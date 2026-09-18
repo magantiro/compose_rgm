@@ -148,3 +148,71 @@ exact whole-patch overlap against 68.1% region-level coverage, 96.6% on JAK2).
   says nothing about the rewards of intermediates along any particular route. Settling
   that needs the route-prefix scoring diagnostic, which costs oracle calls and has not
   been run.
+
+---
+
+# Why generated diamine endpoints die: similarity, and mostly a destroyed core
+
+50 endpoints carrying a diamine ring were drawn from 2,973 base programs and classified by
+the FIRST gate that refuses them. Zero oracle calls.
+
+    similarity                    49/50   98.0%
+    structural:strained_NN_ring    1/50    2.0%
+
+And not marginally:
+
+    similarity - 0.60   median -0.420   min -0.574   max -0.063   violating 50/50
+    4.0 - sa            median -1.092   min -2.661   max +0.376   violating 46/50
+    qed - 0.60          median +0.012   min -0.483   max +0.262   violating 24/50
+
+The best diamine endpoint of fifty sits at similarity 0.537. Even a perfect reward model
+could not select any of these, because they are refused before reward is consulted.
+
+## The coarse SMARTS was wrong, and correcting it changes the reading
+
+`[NX3;R][CX4;R][NX3;R]` requires sp3 ring carbons. Every nitrogen in the root is aromatic,
+so the pattern can be satisfied either by building a new saturated ring OR by
+DE-AROMATISING an existing one -- and `ring_system_restate` is 6.4x enriched in these
+endpoints (0.82 per diamine endpoint against 0.13 per program). Most of the 50 are
+de-aromatised cores with an incidental N-C-N, not piperazines.
+
+Re-measured with a definition that cannot be satisfied by wrecking the core -- a saturated
+ring with two or more nitrogens sharing no atom with any aromatic ring -- and validated
+against ground truth, since all three known strong molecules must and do satisfy it:
+
+| | count |
+| --- | ---: |
+| coarse "diamine" endpoints | 50 |
+| aromatic core preserved (3+ aromatic rings, as the root has) | **10/50** |
+| genuine pendant saturated diamine ring | **7/50** |
+| **both, i.e. the basin architecture** | **2/50** |
+
+    core preserved = True    n=10   median sim 0.385   max 0.537
+    core preserved = False   n=40   median sim 0.138   max 0.394
+
+So 80% of diamine-producing programs destroy the aromatic core, which alone forfeits the
+similarity budget; and the core-preserving remainder still tops out at 0.537.
+
+## The numbers the next change has to move
+
+    P(basin architecture)                       = 2/2973 = 0.067%
+    P(sim >= 0.6 | basin architecture)          = 0/2
+
+The known basin does this conservatively: it keeps the whole
+`C(=O)CC1Nc2ccccc2-c2ccnc3[nH]cc1c23` fragment and all three aromatic rings intact,
+replaces only the methoxy with an amide-linked saturated diamine ring, and lands at
+similarity 0.629 while GROWING from 22 to about 28 heavy atoms. Growth is therefore not
+what costs similarity -- WHERE the graph changes is.
+
+## Superseded readings from earlier in this file
+
+- "the catalog cannot build a diamine ring at all" -- false. The construction catalog does
+  cap at one nitrogen per constructed ring (20 options, max N = 1, verified), but diamine
+  motifs still arise at 1.7% of programs by other routes. The cap raises the cost; it does
+  not forbid the motif.
+- "ring construction is rare" -- false in both directions. 99.07% of programs gain a ring.
+- "cycle_close is downweighted to 0.5" -- that is the NEAR_CAPACITY weight table, which
+  applies only above 36 heavy atoms. The root is 22, so it never fired.
+- "the forced conditionals show the pieces are antagonistic" -- underpowered. 0 of 29
+  retyped-and-feasible endpoints carried a diamine ring, but the independent prediction is
+  0.43 expected, so the test cannot distinguish independence from antagonism.
