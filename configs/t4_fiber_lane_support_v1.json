@@ -1,0 +1,30 @@
+{
+  "payload": {
+    "schema_version": "t4_fiber_lane_support_contract_v1",
+    "scientific_question": "Does the existing progressive-v1 structured proposer place more mass than unchanged shallow-v0 on eligible JAK2 basin transformations inside the actual FiberControl candidate path?",
+    "root_smiles": "COC(=O)CC2Nc1ccccc1c3ccnc4[nH]cc2c34",
+    "root_score": -8.1,
+    "delta": 0.6,
+    "support": "compose_valid",
+    "lanes": [
+      "shallow",
+      "structured"
+    ],
+    "attempts_per_lane": 64,
+    "draws_per_attempt": 8,
+    "horizon": 3,
+    "seed": 2026091817,
+    "maximum_concurrent_single_cpu_workers": 64,
+    "automatic_retry": false,
+    "new_oracle_calls": 0,
+    "promotion_rule": "structured must produce strictly more eligible amide-plus-diamine basin endpoints than shallow at the frozen equal attempt budget",
+    "inputs": {
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "b72cee55d687dfb1bb922d85e385ba3cdba06234b27c5ede4a9bbbd00df0d81b",
+      "src/compose_v4/control/progressive_structured_sampler.py": "30e8a9dc4a41cf24b17648f3862619c023c1242b30e73f0b1aa4e4bd29979df6",
+      "src/compose_v4/experiments/t4_fiber_lane_support.py": "24e7673bed8a8fd2aa2c8c9e0966f7bbf9ed8c913cf459a4de2e0ea36dd7bca8",
+      "src/compose_v4/experiments/t4_route_guided_support.py": "8463e033043e03951d48be1307f76be7052c90f084a0bae019ea6edfcb98804e",
+      "modal_apps/t4_fiber_lane_support_app.py": "f1d820a50840f8d3170c5cb73a46cdc8d49d37552cc562a3cab707d3c7d0366e"
+    }
+  },
+  "payload_sha256": "c68dd069946f5b28071ea48fbd06b902382437da8a3dd538d3ffa7346f64e3ce"
+}
