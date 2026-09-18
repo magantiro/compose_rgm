@@ -15,7 +15,7 @@ from modal_apps.genmol_t4_opt_app import REMOTE_ROOT, ROOT
 from modal_apps.genmol_t4_opt_app import image as base_image
 
 APP_NAME = "compose-t4-route-guided-support"
-CONTRACT = "configs/t4_route_guided_support_probe_v2.json"
+CONTRACT = "configs/t4_route_guided_support_probe_v3.json"
 
 image = base_image
 image = image.add_local_dir(
