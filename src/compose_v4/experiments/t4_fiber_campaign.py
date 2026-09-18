@@ -1,0 +1,230 @@
+"""End-to-end FiberControl campaign on one T4 cell. The JAK2 route is never read.
+
+Each round: expand a diverse frontier into a large FREE pool of complete programs, keep
+only endpoints passing the exact task gate, choose a small batch by reward-guided
+acquisition, dock it, update, replan. Only the first oracle decision of each round is
+executed; the tree is rebuilt from what was actually measured.
+
+Nothing target-specific enters except counted docking outcomes.
+"""
+
+from __future__ import annotations
+
+import itertools
+import os
+import sys
+from dataclasses import replace
+
+from rdkit import Chem, RDLogger
+from rdkit.Chem import QED, DataStructs, RDConfig, rdFingerprintGenerator
+
+RDLogger.DisableLog("rdApp.*")
+sys.path.append(os.path.join(RDConfig.RDContribDir, "SA_Score"))
+import sascorer
+
+from compose_v4.chem.molecular_graph import (
+    molecular_graph_to_smiles,
+    smiles_to_molecular_graph,
+)
+from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.control.dynamic_program_synthesis import synthesize_dynamic_program
+from compose_v4.control.fiber_control import program_features
+from compose_v4.control.intervention_closure import (
+    intervene_bond_order,
+    intervene_element,
+    intervene_retained_deletion,
+    intervene_retained_element,
+    intervene_scale,
+    validate,
+)
+from compose_v4.control.queryable_fiber import instability
+from compose_v4.control.structural_subgoal import (
+    attachment_bindings,
+    extract_structural_goal,
+    instantiate_goal,
+)
+
+SCHEMA_VERSION = "t4_fiber_campaign_v1"
+
+
+class Fiber:
+    """The exact task gate. Free to evaluate; the oracle is never asked about it."""
+
+    def __init__(self, seed_smiles: str, delta: float):
+        self.delta = delta
+        self.generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+        self.seed = self.generator.GetFingerprint(Chem.MolFromSmiles(seed_smiles))
+
+    def check(self, smiles: str) -> dict | None:
+        mol = Chem.MolFromSmiles(smiles) if smiles else None
+        if mol is None or "." in smiles:
+            return None
+        heavy = mol.GetNumHeavyAtoms()
+        if not 18 <= heavy <= 40:
+            return None
+        similarity = DataStructs.TanimotoSimilarity(self.seed, self.generator.GetFingerprint(mol))
+        quality = QED.qed(mol)
+        access = sascorer.calculateScore(mol)
+        if similarity < self.delta or quality <= 0.6 or access >= 4.0 or instability(smiles):
+            return None
+        return {
+            "smiles": Chem.MolToSmiles(mol),
+            "similarity": similarity,
+            "qed": quality,
+            "sa": access,
+            "heavy": heavy,
+        }
+
+
+def _variants(subgoal):
+    out = [("base", subgoal)]
+    created = len(subgoal.output_atoms)
+    if created:
+        for count in (created - 1, created + 1):
+            if count >= 1:
+                try:
+                    out.append(("scale", intervene_scale(subgoal, output_count=count)[0]))
+                except (ValueError, IndexError):
+                    pass
+        for element in (3, 4):
+            try:
+                out.append(
+                    ("element", intervene_element(subgoal, output_index=0, element=element)[0])
+                )
+            except (ValueError, IndexError):
+                pass
+    for role in range(len(subgoal.target_atoms)):
+        for element in (2, 3, 4):
+            try:
+                out.append(
+                    (
+                        "retained_element",
+                        intervene_retained_element(subgoal, input_index=role, element=element)[0],
+                    )
+                )
+            except (ValueError, IndexError):
+                pass
+        try:
+            out.append(
+                ("retained_deletion", intervene_retained_deletion(subgoal, input_index=role)[0])
+            )
+        except (ValueError, IndexError):
+            pass
+    bonds = subgoal.target_bonds
+    for left in range(len(bonds)):
+        for right in range(left + 1, len(bonds)):
+            if bonds[left][right]:
+                for order in (1, 2):
+                    if order == bonds[left][right]:
+                        continue
+                    try:
+                        out.append(
+                            (
+                                "bond_order",
+                                intervene_bond_order(subgoal, left=left, right=right, order=order)[
+                                    0
+                                ],
+                            )
+                        )
+                    except (ValueError, IndexError):
+                        pass
+                break
+        else:
+            continue
+        break
+    keep = [("base", subgoal)]
+    for name, candidate in out[1:]:
+        report = validate(subgoal, candidate)
+        if report["legal"] and report["round_trips"] and report["complement_preserved"]:
+            keep.append((name, candidate))
+    return keep
+
+
+def expand(
+    parent: str,
+    parent_score: float,
+    fiber: Fiber,
+    rng,
+    *,
+    draws: int,
+    multi_region: bool = True,
+    horizon: int = 3,
+) -> list[dict]:
+    """Free complete programs from one parent; only queryable endpoints are returned.
+
+    `horizon` is the receding-horizon depth: the most modules a single program may carry
+    before the controller replans against a measured outcome. It is a parameter rather
+    than a constant so that one-step control is the same code path as depth-three
+    control, and the comparison between them is not a comparison of two programs.
+    """
+    if horizon < 1:
+        raise ValueError("horizon must be at least one module")
+    try:
+        source = pad_molecular_graph(smiles_to_molecular_graph(parent), 48)
+    except (ValueError, KeyError):
+        return []
+    found: dict[str, dict] = {}
+    for _ in range(draws):
+        try:
+            _, _, _, trace, _ = synthesize_dynamic_program(source, rng, max_modules=horizon)
+            goal, _, _ = extract_structural_goal(tuple(trace["states"]), tuple(trace["actions"]))
+        except (ValueError, KeyError, IndexError, TypeError):
+            continue
+        variants = {i: _variants(sg) for i, sg in enumerate(goal.subgoals)}
+        edits = [{i: c} for i, vs in variants.items() for _, c in vs]
+        labels = [[n] for i, vs in variants.items() for n, _ in vs]
+        if multi_region and len(goal.subgoals) >= 2:
+            for i, j in itertools.combinations(sorted(variants), 2):
+                for (ni, ci), (nj, cj) in itertools.product(variants[i][:4], variants[j][:4]):
+                    if ni == "base" and nj == "base":
+                        continue
+                    edits.append({i: ci, j: cj})
+                    labels.append([ni, nj])
+        for edit, families in zip(edits, labels):
+            subs = list(goal.subgoals)
+            for index, candidate in edit.items():
+                subs[index] = candidate
+            merged = replace(goal, subgoals=tuple(subs))
+            bindings, ok = [], True
+            for subgoal in merged.subgoals:
+                census = attachment_bindings(subgoal, source)
+                if not census.assignments:
+                    ok = False
+                    break
+                bindings.append(census.assignments[0])
+            if not ok:
+                continue
+            try:
+                built, _ = instantiate_goal(source, merged, tuple(bindings))
+                endpoint = molecular_graph_to_smiles(built)
+            except (ValueError, KeyError, IndexError, TypeError):
+                continue
+            gate = fiber.check(endpoint)
+            if gate is None or gate["smiles"] in found or gate["smiles"] == parent:
+                continue
+            created = sum(len(c.output_atoms) for c in edit.values())
+            found[gate["smiles"]] = {
+                **gate,
+                "parent": parent,
+                "parent_score": parent_score,
+                "families": families,
+                "regions": len(edit),
+                "created": created,
+                "deleted": sum(1 for c in edit.values() for t in c.target_atoms if t is None),
+                "delta": fiber.delta,
+            }
+    return list(found.values())
+
+
+def prepare(records, state, fiber: Fiber) -> list[dict]:
+    """Attach the decision features and a structural key used for batch diversity."""
+    prepared = []
+    for record in records:
+        mol = Chem.MolFromSmiles(record["smiles"])
+        if mol is None:
+            continue
+        bits = fiber.generator.GetFingerprint(mol).GetOnBits()
+        prepared.append(
+            {**record, "features": program_features(record, state), "fingerprint": set(bits)}
+        )
+    return prepared
