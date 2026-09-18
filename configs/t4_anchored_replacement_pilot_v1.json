@@ -1,0 +1,67 @@
+{
+  "payload": {
+    "schema_version": "t4_anchored_replacement_pilot_contract_v1",
+    "scientific_problem": "The repaired generic anchored-replacement proposer enters an eligible JAK2 amide-plus-diamine basin that shallow-v0 and progressive-v1 missed at equal zero-oracle proposal budget. Determine whether the novel locked endpoints have useful docking utility before integrating the lane with FiberControl.",
+    "primary_model_output": "A complete protected executable anchored-replacement program and its canonical eligible endpoint.",
+    "central_claim_under_test": "Coupling generic pendant deletion and saturated two-nitrogen ring construction at one retained anchor yields at least one novel JAK2 delta-0.6 endpoint with docking score at or below -10.0.",
+    "validation_setting": "One bounded answer-known JAK2 seed-1 delta-0.6 development panel; not held-out, not replicated, not a benchmark-wide IVG comparison.",
+    "declared_support": "Neutral charge-preserving 48-slot molecular graphs, at most 40 active atoms, one or two existing Dynamic-v1 modules, at most 32 primitives and eight blocks; exact executor; complete endpoint QED at least 0.6, SA at most 4.0, Morgan similarity at least 0.6 and COMPOSE structural validity.",
+    "authorization": {
+      "basis": "The user explicitly approved continuing the route-distilled plus FiberControl JAK2 direction, approved Modal use, requested a quick answer, and authorized the bounded work before this lock was scored.",
+      "scope": "Exactly the 12 novel endpoints in the immutable candidate lock, one docking attempt each, no retry or replacement.",
+      "new_oracle_call_limit": 12
+    },
+    "candidate_lock_id": "9154ebd97f40cd47fcf85d10cbc8ec94997da1b45261be149832b8203ec51520",
+    "charged_call_limit": 12,
+    "automatic_retries": 0,
+    "replacement_after_scoring": false,
+    "target": "jak2",
+    "cell": "jak2_1",
+    "delta": 0.6,
+    "docking_seed": 20260918,
+    "support": "compose_valid",
+    "evaluator": {
+      "protocol": "Open Babel --gen3D followed by qvina02 against the unchanged JAK2 box; CPU 1 per ligand; best reported mode.",
+      "box_center": [114.758, 65.496, 11.345],
+      "box_size": [19.033, 17.929, 20.283]
+    },
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "cb900f3f75dcf2ac3efe6538528ed1e87ec934a527b3b060c2b09dfe3a11d9b6"
+    },
+    "frozen_decision": {
+      "promotion": "Promote the anchored-replacement lane into a bounded FiberControl integration if at least one novel endpoint scores at or below -10.0.",
+      "strong_signal": "A score at or below the published IVG mean of -10.4 is a strong signal, subject to the known approximately 0.5 single-call docking variability.",
+      "kill": "If no novel endpoint reaches -10.0, do not claim the proposal repair alone closes the JAK2 gap; retain the zero-oracle support result and diagnose reward allocation or neighborhood refinement before a larger scored run.",
+      "historical_references_are_offline_only": {
+        "root": -8.1,
+        "fibercontrol_adaptive_single_call_best": -10.3,
+        "published_ivg_mean": -10.4,
+        "published_ivg_uncertainty": 0.1,
+        "route_witness": -11.0,
+        "confirmed_route_family_anchor": -11.32
+      }
+    },
+    "inputs": {
+      "candidate_lock": "diagnostics/t4_anchored_replacement_pilot_v1/candidate_lock.json",
+      "candidate_lock_sha256": "def92f269bc002ead09bfac900a6775754497a5d8048ab8fcd1da1b3929d2173",
+      "support_result": "diagnostics/t4_anchored_replacement_support_v1/result.json",
+      "support_result_sha256": "6a9aef8d22611859a0fa2f1de78f64ef3bc743563dac1999b26acf12885c5985",
+      "pilot_app_sha256": "77ee078e8113dd91b7b43845a87345caa9143479ff25bdfeb091b3609361d0ab",
+      "result_reducer_sha256": "70e8e224967bb96745b05d8d3f0f940539e107a108bbabe245b0c741a5b6cd35",
+      "lock_verifier_sha256": "07d64a689f5a7ccfe56a5dabd4ec32ee2e2f841ec15bc1b9c9fc27f58c77a895",
+      "docking_image_definition_sha256": "9b635a9936493a5900b613cdce52f76c24efcf98f3f43b3b155448e0b1796bf0",
+      "scientific_code_revision": "f421f27f9f6cd1f3be63838c52cf4df98589734e"
+    },
+    "output": "diagnostics/t4_anchored_replacement_pilot_v1/result.json",
+    "logging": "The remote worker emits one line per completed locked query and the local entry point atomically seals the full query ledger and summary.",
+    "prohibitions": [
+      "no candidate replacement, backfill or retry",
+      "no score-dependent modification of this lock",
+      "no structural distance used as a docking surrogate",
+      "no full benchmark or additional cell",
+      "no claim of held-out generalization or benchmark-wide IVG superiority"
+    ]
+  },
+  "payload_sha256": "927d769676576f01e8e48927df4d7f8dfe3b9c3d90f68fe7096f44f62057f706"
+}
