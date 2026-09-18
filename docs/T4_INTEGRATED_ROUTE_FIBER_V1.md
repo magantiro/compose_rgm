@@ -49,6 +49,15 @@ new generator. A matched causal ablation is required before making that claim.
 ## Commands
 
 ```bash
-modal run modal_apps/t4_integrated_route_fiber_app.py --mode launch
-modal run modal_apps/t4_integrated_route_fiber_app.py --mode status --run-id RUN_ID
+PYTHONPATH=src modal run -d modal_apps/t4_integrated_route_fiber_app.py --mode launch
+PYTHONPATH=src modal run modal_apps/t4_integrated_route_fiber_app.py --mode status --run-id RUN_ID
 ```
+
+## Operational amendment v1.1
+
+The first authorized launch stopped before every cell imported and made zero
+oracle calls because the lean image omitted the repository's required Torch
+runtime. Contract v1.1 adds only `torch==2.4.0` and corrects the detached launch
+command above. Seeds, proposal laws, route checkpoint, candidate budgets,
+selection logic, query-lock policy, evaluator, and promotion criteria are
+unchanged.

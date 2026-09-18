@@ -14,14 +14,20 @@ import modal
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE = Path("/compose")
 OUTPUT = Path("/integrated")
-CONTRACT = "configs/t4_integrated_route_fiber_v1.json"
+CONTRACT = "configs/t4_integrated_route_fiber_v1_1.json"
 CHECKPOINT = "diagnostics/t4_integrated_route_fiber_v1/route_expert_checkpoint.json"
 VOLUME_NAME = "compose-t4-integrated-route-fiber-v1"
 MOOD = "https://raw.githubusercontent.com/SeulLee05/MOOD/main/scorer"
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .pip_install("numpy==1.26.4", "scipy==1.13.1", "networkx==3.3", "rdkit==2024.3.5")
+    .pip_install(
+        "torch==2.4.0",
+        "numpy==1.26.4",
+        "scipy==1.13.1",
+        "networkx==3.3",
+        "rdkit==2024.3.5",
+    )
     .apt_install("openbabel", "curl", "ca-certificates")
     .run_commands(
         "mkdir -p /opt/dock/receptors",
