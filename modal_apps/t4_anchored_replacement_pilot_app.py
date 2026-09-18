@@ -159,6 +159,7 @@ def main(
     contract_path, lock_path, output_path = Path(contract), Path(lock), Path(output)
     if output_path.exists():
         raise FileExistsError(f"refusing to overwrite scored result: {output_path}")
+    contract_envelope = json.loads(contract_path.read_text())
     contract_payload = unseal(contract_path)
     lock_publication = unseal(lock_path)
     candidate_lock = lock_publication["assessment"]["lock"]
@@ -195,7 +196,8 @@ def main(
     ).stdout.strip()
     payload = {
         "schema_version": "t4_anchored_replacement_pilot_publication_v1",
-        "contract_payload_sha256": contract_payload["contract_payload_sha256"],
+        "contract_file_sha256": _sha256(contract_path),
+        "contract_payload_sha256": contract_envelope["payload_sha256"],
         "candidate_lock_id": candidate_lock["lock_id"],
         "candidate_lock_file_sha256": _sha256(lock_path),
         "code_revision": revision,
