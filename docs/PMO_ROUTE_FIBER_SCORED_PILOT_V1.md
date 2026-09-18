@@ -92,3 +92,48 @@ Prepare or verify the contract with zero oracle calls:
     .venv/bin/python tools/pmo_route_fiber_scored_pilot_contract.py verify
 
 There is intentionally no launch command in this revision.
+
+## Zero-oracle implementation
+
+The thin implementation is in
+src/compose_v4/experiments/pmo_route_fiber_scored_pilot.py. It provides:
+
+- split-clean single-fold runtime bundles;
+- deterministic score-blind pool generation and atomic pool manifests;
+- a fixed task-free PMO transformation feature adapter for FiberControl;
+- paired blind/Fiber selection, immutable query locks and a charged query ledger;
+- round checkpoints with exact model, archive and selection identities;
+- interruption-safe replay and an RNG-free status reader;
+- a mandatory sealed launch receipt for every non-synthetic evaluator.
+
+The preparation tool intentionally exposes no scored action:
+
+    .venv/bin/python tools/pmo_route_fiber_scored_pilot.py prepare-pools
+    .venv/bin/python tools/pmo_route_fiber_scored_pilot.py preflight
+    .venv/bin/python tools/pmo_route_fiber_scored_pilot.py status
+
+Production pool generation and preflight must run in the pinned Python 3.11,
+RDKit 2023.09.6 and PyTDC 1.1.15 environment declared in the contract. The
+preflight verifies package and PyTDC source hashes plus the 27,791,877-byte GSK3B
+asset before publishing a ready-for-authorization result. It never constructs or
+evaluates an oracle.
+
+## Sealed zero-oracle preparation result
+
+The pinned preflight passed with zero oracle calls. All 16 score-blind pools were
+sealed before any score was observed. Each pool contains 31 or 32 unique valid,
+exactly replayed endpoints, exceeding the frozen eight-candidate minimum.
+
+- candidate-lock manifest file SHA-256:
+  `a10608e159b6d70ef5c30d1253a911fea9b43057b7b3f300b4ff02f2289dd0be`
+- candidate-lock manifest payload SHA-256:
+  `0908280ab5ebeada232013a4f46a6408fa1fddfc2fb665b5a78ef14048f220d7`
+- preflight file SHA-256:
+  `5a15cfc096f7e58f9f7d10caaedebcf288f1e72b033a1269eefac58265c0f747`
+- preflight payload SHA-256:
+  `986459abcc849dc7d84cf595a2ee489b10ac7a0adaae56187dde1fef97725379`
+
+The decision remains
+`ZERO_ORACLE_PREPARATION_PASSED_NOT_AUTHORIZED_TO_SCORE`. A scored run still
+requires an AGENTS.md milestone amendment, the exact 384-call authorization and a
+separately sealed launch receipt bound to these preflight and manifest file hashes.
