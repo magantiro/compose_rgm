@@ -12,6 +12,35 @@ route-assisted (`../t4_jak2_contrastive/DELTA_LANES.md`, -11.32 +/- 0.04 against
 archive best of -11.00). This lane asks whether reward-adaptive control finds comparable
 chemistry *without* the route.
 
+## The bar, pinned to its lane
+
+This project has already been burned once by comparing a delta=0.4 molecule against a
+delta=0.6 target (`../t4_jak2_contrastive/DELTA_LANES.md`). So the comparator is written
+down per lane, per seed, with its statistic named.
+
+InVirtuoGen's reported JAK2 means, read from the published table. Seed rows there are
+labelled `seed score / QED / SA`, which identifies each cell unambiguously:
+
+| seed row | cell | delta = 0.4 | delta = 0.6 |
+| --- | --- | ---: | ---: |
+| -7.7 / 0.725 / 2.89 | jak2_0 | -10.2 +/- 0.8 | -9.7 +/- 0.3 |
+| **-8.0 / 0.712 / 3.09** | **jak2_1** | -10.5 +/- 0.3 | **-10.4 +/- 0.1** |
+| -8.6 / 0.482 / 3.10 | jak2_2 | -10.2 +/- 0.2 | -10.3 +/- 0.2 |
+
+delta=0.6 is not materially harder for them than delta=0.4 on this target.
+
+**Oracle calibration.** IVG reports the jak2_1 seed itself at -8.0. Our docking returned
+-8.00 and -8.10 for that molecule on two separate calls, so the two oracles agree on this
+cell to within our own single-call reproducibility. That is the only direct evidence we
+have that the scores are comparable at all, and it is worth re-checking per target.
+
+**A statistic that is NOT the same number.**
+`configs/t4_frozen_program_benchmark_v2.json` carries `ivg_reported.jak2_1.mean = -11.57`
+from `run_bests [-12.6, -11.3, -10.8]` at delta=0.4. That is the mean of per-run BESTS
+over released rows, not the paper's reported mean of -10.5 +/- 0.3. Both are real and they
+differ by more than a unit. Any comparison must name which one it is measured against;
+the paper table is the citable bar and the released-row best-of is the harder internal one.
+
 ## The controller
 
 `P*(tau) ∝ P0(tau) · 1[tau queryable] · exp(beta · J(tau))`
