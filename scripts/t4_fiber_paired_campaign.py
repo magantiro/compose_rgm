@@ -104,6 +104,16 @@ def main() -> None:
 
     destination = require_durable_path(options.out, role="paired campaign result")
     destination.parent.mkdir(parents=True, exist_ok=True)
+    # Never overwrite a previous run's record. A relaunch to the same --out already
+    # destroyed the evidence for a finding once: the first official-fiber attempt docked
+    # an aminyl radical as its leading endpoint, and re-running to the same path left
+    # that only in a commit message. An existing result is moved aside, not clobbered.
+    if destination.exists():
+        superseded = destination.with_name(
+            f"{destination.stem}_superseded_{int(time.time())}{destination.suffix}"
+        )
+        destination.rename(superseded)
+        print(f"[paired] moved the previous result to {superseded.name}", flush=True)
 
     fiber = Fiber(options.root, options.delta, support=options.support)
     rng = np.random.default_rng(options.seed)
