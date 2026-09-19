@@ -1,0 +1,14 @@
+{
+  "cell_key": "parp1_2_d04",
+  "decision": "exclude_run_from_authoritative_scientific_comparison",
+  "durable_checkpoint_payload_sha256": "cbd768d3e0b33c87b54d0f671fb01f7cfd76463b5f601596e259f13b0bc82a57",
+  "expected_contract_payload_sha256": "a2c5672e1140dc8b8dc8e6e99c188ba22cfbf8f4474daf4b2c16cc95d316ba9f",
+  "frozen_round_3_query_lock_payload_sha256": "bd3612c847e46a006f1a86b24817f9b644f838033cef1301f9d8cdc1cf047252",
+  "observed_launch_contract_payload_sha256": "a2c5672e1140dc8b8dc8e6e99c188ba22cfbf8f447daf4b2c16cc95d316ba9f",
+  "oracle_policy": "do_not_retry_or_resubmit_any_locked_query",
+  "reason": "The immutable launch receipt fails exact launch-task reconstruction because its recorded contract payload identity differs from the self-hashed contract. Repository scientific-validity rules prohibit reconciling or weakening this frozen provenance gate.",
+  "retained_evidence_role": "non_authoritative_operational_diagnostic_only",
+  "run_id": "b2a7e0aee53da2fa649103ac0dc83970aa00de218c90a1763f4ef8b9972397b6",
+  "schema_version": "t4_scored_run_disposition_v1",
+  "successor_action": "Evaluate parp1_2_d04 from call zero under a new independently sealed exact launch contract; do not reuse this run's observations for online state or candidate selection."
+}
