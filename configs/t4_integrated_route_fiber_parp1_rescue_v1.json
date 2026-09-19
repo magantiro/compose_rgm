@@ -1,0 +1,181 @@
+{
+  "payload": {
+    "schema_version": "t4_integrated_route_fiber_parp1_rescue_contract_v1",
+    "status": "AUTHORIZED_FROZEN_CHECKPOINT_RESCUE",
+    "scientific_problem": "test whether the unchanged integrated COMPOSE controller transfers from JAK2 development to PARP1 under the same strict delta=0.6 endpoint fiber",
+    "primary_model_output": "a target-reward-adapted selection over the union of complete executable shallow, anchored-replacement, and leave-PARP1-out route-distilled programs",
+    "central_claim_under_test": "checkpoint-boundary recovery preserves the frozen multi-expert FiberControl experiment without changing candidates, repeating charged calls, or altering the controller",
+    "experimental_setting": "prospective three-cell PARP1 delta=0.6 transfer resumed exactly from the three durable completed round-1 checkpoints; fixed 49-call total ceiling per cell; no root or round-1 redocking",
+    "frozen_from": {
+      "controller_contract": "configs/t4_integrated_route_fiber_v1_1.json",
+      "controller_contract_payload_sha256": "256563816a5d5b68706c7542bff1beae22f422e2c12109a55739dfe50680530c",
+      "controller_result": "diagnostics/t4_integrated_route_fiber_v1/final_result.json",
+      "allowed_adapter_changes": [
+        "checkpoint-boundary infrastructure recovery after Modal preemption"
+      ],
+      "forbidden_changes": "proposal families, proposal widths, FiberControl features or fitting, expert-floor schedule, parent selection, exploration, endpoint gates, total call budget, original scored candidates, retries, replacements, or per-cell tuning"
+    },
+    "declared_support": {
+      "objects": "complete connected molecular endpoints produced by three executable COMPOSE proposal experts",
+      "maximum_active_atoms": 40,
+      "shallow_and_anchored_horizon": 3,
+      "route_regions": [
+        1,
+        4
+      ],
+      "route_primitives": 32,
+      "endpoint_support": "compose_valid is a strict subset of the official T4 endpoint fiber",
+      "stereochemistry_claim": false
+    },
+    "cells": [
+      {
+        "cell": "parp1_0",
+        "source_global_index": 0,
+        "smiles": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+        "controller_seed": 2026091800
+      },
+      {
+        "cell": "parp1_1",
+        "source_global_index": 1,
+        "smiles": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+        "controller_seed": 2026091801
+      },
+      {
+        "cell": "parp1_2",
+        "source_global_index": 2,
+        "smiles": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+        "controller_seed": 2026091802
+      }
+    ],
+    "delta": 0.6,
+    "support": "compose_valid",
+    "charged_calls_per_cell": 49,
+    "total_charged_call_ceiling": 147,
+    "batch": 8,
+    "parents": 4,
+    "parent_explore": 0.3,
+    "exploration": 2,
+    "expert_floor_rounds": 2,
+    "value_penalty": 1,
+    "docking_seed": 20260918,
+    "proposal": {
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      },
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "route_complete_region": {
+        "pool_size": 64,
+        "realization_limit": 32,
+        "beam_width": 32,
+        "expansion_width": 24,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "training_split": "leave-PARP1-out"
+      }
+    },
+    "zero_oracle_route_support": {
+      "artifact": "diagnostics/t4_integrated_route_fiber_parp1_v1/route_expert_smoke.json",
+      "artifact_sha256": "edad0e7b247f8c659b3b27626d3aa6163f8f45d88077100d88e51154295b8086",
+      "result": "complete-region programs committed on all three cells at precision 1.0; strict-eligible route endpoints were 4, 6, and 0 for PARP1-0, PARP1-1, and PARP1-2",
+      "interpretation": "preserved as a partial production-yield gate: route proposals can enter the union on two cells, while PARP1-2 route abstention remains a valid negative outcome and triggers no repair"
+    },
+    "round_lock_policy": {
+      "publish_complete_candidate_pool_before_docking": true,
+      "no_backfill": true,
+      "no_candidate_replacement": true,
+      "automatic_retries": 0,
+      "persist_after_every_round": true
+    },
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"
+    },
+    "docking_box": [
+      [
+        26.413,
+        11.282,
+        27.238
+      ],
+      [
+        18.521,
+        17.479,
+        19.995
+      ]
+    ],
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_integrated_route_fiber_parp1_v1/route_expert_checkpoint.json": "73f25dcddb71a3645b7bd45252e37814f837c6f5b1b8d59f5f4e08940439d311",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+      "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "aeaf77d7a75f8cf00ac4c8558f1eb79a0143f39d54b910043e3212511daac206",
+      "src/compose_v4/control/structural_subgoal_policy.py": "ca002b19df2fcc9d8e18d9888b3e4080d5bee251f213aa140357ccafdc3405b9",
+      "src/compose_v4/control/structural_subgoal_realizer.py": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_integrated_route_fiber.py": "0a0f0305e7e31474b2857ab8ca50b40c5ef646e3d460438d075ab12f72e46210",
+      "modal_apps/t4_integrated_route_fiber_parp1_rescue_app.py": "ea820f8877207418d0b3a08aed5dcec903098314184a3badc1a9c54168c3e6d8",
+    "src/compose_v4/experiments/t4_integrated_resume.py": "818e61e4fcd943d0a41177e0535e5c9b6253d2de6c66e4a13fa366fb66839ae7"
+    },
+    "reported_ivg_delta_0_6": {
+      "parp1_0": -12.3,
+      "parp1_1": -11.533333333333333,
+      "parp1_2": -10.1
+    },
+    "promotion_criteria": {
+      "per_round_reporting": true,
+      "transfer_signal": "at least two cells reach their reported IVG delta=0.6 mean or one cell beats it by at least 0.5 while a second improves on its measured root",
+      "negative": "two or more cells exhaust without an eligible non-root candidate, or all cells remain no better than their measured roots"
+    },
+    "primary_baselines": "read-only measured roots and reported IVG delta=0.6 values; no comparator value enters runtime",
+    "claim_boundary": "infrastructure-only rescue of the frozen prospective PARP1 development transfer from completed call-9 checkpoints; prior calls are reused, not repeated; final evidence remains one docking seed and is not benchmark-wide held-out evidence",
+    "reported_ivg_source": {
+      "artifact": "diagnostics/t4_delta06_route_corpus/attempt_1/training_corpus.json.gz",
+      "artifact_sha256": "d96265ca0f3364a118b10037b8312263f2e627ff629651bca22eca1ae834cded",
+      "aggregation": "mean of the three published IVG run winners per exact cell, used only after the run for read-only comparison"
+    },
+    "total_new_charged_call_ceiling": 120,
+    "rescue": {
+      "original_app_id": "ap-SWoIxWEeDAZteff0EFH5Eh",
+      "original_function_call_id": "fc-01M2W2H6HFTGZSCXS8G2PM373J",
+      "original_run_id": "33761ee874a1e7cdc7e937d133aa37995d64761fd8e1bca0057aa744fdd0f3a1",
+      "original_code_revision": "ba979091798853d54c491901339e845b4d2711db",
+      "original_contract_payload_sha256": "948da948ba38b28a2d6d3cfe62fba0ffbb57d09d17b51b079201f513712a8dcb",
+      "original_contract_file_sha256": "53e9501b90256f39a7ced1609f80131dd46e8f78338678cfe7895e3164951bab",
+      "original_launch_receipt_file_sha256": "4de85d2b5274275f7b27db24e7c06aaa13e03a19105685fd93f9bfb4aba78a91",
+      "required_boundary": {
+        "charged_calls": 9,
+        "budget_remaining": 40,
+        "completed_rounds": 1,
+        "next_round_lock_must_be_absent": 2
+      },
+      "restart_policy": "resume only from a completed checkpoint whose locked query census exactly matches durable results; fail closed if any next-round lock exists without its completed checkpoint",
+      "cells": {
+        "parp1_0": {
+          "checkpoint_file_sha256": "6e6b696ed6354969e0ba1b84952024e4c92df3f5554b2f4760c37c22736f91f2",
+          "checkpoint_payload_sha256": "67baeefb41aee46df143e48e79727f23b3c0eaaf604a8b45ac32cfd05770778f",
+          "round_000_file_sha256": "d7e61357e9d12f24b6fc931b19a554b8d6cf0dad0168e3fadca0f7af79620fcb",
+          "round_001_file_sha256": "f027853b224b8a5eeb034da688879c0b930c5f547103a4fbaf2c3dc93c491246"
+        },
+        "parp1_1": {
+          "checkpoint_file_sha256": "22a899b53828d2d94391032122c34f62a9465fa363b47768592cc5ce2ca0b00c",
+          "checkpoint_payload_sha256": "560c493ef7b2b56b6fad7178e61e4cbdb6c29fe81c66e93efd19355f096ec42f",
+          "round_000_file_sha256": "c2d57f989f16b1eae4ee65bc4c497dd379a008b8142af2d9a2d145e3b04ec1ef",
+          "round_001_file_sha256": "23993b24a59138dc0d2fca436eed9d0894b90681337c645e3eb4ec9dcac58a74"
+        },
+        "parp1_2": {
+          "checkpoint_file_sha256": "7ad0d230cdef0dc9d387b0dcd03fafd61ae778a63d116256fd3d9896a6fb8e62",
+          "checkpoint_payload_sha256": "582937f5630af121edacdba35b3a00505b59e62546f0a66b0b62d59d8603352c",
+          "round_000_file_sha256": "924dc6f8a3ee90e9e1f3471ebf80a19d5114e9afd682b696fc4f9c63e273a279",
+          "round_001_file_sha256": "768de8a020db0c5d932c7566956e7ab729d8c72c80616b836e6a02c17596eaeb"
+        }
+      }
+    }
+  },
+  "payload_sha256": "e5176ca6cd134a9a49ed22ad80133f919122066d94372082eba3f36a59973102"
+}
