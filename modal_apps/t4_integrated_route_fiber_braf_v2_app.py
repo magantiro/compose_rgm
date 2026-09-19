@@ -1,4 +1,4 @@
-"""Prospective BRAF repair run with retained-core proposals and FiberControl.
+"""Preemption-safe BRAF repair with retained-core proposals and FiberControl.
 
 Every round first publishes an immutable candidate and query lock to a durable Modal
 volume.  Docking then runs once per locked molecule with no retry or replacement.  The
@@ -13,11 +13,11 @@ import modal
 
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE = Path("/compose")
-OUTPUT = Path("/integrated_braf_v2")
-CONTRACT = "configs/t4_integrated_route_fiber_braf_v2.json"
+OUTPUT = Path("/integrated_braf_v3")
+CONTRACT = "configs/t4_integrated_route_fiber_braf_v3.json"
 CHECKPOINT = "diagnostics/t4_integrated_route_fiber_braf_v1/route_expert_checkpoint.json"
 PREFLIGHT = "diagnostics/t4_integrated_route_fiber_braf_v2/retained_core_preflight.json"
-VOLUME_NAME = "compose-t4-integrated-route-fiber-braf-v2"
+VOLUME_NAME = "compose-t4-integrated-route-fiber-braf-v3"
 MOOD = "https://raw.githubusercontent.com/SeulLee05/MOOD/main/scorer"
 
 image = (
@@ -59,7 +59,7 @@ image = (
     )
 )
 volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
-app = modal.App("compose-t4-integrated-route-fiber-braf-v2")
+app = modal.App("compose-t4-integrated-route-fiber-braf-v3")
 common = {
     "image": image,
     "cpu": (1.0, 1.0),
@@ -104,6 +104,17 @@ def _publish(path: Path, payload: dict) -> str:
     temporary.replace(path)
     volume.commit()
     return envelope["payload_sha256"]
+
+
+def _read(path: Path) -> dict:
+    import json
+
+    from compose_v4.control.docking_value import identity
+
+    envelope = json.loads(path.read_text())
+    if identity(envelope["payload"]) != envelope["payload_sha256"]:
+        raise ValueError(f"durable payload hash mismatch: {path}")
+    return envelope["payload"]
 
 
 def _jsonable(value):
@@ -255,12 +266,31 @@ def dock_worker(task: dict) -> dict:
     from compose_v4.experiments.t4_docking_adapter import dock_t4
 
     contract = _validate_task(task, role="dock")
+    receipt_path = OUTPUT / task["receipt_path"]
+    volume.reload()
+    if receipt_path.exists():
+        receipt = _read(receipt_path)
+        if receipt.get("status") == "complete":
+            return receipt["answer"]
+        raise RuntimeError(
+            f"unresolved docking reservation for {task['query_id']}; retry forbidden"
+        )
     physical = {
         "qvina02": sha256_file(Path("/opt/dock/qvina02")),
         "receptor": sha256_file(Path("/opt/dock/receptors/braf.pdbqt")),
     }
     if physical != contract["evaluator_sha256"]:
         raise ValueError(f"docking evaluator identity mismatch: {physical}")
+    _publish(
+        receipt_path,
+        {
+            "schema_version": "t4_integrated_query_receipt_v1",
+            "status": "reserved",
+            "query_id": task["query_id"],
+            "smiles": task["smiles"],
+            "evaluator_sha256": physical,
+        },
+    )
     started = time.time()
     score = dock_t4(
         task["smiles"],
@@ -271,7 +301,7 @@ def dock_worker(task: dict) -> dict:
             "receptor": "/opt/dock/receptors/braf.pdbqt",
         },
     )
-    return {
+    answer = {
         "query_id": task["query_id"],
         "smiles": task["smiles"],
         "score": score,
@@ -279,13 +309,23 @@ def dock_worker(task: dict) -> dict:
         "elapsed_seconds": time.time() - started,
         "evaluator_sha256": physical,
     }
+    _publish(
+        receipt_path,
+        {
+            "schema_version": "t4_integrated_query_receipt_v1",
+            "status": "complete",
+            "query_id": task["query_id"],
+            "smiles": task["smiles"],
+            "answer": answer,
+        },
+    )
+    return answer
 
 
-@app.function(**common, max_containers=3, timeout=6 * 3600)
-def run_cell(task: dict) -> dict:
-    """Run one BRAF seed with round locks and a shared online value model."""
+@app.function(**common, max_containers=3, timeout=3600)
+def run_phase(task: dict) -> dict:
+    """Execute at most one root or scored round and durably checkpoint it."""
 
-    import json
     import time
 
     import numpy as np
@@ -295,6 +335,7 @@ def run_cell(task: dict) -> dict:
     from compose_v4.experiments.t4_integrated_route_fiber_v2 import (
         EXPERTS,
         attach_features,
+        durable_phase_action,
         expert_census,
         merge_expert_pools,
         select_batch,
@@ -304,65 +345,138 @@ def run_cell(task: dict) -> dict:
     cell = next(row for row in contract["cells"] if row["cell"] == task["cell"])
     folder = OUTPUT / task["run_id"] / task["cell"]
     final_path = folder / "result.json"
+    checkpoint_path = folder / "checkpoint.json"
+    volume.reload()
     if final_path.exists():
-        return json.loads(final_path.read_text())["payload"]
-    if folder.exists() and any(folder.glob("round_*_lock.json")):
-        raise RuntimeError(
-            "an unfinished query lock already exists; automatic or ambiguous scored retry is forbidden"
-        )
+        return _read(final_path)
 
-    rng = np.random.default_rng(cell["controller_seed"])
-    fiber = Fiber(cell["smiles"], contract["delta"], support=contract["support"])
-    state = SearchState(archive={}, budget=contract["charged_calls_per_cell"], rounds=0)
-    value = ProgramValue(penalty=contract["value_penalty"])
-    features: list[list[float]] = []
-    improvements: list[float] = []
-    rounds: list[dict] = []
-    charged = 0
-
-    root_query = {
-        "schema_version": "t4_integrated_round_lock_v1",
-        "cell": cell["cell"],
-        "round": 0,
-        "kind": "root",
-        "queries": [
-            {"query_id": f"{task['run_id']}_{cell['cell']}_root", "smiles": cell["smiles"]}
-        ],
-    }
-    root_lock = _publish(folder / "round_000_lock.json", root_query)
-    root_answer = dock_worker.remote(
-        {
-            **task,
-            "query_id": root_query["queries"][0]["query_id"],
-            "smiles": cell["smiles"],
+    checkpoint = _read(checkpoint_path) if checkpoint_path.exists() else None
+    round_index = 0 if checkpoint is None else int(checkpoint["rounds_completed"]) + 1
+    lock_path = folder / f"round_{round_index:03d}_lock.json"
+    phase_result_path = folder / f"round_{round_index:03d}_result.json"
+    if phase_result_path.exists():
+        phase_result = _read(phase_result_path)
+        if not checkpoint_path.exists() or _read(checkpoint_path) != phase_result["checkpoint"]:
+            _publish(checkpoint_path, phase_result["checkpoint"])
+        return {
+            "status": "running",
+            "cell": cell["cell"],
+            "phase": round_index,
+            "charged_calls": phase_result["checkpoint"]["charged_calls"],
+            "best": min(phase_result["checkpoint"]["archive"].values()),
         }
-    )
-    charged += 1
-    state.budget -= 1
-    if root_answer["score"] is None:
+
+    lock = _read(lock_path) if lock_path.exists() else None
+    statuses = []
+    if lock is not None:
+        for query in lock["queries"]:
+            receipt = folder / "receipts" / f"{query['query_id']}.json"
+            statuses.append(_read(receipt).get("status", "invalid") if receipt.exists() else "missing")
+    action = durable_phase_action(lock_exists=lock is not None, receipt_statuses=statuses)
+    if action == "fail_closed":
+        charged_before = int(lock.get("charged_before", 0)) if lock else 0
+        charged = charged_before + len(lock.get("queries", [])) if lock else charged_before
         result = {
-            "schema_version": "t4_integrated_route_fiber_result_v1",
-            "status": "root_oracle_failure",
+            "schema_version": "t4_integrated_route_fiber_result_v2",
+            "status": "operational_fail_closed",
             "cell": cell["cell"],
             "charged_calls": charged,
-            "root_lock_sha256": root_lock,
-            "root_result": root_answer,
+            "unresolved_phase": round_index,
+            "receipt_statuses": statuses,
+            "failure": "immutable query lock lacks a complete receipt; no query was resubmitted",
+            "prior_operational_waste": contract["prior_operational_waste"],
         }
         _publish(final_path, result)
         return result
-    state.archive[cell["smiles"]] = float(root_answer["score"])
-    previous = state.incumbent
-    print(
-        f"[{cell['cell']}] root call=1 score={previous:.2f} budget={state.budget}",
-        flush=True,
-    )
 
-    while state.budget > 0:
-        round_index = state.rounds + 1
-        started = time.time()
-        parents = state.parents(
-            limit=contract["parents"], rng=rng, explore=contract["parent_explore"]
+    if round_index == 0:
+        if action == "start":
+            query_id = f"{task['run_id']}_{cell['cell']}_root"
+            lock = {
+                "schema_version": "t4_integrated_round_lock_v2",
+                "contract_payload_sha256": task["contract_payload_sha256"],
+                "cell": cell["cell"],
+                "round": 0,
+                "kind": "root",
+                "charged_before": 0,
+                "queries": [{"query_id": query_id, "smiles": cell["smiles"]}],
+            }
+            lock_hash = _publish(lock_path, lock)
+            query = lock["queries"][0]
+            answer = dock_worker.remote(
+                {
+                    **task,
+                    **query,
+                    "receipt_path": str(
+                        Path(task["run_id"])
+                        / cell["cell"]
+                        / "receipts"
+                        / f"{query_id}.json"
+                    ),
+                }
+            )
+        else:
+            lock_hash = __import__("compose_v4.control.docking_value", fromlist=["identity"]).identity(lock)
+            query = lock["queries"][0]
+            answer = _read(folder / "receipts" / f"{query['query_id']}.json")["answer"]
+        if answer["score"] is None:
+            result = {
+                "schema_version": "t4_integrated_route_fiber_result_v2",
+                "status": "root_oracle_failure",
+                "cell": cell["cell"],
+                "charged_calls": 1,
+                "root_lock_sha256": lock_hash,
+                "root_result": answer,
+            }
+            _publish(final_path, result)
+            return result
+        rng = np.random.default_rng(cell["controller_seed"])
+        checkpoint = {
+            "schema_version": "t4_integrated_route_fiber_checkpoint_v2",
+            "status": "running",
+            "cell": cell["cell"],
+            "contract_payload_sha256": task["contract_payload_sha256"],
+            "charged_calls": 1,
+            "budget_remaining": contract["charged_calls_per_cell"] - 1,
+            "archive": {cell["smiles"]: float(answer["score"])},
+            "features": [],
+            "improvements": [],
+            "history": [],
+            "rounds": [],
+            "rounds_completed": 0,
+            "root_result": answer,
+            "rng_state": _jsonable(rng.bit_generator.state),
+        }
+        _publish(
+            phase_result_path,
+            {
+                "schema_version": "t4_integrated_phase_result_v1",
+                "round": 0,
+                "checkpoint": checkpoint,
+            },
         )
+        _publish(checkpoint_path, checkpoint)
+        print(f"[{cell['cell']}] durable root calls=1 score={answer['score']:.2f}", flush=True)
+        return {"status": "running", "cell": cell["cell"], "phase": 0, "charged_calls": 1, "best": answer["score"]}
+
+    rng = np.random.default_rng()
+    rng.bit_generator.state = checkpoint["rng_state"]
+    state = SearchState(
+        archive={key: float(value) for key, value in checkpoint["archive"].items()},
+        budget=int(checkpoint["budget_remaining"]),
+        rounds=int(checkpoint["rounds_completed"]),
+        history=list(checkpoint["history"]),
+    )
+    value = ProgramValue(penalty=contract["value_penalty"])
+    features = list(checkpoint["features"])
+    improvements = list(checkpoint["improvements"])
+    value.fit(features, improvements)
+    rounds = list(checkpoint["rounds"])
+    fiber = Fiber(cell["smiles"], contract["delta"], support=contract["support"])
+    started = time.time()
+
+    if action == "start":
+        parents = state.parents(limit=contract["parents"], rng=rng, explore=contract["parent_explore"])
         requests = []
         for parent_index, parent in enumerate(parents):
             for expert_index, expert in enumerate(EXPERTS):
@@ -373,36 +487,20 @@ def run_cell(task: dict) -> dict:
                         "parent": parent,
                         "parent_score": state.archive[parent],
                         "original_seed": cell["smiles"],
-                        "proposal_seed": int(
-                            cell["controller_seed"]
-                            + 1_000_003 * round_index
-                            + 10_007 * parent_index
-                            + 101 * expert_index
-                        ),
+                        "proposal_seed": int(cell["controller_seed"] + 1_000_003 * round_index + 10_007 * parent_index + 101 * expert_index),
                     }
                 )
-        worker_results = list(
-            proposal_worker.map(requests, order_outputs=True, return_exceptions=True)
-        )
+        worker_results = list(proposal_worker.map(requests, order_outputs=True, return_exceptions=True))
         pools = {expert: [] for expert in EXPERTS}
         worker_telemetry = []
         for request, answer in zip(requests, worker_results, strict=True):
             if isinstance(answer, Exception):
-                worker_telemetry.append(
-                    {
-                        "expert": request["expert"],
-                        "parent": request["parent"],
-                        "status": "failed",
-                        "error": repr(answer),
-                    }
-                )
+                worker_telemetry.append({"expert": request["expert"], "parent": request["parent"], "status": "failed", "error": repr(answer)})
                 continue
             pools[answer["expert"]].extend(answer["records"])
             worker_telemetry.append({**answer, "records": None, "status": "complete"})
-
         merged = merge_expert_pools(pools)
-        fresh = [row for row in merged if row["smiles"] not in state.archive]
-        candidates = attach_features(fresh, state, fiber)
+        candidates = attach_features([row for row in merged if row["smiles"] not in state.archive], state, fiber)
         room = min(contract["batch"], state.budget)
         selected = select_batch(
             candidates,
@@ -414,147 +512,158 @@ def run_cell(task: dict) -> dict:
             exploration=min(contract["exploration"], room),
             expert_floor_rounds=contract["expert_floor_rounds"],
         )
-        pool_census = expert_census(candidates)
-        selected_census = expert_census(selected)
         if not selected:
             result = {
-                "schema_version": "t4_integrated_route_fiber_result_v1",
+                "schema_version": "t4_integrated_route_fiber_result_v2",
                 "status": "candidate_exhaustion",
                 "cell": cell["cell"],
-                "charged_calls": charged,
-                "root_result": root_answer,
+                "charged_calls": checkpoint["charged_calls"],
+                "root_result": checkpoint["root_result"],
                 "rounds": rounds,
                 "archive": dict(sorted(state.archive.items())),
                 "final_best": state.incumbent,
             }
             _publish(final_path, result)
             return result
-
-        queries = []
-        for index, row in enumerate(selected):
-            queries.append(
-                {
-                    "query_id": f"{task['run_id']}_{cell['cell']}_r{round_index:03d}_q{index:02d}",
-                    "smiles": row["smiles"],
-                    "selection_kind": row["selection_kind"],
-                    "proposal_experts": row["proposal_experts"],
-                    "parent": row["parent"],
-                    "parent_score": row["parent_score"],
-                }
-            )
-        lock_payload = {
-            "schema_version": "t4_integrated_round_lock_v1",
+        queries = [
+            {
+                "query_id": f"{task['run_id']}_{cell['cell']}_r{round_index:03d}_q{index:02d}",
+                "smiles": row["smiles"],
+                "selection_kind": row["selection_kind"],
+                "proposal_experts": row["proposal_experts"],
+                "parent": row["parent"],
+                "parent_score": row["parent_score"],
+            }
+            for index, row in enumerate(selected)
+        ]
+        lock = {
+            "schema_version": "t4_integrated_round_lock_v2",
             "contract_payload_sha256": task["contract_payload_sha256"],
             "cell": cell["cell"],
             "round": round_index,
-            "charged_before": charged,
+            "charged_before": checkpoint["charged_calls"],
             "parents": parents,
-            "pool_census": pool_census,
-            "selected_census": selected_census,
+            "pool_census": expert_census(candidates),
+            "selected_census": expert_census(selected),
             "worker_telemetry": _jsonable(worker_telemetry),
             "candidate_pool": _jsonable(candidates),
+            "selected_rows": _jsonable(selected),
             "queries": queries,
+            "rng_state_after_selection": _jsonable(rng.bit_generator.state),
         }
-        lock_hash = _publish(folder / f"round_{round_index:03d}_lock.json", lock_payload)
+        lock_hash = _publish(lock_path, lock)
         dock_tasks = [
-            {**task, "query_id": query["query_id"], "smiles": query["smiles"]} for query in queries
+            {
+                **task,
+                "query_id": query["query_id"],
+                "smiles": query["smiles"],
+                "receipt_path": str(Path(task["run_id"]) / cell["cell"] / "receipts" / f"{query['query_id']}.json"),
+            }
+            for query in queries
         ]
         answers = list(dock_worker.map(dock_tasks, order_outputs=True, return_exceptions=True))
-        observed = []
-        for row, query, answer in zip(selected, queries, answers, strict=True):
-            if isinstance(answer, Exception):
-                answer = {
-                    "query_id": query["query_id"],
-                    "smiles": query["smiles"],
-                    "score": None,
-                    "failure": repr(answer),
-                }
-            charged += 1
-            state.budget -= 1
-            scored = {**row, **answer}
-            observed.append(scored)
-            if answer["score"] is None:
-                continue
-            features.append(np.asarray(row["features"], dtype=float).tolist())
-            improvements.append(float(row["parent_score"] - answer["score"]))
-            state.archive[row["smiles"]] = float(answer["score"])
-        value.fit(features, improvements)
-        improved = state.incumbent < previous
-        state.rounds = round_index
-        state.history.append({"round": round_index, "improved": improved})
-        previous = state.incumbent
-        round_result = {
-            "round": round_index,
-            "charged_calls": charged,
-            "charged_this_round": len(observed),
-            "candidate_lock_payload_sha256": lock_hash,
-            "pool_census": pool_census,
-            "selected_census": selected_census,
-            "selection_kind_census": {
-                kind: sum(row["selection_kind"] == kind for row in selected)
-                for kind in ("expert_floor", "model", "exploration")
-            },
-            "docked": _jsonable(observed),
-            "round_best": min(
-                (row["score"] for row in observed if row.get("score") is not None),
-                default=None,
-            ),
-            "best_so_far": state.incumbent,
-            "improved": improved,
-            "value_training_rows": len(improvements),
-            "timing_seconds": {
-                "round_total": time.time() - started,
-                "proposal_max": max(
-                    (row.get("elapsed_seconds", 0.0) for row in worker_telemetry), default=0.0
-                ),
-            },
-            "rng_state_after": _jsonable(rng.bit_generator.state),
-        }
-        rounds.append(round_result)
-        checkpoint = {
-            "schema_version": "t4_integrated_route_fiber_checkpoint_v1",
-            "status": "running",
+    else:
+        lock_hash = __import__("compose_v4.control.docking_value", fromlist=["identity"]).identity(lock)
+        selected = lock["selected_rows"]
+        candidates = lock["candidate_pool"]
+        worker_telemetry = lock["worker_telemetry"]
+        queries = lock["queries"]
+        rng.bit_generator.state = lock["rng_state_after_selection"]
+        answers = [_read(folder / "receipts" / f"{query['query_id']}.json")["answer"] for query in queries]
+
+    if any(isinstance(answer, Exception) for answer in answers):
+        statuses = []
+        for query in queries:
+            receipt = folder / "receipts" / f"{query['query_id']}.json"
+            statuses.append(_read(receipt).get("status", "invalid") if receipt.exists() else "missing")
+        result = {
+            "schema_version": "t4_integrated_route_fiber_result_v2",
+            "status": "operational_fail_closed",
             "cell": cell["cell"],
-            "contract_payload_sha256": task["contract_payload_sha256"],
-            "charged_calls": charged,
-            "budget_remaining": state.budget,
-            "archive": dict(sorted(state.archive.items())),
-            "features": features,
-            "improvements": improvements,
-            "history": state.history,
-            "rounds": rounds,
-            "rng_state": _jsonable(rng.bit_generator.state),
+            "charged_calls": int(lock["charged_before"]) + len(queries),
+            "unresolved_phase": round_index,
+            "receipt_statuses": statuses,
+            "failure": "one or more locked docking calls failed or remained unresolved; no retry",
         }
-        _publish(folder / "checkpoint.json", checkpoint)
-        print(
-            f"[{cell['cell']}] round={round_index} calls={charged} "
-            f"best={state.incumbent:.2f} round_best={round_result['round_best']} "
-            f"eligible={pool_census} selected={selected_census} "
-            f"kinds={round_result['selection_kind_census']} "
-            f"seconds={round_result['timing_seconds']['round_total']:.1f}",
-            flush=True,
-        )
+        _publish(final_path, result)
+        return result
 
-    result = {
-        "schema_version": "t4_integrated_route_fiber_result_v1",
-        "status": "complete_budget",
-        "contract_payload_sha256": task["contract_payload_sha256"],
-        "cell": cell["cell"],
-        "root_result": root_answer,
+    previous = state.incumbent
+    observed = []
+    for row, answer in zip(selected, answers, strict=True):
+        scored = {**row, **answer}
+        observed.append(scored)
+        if answer["score"] is None:
+            continue
+        features.append(np.asarray(row["features"], dtype=float).tolist())
+        improvements.append(float(row["parent_score"] - answer["score"]))
+        state.archive[row["smiles"]] = float(answer["score"])
+    charged = int(checkpoint["charged_calls"]) + len(observed)
+    state.budget = contract["charged_calls_per_cell"] - charged
+    state.rounds = round_index
+    improved = state.incumbent < previous
+    state.history.append({"round": round_index, "improved": improved})
+    value.fit(features, improvements)
+    round_result = {
+        "round": round_index,
         "charged_calls": charged,
-        "rounds": rounds,
-        "archive": dict(sorted(state.archive.items())),
-        "final_best": state.incumbent,
-        "best_smiles": min(state.archive, key=state.archive.get),
-        "training_rows": len(improvements),
-        "new_oracle_calls": charged,
-        "claim_boundary": contract["claim_boundary"],
+        "charged_this_round": len(observed),
+        "candidate_lock_payload_sha256": lock_hash,
+        "pool_census": lock["pool_census"],
+        "selected_census": lock["selected_census"],
+        "selection_kind_census": {kind: sum(row["selection_kind"] == kind for row in selected) for kind in ("expert_floor", "model", "exploration")},
+        "docked": _jsonable(observed),
+        "round_best": min((row["score"] for row in observed if row.get("score") is not None), default=None),
+        "best_so_far": state.incumbent,
+        "improved": improved,
+        "value_training_rows": len(improvements),
+        "timing_seconds": {"phase_total": time.time() - started, "proposal_max": max((row.get("elapsed_seconds", 0.0) for row in worker_telemetry), default=0.0)},
+        "rng_state_after": _jsonable(rng.bit_generator.state),
     }
-    _publish(final_path, result)
-    return result
+    rounds.append(round_result)
+    checkpoint = {
+        "schema_version": "t4_integrated_route_fiber_checkpoint_v2",
+        "status": "running",
+        "cell": cell["cell"],
+        "contract_payload_sha256": task["contract_payload_sha256"],
+        "charged_calls": charged,
+        "budget_remaining": state.budget,
+        "archive": dict(sorted(state.archive.items())),
+        "features": features,
+        "improvements": improvements,
+        "history": state.history,
+        "rounds": rounds,
+        "rounds_completed": round_index,
+        "root_result": checkpoint["root_result"],
+        "rng_state": _jsonable(rng.bit_generator.state),
+    }
+    _publish(phase_result_path, {"schema_version": "t4_integrated_phase_result_v1", "round": round_index, "checkpoint": checkpoint, "round_result": round_result})
+    _publish(checkpoint_path, checkpoint)
+    print(f"[{cell['cell']}] durable round={round_index} calls={charged} best={state.incumbent:.2f} round_best={round_result['round_best']}", flush=True)
+
+    if state.budget <= 0:
+        result = {
+            "schema_version": "t4_integrated_route_fiber_result_v2",
+            "status": "complete_budget",
+            "contract_payload_sha256": task["contract_payload_sha256"],
+            "cell": cell["cell"],
+            "root_result": checkpoint["root_result"],
+            "charged_calls": charged,
+            "rounds": rounds,
+            "archive": dict(sorted(state.archive.items())),
+            "final_best": state.incumbent,
+            "best_smiles": min(state.archive, key=state.archive.get),
+            "training_rows": len(improvements),
+            "new_oracle_calls": charged,
+            "prior_operational_waste": contract["prior_operational_waste"],
+            "claim_boundary": contract["claim_boundary"],
+        }
+        _publish(final_path, result)
+        return result
+    return {"status": "running", "cell": cell["cell"], "phase": round_index, "charged_calls": charged, "best": state.incumbent}
 
 
-@app.function(**common, max_containers=1, timeout=7 * 3600)
+@app.function(**common, max_containers=1, timeout=4000)
 def drive(task: dict) -> dict:
     import json
 
@@ -562,7 +671,7 @@ def drive(task: dict) -> dict:
     launch_path = OUTPUT / task["run_id"] / "launch.json"
     _publish(launch_path, task)
     tasks = [{**task, "cell": row["cell"]} for row in contract["cells"]]
-    answers = list(run_cell.map(tasks, order_outputs=True, return_exceptions=True))
+    answers = list(run_phase.map(tasks, order_outputs=True, return_exceptions=True))
     records = []
     for row, answer in zip(contract["cells"], answers, strict=True):
         if isinstance(answer, Exception):
@@ -573,20 +682,27 @@ def drive(task: dict) -> dict:
                     "cell": row["cell"],
                     "status": answer["status"],
                     "charged_calls": answer["charged_calls"],
-                    "final_best": answer.get("final_best"),
+                    "final_best": answer.get("final_best", answer.get("best")),
+                    "phase": answer.get("phase"),
                 }
             )
     summary = {
-        "schema_version": "t4_integrated_route_fiber_summary_v1",
+        "schema_version": "t4_integrated_route_fiber_phase_summary_v1",
         "run_id": task["run_id"],
         "contract_payload_sha256": task["contract_payload_sha256"],
         "records": records,
-        "finished": True,
+        "finished": all(row["status"] != "running" for row in records),
         "new_oracle_calls": sum(row.get("charged_calls", 0) for row in records),
         "claim_boundary": contract["claim_boundary"],
     }
-    _publish(OUTPUT / task["run_id"] / "summary.json", summary)
+    _publish(OUTPUT / task["run_id"] / "progress.json", summary)
     print(json.dumps(summary, indent=2), flush=True)
+    if not summary["finished"]:
+        continuation = drive.spawn(task)
+        summary["continuation_function_call_id"] = continuation.object_id
+        _publish(OUTPUT / task["run_id"] / "progress.json", summary)
+    else:
+        _publish(OUTPUT / task["run_id"] / "summary.json", summary)
     return summary
 
 
@@ -652,7 +768,7 @@ def _local_task() -> dict:
     if untracked.strip():
         raise ValueError(f"untracked integrated runtime inputs: {untracked}")
     body = {
-        "schema_version": "t4_integrated_route_fiber_launch_v1",
+        "schema_version": "t4_integrated_route_fiber_launch_v2",
         "contract_payload_sha256": identity(contract),
         "contract_file_sha256": sha256_file(ROOT / CONTRACT),
         "code_revision": subprocess.check_output(
@@ -668,7 +784,7 @@ def _local_task() -> dict:
 def main(mode: str = "launch", run_id: str = "") -> None:
     import json
 
-    from compose_v4.experiments.t4_matched_pilot import seal
+    from compose_v4.experiments.t4_matched_pilot import seal, unseal
 
     if mode == "launch":
         task = _local_task()
@@ -681,14 +797,21 @@ def main(mode: str = "launch", run_id: str = "") -> None:
             "output_prefix": task["run_id"],
         }
         destination = (
-            ROOT / "diagnostics/t4_integrated_route_fiber_braf_v2/launches" / (task["run_id"] + ".json")
+            ROOT / "diagnostics/t4_integrated_route_fiber_braf_v3/launches" / (task["run_id"] + ".json")
         )
         destination.parent.mkdir(parents=True, exist_ok=True)
         seal(destination, receipt)
         print(json.dumps(receipt, sort_keys=True))
         return
-    if mode != "status" or not run_id:
-        raise ValueError("use mode=launch or mode=status with run_id")
-    task = _local_task()
-    task["run_id"] = run_id
+    if mode not in {"advance", "status"} or not run_id:
+        raise ValueError("use mode=launch, or mode=advance/status with run_id")
+    receipt_path = (
+        ROOT / "diagnostics/t4_integrated_route_fiber_braf_v3/launches" / f"{run_id}.json"
+    )
+    receipt = unseal(receipt_path)
+    task = receipt["task"]
+    if mode == "advance":
+        call = drive.spawn(task)
+        print(json.dumps({"run_id": run_id, "function_call_id": call.object_id}, sort_keys=True))
+        return
     print(json.dumps(remote_status.remote(task), indent=2))

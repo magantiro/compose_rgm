@@ -21,6 +21,24 @@ EXPERTS = (
 )
 
 
+def durable_phase_action(*, lock_exists: bool, receipt_statuses: Iterable[str]) -> str:
+    """Decide whether a scored phase may start, recover, or must fail closed.
+
+    A published query lock is the irreversible boundary.  Once it exists, the
+    controller may only reconstruct a phase from complete durable receipts.  It
+    must never resubmit a missing or unresolved query after an executor eviction.
+    """
+
+    statuses = tuple(str(value) for value in receipt_statuses)
+    if not lock_exists:
+        if statuses:
+            raise ValueError("query receipts exist without an immutable phase lock")
+        return "start"
+    if statuses and all(value == "complete" for value in statuses):
+        return "recover"
+    return "fail_closed"
+
+
 def _experts(record: dict) -> tuple[str, ...]:
     values = record.get("proposal_experts") or [record.get("proposal_lane")]
     result = tuple(sorted({str(value) for value in values if value}))
@@ -170,6 +188,7 @@ def expert_census(records: Iterable[dict]) -> dict[str, int]:
 __all__ = [
     "EXPERTS",
     "attach_features",
+    "durable_phase_action",
     "expert_census",
     "integrated_features",
     "merge_expert_pools",
