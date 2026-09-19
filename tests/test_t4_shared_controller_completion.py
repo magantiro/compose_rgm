@@ -206,20 +206,30 @@ def test_runtime_payloads_are_sanitized_and_cell_local():
     assert len({payload_identity(payload) for payload in payloads}) == 9
 
 
-def test_thin_app_has_no_image_volume_or_scored_runtime_path():
+def test_scored_app_transition_remains_inert_without_sealed_authority():
+    import importlib
+
     source = APP.read_text()
-    assert len(source.splitlines()) < 100
-    for forbidden in (
-        "modal.Image",
-        "Volume.from_name",
-        ".spawn(",
-        "dock_t4",
-        "GENMOL_T4_SEEDS",
-        "legacy_resume",
-        "add_local_dir",
-    ):
-        assert forbidden not in source
-    assert "assert_scored_launch_blocked" in source
+    assert "validate_scored_contract" in source
+    assert "local_scored_context" in source
+    assert 'mode == "launch"' in source
+    assert '"modal_calls_created": 0' in source
+    launcher = importlib.import_module(
+        "modal_apps.t4_shared_controller_completion_v1_app"
+    )
+    report = launcher.scored_preflight_report()
+    assert report["modal_calls_created"] == 0
+    sealed_paths = (
+        ROOT / "diagnostics/t4_shared_controller_completion_v1/scored_contract.json",
+        ROOT
+        / "diagnostics/t4_shared_controller_completion_v1/scored_authorization.json",
+        ROOT / "diagnostics/t4_shared_controller_completion_v1/source_capsule",
+        ROOT
+        / "diagnostics/t4_shared_controller_completion_v1/source_capsule_manifest.json",
+    )
+    if not all(path.exists() for path in sealed_paths):
+        assert report["ready"] is False
+        assert report["missing"]
 
 
 def test_runtime_dependencies_do_not_pull_broad_or_legacy_modules_into_capsule():
