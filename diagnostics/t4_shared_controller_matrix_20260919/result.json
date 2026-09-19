@@ -1,0 +1,104 @@
+{
+  "schema_version": "t4_shared_controller_matrix_snapshot_v1",
+  "created_utc": "2026-09-19T13:16:34Z",
+  "reconciliation_code_revision": "4c2d2262e53cd8cd27e21206caf3fa64a1cc3657",
+  "claim_boundary": "Development evidence from the current shared controller under one docking seed per campaign. This is not a frozen full-T4 benchmark and does not combine older Full-146 winners into the current controller result.",
+  "score_direction": "lower_is_better",
+  "ivg_source": {
+    "path": "/Users/rmaganti/compose_rgm_git/tmp/ivg_repo/InVirtuoGen_results-main/README.md",
+    "sha256": "a5ae0d826fc458caa1bdfa0a4d8f23927da33cea39188c3e4375a55164de6b80"
+  },
+  "inputs": [
+    {
+      "name": "jak2_delta_0_6",
+      "location": "diagnostics/t4_integrated_route_fiber_v1/final_result.json",
+      "physical_sha256": "fa1fbae94f7d8fc9f08cfa383b8d435be132a237a321e41792478b15600aed01",
+      "payload_sha256": "53024cb864665d2418a7cc1a9f51e575c98bdcf70d3edf710446ff94eab18349"
+    },
+    {
+      "name": "jak2_delta_0_4",
+      "location": "modal://compose-t4-shared-retained-fiber-jak2-v2/421b1cbf04a212f1a65af44e1f462da5c201fda22268188a17d86c1169fff5c3/summary.json",
+      "physical_sha256": "80a4340f3c6906c67d659ea8bc0afd28f14cbf84c579904734cc340d985fb64a",
+      "payload_sha256": "979aa31a4043dc73c7add9540ffeb07ffb175323efa424699cf9ba3bfa303fe1"
+    },
+    {
+      "name": "parp1_delta_0_6_seed0_rescue",
+      "location": "modal://compose-t4-shared-retained-fiber-parp1-p0-rescue-v1/34da40be9f08692f0c4274b57c55fb3a7e389ba54ddeda5ed27ac16bbcfdedbf/summary.json",
+      "physical_sha256": "42d8467929e6b6f0c2505344994cc1c6550ce72ec986ee721308652cfc968df2",
+      "payload_sha256": "a5b8a3e43404a18eecbf446eacd8d528dd0ab1ae81717c1e6f6e2962550c2054"
+    },
+    {
+      "name": "parp1_delta_0_6_seeds1_2",
+      "location": "modal://compose-t4-shared-retained-fiber-parp1-v2/23e88afc3d7217bf7394f9091f3ded8a218209a77f5f8ae61413c17c5f46db33/summary.json",
+      "physical_sha256": "3db2ccdb69ed966a126bac10fa292e419f3999ebb44de2ff288984460cf47daf",
+      "payload_sha256": "9af251cb5026426297b7a54cee86aeaf63f2f5c3732e32bac79b6e6573cf5c44"
+    },
+    {
+      "name": "5ht1b_delta_0_4",
+      "location": "modal://compose-t4-shared-retained-fiber-5ht1b-d04-v1/b4bdd4eb2407bb3490e75ab552fd4e940b24ba60cbe36fb6491916b8046a25a8/summary.json",
+      "physical_sha256": "7b3482a326228601f6c6c5c448ce762595eb907f3cd78862b8dadde59419be13",
+      "payload_sha256": "110de74d810848a65b10eb6a3cc54523eb39f3c6a7cf5bb8113f4054210a8d3a"
+    },
+    {
+      "name": "5ht1b_delta_0_6",
+      "location": "modal://compose-t4-shared-retained-fiber-5ht1b-d06-v1/795dec1e0f7398a52e1d3cc9f168f20b6f36c65a89236b3408d25ba929826c6a/summary.json",
+      "physical_sha256": "beea9d214e5963ef84d01145f08ca747735ed4923b222fe8e47ac48321e94d18",
+      "payload_sha256": "adafce3e6d27b0000130ec45873af62779bc7568ff8a04b415578f6cc2d5f1e9"
+    },
+    {
+      "name": "fa7_delta_0_4",
+      "location": "modal://compose-t4-shared-retained-fiber-fa7-d04-v1/32dc75bf92f6f625b351efc06a179c515e62148dcf90ff6c3a3679a6f251759a/summary.json",
+      "physical_sha256": "dc80f0a64f599cbf6e3a41aed4be87a24b4543780ed55a96dd217104814e41bb",
+      "payload_sha256": "56ff424e7283dc592f04156b42596d2514ec0c1b56f52557bd532bd9b39137c4"
+    },
+    {
+      "name": "fa7_delta_0_6",
+      "location": "modal://compose-t4-shared-retained-fiber-fa7-d06-v1/263627082295b7000c753625814271890928c356cf06e34837fa66dd82e8718e/summary.json",
+      "physical_sha256": "1cc62be684a2062e570c1214b388a7adac66c0dcd3b46e9befe9c9f43a6b14f6",
+      "payload_sha256": "985843775e0b8f14aa74af886e585e0bb0e2f287e73900b1a62483b28a735639"
+    }
+  ],
+  "records": [
+    {"cell": "jak2_0", "delta": 0.4, "compose": -11.1, "ivg": -10.2, "gap": -0.9, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "jak2_1", "delta": 0.4, "compose": -11.5, "ivg": -10.5, "gap": -1.0, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "jak2_2", "delta": 0.4, "compose": -11.8, "ivg": -10.2, "gap": -1.6, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "jak2_0", "delta": 0.6, "compose": -9.6, "ivg": -9.7, "gap": 0.1, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "jak2_1", "delta": 0.6, "compose": -11.2, "ivg": -10.4, "gap": -0.8, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "jak2_2", "delta": 0.6, "compose": -10.6, "ivg": -10.3, "gap": -0.3, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "parp1_0", "delta": 0.6, "compose": -12.4, "ivg": -12.3, "gap": -0.1, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "parp1_1", "delta": 0.6, "compose": -12.6, "ivg": -11.7, "gap": -0.9, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "parp1_2", "delta": 0.6, "compose": -11.3, "ivg": -10.7, "gap": -0.6, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "5ht1b_0", "delta": 0.4, "compose": -12.6, "ivg": -13.3, "gap": 0.7, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "5ht1b_1", "delta": 0.4, "compose": -11.8, "ivg": -12.0, "gap": 0.2, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "5ht1b_2", "delta": 0.4, "compose": -12.6, "ivg": -10.9, "gap": -1.7, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "5ht1b_0", "delta": 0.6, "compose": -12.7, "ivg": -12.4, "gap": -0.3, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "5ht1b_1", "delta": 0.6, "compose": -12.5, "ivg": -12.0, "gap": -0.5, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "5ht1b_2", "delta": 0.6, "compose": -9.8, "ivg": -10.6, "gap": 0.8, "charged_calls": 1, "status": "candidate_exhaustion"},
+    {"cell": "fa7_0", "delta": 0.4, "compose": -9.7, "ivg": -8.4, "gap": -1.3, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "fa7_1", "delta": 0.4, "compose": -9.4, "ivg": -8.9, "gap": -0.5, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "fa7_2", "delta": 0.4, "compose": -8.4, "ivg": -8.0, "gap": -0.4, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "fa7_0", "delta": 0.6, "compose": -7.7, "ivg": -7.7, "gap": 0.0, "charged_calls": 2, "status": "candidate_exhaustion"},
+    {"cell": "fa7_1", "delta": 0.6, "compose": -7.6, "ivg": -7.5, "gap": -0.1, "charged_calls": 49, "status": "complete_budget"},
+    {"cell": "fa7_2", "delta": 0.6, "compose": -8.3, "ivg": -7.4, "gap": -0.9, "charged_calls": 49, "status": "complete_budget"}
+  ],
+  "summary": {
+    "completed_or_terminal_cells": 21,
+    "strictly_better_than_ivg": 16,
+    "equal_to_ivg": 1,
+    "worse_than_ivg": 4,
+    "at_or_better_than_ivg": 17,
+    "current_shared_controller_cells_not_yet_complete": 9,
+    "remaining_completed_cell_misses": [
+      "jak2_0_delta_0.6",
+      "5ht1b_0_delta_0.4",
+      "5ht1b_1_delta_0.4",
+      "5ht1b_2_delta_0.6"
+    ]
+  },
+  "limitations": [
+    "These are development campaigns under one docking seed, not replicated publication estimates.",
+    "FA7 seed 2 at both deltas and FA7 seed 0 at delta 0.6 began with roots already at or better than the reported IVG mean; their endpoint comparison does not establish controller improvement.",
+    "The PARP1 seed-0 entry uses the authorized fresh rescue campaign because the earlier continuation suffered a route head-of-line timeout.",
+    "BRAF delta 0.6 remains an unfinished frozen continuation and is excluded. PARP1 and BRAF delta 0.4 have no completed current shared-controller campaign in this snapshot."
+  ]
+}
