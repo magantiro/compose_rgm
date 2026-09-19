@@ -546,6 +546,44 @@ def _validate_receipt(
     return spec.job_id, payload
 
 
+def validate_complete_combination_receipt(
+    receipt: Mapping[str, Any],
+    *,
+    expected_spec: CompleteCombinationJobSpec | None = None,
+    source_state_sha256: str | None = None,
+    expert_training_identity_sha256: str | None = None,
+) -> dict[str, Any]:
+    """Validate one self-hashed particle receipt and return its payload.
+
+    This boundary is intentionally public for durable proposal orchestration.
+    It validates only the frozen particle schema and optional parent identities;
+    it does not settle a partial set of receipts or alter failure semantics.
+    """
+
+    expected = {row.job_id: row for row in complete_combination_job_specs()}
+    job_id, payload = _validate_receipt(receipt, expected)
+    if payload is None or job_id is None:
+        raise ValueError("invalid complete-combination particle receipt")
+    if expected_spec is not None and (
+        expected.get(expected_spec.job_id) != expected_spec
+        or job_id != expected_spec.job_id
+    ):
+        raise ValueError("particle receipt belongs to another frozen job")
+    telemetry = payload["telemetry"]
+    if (
+        source_state_sha256 is not None
+        and telemetry["source_state_sha256"] != source_state_sha256
+    ):
+        raise ValueError("particle receipt source-state identity mismatch")
+    if (
+        expert_training_identity_sha256 is not None
+        and telemetry["expert_training_identity_sha256"]
+        != expert_training_identity_sha256
+    ):
+        raise ValueError("particle receipt training identity mismatch")
+    return payload
+
+
 def _legacy_only_result(
     legacy: list[dict[str, Any]],
     *,
@@ -794,4 +832,5 @@ __all__ = [
     "route_record_from_virtual_proposal",
     "run_complete_combination_job",
     "sanitize_particle_telemetry",
+    "validate_complete_combination_receipt",
 ]
