@@ -148,6 +148,22 @@ def _eight_binding_expert():
     return source, replace_carbon, _expert((replace_carbon,))
 
 
+def _chain_binding_expert():
+    source = _graph(
+        (2,) * 8,
+        (3, 2, 2, 2, 2, 2, 2, 3),
+        tuple((index, index + 1, 1) for index in range(7)),
+    )
+    replace_carbon = StructuralDeltaTemplate(
+        input_atoms=((2, 0, 2, 2),),
+        input_bonds=((0,),),
+        target_atoms=((3, 0, 1, 2),),
+        output_atoms=(),
+        target_bonds=((0,),),
+    )
+    return source, replace_carbon, _expert((replace_carbon,))
+
+
 def _crowded_shallow_expert():
     source, joint_template, _ = _co2_compensating_expert()
     shallow = tuple(
@@ -368,12 +384,306 @@ def test_flat_allocation_default_is_byte_equivalent() -> None:
         expert,
         budgets=budgets,
         constituent_allocation="flat",
+        combination_planner="incremental_beam",
     )
 
     assert _signature(default) == _signature(explicit)
     assert default.telemetry == explicit.telemetry
     assert "constituent_allocation_mode" not in default.telemetry
     assert "binding_particle_index" not in default.telemetry
+    assert "combination_planner_mode" not in default.telemetry
+
+
+def test_complete_combination_particles_cover_one_depth_without_overlap() -> None:
+    source, _, expert = _eight_binding_expert()
+    budgets = _budgets(
+        max_depth=2,
+        expansion_width=8,
+        max_planning_expansions=10,
+        max_targets=16,
+        max_realization_attempts=16,
+        max_realization_expansions=1_024,
+    )
+
+    batches = [
+        propose_virtual_joint_region_paths(
+            source,
+            expert,
+            budgets=budgets,
+            combination_planner="complete_combination_particle",
+            combination_particle_depth=2,
+            combination_particle_index=particle_index,
+            combination_particle_count=3,
+        )
+        for particle_index in range(3)
+    ]
+    repeated = propose_virtual_joint_region_paths(
+        source,
+        expert,
+        budgets=budgets,
+        combination_planner="complete_combination_particle",
+        combination_particle_depth=2,
+        combination_particle_index=1,
+        combination_particle_count=3,
+    )
+
+    ranges = [
+        (
+            batch.telemetry["combination_particle_shard_start"],
+            batch.telemetry["combination_particle_shard_stop"],
+        )
+        for batch in batches
+    ]
+    assert ranges == [(0, 9), (9, 18), (18, 28)]
+    assert sum(batch.telemetry["planning_expansions"] for batch in batches) == 28
+    assert all(
+        batch.telemetry["planning_expansions"] <= budgets.max_planning_expansions
+        for batch in batches
+    )
+    assert all(
+        batch.telemetry["combination_particle_raw_union_covers_requested_depth"] == 1
+        for batch in batches
+    )
+    assert all(
+        batch.telemetry.get("combination_particle_target_capacity_abstention", 0) == 0
+        for batch in batches
+    )
+    assert _signature(batches[1]) == _signature(repeated)
+    assert batches[1].telemetry == repeated.telemetry
+    assert all(proposal.depth == 2 for batch in batches for proposal in batch.proposals)
+    assert all(
+        "endpoint" not in key and "teacher" not in key and "route" not in key
+        for batch in batches
+        for key in batch.telemetry
+        if key.startswith("combination_particle_")
+    )
+    forbidden_payload_keys = {
+        "binding",
+        "bindings",
+        "slot",
+        "slots",
+        "action",
+        "actions",
+    }
+
+    def telemetry_keys(value) -> set[str]:
+        if isinstance(value, dict):
+            return set(value) | set().union(
+                *(telemetry_keys(item) for item in value.values())
+            )
+        if isinstance(value, (list, tuple)):
+            return set().union(*(telemetry_keys(item) for item in value), set())
+        return set()
+
+    assert telemetry_keys(batches[0].telemetry).isdisjoint(forbidden_payload_keys)
+
+
+def test_complete_combination_particle_recovers_valid_low_marginal_stop() -> None:
+    source, expert = _crowded_shallow_expert()
+    joint_template = next(row for row in expert.templates if len(row.input_atoms) == 2)
+    low_marginal_expert = _expert(
+        expert.templates,
+        weights={
+            row.template_id: 0.01 if row == joint_template else 1.0
+            for row in expert.templates
+        },
+    )
+    budgets = _budgets(
+        max_depth=2,
+        beam_width=1,
+        max_targets=128,
+        max_realization_attempts=128,
+        max_realization_expansions=4_096,
+    )
+
+    beam = propose_virtual_joint_region_paths(
+        source,
+        low_marginal_expert,
+        budgets=budgets,
+    )
+    particle = propose_virtual_joint_region_paths(
+        source,
+        low_marginal_expert,
+        budgets=budgets,
+        combination_planner="complete_combination_particle",
+        combination_particle_depth=2,
+        combination_particle_index=0,
+        combination_particle_count=1,
+    )
+
+    assert all(row.endpoint_key != "OCO" for row in beam.proposals)
+    assert any(row.endpoint_key == "OCO" for row in particle.proposals)
+    assert particle.telemetry["valid_stop_targets_depth_2"] >= 1
+    assert particle.telemetry["combination_particle_target_capacity_abstention"] == 0
+
+
+def test_complete_combination_particle_abstains_before_partial_planning() -> None:
+    source, _, expert = _eight_binding_expert()
+    budgets = _budgets(
+        max_depth=2,
+        expansion_width=8,
+        max_planning_expansions=10,
+    )
+
+    batch = propose_virtual_joint_region_paths(
+        source,
+        expert,
+        budgets=budgets,
+        combination_planner="complete_combination_particle",
+        combination_particle_depth=2,
+        combination_particle_index=0,
+        combination_particle_count=2,
+    )
+
+    assert batch.proposals == ()
+    assert batch.telemetry["combination_particle_total_combinations"] == 28
+    assert batch.telemetry["combination_particle_required_minimum_count"] == 3
+    assert batch.telemetry["combination_particle_raw_union_covers_requested_depth"] == 0
+    assert batch.telemetry["combination_particle_assigned_combinations"] == 14
+    assert batch.telemetry["combination_particle_planning_capacity_abstention"] == 1
+    assert batch.telemetry["combination_particle_unvalidated_combinations"] == 14
+    assert batch.telemetry["planning_expansions"] == 0
+    assert batch.telemetry["realization_attempts"] == 0
+
+
+def test_complete_combination_particle_never_marginally_truncates_targets() -> None:
+    source, _, expert = _chain_binding_expert()
+    budgets = _budgets(
+        max_depth=1,
+        expansion_width=8,
+        max_targets=2,
+        max_realization_attempts=2,
+    )
+
+    batch = propose_virtual_joint_region_paths(
+        source,
+        expert,
+        budgets=budgets,
+        combination_planner="complete_combination_particle",
+        combination_particle_depth=1,
+        combination_particle_index=0,
+        combination_particle_count=1,
+    )
+
+    assert batch.telemetry["planning_expansions"] == 6
+    assert batch.telemetry["valid_stop_targets_depth_1"] == 6
+    assert batch.telemetry["combination_particle_unique_valid_targets"] == 3
+    assert batch.telemetry["combination_particle_target_capacity"] == 2
+    assert batch.telemetry["combination_particle_target_capacity_abstention"] == 1
+    assert batch.telemetry["combination_particle_unretained_valid_targets"] == 3
+    assert batch.telemetry["retained_targets_depth_1"] == 0
+    assert batch.telemetry["realization_attempts"] == 0
+    assert batch.proposals == ()
+
+
+def test_complete_combination_particle_reports_empty_supported_depth() -> None:
+    source, expert = _append_expert()
+
+    batch = propose_virtual_joint_region_paths(
+        source,
+        expert,
+        budgets=_budgets(max_depth=2),
+        combination_planner="complete_combination_particle",
+        combination_particle_depth=2,
+        combination_particle_index=0,
+        combination_particle_count=1,
+    )
+
+    assert batch.proposals == ()
+    assert batch.telemetry["combination_particle_total_combinations"] == 0
+    assert batch.telemetry["combination_particle_empty_depth_abstention"] == 1
+    assert batch.telemetry["planning_expansions"] == 0
+
+
+@pytest.mark.parametrize(
+    ("arguments", "message"),
+    [
+        ({"combination_planner": "unknown"}, "combination_planner"),
+        (
+            {"combination_particle_depth": 1},
+            "only valid for complete_combination_particle",
+        ),
+        (
+            {"combination_planner": "complete_combination_particle"},
+            "combination_particle_depth",
+        ),
+        (
+            {
+                "combination_planner": "complete_combination_particle",
+                "combination_particle_depth": True,
+                "combination_particle_index": 0,
+                "combination_particle_count": 1,
+            },
+            "combination_particle_depth",
+        ),
+        (
+            {
+                "combination_planner": "complete_combination_particle",
+                "combination_particle_depth": 0,
+                "combination_particle_index": 0,
+                "combination_particle_count": 1,
+            },
+            "combination_particle_depth",
+        ),
+        (
+            {
+                "combination_planner": "complete_combination_particle",
+                "combination_particle_depth": 3,
+                "combination_particle_index": 0,
+                "combination_particle_count": 1,
+            },
+            "combination_particle_depth",
+        ),
+        (
+            {
+                "combination_planner": "complete_combination_particle",
+                "combination_particle_depth": 1,
+                "combination_particle_index": 0,
+                "combination_particle_count": 0,
+            },
+            "combination_particle_count",
+        ),
+        (
+            {
+                "combination_planner": "complete_combination_particle",
+                "combination_particle_depth": 1,
+                "combination_particle_index": True,
+                "combination_particle_count": 1,
+            },
+            "combination_particle_index",
+        ),
+        (
+            {
+                "combination_planner": "complete_combination_particle",
+                "combination_particle_depth": 1,
+                "combination_particle_index": -1,
+                "combination_particle_count": 1,
+            },
+            "combination_particle_index",
+        ),
+        (
+            {
+                "combination_planner": "complete_combination_particle",
+                "combination_particle_depth": 1,
+                "combination_particle_index": 1,
+                "combination_particle_count": 1,
+            },
+            "combination_particle_index",
+        ),
+    ],
+)
+def test_complete_combination_particle_argument_validation(
+    arguments: dict, message: str
+) -> None:
+    source, expert = _append_expert()
+
+    with pytest.raises(ValueError, match=message):
+        propose_virtual_joint_region_paths(
+            source,
+            expert,
+            budgets=_budgets(max_depth=2),
+            **arguments,
+        )
 
 
 def test_template_binding_particle_is_deterministic_and_permutation_invariant() -> None:

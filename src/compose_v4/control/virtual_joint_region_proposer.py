@@ -14,6 +14,8 @@ address-free route expert.
 
 from __future__ import annotations
 
+import itertools
+import math
 from collections import Counter
 from dataclasses import dataclass
 from typing import Any
@@ -47,6 +49,8 @@ _SLOT_CAPACITY = 48
 _MAXIMUM_ACTIVE_ATOMS = 40
 _FLAT_ALLOCATION = "flat"
 _TEMPLATE_BINDING_PARTICLE_ALLOCATION = "template_binding_particle"
+_INCREMENTAL_BEAM_PLANNER = "incremental_beam"
+_COMPLETE_COMBINATION_PARTICLE_PLANNER = "complete_combination_particle"
 
 
 @dataclass(frozen=True)
@@ -563,6 +567,127 @@ def _plan_targets(
     return tuple(sorted(best_by_endpoint.values(), key=_target_rank_key))
 
 
+def _plan_complete_combination_particle(
+    source: MolecularGraph,
+    expert: RouteDistilledGoalExpert,
+    constituents: tuple[_BoundConstituent, ...],
+    budgets: VirtualJointRegionBudgets,
+    telemetry: Counter,
+    *,
+    depth: int,
+    particle_index: int,
+    particle_count: int,
+) -> tuple[_PlannedTarget, ...]:
+    """Validate one disjoint bounded shard of complete combinations."""
+
+    ordered = tuple(sorted(constituents, key=lambda row: row.constituent_key))
+    total_combinations = math.comb(len(ordered), depth)
+    shard_start = total_combinations * particle_index // particle_count
+    shard_stop = total_combinations * (particle_index + 1) // particle_count
+    shard_size = shard_stop - shard_start
+    required_particle_count = max(
+        1,
+        math.ceil(total_combinations / budgets.max_planning_expansions),
+    )
+    telemetry["combination_planner_mode"] = _COMPLETE_COMBINATION_PARTICLE_PLANNER
+    telemetry["combination_particle_depth"] = depth
+    telemetry["combination_particle_index"] = particle_index
+    telemetry["combination_particle_count"] = particle_count
+    telemetry["combination_particle_total_combinations"] = total_combinations
+    telemetry["combination_particle_shard_start"] = shard_start
+    telemetry["combination_particle_shard_stop"] = shard_stop
+    telemetry["combination_particle_assigned_combinations"] = shard_size
+    telemetry["combination_particle_required_minimum_count"] = required_particle_count
+    telemetry["combination_particle_raw_union_covers_requested_depth"] = int(
+        particle_count >= required_particle_count
+    )
+    telemetry["combination_particle_coverage_requires_all_particles"] = 1
+    telemetry["combination_particle_telemetry_sanitized"] = 1
+    telemetry["combination_particle_empty_depth_abstention"] = 0
+    telemetry["combination_particle_planning_capacity_abstention"] = 0
+    telemetry["combination_particle_unvalidated_combinations"] = 0
+    telemetry["combination_particle_target_capacity_abstention"] = 0
+    telemetry["combination_particle_unretained_valid_targets"] = 0
+    telemetry["planning_expansions"] += 0
+    telemetry["realization_attempts"] += 0
+    telemetry["realizer_expansions"] += 0
+    for candidate_depth in range(1, budgets.max_depth + 1):
+        telemetry[f"planning_prefixes_depth_{candidate_depth}"] = (
+            shard_size if candidate_depth == depth else 0
+        )
+
+    if total_combinations == 0:
+        telemetry["combination_particle_empty_depth_abstention"] = 1
+        for candidate_depth in range(1, budgets.max_depth + 1):
+            telemetry[f"retained_targets_depth_{candidate_depth}"] = 0
+        telemetry["target_depths_with_valid_stops"] = 0
+        telemetry["target_depths_retained"] = 0
+        telemetry["valid_joint_endpoints_recovered"] = 0
+        return ()
+    if shard_size > budgets.max_planning_expansions:
+        telemetry["combination_particle_planning_capacity_abstention"] = 1
+        telemetry["combination_particle_unvalidated_combinations"] = shard_size
+        for candidate_depth in range(1, budgets.max_depth + 1):
+            telemetry[f"retained_targets_depth_{candidate_depth}"] = 0
+        telemetry["target_depths_with_valid_stops"] = 0
+        telemetry["target_depths_retained"] = 0
+        telemetry["valid_joint_endpoints_recovered"] = 0
+        return ()
+
+    best_by_endpoint: dict[str, _PlannedTarget] = {}
+    combinations = itertools.islice(
+        itertools.combinations(ordered, depth),
+        shard_start,
+        shard_stop,
+    )
+    for combined in combinations:
+        telemetry["planning_expansions"] += 1
+        prefix = _PlanningPrefix(
+            combined,
+            expert.marginal.score(tuple(row.template for row in combined)),
+        )
+        telemetry["stop_target_attempts"] += 1
+        target = _valid_stop_target(source, prefix)
+        if target is None:
+            telemetry["final_target_abstentions"] += 1
+            telemetry[f"invalid_stop_targets_depth_{depth}"] += 1
+            if depth == 1:
+                telemetry["standalone_invalid_constituents_retained"] += 1
+            continue
+        endpoint, target_receipt = target
+        planned = _PlannedTarget(prefix, endpoint, target_receipt)
+        telemetry[f"valid_stop_targets_depth_{depth}"] += 1
+        previous = best_by_endpoint.get(planned.endpoint_key)
+        if previous is not None:
+            telemetry["canonical_target_aliases"] += 1
+            if _target_rank_key(previous) <= _target_rank_key(planned):
+                continue
+        best_by_endpoint[planned.endpoint_key] = planned
+
+    unique_target_count = len(best_by_endpoint)
+    telemetry["combination_particle_unique_valid_targets"] = unique_target_count
+    target_capacity = min(
+        budgets.max_targets,
+        budgets.max_realization_attempts,
+    )
+    telemetry["combination_particle_target_capacity"] = target_capacity
+    if unique_target_count > target_capacity:
+        telemetry["combination_particle_target_capacity_abstention"] = 1
+        telemetry["combination_particle_unretained_valid_targets"] = unique_target_count
+        best_by_endpoint = {}
+
+    for candidate_depth in range(1, budgets.max_depth + 1):
+        telemetry[f"retained_targets_depth_{candidate_depth}"] = (
+            len(best_by_endpoint) if candidate_depth == depth else 0
+        )
+    telemetry["valid_joint_endpoints_recovered"] = sum(
+        len(row.prefix.constituents) >= 2 for row in best_by_endpoint.values()
+    )
+    telemetry["target_depths_with_valid_stops"] = int(unique_target_count > 0)
+    telemetry["target_depths_retained"] = int(bool(best_by_endpoint))
+    return tuple(sorted(best_by_endpoint.values(), key=_target_rank_key))
+
+
 def _steps(target: _PlannedTarget) -> tuple[VirtualJointRegionStep, ...]:
     raw_output_slots = target.target_receipt.get("output_slots")
     if not isinstance(raw_output_slots, list) or len(raw_output_slots) != len(
@@ -689,12 +814,18 @@ def propose_virtual_joint_region_paths(
     ranker: object | None = None,
     constituent_allocation: str = _FLAT_ALLOCATION,
     binding_particle_index: int | None = None,
+    combination_planner: str = _INCREMENTAL_BEAM_PLANNER,
+    combination_particle_depth: int | None = None,
+    combination_particle_index: int | None = None,
+    combination_particle_count: int | None = None,
 ) -> VirtualJointRegionProposalBatch:
     """Plan and exactly execute valid joint targets from generic same-root deltas.
 
     This function has no task, cell, route, endpoint, evaluator, or teacher
     action input.  Invalid planning prefixes remain private and can only affect
     which complete joint targets are attempted within the declared budgets.
+    The opt-in complete-combination mode covers one requested depth only when
+    every particle in its declared fixed particle count is run and unioned.
     """
 
     budgets = VirtualJointRegionBudgets() if budgets is None else budgets
@@ -723,6 +854,47 @@ def propose_virtual_joint_region_paths(
             "template_binding_particle allocation requires an integer "
             "binding_particle_index within 0..max_bindings_per_template-1"
         )
+    particle_arguments = (
+        combination_particle_depth,
+        combination_particle_index,
+        combination_particle_count,
+    )
+    if combination_planner == _INCREMENTAL_BEAM_PLANNER:
+        if any(value is not None for value in particle_arguments):
+            raise ValueError(
+                "combination particle arguments are only valid for "
+                "complete_combination_particle planning"
+            )
+    elif combination_planner == _COMPLETE_COMBINATION_PARTICLE_PLANNER:
+        if (
+            type(combination_particle_depth) is not int
+            or not 1 <= combination_particle_depth <= budgets.max_depth
+        ):
+            raise ValueError(
+                "complete_combination_particle planning requires an integer "
+                "combination_particle_depth within 1..max_depth"
+            )
+        if (
+            type(combination_particle_count) is not int
+            or combination_particle_count < 1
+        ):
+            raise ValueError(
+                "complete_combination_particle planning requires a positive integer "
+                "combination_particle_count"
+            )
+        if (
+            type(combination_particle_index) is not int
+            or not 0 <= combination_particle_index < combination_particle_count
+        ):
+            raise ValueError(
+                "complete_combination_particle planning requires an integer "
+                "combination_particle_index within 0..combination_particle_count-1"
+            )
+    else:
+        raise ValueError(
+            "combination_planner must be 'incremental_beam' or "
+            "'complete_combination_particle'"
+        )
     if source.n_atoms != _SLOT_CAPACITY:
         raise ValueError("virtual joint region source must have exactly 48 slots")
     if (
@@ -744,8 +916,39 @@ def propose_virtual_joint_region_paths(
         constituent_allocation=constituent_allocation,
         binding_particle_index=binding_particle_index,
     )
-    targets = _plan_targets(source, expert, constituents, budgets, telemetry)
+    if combination_planner == _INCREMENTAL_BEAM_PLANNER:
+        targets = _plan_targets(source, expert, constituents, budgets, telemetry)
+    else:
+        for row in telemetry["bound_constituent_ranks"]:
+            row.pop("binding", None)
+        if (
+            combination_particle_depth is None
+            or combination_particle_index is None
+            or combination_particle_count is None
+        ):
+            raise AssertionError("validated combination particle arguments are missing")
+        targets = _plan_complete_combination_particle(
+            source,
+            expert,
+            constituents,
+            budgets,
+            telemetry,
+            depth=combination_particle_depth,
+            particle_index=combination_particle_index,
+            particle_count=combination_particle_count,
+        )
     proposals = _realize_targets(source, targets, budgets, telemetry)
+    if combination_planner == _COMPLETE_COMBINATION_PARTICLE_PLANNER:
+        telemetry["combination_particle_realization_coverage_numerator"] = telemetry[
+            "realization_attempts"
+        ]
+        telemetry["combination_particle_realization_coverage_denominator"] = len(
+            targets
+        )
+        telemetry["combination_particle_unattempted_targets"] = max(
+            0,
+            len(targets) - telemetry["realization_attempts"],
+        )
     result_telemetry = {
         **dict(sorted(telemetry.items())),
         "max_depth": budgets.max_depth,
