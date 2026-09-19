@@ -3,6 +3,7 @@ from compose_v4.experiments.t4_integrated_route_fiber_v2 import (
     durable_phase_action,
     expert_census,
     merge_expert_pools,
+    proposal_collection_action,
 )
 
 
@@ -45,6 +46,33 @@ def test_durable_phase_fails_closed_without_resubmitting_locked_query():
             lock_exists=True, receipt_statuses=["complete", "reserved"]
         )
         == "fail_closed"
+    )
+
+
+def test_proposal_collector_never_waits_past_frozen_deadline():
+    assert (
+        proposal_collection_action(
+            receipt_statuses=["complete", "failed", "complete"],
+            now=9.0,
+            deadline=10.0,
+        )
+        == "collect"
+    )
+    assert (
+        proposal_collection_action(
+            receipt_statuses=["complete", "running", "missing"],
+            now=9.0,
+            deadline=10.0,
+        )
+        == "wait"
+    )
+    assert (
+        proposal_collection_action(
+            receipt_statuses=["complete", "running", "missing"],
+            now=10.0,
+            deadline=10.0,
+        )
+        == "collect_with_abstentions"
     )
     assert (
         durable_phase_action(lock_exists=True, receipt_statuses=["missing"])

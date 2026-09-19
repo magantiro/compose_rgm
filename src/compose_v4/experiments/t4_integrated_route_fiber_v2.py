@@ -39,6 +39,20 @@ def durable_phase_action(*, lock_exists: bool, receipt_statuses: Iterable[str]) 
     return "fail_closed"
 
 
+def proposal_collection_action(
+    *, receipt_statuses: Iterable[str], now: float, deadline: float
+) -> str:
+    """Return the nonblocking action for independently persisted expert jobs."""
+
+    statuses = tuple(str(value) for value in receipt_statuses)
+    terminal = {"complete", "failed"}
+    if statuses and all(value in terminal for value in statuses):
+        return "collect"
+    if float(now) < float(deadline):
+        return "wait"
+    return "collect_with_abstentions"
+
+
 def _experts(record: dict) -> tuple[str, ...]:
     values = record.get("proposal_experts") or [record.get("proposal_lane")]
     result = tuple(sorted({str(value) for value in values if value}))
@@ -192,5 +206,6 @@ __all__ = [
     "expert_census",
     "integrated_features",
     "merge_expert_pools",
+    "proposal_collection_action",
     "select_batch",
 ]

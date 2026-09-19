@@ -1,4 +1,4 @@
-"""Preemption-safe BRAF repair with retained-core proposals and FiberControl.
+"""Receipt-sharded BRAF repair with retained-core proposals and FiberControl.
 
 Every round first publishes an immutable candidate and query lock to a durable Modal
 volume.  Docking then runs once per locked molecule with no retry or replacement.  The
@@ -13,11 +13,11 @@ import modal
 
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE = Path("/compose")
-OUTPUT = Path("/integrated_braf_v3")
-CONTRACT = "configs/t4_integrated_route_fiber_braf_v3.json"
+OUTPUT = Path("/integrated_braf_v4")
+CONTRACT = "configs/t4_integrated_route_fiber_braf_v4.json"
 CHECKPOINT = "diagnostics/t4_integrated_route_fiber_braf_v1/route_expert_checkpoint.json"
 PREFLIGHT = "diagnostics/t4_integrated_route_fiber_braf_v2/retained_core_preflight.json"
-VOLUME_NAME = "compose-t4-integrated-route-fiber-braf-v3"
+VOLUME_NAME = "compose-t4-integrated-route-fiber-braf-v4"
 MOOD = "https://raw.githubusercontent.com/SeulLee05/MOOD/main/scorer"
 
 image = (
@@ -59,7 +59,7 @@ image = (
     )
 )
 volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
-app = modal.App("compose-t4-integrated-route-fiber-braf-v3")
+app = modal.App("compose-t4-integrated-route-fiber-braf-v4")
 common = {
     "image": image,
     "cpu": (1.0, 1.0),
@@ -133,8 +133,7 @@ def _jsonable(value):
     return value
 
 
-@app.function(**common, max_containers=36, timeout=1800)
-def proposal_worker(task: dict) -> dict:
+def _proposal_worker_impl(task: dict) -> dict:
     """One expert on one measured parent; no task-oracle access."""
 
     import json
@@ -256,6 +255,61 @@ def proposal_worker(task: dict) -> dict:
     }
 
 
+@app.function(**common, max_containers=36, timeout=1800)
+def proposal_worker(task: dict) -> dict:
+    return _proposal_worker_impl(task)
+
+
+@app.function(**common, max_containers=36, timeout=1800)
+def durable_proposal_worker(task: dict) -> dict:
+    """Persist one deterministic expert result independently of its collector."""
+
+    import time
+
+    receipt_path = OUTPUT / task["proposal_receipt_path"]
+    volume.reload()
+    if receipt_path.exists():
+        existing = _read(receipt_path)
+        if existing.get("status") in {"complete", "failed"}:
+            return existing
+    started = time.time()
+    _publish(
+        receipt_path,
+        {
+            "schema_version": "t4_integrated_proposal_receipt_v1",
+            "status": "running",
+            "expert": task["expert"],
+            "parent": task["parent"],
+            "proposal_seed": task["proposal_seed"],
+            "started_at": started,
+        },
+    )
+    try:
+        answer = _proposal_worker_impl(task)
+    except (IndexError, KeyError, RuntimeError, TypeError, ValueError) as error:
+        receipt = {
+            "schema_version": "t4_integrated_proposal_receipt_v1",
+            "status": "failed",
+            "expert": task["expert"],
+            "parent": task["parent"],
+            "proposal_seed": task["proposal_seed"],
+            "error": repr(error),
+            "elapsed_seconds": time.time() - started,
+        }
+    else:
+        receipt = {
+            "schema_version": "t4_integrated_proposal_receipt_v1",
+            "status": "complete",
+            "expert": task["expert"],
+            "parent": task["parent"],
+            "proposal_seed": task["proposal_seed"],
+            "answer": answer,
+            "elapsed_seconds": time.time() - started,
+        }
+    _publish(receipt_path, receipt)
+    return receipt
+
+
 @app.function(**common, max_containers=24, timeout=720)
 def dock_worker(task: dict) -> dict:
     """One locked docking request, charged once, with no retry."""
@@ -338,6 +392,7 @@ def run_phase(task: dict) -> dict:
         durable_phase_action,
         expert_census,
         merge_expert_pools,
+        proposal_collection_action,
         select_batch,
     )
 
@@ -476,27 +531,112 @@ def run_phase(task: dict) -> dict:
     started = time.time()
 
     if action == "start":
-        parents = state.parents(limit=contract["parents"], rng=rng, explore=contract["parent_explore"])
-        requests = []
-        for parent_index, parent in enumerate(parents):
-            for expert_index, expert in enumerate(EXPERTS):
-                requests.append(
-                    {
-                        **task,
-                        "expert": expert,
-                        "parent": parent,
-                        "parent_score": state.archive[parent],
-                        "original_seed": cell["smiles"],
-                        "proposal_seed": int(cell["controller_seed"] + 1_000_003 * round_index + 10_007 * parent_index + 101 * expert_index),
-                    }
-                )
-        worker_results = list(proposal_worker.map(requests, order_outputs=True, return_exceptions=True))
+        proposal_manifest_path = folder / f"round_{round_index:03d}_proposals.json"
+        if not proposal_manifest_path.exists():
+            parents = state.parents(
+                limit=contract["parents"], rng=rng, explore=contract["parent_explore"]
+            )
+            requests = []
+            for parent_index, parent in enumerate(parents):
+                for expert_index, expert in enumerate(EXPERTS):
+                    receipt_relative = str(
+                        Path(task["run_id"])
+                        / cell["cell"]
+                        / f"round_{round_index:03d}_proposal_receipts"
+                        / f"p{parent_index:02d}_{expert}.json"
+                    )
+                    requests.append(
+                        {
+                            **task,
+                            "expert": expert,
+                            "parent": parent,
+                            "parent_score": state.archive[parent],
+                            "original_seed": cell["smiles"],
+                            "proposal_seed": int(
+                                cell["controller_seed"]
+                                + 1_000_003 * round_index
+                                + 10_007 * parent_index
+                                + 101 * expert_index
+                            ),
+                            "proposal_receipt_path": receipt_relative,
+                        }
+                    )
+            manifest = {
+                "schema_version": "t4_integrated_proposal_manifest_v1",
+                "cell": cell["cell"],
+                "round": round_index,
+                "created_at": time.time(),
+                "deadline": time.time() + contract["proposal_wait_seconds"],
+                "parents": parents,
+                "requests": requests,
+                "rng_state_after_parent_selection": _jsonable(rng.bit_generator.state),
+            }
+            _publish(proposal_manifest_path, manifest)
+            call_ids = []
+            for request in requests:
+                call_ids.append(durable_proposal_worker.spawn(request).object_id)
+            _publish(
+                folder / f"round_{round_index:03d}_proposal_dispatch.json",
+                {
+                    "schema_version": "t4_integrated_proposal_dispatch_v1",
+                    "round": round_index,
+                    "call_ids": call_ids,
+                },
+            )
+            return {
+                "status": "proposals_running",
+                "cell": cell["cell"],
+                "phase": round_index,
+                "charged_calls": checkpoint["charged_calls"],
+                "proposal_jobs": len(requests),
+            }
+        manifest = _read(proposal_manifest_path)
+        requests = manifest["requests"]
+        receipt_rows = []
+        statuses = []
+        for request in requests:
+            receipt_path = OUTPUT / request["proposal_receipt_path"]
+            if receipt_path.exists():
+                receipt = _read(receipt_path)
+                statuses.append(receipt.get("status", "invalid"))
+                receipt_rows.append(receipt)
+            else:
+                statuses.append("missing")
+                receipt_rows.append(None)
+        collection = proposal_collection_action(
+            receipt_statuses=statuses,
+            now=time.time(),
+            deadline=manifest["deadline"],
+        )
+        if collection == "wait":
+            return {
+                "status": "proposals_running",
+                "cell": cell["cell"],
+                "phase": round_index,
+                "charged_calls": checkpoint["charged_calls"],
+                "proposal_statuses": {
+                    name: statuses.count(name)
+                    for name in ("complete", "failed", "running", "missing")
+                },
+                "proposal_deadline": manifest["deadline"],
+            }
+        parents = manifest["parents"]
+        rng.bit_generator.state = manifest["rng_state_after_parent_selection"]
         pools = {expert: [] for expert in EXPERTS}
         worker_telemetry = []
-        for request, answer in zip(requests, worker_results, strict=True):
-            if isinstance(answer, Exception):
-                worker_telemetry.append({"expert": request["expert"], "parent": request["parent"], "status": "failed", "error": repr(answer)})
+        for request, receipt in zip(requests, receipt_rows, strict=True):
+            if receipt is None or receipt.get("status") != "complete":
+                worker_telemetry.append(
+                    {
+                        "expert": request["expert"],
+                        "parent": request["parent"],
+                        "status": "abstained",
+                        "receipt_status": "missing" if receipt is None else receipt.get("status"),
+                        "error": None if receipt is None else receipt.get("error"),
+                    }
+                )
                 continue
+            answer = receipt["answer"]
             pools[answer["expert"]].extend(answer["records"])
             worker_telemetry.append({**answer, "records": None, "status": "complete"})
         merged = merge_expert_pools(pools)
@@ -797,7 +937,7 @@ def main(mode: str = "launch", run_id: str = "") -> None:
             "output_prefix": task["run_id"],
         }
         destination = (
-            ROOT / "diagnostics/t4_integrated_route_fiber_braf_v3/launches" / (task["run_id"] + ".json")
+            ROOT / "diagnostics/t4_integrated_route_fiber_braf_v4/launches" / (task["run_id"] + ".json")
         )
         destination.parent.mkdir(parents=True, exist_ok=True)
         seal(destination, receipt)
@@ -806,7 +946,7 @@ def main(mode: str = "launch", run_id: str = "") -> None:
     if mode not in {"advance", "status"} or not run_id:
         raise ValueError("use mode=launch, or mode=advance/status with run_id")
     receipt_path = (
-        ROOT / "diagnostics/t4_integrated_route_fiber_braf_v3/launches" / f"{run_id}.json"
+        ROOT / "diagnostics/t4_integrated_route_fiber_braf_v4/launches" / f"{run_id}.json"
     )
     receipt = unseal(receipt_path)
     task = receipt["task"]
