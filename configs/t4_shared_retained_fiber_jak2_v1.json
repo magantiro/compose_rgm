@@ -43,7 +43,7 @@
     "runtime_inputs_sha256": {
       "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
       "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
-      "modal_apps/t4_shared_retained_fiber_jak2_app.py": "1861906c6d5a05b829003349c5b923f8fe9ca607d26ccdf20edb2af720f23fa2",
+      "modal_apps/t4_shared_retained_fiber_jak2_app.py": "d698a3b401357ced4f043c7dfc50a813accce461d6692dcc648f10f7273f073a",
       "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
       "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
       "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
@@ -60,5 +60,5 @@
     "primary_baselines": "measured roots, frozen prior JAK2 delta=0.6 integrated run, and reported IVG delta=0.4 means; no comparator enters runtime",
     "claim_boundary": "primary shared-controller JAK2 delta=0.4 development evaluation under one docking seed; same weights and proposal law on all cells, no endpoint injection or cell-to-winner lookup"
   },
-  "payload_sha256": "a9d69e6bb5f6f34a65932206bc842e178fd8ca372cb2ca0337478be887915013"
+  "payload_sha256": "f9de6245060d9c3bff168f56c543b715256392b1fdb3367ee68c2d2c76a1c194"
 }

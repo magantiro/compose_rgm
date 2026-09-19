@@ -7,11 +7,13 @@ three cells and all proposal workers execute concurrently on single-CPU containe
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import modal
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
 REMOTE = Path("/compose")
 OUTPUT = Path("/shared_retained_parp1")
 CONTRACT = "configs/t4_shared_retained_fiber_parp1_v1.json"
