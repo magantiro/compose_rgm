@@ -1,4 +1,4 @@
-"""Fit and smoke-test a leave-JAK2-out complete-region proposal expert."""
+"""Fit and smoke-test a leave-one-target-out complete-region proposal expert."""
 
 from __future__ import annotations
 
@@ -41,18 +41,23 @@ def _revision() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
 
 
-def _seeds() -> list[dict]:
+def _seeds(held_target: str) -> list[dict]:
     rows = json.loads((ROOT / "docs/GENMOL_T4_SEEDS.json").read_text())
-    selected = [row for row in rows if row["target"] == "jak2"]
+    selected = [row for row in rows if row["target"] == held_target]
     if len(selected) != 3:
-        raise RuntimeError("JAK2 seed census changed")
+        raise RuntimeError(f"{held_target} seed census changed")
     return selected
 
 
-def run(output: Path, checkpoint: Path) -> dict:
+def run(output: Path, checkpoint: Path, *, held_target: str = "jak2") -> dict:
     routes, metadata = _rows()
-    train = [row for row in routes if metadata[row["source_group"]]["target"] != "jak2"]
-    held = [row for row in routes if metadata[row["source_group"]]["target"] == "jak2"]
+    known_targets = sorted({row["target"] for row in metadata.values()})
+    if held_target not in known_targets:
+        raise ValueError(f"unknown held target {held_target!r}; expected one of {known_targets}")
+    train = [
+        row for row in routes if metadata[row["source_group"]]["target"] != held_target
+    ]
+    held = [row for row in routes if metadata[row["source_group"]]["target"] == held_target]
     if len(routes) != 77 or len(train) + len(held) != len(routes) or not train or not held:
         raise RuntimeError("route-expert held-target split changed")
     marginal = fit_marginal_subgoal_policy(train, exploration_floor=0.10)
@@ -76,14 +81,14 @@ def run(output: Path, checkpoint: Path) -> dict:
         "expert": expert.checkpoint(),
         "split_audit": {
             "split": "leave_one_target_out",
-            "held_target_hash": hashlib.sha256(b"jak2").hexdigest(),
+            "held_target_hash": hashlib.sha256(held_target.encode()).hexdigest(),
             "all_routes": len(routes),
             "training_routes": len(train),
             "held_routes": len(held),
             "training_regions": sum(len(row["templates"]) for row in train),
             "held_regions": sum(len(row["templates"]) for row in held),
             "held_target_absent_from_training": all(
-                metadata[row["source_group"]]["target"] != "jak2" for row in train
+                metadata[row["source_group"]]["target"] != held_target for row in train
             ),
         },
         "new_oracle_calls": 0,
@@ -91,7 +96,7 @@ def run(output: Path, checkpoint: Path) -> dict:
     _publish(checkpoint, checkpoint_payload)
 
     cells = []
-    for source_index, seed in enumerate(_seeds()):
+    for source_index, seed in enumerate(_seeds(held_target)):
         source = pad_molecular_graph(smiles_to_molecular_graph(seed["smiles"]), 48)
         candidates, telemetry = propose_route_expert_candidates(
             source,
@@ -112,7 +117,7 @@ def run(output: Path, checkpoint: Path) -> dict:
         eligible = sum(row["eligible"] for row in rows)
         cells.append(
             {
-                "cell": f"jak2_{source_index}",
+                "cell": f"{held_target}_{source_index}",
                 "source_global_index": seed["idx"],
                 "proposed_pool": int(telemetry["unique_ranked_endpoints"]),
                 "complete_programs_committed": committed,
@@ -149,7 +154,7 @@ def run(output: Path, checkpoint: Path) -> dict:
     }
     payload = {
         "schema_version": SCHEMA,
-        "evidence": "zero-oracle production smoke of leave-JAK2-out route proposals",
+        "evidence": f"zero-oracle production smoke of leave-{held_target}-out route proposals",
         "code_revision": _revision(),
         "inputs_sha256": inputs,
         "checkpoint": str(checkpoint.relative_to(ROOT)),
@@ -183,8 +188,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--checkpoint", type=Path, default=DEFAULT_CHECKPOINT)
+    parser.add_argument("--held-target", default="jak2")
     args = parser.parse_args()
-    result = run(args.output.resolve(), args.checkpoint.resolve())
+    result = run(
+        args.output.resolve(),
+        args.checkpoint.resolve(),
+        held_target=args.held_target,
+    )
     print(
         json.dumps(
             {
