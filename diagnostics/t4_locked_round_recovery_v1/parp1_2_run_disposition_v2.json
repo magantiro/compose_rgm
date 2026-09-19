@@ -1,0 +1,14 @@
+{
+  "cell_key": "parp1_2_d04",
+  "decision": "retain_run_as_scientifically_valid_and_recover_from_immutable_modal_launch",
+  "durable_launch_payload_sha256": "e2ecfb003a05c73fc47bdd20d252cee2cd2aa09b3e46aeef2b1104b659130dd4",
+  "durable_launch_source": "modal-volume:compose-t4-shared-completion-v1-parp1-2-d04/b2a7e0aee53da2fa649103ac0dc83970aa00de218c90a1763f4ef8b9972397b6/launch.json",
+  "expected_contract_payload_sha256": "a2c5672e1140dc8b8dc8e6e99c188ba22cfbf8f4474daf4b2c16cc95d316ba9f",
+  "local_operational_receipt_status": "one_character_contract_payload_identity_transcription_defect",
+  "oracle_policy": "do_not_retry_or_resubmit_any_locked_query",
+  "reason": "Read-only retrieval of the immutable per-cell Modal launch record proved that the originally executed launch contains the exact self-hashed contract identity. The mismatch is confined to the later local operational receipt and does not invalidate the scored execution.",
+  "run_id": "b2a7e0aee53da2fa649103ac0dc83970aa00de218c90a1763f4ef8b9972397b6",
+  "schema_version": "t4_scored_run_disposition_v2",
+  "supersedes": "diagnostics/t4_locked_round_recovery_v1/parp1_2_run_disposition.json",
+  "successor_action": "Use the immutable Modal launch payload for exact validation, settle the existing locked round once, and resume only from the resulting checkpoint."
+}
