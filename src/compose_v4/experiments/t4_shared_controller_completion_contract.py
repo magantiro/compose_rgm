@@ -7,6 +7,7 @@ payload-bound authorization in a later revision.
 
 from __future__ import annotations
 
+import gzip
 import hashlib
 import json
 import re
@@ -19,6 +20,7 @@ from typing import Any
 SCHEMA_VERSION = "t4_shared_controller_completion_preparation_v1"
 RUNTIME_SCHEMA_VERSION = "t4_shared_controller_completion_runtime_cell_v1"
 CAPSULE_MANIFEST_SCHEMA_VERSION = "t4_exact_commit_source_capsule_manifest_v1"
+SUPPORT_SCHEMA_VERSION = "t4_nine_cell_support_preflight_v1"
 PREPARED_STATUS = "PREPARED_PENDING_ZERO_ORACLE_GATE"
 CONTRACT_RELATIVE_PATH = "configs/t4_shared_controller_completion_v1.json"
 
@@ -477,6 +479,8 @@ def build_exact_commit_capsule(
     manifest_path = manifest_path.resolve()
     if capsule_root.exists() or manifest_path.exists():
         raise FileExistsError("capsule and manifest outputs must not already exist")
+    if manifest_path.is_relative_to(capsule_root):
+        raise ValueError("source capsule manifest must be outside the capsule root")
     if not include:
         raise ValueError("source capsule include set must be nonempty")
     requested = tuple(sorted({str(_safe_capsule_path(item)) for item in include}))
@@ -523,6 +527,8 @@ def build_exact_commit_capsule(
         tempfile.mkdtemp(prefix=f".{capsule_root.name}.tmp-", dir=capsule_root.parent)
     )
     temporary_manifest = manifest_path.with_suffix(manifest_path.suffix + ".tmp")
+    if temporary_manifest.exists():
+        raise FileExistsError("temporary capsule manifest output already exists")
     try:
         files: dict[str, dict[str, str]] = {}
         for relative, oid in sorted(entries):
@@ -555,6 +561,133 @@ def build_exact_commit_capsule(
         raise
 
 
+def validate_zero_oracle_support_artifact(
+    *, repository_root: Path, artifact_root: Path
+) -> dict[str, Any]:
+    """Verify the complete nine-cell support gate and every bound endpoint ledger."""
+
+    repository_root = repository_root.resolve()
+    artifact_root = artifact_root.resolve()
+    result_path = artifact_root / "result.json"
+    envelope = _load_json_object(result_path)
+    payload = envelope.get("payload")
+    if not isinstance(payload, dict) or payload_identity(payload) != envelope.get(
+        "payload_sha256"
+    ):
+        raise ValueError("nine-cell support result envelope is invalid")
+    if payload.get("schema_version") != SUPPORT_SCHEMA_VERSION:
+        raise ValueError("unexpected nine-cell support result schema")
+
+    contract_path = repository_root / "configs/t4_nine_cell_support_preflight_v1.json"
+    support_contract = _load_json_object(contract_path)
+    contract_payload = support_contract.get("payload")
+    if not isinstance(contract_payload, dict) or payload_identity(
+        contract_payload
+    ) != support_contract.get("payload_sha256"):
+        raise ValueError("nine-cell support contract envelope is invalid")
+    if payload.get("contract_payload_sha256") != support_contract["payload_sha256"]:
+        raise ValueError("nine-cell support contract identity drift")
+    if payload.get("contract_file_sha256") != sha256_file(contract_path):
+        raise ValueError("nine-cell support contract physical hash drift")
+    if payload.get("shared_route_checkpoint") != {
+        "path": "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json",
+        "sha256": ("cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e"),
+        "payload_sha256": (
+            "5476be572dd40ee3f068cc8f1df238eec54e23a82cb84f803905ac891701e07d"
+        ),
+    }:
+        raise ValueError("nine-cell support checkpoint drift")
+    for relative, expected in payload.get("inputs_sha256", {}).items():
+        path = _safe_capsule_path(str(relative))
+        if sha256_file(repository_root.joinpath(*path.parts)) != expected:
+            raise ValueError(f"nine-cell support material input drift: {relative}")
+    if payload.get("costs") != {
+        "oracle_calls": 0,
+        "docking_calls": 0,
+        "modal_launches": 0,
+        "gpu_seconds": 0,
+    }:
+        raise ValueError("nine-cell support artifact is not zero-oracle")
+    gate = payload.get("gate")
+    if not isinstance(gate, dict) or gate != {
+        "complete_nine_cell_census": True,
+        "zero_oracle": True,
+        "every_cell_has_nonzero_eligible_support": True,
+        "zero_eligible_cells": [],
+        "passed": True,
+    }:
+        raise ValueError("nine-cell support gate did not pass exactly")
+
+    expected_ids = {
+        row["cell_key"].replace("_d04", "_d0p4").replace("_d06", "_d0p6")
+        for row in EXPECTED_CELLS
+    }
+    cells = payload.get("cells")
+    if not isinstance(cells, list) or len(cells) != 9:
+        raise ValueError("nine-cell support cell census is incomplete")
+    observed_ids = [str(row.get("cell_id")) for row in cells]
+    if set(observed_ids) != expected_ids or len(set(observed_ids)) != 9:
+        raise ValueError("nine-cell support cell identities drift")
+
+    ledger_count = 0
+    for cell in cells:
+        cell_id = str(cell["cell_id"])
+        if not cell.get("gate", {}).get("nonzero_eligible_support"):
+            raise ValueError(f"zero eligible support for {cell_id}")
+        if int(cell.get("pooled_eligible_unique", 0)) < 1:
+            raise ValueError(f"invalid pooled eligible count for {cell_id}")
+        experts = cell.get("experts")
+        if not isinstance(experts, list) or [
+            row.get("expert") for row in experts
+        ] != list(EXPECTED_EXPERTS):
+            raise ValueError(f"proposal expert census drift for {cell_id}")
+        for expert in experts:
+            relative = str(expert.get("endpoint_ledger", ""))
+            path = _safe_capsule_path(relative)
+            if path.parts[:2] != ("cells", cell_id):
+                raise ValueError(f"endpoint ledger path drift for {cell_id}")
+            ledger_path = artifact_root.joinpath(*path.parts)
+            if sha256_file(ledger_path) != expert.get("endpoint_ledger_sha256"):
+                raise ValueError(f"endpoint ledger hash mismatch: {relative}")
+            try:
+                with gzip.open(ledger_path, "rt", encoding="utf-8") as handle:
+                    rows = [json.loads(line) for line in handle if line.strip()]
+            except (OSError, UnicodeError, json.JSONDecodeError) as error:
+                raise ValueError(f"invalid endpoint ledger: {relative}") from error
+            if any(not isinstance(row, dict) or not row.get("smiles") for row in rows):
+                raise ValueError(f"invalid endpoint ledger rows: {relative}")
+            ledger_count += 1
+        summary_path = artifact_root / "cells" / cell_id / "summary.json"
+        summary = _load_json_object(summary_path)
+        if summary.get("payload_sha256") != payload_identity(cell):
+            raise ValueError(f"cell summary identity mismatch for {cell_id}")
+        if summary.get("payload") != cell:
+            raise ValueError(f"cell summary payload mismatch for {cell_id}")
+
+    scientific_path = artifact_root / "scientific_result.json"
+    scientific = _load_json_object(scientific_path)
+    from compose_v4.experiments.t4_nine_cell_support_preflight import (
+        scientific_projection,
+    )
+
+    projected = scientific_projection(payload)
+    if scientific.get("payload") != projected or scientific.get(
+        "payload_sha256"
+    ) != payload_identity(projected):
+        raise ValueError("nine-cell scientific projection mismatch")
+    return {
+        "schema_version": "t4_nine_cell_support_binding_verification_v1",
+        "passed": True,
+        "cell_count": 9,
+        "ledger_count": ledger_count,
+        "result_sha256": sha256_file(result_path),
+        "result_payload_sha256": envelope["payload_sha256"],
+        "scientific_result_sha256": sha256_file(scientific_path),
+        "scientific_payload_sha256": scientific["payload_sha256"],
+        "support_contract_payload_sha256": support_contract["payload_sha256"],
+    }
+
+
 __all__ = [
     "CAPSULE_MANIFEST_SCHEMA_VERSION",
     "CONTRACT_RELATIVE_PATH",
@@ -565,10 +698,12 @@ __all__ = [
     "PREPARED_STATUS",
     "RUNTIME_SCHEMA_VERSION",
     "SCHEMA_VERSION",
+    "SUPPORT_SCHEMA_VERSION",
     "assert_scored_launch_blocked",
     "build_exact_commit_capsule",
     "cell_runtime_payload",
     "payload_identity",
     "validate_preparation_contract",
+    "validate_zero_oracle_support_artifact",
     "verify_exact_commit_capsule",
 ]

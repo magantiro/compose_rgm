@@ -1,3 +1,4 @@
+import gzip
 import hashlib
 import json
 import subprocess
@@ -5,6 +6,9 @@ from pathlib import Path
 
 import pytest
 
+from compose_v4.experiments.t4_nine_cell_support_preflight import (
+    scientific_projection,
+)
 from compose_v4.experiments.t4_shared_controller_cell_runtime import (
     QUERY_RECEIPT_SCHEMA,
     ReceiptStore,
@@ -28,6 +32,7 @@ from compose_v4.experiments.t4_shared_controller_completion_contract import (
     cell_runtime_payload,
     payload_identity,
     validate_preparation_contract,
+    validate_zero_oracle_support_artifact,
     verify_exact_commit_capsule,
 )
 
@@ -56,6 +61,84 @@ def _keys(value) -> set[str]:
 
 def _git_blob_oid(data: bytes) -> str:
     return hashlib.sha1(f"blob {len(data)}\0".encode() + data).hexdigest()
+
+
+def _write_envelope(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {"payload": payload, "payload_sha256": payload_identity(payload)},
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + "\n"
+    )
+
+
+def _support_fixture(tmp_path: Path) -> Path:
+    artifact = tmp_path / "support"
+    contract_path = ROOT / "configs/t4_nine_cell_support_preflight_v1.json"
+    contract_envelope = json.loads(contract_path.read_text())
+    contract = contract_envelope["payload"]
+    cells = []
+    for specification in contract["cells"]:
+        cell_id = specification["cell_id"]
+        experts = []
+        for expert in EXPECTED_EXPERTS:
+            relative = f"cells/{cell_id}/{expert}.jsonl.gz"
+            ledger = artifact / relative
+            ledger.parent.mkdir(parents=True, exist_ok=True)
+            with (
+                ledger.open("wb") as raw,
+                gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as stream,
+            ):
+                stream.write(b'{"smiles":"CC"}\n')
+            experts.append(
+                {
+                    "expert": expert,
+                    "attempted": 1,
+                    "generated": 1,
+                    "exact_unique": 1,
+                    "valid_unique": 1,
+                    "eligible_unique": 1,
+                    "endpoint_ledger": relative,
+                    "endpoint_ledger_sha256": hashlib.sha256(
+                        ledger.read_bytes()
+                    ).hexdigest(),
+                }
+            )
+        cell = {
+            "cell_id": cell_id,
+            "experts": experts,
+            "pooled_eligible_unique": 1,
+            "gate": {"nonzero_eligible_support": True},
+        }
+        cells.append(cell)
+        _write_envelope(artifact / "cells" / cell_id / "summary.json", cell)
+    payload = {
+        "schema_version": "t4_nine_cell_support_preflight_v1",
+        "contract_payload_sha256": contract_envelope["payload_sha256"],
+        "contract_file_sha256": hashlib.sha256(contract_path.read_bytes()).hexdigest(),
+        "shared_route_checkpoint": contract["shared_route_checkpoint"],
+        "inputs_sha256": contract["inputs_sha256"],
+        "cells": cells,
+        "gate": {
+            "complete_nine_cell_census": True,
+            "zero_oracle": True,
+            "every_cell_has_nonzero_eligible_support": True,
+            "zero_eligible_cells": [],
+            "passed": True,
+        },
+        "costs": {
+            "oracle_calls": 0,
+            "docking_calls": 0,
+            "modal_launches": 0,
+            "gpu_seconds": 0,
+        },
+    }
+    _write_envelope(artifact / "result.json", payload)
+    _write_envelope(artifact / "scientific_result.json", scientific_projection(payload))
+    return artifact
 
 
 def test_preparation_contract_is_exactly_nine_cells_and_unlaunchable():
@@ -242,6 +325,46 @@ def test_exact_commit_capsule_builder_rejects_empty_or_unsafe_selection(tmp_path
             include=("../escape",),
             capsule_root=tmp_path / "unsafe",
             manifest_path=tmp_path / "unsafe.json",
+        )
+    with pytest.raises(ValueError, match="must be outside"):
+        build_exact_commit_capsule(
+            repository_root=ROOT,
+            revision=revision,
+            include=("modal_apps/t4_shared_controller_completion_v1_app.py",),
+            capsule_root=tmp_path / "nested",
+            manifest_path=tmp_path / "nested" / "manifest.json",
+        )
+
+
+def test_zero_oracle_support_binding_verifies_every_cell_and_ledger(tmp_path):
+    artifact = _support_fixture(tmp_path)
+    report = validate_zero_oracle_support_artifact(
+        repository_root=ROOT, artifact_root=artifact
+    )
+    assert report["passed"] is True
+    assert report["cell_count"] == 9
+    assert report["ledger_count"] == 27
+
+
+def test_zero_oracle_support_binding_rejects_failed_gate_and_ledger_tampering(
+    tmp_path,
+):
+    artifact = _support_fixture(tmp_path)
+    result_path = artifact / "result.json"
+    result = json.loads(result_path.read_text())["payload"]
+    result["gate"]["passed"] = False
+    _write_envelope(result_path, result)
+    with pytest.raises(ValueError, match="did not pass exactly"):
+        validate_zero_oracle_support_artifact(
+            repository_root=ROOT, artifact_root=artifact
+        )
+
+    artifact = _support_fixture(tmp_path / "second")
+    ledger = next(artifact.glob("cells/*/*.jsonl.gz"))
+    ledger.write_bytes(b"tampered")
+    with pytest.raises(ValueError, match="ledger hash mismatch"):
+        validate_zero_oracle_support_artifact(
+            repository_root=ROOT, artifact_root=artifact
         )
 
 
