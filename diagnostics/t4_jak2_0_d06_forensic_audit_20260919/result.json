@@ -1,0 +1,840 @@
+{
+  "payload": {
+    "audit_date": "2026-09-19",
+    "central_claim_under_test": "Whether known strong JAK2 transformations were available to, proposed by, and retained by the scored shared controller.",
+    "costs": {
+      "live_run_accesses": 0,
+      "modal_launches": 0,
+      "network_calls": 0,
+      "new_docking_calls": 0,
+      "new_oracle_calls": 0
+    },
+    "current_scored_run": {
+      "any_current_scored_candidate_meets_or_beats_ivg": false,
+      "best_by_call": {
+        "1": -7.5,
+        "17": -9.0,
+        "25": -9.0,
+        "33": -9.2,
+        "41": -9.6,
+        "49": -9.6,
+        "9": -9.0
+      },
+      "best_smiles": "N=C1N(O)CCN1CCCC1=Nc2ccccc2-c2ncnc3[nH]cc1c23",
+      "cell_result_physical_sha256": "52df52490281aadda3f68db1ec0de880a85d332eb6ed884e9c3e050840cbd8f5",
+      "charged_calls": 49,
+      "code_revision": "8acee6df25e60887a742d4693f5b363ccf994ac2",
+      "contract_payload_sha256": "256563816a5d5b68706c7542bff1beae22f422e2c12109a55739dfe50680530c",
+      "controller_seed": 2026091800,
+      "docking_seed": 20260918,
+      "final_best": -9.6,
+      "gap": 0.1,
+      "ivg_reported": -9.7,
+      "proposal_policy": {
+        "aggregate_observation": {
+          "exploration_selected_final_winners": 1,
+          "fibercontrol_selected_final_winners": 2,
+          "final_incumbents_with_route_expert_provenance": 0,
+          "route_expert_entered_all_first_round_locks": true,
+          "route_supported_near_ivg_endpoint_observed": {
+            "cell": "jak2_2",
+            "proposal_experts": [
+              "route_complete_region",
+              "shallow"
+            ],
+            "score": -10.1,
+            "selection_kind": "model"
+          }
+        },
+        "batch": 8,
+        "expert_floor_rounds": 2,
+        "exploration_per_round": 2,
+        "families_scheduled_for_every_parent": [
+          "shallow",
+          "anchored_replacement",
+          "route_complete_region"
+        ],
+        "parent_explore": 0.3,
+        "parents_per_round": 4,
+        "proposal_parameters": {
+          "anchored_replacement": {
+            "draws": 512,
+            "horizon": 3
+          },
+          "route_complete_region": {
+            "beam_width": 32,
+            "expansion_width": 24,
+            "max_bindings_per_template": 4,
+            "maximum_expansions": 4000,
+            "pool_size": 64,
+            "realization_limit": 32,
+            "training_split": "leave-JAK2-out"
+          },
+          "shallow": {
+            "draws": 480,
+            "horizon": 3
+          }
+        },
+        "route_scales": "route records carried local/medium/large rewrite_scale, but this revision had no scale floor; exact offered/selected scale census requires the missing round locks"
+      },
+      "remote_path": "/2f223bd1210f3da8e5adc99e93679b1303bfb2922c0509f570b9b213bb96d066",
+      "remote_volume": "compose-t4-integrated-route-fiber-v1",
+      "run_id": "2f223bd1210f3da8e5adc99e93679b1303bfb2922c0509f570b9b213bb96d066",
+      "source_global_index": 12,
+      "source_smiles": "OCCCCc2nc1ccccc1c4ncnc3[nH]cc2c34",
+      "winner": {
+        "parent_score": -8.3,
+        "proposal_experts": [
+          "shallow"
+        ],
+        "round": 5,
+        "selection_kind": "exploration"
+      }
+    },
+    "decision": {
+      "current_scored_candidate_at_or_below_ivg": false,
+      "exact_current_pool_audit": "ABSTAIN_MISSING_LOCKS",
+      "historical_dynamic_v0_delta_0_6_at_or_below_ivg": false,
+      "known_reported_delta_0_6_routes_at_or_below_ivg": 3,
+      "known_reported_delta_0_6_routes_in_current_shared_support": 2,
+      "primary_localized_loss": "scored-run route-checkpoint lineage excluded the known JAK2 exact templates",
+      "residual_unknown": "selection and archive-continuation behavior in the exact scored pool"
+    },
+    "declared_support": {
+      "delta": 0.6,
+      "limitations": [
+        "Historical Full146 score labels are not current-run docking observations.",
+        "The exact current candidate pools and selected-record ancestry are unavailable locally.",
+        "The later all-route support shard postdates the scored delta=0.6 run."
+      ],
+      "representation_limit_heavy_atoms": 40,
+      "route_primitive_limit": 32,
+      "route_region_limit": 4,
+      "runtime_support": "compose_valid",
+      "source": "jak2_0 / global source index 12"
+    },
+    "deferred_joint_planning": {
+      "basis": "All three reported delta=0.6 JAK2 routes have one dependency region, and the two current-support-eligible routes were already exactly emitted as one-region candidates before the deferred multi-region planning commits. Those commits can affect other multi-region proposals only.",
+      "commits": {
+        "defer_joint_region_validity_until_stop": "b5dcafa4d887d971a383aabab3fe1316ff9ada37",
+        "preserve_depth_coverage_in_joint_planning": "412c9f03d1f8b3c252b2155c64ae790c203b3a71"
+      },
+      "evidence_class": "inferred from observed region counts, artifact chronology, and commit scope",
+      "relevance": "not causal for the identified delta=0.6 strong-route miss"
+    },
+    "experimental_setting": "Read-only reconciliation of one 49-call JAK2 delta=0.6 campaign, frozen reported historical labels and routes, and later zero-oracle shared-route support.",
+    "historical_scored_evidence": {
+      "claim_boundary": "Dynamic-v0 delta=0.6 is protocol-aligned by delta and reached only -9.5. Full146 contains many labels below -9.7, but those rows use its historical protocol, lack recovered exact call indices, and are not current-run oracle observations. Endpoint overlap with the later route shard does not establish support in the scored run or in Dynamic's stochastic proposal law.",
+      "dynamic_v0_delta_0_6": {
+        "arm": "v0d06",
+        "best_endpoint": "NC(=O)C(=CN1CCCC1)CCCC1=Nc2ccccc2-c2ncnc3[nH]cc1c23",
+        "best_reported_historical_score": -9.5,
+        "by_replicate": [
+          {
+            "best_endpoint": "NC(=O)C(=CN1CCCC1)CCCC1=Nc2ccccc2-c2ncnc3[nH]cc1c23",
+            "best_reported_historical_score": -9.5,
+            "query": 371,
+            "query_verified": true,
+            "replicate": 0,
+            "scored_rows": 912
+          }
+        ],
+        "evidence_class": "reported_historical_labels_not_current_oracle_evidence",
+        "query_verified_census": {
+          "true": 912
+        },
+        "reported_historical_rows_at_or_better_than_ivg": 0,
+        "scored_rows": 912,
+        "shared_route_pool_overlap": {
+          "any_reported_historical_score_at_or_better_than_ivg": false,
+          "best_arm_endpoint_is_in_shared_route_pool": false,
+          "best_reported_historical_score": -8.1,
+          "scored_rows": 6,
+          "unique_endpoints": 6
+        },
+        "unique_endpoints": 912,
+        "unique_reported_historical_endpoints_at_or_better_than_ivg": 0
+      },
+      "full146": {
+        "arm": "full146",
+        "best_endpoint": "c1ccc2c(c1)N=C(CCCC1=NN=C(C3=NNCC3)CCC1)c1c[nH]c3nnnc-2c13",
+        "best_reported_historical_score": -11.6,
+        "by_replicate": [
+          {
+            "best_endpoint": "c1ccc2c(c1)N=C(CCCC1=NN=C(C3=NNCC3)CCC1)c1c[nH]c3nnnc-2c13",
+            "best_reported_historical_score": -11.6,
+            "query": null,
+            "query_verified": false,
+            "replicate": 0,
+            "scored_rows": 494
+          },
+          {
+            "best_endpoint": "c1ccc2c(c1)N=C(CCCC1=NCCN=C(C3=NCNCC3)CC1)c1c[nH]c3ncnc-2c13",
+            "best_reported_historical_score": -11.4,
+            "query": null,
+            "query_verified": false,
+            "replicate": 1,
+            "scored_rows": 498
+          },
+          {
+            "best_endpoint": "c1ccc2c(c1)N=C(CCCC1=NCCCN=C(C3=NNCO3)C1)c1c[nH]c3ncnc-2c13",
+            "best_reported_historical_score": -11.5,
+            "query": null,
+            "query_verified": false,
+            "replicate": 2,
+            "scored_rows": 757
+          }
+        ],
+        "evidence_class": "reported_historical_labels_not_current_oracle_evidence",
+        "query_verified_census": {
+          "false": 1749
+        },
+        "reported_historical_rows_at_or_better_than_ivg": 693,
+        "scored_rows": 1749,
+        "shared_route_pool_overlap": {
+          "any_reported_historical_score_at_or_better_than_ivg": true,
+          "best_arm_endpoint_is_in_shared_route_pool": false,
+          "best_reported_historical_score": -10.7,
+          "scored_rows": 10,
+          "unique_endpoints": 5
+        },
+        "unique_endpoints": 1516,
+        "unique_reported_historical_endpoints_at_or_better_than_ivg": 596
+      },
+      "ivg_threshold": -9.7
+    },
+    "implementation": {
+      "audit_script_sha256": "d70a6f2243fa44afdb5e916cf01fa3c23df4c96fc95c2c7ec5220523e8e33753",
+      "historical_scored_rows": 2661,
+      "python": "3.14.2",
+      "rdkit": "2025.09.6",
+      "repository_revision_at_audit": "412c9f03d1f8b3c252b2155c64ae790c203b3a71"
+    },
+    "inputs": {
+      "compose_endpoint_gate": {
+        "path": "src/compose_v4/gates/med_chem_gate.py",
+        "payload_sha256": null,
+        "physical_sha256": "4503e1e72d7c8022b3b5cf24f36bfd2e63dea5a4eb261cb018ce06d508928946"
+      },
+      "current_contract": {
+        "path": "configs/t4_integrated_route_fiber_v1_1.json",
+        "payload_sha256": "256563816a5d5b68706c7542bff1beae22f422e2c12109a55739dfe50680530c",
+        "physical_sha256": "74fd3a1c0fce95ee0489107cbe951a23825af44bef2feb1a0c8dfd8850f5d96e"
+      },
+      "current_final": {
+        "path": "diagnostics/t4_integrated_route_fiber_v1/final_result.json",
+        "payload_sha256": "53024cb864665d2418a7cc1a9f51e575c98bdcf70d3edf710446ff94eab18349",
+        "physical_sha256": "fa1fbae94f7d8fc9f08cfa383b8d435be132a237a321e41792478b15600aed01"
+      },
+      "current_matrix": {
+        "path": "diagnostics/t4_shared_controller_matrix_20260919/result.json",
+        "payload_sha256": null,
+        "physical_sha256": "1b0c8ec8e202e19b758a653a0a23f07c1f539410c49b098c5489181b6dac3c8c"
+      },
+      "current_route_checkpoint": {
+        "path": "diagnostics/t4_integrated_route_fiber_v1/route_expert_checkpoint.json",
+        "payload_sha256": "357851af5f1cd5a25d0a45c63b1c31adaba3197becedf388e840d72be829e022",
+        "physical_sha256": "d9771225c7a9dc855330318ea4475246b7328107c9ad95da11c976098ca3fb25"
+      },
+      "historical_audit": {
+        "path": "diagnostics/t4_strategy_reset/20260916/audit.json",
+        "payload_sha256": null,
+        "physical_sha256": "c78d2a9af4961a98208289d1b362b71ca383b3e0a24877c575e944692c3fcdc3"
+      },
+      "historical_scored_rows": {
+        "path": "diagnostics/t4_strategy_reset/20260916/scored_rows.jsonl.gz",
+        "payload_sha256": null,
+        "physical_sha256": "0e78c3b19839c8535bf342d4120ec72f1086d11b9260b46e0850878621153bcf"
+      },
+      "old_route_forensics": {
+        "path": "diagnostics/t4_known_good_transformation_forensics/attempt_1/result.json",
+        "payload_sha256": "2a324fbae3295fb54f867927d313fc57b4c1182bdc2bb4d0bfb7186c6cd1a0e7",
+        "physical_sha256": "b332e768d2ffd4b2b298d565aea4270fcef890c0e6c6e4b01add10ea8cc33724"
+      },
+      "shared_jak2_0_support": {
+        "path": "diagnostics/t4_shared_retained_rewrite_v1/shards/jak2_0.json",
+        "payload_sha256": "2c042bf8e9e6afd7e23480227bcbc77811daeccf45fae8ffae407575ab4f544d",
+        "physical_sha256": "0e0c9b70eb3ac590e09803545e6fdc7dfca9ef3f39ab821fad09e9bcc9cc4755"
+      },
+      "shared_jak2_contract": {
+        "path": "configs/t4_shared_retained_fiber_jak2_v1.json",
+        "payload_sha256": "f9de6245060d9c3bff168f56c543b715256392b1fdb3367ee68c2d2c76a1c194",
+        "physical_sha256": "6884b616e1b896001a7e0e21d45049da8ae7a29b6acfd1c1b77e5f3cc7705388"
+      },
+      "shared_route_checkpoint": {
+        "path": "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json",
+        "payload_sha256": "5476be572dd40ee3f068cc8f1df238eec54e23a82cb84f803905ac891701e07d",
+        "physical_sha256": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e"
+      }
+    },
+    "known_route_evidence": {
+      "delta_0_6_routes_exactly_realized_and_eligible_in_shared_support": 2,
+      "delta_0_6_routes_meeting_ivg": 3,
+      "routes": [
+        {
+          "dependency_regions": 1,
+          "endpoint": "c1ccc2c(c1)N=C(CCCC1=NN=C(C3=NNC3)C1)c1c[nH]c3ncnc-2c13",
+          "old_standalone_compiler": {
+            "exact_endpoint_realization": null,
+            "interpretation": "prior compiler success was reported but cannot be promoted to per-route computed evidence without the sealed result payload",
+            "launch_receipt": "diagnostics/t4_structural_subgoal_realizer/attempt_1/launch.json",
+            "recomputed": false,
+            "sealed_realizer_identity_reported_sha256": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+            "status": "abstained_missing_local_sealed_realizer_result_payload"
+          },
+          "old_standalone_generator_support": {
+            "single_invocation_runtime": {
+              "dynamic_v0_after_initial_lock": true,
+              "dynamic_v0_exact_route_recovery": "not established by this zero-oracle teacher-forced audit",
+              "generator_invocations_before_dynamic_v0": 1,
+              "repeated_generator_decisions_authorized": false,
+              "teacher_trace_emittable_by_macro_lane": false
+            },
+            "whole_macro_support_absence": "route_exceeds_single_invocation_event_horizon",
+            "whole_macro_supported": false
+          },
+          "old_standalone_representation": {
+            "dependency_region_count": 1,
+            "exact_endpoint_reconstruction": true,
+            "goal_id": "3e5723ae3e7fdd859959cfc89edda5bbb49a79787b4bee41674211661d57b0f6",
+            "precision": 1.0,
+            "primitive_teacher_actions_used": 0,
+            "status": "represented"
+          },
+          "primitive_count": 11,
+          "probe_id": "1060f09b1951d30f3f660062d66e4860cf1236092259a47e9e56cc7cb29d31c9",
+          "recovered_historical_archive_scores": [
+            {
+              "arm": "full146",
+              "entry_id": "dd66b2ef53fed0e7ae08582805bc746fd3986520a0cdbee7504cff5a0188cd29",
+              "evidence_class": "reported_historical_label_not_current_oracle_evidence",
+              "protocol": "09b7e0ac818365b024a58389c88cf19379cf8303f86cb78e8c58d051e3a4b6fb",
+              "query": null,
+              "query_verified": false,
+              "replicate": 0,
+              "reported_historical_score": -10.5
+            },
+            {
+              "arm": "full146",
+              "entry_id": "dd66b2ef53fed0e7ae08582805bc746fd3986520a0cdbee7504cff5a0188cd29",
+              "evidence_class": "reported_historical_label_not_current_oracle_evidence",
+              "protocol": "09b7e0ac818365b024a58389c88cf19379cf8303f86cb78e8c58d051e3a4b6fb",
+              "query": null,
+              "query_verified": false,
+              "replicate": 1,
+              "reported_historical_score": -10.5
+            },
+            {
+              "arm": "full146",
+              "entry_id": "dd66b2ef53fed0e7ae08582805bc746fd3986520a0cdbee7504cff5a0188cd29",
+              "evidence_class": "reported_historical_label_not_current_oracle_evidence",
+              "protocol": "09b7e0ac818365b024a58389c88cf19379cf8303f86cb78e8c58d051e3a4b6fb",
+              "query": null,
+              "query_verified": false,
+              "replicate": 2,
+              "reported_historical_score": -10.5
+            }
+          ],
+          "reported_external_label": -10.5,
+          "reported_label_delta": 0.6,
+          "reported_label_meets_or_beats_ivg": true,
+          "reported_label_seed": 2,
+          "shared_route_runtime": {
+            "autonomously_realized_in_shared_support_shard": true,
+            "compose_validity_reasons": [
+              "strained_NN_ring:4"
+            ],
+            "eligible_delta_0_6": false,
+            "exact_teacher_endpoint": true,
+            "exact_template_present_in_scored_run_checkpoint": false,
+            "exact_template_present_in_shared_checkpoint": true,
+            "realized_primitive_band": "medium",
+            "realized_primitives": 11,
+            "regions": 1,
+            "rewrite_scale": "large",
+            "route_proposal_rank": 12,
+            "template_ids": [
+              "9d962deb5455e167fb5848de5cb1e0571663f5dcc3293fea520deb8e4ecfafb2"
+            ]
+          }
+        },
+        {
+          "dependency_regions": 1,
+          "endpoint": "O=C(C1CCC(CCC2=Nc3ccccc3-c3ncnc4[nH]cc2c34)CC1)C1CC1",
+          "old_standalone_compiler": {
+            "exact_endpoint_realization": null,
+            "interpretation": "prior compiler success was reported but cannot be promoted to per-route computed evidence without the sealed result payload",
+            "launch_receipt": "diagnostics/t4_structural_subgoal_realizer/attempt_1/launch.json",
+            "recomputed": false,
+            "sealed_realizer_identity_reported_sha256": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+            "status": "abstained_missing_local_sealed_realizer_result_payload"
+          },
+          "old_standalone_generator_support": {
+            "single_invocation_runtime": {
+              "dynamic_v0_after_initial_lock": true,
+              "dynamic_v0_exact_route_recovery": "not established by this zero-oracle teacher-forced audit",
+              "generator_invocations_before_dynamic_v0": 1,
+              "repeated_generator_decisions_authorized": false,
+              "teacher_trace_emittable_by_macro_lane": false
+            },
+            "whole_macro_support_absence": "route_exceeds_single_invocation_event_horizon",
+            "whole_macro_supported": false
+          },
+          "old_standalone_representation": {
+            "dependency_region_count": 1,
+            "exact_endpoint_reconstruction": true,
+            "goal_id": "a7d995ae8fa8ffc40b7cb1fd36f728badb975591e8e4012c132800ee551288ff",
+            "precision": 1.0,
+            "primitive_teacher_actions_used": 0,
+            "status": "represented"
+          },
+          "primitive_count": 12,
+          "probe_id": "2c4e8804eddc76b639eb4b0fdc0e87db49a9908cb04ad02bc90e8ef626873c52",
+          "recovered_historical_archive_scores": [
+            {
+              "arm": "full146",
+              "entry_id": "1f9c9626b1afd57f9b9f3db80ed37fd50558f1aa9c2fc4b3ba6a7a7e3f15e9fe",
+              "evidence_class": "reported_historical_label_not_current_oracle_evidence",
+              "protocol": "09b7e0ac818365b024a58389c88cf19379cf8303f86cb78e8c58d051e3a4b6fb",
+              "query": null,
+              "query_verified": false,
+              "replicate": 0,
+              "reported_historical_score": -10.7
+            },
+            {
+              "arm": "full146",
+              "entry_id": "1f9c9626b1afd57f9b9f3db80ed37fd50558f1aa9c2fc4b3ba6a7a7e3f15e9fe",
+              "evidence_class": "reported_historical_label_not_current_oracle_evidence",
+              "protocol": "09b7e0ac818365b024a58389c88cf19379cf8303f86cb78e8c58d051e3a4b6fb",
+              "query": null,
+              "query_verified": false,
+              "replicate": 1,
+              "reported_historical_score": -10.5
+            }
+          ],
+          "reported_external_label": -10.8,
+          "reported_label_delta": 0.6,
+          "reported_label_meets_or_beats_ivg": true,
+          "reported_label_seed": 1,
+          "shared_route_runtime": {
+            "autonomously_realized_in_shared_support_shard": true,
+            "compose_validity_reasons": [],
+            "eligible_delta_0_6": true,
+            "exact_teacher_endpoint": true,
+            "exact_template_present_in_scored_run_checkpoint": false,
+            "exact_template_present_in_shared_checkpoint": true,
+            "realized_primitive_band": "large",
+            "realized_primitives": 12,
+            "regions": 1,
+            "rewrite_scale": "large",
+            "route_proposal_rank": 6,
+            "template_ids": [
+              "fca52aa6080d9fc8f2bc6bea4cdf670b01e68ff30a7de674f1794afa043fb280"
+            ]
+          }
+        },
+        {
+          "dependency_regions": 2,
+          "endpoint": "CC1=Cc2c[nH]c3ncnc(c23)-c2ccccc2N=C1NC(=O)CC1CCCC1",
+          "old_standalone_compiler": {
+            "exact_endpoint_realization": null,
+            "interpretation": "prior compiler success was reported but cannot be promoted to per-route computed evidence without the sealed result payload",
+            "launch_receipt": "diagnostics/t4_structural_subgoal_realizer/attempt_1/launch.json",
+            "recomputed": false,
+            "sealed_realizer_identity_reported_sha256": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+            "status": "abstained_missing_local_sealed_realizer_result_payload"
+          },
+          "old_standalone_generator_support": {
+            "single_invocation_runtime": {
+              "dynamic_v0_after_initial_lock": true,
+              "dynamic_v0_exact_route_recovery": "not established by this zero-oracle teacher-forced audit",
+              "generator_invocations_before_dynamic_v0": 1,
+              "repeated_generator_decisions_authorized": false,
+              "teacher_trace_emittable_by_macro_lane": false
+            },
+            "whole_macro_support_absence": "route_exceeds_single_invocation_event_horizon",
+            "whole_macro_supported": false
+          },
+          "old_standalone_representation": {
+            "dependency_region_count": 2,
+            "exact_endpoint_reconstruction": true,
+            "goal_id": "9904424d9da9064829839f60c50cc40e854824e55068615991cf0aba099fec18",
+            "precision": 1.0,
+            "primitive_teacher_actions_used": 0,
+            "status": "represented"
+          },
+          "primitive_count": 20,
+          "probe_id": "88c61a5db1659fc96e4762c74c186eb08c5f9242d3fc7a493f05723f622467cd",
+          "recovered_historical_archive_scores": [
+            {
+              "arm": "full146",
+              "entry_id": "7afaf2ba62572e20f54c08302b8715dc387c08e15058e2f3564db4552c8ee15c",
+              "evidence_class": "reported_historical_label_not_current_oracle_evidence",
+              "protocol": "09b7e0ac818365b024a58389c88cf19379cf8303f86cb78e8c58d051e3a4b6fb",
+              "query": null,
+              "query_verified": false,
+              "replicate": 0,
+              "reported_historical_score": -10.8
+            },
+            {
+              "arm": "full146",
+              "entry_id": "7afaf2ba62572e20f54c08302b8715dc387c08e15058e2f3564db4552c8ee15c",
+              "evidence_class": "reported_historical_label_not_current_oracle_evidence",
+              "protocol": "09b7e0ac818365b024a58389c88cf19379cf8303f86cb78e8c58d051e3a4b6fb",
+              "query": null,
+              "query_verified": false,
+              "replicate": 1,
+              "reported_historical_score": -11.0
+            },
+            {
+              "arm": "full146",
+              "entry_id": "7afaf2ba62572e20f54c08302b8715dc387c08e15058e2f3564db4552c8ee15c",
+              "evidence_class": "reported_historical_label_not_current_oracle_evidence",
+              "protocol": "09b7e0ac818365b024a58389c88cf19379cf8303f86cb78e8c58d051e3a4b6fb",
+              "query": null,
+              "query_verified": false,
+              "replicate": 2,
+              "reported_historical_score": -10.9
+            }
+          ],
+          "reported_external_label": -11.0,
+          "reported_label_delta": 0.4,
+          "reported_label_meets_or_beats_ivg": false,
+          "reported_label_seed": 0,
+          "shared_route_runtime": {
+            "autonomously_realized_in_shared_support_shard": false
+          }
+        },
+        {
+          "dependency_regions": 1,
+          "endpoint": "c1ccc2c(c1)N=C(C1=NCN=C1NC1=NCNC1)c1c[nH]c3ncnc-2c13",
+          "old_standalone_compiler": {
+            "exact_endpoint_realization": null,
+            "interpretation": "prior compiler success was reported but cannot be promoted to per-route computed evidence without the sealed result payload",
+            "launch_receipt": "diagnostics/t4_structural_subgoal_realizer/attempt_1/launch.json",
+            "recomputed": false,
+            "sealed_realizer_identity_reported_sha256": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+            "status": "abstained_missing_local_sealed_realizer_result_payload"
+          },
+          "old_standalone_generator_support": {
+            "single_invocation_runtime": {
+              "dynamic_v0_after_initial_lock": true,
+              "dynamic_v0_exact_route_recovery": "not established by this zero-oracle teacher-forced audit",
+              "generator_invocations_before_dynamic_v0": 1,
+              "repeated_generator_decisions_authorized": false,
+              "teacher_trace_emittable_by_macro_lane": false
+            },
+            "whole_macro_support_absence": "route_exceeds_single_invocation_event_horizon",
+            "whole_macro_supported": false
+          },
+          "old_standalone_representation": {
+            "dependency_region_count": 1,
+            "exact_endpoint_reconstruction": true,
+            "goal_id": "d2f91cd70389ab68bedb1c54bf22881c1e4c4924c2bf20d4d13209bb33b63c70",
+            "precision": 1.0,
+            "primitive_teacher_actions_used": 0,
+            "status": "represented"
+          },
+          "primitive_count": 22,
+          "probe_id": "c09356e155cb88211b5c767a85b2fb2f47a4da0f7d47ac942ff1d85cc80898bc",
+          "recovered_historical_archive_scores": [],
+          "reported_external_label": -11.1,
+          "reported_label_delta": 0.4,
+          "reported_label_meets_or_beats_ivg": false,
+          "reported_label_seed": 1,
+          "shared_route_runtime": {
+            "autonomously_realized_in_shared_support_shard": true,
+            "compose_validity_reasons": [],
+            "eligible_delta_0_6": false,
+            "exact_teacher_endpoint": true,
+            "exact_template_present_in_scored_run_checkpoint": false,
+            "exact_template_present_in_shared_checkpoint": true,
+            "realized_primitive_band": "large",
+            "realized_primitives": 23,
+            "regions": 1,
+            "rewrite_scale": "large",
+            "route_proposal_rank": 9,
+            "template_ids": [
+              "ca681b2c5226c3e77231ee4c6efe1a08b5961ab0f4c1f48af6b08127f72e2bff"
+            ]
+          }
+        },
+        {
+          "dependency_regions": 3,
+          "endpoint": "C1=CCC(C=CC2=Nc3ccccc3-c3ncnc4[nH]cc(c34)C2)CC=C1",
+          "old_standalone_compiler": {
+            "exact_endpoint_realization": null,
+            "interpretation": "prior compiler success was reported but cannot be promoted to per-route computed evidence without the sealed result payload",
+            "launch_receipt": "diagnostics/t4_structural_subgoal_realizer/attempt_1/launch.json",
+            "recomputed": false,
+            "sealed_realizer_identity_reported_sha256": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+            "status": "abstained_missing_local_sealed_realizer_result_payload"
+          },
+          "old_standalone_generator_support": {
+            "single_invocation_runtime": {
+              "dynamic_v0_after_initial_lock": true,
+              "dynamic_v0_exact_route_recovery": "not established by this zero-oracle teacher-forced audit",
+              "generator_invocations_before_dynamic_v0": 1,
+              "repeated_generator_decisions_authorized": false,
+              "teacher_trace_emittable_by_macro_lane": false
+            },
+            "whole_macro_support_absence": "route_exceeds_single_invocation_event_horizon",
+            "whole_macro_supported": false
+          },
+          "old_standalone_representation": {
+            "dependency_region_count": 3,
+            "exact_endpoint_reconstruction": true,
+            "goal_id": "ef842e79fd81206d6d3992900473e10781de7fc59733e866bde0cf36a44601c6",
+            "precision": 1.0,
+            "primitive_teacher_actions_used": 0,
+            "status": "represented"
+          },
+          "primitive_count": 11,
+          "probe_id": "c7c7b8648ccb8bf95ce50856b4d4043e780dc4495da12bb67f148b1777603ec9",
+          "recovered_historical_archive_scores": [],
+          "reported_external_label": -11.6,
+          "reported_label_delta": 0.4,
+          "reported_label_meets_or_beats_ivg": false,
+          "reported_label_seed": 2,
+          "shared_route_runtime": {
+            "autonomously_realized_in_shared_support_shard": false
+          }
+        },
+        {
+          "dependency_regions": 1,
+          "endpoint": "CC(=O)N1CC=C(CCCC2=Nc3ccccc3-c3ncnc4[nH]cc2c34)CC1",
+          "old_standalone_compiler": {
+            "exact_endpoint_realization": null,
+            "interpretation": "prior compiler success was reported but cannot be promoted to per-route computed evidence without the sealed result payload",
+            "launch_receipt": "diagnostics/t4_structural_subgoal_realizer/attempt_1/launch.json",
+            "recomputed": false,
+            "sealed_realizer_identity_reported_sha256": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+            "status": "abstained_missing_local_sealed_realizer_result_payload"
+          },
+          "old_standalone_generator_support": {
+            "single_invocation_runtime": {
+              "dynamic_v0_after_initial_lock": true,
+              "dynamic_v0_exact_route_recovery": "not established by this zero-oracle teacher-forced audit",
+              "generator_invocations_before_dynamic_v0": 1,
+              "repeated_generator_decisions_authorized": false,
+              "teacher_trace_emittable_by_macro_lane": false
+            },
+            "whole_macro_support_absence": "route_exceeds_single_invocation_event_horizon",
+            "whole_macro_supported": false
+          },
+          "old_standalone_representation": {
+            "dependency_region_count": 1,
+            "exact_endpoint_reconstruction": true,
+            "goal_id": "19ed9ea33e2e1b8ae6503bb6a41f46570a60264621b9d369f2d3aba50c421cb4",
+            "precision": 1.0,
+            "primitive_teacher_actions_used": 0,
+            "status": "represented"
+          },
+          "primitive_count": 10,
+          "probe_id": "f9ee13b63c7a2e74b646f3783199f66623f8ad8fa33dfc7bcd1fdfe0de1d7e73",
+          "recovered_historical_archive_scores": [
+            {
+              "arm": "full146",
+              "entry_id": "45915d6703a3853c7a95a3d2ec6249ee43d6aa7d98a0c72e6a41ad4c3894e8c7",
+              "evidence_class": "reported_historical_label_not_current_oracle_evidence",
+              "protocol": "09b7e0ac818365b024a58389c88cf19379cf8303f86cb78e8c58d051e3a4b6fb",
+              "query": null,
+              "query_verified": false,
+              "replicate": 0,
+              "reported_historical_score": -8.9
+            },
+            {
+              "arm": "full146",
+              "entry_id": "45915d6703a3853c7a95a3d2ec6249ee43d6aa7d98a0c72e6a41ad4c3894e8c7",
+              "evidence_class": "reported_historical_label_not_current_oracle_evidence",
+              "protocol": "09b7e0ac818365b024a58389c88cf19379cf8303f86cb78e8c58d051e3a4b6fb",
+              "query": null,
+              "query_verified": false,
+              "replicate": 1,
+              "reported_historical_score": -10.6
+            },
+            {
+              "arm": "full146",
+              "entry_id": "45915d6703a3853c7a95a3d2ec6249ee43d6aa7d98a0c72e6a41ad4c3894e8c7",
+              "evidence_class": "reported_historical_label_not_current_oracle_evidence",
+              "protocol": "09b7e0ac818365b024a58389c88cf19379cf8303f86cb78e8c58d051e3a4b6fb",
+              "query": null,
+              "query_verified": false,
+              "replicate": 2,
+              "reported_historical_score": -10.5
+            }
+          ],
+          "reported_external_label": -10.6,
+          "reported_label_delta": 0.6,
+          "reported_label_meets_or_beats_ivg": true,
+          "reported_label_seed": 0,
+          "shared_route_runtime": {
+            "autonomously_realized_in_shared_support_shard": true,
+            "compose_validity_reasons": [],
+            "eligible_delta_0_6": true,
+            "exact_teacher_endpoint": true,
+            "exact_template_present_in_scored_run_checkpoint": false,
+            "exact_template_present_in_shared_checkpoint": true,
+            "realized_primitive_band": "medium",
+            "realized_primitives": 10,
+            "regions": 1,
+            "rewrite_scale": "large",
+            "route_proposal_rank": 3,
+            "template_ids": [
+              "cc4a3e2d99cb60f2feea750f056ab462f0aa16143a148490d215ef23ac951e64"
+            ]
+          }
+        }
+      ],
+      "scored_run_checkpoint": {
+        "split_audit": {
+          "all_routes": 77,
+          "held_regions": 32,
+          "held_routes": 19,
+          "held_target_absent_from_training": true,
+          "held_target_hash": "40221c8e86c8dad960f09cadf718979534542c306eb99a76ac55728e795fa619",
+          "split": "leave_one_target_out",
+          "training_regions": 115,
+          "training_routes": 58
+        },
+        "template_count": 111,
+        "training_split": "leave-JAK2-out"
+      },
+      "shared_checkpoint": {
+        "bound_by_later_shared_jak2_contract": true,
+        "runtime_target_conditioning": false,
+        "template_count": 137,
+        "training_regions": 147,
+        "training_routes": 77,
+        "training_scope": "all_locked_t4_routes_shared_task_independent"
+      },
+      "shared_jak2_0_support": {
+        "code_revision": "b3023bfba52b112f5a8e503a0fdc2c19472d76c0",
+        "complete_programs": 96,
+        "eligible_delta_0_6": 16,
+        "exact_realization_precision": {
+          "denominator": 96,
+          "numerator": 96
+        },
+        "exact_teacher_endpoints": 4,
+        "exact_teacher_endpoints_eligible_delta_0_6": 2,
+        "scale_census": {
+          "primitive_bands": {
+            "large": {
+              "eligible_delta_0_6": 1,
+              "realized": 33
+            },
+            "medium": {
+              "eligible_delta_0_6": 5,
+              "realized": 38
+            },
+            "small": {
+              "eligible_delta_0_6": 10,
+              "realized": 25
+            }
+          },
+          "rewrite_scales": {
+            "large": {
+              "eligible_delta_0_6": 2,
+              "realized": 42
+            },
+            "local": {
+              "eligible_delta_0_6": 5,
+              "realized": 11
+            },
+            "medium": {
+              "eligible_delta_0_6": 9,
+              "realized": 43
+            }
+          }
+        },
+        "working_tree_dirty": true
+      }
+    },
+    "localization": {
+      "inferred": [
+        "For the two eligible strong routes, the latest evidence rules out binding, exact compilation, primitive budget, and joint-region composition as the present support loss: each is one region and was exactly emitted within 12 primitives.",
+        "Their absence from the scored delta=0.6 result is first explained by checkpoint lineage: the scored route prior deliberately excluded JAK2. The missing locks prevent a stronger claim that no alternative template produced the same endpoints or that selection, rather than proposal, lost them.",
+        "Archive continuation is not required to establish a historically strong direct route: the external endpoint labels already beat -9.7. It may still matter for stronger Full146 descendants, but current-run ancestry is missing."
+      ],
+      "observed": [
+        "The current 49-call run scored no candidate at or below -9.7; its best was -9.6 from shallow exploration.",
+        "The scored run used a leave-JAK2-out 111-template checkpoint. The exact templates for all autonomously recovered JAK2 teacher endpoints in the later support shard are absent from that checkpoint.",
+        "The later all-route shared checkpoint autonomously realized two one-region, delta=0.6-eligible reported JAK2 routes at ranks 3 and 6; their reported external labels are -10.6 and -10.8.",
+        "A third reported delta=0.6 route at -10.5 is exactly realized at rank 12 but rejected by the current compose_valid endpoint support; the route receipt records benchmark feasibility at delta=0.6.",
+        "The old standalone forensic represented all six JAK2 routes exactly but its earlier one-to-two-event generator did not support the complete control sequence and its compiler result was an explicit missing-payload abstention."
+      ]
+    },
+    "missing_current_run_assets": {
+      "effect": "Exact candidate pools, per-round eligible/selected family and scale censuses, selected-record parent/program ancestry, and whether a historically known endpoint appeared before selection cannot be reconstructed.",
+      "not_accessed_because": "bounded audit forbids live-run or Modal access",
+      "required": [
+        {
+          "identity": "modal://compose-t4-integrated-route-fiber-v1/2f223bd1210f3da8e5adc99e93679b1303bfb2922c0509f570b9b213bb96d066/jak2_0/result.json",
+          "physical_sha256": "52df52490281aadda3f68db1ec0de880a85d332eb6ed884e9c3e050840cbd8f5"
+        },
+        {
+          "identity": "modal://compose-t4-integrated-route-fiber-v1/2f223bd1210f3da8e5adc99e93679b1303bfb2922c0509f570b9b213bb96d066/jak2_0/round_001_lock.json",
+          "physical_sha256": "not recorded in the local aggregate; the payload hash is referenced by the missing cell result"
+        },
+        {
+          "identity": "modal://compose-t4-integrated-route-fiber-v1/2f223bd1210f3da8e5adc99e93679b1303bfb2922c0509f570b9b213bb96d066/jak2_0/round_002_lock.json",
+          "physical_sha256": "not recorded in the local aggregate; the payload hash is referenced by the missing cell result"
+        },
+        {
+          "identity": "modal://compose-t4-integrated-route-fiber-v1/2f223bd1210f3da8e5adc99e93679b1303bfb2922c0509f570b9b213bb96d066/jak2_0/round_003_lock.json",
+          "physical_sha256": "not recorded in the local aggregate; the payload hash is referenced by the missing cell result"
+        },
+        {
+          "identity": "modal://compose-t4-integrated-route-fiber-v1/2f223bd1210f3da8e5adc99e93679b1303bfb2922c0509f570b9b213bb96d066/jak2_0/round_004_lock.json",
+          "physical_sha256": "not recorded in the local aggregate; the payload hash is referenced by the missing cell result"
+        },
+        {
+          "identity": "modal://compose-t4-integrated-route-fiber-v1/2f223bd1210f3da8e5adc99e93679b1303bfb2922c0509f570b9b213bb96d066/jak2_0/round_005_lock.json",
+          "physical_sha256": "not recorded in the local aggregate; the payload hash is referenced by the missing cell result"
+        },
+        {
+          "identity": "modal://compose-t4-integrated-route-fiber-v1/2f223bd1210f3da8e5adc99e93679b1303bfb2922c0509f570b9b213bb96d066/jak2_0/round_006_lock.json",
+          "physical_sha256": "not recorded in the local aggregate; the payload hash is referenced by the missing cell result"
+        }
+      ]
+    },
+    "primary_model_output": "A state-dependent distribution over complete executable molecular edit programs.",
+    "schema_version": "t4_jak2_0_d06_forensic_audit_v1",
+    "scientific_problem": "Localize the current shared-controller JAK2 seed-0 delta=0.6 0.1 docking-score miss without new scored evidence.",
+    "status": "PARTIAL_ABSTENTION_MISSING_CURRENT_PROPOSAL_LOCKS",
+    "teacher_receipts": [
+      {
+        "path": "diagnostics/ivg_winner_paths/pairs/0f03daa7fd51de6919df52cfc6333e29e200feb1fd7911100a8ca601c62c48ed.json.gz",
+        "payload_sha256": "988aafdf37cb89c349e08331f282579080ff2522c2c8d013ae725a888931d593",
+        "physical_sha256": "c2be93d0300345d1e9b43b8226a2b588121d3a1ccce9f2da9787eaf4b4be4c9c"
+      },
+      {
+        "path": "diagnostics/ivg_winner_paths/pairs/28e71d349631b69ed6754268f4da778138456cfaf8a7e0e6d6dd39fe3a8acb22.json.gz",
+        "payload_sha256": "b0dc78dcf20b629da271133f7b8d4579fe2b73c8c339395d4bd9525c9dbb0e60",
+        "physical_sha256": "9c2c1962d4cad464cb4a3135a4a3363bbd613309b0491e61b2358c194bafb3e4"
+      },
+      {
+        "path": "diagnostics/ivg_winner_paths/pairs/2e86ea9ae41851bb3f93d19cad074466265b6709494de4e967fde84d96ae10ab.json.gz",
+        "payload_sha256": "529518889374784f8af677f7a6d4c2cdd27b8984e93aa9af4667d18d1e9d8e73",
+        "physical_sha256": "c9068adb31622a697123296c69710631fca29541fc07a01d74de47c890061301"
+      },
+      {
+        "path": "diagnostics/ivg_winner_paths/pairs/4824ec14ef08e20f17634a090a30415fe5d4cba60f5d908b2acc1108ffa23fa3.json.gz",
+        "payload_sha256": "b3c7291d653554e022daf34a5ae0e51f7cbf98f44831a16e2cd305e3305be2c9",
+        "physical_sha256": "3e93f00beda43fcf2d1fe5d81bad35cc56a8a7ffbf9aa477d724d92506050da3"
+      },
+      {
+        "path": "diagnostics/ivg_winner_paths/pairs/890b99da21f3bcf7814daf556da51a86fbbb274f6c4b4de528751d73625bb869.json.gz",
+        "payload_sha256": "3c60ca47f7216d4f1f28601efac67885c39a70bc4749ded270836cb6a607782b",
+        "physical_sha256": "57a4b362296af304a125488c89ef53622ab8e033d22d428c31df491f508e8fb3"
+      },
+      {
+        "path": "diagnostics/ivg_winner_paths/pairs/92c3750044ec6a7c715aada923ce1ab6426105fc4387516a61021f6be7bbadcf.json.gz",
+        "payload_sha256": "4f803e8f5e2f485aeedad8c66896dd201198bfa45351fd567329fd98853cc191",
+        "physical_sha256": "63ee1bf17be2f6e9cc2e17dbb5eb562e9f1e8ea20fe2fe885d8e766bc751f0a8"
+      }
+    ]
+  },
+  "payload_sha256": "3a1b9f49fef7cd83ce9ac29584ae6732ce1cc9ec0318706e1e54941b348a16db"
+}
