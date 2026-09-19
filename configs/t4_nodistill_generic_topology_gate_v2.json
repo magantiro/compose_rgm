@@ -1,0 +1,64 @@
+{
+  "payload": {
+    "schema_version": "t4_nodistill_generic_topology_gate_contract_v2",
+    "status": "FROZEN_ZERO_ORACLE_SUPPORT_GATE",
+    "scientific_problem": "test whether route-free generic repeated topology-closing macro plans repair the PARP multi-cycle complete-program support gap",
+    "primary_model_output": "an exact protected 12-32 primitive program compiled from task-independent graph-change plan fields",
+    "central_claim_under_test": "existing generic COMPOSE operators can autonomously compose eligible large-growth multi-cycle programs without route-derived templates or weights",
+    "experimental_setting": "matched zero-oracle candidate locks against attempt-1 generic complete programs on three PARP and three contrasting T4 cells",
+    "inputs": {
+      "parp1_source_contract": {"path": "configs/t4_compose_nodistill_parp1_v1.json", "sha256": "1ea9351d377e6741ebc9de4353d3fe411115f92c108278879c0e206c29e9e412"},
+      "transfer_source_contract": {"path": "configs/t4_compose_nodistill_transfer_v1.json", "sha256": "05723c43824cc1456a1729c40c9f120cf1258017e432a606b88ebf56eb61ebdc"},
+      "attempt_1_contract": {"path": "configs/t4_nodistill_generic_composer_gate_v1.json", "sha256": "be85f85076f34386a017a5790d94f77d6db5fae2a2b57456f4d6690784c1dfcf"},
+      "attempt_1_result": {"path": "diagnostics/t4_nodistill_generic_composer_gate_v1/attempt_1/result.json", "sha256": "4810d0893faa7b6f90deeff4a727f9eb21e7fbbda35b58eb1f4821c9a2a3cf98", "payload_sha256": "3e579b9bc58d73014ce2ac9c424f0e08c3da0bc8d27ec39def2a1597b0ec4206"},
+      "teacher_library_diagnostic_only": {"path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json", "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5", "load_phase": "after_all_candidate_locks_are_sealed"}
+    },
+    "cells": [
+      {"cell_key": "parp1_0_d04", "source_contract": "parp1", "controller_seed": 812001},
+      {"cell_key": "parp1_1_d04", "source_contract": "parp1", "controller_seed": 812002},
+      {"cell_key": "parp1_2_d04", "source_contract": "parp1", "controller_seed": 812003},
+      {"cell_key": "jak2_1_d06", "source_contract": "transfer", "controller_seed": 812004},
+      {"cell_key": "braf_1_d04", "source_contract": "transfer", "controller_seed": 812005},
+      {"cell_key": "braf_0_d06", "source_contract": "transfer", "controller_seed": 812006}
+    ],
+    "support": {
+      "maximum_primitives": 32,
+      "maximum_blocks": 8,
+      "macro_plan_fields": ["delta_heavy_atoms", "delta_cycle_rank", "retained_fraction", "interface_count", "rewrite_mode"],
+      "predeclared_cycle_gain_support": [2, 3],
+      "primitive_scale": "large: 12-32 exact replayed primitives",
+      "role": "additive route-free large topology expert; attempt-1 small/medium/large composer remains unchanged"
+    },
+    "proposal": {
+      "attempts_per_plan": 24,
+      "maximum_candidates": 24,
+      "matched_baseline": "same number of medium/large attempt-1 generic composer candidates in deterministic lock order",
+      "no_backfill_across_cells": true
+    },
+    "evaluation": {
+      "teacher_load_phase": "only after all six autonomous locks exist and validate",
+      "large_growth_threshold": 7,
+      "multi_cycle_threshold": 2,
+      "promotion_gate": {
+        "complete_six_cell_lock_census": true,
+        "matched_candidate_budgets": true,
+        "exact_execution_precision": 1.0,
+        "preteacher_plus_2_and_plus_3_cycle_support_on_parp_panel": true,
+        "eligible_large_growth_multicycle_support_on_parp1_0_and_parp1_1": true,
+        "nonzero_macro_plan_diversity": true,
+        "post_lock_teacher_descriptor_comparison_reported": true
+      }
+    },
+    "runtime_prohibitions": {
+      "no_trajectory_distilled_templates": true,
+      "no_route_weights_or_ids": true,
+      "no_teacher_or_winner_endpoints": true,
+      "no_target_or_cell_name": true,
+      "no_objective_or_comparator_score": true,
+      "no_runtime_teacher_data": true
+    },
+    "costs": {"oracle_calls": 0, "docking_calls": 0, "modal_launches": 0, "gpu_seconds": 0},
+    "claim_boundary": "zero-oracle proposal-support evidence only; no docking utility or autonomous benchmark claim"
+  },
+  "payload_sha256": "4d81e9e7e57a756f92808692fda74d87ca66402240b7275c0a31472401487e5a"
+}
