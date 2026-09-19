@@ -1,0 +1,209 @@
+{
+  "schema_version": "t4_shared_controller_completion_preparation_v1",
+  "status": "PREPARED_PENDING_ZERO_ORACLE_GATE",
+  "scored_calls_authorized": 0,
+  "final_contract_payload_sha256": null,
+  "authorization": {
+    "state": "BLOCKED_PENDING_ZERO_ORACLE_GATE",
+    "payload_sha256": null
+  },
+  "zero_oracle_support_gate": {
+    "state": "PENDING",
+    "artifact": null,
+    "artifact_sha256": null,
+    "payload_sha256": null
+  },
+  "support": "compose_valid",
+  "charged_calls_per_cell": 49,
+  "total_charged_call_ceiling": 441,
+  "automatic_retries": 0,
+  "replacement": false,
+  "backfill": false,
+  "controller": {
+    "batch": 8,
+    "parents": 4,
+    "parent_explore": 0.3,
+    "exploration": 2,
+    "expert_floor_rounds": 2,
+    "route_scale_floor_rounds": 2,
+    "value_penalty": 1.0,
+    "docking_seed": 20260919,
+    "proposal": {
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      },
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "route_complete_region": {
+        "pool_size": 192,
+        "realization_limit": 96,
+        "beam_width": 48,
+        "expansion_width": 48,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "scale_balanced": true,
+        "training_scope": "one shared task-independent expert fit on all 77 locked routes"
+      }
+    }
+  },
+  "shared_route_checkpoint": {
+    "path": "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json",
+    "sha256": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
+    "payload_sha256": "5476be572dd40ee3f068cc8f1df238eec54e23a82cb84f803905ac891701e07d"
+  },
+  "receipt_policy": {
+    "publish_query_lock_before_docking": true,
+    "one_volume_per_cell": true,
+    "one_driver_per_cell": true,
+    "missing_locked_query": "charge_once_after_deadline_without_resubmission",
+    "continuation": "reserved_running_terminal_generation",
+    "candidate_exhaustion": "terminal_without_replacement_or_backfill"
+  },
+  "source_capsule": {
+    "state": "PENDING_EXACT_COMMIT_MANIFEST",
+    "manifest_schema": "t4_exact_commit_source_capsule_manifest_v1",
+    "manifest_payload_sha256": null,
+    "working_tree_packaging_allowed": false,
+    "complete_file_census_required": true
+  },
+  "cells": [
+    {
+      "cell_key": "parp1_0_d04",
+      "source_cell": "parp1_0",
+      "target": "parp1",
+      "source_global_index": 0,
+      "source_smiles": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+      "delta": 0.4,
+      "controller_seed": 2026091900,
+      "volume": "compose-t4-shared-completion-v1-parp1-0-d04",
+      "evaluator": {
+        "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+        "receptor_sha256": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+        "docking_box": [[26.413, 11.282, 27.238], [18.521, 17.479, 19.995]]
+      }
+    },
+    {
+      "cell_key": "parp1_1_d04",
+      "source_cell": "parp1_1",
+      "target": "parp1",
+      "source_global_index": 1,
+      "source_smiles": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+      "delta": 0.4,
+      "controller_seed": 2026091901,
+      "volume": "compose-t4-shared-completion-v1-parp1-1-d04",
+      "evaluator": {
+        "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+        "receptor_sha256": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+        "docking_box": [[26.413, 11.282, 27.238], [18.521, 17.479, 19.995]]
+      }
+    },
+    {
+      "cell_key": "parp1_2_d04",
+      "source_cell": "parp1_2",
+      "target": "parp1",
+      "source_global_index": 2,
+      "source_smiles": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+      "delta": 0.4,
+      "controller_seed": 2026091902,
+      "volume": "compose-t4-shared-completion-v1-parp1-2-d04",
+      "evaluator": {
+        "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+        "receptor_sha256": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+        "docking_box": [[26.413, 11.282, 27.238], [18.521, 17.479, 19.995]]
+      }
+    },
+    {
+      "cell_key": "braf_0_d04",
+      "source_cell": "braf_0",
+      "target": "braf",
+      "source_global_index": 9,
+      "source_smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34",
+      "delta": 0.4,
+      "controller_seed": 2026091909,
+      "volume": "compose-t4-shared-completion-v1-braf-0-d04",
+      "evaluator": {
+        "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+        "receptor_sha256": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a",
+        "docking_box": [[84.194, 6.949, -7.081], [22.032, 19.211, 14.106]]
+      }
+    },
+    {
+      "cell_key": "braf_1_d04",
+      "source_cell": "braf_1",
+      "target": "braf",
+      "source_global_index": 10,
+      "source_smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+      "delta": 0.4,
+      "controller_seed": 2026091910,
+      "volume": "compose-t4-shared-completion-v1-braf-1-d04",
+      "evaluator": {
+        "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+        "receptor_sha256": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a",
+        "docking_box": [[84.194, 6.949, -7.081], [22.032, 19.211, 14.106]]
+      }
+    },
+    {
+      "cell_key": "braf_2_d04",
+      "source_cell": "braf_2",
+      "target": "braf",
+      "source_global_index": 11,
+      "source_smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+      "delta": 0.4,
+      "controller_seed": 2026091911,
+      "volume": "compose-t4-shared-completion-v1-braf-2-d04",
+      "evaluator": {
+        "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+        "receptor_sha256": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a",
+        "docking_box": [[84.194, 6.949, -7.081], [22.032, 19.211, 14.106]]
+      }
+    },
+    {
+      "cell_key": "braf_0_d06",
+      "source_cell": "braf_0",
+      "target": "braf",
+      "source_global_index": 9,
+      "source_smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34",
+      "delta": 0.6,
+      "controller_seed": 2026091909,
+      "volume": "compose-t4-shared-completion-v1-braf-0-d06",
+      "evaluator": {
+        "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+        "receptor_sha256": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a",
+        "docking_box": [[84.194, 6.949, -7.081], [22.032, 19.211, 14.106]]
+      }
+    },
+    {
+      "cell_key": "braf_1_d06",
+      "source_cell": "braf_1",
+      "target": "braf",
+      "source_global_index": 10,
+      "source_smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+      "delta": 0.6,
+      "controller_seed": 2026091910,
+      "volume": "compose-t4-shared-completion-v1-braf-1-d06",
+      "evaluator": {
+        "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+        "receptor_sha256": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a",
+        "docking_box": [[84.194, 6.949, -7.081], [22.032, 19.211, 14.106]]
+      }
+    },
+    {
+      "cell_key": "braf_2_d06",
+      "source_cell": "braf_2",
+      "target": "braf",
+      "source_global_index": 11,
+      "source_smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+      "delta": 0.6,
+      "controller_seed": 2026091911,
+      "volume": "compose-t4-shared-completion-v1-braf-2-d06",
+      "evaluator": {
+        "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+        "receptor_sha256": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a",
+        "docking_box": [[84.194, 6.949, -7.081], [22.032, 19.211, 14.106]]
+      }
+    }
+  ]
+}
