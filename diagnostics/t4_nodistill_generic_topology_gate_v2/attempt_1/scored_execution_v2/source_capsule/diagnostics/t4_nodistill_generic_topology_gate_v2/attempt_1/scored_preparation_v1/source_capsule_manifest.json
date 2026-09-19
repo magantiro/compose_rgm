@@ -1,0 +1,65 @@
+{
+  "payload": {
+    "schema_version": "t4_nodistill_generic_topology_scored_source_capsule_v1",
+    "status": "SEALED_PREPARATION_ONLY",
+    "code_revision": "7c2f34f8574c7b247a315c0fefa09033e6241542",
+    "git_tree": "605e68981e834c6b0aad874b676b3c41585c5799",
+    "files": {
+      "configs/t4_compose_nodistill_parp1_v1.json": {
+        "git_blob_oid": "98f3bb392d262ab55f02c981aaf1e991a90662e7",
+        "sha256": "1ea9351d377e6741ebc9de4353d3fe411115f92c108278879c0e206c29e9e412"
+      },
+      "configs/t4_nodistill_generic_topology_gate_v2.json": {
+        "git_blob_oid": "d6b9c8d61670cbbe79ea9dfe2a52a5352b505f3b",
+        "sha256": "0c022cd132f0e5217c6d1aee7c78ebaebe1a8ee60cbaf1893be75eb5912f22ea"
+      },
+      "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/locks/parp1_0_d04.json.gz": {
+        "git_blob_oid": "d74a6b912a463cc93e267b1c3bc93cc8eb0faf5d",
+        "payload_sha256": "1bf96d6ad3e5f609317b68e1c31b17627ba8685affaaa58b4661aa248b054611",
+        "sha256": "7c81c502c79592e0bddd4d348a20336032a0bee73b224ef9a3e303dbd973c13b"
+      },
+      "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/locks/parp1_1_d04.json.gz": {
+        "git_blob_oid": "cf122307eb91abc8958bb63211c7a439b86a0059",
+        "payload_sha256": "e615efddeaf180acde61e6f1531bf90c0df25901d3d48d85b908a80bbd48d5f4",
+        "sha256": "d26557b0a3a23ebf22a44831724374945405b75034215cb2f2228d4d2ef480a1"
+      },
+      "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/result.json": {
+        "git_blob_oid": "a508b952305a06c510b16c310841333a1a975d5f",
+        "payload_sha256": "d45c22a88d0b0bac1f5856ee881382a3ba06db8a68d831bd0199492ca6dd40db",
+        "sha256": "29afab84042d6fe354b8774e893dfa21d660a1f36004cbacb9dc3365ae101b7b"
+      },
+      "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/scored_candidate_proposal.json": {
+        "git_blob_oid": "a48bb799a3a61011860c1470b69dd9015be2659f",
+        "payload_sha256": "41d67dd0026e1e120bf130446845f229efb0ef13b19699d7efb4fef2aa043d4e",
+        "sha256": "7377eb5014cc9b3d89907546eef8bb947c85ea00369f1581abf845016db03d21"
+      },
+      "src/compose_v4/control/docking_value.py": {
+        "git_blob_oid": "7af6898e123c1d59c3dde40e6188cc136ceda63e",
+        "sha256": "6177a9445f05900334066c1ce17be4e07182d1328cc9740c990dfa254f6003c8"
+      },
+      "src/compose_v4/control/generic_complete_program_composer.py": {
+        "git_blob_oid": "c46fce80caf935f6ecac6c57248e066bbb50a77e",
+        "sha256": "53c355c901c07b120bbbdac8aeba56d3d26c82e9afcfe7b2b4123da432f10991"
+      },
+      "src/compose_v4/control/generic_complete_program_composer_v2.py": {
+        "git_blob_oid": "6836c0a7234d2ec2f2a7d14bd0a079f84e00e9b0",
+        "sha256": "67b18f3da87cc4bdff7e08fd0911c576c7dd4dbe048f20cf0ba07a9a93e3f876"
+      },
+      "src/compose_v4/experiments/t4_docking_adapter.py": {
+        "git_blob_oid": "c6f01d1732b929c81b330db8d0af481e7ddc94c9",
+        "sha256": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e"
+      },
+      "src/compose_v4/experiments/t4_nodistill_generic_topology_gate_v2.py": {
+        "git_blob_oid": "1d70574adce3adb7254526a9e0e50d70469a9519",
+        "sha256": "95490045240fbdcf924a5f23f8eab39c0a4ad9591fa539017c9366ef8bd3e65a"
+      }
+    },
+    "external_evaluator_assets": {
+      "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor_sha256": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+      "verification_phase": "required_again_immediately_before_any_future_launch"
+    },
+    "scope": "Exact committed evidence and evaluator-code identities required to reconstruct the four locked candidate queries. This capsule is not an authorization, runner, launch, or score receipt."
+  },
+  "payload_sha256": "a039a0e5058a9a32b3d7cf435f4ddfb3ea30866acb777a27a00ef6d9e3a4cc9d"
+}
