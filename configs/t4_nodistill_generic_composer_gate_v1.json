@@ -1,0 +1,88 @@
+{
+  "payload": {
+    "schema_version": "t4_nodistill_generic_composer_gate_contract_v1",
+    "status": "FROZEN_ZERO_ORACLE_SUPPORT_GATE",
+    "scientific_problem": "test whether route-free generic complete-program composition repairs the measured COMPOSE-NoDistill semantic-support gap beyond retained-core-only rewriting",
+    "primary_model_output": "exact protected 1-32 primitive programs composed from generic COMPOSE operators on current exact successor states",
+    "central_claim_under_test": "a task-independent generic composer can generate joint grow, prune, replace, ring, linker and local programs at small, medium and large realized scales without trajectory-derived templates or weights",
+    "experimental_setting": "matched zero-oracle candidate locks on PARP1 0/1/2 plus contrasting JAK2-1 delta 0.6, BRAF-1 delta 0.4 and BRAF-0 delta 0.6",
+    "baseline": "generic_retained_core_only under the same maximum output budget per scale",
+    "support": {
+      "slot_capacity": 48,
+      "maximum_active_atoms": 40,
+      "maximum_primitives": 32,
+      "maximum_blocks": 8,
+      "stereochemistry": "out_of_scope",
+      "formal_charge_changes": "out_of_scope"
+    },
+    "proposal": {
+      "composer_candidates_per_scale": 12,
+      "composer_attempts_per_scale": 192,
+      "baseline_candidates_per_scale": 12,
+      "scale_bands": {
+        "small": [1, 3],
+        "medium": [4, 11],
+        "large": [12, 32]
+      },
+      "structural_extent_definition": "max(1, surviving_new_atoms + deleted_original_atoms, changed_original_slots); small 1-3, medium 4-11, large 12 or more",
+      "retained_core": {
+        "maximum_fragment_atoms": 16,
+        "maximum_stages": 2,
+        "maximum_primitives": 32,
+        "maximum_prefixes": 4096
+      },
+      "candidate_budget_interpretation": "matched maximum unique exact endpoints in each scale band; shortfalls remain shortfalls and are not backfilled",
+      "generic_schedule_weighting": "fixed uniform round-robin over task-independent operator schedules; no fitted route frequency"
+    },
+    "cells": [
+      {"cell_key": "parp1_0_d04", "source_contract": "parp1", "controller_seed": 2026092000},
+      {"cell_key": "parp1_1_d04", "source_contract": "parp1", "controller_seed": 2026092001},
+      {"cell_key": "parp1_2_d04", "source_contract": "parp1", "controller_seed": 2026092002},
+      {"cell_key": "jak2_1_d06", "source_contract": "transfer", "controller_seed": 2026092013},
+      {"cell_key": "braf_1_d04", "source_contract": "transfer", "controller_seed": 2026092010},
+      {"cell_key": "braf_0_d06", "source_contract": "transfer", "controller_seed": 2026092009}
+    ],
+    "inputs": {
+      "parp1_source_contract": {"path": "configs/t4_compose_nodistill_parp1_v1.json", "sha256": "1ea9351d377e6741ebc9de4353d3fe411115f92c108278879c0e206c29e9e412"},
+      "transfer_source_contract": {"path": "configs/t4_compose_nodistill_transfer_v1.json", "sha256": "05723c43824cc1456a1729c40c9f120cf1258017e432a606b88ebf56eb61ebdc"},
+      "motivating_audit": {"path": "diagnostics/t4_compose_nodistill_parp1_v1/full_vs_nodistill_audit_v1/result.json", "sha256": "7dd9d3e778ee91c74c2df42a65e557774c2468e65aa08a854dad2c9ace3f5dfb", "payload_sha256": "383e80f17442373c6f69639caaf1c0e48856d91b362f1f3331767446fb351e7d"},
+      "teacher_library_diagnostic_only": {"path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json", "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5", "load_phase": "after_all_candidate_locks_are_sealed"}
+    },
+    "runtime_prohibitions": {
+      "trajectory_distilled_templates": true,
+      "fitted_route_weights": true,
+      "route_identifiers": true,
+      "teacher_or_winner_endpoints": true,
+      "target_or_cell_identity_as_proposer_input": true,
+      "objective_or_comparator_scores": true,
+      "docking_or_oracle_calls": true,
+      "modal_launches": true,
+      "live_run_access_or_mutation": true
+    },
+    "evaluation": {
+      "required_metrics": [
+        "exact_execution_precision",
+        "endpoint_eligibility",
+        "unique_endpoint_yield",
+        "primitive_and_structural_extent_bands",
+        "program_family_and_composition_diversity",
+        "created_handle_dependencies",
+        "cycle_rank_and_heavy_atom_changes",
+        "teacher_descriptor_coverage_and_candidate_precision_after_lock",
+        "exact_teacher_endpoint_recovery_after_lock"
+      ],
+      "teacher_descriptor": "exact tuple of realized primitive band, heavy-atom delta, cycle-rank delta and changed-source-region count, plus a separately reported coarse tuple",
+      "promotion_gate": {
+        "complete_six_cell_lock_census": true,
+        "exact_execution_precision": 1.0,
+        "joint_multimodule_support_every_cell": true,
+        "small_medium_large_support_across_panel": true,
+        "nonzero_created_handle_dependency_support_across_panel": true,
+        "strict_improvement_over_retained_core_in_exact_or_coarse_teacher_descriptor_coverage": true
+      }
+    },
+    "costs": {"oracle_calls": 0, "docking_calls": 0, "modal_launches": 0, "gpu_seconds": 0},
+    "claim_boundary": "zero-oracle proposal-support and structural-descriptor evidence only; no docking utility or benchmark-performance claim"
+  },
+  "payload_sha256": "683c82daa65e3abe749cf249dd87b3ee488e3da2dd952a6c28b6571fe8fcc8b9"
+}
