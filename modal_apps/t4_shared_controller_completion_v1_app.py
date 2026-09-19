@@ -9,6 +9,7 @@ contract and its exact-commit source capsule validate.
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -18,25 +19,49 @@ import modal
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+_CAMPAIGN_VARIANT = os.environ.get("COMPOSE_T4_CAMPAIGN_VARIANT", "full")
+if _CAMPAIGN_VARIANT == "nodistill_parp1_v1":
+    from compose_v4.experiments.t4_compose_nodistill_contract import (
+        AUTHORIZATION_RELATIVE_PATH,
+        CAPSULE_MANIFEST_RELATIVE_PATH,
+        CAPSULE_ROOT_RELATIVE_PATH,
+        FINAL_CONTRACT_RELATIVE_PATH,
+        validate_scored_contract,
+    )
+    from compose_v4.experiments.t4_compose_nodistill_contract import (
+        PREPARATION_RELATIVE_PATH as CONTRACT_RELATIVE_PATH,
+    )
+else:
+    from compose_v4.experiments.t4_shared_controller_completion_contract import (
+        CONTRACT_RELATIVE_PATH,
+    )
+    from compose_v4.experiments.t4_shared_controller_scored_contract import (
+        AUTHORIZATION_RELATIVE_PATH,
+        CAPSULE_MANIFEST_RELATIVE_PATH,
+        CAPSULE_ROOT_RELATIVE_PATH,
+        FINAL_CONTRACT_RELATIVE_PATH,
+        validate_scored_contract,
+    )
+
 from compose_v4.experiments.t4_shared_controller_completion_contract import (
-    CONTRACT_RELATIVE_PATH,
     payload_identity,
     sha256_file,
-)
-from compose_v4.experiments.t4_shared_controller_scored_contract import (
-    AUTHORIZATION_RELATIVE_PATH,
-    CAPSULE_MANIFEST_RELATIVE_PATH,
-    CAPSULE_ROOT_RELATIVE_PATH,
-    FINAL_CONTRACT_RELATIVE_PATH,
-    validate_scored_contract,
 )
 from compose_v4.experiments.t4_shared_controller_scored_runtime import (
     make_launch_task,
     validate_launch_task,
 )
 
-APP_NAME = "compose-t4-shared-controller-completion-v1"
-APP_RELATIVE_PATH = "modal_apps/t4_shared_controller_completion_v1_app.py"
+APP_NAME = (
+    "compose-t4-compose-nodistill-parp1-v1"
+    if _CAMPAIGN_VARIANT == "nodistill_parp1_v1"
+    else "compose-t4-shared-controller-completion-v1"
+)
+APP_RELATIVE_PATH = (
+    "modal_apps/t4_compose_nodistill_parp1_v1_app.py"
+    if _CAMPAIGN_VARIANT == "nodistill_parp1_v1"
+    else "modal_apps/t4_shared_controller_completion_v1_app.py"
+)
 MOOD = "https://raw.githubusercontent.com/SeulLee05/MOOD/main/scorer"
 REMOTE_ROOT = Path("/capsule")
 REMOTE_SEALED = Path("/sealed")
@@ -62,8 +87,12 @@ def _load_envelope(path: Path) -> tuple[dict[str, Any], str]:
 
 PREPARATION = json.loads((ROOT / CONTRACT_RELATIVE_PATH).read_text())
 CELLS = tuple(PREPARATION["cells"])
-if len(CELLS) != 9:
-    raise ValueError("completion launcher requires exactly nine cells")
+_EXPECTED_CELL_COUNT = 3 if _CAMPAIGN_VARIANT == "nodistill_parp1_v1" else 9
+if len(CELLS) != _EXPECTED_CELL_COUNT:
+    raise ValueError(
+        f"{_CAMPAIGN_VARIANT} launcher requires exactly "
+        f"{_EXPECTED_CELL_COUNT} cells"
+    )
 CELL_KEYS = tuple(row["cell_key"] for row in CELLS)
 CELL_VOLUMES = {row["cell_key"]: row["volume"] for row in CELLS}
 
@@ -171,7 +200,7 @@ def scored_preflight_report() -> dict:
         "schema_version": "t4_shared_controller_scored_preflight_v1",
         "ready": True,
         "run_id": context["launch"]["run_id"],
-        "scored_calls_requested": 441,
+        "scored_calls_requested": context["contract"]["scored_calls_requested"],
         "cell_keys": list(context["launch"]["cell_keys"]),
         "volumes": [CELL_VOLUMES[key] for key in CELL_KEYS],
         "modal_calls_created": 0,
@@ -234,6 +263,8 @@ def _publish_or_assert(store: Any, path: str, payload: dict[str, Any]) -> str:
 def _load_route_expert(contract: dict[str, Any]):
     from compose_v4.control.route_distilled_goal_expert import RouteDistilledGoalExpert
 
+    if not contract.get("trajectory_distillation", {"enabled": True})["enabled"]:
+        raise RuntimeError("COMPOSE-NoDistill may not load a route checkpoint")
     path = REMOTE_ROOT / contract["shared_route_checkpoint"]["path"]
     envelope = json.loads(path.read_text())
     payload = envelope.get("payload")
@@ -289,33 +320,43 @@ def _proposal_answer(
         telemetry: dict[str, Any] = {"raw_draws": settings["draws"]}
     elif expert_name == "route_complete_region":
         settings = controller["proposal"][expert_name]
-        source = pad_molecular_graph(smiles_to_molecular_graph(request["parent"]), 48)
-        proposed, route_telemetry = propose_route_expert_candidates(
-            source,
-            _load_route_expert(contract),
-            pool_size=settings["pool_size"],
-            realization_limit=settings["realization_limit"],
-            beam_width=settings["beam_width"],
-            expansion_width=settings["expansion_width"],
-            max_bindings_per_template=settings["max_bindings_per_template"],
-            maximum_expansions=settings["maximum_expansions"],
-            scale_balanced=settings["scale_balanced"],
-        )
         records = []
-        for row in proposed:
-            properties = fiber.check(row["smiles"])
-            if properties is None or properties["smiles"] == request["parent"]:
-                continue
-            records.append(
-                {
-                    **row,
-                    **properties,
-                    "parent": request["parent"],
-                    "parent_score": request["parent_score"],
-                    "delta": cell["delta"],
-                    "route_generation_modes": ["legacy_route_expert"],
-                }
+        route_telemetry: dict[str, Any]
+        if contract.get("trajectory_distillation", {"enabled": True})["enabled"]:
+            source = pad_molecular_graph(
+                smiles_to_molecular_graph(request["parent"]), 48
             )
+            proposed, route_telemetry = propose_route_expert_candidates(
+                source,
+                _load_route_expert(contract),
+                pool_size=settings["pool_size"],
+                realization_limit=settings["realization_limit"],
+                beam_width=settings["beam_width"],
+                expansion_width=settings["expansion_width"],
+                max_bindings_per_template=settings["max_bindings_per_template"],
+                maximum_expansions=settings["maximum_expansions"],
+                scale_balanced=settings["scale_balanced"],
+            )
+            for row in proposed:
+                properties = fiber.check(row["smiles"])
+                if properties is None or properties["smiles"] == request["parent"]:
+                    continue
+                records.append(
+                    {
+                        **row,
+                        **properties,
+                        "parent": request["parent"],
+                        "parent_score": request["parent_score"],
+                        "delta": cell["delta"],
+                        "route_generation_modes": ["legacy_route_expert"],
+                    }
+                )
+        else:
+            route_telemetry = {
+                "status": "disabled_by_compose_nodistill",
+                "templates_loaded": 0,
+                "route_checkpoint_read": False,
+            }
         retained, retained_telemetry = retained_core_route_records(
             parent=request["parent"],
             parent_score=request["parent_score"],
@@ -325,7 +366,7 @@ def _proposal_answer(
         )
         records.extend(retained)
         telemetry = {
-            "legacy_route": route_telemetry,
+            "distilled_route": route_telemetry,
             "retained_core": retained_telemetry,
         }
     else:
@@ -471,6 +512,8 @@ def _register_cell(cell_binding: dict[str, Any]) -> dict[str, Any]:
         )
 
         contract, launch = _remote_context(task)
+        if not contract.get("trajectory_distillation", {"enabled": True})["enabled"]:
+            raise RuntimeError("COMPOSE-NoDistill has no route-template particles")
         _bound_cell(contract, cell_key)
         volume.reload()
         run_root = _run_root(launch)
@@ -774,33 +817,34 @@ def _drive_cell(
         manifest_path = f"{round_root}/proposal_manifest.json"
         manifest = _read_optional(store, manifest_path)
         if manifest is None:
-            expert = _load_route_expert(contract)
             parents = preview_selected_parents(checkpoint, cell=cell, contract=contract)
             parent_manifests = {}
-            for parent_index, parent in enumerate(parents):
-                relative_root = f"{round_root}/particles/p{parent_index:02d}"
-                parent_manifest = particle_parent_manifest(
-                    parent=parent,
-                    shared_checkpoint_sha256=contract["shared_route_checkpoint"][
-                        "sha256"
-                    ],
-                    expert=expert,
-                    code_identities={
-                        "source_capsule": launch["source_capsule_payload_sha256"]
-                    },
-                    config_identities={
-                        "scored_contract": launch["contract_payload_sha256"],
-                        "shared_route_checkpoint": contract["shared_route_checkpoint"][
-                            "payload_sha256"
+            if contract.get("trajectory_distillation", {"enabled": True})["enabled"]:
+                expert = _load_route_expert(contract)
+                for parent_index, parent in enumerate(parents):
+                    relative_root = f"{round_root}/particles/p{parent_index:02d}"
+                    parent_manifest = particle_parent_manifest(
+                        parent=parent,
+                        shared_checkpoint_sha256=contract["shared_route_checkpoint"][
+                            "sha256"
                         ],
-                    },
-                )
-                CompleteCombinationParticleReceiptStore(
-                    run_root / relative_root,
-                    parent_manifest,
-                    flush=volume.commit,
-                )
-                parent_manifests[parent] = parent_manifest
+                        expert=expert,
+                        code_identities={
+                            "source_capsule": launch["source_capsule_payload_sha256"]
+                        },
+                        config_identities={
+                            "scored_contract": launch["contract_payload_sha256"],
+                            "shared_route_checkpoint": contract[
+                                "shared_route_checkpoint"
+                            ]["payload_sha256"],
+                        },
+                    )
+                    CompleteCombinationParticleReceiptStore(
+                        run_root / relative_root,
+                        parent_manifest,
+                        flush=volume.commit,
+                    )
+                    parent_manifests[parent] = parent_manifest
             manifest = make_proposal_manifest(
                 checkpoint=checkpoint,
                 cell=cell,
@@ -819,7 +863,13 @@ def _drive_cell(
                     "schema_version": "t4_shared_controller_proposal_dispatch_v1",
                     "proposal_manifest_payload_sha256": payload_identity(manifest),
                     "expert_jobs": len(manifest["requests"]),
-                    "particle_jobs": 28 * len(manifest["parents"]),
+                    "particle_jobs": (
+                        28 * len(manifest["parents"])
+                        if contract.get("trajectory_distillation", {"enabled": True})[
+                            "enabled"
+                        ]
+                        else 0
+                    ),
                     "automatic_retries": 0,
                 },
             )
@@ -835,19 +885,20 @@ def _drive_cell(
                         "request": request,
                     }
                 )
-            for parent_index, parent in enumerate(manifest["parents"]):
-                relative_root = f"{round_root}/particles/p{parent_index:02d}"
-                payload = store.read(f"{relative_root}/manifest.json")
-                for job in payload["jobs"]:
-                    particle_worker.spawn(
-                        {
-                            "launch": launch,
-                            "parent": parent,
-                            "particle_root": relative_root,
-                            "manifest_path": f"{relative_root}/manifest.json",
-                            "job": job,
-                        }
-                    )
+            if contract.get("trajectory_distillation", {"enabled": True})["enabled"]:
+                for parent_index, parent in enumerate(manifest["parents"]):
+                    relative_root = f"{round_root}/particles/p{parent_index:02d}"
+                    payload = store.read(f"{relative_root}/manifest.json")
+                    for job in payload["jobs"]:
+                        particle_worker.spawn(
+                            {
+                                "launch": launch,
+                                "parent": parent,
+                                "particle_root": relative_root,
+                                "manifest_path": f"{relative_root}/manifest.json",
+                                "job": job,
+                            }
+                        )
 
         while True:
             volume.reload()
@@ -860,23 +911,24 @@ def _drive_cell(
                 is None
                 for request in manifest["requests"]
             )
-            for parent_index, _ in enumerate(manifest["parents"]):
-                relative_root = f"{round_root}/particles/p{parent_index:02d}"
-                particle_store, payload = _particle_store(
-                    store=store,
-                    run_root=run_root,
-                    relative_root=relative_root,
-                    volume=volume,
-                )
-                for job in payload["jobs"]:
-                    values = dict(job)
-                    values.pop("job_id", None)
-                    try:
-                        particle_store.load_receipt(
-                            CompleteCombinationJobSpec(**values)
-                        )
-                    except FileNotFoundError:
-                        missing = True
+            if contract.get("trajectory_distillation", {"enabled": True})["enabled"]:
+                for parent_index, _ in enumerate(manifest["parents"]):
+                    relative_root = f"{round_root}/particles/p{parent_index:02d}"
+                    particle_store, payload = _particle_store(
+                        store=store,
+                        run_root=run_root,
+                        relative_root=relative_root,
+                        volume=volume,
+                    )
+                    for job in payload["jobs"]:
+                        values = dict(job)
+                        values.pop("job_id", None)
+                        try:
+                            particle_store.load_receipt(
+                                CompleteCombinationJobSpec(**values)
+                            )
+                        except FileNotFoundError:
+                            missing = True
             if not missing or time.time() >= manifest["deadline"]:
                 break
             time.sleep(settings["driver_poll_seconds"])
@@ -905,29 +957,42 @@ def _drive_cell(
                 pools[request["expert"]].extend(rows)
 
         particle_telemetry = []
-        for parent_index, parent in enumerate(manifest["parents"]):
-            relative_root = f"{round_root}/particles/p{parent_index:02d}"
-            particle_store, payload = _particle_store(
-                store=store,
-                run_root=run_root,
-                relative_root=relative_root,
-                volume=volume,
-            )
-            for job in payload["jobs"]:
-                values = dict(job)
-                values.pop("job_id", None)
-                spec = CompleteCombinationJobSpec(**values)
-                try:
-                    particle_store.load_receipt(spec)
-                except FileNotFoundError:
-                    particle_store.mark_missing_at_deadline(spec)
-            combined, telemetry = particle_store.settle(route_by_parent[parent])
-            for row in combined:
-                row["parent"] = parent
-                row["parent_score"] = checkpoint["archive"][parent]
-                row["delta"] = cell["delta"]
-            pools["route_complete_region"].extend(combined)
-            particle_telemetry.append({"parent": parent, **telemetry})
+        if contract.get("trajectory_distillation", {"enabled": True})["enabled"]:
+            for parent_index, parent in enumerate(manifest["parents"]):
+                relative_root = f"{round_root}/particles/p{parent_index:02d}"
+                particle_store, payload = _particle_store(
+                    store=store,
+                    run_root=run_root,
+                    relative_root=relative_root,
+                    volume=volume,
+                )
+                for job in payload["jobs"]:
+                    values = dict(job)
+                    values.pop("job_id", None)
+                    spec = CompleteCombinationJobSpec(**values)
+                    try:
+                        particle_store.load_receipt(spec)
+                    except FileNotFoundError:
+                        particle_store.mark_missing_at_deadline(spec)
+                combined, telemetry = particle_store.settle(route_by_parent[parent])
+                for row in combined:
+                    row["parent"] = parent
+                    row["parent_score"] = checkpoint["archive"][parent]
+                    row["delta"] = cell["delta"]
+                pools["route_complete_region"].extend(combined)
+                particle_telemetry.append({"parent": parent, **telemetry})
+        else:
+            for parent in manifest["parents"]:
+                pools["route_complete_region"].extend(route_by_parent[parent])
+                particle_telemetry.append(
+                    {
+                        "parent": parent,
+                        "status": "disabled_by_compose_nodistill",
+                        "scheduled_jobs": 0,
+                        "templates_loaded": 0,
+                        "route_checkpoint_read": False,
+                    }
+                )
 
         for expert_name, rows in pools.items():
             if expert_name == "route_complete_region":
@@ -1223,7 +1288,7 @@ def main(mode: str = "preflight", run_id: str = "") -> None:
             "schema_version": "t4_shared_controller_scored_launch_receipt_v1",
             "launch": launch,
             "cells": cells,
-            "driver_count": 9,
+            "driver_count": len(launch["cell_keys"]),
             "automatic_retries": 0,
             "replacement": False,
             "backfill": False,

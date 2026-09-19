@@ -11,7 +11,8 @@ import copy
 import hashlib
 import json
 import math
-from collections.abc import Mapping
+from collections import Counter
+from collections.abc import Iterable, Mapping
 from typing import Any
 
 from rdkit import Chem
@@ -21,6 +22,7 @@ from compose_v4.chem.molecular_graph import (
     smiles_to_molecular_graph,
 )
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.control.generic_legal_action_policy import enumerate_rule_successors
 from compose_v4.control.retained_core_pruning import enumerate_retained_core_prunes
 from compose_v4.control.route_complete_region_particle_receipts import (
     make_complete_combination_parent_manifest,
@@ -37,6 +39,8 @@ from compose_v4.experiments.t4_shared_controller_completion_contract import (
 from compose_v4.experiments.t4_shared_controller_scored_contract import (
     AUTHORIZATION_SCHEMA_VERSION,
 )
+from compose_v4.experiments.whole_ring_plan import execute_program
+from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import encode_state
 
 AUTHORIZATION_SCHEMA = AUTHORIZATION_SCHEMA_VERSION
@@ -49,6 +53,24 @@ RETAINED_CORE_CONFIG = {
     "maximum_prefixes": 4096,
     "program_family": "retained_core_prune",
     "proposal_expert": "route_complete_region",
+}
+
+# One exact, non-cardinality Active8 refinement after a retained-core prune.  The
+# prune handles the large feasibility-changing move; the refinement creates a new
+# queryable endpoint without undoing that cardinality decision.  Ring-system
+# restatement is deliberately not part of this *local* refinement family, and
+# atom insertion/deletion remain available through the other production experts.
+RETAINED_CORE_REFINE_CONFIG = {
+    **RETAINED_CORE_CONFIG,
+    "program_family": "retained_core_prune_then_refine",
+    "refinement_rules": (
+        "atom_restate_semantic",
+        "bond_reorder",
+        "bond_reroute",
+        "cycle_open",
+        "cycle_close",
+    ),
+    "refinement_steps": 1,
 }
 
 _HEX = frozenset("0123456789abcdef")
@@ -167,7 +189,12 @@ def make_launch_task(
         "total_charged_call_ceiling": total,
         "cell_keys": [row["cell_key"] for row in contract["cells"]],
     }
-    if body["charged_call_ceiling_per_cell"] != 49 or len(body["cell_keys"]) != 9:
+    expected_cell_count = int(contract.get("campaign_cell_count", 9))
+    if (
+        body["charged_call_ceiling_per_cell"] != 49
+        or len(body["cell_keys"]) != expected_cell_count
+        or total != 49 * expected_cell_count
+    ):
         raise ValueError("scored launch matrix or per-cell ceiling drift")
     return {**body, "run_id": payload_identity(body)}
 
@@ -312,6 +339,163 @@ def retained_core_route_records(
     }
 
 
+def retained_core_prune_refine_records(
+    *,
+    parent: str,
+    parent_score: float,
+    original_seed: str,
+    delta: float,
+    support: str,
+    excluded_canonical_smiles_sha256: Iterable[str] = (),
+    refinement_rules: tuple[str, ...] | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Compose one exact local refinement after a complete retained-core prune.
+
+    The intermediate prune is generated from the current parent and may be used as
+    a free planning state.  It is never queried or admitted to the archive here.
+    Only the completed prune-plus-refinement endpoint is returned.  Every accepted
+    result is replayed once from the original parent through the ordinary executor,
+    so the function cannot mistake two separately valid steps for a valid protected
+    composition.
+
+    ``excluded_canonical_smiles_sha256`` is a query-history denylist, not a reward
+    input.  Applying it inside this gate makes its support definition identical to
+    deployment rather than counting already charged endpoints as new support.
+    """
+
+    score = float(parent_score)
+    if not math.isfinite(score):
+        raise ValueError("retained-core refinement parent score must be finite")
+    rules = (
+        RETAINED_CORE_REFINE_CONFIG["refinement_rules"]
+        if refinement_rules is None
+        else tuple(refinement_rules)
+    )
+    supported_rules = set(RETAINED_CORE_REFINE_CONFIG["refinement_rules"])
+    if not rules or len(set(rules)) != len(rules) or not set(rules) <= supported_rules:
+        raise ValueError(
+            "retained-core refinement rules are empty, repeated, or unsupported"
+        )
+    excluded = set(excluded_canonical_smiles_sha256)
+    if any(
+        not isinstance(value, str)
+        or len(value) != 64
+        or any(character not in _HEX for character in value)
+        for value in excluded
+    ):
+        raise ValueError(
+            "retained-core refinement exclusions must be SHA-256 identities"
+        )
+
+    source = pad_molecular_graph(smiles_to_molecular_graph(parent), 48)
+    prune_programs = enumerate_retained_core_prunes(
+        source,
+        maximum_fragment_atoms=RETAINED_CORE_REFINE_CONFIG["maximum_fragment_atoms"],
+        maximum_stages=RETAINED_CORE_REFINE_CONFIG["maximum_stages"],
+        maximum_primitives=RETAINED_CORE_REFINE_CONFIG["maximum_primitives"],
+        maximum_prefixes=RETAINED_CORE_REFINE_CONFIG["maximum_prefixes"],
+    )
+    fiber = Fiber(original_seed, float(delta), support=support)
+    counters: Counter[str] = Counter()
+    successor_counts: Counter[str] = Counter()
+    accepted_by_rule: Counter[str] = Counter()
+    by_smiles: dict[str, dict[str, Any]] = {}
+    for prune in prune_programs:
+        counters["prune_programs"] += 1
+        intermediate_smiles = molecular_graph_to_smiles(prune.product)
+        if fiber.check(intermediate_smiles) is None:
+            counters["prune_intermediate_outside_endpoint_fiber"] += 1
+            continue
+        counters["prune_intermediate_inside_endpoint_fiber"] += 1
+        if len(prune.actions) >= RETAINED_CORE_REFINE_CONFIG["maximum_primitives"]:
+            counters["prune_programs_without_refinement_room"] += 1
+            continue
+        for rule in rules:
+            successors = enumerate_rule_successors(prune.product, rule)
+            successor_counts[rule] += len(successors)
+            for successor in successors:
+                counters["refinement_successors"] += 1
+                endpoint = fiber.check(molecular_graph_to_smiles(successor.successor))
+                if endpoint is None or endpoint["smiles"] == parent:
+                    counters["refinement_endpoint_outside_fiber"] += 1
+                    continue
+                endpoint_identity = hashlib.sha256(
+                    endpoint["smiles"].encode()
+                ).hexdigest()
+                if endpoint_identity in excluded:
+                    counters["stale_query_exclusions"] += 1
+                    continue
+                actions = (*prune.actions, successor.action_record)
+                if len(actions) > RETAINED_CORE_REFINE_CONFIG["maximum_primitives"]:
+                    counters["cumulative_primitive_budget_abstentions"] += 1
+                    continue
+                replayed, _ = execute_program(source, list(actions))
+                if canonical_state_key(replayed) != successor.successor_key:
+                    raise RuntimeError(
+                        "retained-core prune/refine composition changed on exact replay"
+                    )
+                counters["exact_composed_replays"] += 1
+                primitives = len(actions)
+                band = (
+                    "small"
+                    if primitives <= 3
+                    else "medium" if primitives <= 11 else "large"
+                )
+                row = {
+                    **endpoint,
+                    "proposal_lane": "route_complete_region",
+                    "proposal_experts": ["route_complete_region"],
+                    "families": ["retained_core_prune", f"active8_refine:{rule}"],
+                    "program_families": ["retained_core_prune_then_refine"],
+                    "parent": parent,
+                    "parent_score": score,
+                    "delta": float(delta),
+                    "regions": len(prune.stages) + 1,
+                    "created": 0,
+                    "deleted": sum(
+                        int(stage["deleted_atoms"]) for stage in prune.stages
+                    ),
+                    "realized_primitives": primitives,
+                    "realized_primitive_band": band,
+                    "route_generation_modes": ["retained_core_prune_then_refine"],
+                    "refinement_rule": rule,
+                    "protected_program_actions": list(actions),
+                    "protected_program_sha256": payload_identity(list(actions)),
+                    "intermediate_endpoint_queried": False,
+                }
+                previous = by_smiles.get(endpoint["smiles"])
+                rank = (primitives, rule, row["protected_program_sha256"])
+                previous_rank = (
+                    (
+                        int(previous["realized_primitives"]),
+                        str(previous["refinement_rule"]),
+                        str(previous["protected_program_sha256"]),
+                    )
+                    if previous is not None
+                    else None
+                )
+                if previous_rank is None or rank < previous_rank:
+                    by_smiles[endpoint["smiles"]] = row
+                accepted_by_rule[rule] += 1
+    records = [by_smiles[key] for key in sorted(by_smiles)]
+    for rank, row in enumerate(records, 1):
+        row["route_proposal_rank"] = rank
+    return records, {
+        "program_family": "retained_core_prune_then_refine",
+        "proposal_expert": "route_complete_region",
+        "eligible_novel_unique": len(records),
+        "configuration": {
+            **copy.deepcopy(RETAINED_CORE_REFINE_CONFIG),
+            "refinement_rules": list(rules),
+        },
+        "counts": dict(sorted(counters.items())),
+        "successors_by_rule": dict(sorted(successor_counts.items())),
+        "accepted_occurrences_by_rule": dict(sorted(accepted_by_rule.items())),
+        "excluded_query_identity_count": len(excluded),
+        "prior_scores_or_receipts_read": False,
+    }
+
+
 def attach_endpoint_fingerprints(
     records: list[dict[str, Any]], *, original_seed: str, delta: float, support: str
 ) -> list[dict[str, Any]]:
@@ -369,8 +553,14 @@ def filter_stale_braf_candidates(
 ) -> tuple[dict[str, list[dict[str, Any]]], dict[str, Any]]:
     """Remove hash-bound stale BRAF queries before selection or query locking."""
 
-    exclusions = validate_stale_braf_exclusions(contract)
     source_cell = str(cell.get("source_cell", ""))
+    binding = contract.get("stale_braf_v4_reconciliation")
+    if binding is None:
+        if cell.get("target") == "braf":
+            raise ValueError("BRAF campaign omitted its stale-query reconciliation")
+        exclusions: dict[str, tuple[str, ...]] = {}
+    else:
+        exclusions = validate_stale_braf_exclusions(contract)
     deny = set(exclusions.get(source_cell, ()))
     if cell.get("target") == "braf" and source_cell not in {
         "braf_0",
@@ -440,10 +630,16 @@ def make_proposal_manifest(
     """Freeze the exact parent/expert/particle proposal census for one round."""
 
     parents = preview_selected_parents(checkpoint, cell=cell, contract=contract)
-    if set(parents) != set(particle_manifests) or len(parents) != len(
-        particle_manifests
-    ):
-        raise ValueError("particle manifest census differs from selected parents")
+    trajectory_distillation_enabled = bool(
+        contract.get("trajectory_distillation", {"enabled": True})["enabled"]
+    )
+    if trajectory_distillation_enabled:
+        if set(parents) != set(particle_manifests) or len(parents) != len(
+            particle_manifests
+        ):
+            raise ValueError("particle manifest census differs from selected parents")
+    elif particle_manifests:
+        raise ValueError("COMPOSE-NoDistill may not schedule route-template particles")
     if not math.isfinite(float(deadline)):
         raise ValueError("proposal deadline must be finite")
     experts = ("shallow", "anchored_replacement", "route_complete_region")
@@ -472,9 +668,12 @@ def make_proposal_manifest(
         "deadline": float(deadline),
         "parents": parents,
         "requests": requests,
-        "particle_parent_manifest_sha256": {
-            parent: particle_manifests[parent]["payload_sha256"] for parent in parents
-        },
+        "trajectory_distillation_enabled": trajectory_distillation_enabled,
+        "particle_parent_manifest_sha256": (
+            {parent: particle_manifests[parent]["payload_sha256"] for parent in parents}
+            if trajectory_distillation_enabled
+            else {}
+        ),
         "retained_core": copy.deepcopy(RETAINED_CORE_CONFIG),
         "proposal_experts": list(experts),
     }
@@ -486,6 +685,7 @@ __all__ = [
     "LAUNCH_TASK_SCHEMA",
     "PROPOSAL_MANIFEST_SCHEMA",
     "RETAINED_CORE_CONFIG",
+    "RETAINED_CORE_REFINE_CONFIG",
     "attach_endpoint_fingerprints",
     "checkpoint_controller_config",
     "filter_stale_braf_candidates",
@@ -494,6 +694,7 @@ __all__ = [
     "particle_parent_manifest",
     "preview_selected_parents",
     "proposal_seed",
+    "retained_core_prune_refine_records",
     "retained_core_route_records",
     "validate_authorization_receipt",
     "validate_launch_task",

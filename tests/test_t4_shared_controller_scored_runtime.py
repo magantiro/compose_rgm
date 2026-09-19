@@ -1,4 +1,7 @@
 import copy
+import hashlib
+import json
+from pathlib import Path
 
 import pytest
 
@@ -17,14 +20,18 @@ from compose_v4.experiments.t4_shared_controller_completion_contract import (
 from compose_v4.experiments.t4_shared_controller_scored_runtime import (
     AUTHORIZATION_SCHEMA,
     RETAINED_CORE_CONFIG,
+    RETAINED_CORE_REFINE_CONFIG,
     attach_endpoint_fingerprints,
     make_launch_task,
     make_proposal_manifest,
     preview_selected_parents,
+    retained_core_prune_refine_records,
     retained_core_route_records,
     validate_authorization_receipt,
     validate_launch_task,
 )
+
+ROOT = Path(__file__).resolve().parents[1]
 
 CELL = {
     "cell_key": "parp1_0_d04",
@@ -184,6 +191,56 @@ def test_parent_preview_and_proposal_manifest_do_not_advance_checkpoint():
     assert manifest["base_checkpoint_payload_sha256"] == payload_identity(checkpoint)
 
 
+def test_nodistill_launch_and_manifest_disable_only_route_template_particles():
+    checkpoint = _checkpoint()
+    contract = {
+        **CONTRACT,
+        "campaign_cell_count": 3,
+        "scored_calls_requested": 147,
+        "total_charged_call_ceiling": 147,
+        "cells": [{**CELL, "cell_key": f"cell_{index}"} for index in range(3)],
+        "trajectory_distillation": {"enabled": False},
+    }
+    authorization = {
+        **_authorization(),
+        "authorized_scored_calls": 147,
+    }
+    task = make_launch_task(
+        contract=contract,
+        contract_payload_sha256=CONTRACT_HASH,
+        contract_file_sha256=CONTRACT_FILE_HASH,
+        authorization_receipt=authorization,
+        authorization_receipt_sha256=AUTHORIZATION_FILE_HASH,
+        code_revision="1" * 40,
+        source_capsule_payload_sha256=CAPSULE_HASH,
+    )
+    assert task["cell_keys"] == ["cell_0", "cell_1", "cell_2"]
+    manifest = make_proposal_manifest(
+        checkpoint=checkpoint,
+        cell=CELL,
+        contract={**contract, "cells": [CELL]},
+        round_index=1,
+        deadline=10.0,
+        particle_manifests={},
+    )
+    assert manifest["trajectory_distillation_enabled"] is False
+    assert manifest["particle_parent_manifest_sha256"] == {}
+    assert manifest["proposal_experts"] == [
+        "shallow",
+        "anchored_replacement",
+        "route_complete_region",
+    ]
+    with pytest.raises(ValueError, match="may not schedule"):
+        make_proposal_manifest(
+            checkpoint=checkpoint,
+            cell=CELL,
+            contract={**contract, "cells": [CELL]},
+            round_index=1,
+            deadline=10.0,
+            particle_manifests={CELL["source_smiles"]: {"payload_sha256": "e" * 64}},
+        )
+
+
 def test_retained_core_is_tagged_inside_route_expert_and_fingerprinted():
     records, telemetry = retained_core_route_records(
         parent=CELL["source_smiles"],
@@ -207,3 +264,45 @@ def test_retained_core_is_tagged_inside_route_expert_and_fingerprinted():
     )
     assert len(prepared) == len(records)
     assert all(isinstance(row["fingerprint"], list) for row in prepared)
+
+
+def test_retained_core_refinement_creates_exact_novel_deployment_candidates():
+    contract = json.loads(
+        (
+            ROOT
+            / "diagnostics/t4_shared_controller_completion_v1/scored_contract_v4.json"
+        ).read_text()
+    )["payload"]
+    cell = next(row for row in contract["cells"] if row["cell_key"] == "braf_0_d06")
+    denied = contract["stale_braf_v4_reconciliation"][
+        "excluded_canonical_smiles_sha256"
+    ]["braf_0"]
+
+    records, telemetry = retained_core_prune_refine_records(
+        parent=cell["source_smiles"],
+        parent_score=-8.9,
+        original_seed=cell["source_smiles"],
+        delta=cell["delta"],
+        support=contract["support"],
+        excluded_canonical_smiles_sha256=denied,
+        refinement_rules=("bond_reorder",),
+    )
+
+    assert records
+    assert telemetry["eligible_novel_unique"] == len(records)
+    assert telemetry["prior_scores_or_receipts_read"] is False
+    assert telemetry["configuration"]["refinement_rules"] == ["bond_reorder"]
+    assert set(telemetry["configuration"]["refinement_rules"]) <= set(
+        RETAINED_CORE_REFINE_CONFIG["refinement_rules"]
+    )
+    assert all(
+        hashlib.sha256(row["smiles"].encode()).hexdigest() not in denied
+        for row in records
+    )
+    assert all(row["realized_primitives"] <= 32 for row in records)
+    assert all(row["intermediate_endpoint_queried"] is False for row in records)
+    assert all(
+        row["protected_program_sha256"]
+        == payload_identity(row["protected_program_actions"])
+        for row in records
+    )

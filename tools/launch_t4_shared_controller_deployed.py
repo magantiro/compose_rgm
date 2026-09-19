@@ -68,9 +68,7 @@ def launch() -> dict:
     if receipt_path.exists():
         raise FileExistsError("this exact scored payload was already launched")
     planned = {
-        cell_key: reserve_driver_generation(
-            phase_status="running", existing_state=None
-        )
+        cell_key: reserve_driver_generation(phase_status="running", existing_state=None)
         for cell_key in launch_task["cell_keys"]
     }
     receipt = {
@@ -83,15 +81,13 @@ def launch() -> dict:
             }
             for cell_key in launch_task["cell_keys"]
         },
-        "driver_count": 9,
+        "driver_count": len(launch_task["cell_keys"]),
         "automatic_retries": 0,
         "replacement": False,
         "backfill": False,
     }
     launcher._publish_launch_receipt(receipt_path, receipt)
-    return _spawn_planned(
-        receipt_path=receipt_path, receipt=receipt, planned=planned
-    )
+    return _spawn_planned(receipt_path=receipt_path, receipt=receipt, planned=planned)
 
 
 def resume(run_id: str) -> dict:
@@ -121,9 +117,7 @@ def resume(run_id: str) -> dict:
     }
     phase_status_by_cell = {
         cell_key: (
-            "running"
-            if row["status"] in {"not_started", "running"}
-            else row["status"]
+            "running" if row["status"] in {"not_started", "running"} else row["status"]
         )
         for cell_key, row in status_rows.items()
     }
@@ -132,9 +126,7 @@ def resume(run_id: str) -> dict:
         terminal_by_cell=terminal_by_cell,
         phase_status_by_cell=phase_status_by_cell,
     )
-    return _spawn_planned(
-        receipt_path=receipt_path, receipt=receipt, planned=planned
-    )
+    return _spawn_planned(receipt_path=receipt_path, receipt=receipt, planned=planned)
 
 
 if __name__ == "__main__":

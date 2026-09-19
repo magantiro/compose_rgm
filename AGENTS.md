@@ -608,6 +608,32 @@ final task fiber, generation depth and reward improvement along the lineage. Thi
 conditional work must not delay or modify the currently running 49-call PARP1 and
 JAK2 campaigns.
 
+**Activated amendment, 2026-09-19, COMPOSE-NoDistill:** the user explicitly
+activated and authorized one matched claim-driven scored ablation of the shared
+controller. COMPOSE-NoDistill must preserve the base COMPOSE transition and
+proposal machinery, chemically valid primitive execution, protected and
+dependency-aware multi-step programs, coordinated multi-site rewriting,
+retained-core or released-region pruning/growth/replacement/ring rewriting,
+completed-endpoint T4 similarity/QED/SA filtering, FiberControl, exploration,
+recursive archive descendants, docking protocol, controller seeds and the
+49-call per-cell horizon. Disable only the explicit trajectory-distilled T4
+structural-template proposal source: its stored address-free template library,
+its fitted marginal/scale weights, direct template rebinding and any
+route-template or route-scale selection quota. Generic coordinated proposal
+families that were added to the architecture during development remain enabled
+and must not read the route checkpoint at runtime.
+
+Run this as an independent immutable campaign without altering, restarting or
+sharing outcomes with the active Full-COMPOSE campaign. Bind the exact cell
+panel, controller law, no-distillation assertion, source revision, evaluator,
+seeds, per-cell private volumes, query-lock protocol and 49-call ceilings in a
+self-hashed contract. The user's statement explicitly authorizes the resulting
+bounded scored run after those identities validate. Publish every candidate and
+query receipt; use no retries, replacement, backfill, teacher/endpoint injection,
+runtime comparator, prior scored outcome or cell-specific controller setting.
+Report COMPOSE-NoDistill against matched Full-COMPOSE trajectories and IVG,
+including support collapse or early abstention as a valid negative result.
+
 **Amendment, 2026-09-16, bounded scored-pilot extension:** after the zero-oracle
 construction-scale diagnostic measured that the docking value from a benchmark root
 sits at 15 or more primitive edits while the search proposes a median of 5.5, and
