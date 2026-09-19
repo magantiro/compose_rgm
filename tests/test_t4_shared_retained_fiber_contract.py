@@ -87,7 +87,9 @@ def test_shared_checkpoint_contains_no_runtime_answer_map():
 
 def test_shared_apps_enable_scale_balancing_and_route_scale_floor():
     for name in ("parp1", "jak2"):
-        source = (ROOT / f"modal_apps/t4_shared_retained_fiber_{name}_app.py").read_text()
+        source = (
+            ROOT / f"modal_apps/t4_shared_retained_fiber_{name}_app.py"
+        ).read_text()
         assert 'scale_balanced=route["scale_balanced"]' in source
         assert 'route_scale_floor_rounds=contract["route_scale_floor_rounds"]' in source
         assert 'automatic_retries": 0' in source
@@ -112,7 +114,9 @@ def test_v2_runner_contracts_authorize_only_hash_bound_v1_continuation():
         }
         for relative, expected in contract["runtime_inputs_sha256"].items():
             assert sha256_file(ROOT / relative) == expected
-        assert set(contract["legacy_resume"]) == {row["cell"] for row in contract["cells"]}
+        assert set(contract["legacy_resume"]) == {
+            row["cell"] for row in contract["cells"]
+        }
         for cell, legacy in contract["legacy_resume"].items():
             assert cell in {row["cell"] for row in contract["cells"]}
             assert legacy["mode"] in {"checkpoint", "fail_closed"}
@@ -121,11 +125,38 @@ def test_v2_runner_contracts_authorize_only_hash_bound_v1_continuation():
             if legacy["mode"] == "checkpoint":
                 assert len(legacy["checkpoint_sha256"]) == 64
                 assert len(legacy["checkpoint_payload_sha256"]) == 64
+            if "unresolved_round_lock_path" in legacy:
+                assert legacy["mode"] == "checkpoint"
+                assert len(legacy["unresolved_round_lock_sha256"]) == 64
+                assert len(legacy["unresolved_round_lock_payload_sha256"]) == 64
+
+        source = contract["reported_ivg_source"]
+        assert source["upstream_revision"] == (
+            "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb"
+        )
+        assert source["sha256"] == (
+            "a5ae0d826fc458caa1bdfa0a4d8f23927da33cea39188c3e4375a55164de6b80"
+        )
+        assert source["evidence"].startswith("published lead-optimization table")
+
+    parp1, jak2 = contracts
+    assert parp1["reported_ivg_delta_0_6"] == {
+        "parp1_0": -12.3,
+        "parp1_1": -11.7,
+        "parp1_2": -10.7,
+    }
+    assert jak2["reported_ivg_delta_0_4"] == {
+        "jak2_0": -10.2,
+        "jak2_1": -10.5,
+        "jak2_2": -10.2,
+    }
 
 
 def test_v2_apps_shard_proposals_queries_and_phases():
     for name in ("parp1", "jak2"):
-        source = (ROOT / f"modal_apps/t4_shared_retained_fiber_{name}_v2_app.py").read_text()
+        source = (
+            ROOT / f"modal_apps/t4_shared_retained_fiber_{name}_v2_app.py"
+        ).read_text()
         assert "def durable_proposal_worker" in source
         assert '"status": "reserved"' in source
         assert '"status": "complete"' in source

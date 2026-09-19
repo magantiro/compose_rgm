@@ -73,31 +73,40 @@
         "mode": "checkpoint",
         "run_id": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2",
         "checkpoint_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_0/checkpoint.json",
-        "checkpoint_sha256": "e752cc8a3b0ba96b6e19b51bc2a288b73f2736126fd099b2f0f9091ef9e0f85a",
-        "checkpoint_payload_sha256": "d2e16e6a45a4ac9fa0b46992792f282b2afa5b2a560f9ea5aaad35c40c805b68",
-        "round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_0/round_001_lock.json",
-        "round_lock_sha256": "7d962e9a51ea179446a03503d76d6f9a988eaba1eab5480cb90fda7e96c197ee",
-        "round_lock_payload_sha256": "41727c62ca0e706d369489e14dea0b555ce72defc47ea2f54c48f7b1862643c3"
+        "checkpoint_sha256": "3cffdcfb65807ed268be5be0a1107ba2816534b961aeaab9d4ce92ad6071bc71",
+        "checkpoint_payload_sha256": "b2f9cb01de1d325c32d2b18f106f76c0a1cfb85365c8a8425f94097066883608",
+        "round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_0/round_002_lock.json",
+        "round_lock_sha256": "3237d844149f15e8da036b3a2f1ad933dd0d7475a75b0bd0e85fa965b5eae811",
+        "round_lock_payload_sha256": "007b191cd94b4242373b3e073dd1a59dd123e4b564a23c6c81cde1eafbe7ed86",
+        "unresolved_round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_0/round_003_lock.json",
+        "unresolved_round_lock_sha256": "850d3f8af6638d14d949c71950bfffecb0e13327d214e4a7be6776ea55f14322",
+        "unresolved_round_lock_payload_sha256": "cf0718e6d16cb589b13e80e72a49b5680080e7acb393730049830434ba5792da"
       },
       "jak2_1": {
         "mode": "checkpoint",
         "run_id": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2",
         "checkpoint_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_1/checkpoint.json",
-        "checkpoint_sha256": "7f6e316d684c3d1f4f5e9f8e7f4f671cfcc16eb7289b8dbe0e9f432b339f8c8f",
-        "checkpoint_payload_sha256": "624589d51bfafd122797aace9a52d6bee20d9b4921109290f153c0ad7e6e8398",
-        "round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_1/round_001_lock.json",
-        "round_lock_sha256": "39c034e7f279108a1bc106f5ef49de669e0009b831bf69b5e64f69dae9963a80",
-        "round_lock_payload_sha256": "fe7cd417c9734e1a41bf3bf84394ab65870df4e1035e903c42f1a2dc8a7f1279"
+        "checkpoint_sha256": "284bc4c2da020a7f350c34655d14fa25fd480e0d2b80c60169fb31484429ebe0",
+        "checkpoint_payload_sha256": "3ef28e09a8a51a5dc103be1a230bd69d003ff2df739bc834a26659b02786fbb0",
+        "round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_1/round_002_lock.json",
+        "round_lock_sha256": "10ea75b703b1a06b2cb57c85b4a924a31285020665526658eecc8a7791fe059e",
+        "round_lock_payload_sha256": "054906a6f4b7a3d7ff2729520abdaf60e7fe3f0abd3f0fa7b451944f5ce2e16d",
+        "unresolved_round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_1/round_003_lock.json",
+        "unresolved_round_lock_sha256": "4a551848bed80c3767b0fb45f8188e89a17aa5ede6ec0cacd3616283f67344c7",
+        "unresolved_round_lock_payload_sha256": "cf34d74b947cf6eb7fdb2d1abf1846d031cb964dd19a0b177d604b8f8b7c13a2"
       },
       "jak2_2": {
         "mode": "checkpoint",
         "run_id": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2",
         "checkpoint_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_2/checkpoint.json",
-        "checkpoint_sha256": "9a378b62a936c5ef468aaa60cf561ec9dbbf03c4c545b857e4a1bcb92fdce34f",
-        "checkpoint_payload_sha256": "b45518ddde47db6dc712e060f4470f1262f4f6e96c0ad09c9e7cef0242daf1a7",
-        "round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_2/round_001_lock.json",
-        "round_lock_sha256": "f9e7f269a54596144f8237b47242f353624846a190e0a370991452d48d88c299",
-        "round_lock_payload_sha256": "d728078097ea3862572c5e21568a4148a3e887a0fbaf8cab8e7c394dcd250bb1"
+        "checkpoint_sha256": "1fd2a316d1c73e937e888ae7262ba29748bfd5b651119dd0fc3f7872645c0b1d",
+        "checkpoint_payload_sha256": "8e01f901496a09d46e7763ab0add4df791970ab526010ca8700dcc04376c82ee",
+        "round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_2/round_002_lock.json",
+        "round_lock_sha256": "868d7d2bd8d37e213f57dc94f315c1e71ad3a7b81ad0ea684631f5c1679e38fa",
+        "round_lock_payload_sha256": "f4aba34b2f3e3b3dea7ffdb7c5f600c1d2c7314a09cbd9a6b489e54111925b12",
+        "unresolved_round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_2/round_003_lock.json",
+        "unresolved_round_lock_sha256": "8918bb97208e883aada83d3b0af177af24ac8b03dbc830e432ff09c422c6d56c",
+        "unresolved_round_lock_payload_sha256": "dfac0cac4fc6e678a8a74e89d088c9cc4767512c24857bc0d9eae55754e55023"
       }
     },
     "evaluator_sha256": {
@@ -129,8 +138,8 @@
       "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
       "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
       "src/compose_v4/experiments/t4_integrated_route_fiber.py": "4a5e1de25e0478b7572d333103ac3d5fe7ff46a1fd669acd7b99da4a2757e687",
-      "modal_apps/t4_shared_retained_fiber_jak2_v2_app.py": "89597d027ef574f22b2e451ed9c27a8a84fcb026a03093fbef0ff8749dfbd152",
-      "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "6b7048648bb608c2f62c78f7f8c40e7fa48c5acc71b13569de4b96319efc27a3"
+      "modal_apps/t4_shared_retained_fiber_jak2_v2_app.py": "cd7808ce9d94ae06fb780e8132422b09cb20f59dc79bfa7b8e50df7f05233f5d",
+      "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "86459f2df8d70b51e8e06f86836f6d3cc4fedcdd42b2c3a93e2604a4271c151c"
     },
     "zero_oracle_support": {
       "artifacts": [
@@ -144,16 +153,30 @@
       "result": "both audited cells emitted exact small, medium and large programs with 41-42 eligible endpoints at delta 0.4"
     },
     "reported_ivg_delta_0_4": {
-      "jak2_0": -11.233333333333333,
-      "jak2_1": -11.566666666666666,
-      "jak2_2": -10.566666666666666
+      "jak2_0": -10.2,
+      "jak2_1": -10.5,
+      "jak2_2": -10.2
+    },
+    "reported_ivg_source": {
+      "evidence": "published lead-optimization table, not a recomputation from released per-seed CSV rows",
+      "upstream_revision": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/README.md",
+      "sha256": "a5ae0d826fc458caa1bdfa0a4d8f23927da33cea39188c3e4375a55164de6b80",
+      "uncertainty": {
+        "jak2_0": 0.8,
+        "jak2_1": 0.3,
+        "jak2_2": 0.2
+      },
+      "known_upstream_discrepancy": "the released CSV-derived run means differ from the published README table; headline comparison uses the published table and records the discrepancy rather than silently substituting the recomputation",
+      "csv_census_artifact": "diagnostics/ivg_t4_census/census.json",
+      "csv_census_sha256": "2c06fdfe65fc31327d865381ccb8f4d2c40553c3925d9dc0a03386c22fda05bb"
     },
     "primary_baselines": "measured roots, frozen prior JAK2 delta=0.6 integrated run, and reported IVG delta=0.4 means; no comparator enters runtime",
-    "claim_boundary": "authorized continuation only: migrate complete hash-bound v1 checkpoints and spend only each cell's remaining original budget; no v1 query is repeated",
+    "claim_boundary": "authorized continuation only: migrate complete hash-bound v1 checkpoints, conservatively charge each unresolved locked v1 query without retry, and spend only each cell's remaining original budget",
     "proposal_wait_seconds": 2400,
     "query_wait_seconds": 1200,
     "phase_poll_seconds": 5,
-    "prior_operational_waste": 0
+    "prior_operational_waste": 24
   },
-  "payload_sha256": "636aeb0f4d2cd910a5290fc4dd8e37385007cbb24dcf11193ae2442ef3ce82d0"
+  "payload_sha256": "f7ea500332f32facba88e0c985ef1d680cc97fa6c878169e95c6c8c0e636b281"
 }

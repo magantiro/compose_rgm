@@ -93,6 +93,16 @@ def migrate_v1_checkpoint(
     legacy_checkpoint_payload_sha256: str,
     legacy_round_lock_sha256: str,
     legacy_round_lock_payload_sha256: str,
+    unresolved_round_lock: dict | None = None,
+    legacy_unresolved_round_lock_sha256: str | None = None,
+    legacy_unresolved_round_lock_payload_sha256: str | None = None,
+    parents: int | None = None,
+    parent_explore: float | None = None,
+    value_penalty: float | None = None,
+    batch: int | None = None,
+    exploration: int | None = None,
+    expert_floor_rounds: int | None = None,
+    route_scale_floor_rounds: int | None = None,
 ) -> dict:
     """Convert one completed v1 round checkpoint into the restartable v2 schema.
 
@@ -120,29 +130,176 @@ def migrate_v1_checkpoint(
         raise ValueError("legacy checkpoint history is not contiguous from one")
     charged_calls = int(checkpoint["charged_calls"])
     if charged_calls != 1 + sum(int(row["charged_this_round"]) for row in rounds):
-        raise ValueError("legacy charged-call count is inconsistent with completed rounds")
+        raise ValueError(
+            "legacy charged-call count is inconsistent with completed rounds"
+        )
     if int(checkpoint["budget_remaining"]) != charged_call_ceiling - charged_calls:
-        raise ValueError("legacy remaining budget is inconsistent with the frozen ceiling")
-    if rounds[-1].get("candidate_lock_payload_sha256") != legacy_round_lock_payload_sha256:
-        raise ValueError("legacy checkpoint does not bind the declared final round lock")
+        raise ValueError(
+            "legacy remaining budget is inconsistent with the frozen ceiling"
+        )
+    if (
+        rounds[-1].get("candidate_lock_payload_sha256")
+        != legacy_round_lock_payload_sha256
+    ):
+        raise ValueError(
+            "legacy checkpoint does not bind the declared final round lock"
+        )
     if len(checkpoint["features"]) != len(checkpoint["improvements"]):
         raise ValueError("legacy value-training rows are misaligned")
     if "rng_state" not in checkpoint:
         raise ValueError("legacy checkpoint has no resumable RNG state")
 
+    migrated_rounds = rounds
+    migrated_history = history
+    migrated_rng_state = checkpoint["rng_state"]
+    unresolved_charged_calls = 0
+    if unresolved_round_lock is not None:
+        if unresolved_round_lock.get("schema_version") != "t4_integrated_round_lock_v1":
+            raise ValueError("legacy unresolved lock has the wrong schema")
+        unresolved_round = len(rounds) + 1
+        if (
+            unresolved_round_lock.get("cell") != cell
+            or int(unresolved_round_lock.get("round", -1)) != unresolved_round
+            or int(unresolved_round_lock.get("charged_before", -1)) != charged_calls
+        ):
+            raise ValueError("legacy unresolved lock does not follow the checkpoint")
+        queries = list(unresolved_round_lock.get("queries") or [])
+        if not queries:
+            raise ValueError("legacy unresolved lock has no selected queries")
+        if (
+            not legacy_unresolved_round_lock_sha256
+            or not legacy_unresolved_round_lock_payload_sha256
+        ):
+            raise ValueError("legacy unresolved lock identities are required")
+        selected = list(unresolved_round_lock.get("selected_rows") or [])
+        migrated_rng_state = unresolved_round_lock.get("rng_state_after_selection")
+        if not selected or migrated_rng_state is None:
+            required = {
+                "parents": parents,
+                "parent_explore": parent_explore,
+                "value_penalty": value_penalty,
+                "batch": batch,
+                "exploration": exploration,
+                "expert_floor_rounds": expert_floor_rounds,
+                "route_scale_floor_rounds": route_scale_floor_rounds,
+            }
+            missing = sorted(key for key, value in required.items() if value is None)
+            if missing:
+                raise ValueError(
+                    "legacy unresolved selection replay is missing settings: "
+                    + ", ".join(missing)
+                )
+            from compose_v4.experiments.t4_integrated_route_fiber import (
+                select_batch as select_v1_batch,
+            )
+
+            replay_state = SearchState(
+                archive=dict(archive),
+                budget=charged_call_ceiling - charged_calls,
+                rounds=len(rounds),
+                history=list(history),
+            )
+            replay_value = ProgramValue(penalty=float(value_penalty))
+            replay_value.fit(checkpoint["features"], checkpoint["improvements"])
+            replay_rng = np.random.default_rng()
+            replay_rng.bit_generator.state = checkpoint["rng_state"]
+            replay_state.parents(
+                limit=int(parents),
+                rng=replay_rng,
+                explore=float(parent_explore),
+            )
+            candidates = [
+                {**row, "fingerprint": set(row.get("fingerprint") or [])}
+                for row in unresolved_round_lock.get("candidate_pool") or []
+            ]
+            selected = select_v1_batch(
+                candidates,
+                replay_value,
+                replay_state,
+                replay_rng,
+                round_index=unresolved_round,
+                batch=min(int(batch), len(queries)),
+                exploration=min(int(exploration), len(queries)),
+                expert_floor_rounds=int(expert_floor_rounds),
+                route_scale_floor_rounds=int(route_scale_floor_rounds),
+            )
+            migrated_rng_state = replay_rng.bit_generator.state
+        if len(queries) != len(selected):
+            raise ValueError("legacy unresolved lock has misaligned selected queries")
+        query_fields = (
+            "smiles",
+            "selection_kind",
+            "proposal_experts",
+            "parent",
+            "parent_score",
+        )
+        if any(
+            any(row.get(field) != query.get(field) for field in query_fields)
+            for row, query in zip(selected, queries, strict=True)
+        ):
+            raise ValueError(
+                "legacy unresolved selection replay does not match its lock"
+            )
+        unresolved_charged_calls = len(queries)
+        if charged_calls + unresolved_charged_calls > charged_call_ceiling:
+            raise ValueError("legacy unresolved lock exceeds the charged-call ceiling")
+        observed = []
+        for row, query in zip(selected, queries, strict=True):
+            if row.get("smiles") != query.get("smiles"):
+                raise ValueError(
+                    "legacy unresolved lock query does not match selected row"
+                )
+            observed.append(
+                {
+                    **row,
+                    "query_id": query["query_id"],
+                    "score": None,
+                    "failure": "legacy_unresolved_locked_query_after_preemption",
+                    "elapsed_seconds": None,
+                }
+            )
+        migrated_rounds = [
+            *rounds,
+            {
+                "round": unresolved_round,
+                "charged_calls": charged_calls + unresolved_charged_calls,
+                "charged_this_round": unresolved_charged_calls,
+                "candidate_lock_payload_sha256": legacy_unresolved_round_lock_payload_sha256,
+                "pool_census": unresolved_round_lock.get("pool_census", {}),
+                "selected_census": unresolved_round_lock.get("selected_census", {}),
+                "selection_kind_census": {
+                    kind: sum(row.get("selection_kind") == kind for row in selected)
+                    for kind in (
+                        "route_scale_floor",
+                        "expert_floor",
+                        "model",
+                        "exploration",
+                    )
+                },
+                "docked": observed,
+                "round_best": None,
+                "best_so_far": min(archive.values()),
+                "improved": False,
+                "value_training_rows": len(checkpoint["improvements"]),
+                "operational_recovery": "unresolved v1 locked calls charged without retry",
+            },
+        ]
+        migrated_history = [*history, {"round": unresolved_round, "improved": False}]
+
+    migrated_charged_calls = charged_calls + unresolved_charged_calls
     return {
         "schema_version": "t4_integrated_route_fiber_checkpoint_v2",
         "status": "running",
         "cell": cell,
         "contract_payload_sha256": new_contract_payload_sha256,
-        "charged_calls": charged_calls,
-        "budget_remaining": charged_call_ceiling - charged_calls,
+        "charged_calls": migrated_charged_calls,
+        "budget_remaining": charged_call_ceiling - migrated_charged_calls,
         "archive": dict(sorted(archive.items())),
         "features": list(checkpoint["features"]),
         "improvements": list(checkpoint["improvements"]),
-        "history": history,
-        "rounds": rounds,
-        "rounds_completed": len(rounds),
+        "history": migrated_history,
+        "rounds": migrated_rounds,
+        "rounds_completed": len(migrated_rounds),
         "root_result": {
             "query_id": f"{legacy_run_id}_{cell}_root",
             "smiles": original_seed,
@@ -150,7 +307,7 @@ def migrate_v1_checkpoint(
             "failure": None,
             "recovered_from": "sealed_v1_archive_source_entry",
         },
-        "rng_state": checkpoint["rng_state"],
+        "rng_state": migrated_rng_state,
         "migration_provenance": {
             "legacy_run_id": legacy_run_id,
             "legacy_contract_payload_sha256": checkpoint["contract_payload_sha256"],
@@ -158,7 +315,13 @@ def migrate_v1_checkpoint(
             "legacy_checkpoint_payload_sha256": legacy_checkpoint_payload_sha256,
             "legacy_round_lock_sha256": legacy_round_lock_sha256,
             "legacy_round_lock_payload_sha256": legacy_round_lock_payload_sha256,
-            "legacy_charged_calls": charged_calls,
+            "legacy_unresolved_round_lock_sha256": legacy_unresolved_round_lock_sha256,
+            "legacy_unresolved_round_lock_payload_sha256": (
+                legacy_unresolved_round_lock_payload_sha256
+            ),
+            "legacy_completed_charged_calls": charged_calls,
+            "legacy_unresolved_charged_calls": unresolved_charged_calls,
+            "legacy_charged_calls": migrated_charged_calls,
         },
     }
 
@@ -181,7 +344,9 @@ def merge_expert_pools(pools: dict[str, Iterable[dict]]) -> list[dict]:
         for position, source in enumerate(pools.get(expert, ())):
             row = dict(source)
             if row.get("proposal_lane") not in (None, expert):
-                raise ValueError(f"pool {expert!r} contains lane {row.get('proposal_lane')!r}")
+                raise ValueError(
+                    f"pool {expert!r} contains lane {row.get('proposal_lane')!r}"
+                )
             row["proposal_lane"] = expert
             row["proposal_experts"] = sorted(set(_experts(row)) | {expert})
             smiles = str(row.get("smiles") or "")
@@ -200,7 +365,11 @@ def merge_expert_pools(pools: dict[str, Iterable[dict]]) -> list[dict]:
             expert_sets.setdefault(smiles, set()).update(row["proposal_experts"])
             family_sets.setdefault(smiles, set()).update(row.get("families") or [])
             incumbent = merged.get(smiles)
-            key = (float(row.get("parent_score", float("inf"))), EXPERTS.index(expert), position)
+            key = (
+                float(row.get("parent_score", float("inf"))),
+                EXPERTS.index(expert),
+                position,
+            )
             incumbent_key = None
             if incumbent is not None:
                 incumbent_key = (
@@ -274,7 +443,9 @@ def select_batch(
     if round_index <= expert_floor_rounds:
         for expert in EXPERTS:
             choices = [
-                row for row in available if expert in _experts(row) and row["smiles"] not in used
+                row
+                for row in available
+                if expert in _experts(row) and row["smiles"] not in used
             ]
             if not choices or len(selected) >= batch:
                 continue
@@ -285,7 +456,9 @@ def select_batch(
     room = min(batch - len(selected), len(remaining))
     if room:
         random_quota = min(exploration, room)
-        indices = acquisition(remaining, value, state, rng, batch=room, exploration=random_quota)
+        indices = acquisition(
+            remaining, value, state, rng, batch=room, exploration=random_quota
+        )
         model_count = room - random_quota if value.weights is not None else 0
         for position, index in enumerate(indices):
             kind = "model" if position < model_count else "exploration"

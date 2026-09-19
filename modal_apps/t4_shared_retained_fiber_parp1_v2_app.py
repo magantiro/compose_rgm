@@ -39,7 +39,9 @@ image = (
         "chmod +x /opt/dock/qvina02",
         f"curl --fail -sSL -o /opt/dock/receptors/parp1.pdbqt {MOOD}/receptors/parp1.pdbqt",
     )
-    .add_local_dir(ROOT / "src", str(REMOTE / "src"), copy=True, ignore=["**/__pycache__/**"])
+    .add_local_dir(
+        ROOT / "src", str(REMOTE / "src"), copy=True, ignore=["**/__pycache__/**"]
+    )
     .add_local_file(ROOT / CONTRACT, str(REMOTE / CONTRACT), copy=True)
     .add_local_file(ROOT / CHECKPOINT, str(REMOTE / CHECKPOINT), copy=True)
     .add_local_file(
@@ -103,7 +105,9 @@ def _publish(path: Path, payload: dict) -> str:
     temporary = path.with_suffix(path.suffix + ".tmp")
     import json
 
-    temporary.write_text(json.dumps(envelope, sort_keys=True, separators=(",", ":")) + "\n")
+    temporary.write_text(
+        json.dumps(envelope, sort_keys=True, separators=(",", ":")) + "\n"
+    )
     temporary.replace(path)
     volume.commit()
     return envelope["payload_sha256"]
@@ -379,9 +383,9 @@ def run_phase(task: dict) -> dict:
                 raise ValueError("legacy round lock physical hash mismatch")
             legacy_lock = _read(legacy_lock_path)
             if (
-                __import__("compose_v4.control.docking_value", fromlist=["identity"]).identity(
-                    legacy_lock
-                )
+                __import__(
+                    "compose_v4.control.docking_value", fromlist=["identity"]
+                ).identity(legacy_lock)
                 != legacy["round_lock_payload_sha256"]
             ):
                 raise ValueError("legacy round lock payload hash mismatch")
@@ -407,12 +411,32 @@ def run_phase(task: dict) -> dict:
                 raise ValueError("legacy checkpoint physical hash mismatch")
             legacy_checkpoint = _read(legacy_checkpoint_path)
             if (
-                __import__("compose_v4.control.docking_value", fromlist=["identity"]).identity(
-                    legacy_checkpoint
-                )
+                __import__(
+                    "compose_v4.control.docking_value", fromlist=["identity"]
+                ).identity(legacy_checkpoint)
                 != legacy["checkpoint_payload_sha256"]
             ):
                 raise ValueError("legacy checkpoint payload hash mismatch")
+            unresolved_lock = None
+            if legacy.get("unresolved_round_lock_path"):
+                unresolved_path = LEGACY_OUTPUT / legacy["unresolved_round_lock_path"]
+                if (
+                    sha256_file(unresolved_path)
+                    != legacy["unresolved_round_lock_sha256"]
+                ):
+                    raise ValueError(
+                        "legacy unresolved round lock physical hash mismatch"
+                    )
+                unresolved_lock = _read(unresolved_path)
+                if (
+                    __import__(
+                        "compose_v4.control.docking_value", fromlist=["identity"]
+                    ).identity(unresolved_lock)
+                    != legacy["unresolved_round_lock_payload_sha256"]
+                ):
+                    raise ValueError(
+                        "legacy unresolved round lock payload hash mismatch"
+                    )
             from compose_v4.experiments.t4_integrated_route_fiber_v2 import (
                 migrate_v1_checkpoint,
             )
@@ -428,6 +452,20 @@ def run_phase(task: dict) -> dict:
                 legacy_checkpoint_payload_sha256=legacy["checkpoint_payload_sha256"],
                 legacy_round_lock_sha256=legacy["round_lock_sha256"],
                 legacy_round_lock_payload_sha256=legacy["round_lock_payload_sha256"],
+                unresolved_round_lock=unresolved_lock,
+                legacy_unresolved_round_lock_sha256=legacy.get(
+                    "unresolved_round_lock_sha256"
+                ),
+                legacy_unresolved_round_lock_payload_sha256=legacy.get(
+                    "unresolved_round_lock_payload_sha256"
+                ),
+                parents=contract["parents"],
+                parent_explore=contract["parent_explore"],
+                value_penalty=contract["value_penalty"],
+                batch=contract["batch"],
+                exploration=contract["exploration"],
+                expert_floor_rounds=contract["expert_floor_rounds"],
+                route_scale_floor_rounds=contract["route_scale_floor_rounds"],
             )
             _publish(checkpoint_path, checkpoint)
             _publish(
@@ -455,7 +493,10 @@ def run_phase(task: dict) -> dict:
     phase_result_path = folder / f"round_{round_index:03d}_result.json"
     if phase_result_path.exists():
         phase_result = _read(phase_result_path)
-        if not checkpoint_path.exists() or _read(checkpoint_path) != phase_result["checkpoint"]:
+        if (
+            not checkpoint_path.exists()
+            or _read(checkpoint_path) != phase_result["checkpoint"]
+        ):
             _publish(checkpoint_path, phase_result["checkpoint"])
         return {
             "status": "running",
@@ -471,7 +512,9 @@ def run_phase(task: dict) -> dict:
         for query in lock["queries"]:
             receipt = folder / "receipts" / f"{query['query_id']}.json"
             statuses.append(
-                _read(receipt).get("status", "invalid") if receipt.exists() else "missing"
+                _read(receipt).get("status", "invalid")
+                if receipt.exists()
+                else "missing"
             )
     action = query_collection_action(
         lock_exists=lock is not None,
@@ -509,7 +552,10 @@ def run_phase(task: dict) -> dict:
                     **task,
                     **query,
                     "receipt_path": str(
-                        Path(task["run_id"]) / cell["cell"] / "receipts" / f"{query_id}.json"
+                        Path(task["run_id"])
+                        / cell["cell"]
+                        / "receipts"
+                        / f"{query_id}.json"
                     ),
                 }
             )
@@ -567,7 +613,10 @@ def run_phase(task: dict) -> dict:
             },
         )
         _publish(checkpoint_path, checkpoint)
-        print(f"[{cell['cell']}] durable root calls=1 score={answer['score']:.2f}", flush=True)
+        print(
+            f"[{cell['cell']}] durable root calls=1 score={answer['score']:.2f}",
+            flush=True,
+        )
         return {
             "status": "running",
             "cell": cell["cell"],
@@ -693,7 +742,9 @@ def run_phase(task: dict) -> dict:
                         "expert": request["expert"],
                         "parent": request["parent"],
                         "status": "abstained",
-                        "receipt_status": "missing" if receipt is None else receipt.get("status"),
+                        "receipt_status": (
+                            "missing" if receipt is None else receipt.get("status")
+                        ),
                         "error": None if receipt is None else receipt.get("error"),
                     }
                 )
@@ -764,16 +815,21 @@ def run_phase(task: dict) -> dict:
                 "query_id": query["query_id"],
                 "smiles": query["smiles"],
                 "receipt_path": str(
-                    Path(task["run_id"]) / cell["cell"] / "receipts" / f"{query['query_id']}.json"
+                    Path(task["run_id"])
+                    / cell["cell"]
+                    / "receipts"
+                    / f"{query['query_id']}.json"
                 ),
             }
             for query in queries
         ]
-        answers = list(dock_worker.map(dock_tasks, order_outputs=True, return_exceptions=True))
-    else:
-        lock_hash = __import__("compose_v4.control.docking_value", fromlist=["identity"]).identity(
-            lock
+        answers = list(
+            dock_worker.map(dock_tasks, order_outputs=True, return_exceptions=True)
         )
+    else:
+        lock_hash = __import__(
+            "compose_v4.control.docking_value", fromlist=["identity"]
+        ).identity(lock)
         selected = lock["selected_rows"]
         candidates = lock["candidate_pool"]
         worker_telemetry = lock["worker_telemetry"]
@@ -782,7 +838,9 @@ def run_phase(task: dict) -> dict:
         answers = []
         for query in queries:
             receipt_path = folder / "receipts" / f"{query['query_id']}.json"
-            receipt = _read(receipt_path) if receipt_path.exists() else {"status": "missing"}
+            receipt = (
+                _read(receipt_path) if receipt_path.exists() else {"status": "missing"}
+            )
             if receipt.get("status") == "complete":
                 answers.append(receipt["answer"])
             else:
@@ -803,7 +861,9 @@ def run_phase(task: dict) -> dict:
         for query in queries:
             receipt = folder / "receipts" / f"{query['query_id']}.json"
             statuses.append(
-                _read(receipt).get("status", "invalid") if receipt.exists() else "missing"
+                _read(receipt).get("status", "invalid")
+                if receipt.exists()
+                else "missing"
             )
         collection = query_collection_action(
             lock_exists=True,
@@ -823,7 +883,9 @@ def run_phase(task: dict) -> dict:
         answers = []
         for query in queries:
             receipt_path = folder / "receipts" / f"{query['query_id']}.json"
-            receipt = _read(receipt_path) if receipt_path.exists() else {"status": "missing"}
+            receipt = (
+                _read(receipt_path) if receipt_path.exists() else {"status": "missing"}
+            )
             if receipt.get("status") == "complete":
                 answers.append(receipt["answer"])
             else:
@@ -867,7 +929,8 @@ def run_phase(task: dict) -> dict:
         },
         "docked": _jsonable(observed),
         "round_best": min(
-            (row["score"] for row in observed if row.get("score") is not None), default=None
+            (row["score"] for row in observed if row.get("score") is not None),
+            default=None,
         ),
         "best_so_far": state.incumbent,
         "improved": improved,
@@ -875,7 +938,8 @@ def run_phase(task: dict) -> dict:
         "timing_seconds": {
             "phase_total": time.time() - started,
             "proposal_max": max(
-                (row.get("elapsed_seconds", 0.0) for row in worker_telemetry), default=0.0
+                (row.get("elapsed_seconds", 0.0) for row in worker_telemetry),
+                default=0.0,
             ),
         },
         "rng_state_after": _jsonable(rng.bit_generator.state),
@@ -931,7 +995,11 @@ def run_phase(task: dict) -> dict:
             "best_smiles": min(state.archive, key=state.archive.get),
             "training_rows": len(improvements),
             "new_oracle_calls": charged
-            - int(checkpoint.get("migration_provenance", {}).get("legacy_charged_calls", 0)),
+            - int(
+                checkpoint.get("migration_provenance", {}).get(
+                    "legacy_charged_calls", 0
+                )
+            ),
             "prior_operational_waste": contract.get("prior_operational_waste", 0),
             "claim_boundary": contract["claim_boundary"],
         }
@@ -963,7 +1031,9 @@ def drive(task: dict) -> dict:
     records = []
     for row, answer in zip(contract["cells"], answers, strict=True):
         if isinstance(answer, Exception):
-            records.append({"cell": row["cell"], "status": "failed", "error": repr(answer)})
+            records.append(
+                {"cell": row["cell"], "status": "failed", "error": repr(answer)}
+            )
         else:
             records.append(
                 {
@@ -1058,7 +1128,9 @@ def _local_task() -> dict:
             raise ValueError(f"local runtime input mismatch for {relative}: {actual}")
     runtime_paths = sorted({*contract["runtime_inputs_sha256"], CONTRACT})
     subprocess.run(
-        ["git", "diff", "--exit-code", "HEAD", "--", *runtime_paths], cwd=ROOT, check=True
+        ["git", "diff", "--exit-code", "HEAD", "--", *runtime_paths],
+        cwd=ROOT,
+        check=True,
     )
     untracked = subprocess.check_output(
         ["git", "ls-files", "--others", "--exclude-standard", "--", *runtime_paths],
@@ -1108,12 +1180,18 @@ def main(mode: str = "launch", run_id: str = "") -> None:
     if mode not in {"advance", "status"} or not run_id:
         raise ValueError("use mode=launch, or mode=advance/status with run_id")
     receipt_path = (
-        ROOT / "diagnostics/t4_shared_retained_fiber_parp1_v2/launches" / f"{run_id}.json"
+        ROOT
+        / "diagnostics/t4_shared_retained_fiber_parp1_v2/launches"
+        / f"{run_id}.json"
     )
     receipt = unseal(receipt_path)
     task = receipt["task"]
     if mode == "advance":
         call = drive.spawn(task)
-        print(json.dumps({"run_id": run_id, "function_call_id": call.object_id}, sort_keys=True))
+        print(
+            json.dumps(
+                {"run_id": run_id, "function_call_id": call.object_id}, sort_keys=True
+            )
+        )
         return
     print(json.dumps(remote_status.remote(task), indent=2))
