@@ -58,6 +58,7 @@ class VirtualJointRegionBudgets:
     max_targets: int = 128
     max_realization_attempts: int = 128
     max_realization_expansions: int = 65_536
+    maximum_expansions_per_realization: int = 4_000
     maximum_primitives: int = 32
 
     def __post_init__(self) -> None:
@@ -71,6 +72,7 @@ class VirtualJointRegionBudgets:
             "max_targets",
             "max_realization_attempts",
             "max_realization_expansions",
+            "maximum_expansions_per_realization",
             "maximum_primitives",
         ):
             value = getattr(self, name)
@@ -80,6 +82,10 @@ class VirtualJointRegionBudgets:
                 )
         if self.max_depth > 4:
             raise ValueError("virtual joint region depth must be within 1..4")
+        if self.max_targets < self.max_depth:
+            raise ValueError(
+                "virtual joint region max_targets must cover every requested depth"
+            )
         if self.maximum_primitives > 32:
             raise ValueError(
                 "virtual joint region programs are limited to 32 primitives"
@@ -260,7 +266,23 @@ def _bound_constituents(
         ),
     )
     telemetry["bound_constituents"] = len(ordered)
-    return tuple(ordered[: budgets.expansion_width])
+    selected = tuple(ordered[: budgets.expansion_width])
+    selected_keys = {row.constituent_key for row in selected}
+    telemetry["selected_constituents"] = len(selected)
+    telemetry["constituents_truncated_by_expansion_width"] = max(
+        0, len(ordered) - len(selected)
+    )
+    telemetry["bound_constituent_ranks"] = [
+        {
+            "rank": rank,
+            "constituent_key": row.constituent_key,
+            "template_id": row.template.template_id,
+            "binding": list(row.binding),
+            "selected_for_expansion": row.constituent_key in selected_keys,
+        }
+        for rank, row in enumerate(ordered, 1)
+    ]
+    return selected
 
 
 def _goal(
@@ -306,6 +328,7 @@ def _plan_targets(
 
     frontier = (_PlanningPrefix((), 0.0),)
     best_by_endpoint: dict[str, _PlannedTarget] = {}
+    depth_champions: dict[int, _PlannedTarget] = {}
     stop = False
     for depth in range(1, budgets.max_depth + 1):
         next_by_keys: dict[tuple[str, ...], _PlanningPrefix] = {}
@@ -334,29 +357,66 @@ def _plan_targets(
             telemetry["stop_target_attempts"] += 1
             target = _valid_stop_target(source, prefix)
             if target is None:
+                telemetry["final_target_abstentions"] += 1
                 telemetry[f"invalid_stop_targets_depth_{depth}"] += 1
                 if depth == 1:
                     telemetry["standalone_invalid_constituents_retained"] += 1
                 continue
             endpoint, target_receipt = target
             planned = _PlannedTarget(prefix, endpoint, target_receipt)
+            telemetry[f"valid_stop_targets_depth_{depth}"] += 1
+            champion = depth_champions.get(depth)
+            if champion is None or _target_rank_key(planned) < _target_rank_key(
+                champion
+            ):
+                depth_champions[depth] = planned
             previous = best_by_endpoint.get(planned.endpoint_key)
             if previous is not None:
                 telemetry["canonical_target_aliases"] += 1
                 if _target_rank_key(previous) <= _target_rank_key(planned):
                     continue
             best_by_endpoint[planned.endpoint_key] = planned
-            if len(best_by_endpoint) >= budgets.max_targets:
+            ranked_targets = sorted(best_by_endpoint.values(), key=_target_rank_key)
+            if len(ranked_targets) > budgets.max_targets:
                 telemetry["target_budget_exhausted"] = 1
-                stop = True
-                break
-        telemetry[f"valid_stop_targets_depth_{depth}"] = sum(
-            len(row.prefix.constituents) == depth for row in best_by_endpoint.values()
-        )
+                telemetry[f"target_budget_drops_depth_{depth}"] += len(
+                    ranked_targets[budgets.max_targets :]
+                )
+                best_by_endpoint = {
+                    row.endpoint_key: row
+                    for row in ranked_targets[: budgets.max_targets]
+                }
+        telemetry[f"target_quota_depth_{depth}"] = 1
         if stop or not frontier:
             break
+
+    selected_by_endpoint: dict[str, _PlannedTarget] = {}
+    for depth in sorted(depth_champions):
+        planned = depth_champions[depth]
+        previous = selected_by_endpoint.get(planned.endpoint_key)
+        if previous is None or _target_rank_key(planned) < _target_rank_key(previous):
+            selected_by_endpoint[planned.endpoint_key] = planned
+        else:
+            telemetry["cross_depth_canonical_target_aliases"] += 1
+    for planned in sorted(best_by_endpoint.values(), key=_target_rank_key):
+        if len(selected_by_endpoint) >= budgets.max_targets:
+            break
+        selected_by_endpoint.setdefault(planned.endpoint_key, planned)
+    best_by_endpoint = selected_by_endpoint
+    for depth in range(1, budgets.max_depth + 1):
+        telemetry[f"retained_targets_depth_{depth}"] = sum(
+            len(row.prefix.constituents) == depth for row in best_by_endpoint.values()
+        )
     telemetry["valid_joint_endpoints_recovered"] = sum(
         len(row.prefix.constituents) >= 2 for row in best_by_endpoint.values()
+    )
+    telemetry["target_depths_with_valid_stops"] = sum(
+        telemetry[f"valid_stop_targets_depth_{depth}"] > 0
+        for depth in range(1, budgets.max_depth + 1)
+    )
+    telemetry["target_depths_retained"] = sum(
+        telemetry[f"retained_targets_depth_{depth}"] > 0
+        for depth in range(1, budgets.max_depth + 1)
     )
     return tuple(sorted(best_by_endpoint.values(), key=_target_rank_key))
 
@@ -411,17 +471,23 @@ def _realize_targets(
         telemetry["realization_attempts"] += 1
         goal, _ = _goal(target.prefix)
         program = program_from_structural_goal(goal)
+        candidate_expansion_limit = min(
+            budgets.maximum_expansions_per_realization,
+            remaining,
+        )
         receipt = realize_target(
             source,
             target.endpoint,
             config=RealizerConfig(
                 maximum_primitives=budgets.maximum_primitives,
-                maximum_expansions=remaining,
+                maximum_expansions=candidate_expansion_limit,
             ),
         )
         expanded = int(receipt.get("expanded", 0))
-        if not 0 <= expanded <= remaining:
-            raise RuntimeError("joint realizer exceeded its global expansion budget")
+        if not 0 <= expanded <= candidate_expansion_limit:
+            raise RuntimeError(
+                "joint realizer exceeded its per-candidate expansion budget"
+            )
         telemetry["realizer_expansions"] += expanded
         telemetry["realizer_action_attempts"] += int(receipt.get("attempted", 0))
         if telemetry["realizer_expansions"] >= budgets.max_realization_expansions:
@@ -429,7 +495,11 @@ def _realize_targets(
         status = str(receipt["status"])
         telemetry[f"realization_status:{status}"] += 1
         if status != "realized":
+            telemetry["compiler_abstentions"] += 1
+            if expanded >= candidate_expansion_limit:
+                telemetry["per_realization_expansion_cap_abstentions"] += 1
             continue
+        telemetry["successful_realized_targets"] += 1
         if int(receipt.get("primitive_teacher_actions_used", -1)) != 0:
             raise RuntimeError("joint target realizer used teacher actions")
         states = receipt.get("states")
@@ -512,9 +582,18 @@ def propose_virtual_joint_region_paths(
         "max_targets": budgets.max_targets,
         "max_realization_attempts": budgets.max_realization_attempts,
         "max_realization_expansions": budgets.max_realization_expansions,
+        "maximum_expansions_per_realization": (
+            budgets.maximum_expansions_per_realization
+        ),
         "maximum_primitives": budgets.maximum_primitives,
         "unique_valid_targets": len(targets),
         "unique_committed_endpoints": len(proposals),
+        "exact_realization_precision_numerator": len(proposals),
+        "exact_realization_precision_denominator": telemetry[
+            "successful_realized_targets"
+        ],
+        "final_target_abstentions": telemetry["final_target_abstentions"],
+        "compiler_abstentions": telemetry["compiler_abstentions"],
         "virtual_prefix_commits": 0,
         "partial_endpoint_evaluations": 0,
         "task_cell_route_or_endpoint_input_used": False,

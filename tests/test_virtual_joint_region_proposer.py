@@ -43,12 +43,22 @@ def _graph(
     return MolecularGraph(types, charges, hydrogen_counts, bonds)
 
 
-def _expert(templates: tuple[StructuralDeltaTemplate, ...]):
+def _expert(
+    templates: tuple[StructuralDeltaTemplate, ...],
+    *,
+    weights: dict[str, float] | None = None,
+):
     ordered_ids = tuple(sorted({row.template_id for row in templates}))
-    probability = 1.0 / len(ordered_ids)
+    if weights is None:
+        probabilities = tuple(1.0 / len(ordered_ids) for _ in ordered_ids)
+    else:
+        total = sum(weights.values())
+        probabilities = tuple(
+            weights[template_id] / total for template_id in ordered_ids
+        )
     marginal = MarginalSubgoalPolicy(
         template_ids=ordered_ids,
-        probabilities=tuple(probability for _ in ordered_ids),
+        probabilities=probabilities,
         goal_count_probabilities=(0.25, 0.25, 0.25, 0.25),
         exploration_floor=0.1,
         training_identity="generic-split-first-marginal",
@@ -89,6 +99,27 @@ def _append_expert():
     return source, _expert((append,))
 
 
+def _crowded_shallow_expert():
+    source, joint_template, _ = _co2_compensating_expert()
+    shallow = tuple(
+        StructuralDeltaTemplate(
+            input_atoms=((4, 0, 0, 1),),
+            input_bonds=((0,),),
+            target_atoms=(target,),
+            output_atoms=(),
+            target_bonds=((0,),),
+        )
+        for target in (
+            (7, 0, 0, 1),
+            (3, 0, 1, 1),
+            (2, 0, 2, 1),
+        )
+    )
+    weights = {joint_template.template_id: 0.7}
+    weights.update({row.template_id: 0.1 for row in shallow})
+    return source, _expert((joint_template, *shallow), weights=weights)
+
+
 def _budgets(**updates) -> VirtualJointRegionBudgets:
     values = {
         "max_depth": 4,
@@ -100,6 +131,7 @@ def _budgets(**updates) -> VirtualJointRegionBudgets:
         "max_targets": 16,
         "max_realization_attempts": 16,
         "max_realization_expansions": 256,
+        "maximum_expansions_per_realization": 64,
         "maximum_primitives": 32,
     }
     values.update(updates)
@@ -162,6 +194,28 @@ def test_invalid_single_regions_are_retained_until_a_valid_joint_stop() -> None:
     assert batch.telemetry["virtual_prefix_commits"] == 0
     assert batch.telemetry["partial_endpoint_evaluations"] == 0
     assert batch.telemetry["primitive_teacher_actions_used"] == 0
+    assert batch.telemetry["final_target_abstentions"] == 2
+    assert batch.telemetry["compiler_abstentions"] == 0
+    assert batch.telemetry["exact_realization_precision_numerator"] == 1
+    assert batch.telemetry["exact_realization_precision_denominator"] == 1
+
+
+def test_shallow_target_cap_preserves_deeper_joint_target_coverage() -> None:
+    source, expert = _crowded_shallow_expert()
+
+    batch = propose_virtual_joint_region_paths(
+        source,
+        expert,
+        budgets=_budgets(max_depth=2, max_targets=2),
+    )
+
+    assert batch.telemetry["valid_stop_targets_depth_1"] >= 3
+    assert batch.telemetry["target_budget_drops_depth_1"] >= 1
+    assert batch.telemetry["target_quota_depth_1"] == 1
+    assert batch.telemetry["target_quota_depth_2"] == 1
+    assert batch.telemetry["target_depths_retained"] == 2
+    assert batch.telemetry["valid_joint_endpoints_recovered"] == 1
+    assert any(row.depth == 2 and row.endpoint_key == "OCO" for row in batch.proposals)
 
 
 def test_joint_execution_replays_exactly_through_only_valid_intermediates() -> None:
@@ -213,6 +267,47 @@ def test_joint_planning_is_deterministic_and_globally_budgeted() -> None:
     assert realization_limited.telemetry["realizer_expansions"] == 1
     assert realization_limited.telemetry["realization_expansion_budget_exhausted"] == 1
 
+    per_realization_limited = propose_virtual_joint_region_paths(
+        source,
+        expert,
+        budgets=_budgets(
+            max_depth=2,
+            max_realization_expansions=256,
+            maximum_expansions_per_realization=1,
+        ),
+    )
+    assert per_realization_limited.proposals == ()
+    assert per_realization_limited.telemetry["realizer_expansions"] == 1
+    assert per_realization_limited.telemetry["compiler_abstentions"] == 1
+    assert (
+        per_realization_limited.telemetry["per_realization_expansion_cap_abstentions"]
+        == 1
+    )
+    assert (
+        per_realization_limited.telemetry.get(
+            "realization_expansion_budget_exhausted", 0
+        )
+        == 0
+    )
+
+
+def test_expansion_width_truncation_reports_constituent_ranks() -> None:
+    source, _, expert = _co2_compensating_expert()
+
+    batch = propose_virtual_joint_region_paths(
+        source,
+        expert,
+        budgets=_budgets(max_depth=2, expansion_width=1),
+    )
+
+    ranks = batch.telemetry["bound_constituent_ranks"]
+    assert [row["rank"] for row in ranks] == [1, 2]
+    assert sum(row["selected_for_expansion"] for row in ranks) == 1
+    assert batch.telemetry["bound_constituents"] == 2
+    assert batch.telemetry["selected_constituents"] == 1
+    assert batch.telemetry["constituents_truncated_by_expansion_width"] == 1
+    assert batch.proposals == ()
+
 
 def test_created_role_to_virtual_slot_provenance_is_preserved() -> None:
     source, expert = _append_expert()
@@ -239,7 +334,9 @@ def test_created_role_to_virtual_slot_provenance_is_preserved() -> None:
         ({"max_binding_visits": 0}, "positive integer"),
         ({"max_planning_expansions": 0}, "positive integer"),
         ({"max_targets": 0}, "positive integer"),
+        ({"max_depth": 4, "max_targets": 3}, "cover every requested depth"),
         ({"max_realization_expansions": 0}, "positive integer"),
+        ({"maximum_expansions_per_realization": 0}, "positive integer"),
         ({"maximum_primitives": 33}, "limited to 32"),
     ],
 )
