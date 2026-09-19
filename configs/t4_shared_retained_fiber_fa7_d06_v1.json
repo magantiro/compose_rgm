@@ -1,0 +1,160 @@
+{
+  "payload": {
+    "schema_version": "t4_shared_retained_fiber_scored_contract_v2",
+    "status": "AUTHORIZED_FROZEN_PRIMARY_CONTROLLER",
+    "scientific_problem": "measure the primary shared COMPOSE controller on FA7 under the delta=0.6 endpoint fiber",
+    "primary_model_output": "target-reward-adapted selection over shallow, anchored and scale-balanced shared retained-subgraph rewrite programs",
+    "central_claim_under_test": "the unchanged shared controller can autonomously repair the initially low-QED FA7 sources while remaining inside the stricter delta=0.6 similarity corridor and optimize docking utility without FA7-specific proposal code or settings",
+    "experimental_setting": "prospective three-cell FA7 delta=0.6 development campaign under one frozen 49-call-per-cell recursive controller",
+    "declared_support": "connected neutral charge-preserving 2D molecular graphs in the existing COMPOSE vocabulary with at most 40 active atoms, exact protected programs of at most 32 primitives, no stereochemical or formal-charge editing, and strict endpoint similarity, QED and SA gates",
+    "cells": [
+      {
+        "cell": "fa7_0",
+        "source_global_index": 3,
+        "smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+        "controller_seed": 2026091903
+      },
+      {
+        "cell": "fa7_1",
+        "source_global_index": 4,
+        "smiles": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+        "controller_seed": 2026091904
+      },
+      {
+        "cell": "fa7_2",
+        "source_global_index": 5,
+        "smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+        "controller_seed": 2026091905
+      }
+    ],
+    "delta": 0.6,
+    "support": "compose_valid",
+    "charged_calls_per_cell": 49,
+    "total_charged_call_ceiling": 147,
+    "batch": 8,
+    "parents": 4,
+    "parent_explore": 0.3,
+    "exploration": 2,
+    "expert_floor_rounds": 2,
+    "route_scale_floor_rounds": 2,
+    "value_penalty": 1.0,
+    "docking_seed": 20260919,
+    "proposal": {
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      },
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "route_complete_region": {
+        "pool_size": 192,
+        "realization_limit": 96,
+        "beam_width": 48,
+        "expansion_width": 48,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "scale_balanced": true,
+        "training_scope": "one shared task-independent expert fit on all 77 locked routes"
+      }
+    },
+    "round_lock_policy": {
+      "publish_before_docking": true,
+      "per_query_receipts": true,
+      "per_expert_proposal_receipts": true,
+      "resume_complete_receipts_only": true,
+      "never_resubmit_reserved_or_missing_query_receipt": true,
+      "continue_after_deadline_with_unresolved_calls_charged": true,
+      "no_backfill": true,
+      "automatic_retries": 0
+    },
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "bfd705fb8220c52e1b447afce23a3810bc6deddb06983e98a2b0934b24ba092d"
+    },
+    "docking_box": [
+      [
+        10.131,
+        41.879,
+        32.097
+      ],
+      [
+        20.673,
+        20.198,
+        21.362
+      ]
+    ],
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "modal_apps/t4_shared_retained_fiber_fa7_d06_app.py": "77b693725bb2125d839f79b96814ff040f00cdf9e6f443e74121835615519953",
+      "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+      "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "73c574c9e562d80583c01c556e1732e108957eb5271a79850f30db602296b0eb",
+      "src/compose_v4/control/structural_subgoal_policy.py": "d45a2f6b92a69f7462f6c1e2cd5523bc529cedb0a24e5a993aa714a2ade3d2b4",
+      "src/compose_v4/control/structural_subgoal_realizer.py": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_integrated_route_fiber.py": "4a5e1de25e0478b7572d333103ac3d5fe7ff46a1fd669acd7b99da4a2757e687",
+      "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "aeee1616ed67c5af77de7da8eae4519ddedda929618286d6d966868d543503ed"
+    },
+    "zero_oracle_support": {
+      "checkpoint_payload_sha256": "5476be572dd40ee3f068cc8f1df238eec54e23a82cb84f803905ac891701e07d",
+      "artifacts": [
+        {
+          "path": "diagnostics/t4_shared_retained_rewrite_v1/shards/fa7_0.json",
+          "sha256": "4920bb3ea0ca36bea44b572fa6a5bd97125ae60ca044ade04f79eeeef1c81864",
+          "complete_programs": 75,
+          "eligible_delta_0_4": 8,
+          "eligible_delta_0_6": 2
+        },
+        {
+          "path": "diagnostics/t4_shared_retained_rewrite_v1/shards/fa7_1.json",
+          "sha256": "28096af5fd72e46878e1365435e18cfbeb035cf36d456ab7787f65e57c6ad5d3",
+          "complete_programs": 89,
+          "eligible_delta_0_4": 8,
+          "eligible_delta_0_6": 1
+        },
+        {
+          "path": "diagnostics/t4_shared_retained_fiber_fa7_preflight/fa7_2.json",
+          "sha256": "986c801613b7df5326297fb65b8963c609508237070e2ff4deffce4f010198cd",
+          "complete_programs": 84,
+          "eligible_delta_0_4": 15,
+          "eligible_delta_0_6": 4
+        }
+      ],
+      "result": "all three FA7 cells emitted exact small, medium and large protected programs; strict eligible counts were 8, 8 and 15 at delta 0.4 and 2, 1 and 4 at delta 0.6"
+    },
+    "reported_ivg": {
+      "means": {
+        "fa7_0": -7.7,
+        "fa7_1": -7.5,
+        "fa7_2": -7.4
+      },
+      "uncertainty": {
+        "fa7_0": 0.4,
+        "fa7_1": 0.3,
+        "fa7_2": 0.4
+      },
+      "delta": 0.6
+    },
+    "reported_ivg_source": {
+      "evidence": "published lead-optimization table, not a recomputation from released per-seed CSV rows",
+      "upstream_revision": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/README.md",
+      "sha256": "a5ae0d826fc458caa1bdfa0a4d8f23927da33cea39188c3e4375a55164de6b80",
+      "known_upstream_discrepancy": "the released CSV-derived run means differ from the published README table; headline comparison uses the published table and records the discrepancy rather than silently substituting the recomputation"
+    },
+    "primary_baselines": "measured roots, frozen historical Dynamic and route-aware COMPOSE development artifacts, and reported IVG delta=0.6 means; no comparator enters runtime",
+    "causal_ablation_status": "dormant unless the conditional striking-result trigger in AGENTS.md activates",
+    "claim_boundary": "one primary shared-controller FA7 development campaign under one docking seed; same checkpoint, proposal settings and FiberControl on all cells; no FA7-specific proposal code, endpoint injection, cell-to-winner lookup or per-cell tuning",
+    "proposal_wait_seconds": 2400,
+    "query_wait_seconds": 1200,
+    "phase_poll_seconds": 5,
+    "prior_operational_waste": 0
+  },
+  "payload_sha256": "91f59c92da209fa328bb3e271c2da8b390c9d67e8807a9c253d69392fe26a062"
+}
