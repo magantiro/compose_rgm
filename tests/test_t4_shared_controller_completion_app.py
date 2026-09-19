@@ -45,6 +45,7 @@ def test_launcher_registers_nine_private_cell_runtimes_and_is_inert_on_import():
     main_source = (launcher.ROOT / launcher.APP_RELATIVE_PATH).read_text()
     assert "reserve_driver_generation" in main_source
     assert "_spawn_reserved_drivers" in main_source
+    assert "REMOTE_ROOT / 'modal_apps'" in main_source
 
 
 def test_resume_plan_is_independent_and_never_overlaps_a_live_cell():

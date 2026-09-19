@@ -100,7 +100,7 @@ def _runtime_image() -> modal.Image:
         )
         .env(
             {
-                "PYTHONPATH": str(REMOTE_ROOT / "src"),
+                "PYTHONPATH": (f"{REMOTE_ROOT / 'src'}:{REMOTE_ROOT / 'modal_apps'}"),
                 "PYTHONDONTWRITEBYTECODE": "1",
                 "OMP_NUM_THREADS": "1",
                 "OPENBLAS_NUM_THREADS": "1",

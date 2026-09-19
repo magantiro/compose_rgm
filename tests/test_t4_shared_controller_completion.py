@@ -220,12 +220,10 @@ def test_scored_app_transition_remains_inert_without_sealed_authority():
     report = launcher.scored_preflight_report()
     assert report["modal_calls_created"] == 0
     sealed_paths = (
-        ROOT / "diagnostics/t4_shared_controller_completion_v1/scored_contract.json",
-        ROOT
-        / "diagnostics/t4_shared_controller_completion_v1/scored_authorization.json",
-        ROOT / "diagnostics/t4_shared_controller_completion_v1/source_capsule",
-        ROOT
-        / "diagnostics/t4_shared_controller_completion_v1/source_capsule_manifest.json",
+        launcher.FINAL_CONTRACT_PATH,
+        launcher.AUTHORIZATION_PATH,
+        launcher.CAPSULE_ROOT,
+        launcher.CAPSULE_MANIFEST_PATH,
     )
     if not all(path.exists() for path in sealed_paths):
         assert report["ready"] is False
