@@ -1,0 +1,74 @@
+{
+  "payload": {
+    "schema_version": "t4_nodistill_generic_topology_scored_candidate_proposal_v1",
+    "status": "PROPOSED_REQUIRES_SEPARATE_SCORED_CONTRACT_AND_AUTHORIZATION",
+    "selection_rule": "all autonomously locked v2 candidates on PARP1-0 and PARP1-1 that were endpoint-eligible, used 12-32 primitives, added at least seven heavy atoms and at least two cycles; no docking score or teacher identity entered selection",
+    "candidate_count": 4,
+    "candidates": [
+      {
+        "cell_key": "parp1_0_d04",
+        "endpoint_key_sha256": "bab27bc3e9da14696938fcfc5af99ee7a04f139d550b4cf30140a339b9c6f76f",
+        "canonical_smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1c3cc4c(cc3cn1-2)CNC1CCCCC41",
+        "primitive_count": 15,
+        "delta_heavy_atoms": 12,
+        "delta_cycle_rank": 3,
+        "macro_plan": "construct_three_connected_rings",
+        "similarity": 0.4852941176470588,
+        "qed": 0.6647800352994124,
+        "sa": 3.9140131332142385
+      },
+      {
+        "cell_key": "parp1_0_d04",
+        "endpoint_key_sha256": "d169316b89cf70df97005fff36c8ff36cb1d9438682a8a2a697ae59e0911281e",
+        "canonical_smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1c3c(O)c4c(nc3cn1-2)C(O)CCC4",
+        "primitive_count": 12,
+        "delta_heavy_atoms": 10,
+        "delta_cycle_rank": 2,
+        "macro_plan": "construct_two_connected_rings",
+        "similarity": 0.4444444444444444,
+        "qed": 0.6230967694249445,
+        "sa": 3.7354946340916158
+      },
+      {
+        "cell_key": "parp1_0_d04",
+        "endpoint_key_sha256": "6437e7432a67a1a8298c79537fce7deb5319e809055326399d9a92eeb901922f",
+        "canonical_smiles": "Cc1cccc(CN(C)Cc2ccc3c(c2)CNC(=O)c2cccn2-3)c1N1CCNC1C",
+        "primitive_count": 15,
+        "delta_heavy_atoms": 13,
+        "delta_cycle_rank": 2,
+        "macro_plan": "construct_two_connected_rings",
+        "similarity": 0.5757575757575758,
+        "qed": 0.6526921928040903,
+        "sa": 3.572707455455763
+      },
+      {
+        "cell_key": "parp1_1_d04",
+        "endpoint_key_sha256": "661f142472a72eb76743a1511fb4d7f6cfb23c0accad1c0c88819f6f8bf9107a",
+        "canonical_smiles": "COc1[nH]c2ccc(-c3ccc(C)c4c3CCO4)c3c2c1CCNC3=O",
+        "primitive_count": 12,
+        "delta_heavy_atoms": 10,
+        "delta_cycle_rank": 2,
+        "macro_plan": "construct_two_connected_rings",
+        "similarity": 0.5087719298245614,
+        "qed": 0.7462654365432224,
+        "sa": 3.126722412540584
+      }
+    ],
+    "source_locks": [
+      {
+        "path": "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/locks/parp1_0_d04.json.gz",
+        "sha256": "7c81c502c79592e0bddd4d348a20336032a0bee73b224ef9a3e303dbd973c13b",
+        "payload_sha256": "1bf96d6ad3e5f609317b68e1c31b17627ba8685affaaa58b4661aa248b054611"
+      },
+      {
+        "path": "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/locks/parp1_1_d04.json.gz",
+        "sha256": "d26557b0a3a23ebf22a44831724374945405b75034215cb2f2228d4d2ef480a1",
+        "payload_sha256": "e615efddeaf180acde61e6f1531bf90c0df25901d3d48d85b908a80bbd48d5f4"
+      }
+    ],
+    "costs_spent": {"oracle_calls": 0, "docking_calls": 0, "modal_launches": 0},
+    "future_scored_calls_proposed": 4,
+    "claim_boundary": "This file is a frozen proposal only. It is not a scored contract, authorization, launch, or docking result."
+  },
+  "payload_sha256": "41d67dd0026e1e120bf130446845f229efb0ef13b19699d7efb4fef2aa043d4e"
+}
