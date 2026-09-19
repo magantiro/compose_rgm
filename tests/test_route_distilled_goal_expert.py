@@ -86,9 +86,7 @@ def test_route_expert_rejects_realization_limit_outside_pool():
 
     source = pad_molecular_graph(smiles_to_molecular_graph("CC"), 48)
     with pytest.raises(ValueError, match="within the pool"):
-        propose_route_expert_candidates(
-            source, _expert(), pool_size=2, realization_limit=3
-        )
+        propose_route_expert_candidates(source, _expert(), pool_size=2, realization_limit=3)
 
 
 def test_route_expert_abstains_from_invalid_composed_target(monkeypatch):
@@ -150,6 +148,39 @@ def test_route_expert_default_realization_stays_in_calling_process(monkeypatch):
     assert telemetry["realization_status_counts"] == {"committed": 1}
 
 
+def test_route_expert_discloses_realized_actions_only_when_requested(monkeypatch):
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+
+    source = pad_molecular_graph(smiles_to_molecular_graph("CC"), 48)
+    _patch_proposals(monkeypatch, source, ("quick",))
+    realized_action = {"executor_rule": "fixture"}
+
+    def execute(candidate_source, program, *, resolved_bindings, config):
+        return {
+            "status": "committed",
+            "committed_endpoint_state": candidate_source,
+            "realized_primitive_count": 1,
+            "realized_actions": [realized_action],
+            "compiler_strategy": "fixture",
+        }
+
+    monkeypatch.setattr(
+        "compose_v4.control.route_distilled_goal_expert.execute_complete_region_program",
+        execute,
+    )
+    candidates, telemetry = propose_route_expert_candidates(
+        source,
+        _expert(),
+        pool_size=1,
+        realization_limit=1,
+        include_realized_actions=True,
+    )
+
+    assert candidates[0]["realized_actions"] == [realized_action]
+    assert telemetry["realized_actions_included"] is True
+
+
 @pytest.mark.skipif(
     "fork" not in multiprocessing.get_all_start_methods(),
     reason="the monkeypatched hanging worker fixture requires fork",
@@ -193,9 +224,7 @@ def test_route_expert_timeout_preserves_later_candidates(monkeypatch):
     assert telemetry["complete_programs_committed"] == 2
     assert telemetry["exact_realization_precision_numerator"] == 2
     assert telemetry["exact_realization_precision_denominator"] == 2
-    assert {
-        child.pid for child in multiprocessing.active_children()
-    } <= existing_child_pids
+    assert {child.pid for child in multiprocessing.active_children()} <= existing_child_pids
 
 
 @pytest.mark.parametrize("timeout", [0.0, -1.0, float("nan"), float("inf"), True])

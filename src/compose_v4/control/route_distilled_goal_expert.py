@@ -112,8 +112,7 @@ def _execute_with_candidate_timeout(
         except EOFError as exc:
             process.join(_PROCESS_CLEANUP_SECONDS)
             raise RuntimeError(
-                "route realization worker exited without a result "
-                f"(exitcode={process.exitcode})"
+                f"route realization worker exited without a result (exitcode={process.exitcode})"
             ) from exc
         process.join(_PROCESS_CLEANUP_SECONDS)
         if process.is_alive():
@@ -121,14 +120,11 @@ def _execute_with_candidate_timeout(
             raise RuntimeError("route realization worker did not exit after reporting")
         if process.exitcode != 0:
             raise RuntimeError(
-                "route realization worker failed after reporting "
-                f"(exitcode={process.exitcode})"
+                f"route realization worker failed after reporting (exitcode={process.exitcode})"
             )
         if message_type == "committed_result":
             if not isinstance(payload, dict):
-                raise RuntimeError(
-                    "route realization worker returned a non-dict receipt"
-                )
+                raise RuntimeError("route realization worker returned a non-dict receipt")
             return payload
         if message_type == "value_error":
             raise ValueError(str(payload))
@@ -183,10 +179,7 @@ class RouteDistilledGoalExpert:
         }:
             raise ValueError("route-distilled complete-region checkpoint mismatch")
         return cls(
-            tuple(
-                StructuralDeltaTemplate.from_payload(row)
-                for row in payload["templates"]
-            ),
+            tuple(StructuralDeltaTemplate.from_payload(row) for row in payload["templates"]),
             MarginalSubgoalPolicy.from_checkpoint(payload["marginal"]),
             str(payload["training_identity"]),
         )
@@ -224,6 +217,7 @@ def propose_route_expert_candidates(
     maximum_expansions: int = 4_000,
     scale_balanced: bool = False,
     per_candidate_timeout_seconds: float | None = None,
+    include_realized_actions: bool = False,
 ) -> tuple[list[dict], dict]:
     """Generate and exact-execute complete region programs on one current state.
 
@@ -241,9 +235,7 @@ def propose_route_expert_candidates(
             or not math.isfinite(float(per_candidate_timeout_seconds))
             or per_candidate_timeout_seconds <= 0
         ):
-            raise ValueError(
-                "route expert per-candidate timeout must be positive and finite"
-            )
+            raise ValueError("route expert per-candidate timeout must be positive and finite")
         per_candidate_timeout_seconds = float(per_candidate_timeout_seconds)
     goals, proposal_telemetry = propose_structural_goals(
         source,
@@ -298,34 +290,36 @@ def propose_route_expert_candidates(
         primitive_band = (
             "small"
             if realized_primitives <= 3
-            else "medium" if realized_primitives <= 11 else "large"
+            else "medium"
+            if realized_primitives <= 11
+            else "large"
         )
         realized_primitive_band_counts[primitive_band] += 1
-        records.append(
-            {
-                "smiles": molecular_graph_to_smiles(endpoint),
-                "proposal_lane": "route_complete_region",
-                "proposal_experts": ["route_complete_region"],
-                "families": ["route_complete_region"],
-                "program_families": ["route_complete_region"],
-                "regions": len(proposal.templates),
-                "created": sum(len(row.output_atoms) for row in proposal.templates),
-                "deleted": sum(
-                    atom is None
-                    for row in proposal.templates
-                    for atom in row.target_atoms
-                ),
-                "route_prior_score": float(proposal.score),
-                "route_proposal_rank": proposal_rank,
-                "route_program_id": program.program_id,
-                "route_template_ids": [row.template_id for row in proposal.templates],
-                "rewrite_events": proposal_rewrite_event_count(proposal),
-                "rewrite_scale": proposal_rewrite_scale(proposal),
-                "realized_primitives": realized_primitives,
-                "realized_primitive_band": primitive_band,
-                "compiler_strategy": receipt.get("compiler_strategy"),
-            }
-        )
+        record = {
+            "smiles": molecular_graph_to_smiles(endpoint),
+            "proposal_lane": "route_complete_region",
+            "proposal_experts": ["route_complete_region"],
+            "families": ["route_complete_region"],
+            "program_families": ["route_complete_region"],
+            "regions": len(proposal.templates),
+            "created": sum(len(row.output_atoms) for row in proposal.templates),
+            "deleted": sum(atom is None for row in proposal.templates for atom in row.target_atoms),
+            "route_prior_score": float(proposal.score),
+            "route_proposal_rank": proposal_rank,
+            "route_program_id": program.program_id,
+            "route_template_ids": [row.template_id for row in proposal.templates],
+            "rewrite_events": proposal_rewrite_event_count(proposal),
+            "rewrite_scale": proposal_rewrite_scale(proposal),
+            "realized_primitives": realized_primitives,
+            "realized_primitive_band": primitive_band,
+            "compiler_strategy": receipt.get("compiler_strategy"),
+        }
+        if include_realized_actions:
+            actions = receipt.get("realized_actions")
+            if not isinstance(actions, list) or len(actions) != realized_primitives:
+                raise RuntimeError("route realization omitted its exact action receipt")
+            record["realized_actions"] = actions
+        records.append(record)
     telemetry = {
         **proposal_telemetry,
         "realization_limit": realization_limit,
@@ -337,6 +331,8 @@ def propose_route_expert_candidates(
     }
     if per_candidate_timeout_seconds is not None:
         telemetry["per_candidate_timeout_seconds"] = per_candidate_timeout_seconds
+    if include_realized_actions:
+        telemetry["realized_actions_included"] = True
     return records, telemetry
 
 
