@@ -50,6 +50,17 @@ elif _CAMPAIGN_VARIANT == "nodistill_transfer_v1":
     from compose_v4.experiments.t4_compose_nodistill_transfer_contract import (
         PREPARATION_RELATIVE_PATH as CONTRACT_RELATIVE_PATH,
     )
+elif _CAMPAIGN_VARIANT == "repaired_exhaustion_v1":
+    from compose_v4.experiments.t4_repaired_exhaustion_contract import (
+        AUTHORIZATION_RELATIVE_PATH,
+        CAPSULE_MANIFEST_RELATIVE_PATH,
+        CAPSULE_ROOT_RELATIVE_PATH,
+        FINAL_CONTRACT_RELATIVE_PATH,
+        validate_scored_contract,
+    )
+    from compose_v4.experiments.t4_repaired_exhaustion_contract import (
+        PREPARATION_RELATIVE_PATH as CONTRACT_RELATIVE_PATH,
+    )
 else:
     from compose_v4.experiments.t4_shared_controller_completion_contract import (
         CONTRACT_RELATIVE_PATH,
@@ -84,6 +95,10 @@ _VARIANT_APPS = {
         "compose-t4-compose-nodistill-transfer-v1",
         "modal_apps/t4_compose_nodistill_transfer_v1_app.py",
     ),
+    "repaired_exhaustion_v1": (
+        "compose-t4-repaired-exhaustion-v1",
+        "modal_apps/t4_shared_controller_repaired_exhaustion_v1_app.py",
+    ),
 }
 try:
     APP_NAME, APP_RELATIVE_PATH = _VARIANT_APPS[_CAMPAIGN_VARIANT]
@@ -114,7 +129,13 @@ def _load_envelope(path: Path) -> tuple[dict[str, Any], str]:
 
 PREPARATION = json.loads((ROOT / CONTRACT_RELATIVE_PATH).read_text())
 CELLS = tuple(PREPARATION["cells"])
-_EXPECTED_CELL_COUNT = 9 if _CAMPAIGN_VARIANT == "full" else 3
+_EXPECTED_CELL_COUNTS = {
+    "full": 9,
+    "nodistill_parp1_v1": 3,
+    "nodistill_transfer_v1": 3,
+    "repaired_exhaustion_v1": 2,
+}
+_EXPECTED_CELL_COUNT = _EXPECTED_CELL_COUNTS[_CAMPAIGN_VARIANT]
 if len(CELLS) != _EXPECTED_CELL_COUNT:
     raise ValueError(
         f"{_CAMPAIGN_VARIANT} launcher requires exactly "
@@ -154,6 +175,7 @@ def _runtime_image() -> modal.Image:
             f"curl --fail -sSL -o /opt/dock/receptors/parp1.pdbqt {MOOD}/receptors/parp1.pdbqt",
             f"curl --fail -sSL -o /opt/dock/receptors/braf.pdbqt {MOOD}/receptors/braf.pdbqt",
             f"curl --fail -sSL -o /opt/dock/receptors/jak2.pdbqt {MOOD}/receptors/jak2.pdbqt",
+            f"curl --fail -sSL -o /opt/dock/receptors/5ht1b.pdbqt {MOOD}/receptors/5ht1b.pdbqt",
         )
         .env(
             {
@@ -313,7 +335,7 @@ def _load_route_expert(contract: dict[str, Any]):
 def _proposal_answer(
     request: dict[str, Any], cell: dict[str, Any], contract: dict[str, Any]
 ) -> dict[str, Any]:
-    """Run one of the unchanged three proposal experts on one measured parent."""
+    """Run one configured generic proposal expert on one measured parent."""
 
     import time
 
@@ -1177,6 +1199,12 @@ def _launch_receipt_path(run_id: str) -> Path:
         return (
             ROOT
             / "diagnostics/t4_compose_nodistill_transfer_v1/attempt_1/launches"
+            / f"{run_id}.json"
+        )
+    if _CAMPAIGN_VARIANT == "repaired_exhaustion_v1":
+        return (
+            ROOT
+            / "diagnostics/t4_shared_controller_repaired_exhaustion_v1/attempt_1/launches"
             / f"{run_id}.json"
         )
     return (
