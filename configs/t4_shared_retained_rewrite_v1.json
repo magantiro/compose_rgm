@@ -1,0 +1,70 @@
+{
+  "payload": {
+    "schema_version": "t4_shared_retained_rewrite_contract_v1",
+    "status": "AUTHORIZED_ZERO_ORACLE",
+    "scientific_problem": "restore teacher-scale coordinated proposal support in the actual shared T4 production sampler",
+    "primary_model_output": "a target-independent distribution over executable complete retained-subgraph rewrite programs",
+    "central_claim_under_test": "scale-balanced selection from one shared all-route structural prior prevents frequent local edits from suppressing executable medium and large protected programs",
+    "experimental_setting": "zero-oracle production-path generation on all fifteen T4 roots under both delta 0.4 and delta 0.6 endpoint fibers",
+    "primary_baseline": "the frozen marginal route expert that globally ranked all proposals and realized only its first 32",
+    "causal_ablation": "same structural templates and marginal scores with versus without target-independent scale balancing",
+    "declared_support": {
+      "maximum_active_atoms": 40,
+      "complete_regions": [1, 4],
+      "protected_primitives": [1, 32],
+      "elements_and_bonds": "unchanged COMPOSE molecular-graph vocabulary",
+      "stereochemistry_claim": false
+    },
+    "training": {
+      "scope": "all 77 locked T4 complete routes",
+      "task_conditioning": false,
+      "runtime_forbidden": "target or cell name, route identifier, source graph, endpoint, SMILES, absolute atom address, executable route, or cell-to-winner lookup"
+    },
+    "proposal": {
+      "pool_size": 192,
+      "realization_limit": 96,
+      "beam_width": 48,
+      "expansion_width": 48,
+      "max_bindings_per_template": 4,
+      "maximum_expansions": 4000,
+      "scale_balanced": true,
+      "rewrite_bands": {
+        "local": [1, 3],
+        "medium": [4, 11],
+        "large": [12, null]
+      },
+      "reported_realized_primitive_bands": {
+        "small": [1, 3],
+        "medium": [4, 11],
+        "large": [12, 32]
+      }
+    },
+    "cells": "all fifteen frozen T4 roots",
+    "deltas": [0.4, 0.6],
+    "workers": 8,
+    "inputs": {
+      "route_corpus": {
+        "path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json",
+        "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5"
+      },
+      "source_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      }
+    },
+    "gates": {
+      "exact_realization_precision": 1.0,
+      "committed_program_every_cell": true,
+      "small_medium_large_realized": true,
+      "parp1_1_teacher_scale_geometry": "at least one realized program with 27 or more heavy atoms and cycle-rank increase of at least 2",
+      "eligibility": "reported separately at delta 0.4 and 0.6; abstention is preserved"
+    },
+    "oracle": {
+      "calls_authorized": 0,
+      "docking_calls_authorized": 0,
+      "modal_zero_oracle_authorized": true
+    },
+    "claim_boundary": "support and exact-execution gate for the primary shared controller; structural or teacher recovery is not docking validation"
+  },
+  "payload_sha256": "6c8b3e741e498557c659e7e5f3322966ee3e03c5a100b6d467fef390c0e62a9c"
+}

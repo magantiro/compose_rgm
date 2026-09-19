@@ -143,16 +143,39 @@ def select_batch(
     batch: int,
     exploration: int,
     expert_floor_rounds: int,
+    route_scale_floor_rounds: int = 0,
 ) -> list[dict]:
     """Select one batch, seeding each available expert only in early rounds."""
 
-    if batch < 1 or exploration < 0 or exploration > batch:
+    if batch < 1 or exploration < 0 or exploration > batch or route_scale_floor_rounds < 0:
         raise ValueError("invalid batch or exploration quota")
     available = [row for row in candidates if row["smiles"] not in state.archive]
     selected: list[dict] = []
     used: set[str] = set()
+    if round_index <= route_scale_floor_rounds:
+        for band in ("small", "medium", "large"):
+            choices = [
+                row
+                for row in available
+                if "route_complete_region" in _experts(row)
+                and row.get("realized_primitive_band") == band
+                and row["smiles"] not in used
+            ]
+            if not choices or len(selected) >= batch:
+                continue
+            chosen = min(
+                choices,
+                key=lambda row: (
+                    int(row.get("route_proposal_rank", 1 << 30)),
+                    row["smiles"],
+                ),
+            )
+            selected.append({**chosen, "selection_kind": "route_scale_floor"})
+            used.add(chosen["smiles"])
     if round_index <= expert_floor_rounds:
         for expert in EXPERTS:
+            if any(expert in _experts(row) for row in selected):
+                continue
             choices = [
                 row for row in available if expert in _experts(row) and row["smiles"] not in used
             ]

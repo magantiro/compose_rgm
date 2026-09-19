@@ -94,3 +94,41 @@ def test_early_selection_seeds_every_available_expert_then_releases_floor():
         expert_floor_rounds=2,
     )
     assert {row["selection_kind"] for row in late} == {"exploration"}
+
+
+def test_route_scale_floor_uses_prior_rank_before_online_value_is_fit():
+    state = SearchState(archive={"P": -8.0})
+    candidates = []
+    for band_index, band in enumerate(("small", "medium", "large")):
+        for rank in (9, 3):
+            row = _row(f"route-{band_index}-{rank}", "route_complete_region")
+            row["realized_primitive_band"] = band
+            row["route_proposal_rank"] = rank
+            row["features"] = integrated_features(row, state)
+            row["fingerprint"] = {band_index * 10 + rank}
+            candidates.append(row)
+    for expert in ("shallow", "anchored_replacement"):
+        row = _row(expert, expert)
+        row["features"] = integrated_features(row, state)
+        candidates.append(row)
+
+    selected = select_batch(
+        candidates,
+        ProgramValue(),
+        state,
+        np.random.default_rng(7),
+        round_index=1,
+        batch=8,
+        exploration=2,
+        expert_floor_rounds=2,
+        route_scale_floor_rounds=2,
+    )
+    scale_floor = [row for row in selected if row["selection_kind"] == "route_scale_floor"]
+
+    assert {row["realized_primitive_band"] for row in scale_floor} == {
+        "small",
+        "medium",
+        "large",
+    }
+    assert {row["route_proposal_rank"] for row in scale_floor} == {3}
+    assert sum(row["selection_kind"] == "expert_floor" for row in selected) == 2

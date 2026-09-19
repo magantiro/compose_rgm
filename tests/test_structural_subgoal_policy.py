@@ -10,11 +10,16 @@ from compose_v4.control.structural_subgoal import (
     instantiate_goal,
 )
 from compose_v4.control.structural_subgoal_policy import (
+    ProposedStructuralGoal,
     StructuralDeltaTemplate,
     fit_marginal_subgoal_policy,
     materialize_template,
     minimize_subgoal,
+    proposal_rewrite_event_count,
+    proposal_rewrite_scale,
     propose_structural_goals,
+    select_scale_balanced_proposals,
+    structural_rewrite_event_count,
     template_features,
     transfer_bindings,
 )
@@ -125,3 +130,76 @@ def test_marginal_policy_proposes_rebound_valid_structural_goal():
     assert candidates
     assert all(row.goal.subgoals for row in candidates)
     assert telemetry["valid_unique_single_goals"] >= 1
+
+
+def test_rewrite_scale_counts_complete_target_graph_changes():
+    template = StructuralDeltaTemplate(
+        input_atoms=((2, 0, 3, 1),),
+        input_bonds=((0,),),
+        target_atoms=((2, 0, 2, 2),),
+        output_atoms=tuple((2, 0, 2, 2) for _ in range(6)),
+        target_bonds=tuple(
+            tuple(1 if abs(left - right) == 1 else 0 for right in range(7)) for left in range(7)
+        ),
+    )
+    placeholder = StructuralSubgoal(
+        input_atoms=((2, 0, 3, 1),),
+        input_bonds=((0,),),
+        environments=(environment(_ethane(), 0),),
+        target_atoms=((2, 0, 2, 2),),
+        output_atoms=(),
+        target_bonds=((0,),),
+    )
+    proposal = ProposedStructuralGoal(
+        StructuralGoal((placeholder,)),
+        ((0,),),
+        (template,),
+        _ethane(),
+        ("constituent",),
+        0.0,
+    )
+
+    assert structural_rewrite_event_count(template) == 13
+    assert proposal_rewrite_event_count(proposal) == 13
+    assert proposal_rewrite_scale(proposal) == "large"
+
+
+def test_scale_balanced_selection_preserves_large_rewrite_support():
+    placeholder = StructuralSubgoal(
+        input_atoms=((2, 0, 3, 1),),
+        input_bonds=((0,),),
+        environments=(environment(_ethane(), 0),),
+        target_atoms=((2, 0, 2, 2),),
+        output_atoms=(),
+        target_bonds=((0,),),
+    )
+
+    def proposal(outputs: int, score: float) -> ProposedStructuralGoal:
+        size = outputs + 1
+        template = StructuralDeltaTemplate(
+            input_atoms=((2, 0, 3, 1),),
+            input_bonds=((0,),),
+            target_atoms=((2, 0, 2, 2),),
+            output_atoms=tuple((2, 0, 2, 2) for _ in range(outputs)),
+            target_bonds=tuple(
+                tuple(1 if abs(left - right) == 1 else 0 for right in range(size))
+                for left in range(size)
+            ),
+        )
+        return ProposedStructuralGoal(
+            StructuralGoal((placeholder,)),
+            ((0,),),
+            (template,),
+            _ethane(),
+            (f"constituent-{outputs}",),
+            score,
+        )
+
+    ranked = [proposal(0, 4.0), proposal(0, 3.0), proposal(2, 2.0), proposal(6, 1.0)]
+    selected = select_scale_balanced_proposals(ranked, 3)
+
+    assert [proposal_rewrite_scale(row) for row in selected] == [
+        "local",
+        "medium",
+        "large",
+    ]

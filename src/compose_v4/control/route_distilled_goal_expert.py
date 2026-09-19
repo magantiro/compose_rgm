@@ -21,6 +21,8 @@ from compose_v4.control.docking_value import identity
 from compose_v4.control.structural_subgoal_policy import (
     MarginalSubgoalPolicy,
     StructuralDeltaTemplate,
+    proposal_rewrite_event_count,
+    proposal_rewrite_scale,
     propose_structural_goals,
 )
 from compose_v4.control.structural_subgoal_realizer import RealizerConfig
@@ -108,6 +110,7 @@ def propose_route_expert_candidates(
     expansion_width: int = 24,
     max_bindings_per_template: int = 4,
     maximum_expansions: int = 4_000,
+    scale_balanced: bool = False,
 ) -> tuple[list[dict], dict]:
     """Generate and exact-execute complete region programs on one current state.
 
@@ -127,17 +130,25 @@ def propose_route_expert_candidates(
         beam_width=beam_width,
         expansion_width=expansion_width,
         max_bindings_per_template=max_bindings_per_template,
+        scale_balanced=scale_balanced,
     )
     records = []
     status_counts: dict[str, int] = {}
+    realized_primitive_band_counts = {"small": 0, "medium": 0, "large": 0}
     for proposal_rank, proposal in enumerate(goals[:realization_limit], 1):
         program = program_from_structural_goal(proposal.goal)
-        receipt = execute_complete_region_program(
-            source,
-            program,
-            resolved_bindings=proposal.bindings,
-            config=RealizerConfig(maximum_expansions=maximum_expansions),
-        )
+        try:
+            receipt = execute_complete_region_program(
+                source,
+                program,
+                resolved_bindings=proposal.bindings,
+                config=RealizerConfig(maximum_expansions=maximum_expansions),
+            )
+        except ValueError:
+            status_counts["invalid_composed_target"] = (
+                status_counts.get("invalid_composed_target", 0) + 1
+            )
+            continue
         status = str(receipt["status"])
         status_counts[status] = status_counts.get(status, 0) + 1
         if status != "committed":
@@ -145,6 +156,15 @@ def propose_route_expert_candidates(
         endpoint = decode_state(receipt["committed_endpoint_state"])
         if canonical_state_key(endpoint) != canonical_state_key(proposal.endpoint):
             raise RuntimeError("complete-region runtime changed a route proposal")
+        realized_primitives = int(receipt["realized_primitive_count"])
+        primitive_band = (
+            "small"
+            if realized_primitives <= 3
+            else "medium"
+            if realized_primitives <= 11
+            else "large"
+        )
+        realized_primitive_band_counts[primitive_band] += 1
         records.append(
             {
                 "smiles": molecular_graph_to_smiles(endpoint),
@@ -161,7 +181,10 @@ def propose_route_expert_candidates(
                 "route_proposal_rank": proposal_rank,
                 "route_program_id": program.program_id,
                 "route_template_ids": [row.template_id for row in proposal.templates],
-                "realized_primitives": int(receipt["realized_primitive_count"]),
+                "rewrite_events": proposal_rewrite_event_count(proposal),
+                "rewrite_scale": proposal_rewrite_scale(proposal),
+                "realized_primitives": realized_primitives,
+                "realized_primitive_band": primitive_band,
                 "compiler_strategy": receipt.get("compiler_strategy"),
             }
         )
@@ -170,6 +193,7 @@ def propose_route_expert_candidates(
         "realization_limit": realization_limit,
         "realization_status_counts": dict(sorted(status_counts.items())),
         "complete_programs_committed": len(records),
+        "realized_primitive_band_counts": realized_primitive_band_counts,
         "exact_realization_precision_numerator": len(records),
         "exact_realization_precision_denominator": len(records),
     }

@@ -48,3 +48,27 @@ def test_route_expert_rejects_realization_limit_outside_pool():
     source = pad_molecular_graph(smiles_to_molecular_graph("CC"), 48)
     with pytest.raises(ValueError, match="within the pool"):
         propose_route_expert_candidates(source, _expert(), pool_size=2, realization_limit=3)
+
+
+def test_route_expert_abstains_from_invalid_composed_target(monkeypatch):
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+
+    source = pad_molecular_graph(smiles_to_molecular_graph("CC"), 48)
+
+    def reject(*args, **kwargs):
+        raise ValueError("overlapping subgoals disagree on a target bond")
+
+    monkeypatch.setattr(
+        "compose_v4.control.route_distilled_goal_expert.execute_complete_region_program",
+        reject,
+    )
+    candidates, telemetry = propose_route_expert_candidates(
+        source,
+        _expert(),
+        pool_size=2,
+        realization_limit=2,
+    )
+
+    assert candidates == []
+    assert telemetry["realization_status_counts"] == {"invalid_composed_target": 1}

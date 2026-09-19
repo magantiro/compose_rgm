@@ -31,6 +31,7 @@ from compose_v4.rewrite.trace_shard import encode_state
 TEMPLATE_SCHEMA = "structural_delta_template_v1"
 MARGINAL_SCHEMA = "t4_structural_subgoal_marginal_v1"
 RANKER_SCHEMA = "t4_structural_subgoal_context_ranker_v1"
+REWRITE_SCALE_BANDS = ("local", "medium", "large")
 
 
 @dataclass(frozen=True)
@@ -551,6 +552,73 @@ class ProposedStructuralGoal:
         return encode_state(self.endpoint)
 
 
+def structural_rewrite_event_count(template: StructuralDeltaTemplate) -> int:
+    """Count target-graph changes without depending on an executor schedule.
+
+    The count is a target-independent proposal-selection coordinate.  It is not
+    reported as a primitive count; exact protected primitive counts are measured
+    only after realization.
+    """
+
+    n_input = len(template.input_atoms)
+    atom_events = len(template.output_atoms) + sum(
+        after is None or before != after
+        for before, after in zip(template.input_atoms, template.target_atoms, strict=True)
+    )
+    bond_events = 0
+    n_target = len(template.target_bonds)
+    for left in range(n_target):
+        for right in range(left + 1, n_target):
+            before = template.input_bonds[left][right] if left < n_input and right < n_input else 0
+            if before != template.target_bonds[left][right]:
+                bond_events += 1
+    return max(1, atom_events + bond_events)
+
+
+def proposal_rewrite_event_count(proposal: ProposedStructuralGoal) -> int:
+    """Return the schedule-free edit mass of a complete region proposal."""
+
+    return sum(structural_rewrite_event_count(row) for row in proposal.templates)
+
+
+def proposal_rewrite_scale(proposal: ProposedStructuralGoal) -> str:
+    """Assign a generic local/medium/large band before exact realization."""
+
+    events = proposal_rewrite_event_count(proposal)
+    if events <= 3:
+        return "local"
+    if events <= 11:
+        return "medium"
+    return "large"
+
+
+def select_scale_balanced_proposals(
+    rows: list[ProposedStructuralGoal], limit: int
+) -> list[ProposedStructuralGoal]:
+    """Interleave ranked scale bands while preserving order within each band."""
+
+    buckets = {
+        band: [row for row in rows if proposal_rewrite_scale(row) == band]
+        for band in REWRITE_SCALE_BANDS
+    }
+    positions = {band: 0 for band in REWRITE_SCALE_BANDS}
+    selected: list[ProposedStructuralGoal] = []
+    while len(selected) < limit:
+        added = False
+        for band in REWRITE_SCALE_BANDS:
+            position = positions[band]
+            if position >= len(buckets[band]):
+                continue
+            selected.append(buckets[band][position])
+            positions[band] += 1
+            added = True
+            if len(selected) == limit:
+                break
+        if not added:
+            break
+    return selected
+
+
 def _single_goal_candidates(
     source: MolecularGraph,
     templates: tuple[StructuralDeltaTemplate, ...],
@@ -616,6 +684,7 @@ def propose_structural_goals(
     beam_width: int = 64,
     expansion_width: int = 48,
     max_bindings_per_template: int = 8,
+    scale_balanced: bool = False,
 ) -> tuple[list[ProposedStructuralGoal], dict]:
     """Rebind and compose training-fold deltas into a teacher-free candidate pool."""
 
@@ -649,8 +718,12 @@ def propose_structural_goals(
     singles.sort(
         key=lambda row: (-row.score, canonical_state_key(row.endpoint), row.constituent_keys)
     )
-    expansion = singles[:expansion_width]
-    frontier = singles[:beam_width]
+    if scale_balanced:
+        expansion = select_scale_balanced_proposals(singles, expansion_width)
+        frontier = select_scale_balanced_proposals(singles, beam_width)
+    else:
+        expansion = singles[:expansion_width]
+        frontier = singles[:beam_width]
     all_rows = list(singles)
     telemetry = Counter(telemetry)
     seen = {(len(row.templates), canonical_state_key(row.endpoint)): row for row in singles}
@@ -713,7 +786,11 @@ def propose_structural_goals(
                 row.constituent_keys,
             )
         )
-        frontier = next_rows[:beam_width]
+        frontier = (
+            select_scale_balanced_proposals(next_rows, beam_width)
+            if scale_balanced
+            else next_rows[:beam_width]
+        )
         all_rows.extend(frontier)
         telemetry[f"valid_depth_{depth}"] = len(next_rows)
         if not frontier:
@@ -727,10 +804,21 @@ def propose_structural_goals(
             tuple(reversed(previous.constituent_keys)),
         ):
             best_by_endpoint[key] = row
-    result = sorted(
+    ranked = sorted(
         best_by_endpoint.values(),
         key=lambda row: (-row.score, canonical_state_key(row.endpoint), row.constituent_keys),
-    )[:pool_size]
+    )
+    result = (
+        select_scale_balanced_proposals(ranked, pool_size) if scale_balanced else ranked[:pool_size]
+    )
+    telemetry["scale_balanced"] = int(scale_balanced)
+    for band in REWRITE_SCALE_BANDS:
+        telemetry[f"available_{band}_rewrite_proposals"] = sum(
+            proposal_rewrite_scale(row) == band for row in ranked
+        )
+        telemetry[f"selected_{band}_rewrite_proposals"] = sum(
+            proposal_rewrite_scale(row) == band for row in result
+        )
     telemetry["unique_ranked_endpoints"] = len(result)
     telemetry["candidate_shortfall"] = max(0, pool_size - len(result))
     return result, dict(sorted(telemetry.items()))
@@ -747,7 +835,11 @@ __all__ = [
     "materialize_template",
     "minimize_subgoal",
     "proposal_features",
+    "proposal_rewrite_event_count",
+    "proposal_rewrite_scale",
     "propose_structural_goals",
+    "select_scale_balanced_proposals",
+    "structural_rewrite_event_count",
     "template_features",
     "transfer_bindings",
 ]

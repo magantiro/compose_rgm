@@ -1,0 +1,64 @@
+{
+  "payload": {
+    "schema_version": "t4_shared_retained_fiber_scored_contract_v1",
+    "status": "AUTHORIZED_FROZEN_PRIMARY_CONTROLLER",
+    "scientific_problem": "test whether the primary shared COMPOSE controller converts repaired teacher-scale PARP1 proposal support into docking utility",
+    "primary_model_output": "target-reward-adapted selection over shallow, anchored and scale-balanced shared retained-subgraph rewrite programs",
+    "central_claim_under_test": "a shared route proposal law plus online FiberControl can enter and refine the strong PARP1 basin that the earlier short-scale route lane could not reach",
+    "experimental_setting": "prospective three-seed PARP1 delta=0.6 development evaluation under one frozen 49-call-per-cell controller",
+    "cells": [
+      {"cell": "parp1_0", "source_global_index": 0, "smiles": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3", "controller_seed": 2026091900},
+      {"cell": "parp1_1", "source_global_index": 1, "smiles": "COc1[nH]c3cccc2C(=O)NCCc1c23", "controller_seed": 2026091901},
+      {"cell": "parp1_2", "source_global_index": 2, "smiles": "O/N=C/c1cn3CCNC(=O)c2cccc1c23", "controller_seed": 2026091902}
+    ],
+    "delta": 0.6,
+    "support": "compose_valid",
+    "charged_calls_per_cell": 49,
+    "total_charged_call_ceiling": 147,
+    "batch": 8,
+    "parents": 4,
+    "parent_explore": 0.3,
+    "exploration": 2,
+    "expert_floor_rounds": 2,
+    "route_scale_floor_rounds": 2,
+    "value_penalty": 1.0,
+    "docking_seed": 20260919,
+    "proposal": {
+      "shallow": {"draws": 480, "horizon": 3},
+      "anchored_replacement": {"draws": 512, "horizon": 3},
+      "route_complete_region": {
+        "pool_size": 192,
+        "realization_limit": 96,
+        "beam_width": 48,
+        "expansion_width": 48,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "scale_balanced": true,
+        "training_scope": "one shared task-independent expert fit on all 77 locked routes"
+      }
+    },
+    "round_lock_policy": {"publish_before_docking": true, "no_backfill": true, "automatic_retries": 0},
+    "evaluator_sha256": {"qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0", "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"},
+    "docking_box": [[26.413, 11.282, 27.238], [18.521, 17.479, 19.995]],
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "modal_apps/t4_shared_retained_fiber_parp1_app.py": "6718149d5ac3d10f94799bf2722d7b106769a654b245f49ce249294c9d438de4",
+      "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+      "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "73c574c9e562d80583c01c556e1732e108957eb5271a79850f30db602296b0eb",
+      "src/compose_v4/control/structural_subgoal_policy.py": "d45a2f6b92a69f7462f6c1e2cd5523bc529cedb0a24e5a993aa714a2ade3d2b4",
+      "src/compose_v4/control/structural_subgoal_realizer.py": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_integrated_route_fiber.py": "4a5e1de25e0478b7572d333103ac3d5fe7ff46a1fd669acd7b99da4a2757e687"
+    },
+    "zero_oracle_support": {"artifact": "diagnostics/t4_shared_retained_rewrite_v1/shards/parp1_1.json", "sha256": "f881e9b74d20bd811883d79bef7b1fff59a221e76e4b38813c07a35c6a540662", "result": "96 exact programs, 32 large, 10 eligible at delta 0.6, four exact known endpoints including the 14- and 17-primitive witnesses"},
+    "reported_ivg_delta_0_6": {"parp1_0": -12.3, "parp1_1": -11.533333333333333, "parp1_2": -10.1},
+    "primary_baselines": "measured roots, frozen prior PARP1 integrated run, and reported IVG means; no comparator enters runtime",
+    "claim_boundary": "primary shared-controller PARP1 development evaluation under one docking seed; same weights and proposal law on all cells, no endpoint injection or cell-to-winner lookup"
+  },
+  "payload_sha256": "15bd03106e565a5eb9e46aa105c05053f6fde01263cc4a14633a6dac4a04750b"
+}
