@@ -181,8 +181,8 @@ committed state is checked for validity and connectedness. Each retained
 fragment is rechecked in every state after its construction/attachment lock.
 Motif extension, scaffold decoration, and superstructure generation preserve
 their one retained core and add generic carbon extensions at declared sites (or
-the first deterministic hydrogen-bearing site for superstructure inputs, which
-declare no site).
+the first deterministic implicit-hydrogen site for superstructure inputs,
+which declare no site).
 
 The runner is deliberately not a learned controller and does not evaluate QED,
 SA, similarity, docking, or another objective. It may abstain on active-atom,
@@ -220,3 +220,24 @@ explicit chiral hydrogen and its generic extension was over-valent. This is a
 runner defect found by the frozen panel, not evidence that the prompt itself is
 unsupported. The v1 contract, full receipts, per-task metrics, and failure
 detail are under `diagnostics/fragment_constrained_proposal_panel_v1/`.
+
+A focused regression then restricted the generic superstructure site to a
+replaceable implicit hydrogen. The separately frozen v2 panel kept all prompts,
+limits, attempt counts, and metrics unchanged. It completed all 50/50 proposals
+with 50/50 conditional constraint precision and 50/50 exact-valid execution
+yield. Every individual task label was 10/10 on each measure, with zero
+abstentions, constraint failures, or unexpected failures. The 50 completed
+proposals contain 40 unique endpoints overall and ten unique endpoints within
+each label. The cross-label duplication is expected because scaffold morphing
+reuses the ten linker-design prompts and the deterministic proposal law.
+
+```bash
+PYTHONPATH=src ../../.venv/bin/python \
+  tools/fragment_constrained_proposal_panel.py \
+  --contract configs/fragment_constrained_proposal_panel_v2.json \
+  --output diagnostics/fragment_constrained_proposal_panel_v2/result.json
+```
+
+The authoritative repaired artifact and per-prompt exact receipts are under
+`diagnostics/fragment_constrained_proposal_panel_v2/`. Neither v1 nor v2 calls
+an oracle or reports the released 100-sample benchmark metrics.

@@ -129,3 +129,20 @@ def test_frozen_manifest_smoke_is_exactly_one_prompt_per_task() -> None:
     assert [row["task"] for row in smoke["proposals"]] == [
         task.value for task in FragmentTask
     ]
+
+
+def test_superstructure_skips_explicit_chiral_hydrogen_site() -> None:
+    prompt = next(
+        prompt
+        for prompt in load_genmol_prompts(ASSET)
+        if prompt.drug_name == "FUTIBATINIB"
+        and prompt.task is FragmentTask.SUPERSTRUCTURE_GENERATION
+    )
+
+    proposal = propose_prompt(prompt)
+
+    assert proposal["status"] == "complete"
+    assert check_fragment_constraint(prompt, proposal["endpoint"]).satisfied
+    states = [decode_state(row) for row in proposal["receipt"]["states"]]
+    assert all(is_valid_state(state) for state in states)
+    assert all(is_connected_or_null(state) for state in states)

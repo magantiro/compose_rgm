@@ -247,10 +247,14 @@ def _linker_plan(prompt: FragmentPrompt, variant_index: int) -> _CandidatePlan:
 
 def _first_extendable_atom(molecule: Chem.Mol) -> int:
     for atom in molecule.GetAtoms():
-        if atom.GetAtomicNum() > 1 and atom.GetTotalNumHs() > 0:
+        # An explicit hydrogen, for example the H in ``[C@H]``, remains part of
+        # RDKit's atom valence when a bond is added. Restrict this generic
+        # substitution to an implicit H that sanitization can consume.
+        if atom.GetAtomicNum() > 1 and atom.GetNumImplicitHs() > 0:
             return atom.GetIdx()
     raise FragmentProposalAbstention(
-        "no_generic_extension_site", "the retained core has no hydrogen-bearing atom"
+        "no_generic_extension_site",
+        "the retained core has no atom with a replaceable implicit hydrogen",
     )
 
 
