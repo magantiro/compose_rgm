@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REMOTE = Path("/compose")
 OUTPUT = Path("/braf_funnel")
 CONTRACT = "configs/t4_braf_first_round_funnel_v1.json"
+SOURCE_CONTRACT = "configs/t4_integrated_route_fiber_braf_v1.json"
 ROUTE_SMOKE = "diagnostics/t4_integrated_route_fiber_braf_v1/route_expert_smoke.json"
 VOLUME_NAME = "compose-t4-braf-first-round-funnel-v1"
 
@@ -27,6 +28,7 @@ image = (
     )
     .add_local_dir(ROOT / "src", str(REMOTE / "src"), copy=True)
     .add_local_file(ROOT / CONTRACT, str(REMOTE / CONTRACT), copy=True)
+    .add_local_file(ROOT / SOURCE_CONTRACT, str(REMOTE / SOURCE_CONTRACT), copy=True)
     .add_local_file(ROOT / ROUTE_SMOKE, str(REMOTE / ROUTE_SMOKE), copy=True)
     .add_local_file(
         ROOT / "modal_apps/t4_braf_first_round_funnel_app.py",
@@ -202,6 +204,17 @@ def finalize(task: dict, summaries: list[dict]) -> dict:
     return payload
 
 
+@app.function(**common, max_containers=1, timeout=2 * 3600)
+def drive(task: dict) -> dict:
+    tasks = [
+        {**task, "cell": cell, "lane": lane}
+        for cell in task["cells"]
+        for lane in task["lanes"]
+    ]
+    summaries = list(audit_worker.map(tasks, order_outputs=True))
+    return finalize.remote(task, summaries)
+
+
 @app.function(**common, max_containers=1, timeout=120)
 def remote_status(task: dict) -> dict:
     volume.reload()
@@ -273,11 +286,16 @@ def main(mode: str = "launch", run_id: str | None = None) -> None:
         return
     if mode != "launch":
         raise ValueError("mode must be launch or status")
-    tasks = [
-        {**task, "cell": cell, "lane": lane}
-        for cell in task["cells"]
-        for lane in task["lanes"]
-    ]
-    summaries = list(audit_worker.map(tasks, order_outputs=True))
-    result = finalize.remote(task, summaries)
-    print(json.dumps(result, indent=2))
+    call = drive.spawn(task)
+    print(
+        json.dumps(
+            {
+                "run_id": task["run_id"],
+                "function_call_id": call.object_id,
+                "volume": VOLUME_NAME,
+                "contract_payload_sha256": task["contract_payload_sha256"],
+                "code_revision": task["code_revision"],
+            },
+            indent=2,
+        )
+    )

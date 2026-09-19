@@ -78,12 +78,12 @@
     "inputs_sha256": {
       "configs/t4_integrated_route_fiber_braf_v1.json": "02bdd7b1d893c569ab145db0ccd65c8bd6c588a2e6db03477693e01167027a08",
       "diagnostics/t4_integrated_route_fiber_braf_v1/route_expert_smoke.json": "e4e2c7f3609bca357876776a70a4059a6b32e488555c829dcf98fbac40fdd014",
-      "modal_apps/t4_braf_first_round_funnel_app.py": "a236b9d92d7f0f4e023542d436cef030d437d26653ded47dc4c6df70f357eb24",
+      "modal_apps/t4_braf_first_round_funnel_app.py": "6c8055b72dc4187820a16263e35f7a8ad0ac14893d639b162ba9dcabec49a360",
       "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
       "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
       "src/compose_v4/experiments/t4_proposal_funnel_audit.py": "6ecc4bff0025799f7bc801ea06432ca6a60c4afa096878c461f406e16cb14c1c"
     },
     "new_oracle_calls": 0
   },
-  "payload_sha256": "b99fda7aa0447460a8de9f48c14d7a76e31f71367ad0fcaaaf0242b09d184bf3"
+  "payload_sha256": "50360c3ef1b881a05e6952428590877319023788eee50a6da4199634329c5270"
 }
