@@ -67,7 +67,10 @@ def _runtime_image() -> modal.Image:
     if not all(path.exists() for path in required):
         return image
     return (
-        image.add_local_dir(CAPSULE_ROOT, str(REMOTE_ROOT), copy=True)
+        image.add_local_file(
+            Path(__file__).resolve(), "/t4_locked_round_recovery_v1_app.py", copy=True
+        )
+        .add_local_dir(CAPSULE_ROOT, str(REMOTE_ROOT), copy=True)
         .add_local_file(
             RECOVERY_MODULE_PATH,
             str(
