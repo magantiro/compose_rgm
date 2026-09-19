@@ -658,6 +658,14 @@ private volumes again contained zero files, query locks, or oracle receipts.
 Bind `COMPOSE_T4_CAMPAIGN_VARIANT=nodistill_parp1_v1` into the remote image and
 preserve this as a second zero-call pre-query failure before a new `attempt_3`.
 
+`attempt_3` demonstrated that Modal deserializes the shared module before image
+environment variables become available. It therefore failed at the same missing
+Full-preparation read, again with all three private volumes empty and zero query
+locks or oracle calls. For `attempt_4`, the sealed capsule must deterministically
+select NoDistill when the Full preparation is absent and the NoDistill preparation
+is present. This is packaging identity resolution only; the scored controller,
+panel, budgets, scale allocation and scientific comparison remain unchanged.
+
 **Amendment, 2026-09-16, bounded scored-pilot extension:** after the zero-oracle
 construction-scale diagnostic measured that the docking value from a benchmark root
 sits at 15 or more primitive edits while the search proposes a median of 5.5, and

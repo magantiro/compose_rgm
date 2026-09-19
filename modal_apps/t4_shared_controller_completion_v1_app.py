@@ -20,6 +20,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 _CAMPAIGN_VARIANT = os.environ.get("COMPOSE_T4_CAMPAIGN_VARIANT", "full")
+if (
+    _CAMPAIGN_VARIANT == "full"
+    and not (ROOT / "configs/t4_shared_controller_completion_v1.json").exists()
+    and (ROOT / "configs/t4_compose_nodistill_parp1_v1.json").exists()
+):
+    _CAMPAIGN_VARIANT = "nodistill_parp1_v1"
 if _CAMPAIGN_VARIANT == "nodistill_parp1_v1":
     from compose_v4.experiments.t4_compose_nodistill_contract import (
         AUTHORIZATION_RELATIVE_PATH,
@@ -1139,7 +1145,7 @@ def _launch_receipt_path(run_id: str) -> Path:
     if _CAMPAIGN_VARIANT == "nodistill_parp1_v1":
         return (
             ROOT
-            / "diagnostics/t4_compose_nodistill_parp1_v1/attempt_3/launches"
+            / "diagnostics/t4_compose_nodistill_parp1_v1/attempt_4/launches"
             / f"{run_id}.json"
         )
     return (

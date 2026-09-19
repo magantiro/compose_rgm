@@ -19,16 +19,16 @@ from compose_v4.experiments.t4_shared_controller_scored_contract import (
 SCHEMA_VERSION = "t4_compose_nodistill_parp1_scored_contract_v1"
 PREPARATION_RELATIVE_PATH = "configs/t4_compose_nodistill_parp1_v1.json"
 FINAL_CONTRACT_RELATIVE_PATH = (
-    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_3/scored_contract.json"
+    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_4/scored_contract.json"
 )
 AUTHORIZATION_RELATIVE_PATH = (
-    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_3/scored_authorization.json"
+    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_4/scored_authorization.json"
 )
 CAPSULE_ROOT_RELATIVE_PATH = (
-    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_3/source_capsule"
+    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_4/source_capsule"
 )
 CAPSULE_MANIFEST_RELATIVE_PATH = (
-    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_3/source_capsule_manifest.json"
+    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_4/source_capsule_manifest.json"
 )
 SUPPORT_RELATIVE_PATH = (
     "diagnostics/t4_retained_core_shared_support_v1/attempt_1/scientific_result.json"
