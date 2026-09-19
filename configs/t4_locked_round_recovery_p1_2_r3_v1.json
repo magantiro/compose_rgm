@@ -43,7 +43,7 @@
       "settlement_action": "recover_with_unresolved"
     },
     "implementation_sha256": {
-      "modal_apps/t4_locked_round_recovery_v1_app.py": "5fcfb0d50d61f8aa6583f0fd02cee98edbfda20717e765cda087505221ae7e6c",
+      "modal_apps/t4_locked_round_recovery_v1_app.py": "166cf5a16326b6cd14842b0e33192b274fa0417b3947c7a3cfbc07f86dab7676",
       "src/compose_v4/experiments/t4_locked_round_recovery.py": "30ba57f1248ddf366c842412144f52f49b794db848724570bfcfc12a1a651b57"
     },
     "launch": {
@@ -107,5 +107,5 @@
     "schema_version": "t4_locked_round_recovery_contract_v1",
     "volume": "compose-t4-shared-completion-v1-parp1-2-d04"
   },
-  "payload_sha256": "2ad612cc948612866d9258006676ba5a12562a2869e0ccf9ecdde1b94b99b483"
+  "payload_sha256": "290500f41f8acec198b1feaba375c730f64cdf7d666eaaeece5188df339d8db0"
 }

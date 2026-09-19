@@ -14,7 +14,8 @@ from typing import Any
 
 import modal
 
-ROOT = Path(__file__).resolve().parents[1]
+MODULE_PATH = Path(__file__).resolve()
+ROOT = Path("/capsule") if MODULE_PATH.parent == Path("/") else MODULE_PATH.parents[1]
 RECOVERY_PATH = ROOT / "configs/t4_locked_round_recovery_p1_2_r3_v1.json"
 RECOVERY_MODULE_PATH = (
     ROOT / "src/compose_v4/experiments/t4_locked_round_recovery.py"
@@ -68,7 +69,7 @@ def _runtime_image() -> modal.Image:
         return image
     return (
         image.add_local_file(
-            Path(__file__).resolve(), "/t4_locked_round_recovery_v1_app.py", copy=True
+            MODULE_PATH, "/t4_locked_round_recovery_v1_app.py", copy=True
         )
         .add_local_dir(CAPSULE_ROOT, str(REMOTE_ROOT), copy=True)
         .add_local_file(
@@ -119,7 +120,7 @@ def _sha256_file(path: Path) -> str:
 def _verify_local_implementation(recovery: dict[str, Any]) -> None:
     expected = recovery.get("implementation_sha256")
     paths = {
-        "modal_apps/t4_locked_round_recovery_v1_app.py": Path(__file__).resolve(),
+        "modal_apps/t4_locked_round_recovery_v1_app.py": MODULE_PATH,
         "src/compose_v4/experiments/t4_locked_round_recovery.py": RECOVERY_MODULE_PATH,
     }
     if not isinstance(expected, dict) or set(expected) != set(paths):
