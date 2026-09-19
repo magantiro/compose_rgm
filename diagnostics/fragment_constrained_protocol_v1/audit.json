@@ -1,0 +1,422 @@
+{
+  "adapter_schema": "compose_fragment_constrained_v1",
+  "counts": {
+    "attachment_count_histogram": {
+      "0": 10,
+      "1": 10,
+      "2": 24,
+      "3": 2,
+      "4": 2,
+      "5": 1,
+      "6": 1
+    },
+    "attempts_per_prompt": 100,
+    "attempts_per_task_per_run": 1000,
+    "drugs": 10,
+    "explicit_prompts": 50,
+    "fragment_count_histogram": {
+      "1": 30,
+      "2": 20
+    },
+    "reference_drug_constraint_checks": 50,
+    "reference_drug_constraint_satisfied": 50,
+    "reported_runs": 3,
+    "task_counts": {
+      "linker_design": 10,
+      "motif_extension": 10,
+      "scaffold_decoration": 10,
+      "scaffold_morphing": 10,
+      "superstructure_generation": 10
+    },
+    "tasks": 5
+  },
+  "input": {
+    "dataset_license": "CC-BY-4.0",
+    "path": "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv",
+    "sha256": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+    "upstream_commit": "add09fc83b7255bd09c797e527c0f4b51f5fb7c1",
+    "upstream_path": "data/fragments.csv",
+    "upstream_repository": "https://github.com/NVIDIA-BioNeMo/genmol"
+  },
+  "limitations": [
+    "no COMPOSE candidates generated or scored",
+    "InVirtuoGen superstructure attachment prompts are randomized before seed initialization",
+    "connected-or-null COMPOSE runtime needs a protected two-fragment linker proposal contract"
+  ],
+  "metrics": {
+    "central_distance": "mean distance to original; Morgan radius=2 bits=1024",
+    "compose_addition": "explicit fragment-constraint validity",
+    "diversity": "mean pairwise Tanimoto distance; Morgan radius=2 bits=2048",
+    "quality": "unique valid QED>=0.6 and SA<=4 outputs / 100 attempts",
+    "uniqueness": "unique valid outputs / valid outputs",
+    "validity": "valid outputs / 100 attempts"
+  },
+  "provenance": {
+    "adapter_path": "src/compose_v4/benchmark/fragment_constrained.py",
+    "adapter_sha256": "cd9113a6afd22e833de462a0ad7d816ed170e8bde0d9d5577d7cae98caf0ddc6",
+    "code_revision": "c23963269724f240532679925ee7d8efa93cfada",
+    "deterministic": true,
+    "oracle_calls": 0,
+    "python": "3.12.9",
+    "rdkit": "2026.03.6"
+  },
+  "reported_comparators": {
+    "evidence_class": "reported",
+    "field_order": [
+      "validity_percent",
+      "uniqueness_percent",
+      "quality_percent",
+      "diversity"
+    ],
+    "source": "InVirtuoGen arXiv:2509.26405v2 Table 4",
+    "table": {
+      "average": {
+        "GenMol": [
+          [
+            62.08,
+            0.242
+          ],
+          [
+            87.88,
+            0.436
+          ],
+          [
+            21.06,
+            0.263
+          ],
+          [
+            0.57,
+            0.002
+          ]
+        ],
+        "InVirtuoGen": [
+          [
+            71.22,
+            0.399
+          ],
+          [
+            90.87,
+            0.445
+          ],
+          [
+            29.55,
+            0.813
+          ],
+          [
+            0.59,
+            0.001
+          ]
+        ],
+        "SAFE-GPT": [
+          [
+            85.0,
+            1.788
+          ],
+          [
+            75.48,
+            1.773
+          ],
+          [
+            16.26,
+            1.031
+          ],
+          [
+            0.55,
+            0.006
+          ]
+        ]
+      },
+      "linker_design": {
+        "GenMol_one_step": [
+          [
+            16.7,
+            0.2
+          ],
+          [
+            97.8,
+            0.5
+          ],
+          [
+            4.3,
+            0.4
+          ],
+          [
+            0.53,
+            0.002
+          ]
+        ],
+        "InVirtuoGen": [
+          [
+            60.37,
+            0.573
+          ],
+          [
+            84.76,
+            1.62
+          ],
+          [
+            22.33,
+            1.25
+          ],
+          [
+            0.52,
+            0.004
+          ]
+        ],
+        "SAFE-GPT": [
+          [
+            76.6,
+            5.1
+          ],
+          [
+            82.5,
+            1.9
+          ],
+          [
+            21.7,
+            1.1
+          ],
+          [
+            0.545,
+            0.007
+          ]
+        ]
+      },
+      "motif_extension": {
+        "GenMol": [
+          [
+            82.9,
+            0.1
+          ],
+          [
+            77.5,
+            0.1
+          ],
+          [
+            30.1,
+            0.4
+          ],
+          [
+            0.617,
+            0.002
+          ]
+        ],
+        "InVirtuoGen": [
+          [
+            68.97,
+            0.759
+          ],
+          [
+            96.83,
+            0.29
+          ],
+          [
+            39.27,
+            1.078
+          ],
+          [
+            0.62,
+            0.005
+          ]
+        ],
+        "SAFE-GPT": [
+          [
+            96.1,
+            1.9
+          ],
+          [
+            66.8,
+            1.2
+          ],
+          [
+            18.6,
+            2.1
+          ],
+          [
+            0.562,
+            0.003
+          ]
+        ]
+      },
+      "scaffold_decoration": {
+        "GenMol": [
+          [
+            96.6,
+            0.8
+          ],
+          [
+            82.7,
+            1.8
+          ],
+          [
+            31.8,
+            0.5
+          ],
+          [
+            0.591,
+            0.001
+          ]
+        ],
+        "InVirtuoGen": [
+          [
+            90.7,
+            0.616
+          ],
+          [
+            88.58,
+            1.13
+          ],
+          [
+            36.37,
+            1.096
+          ],
+          [
+            0.56,
+            0.003
+          ]
+        ],
+        "SAFE-GPT": [
+          [
+            97.7,
+            0.3
+          ],
+          [
+            74.7,
+            2.5
+          ],
+          [
+            10.0,
+            1.4
+          ],
+          [
+            0.575,
+            0.008
+          ]
+        ]
+      },
+      "scaffold_morphing": {
+        "GenMol_one_step": [
+          [
+            16.7,
+            0.2
+          ],
+          [
+            97.8,
+            0.5
+          ],
+          [
+            4.3,
+            0.4
+          ],
+          [
+            0.53,
+            0.002
+          ]
+        ],
+        "InVirtuoGen": [
+          [
+            60.37,
+            0.573
+          ],
+          [
+            84.76,
+            1.62
+          ],
+          [
+            22.33,
+            1.25
+          ],
+          [
+            0.52,
+            0.004
+          ]
+        ],
+        "SAFE-GPT": [
+          [
+            58.9,
+            6.8
+          ],
+          [
+            70.4,
+            5.7
+          ],
+          [
+            16.7,
+            2.3
+          ],
+          [
+            0.514,
+            0.011
+          ]
+        ]
+      },
+      "superstructure_generation": {
+        "GenMol": [
+          [
+            97.5,
+            0.9
+          ],
+          [
+            83.6,
+            1.0
+          ],
+          [
+            34.8,
+            1.0
+          ],
+          [
+            0.599,
+            0.009
+          ]
+        ],
+        "InVirtuoGen": [
+          [
+            75.7,
+            0.898
+          ],
+          [
+            99.41,
+            0.157
+          ],
+          [
+            27.43,
+            0.953
+          ],
+          [
+            0.73,
+            0.001
+          ]
+        ],
+        "SAFE-GPT": [
+          [
+            95.7,
+            2.0
+          ],
+          [
+            83.0,
+            5.9
+          ],
+          [
+            14.3,
+            3.7
+          ],
+          [
+            0.573,
+            0.028
+          ]
+        ]
+      }
+    },
+    "value_encoding": "[mean, standard_deviation]"
+  },
+  "schema": "fragment_constrained_protocol_audit_v1",
+  "scientific_scope": "SAFE-drug fragment-constrained conditional generation",
+  "sources": {
+    "genmol_paper": "https://arxiv.org/abs/2501.06158",
+    "invirtuogen_commit": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "invirtuogen_paper": "https://arxiv.org/abs/2509.26405",
+    "safe_commit": "d162d23e3e8c8a77b54c559e88a35d08b3b1d1b5",
+    "safe_paper": "https://arxiv.org/abs/2310.10773"
+  },
+  "status": "zero_oracle_adapter_ready"
+}
