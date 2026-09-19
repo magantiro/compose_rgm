@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 
 from compose_v4.experiments.t4_integrated_route_fiber_v2 import (
@@ -261,6 +263,7 @@ def test_v1_checkpoint_migration_charges_unresolved_lock_without_retry():
         "legacy_unresolved_locked_query_after_preemption"
     }
     assert migrated["migration_provenance"]["legacy_unresolved_charged_calls"] == 1
+    json.dumps(migrated, sort_keys=True, allow_nan=False)
 
 
 def test_v1_checkpoint_migration_rejects_unbound_round_lock():

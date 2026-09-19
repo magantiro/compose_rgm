@@ -139,7 +139,7 @@
       "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
       "src/compose_v4/experiments/t4_integrated_route_fiber.py": "4a5e1de25e0478b7572d333103ac3d5fe7ff46a1fd669acd7b99da4a2757e687",
       "modal_apps/t4_shared_retained_fiber_jak2_v2_app.py": "cd7808ce9d94ae06fb780e8132422b09cb20f59dc79bfa7b8e50df7f05233f5d",
-      "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "86459f2df8d70b51e8e06f86836f6d3cc4fedcdd42b2c3a93e2604a4271c151c"
+      "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "aeee1616ed67c5af77de7da8eae4519ddedda929618286d6d966868d543503ed"
     },
     "zero_oracle_support": {
       "artifacts": [
@@ -178,5 +178,5 @@
     "phase_poll_seconds": 5,
     "prior_operational_waste": 24
   },
-  "payload_sha256": "f7ea500332f32facba88e0c985ef1d680cc97fa6c878169e95c6c8c0e636b281"
+  "payload_sha256": "76b71da1d6158ba9f41f9ee1a71efa72b6d39f66114090fe7c850ac1f2b30928"
 }

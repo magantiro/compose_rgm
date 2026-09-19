@@ -223,6 +223,13 @@ def migrate_v1_checkpoint(
                 expert_floor_rounds=int(expert_floor_rounds),
                 route_scale_floor_rounds=int(route_scale_floor_rounds),
             )
+            selected = [
+                {
+                    **row,
+                    "fingerprint": sorted(row.get("fingerprint") or []),
+                }
+                for row in selected
+            ]
             migrated_rng_state = replay_rng.bit_generator.state
         if len(queries) != len(selected):
             raise ValueError("legacy unresolved lock has misaligned selected queries")
