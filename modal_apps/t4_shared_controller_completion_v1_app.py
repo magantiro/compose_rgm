@@ -328,6 +328,7 @@ def _proposal_answer(
     from compose_v4.experiments.t4_shared_controller_scored_runtime import (
         attach_endpoint_fingerprints,
         attach_generic_scale_band,
+        protonation_aware_records,
         retained_core_route_records,
     )
 
@@ -401,6 +402,17 @@ def _proposal_answer(
             "distilled_route": route_telemetry,
             "retained_core": retained_telemetry,
         }
+    elif expert_name == "protonation_aware_retained_subgraph":
+        records, telemetry = protonation_aware_records(
+            parent=request["parent"],
+            parent_score=request["parent_score"],
+            original_seed=cell["source_smiles"],
+            delta=cell["delta"],
+            support=contract["support"],
+            proposal_seed_value=request["proposal_seed"],
+            route_expert=_load_route_expert(contract),
+            settings=controller["proposal"][expert_name],
+        )
     else:
         raise ValueError(f"unknown proposal expert: {expert_name}")
     if not contract.get("trajectory_distillation", {"enabled": True})["enabled"]:
@@ -731,9 +743,8 @@ def _drive_cell(
         select_parent_and_batch,
     )
     from compose_v4.experiments.t4_shared_controller_scored_runtime import (
-        attach_endpoint_fingerprints,
+        admit_runtime_proposal_pools,
         checkpoint_controller_config,
-        filter_stale_braf_candidates,
         make_proposal_manifest,
         particle_parent_manifest,
         preview_selected_parents,
@@ -968,9 +979,7 @@ def _drive_cell(
             time.sleep(settings["driver_poll_seconds"])
 
         pools: dict[str, list[dict[str, Any]]] = {
-            "shallow": [],
-            "anchored_replacement": [],
-            "route_complete_region": [],
+            expert: [] for expert in manifest["proposal_experts"]
         }
         route_by_parent = {parent: [] for parent in manifest["parents"]}
         receipt_statuses: dict[str, int] = {}
@@ -1028,17 +1037,10 @@ def _drive_cell(
                     }
                 )
 
-        for expert_name, rows in pools.items():
-            if expert_name == "route_complete_region":
-                rows = _fiber_gate_route_rows(rows, cell=cell, contract=contract)
-            pools[expert_name] = attach_endpoint_fingerprints(
-                rows,
-                original_seed=cell["source_smiles"],
-                delta=cell["delta"],
-                support=contract["support"],
-            )
-        pools, exclusion_ledger = filter_stale_braf_candidates(
-            pools, cell=cell, contract=contract
+        pools, admission_ledger = admit_runtime_proposal_pools(
+            pools,
+            cell=cell,
+            contract=contract,
         )
         _publish_or_assert(
             store,
@@ -1051,7 +1053,8 @@ def _drive_cell(
                 "eligible_by_expert": {
                     expert_name: len(rows) for expert_name, rows in pools.items()
                 },
-                "stale_braf_exclusions": exclusion_ledger,
+                "runtime_admission": admission_ledger,
+                "stale_braf_exclusions": admission_ledger["stale_query_exclusions"],
                 "particle_telemetry": particle_telemetry,
             },
         )

@@ -23,6 +23,7 @@ from compose_v4.experiments.t4_integrated_route_fiber import (
     integrated_features,
     merge_expert_pools,
     select_batch,
+    validate_expert_vocabulary,
 )
 from compose_v4.experiments.t4_shared_controller_cell_runtime import (
     make_query_lock,
@@ -162,7 +163,18 @@ def _validate_controller_config(config: Mapping[str, Any]) -> dict[str, Any]:
     scope = normalized.get("scale_floor_scope", "route_prior")
     if scope not in {"route_prior", "all_generic"}:
         raise ValueError(f"unknown controller scale_floor_scope: {scope!r}")
+    proposal_experts = normalized.get("proposal_experts")
+    if proposal_experts is not None:
+        if not isinstance(proposal_experts, list):
+            raise TypeError("controller proposal_experts must be a list")
+        normalized["proposal_experts"] = list(
+            validate_expert_vocabulary(proposal_experts)
+        )
     return normalized
+
+
+def _configured_experts(config: Mapping[str, Any]) -> tuple[str, ...]:
+    return validate_expert_vocabulary(config.get("proposal_experts", EXPERTS))
 
 
 def _validate_expected_binding(
@@ -483,15 +495,17 @@ def _normalize_proposal_pools(
     *,
     state: SearchState,
     parents: list[str],
+    experts: tuple[str, ...],
 ) -> dict[str, list[dict[str, Any]]]:
     if not isinstance(proposal_pools, Mapping):
         raise TypeError("proposal pools must be a mapping")
-    unknown = sorted(set(proposal_pools).difference(EXPERTS))
+    experts = validate_expert_vocabulary(experts)
+    unknown = sorted(set(proposal_pools).difference(experts))
     if unknown:
         raise ValueError(f"unknown proposal pools: {unknown}")
     parent_set = set(parents)
-    normalized = {expert: [] for expert in EXPERTS}
-    for expert in EXPERTS:
+    normalized = {expert: [] for expert in experts}
+    for expert in experts:
         rows = proposal_pools.get(expert, ())
         for source in rows:
             if not isinstance(source, Mapping):
@@ -513,6 +527,34 @@ def _normalize_proposal_pools(
             row["fingerprint"] = set(fingerprint)
             normalized[expert].append(row)
     return normalized
+
+
+def admit_candidate_union(
+    proposal_pools: Mapping[str, Iterable[Mapping[str, Any]]],
+    *,
+    state: SearchState,
+    parents: list[str],
+    experts: tuple[str, ...] = EXPERTS,
+) -> list[dict[str, Any]]:
+    """Apply the exact runtime deduplication and seen-candidate admission path."""
+
+    experts = validate_expert_vocabulary(experts)
+    pools = _normalize_proposal_pools(
+        proposal_pools,
+        state=state,
+        parents=parents,
+        experts=experts,
+    )
+    merged = merge_expert_pools(pools, experts=experts)
+    candidates = []
+    for source in merged:
+        if source["smiles"] in state.archive:
+            continue
+        row = dict(source)
+        row["features"] = integrated_features(row, state, experts=experts)
+        row["fingerprint"] = set(row["fingerprint"])
+        candidates.append(row)
+    return candidates
 
 
 def _serialize_selected(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -555,6 +597,7 @@ def select_parent_and_batch(
         raise RuntimeError("terminal checkpoint may not select another round")
     deadline = _finite_number(query_deadline, label="query deadline")
     config = restored.config
+    experts = _configured_experts(config)
     state = restored.state
     rng = restored.rng
     round_index = state.rounds + 1
@@ -563,16 +606,12 @@ def select_parent_and_batch(
         rng=rng,
         explore=float(config["parent_explore"]),
     )
-    pools = _normalize_proposal_pools(proposal_pools, state=state, parents=parents)
-    merged = merge_expert_pools(pools)
-    candidates = []
-    for source in merged:
-        if source["smiles"] in state.archive:
-            continue
-        row = dict(source)
-        row["features"] = integrated_features(row, state)
-        row["fingerprint"] = set(row["fingerprint"])
-        candidates.append(row)
+    candidates = admit_candidate_union(
+        proposal_pools,
+        state=state,
+        parents=parents,
+        experts=experts,
+    )
     room = min(int(config["batch"]), state.budget)
     selected = select_batch(
         candidates,
@@ -586,6 +625,7 @@ def select_parent_and_batch(
         route_scale_floor_rounds=int(config["route_scale_floor_rounds"]),
         route_scale_floor_counts=config.get("route_scale_floor_counts"),
         scale_floor_scope=str(config.get("scale_floor_scope", "route_prior")),
+        experts=experts,
     )
     if not selected:
         terminal = copy.deepcopy(restored.checkpoint)
@@ -860,6 +900,7 @@ __all__ = [
     "ROUND_PLAN_SCHEMA",
     "RUNNING",
     "RestoredController",
+    "admit_candidate_union",
     "apply_settled_observations",
     "initialize_after_settled_root",
     "restore_checkpoint",

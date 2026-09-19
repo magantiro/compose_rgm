@@ -5,6 +5,10 @@ from pathlib import Path
 
 import pytest
 
+from compose_v4.experiments.t4_integrated_route_fiber import (
+    EXPERTS,
+    PROTONATION_AWARE_EXPERT,
+)
 from compose_v4.experiments.t4_shared_controller_cell_runtime import (
     QUERY_RECEIPT_SCHEMA,
     make_query_lock,
@@ -21,11 +25,13 @@ from compose_v4.experiments.t4_shared_controller_scored_runtime import (
     AUTHORIZATION_SCHEMA,
     RETAINED_CORE_CONFIG,
     RETAINED_CORE_REFINE_CONFIG,
+    admit_runtime_proposal_pools,
     attach_endpoint_fingerprints,
     attach_generic_scale_band,
     make_launch_task,
     make_proposal_manifest,
     preview_selected_parents,
+    protonation_aware_records,
     retained_core_prune_refine_records,
     retained_core_route_records,
     validate_authorization_receipt,
@@ -89,7 +95,7 @@ def _authorization():
     }
 
 
-def _checkpoint():
+def _checkpoint(controller=CONTROLLER):
     lock = make_query_lock(
         cell_key=CELL["cell_key"],
         round_index=0,
@@ -110,7 +116,7 @@ def _checkpoint():
         source_smiles=CELL["source_smiles"],
         delta=CELL["delta"],
         budget_ceiling=49,
-        controller_config=CONTROLLER,
+        controller_config=controller,
         controller_seed=CELL["controller_seed"],
         root_query_lock=lock,
         settled_root=settled,
@@ -202,6 +208,186 @@ def test_parent_preview_and_proposal_manifest_do_not_advance_checkpoint():
     ]
     assert manifest["retained_core"] == RETAINED_CORE_CONFIG
     assert manifest["base_checkpoint_payload_sha256"] == payload_identity(checkpoint)
+
+
+def test_fourth_expert_is_appended_without_changing_existing_seed_streams():
+    checkpoint = _checkpoint()
+    legacy_contract = {**CONTRACT, "cells": [CELL], "support": "compose_valid"}
+    legacy = make_proposal_manifest(
+        checkpoint=checkpoint,
+        cell=CELL,
+        contract=legacy_contract,
+        round_index=1,
+        deadline=10.0,
+        particle_manifests={
+            CELL["source_smiles"]: {
+                "payload": {"job_count": 28},
+                "payload_sha256": "e" * 64,
+            }
+        },
+    )
+    fourth_controller = copy.deepcopy(CONTROLLER)
+    fourth_controller["proposal_experts"] = [*EXPERTS, PROTONATION_AWARE_EXPERT]
+    fourth_controller["proposal"][PROTONATION_AWARE_EXPERT] = {"shallow_draws": 1}
+    extended = make_proposal_manifest(
+        checkpoint=_checkpoint(fourth_controller),
+        cell=CELL,
+        contract={
+            **legacy_contract,
+            "controller": fourth_controller,
+            "trajectory_distillation": {"enabled": True},
+        },
+        round_index=1,
+        deadline=10.0,
+        particle_manifests={
+            CELL["source_smiles"]: {
+                "payload": {"job_count": 28},
+                "payload_sha256": "e" * 64,
+            }
+        },
+    )
+
+    assert extended["proposal_experts"] == [*EXPERTS, PROTONATION_AWARE_EXPERT]
+    keys = ("parent", "parent_index", "expert", "proposal_seed")
+    assert [{key: row[key] for key in keys} for row in extended["requests"][:3]] == [
+        {key: row[key] for key in keys} for row in legacy["requests"]
+    ]
+    assert extended["requests"][3]["expert"] == PROTONATION_AWARE_EXPERT
+
+
+def _stale_binding(*, include: str) -> dict:
+    def hashes(label: str, count: int, extra: tuple[str, ...] = ()) -> list[str]:
+        values = set(extra)
+        index = 0
+        while len(values) < count:
+            values.add(hashlib.sha256(f"{label}-{index}".encode()).hexdigest())
+            index += 1
+        return sorted(values)
+
+    return {
+        "excluded_canonical_smiles_sha256": {
+            "braf_0": hashes("braf-0", 20, (include,)),
+            "braf_1": hashes("braf-1", 23),
+        }
+    }
+
+
+def test_runtime_admission_keeps_unseen_braf_route_after_stale_filter():
+    source = "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC(=O)Nc4ccc(Cl)c(C(F)(F)F)c4)c3)ccnc12"
+    unseen = "CCCNC(=O)c1cnn2c(-c3cccc(NC(=O)NC)c3)ccnc12"
+    stale = "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC)c3)ccnc12"
+    contract = {
+        "support": "compose_valid",
+        "controller": CONTROLLER,
+        "stale_braf_v4_reconciliation": _stale_binding(
+            include=hashlib.sha256(stale.encode()).hexdigest()
+        ),
+    }
+    base = {
+        "parent": source,
+        "parent_score": 0.0,
+        "families": ["route_complete_region"],
+        "program_families": ["route_complete_region"],
+        "realized_primitives": 16,
+        "realized_primitive_band": "large",
+    }
+    pools, ledger = admit_runtime_proposal_pools(
+        {
+            "shallow": [],
+            "anchored_replacement": [],
+            "route_complete_region": [
+                {**base, "smiles": stale},
+                {**base, "smiles": unseen},
+            ],
+        },
+        cell={
+            "target": "braf",
+            "source_cell": "braf_0",
+            "source_smiles": source,
+            "delta": 0.6,
+        },
+        contract=contract,
+    )
+
+    assert [row["smiles"] for row in pools["route_complete_region"]] == [unseen]
+    assert ledger["fiber_admitted_before_stale_by_expert"]["route_complete_region"] == 2
+    assert ledger["stale_query_exclusions"]["excluded_total"] == 1
+    assert ledger["selection_ready_by_expert"]["route_complete_region"] == 1
+
+
+def test_protonation_adapter_and_runtime_admission_are_generic(monkeypatch):
+    source = "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1"
+    endpoint = "C1=CC2=NC=C(CCCN3CCN(CCc4ccccc4)CC3)C2C=C1n1cnnc1"
+
+    monkeypatch.setattr(
+        "compose_v4.experiments.t4_shared_controller_scored_runtime."
+        "propose_protonation_aware_candidates",
+        lambda _source, _route_expert, config: (
+            [
+                {
+                    "smiles": endpoint,
+                    "actions": [{"executor_rule": "atom_protonation_restate"}],
+                    "primitive_edits": 1,
+                    "program_families": [
+                        "atom_protonation_restate",
+                        "charge_only",
+                    ],
+                    "program_kind": "charge_only",
+                    "structural_lane": "charge_only",
+                }
+            ],
+            {"exact_execution_precision_numerator": 1},
+        ),
+    )
+    settings = {
+        "shallow_draws": 1,
+        "retained_maximum_fragment_atoms": 16,
+        "retained_maximum_stages": 2,
+        "retained_maximum_prefixes": 16,
+        "route_pool_size": 1,
+        "route_realization_limit": 1,
+        "route_beam_width": 1,
+        "route_expansion_width": 1,
+        "route_max_bindings_per_template": 1,
+        "route_maximum_expansions": 1,
+        "route_candidate_timeout_seconds": 1.0,
+    }
+    records, telemetry = protonation_aware_records(
+        parent=source,
+        parent_score=0.0,
+        original_seed=source,
+        delta=0.6,
+        support="compose_valid",
+        proposal_seed_value=7,
+        route_expert=object(),
+        settings=settings,
+    )
+    controller = copy.deepcopy(CONTROLLER)
+    controller["proposal_experts"] = [*EXPERTS, PROTONATION_AWARE_EXPERT]
+    controller["proposal"][PROTONATION_AWARE_EXPERT] = settings
+    pools, ledger = admit_runtime_proposal_pools(
+        {
+            "shallow": [],
+            "anchored_replacement": [],
+            "route_complete_region": [],
+            PROTONATION_AWARE_EXPERT: records,
+        },
+        cell={
+            "target": "5ht1b",
+            "source_cell": "5ht1b_2",
+            "source_smiles": source,
+            "delta": 0.6,
+        },
+        contract={
+            "support": "compose_valid",
+            "controller": controller,
+            "trajectory_distillation": {"enabled": True},
+        },
+    )
+
+    assert telemetry["fiber_admitted_unique"] == 1
+    assert [row["smiles"] for row in pools[PROTONATION_AWARE_EXPERT]] == [endpoint]
+    assert ledger["selection_ready_by_expert"][PROTONATION_AWARE_EXPERT] == 1
 
 
 def test_nodistill_launch_and_manifest_disable_only_route_template_particles():

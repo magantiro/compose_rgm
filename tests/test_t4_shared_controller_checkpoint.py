@@ -3,6 +3,10 @@ import json
 
 import pytest
 
+from compose_v4.experiments.t4_integrated_route_fiber import (
+    EXPERTS,
+    PROTONATION_AWARE_EXPERT,
+)
 from compose_v4.experiments.t4_locked_round_recovery import recover_locked_round
 from compose_v4.experiments.t4_shared_controller_cell_runtime import (
     QUERY_RECEIPT_SCHEMA,
@@ -13,6 +17,7 @@ from compose_v4.experiments.t4_shared_controller_cell_runtime import (
 from compose_v4.experiments.t4_shared_controller_checkpoint import (
     CANDIDATE_EXHAUSTION,
     RUNNING,
+    admit_candidate_union,
     apply_settled_observations,
     initialize_after_settled_root,
     restore_checkpoint,
@@ -91,6 +96,39 @@ def _proposal(smiles, expert, parent, parent_score, marker):
         "realized_primitive_band": band,
         "route_proposal_rank": marker + 1,
     }
+
+
+def test_explicit_fourth_expert_uses_exact_seen_and_cross_expert_dedup_path():
+    checkpoint = _initial_checkpoint()
+    state = restore_checkpoint(
+        checkpoint,
+        cell_key=CELL,
+        source_smiles=SOURCE,
+        delta=DELTA,
+        budget_ceiling=BUDGET,
+        controller_config=CONFIG,
+    ).state
+    experts = (*EXPERTS, PROTONATION_AWARE_EXPERT)
+    pools = {expert: [] for expert in experts}
+    pools["shallow"] = [_proposal("N", "shallow", SOURCE, -8.0, 1)]
+    pools[PROTONATION_AWARE_EXPERT] = [
+        _proposal("N", PROTONATION_AWARE_EXPERT, SOURCE, -8.0, 2),
+        _proposal(SOURCE, PROTONATION_AWARE_EXPERT, SOURCE, -8.0, 3),
+    ]
+
+    admitted = admit_candidate_union(
+        pools,
+        state=state,
+        parents=[SOURCE],
+        experts=experts,
+    )
+
+    assert [row["smiles"] for row in admitted] == ["N"]
+    assert admitted[0]["proposal_experts"] == [
+        PROTONATION_AWARE_EXPERT,
+        "shallow",
+    ]
+    assert len(admitted[0]["features"]) == 20
 
 
 def _pools(checkpoint, generation):
@@ -257,9 +295,10 @@ def test_locked_round_recovery_uses_the_existing_plan_and_charges_missing_once()
     assert recovered["settlement"]["action"] == "recover_with_unresolved"
     assert recovered["checkpoint"]["charged_count"] == 9
     assert recovered["checkpoint"]["rounds_completed"] == 1
-    assert recovered["checkpoint"]["rounds"][-1]["observations"][-1][
-        "failure"
-    ] == "unresolved_locked_query_missing"
+    assert (
+        recovered["checkpoint"]["rounds"][-1]["observations"][-1]["failure"]
+        == "unresolved_locked_query_missing"
+    )
 
     tampered = copy.deepcopy(receipts)
     first = next(iter(tampered))

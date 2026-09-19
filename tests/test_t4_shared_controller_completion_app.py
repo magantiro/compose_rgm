@@ -2,6 +2,8 @@ import hashlib
 import inspect
 import json
 
+import pytest
+
 import modal_apps.t4_shared_controller_completion_v1_app as launcher
 import tools.launch_t4_shared_controller_deployed as deployed_launcher
 from compose_v4.experiments.t4_shared_controller_cell_runtime import (
@@ -40,10 +42,10 @@ def test_launcher_registers_nine_private_cell_runtimes_and_is_inert_on_import():
         == {"volume", "proposal", "particle", "dock", "driver", "status"}
         for cell_key in launcher.CELL_KEYS
     )
-    report = launcher.scored_preflight_report()
-    assert report["modal_calls_created"] == 0
-    if not report["ready"]:
-        assert report["missing"]
+    with pytest.raises(
+        ValueError, match="local launcher differs from the exact source capsule"
+    ):
+        launcher.scored_preflight_report()
     main_source = (launcher.ROOT / launcher.APP_RELATIVE_PATH).read_text()
     assert "reserve_driver_generation" in main_source
     assert "_spawn_reserved_drivers" in main_source
@@ -63,8 +65,7 @@ def test_capsule_contains_every_support_gate_material_input():
     included = tuple(CAPSULE_INCLUDE)
     for relative in envelope["payload"]["inputs_sha256"]:
         assert any(
-            relative == item or relative.startswith(f"{item}/")
-            for item in included
+            relative == item or relative.startswith(f"{item}/") for item in included
         ), relative
 
 
@@ -114,9 +115,9 @@ def test_deployed_launcher_spawns_only_pre_reserved_cells(monkeypatch, tmp_path)
         "_replace_launch_receipt",
         lambda _path, payload: published.append(payload),
     )
-    state = reserve_driver_generation(
-        phase_status="running", existing_state=None
-    )["state"]
+    state = reserve_driver_generation(phase_status="running", existing_state=None)[
+        "state"
+    ]
     receipt = {
         "launch": {"cell_keys": ["spawn", "wait"]},
         "cells": {
@@ -143,7 +144,7 @@ def test_deployed_launcher_spawns_only_pre_reserved_cells(monkeypatch, tmp_path)
 def test_driver_filters_bound_stale_braf_hashes_before_pure_selection():
     driver_source = inspect.getsource(launcher._drive_cell)
     assert driver_source.index(
-        "pools, exclusion_ledger = filter_stale_braf_candidates"
+        "pools, admission_ledger = admit_runtime_proposal_pools"
     ) < driver_source.index("plan = select_parent_and_batch")
 
     stale = hashlib.sha256(b"CCO").hexdigest()
@@ -176,6 +177,15 @@ def test_driver_filters_bound_stale_braf_hashes_before_pure_selection():
         "excluded_total": 1,
         "prior_scores_or_receipts_read": False,
     }
+
+
+def test_driver_dispatches_optional_protonation_expert_through_shared_receipts():
+    proposal_source = inspect.getsource(launcher._proposal_answer)
+    driver_source = inspect.getsource(launcher._drive_cell)
+    assert 'expert_name == "protonation_aware_retained_subgraph"' in proposal_source
+    assert "protonation_aware_records(" in proposal_source
+    assert 'expert: [] for expert in manifest["proposal_experts"]' in driver_source
+    assert "admit_runtime_proposal_pools(" in driver_source
 
 
 def test_particle_route_rows_are_fiber_gated_before_query_lock():

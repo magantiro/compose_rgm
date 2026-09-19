@@ -21,18 +21,35 @@ from compose_v4.control.fiber_control import (
 
 SCHEMA_VERSION = "t4_integrated_route_fiber_policy_v1"
 EXPERTS = ("shallow", "anchored_replacement", "route_complete_region")
+PROTONATION_AWARE_EXPERT = "protonation_aware_retained_subgraph"
+SUPPORTED_EXPERT_VOCABULARIES = (
+    EXPERTS,
+    (*EXPERTS, PROTONATION_AWARE_EXPERT),
+)
 
 
-def _experts(record: dict) -> tuple[str, ...]:
+def validate_expert_vocabulary(experts: Iterable[str]) -> tuple[str, ...]:
+    """Validate a versioned expert vocabulary without changing legacy defaults."""
+
+    result = tuple(str(value) for value in experts)
+    if result not in SUPPORTED_EXPERT_VOCABULARIES:
+        raise ValueError(f"unsupported proposal expert vocabulary: {result!r}")
+    return result
+
+
+def _experts(record: dict, *, experts: tuple[str, ...] = EXPERTS) -> tuple[str, ...]:
+    experts = validate_expert_vocabulary(experts)
     values = record.get("proposal_experts") or [record.get("proposal_lane")]
     result = tuple(sorted({str(value) for value in values if value}))
-    unknown = set(result).difference(EXPERTS)
+    unknown = set(result).difference(experts)
     if unknown:
         raise ValueError(f"unknown proposal experts: {sorted(unknown)}")
     return result
 
 
-def merge_expert_pools(pools: dict[str, Iterable[dict]]) -> list[dict]:
+def merge_expert_pools(
+    pools: dict[str, Iterable[dict]], *, experts: tuple[str, ...] = EXPERTS
+) -> list[dict]:
     """Canonical endpoint union with complete, deterministic origin provenance.
 
     An endpoint reachable from several parents retains the best-scored parent as its
@@ -40,11 +57,15 @@ def merge_expert_pools(pools: dict[str, Iterable[dict]]) -> list[dict]:
     erase evidence that several experts support the same endpoint.
     """
 
+    experts = validate_expert_vocabulary(experts)
+    unknown_pools = sorted(set(pools).difference(experts))
+    if unknown_pools:
+        raise ValueError(f"unknown proposal pools: {unknown_pools}")
     merged: dict[str, dict] = {}
     origins: dict[str, list[dict]] = {}
     expert_sets: dict[str, set[str]] = {}
     family_sets: dict[str, set[str]] = {}
-    for expert in EXPERTS:
+    for expert in experts:
         for position, source in enumerate(pools.get(expert, ())):
             row = dict(source)
             if row.get("proposal_lane") not in (None, expert):
@@ -52,7 +73,9 @@ def merge_expert_pools(pools: dict[str, Iterable[dict]]) -> list[dict]:
                     f"pool {expert!r} contains lane {row.get('proposal_lane')!r}"
                 )
             row["proposal_lane"] = expert
-            row["proposal_experts"] = sorted(set(_experts(row)) | {expert})
+            row["proposal_experts"] = sorted(
+                set(_experts(row, experts=experts)) | {expert}
+            )
             smiles = str(row.get("smiles") or "")
             if not smiles:
                 raise ValueError(f"proposal from {expert!r} has no canonical smiles")
@@ -64,20 +87,27 @@ def merge_expert_pools(pools: dict[str, Iterable[dict]]) -> list[dict]:
                 "program_families": sorted(set(row.get("program_families") or [])),
                 "route_program_id": row.get("route_program_id"),
             }
+            for field in (
+                "proposal_program_sha256",
+                "program_kind",
+                "structural_lane",
+            ):
+                if row.get(field) is not None:
+                    origin[field] = row[field]
             origins.setdefault(smiles, []).append(origin)
             expert_sets.setdefault(smiles, set()).update(row["proposal_experts"])
             family_sets.setdefault(smiles, set()).update(row.get("families") or [])
             incumbent = merged.get(smiles)
             key = (
                 float(row.get("parent_score", float("inf"))),
-                EXPERTS.index(expert),
+                experts.index(expert),
                 position,
             )
             incumbent_key = None
             if incumbent is not None:
                 incumbent_key = (
                     float(incumbent.get("parent_score", float("inf"))),
-                    EXPERTS.index(str(incumbent["proposal_lane"])),
+                    experts.index(str(incumbent["proposal_lane"])),
                     int(incumbent["_pool_position"]),
                 )
             if incumbent is None or key < incumbent_key:
@@ -100,25 +130,39 @@ def merge_expert_pools(pools: dict[str, Iterable[dict]]) -> list[dict]:
     return result
 
 
-def integrated_features(record: dict, state: SearchState) -> np.ndarray:
+def integrated_features(
+    record: dict,
+    state: SearchState,
+    *,
+    experts: tuple[str, ...] = EXPERTS,
+) -> np.ndarray:
     """Existing whole-program features plus proposal-expert provenance.
 
     The intercept remains last because :class:`ProgramValue` leaves only its final
     coefficient unpenalized.
     """
 
+    vocabulary = validate_expert_vocabulary(experts)
     base = program_features(record, state)
-    experts = set(_experts(record))
+    record_experts = set(_experts(record, experts=vocabulary))
     return np.concatenate(
         [
             base[:-1],
-            np.asarray([float(name in experts) for name in EXPERTS], dtype=float),
-            np.asarray([float(len(experts) > 1), 1.0], dtype=float),
+            np.asarray(
+                [float(name in record_experts) for name in vocabulary], dtype=float
+            ),
+            np.asarray([float(len(record_experts) > 1), 1.0], dtype=float),
         ]
     )
 
 
-def attach_features(records: Iterable[dict], state: SearchState, fiber) -> list[dict]:
+def attach_features(
+    records: Iterable[dict],
+    state: SearchState,
+    fiber,
+    *,
+    experts: tuple[str, ...] = EXPERTS,
+) -> list[dict]:
     """Attach current-state features and endpoint fingerprints."""
 
     from rdkit import Chem
@@ -129,7 +173,7 @@ def attach_features(records: Iterable[dict], state: SearchState, fiber) -> list[
         molecule = Chem.MolFromSmiles(row["smiles"])
         if molecule is None:
             continue
-        row["features"] = integrated_features(row, state)
+        row["features"] = integrated_features(row, state, experts=experts)
         row["fingerprint"] = set(fiber.generator.GetFingerprint(molecule).GetOnBits())
         prepared.append(row)
     return prepared
@@ -148,6 +192,7 @@ def select_batch(
     route_scale_floor_rounds: int = 0,
     route_scale_floor_counts: Mapping[str, int] | None = None,
     scale_floor_scope: str = "route_prior",
+    experts: tuple[str, ...] = EXPERTS,
 ) -> list[dict]:
     """Select one batch, seeding available route scales and experts early.
 
@@ -158,6 +203,7 @@ def select_batch(
     SMILES.
     """
 
+    experts = validate_expert_vocabulary(experts)
     if (
         batch < 1
         or exploration < 0
@@ -196,7 +242,7 @@ def select_batch(
                 and row["smiles"] not in used
                 and (
                     scale_floor_scope == "all_generic"
-                    or "route_complete_region" in _experts(row)
+                    or "route_complete_region" in _experts(row, experts=experts)
                 )
             ]
             if scale_floor_scope == "route_prior":
@@ -223,13 +269,14 @@ def select_batch(
                 if selected_in_band >= scale_counts[band]:
                     break
     if round_index <= expert_floor_rounds:
-        for expert in EXPERTS:
-            if any(expert in _experts(row) for row in selected):
+        for expert in experts:
+            if any(expert in _experts(row, experts=experts) for row in selected):
                 continue
             choices = [
                 row
                 for row in available
-                if expert in _experts(row) and row["smiles"] not in used
+                if expert in _experts(row, experts=experts)
+                and row["smiles"] not in used
             ]
             if not choices or len(selected) >= batch:
                 continue
@@ -256,25 +303,31 @@ def select_batch(
     return selected
 
 
-def expert_census(records: Iterable[dict]) -> dict[str, int]:
-    counts = {expert: 0 for expert in EXPERTS}
+def expert_census(
+    records: Iterable[dict], *, experts: tuple[str, ...] = EXPERTS
+) -> dict[str, int]:
+    experts = validate_expert_vocabulary(experts)
+    counts = {expert: 0 for expert in experts}
     counts["multi_expert"] = 0
     counts["unique_endpoints"] = 0
     for record in records:
-        experts = _experts(record)
-        for expert in experts:
+        record_experts = _experts(record, experts=experts)
+        for expert in record_experts:
             counts[expert] += 1
-        counts["multi_expert"] += int(len(experts) > 1)
+        counts["multi_expert"] += int(len(record_experts) > 1)
         counts["unique_endpoints"] += 1
     return counts
 
 
 __all__ = [
     "EXPERTS",
+    "PROTONATION_AWARE_EXPERT",
     "SCHEMA_VERSION",
+    "SUPPORTED_EXPERT_VOCABULARIES",
     "attach_features",
     "expert_census",
     "integrated_features",
     "merge_expert_pools",
     "select_batch",
+    "validate_expert_vocabulary",
 ]

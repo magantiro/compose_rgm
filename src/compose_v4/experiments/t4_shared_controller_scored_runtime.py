@@ -23,12 +23,21 @@ from compose_v4.chem.molecular_graph import (
 )
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.control.generic_legal_action_policy import enumerate_rule_successors
+from compose_v4.control.protonation_aware_proposal import (
+    ProtonationAwareProposalConfig,
+    propose_protonation_aware_candidates,
+)
 from compose_v4.control.retained_core_pruning import enumerate_retained_core_prunes
 from compose_v4.control.route_complete_region_particle_receipts import (
     make_complete_combination_parent_manifest,
 )
 from compose_v4.control.route_distilled_goal_expert import RouteDistilledGoalExpert
 from compose_v4.experiments.t4_fiber_campaign import Fiber
+from compose_v4.experiments.t4_integrated_route_fiber import (
+    EXPERTS,
+    PROTONATION_AWARE_EXPERT,
+    validate_expert_vocabulary,
+)
 from compose_v4.experiments.t4_shared_controller_checkpoint import (
     RUNNING,
     restore_checkpoint,
@@ -115,6 +124,28 @@ def attach_generic_scale_band(record: Mapping[str, Any]) -> dict[str, Any]:
         "small" if extent <= 3 else "medium" if extent <= 11 else "large"
     )
     return row
+
+
+def proposal_expert_vocabulary(contract: Mapping[str, Any]) -> tuple[str, ...]:
+    """Return the bound ordered producer vocabulary for this fresh campaign."""
+
+    controller = contract.get("controller")
+    if not isinstance(controller, Mapping):
+        raise TypeError("scored contract omitted its controller")
+    experts = validate_expert_vocabulary(controller.get("proposal_experts", EXPERTS))
+    proposal = controller.get("proposal")
+    if not isinstance(proposal, Mapping) or any(
+        name not in proposal for name in experts
+    ):
+        raise ValueError("controller proposal settings do not cover every expert")
+    if (
+        PROTONATION_AWARE_EXPERT in experts
+        and not contract.get("trajectory_distillation", {"enabled": True})["enabled"]
+    ):
+        raise ValueError(
+            "protonation-aware route continuation requires the shared route expert"
+        )
+    return experts
 
 
 def _hash(value: Any, *, label: str) -> str:
@@ -556,6 +587,155 @@ def attach_endpoint_fingerprints(
     return prepared
 
 
+def protonation_aware_records(
+    *,
+    parent: str,
+    parent_score: float,
+    original_seed: str,
+    delta: float,
+    support: str,
+    proposal_seed_value: int,
+    route_expert: RouteDistilledGoalExpert,
+    settings: Mapping[str, Any],
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Adapt the generic protonation-aware proposer to a production expert pool."""
+
+    score = float(parent_score)
+    if not math.isfinite(score):
+        raise ValueError("protonation-aware parent score must be finite")
+    source = pad_molecular_graph(smiles_to_molecular_graph(parent), 48)
+    config = ProtonationAwareProposalConfig(
+        seed=int(proposal_seed_value),
+        shallow_draws=int(settings["shallow_draws"]),
+        maximum_primitives=int(settings.get("maximum_primitives", 32)),
+        maximum_active_atoms=int(settings.get("maximum_active_atoms", 40)),
+        persistent_slots=int(settings.get("persistent_slots", 48)),
+        retained_maximum_fragment_atoms=int(
+            settings["retained_maximum_fragment_atoms"]
+        ),
+        retained_maximum_stages=int(settings["retained_maximum_stages"]),
+        retained_maximum_prefixes=int(settings["retained_maximum_prefixes"]),
+        route_pool_size=int(settings["route_pool_size"]),
+        route_realization_limit=int(settings["route_realization_limit"]),
+        route_beam_width=int(settings["route_beam_width"]),
+        route_expansion_width=int(settings["route_expansion_width"]),
+        route_max_bindings_per_template=int(
+            settings["route_max_bindings_per_template"]
+        ),
+        route_maximum_expansions=int(settings["route_maximum_expansions"]),
+        route_candidate_timeout_seconds=float(
+            settings["route_candidate_timeout_seconds"]
+        ),
+    )
+    proposed, telemetry = propose_protonation_aware_candidates(
+        source, route_expert, config=config
+    )
+    fiber = Fiber(original_seed, float(delta), support=support)
+    records = []
+    for source_row in proposed:
+        properties = fiber.check(source_row["smiles"])
+        if properties is None or properties["smiles"] == parent:
+            continue
+        primitives = int(source_row["primitive_edits"])
+        band = "small" if primitives <= 3 else "medium" if primitives <= 11 else "large"
+        records.append(
+            attach_generic_scale_band(
+                {
+                    **copy.deepcopy(source_row),
+                    **properties,
+                    "proposal_lane": PROTONATION_AWARE_EXPERT,
+                    "proposal_experts": [PROTONATION_AWARE_EXPERT],
+                    "families": sorted(set(source_row.get("program_families") or [])),
+                    "proposal_program_sha256": payload_identity(source_row["actions"]),
+                    "parent": parent,
+                    "parent_score": score,
+                    "delta": float(delta),
+                    "realized_primitives": primitives,
+                    "realized_primitive_band": band,
+                }
+            )
+        )
+    records.sort(key=lambda row: row["smiles"])
+    return records, {
+        **copy.deepcopy(telemetry),
+        "fiber_admitted_unique": len(records),
+        "proposal_expert": PROTONATION_AWARE_EXPERT,
+    }
+
+
+def admit_runtime_proposal_pools(
+    proposal_pools: Mapping[str, Iterable[Mapping[str, Any]]],
+    *,
+    cell: Mapping[str, Any],
+    contract: Mapping[str, Any],
+) -> tuple[dict[str, list[dict[str, Any]]], dict[str, Any]]:
+    """Apply the authoritative Fiber, fingerprint, and stale-query admission path."""
+
+    experts = proposal_expert_vocabulary(contract)
+    unknown = sorted(set(proposal_pools).difference(experts))
+    if unknown:
+        raise ValueError(f"unknown proposal pools: {unknown}")
+    fiber = Fiber(
+        str(cell["source_smiles"]),
+        float(cell["delta"]),
+        support=str(contract["support"]),
+    )
+    admitted: dict[str, list[dict[str, Any]]] = {name: [] for name in experts}
+    raw_counts: dict[str, int] = {}
+    fiber_rejections: dict[str, int] = {}
+    canonical_self_events: dict[str, int] = {}
+    for expert in experts:
+        rows = list(proposal_pools.get(expert, ()))
+        raw_counts[expert] = len(rows)
+        rejected = 0
+        self_events = 0
+        for source_row in rows:
+            row = copy.deepcopy(dict(source_row))
+            properties = fiber.check(str(row.get("smiles") or ""))
+            if properties is None:
+                rejected += 1
+                continue
+            if properties["smiles"] == row.get("parent"):
+                self_events += 1
+                continue
+            row.update(properties)
+            row["proposal_lane"] = expert
+            row["proposal_experts"] = sorted(
+                set(row.get("proposal_experts") or ()) | {expert}
+            )
+            admitted[expert].append(row)
+        fiber_rejections[expert] = rejected
+        canonical_self_events[expert] = self_events
+        admitted[expert] = attach_endpoint_fingerprints(
+            admitted[expert],
+            original_seed=str(cell["source_smiles"]),
+            delta=float(cell["delta"]),
+            support=str(contract["support"]),
+        )
+    filtered, stale = filter_stale_braf_candidates(
+        admitted, cell=cell, contract=contract
+    )
+    return filtered, {
+        "proposal_experts": list(experts),
+        "raw_by_expert": raw_counts,
+        "fiber_rejected_by_expert": fiber_rejections,
+        "canonical_self_events_by_expert": canonical_self_events,
+        "fiber_admitted_before_stale_by_expert": {
+            expert: len(admitted[expert]) for expert in experts
+        },
+        "selection_ready_by_expert": {
+            expert: len(filtered[expert]) for expert in experts
+        },
+        "stale_query_exclusions": stale,
+        "admission_order": [
+            "original_root_fiber",
+            "canonical_self_exclusion",
+            "endpoint_fingerprint",
+            "canonical_stale_query_hash_filter",
+        ],
+    }
+
+
 def validate_stale_braf_exclusions(
     contract: Mapping[str, Any],
 ) -> dict[str, tuple[str, ...]]:
@@ -683,7 +863,7 @@ def make_proposal_manifest(
         raise ValueError("COMPOSE-NoDistill may not schedule route-template particles")
     if not math.isfinite(float(deadline)):
         raise ValueError("proposal deadline must be finite")
-    experts = ("shallow", "anchored_replacement", "route_complete_region")
+    experts = proposal_expert_vocabulary(contract)
     requests = []
     for parent_index, parent in enumerate(parents):
         for expert_index, expert_name in enumerate(experts):
@@ -727,14 +907,18 @@ __all__ = [
     "PROPOSAL_MANIFEST_SCHEMA",
     "RETAINED_CORE_CONFIG",
     "RETAINED_CORE_REFINE_CONFIG",
+    "admit_runtime_proposal_pools",
     "attach_endpoint_fingerprints",
+    "attach_generic_scale_band",
     "checkpoint_controller_config",
     "filter_stale_braf_candidates",
     "make_launch_task",
     "make_proposal_manifest",
     "particle_parent_manifest",
     "preview_selected_parents",
+    "proposal_expert_vocabulary",
     "proposal_seed",
+    "protonation_aware_records",
     "retained_core_prune_refine_records",
     "retained_core_route_records",
     "validate_authorization_receipt",

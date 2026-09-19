@@ -3,6 +3,7 @@ import numpy as np
 from compose_v4.control.fiber_control import ProgramValue, SearchState
 from compose_v4.experiments.t4_integrated_route_fiber import (
     EXPERTS,
+    PROTONATION_AWARE_EXPERT,
     integrated_features,
     merge_expert_pools,
     select_batch,
@@ -47,6 +48,46 @@ def test_merge_preserves_all_experts_and_best_parent():
         "route_complete_region",
         "shallow",
     ]
+
+
+def test_explicit_protonation_expert_survives_union_and_preserves_provenance():
+    experts = (*EXPERTS, PROTONATION_AWARE_EXPERT)
+    protonation = _row("C", PROTONATION_AWARE_EXPERT, parent="strong", score=-9.0)
+    protonation.update(
+        {
+            "proposal_program_sha256": "a" * 64,
+            "program_kind": "charge_plus_structural",
+            "structural_lane": "shallow_local",
+        }
+    )
+    pools = {
+        "shallow": [_row("C", "shallow", parent="weak", score=-7.0)],
+        "anchored_replacement": [],
+        "route_complete_region": [],
+        PROTONATION_AWARE_EXPERT: [protonation],
+    }
+
+    result = merge_expert_pools(pools, experts=experts)
+
+    assert len(result) == 1
+    assert result[0]["parent"] == "strong"
+    assert result[0]["proposal_experts"] == [
+        PROTONATION_AWARE_EXPERT,
+        "shallow",
+    ]
+    origin = next(
+        row
+        for row in result[0]["proposal_origins"]
+        if row["expert"] == PROTONATION_AWARE_EXPERT
+    )
+    assert origin["proposal_program_sha256"] == "a" * 64
+    assert origin["program_kind"] == "charge_plus_structural"
+    assert origin["structural_lane"] == "shallow_local"
+    features = integrated_features(
+        result[0], SearchState(archive={"P": -8.0}), experts=experts
+    )
+    assert len(features) == 20
+    assert features[-1] == 1.0
 
 
 def test_integrated_features_keep_intercept_last_and_distinguish_experts():
