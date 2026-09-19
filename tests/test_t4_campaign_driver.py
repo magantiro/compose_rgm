@@ -21,6 +21,7 @@ SHARED_APPS = (
     ROOT / "modal_apps/t4_shared_retained_fiber_5ht1b_d04_v1_app.py",
     ROOT / "modal_apps/t4_shared_retained_fiber_5ht1b_d06_v1_app.py",
     ROOT / "modal_apps/t4_shared_retained_fiber_parp1_p0_rescue_v1_app.py",
+    ROOT / "modal_apps/t4_shared_retained_fiber_5ht1b2_protonation_rescue_v1_app.py",
 )
 
 

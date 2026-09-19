@@ -1,0 +1,204 @@
+{
+  "payload": {
+    "schema_version": "t4_5ht1b2_protonation_rescue_contract_v1",
+    "status": "PREPARED_AWAITING_SEPARATE_SCORED_AUTHORIZATION",
+    "scientific_problem": "test whether the smallest general Editing-V3 support repair converts the previously exhausted strict 5HT1B seed-2 cell into an autonomously searchable reward-bearing trajectory",
+    "primary_model_output": "FiberControl-selected complete endpoints from one shared additive mixture of shallow, anchored, route-complete and protonation-aware retained-subgraph programs",
+    "central_claim_under_test": "adding one generic explicit protonation-aware proposal expert to the otherwise unchanged shared controller exposes useful strict-eligible endpoints and permits recursive reward-guided improvement",
+    "experimental_setting": "one prospective 49-charged-call 5HT1B seed-2 delta=0.6 development rescue under one docking seed, with a fresh archive and no reuse of prior outcomes",
+    "editing_support": "Editing-V3 atom_protonation_restate",
+    "support": "compose_valid",
+    "cells": [
+      {
+        "cell": "5ht1b_2",
+        "source_global_index": 8,
+        "smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1",
+        "controller_seed": 2026091908
+      }
+    ],
+    "delta": 0.6,
+    "charged_calls_per_cell": 49,
+    "total_charged_call_ceiling": 49,
+    "automatic_retries": 0,
+    "batch": 8,
+    "parents": 4,
+    "parent_explore": 0.3,
+    "exploration": 2,
+    "cold_start_floor_rounds": 1,
+    "allocation_policy": {
+      "schema_version": "t4_cold_start_allocation_v1",
+      "status": "FROZEN_PRE_SCORE",
+      "implementation": "src/compose_v4/control/t4_cold_start_allocation.py",
+      "implementation_revision": "617eef03",
+      "selection_basis": "score-free cross-cell cold-start replay: preserve small1, medium1 and large3 route observations, shallow1, anchored1 and one remaining expert slot; assign that slot to protonation when available and otherwise ordinary exploration",
+      "selection_evidence": {
+        "path": "diagnostics/t4_cold_start_allocation_v1/attempt_1/result.json",
+        "sha256": "5e600471c4591012f3db29b3b36915eaa4dee9adba1e31b15c6c226041200187",
+        "payload_sha256": "0d8ce0d79e806d42d7e3635e848a3da543a4fadb402253e20c35aab3be6a28b2",
+        "status": "selected_zero_oracle_policy",
+        "claim_boundary": "score-free deterministic replay only; no new docking or utility claim"
+      },
+      "expected_all_pools_nonempty": {
+        "expert_floor_counts": {
+          "shallow": 1,
+          "anchored_replacement": 1,
+          "protonation_aware_retained_subgraph": 1
+        },
+        "route_scale_floor_counts": {
+          "small": 1,
+          "medium": 1,
+          "large": 3
+        },
+        "exploration_slots": 0
+      },
+      "empty_optional_protonation_pool": {
+        "behavior": "release the optional expert slot to ordinary exploration",
+        "exploration_slots": 1
+      },
+      "later_rounds": {
+        "cold_start_floors_active": false,
+        "ordinary_exploration_slots": 2
+      }
+    },
+    "value_penalty": 1.0,
+    "docking_seed": 20260919,
+    "proposal": {
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      },
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "route_complete_region": {
+        "pool_size": 192,
+        "realization_limit": 96,
+        "beam_width": 48,
+        "expansion_width": 48,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "scale_balanced": true,
+        "training_scope": "one shared task-independent expert fit on all 77 locked routes"
+      },
+      "protonation_aware_retained_subgraph": {
+        "shallow_draws": 256,
+        "retained_maximum_fragment_atoms": 16,
+        "retained_maximum_stages": 2,
+        "retained_maximum_prefixes": 4096,
+        "route_pool_size": 192,
+        "route_realization_limit": 96,
+        "route_beam_width": 48,
+        "route_expansion_width": 48,
+        "route_max_bindings_per_template": 4,
+        "route_maximum_expansions": 4000,
+        "route_candidate_timeout_seconds": 10.0,
+        "maximum_primitives": 32,
+        "maximum_active_atoms": 40,
+        "persistent_slots": 48,
+        "task_or_target_input_used": false,
+        "teacher_or_endpoint_input_used": false
+      }
+    },
+    "endpoint_gate": {
+      "similarity": ">= 0.6 against the original root using Morgan radius 2, 2048-bit Tanimoto",
+      "qed": ">= 0.6",
+      "sa": "<= 4.0",
+      "structural_support": "compose_valid",
+      "application_time": "completed endpoint only"
+    },
+    "round_lock_policy": {
+      "publish_before_docking": true,
+      "per_query_receipts": true,
+      "per_expert_proposal_receipts": true,
+      "resume_complete_receipts_only": true,
+      "never_resubmit_reserved_or_missing_query_receipt": true,
+      "continue_after_deadline_with_unresolved_calls_charged": true,
+      "no_backfill": true,
+      "automatic_retries": 0
+    },
+    "continuation_policy": {
+      "helper": "src/compose_v4/experiments/t4_campaign_driver.py",
+      "active_statuses": [
+        "proposals_running",
+        "queries_running",
+        "running"
+      ],
+      "reservation_order": "publish reserved, spawn one continuation, publish running with call ID",
+      "ambiguous_reservation": "wait; never respawn without explicit authoritative prior-call terminal confirmation"
+    },
+    "proposal_wait_seconds": 2400,
+    "query_wait_seconds": 1200,
+    "phase_poll_seconds": 5,
+    "prior_operational_waste": 0,
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "6ab5ac2d63be05c4d7992f96175258c2b253ccc41539833af4fb12465ee3a59f"
+    },
+    "docking_box": [
+      [
+        -26.602,
+        5.277,
+        17.898
+      ],
+      [
+        22.5,
+        22.5,
+        22.5
+      ]
+    ],
+    "zero_oracle_proposal_gate": {
+      "path": "diagnostics/t4_protonation_aware_proposal_gate_v1/attempt_1/result.json",
+      "sha256": "bec9bc6e697a0178f9725df9a83a53de5d32bd9b985cfd9522790cd41cabd6db",
+      "payload_sha256": "69c718b442509324bf28f1acc46b6b7bf49ced0554f70cc06d3a979339c59b11",
+      "primary_eligible_unique": 14,
+      "primary_murcko_scaffolds": 8,
+      "exact_replays": "1078/1078 on the motivating root; 1766/1766 across all frozen roots",
+      "claim_boundary": "autonomous proposal support and free endpoint feasibility only; no docking utility was measured"
+    },
+    "reported_ivg_delta_0_6": {
+      "5ht1b_2": -10.6
+    },
+    "reported_ivg_source": {
+      "evidence": "published lead-optimization table, not a runtime input or selection threshold",
+      "upstream_revision": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/README.md",
+      "sha256": "a5ae0d826fc458caa1bdfa0a4d8f23927da33cea39188c3e4375a55164de6b80",
+      "uncertainty": 0.1
+    },
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "modal_apps/t4_shared_retained_fiber_5ht1b2_protonation_rescue_v1_app.py": "7f832e452cb5a0d53bae1e4451888832f13c8831b42d02dcfb3b7df44ab11992",
+      "src/compose_v4/control/protonation_aware_proposal.py": "97842262c5c7a0aa0f330045f82d107bbd441b63a01b1c4e82f8f1f7134ca413",
+      "src/compose_v4/control/t4_cold_start_allocation.py": "840aa0604477832b9ada86ed0659cefd54375e7ec2266835af66cb109c7dc6d5",
+      "src/compose_v4/experiments/t4_campaign_driver.py": "f7270b73f50cd1b8afdcca6cbe636d857ae3547dc09429e02e4b7642447616ee",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "aeee1616ed67c5af77de7da8eae4519ddedda929618286d6d966868d543503ed",
+      "src/compose_v4/experiments/t4_protonation_integrated_route_fiber.py": "8ec1218efb282c039aa326ab71a6a31a605fa695458a925dcf364ece6d404910",
+      "src/compose_v4/experiments/t4_protonation_rescue_contract.py": "6d141576e245ef0fbafd2341699e5aee30586b06a47f042fbb9ae492a30a4cca",
+      "src/compose_v4/rewrite/action_codec_v5.py": "dd2b85dbf49e9ae2c3c6bcf77708ab2a49e7e9ab6035a24c6ddccdbea0bd32b1",
+      "src/compose_v4/rewrite/kernel.py": "afdda7d41ee3f437aa1a72e90341dc81f0f776c6e1cb6799f1ad9ff75d5c3e99",
+      "src/compose_v4/rewrite/operators.py": "a1542f2cd7bdae392ef7618636ab8ca9ec49215cda9b8927113e4daf2c9b5c0f"
+    },
+    "launch_authorization": {
+      "state": "REQUIRED_AND_NOT_YET_RECORDED",
+      "required_user_scope": "one fresh 5ht1b_2 delta=0.6 run under this exact payload, at most 49 charged calls, no retry or replacement",
+      "binding": "the launch command must supply this contract's exact payload_sha256",
+      "no_prior_run_resume": true
+    },
+    "forbidden_runtime_inputs": [
+      "cell-to-winner lookup",
+      "known endpoint or teacher candidate injection",
+      "target-specific chemistry constant",
+      "reported IVG comparator in proposal or selection",
+      "prior scored 5HT1B-2 outcomes",
+      "per-cell hyperparameter branch"
+    ],
+    "promotion_readout": "best eligible docking score versus the reported IVG mean after all locked calls, plus score-versus-call trajectory and winning lineage",
+    "claim_boundary": "prospective single-cell shared-controller development rescue under one docking seed. A positive outcome tests the additive general support repair; it is not a replicated full-T4 result.",
+    "required_separate_launch_authorization": "Explicitly authorize this exact payload SHA-256 and its 49-call ceiling before invoking Modal launch. Preparation alone confers zero scored-call authority."
+  },
+  "payload_sha256": "e15929bd80a67c3ce0e856f313d0e8bad4da042045e6010afae61d87e2f5d80e"
+}
