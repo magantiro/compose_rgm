@@ -78,3 +78,57 @@ def test_v2_sealed_result_and_unscored_panel_are_self_hashed() -> None:
         "PROPOSED_REQUIRES_SEPARATE_SCORED_CONTRACT_AND_AUTHORIZATION"
     )
     assert panel["payload"]["costs_spent"]["docking_calls"] == 0
+
+
+def test_v2_four_call_scored_preparation_is_sealed_but_unauthorized() -> None:
+    root = ROOT / gate.ARTIFACT_ROOT_RELATIVE_PATH
+    preparation = root / "scored_preparation_v1"
+    manifest_path = preparation / "source_capsule_manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    assert manifest["payload_sha256"] == identity(manifest["payload"])
+    assert manifest["payload"]["code_revision"] == (
+        "7c2f34f8574c7b247a315c0fefa09033e6241542"
+    )
+
+    contract = json.loads((preparation / "scored_contract.json").read_text())
+    assert contract["payload_sha256"] == identity(contract["payload"])
+    payload = contract["payload"]
+    assert payload["status"] == "SEALED_PENDING_EXACT_PAYLOAD_BOUND_USER_AUTHORIZATION"
+    assert payload["budget"] == {
+        "unique_query_count": 4,
+        "total_charged_call_ceiling": 4,
+        "automatic_retries": 0,
+        "replacement_queries": 0,
+        "backfill_queries": 0,
+        "replicate_calls": 0,
+    }
+    assert payload["authorization"]["state"] == (
+        "PENDING_EXACT_PAYLOAD_BOUND_USER_AUTHORIZATION"
+    )
+    assert payload["authorization"]["required_contract_payload_sha256"] == (
+        "must_equal_this_envelope_payload_sha256"
+    )
+    assert payload["costs_spent_during_preparation"] == {
+        "oracle_calls": 0,
+        "docking_calls": 0,
+        "modal_launches": 0,
+    }
+
+
+def test_v2_four_call_queries_exactly_match_locked_proposal() -> None:
+    root = ROOT / gate.ARTIFACT_ROOT_RELATIVE_PATH
+    proposal = json.loads((root / "scored_candidate_proposal.json").read_text())["payload"]
+    contract = json.loads(
+        (root / "scored_preparation_v1" / "scored_contract.json").read_text()
+    )["payload"]
+    expected = [
+        (row["cell_key"], row["endpoint_key_sha256"], row["canonical_smiles"])
+        for row in proposal["candidates"]
+    ]
+    observed = [
+        (row["cell_key"], row["endpoint_key_sha256"], row["canonical_smiles"])
+        for row in contract["queries"]
+    ]
+    assert observed == expected
+    assert len({row["query_id"] for row in contract["queries"]}) == 4
+    assert {row["attempt_ceiling"] for row in contract["queries"]} == {1}

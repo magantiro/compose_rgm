@@ -1,0 +1,98 @@
+{
+  "payload": {
+    "schema_version": "t4_nodistill_generic_topology_four_call_scored_contract_v1",
+    "status": "SEALED_PENDING_EXACT_PAYLOAD_BOUND_USER_AUTHORIZATION",
+    "scientific_question": "Do the four prospectively locked, route-free, large-growth multi-cycle PARP candidates have nontrivial docking utility?",
+    "claim_boundary": "A four-candidate prospective utility diagnostic for a zero-oracle generic proposal-support repair. It is not a controller benchmark, a Full-versus-NoDistill comparison, teacher recovery evidence, or evidence of autonomous search performance.",
+    "candidate_lock": {
+      "path": "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/scored_candidate_proposal.json",
+      "sha256": "7377eb5014cc9b3d89907546eef8bb947c85ea00369f1581abf845016db03d21",
+      "payload_sha256": "41d67dd0026e1e120bf130446845f229efb0ef13b19699d7efb4fef2aa043d4e",
+      "selection_phase": "before_any_docking_or_teacher_identity_inspection",
+      "selection_rule": "all autonomously locked v2 candidates on PARP1-0 and PARP1-1 that were endpoint-eligible, used 12-32 primitives, added at least seven heavy atoms and at least two cycles"
+    },
+    "zero_oracle_result": {
+      "path": "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/result.json",
+      "sha256": "29afab84042d6fe354b8774e893dfa21d660a1f36004cbacb9dc3365ae101b7b",
+      "payload_sha256": "d45c22a88d0b0bac1f5856ee881382a3ba06db8a68d831bd0199492ca6dd40db"
+    },
+    "source_capsule": {
+      "path": "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/scored_preparation_v1/source_capsule_manifest.json",
+      "sha256": "4a3cefe67118fe524db1a20d01674a3bf32c3ea1ffe6146f2ef2387db8f29e5f",
+      "payload_sha256": "a039a0e5058a9a32b3d7cf435f4ddfb3ea30866acb777a27a00ef6d9e3a4cc9d",
+      "code_revision": "7c2f34f8574c7b247a315c0fefa09033e6241542",
+      "git_tree": "605e68981e834c6b0aad874b676b3c41585c5799"
+    },
+    "evaluator": {
+      "target": "parp1",
+      "docking_box": [
+        [26.413, 11.282, 27.238],
+        [18.521, 17.479, 19.995]
+      ],
+      "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor_sha256": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+      "docking_seed": 20260919,
+      "asset_hash_verification": "required_immediately_before_launch"
+    },
+    "queries": [
+      {
+        "query_id": "generic_topology_v2_parp1_0_bab27bc3",
+        "cell_key": "parp1_0_d04",
+        "endpoint_key_sha256": "bab27bc3e9da14696938fcfc5af99ee7a04f139d550b4cf30140a339b9c6f76f",
+        "canonical_smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1c3cc4c(cc3cn1-2)CNC1CCCCC41",
+        "attempt_ceiling": 1
+      },
+      {
+        "query_id": "generic_topology_v2_parp1_0_d169316b",
+        "cell_key": "parp1_0_d04",
+        "endpoint_key_sha256": "d169316b89cf70df97005fff36c8ff36cb1d9438682a8a2a697ae59e0911281e",
+        "canonical_smiles": "CN(C)Cc1ccc2c(c1)CNC(=O)c1c3c(O)c4c(nc3cn1-2)C(O)CCC4",
+        "attempt_ceiling": 1
+      },
+      {
+        "query_id": "generic_topology_v2_parp1_0_6437e743",
+        "cell_key": "parp1_0_d04",
+        "endpoint_key_sha256": "6437e7432a67a1a8298c79537fce7deb5319e809055326399d9a92eeb901922f",
+        "canonical_smiles": "Cc1cccc(CN(C)Cc2ccc3c(c2)CNC(=O)c2cccn2-3)c1N1CCNC1C",
+        "attempt_ceiling": 1
+      },
+      {
+        "query_id": "generic_topology_v2_parp1_1_661f1424",
+        "cell_key": "parp1_1_d04",
+        "endpoint_key_sha256": "661f142472a72eb76743a1511fb4d7f6cfb23c0accad1c0c88819f6f8bf9107a",
+        "canonical_smiles": "COc1[nH]c2ccc(-c3ccc(C)c4c3CCO4)c3c2c1CCNC3=O",
+        "attempt_ceiling": 1
+      }
+    ],
+    "budget": {
+      "unique_query_count": 4,
+      "total_charged_call_ceiling": 4,
+      "automatic_retries": 0,
+      "replacement_queries": 0,
+      "backfill_queries": 0,
+      "replicate_calls": 0
+    },
+    "receipt_policy": {
+      "publish_query_lock_before_first_docking_call": true,
+      "failed_or_timed_out_query": "record_once_as_terminal_failure_without_retry_replacement_or_backfill",
+      "partial_campaign": "publish_all_completed_and_failed_receipts_without_filling_unused_slots",
+      "candidate_mutation_after_authorization": false,
+      "score_visibility_before_lock_change": false
+    },
+    "authorization": {
+      "state": "PENDING_EXACT_PAYLOAD_BOUND_USER_AUTHORIZATION",
+      "receipt_path": "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/scored_preparation_v1/scored_authorization.json",
+      "required_receipt_schema": "t4_exact_payload_bound_scored_authorization_v1",
+      "required_contract_path": "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/scored_preparation_v1/scored_contract.json",
+      "required_contract_payload_sha256": "must_equal_this_envelope_payload_sha256",
+      "required_authorized_call_count": 4,
+      "launch_rule": "refuse_to_launch_if_receipt_is_absent_malformed_not_self_hashed_or_not_bound_to_this_exact_contract_payload"
+    },
+    "costs_spent_during_preparation": {
+      "oracle_calls": 0,
+      "docking_calls": 0,
+      "modal_launches": 0
+    }
+  },
+  "payload_sha256": "4f973c171dd9392f23819b362c6b1946d846e712103d8f58b8a2ce29f70a8da6"
+}
