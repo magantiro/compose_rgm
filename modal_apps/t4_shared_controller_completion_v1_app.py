@@ -23,9 +23,11 @@ _CAMPAIGN_VARIANT = os.environ.get("COMPOSE_T4_CAMPAIGN_VARIANT", "full")
 if (
     _CAMPAIGN_VARIANT == "full"
     and not (ROOT / "configs/t4_shared_controller_completion_v1.json").exists()
-    and (ROOT / "configs/t4_compose_nodistill_parp1_v1.json").exists()
 ):
-    _CAMPAIGN_VARIANT = "nodistill_parp1_v1"
+    if (ROOT / "configs/t4_compose_nodistill_transfer_v1.json").exists():
+        _CAMPAIGN_VARIANT = "nodistill_transfer_v1"
+    elif (ROOT / "configs/t4_compose_nodistill_parp1_v1.json").exists():
+        _CAMPAIGN_VARIANT = "nodistill_parp1_v1"
 if _CAMPAIGN_VARIANT == "nodistill_parp1_v1":
     from compose_v4.experiments.t4_compose_nodistill_contract import (
         AUTHORIZATION_RELATIVE_PATH,
@@ -35,6 +37,17 @@ if _CAMPAIGN_VARIANT == "nodistill_parp1_v1":
         validate_scored_contract,
     )
     from compose_v4.experiments.t4_compose_nodistill_contract import (
+        PREPARATION_RELATIVE_PATH as CONTRACT_RELATIVE_PATH,
+    )
+elif _CAMPAIGN_VARIANT == "nodistill_transfer_v1":
+    from compose_v4.experiments.t4_compose_nodistill_transfer_contract import (
+        AUTHORIZATION_RELATIVE_PATH,
+        CAPSULE_MANIFEST_RELATIVE_PATH,
+        CAPSULE_ROOT_RELATIVE_PATH,
+        FINAL_CONTRACT_RELATIVE_PATH,
+        validate_scored_contract,
+    )
+    from compose_v4.experiments.t4_compose_nodistill_transfer_contract import (
         PREPARATION_RELATIVE_PATH as CONTRACT_RELATIVE_PATH,
     )
 else:
@@ -58,16 +71,24 @@ from compose_v4.experiments.t4_shared_controller_scored_runtime import (
     validate_launch_task,
 )
 
-APP_NAME = (
-    "compose-t4-compose-nodistill-parp1-v1"
-    if _CAMPAIGN_VARIANT == "nodistill_parp1_v1"
-    else "compose-t4-shared-controller-completion-v1"
-)
-APP_RELATIVE_PATH = (
-    "modal_apps/t4_compose_nodistill_parp1_v1_app.py"
-    if _CAMPAIGN_VARIANT == "nodistill_parp1_v1"
-    else "modal_apps/t4_shared_controller_completion_v1_app.py"
-)
+_VARIANT_APPS = {
+    "full": (
+        "compose-t4-shared-controller-completion-v1",
+        "modal_apps/t4_shared_controller_completion_v1_app.py",
+    ),
+    "nodistill_parp1_v1": (
+        "compose-t4-compose-nodistill-parp1-v1",
+        "modal_apps/t4_compose_nodistill_parp1_v1_app.py",
+    ),
+    "nodistill_transfer_v1": (
+        "compose-t4-compose-nodistill-transfer-v1",
+        "modal_apps/t4_compose_nodistill_transfer_v1_app.py",
+    ),
+}
+try:
+    APP_NAME, APP_RELATIVE_PATH = _VARIANT_APPS[_CAMPAIGN_VARIANT]
+except KeyError as error:
+    raise ValueError(f"unknown T4 campaign variant: {_CAMPAIGN_VARIANT}") from error
 MOOD = "https://raw.githubusercontent.com/SeulLee05/MOOD/main/scorer"
 REMOTE_ROOT = Path("/capsule")
 REMOTE_SEALED = Path("/sealed")
@@ -93,7 +114,7 @@ def _load_envelope(path: Path) -> tuple[dict[str, Any], str]:
 
 PREPARATION = json.loads((ROOT / CONTRACT_RELATIVE_PATH).read_text())
 CELLS = tuple(PREPARATION["cells"])
-_EXPECTED_CELL_COUNT = 3 if _CAMPAIGN_VARIANT == "nodistill_parp1_v1" else 9
+_EXPECTED_CELL_COUNT = 9 if _CAMPAIGN_VARIANT == "full" else 3
 if len(CELLS) != _EXPECTED_CELL_COUNT:
     raise ValueError(
         f"{_CAMPAIGN_VARIANT} launcher requires exactly "
@@ -132,6 +153,7 @@ def _runtime_image() -> modal.Image:
             "chmod +x /opt/dock/qvina02",
             f"curl --fail -sSL -o /opt/dock/receptors/parp1.pdbqt {MOOD}/receptors/parp1.pdbqt",
             f"curl --fail -sSL -o /opt/dock/receptors/braf.pdbqt {MOOD}/receptors/braf.pdbqt",
+            f"curl --fail -sSL -o /opt/dock/receptors/jak2.pdbqt {MOOD}/receptors/jak2.pdbqt",
         )
         .env(
             {
@@ -1146,6 +1168,12 @@ def _launch_receipt_path(run_id: str) -> Path:
         return (
             ROOT
             / "diagnostics/t4_compose_nodistill_parp1_v1/attempt_4/launches"
+            / f"{run_id}.json"
+        )
+    if _CAMPAIGN_VARIANT == "nodistill_transfer_v1":
+        return (
+            ROOT
+            / "diagnostics/t4_compose_nodistill_transfer_v1/attempt_1/launches"
             / f"{run_id}.json"
         )
     return (
