@@ -14,6 +14,7 @@ import multiprocessing as mp
 import platform
 import subprocess
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -487,6 +488,7 @@ def run(
         "code_revision": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
         ).strip(),
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "environment": {
             "python": platform.python_version(),
             "rdkit": rdBase.rdkitVersion,
