@@ -4,8 +4,9 @@
 
 This document binds the zero-oracle COMPOSE adapter to the primary released
 SAFE/GenMol benchmark inputs and the GenMol and InVirtuoGen evaluation
-protocols. It does not authorize or report a generated-molecule experiment.
-It is isolated from T4 docking and PMO optimization.
+protocols. It also records a five-prompt, deterministic proposal-support smoke.
+It does not authorize or report a scored or full 100-sample generated-molecule
+experiment. It is isolated from T4 docking and PMO optimization.
 
 The scientific problem is conditional molecular generation from retained
 fragments. The primary output is a set of complete connected molecules that
@@ -165,12 +166,57 @@ Primary URLs:
 - a separate constraint-validity diagnostic required for COMPOSE;
 - fail-closed handling of schema drift and sample-count drift.
 
-No fragment-constrained COMPOSE generation has been run. A production runner
-still needs an explicit prompt-conditioned proposal contract. In particular,
-COMPOSE's current molecular state is connected-or-null, while linker design
-starts from two disconnected retained fragments. A faithful runner must either
-construct both retained components within one protected program or add a
-generic retained-fragment conditioning mechanism. It must not initialize from
-the original full drug, which is an evaluation reference rather than the
-generation prompt. That controller decision is outside this zero-oracle
-adapter milestone.
+`compose_v4.benchmark.fragment_constrained_runner` now provides the smallest
+prompt-conditioned COMPOSE proposal gate needed to exercise all five labels.
+It conditions only on task, released fragment strings, and a generic variant
+index. The original full drug remains an evaluation reference and never enters
+proposal construction.
+
+For linker design and scaffold morphing, the runner caps both fragments with H,
+selects the larger retained component as a valid connected source, and compiles
+a generic one-to-three-carbon bridge plus the second retained component as one
+dependency-aware edit program. It never commits the disconnected pair. Every
+primitive is executed through the existing Editing-V2 executor, and every
+committed state is checked for validity and connectedness. Each retained
+fragment is rechecked in every state after its construction/attachment lock.
+Motif extension, scaffold decoration, and superstructure generation preserve
+their one retained core and add generic carbon extensions at declared sites (or
+the first deterministic hydrogen-bearing site for superstructure inputs, which
+declare no site).
+
+The runner is deliberately not a learned controller and does not evaluate QED,
+SA, similarity, docking, or another objective. It may abstain on active-atom,
+primitive, block, transient-valence, or source-support limits; those limits are
+not relaxed after seeing a prompt outcome. A full benchmark still requires a
+self-hashed scored-launch contract, 100 attempts per prompt, three declared
+runs, and the frozen evaluator above.
+
+The bounded smoke loads all 50 prompts, freezes the first manifest prompt for
+each task before execution, and attempts exactly five proposals:
+
+```bash
+PYTHONPATH=src ../../.venv/bin/python \
+  tools/fragment_constrained_proposal_smoke.py
+```
+
+Its authoritative output is
+`diagnostics/fragment_constrained_proposal_smoke_v1/result.json`. This is a
+zero-oracle executor/constraint support check, not a comparator result.
+
+The first frozen all-prompt audit then attempted one deterministic proposal for
+each of the 50 manifest prompts under the same 40-atom, 32-primitive, and
+eight-block support:
+
+```bash
+PYTHONPATH=src ../../.venv/bin/python \
+  tools/fragment_constrained_proposal_panel.py \
+  --contract configs/fragment_constrained_proposal_panel_v1.json
+```
+
+It completed 49/50 proposals, with 49/49 constraint-valid completed endpoints
+and 49/50 exact-valid execution yield. The single preserved abstention was the
+Futibatinib superstructure prompt: the v1 site selector chose an atom bearing an
+explicit chiral hydrogen and its generic extension was over-valent. This is a
+runner defect found by the frozen panel, not evidence that the prompt itself is
+unsupported. The v1 contract, full receipts, per-task metrics, and failure
+detail are under `diagnostics/fragment_constrained_proposal_panel_v1/`.

@@ -1,0 +1,80 @@
+{
+  "payload": {
+    "schema_version": "fragment_constrained_proposal_panel_contract_v1",
+    "status": "FROZEN_ZERO_ORACLE_FULL_PROMPT_PANEL",
+    "authorizing_milestone": "AGENTS.md fragment-constrained adapter authorization, 2026-09-19, plus explicit user direction to run one deterministic proposal for every frozen prompt",
+    "scientific_problem": "Measure whether the smallest prompt-conditioned COMPOSE edit-program runner can emit one exact executor-valid, connected completion for every released retained-fragment prompt without an objective or original-drug input.",
+    "primary_model_output": "One dependency-aware executable edit program and its locked connected endpoint per prompt, or an explicit abstention.",
+    "claim_boundary": "This is a deterministic zero-oracle support and constraint audit over 50 prompts. It is not the published 100-sample, three-run benchmark, a quality or diversity evaluation, an optimization result, or evidence for a learned controller.",
+    "inputs": {
+      "prompt_manifest": {
+        "path": "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv",
+        "sha256": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+        "origin": "NVIDIA-BioNeMo/genmol data/fragments.csv at add09fc83b7255bd09c797e527c0f4b51f5fb7c1",
+        "license_basis": "SAFE-DRUGS CC BY 4.0",
+        "expected_prompt_count": 50
+      }
+    },
+    "material_code_sha256": {
+      "src/compose_v4/benchmark/fragment_constrained.py": "cd9113a6afd22e833de462a0ad7d816ed170e8bde0d9d5577d7cae98caf0ddc6",
+      "src/compose_v4/benchmark/fragment_constrained_runner.py": "ffc1b46d33a6ef74631d0f85bc023eafaeabaa89d2e46c19416c393ffa3efb98",
+      "src/compose_v4/control/edit_program.py": "fedae8c4c17392bf133a1c16a49131f89d1e2570b79b541f91916c05c7676098",
+      "src/compose_v4/control/edit_program_graph.py": "16688a1835298a97dd80ff533f6978026ece85900d19e115a33e0258ec4dd13f",
+      "src/compose_v4/experiments/whole_ring_plan.py": "2ea6b5552cae5786781bf3faffa50b643341380a4192c642c19e71aae02aa0f0",
+      "tools/fragment_constrained_proposal_panel.py": "8cbcca118ac98ea3f4111d377c56b51332605f9f1545ea5d32a68db2ef880914"
+    },
+    "selection": {
+      "rule": "all prompts in frozen manifest order; exactly one attempt per prompt; no replacement, retry, backfill, or outcome-dependent selection",
+      "expected_prompt_count": 50,
+      "expected_prompts_per_task": 10,
+      "task_labels": [
+        "linker_design",
+        "scaffold_morphing",
+        "motif_extension",
+        "scaffold_decoration",
+        "superstructure_generation"
+      ]
+    },
+    "proposal_law": {
+      "variant_index": 0,
+      "random_seed": null,
+      "deterministic": true,
+      "limits": {
+        "max_active_atoms": 40,
+        "max_primitives": 32,
+        "max_blocks": 8
+      },
+      "conditioning_fields": [
+        "task",
+        "fragments",
+        "variant_index"
+      ],
+      "excluded_proposal_inputs": [
+        "original benchmark drug",
+        "benchmark winner",
+        "objective score",
+        "teacher endpoint"
+      ]
+    },
+    "metrics": {
+      "proposal_coverage": "completed proposals divided by all frozen prompts, reported overall and separately for every task label",
+      "constraint_precision": "independently constraint-valid endpoints divided by completed proposals, reported separately from coverage",
+      "exact_valid_execution_yield": "completed endpoints with matching exact receipt, valid and connected committed states, and independently satisfied fragment constraint, divided by all prompts",
+      "unique_endpoints": "distinct canonical endpoints among completed proposals, without conflating this one-sample support audit with benchmark uniqueness",
+      "failure_accounting": "report abstention reason codes, independent constraint failures, and unexpected exception types without replacement"
+    },
+    "outputs": {
+      "result": "diagnostics/fragment_constrained_proposal_panel_v1/result.json",
+      "report": "diagnostics/fragment_constrained_proposal_panel_v1/README.md"
+    },
+    "prohibitions": [
+      "no oracle, docking, QED, SA, similarity, quality, or objective call",
+      "no Modal launch or live-run access",
+      "no T4 or PMO artifact access or modification",
+      "no benchmark winner, central drug, teacher endpoint, or original-drug injection",
+      "no scored conclusion and no 100-sample benchmark claim",
+      "no changing support limits after observing panel outcomes"
+    ]
+  },
+  "payload_sha256": "77c04325ca7b438da899e2074517a69122eb8ed55cd3477a73a17d80288915af"
+}
