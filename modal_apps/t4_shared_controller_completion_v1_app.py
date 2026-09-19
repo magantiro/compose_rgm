@@ -135,6 +135,7 @@ def _runtime_image() -> modal.Image:
                 "PYTHONDONTWRITEBYTECODE": "1",
                 "OMP_NUM_THREADS": "1",
                 "OPENBLAS_NUM_THREADS": "1",
+                "COMPOSE_T4_CAMPAIGN_VARIANT": _CAMPAIGN_VARIANT,
             }
         )
     )
@@ -1138,7 +1139,7 @@ def _launch_receipt_path(run_id: str) -> Path:
     if _CAMPAIGN_VARIANT == "nodistill_parp1_v1":
         return (
             ROOT
-            / "diagnostics/t4_compose_nodistill_parp1_v1/attempt_2/launches"
+            / "diagnostics/t4_compose_nodistill_parp1_v1/attempt_3/launches"
             / f"{run_id}.json"
         )
     return (

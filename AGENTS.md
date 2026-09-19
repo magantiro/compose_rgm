@@ -649,6 +649,15 @@ oracle or docking calls. Preserve that failed attempt and launch the corrected
 scale-preserving comparison as a new immutable attempt rather than overwriting
 or continuing it.
 
+The first corrected-scale deployment (`attempt_2`, run
+`a44b57b2da572ab216d93bb3a0427a1fe6de85cac32afa512e7a10bb0a1ae0ac`)
+also failed before function entry: remote deserialization imported the shared
+module without the NoDistill variant environment binding and therefore requested
+the Full-COMPOSE preparation path absent from the NoDistill capsule. All three
+private volumes again contained zero files, query locks, or oracle receipts.
+Bind `COMPOSE_T4_CAMPAIGN_VARIANT=nodistill_parp1_v1` into the remote image and
+preserve this as a second zero-call pre-query failure before a new `attempt_3`.
+
 **Amendment, 2026-09-16, bounded scored-pilot extension:** after the zero-oracle
 construction-scale diagnostic measured that the docking value from a benchmark root
 sits at 15 or more primitive edits while the search proposes a median of 5.5, and
