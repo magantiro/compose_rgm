@@ -22,16 +22,13 @@ ASSETS = "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets"
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .pip_install("PyTDC==1.1.15")
-    .pip_install(
-        "numpy==1.26.4",
-        "pandas==2.1.4",
-        "rdkit==2023.9.6",
-        "requests==2.32.4",
-        "scikit-learn==1.2.2",
-        "scipy==1.15.0",
-        "seaborn==0.13.2",
-        "setuptools==75.6.0",
+    .pip_install("uv==0.5.31")
+    .run_commands(
+        "uv pip install --system --no-deps 'PyTDC==1.1.15'",
+        "uv pip install --system 'numpy==1.26.4' 'pandas==2.1.4' "
+        "'rdkit==2023.9.6' 'requests==2.32.4' 'scikit-learn==1.2.2' "
+        "'scipy==1.15.0' 'seaborn==0.13.2' 'setuptools==75.6.0' "
+        "fuzzywuzzy huggingface-hub networkx packaging tqdm",
     )
     .add_local_dir(
         ROOT / "src", str(REMOTE / "src"), copy=True, ignore=["**/__pycache__/**"]
