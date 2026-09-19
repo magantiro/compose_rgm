@@ -1,0 +1,89 @@
+{
+  "schema_version": "t4_cold_start_allocation_replay_manifest_v1",
+  "policy_schema_version": "t4_cold_start_allocation_v1",
+  "cases": [
+    {
+      "label": "5ht1b_1_delta04",
+      "cell": "5ht1b_1",
+      "contract": "configs/t4_shared_retained_fiber_5ht1b_d04_v1.json",
+      "contract_sha256": "7d42df76a65ab9a432b4cea5fcde09b717b533d85cd162d5320d36bbcf0d25ce",
+      "lock": "/tmp/5ht1b1_d04_round_001_lock.json",
+      "lock_sha256": "d53625d302fcc6aec08fb44f0159e98730b53ef02fe37eb4b3c81e3143ced690",
+      "result": "/tmp/5ht1b1_d04_final_result.json",
+      "result_sha256": "1b47b783096d10ce5c348efc8e47e2a74c0c16cf032f5d87faab4bacf0f096e7",
+      "diagnostic_probes": [
+        {
+          "smiles": "Cc1c(-c2cccc(N3CCCCC3)c2)cccc1-c1cccc(N2CC[NH2+]CC2)c1",
+          "reported_score": -12.8,
+          "evidence": "diagnostics/ivg_molecules/docking_5ht1b_idx1_thr4.csv"
+        },
+        {
+          "smiles": "Cc1cccc(C2=CC=C(c3cccc(-c4cccc(N5CC[NH2+]CC5)c4)c3)NN2)c1",
+          "reported_score": -13.0,
+          "evidence": "diagnostics/ivg_molecules/docking_5ht1b_idx1_thr4.csv"
+        }
+      ]
+    },
+    {
+      "label": "jak2_0_delta04",
+      "cell": "jak2_0",
+      "contract": "configs/t4_shared_retained_fiber_jak2_v1.json",
+      "contract_sha256": "6884b616e1b896001a7e0e21d45049da8ae7a29b6acfd1c1b77e5f3cc7705388",
+      "lock": "/tmp/jak2_0_v1_round_001_lock.json",
+      "lock_sha256": "7d962e9a51ea179446a03503d76d6f9a988eaba1eab5480cb90fda7e96c197ee",
+      "result": "/tmp/final_jak2_0_checkpoint.json",
+      "result_sha256": "3cffdcfb65807ed268be5be0a1107ba2816534b961aeaab9d4ce92ad6071bc71"
+    },
+    {
+      "label": "jak2_1_delta04",
+      "cell": "jak2_1",
+      "contract": "configs/t4_shared_retained_fiber_jak2_v1.json",
+      "contract_sha256": "6884b616e1b896001a7e0e21d45049da8ae7a29b6acfd1c1b77e5f3cc7705388",
+      "lock": "/tmp/jak2_1_v1_round_001_lock.json",
+      "lock_sha256": "39c034e7f279108a1bc106f5ef49de669e0009b831bf69b5e64f69dae9963a80",
+      "result": "/tmp/final_jak2_1_checkpoint.json",
+      "result_sha256": "284bc4c2da020a7f350c34655d14fa25fd480e0d2b80c60169fb31484429ebe0"
+    },
+    {
+      "label": "jak2_2_delta04",
+      "cell": "jak2_2",
+      "contract": "configs/t4_shared_retained_fiber_jak2_v1.json",
+      "contract_sha256": "6884b616e1b896001a7e0e21d45049da8ae7a29b6acfd1c1b77e5f3cc7705388",
+      "lock": "/tmp/jak2_2_v1_round_001_lock.json",
+      "lock_sha256": "f9e7f269a54596144f8237b47242f353624846a190e0a370991452d48d88c299",
+      "result": "/tmp/final_jak2_2_checkpoint.json",
+      "result_sha256": "1fd2a316d1c73e937e888ae7262ba29748bfd5b651119dd0fc3f7872645c0b1d"
+    },
+    {
+      "label": "parp1_1_delta06",
+      "cell": "parp1_1",
+      "contract": "configs/t4_shared_retained_fiber_parp1_v1.json",
+      "contract_sha256": "5fc1489be8877537e9d1fd27d699e9015061584a7281f6d26bdc26be76907839",
+      "lock": "/tmp/parp1_1_v1_round_001_lock.json",
+      "lock_sha256": "ace0f9d3279fff0adeb881c5dd5fb480c49f78a4e6102a3ddea6ca25ff316771",
+      "result": "/tmp/final_parp1_1_checkpoint.json",
+      "result_sha256": "6d231db4d1117b9425c5409bf75f0c93d26f55ac5d417dba4e1630964af33f5e"
+    },
+    {
+      "label": "parp1_2_delta06",
+      "cell": "parp1_2",
+      "contract": "configs/t4_shared_retained_fiber_parp1_v1.json",
+      "contract_sha256": "5fc1489be8877537e9d1fd27d699e9015061584a7281f6d26bdc26be76907839",
+      "lock": "/tmp/parp1_2_v1_round_001_lock.json",
+      "lock_sha256": "f0fdd06948439ec4972dd29c4f8c24574b7090b7ee5c605ffc894b8249e10545",
+      "result": "/tmp/final_parp1_2_checkpoint.json",
+      "result_sha256": "915d5e4c04a3cbb66d4c6dfe40cffe0652ae19348878eb60d6ab0ea5a79d2385"
+    }
+  ],
+  "abstentions": [
+    {
+      "label": "fa7_1_delta04",
+      "cell": "fa7_1",
+      "contract": "configs/t4_shared_retained_fiber_fa7_d04_v1.json",
+      "contract_sha256": "45c342c8a3a755256989f979d12b3b3af9a276d02490031dd7ad0d6e387d41ff",
+      "result": "/tmp/fa704_1_final.json",
+      "result_sha256": "11f393c3f8918fc1522d98e7c0e774cbe7deda6f30110786bc87d952cac84939",
+      "reason": "completed result is present but its round-one candidate-pool lock is not locally available"
+    }
+  ]
+}

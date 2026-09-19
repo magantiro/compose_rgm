@@ -1,0 +1,1471 @@
+{
+  "payload": {
+    "abstentions": [
+      {
+        "cell": "fa7_1",
+        "inputs": {
+          "contract": {
+            "path": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916/configs/t4_shared_retained_fiber_fa7_d04_v1.json",
+            "payload_sha256": "3d948a7032dbf035fd35a0d8a346840b0551730ad5b66ac7a3a4d0d3101a4ec3",
+            "schema_version": "t4_shared_retained_fiber_scored_contract_v2",
+            "sha256": "45c342c8a3a755256989f979d12b3b3af9a276d02490031dd7ad0d6e387d41ff"
+          },
+          "result": {
+            "path": "/tmp/fa704_1_final.json",
+            "payload_sha256": "678ddde539ae1ee3a68bb9736a8663289e274c604d46d9a573e98bb1836e2fdc",
+            "schema_version": "t4_integrated_route_fiber_result_v2",
+            "sha256": "11f393c3f8918fc1522d98e7c0e774cbe7deda6f30110786bc87d952cac84939"
+          }
+        },
+        "label": "fa7_1_delta04",
+        "missing_lock_payload_sha256": "e735aec8898519385492971da924fa175aed51911628ccc259b5433abd3656b0",
+        "reason": "completed result is present but its round-one candidate-pool lock is not locally available",
+        "status": "abstained_missing_round_one_candidate_pool"
+      }
+    ],
+    "audit_script_sha256": "66f2fc4c360fb619874be760800b31decab04678ac4c6666658dccf8bd7509bb",
+    "cases": [
+      {
+        "candidate_count": 213,
+        "cell": "5ht1b_1",
+        "controller_seed": 2026091907,
+        "diagnostic_probes": [
+          {
+            "evidence": "diagnostics/ivg_molecules/docking_5ht1b_idx1_thr4.csv",
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "reported_score": -12.8,
+            "route_proposal_rank": 6,
+            "selected_by_original": false,
+            "selected_by_repair": true,
+            "smiles": "Cc1c(-c2cccc(N3CCCCC3)c2)cccc1-c1cccc(N2CC[NH2+]CC2)c1"
+          },
+          {
+            "evidence": "diagnostics/ivg_molecules/docking_5ht1b_idx1_thr4.csv",
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "reported_score": -13.0,
+            "route_proposal_rank": 9,
+            "selected_by_original": false,
+            "selected_by_repair": true,
+            "smiles": "Cc1cccc(C2=CC=C(c3cccc(-c4cccc(N5CC[NH2+]CC5)c4)c3)NN2)c1"
+          }
+        ],
+        "inputs": {
+          "contract": {
+            "path": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916/configs/t4_shared_retained_fiber_5ht1b_d04_v1.json",
+            "payload_sha256": "50328721b6bdf9f3d092bd032ce72ca2383c2c6985c613cf19390e881a65b30d",
+            "schema_version": "t4_shared_retained_fiber_scored_contract_v2",
+            "sha256": "7d42df76a65ab9a432b4cea5fcde09b717b533d85cd162d5320d36bbcf0d25ce"
+          },
+          "lock": {
+            "path": "/tmp/5ht1b1_d04_round_001_lock.json",
+            "payload_sha256": "2cc9578d1980dd3f48cf0a33f4f7b96559045c9828b975b29d049289b1837a62",
+            "schema_version": "t4_integrated_round_lock_v2",
+            "sha256": "d53625d302fcc6aec08fb44f0159e98730b53ef02fe37eb4b3c81e3143ced690"
+          },
+          "result_or_checkpoint": {
+            "path": "/tmp/5ht1b1_d04_final_result.json",
+            "payload_sha256": "3a787716027578f11471c027f3862f7ef879bd8181cc4809b8c066cec6217285",
+            "schema_version": "t4_integrated_route_fiber_result_v2",
+            "sha256": "1b47b783096d10ce5c348efc8e47e2a74c0c16cf032f5d87faab4bacf0f096e7"
+          }
+        },
+        "label": "5ht1b_1_delta04",
+        "original_base_expert_floors": {
+          "anchored_replacement": "O=C(O)CCNCc1cccc(N2CC[NH2+]CC2)c1",
+          "shallow": "NC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1"
+        },
+        "original_base_expert_floors_preserved": {
+          "anchored_replacement": true,
+          "shallow": true
+        },
+        "original_replay_exact": true,
+        "original_round_best": {
+          "preserved_count": 1,
+          "score": -10.9,
+          "score_preserved": true,
+          "smiles": [
+            "FC(F)(F)c1ccccc1C=Cc1ccccc1-c1ccc(N2CC[NH2+]CC2)cc1"
+          ],
+          "tied_count": 1
+        },
+        "original_selection": [
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "small",
+            "route_proposal_rank": 4,
+            "selection_kind": "route_scale_floor",
+            "smiles": "Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 12,
+            "selection_kind": "route_scale_floor",
+            "smiles": "FC(F)(F)c1cccc(C(F)(F)c2cccc(N3CC[NH2+]CC3)c2)c1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 3,
+            "selection_kind": "route_scale_floor",
+            "smiles": "FC(F)(F)c1ccccc1C=Cc1ccccc1-c1ccc(N2CC[NH2+]CC2)cc1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "NC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "O=C(O)CCNCc1cccc(N2CC[NH2+]CC2)c1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "NC1=[NH+]CCN(c2cccc(C(F)(F)F)c2)C1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "Nc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 67,
+            "selection_kind": "exploration",
+            "smiles": "FC(F)(F)c1cccc(C(F)(F)c2cc(N3CC[NH2+]CC3)c3cc2-3)c1"
+          }
+        ],
+        "policy_plan": {
+          "expert_floor_counts": {
+            "anchored_replacement": 1,
+            "shallow": 1
+          },
+          "exploration_slots": 1,
+          "route_scale_floor_counts": {
+            "large": 3,
+            "medium": 1,
+            "small": 1
+          }
+        },
+        "repaired_large_route_ranks": [
+          3,
+          6,
+          9
+        ],
+        "repaired_selection": [
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "small",
+            "route_proposal_rank": 4,
+            "selection_kind": "route_scale_floor",
+            "smiles": "Cc1cc(N2CC[NH2+]CC2)cc(C(F)(F)F)c1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 12,
+            "selection_kind": "route_scale_floor",
+            "smiles": "FC(F)(F)c1cccc(C(F)(F)c2cccc(N3CC[NH2+]CC3)c2)c1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 3,
+            "selection_kind": "route_scale_floor",
+            "smiles": "FC(F)(F)c1ccccc1C=Cc1ccccc1-c1ccc(N2CC[NH2+]CC2)cc1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 6,
+            "selection_kind": "route_scale_floor",
+            "smiles": "Cc1c(-c2cccc(N3CCCCC3)c2)cccc1-c1cccc(N2CC[NH2+]CC2)c1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 9,
+            "selection_kind": "route_scale_floor",
+            "smiles": "Cc1cccc(C2=CC=C(c3cccc(-c4cccc(N5CC[NH2+]CC5)c4)c3)NN2)c1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "NC1CN(c2cccc(C(F)(F)F)c2)CC[NH2+]1"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "O=C(O)CCNCc1cccc(N2CC[NH2+]CC2)c1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "FC(F)(F)c1cccc(C2CC[NH2+]CC2)c1"
+          }
+        ],
+        "represented_experts": [
+          "anchored_replacement",
+          "route_complete_region",
+          "shallow"
+        ]
+      },
+      {
+        "candidate_count": 1239,
+        "cell": "jak2_0",
+        "controller_seed": 2026091912,
+        "diagnostic_probes": [],
+        "inputs": {
+          "contract": {
+            "path": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916/configs/t4_shared_retained_fiber_jak2_v1.json",
+            "payload_sha256": "f9de6245060d9c3bff168f56c543b715256392b1fdb3367ee68c2d2c76a1c194",
+            "schema_version": "t4_shared_retained_fiber_scored_contract_v1",
+            "sha256": "6884b616e1b896001a7e0e21d45049da8ae7a29b6acfd1c1b77e5f3cc7705388"
+          },
+          "lock": {
+            "path": "/tmp/jak2_0_v1_round_001_lock.json",
+            "payload_sha256": "41727c62ca0e706d369489e14dea0b555ce72defc47ea2f54c48f7b1862643c3",
+            "schema_version": "t4_integrated_round_lock_v1",
+            "sha256": "7d962e9a51ea179446a03503d76d6f9a988eaba1eab5480cb90fda7e96c197ee"
+          },
+          "result_or_checkpoint": {
+            "path": "/tmp/final_jak2_0_checkpoint.json",
+            "payload_sha256": "b2f9cb01de1d325c32d2b18f106f76c0a1cfb85365c8a8425f94097066883608",
+            "schema_version": "t4_integrated_route_fiber_checkpoint_v1",
+            "sha256": "3cffdcfb65807ed268be5be0a1107ba2816534b961aeaab9d4ce92ad6071bc71"
+          }
+        },
+        "label": "jak2_0_delta04",
+        "original_base_expert_floors": {
+          "anchored_replacement": "CC1CNN(CCCCC2=Nc3ccccc3-c3ncnc4[nH]cc2c34)C1",
+          "shallow": "OCCCCC1=Nc2ccccc2-c2ncnc3c2C1N=N3"
+        },
+        "original_base_expert_floors_preserved": {
+          "anchored_replacement": true,
+          "shallow": true
+        },
+        "original_replay_exact": true,
+        "original_round_best": {
+          "preserved_count": 1,
+          "score": -10.9,
+          "score_preserved": true,
+          "smiles": [
+            "O=C(C1CCC(CCC2=Nc3ccccc3-c3ncnc4[nH]cc2c34)CC1)C1CC1"
+          ],
+          "tied_count": 1
+        },
+        "original_selection": [
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "small",
+            "route_proposal_rank": 1,
+            "selection_kind": "route_scale_floor",
+            "smiles": "CC(CCCO)C1=Nc2ccccc2-c2ncnc3[nH]cc1c23"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 2,
+            "selection_kind": "route_scale_floor",
+            "smiles": "OCCCCC1=Nc2ccccc2-c2nccc3[nH]cc1c23"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 6,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C(C1CCC(CCC2=Nc3ccccc3-c3ncnc4[nH]cc2c34)CC1)C1CC1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "OCCCCC1=Nc2ccccc2-c2ncnc3c2C1N=N3"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "CC1CNN(CCCCC2=Nc3ccccc3-c3ncnc4[nH]cc2c34)C1"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "c1ccc2c(c1)N=C(CCCOC1CNCCN1)c1c[nH]c3ncnc-2c13"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "OCCCCC1=Nc2ccccc2-c2ccnc3c2c1c1n3CCC1"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "O=C(O)N1CC(CCCC2=Nc3ccccc3-c3ncnc4[nH]cc2c34)CN1O"
+          }
+        ],
+        "policy_plan": {
+          "expert_floor_counts": {
+            "anchored_replacement": 1,
+            "shallow": 1
+          },
+          "exploration_slots": 1,
+          "route_scale_floor_counts": {
+            "large": 3,
+            "medium": 1,
+            "small": 1
+          }
+        },
+        "repaired_large_route_ranks": [
+          6,
+          9,
+          24
+        ],
+        "repaired_selection": [
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "small",
+            "route_proposal_rank": 1,
+            "selection_kind": "route_scale_floor",
+            "smiles": "CC(CCCO)C1=Nc2ccccc2-c2ncnc3[nH]cc1c23"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 2,
+            "selection_kind": "route_scale_floor",
+            "smiles": "OCCCCC1=Nc2ccccc2-c2nccc3[nH]cc1c23"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 6,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C(C1CCC(CCC2=Nc3ccccc3-c3ncnc4[nH]cc2c34)CC1)C1CC1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 9,
+            "selection_kind": "route_scale_floor",
+            "smiles": "c1ccc2c(c1)N=C(C1=NCN=C1NC1=NCNC1)c1c[nH]c3ncnc-2c13"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 24,
+            "selection_kind": "route_scale_floor",
+            "smiles": "CC(=O)N1CC=C(CCCC2=Nc3ccccc3-c3nccc4[nH]cc2c34)CC1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "OCCCCC1=Nc2ccccc2-c2ncnc3c2C1N=N3"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "CC1CNN(CCCCC2=Nc3ccccc3-c3ncnc4[nH]cc2c34)C1"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "O=C(O)N1CC(O)CN1CC1=Nc2ccccc2-c2ncnc3[nH]cc1c23"
+          }
+        ],
+        "represented_experts": [
+          "anchored_replacement",
+          "route_complete_region",
+          "shallow"
+        ]
+      },
+      {
+        "candidate_count": 611,
+        "cell": "jak2_1",
+        "controller_seed": 2026091913,
+        "diagnostic_probes": [],
+        "inputs": {
+          "contract": {
+            "path": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916/configs/t4_shared_retained_fiber_jak2_v1.json",
+            "payload_sha256": "f9de6245060d9c3bff168f56c543b715256392b1fdb3367ee68c2d2c76a1c194",
+            "schema_version": "t4_shared_retained_fiber_scored_contract_v1",
+            "sha256": "6884b616e1b896001a7e0e21d45049da8ae7a29b6acfd1c1b77e5f3cc7705388"
+          },
+          "lock": {
+            "path": "/tmp/jak2_1_v1_round_001_lock.json",
+            "payload_sha256": "fe7cd417c9734e1a41bf3bf84394ab65870df4e1035e903c42f1a2dc8a7f1279",
+            "schema_version": "t4_integrated_round_lock_v1",
+            "sha256": "39c034e7f279108a1bc106f5ef49de669e0009b831bf69b5e64f69dae9963a80"
+          },
+          "result_or_checkpoint": {
+            "path": "/tmp/final_jak2_1_checkpoint.json",
+            "payload_sha256": "3ef28e09a8a51a5dc103be1a230bd69d003ff2df739bc834a26659b02786fbb0",
+            "schema_version": "t4_integrated_route_fiber_checkpoint_v1",
+            "sha256": "284bc4c2da020a7f350c34655d14fa25fd480e0d2b80c60169fb31484429ebe0"
+          }
+        },
+        "label": "jak2_1_delta04",
+        "original_base_expert_floors": {
+          "anchored_replacement": "O=C(CC1Nc2ccccc2-c2ccnc3[nH]cc1c23)CN1CCCN1",
+          "shallow": "CCC1Nc2ccccc2-c2ccnc3[nH]cc1c23"
+        },
+        "original_base_expert_floors_preserved": {
+          "anchored_replacement": true,
+          "shallow": true
+        },
+        "original_replay_exact": true,
+        "original_round_best": {
+          "preserved_count": 1,
+          "score": -10.6,
+          "score_preserved": true,
+          "smiles": [
+            "NC(=O)C1CCN(C(=O)CC2Nc3ccccc3-c3ccnc4[nH]cc2c34)CC1"
+          ],
+          "tied_count": 1
+        },
+        "original_selection": [
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "small",
+            "route_proposal_rank": 2,
+            "selection_kind": "route_scale_floor",
+            "smiles": "COC(=O)CC1Nc2ccccc2-c2cccc3[nH]cc1c23"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 8,
+            "selection_kind": "route_scale_floor",
+            "smiles": "COC(=O)CC1Cc2c[nH]c3nccc(c23)-c2ccccc2N1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 18,
+            "selection_kind": "route_scale_floor",
+            "smiles": "NC(=O)C1CCN(C(=O)CC2Nc3ccccc3-c3ccnc4[nH]cc2c34)CC1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "CCC1Nc2ccccc2-c2ccnc3[nH]cc1c23"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "O=C(CC1Nc2ccccc2-c2ccnc3[nH]cc1c23)CN1CCCN1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 34,
+            "selection_kind": "exploration",
+            "smiles": "COC(=O)CC1Nc2ccc(C)cc2-c2cccc3[nH]cc1c23"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "COc1cccc2c1NC(CC=N)c1c[nH]c3nccc-2c13"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "Cc1cccc2c1NC(CC=O)c1c[nH]c3nccc-2c13"
+          }
+        ],
+        "policy_plan": {
+          "expert_floor_counts": {
+            "anchored_replacement": 1,
+            "shallow": 1
+          },
+          "exploration_slots": 1,
+          "route_scale_floor_counts": {
+            "large": 3,
+            "medium": 1,
+            "small": 1
+          }
+        },
+        "repaired_large_route_ranks": [
+          18,
+          21,
+          33
+        ],
+        "repaired_selection": [
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "small",
+            "route_proposal_rank": 2,
+            "selection_kind": "route_scale_floor",
+            "smiles": "COC(=O)CC1Nc2ccccc2-c2cccc3[nH]cc1c23"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 8,
+            "selection_kind": "route_scale_floor",
+            "smiles": "COC(=O)CC1Cc2c[nH]c3nccc(c23)-c2ccccc2N1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 18,
+            "selection_kind": "route_scale_floor",
+            "smiles": "NC(=O)C1CCN(C(=O)CC2Nc3ccccc3-c3ccnc4[nH]cc2c34)CC1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 21,
+            "selection_kind": "route_scale_floor",
+            "smiles": "COC(=O)CC1NC(=O)Nc2cccnc2-c2ccccc21"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 33,
+            "selection_kind": "route_scale_floor",
+            "smiles": "CC(=O)NC(=O)C1CCCN1C(=O)CC1Nc2ccccc2-c2ccnc3[nH]cc1c23"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "CCC1Nc2ccccc2-c2ccnc3[nH]cc1c23"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "O=C(CC1Nc2ccccc2-c2ccnc3[nH]cc1c23)CN1CCCN1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "N=C1OC(=O)C1C1Nc2ccccc2-c2ccnc3[nH]cc1c23"
+          }
+        ],
+        "represented_experts": [
+          "anchored_replacement",
+          "route_complete_region",
+          "shallow"
+        ]
+      },
+      {
+        "candidate_count": 191,
+        "cell": "jak2_2",
+        "controller_seed": 2026091914,
+        "diagnostic_probes": [],
+        "inputs": {
+          "contract": {
+            "path": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916/configs/t4_shared_retained_fiber_jak2_v1.json",
+            "payload_sha256": "f9de6245060d9c3bff168f56c543b715256392b1fdb3367ee68c2d2c76a1c194",
+            "schema_version": "t4_shared_retained_fiber_scored_contract_v1",
+            "sha256": "6884b616e1b896001a7e0e21d45049da8ae7a29b6acfd1c1b77e5f3cc7705388"
+          },
+          "lock": {
+            "path": "/tmp/jak2_2_v1_round_001_lock.json",
+            "payload_sha256": "d728078097ea3862572c5e21568a4148a3e887a0fbaf8cab8e7c394dcd250bb1",
+            "schema_version": "t4_integrated_round_lock_v1",
+            "sha256": "f9e7f269a54596144f8237b47242f353624846a190e0a370991452d48d88c299"
+          },
+          "result_or_checkpoint": {
+            "path": "/tmp/final_jak2_2_checkpoint.json",
+            "payload_sha256": "8e01f901496a09d46e7763ab0add4df791970ab526010ca8700dcc04376c82ee",
+            "schema_version": "t4_integrated_route_fiber_checkpoint_v1",
+            "sha256": "1fd2a316d1c73e937e888ae7262ba29748bfd5b651119dd0fc3f7872645c0b1d"
+          }
+        },
+        "label": "jak2_2_delta04",
+        "original_base_expert_floors": {
+          "anchored_replacement": "O=C1NC(ON2CCNC2)c2c[nH]c3nccc(c23)-c2ccccc21",
+          "shallow": "O=C1NN(CO)c2c[nH]c3nccc(c23)-c2ccccc21"
+        },
+        "original_base_expert_floors_preserved": {
+          "anchored_replacement": true,
+          "shallow": true
+        },
+        "original_replay_exact": true,
+        "original_round_best": {
+          "preserved_count": 1,
+          "score": -10.5,
+          "score_preserved": true,
+          "smiles": [
+            "O=C1C=CC(=C2NC(c3ccc(F)cc3F)c3c[nH]c4nccc2c34)C=CC1"
+          ],
+          "tied_count": 1
+        },
+        "original_selection": [
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "small",
+            "route_proposal_rank": 12,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C1NC(c2ccc(O)cc2F)c2c[nH]c3nccc(c23)C2=CC=CC12"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 6,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C1C=CC(=C2NC(c3ccc(O)cc3F)c3c[nH]c4nccc2c34)C=CC1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 39,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C1C=CC(=C2NC(c3ccc(F)cc3F)c3c[nH]c4nccc2c34)C=CC1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "O=C1NN(CO)c2c[nH]c3nccc(c23)-c2ccccc21"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "O=C1NC(ON2CCNC2)c2c[nH]c3nccc(c23)-c2ccccc21"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "O=C1NC(c2ccccc2F)C(=CO)c2cnccc2-c2ccccc21"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "CC1=C2C=Cc3cnc4[nH]cc(c4c32)C(c2ccc(O)cc2F)NC1=O"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "CC=CC1=CC(=O)NC(c2ccc(O)cc2F)c2c[nH]c3nccc1c23"
+          }
+        ],
+        "policy_plan": {
+          "expert_floor_counts": {
+            "anchored_replacement": 1,
+            "shallow": 1
+          },
+          "exploration_slots": 1,
+          "route_scale_floor_counts": {
+            "large": 3,
+            "medium": 1,
+            "small": 1
+          }
+        },
+        "repaired_large_route_ranks": [
+          39,
+          51
+        ],
+        "repaired_selection": [
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "small",
+            "route_proposal_rank": 12,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C1NC(c2ccc(O)cc2F)c2c[nH]c3nccc(c23)C2=CC=CC12"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 6,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C1C=CC(=C2NC(c3ccc(O)cc3F)c3c[nH]c4nccc2c34)C=CC1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 39,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C1C=CC(=C2NC(c3ccc(F)cc3F)c3c[nH]c4nccc2c34)C=CC1"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 51,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C1Nc2cccnc2-c2ccccc2C(c2ccc(F)cc2F)NC1=O"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "O=C1NN(CO)c2c[nH]c3nccc(c23)-c2ccccc21"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "O=C1NC(ON2CCNC2)c2c[nH]c3nccc(c23)-c2ccccc21"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "CC=CC1=CC(=O)NC(c2ccc(O)cc2F)c2c[nH]c3nccc1c23"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "CC1=C2C=Cc3cnc4[nH]cc(c4c32)C(c2ccc(O)cc2F)NC1=O"
+          }
+        ],
+        "represented_experts": [
+          "anchored_replacement",
+          "route_complete_region",
+          "shallow"
+        ]
+      },
+      {
+        "candidate_count": 88,
+        "cell": "parp1_1",
+        "controller_seed": 2026091901,
+        "diagnostic_probes": [],
+        "inputs": {
+          "contract": {
+            "path": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916/configs/t4_shared_retained_fiber_parp1_v1.json",
+            "payload_sha256": "e0e554671c925c40de22cd700bd6fff8691cff0b6591e730a931b80ab9f66054",
+            "schema_version": "t4_shared_retained_fiber_scored_contract_v1",
+            "sha256": "5fc1489be8877537e9d1fd27d699e9015061584a7281f6d26bdc26be76907839"
+          },
+          "lock": {
+            "path": "/tmp/parp1_1_v1_round_001_lock.json",
+            "payload_sha256": "9e17bb02a09281019445ac786fbcb01482800946789040a3b4248c307709bb5f",
+            "schema_version": "t4_integrated_round_lock_v1",
+            "sha256": "ace0f9d3279fff0adeb881c5dd5fb480c49f78a4e6102a3ddea6ca25ff316771"
+          },
+          "result_or_checkpoint": {
+            "path": "/tmp/final_parp1_1_checkpoint.json",
+            "payload_sha256": "cb02f9e31a1b4d5597cde704eb4cfef1843acd8edbe46ba52fb3e25f3c45c598",
+            "schema_version": "t4_integrated_route_fiber_checkpoint_v1",
+            "sha256": "6d231db4d1117b9425c5409bf75f0c93d26f55ac5d417dba4e1630964af33f5e"
+          }
+        },
+        "label": "parp1_1_delta06",
+        "original_base_expert_floors": {
+          "anchored_replacement": "CN1CON(Oc2[nH]c3cccc4c3c2CCNC4=O)C1",
+          "shallow": "COc1[nH]c2cccc3c2c1CCCC3=O"
+        },
+        "original_base_expert_floors_preserved": {
+          "anchored_replacement": true,
+          "shallow": true
+        },
+        "original_replay_exact": true,
+        "original_round_best": {
+          "preserved_count": 1,
+          "score": -11.4,
+          "score_preserved": true,
+          "smiles": [
+            "COc1[nH]c2cccc3c2c1CCNC3=CC=C1NC(=O)c2ccccc21"
+          ],
+          "tied_count": 1
+        },
+        "original_selection": [
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "small",
+            "route_proposal_rank": 14,
+            "selection_kind": "route_scale_floor",
+            "smiles": "COc1[nH]c2cccc3c2c1CCCNC3=O"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 21,
+            "selection_kind": "route_scale_floor",
+            "smiles": "COc1[nH]c2cccc3c2c1CCNC(=O)c1ccccc1-3"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 9,
+            "selection_kind": "route_scale_floor",
+            "smiles": "COc1[nH]c2cccc3c2c1CCNC3=CC=C1NC(=O)c2ccccc21"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region",
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "COc1[nH]c2cccc3c2c1CCCC3=O"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "CN1CON(Oc2[nH]c3cccc4c3c2CCNC4=O)C1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "COc1[nH]c2cc(O)cc3c2c1CCNC3=O"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "CN1CCCN1Oc1[nH]c2cccc3c2c1CCNC3=O"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "CN1CCON1Oc1[nH]c2cccc3c2c1CCNC3=O"
+          }
+        ],
+        "policy_plan": {
+          "expert_floor_counts": {
+            "anchored_replacement": 1,
+            "shallow": 1
+          },
+          "exploration_slots": 1,
+          "route_scale_floor_counts": {
+            "large": 3,
+            "medium": 1,
+            "small": 1
+          }
+        },
+        "repaired_large_route_ranks": [
+          9,
+          12
+        ],
+        "repaired_selection": [
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "small",
+            "route_proposal_rank": 14,
+            "selection_kind": "route_scale_floor",
+            "smiles": "COc1[nH]c2cccc3c2c1CCCNC3=O"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 21,
+            "selection_kind": "route_scale_floor",
+            "smiles": "COc1[nH]c2cccc3c2c1CCNC(=O)c1ccccc1-3"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 9,
+            "selection_kind": "route_scale_floor",
+            "smiles": "COc1[nH]c2cccc3c2c1CCNC3=CC=C1NC(=O)c2ccccc21"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 12,
+            "selection_kind": "route_scale_floor",
+            "smiles": "COc1cccn(C2CC(Oc3[nH]c4cccc5c4c3CCNC5=O)C2)c1=O"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region",
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "COc1[nH]c2cccc3c2c1CCCC3=O"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "CN1CON(Oc2[nH]c3cccc4c3c2CCNC4=O)C1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "COc1[nH]c2cc(O)cc3c2c1CCNC3=O"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "CN1CCCN1Oc1[nH]c2cccc3c2c1CCNC3=O"
+          }
+        ],
+        "represented_experts": [
+          "anchored_replacement",
+          "route_complete_region",
+          "shallow"
+        ]
+      },
+      {
+        "candidate_count": 77,
+        "cell": "parp1_2",
+        "controller_seed": 2026091902,
+        "diagnostic_probes": [],
+        "inputs": {
+          "contract": {
+            "path": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916/configs/t4_shared_retained_fiber_parp1_v1.json",
+            "payload_sha256": "e0e554671c925c40de22cd700bd6fff8691cff0b6591e730a931b80ab9f66054",
+            "schema_version": "t4_shared_retained_fiber_scored_contract_v1",
+            "sha256": "5fc1489be8877537e9d1fd27d699e9015061584a7281f6d26bdc26be76907839"
+          },
+          "lock": {
+            "path": "/tmp/parp1_2_v1_round_001_lock.json",
+            "payload_sha256": "09d7d057fea4e225570fe06b42beb013b903fee725f8d625a47e35e970ecef9d",
+            "schema_version": "t4_integrated_round_lock_v1",
+            "sha256": "f0fdd06948439ec4972dd29c4f8c24574b7090b7ee5c605ffc894b8249e10545"
+          },
+          "result_or_checkpoint": {
+            "path": "/tmp/final_parp1_2_checkpoint.json",
+            "payload_sha256": "70dfaaab70ca68f4c1da009ccc4253cc8ff2b0580c175c09ac2c4fe4ff1f7505",
+            "schema_version": "t4_integrated_route_fiber_checkpoint_v1",
+            "sha256": "915d5e4c04a3cbb66d4c6dfe40cffe0652ae19348878eb60d6ab0ea5a79d2385"
+          }
+        },
+        "label": "parp1_2_delta06",
+        "original_base_expert_floors": {
+          "anchored_replacement": "CC1CNCCN1N=Cc1cn2c3c(cccc13)C(=O)NCC2",
+          "shallow": "N=Cc1cn2c3c(cccc13)C(=O)NCC2"
+        },
+        "original_base_expert_floors_preserved": {
+          "anchored_replacement": true,
+          "shallow": true
+        },
+        "original_replay_exact": true,
+        "original_round_best": {
+          "preserved_count": 1,
+          "score": -9.9,
+          "score_preserved": true,
+          "smiles": [
+            "CC1CN(C(=O)O)CN1N=Cc1cn2c3c(cccc13)C(=O)NCC2",
+            "O=C1NCCn2cc(C=Nc3cccc(C(F)(F)F)c3Cl)c3cccc1c32"
+          ],
+          "tied_count": 2
+        },
+        "original_selection": [
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 5,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C1NCCn2cc(C=CCl)c3cccc1c32"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 6,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C1NCCn2cc(C=Nc3cccc(C(F)(F)F)c3Cl)c3cccc1c32"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "N=Cc1cn2c3c(cccc13)C(=O)NCC2"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "CC1CNCCN1N=Cc1cn2c3c(cccc13)C(=O)NCC2"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "CC1CN(C(=O)O)CN1N=Cc1cn2c3c(cccc13)C(=O)NCC2"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "CC=Cc1cn2c3c(cccc13)C(=O)NCC2"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "O=C1NCCn2cc(CO)c3cccc1c32"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "NCN=Cc1cn2c3c(cccc13)C(=O)NCC2"
+          }
+        ],
+        "policy_plan": {
+          "expert_floor_counts": {
+            "anchored_replacement": 1,
+            "shallow": 1
+          },
+          "exploration_slots": 1,
+          "route_scale_floor_counts": {
+            "large": 3,
+            "medium": 1,
+            "small": 1
+          }
+        },
+        "repaired_large_route_ranks": [
+          6,
+          9
+        ],
+        "repaired_selection": [
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "medium",
+            "route_proposal_rank": 5,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C1NCCn2cc(C=CCl)c3cccc1c32"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 6,
+            "selection_kind": "route_scale_floor",
+            "smiles": "O=C1NCCn2cc(C=Nc3cccc(C(F)(F)F)c3Cl)c3cccc1c32"
+          },
+          {
+            "proposal_experts": [
+              "route_complete_region"
+            ],
+            "proposal_lane": "route_complete_region",
+            "realized_primitive_band": "large",
+            "route_proposal_rank": 9,
+            "selection_kind": "route_scale_floor",
+            "smiles": "CC(=O)NCc1ccc(CN=Cc2cn3c4c(cccc24)C(=O)NCC3)cc1"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "N=Cc1cn2c3c(cccc13)C(=O)NCC2"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "expert_floor",
+            "smiles": "CC1CNCCN1N=Cc1cn2c3c(cccc13)C(=O)NCC2"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "CCC(CN)N=Cc1cn2c3c(cccc13)C(=O)NCC2"
+          },
+          {
+            "proposal_experts": [
+              "anchored_replacement"
+            ],
+            "proposal_lane": "anchored_replacement",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "CC1CNCN1N=Cc1cn2c3c(cccc13)C(=O)NCC2"
+          },
+          {
+            "proposal_experts": [
+              "shallow"
+            ],
+            "proposal_lane": "shallow",
+            "realized_primitive_band": null,
+            "route_proposal_rank": null,
+            "selection_kind": "exploration",
+            "smiles": "Nc1cn2c3c(cccc13)C(=O)NCC2"
+          }
+        ],
+        "represented_experts": [
+          "anchored_replacement",
+          "route_complete_region",
+          "shallow"
+        ]
+      }
+    ],
+    "claim_boundary": "Retrospective selection replay on immutable completed candidate pools. It establishes coverage and preservation under an eight-call counterfactual, not prospective docking performance.",
+    "code_revision": "617eef0342db394bc7458b149a0539d5c2c56b5f",
+    "costs": {
+      "docking_calls": 0,
+      "modal_launches": 0,
+      "oracle_calls": 0
+    },
+    "decision": "Use round-one route floors small=1, medium=1, large=3; retain one nonempty shallow and anchored floor; leave the eighth slot to ordinary exploration unless a nonempty optional protonation expert claims it.",
+    "manifest": {
+      "path": "configs/t4_cold_start_allocation_replay_v1.json",
+      "sha256": "adeb5b1695b3bf96aee0bc71dd94eaf39db20e37fe007faff4d28d559913c4fd"
+    },
+    "policy_schema_version": "t4_cold_start_allocation_v1",
+    "sample_counts": {
+      "abstentions": 1,
+      "diagnostic_probes": 2,
+      "exact_replay_cases": 6
+    },
+    "schema_version": "t4_cold_start_allocation_replay_v1",
+    "scientific_problem": "repair value-free round-one undercoverage of high-ranked large coordinated route transformations without target-specific information",
+    "software": {
+      "numpy": "2.5.3",
+      "platform": "macOS-26.5.2-arm64-arm-64bit",
+      "python": "3.12.9"
+    },
+    "status": "selected_zero_oracle_policy",
+    "summary": {
+      "diagnostic_probes_selected_by_original": 0,
+      "diagnostic_probes_selected_by_repair": 2,
+      "original_base_expert_floors_preserved": 6,
+      "original_locks_exactly_reproduced": 6,
+      "original_round_best_score_preserved": 6
+    }
+  },
+  "payload_sha256": "0d8ce0d79e806d42d7e3635e848a3da543a4fadb402253e20c35aab3be6a28b2"
+}
