@@ -453,6 +453,20 @@ def test_receipt_store_is_atomic_self_hashed_and_refuses_lock_overwrite(tmp_path
     assert flushes == ["flush", "flush", "flush"]
 
 
+def test_receipt_store_publish_once_does_not_require_hard_links(
+    tmp_path, monkeypatch
+):
+    store = ReceiptStore(tmp_path)
+
+    def reject_hard_link(*_args, **_kwargs):
+        raise PermissionError("hard links are unsupported by this volume")
+
+    monkeypatch.setattr("os.link", reject_hard_link)
+    identity = store.publish_once("cell/launch.json", {"state": "running"})
+    assert store.read("cell/launch.json") == {"state": "running"}
+    assert len(identity) == 64
+
+
 def test_query_crash_after_durable_reservation_cannot_repeat_evaluation(tmp_path):
     store = ReceiptStore(tmp_path)
     lock = make_query_lock(

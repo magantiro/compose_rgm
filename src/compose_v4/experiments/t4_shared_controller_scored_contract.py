@@ -24,21 +24,21 @@ from compose_v4.experiments.t4_shared_controller_completion_contract import (
     verify_exact_commit_capsule,
 )
 
-SCHEMA_VERSION = "t4_shared_controller_completion_scored_contract_v3"
-AUTHORIZATION_SCHEMA_VERSION = "t4_shared_controller_completion_scored_authorization_v3"
+SCHEMA_VERSION = "t4_shared_controller_completion_scored_contract_v4"
+AUTHORIZATION_SCHEMA_VERSION = "t4_shared_controller_completion_scored_authorization_v4"
 FINAL_CONTRACT_RELATIVE_PATH = (
-    "diagnostics/t4_shared_controller_completion_v1/scored_contract_v3.json"
+    "diagnostics/t4_shared_controller_completion_v1/scored_contract_v4.json"
 )
 AUTHORIZATION_RELATIVE_PATH = (
-    "diagnostics/t4_shared_controller_completion_v1/scored_authorization_v3.json"
+    "diagnostics/t4_shared_controller_completion_v1/scored_authorization_v4.json"
 )
 RECONCILIATION_SCHEMA_VERSION = "t4_braf_v4_stale_query_reconciliation_v1"
 SUPPORT_RELATIVE_PATH = "diagnostics/t4_nine_cell_support_preflight_v1/attempt_1"
 CAPSULE_ROOT_RELATIVE_PATH = (
-    "diagnostics/t4_shared_controller_completion_v1/source_capsule_v3"
+    "diagnostics/t4_shared_controller_completion_v1/source_capsule_v4"
 )
 CAPSULE_MANIFEST_RELATIVE_PATH = (
-    "diagnostics/t4_shared_controller_completion_v1/source_capsule_manifest_v3.json"
+    "diagnostics/t4_shared_controller_completion_v1/source_capsule_manifest_v4.json"
 )
 CAPSULE_INCLUDE = (
     "configs/t4_nine_cell_support_preflight_v1.json",

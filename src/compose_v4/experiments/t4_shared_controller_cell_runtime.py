@@ -33,7 +33,13 @@ def _safe_relative_path(relative: str) -> PurePosixPath:
 
 
 class ReceiptStore:
-    """Atomic self-hashed JSON publication with an injected durability flush."""
+    """Atomic self-hashed JSON publication with an injected durability flush.
+
+    Each exact receipt path has one contractually exclusive writer. Modal
+    volumes support same-directory atomic rename but reject hard-link creation,
+    so immutable publication checks for a final path before renaming the fully
+    fsynced temporary file.
+    """
 
     def __init__(self, root: Path, flush: Callable[[], None] | None = None):
         self.root = root.resolve()
@@ -93,12 +99,12 @@ class ReceiptStore:
                 os.replace(temporary_name, path)
                 temporary_name = None
             else:
-                try:
-                    os.link(temporary_name, path)
-                except FileExistsError as error:
+                if path.exists():
                     raise FileExistsError(
                         f"durable receipt already exists: {path.relative_to(self.root)}"
-                    ) from error
+                    )
+                os.rename(temporary_name, path)
+                temporary_name = None
         finally:
             if temporary_name is not None:
                 Path(temporary_name).unlink(missing_ok=True)
