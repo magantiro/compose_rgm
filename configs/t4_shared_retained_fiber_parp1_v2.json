@@ -1,0 +1,150 @@
+{
+  "payload": {
+    "schema_version": "t4_shared_retained_fiber_scored_contract_v2",
+    "status": "AUTHORIZED_V1_CHECKPOINT_CONTINUATION",
+    "scientific_problem": "test whether the primary shared COMPOSE controller converts repaired teacher-scale PARP1 proposal support into docking utility",
+    "primary_model_output": "target-reward-adapted selection over shallow, anchored and scale-balanced shared retained-subgraph rewrite programs",
+    "central_claim_under_test": "a shared route proposal law plus online FiberControl can enter and refine the strong PARP1 basin that the earlier short-scale route lane could not reach",
+    "experimental_setting": "receipt-sharded continuation of the authorized three-seed PARP1 delta=0.6 campaign after v1 preemption; completed v1 calls count against the unchanged 49-call-per-cell ceiling and are never repeated",
+    "cells": [
+      {
+        "cell": "parp1_0",
+        "source_global_index": 0,
+        "smiles": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+        "controller_seed": 2026091900
+      },
+      {
+        "cell": "parp1_1",
+        "source_global_index": 1,
+        "smiles": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+        "controller_seed": 2026091901
+      },
+      {
+        "cell": "parp1_2",
+        "source_global_index": 2,
+        "smiles": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+        "controller_seed": 2026091902
+      }
+    ],
+    "delta": 0.6,
+    "support": "compose_valid",
+    "charged_calls_per_cell": 49,
+    "total_charged_call_ceiling": 147,
+    "batch": 8,
+    "parents": 4,
+    "parent_explore": 0.3,
+    "exploration": 2,
+    "expert_floor_rounds": 2,
+    "route_scale_floor_rounds": 2,
+    "value_penalty": 1.0,
+    "docking_seed": 20260919,
+    "proposal": {
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      },
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "route_complete_region": {
+        "pool_size": 192,
+        "realization_limit": 96,
+        "beam_width": 48,
+        "expansion_width": 48,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "scale_balanced": true,
+        "training_scope": "one shared task-independent expert fit on all 77 locked routes"
+      }
+    },
+    "round_lock_policy": {
+      "publish_before_docking": true,
+      "per_query_receipts": true,
+      "per_expert_proposal_receipts": true,
+      "resume_complete_receipts_only": true,
+      "never_resubmit_reserved_or_missing_query_receipt": true,
+      "continue_after_deadline_with_unresolved_calls_charged": true,
+      "no_backfill": true,
+      "automatic_retries": 0
+    },
+    "legacy_resume": {
+      "parp1_0": {
+        "mode": "fail_closed",
+        "run_id": "a1c58fa6354ff2b6de76c6894322906d8e4a4fe7cfd5e34899737d7233e08806",
+        "round_lock_path": "a1c58fa6354ff2b6de76c6894322906d8e4a4fe7cfd5e34899737d7233e08806/parp1_0/round_000_lock.json",
+        "round_lock_sha256": "3664433f3e2e154284df90fc51f311812a41a79fced31d2a05962005531f32dc",
+        "round_lock_payload_sha256": "2def9fb6067ea33830879786b1c6caa0d70b556216e38894fef7fc67c5f859c8"
+      },
+      "parp1_1": {
+        "mode": "checkpoint",
+        "run_id": "a1c58fa6354ff2b6de76c6894322906d8e4a4fe7cfd5e34899737d7233e08806",
+        "checkpoint_path": "a1c58fa6354ff2b6de76c6894322906d8e4a4fe7cfd5e34899737d7233e08806/parp1_1/checkpoint.json",
+        "checkpoint_sha256": "6d231db4d1117b9425c5409bf75f0c93d26f55ac5d417dba4e1630964af33f5e",
+        "checkpoint_payload_sha256": "cb02f9e31a1b4d5597cde704eb4cfef1843acd8edbe46ba52fb3e25f3c45c598",
+        "round_lock_path": "a1c58fa6354ff2b6de76c6894322906d8e4a4fe7cfd5e34899737d7233e08806/parp1_1/round_001_lock.json",
+        "round_lock_sha256": "ace0f9d3279fff0adeb881c5dd5fb480c49f78a4e6102a3ddea6ca25ff316771",
+        "round_lock_payload_sha256": "9e17bb02a09281019445ac786fbcb01482800946789040a3b4248c307709bb5f"
+      },
+      "parp1_2": {
+        "mode": "checkpoint",
+        "run_id": "a1c58fa6354ff2b6de76c6894322906d8e4a4fe7cfd5e34899737d7233e08806",
+        "checkpoint_path": "a1c58fa6354ff2b6de76c6894322906d8e4a4fe7cfd5e34899737d7233e08806/parp1_2/checkpoint.json",
+        "checkpoint_sha256": "66ef9ea9761b17a79ffc72b76ddcc4e3faccccc64bcd0f388d5b5daba3e7f765",
+        "checkpoint_payload_sha256": "c4f89bf11f2b16e4fd2f061d738a52ff3f04ae154427e2c3dcf5578881ac9642",
+        "round_lock_path": "a1c58fa6354ff2b6de76c6894322906d8e4a4fe7cfd5e34899737d7233e08806/parp1_2/round_001_lock.json",
+        "round_lock_sha256": "f0fdd06948439ec4972dd29c4f8c24574b7090b7ee5c605ffc894b8249e10545",
+        "round_lock_payload_sha256": "09d7d057fea4e225570fe06b42beb013b903fee725f8d625a47e35e970ecef9d"
+      }
+    },
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"
+    },
+    "docking_box": [
+      [
+        26.413,
+        11.282,
+        27.238
+      ],
+      [
+        18.521,
+        17.479,
+        19.995
+      ]
+    ],
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+      "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "73c574c9e562d80583c01c556e1732e108957eb5271a79850f30db602296b0eb",
+      "src/compose_v4/control/structural_subgoal_policy.py": "d45a2f6b92a69f7462f6c1e2cd5523bc529cedb0a24e5a993aa714a2ade3d2b4",
+      "src/compose_v4/control/structural_subgoal_realizer.py": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_integrated_route_fiber.py": "4a5e1de25e0478b7572d333103ac3d5fe7ff46a1fd669acd7b99da4a2757e687",
+      "modal_apps/t4_shared_retained_fiber_parp1_v2_app.py": "95b7e23f83619bae031b9d7de0ba2116b301a4f1a2741cebe6fa009e21a886a3",
+      "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "6b7048648bb608c2f62c78f7f8c40e7fa48c5acc71b13569de4b96319efc27a3"
+    },
+    "zero_oracle_support": {
+      "artifact": "diagnostics/t4_shared_retained_rewrite_v1/shards/parp1_1.json",
+      "sha256": "f881e9b74d20bd811883d79bef7b1fff59a221e76e4b38813c07a35c6a540662",
+      "result": "96 exact programs, 32 large, 10 eligible at delta 0.6, four exact known endpoints including the 14- and 17-primitive witnesses"
+    },
+    "reported_ivg_delta_0_6": {
+      "parp1_0": -12.3,
+      "parp1_1": -11.533333333333333,
+      "parp1_2": -10.1
+    },
+    "primary_baselines": "measured roots, frozen prior PARP1 integrated run, and reported IVG means; no comparator enters runtime",
+    "claim_boundary": "authorized continuation only: migrate complete hash-bound v1 checkpoints, fail closed on the unresolved PARP1-0 root lock, and spend only each safe cell's remaining original budget",
+    "proposal_wait_seconds": 2400,
+    "query_wait_seconds": 1200,
+    "phase_poll_seconds": 5,
+    "prior_operational_waste": 1
+  },
+  "payload_sha256": "1dd9c1b2970e0f1297258dfb0be6ff7e7b0f995fed928e8d98a3912164dfbaf0"
+}

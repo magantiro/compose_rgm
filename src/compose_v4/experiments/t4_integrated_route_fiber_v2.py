@@ -53,6 +53,116 @@ def proposal_collection_action(
     return "collect_with_abstentions"
 
 
+def query_collection_action(
+    *,
+    lock_exists: bool,
+    receipt_statuses: Iterable[str],
+    now: float,
+    deadline: float | None,
+) -> str:
+    """Choose a no-retry action for one immutable scored-query lock.
+
+    Missing or reserved receipts are never resubmitted.  They are allowed time to
+    finish, then conservatively consume their already locked budget as unresolved
+    failures so the next checkpointed round can continue.
+    """
+
+    statuses = tuple(str(value) for value in receipt_statuses)
+    if not lock_exists:
+        if statuses:
+            raise ValueError("query receipts exist without an immutable phase lock")
+        return "start"
+    if statuses and all(value == "complete" for value in statuses):
+        return "recover"
+    if deadline is None:
+        raise ValueError("locked query phase has no frozen receipt deadline")
+    if float(now) < float(deadline):
+        return "wait"
+    return "recover_with_unresolved"
+
+
+def migrate_v1_checkpoint(
+    checkpoint: dict,
+    *,
+    cell: str,
+    original_seed: str,
+    new_contract_payload_sha256: str,
+    charged_call_ceiling: int,
+    legacy_run_id: str,
+    legacy_checkpoint_sha256: str,
+    legacy_checkpoint_payload_sha256: str,
+    legacy_round_lock_sha256: str,
+    legacy_round_lock_payload_sha256: str,
+) -> dict:
+    """Convert one completed v1 round checkpoint into the restartable v2 schema.
+
+    Only information already sealed in the v1 checkpoint is carried forward.  The
+    root result is reconstructed from the source entry in the sealed archive, not
+    from console logs or a new oracle call.  The legacy checkpoint and round lock
+    identities remain attached to the migrated state.
+    """
+
+    if checkpoint.get("schema_version") != "t4_integrated_route_fiber_checkpoint_v1":
+        raise ValueError("legacy checkpoint has the wrong schema")
+    if checkpoint.get("status") != "running" or checkpoint.get("cell") != cell:
+        raise ValueError("legacy checkpoint status or cell mismatch")
+    archive = {str(key): float(value) for key, value in checkpoint["archive"].items()}
+    if original_seed not in archive:
+        raise ValueError("legacy checkpoint does not contain the declared source")
+    rounds = list(checkpoint["rounds"])
+    history = list(checkpoint["history"])
+    if not rounds or len(rounds) != len(history):
+        raise ValueError("legacy checkpoint must contain aligned completed rounds")
+    expected_rounds = list(range(1, len(rounds) + 1))
+    if [int(row["round"]) for row in rounds] != expected_rounds:
+        raise ValueError("legacy checkpoint rounds are not contiguous from one")
+    if [int(row["round"]) for row in history] != expected_rounds:
+        raise ValueError("legacy checkpoint history is not contiguous from one")
+    charged_calls = int(checkpoint["charged_calls"])
+    if charged_calls != 1 + sum(int(row["charged_this_round"]) for row in rounds):
+        raise ValueError("legacy charged-call count is inconsistent with completed rounds")
+    if int(checkpoint["budget_remaining"]) != charged_call_ceiling - charged_calls:
+        raise ValueError("legacy remaining budget is inconsistent with the frozen ceiling")
+    if rounds[-1].get("candidate_lock_payload_sha256") != legacy_round_lock_payload_sha256:
+        raise ValueError("legacy checkpoint does not bind the declared final round lock")
+    if len(checkpoint["features"]) != len(checkpoint["improvements"]):
+        raise ValueError("legacy value-training rows are misaligned")
+    if "rng_state" not in checkpoint:
+        raise ValueError("legacy checkpoint has no resumable RNG state")
+
+    return {
+        "schema_version": "t4_integrated_route_fiber_checkpoint_v2",
+        "status": "running",
+        "cell": cell,
+        "contract_payload_sha256": new_contract_payload_sha256,
+        "charged_calls": charged_calls,
+        "budget_remaining": charged_call_ceiling - charged_calls,
+        "archive": dict(sorted(archive.items())),
+        "features": list(checkpoint["features"]),
+        "improvements": list(checkpoint["improvements"]),
+        "history": history,
+        "rounds": rounds,
+        "rounds_completed": len(rounds),
+        "root_result": {
+            "query_id": f"{legacy_run_id}_{cell}_root",
+            "smiles": original_seed,
+            "score": archive[original_seed],
+            "failure": None,
+            "recovered_from": "sealed_v1_archive_source_entry",
+        },
+        "rng_state": checkpoint["rng_state"],
+        "migration_provenance": {
+            "legacy_run_id": legacy_run_id,
+            "legacy_contract_payload_sha256": checkpoint["contract_payload_sha256"],
+            "legacy_checkpoint_sha256": legacy_checkpoint_sha256,
+            "legacy_checkpoint_payload_sha256": legacy_checkpoint_payload_sha256,
+            "legacy_round_lock_sha256": legacy_round_lock_sha256,
+            "legacy_round_lock_payload_sha256": legacy_round_lock_payload_sha256,
+            "legacy_charged_calls": charged_calls,
+        },
+    }
+
+
 def _experts(record: dict) -> tuple[str, ...]:
     values = record.get("proposal_experts") or [record.get("proposal_lane")]
     result = tuple(sorted({str(value) for value in values if value}))
@@ -164,9 +274,7 @@ def select_batch(
     if round_index <= expert_floor_rounds:
         for expert in EXPERTS:
             choices = [
-                row
-                for row in available
-                if expert in _experts(row) and row["smiles"] not in used
+                row for row in available if expert in _experts(row) and row["smiles"] not in used
             ]
             if not choices or len(selected) >= batch:
                 continue
@@ -177,9 +285,7 @@ def select_batch(
     room = min(batch - len(selected), len(remaining))
     if room:
         random_quota = min(exploration, room)
-        indices = acquisition(
-            remaining, value, state, rng, batch=room, exploration=random_quota
-        )
+        indices = acquisition(remaining, value, state, rng, batch=room, exploration=random_quota)
         model_count = room - random_quota if value.weights is not None else 0
         for position, index in enumerate(indices):
             kind = "model" if position < model_count else "exploration"
@@ -206,6 +312,8 @@ __all__ = [
     "expert_census",
     "integrated_features",
     "merge_expert_pools",
+    "migrate_v1_checkpoint",
     "proposal_collection_action",
+    "query_collection_action",
     "select_batch",
 ]

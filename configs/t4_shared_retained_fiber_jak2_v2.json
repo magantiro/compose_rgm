@@ -1,0 +1,159 @@
+{
+  "payload": {
+    "schema_version": "t4_shared_retained_fiber_scored_contract_v2",
+    "status": "AUTHORIZED_V1_CHECKPOINT_CONTINUATION",
+    "scientific_problem": "measure the primary shared COMPOSE controller on JAK2 under the delta=0.4 fiber",
+    "primary_model_output": "target-reward-adapted selection over shallow, anchored and scale-balanced shared retained-subgraph rewrite programs",
+    "central_claim_under_test": "the same shared controller can use the broader delta=0.4 corridor to match or exceed reported IVG JAK2 utility",
+    "experimental_setting": "receipt-sharded continuation of the authorized three-seed JAK2 delta=0.4 campaign after v1 preemption; completed v1 calls count against the unchanged 49-call-per-cell ceiling and are never repeated",
+    "cells": [
+      {
+        "cell": "jak2_0",
+        "source_global_index": 12,
+        "smiles": "OCCCCc2nc1ccccc1c4ncnc3[nH]cc2c34",
+        "controller_seed": 2026091912
+      },
+      {
+        "cell": "jak2_1",
+        "source_global_index": 13,
+        "smiles": "COC(=O)CC2Nc1ccccc1c3ccnc4[nH]cc2c34",
+        "controller_seed": 2026091913
+      },
+      {
+        "cell": "jak2_2",
+        "source_global_index": 14,
+        "smiles": "Oc5ccc(C2NC(=O)c1ccccc1c3ccnc4[nH]cc2c34)c(F)c5",
+        "controller_seed": 2026091914
+      }
+    ],
+    "delta": 0.4,
+    "support": "compose_valid",
+    "charged_calls_per_cell": 49,
+    "total_charged_call_ceiling": 147,
+    "batch": 8,
+    "parents": 4,
+    "parent_explore": 0.3,
+    "exploration": 2,
+    "expert_floor_rounds": 2,
+    "route_scale_floor_rounds": 2,
+    "value_penalty": 1.0,
+    "docking_seed": 20260919,
+    "proposal": {
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      },
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "route_complete_region": {
+        "pool_size": 192,
+        "realization_limit": 96,
+        "beam_width": 48,
+        "expansion_width": 48,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "scale_balanced": true,
+        "training_scope": "one shared task-independent expert fit on all 77 locked routes"
+      }
+    },
+    "round_lock_policy": {
+      "publish_before_docking": true,
+      "per_query_receipts": true,
+      "per_expert_proposal_receipts": true,
+      "resume_complete_receipts_only": true,
+      "never_resubmit_reserved_or_missing_query_receipt": true,
+      "continue_after_deadline_with_unresolved_calls_charged": true,
+      "no_backfill": true,
+      "automatic_retries": 0
+    },
+    "legacy_resume": {
+      "jak2_0": {
+        "mode": "checkpoint",
+        "run_id": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2",
+        "checkpoint_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_0/checkpoint.json",
+        "checkpoint_sha256": "e752cc8a3b0ba96b6e19b51bc2a288b73f2736126fd099b2f0f9091ef9e0f85a",
+        "checkpoint_payload_sha256": "d2e16e6a45a4ac9fa0b46992792f282b2afa5b2a560f9ea5aaad35c40c805b68",
+        "round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_0/round_001_lock.json",
+        "round_lock_sha256": "7d962e9a51ea179446a03503d76d6f9a988eaba1eab5480cb90fda7e96c197ee",
+        "round_lock_payload_sha256": "41727c62ca0e706d369489e14dea0b555ce72defc47ea2f54c48f7b1862643c3"
+      },
+      "jak2_1": {
+        "mode": "checkpoint",
+        "run_id": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2",
+        "checkpoint_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_1/checkpoint.json",
+        "checkpoint_sha256": "7f6e316d684c3d1f4f5e9f8e7f4f671cfcc16eb7289b8dbe0e9f432b339f8c8f",
+        "checkpoint_payload_sha256": "624589d51bfafd122797aace9a52d6bee20d9b4921109290f153c0ad7e6e8398",
+        "round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_1/round_001_lock.json",
+        "round_lock_sha256": "39c034e7f279108a1bc106f5ef49de669e0009b831bf69b5e64f69dae9963a80",
+        "round_lock_payload_sha256": "fe7cd417c9734e1a41bf3bf84394ab65870df4e1035e903c42f1a2dc8a7f1279"
+      },
+      "jak2_2": {
+        "mode": "checkpoint",
+        "run_id": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2",
+        "checkpoint_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_2/checkpoint.json",
+        "checkpoint_sha256": "9a378b62a936c5ef468aaa60cf561ec9dbbf03c4c545b857e4a1bcb92fdce34f",
+        "checkpoint_payload_sha256": "b45518ddde47db6dc712e060f4470f1262f4f6e96c0ad09c9e7cef0242daf1a7",
+        "round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_2/round_001_lock.json",
+        "round_lock_sha256": "f9e7f269a54596144f8237b47242f353624846a190e0a370991452d48d88c299",
+        "round_lock_payload_sha256": "d728078097ea3862572c5e21568a4148a3e887a0fbaf8cab8e7c394dcd250bb1"
+      }
+    },
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "cb900f3f75dcf2ac3efe6538528ed1e87ec934a527b3b060c2b09dfe3a11d9b6"
+    },
+    "docking_box": [
+      [
+        114.758,
+        65.496,
+        11.345
+      ],
+      [
+        19.033,
+        17.929,
+        20.283
+      ]
+    ],
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+      "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "73c574c9e562d80583c01c556e1732e108957eb5271a79850f30db602296b0eb",
+      "src/compose_v4/control/structural_subgoal_policy.py": "d45a2f6b92a69f7462f6c1e2cd5523bc529cedb0a24e5a993aa714a2ade3d2b4",
+      "src/compose_v4/control/structural_subgoal_realizer.py": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_integrated_route_fiber.py": "4a5e1de25e0478b7572d333103ac3d5fe7ff46a1fd669acd7b99da4a2757e687",
+      "modal_apps/t4_shared_retained_fiber_jak2_v2_app.py": "89597d027ef574f22b2e451ed9c27a8a84fcb026a03093fbef0ff8749dfbd152",
+      "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "6b7048648bb608c2f62c78f7f8c40e7fa48c5acc71b13569de4b96319efc27a3"
+    },
+    "zero_oracle_support": {
+      "artifacts": [
+        "diagnostics/t4_shared_retained_rewrite_v1/shards/jak2_0.json",
+        "diagnostics/t4_shared_retained_rewrite_v1/shards/jak2_1.json"
+      ],
+      "sha256": [
+        "0e0c9b70eb3ac590e09803545e6fdc7dfca9ef3f39ab821fad09e9bcc9cc4755",
+        "51185f360bd67421251a1d62d8056eb6530cde429fbccc08d039c52de187a2e4"
+      ],
+      "result": "both audited cells emitted exact small, medium and large programs with 41-42 eligible endpoints at delta 0.4"
+    },
+    "reported_ivg_delta_0_4": {
+      "jak2_0": -11.233333333333333,
+      "jak2_1": -11.566666666666666,
+      "jak2_2": -10.566666666666666
+    },
+    "primary_baselines": "measured roots, frozen prior JAK2 delta=0.6 integrated run, and reported IVG delta=0.4 means; no comparator enters runtime",
+    "claim_boundary": "authorized continuation only: migrate complete hash-bound v1 checkpoints and spend only each cell's remaining original budget; no v1 query is repeated",
+    "proposal_wait_seconds": 2400,
+    "query_wait_seconds": 1200,
+    "phase_poll_seconds": 5,
+    "prior_operational_waste": 0
+  },
+  "payload_sha256": "636aeb0f4d2cd910a5290fc4dd8e37385007cbb24dcf11193ae2442ef3ce82d0"
+}
