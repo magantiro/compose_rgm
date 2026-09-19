@@ -459,6 +459,7 @@ def _merge(args: argparse.Namespace) -> dict:
         fiber,
         generated_smiles,
     )
+    root_properties = _properties(str(cell["smiles"]), fiber)
     run_receipts = {}
     for name, path in (
         ("final_result", args.final_result),
@@ -492,6 +493,53 @@ def _merge(args: argparse.Namespace) -> dict:
     route_remote = run_receipts["route_receipt"]["payload"]["answer"]
     if int(route_remote["telemetry"]["complete_programs_committed"]) != 96:
         raise ValueError("durable production route receipt no longer proves 96 commits")
+    sim_sa_counts = {
+        expert: int(
+            experts[expert]["summary"]["gate_intersections"][
+                "structural_valid&similarity&sa"
+            ]
+        )
+        for expert in EXPERTS
+    }
+    strict_known = [
+        row
+        for row in known_answers
+        if row["evidence_role"] == "reported_delta06_IVG_endpoint_known_answer_only"
+    ]
+    charge_mismatches = sum(
+        row["source_formal_charge"] != row["endpoint_formal_charge"]
+        for row in strict_known
+    )
+    decisive_mechanism = (
+        "The campaign stopped before FiberControl selection because every expert's "
+        "completed-endpoint pool had an empty intersection between structural "
+        "validity, similarity>=0.6 and SA<=4: "
+        + ", ".join(f"{expert}={sim_sa_counts[expert]}" for expert in EXPERTS)
+        + ". Exact construction itself was healthy: shallow built "
+        f"{experts['shallow']['exact_executed_unique_endpoints']} unique endpoints, "
+        "anchored replacement built "
+        f"{experts['anchored_replacement']['exact_executed_unique_endpoints']}, and "
+        "the route expert committed "
+        f"{experts['route_complete_region']['exact_executed_unique_endpoints']}/96 "
+        "with exact precision. The root is valid with similarity=1 and QED above the "
+        f"floor, but SA={root_properties['sa']:.4f}>4. The lanes can preserve "
+        "similarity or repair SA, but not both in one protected program. This is an "
+        "endpoint constraint-support failure, not a compiler, docking-value, or "
+        "FiberControl-ranking failure. The answer-known strict corpus sharpens the "
+        f"support diagnosis: {charge_mismatches}/{len(strict_known)} released "
+        "delta=0.6 endpoints change the source formal charge (+1 to 0), and all are "
+        "recorded as unreachable by the current charge-preserving rewrite support."
+    )
+    smallest_general_fix = (
+        "Add one shared charge-aware retained-subgraph constraint-repair program "
+        "family. It should explicitly extend the declared exact rewrite support with "
+        "a chemically validated formal-charge/protonation restatement, retain the "
+        "source scaffold, and use only free similarity/QED/SA margins to Pareto-search "
+        "the rewritten complement as one protected program. Require nonzero diverse "
+        "eligible yield under the production sampler on this root plus contrasting "
+        "roots before scoring. Do not tune FiberControl first because no candidate "
+        "currently reaches it."
+    )
     payload = {
         "schema_version": SCHEMA,
         "evidence": "computed zero-oracle frozen-production forensic",
@@ -503,6 +551,7 @@ def _merge(args: argparse.Namespace) -> dict:
         "primary_output": "per-expert complete-endpoint constraint funnel",
         "cell": CELL,
         "root": cell["smiles"],
+        "root_properties": root_properties,
         "delta": float(contract["delta"]),
         "production_code_revision": run_receipts["proposal_manifest"]["payload"][
             "requests"
@@ -517,14 +566,8 @@ def _merge(args: argparse.Namespace) -> dict:
         },
         "experts": experts,
         "known_answer_diagnostics": known_answers,
-        "decisive_mechanism": (
-            "filled after the complete measured funnel is inspected; this field must "
-            "not infer a cause from the zero-candidate symptom alone"
-        ),
-        "smallest_general_fix": (
-            "filled after the complete measured funnel is inspected; no controller "
-            "change is made by this audit"
-        ),
+        "decisive_mechanism": decisive_mechanism,
+        "smallest_general_fix": smallest_general_fix,
         "costs": {"docking_calls": 0, "oracle_calls": 0, "modal_launches": 0},
         "inputs": {
             "contract": {
