@@ -1,0 +1,89 @@
+{
+  "payload": {
+    "schema_version": "t4_braf_first_round_funnel_contract_v1",
+    "status": "AUTHORIZED_ZERO_ORACLE_FORENSIC_AUDIT",
+    "scientific_question": "At which exact stage did the frozen integrated controller lose every non-root BRAF-0 and BRAF-1 proposal?",
+    "claim_boundary": "Deterministic replay of the frozen first-round proposal streams with endpoint-level gate instrumentation; zero oracle calls; not a controller revision or docking result",
+    "source_run_id": "f842d85d2ac1e32cf0d28a67d47560404da85a7b0f6d7b7f94ea6c11976c8079",
+    "source_contract": "configs/t4_integrated_route_fiber_braf_v1.json",
+    "delta": 0.6,
+    "support": "compose_valid",
+    "constraints": {
+      "similarity_minimum": 0.6,
+      "qed_minimum": 0.6,
+      "sa_maximum": 4.0,
+      "representable_heavy_atoms": 40
+    },
+    "cells": {
+      "braf_0": {
+        "source_global_index": 9,
+        "smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34",
+        "controller_seed": 2026091800,
+        "proposal_seeds": {
+          "shallow": 2027091803,
+          "anchored_replacement": 2027091904
+        }
+      },
+      "braf_1": {
+        "source_global_index": 10,
+        "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+        "controller_seed": 2026091801,
+        "proposal_seeds": {
+          "shallow": 2027091804,
+          "anchored_replacement": 2027091905
+        }
+      }
+    },
+    "lanes": {
+      "shallow": {
+        "draws": 480,
+        "horizon": 3,
+        "source": "exact deterministic replay"
+      },
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3,
+        "source": "exact deterministic replay"
+      },
+      "route_complete_region": {
+        "proposed_pool": 64,
+        "realization_limit": 32,
+        "source": "reuse sealed leave-BRAF-out route expert smoke artifact"
+      }
+    },
+    "stage_definitions": {
+      "programs_attempted": "calls to the frozen lane synthesizer; for route, unique ranked structural goals",
+      "programs_synthesized": "successful exact protected-program synthesis; for route, committed exact realizations",
+      "distinct_executed_endpoints": "unique canonical endpoints reaching the unchanged Fiber.check boundary",
+      "independent_gate_counts": "each gate evaluated independently on every distinct endpoint",
+      "cumulative_funnel": "parse/connectivity then representation cap then structural validity then similarity then QED then SA",
+      "admitted_to_candidate_pool": "unique non-root endpoints returned by the frozen production generator"
+    },
+    "closest_endpoint_order": {
+      "domain": "parseable connected within-capacity structurally-valid endpoints",
+      "primary": "minimum maximum of similarity deficit/delta, QED deficit/0.6, and SA excess/4",
+      "secondary": "minimum sum of the same normalized deficits",
+      "tie_breaker": "canonical SMILES",
+      "count": 10
+    },
+    "required_outputs": [
+      "full per-endpoint ledgers with similarity, QED, SA, heavy-atom change, gate flags, and margins",
+      "independent and cumulative funnel counts per cell and expert",
+      "failure-gate combinations",
+      "closest ten structurally valid endpoints",
+      "heavy-atom-change distribution",
+      "route-realization status and route shrink/pruning yield",
+      "production admission equality check"
+    ],
+    "inputs_sha256": {
+      "configs/t4_integrated_route_fiber_braf_v1.json": "02bdd7b1d893c569ab145db0ccd65c8bd6c588a2e6db03477693e01167027a08",
+      "diagnostics/t4_integrated_route_fiber_braf_v1/route_expert_smoke.json": "e4e2c7f3609bca357876776a70a4059a6b32e488555c829dcf98fbac40fdd014",
+      "modal_apps/t4_braf_first_round_funnel_app.py": "a236b9d92d7f0f4e023542d436cef030d437d26653ded47dc4c6df70f357eb24",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_proposal_funnel_audit.py": "6ecc4bff0025799f7bc801ea06432ca6a60c4afa096878c461f406e16cb14c1c"
+    },
+    "new_oracle_calls": 0
+  },
+  "payload_sha256": "b99fda7aa0447460a8de9f48c14d7a76e31f71367ad0fcaaaf0242b09d184bf3"
+}
