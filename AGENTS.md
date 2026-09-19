@@ -372,6 +372,58 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Active-priority amendment, 2026-09-19, T4-first shared autonomous controller:**
+the user explicitly authorized replacing the previously PMO-first ordering with
+the active full-T4 controller objective. Develop, validate and iterate one shared
+autonomous COMPOSE controller across every T4 cell at delta 0.4 and delta 0.6.
+Use general proposal and complete-program mechanisms, exact protected execution,
+completed-endpoint constraint filtering, FiberControl reward allocation, a
+recursive shared archive and descendant refinement. Use all legitimate route
+supervision and development evidence, but prohibit cell-to-winner lookup,
+endpoint or teacher injection presented as discovery, per-cell controller
+branches and hidden task-specific settings. Preserve every scored, failed,
+blocked and abstaining outcome with its provenance.
+
+Prioritize fast, falsifiable development on motivating full-horizon cells and a
+small number of contrasting cells rather than repeatedly running the full suite.
+For each miss against the authoritative IVG comparator, diagnose proposal
+support, exact execution, endpoint feasibility, selection, exploration,
+archive/descendant propagation and refinement before changing the controller.
+Implement the smallest general capability correction, test it under the same
+shared settings, and retain checkpoint/resume semantics for preemption-safe
+campaigns. Once the architecture is mature, freeze it and run the complete T4
+evaluation at both thresholds. New scored calls still require a separate
+self-hashed launch contract and explicit hash-specific authorization; this
+amendment alone authorizes no docking or other oracle call.
+
+Do not run the conditional T4 ablation suite during this milestone. Once the
+nine-cell PARP1/BRAF completion campaign is durably launched under its exact
+scored contract, make PMO the active controller-development track while the T4
+cells run independently. Reuse the same general dependency-aware program
+representation, route distillation, compiler, exploration, FiberControl and
+recursive archive wherever supported. Start with three predeclared diverse
+known-route PMO tasks, then all eleven known-route tasks, then broader held
+tasks. Treat PMO as an objective adapter and additional source of reusable route
+supervision rather than a separate architecture unless measured evidence
+establishes a genuinely benchmark-specific requirement. The user's broad PMO
+development authorization permits the downstream implementation, zero-oracle
+support gates and historical replay work needed for this sequence; a new scored
+PMO campaign still requires its exact self-hashed launch contract and
+payload-bound scored-call authorization. Existing completed PMO results and
+contracts remain immutable evidence.
+
+In parallel, prepare a separate fragment-constrained optimization adapter for
+the task reported by GenMol and InVirtuoGen. First bind the exact primary-source
+task definition, fragment constraint, starting inputs, evaluator, budgets,
+metrics, comparator values and source assets. Reuse the shared COMPOSE
+dependency-aware program controller where the published protocol supports it,
+but keep this adapter and its evidence separate from T4 and PMO. Zero-oracle
+protocol reconstruction, asset verification, implementation and focused tests
+are authorized. Missing or ambiguous primary assets require an explicit
+abstention rather than a substituted benchmark. Any scored fragment-constrained
+run requires its own self-hashed launch contract and payload-bound scored-call
+authorization and must not delay or alter the nine-cell T4 campaign.
+
 **Scoped PMO route-prior x FiberControl scored pilot, 2026-09-19:** after the
 immutable zero-oracle preparation sealed sixteen score-blind pools with 31 or
 32 unique valid exact endpoints each, the user explicitly directed the frozen
@@ -387,6 +439,46 @@ consume another unit's outcomes. Aggregate only after all eight isolated units
 finish, apply the decision rule frozen in
 `configs/pmo_route_fiber_scored_pilot_v1.json`, and preserve failed or
 unresolved reservations as charged without automatic continuation.
+
+**Scoped zero-oracle PMO complete-route Dynamic integration gate, 2026-09-19:**
+after the frozen 384-call factorial returned `NO_PROMOTION`, the user explicitly
+authorized replacing that development recipe with the smallest controller that
+actually tests the intended route-distilled Dynamic hypothesis. Preserve the
+completed factorial and its immutable locks as a negative result. Its route lane
+was capped at eight primitives, reused the same sixteen initialization parents in
+every round, and prohibited scored children from becoming later parents; it is a
+static proposal/selection diagnostic, not a competitive PMO optimizer.
+
+Implement one zero-oracle controller gate that combines: (1) complete
+dependency-region programs within the already declared 32-primitive runtime
+support, (2) the unchanged Dynamic-v0 exploration lane, (3) a shared archive in
+which scored historical children may become later replay parents, and (4)
+FiberControl/expert allocation driven only by outcomes already present in the
+historical ledger. Reuse the sealed exact PMO route corpus, folds, executor and
+route ancestry. Keep routes longer than 32 primitives as local-decision
+supervision only. Do not silently truncate a complete route to eight primitives
+and call it complete-route support.
+
+Before any new oracle call, run an actual-production known-answer support and
+historical replay audit. At every eligible state of the frozen successful PMO
+routes, compare the current eight-primitive transition proposer, unchanged v0,
+and the new complete-route proposer under matched candidate budgets. Report
+representability, exact execution precision, unique yield, exact endpoint and
+transformation-equivalent support, productive-continuation rank, and whether
+historically improving children can form multi-generation archive lineages.
+Same-task teacher injection or replay is an explicitly answer-known debugging
+upper bound; it may not be reported as autonomous generalization. The clean arm
+must hold out the evaluated task family and every shared lineage before fitting
+or extracting reusable route objects.
+
+This gate authorizes CPU-only offline implementation and replay using existing
+scores. It authorizes zero new PMO oracle calls, no Modal launch, no new task,
+and no mutation of the completed factorial. A later prospective Dynamic pilot
+requires a separately self-hashed contract with matched initialization,
+candidate and call budgets, immutable receipts, and explicit scored-call
+authorization. Do not promote on structural recall alone: the required signal is
+support for known productive complete programs plus enrichment of historical
+reward under live descendant replay.
 
 **T4 autonomous-search strategy reset and collaborator handoff, 2026-09-16:**
 the user authorized implementing the evidence-backed search reset and a one-hour
@@ -412,6 +504,138 @@ are the iteration gate; a scientific launch additionally needs the existing
 repository's one-time clean-candidate verification boundary. If it is not ready
 by handoff, report that and leave an exact next command instead of bypassing it.
 This is a new development revision, not a relaxation of any previous failed gate.
+
+**Scoped zero-oracle T4 shared retained-subgraph proposal gate, 2026-09-19:**
+after the integrated JAK2 controller showed that coordinated proposal support can
+expose IVG-competitive chemistry, and the PARP1 transfer run showed that the live
+route lane never reached the size or construction depth of known exact COMPOSE
+witnesses, the user authorized one shared proposal-law revision. Preserve every
+completed JAK2, BRAF, PARP1 and PMO run and its frozen receipts. Do not modify the
+exact complete-region compiler, docking adapter, eligibility rules or FiberControl.
+
+Fit one task-independent route expert from all legitimate locked T4 route
+supervision. Its runtime checkpoint may contain address-free structural rewrite
+templates, generic fitted probabilities, scale-band policy and hashed training
+identity, but no target or cell name, route identifier, source graph, endpoint,
+SMILES, absolute atom address or cell-to-winner lookup. Apply the same checkpoint
+and proposal settings to every T4 cell. This is the primary full-experience
+development controller; leave-target-out remains an explicitly separate transfer
+ablation and must not silently replace it.
+
+Repair the production selection law so low-frequency medium and large complete
+retained-subgraph rewrites cannot be removed solely by a global marginal top-k.
+Preserve an explicit exploration floor for local rewrites and deterministically
+allocate proposal support across local, medium and large structural rewrite bands.
+Measure actual protected primitive counts after exact realization, and report
+small (1--3), medium (4--11) and large (12--32) realized programs separately.
+Before any new docking call, run the exact production sampler on all fifteen T4
+roots and report binding, realization, eligibility, uniqueness, scale coverage,
+heavy-atom and cycle-rank changes, wall time and abstentions. Known routes may be
+teacher-forced only as a separately labelled support probe. Autonomous candidates
+must be generated by the shared runtime checkpoint with no endpoint injection.
+
+This gate authorizes CPU and bounded Modal zero-oracle work only. It authorizes no
+new docking or other scored call. If the shared sampler does not emit executable
+medium and large programs, especially teacher-scale PARP1 constructions, stop and
+fix proposal support rather than tuning value selection. A later PARP1 rerun needs
+a separately sealed candidate lock, call budget and scored-call authorization.
+Structural recovery is a support diagnostic, not the final objective; prospective
+docking utility remains the promotion criterion after this gate passes.
+
+**Amendment, 2026-09-19, shared-controller PARP1 and JAK2 scored campaigns:**
+after the actual production sampler autonomously emitted and exactly realized the
+known 14- and 17-primitive PARP1 witness endpoints, retained medium and large
+program support, and produced eligible candidates at both delta 0.4 and 0.6, the
+user explicitly authorized immediate scored evaluation of the primary shared
+controller. Run PARP1 seeds 0--2 at delta 0.6 and JAK2 seeds 0--2 at delta 0.4.
+Use one frozen all-route target-independent checkpoint, the unchanged shallow and
+anchored lanes, the unchanged exact executor and FiberControl, and the same policy
+settings on every cell. The only benchmark adapters that differ are the frozen
+source, delta, receptor and docking box.
+
+Each campaign is capped at 49 charged calls per cell, 147 per target and 294 total.
+There are no automatic retries or replacements. Publish an immutable query lock
+before every docking batch, preserve failures as charged outcomes, and write
+durable per-cell and per-round receipts on separate Modal volumes so one cell or
+container cannot cancel another. During the two initial rounds, guarantee one
+proposal-prior observation from every available realized route scale (small,
+medium and large), then retain the existing expert floor and exploration quota.
+Within a route scale, select by the frozen shared route-prior rank. This is a
+task-independent use of the trained proposal law, not endpoint lookup.
+
+These are the primary shared COMPOSE controller runs, not leave-target-out
+ablations. Runtime may not use a target-specific route table, known endpoint,
+teacher injection, comparator value or per-cell tuning. Report the exact proposal
+expert, scale, parent, selection kind and call index for every docked candidate.
+Compare against IVG only after locking and scoring. Do not start a full T4 campaign
+automatically from these results.
+
+**Conditional amendment, 2026-09-19, claim-driven COMPOSE ablations:** this
+milestone remains inactive unless a frozen primary shared-controller campaign
+first produces a striking IVG-competitive result. For this trigger, require a
+completed target campaign that matches or beats the reported IVG mean on at least
+two of three cells and whose three-cell mean is no worse than the corresponding
+reported IVG mean, or stronger multi-target evidence. Ordinary intermediate
+scores, isolated single candidates and support-only diagnostics do not activate
+the milestone.
+
+If activated, freeze the successful controller before ablation and run only the
+smallest representative-cell experiments needed to test framework-level claims.
+At matched starting molecules, random seeds, controller settings and oracle
+budgets and, where possible, matched primitive-operation counts, prioritize: (1)
+one local primitive at a time versus multiple independently chosen edits combined
+into one proposal versus a dependency-aware, jointly proposed multi-site program;
+(2) protected completion of the same program before reward selection versus
+exposing every primitive intermediate to selection and possible truncation; (3)
+chemical validity throughout with similarity, QED and SA enforced at the completed
+endpoint versus enforcing those final task constraints at every chemically valid
+primitive intermediate; and (4) the same fixed proposal mechanisms under blind or
+fixed allocation versus FiberControl's online reward-adaptive allocation. The
+first comparison is the primary causal test: it must distinguish coordination from
+merely allowing more edits.
+Add a local-only versus local-plus-medium-plus-large scale ablation only when it
+answers a question not already resolved by the coordinated-program comparison.
+
+Do not perform exhaustive leave-one-proposal-family-out studies. Anchored
+replacement, retained-core pruning and route-derived proposal families are
+implementation details unless measured evidence supports a distinct scientific
+claim. Preserve complete winning lineages and proposal, parent, selection,
+eligibility and oracle provenance so mechanism is demonstrated rather than
+inferred only from aggregate scores. For representative winners, report primitive
+count, number of changed regions, whether independent single-edit search could
+express the transformation, whether any chemically valid intermediate left the
+final task fiber, generation depth and reward improvement along the lineage. This
+conditional work must not delay or modify the currently running 49-call PARP1 and
+JAK2 campaigns.
+
+**Amendment, 2026-09-16, bounded scored-pilot extension:** after the zero-oracle
+construction-scale diagnostic measured that the docking value from a benchmark root
+sits at 15 or more primitive edits while the search proposes a median of 5.5, and
+that eligible large constructions can be produced by generating in volume and
+filtering locally at zero oracle cost, the user authorized a specific extension of
+the scored pilot. It does not increase spend. The 180-charged-call ceiling, delta
+0.4, the prohibition on automatic retry and replacement, the unchanged docking and
+eligibility protocol, prospective candidate locks and durable call logs all stand
+unchanged. Two things change: PARP1-0 joins BRAF-1, JAK2-1 and FA7-0 in the scored
+cell set, which is a reallocation of the existing ceiling rather than an increase;
+and the completed repository-wide verification receipt is accepted under the
+2026-09-08 T4 development policy, which already declares that an unrelated
+repository-wide suite is not a launch blocker for a bounded development run. That
+receipt is `diagnostics/t4_objective_reset/verification/full_suite_classification.json`
+and it records, three independent ways, that no failure is attributable to this
+branch: every executable change is a new file, no failing node lies in a branch test
+file, and no failing node's error text names any file this branch adds. Its
+environment limitation stands and is not waived: this checkout cannot reconstruct the
+frozen RingCore catalog fingerprint, and 82 of the 168 failing nodes are that drift.
+
+Before any call is charged under this amendment, the prospected pool must first be
+assessed at zero cost against the recovered historical observations, because an
+endpoint the pool rediscovers already carries a measured score and that is the only
+unbiased read on pool quality available before docking. A pool may not be docked
+straight out of generation. Structural proximity to a high-scoring molecule remains
+unusable as a surrogate; it was measured at Spearman 0.12 on PARP1. A scored result
+under this amendment is bounded development evidence on answer-known cells, not a
+held-out benchmark result and not an IVG comparison.
 
 
 **Scoped zero-oracle T4 target-conditioned utility selector, 2026-09-15:**
