@@ -33,7 +33,7 @@ CANDIDATE_PROPOSAL_RELATIVE_PATH = (
     "scored_candidate_proposal.json"
 )
 EXECUTION_ROOT = (
-    "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/" "scored_execution_v1"
+    "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/" "scored_execution_v2"
 )
 EXECUTION_CONTRACT_RELATIVE_PATH = f"{EXECUTION_ROOT}/execution_contract.json"
 CAPSULE_ROOT_RELATIVE_PATH = f"{EXECUTION_ROOT}/source_capsule"
@@ -74,8 +74,6 @@ CAPSULE_INCLUDE = (
     PREPARATION_CAPSULE_MANIFEST_RELATIVE_PATH,
     CANDIDATE_PROPOSAL_RELATIVE_PATH,
     APP_SOURCE,
-    "modal_apps/genmol_t4_opt_app.py",
-    "modal_apps/run_process_v2_p50_app.py",
     LAUNCHER_SOURCE,
     SEALER_SOURCE,
     CONTRACT_SOURCE,

@@ -97,6 +97,31 @@ def make_run_id(
     )
 
 
+def capsule_image_revision(repository_root: Path) -> dict[str, Any]:
+    """Bind the standalone runtime image to the verified exact capsule."""
+
+    execution, execution_identity, _scientific = validate_execution_contract(
+        repository_root
+    )
+    capsule = execution["execution_source_capsule"]
+    return {
+        "schema_version": "t4_nodistill_topology_four_call_capsule_image_v1",
+        "execution_contract_payload_sha256": execution_identity,
+        "code_revision": capsule["code_revision"],
+        "git_tree": capsule["git_tree"],
+        "source_capsule_payload_sha256": capsule["manifest_payload_sha256"],
+        "source_capsule_manifest_sha256": capsule["manifest_sha256"],
+        "file_count": capsule["file_count"],
+    }
+
+
+def validate_capsule_image_revision(
+    value: dict[str, Any], repository_root: Path
+) -> None:
+    if value != capsule_image_revision(repository_root):
+        raise ValueError("four-call standalone image revision changed")
+
+
 def make_task(
     repository_root: Path,
     *,
@@ -529,6 +554,7 @@ def reduce_run(
 
 
 __all__ = [
+    "capsule_image_revision",
     "make_run_id",
     "make_task",
     "prepare_dispatch",
@@ -538,5 +564,6 @@ __all__ = [
     "reduce_run",
     "remote_preflight",
     "run_query",
+    "validate_capsule_image_revision",
     "validate_task",
 ]

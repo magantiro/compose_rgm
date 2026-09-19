@@ -25,12 +25,10 @@ from compose_v4.experiments.t4_nodistill_topology_four_call_contract import (
     VOLUME_NAME,
     VOLUME_ROOT,
 )
-from modal_apps.genmol_t4_opt_app import image as _scoring_image
-from modal_apps.run_process_v2_p50_app import (
-    REMOTE_ROOT,
-    ROOT,
-    _validate_remote_revision,
-)
+
+ROOT = Path(__file__).resolve().parents[1]
+REMOTE_ROOT = Path("/root/t4_nodistill_topology_four_call")
+MOOD = "https://raw.githubusercontent.com/SeulLee05/MOOD/main/scorer"
 
 PRIVATE_ROOT = Path(VOLUME_ROOT)
 _REQUIRED_FILES = (
@@ -51,16 +49,45 @@ for _relative in _REQUIRED_FILES:
 if not (ROOT / CAPSULE_ROOT_RELATIVE_PATH).is_dir():
     raise FileNotFoundError("four-call exact source capsule is absent")
 
-image = _scoring_image
-for _relative in _REQUIRED_FILES:
-    image = image.add_local_file(
-        ROOT / _relative, str(REMOTE_ROOT / _relative), copy=True
+image = (
+    modal.Image.debian_slim(python_version="3.11")
+    .apt_install("openbabel", "curl", "ca-certificates")
+    .pip_install("numpy==1.26.4", "rdkit==2024.3.5")
+    .run_commands(
+        "mkdir -p /opt/dock/receptors",
+        f"curl -sSL -o /opt/dock/qvina02 {MOOD}/qvina02",
+        "chmod +x /opt/dock/qvina02",
+        f"curl -sSL -o /opt/dock/receptors/parp1.pdbqt {MOOD}/receptors/parp1.pdbqt",
     )
-image = image.add_local_dir(
-    ROOT / CAPSULE_ROOT_RELATIVE_PATH,
-    str(REMOTE_ROOT / CAPSULE_ROOT_RELATIVE_PATH),
-    copy=True,
-    ignore=("**/__pycache__/**", "**/*.pyc"),
+    .add_local_dir(
+        ROOT / CAPSULE_ROOT_RELATIVE_PATH,
+        str(REMOTE_ROOT),
+        copy=True,
+        ignore=("**/__pycache__/**", "**/*.pyc"),
+    )
+    .add_local_dir(
+        ROOT / CAPSULE_ROOT_RELATIVE_PATH,
+        str(REMOTE_ROOT / CAPSULE_ROOT_RELATIVE_PATH),
+        copy=True,
+        ignore=("**/__pycache__/**", "**/*.pyc"),
+    )
+    .add_local_file(
+        ROOT / EXECUTION_CONTRACT_RELATIVE_PATH,
+        str(REMOTE_ROOT / EXECUTION_CONTRACT_RELATIVE_PATH),
+        copy=True,
+    )
+    .add_local_file(
+        ROOT / CAPSULE_MANIFEST_RELATIVE_PATH,
+        str(REMOTE_ROOT / CAPSULE_MANIFEST_RELATIVE_PATH),
+        copy=True,
+    )
+    .env(
+        {
+            "PYTHONPATH": f"{REMOTE_ROOT / 'src'}:{REMOTE_ROOT}",
+            "PYTHONUNBUFFERED": "1",
+            "OMP_NUM_THREADS": "1",
+        }
+    )
 )
 
 app = modal.App(APP_NAME)
@@ -87,6 +114,7 @@ def t4_nodistill_topology_four_call_preflight(
 ) -> dict[str, Any]:
     from compose_v4.experiments.t4_nodistill_topology_four_call_runtime import (
         remote_preflight,
+        validate_capsule_image_revision,
     )
 
     return remote_preflight(
@@ -94,7 +122,9 @@ def t4_nodistill_topology_four_call_preflight(
         REMOTE_ROOT,
         PRIVATE_ROOT,
         private_volume,
-        validate_revision=_validate_remote_revision,
+        validate_revision=lambda value: validate_capsule_image_revision(
+            value, REMOTE_ROOT
+        ),
     )
 
 
@@ -113,6 +143,7 @@ def t4_nodistill_topology_four_call_driver(
     from compose_v4.experiments.t4_nodistill_topology_four_call_runtime import (
         prepare_dispatch,
         publish_dispatch_receipt,
+        validate_capsule_image_revision,
     )
 
     intent, reservations = prepare_dispatch(
@@ -120,7 +151,9 @@ def t4_nodistill_topology_four_call_driver(
         REMOTE_ROOT,
         PRIVATE_ROOT,
         private_volume,
-        validate_revision=_validate_remote_revision,
+        validate_revision=lambda value: validate_capsule_image_revision(
+            value, REMOTE_ROOT
+        ),
     )
     calls = []
     for ordinal, reservation in enumerate(reservations):
@@ -162,6 +195,7 @@ def t4_nodistill_topology_four_call_worker(
 ) -> dict[str, Any]:
     from compose_v4.experiments.t4_nodistill_topology_four_call_runtime import (
         run_query,
+        validate_capsule_image_revision,
     )
 
     return run_query(
@@ -170,7 +204,9 @@ def t4_nodistill_topology_four_call_worker(
         REMOTE_ROOT,
         PRIVATE_ROOT,
         private_volume,
-        validate_revision=_validate_remote_revision,
+        validate_revision=lambda value: validate_capsule_image_revision(
+            value, REMOTE_ROOT
+        ),
         dock=_dock_once,
     )
 
@@ -189,6 +225,7 @@ def t4_nodistill_topology_four_call_reduce(
 ) -> dict[str, Any]:
     from compose_v4.experiments.t4_nodistill_topology_four_call_runtime import (
         reduce_run,
+        validate_capsule_image_revision,
     )
 
     return reduce_run(
@@ -196,6 +233,8 @@ def t4_nodistill_topology_four_call_reduce(
         REMOTE_ROOT,
         PRIVATE_ROOT,
         private_volume,
-        validate_revision=_validate_remote_revision,
+        validate_revision=lambda value: validate_capsule_image_revision(
+            value, REMOTE_ROOT
+        ),
         finalize_incomplete=finalize_incomplete,
     )

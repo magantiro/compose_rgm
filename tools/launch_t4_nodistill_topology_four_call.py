@@ -34,6 +34,7 @@ from compose_v4.experiments.t4_nodistill_topology_four_call_contract import (
     validate_execution_contract,
 )
 from compose_v4.experiments.t4_nodistill_topology_four_call_runtime import (
+    capsule_image_revision,
     make_task,
     publish_once,
     read_sealed,
@@ -46,26 +47,27 @@ LAUNCHER_IDENTITY_SOURCES = (
     CONTRACT_SOURCE,
     RUNTIME_SOURCE,
     DOCKING_ADAPTER_SOURCE,
-    "modal_apps/genmol_t4_opt_app.py",
-    "modal_apps/run_process_v2_p50_app.py",
 )
 
 
 def _common_task() -> tuple[dict, dict]:
-    from modal_apps.run_process_v2_p50_app import local_image_revision
-    from tools.preflight import assert_synced
-
-    _execution, _identity, scientific = validate_execution_contract(ROOT)
-    synced = assert_synced(strict=True)
+    execution, _identity, scientific = validate_execution_contract(ROOT)
+    manifest_path = (
+        ROOT / execution["execution_source_capsule"]["manifest_relative_path"]
+    )
+    manifest = json.loads(manifest_path.read_text())["payload"]
     launcher_identity = {
         relative: file_sha256(ROOT / relative) for relative in LAUNCHER_IDENTITY_SOURCES
     }
+    for relative, observed in launcher_identity.items():
+        if manifest["files"][relative]["sha256"] != observed:
+            raise RuntimeError(
+                f"local four-call source differs from exact capsule: {relative}"
+            )
     task = make_task(
         ROOT,
         launcher_identity=launcher_identity,
-        image_revision=local_image_revision(
-            expected_commit=synced["commit"], repo_root=ROOT
-        ),
+        image_revision=capsule_image_revision(ROOT),
     )
     return task, scientific
 

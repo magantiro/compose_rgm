@@ -210,6 +210,9 @@ def test_app_and_launcher_enforce_private_one_shot_driver_ordering():
     assert VOLUME_NAME == "compose-t4-nodistill-topology-four-call-v1"
     assert "modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)" in app_source
     assert "compose-v4-artifacts" not in app_source
+    assert "modal.Image.debian_slim" in app_source
+    assert "genmol_t4_opt_app" not in app_source
+    assert "run_process_v2_p50_app" not in app_source
     assert app_source.index("prepare_dispatch(") < app_source.index(
         "t4_nodistill_topology_four_call_worker.spawn"
     )
@@ -221,6 +224,8 @@ def test_app_and_launcher_enforce_private_one_shot_driver_ordering():
         launch_source.index("call = function.spawn(task)")
     )
     assert 'add_parser("resume")' not in launcher_source
+    assert "capsule_image_revision(ROOT)" in launcher_source
+    assert "assert_synced" not in launcher_source
     assert 'replacement_queries": 0' in launcher_source
     assert 'backfill_queries": 0' in launcher_source
 
