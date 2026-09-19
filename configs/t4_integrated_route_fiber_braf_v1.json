@@ -1,0 +1,130 @@
+{
+  "payload": {
+    "schema_version": "t4_integrated_route_fiber_braf_contract_v1",
+    "status": "AUTHORIZED_FROZEN_TRANSFER",
+    "scientific_problem": "test whether the unchanged integrated COMPOSE controller transfers from JAK2 development to the structurally distinct BRAF delta=0.6 repair regime",
+    "primary_model_output": "a target-reward-adapted selection over the union of complete executable shallow, anchored-replacement, and leave-BRAF-out route-distilled programs",
+    "central_claim_under_test": "the same multi-expert FiberControl algorithm can autonomously allocate docking calls on BRAF without BRAF-specific controller changes",
+    "experimental_setting": "prospective three-cell BRAF delta=0.6 cross-target development transfer; fixed 49-call ceiling per cell; candidate exhaustion and abstention are valid outcomes",
+    "frozen_from": {
+      "controller_contract": "configs/t4_integrated_route_fiber_v1_1.json",
+      "controller_contract_payload_sha256": "256563816a5d5b68706c7542bff1beae22f422e2c12109a55739dfe50680530c",
+      "controller_result": "diagnostics/t4_integrated_route_fiber_v1/final_result.json",
+      "allowed_adapter_changes": [
+        "BRAF source cells",
+        "BRAF receptor and docking box",
+        "leave-BRAF-out route checkpoint",
+        "BRAF-specific output namespace"
+      ],
+      "forbidden_changes": "proposal families, proposal widths, FiberControl features or fitting, expert-floor schedule, parent selection, exploration, endpoint gates, call budget, retries, or per-cell tuning"
+    },
+    "declared_support": {
+      "objects": "complete connected molecular endpoints produced by three executable COMPOSE proposal experts",
+      "maximum_active_atoms": 40,
+      "shallow_and_anchored_horizon": 3,
+      "route_regions": [1, 4],
+      "route_primitives": 32,
+      "endpoint_support": "compose_valid is a strict subset of the official T4 endpoint fiber",
+      "stereochemistry_claim": false
+    },
+    "cells": [
+      {
+        "cell": "braf_0",
+        "source_global_index": 9,
+        "smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34",
+        "controller_seed": 2026091800
+      },
+      {
+        "cell": "braf_1",
+        "source_global_index": 10,
+        "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+        "controller_seed": 2026091801
+      },
+      {
+        "cell": "braf_2",
+        "source_global_index": 11,
+        "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+        "controller_seed": 2026091802
+      }
+    ],
+    "delta": 0.6,
+    "support": "compose_valid",
+    "charged_calls_per_cell": 49,
+    "total_charged_call_ceiling": 147,
+    "batch": 8,
+    "parents": 4,
+    "parent_explore": 0.3,
+    "exploration": 2,
+    "expert_floor_rounds": 2,
+    "value_penalty": 1.0,
+    "docking_seed": 20260918,
+    "proposal": {
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      },
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "route_complete_region": {
+        "pool_size": 64,
+        "realization_limit": 32,
+        "beam_width": 32,
+        "expansion_width": 24,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "training_split": "leave-BRAF-out"
+      }
+    },
+    "zero_oracle_route_support": {
+      "artifact": "diagnostics/t4_integrated_route_fiber_braf_v1/route_expert_smoke.json",
+      "artifact_sha256": "e4e2c7f3609bca357876776a70a4059a6b32e488555c829dcf98fbac40fdd014",
+      "result": "complete-region programs committed on all three cells at precision 1.0, but zero strict-eligible route endpoints on all three cells",
+      "interpretation": "preserved as a failed route-yield gate; the transfer run is authorized to measure the frozen algorithm including abstention, not to relabel this gate as passing"
+    },
+    "round_lock_policy": {
+      "publish_complete_candidate_pool_before_docking": true,
+      "no_backfill": true,
+      "no_candidate_replacement": true,
+      "automatic_retries": 0,
+      "persist_after_every_round": true
+    },
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a"
+    },
+    "docking_box": [
+      [84.194, 6.949, -7.081],
+      [22.032, 19.211, 14.106]
+    ],
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_integrated_route_fiber_braf_v1/route_expert_checkpoint.json": "ab5ba04e3ec52a2f92cedcebec4e53ec7159d03d5a4871aa56199ee485c0709a",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "modal_apps/t4_integrated_route_fiber_braf_app.py": "5d37a230d36a05cb566fed68288bd8d8cd870ffbf50714bc1a7068992ff71972",
+      "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+      "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "aeaf77d7a75f8cf00ac4c8558f1eb79a0143f39d54b910043e3212511daac206",
+      "src/compose_v4/control/structural_subgoal_policy.py": "ca002b19df2fcc9d8e18d9888b3e4080d5bee251f213aa140357ccafdc3405b9",
+      "src/compose_v4/control/structural_subgoal_realizer.py": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_integrated_route_fiber.py": "0a0f0305e7e31474b2857ab8ca50b40c5ef646e3d460438d075ab12f72e46210"
+    },
+    "reported_ivg_delta_0_6": {
+      "braf_0": -9.7,
+      "braf_1": -10.4,
+      "braf_2": -10.3
+    },
+    "promotion_criteria": {
+      "per_round_reporting": true,
+      "transfer_signal": "at least two cells reach their reported IVG delta=0.6 mean or one cell beats it by at least 0.5 while a second improves on its measured root",
+      "negative": "two or more cells exhaust without an eligible non-root candidate, or all cells remain no better than their measured roots"
+    },
+    "primary_baselines": "read-only measured roots and reported IVG delta=0.6 values; no comparator value enters runtime",
+    "claim_boundary": "frozen cross-target BRAF development transfer under one docking seed; route prior excludes BRAF, but the anchored expert was developed from answer-known JAK2 evidence; not held-out benchmark-wide evidence or a same-generator causal ablation"
+  },
+  "payload_sha256": "ce36297195e2fed0afe91bd077fab3c91b3e379ed8573dedc595fa801e5260cd"
+}
