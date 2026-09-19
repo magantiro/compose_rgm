@@ -372,6 +372,22 @@ identify the conflicting revisions, and resolve the lineage instead of choosing 
 
 ### Current authorized milestone
 
+**Scoped PMO route-prior x FiberControl scored pilot, 2026-09-19:** after the
+immutable zero-oracle preparation sealed sixteen score-blind pools with 31 or
+32 unique valid exact endpoints each, the user explicitly directed the frozen
+pilot to run. Authorize only the self-hashed PMO route-prior x FiberControl v1
+pilot: GSK3B fold 0 and Perindopril MPO fold 2; four frozen arms; 48 charged
+calls per task and arm including 16 initialization calls; 384 total; zero
+retry; immutable score-blind pool locks; exact receipts and resume; no T4
+change, broader PMO run or post-score candidate replacement. The scored launch
+must use the pinned PyTDC 1.1.15 and RDKit 2023.09.6 environment, eight
+independent single-CPU workers, and a separately sealed receipt bound to the
+existing preflight and candidate-manifest file hashes. No task or arm may
+consume another unit's outcomes. Aggregate only after all eight isolated units
+finish, apply the decision rule frozen in
+`configs/pmo_route_fiber_scored_pilot_v1.json`, and preserve failed or
+unresolved reservations as charged without automatic continuation.
+
 **T4 autonomous-search strategy reset and collaborator handoff, 2026-09-16:**
 the user authorized implementing the evidence-backed search reset and a one-hour
 handoff. Preserve all earlier controllers, contracts, results, and unrelated PMO

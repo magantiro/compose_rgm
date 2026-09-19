@@ -770,6 +770,7 @@ def run_locked_unit(
     stop_after_round: int | None = None,
     query_lock_root: Path | None = None,
     launch_receipt: Path | None = None,
+    flush=None,
 ) -> dict[str, Any]:
     """Run one locked unit with a caller-supplied evaluator.
 
@@ -802,7 +803,9 @@ def run_locked_unit(
     proposal_source = spec["proposal_source"]
     selection = spec["selection"]
     task_object = ProgramTask(task, oracle_protocol, "pmo")
-    ledger = ProgramQueryLedger(output / "oracle", task_object, evaluate, budget=48)
+    ledger = ProgramQueryLedger(
+        output / "oracle", task_object, evaluate, budget=48, flush=flush
+    )
     report = progress or (lambda row: None)
     lock_root = root if query_lock_root is None else query_lock_root
     initialization_lock = {
@@ -1014,7 +1017,133 @@ def run_locked_unit(
         "new_oracle_calls": len(ledger.rows),
     }
     seal(output / "result.json", result)
+    if flush is not None:
+        flush()
     return result
+
+
+def build_scored_launch_receipt(root: Path, *, code_revision: str) -> dict[str, Any]:
+    """Build the separately authorized receipt without changing the frozen contract."""
+    contract = verify_contract(root, root / CONTRACT)
+    preflight = unseal(root / PREFLIGHT)
+    manifest = unseal(root / LOCK_MANIFEST)
+    if (
+        preflight.get("decision")
+        != "ZERO_ORACLE_PREPARATION_PASSED_NOT_AUTHORIZED_TO_SCORE"
+        or preflight.get("new_oracle_calls") != 0
+        or manifest.get("pool_count") != 16
+        or manifest.get("all_locked_before_scoring") is not True
+    ):
+        raise ValueError("PMO route/FiberControl launch prerequisites changed")
+    if not isinstance(code_revision, str) or len(code_revision) != 40:
+        raise ValueError("launch requires an exact Git revision")
+    return {
+        "schema_version": "pmo_route_fiber_scored_launch_v1",
+        "contract_payload_sha256": contract["payload_sha256"],
+        "preflight_file_sha256": sha256_file(root / PREFLIGHT),
+        "candidate_manifest_file_sha256": sha256_file(root / LOCK_MANIFEST),
+        "scored_launch_authorized": True,
+        "authorization_recorded_at_utc": "2026-09-19",
+        "authorization_scope": (
+            "user directed the exact frozen PMO route-prior x FiberControl pilot "
+            "to run under its 384-call, zero-retry contract"
+        ),
+        "code_revision": code_revision,
+        "tasks": sorted(TASKS),
+        "arms": sorted(ARMS),
+        "oracle_protocols": {
+            task: f"native-pmo:{task}" for task in sorted(TASKS)
+        },
+        "charged_call_ceiling": 384,
+        "automatic_retries": 0,
+        "worker_count": 8,
+        "cpu_per_worker": 1,
+    }
+
+
+def aggregate_scored_units(
+    launch: dict[str, Any], results: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Reduce the eight isolated units only after every unit has completed."""
+    expected = {(task, arm) for task in TASKS for arm in ARMS}
+    observed = {(row.get("task"), row.get("arm")) for row in results}
+    if observed != expected or len(results) != len(expected):
+        raise ValueError(f"PMO scored unit census mismatch: {observed} != {expected}")
+    if any(
+        row.get("schema_version") != UNIT_SCHEMA
+        or row.get("status") != "complete"
+        or row.get("charged_calls") != 48
+        or row.get("new_oracle_calls") != 48
+        for row in results
+    ):
+        raise ValueError("PMO scored unit is incomplete or violates its call budget")
+    total = sum(int(row["charged_calls"]) for row in results)
+    if total != 384 or total > int(launch["charged_call_ceiling"]):
+        raise ValueError("PMO scored aggregate violates the frozen call ceiling")
+
+    by_task = {}
+    for task in sorted(TASKS):
+        arms = {row["arm"]: row for row in results if row["task"] == task}
+        combined = arms["additive_route_fiber_control"]
+        better_single = max(
+            arms["additive_route_blind"]["auc_top10_48"],
+            arms["old_v0_fiber_control"]["auc_top10_48"],
+        )
+        route_improvements = sum(
+            row["proposal_lane"] == "route" and row["improvement"] > 0
+            for row in combined["observations"]
+        )
+        by_task[task] = {
+            "arms": arms,
+            "combined_minus_v0_blind_auc": (
+                combined["auc_top10_48"] - arms["old_v0_blind"]["auc_top10_48"]
+            ),
+            "combined_minus_best_single_auc": (
+                combined["auc_top10_48"] - better_single
+            ),
+            "combined_route_parent_improvements": route_improvements,
+        }
+
+    both_base = all(
+        row["arms"]["additive_route_fiber_control"]["auc_top10_48"]
+        > row["arms"]["old_v0_blind"]["auc_top10_48"]
+        and row["arms"]["additive_route_fiber_control"]["best_reward"]
+        > row["arms"]["old_v0_blind"]["best_reward"]
+        for row in by_task.values()
+    )
+    single_deltas = [
+        row["combined_minus_best_single_auc"] for row in by_task.values()
+    ]
+    promotion = (
+        both_base
+        and max(single_deltas) >= 0.02
+        and min(single_deltas) >= -0.01
+        and all(
+            row["combined_route_parent_improvements"] > 0
+            for row in by_task.values()
+        )
+    )
+    route_failed_both = all(
+        row["arms"]["additive_route_fiber_control"]["auc_top10_48"]
+        <= row["arms"]["old_v0_fiber_control"]["auc_top10_48"]
+        and row["arms"]["additive_route_blind"]["auc_top10_48"]
+        <= row["arms"]["old_v0_blind"]["auc_top10_48"]
+        for row in by_task.values()
+    )
+    decision = (
+        "PROMOTE"
+        if promotion
+        else ("KILL_REVISION" if route_failed_both else "NO_PROMOTION")
+    )
+    return {
+        "schema_version": "pmo_route_fiber_scored_result_v1",
+        "status": "complete",
+        "decision": decision,
+        "launch_payload_sha256": identity(launch),
+        "charged_calls": total,
+        "automatic_retries": 0,
+        "tasks": by_task,
+    }
 
 
 def build_preflight(root: Path) -> dict[str, Any]:
@@ -1139,7 +1268,9 @@ def status(root: Path) -> dict[str, Any]:
 __all__ = [
     "LOCK_MANIFEST",
     "PREFLIGHT",
+    "aggregate_scored_units",
     "build_preflight",
+    "build_scored_launch_receipt",
     "pmo_program_features",
     "prepare_candidate_locks",
     "prepare_runtime_bundles",
