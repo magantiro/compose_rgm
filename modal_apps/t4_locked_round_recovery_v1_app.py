@@ -50,7 +50,7 @@ def _runtime_image() -> modal.Image:
         )
         .env(
             {
-                "PYTHONPATH": f"/:{REMOTE_ROOT}:{REMOTE_ROOT / 'src'}",
+                "PYTHONPATH": f"/:/recovery:{REMOTE_ROOT}:{REMOTE_ROOT / 'src'}",
                 "PYTHONDONTWRITEBYTECODE": "1",
                 "OMP_NUM_THREADS": "1",
                 "OPENBLAS_NUM_THREADS": "1",
@@ -74,10 +74,7 @@ def _runtime_image() -> modal.Image:
         .add_local_dir(CAPSULE_ROOT, str(REMOTE_ROOT), copy=True)
         .add_local_file(
             RECOVERY_MODULE_PATH,
-            str(
-                REMOTE_ROOT
-                / "src/compose_v4/experiments/t4_locked_round_recovery.py"
-            ),
+            "/recovery/t4_locked_round_recovery.py",
             copy=True,
         )
         .add_local_file(
@@ -152,9 +149,8 @@ def settle_locked_round(task: dict[str, Any]) -> dict[str, Any]:
     import time
 
     sys.path.insert(0, str(REMOTE_ROOT / "src"))
-    from compose_v4.experiments.t4_locked_round_recovery import (
-        recover_locked_round,
-    )
+    from t4_locked_round_recovery import recover_locked_round
+
     from compose_v4.experiments.t4_shared_controller_cell_runtime import ReceiptStore
     from compose_v4.experiments.t4_shared_controller_completion_contract import (
         payload_identity,
@@ -172,7 +168,7 @@ def settle_locked_round(task: dict[str, Any]) -> dict[str, Any]:
         REMOTE_SEALED / "recovery_contract.json", payload_identity
     )
     if sha256_file(
-        REMOTE_ROOT / "src/compose_v4/experiments/t4_locked_round_recovery.py"
+        Path("/recovery/t4_locked_round_recovery.py")
     ) != recovery["implementation_sha256"][
         "src/compose_v4/experiments/t4_locked_round_recovery.py"
     ]:
