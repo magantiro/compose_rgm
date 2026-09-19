@@ -1,5 +1,6 @@
 import hashlib
 import inspect
+import json
 
 import modal_apps.t4_shared_controller_completion_v1_app as launcher
 from compose_v4.experiments.t4_shared_controller_cell_runtime import (
@@ -46,6 +47,24 @@ def test_launcher_registers_nine_private_cell_runtimes_and_is_inert_on_import():
     assert "reserve_driver_generation" in main_source
     assert "_spawn_reserved_drivers" in main_source
     assert "REMOTE_ROOT / 'modal_apps'" in main_source
+
+
+def test_capsule_contains_every_support_gate_material_input():
+    from compose_v4.experiments.t4_shared_controller_scored_contract import (
+        CAPSULE_INCLUDE,
+    )
+
+    support = (
+        launcher.ROOT
+        / "diagnostics/t4_nine_cell_support_preflight_v1/attempt_1/result.json"
+    )
+    envelope = json.loads(support.read_text())
+    included = tuple(CAPSULE_INCLUDE)
+    for relative in envelope["payload"]["inputs_sha256"]:
+        assert any(
+            relative == item or relative.startswith(f"{item}/")
+            for item in included
+        ), relative
 
 
 def test_resume_plan_is_independent_and_never_overlaps_a_live_cell():
