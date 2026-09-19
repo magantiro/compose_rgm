@@ -1,0 +1,191 @@
+{
+  "schema_version": "t4_shared_controller_authoritative_inventory_v2",
+  "created_utc": "2026-09-19T22:51:17Z",
+  "reconciliation_code_revision": "e64a2021b244cc516767df0d6cf2ef11730ed83d",
+  "project_identity": {
+    "scientific_problem": "Inventory the current shared-controller T4 development evidence against the corrected published InVirtuoGen means without mixing older controller generations into the headline.",
+    "primary_output": "A deterministic 30-cell evidence matrix with exact run, contract, code revision, status, score, comparator, and champion provenance.",
+    "central_claim_tested": "Completeness and score status of the current shared-controller development line; this is not a single frozen full-benchmark claim.",
+    "validation_setting": "Five T4 proteins, three seeds per protein, delta 0.4 and 0.6, at most 49 charged calls per cell, one docking seed per development campaign.",
+    "primary_baseline": "Published InVirtuoGen T4 mean docking score for the same protein, seed, and delta.",
+    "declared_support": "Only settled immutable result payloads or the last settled immutable checkpoint from the current shared-controller line and its immediately preceding integrated-controller evidence."
+  },
+  "score_direction": "lower_is_better",
+  "ivg_source": {
+    "location": "/Users/rmaganti/compose_rgm_git/tmp/ivg_repo/InVirtuoGen_results-main/README.md",
+    "physical_sha256": "a5ae0d826fc458caa1bdfa0a4d8f23927da33cea39188c3e4375a55164de6b80",
+    "public_release_revision": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "census_location": "diagnostics/ivg_t4_census/census.json",
+    "census_physical_sha256": "2c06fdfe65fc31327d865381ccb8f4d2c40553c3925d9dc0a03386c22fda05bb"
+  },
+  "evidence_hierarchy": [
+    "settled immutable terminal per-cell result payload",
+    "settled immutable terminal campaign summary plus hashed per-cell result for champion provenance",
+    "last settled immutable checkpoint for an incomplete cell",
+    "frozen but unsettled observations are excluded",
+    "older Dynamic, Full-146, route-aware, and NoDistill results are development evidence only and are excluded from this matrix"
+  ],
+  "evidence_batches": {
+    "integrated_jak2_d06": {
+      "tier": "immediately_preceding_integrated_shared_controller",
+      "run_id": "2f223bd1210f3da8e5adc99e93679b1303bfb2922c0509f570b9b213bb96d066",
+      "contract_payload_sha256": "256563816a5d5b68706c7542bff1beae22f422e2c12109a55739dfe50680530c",
+      "contract_file_sha256": "74fd3a1c0fce95ee0489107cbe951a23825af44bef2feb1a0c8dfd8850f5d96e",
+      "code_revision": "8acee6df25e60887a742d4693f5b363ccf994ac2",
+      "result_location": "diagnostics/t4_integrated_route_fiber_v1/final_result.json",
+      "result_physical_sha256": "fa1fbae94f7d8fc9f08cfa383b8d435be132a237a321e41792478b15600aed01",
+      "result_payload_sha256": "53024cb864665d2418a7cc1a9f51e575c98bdcf70d3edf710446ff94eab18349"
+    },
+    "shared_jak2_d04": {
+      "tier": "preceding_shared_retained_fiber",
+      "run_id": "421b1cbf04a212f1a65af44e1f462da5c201fda22268188a17d86c1169fff5c3",
+      "contract_payload_sha256": "76b71da1d6158ba9f41f9ee1a71efa72b6d39f66114090fe7c850ac1f2b30928",
+      "contract_file_sha256": "3cb26039a3474055c34e05ff966fd43c1b72ca80dc95e65c1189e74d536b020b",
+      "code_revision": "92e19913ec99e02c4bc0c10be25770d1c8f43225",
+      "summary_location": "modal://compose-t4-shared-retained-fiber-jak2-v2/421b1cbf04a212f1a65af44e1f462da5c201fda22268188a17d86c1169fff5c3/summary.json",
+      "summary_physical_sha256": "80a4340f3c6906c67d659ea8bc0afd28f14cbf84c579904734cc340d985fb64a",
+      "summary_payload_sha256": "979aa31a4043dc73c7add9540ffeb07ffb175323efa424699cf9ba3bfa303fe1"
+    },
+    "shared_parp1_d06": {
+      "tier": "preceding_shared_retained_fiber",
+      "run_id": "23e88afc3d7217bf7394f9091f3ded8a218209a77f5f8ae61413c17c5f46db33",
+      "contract_payload_sha256": "b16167d8bd53d2d0c4c49240fcc43b3ff482b37969a3894a420d7ba230a88cb5",
+      "contract_file_sha256": "ca95db6ddecb01609c86d3fe3bea25bf5e4b1468bfd49899b6fca9ded406db80",
+      "code_revision": "92e19913ec99e02c4bc0c10be25770d1c8f43225",
+      "summary_location": "modal://compose-t4-shared-retained-fiber-parp1-v2/23e88afc3d7217bf7394f9091f3ded8a218209a77f5f8ae61413c17c5f46db33/summary.json",
+      "summary_physical_sha256": "3db2ccdb69ed966a126bac10fa292e419f3999ebb44de2ff288984460cf47daf",
+      "summary_payload_sha256": "9af251cb5026426297b7a54cee86aeaf63f2f5c3732e32bac79b6e6573cf5c44"
+    },
+    "shared_parp1_0_d06_rescue": {
+      "tier": "preceding_shared_retained_fiber_rescue",
+      "run_id": "34da40be9f08692f0c4274b57c55fb3a7e389ba54ddeda5ed27ac16bbcfdedbf",
+      "contract_payload_sha256": "f5f4ee8cb69eed8e9de99f6e3b7de3e2bdff70e15554f71eca5a5d5540af0eed",
+      "contract_file_sha256": "fe0e8f4eacf50a46f78aeff702c00f1915186720b51da3066e0fa49ae24a79c7",
+      "code_revision": "1efa3407078d0a928fa5ef97038c09f47b232bb0",
+      "summary_location": "modal://compose-t4-shared-retained-fiber-parp1-p0-rescue-v1/34da40be9f08692f0c4274b57c55fb3a7e389ba54ddeda5ed27ac16bbcfdedbf/summary.json",
+      "summary_physical_sha256": "42d8467929e6b6f0c2505344994cc1c6550ce72ec986ee721308652cfc968df2",
+      "summary_payload_sha256": "a5b8a3e43404a18eecbf446eacd8d528dd0ab1ae81717c1e6f6e2962550c2054"
+    },
+    "shared_5ht1b_d04": {
+      "tier": "preceding_shared_retained_fiber",
+      "run_id": "b4bdd4eb2407bb3490e75ab552fd4e940b24ba60cbe36fb6491916b8046a25a8",
+      "contract_payload_sha256": "50328721b6bdf9f3d092bd032ce72ca2383c2c6985c613cf19390e881a65b30d",
+      "contract_file_sha256": "7d42df76a65ab9a432b4cea5fcde09b717b533d85cd162d5320d36bbcf0d25ce",
+      "code_revision": "25aff00cc49069f9ae5eb44648194d8dc3ee2473",
+      "summary_location": "modal://compose-t4-shared-retained-fiber-5ht1b-d04-v1/b4bdd4eb2407bb3490e75ab552fd4e940b24ba60cbe36fb6491916b8046a25a8/summary.json",
+      "summary_physical_sha256": "7b3482a326228601f6c6c5c448ce762595eb907f3cd78862b8dadde59419be13",
+      "summary_payload_sha256": "110de74d810848a65b10eb6a3cc54523eb39f3c6a7cf5bb8113f4054210a8d3a"
+    },
+    "shared_5ht1b_d06": {
+      "tier": "preceding_shared_retained_fiber",
+      "run_id": "795dec1e0f7398a52e1d3cc9f168f20b6f36c65a89236b3408d25ba929826c6a",
+      "contract_payload_sha256": "f87fc4c69af36c837f699b843f9d9f5bef4d797d39d0301bcf55654d56e2d011",
+      "contract_file_sha256": "41b70fcff8e42da7a542e6ea12e68de574f628d7cda0c4653f272b4024b13764",
+      "code_revision": "25aff00cc49069f9ae5eb44648194d8dc3ee2473",
+      "summary_location": "modal://compose-t4-shared-retained-fiber-5ht1b-d06-v1/795dec1e0f7398a52e1d3cc9f168f20b6f36c65a89236b3408d25ba929826c6a/summary.json",
+      "summary_physical_sha256": "beea9d214e5963ef84d01145f08ca747735ed4923b222fe8e47ac48321e94d18",
+      "summary_payload_sha256": "adafce3e6d27b0000130ec45873af62779bc7568ff8a04b415578f6cc2d5f1e9"
+    },
+    "shared_fa7_d04": {
+      "tier": "preceding_shared_retained_fiber",
+      "run_id": "32dc75bf92f6f625b351efc06a179c515e62148dcf90ff6c3a3679a6f251759a",
+      "contract_payload_sha256": "3d948a7032dbf035fd35a0d8a346840b0551730ad5b66ac7a3a4d0d3101a4ec3",
+      "contract_file_sha256": "45c342c8a3a755256989f979d12b3b3af9a276d02490031dd7ad0d6e387d41ff",
+      "code_revision": "25aff00cc49069f9ae5eb44648194d8dc3ee2473",
+      "summary_location": "modal://compose-t4-shared-retained-fiber-fa7-d04-v1/32dc75bf92f6f625b351efc06a179c515e62148dcf90ff6c3a3679a6f251759a/summary.json",
+      "summary_physical_sha256": "dc80f0a64f599cbf6e3a41aed4be87a24b4543780ed55a96dd217104814e41bb",
+      "summary_payload_sha256": "56ff424e7283dc592f04156b42596d2514ec0c1b56f52557bd532bd9b39137c4"
+    },
+    "shared_fa7_d06": {
+      "tier": "preceding_shared_retained_fiber",
+      "run_id": "263627082295b7000c753625814271890928c356cf06e34837fa66dd82e8718e",
+      "contract_payload_sha256": "91f59c92da209fa328bb3e271c2da8b390c9d67e8807a9c253d69392fe26a062",
+      "contract_file_sha256": "8512472cdf4e7305c4acc798298a52ec59a9a7cc17eaf020126ff8f3c212eed2",
+      "code_revision": "25aff00cc49069f9ae5eb44648194d8dc3ee2473",
+      "summary_location": "modal://compose-t4-shared-retained-fiber-fa7-d06-v1/263627082295b7000c753625814271890928c356cf06e34837fa66dd82e8718e/summary.json",
+      "summary_physical_sha256": "1cc62be684a2062e570c1214b388a7adac66c0dcd3b46e9befe9c9f43a6b14f6",
+      "summary_payload_sha256": "985843775e0b8f14aa74af886e585e0bb0e2f287e73900b1a62483b28a735639"
+    },
+    "completion_v4": {
+      "tier": "current_shared_controller_completion_campaign",
+      "run_id": "b2a7e0aee53da2fa649103ac0dc83970aa00de218c90a1763f4ef8b9972397b6",
+      "contract_location": "diagnostics/t4_shared_controller_completion_v1/scored_contract_v4.json",
+      "contract_payload_sha256": "a2c5672e1140dc8b8dc8e6e99c188ba22cfbf8f4474daf4b2c16cc95d316ba9f",
+      "contract_file_sha256": "02b65d0cd27c5a49a9e49839ed14cf0af653ab772d9cf4f49846b358f9f97381",
+      "code_revision": "54fb2d5a3f431dada67a50e6962be09d1593ee7c",
+      "source_capsule_payload_sha256": "ddd6266ba87e0acb985e86b52f98a0b7a2f2d62642d23a695c0dd26e3893f31a",
+      "launch_receipt_location": "diagnostics/t4_shared_controller_completion_v1/launches/b2a7e0aee53da2fa649103ac0dc83970aa00de218c90a1763f4ef8b9972397b6.json",
+      "launch_receipt_physical_sha256_at_inventory": "b52857e56a80ef0b00ef5f5bfd84ee463c11f195dbacd390abff2f1e9ff63de3",
+      "launch_receipt_payload_sha256": "bb0ddc1e2bd130ddb1042960f62490f449b93d357994fda0cfa557141edc0cc9"
+    }
+  },
+  "summary": {
+    "cells_total": 30,
+    "scientifically_comparable_current_line_cells": 30,
+    "terminal_cells": 29,
+    "complete_budget_cells": 26,
+    "candidate_exhaustion_cells": 3,
+    "incomplete_frozen_cells": 1,
+    "strictly_better_than_ivg_among_terminal": 22,
+    "equal_to_ivg_among_terminal": 1,
+    "worse_than_ivg_among_terminal": 6,
+    "at_or_better_than_ivg_among_terminal": 23,
+    "at_or_better_than_ivg_including_incomplete_settled_checkpoint": 24,
+    "single_frozen_controller_full_benchmark_complete": false,
+    "single_frozen_controller_note": "The 30-cell inventory is a scientifically comparable development mosaic spanning nine run IDs and multiple code revisions, not one frozen controller revision evaluated prospectively across all 30 cells.",
+    "minimal_completeness_panel": ["parp1_2_delta_0.4"],
+    "terminal_miss_panel": [
+      "jak2_0_delta_0.6",
+      "parp1_0_delta_0.4",
+      "braf_0_delta_0.6",
+      "5ht1b_0_delta_0.4",
+      "5ht1b_1_delta_0.4",
+      "5ht1b_2_delta_0.6"
+    ]
+  },
+  "records": [
+    {"cell":"5ht1b_0","delta":0.4,"comparable_current_line":true,"evidence_batch":"shared_5ht1b_d04","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-12.6,"ivg":-13.3,"gap":0.7,"outcome":"worse","champion":{"proposal_experts":["route_complete_region"],"selection_kind":"route_scale_floor","parent_score":-0.2}},
+    {"cell":"5ht1b_1","delta":0.4,"comparable_current_line":true,"evidence_batch":"shared_5ht1b_d04","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-11.8,"ivg":-12.0,"gap":0.2,"outcome":"worse","champion":{"proposal_experts":["shallow"],"selection_kind":"model","parent_score":-11.7}},
+    {"cell":"5ht1b_2","delta":0.4,"comparable_current_line":true,"evidence_batch":"shared_5ht1b_d04","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-12.6,"ivg":-10.9,"gap":-1.7,"outcome":"better","champion":{"proposal_experts":["route_complete_region"],"selection_kind":"model","parent_score":-10.3}},
+    {"cell":"5ht1b_0","delta":0.6,"comparable_current_line":true,"evidence_batch":"shared_5ht1b_d06","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-12.7,"ivg":-12.4,"gap":-0.3,"outcome":"better","champion":{"proposal_experts":["shallow"],"selection_kind":"model","parent_score":-11.3}},
+    {"cell":"5ht1b_1","delta":0.6,"comparable_current_line":true,"evidence_batch":"shared_5ht1b_d06","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-12.5,"ivg":-12.0,"gap":-0.5,"outcome":"better","champion":{"proposal_experts":["route_complete_region"],"selection_kind":"exploration","parent_score":-7.5}},
+    {"cell":"5ht1b_2","delta":0.6,"comparable_current_line":true,"evidence_batch":"shared_5ht1b_d06","settled_calls":1,"status":"candidate_exhaustion","status_class":"exhausted","compose":-9.8,"ivg":-10.6,"gap":0.8,"outcome":"worse","champion":{"proposal_experts":[],"selection_kind":"root","parent_score":null}},
+    {"cell":"braf_0","delta":0.4,"comparable_current_line":true,"evidence_batch":"completion_v4","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-10.6,"ivg":-10.1,"gap":-0.5,"outcome":"better","champion":{"proposal_experts":["anchored_replacement"],"selection_kind":"exploration","parent_score":-9.6},"result_physical_sha256":"3da5c66a198cbc479938ae11143f6d1fbb0171826e28bee72065673fef63c548","result_payload_sha256":"69fb0e834d2dd532ab2d6e4bc4f18f3d582500a3c81dde580d021ad0b1d52b1c"},
+    {"cell":"braf_1","delta":0.4,"comparable_current_line":true,"evidence_batch":"completion_v4","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-11.3,"ivg":-10.8,"gap":-0.5,"outcome":"better","champion":{"proposal_experts":["route_complete_region","shallow"],"selection_kind":"model","parent_score":-11.2},"result_physical_sha256":"75e34c1cbd44ea9289daef3d8c43c07c4d9738fe5a67ff11c0c20981021e27bd","result_payload_sha256":"4bf70ceea703ae73909c6be8f51550c744e9c330252fe2a54aaef40e2aa202d4"},
+    {"cell":"braf_2","delta":0.4,"comparable_current_line":true,"evidence_batch":"completion_v4","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-11.1,"ivg":-10.6,"gap":-0.5,"outcome":"better","champion":{"proposal_experts":["shallow"],"selection_kind":"exploration","parent_score":-10.7},"result_physical_sha256":"f5b7554901f6b20a7921c0484cf3f16b4a8ace3d94182a90eafb5c8f0272f063","result_payload_sha256":"7ad1faf6304bbe8c645d9fd767ebfd1e8ec00481ac050bc5ed30dc7f2570fd0e"},
+    {"cell":"braf_0","delta":0.6,"comparable_current_line":true,"evidence_batch":"completion_v4","settled_calls":1,"status":"candidate_exhaustion","status_class":"exhausted","compose":-8.9,"ivg":-9.7,"gap":0.8,"outcome":"worse","champion":{"proposal_experts":[],"selection_kind":"root","parent_score":null},"result_physical_sha256":"21fa0faf4d00bc50e64afb1dd9c446e6cb6bbdc0993c5d00f52f68fe2c80605b","result_payload_sha256":"6925c1a4eeb387a7c4415bbf759d33c5c68d91bb2a3350d06f126dcc7a63ad16"},
+    {"cell":"braf_1","delta":0.6,"comparable_current_line":true,"evidence_batch":"completion_v4","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-11.0,"ivg":-10.4,"gap":-0.6,"outcome":"better","champion":{"proposal_experts":["shallow"],"selection_kind":"model","parent_score":-10.6},"result_physical_sha256":"c47059d7fbe4eae0008e158da14f38e3ee9b8f4f45bb8e90572cae4e2169a294","result_payload_sha256":"0927a827adaf9fc95e51fc2ccee2778bd06c307c69b0b071ee30b73a2501ac3b"},
+    {"cell":"braf_2","delta":0.6,"comparable_current_line":true,"evidence_batch":"completion_v4","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-11.0,"ivg":-10.3,"gap":-0.7,"outcome":"better","champion":{"proposal_experts":["shallow"],"selection_kind":"model","parent_score":-10.7},"result_physical_sha256":"c47529afbff01c36687bfc0c710f10309b16656f7f40980ec7b516df02dd9337","result_payload_sha256":"6b29efcd2b8212e2ab7e4b46ed1b6107409bb22458821ad391b58e8c285fd6f8"},
+    {"cell":"fa7_0","delta":0.4,"comparable_current_line":true,"evidence_batch":"shared_fa7_d04","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-9.7,"ivg":-8.4,"gap":-1.3,"outcome":"better","champion":{"proposal_experts":["route_complete_region"],"selection_kind":"model","parent_score":-9.3}},
+    {"cell":"fa7_1","delta":0.4,"comparable_current_line":true,"evidence_batch":"shared_fa7_d04","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-9.4,"ivg":-8.9,"gap":-0.5,"outcome":"better","champion":{"proposal_experts":["shallow"],"selection_kind":"model","parent_score":-8.6}},
+    {"cell":"fa7_2","delta":0.4,"comparable_current_line":true,"evidence_batch":"shared_fa7_d04","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-8.4,"ivg":-8.0,"gap":-0.4,"outcome":"better","champion":{"proposal_experts":[],"selection_kind":"root","parent_score":null}},
+    {"cell":"fa7_0","delta":0.6,"comparable_current_line":true,"evidence_batch":"shared_fa7_d06","settled_calls":2,"status":"candidate_exhaustion","status_class":"exhausted","compose":-7.7,"ivg":-7.7,"gap":0.0,"outcome":"equal","champion":{"proposal_experts":["route_complete_region"],"selection_kind":"route_scale_floor","parent_score":-7.1}},
+    {"cell":"fa7_1","delta":0.6,"comparable_current_line":true,"evidence_batch":"shared_fa7_d06","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-7.6,"ivg":-7.5,"gap":-0.1,"outcome":"better","champion":{"proposal_experts":[],"selection_kind":"root","parent_score":null}},
+    {"cell":"fa7_2","delta":0.6,"comparable_current_line":true,"evidence_batch":"shared_fa7_d06","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-8.3,"ivg":-7.4,"gap":-0.9,"outcome":"better","champion":{"proposal_experts":[],"selection_kind":"root","parent_score":null}},
+    {"cell":"jak2_0","delta":0.4,"comparable_current_line":true,"evidence_batch":"shared_jak2_d04","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-11.1,"ivg":-10.2,"gap":-0.9,"outcome":"better","champion":{"proposal_experts":["route_complete_region"],"selection_kind":"route_scale_floor","parent_score":-7.5}},
+    {"cell":"jak2_1","delta":0.4,"comparable_current_line":true,"evidence_batch":"shared_jak2_d04","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-11.5,"ivg":-10.5,"gap":-1.0,"outcome":"better","champion":{"proposal_experts":["route_complete_region"],"selection_kind":"model","parent_score":-11.3}},
+    {"cell":"jak2_2","delta":0.4,"comparable_current_line":true,"evidence_batch":"shared_jak2_d04","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-11.8,"ivg":-10.2,"gap":-1.6,"outcome":"better","champion":{"proposal_experts":["route_complete_region"],"selection_kind":"model","parent_score":-10.5}},
+    {"cell":"jak2_0","delta":0.6,"comparable_current_line":true,"evidence_batch":"integrated_jak2_d06","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-9.6,"ivg":-9.7,"gap":0.1,"outcome":"worse","champion":{"proposal_experts":["shallow"],"selection_kind":"exploration","parent_score":-8.3,"round":5}},
+    {"cell":"jak2_1","delta":0.6,"comparable_current_line":true,"evidence_batch":"integrated_jak2_d06","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-11.2,"ivg":-10.4,"gap":-0.8,"outcome":"better","champion":{"proposal_experts":["anchored_replacement"],"selection_kind":"model","parent_score":-9.8,"round":3}},
+    {"cell":"jak2_2","delta":0.6,"comparable_current_line":true,"evidence_batch":"integrated_jak2_d06","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-10.6,"ivg":-10.3,"gap":-0.3,"outcome":"better","champion":{"proposal_experts":["shallow"],"selection_kind":"model","parent_score":-10.1,"round":6}},
+    {"cell":"parp1_0","delta":0.4,"comparable_current_line":true,"evidence_batch":"completion_v4","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-13.1,"ivg":-14.1,"gap":1.0,"outcome":"worse","champion":{"proposal_experts":["shallow"],"selection_kind":"model","parent_score":-13.0},"result_physical_sha256":"a5d4e2db364ea977ac1cf833342d9ae3edc0ed9dd46709b8090e760d618c7083","result_payload_sha256":"169464804ea4c128d7c2390678eb21532932fa1e587448d17d0603e4f9639434"},
+    {"cell":"parp1_1","delta":0.4,"comparable_current_line":true,"evidence_batch":"completion_v4","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-13.7,"ivg":-13.4,"gap":-0.3,"outcome":"better","champion":{"proposal_experts":["shallow"],"selection_kind":"model","parent_score":-13.6},"result_physical_sha256":"235f32dac20a8ffe24245ddf247aec67a18ef9158762032ab02ac38be2c962c3","result_payload_sha256":"6ddb809cab93aa4565bf4a9b50a49ce1d0de4f69659d75b6986d4243411dda70"},
+    {"cell":"parp1_2","delta":0.4,"comparable_current_line":true,"evidence_batch":"completion_v4","settled_calls":17,"status":"running_at_last_settled_checkpoint","status_class":"incomplete_frozen","compose":-11.1,"ivg":-9.0,"gap":-2.1,"outcome":"better_at_incomplete_checkpoint","champion":{"proposal_experts":["anchored_replacement"],"selection_kind":"expert_floor","parent_score":-10.3,"round":2},"checkpoint_physical_sha256":"4ee62e410c278b20ca28ee359fcc43fa9040073643030166d3e48db5ad90b7c9","checkpoint_payload_sha256":"cbd768d3e0b33c87b54d0f671fb01f7cfd76463b5f601596e259f13b0bc82a57","excluded_unsettled_observation":-11.8},
+    {"cell":"parp1_0","delta":0.6,"comparable_current_line":true,"evidence_batch":"shared_parp1_0_d06_rescue","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-12.4,"ivg":-12.3,"gap":-0.1,"outcome":"better","champion":{"proposal_experts":["route_complete_region"],"selection_kind":"route_scale_floor","parent_score":-7.3}},
+    {"cell":"parp1_1","delta":0.6,"comparable_current_line":true,"evidence_batch":"shared_parp1_d06","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-12.6,"ivg":-11.7,"gap":-0.9,"outcome":"better","champion":{"proposal_experts":["shallow"],"selection_kind":"model","parent_score":-11.4}},
+    {"cell":"parp1_2","delta":0.6,"comparable_current_line":true,"evidence_batch":"shared_parp1_d06","settled_calls":49,"status":"complete_budget","status_class":"complete","compose":-11.3,"ivg":-10.7,"gap":-0.6,"outcome":"better","champion":{"proposal_experts":["shallow"],"selection_kind":"model","parent_score":-10.9}}
+  ],
+  "excluded_development_evidence": [
+    {"line":"Full-146 and route-aware witness programs","reason":"answer-known or teacher-route evidence; useful mechanism evidence but not autonomous current-controller performance"},
+    {"line":"Dynamic-v0/v1/v2/v2.1/v2.2","reason":"older controller generations; not mixed into the current shared-controller score matrix"},
+    {"line":"COMPOSE-NoDistill","reason":"separate causal ablation; not a Full-controller replacement result"},
+    {"line":"original PARP1-0 delta 0.6 run","reason":"superseded by the separately contracted rescue result; retained as negative development evidence"}
+  ],
+  "limitations": [
+    "This is development evidence assembled across nine run IDs and multiple code revisions, not one prospectively frozen controller evaluated on all 30 cells.",
+    "Each included campaign used one docking seed; no cross-seed robustness claim follows.",
+    "Candidate exhaustion is terminal and is not equivalent to spending the full 49-call budget.",
+    "PARP1 seed 2 at delta 0.4 is incomplete; only the 17-call settled checkpoint is included, and the later frozen -11.8 observation is excluded.",
+    "Comparison is to the published IVG mean, not to a matched per-call IVG trajectory or uncertainty-adjusted hypothesis test."
+  ]
+}
