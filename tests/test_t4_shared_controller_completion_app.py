@@ -3,6 +3,7 @@ import inspect
 import json
 
 import modal_apps.t4_shared_controller_completion_v1_app as launcher
+import tools.launch_t4_shared_controller_deployed as deployed_launcher
 from compose_v4.experiments.t4_shared_controller_cell_runtime import (
     QUERY_RECEIPT_SCHEMA,
     make_query_lock,
@@ -93,6 +94,50 @@ def test_resume_plan_is_independent_and_never_overlaps_a_live_cell():
     assert plan["live"] == {"action": "wait", "state": running["live"]}
     assert plan["finished"]["action"] == "finish"
     assert plan["finished"]["state"]["state"] == "terminal"
+
+
+def test_deployed_launcher_spawns_only_pre_reserved_cells(monkeypatch, tmp_path):
+    spawned = []
+    published = []
+
+    class _Call:
+        object_id = "fc-resumed"
+
+    class _Driver:
+        def spawn(self, task):
+            spawned.append(task)
+            return _Call()
+
+    monkeypatch.setattr(deployed_launcher, "_driver", lambda _cell_key: _Driver())
+    monkeypatch.setattr(
+        deployed_launcher.launcher,
+        "_replace_launch_receipt",
+        lambda _path, payload: published.append(payload),
+    )
+    state = reserve_driver_generation(
+        phase_status="running", existing_state=None
+    )["state"]
+    receipt = {
+        "launch": {"cell_keys": ["spawn", "wait"]},
+        "cells": {
+            "spawn": {"driver_state": state},
+            "wait": {"driver_state": state},
+        },
+    }
+    result = deployed_launcher._spawn_planned(
+        receipt_path=tmp_path / "launch.json",
+        receipt=receipt,
+        planned={
+            "spawn": {"action": "spawn", "state": state},
+            "wait": {"action": "wait", "state": state},
+        },
+    )
+    assert len(spawned) == 1
+    assert spawned[0]["driver_generation"] == 0
+    assert result["cells"]["spawn"]["driver_state"]["function_call_id"] == (
+        "fc-resumed"
+    )
+    assert len(published) == 2
 
 
 def test_driver_filters_bound_stale_braf_hashes_before_pure_selection():
