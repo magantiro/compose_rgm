@@ -1,0 +1,50 @@
+{
+  "payload": {
+    "automatic_retries": 0,
+    "cells": [
+      "jak2_0"
+    ],
+    "charged_call_ceiling": 49,
+    "contract_file_sha256": "8ff98658f697e7c81cee41d09e821563fad8b612ba141b0903f0e14bfdfe5f0c",
+    "contract_payload_sha256": "fed1f158caa3142eea4a0e861c4689d72addb32d37c665ef6eeb2771cc3492a3",
+    "deferred_joint_planning": false,
+    "delta": 0.6,
+    "proposal_experts": [
+      "shallow",
+      "anchored_replacement",
+      "route_complete_region"
+    ],
+    "required_scored_authorization": "I authorize one fresh JAK2 seed-0 delta=0.6 shared-controller rerun under contract payload SHA-256 fed1f158caa3142eea4a0e861c4689d72addb32d37c665ef6eeb2771cc3492a3, capped at 49 charged docking calls, with zero retries, replacements, prior-outcome reuse, winner injection, or runtime comparator.",
+    "route_scale_floor_rounds": 2,
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "modal_apps/t4_shared_retained_fiber_jak2_s0_d06_rerun_v1_app.py": "d3d85d4054916d05b27bbb4aaf9f6c0e7c19be8c68c47e98c4c3099416bfd92f",
+      "src/compose_v4/chem/molecular_graph.py": "f25e20f52bd56f90299d93e934038f9caf4768b557b68a3d5781ca925efc16a2",
+      "src/compose_v4/chem/state.py": "4aa1acc257b053a562969ad8cc9b62fd84ce2931b04f1890f1c242888a3cecf5",
+      "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
+      "src/compose_v4/control/docking_value.py": "6177a9445f05900334066c1ce17be4e07182d1328cc9740c990dfa254f6003c8",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+      "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "092eb28b6a115a328be7f94ab115317b8f9c196b1f510aaed7a216911cee215e",
+      "src/compose_v4/control/structural_subgoal_policy.py": "d45a2f6b92a69f7462f6c1e2cd5523bc529cedb0a24e5a993aa714a2ade3d2b4",
+      "src/compose_v4/control/structural_subgoal_realizer.py": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+      "src/compose_v4/experiments/continuation_profile.py": "a4998ec45f3039a40486833d3634644e545ca2688ece9a6f15987855f0e2c1e2",
+      "src/compose_v4/experiments/t4_campaign_driver.py": "f7270b73f50cd1b8afdcca6cbe636d857ae3547dc09429e02e4b7642447616ee",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_integrated_route_fiber.py": "7dd5fa177c10bf0d2b415f2051a68fe9c26b5d1fc677f297161c2bfbf05cb7c5",
+      "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "aeee1616ed67c5af77de7da8eae4519ddedda929618286d6d966868d543503ed",
+      "src/compose_v4/experiments/t4_jak2_s0_d06_rerun_contract.py": "f588f1829c696d45f8f1f20764c64e3b103ddf80a174a7763f4f5b369c849809",
+      "src/compose_v4/experiments/t4_matched_pilot.py": "8ccbc05e32cd05c8dbde746e41ece693ef997f6765180e0011a5bd416d90ac4a"
+    },
+    "schema_version": "t4_jak2_s0_d06_shared_controller_rerun_preflight_v1",
+    "shared_route_checkpoint_payload_sha256": "5476be572dd40ee3f068cc8f1df238eec54e23a82cb84f803905ac891701e07d",
+    "shared_route_checkpoint_sha256": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
+    "shared_route_training_regions": 147,
+    "shared_route_training_routes": 77,
+    "status": "PREPARED_NO_SCORED_AUTHORIZATION"
+  },
+  "payload_sha256": "1b968d346b49deebbf73c205a8901e9706215c3a908be8fe44801bf0371433e9"
+}
