@@ -1,0 +1,125 @@
+{
+  "payload": {
+    "schema_version": "t4_integrated_route_fiber_final_result_v1",
+    "retrieved_at_utc": "2026-09-19T01:12:44Z",
+    "run_id": "2f223bd1210f3da8e5adc99e93679b1303bfb2922c0509f570b9b213bb96d066",
+    "code_revision": "8acee6df25e60887a742d4693f5b363ccf994ac2",
+    "contract_payload_sha256": "256563816a5d5b68706c7542bff1beae22f422e2c12109a55739dfe50680530c",
+    "contract_file_sha256": "74fd3a1c0fce95ee0489107cbe951a23825af44bef2feb1a0c8dfd8850f5d96e",
+    "remote_volume": "compose-t4-integrated-route-fiber-v1",
+    "remote_path": "/2f223bd1210f3da8e5adc99e93679b1303bfb2922c0509f570b9b213bb96d066",
+    "authoritative_artifact_sha256": {
+      "summary.json": "e1963a55e12929ce46005c8203f12121cd869e1e1573fff914237706cad039a3",
+      "jak2_0/result.json": "52df52490281aadda3f68db1ec0de880a85d332eb6ed884e9c3e050840cbd8f5",
+      "jak2_1/result.json": "a0df91ad48939ddd52dfc3a47540129523157f7b4117e004948ebd8c98d2166f",
+      "jak2_2/result.json": "e47d2ad4b17e29b63cfa89270a94a04d358fe43840596010cd30d3f7aab9dbeb"
+    },
+    "integrity": {
+      "json_envelopes_verified": 29,
+      "invalid_envelopes": 0,
+      "round_locks": 21,
+      "terminal_results": 3,
+      "failed_docking_calls": 0,
+      "new_oracle_calls": 147
+    },
+    "cells": [
+      {
+        "cell": "jak2_0",
+        "status": "complete_budget",
+        "charged_calls": 49,
+        "root_score": -7.5,
+        "best_by_call": {
+          "1": -7.5,
+          "9": -9.0,
+          "17": -9.0,
+          "25": -9.0,
+          "33": -9.2,
+          "41": -9.6,
+          "49": -9.6
+        },
+        "final_best": -9.6,
+        "ivg_reported_delta_0_6": -9.7,
+        "compose_minus_ivg": 0.1,
+        "best_smiles": "N=C1N(O)CCN1CCCC1=Nc2ccccc2-c2ncnc3[nH]cc1c23",
+        "winner_proposal_experts": [
+          "shallow"
+        ],
+        "winner_selection_kind": "exploration",
+        "winner_parent_score": -8.3,
+        "winner_round": 5
+      },
+      {
+        "cell": "jak2_1",
+        "status": "complete_budget",
+        "charged_calls": 49,
+        "root_score": -8.0,
+        "best_by_call": {
+          "1": -8.0,
+          "9": -9.8,
+          "17": -9.8,
+          "25": -11.2,
+          "33": -11.2,
+          "41": -11.2,
+          "49": -11.2
+        },
+        "final_best": -11.2,
+        "ivg_reported_delta_0_6": -10.4,
+        "compose_minus_ivg": -0.8,
+        "best_smiles": "CN1CCCN1C(=O)N1CCN(OC(=O)CC2Nc3ccccc3-c3ccnc4[nH]cc2c34)C1",
+        "winner_proposal_experts": [
+          "anchored_replacement"
+        ],
+        "winner_selection_kind": "model",
+        "winner_parent_score": -9.8,
+        "winner_round": 3
+      },
+      {
+        "cell": "jak2_2",
+        "status": "complete_budget",
+        "charged_calls": 49,
+        "root_score": -8.6,
+        "best_by_call": {
+          "1": -8.6,
+          "9": -9.4,
+          "17": -10.1,
+          "25": -10.1,
+          "33": -10.1,
+          "41": -10.1,
+          "49": -10.6
+        },
+        "final_best": -10.6,
+        "ivg_reported_delta_0_6": -10.3,
+        "compose_minus_ivg": -0.3,
+        "best_smiles": "O=C1NC(c2ccc(O)cc2F)c2c[nH]c3nccc(c23)C=C1C=C1C=N1",
+        "winner_proposal_experts": [
+          "shallow"
+        ],
+        "winner_selection_kind": "model",
+        "winner_parent_score": -10.1,
+        "winner_round": 6
+      }
+    ],
+    "promotion_gate": {
+      "criterion": "at least two cells reach their reported IVG mean or one beats it by at least 0.5 while another closes at least half its seed-to-IVG gap",
+      "passed": true,
+      "reason": "jak2_1 beats the reported IVG mean by 0.8 and jak2_2 beats it by 0.3; jak2_0 finishes 0.1 above the mean"
+    },
+    "mechanism_findings": {
+      "final_incumbents_with_route_expert_provenance": 0,
+      "route_expert_entered_all_first_round_locks": true,
+      "route_supported_near_ivg_endpoint_observed": {
+        "cell": "jak2_2",
+        "score": -10.1,
+        "proposal_experts": [
+          "route_complete_region",
+          "shallow"
+        ],
+        "selection_kind": "model"
+      },
+      "fibercontrol_selected_final_winners": 2,
+      "exploration_selected_final_winners": 1
+    },
+    "claim_boundary": "winner-informed three-cell JAK2 development evidence from one fixed docking seed; not held-out, not replicated, not a full T4 benchmark, and not a same-generator causal ablation of FiberControl"
+  },
+  "payload_sha256": "53024cb864665d2418a7cc1a9f51e575c98bdcf70d3edf710446ff94eab18349"
+}
