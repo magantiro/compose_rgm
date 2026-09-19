@@ -19,14 +19,16 @@ from compose_v4.experiments.t4_shared_controller_scored_contract import (
 SCHEMA_VERSION = "t4_compose_nodistill_parp1_scored_contract_v1"
 PREPARATION_RELATIVE_PATH = "configs/t4_compose_nodistill_parp1_v1.json"
 FINAL_CONTRACT_RELATIVE_PATH = (
-    "diagnostics/t4_compose_nodistill_parp1_v1/scored_contract.json"
+    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_2/scored_contract.json"
 )
 AUTHORIZATION_RELATIVE_PATH = (
-    "diagnostics/t4_compose_nodistill_parp1_v1/scored_authorization.json"
+    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_2/scored_authorization.json"
 )
-CAPSULE_ROOT_RELATIVE_PATH = "diagnostics/t4_compose_nodistill_parp1_v1/source_capsule"
+CAPSULE_ROOT_RELATIVE_PATH = (
+    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_2/source_capsule"
+)
 CAPSULE_MANIFEST_RELATIVE_PATH = (
-    "diagnostics/t4_compose_nodistill_parp1_v1/source_capsule_manifest.json"
+    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_2/source_capsule_manifest.json"
 )
 SUPPORT_RELATIVE_PATH = (
     "diagnostics/t4_retained_core_shared_support_v1/attempt_1/scientific_result.json"
@@ -119,13 +121,25 @@ def _validate_preparation(path: Path) -> dict[str, Any]:
     ):
         raise ValueError("NoDistill budget drift")
     distillation = payload.get("trajectory_distillation")
-    if not isinstance(distillation, dict) or set(distillation.values()) != {False}:
+    if distillation != {
+        "enabled": False,
+        "stored_structural_template_library": False,
+        "route_marginal_or_scale_weights": False,
+        "direct_template_rebinding": False,
+        "route_template_particles": False,
+        "route_template_quota": False,
+        "target_independent_scale_floor": True,
+        "route_checkpoint_allowed": False,
+    }:
         raise ValueError("explicit trajectory distillation was not fully disabled")
     controller = payload.get("controller")
     if not isinstance(controller, dict):
         raise TypeError("NoDistill controller is missing")
-    if controller.get("route_scale_floor_rounds") != 0:
-        raise ValueError("NoDistill retained a route-scale selection quota")
+    if (
+        controller.get("route_scale_floor_rounds") != 2
+        or controller.get("scale_floor_scope") != "all_generic"
+    ):
+        raise ValueError("NoDistill generic transformation-scale floor drift")
     route = controller.get("proposal", {}).get("route_complete_region")
     if route != {
         "mode": "generic_retained_core_only",

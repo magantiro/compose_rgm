@@ -159,6 +159,9 @@ def _validate_controller_config(config: Mapping[str, Any]) -> dict[str, Any]:
             raise ValueError(f"unknown route-scale floor bands: {unknown}")
         for band, count in counts.items():
             _integer(count, label=f"route scale floor {band}")
+    scope = normalized.get("scale_floor_scope", "route_prior")
+    if scope not in {"route_prior", "all_generic"}:
+        raise ValueError(f"unknown controller scale_floor_scope: {scope!r}")
     return normalized
 
 
@@ -582,6 +585,7 @@ def select_parent_and_batch(
         expert_floor_rounds=int(config["expert_floor_rounds"]),
         route_scale_floor_rounds=int(config["route_scale_floor_rounds"]),
         route_scale_floor_counts=config.get("route_scale_floor_counts"),
+        scale_floor_scope=str(config.get("scale_floor_scope", "route_prior")),
     )
     if not selected:
         terminal = copy.deepcopy(restored.checkpoint)

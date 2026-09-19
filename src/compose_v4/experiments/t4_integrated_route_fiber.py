@@ -48,7 +48,9 @@ def merge_expert_pools(pools: dict[str, Iterable[dict]]) -> list[dict]:
         for position, source in enumerate(pools.get(expert, ())):
             row = dict(source)
             if row.get("proposal_lane") not in (None, expert):
-                raise ValueError(f"pool {expert!r} contains lane {row.get('proposal_lane')!r}")
+                raise ValueError(
+                    f"pool {expert!r} contains lane {row.get('proposal_lane')!r}"
+                )
             row["proposal_lane"] = expert
             row["proposal_experts"] = sorted(set(_experts(row)) | {expert})
             smiles = str(row.get("smiles") or "")
@@ -145,6 +147,7 @@ def select_batch(
     expert_floor_rounds: int,
     route_scale_floor_rounds: int = 0,
     route_scale_floor_counts: Mapping[str, int] | None = None,
+    scale_floor_scope: str = "route_prior",
 ) -> list[dict]:
     """Select one batch, seeding available route scales and experts early.
 
@@ -155,8 +158,15 @@ def select_batch(
     SMILES.
     """
 
-    if batch < 1 or exploration < 0 or exploration > batch or route_scale_floor_rounds < 0:
+    if (
+        batch < 1
+        or exploration < 0
+        or exploration > batch
+        or route_scale_floor_rounds < 0
+    ):
         raise ValueError("invalid batch or exploration quota")
+    if scale_floor_scope not in {"route_prior", "all_generic"}:
+        raise ValueError(f"unknown scale floor scope: {scale_floor_scope!r}")
     route_bands = ("small", "medium", "large")
     scale_counts = {band: 1 for band in route_bands}
     if route_scale_floor_counts is not None:
@@ -165,33 +175,49 @@ def select_batch(
             raise ValueError(f"unknown route scale floor bands: {sorted(unknown)}")
         for band, count in route_scale_floor_counts.items():
             if isinstance(count, bool) or not isinstance(count, int) or count < 0:
-                raise ValueError(f"invalid route scale floor count for {band!r}: {count!r}")
+                raise ValueError(
+                    f"invalid route scale floor count for {band!r}: {count!r}"
+                )
             scale_counts[band] = count
     available = [row for row in candidates if row["smiles"] not in state.archive]
     selected: list[dict] = []
     used: set[str] = set()
     if round_index <= route_scale_floor_rounds:
         for band in route_bands:
-            choices = sorted(
-                (
-                    row
-                    for row in available
-                    if "route_complete_region" in _experts(row)
-                    and row.get("realized_primitive_band") == band
-                    and row["smiles"] not in used
-                ),
-                key=lambda row: (
-                    int(row.get("route_proposal_rank", 1 << 30)),
-                    row["smiles"],
-                ),
-            )
+            eligible = [
+                row
+                for row in available
+                if (
+                    row.get("proposal_scale_band")
+                    if scale_floor_scope == "all_generic"
+                    else row.get("realized_primitive_band")
+                )
+                == band
+                and row["smiles"] not in used
+                and (
+                    scale_floor_scope == "all_generic"
+                    or "route_complete_region" in _experts(row)
+                )
+            ]
+            if scale_floor_scope == "route_prior":
+                choices = sorted(
+                    eligible,
+                    key=lambda row: (
+                        int(row.get("route_proposal_rank", 1 << 30)),
+                        row["smiles"],
+                    ),
+                )
+                selection_kind = "route_scale_floor"
+            else:
+                choices = [eligible[index] for index in rng.permutation(len(eligible))]
+                selection_kind = "generic_scale_floor"
             selected_in_band = 0
             for chosen in choices:
                 if len(selected) >= batch:
                     break
                 if chosen["smiles"] in used:
                     continue
-                selected.append({**chosen, "selection_kind": "route_scale_floor"})
+                selected.append({**chosen, "selection_kind": selection_kind})
                 used.add(chosen["smiles"])
                 selected_in_band += 1
                 if selected_in_band >= scale_counts[band]:
@@ -201,7 +227,9 @@ def select_batch(
             if any(expert in _experts(row) for row in selected):
                 continue
             choices = [
-                row for row in available if expert in _experts(row) and row["smiles"] not in used
+                row
+                for row in available
+                if expert in _experts(row) and row["smiles"] not in used
             ]
             if not choices or len(selected) >= batch:
                 continue

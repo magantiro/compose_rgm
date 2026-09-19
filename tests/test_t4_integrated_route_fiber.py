@@ -123,7 +123,9 @@ def test_route_scale_floor_uses_prior_rank_before_online_value_is_fit():
         expert_floor_rounds=2,
         route_scale_floor_rounds=2,
     )
-    scale_floor = [row for row in selected if row["selection_kind"] == "route_scale_floor"]
+    scale_floor = [
+        row for row in selected if row["selection_kind"] == "route_scale_floor"
+    ]
 
     assert {row["realized_primitive_band"] for row in scale_floor} == {
         "small",
@@ -132,6 +134,41 @@ def test_route_scale_floor_uses_prior_rank_before_online_value_is_fit():
     }
     assert {row["route_proposal_rank"] for row in scale_floor} == {3}
     assert sum(row["selection_kind"] == "expert_floor" for row in selected) == 2
+
+
+def test_generic_scale_floor_spans_experts_without_route_prior_ranking():
+    state = SearchState(archive={"P": -8.0})
+    candidates = []
+    for index, (band, expert) in enumerate(
+        zip(("small", "medium", "large"), EXPERTS, strict=True)
+    ):
+        row = _row(f"generic-{band}", expert)
+        row["proposal_scale_band"] = band
+        row["route_proposal_rank"] = 999 - index
+        row["features"] = integrated_features(row, state)
+        row["fingerprint"] = {index}
+        candidates.append(row)
+
+    selected = select_batch(
+        candidates,
+        ProgramValue(),
+        state,
+        np.random.default_rng(7),
+        round_index=1,
+        batch=3,
+        exploration=0,
+        expert_floor_rounds=2,
+        route_scale_floor_rounds=2,
+        scale_floor_scope="all_generic",
+    )
+
+    assert {row["selection_kind"] for row in selected} == {"generic_scale_floor"}
+    assert {row["proposal_scale_band"] for row in selected} == {
+        "small",
+        "medium",
+        "large",
+    }
+    assert {row["proposal_lane"] for row in selected} == set(EXPERTS)
 
 
 def test_route_scale_floor_accepts_per_band_counts_without_changing_defaults():
@@ -187,9 +224,12 @@ def test_route_scale_floor_accepts_per_band_counts_without_changing_defaults():
         route_scale_floor_rounds=1,
         route_scale_floor_counts={"small": 1, "medium": 1, "large": 4},
     )
-    scale_floor = [row for row in expanded if row["selection_kind"] == "route_scale_floor"]
+    scale_floor = [
+        row for row in expanded if row["selection_kind"] == "route_scale_floor"
+    ]
     assert [
-        (row["realized_primitive_band"], row["route_proposal_rank"]) for row in scale_floor
+        (row["realized_primitive_band"], row["route_proposal_rank"])
+        for row in scale_floor
     ] == [
         ("small", 1),
         ("medium", 1),

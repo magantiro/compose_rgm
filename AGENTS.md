@@ -634,6 +634,21 @@ runtime comparator, prior scored outcome or cell-specific controller setting.
 Report COMPOSE-NoDistill against matched Full-COMPOSE trajectories and IVG,
 including support collapse or early abstention as a valid negative result.
 
+**Prospective clarification, 2026-09-19, NoDistill transformation scale:** the
+explicit-distillation subtraction must not remove the modern controller's
+target-independent small, medium and large transformation allocation or its
+one-to-32-primitive protected-program support. Reallocate the early scale floor
+across generic COMPOSE proposal mechanisms and label generic candidates using
+only exact protected-program length or their realized structural extent. Do not
+use route-template rank, fitted route weights, target identity, teacher
+statistics or scored outcomes for this allocation. The first attempted launch
+under revision `9b618d0527508c666c48ffde09caaf1afd6ad7f3` failed before
+function entry because of client/remote serialization and module-search-path
+errors. All three private run volumes were verified empty; it charged zero
+oracle or docking calls. Preserve that failed attempt and launch the corrected
+scale-preserving comparison as a new immutable attempt rather than overwriting
+or continuing it.
+
 **Amendment, 2026-09-16, bounded scored-pilot extension:** after the zero-oracle
 construction-scale diagnostic measured that the docking value from a benchmark root
 sits at 15 or more primitive edits while the search proposes a median of 5.5, and

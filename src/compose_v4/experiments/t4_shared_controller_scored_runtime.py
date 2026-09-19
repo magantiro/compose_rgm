@@ -76,6 +76,47 @@ RETAINED_CORE_REFINE_CONFIG = {
 _HEX = frozenset("0123456789abcdef")
 
 
+def attach_generic_scale_band(record: Mapping[str, Any]) -> dict[str, Any]:
+    """Label a generic proposal by task-independent structural rewrite extent.
+
+    Exact protected programs retain their measured primitive count.  The legacy
+    shallow and anchored generators expose only their realized structural delta,
+    so their scale uses changed roles with coordinated regions as a lower bound.
+    No route template, target identity, teacher statistic, or scored outcome enters
+    this label.
+    """
+
+    row = copy.deepcopy(dict(record))
+    primitives = row.get("realized_primitives")
+    if (
+        isinstance(primitives, int)
+        and not isinstance(primitives, bool)
+        and primitives > 0
+    ):
+        extent = primitives
+        basis = "exact_protected_primitive_count"
+    else:
+        fields = (
+            row.get("created", 0),
+            row.get("deleted", 0),
+            row.get("regions", 0),
+        )
+        if any(
+            isinstance(value, bool) or not isinstance(value, int) or value < 0
+            for value in fields
+        ):
+            raise ValueError("generic proposal structural extent is malformed")
+        created, deleted, regions = fields
+        extent = max(1, created + deleted, regions)
+        basis = "realized_structural_role_extent"
+    row["proposal_scale_extent"] = extent
+    row["proposal_scale_basis"] = basis
+    row["proposal_scale_band"] = (
+        "small" if extent <= 3 else "medium" if extent <= 11 else "large"
+    )
+    return row
+
+
 def _hash(value: Any, *, label: str) -> str:
     if (
         not isinstance(value, str)

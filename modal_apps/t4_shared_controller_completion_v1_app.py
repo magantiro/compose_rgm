@@ -129,7 +129,9 @@ def _runtime_image() -> modal.Image:
         )
         .env(
             {
-                "PYTHONPATH": (f"{REMOTE_ROOT / 'src'}:{REMOTE_ROOT / 'modal_apps'}"),
+                "PYTHONPATH": (
+                    f"{REMOTE_ROOT}:{REMOTE_ROOT / 'src'}:{REMOTE_ROOT / 'modal_apps'}"
+                ),
                 "PYTHONDONTWRITEBYTECODE": "1",
                 "OMP_NUM_THREADS": "1",
                 "OPENBLAS_NUM_THREADS": "1",
@@ -296,6 +298,7 @@ def _proposal_answer(
     from compose_v4.experiments.t4_fiber_campaign import Fiber, expand
     from compose_v4.experiments.t4_shared_controller_scored_runtime import (
         attach_endpoint_fingerprints,
+        attach_generic_scale_band,
         retained_core_route_records,
     )
 
@@ -371,6 +374,8 @@ def _proposal_answer(
         }
     else:
         raise ValueError(f"unknown proposal expert: {expert_name}")
+    if not contract.get("trajectory_distillation", {"enabled": True})["enabled"]:
+        records = [attach_generic_scale_band(row) for row in records]
     records = attach_endpoint_fingerprints(
         records,
         original_seed=cell["source_smiles"],
@@ -1130,6 +1135,12 @@ for _cell_binding in CELLS:
 
 
 def _launch_receipt_path(run_id: str) -> Path:
+    if _CAMPAIGN_VARIANT == "nodistill_parp1_v1":
+        return (
+            ROOT
+            / "diagnostics/t4_compose_nodistill_parp1_v1/attempt_2/launches"
+            / f"{run_id}.json"
+        )
     return (
         ROOT
         / "diagnostics/t4_shared_controller_completion_v1/launches"

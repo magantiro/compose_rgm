@@ -22,6 +22,7 @@ from compose_v4.experiments.t4_shared_controller_scored_runtime import (
     RETAINED_CORE_CONFIG,
     RETAINED_CORE_REFINE_CONFIG,
     attach_endpoint_fingerprints,
+    attach_generic_scale_band,
     make_launch_task,
     make_proposal_manifest,
     preview_selected_parents,
@@ -65,6 +66,18 @@ CONTRACT_HASH = "a" * 64
 CONTRACT_FILE_HASH = "b" * 64
 AUTHORIZATION_FILE_HASH = "c" * 64
 CAPSULE_HASH = "d" * 64
+
+
+def test_generic_scale_band_uses_exact_programs_and_structural_extent():
+    exact = attach_generic_scale_band(
+        {"realized_primitives": 14, "created": 1, "deleted": 0, "regions": 1}
+    )
+    assert exact["proposal_scale_band"] == "large"
+    assert exact["proposal_scale_basis"] == "exact_protected_primitive_count"
+    structural = attach_generic_scale_band({"created": 5, "deleted": 2, "regions": 2})
+    assert structural["proposal_scale_band"] == "medium"
+    assert structural["proposal_scale_extent"] == 7
+    assert structural["proposal_scale_basis"] == "realized_structural_role_extent"
 
 
 def _authorization():
