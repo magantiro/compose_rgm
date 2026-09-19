@@ -3,6 +3,7 @@ import json
 
 import pytest
 
+from compose_v4.experiments.t4_locked_round_recovery import recover_locked_round
 from compose_v4.experiments.t4_shared_controller_cell_runtime import (
     QUERY_RECEIPT_SCHEMA,
     make_query_lock,
@@ -195,6 +196,88 @@ def test_uninterrupted_and_resumed_execution_are_byte_identical_after_two_rounds
         resumed["last_settled_query_lock_identity"]
         == resumed["rounds"][-1]["query_lock_payload_sha256"]
     )
+
+
+def test_locked_round_recovery_uses_the_existing_plan_and_charges_missing_once():
+    checkpoint = _initial_checkpoint()
+    plan = _plan(checkpoint, 1)
+    lock = plan["query_lock"]
+    dispatch = {
+        "schema_version": "t4_shared_controller_query_dispatch_v1",
+        "query_lock_payload_sha256": payload_identity(lock),
+        "query_ids": [row["query_id"] for row in lock["queries"]],
+        "automatic_retries": 0,
+    }
+    reservations = {
+        row["query_id"]: make_query_reservation(lock, row["query_id"])
+        for row in lock["queries"]
+    }
+    receipts = {}
+    for index, row in enumerate(lock["queries"][:-1]):
+        query_id = row["query_id"]
+        receipts[query_id] = {
+            **reservations[query_id],
+            "schema_version": QUERY_RECEIPT_SCHEMA,
+            "status": "complete",
+            "answer": {"score": -8.1 - 0.1 * index, "failure": None},
+        }
+    expected = {
+        "checkpoint_payload_sha256": payload_identity(checkpoint),
+        "round_plan_payload_sha256": payload_identity(plan),
+        "query_lock_payload_sha256": payload_identity(lock),
+        "query_dispatch_payload_sha256": payload_identity(dispatch),
+        "query_ids": [row["query_id"] for row in lock["queries"]],
+        "reservation_payload_sha256": {
+            query_id: payload_identity(payload)
+            for query_id, payload in reservations.items()
+        },
+        "receipt_payload_sha256": {
+            query_id: (
+                payload_identity(receipts[query_id]) if query_id in receipts else None
+            )
+            for query_id in reservations
+        },
+        "settlement_action": "recover_with_unresolved",
+        "charged_after": 9,
+        "round_after": 1,
+    }
+    recovered = recover_locked_round(
+        checkpoint=checkpoint,
+        round_plan=plan,
+        query_lock=lock,
+        dispatch_intent=dispatch,
+        reservations=reservations,
+        receipts=receipts,
+        expected=expected,
+        cell={"cell_key": CELL, "source_smiles": SOURCE, "delta": DELTA},
+        controller_config=CONFIG,
+        budget_ceiling=BUDGET,
+        now=lock["query_deadline"] + 1,
+    )
+    assert recovered["settlement"]["action"] == "recover_with_unresolved"
+    assert recovered["checkpoint"]["charged_count"] == 9
+    assert recovered["checkpoint"]["rounds_completed"] == 1
+    assert recovered["checkpoint"]["rounds"][-1]["observations"][-1][
+        "failure"
+    ] == "unresolved_locked_query_missing"
+
+    tampered = copy.deepcopy(receipts)
+    first = next(iter(tampered))
+    tampered[first]["answer"]["score"] = -99.0
+    with pytest.raises(ValueError, match="query receipt .* identity drift"):
+        recover_locked_round(
+            checkpoint=checkpoint,
+            round_plan=plan,
+            query_lock=lock,
+            dispatch_intent=dispatch,
+            reservations=reservations,
+            receipts=tampered,
+            expected=expected,
+            cell={"cell_key": CELL, "source_smiles": SOURCE, "delta": DELTA},
+            controller_config=CONFIG,
+            budget_ceiling=BUDGET,
+            now=lock["query_deadline"] + 1,
+        )
 
 
 @pytest.mark.parametrize(

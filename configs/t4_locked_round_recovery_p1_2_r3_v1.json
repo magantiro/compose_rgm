@@ -1,0 +1,111 @@
+{
+  "payload": {
+    "cell_key": "parp1_2_d04",
+    "claim_boundary": "Operational settlement of an already immutable scored batch. No proposal, selection, docking, retry, replacement, or candidate change is authorized.",
+    "completion_path": "operational_recoveries/round_003.json",
+    "expected": {
+      "charged_after": 25,
+      "checkpoint_payload_sha256": "cbd768d3e0b33c87b54d0f671fb01f7cfd76463b5f601596e259f13b0bc82a57",
+      "query_dispatch_payload_sha256": "d86fd16e7883592a8b9cb60ec547db9b4cf617a99364b044facc1410333d17d6",
+      "query_ids": [
+        "parp1_2_d04_r003_q00",
+        "parp1_2_d04_r003_q01",
+        "parp1_2_d04_r003_q02",
+        "parp1_2_d04_r003_q03",
+        "parp1_2_d04_r003_q04",
+        "parp1_2_d04_r003_q05",
+        "parp1_2_d04_r003_q06",
+        "parp1_2_d04_r003_q07"
+      ],
+      "query_lock_payload_sha256": "bd3612c847e46a006f1a86b24817f9b644f838033cef1301f9d8cdc1cf047252",
+      "receipt_payload_sha256": {
+        "parp1_2_d04_r003_q00": "8ec82554272e3d503dd34a92bb7b4907c7f60cbf9473d5779089d5074ebb1a83",
+        "parp1_2_d04_r003_q01": "5f162392b5f13bdcb5dc5c3f2b8bab860a4cfac6eca9effd9d13eec6fb1e2675",
+        "parp1_2_d04_r003_q02": "52cdecbe1efcc7db1ca1dc30b01c1a2ebf32a993f6ce16c614d763fe566730bf",
+        "parp1_2_d04_r003_q03": "405ccba6e19e82153b6e8f4554b92d6a045f67651d3c6a5e9210e0b80b3868d5",
+        "parp1_2_d04_r003_q04": "48dffa23da2a5b4d4d4c95aac6dc52eceda8a8079b4691f012ebf189b0fb7800",
+        "parp1_2_d04_r003_q05": "814b1316252ca7b880671162f5b0553bca854d678be66dd2c6ae66ef02858061",
+        "parp1_2_d04_r003_q06": null,
+        "parp1_2_d04_r003_q07": "912680e3674fa016037348ab982ee58f071ce98324e1354faf080734e08b6a0f"
+      },
+      "reservation_payload_sha256": {
+        "parp1_2_d04_r003_q00": "96c0f801f1a89acd0506a8a86e1521166f7ac66d2bdb0670d26b3248e6ce2ee4",
+        "parp1_2_d04_r003_q01": "bdbb76b577f243aac92e9404e81397bebb525efee5a8949c8436f7146c28bffc",
+        "parp1_2_d04_r003_q02": "5c1c3d19c34ac95ce45a3cb7fc600f75161fcd93b8334a1fbd8bc2e499c8a5e8",
+        "parp1_2_d04_r003_q03": "8c2b19de43ef7d58cd71d07c5b4f6a7d9728d6baa5654027cfe9482ef232befb",
+        "parp1_2_d04_r003_q04": "3143207ce281efb6ee3f0c09c330b23215806ba1b0b00d45bc5c55be1f247719",
+        "parp1_2_d04_r003_q05": "bd6331a41edc3d55f127c63ef91853d9c75f9b3474b4d302cd9c29dae21d73e5",
+        "parp1_2_d04_r003_q06": "4367f5bee69ffca681488439a8e2a57a09c38720c1e0b7f0a4b4ccb1bcf5817f",
+        "parp1_2_d04_r003_q07": "6667e353b7a11150379eba7b1a2d1ceaff24645706cdcafcd197d9498114f73f"
+      },
+      "round_after": 3,
+      "round_plan_payload_sha256": "7ead3f5a5829b7e839b72bc47019b4f57f3426e12493060d35ba91237280fafd",
+      "settlement_action": "recover_with_unresolved"
+    },
+    "implementation_sha256": {
+      "modal_apps/t4_locked_round_recovery_v1_app.py": "c41f31816f5832b0e4fa8f85d2a5827bacc596a2560f7ca6a73660f0a3471a6f",
+      "src/compose_v4/experiments/t4_locked_round_recovery.py": "30ba57f1248ddf366c842412144f52f49b794db848724570bfcfc12a1a651b57"
+    },
+    "launch": {
+      "authorization_receipt_sha256": "5b76d348b4f9df203dbe1bc035dc930a5880ae6d278eb9efe18fb976806f24d9",
+      "automatic_retries": 0,
+      "backfill": false,
+      "cell_keys": [
+        "parp1_0_d04",
+        "parp1_1_d04",
+        "parp1_2_d04",
+        "braf_0_d04",
+        "braf_1_d04",
+        "braf_2_d04",
+        "braf_0_d06",
+        "braf_1_d06",
+        "braf_2_d06"
+      ],
+      "charged_call_ceiling_per_cell": 49,
+      "code_revision": "54fb2d5a3f431dada67a50e6962be09d1593ee7c",
+      "contract_file_sha256": "02b65d0cd27c5a49a9e49839ed14cf0af653ab772d9cf4f49846b358f9f97381",
+      "contract_payload_sha256": "a2c5672e1140dc8b8dc8e6e99c188ba22cfbf8f447daf4b2c16cc95d316ba9f",
+      "replacement": false,
+      "run_id": "b2a7e0aee53da2fa649103ac0dc83970aa00de218c90a1763f4ef8b9972397b6",
+      "schema_version": "t4_shared_controller_scored_launch_v1",
+      "source_capsule_payload_sha256": "ddd6266ba87e0acb985e86b52f98a0b7a2f2d62642d23a695c0dd26e3893f31a",
+      "total_charged_call_ceiling": 441
+    },
+    "no_retry_replacement_or_backfill": true,
+    "paths": {
+      "query_dispatch": "rounds/003/query_dispatch_intent.json",
+      "query_lock": "rounds/003/query_lock.json",
+      "receipts": {
+        "parp1_2_d04_r003_q00": "rounds/003/query_receipts/parp1_2_d04_r003_q00.json",
+        "parp1_2_d04_r003_q01": "rounds/003/query_receipts/parp1_2_d04_r003_q01.json",
+        "parp1_2_d04_r003_q02": "rounds/003/query_receipts/parp1_2_d04_r003_q02.json",
+        "parp1_2_d04_r003_q03": "rounds/003/query_receipts/parp1_2_d04_r003_q03.json",
+        "parp1_2_d04_r003_q04": "rounds/003/query_receipts/parp1_2_d04_r003_q04.json",
+        "parp1_2_d04_r003_q05": "rounds/003/query_receipts/parp1_2_d04_r003_q05.json",
+        "parp1_2_d04_r003_q06": null,
+        "parp1_2_d04_r003_q07": "rounds/003/query_receipts/parp1_2_d04_r003_q07.json"
+      },
+      "reservations": {
+        "parp1_2_d04_r003_q00": "rounds/003/query_reservations/parp1_2_d04_r003_q00.json",
+        "parp1_2_d04_r003_q01": "rounds/003/query_reservations/parp1_2_d04_r003_q01.json",
+        "parp1_2_d04_r003_q02": "rounds/003/query_reservations/parp1_2_d04_r003_q02.json",
+        "parp1_2_d04_r003_q03": "rounds/003/query_reservations/parp1_2_d04_r003_q03.json",
+        "parp1_2_d04_r003_q04": "rounds/003/query_reservations/parp1_2_d04_r003_q04.json",
+        "parp1_2_d04_r003_q05": "rounds/003/query_reservations/parp1_2_d04_r003_q05.json",
+        "parp1_2_d04_r003_q06": "rounds/003/query_reservations/parp1_2_d04_r003_q06.json",
+        "parp1_2_d04_r003_q07": "rounds/003/query_reservations/parp1_2_d04_r003_q07.json"
+      },
+      "round_checkpoint": "checkpoints/round_003.json",
+      "round_plan": "rounds/003/round_plan.json"
+    },
+    "prior_driver": {
+      "function_call_id": "fc-01M2XM6912Q6EM6YH7J03GTB84",
+      "generation": 1,
+      "status": "terminal_failure"
+    },
+    "run_id": "b2a7e0aee53da2fa649103ac0dc83970aa00de218c90a1763f4ef8b9972397b6",
+    "schema_version": "t4_locked_round_recovery_contract_v1",
+    "volume": "compose-t4-shared-completion-v1-parp1-2-d04"
+  },
+  "payload_sha256": "c27eef3ef860414ce9ad245426d38700ebe1c82030deac9fe0df72712257199f"
+}
