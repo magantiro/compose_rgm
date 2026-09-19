@@ -189,6 +189,14 @@ def test_sequential_region_realization_and_primitive_budgets_stop_expansion() ->
         "realization_status:cumulative_primitive_budget_abstention"
     ]
 
+    binding_limited = propose_sequential_region_paths(
+        source,
+        expert,
+        budgets=_budgets(max_binding_visits=1),
+    )
+    assert binding_limited.telemetry["binding_visits"] == 1
+    assert binding_limited.telemetry["binding_visit_budget_exhausted"] == 1
+
 
 @pytest.mark.parametrize(
     "updates, message",

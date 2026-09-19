@@ -154,11 +154,15 @@ def _materialized_extensions(
     templates = prefix.templates
     best_by_target: dict[str, _MaterializedExtension] = {}
     for template in expert.templates:
+        remaining_visits = budgets.max_binding_visits - telemetry["binding_visits"]
+        if remaining_visits < 1:
+            telemetry["binding_visit_budget_exhausted"] = 1
+            break
         census = transfer_bindings(
             template,
             prefix.endpoint,
             max_bindings=budgets.max_bindings_per_template,
-            max_visits=budgets.max_binding_visits,
+            max_visits=remaining_visits,
         )
         telemetry["binding_visits"] += census.visits
         telemetry["binding_truncations"] += int(census.truncated)
