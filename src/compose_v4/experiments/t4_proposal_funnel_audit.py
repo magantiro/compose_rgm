@@ -60,10 +60,14 @@ def assess_endpoint(
         }
 
     canonical = Chem.MolToSmiles(molecule)
-    generator = campaign.rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+    generator = campaign.rdFingerprintGenerator.GetMorganGenerator(
+        radius=2, fpSize=2048
+    )
     seed_fingerprint = generator.GetFingerprint(seed)
     similarity = float(
-        DataStructs.TanimotoSimilarity(seed_fingerprint, generator.GetFingerprint(molecule))
+        DataStructs.TanimotoSimilarity(
+            seed_fingerprint, generator.GetFingerprint(molecule)
+        )
     )
     qed = float(QED.qed(molecule))
     sa = float(campaign.sascorer.calculateScore(molecule))
@@ -136,7 +140,9 @@ class _AuditedFiber:
         result = self.base.check(smiles)
         observed = result is not None
         if observed != bool(assessment["compose_valid_pass"]):
-            raise RuntimeError("endpoint assessment disagrees with production Fiber.check")
+            raise RuntimeError(
+                "endpoint assessment disagrees with production Fiber.check"
+            )
         return result
 
 
@@ -241,7 +247,9 @@ def _summarize_assessments(
         "failure_combinations": dict(sorted(failure_combinations.items())),
         "heavy_delta_counts": {
             "shrink_7plus": sum((row["heavy_delta"] or 0) <= -7 for row in parsed),
-            "shrink_1_to_6": sum(-7 < (row["heavy_delta"] or 0) <= -1 for row in parsed),
+            "shrink_1_to_6": sum(
+                -7 < (row["heavy_delta"] or 0) <= -1 for row in parsed
+            ),
             "unchanged": sum(row["heavy_delta"] == 0 for row in parsed),
             "growth": sum((row["heavy_delta"] or 0) > 0 for row in parsed),
         },
@@ -280,15 +288,33 @@ def audit_expansion_lane(
             horizon=horizon,
             proposal_lane=lane,
         )
-    assessments = sorted(audited_fiber.assessments.values(), key=lambda row: row["smiles"])
+    assessments = sorted(
+        audited_fiber.assessments.values(), key=lambda row: row["smiles"]
+    )
     admitted_smiles = {row["smiles"] for row in admitted}
+    admitted_by_smiles = {row["smiles"]: row for row in admitted}
+    for assessment in assessments:
+        candidate = admitted_by_smiles.get(assessment["smiles"])
+        assessment["production_candidate"] = candidate is not None
+        if candidate is not None:
+            assessment.update(
+                {
+                    "created": int(candidate["created"]),
+                    "deleted": int(candidate["deleted"]),
+                    "regions": int(candidate["regions"]),
+                    "program_families": list(candidate["program_families"]),
+                    "program_module_count": len(candidate["program_families"]),
+                }
+            )
     eligible_smiles = {
         row["smiles"]
         for row in assessments
         if row["compose_valid_pass"] and row["smiles"] != seed_smiles
     }
     if admitted_smiles != eligible_smiles:
-        raise RuntimeError("production candidate pool differs from audited eligible endpoints")
+        raise RuntimeError(
+            "production candidate pool differs from audited eligible endpoints"
+        )
     synthesis_name = (
         "synthesize_dynamic_program"
         if lane == "shallow"
@@ -345,6 +371,8 @@ def audit_route_candidates(
                 "route_proposal_rank": int(candidate["route_proposal_rank"]),
                 "route_template_ids": list(candidate["route_template_ids"]),
                 "realized_primitives": int(candidate["realized_primitives"]),
+                "realized_primitive_band": candidate.get("realized_primitive_band"),
+                "rewrite_scale": candidate.get("rewrite_scale"),
             }
         )
         by_smiles.setdefault(assessment["smiles"], assessment)

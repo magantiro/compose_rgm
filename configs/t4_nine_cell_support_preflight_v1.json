@@ -1,0 +1,187 @@
+{
+  "payload": {
+    "schema_version": "t4_nine_cell_support_preflight_v1",
+    "status": "AUTHORIZED_ZERO_ORACLE_PRODUCTION_PREFLIGHT",
+    "scientific_problem": "determine whether the current production proposal mixture has autonomous endpoint support in exactly the nine missing PARP1 and BRAF T4 cells before any scored launch",
+    "primary_model_output": "deduplicated exactly executed molecular endpoints proposed by each of the three frozen production experts",
+    "central_claim_under_test": "the current all-77 shared controller proposal mixture exposes at least one endpoint satisfying the official T4 fiber in every missing cell",
+    "experimental_setting": "zero-oracle local CPU proposal generation and exact execution at the frozen first-round root state, followed by the official per-delta endpoint filters",
+    "claim_boundary": "proposal feasibility only; no docking utility, scored performance, dynamic controller adaptation, or prospective validation is measured",
+    "support": "compose_valid",
+    "workers": 3,
+    "experts": [
+      "shallow",
+      "anchored_replacement",
+      "route_complete_region"
+    ],
+    "proposal": {
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      },
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "route_complete_region": {
+        "pool_size": 192,
+        "realization_limit": 96,
+        "beam_width": 48,
+        "expansion_width": 48,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "scale_balanced": true
+      }
+    },
+    "deferred_joint_planning": {
+      "enabled": false,
+      "reason": "not_a_production_expert_and_cells_are_not_the_motivating_5ht1b_cell"
+    },
+    "cells": [
+      {
+        "cell_id": "parp1_0_d0p4",
+        "cell": "parp1_0",
+        "source_global_index": 0,
+        "delta": 0.4,
+        "controller_seed": 2026091900,
+        "proposal_seeds": {
+          "shallow": 2027091903,
+          "anchored_replacement": 2027092004,
+          "route_complete_region": 2027092105
+        }
+      },
+      {
+        "cell_id": "parp1_1_d0p4",
+        "cell": "parp1_1",
+        "source_global_index": 1,
+        "delta": 0.4,
+        "controller_seed": 2026091901,
+        "proposal_seeds": {
+          "shallow": 2027091904,
+          "anchored_replacement": 2027092005,
+          "route_complete_region": 2027092106
+        }
+      },
+      {
+        "cell_id": "parp1_2_d0p4",
+        "cell": "parp1_2",
+        "source_global_index": 2,
+        "delta": 0.4,
+        "controller_seed": 2026091902,
+        "proposal_seeds": {
+          "shallow": 2027091905,
+          "anchored_replacement": 2027092006,
+          "route_complete_region": 2027092107
+        }
+      },
+      {
+        "cell_id": "braf_0_d0p4",
+        "cell": "braf_0",
+        "source_global_index": 9,
+        "delta": 0.4,
+        "controller_seed": 2026091909,
+        "proposal_seeds": {
+          "shallow": 2027091912,
+          "anchored_replacement": 2027092013,
+          "route_complete_region": 2027092114
+        }
+      },
+      {
+        "cell_id": "braf_1_d0p4",
+        "cell": "braf_1",
+        "source_global_index": 10,
+        "delta": 0.4,
+        "controller_seed": 2026091910,
+        "proposal_seeds": {
+          "shallow": 2027091913,
+          "anchored_replacement": 2027092014,
+          "route_complete_region": 2027092115
+        }
+      },
+      {
+        "cell_id": "braf_2_d0p4",
+        "cell": "braf_2",
+        "source_global_index": 11,
+        "delta": 0.4,
+        "controller_seed": 2026091911,
+        "proposal_seeds": {
+          "shallow": 2027091914,
+          "anchored_replacement": 2027092015,
+          "route_complete_region": 2027092116
+        }
+      },
+      {
+        "cell_id": "braf_0_d0p6",
+        "cell": "braf_0",
+        "source_global_index": 9,
+        "delta": 0.6,
+        "controller_seed": 2026091909,
+        "proposal_seeds": {
+          "shallow": 2027091912,
+          "anchored_replacement": 2027092013,
+          "route_complete_region": 2027092114
+        }
+      },
+      {
+        "cell_id": "braf_1_d0p6",
+        "cell": "braf_1",
+        "source_global_index": 10,
+        "delta": 0.6,
+        "controller_seed": 2026091910,
+        "proposal_seeds": {
+          "shallow": 2027091913,
+          "anchored_replacement": 2027092014,
+          "route_complete_region": 2027092115
+        }
+      },
+      {
+        "cell_id": "braf_2_d0p6",
+        "cell": "braf_2",
+        "source_global_index": 11,
+        "delta": 0.6,
+        "controller_seed": 2026091911,
+        "proposal_seeds": {
+          "shallow": 2027091914,
+          "anchored_replacement": 2027092015,
+          "route_complete_region": 2027092116
+        }
+      }
+    ],
+    "shared_route_checkpoint": {
+      "path": "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json",
+      "sha256": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
+      "payload_sha256": "5476be572dd40ee3f068cc8f1df238eec54e23a82cb84f803905ac891701e07d"
+    },
+    "inputs_sha256": {
+      "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "src/compose_v4/chem/molecular_graph.py": "f25e20f52bd56f90299d93e934038f9caf4768b557b68a3d5781ca925efc16a2",
+      "src/compose_v4/chem/state.py": "4aa1acc257b053a562969ad8cc9b62fd84ce2931b04f1890f1c242888a3cecf5",
+      "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+      "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "092eb28b6a115a328be7f94ab115317b8f9c196b1f510aaed7a216911cee215e",
+      "src/compose_v4/control/structural_subgoal_policy.py": "d45a2f6b92a69f7462f6c1e2cd5523bc529cedb0a24e5a993aa714a2ade3d2b4",
+      "src/compose_v4/control/structural_subgoal_realizer.py": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_matched_pilot.py": "8ccbc05e32cd05c8dbde746e41ece693ef997f6765180e0011a5bd416d90ac4a",
+      "src/compose_v4/experiments/t4_proposal_funnel_audit.py": "62019f31de3839d0fd961eb2634db8c3b384830385df678950e1191d3fbbc807",
+      "src/compose_v4/experiments/t4_nine_cell_support_preflight.py": "6b8406452eb17919f988f4153cc5853f727c62abea1f11e2c43e98bd92d61fd8",
+      "tools/t4_nine_cell_support_preflight.py": "da5dafb03c5458a1b0fe56899bf648410fc5d5f36f2a349860fe8cf81aedad78"
+    },
+    "forbidden_runtime_inputs": [
+      "teacher endpoint or target-to-program lookup",
+      "historical scored outcome",
+      "docking or oracle response",
+      "deferred-joint proposal lane",
+      "live run state"
+    ],
+    "costs": {
+      "oracle_calls": 0,
+      "docking_calls": 0,
+      "modal_launches": 0
+    }
+  },
+  "payload_sha256": "2874ecdc0b0b3be8cfd4d1997f8e8ab786efbebb3784bf465ad805d318cf0ed7"
+}
