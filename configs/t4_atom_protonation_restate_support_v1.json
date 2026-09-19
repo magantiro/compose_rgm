@@ -1,0 +1,68 @@
+{
+  "payload": {
+    "acceptance_gates": {
+      "exact_action_semantics": "Only a real nitrogen with exactly three heavy-atom single bonds may move reversibly between (+1, implicit-H=1) and (0, implicit-H=0); persistent slot, element and the complete heavy-atom bond matrix are invariant.",
+      "historical_compatibility": "The V4 codec and frozen Active8 Editing-V2 runtime remain unchanged and reject atom_protonation_restate.",
+      "teacher_forced_probe": "Compile and exact-replay the three answer-known 5HT1B seed-2 delta=0.6 endpoints under the new support, reporting exact endpoint coverage, exact execution precision, primitive counts and every residual blocker.",
+      "validation": "Focused codec, executor, inverse, malformed-input, silent-charge-change and old-runtime-rejection tests pass; Ruff, formatting and git diff checks pass."
+    },
+    "authorized_changes": [
+      "one new public atom_protonation_restate action and strict V5 action codec",
+      "one new Editing-V3 rewrite-system constructor whose only charge-changing rule is atom_protonation_restate",
+      "minimal target-informed zero-oracle compiler and exact replay path for the support probe",
+      "focused tests, one deterministic probe command and versioned evidence artifacts"
+    ],
+    "central_claim_under_test": "The sealed 5HT1B seed-2 strict-regime support gap can be narrowed by one explicit chemically constrained protonation-state rewrite without exposing arbitrary raw atom restatement or changing historical runtime support.",
+    "declared_support": {
+      "action": "atom_protonation_restate",
+      "allowed_pairs": [
+        {
+          "source": {"formal_charge": 1, "implicit_h_count": 1},
+          "target": {"formal_charge": 0, "implicit_h_count": 0}
+        },
+        {
+          "source": {"formal_charge": 0, "implicit_h_count": 0},
+          "target": {"formal_charge": 1, "implicit_h_count": 1}
+        }
+      ],
+      "element": "N",
+      "heavy_atom_environment": "exactly three distinct real heavy-atom neighbors joined by single bonds; heavy-bond valence sum 3",
+      "invariants": [
+        "persistent slot unchanged",
+        "element unchanged",
+        "complete heavy-atom bond matrix unchanged",
+        "all non-addressed atom fields unchanged",
+        "source and successor are valid connected supported molecular graphs"
+      ],
+      "size": "existing 1..40 active atoms in 48 persistent slots",
+      "stereochemistry": "unchanged repository 2D graph limitation"
+    },
+    "experimental_setting": "answer-known zero-oracle exact-support probe on the three released strict 5HT1B seed-2 endpoints identified by the sealed exhaustion audit",
+    "forbidden_actions": [
+      "no Modal, docking or other oracle calls",
+      "no live-run access or mutation",
+      "no autonomous proposal injection or endpoint injection",
+      "no corpus, checkpoint, route-prior or scored-artifact mutation",
+      "no arbitrary formal-charge value, charge transfer, element change, raw AtomRestate exposure or bond change",
+      "no weakening of chemical validity, endpoint constraints or the historical charge-preserving runtime",
+      "no claim of autonomous recovery or docking utility",
+      "no repository-wide test suite"
+    ],
+    "governing_evidence": {
+      "artifact": "diagnostics/t4_shared_retained_fiber_5ht1b_d06_v1/audit_20260919/result.json",
+      "artifact_payload_sha256": "c258423c2a4d4295142ee167f45023793f13e95ecac212d0393ceb359b9c9e6d",
+      "observation": "All three released strict endpoints change total formal charge from +1 to 0 and are outside the frozen charge-preserving support."
+    },
+    "primary_baselines": [
+      "unchanged V4 action codec rejection",
+      "unchanged Editing-V2 Active8 runtime rejection",
+      "the sealed charge-policy abstention on all three known strict endpoints"
+    ],
+    "primary_model_output": "one explicit versioned executable protonation-state rewrite mark, plus an exact complete-program support certificate when target-informed compilation succeeds",
+    "schema_version": "t4_atom_protonation_restate_support_contract_v1",
+    "scientific_problem": "determine whether the smallest general chemically explicit protonation support expansion makes the known strict 5HT1B seed-2 transformation class exactly executable",
+    "status": "AUTHORIZED_ZERO_ORACLE_SUPPORT_EXPANSION",
+    "teacher_forced_claim_boundary": "The three endpoints are used only as known-answer compiler targets. Exact recovery demonstrates declared executor/compiler support, not autonomous proposal probability, route distillation, reward selection or optimization performance."
+  },
+  "payload_sha256": "2d606bcb1977ae7c0984ac6490d5e69210ffeeae45863aba86f1d966478442a1"
+}

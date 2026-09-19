@@ -380,3 +380,58 @@ def editing_v2_semantic_rewrite_system(
             *tuple(constraints),
         ),
     )
+
+
+def editing_v3_protonation_policy_constraint(
+    source: MolecularGraph,
+    action: Any,
+    successor: MolecularGraph,
+) -> bool:
+    """Permit only the declared protonation action to change charge/H state."""
+
+    if type(action) is not ops.AtomProtonationRestate:
+        return charge_policy_preserved(source, successor)
+    vertex = int(action.v)
+    if not (
+        0 <= vertex < source.n_atoms
+        and source.n_atoms == successor.n_atoms
+        and (source.atom_types == successor.atom_types).all()
+        and (source.bonds == successor.bonds).all()
+    ):
+        return False
+    other = [index for index in range(source.n_atoms) if index != vertex]
+    return bool(
+        (source.formal_charges[other] == successor.formal_charges[other]).all()
+        and (
+            source.implicit_h_counts[other] == successor.implicit_h_counts[other]
+        ).all()
+    )
+
+
+def editing_v3_protonation_rewrite_system(
+    constraints: Iterable[Constraint] = (),
+) -> RewriteSystem:
+    """Versioned Active9 runtime with a narrow tertiary-amine state rewrite.
+
+    The frozen Editing-V2 runtime above remains untouched.  All inherited rules
+    remain charge preserving; only ``atom_protonation_restate`` may change charge
+    and implicit H, under its exact validator and this independent invariant.
+    """
+
+    inherited = editing_v2_semantic_rewrite_system()
+    return RewriteSystem(
+        rules=(
+            *inherited.rules.values(),
+            RewriteRule(
+                "atom_protonation_restate",
+                ops.AtomProtonationRestate,
+                ops.is_valid_atom_protonation_restate,
+                ops.apply_atom_protonation_restate,
+            ),
+        ),
+        constraints=(
+            connected_successor_constraint,
+            editing_v3_protonation_policy_constraint,
+            *tuple(constraints),
+        ),
+    )

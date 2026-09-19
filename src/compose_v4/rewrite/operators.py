@@ -139,6 +139,27 @@ class SemanticAtomRestate:
     target_class_index: int
 
 
+PROTONATION_STATE_NEUTRAL_TERTIARY = "neutral_tertiary_amine"
+PROTONATION_STATE_PROTONATED_TERTIARY = "protonated_tertiary_amine"
+PROTONATION_RESTATE_TARGET_STATES = (
+    PROTONATION_STATE_NEUTRAL_TERTIARY,
+    PROTONATION_STATE_PROTONATED_TERTIARY,
+)
+
+
+@dataclass(frozen=True)
+class AtomProtonationRestate:
+    """Narrow public protonation-state rewrite for one tertiary amine.
+
+    The target is a named state rather than free charge/H integers.  This keeps
+    the public action surface restricted to the predeclared reversible pair and
+    prevents it from becoming an alias for raw :class:`AtomRestate`.
+    """
+
+    v: int
+    target_state: str
+
+
 def _real_atom(mg: MolecularGraph, v: int) -> bool:
     return bool(0 <= v < mg.n_atoms and is_element(np.asarray(mg.atom_types[v])))
 
@@ -606,3 +627,113 @@ def enumerate_semantic_atom_restates(
             ):
                 actions.append(action)
     return tuple(actions)
+
+
+def _protonation_state_values(target_state: str) -> tuple[int, int] | None:
+    if target_state == PROTONATION_STATE_NEUTRAL_TERTIARY:
+        return 0, 0
+    if target_state == PROTONATION_STATE_PROTONATED_TERTIARY:
+        return 1, 1
+    return None
+
+
+def _tertiary_amine_site(mg: MolecularGraph, vertex: int) -> bool:
+    """Return whether ``vertex`` is the declared narrow tertiary-amine site."""
+
+    from compose_v4.chem.molecular_graph import ELEMENT_TO_IDX
+
+    if not _real_atom(mg, vertex):
+        return False
+    if int(mg.atom_types[vertex]) != int(ELEMENT_TO_IDX["N"]):
+        return False
+    neighbors = tuple(int(index) for index in np.flatnonzero(mg.bonds[vertex]))
+    return (
+        len(neighbors) == 3
+        and all(_real_atom(mg, neighbor) for neighbor in neighbors)
+        and all(int(mg.bonds[vertex, neighbor]) == BOND_SINGLE for neighbor in neighbors)
+    )
+
+
+def is_valid_atom_protonation_restate(
+    mg: MolecularGraph,
+    op: AtomProtonationRestate,
+) -> bool:
+    """Validate exactly ``(+1,H1) <-> (0,H0)`` on a tertiary amine."""
+
+    if type(op) is not AtomProtonationRestate:
+        return False
+    if type(op.v) is not int or not _tertiary_amine_site(mg, int(op.v)):
+        return False
+    target = _protonation_state_values(op.target_state)
+    if target is None:
+        return False
+    source = (
+        int(mg.formal_charges[op.v]),
+        int(mg.implicit_h_counts[op.v]),
+    )
+    if {source, target} != {(1, 1), (0, 0)}:
+        return False
+    return is_valid_state(apply_atom_protonation_restate(mg, op))
+
+
+def apply_atom_protonation_restate(
+    mg: MolecularGraph,
+    op: AtomProtonationRestate,
+) -> MolecularGraph:
+    """Change only formal charge and implicit H at one persistent N slot."""
+
+    target = _protonation_state_values(op.target_state)
+    if target is None:
+        raise ValueError(f"unsupported protonation target state: {op.target_state!r}")
+    formal_charges = mg.formal_charges.copy()
+    implicit_h = mg.implicit_h_counts.copy()
+    formal_charges[op.v], implicit_h[op.v] = target
+    return MolecularGraph(
+        mg.atom_types.copy(),
+        formal_charges,
+        implicit_h,
+        mg.bonds.copy(),
+    )
+
+
+def inverse_atom_protonation_restate(
+    mg: MolecularGraph,
+    op: AtomProtonationRestate,
+) -> AtomProtonationRestate:
+    """Return the exact inverse of one admitted protonation restatement."""
+
+    if not is_valid_atom_protonation_restate(mg, op):
+        raise ValueError(f"rejected protonation restatement has no inverse: {op!r}")
+    source = (
+        int(mg.formal_charges[op.v]),
+        int(mg.implicit_h_counts[op.v]),
+    )
+    target_state = (
+        PROTONATION_STATE_PROTONATED_TERTIARY
+        if source == (1, 1)
+        else PROTONATION_STATE_NEUTRAL_TERTIARY
+    )
+    return AtomProtonationRestate(int(op.v), target_state)
+
+
+def enumerate_atom_protonation_restates(
+    mg: MolecularGraph,
+) -> tuple[AtomProtonationRestate, ...]:
+    """Enumerate the complete narrow protonation-restatement fiber."""
+
+    result = []
+    for vertex in np.flatnonzero(is_element(mg.atom_types)):
+        source = (
+            int(mg.formal_charges[vertex]),
+            int(mg.implicit_h_counts[vertex]),
+        )
+        if source == (1, 1):
+            target = PROTONATION_STATE_NEUTRAL_TERTIARY
+        elif source == (0, 0):
+            target = PROTONATION_STATE_PROTONATED_TERTIARY
+        else:
+            continue
+        action = AtomProtonationRestate(int(vertex), target)
+        if is_valid_atom_protonation_restate(mg, action):
+            result.append(action)
+    return tuple(result)
