@@ -1,0 +1,2210 @@
+"""Deterministic, prefetched training for the dense marked-rewrite generator."""
+
+from __future__ import annotations
+
+import copy
+import json
+from collections import OrderedDict
+from collections.abc import Callable, Iterator, Mapping
+from contextlib import nullcontext
+from dataclasses import dataclass, field
+from dataclasses import fields as dataclass_fields
+from dataclasses import replace
+from math import cos, exp, pi
+from pathlib import Path
+from time import perf_counter
+from typing import Any
+
+import numpy as np
+import torch
+from torch import Tensor, nn
+from torch.utils.data import DataLoader, Dataset
+
+from compose_v4.chem.molecular_graph import MolecularGraph
+from compose_v4.experiments import zero_mixture_instrumentation as _zmi
+from compose_v4.experiments.cnof_conditional import PathRecord
+from compose_v4.experiments.factorized_training_objective import (
+    FactorizedTrainingObjective,
+    GradientAuditCallback,
+    TrainingBatchAuditCallback,
+    TrainingLoaderFactory,
+    ValidationAuditCallback,
+)
+from compose_v4.experiments.tracelet_conditional import _sample_tracelet_progress
+from compose_v4.experiments.training_support_cache import (
+    ShardedTrainingSupportCache,
+)
+from compose_v4.model.factorized_tracelet_rate_model import (
+    _CYCLE_OP_EXECUTOR_TO_FAMILY,
+    LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
+    LEGACY_ATOM_RESTATE_ACTION_SEMANTICS,
+    LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
+    LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
+    LEGACY_EDITING_PROCESS_SEMANTICS,
+    LEGACY_RING_RESTATE_SCORER_MODE,
+    MARK_RULE_NAMES,
+    MARK_RULE_TO_INDEX,
+    ChemistryStateFeatures,
+    FactorizedMarkBatch,
+    FactorizedTraceletRateModel,
+    OperatorCapabilities,
+    RingTeacherSemanticCertificate,
+    SparseBinaryRows,
+    factorized_mark_bregman_loss,
+    prepare_factorized_mark_batch,
+)
+from compose_v4.rewrite.ring_system_fiber import (
+    clear_semantic_ring_state_caches,
+    warm_ring_system_candidate_indices,
+)
+from compose_v4.rewrite.action_codec_v4 import (
+    ActionCodecV4Error,
+    canonical_family as editing_v2_canonical_family,
+)
+from compose_v4.rewrite.tracelets import RingSystemGrow
+from compose_v4.rewrite.typed_ring_catalog import TypedRingCatalog
+
+
+@dataclass(frozen=True)
+class FactorizedMarkExample:
+    state: MolecularGraph
+    time: float
+    teacher_action: Any | None
+    teacher_rule_name: str | None
+    teacher_rate: float
+    importance_weight: float
+    property_condition_values: tuple[float, ...] | None = None
+    property_condition_mask: tuple[bool, ...] | None = None
+    ring_grow_support_indices: tuple[int, ...] | None = None
+    ring_grow_support_width: int = 0
+    ring_grow_support_is_exact: bool = False
+    ring_grow_enablement_is_exact: bool = False
+    ring_topology_local_support_log_mass: float | None = None
+    ring_teacher_semantic_certificate: RingTeacherSemanticCertificate | None = None
+    record_index: int | None = None
+    progress_index: int | None = None
+
+    @property
+    def ring_grow_support_mask(self) -> tuple[bool, ...] | None:
+        """Dense compatibility view; transport and caches use sparse indices."""
+
+        if self.ring_grow_support_indices is None:
+            return None
+        selected = set(self.ring_grow_support_indices)
+        return tuple(index in selected for index in range(self.ring_grow_support_width))
+
+
+def _teacher_rule_is_supported(rule_name: str) -> bool:
+    """Accept legacy model families and the frozen Action V4 executor surface."""
+
+    if rule_name in MARK_RULE_TO_INDEX or rule_name in _CYCLE_OP_EXECUTOR_TO_FAMILY:
+        return True
+    try:
+        return editing_v2_canonical_family(rule_name) in MARK_RULE_TO_INDEX
+    except ActionCodecV4Error:
+        return False
+
+
+class FactorizedMarkDataset(Dataset[FactorizedMarkExample]):
+    """Index-deterministic examples safe under arbitrary worker prefetching.
+
+    Example ``i`` is a pure function of ``(seed, i)``.  A resumed run starts at
+    ``completed_steps * batch_size`` and therefore sees exactly the same future
+    training stream without serializing worker RNG or prefetch queues.
+    """
+
+    def __init__(
+        self,
+        records: tuple[PathRecord, ...],
+        *,
+        start_index: int,
+        length: int,
+        seed: int,
+        late_time_fraction: float,
+        operational_horizon: float,
+        progress_stratification_fraction: float,
+        ring_catalog: TypedRingCatalog | None = None,
+        ring_electronic_mode: str = "factorized_local",
+        support_cache_limit: int = 2048,
+        support_cache_reset_interval: int = 2048,
+        training_support_cache: ShardedTrainingSupportCache | None = None,
+        require_cached_support: bool = False,
+        target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
+        condition_dropout_probability: float = 0.0,
+        ring_family_mass_mode: str = "boolean",
+        record_index_sampler: object | None = None,
+    ) -> None:
+        if not records:
+            raise ValueError("factorized mark training records must be non-empty")
+        if start_index < 0 or length < 0:
+            raise ValueError("dataset indices and length must be non-negative")
+        if not 0.0 <= late_time_fraction <= 1.0:
+            raise ValueError("late-time fraction must lie in [0, 1]")
+        if operational_horizon <= 0.0:
+            raise ValueError("operational horizon must be positive")
+        if not 0.0 <= progress_stratification_fraction <= 1.0:
+            raise ValueError("progress stratification must lie in [0, 1]")
+        if support_cache_limit <= 0 or support_cache_reset_interval <= 0:
+            raise ValueError(
+                "support cache limits and reset intervals must be positive"
+            )
+        if training_support_cache is not None and ring_catalog is None:
+            raise ValueError("training support cache requires a ring catalog")
+        if require_cached_support and training_support_cache is None:
+            raise ValueError("required training support cache was not provided")
+        if not 0.0 <= condition_dropout_probability <= 1.0:
+            raise ValueError("condition dropout probability must lie in [0, 1]")
+        if ring_family_mass_mode not in {
+            "boolean",
+            "catalog_topology_local_support",
+        }:
+            raise ValueError("unknown ring family mass mode")
+        condition_widths = (
+            set()
+            if target_property_conditions is None
+            else {len(values) for values in target_property_conditions.values()}
+        )
+        if target_property_conditions is not None and (
+            condition_widths != {next(iter(condition_widths), 0)}
+            or next(iter(condition_widths), 0) <= 0
+        ):
+            raise ValueError("target property conditions must share one positive width")
+        if (
+            training_support_cache is not None
+            and start_index + length > training_support_cache.total_rows
+        ):
+            raise ValueError("training dataset extends beyond its support cache")
+        self.records = records
+        self.start_index = int(start_index)
+        self.length = int(length)
+        self.seed = int(seed)
+        self.late_time_fraction = float(late_time_fraction)
+        self.operational_horizon = float(operational_horizon)
+        self.progress_stratification_fraction = float(progress_stratification_fraction)
+        self.ring_catalog = ring_catalog
+        self.ring_electronic_mode = str(ring_electronic_mode)
+        self.support_cache_limit = int(support_cache_limit)
+        self.support_cache_reset_interval = int(support_cache_reset_interval)
+        self.training_support_cache = training_support_cache
+        self.require_cached_support = bool(require_cached_support)
+        self.target_property_conditions = target_property_conditions
+        self.condition_dropout_probability = float(condition_dropout_probability)
+        self.ring_family_mass_mode = str(ring_family_mass_mode)
+        # Optional hierarchical record sampler (layer -> curriculum bin -> example). None -> uniform draw
+        # over records, byte-identical to the de-novo path. Must expose a stateless ``draw(rng) -> int``.
+        if record_index_sampler is not None and len(
+            getattr(record_index_sampler, "tags", records)
+        ) != len(records):
+            raise ValueError(
+                "record_index_sampler tags must align 1:1 with the training records"
+            )
+        self.record_index_sampler = record_index_sampler
+        self._ring_support_model: FactorizedTraceletRateModel | None = None
+        self._ring_support_examples_since_reset = 0
+
+    def _ring_chemistry_model(self) -> FactorizedTraceletRateModel:
+        if (
+            self._ring_support_model is not None
+            and self._ring_support_examples_since_reset
+            >= self.support_cache_reset_interval
+        ):
+            self._ring_support_model.clear_ring_candidate_caches()
+            clear_semantic_ring_state_caches()
+            self._ring_support_examples_since_reset = 0
+        if self._ring_support_model is None:
+            # This is a chemistry oracle only. Its parameters are never read,
+            # and the forked RNG prevents worker initialization from changing
+            # the deterministic training stream.
+            with torch.random.fork_rng(devices=[]):
+                torch.manual_seed(0)
+                self._ring_support_model = FactorizedTraceletRateModel(
+                    self.ring_catalog,
+                    hidden_dim=1,
+                    message_passing_steps=1,
+                    mark_dim=1,
+                    ring_electronic_mode=self.ring_electronic_mode,
+                    ring_candidate_cache_limit=self.support_cache_limit,
+                )
+        return self._ring_support_model
+
+    def __len__(self) -> int:
+        return self.length
+
+    def __getitem__(self, index: int) -> FactorizedMarkExample:
+        if not 0 <= index < self.length:
+            raise IndexError(index)
+        absolute_index = self.start_index + int(index)
+        rng = np.random.default_rng(np.random.SeedSequence((self.seed, absolute_index)))
+        if self.record_index_sampler is not None:
+            record_index = int(self.record_index_sampler.draw(rng))
+        else:
+            record_index = int(rng.integers(len(self.records)))
+        record = self.records[record_index]
+        if rng.random() < self.late_time_fraction:
+            operational_time = float(rng.uniform(0.0, self.operational_horizon))
+            time = 1.0 - exp(-operational_time)
+        else:
+            time = float(rng.uniform(0.01, 0.99))
+        progress, importance_weight = _sample_tracelet_progress(
+            record.path,
+            time=time,
+            rng=rng,
+            stratification_fraction=self.progress_stratification_fraction,
+        )
+        if progress < record.path.path_length:
+            step = record.path.trace.steps[progress]
+            # cycle ops record EXECUTOR names (bond_insert/bond_delete) that the model scores under the
+            # cycle_insert/cycle_attach slots; accept them (the rule_name stays the executor name, which
+            # _teacher_action_score dispatches on). Everything else must be a dense family.
+            if not _teacher_rule_is_supported(step.rule_name):
+                raise ValueError(
+                    f"compiled teacher uses unsupported dense family: {step.rule_name}"
+                )
+            teacher_action = step.action
+            teacher_rule_name = step.rule_name
+            teacher_rate = record.path.operational_jump_rate(progress)
+        else:
+            teacher_action = None
+            teacher_rule_name = None
+            teacher_rate = 0.0
+        state = record.path.state_at(progress)
+        property_condition_values = None
+        property_condition_mask = None
+        if self.target_property_conditions is not None:
+            raw_values = self.target_property_conditions.get(record.target_key)
+            if raw_values is None:
+                raise KeyError(
+                    f"missing target property condition: {record.target_key}"
+                )
+            property_condition_values = tuple(float(value) for value in raw_values)
+            if not np.isfinite(property_condition_values).all():
+                raise ValueError(
+                    "target property condition contains a non-finite value"
+                )
+            dropout_rng = np.random.default_rng(
+                np.random.SeedSequence((self.seed, absolute_index, 0xC0D17))
+            )
+            observed = bool(dropout_rng.random() >= self.condition_dropout_probability)
+            property_condition_mask = (observed,) * len(property_condition_values)
+        ring_grow_support_mask = None
+        ring_grow_support_indices = None
+        ring_grow_support_width = 0
+        ring_grow_support_is_exact = False
+        ring_grow_enablement_is_exact = False
+        ring_topology_local_support_log_mass = None
+        ring_teacher_semantic_certificate = None
+        chemistry_model = None
+        if self.ring_catalog is not None:
+            cached_support = (
+                None
+                if self.training_support_cache is None
+                else (
+                    self.training_support_cache.require(absolute_index)
+                    if self.require_cached_support
+                    else self.training_support_cache.get(absolute_index)
+                )
+            )
+            if cached_support is not None:
+                ring_grow_support_indices = cached_support.indices
+                ring_grow_support_width = int(cached_support.width)
+                ring_grow_support_is_exact = bool(cached_support.support_is_exact)
+                ring_grow_enablement_is_exact = bool(cached_support.enablement_is_exact)
+                ring_teacher_semantic_certificate = (
+                    cached_support.teacher_semantic_certificate
+                )
+            else:
+                chemistry_model = self._ring_chemistry_model()
+                if teacher_rule_name == "ring_system_grow":
+                    ring_grow_support_mask = chemistry_model._ring_grow_support(state)
+                    ring_grow_support_is_exact = True
+                else:
+                    ring_grow_support_mask = (
+                        chemistry_model._ring_grow_enablement_certificate(state)
+                    )
+                ring_grow_enablement_is_exact = True
+                ring_grow_support_indices = tuple(
+                    int(index)
+                    for index, supported in enumerate(ring_grow_support_mask)
+                    if supported
+                )
+                ring_grow_support_width = len(ring_grow_support_mask)
+            if (
+                teacher_rule_name == "ring_system_grow"
+                and ring_teacher_semantic_certificate is None
+            ):
+                if not isinstance(teacher_action, RingSystemGrow):
+                    raise TypeError("ring-system teacher has the wrong action type")
+                if cached_support is not None and self.require_cached_support:
+                    raise RuntimeError(
+                        "required training support row lacks its exact semantic teacher certificate"
+                    )
+                if chemistry_model is None:
+                    chemistry_model = self._ring_chemistry_model()
+                ring_teacher_semantic_certificate = (
+                    chemistry_model.ring_teacher_semantic_certificate(
+                        state,
+                        teacher_action,
+                    )
+                )
+            if chemistry_model is not None:
+                self._ring_support_examples_since_reset += 1
+        if self.ring_family_mass_mode == "catalog_topology_local_support":
+            if self.ring_catalog is None:
+                raise RuntimeError("ring topology mass requires a ring catalog")
+            if chemistry_model is None:
+                chemistry_model = self._ring_chemistry_model()
+                self._ring_support_examples_since_reset += 1
+            ring_topology_local_support_log_mass = (
+                chemistry_model._ring_topology_local_support_log_mass(state)
+            )
+        return FactorizedMarkExample(
+            state=state,
+            time=time,
+            teacher_action=teacher_action,
+            teacher_rule_name=teacher_rule_name,
+            teacher_rate=teacher_rate,
+            importance_weight=importance_weight,
+            property_condition_values=property_condition_values,
+            property_condition_mask=property_condition_mask,
+            ring_grow_support_indices=ring_grow_support_indices,
+            ring_grow_support_width=ring_grow_support_width,
+            ring_grow_support_is_exact=ring_grow_support_is_exact,
+            ring_grow_enablement_is_exact=ring_grow_enablement_is_exact,
+            ring_topology_local_support_log_mass=(ring_topology_local_support_log_mass),
+            ring_teacher_semantic_certificate=ring_teacher_semantic_certificate,
+            record_index=record_index,
+            progress_index=int(progress),
+        )
+
+
+# Every enumeration/semantics coordinate an ``OperatorCapabilities`` object carries, DERIVED from the
+# dataclass rather than retyped.  ``prepare_factorized_mark_batch`` and ``FactorizedMarkCollator`` take
+# exactly these keyword names, which is what makes the derivation safe.
+_OPERATOR_CAPABILITY_FIELDS: tuple[str, ...] = tuple(
+    capability.name for capability in dataclass_fields(OperatorCapabilities)
+)
+
+
+def operator_capability_batch_kwargs(
+    capabilities: OperatorCapabilities,
+) -> dict[str, Any]:
+    """Return every batch-builder keyword implied by one immutable capability object.
+
+    A batch builder that hand-copies capability fields silently drops the ones added later: that is
+    exactly how ``atom_delete_action_semantics`` was omitted by eight builders, which made a Process-V2
+    model unconstructible through any of them.  Deriving the keywords from
+    :class:`OperatorCapabilities` removes the hand-copy step, so a capability added later flows through
+    every call site at once, and a builder that cannot accept it raises ``TypeError`` instead of quietly
+    building a differently supported batch.
+    """
+
+    if not isinstance(capabilities, OperatorCapabilities):
+        raise TypeError(
+            "batch-builder capability keywords require an OperatorCapabilities object; "
+            f"got {type(capabilities).__name__}"
+        )
+    return {name: getattr(capabilities, name) for name in _OPERATOR_CAPABILITY_FIELDS}
+
+
+def _require_complete_capability_keywords(keywords: Mapping[str, Any]) -> None:
+    """Fail loudly when a hand-listed capability keyword set is no longer complete."""
+
+    observed = set(keywords)
+    expected = set(_OPERATOR_CAPABILITY_FIELDS)
+    if observed != expected:
+        raise ValueError(
+            "batch-builder capability keywords are incomplete; "
+            f"missing={sorted(expected - observed)}, unexpected={sorted(observed - expected)}"
+        )
+
+
+def _resolve_capability_kwargs(
+    capabilities: OperatorCapabilities | None,
+    **individual: Any,
+) -> dict[str, Any]:
+    """Prefer the immutable capability object; otherwise require a complete keyword set.
+
+    The individual keywords remain for de-novo callers that never hold a model, but they are checked
+    against the dataclass so a capability added later cannot silently fall back to its legacy default.
+    """
+
+    if capabilities is not None:
+        return operator_capability_batch_kwargs(capabilities)
+    _require_complete_capability_keywords(individual)
+    return dict(individual)
+
+
+@dataclass(frozen=True)
+class FactorizedMarkCollator:
+    use_aromatic_bond_view: bool
+    ring_catalog: TypedRingCatalog | None = None
+    chemistry_feature_cache_limit: int = 2048
+    compute_ring_grow_support: bool = True
+    compute_ring_restates: bool = False
+    compute_cyclic_graft: bool = False
+    compute_ring_opening: bool = False
+    compute_ring_system_delete: bool = True
+    editing_process_semantics: str = LEGACY_EDITING_PROCESS_SEMANTICS
+    atom_restate_action_semantics: str = LEGACY_ATOM_RESTATE_ACTION_SEMANTICS
+    ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE
+    cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS
+    cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS
+    atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS
+    _chemistry_feature_cache: OrderedDict[
+        tuple[
+            int,
+            bool,
+            bool,
+            bool,
+            bool,
+            str,
+            str,
+            str,
+            str,
+            str,
+            tuple[bytes, bytes, bytes, bytes],
+        ],
+        ChemistryStateFeatures,
+    ] = field(default_factory=OrderedDict, init=False, repr=False, compare=False)
+
+    @classmethod
+    def from_capabilities(
+        cls,
+        capabilities: OperatorCapabilities,
+        *,
+        use_aromatic_bond_view: bool,
+        ring_catalog: TypedRingCatalog | None = None,
+        chemistry_feature_cache_limit: int = 2048,
+    ) -> FactorizedMarkCollator:
+        """Build a collator from one immutable capability object, dropping nothing.
+
+        Prefer this over listing capability keywords at a call site: the listed form is what silently
+        omitted the atom-delete mode (and, at several call sites, every Active8 semantic mode) from
+        evaluation, Gate-0, trainer, T1, and P50 batches.
+        """
+
+        return cls(
+            use_aromatic_bond_view,
+            ring_catalog,
+            chemistry_feature_cache_limit=chemistry_feature_cache_limit,
+            **operator_capability_batch_kwargs(capabilities),
+        )
+
+    def __call__(self, examples: list[FactorizedMarkExample]) -> FactorizedMarkBatch:
+        support_rows = tuple(example.ring_grow_support_indices for example in examples)
+        topology_masses = tuple(
+            example.ring_topology_local_support_log_mass for example in examples
+        )
+        if any(value is None for value in topology_masses) and not all(
+            value is None for value in topology_masses
+        ):
+            raise ValueError(
+                "factorized examples mix topology masses and missing values"
+            )
+        has_precomputed_ring_support = bool(support_rows) and all(
+            row is not None for row in support_rows
+        )
+        condition_values = tuple(
+            example.property_condition_values for example in examples
+        )
+        condition_masks = tuple(example.property_condition_mask for example in examples)
+        has_conditions = all(values is not None for values in condition_values) and all(
+            mask is not None for mask in condition_masks
+        )
+        if not has_conditions and any(
+            values is not None or mask is not None
+            for values, mask in zip(condition_values, condition_masks)
+        ):
+            raise ValueError(
+                "property-conditioned examples are only partially populated"
+            )
+        # Read the capability coordinates off this collator by the SAME derived field list the model
+        # exposes, so a capability the collator forgot to declare raises here instead of silently
+        # collating under its legacy default.
+        capability_kwargs = {
+            name: getattr(self, name) for name in _OPERATOR_CAPABILITY_FIELDS
+        }
+        _require_complete_capability_keywords(capability_kwargs)
+        # Exact precomputed ring-grow support supersedes recomputation for this batch only.
+        capability_kwargs["compute_ring_grow_support"] = (
+            capability_kwargs["compute_ring_grow_support"]
+            and not has_precomputed_ring_support
+        )
+        batch = prepare_factorized_mark_batch(
+            tuple(example.state for example in examples),
+            tuple(example.time for example in examples),
+            tuple(example.teacher_action for example in examples),
+            tuple(example.teacher_rule_name for example in examples),
+            tuple(example.teacher_rate for example in examples),
+            tuple(example.importance_weight for example in examples),
+            use_aromatic_bond_view=self.use_aromatic_bond_view,
+            ring_catalog=self.ring_catalog,
+            chemistry_feature_cache=self._chemistry_feature_cache,
+            chemistry_feature_cache_limit=self.chemistry_feature_cache_limit,
+            **capability_kwargs,
+            property_condition_values=(
+                tuple(values for values in condition_values if values is not None)
+                if has_conditions
+                else None
+            ),
+            property_condition_mask=(
+                tuple(mask for mask in condition_masks if mask is not None)
+                if has_conditions
+                else None
+            ),
+        )
+        if has_precomputed_ring_support:
+            widths = {example.ring_grow_support_width for example in examples}
+            if len(widths) != 1:
+                raise ValueError(
+                    "precomputed ring support rows have inconsistent widths"
+                )
+            batch = replace(
+                batch,
+                ring_grow_support_mask=None,
+                ring_grow_support_sparse=SparseBinaryRows.from_index_rows(
+                    tuple(row for row in support_rows if row is not None),
+                    width=widths.pop(),
+                ),
+                ring_grow_support_is_exact=torch.tensor(
+                    tuple(example.ring_grow_support_is_exact for example in examples),
+                    dtype=torch.bool,
+                ),
+                ring_grow_enablement_is_exact=torch.tensor(
+                    tuple(
+                        example.ring_grow_enablement_is_exact for example in examples
+                    ),
+                    dtype=torch.bool,
+                ),
+            )
+        batch = replace(
+            batch,
+            ring_teacher_semantic_certificates=tuple(
+                example.ring_teacher_semantic_certificate for example in examples
+            ),
+            ring_topology_local_support_log_mass=(
+                None
+                if all(value is None for value in topology_masses)
+                else torch.tensor(
+                    tuple(
+                        float(value) for value in topology_masses if value is not None
+                    ),
+                    dtype=batch.times.dtype,
+                )
+            ),
+        )
+        return batch
+
+
+def factorized_mark_loader(
+    records: tuple[PathRecord, ...],
+    *,
+    steps: int,
+    batch_size: int,
+    start_step: int,
+    seed: int,
+    workers: int,
+    late_time_fraction: float,
+    operational_horizon: float,
+    progress_stratification_fraction: float,
+    use_aromatic_bond_view: bool,
+    pin_memory: bool,
+    ring_catalog: TypedRingCatalog | None = None,
+    prefetch_factor: int = 2,
+    ring_electronic_mode: str = "factorized_local",
+    training_support_cache: ShardedTrainingSupportCache | None = None,
+    require_cached_support: bool = False,
+    target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
+    condition_dropout_probability: float = 0.0,
+    ring_family_mass_mode: str = "boolean",
+    capabilities: OperatorCapabilities | None = None,
+    compute_ring_grow_support: bool = True,
+    compute_ring_restates: bool = False,
+    compute_cyclic_graft: bool = False,
+    compute_ring_opening: bool = False,
+    compute_ring_system_delete: bool = True,
+    editing_process_semantics: str = LEGACY_EDITING_PROCESS_SEMANTICS,
+    atom_restate_action_semantics: str = LEGACY_ATOM_RESTATE_ACTION_SEMANTICS,
+    ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE,
+    cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
+    cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
+    atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
+    record_index_sampler: object | None = None,
+) -> DataLoader[FactorizedMarkBatch]:
+    if not 0 <= start_step <= steps:
+        raise ValueError("start step lies outside the training horizon")
+    if prefetch_factor <= 0:
+        raise ValueError("prefetch factor must be positive")
+    capability_kwargs = _resolve_capability_kwargs(
+        capabilities,
+        compute_ring_grow_support=compute_ring_grow_support,
+        compute_ring_restates=compute_ring_restates,
+        compute_cyclic_graft=compute_cyclic_graft,
+        compute_ring_opening=compute_ring_opening,
+        compute_ring_system_delete=compute_ring_system_delete,
+        editing_process_semantics=editing_process_semantics,
+        atom_restate_action_semantics=atom_restate_action_semantics,
+        ring_restate_scorer_mode=ring_restate_scorer_mode,
+        cycle_close_action_semantics=cycle_close_action_semantics,
+        cycle_open_action_semantics=cycle_open_action_semantics,
+        atom_delete_action_semantics=atom_delete_action_semantics,
+    )
+    remaining_steps = steps - start_step
+    if ring_catalog is not None:
+        warm_ring_system_candidate_indices(ring_catalog)
+    _zmi.bump("edit_dataset_constructions")
+    _zmi.bump("edit_dataloader_constructions")
+    dataset = FactorizedMarkDataset(
+        records,
+        start_index=start_step * batch_size,
+        length=remaining_steps * batch_size,
+        seed=seed,
+        late_time_fraction=late_time_fraction,
+        operational_horizon=operational_horizon,
+        progress_stratification_fraction=progress_stratification_fraction,
+        ring_catalog=ring_catalog,
+        ring_electronic_mode=ring_electronic_mode,
+        training_support_cache=training_support_cache,
+        require_cached_support=require_cached_support,
+        target_property_conditions=target_property_conditions,
+        condition_dropout_probability=condition_dropout_probability,
+        ring_family_mass_mode=ring_family_mass_mode,
+        record_index_sampler=record_index_sampler,
+    )
+    options: dict[str, Any] = {}
+    if workers > 0:
+        options.update(
+            persistent_workers=True,
+            prefetch_factor=prefetch_factor,
+        )
+    loader_generator = torch.Generator(device="cpu")
+    loader_generator.manual_seed(int(seed))
+    return DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=workers,
+        collate_fn=FactorizedMarkCollator(
+            use_aromatic_bond_view,
+            ring_catalog,
+            **capability_kwargs,
+        ),
+        pin_memory=pin_memory,
+        drop_last=True,
+        generator=loader_generator,
+        **options,
+    )
+
+
+class TeacherOutsideCandidatesError(ValueError):
+    """A batch was built whose teacher mark is outside the model's exact dynamic candidate set -- raised
+    immediately after batch construction (before scoring) with the molecule, teacher, and candidate context,
+    so the representability failure is reported precisely instead of surfacing as a cryptic loss-time crash.
+    """
+
+
+def assert_teachers_in_exact_candidates(batch: FactorizedMarkBatch) -> None:
+    """Global invariant: every nonterminal teacher whose family carries an explicit dynamic candidate LIST
+    (ring_system_restate, ring_system_delete) must be present in that list for its example -- otherwise the
+    editing enumeration for the batch did not match the teacher support (e.g. a batch builder omitted a
+    capability flag). Per-coordinate families (atom_*, bond_reorder, cycle_close/open) are validated by their
+    masks at scoring; graft (bond_reroute) by its successor-group mask. Raises with rich context on mismatch.
+    """
+    restate_cands = batch.ring_restate_actions
+    delete_cands = batch.ring_delete_actions
+    for i, (rule_name, action) in enumerate(
+        zip(batch.teacher_rule_names, batch.teacher_actions)
+    ):
+        if rule_name is None or action is None:
+            continue
+        candidates = None
+        if rule_name == "ring_system_restate":
+            candidates = restate_cands[i] if restate_cands is not None else ()
+        elif rule_name == "ring_system_delete":
+            candidates = delete_cands[i] if delete_cands is not None else ()
+        if candidates is None:
+            continue  # family validated via its per-coordinate mask, not a candidate list
+        if action not in candidates:
+            try:
+                from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
+
+                smiles = molecular_graph_to_smiles(batch.states[i])
+            except Exception:  # noqa: BLE001
+                smiles = "<unrenderable>"
+            raise TeacherOutsideCandidatesError(
+                f"teacher '{rule_name}' outside the exact dynamic candidates for example {i} "
+                f"(smiles={smiles}, enumerated={len(candidates)} candidates). The batch builder likely did "
+                f"not enable this editing family's enumeration -- pass the active model's operator "
+                f"capabilities so the batch enumerates the same families the teacher was generated under."
+            )
+
+
+def sample_factorized_mark_batch(
+    records: tuple[PathRecord, ...],
+    *,
+    batch_size: int,
+    seed: int,
+    late_time_fraction: float,
+    operational_horizon: float,
+    progress_stratification_fraction: float = 0.0,
+    use_aromatic_bond_view: bool = True,
+    workers: int = 0,
+    ring_catalog: TypedRingCatalog | None = None,
+    ring_electronic_mode: str = "factorized_local",
+    target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
+    condition_dropout_probability: float = 0.0,
+    ring_family_mass_mode: str = "boolean",
+    capabilities: OperatorCapabilities | None = None,
+    compute_ring_grow_support: bool = True,
+    compute_ring_restates: bool = False,
+    compute_cyclic_graft: bool = False,
+    compute_ring_opening: bool = False,
+    compute_ring_system_delete: bool = True,
+    editing_process_semantics: str = LEGACY_EDITING_PROCESS_SEMANTICS,
+    atom_restate_action_semantics: str = LEGACY_ATOM_RESTATE_ACTION_SEMANTICS,
+    ring_restate_scorer_mode: str = LEGACY_RING_RESTATE_SCORER_MODE,
+    cycle_close_action_semantics: str = LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
+    cycle_open_action_semantics: str = LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
+    atom_delete_action_semantics: str = LEGACY_ATOM_DELETE_ACTION_SEMANTICS,
+) -> FactorizedMarkBatch:
+    if workers < 0:
+        raise ValueError("evaluation workers must be non-negative")
+    # Prefer the immutable capability object (model.operator_capabilities) -- it is the single source of the
+    # editing-family enumeration, so the eval/validation/test batch enumerates the SAME families as training
+    # and a teacher is never silently excluded from the exact candidates. The individual flags remain for
+    # de-novo callers but the object overrides them when supplied.  The expansion is DERIVED from the
+    # dataclass: a hand-copied field list is what dropped the atom-delete mode from eight builders.
+    capability_kwargs = _resolve_capability_kwargs(
+        capabilities,
+        compute_ring_grow_support=compute_ring_grow_support,
+        compute_ring_restates=compute_ring_restates,
+        compute_cyclic_graft=compute_cyclic_graft,
+        compute_ring_opening=compute_ring_opening,
+        compute_ring_system_delete=compute_ring_system_delete,
+        editing_process_semantics=editing_process_semantics,
+        atom_restate_action_semantics=atom_restate_action_semantics,
+        ring_restate_scorer_mode=ring_restate_scorer_mode,
+        cycle_close_action_semantics=cycle_close_action_semantics,
+        cycle_open_action_semantics=cycle_open_action_semantics,
+        atom_delete_action_semantics=atom_delete_action_semantics,
+    )
+    if ring_catalog is not None:
+        warm_ring_system_candidate_indices(ring_catalog)
+    dataset = FactorizedMarkDataset(
+        records,
+        start_index=0,
+        length=batch_size,
+        seed=seed,
+        late_time_fraction=late_time_fraction,
+        operational_horizon=operational_horizon,
+        progress_stratification_fraction=progress_stratification_fraction,
+        ring_catalog=ring_catalog,
+        ring_electronic_mode=ring_electronic_mode,
+        target_property_conditions=target_property_conditions,
+        condition_dropout_probability=condition_dropout_probability,
+        ring_family_mass_mode=ring_family_mass_mode,
+    )
+    # The eval/validation/test batch must enumerate the SAME editing families as training (one shared
+    # representability contract); otherwise an editing teacher (ring_system_restate / ring_system_delete /
+    # bond_reroute) lands outside the batch's dynamic candidates and scoring raises "outside exact dynamic
+    # candidates". The flags mirror FactorizedMarkCollator's training defaults (sourced from model.enable_*).
+    collator = FactorizedMarkCollator(
+        use_aromatic_bond_view,
+        ring_catalog,
+        **capability_kwargs,
+    )
+    if workers == 0:
+        batch = collator([dataset[index] for index in range(batch_size)])
+        assert_teachers_in_exact_candidates(batch)
+        return batch
+    loader = DataLoader(
+        dataset,
+        batch_size=min(batch_size, 32),
+        shuffle=False,
+        num_workers=workers,
+        collate_fn=collator,
+        pin_memory=False,
+        drop_last=False,
+    )
+    batch = _concatenate_factorized_mark_batches(tuple(loader))
+    assert_teachers_in_exact_candidates(batch)
+    return batch
+
+
+def attach_property_conditions(
+    batch: FactorizedMarkBatch,
+    records: tuple[PathRecord, ...],
+    *,
+    seed: int,
+    target_property_conditions: Mapping[str, tuple[float, ...]],
+    condition_dropout_probability: float = 0.0,
+    start_index: int = 0,
+) -> FactorizedMarkBatch:
+    """Attach endpoint conditions without rebuilding cached chemistry support."""
+
+    if not records:
+        raise ValueError("property-condition attachment requires records")
+    if start_index < 0:
+        raise ValueError("start_index must be non-negative")
+    if not 0.0 <= condition_dropout_probability <= 1.0:
+        raise ValueError("condition dropout probability must lie in [0, 1]")
+    widths = {len(values) for values in target_property_conditions.values()}
+    if len(widths) != 1 or next(iter(widths), 0) <= 0:
+        raise ValueError("target property conditions must share one positive width")
+
+    values: list[tuple[float, ...]] = []
+    masks: list[tuple[bool, ...]] = []
+    width = next(iter(widths))
+    for offset in range(batch.batch_size):
+        absolute_index = start_index + offset
+        rng = np.random.default_rng(np.random.SeedSequence((seed, absolute_index)))
+        record = records[int(rng.integers(len(records)))]
+        row = target_property_conditions.get(record.target_key)
+        if row is None:
+            raise KeyError(f"missing target property condition: {record.target_key}")
+        numeric_row = tuple(float(value) for value in row)
+        if not np.isfinite(numeric_row).all():
+            raise ValueError("target property condition contains a non-finite value")
+        dropout_rng = np.random.default_rng(
+            np.random.SeedSequence((seed, absolute_index, 0xC0D17))
+        )
+        observed = bool(dropout_rng.random() >= condition_dropout_probability)
+        values.append(numeric_row if observed else (0.0,) * width)
+        masks.append((observed,) * width)
+
+    return replace(
+        batch,
+        property_condition_values=torch.tensor(
+            values,
+            dtype=batch.times.dtype,
+            device=batch.times.device,
+        ),
+        property_condition_mask=torch.tensor(
+            masks,
+            dtype=torch.bool,
+            device=batch.times.device,
+        ),
+    )
+
+
+def _concatenate_factorized_mark_batches(
+    batches: tuple[FactorizedMarkBatch, ...],
+) -> FactorizedMarkBatch:
+    if not batches:
+        raise ValueError("cannot concatenate an empty batch sequence")
+
+    def tensors(name: str) -> Tensor:
+        return torch.cat([getattr(batch, name) for batch in batches], dim=0)
+
+    def optional_tensors(name: str) -> Tensor | None:
+        values = tuple(getattr(batch, name) for batch in batches)
+        if all(value is None for value in values):
+            return None
+        if any(value is None for value in values):
+            raise ValueError(f"factorized batches mix present and absent {name}")
+        return torch.cat([value for value in values if value is not None], dim=0)
+
+    def optional_rows(name: str) -> tuple[Any, ...] | None:
+        values = tuple(getattr(batch, name) for batch in batches)
+        if all(value is None for value in values):
+            return None
+        if any(value is None for value in values):
+            raise ValueError(f"factorized batches mix present and absent {name}")
+        return tuple(row for value in values if value is not None for row in value)
+
+    process_semantics = {batch.editing_process_semantics for batch in batches}
+    restate_semantics = {batch.atom_restate_action_semantics for batch in batches}
+    ring_restate_scorers = {batch.ring_restate_scorer_mode for batch in batches}
+    close_semantics = {batch.cycle_close_action_semantics for batch in batches}
+    open_semantics = {batch.cycle_open_action_semantics for batch in batches}
+    delete_semantics = {batch.atom_delete_action_semantics for batch in batches}
+    if (
+        len(process_semantics) != 1
+        or len(restate_semantics) != 1
+        or len(ring_restate_scorers) != 1
+        or len(close_semantics) != 1
+        or len(open_semantics) != 1
+        or len(delete_semantics) != 1
+    ):
+        raise ValueError("factorized batches mix semantic action process identities")
+    editing_process_semantics = process_semantics.pop()
+    atom_restate_action_semantics = restate_semantics.pop()
+    ring_restate_scorer_mode = ring_restate_scorers.pop()
+    cycle_close_action_semantics = close_semantics.pop()
+    cycle_open_action_semantics = open_semantics.pop()
+    atom_delete_action_semantics = delete_semantics.pop()
+
+    support_masks = tuple(batch.ring_grow_support_mask for batch in batches)
+    support_sparse = tuple(batch.ring_grow_support_sparse for batch in batches)
+    if all(mask is not None for mask in support_masks):
+        ring_grow_support_mask = torch.cat(
+            [mask for mask in support_masks if mask is not None],
+            dim=0,
+        )
+        ring_grow_support_sparse = None
+    elif all(
+        mask is not None or sparse is not None
+        for mask, sparse in zip(support_masks, support_sparse)
+    ):
+        sparse_batches = tuple(
+            sparse if sparse is not None else SparseBinaryRows.from_dense(mask)
+            for mask, sparse in zip(support_masks, support_sparse)
+            if sparse is not None or mask is not None
+        )
+        widths = {item.width for item in sparse_batches}
+        if len(widths) != 1:
+            raise ValueError("factorized ring support widths do not align")
+        ring_grow_support_mask = None
+        ring_grow_support_sparse = SparseBinaryRows.from_index_rows(
+            tuple(row for item in sparse_batches for row in item.index_rows()),
+            width=widths.pop(),
+        )
+    else:
+        ring_grow_support_mask = None
+        ring_grow_support_sparse = None
+    delete_actions = tuple(batch.ring_delete_actions for batch in batches)
+    ring_delete_actions = (
+        None
+        if any(actions is None for actions in delete_actions)
+        else tuple(
+            action_group
+            for actions in delete_actions
+            if actions is not None
+            for action_group in actions
+        )
+    )
+    property_values = tuple(batch.property_condition_values for batch in batches)
+    property_masks = tuple(batch.property_condition_mask for batch in batches)
+    if all(
+        values is None and mask is None
+        for values, mask in zip(property_values, property_masks)
+    ):
+        concatenated_property_values = None
+        concatenated_property_masks = None
+    elif all(
+        values is not None and mask is not None
+        for values, mask in zip(property_values, property_masks)
+    ):
+        concatenated_property_values = torch.cat(
+            [values for values in property_values if values is not None], dim=0
+        )
+        concatenated_property_masks = torch.cat(
+            [mask for mask in property_masks if mask is not None], dim=0
+        )
+    else:
+        raise ValueError("factorized batches mix conditioned and unconditioned rows")
+    topology_masses = tuple(
+        batch.ring_topology_local_support_log_mass for batch in batches
+    )
+    if all(values is None for values in topology_masses):
+        concatenated_topology_mass = None
+    elif all(values is not None for values in topology_masses):
+        concatenated_topology_mass = torch.cat(
+            [values for values in topology_masses if values is not None],
+            dim=0,
+        )
+    else:
+        raise ValueError("factorized batches mix topology masses and missing values")
+
+    return FactorizedMarkBatch(
+        states=tuple(state for batch in batches for state in batch.states),
+        atom_types=tensors("atom_types"),
+        formal_charges=tensors("formal_charges"),
+        implicit_h_counts=tensors("implicit_h_counts"),
+        bonds=tensors("bonds"),
+        neural_bonds=tensors("neural_bonds"),
+        times=tensors("times"),
+        atom_topology=tensors("atom_topology"),
+        closure_topology=tensors("closure_topology"),
+        ring_system_topology=tensors("ring_system_topology"),
+        atom_delete_mask=tensors("atom_delete_mask"),
+        cycle_edge_mask=tensors("cycle_edge_mask"),
+        cyclic_pair_mask=tensors("cyclic_pair_mask"),
+        graft_mask=tensors("graft_mask"),
+        graft_remove_neighbors=tensors("graft_remove_neighbors"),
+        graft_successor_groups=tensors("graft_successor_groups"),
+        teacher_actions=tuple(
+            action for batch in batches for action in batch.teacher_actions
+        ),
+        teacher_rule_names=tuple(
+            name for batch in batches for name in batch.teacher_rule_names
+        ),
+        teacher_rates=tensors("teacher_rates"),
+        importance_weights=tensors("importance_weights"),
+        ring_restate_actions=tuple(
+            actions for batch in batches for actions in batch.ring_restate_actions
+        ),
+        ring_restate_scorer_mode=ring_restate_scorer_mode,
+        ring_restate_successor_group_ids=optional_rows(
+            "ring_restate_successor_group_ids"
+        ),
+        ring_restate_successor_group_descriptors=optional_rows(
+            "ring_restate_successor_group_descriptors"
+        ),
+        ring_restate_successor_group_multiplicities=optional_rows(
+            "ring_restate_successor_group_multiplicities"
+        ),
+        editing_process_semantics=editing_process_semantics,
+        atom_delete_admission_mask=optional_tensors("atom_delete_admission_mask"),
+        atom_delete_action_semantics=atom_delete_action_semantics,
+        atom_restate_admission_mask=optional_tensors("atom_restate_admission_mask"),
+        atom_restate_action_semantics=atom_restate_action_semantics,
+        cycle_close_admission_mask=optional_tensors("cycle_close_admission_mask"),
+        cycle_close_action_semantics=cycle_close_action_semantics,
+        cycle_open_admission_mask=optional_tensors("cycle_open_admission_mask"),
+        cycle_open_action_semantics=cycle_open_action_semantics,
+        ring_grow_support_mask=ring_grow_support_mask,
+        ring_grow_support_sparse=ring_grow_support_sparse,
+        ring_delete_actions=ring_delete_actions,
+        ring_grow_support_is_exact=torch.cat(
+            [
+                (
+                    batch.ring_grow_support_is_exact
+                    if isinstance(batch.ring_grow_support_is_exact, Tensor)
+                    else torch.full(
+                        (batch.batch_size,),
+                        bool(batch.ring_grow_support_is_exact),
+                        dtype=torch.bool,
+                    )
+                )
+                for batch in batches
+            ],
+            dim=0,
+        ),
+        ring_grow_enablement_is_exact=torch.cat(
+            [
+                (
+                    batch.ring_grow_enablement_is_exact
+                    if isinstance(batch.ring_grow_enablement_is_exact, Tensor)
+                    else torch.full(
+                        (batch.batch_size,),
+                        bool(batch.ring_grow_enablement_is_exact),
+                        dtype=torch.bool,
+                    )
+                )
+                for batch in batches
+            ],
+            dim=0,
+        ),
+        ring_topology_local_support_log_mass=concatenated_topology_mass,
+        ring_teacher_semantic_certificates=tuple(
+            certificate
+            for batch in batches
+            for certificate in (
+                batch.ring_teacher_semantic_certificates
+                if getattr(batch, "ring_teacher_semantic_certificates", None)
+                is not None
+                else (None,) * batch.batch_size
+            )
+        ),
+        property_condition_values=concatenated_property_values,
+        property_condition_mask=concatenated_property_masks,
+    )
+
+
+@torch.no_grad()
+def factorized_mark_metrics(
+    model: FactorizedTraceletRateModel,
+    batch: FactorizedMarkBatch,
+    *,
+    use_bf16: bool,
+    microbatch_size: int | None = None,
+) -> dict[str, float]:
+    """Evaluate a frozen batch without making GPU memory scale with its size."""
+
+    if microbatch_size is not None and microbatch_size <= 0:
+        raise ValueError("evaluation microbatch size must be positive")
+    device = model.device
+    resolved_microbatch_size = min(
+        batch.batch_size,
+        batch.batch_size if microbatch_size is None else microbatch_size,
+    )
+    loss_sum = 0.0
+    teacher_probability_sum = 0.0
+    teacher_family_probability_sum = 0.0
+    family_hits_sum = 0
+    family_top3_hits_sum = 0
+    nonterminal_count = 0
+    terminal_hazard_sum = 0.0
+    terminal_count = 0
+    predicted_hazard_sum = 0.0
+    teacher_hazard_sum = 0.0
+    hazard_absolute_error_sum = 0.0
+    weighted_hazard_absolute_error_sum = 0.0
+    importance_weight_sum = 0.0
+    family_counts = [0 for _ in MARK_RULE_NAMES]
+    family_hits = [0 for _ in MARK_RULE_NAMES]
+    family_top3_hits = [0 for _ in MARK_RULE_NAMES]
+    family_teacher_probability_sums = [0.0 for _ in MARK_RULE_NAMES]
+    family_teacher_mark_probability_sums = [0.0 for _ in MARK_RULE_NAMES]
+    for start in range(0, batch.batch_size, resolved_microbatch_size):
+        cpu_batch = batch.subbatch(
+            start,
+            min(start + resolved_microbatch_size, batch.batch_size),
+        )
+        device_batch = cpu_batch.to(
+            device,
+            non_blocking=device.type == "cuda",
+        )
+        context = (
+            torch.autocast(device_type="cuda", dtype=torch.bfloat16)
+            if use_bf16 and device.type == "cuda"
+            else nullcontext()
+        )
+        with context:
+            prediction = model.forward_mark_batch(device_batch)
+            loss = factorized_mark_bregman_loss(prediction, device_batch)
+        teacher_family = torch.tensor(
+            [
+                (
+                    MARK_RULE_TO_INDEX[_CYCLE_OP_EXECUTOR_TO_FAMILY.get(name, name)]
+                    if name is not None
+                    else -1
+                )
+                for name in device_batch.teacher_rule_names
+            ],
+            dtype=torch.long,
+            device=device,
+        )
+        nonterminal = teacher_family >= 0
+        terminal = ~nonterminal
+        teacher_rates = device_batch.teacher_rates.to(device)
+        importance_weights = device_batch.importance_weights.to(device)
+        hazard_absolute_error = (prediction.total_hazard - teacher_rates).abs()
+        predicted_hazard_sum += float(prediction.total_hazard.sum())
+        teacher_hazard_sum += float(teacher_rates.sum())
+        hazard_absolute_error_sum += float(hazard_absolute_error.sum())
+        weighted_hazard_absolute_error_sum += float(
+            (hazard_absolute_error * importance_weights).sum()
+        )
+        importance_weight_sum += float(importance_weights.sum())
+        current_nonterminal_count = int(nonterminal.sum())
+        current_terminal_count = int(terminal.sum())
+        loss_sum += float(loss) * device_batch.batch_size
+        if current_nonterminal_count:
+            teacher_probability_sum += float(
+                prediction.selected_mark_log_probability[nonterminal].exp().sum()
+            )
+            teacher_family_probability = (
+                prediction.family_log_probabilities.gather(
+                    1,
+                    teacher_family.clamp_min(0).unsqueeze(1),
+                )
+                .squeeze(1)
+                .exp()
+            )
+            teacher_family_probability_sum += float(
+                teacher_family_probability[nonterminal].sum()
+            )
+            family_top3 = prediction.family_log_probabilities.topk(
+                k=min(3, len(MARK_RULE_NAMES)),
+                dim=-1,
+            ).indices
+            family_hits_sum += int(
+                (
+                    prediction.family_log_probabilities.argmax(dim=-1)[nonterminal]
+                    == teacher_family[nonterminal]
+                ).sum()
+            )
+            family_top3_hits_sum += int(
+                (family_top3[nonterminal] == teacher_family[nonterminal].unsqueeze(1))
+                .any(dim=1)
+                .sum()
+            )
+            predicted_family = prediction.family_log_probabilities.argmax(dim=-1)
+            teacher_mark_probability = prediction.selected_mark_log_probability.exp()
+            for family_index in range(len(MARK_RULE_NAMES)):
+                selected_family = nonterminal & (teacher_family == family_index)
+                family_count = int(selected_family.sum())
+                if not family_count:
+                    continue
+                family_counts[family_index] += family_count
+                family_hits[family_index] += int(
+                    (predicted_family[selected_family] == family_index).sum()
+                )
+                family_top3_hits[family_index] += int(
+                    (family_top3[selected_family] == family_index).any(dim=1).sum()
+                )
+                family_teacher_probability_sums[family_index] += float(
+                    teacher_family_probability[selected_family].sum()
+                )
+                family_teacher_mark_probability_sums[family_index] += float(
+                    teacher_mark_probability[selected_family].sum()
+                )
+            nonterminal_count += current_nonterminal_count
+        if current_terminal_count:
+            terminal_hazard_sum += float(prediction.total_hazard[terminal].sum())
+            terminal_count += current_terminal_count
+    family_choice_accuracy = (
+        family_hits_sum / nonterminal_count if nonterminal_count else 0.0
+    )
+    family_choice_top3_recall = (
+        family_top3_hits_sum / nonterminal_count if nonterminal_count else 0.0
+    )
+    mean_teacher_full_mark_probability = (
+        teacher_probability_sum / nonterminal_count if nonterminal_count else 0.0
+    )
+    metrics = {
+        "factorized_gm_loss": loss_sum / batch.batch_size,
+        # Explicit names prevent these diagnostics from being mistaken for
+        # complete-action or canonical-successor accuracy.  Keep the legacy
+        # keys below for checkpoint/report compatibility.
+        "mean_teacher_full_mark_probability": mean_teacher_full_mark_probability,
+        "family_choice_accuracy": family_choice_accuracy,
+        "family_choice_top3_recall": family_choice_top3_recall,
+        "mean_teacher_mark_probability": mean_teacher_full_mark_probability,
+        "mean_teacher_family_probability": (
+            teacher_family_probability_sum / nonterminal_count
+            if nonterminal_count
+            else 0.0
+        ),
+        "family_accuracy": family_choice_accuracy,
+        "family_top3_accuracy": family_choice_top3_recall,
+        "mean_terminal_hazard": (
+            terminal_hazard_sum / terminal_count if terminal_count else 0.0
+        ),
+        "mean_predicted_hazard": predicted_hazard_sum / batch.batch_size,
+        "mean_teacher_hazard": teacher_hazard_sum / batch.batch_size,
+        "mean_absolute_hazard_error": hazard_absolute_error_sum / batch.batch_size,
+        "importance_weighted_mean_absolute_hazard_error": (
+            weighted_hazard_absolute_error_sum / importance_weight_sum
+            if importance_weight_sum
+            else 0.0
+        ),
+    }
+    represented_family_indices = [
+        index for index, count in enumerate(family_counts) if count
+    ]
+    balanced_family_choice_accuracy = (
+        sum(
+            family_hits[index] / family_counts[index]
+            for index in represented_family_indices
+        )
+        / len(represented_family_indices)
+        if represented_family_indices
+        else 0.0
+    )
+    balanced_family_choice_top3_recall = (
+        sum(
+            family_top3_hits[index] / family_counts[index]
+            for index in represented_family_indices
+        )
+        / len(represented_family_indices)
+        if represented_family_indices
+        else 0.0
+    )
+    metrics["balanced_family_choice_accuracy"] = balanced_family_choice_accuracy
+    metrics["balanced_family_choice_top3_recall"] = balanced_family_choice_top3_recall
+    # Backward-compatible aliases.  These are family-choice diagnostics, not
+    # full-mark accuracy and not canonical-successor accuracy.
+    metrics["balanced_family_accuracy"] = balanced_family_choice_accuracy
+    metrics["balanced_family_top3_accuracy"] = balanced_family_choice_top3_recall
+    metrics["represented_families"] = float(len(represented_family_indices))
+    for family_index, family_name in enumerate(MARK_RULE_NAMES):
+        count = family_counts[family_index]
+        family_choice_recall = family_hits[family_index] / count if count else 0.0
+        family_choice_top3_recall = (
+            family_top3_hits[family_index] / count if count else 0.0
+        )
+        metrics[f"teacher_examples_{family_name}"] = float(count)
+        metrics[f"family_choice_recall_{family_name}"] = family_choice_recall
+        metrics[f"family_choice_top3_recall_{family_name}"] = family_choice_top3_recall
+        metrics[f"family_accuracy_{family_name}"] = family_choice_recall
+        metrics[f"family_top3_accuracy_{family_name}"] = family_choice_top3_recall
+        metrics[f"mean_teacher_family_probability_{family_name}"] = (
+            family_teacher_probability_sums[family_index] / count if count else 0.0
+        )
+        metrics[f"mean_teacher_mark_probability_{family_name}"] = (
+            family_teacher_mark_probability_sums[family_index] / count if count else 0.0
+        )
+    return metrics
+
+
+@dataclass(frozen=True)
+class MarkGeneratorMatchingObjective:
+    """Default adapter preserving the historical mark-level trainer exactly."""
+
+    name: str = "factorized_mark_generator_matching_v1"
+    selection_metric: str = "factorized_gm_loss"
+
+    def validate_batch(self, batch: Any) -> None:
+        if not isinstance(batch, FactorizedMarkBatch):
+            raise TypeError("mark objective requires FactorizedMarkBatch")
+        assert_teachers_in_exact_candidates(batch)
+
+    def mark_batch(self, batch: Any) -> FactorizedMarkBatch:
+        if not isinstance(batch, FactorizedMarkBatch):
+            raise TypeError("mark objective requires FactorizedMarkBatch")
+        return batch
+
+    def loss(
+        self,
+        model: FactorizedTraceletRateModel,
+        batch: Any,
+    ) -> Tensor:
+        mark_batch = self.mark_batch(batch)
+        prediction = model.forward_mark_batch(mark_batch)
+        return factorized_mark_bregman_loss(prediction, mark_batch)
+
+    def metrics(
+        self,
+        model: FactorizedTraceletRateModel,
+        batch: Any,
+        *,
+        use_bf16: bool,
+        microbatch_size: int | None,
+    ) -> dict[str, float]:
+        return factorized_mark_metrics(
+            model,
+            self.mark_batch(batch),
+            use_bf16=use_bf16,
+            microbatch_size=microbatch_size,
+        )
+
+
+DEFAULT_MARK_TRAINING_OBJECTIVE = MarkGeneratorMatchingObjective()
+
+
+def _finalize_benchmark(bench, warmup, output, model, use_bf16, last_loss):
+    """Steady-state throughput report. Operational only -- the checkpoint is meaningless and discarded.
+
+    Steady state excludes the first ``warmup`` recorded steps: kernel autotuning, the first shard open and
+    dataloader cache population all land there and would otherwise flatter (or distort) seconds/step.
+    """
+    import statistics
+
+    n = len(bench["step"])
+    keep = slice(min(warmup, max(n - 1, 0)), n)
+    steady = {k: v[keep] for k, v in bench.items()}
+    count = len(steady["total"])
+    if count == 0:
+        raise RuntimeError(
+            "benchmark produced no steady-state steps; lower benchmark_warmup"
+        )
+
+    def stat(key):
+        values = steady[key]
+        return {
+            "mean": statistics.fmean(values),
+            "median": statistics.median(values),
+            "p90": sorted(values)[int(0.9 * (len(values) - 1))],
+            "total": sum(values),
+        }
+
+    phases = {
+        k: stat(k)
+        for k in ("data_wait", "transfer", "forward", "backward", "optimizer", "total")
+    }
+    seconds_per_step = phases["total"]["mean"]
+    report = {
+        "artifact": "a100_throughput_benchmark",
+        "steps_recorded": n,
+        "warmup_excluded": min(warmup, max(n - 1, 0)),
+        "steady_state_steps": count,
+        "seconds_per_step": seconds_per_step,
+        "phase_seconds": phases,
+        "phase_fraction_of_step": {
+            k: (phases[k]["mean"] / seconds_per_step if seconds_per_step else 0.0)
+            for k in ("data_wait", "transfer", "forward", "backward", "optimizer")
+        },
+        "throughput": {
+            "examples_per_second": statistics.fmean(steady["examples"])
+            / seconds_per_step,
+            "candidate_actions_per_second": statistics.fmean(steady["candidates"])
+            / seconds_per_step,
+            "successor_groups_per_second": statistics.fmean(steady["successor_groups"])
+            / seconds_per_step,
+            "mean_candidates_per_batch": statistics.fmean(steady["candidates"]),
+            "mean_successor_groups_per_batch": statistics.fmean(
+                steady["successor_groups"]
+            ),
+        },
+        "precision": {"bf16_autocast": bool(use_bf16), "device": str(model.device)},
+        "last_loss": last_loss,
+        "projected_runtime_hours": {
+            str(h): h * seconds_per_step / 3600.0 for h in (8000, 12000, 16000)
+        },
+    }
+    if torch.cuda.is_available():
+        report["gpu"] = {
+            "name": torch.cuda.get_device_name(0),
+            "max_memory_allocated_gb": torch.cuda.max_memory_allocated() / 1e9,
+            "max_memory_reserved_gb": torch.cuda.max_memory_reserved() / 1e9,
+        }
+    if output:
+        Path(output).write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+    print(
+        json.dumps(
+            {
+                "phase": "benchmark_complete",
+                **{
+                    k: report[k]
+                    for k in (
+                        "seconds_per_step",
+                        "steady_state_steps",
+                        "projected_runtime_hours",
+                    )
+                },
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+    return report
+
+
+def train_factorized_mark_model(
+    model: FactorizedTraceletRateModel,
+    train_records: tuple[PathRecord, ...],
+    validation_batch: Any,
+    *,
+    dry_launch: bool = False,
+    dry_launch_output: str | None = None,
+    benchmark_steps: int = 0,
+    benchmark_warmup: int = 0,
+    benchmark_output: str | None = None,
+    steps: int,
+    batch_size: int,
+    learning_rate: float,
+    weight_decay: float,
+    seed: int,
+    workers: int,
+    late_time_fraction: float,
+    operational_horizon: float,
+    progress_stratification_fraction: float,
+    use_aromatic_bond_view: bool,
+    use_bf16: bool,
+    ring_catalog: TypedRingCatalog | None = None,
+    data_prefetch_factor: int = 2,
+    ring_electronic_mode: str = "factorized_local",
+    evaluation_points: int = 10,
+    evaluation_interval: int | None = None,
+    warmup_steps: int = 0,
+    schedule_steps: int | None = None,
+    minimum_learning_rate_fraction: float = 1.0,
+    early_stopping_patience: int = 0,
+    early_stopping_min_relative_delta: float = 0.0,
+    progress_callback: Callable[[dict[str, float]], None] | None = None,
+    checkpoint_interval: int = 0,
+    checkpoint_callback: Callable[[dict[str, object]], None] | None = None,
+    resume_state: dict[str, object] | None = None,
+    profile_timing: bool = False,
+    evaluation_batch_size: int | None = None,
+    initial_validation_metrics: dict[str, float] | None = None,
+    training_support_cache: ShardedTrainingSupportCache | None = None,
+    require_cached_support: bool = False,
+    target_property_conditions: Mapping[str, tuple[float, ...]] | None = None,
+    condition_dropout_probability: float = 0.0,
+    trainable_parameter_scope: str = "all",
+    record_index_sampler: object | None = None,
+    training_objective: FactorizedTrainingObjective | None = None,
+    training_loader_factory: TrainingLoaderFactory | None = None,
+    training_batch_audit_callback: TrainingBatchAuditCallback | None = None,
+    gradient_audit_callback: GradientAuditCallback | None = None,
+    validation_audit_callback: ValidationAuditCallback | None = None,
+) -> tuple[list[dict[str, float]], dict[str, float]]:
+    if steps <= 0 or batch_size <= 0 or learning_rate <= 0.0:
+        raise ValueError("steps, batch size, and learning rate must be positive")
+    if workers < 0:
+        raise ValueError("data workers must be non-negative")
+    if data_prefetch_factor <= 0:
+        raise ValueError("data prefetch factor must be positive")
+    if evaluation_interval is not None and evaluation_interval <= 0:
+        raise ValueError("evaluation interval must be positive")
+    resolved_schedule_steps = steps if schedule_steps is None else int(schedule_steps)
+    if resolved_schedule_steps <= 0:
+        raise ValueError("learning-rate schedule horizon must be positive")
+    if not 0 <= warmup_steps <= steps:
+        raise ValueError("warmup steps must lie in [0, steps]")
+    if not 0.0 < minimum_learning_rate_fraction <= 1.0:
+        raise ValueError("minimum learning-rate fraction must lie in (0, 1]")
+    if early_stopping_patience < 0:
+        raise ValueError("early-stopping patience must be non-negative")
+    if evaluation_batch_size is not None and evaluation_batch_size <= 0:
+        raise ValueError("evaluation batch size must be positive")
+    if not 0.0 <= early_stopping_min_relative_delta < 1.0:
+        raise ValueError("early-stopping minimum relative delta must lie in [0, 1)")
+    objective = (
+        DEFAULT_MARK_TRAINING_OBJECTIVE
+        if training_objective is None
+        else training_objective
+    )
+    if not isinstance(objective, FactorizedTrainingObjective):
+        raise TypeError("training_objective does not implement the shared protocol")
+    if not objective.name or not objective.selection_metric:
+        raise ValueError("training objective identity and selector must be nonempty")
+    configure_factorized_trainable_parameters(
+        model,
+        scope=trainable_parameter_scope,
+    )
+    optimizer = torch.optim.AdamW(
+        factorized_adamw_parameter_groups(model, weight_decay=weight_decay),
+        lr=learning_rate,
+    )
+    if resume_state is None:
+        start_step = 0
+        model.eval()
+        best_metrics = (
+            objective.metrics(
+                model,
+                validation_batch,
+                use_bf16=use_bf16,
+                microbatch_size=evaluation_batch_size,
+            )
+            if initial_validation_metrics is None
+            else {
+                str(key): float(value)
+                for key, value in initial_validation_metrics.items()
+            }
+        )
+        if objective.selection_metric not in best_metrics:
+            raise ValueError(
+                "initial validation metrics lack the objective selector "
+                f"{objective.selection_metric!r}"
+            )
+        best_metrics["selected_step"] = 0.0
+        best_state = _clone_model_state(model)
+        history: list[dict[str, float]] = []
+        evaluations_without_improvement = 0
+        early_stopping_reference_loss = float(best_metrics[objective.selection_metric])
+    else:
+        required = {
+            "completed_steps",
+            "current_state_dict",
+            "optimizer_state_dict",
+            "best_state_dict",
+            "best_metrics",
+            "history",
+            "optimizer_kind",
+            "evaluations_without_improvement",
+        }
+        missing = sorted(required - resume_state.keys())
+        if missing:
+            raise ValueError(f"factorized recovery state is missing: {missing}")
+        if resume_state["optimizer_kind"] != "adamw_decoupled_v1":
+            raise ValueError(
+                "factorized recovery checkpoint uses an incompatible optimizer"
+            )
+        recorded_objective = resume_state.get(
+            "training_objective_name",
+            DEFAULT_MARK_TRAINING_OBJECTIVE.name,
+        )
+        recorded_selector = resume_state.get(
+            "training_selection_metric",
+            DEFAULT_MARK_TRAINING_OBJECTIVE.selection_metric,
+        )
+        if (
+            recorded_objective != objective.name
+            or recorded_selector != objective.selection_metric
+        ):
+            raise ValueError(
+                "factorized recovery checkpoint uses another training objective"
+            )
+        start_step = int(resume_state["completed_steps"])
+        model.load_state_dict(resume_state["current_state_dict"])  # type: ignore[arg-type]
+        optimizer.load_state_dict(resume_state["optimizer_state_dict"])  # type: ignore[arg-type]
+        torch_rng_state = resume_state.get("torch_rng_state")
+        if isinstance(torch_rng_state, Tensor):
+            torch.set_rng_state(torch_rng_state.detach().cpu().to(torch.uint8))
+        cuda_rng_states = resume_state.get("cuda_rng_states")
+        if cuda_rng_states is not None and torch.cuda.is_available():
+            torch.cuda.set_rng_state_all(
+                [state.detach().cpu().to(torch.uint8) for state in cuda_rng_states]  # type: ignore[union-attr]
+            )
+        best_state = {
+            name: value.detach().clone()
+            for name, value in resume_state["best_state_dict"].items()  # type: ignore[union-attr]
+        }
+        best_metrics = {
+            str(key): float(value)
+            for key, value in resume_state["best_metrics"].items()  # type: ignore[union-attr]
+        }
+        history = [
+            {str(key): float(value) for key, value in row.items()}
+            for row in resume_state["history"]  # type: ignore[union-attr]
+        ]
+        evaluations_without_improvement = int(
+            resume_state["evaluations_without_improvement"]
+        )
+        early_stopping_reference_loss = float(
+            resume_state.get(
+                "early_stopping_reference_loss",
+                best_metrics[objective.selection_metric],
+            )
+        )
+
+    if (
+        resume_state is not None
+        and early_stopping_patience > 0
+        and evaluations_without_improvement >= early_stopping_patience
+    ):
+        # The recovery callback runs before the terminal early-stop break.  A
+        # retry from that exact checkpoint must therefore be a no-op, not an
+        # extra evaluation interval that can alter the selected model.
+        model.load_state_dict(best_state)
+        model.eval()
+        return history, best_metrics
+
+    loader = (
+        factorized_mark_loader(
+            train_records,
+            steps=steps,
+            batch_size=batch_size,
+            start_step=start_step,
+            seed=seed,
+            workers=workers,
+            late_time_fraction=late_time_fraction,
+            operational_horizon=operational_horizon,
+            progress_stratification_fraction=progress_stratification_fraction,
+            use_aromatic_bond_view=use_aromatic_bond_view,
+            pin_memory=model.device.type == "cuda",
+            ring_catalog=ring_catalog,
+            prefetch_factor=data_prefetch_factor,
+            ring_electronic_mode=ring_electronic_mode,
+            training_support_cache=training_support_cache,
+            require_cached_support=require_cached_support,
+            target_property_conditions=target_property_conditions,
+            condition_dropout_probability=condition_dropout_probability,
+            ring_family_mass_mode=model.ring_family_mass_mode,
+            capabilities=model.operator_capabilities,
+            record_index_sampler=record_index_sampler,
+        )
+        if training_loader_factory is None
+        else training_loader_factory(start_step)
+    )
+    timing_loop_started = perf_counter()
+    iterator: Iterator[Any] = iter(loader)
+    cumulative_data_wait = 0.0
+    cumulative_update_time = 0.0
+    maximum_data_wait = 0.0
+    # Benchmark accumulators. Steady state EXCLUDES the warmup window so kernel autotuning, the first
+    # shard open and cache population do not contaminate the per-step estimate.
+    _bench: dict[str, list] = {
+        "step": [],
+        "data_wait": [],
+        "transfer": [],
+        "forward": [],
+        "backward": [],
+        "optimizer": [],
+        "total": [],
+        "candidates": [],
+        "successor_groups": [],
+        "examples": [],
+    }
+    data_wait_history: list[float] = []
+    resolved_evaluation_interval = (
+        evaluation_interval
+        if evaluation_interval is not None
+        else max(steps // evaluation_points, 1)
+    )
+    model.train()
+    for step in range(start_step, steps):
+        completed_steps = step + 1
+        current_learning_rate = cosine_warmup_learning_rate(
+            base_learning_rate=learning_rate,
+            completed_step=completed_steps,
+            total_steps=resolved_schedule_steps,
+            warmup_steps=warmup_steps,
+            minimum_fraction=minimum_learning_rate_fraction,
+        )
+        for parameter_group in optimizer.param_groups:
+            parameter_group["lr"] = current_learning_rate
+        started = perf_counter()
+        cpu_batch = next(iterator)
+        loaded_at = perf_counter()
+        # Objective-specific support is checked before scoring so a cache,
+        # representability, or alignment failure cannot reach an optimizer step.
+        objective.validate_batch(cpu_batch)
+        if training_batch_audit_callback is not None:
+            training_batch_audit_callback(cpu_batch, completed_steps)
+        batch = cpu_batch.to(model.device, non_blocking=model.device.type == "cuda")
+        transferred_at = perf_counter()
+        optimizer.zero_grad(set_to_none=True)
+        context = (
+            torch.autocast(device_type="cuda", dtype=torch.bfloat16)
+            if use_bf16 and model.device.type == "cuda"
+            else nullcontext()
+        )
+        with context:
+            loss = objective.loss(model, batch)
+        if dry_launch:
+            # CPU dry-launch (owner mandate §1): exit after the FIRST real training forward + one real
+            # editing-validation forward, BEFORE backward/optimizer -- proving the zero-mixture path reaches
+            # the first editing batch with a finite loss and zero optimizer updates on the real code path.
+            _zmi.bump("edit_training_batches_emitted")
+            _zmi.bump("model_forward_calls")
+            _zmi.bump("gm_loss_calls")
+            model.eval()
+            val_metrics = objective.metrics(
+                model,
+                validation_batch,
+                use_bf16=use_bf16,
+                microbatch_size=evaluation_batch_size,
+            )
+            _zmi.bump("edit_validation_batches_emitted")
+            _zmi.bump("model_forward_calls")
+            _zmi.bump("gm_loss_calls")
+            ok, zmi_report = _zmi.zero_mixture_ok()
+            validation_selection_value = float(
+                val_metrics.get(objective.selection_metric, float("nan"))
+            )
+            result = {
+                "phase": "dry_launch_first_batch",
+                "training_objective": objective.name,
+                "selection_metric": objective.selection_metric,
+                "train_objective_loss": float(loss.detach()),
+                "train_loss_finite": bool(torch.isfinite(loss)),
+                "validation_selection_value": validation_selection_value,
+                "validation_selection_finite": bool(
+                    torch.isfinite(torch.tensor(validation_selection_value))
+                ),
+                "train_batch_size": int(batch.batch_size),
+                "validation_batch_size": int(validation_batch.batch_size),
+                "zero_mixture_ok": ok,
+                "zero_mixture_report": zmi_report,
+            }
+            if objective is DEFAULT_MARK_TRAINING_OBJECTIVE:
+                result["train_gm_loss"] = result["train_objective_loss"]
+                result["validation_gm_loss"] = validation_selection_value
+                result["validation_loss_finite"] = result["validation_selection_finite"]
+            if dry_launch_output:
+                Path(dry_launch_output).write_text(
+                    json.dumps(result, indent=2, sort_keys=True) + "\n"
+                )
+            print(
+                json.dumps(
+                    {
+                        "phase": "dry_launch_first_batch",
+                        "training_objective": objective.name,
+                        "train_objective_loss": result["train_objective_loss"],
+                        "validation_selection_value": validation_selection_value,
+                        "zero_mixture_ok": ok,
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+            return result
+        if profile_timing:
+            _synchronize(model.device)
+        forwarded_at = perf_counter()
+        _zmi.bump("backward_calls")
+        loss.backward()
+        if gradient_audit_callback is not None:
+            gradient_audit_callback(
+                model,
+                objective.mark_batch(batch),
+                completed_steps,
+                loss.detach(),
+            )
+        if profile_timing:
+            _synchronize(model.device)
+        backward_at = perf_counter()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=10.0)
+        _zmi.bump("optimizer_steps")
+        _zmi.bump("optimizer_step_calls")
+        optimizer.step()
+        if profile_timing:
+            _synchronize(model.device)
+        optimized_at = perf_counter()
+        if benchmark_steps and completed_steps == 1:
+            print(
+                json.dumps(
+                    {
+                        "phase": "OPTIMIZER_STEP_1",
+                        "step": completed_steps,
+                        "device": str(model.device),
+                        "bf16": bool(use_bf16),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+        if benchmark_steps:
+            # Count LEGAL candidates, not padded tensor elements. The first version used
+            # graft_successor_groups.numel(), which is the dense [B, n_slots, n_slots] size -- a
+            # configuration constant (64*40*40 = 102,400 every batch), so the reported
+            # "candidate actions/second" was tensor elements per second and meant nothing.
+            benchmark_batch = objective.mark_batch(batch)
+            _n_cand = 0
+            for _mask_name in (
+                "atom_delete_mask",
+                "cycle_edge_mask",
+                "cyclic_pair_mask",
+                "graft_mask",
+            ):
+                _mask = getattr(benchmark_batch, _mask_name, None)
+                if _mask is not None:
+                    _n_cand += int(_mask.sum().item())
+            for _actions_name in ("ring_restate_actions", "ring_delete_actions"):
+                _actions = getattr(benchmark_batch, _actions_name, None)
+                if _actions:
+                    _n_cand += sum(len(_a) for _a in _actions if _a)
+            _n_groups = (
+                int(torch.unique(benchmark_batch.graft_successor_groups).numel())
+                if getattr(benchmark_batch, "graft_successor_groups", None) is not None
+                and benchmark_batch.graft_successor_groups.numel()
+                else 0
+            )
+            _bench["step"].append(step)
+            _bench["data_wait"].append(loaded_at - started)
+            _bench["transfer"].append(transferred_at - loaded_at)
+            _bench["forward"].append(forwarded_at - transferred_at)
+            _bench["backward"].append(backward_at - forwarded_at)
+            _bench["optimizer"].append(optimized_at - backward_at)
+            _bench["total"].append(optimized_at - started)
+            _bench["candidates"].append(_n_cand)
+            _bench["successor_groups"].append(_n_groups)
+            _bench["examples"].append(int(benchmark_batch.atom_types.shape[0]))
+            if completed_steps >= benchmark_steps:
+                return _finalize_benchmark(
+                    _bench,
+                    benchmark_warmup,
+                    benchmark_output,
+                    model,
+                    use_bf16,
+                    float(loss.detach().cpu()),
+                )
+        data_wait = loaded_at - started
+        update_time = optimized_at - started
+        cumulative_data_wait += data_wait
+        cumulative_update_time += update_time
+        maximum_data_wait = max(maximum_data_wait, data_wait)
+        data_wait_history.append(data_wait)
+        evaluated = (
+            step == 0
+            or completed_steps % resolved_evaluation_interval == 0
+            or completed_steps == steps
+        )
+        should_early_stop = False
+        if evaluated:
+            model.eval()
+            metrics = objective.metrics(
+                model,
+                validation_batch,
+                use_bf16=use_bf16,
+                microbatch_size=evaluation_batch_size,
+            )
+            metrics["step"] = float(completed_steps)
+            metrics["train_batch_loss"] = float(loss.detach())
+            metrics["learning_rate"] = float(current_learning_rate)
+            current_validation_loss = float(metrics[objective.selection_metric])
+            improved = (
+                current_validation_loss < best_metrics[objective.selection_metric]
+            )
+            if improved:
+                best_metrics = {
+                    key: value
+                    for key, value in metrics.items()
+                    if key not in {"step", "train_batch_loss"}
+                }
+                best_metrics["selected_step"] = float(completed_steps)
+                best_state = _clone_model_state(model)
+            material_threshold = early_stopping_reference_loss * (
+                1.0 - early_stopping_min_relative_delta
+            )
+            materially_improved = current_validation_loss < material_threshold
+            if materially_improved:
+                early_stopping_reference_loss = current_validation_loss
+                evaluations_without_improvement = 0
+            elif completed_steps >= max(warmup_steps, 1):
+                evaluations_without_improvement += 1
+            metrics["materially_improved"] = float(materially_improved)
+            metrics["early_stopping_reference_loss"] = float(
+                early_stopping_reference_loss
+            )
+            metrics["evaluations_without_improvement"] = float(
+                evaluations_without_improvement
+            )
+            should_early_stop = (
+                early_stopping_patience > 0
+                and evaluations_without_improvement >= early_stopping_patience
+            )
+            metrics["early_stopped"] = float(should_early_stop)
+            if validation_audit_callback is not None:
+                validation_audit_callback(completed_steps, metrics)
+            history.append(metrics)
+            if progress_callback is not None:
+                observed_updates = completed_steps - start_step
+                timing_metrics = {
+                    "timing/profile_synchronized": float(profile_timing),
+                    "timing/data_wait_seconds": data_wait,
+                    "timing/cumulative_data_wait_seconds": cumulative_data_wait,
+                    "timing/mean_data_wait_seconds": (
+                        cumulative_data_wait / observed_updates
+                    ),
+                    "timing/p95_data_wait_seconds": float(
+                        np.percentile(data_wait_history, 95)
+                    ),
+                    "timing/max_data_wait_seconds": maximum_data_wait,
+                }
+                if profile_timing:
+                    elapsed = max(optimized_at - timing_loop_started, 1e-12)
+                    timing_metrics.update(
+                        {
+                            "timing/transfer_seconds": transferred_at - loaded_at,
+                            "timing/forward_seconds": forwarded_at - transferred_at,
+                            "timing/backward_seconds": backward_at - forwarded_at,
+                            "timing/optimizer_seconds": optimized_at - backward_at,
+                            "timing/update_seconds": update_time,
+                            "timing/data_wait_fraction": (
+                                cumulative_data_wait
+                                / max(cumulative_update_time, 1e-12)
+                            ),
+                            "timing/updates_per_second": observed_updates / elapsed,
+                            "timing/examples_per_second": (
+                                observed_updates * batch_size / elapsed
+                            ),
+                        }
+                    )
+                progress_callback(
+                    {
+                        **metrics,
+                        **timing_metrics,
+                    }
+                )
+            model.train()
+        should_checkpoint = checkpoint_callback is not None and (
+            completed_steps == steps
+            or should_early_stop
+            or (checkpoint_interval > 0 and completed_steps % checkpoint_interval == 0)
+        )
+        if should_checkpoint:
+            checkpoint_callback(
+                _factorized_recovery_state(
+                    model=model,
+                    optimizer=optimizer,
+                    completed_steps=completed_steps,
+                    best_state=best_state,
+                    best_metrics=best_metrics,
+                    history=history,
+                    evaluations_without_improvement=(evaluations_without_improvement),
+                    early_stopping_reference_loss=early_stopping_reference_loss,
+                    training_objective_name=objective.name,
+                    training_selection_metric=objective.selection_metric,
+                )
+            )
+        if should_early_stop:
+            break
+    model.load_state_dict(best_state)
+    model.eval()
+    return history, best_metrics
+
+
+def _clone_model_state(model: nn.Module) -> dict[str, Tensor]:
+    return {name: value.detach().clone() for name, value in model.state_dict().items()}
+
+
+def factorized_adamw_parameter_groups(
+    model: nn.Module,
+    *,
+    weight_decay: float,
+) -> list[dict[str, object]]:
+    """Partition dense weights from lookup and scale parameters for AdamW.
+
+    Mark dictionaries are large, sparsely activated embedding tables.  Coupled
+    Adam L2 regularization normalizes their otherwise tiny decay gradients and
+    can collapse an inactive entry by roughly one learning-rate unit per step.
+    Decoupled decay avoids that pathology, and embeddings, biases, normalization
+    scales, and other vector parameters receive no decay at all.
+    """
+
+    if weight_decay < 0.0:
+        raise ValueError("weight decay must be non-negative")
+    no_decay_ids: set[int] = set()
+    for module in model.modules():
+        if isinstance(module, (nn.Embedding, nn.LayerNorm)):
+            no_decay_ids.update(
+                id(parameter) for parameter in module.parameters(recurse=False)
+            )
+
+    decay: list[nn.Parameter] = []
+    no_decay: list[nn.Parameter] = []
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad:
+            continue
+        excluded = (
+            id(parameter) in no_decay_ids
+            or parameter.ndim < 2
+            or name.endswith(".bias")
+        )
+        (no_decay if excluded else decay).append(parameter)
+
+    assigned = {id(parameter) for parameter in (*decay, *no_decay)}
+    expected = {
+        id(parameter) for parameter in model.parameters() if parameter.requires_grad
+    }
+    if assigned != expected or len(decay) + len(no_decay) != len(expected):
+        raise RuntimeError("optimizer parameter partition is incomplete or duplicated")
+    return [
+        {"params": decay, "weight_decay": float(weight_decay)},
+        {"params": no_decay, "weight_decay": 0.0},
+    ]
+
+
+_CHEMISTRY_MARK_PARAMETER_PREFIXES = (
+    "grow_root_head.",
+    "grow_query.",
+    "grow_option.",
+    "restate_head.",
+    "reorder_head.",
+    "ring_system_atom_head.",
+    "ring_system_role_head.",
+    "ring_system_global_category_pair",
+    "ring_system_adjacent_category_pair",
+)
+
+_RING_TOPOLOGY_PARAMETER_PREFIXES = ("ring_topology_group_head.",)
+
+
+def configure_factorized_trainable_parameters(
+    model: FactorizedTraceletRateModel,
+    *,
+    scope: str,
+) -> tuple[str, ...]:
+    """Select a controlled training surface for a factorized rate model.
+
+    ``chemistry_marks_only`` repairs atom/bond marks and coordinated ring
+    electronics while keeping the encoder, total hazard, family law, Graft,
+    ring topology/template choice, and placement rates exactly frozen.  It is
+    intentionally narrower than generic fine-tuning so a chemistry pilot
+    cannot recreate the family-rate and topology drift seen in the coupled
+    P1/P2 experiment.
+
+    ``ring_topology_only`` trains only the shared topology-and-cycle group
+    head introduced above the complete-template selector.  It leaves family
+    timing, exact template residuals, placements, electronics, and the graph
+    encoder frozen, isolating the diagnosed fused-ring probability seam.
+
+    ``chemistry_and_topology`` is the union of the two above: it repairs the
+    atom/bond/ring-electronic marks and the shared topology-cycle group head
+    together, while keeping the encoder, total hazard, family law, Graft,
+    exact template residuals, and placement frozen.  This composes the two
+    independently rollout-validated fixes (chemistry marks and ring-topology
+    mix) without unfreezing the family/Graft rates that caused the coupled
+    P1/P2 drift.
+    """
+
+    valid_scopes = {
+        "all",
+        "chemistry_marks_only",
+        "ring_topology_only",
+        "chemistry_and_topology",
+    }
+    if scope not in valid_scopes:
+        raise ValueError(f"unknown trainable parameter scope: {scope}")
+    selected: list[str] = []
+    for name, parameter in model.named_parameters():
+        trainable = (
+            scope == "all"
+            or (
+                scope == "chemistry_marks_only"
+                and name.startswith(_CHEMISTRY_MARK_PARAMETER_PREFIXES)
+            )
+            or (
+                scope == "ring_topology_only"
+                and name.startswith(_RING_TOPOLOGY_PARAMETER_PREFIXES)
+            )
+            or (
+                scope == "chemistry_and_topology"
+                and name.startswith(
+                    _CHEMISTRY_MARK_PARAMETER_PREFIXES
+                    + _RING_TOPOLOGY_PARAMETER_PREFIXES
+                )
+            )
+        )
+        parameter.requires_grad_(trainable)
+        if trainable:
+            selected.append(name)
+    if not selected:
+        raise RuntimeError("trainable parameter scope selected no parameters")
+    return tuple(selected)
+
+
+def cosine_warmup_learning_rate(
+    *,
+    base_learning_rate: float,
+    completed_step: int,
+    total_steps: int,
+    warmup_steps: int,
+    minimum_fraction: float,
+) -> float:
+    """Deterministic linear-warmup/cosine-decay schedule, safe on resume."""
+
+    if base_learning_rate <= 0.0 or total_steps <= 0:
+        raise ValueError("learning rate and total steps must be positive")
+    if completed_step < 1:
+        raise ValueError("completed step must be positive")
+    if not 0 <= warmup_steps <= total_steps:
+        raise ValueError("warmup steps must lie in [0, total_steps]")
+    if not 0.0 < minimum_fraction <= 1.0:
+        raise ValueError("minimum fraction must lie in (0, 1]")
+    if warmup_steps > 0 and completed_step <= warmup_steps:
+        return base_learning_rate * completed_step / warmup_steps
+    decay_steps = max(total_steps - warmup_steps, 1)
+    progress = min(
+        max((completed_step - warmup_steps) / decay_steps, 0.0),
+        1.0,
+    )
+    cosine_fraction = 0.5 * (1.0 + cos(pi * progress))
+    scale = minimum_fraction + (1.0 - minimum_fraction) * cosine_fraction
+    return base_learning_rate * scale
+
+
+def _factorized_recovery_state(
+    *,
+    model: nn.Module,
+    optimizer: torch.optim.Optimizer,
+    completed_steps: int,
+    best_state: dict[str, Tensor],
+    best_metrics: dict[str, float],
+    history: list[dict[str, float]],
+    evaluations_without_improvement: int,
+    early_stopping_reference_loss: float,
+    training_objective_name: str,
+    training_selection_metric: str,
+) -> dict[str, object]:
+    return {
+        "optimizer_kind": "adamw_decoupled_v1",
+        "training_objective_name": training_objective_name,
+        "training_selection_metric": training_selection_metric,
+        "completed_steps": int(completed_steps),
+        "current_state_dict": _clone_model_state(model),
+        "optimizer_state_dict": copy.deepcopy(optimizer.state_dict()),
+        "torch_rng_state": torch.get_rng_state().detach().cpu(),
+        "cuda_rng_states": (
+            [state.detach().cpu() for state in torch.cuda.get_rng_state_all()]
+            if torch.cuda.is_available()
+            else None
+        ),
+        "best_state_dict": {
+            name: value.detach().clone() for name, value in best_state.items()
+        },
+        "best_metrics": copy.deepcopy(best_metrics),
+        "history": copy.deepcopy(history),
+        "evaluations_without_improvement": int(evaluations_without_improvement),
+        "early_stopping_reference_loss": float(early_stopping_reference_loss),
+    }
+
+
+def _synchronize(device: torch.device) -> None:
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
+    elif device.type == "mps":
+        torch.mps.synchronize()
+
+
+__all__ = [
+    "DEFAULT_MARK_TRAINING_OBJECTIVE",
+    "FactorizedMarkCollator",
+    "FactorizedMarkDataset",
+    "FactorizedMarkExample",
+    "MarkGeneratorMatchingObjective",
+    "configure_factorized_trainable_parameters",
+    "cosine_warmup_learning_rate",
+    "factorized_adamw_parameter_groups",
+    "factorized_mark_loader",
+    "factorized_mark_metrics",
+    "sample_factorized_mark_batch",
+    "train_factorized_mark_model",
+]

@@ -1,0 +1,507 @@
+"""Every shape that crosses a stage boundary in the Process-V2 vertical pipeline.
+
+WHY THIS IS COMPLETE AND NOT MINIMAL
+------------------------------------
+The previous attempt froze a protocol, the join key and two rejection categories,
+and left the resolved ROW and the accepted TRANSITION unstated.  Three stages
+were then built in parallel, each green against the contract written for it, and
+the chain did not join: the producer spelled the partition role ``split`` while
+the consumer required ``partition_role``; the consumer required a capability cell
+and three strata that no producer emitted.  A seam that names a concept but not
+the field carrying it has not named it.
+
+So this module names every field of every artifact that crosses a boundary, and
+nothing else.  It holds no machinery, computes nothing, and owns no artifact.
+
+THE PIPELINE
+------------
+    plan -> Active8 map (one task per source chunk) -> Active8 reduce + sentinel
+         -> Gate 0 deterministic metadata reduction
+
+CLASSIFICATION IS DERIVED ANNOTATION
+------------------------------------
+Active8 assigns ``capability_cell_id`` at WRITE time, while the exact source
+state, the action, the candidate fiber and the executor result are already in
+memory.  It is an ANNOTATION: it must never affect admission.  The admission
+decision is a function of the candidate evidence alone, and a row records both
+so a reader can check that independence rather than trust it.
+
+The raw structural axes are stored BESIDE the cell so a consumer can audit the
+assignment without the classifier.  That is what lets Gate 0 aggregate
+authenticated evidence while importing no classifier, reconstructing no model,
+decoding no molecular state and re-enumerating no successor fiber.
+"""
+
+from __future__ import annotations
+
+from compose_v4.data.editing_v2_process_v2_schema import AUTHORITY_FIELDS
+
+# ---- Schemas and versions ----
+
+PIPELINE_NAMESPACE = "compose.data.editing_v2_process_v2_pipeline"
+
+PLAN_SCHEMA = f"{PIPELINE_NAMESPACE}.plan"
+PLAN_SCHEMA_VERSION = 3
+
+ACTIVE8_TASK_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_task_result"
+ACTIVE8_TASK_SCHEMA_VERSION = 3
+
+ACTIVE8_COMPLETION_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_completion"
+ACTIVE8_COMPLETION_SCHEMA_VERSION = 3
+
+SENTINEL_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_release_sentinel"
+SENTINEL_SCHEMA_VERSION = 3
+
+SENTINEL_PLAN_SCHEMA = f"{PIPELINE_NAMESPACE}.active8_release_sentinel_plan"
+SENTINEL_PLAN_SCHEMA_VERSION = 2
+
+SENTINEL_PARTITION_RESULT_SCHEMA = (
+    f"{PIPELINE_NAMESPACE}.active8_release_sentinel_partition_result"
+)
+SENTINEL_PARTITION_RESULT_SCHEMA_VERSION = 2
+
+ACTIVE8_REDUCTION_PREPARED_SCHEMA = (
+    f"{PIPELINE_NAMESPACE}.active8_reduction_prepared"
+)
+ACTIVE8_REDUCTION_PREPARED_SCHEMA_VERSION = 2
+
+GATE_ZERO_TASK_SCHEMA = f"{PIPELINE_NAMESPACE}.gate_zero_task_result"
+GATE_ZERO_TASK_SCHEMA_VERSION = 3
+
+GATE_ZERO_DECISION_SCHEMA = f"{PIPELINE_NAMESPACE}.gate_zero_decision"
+GATE_ZERO_DECISION_SCHEMA_VERSION = 3
+
+#: No stage in this pipeline authorizes anything, in either outcome.
+PIPELINE_STATUS_NO_AUTHORITY = "PROCESS_V2_PIPELINE_EVIDENCE_ONLY_NO_AUTHORITY"
+
+# ---- Addressing ----
+
+#: A cache row joins to its rebind decision by the V1 task identity and the
+#: GLOBAL entry index.  Never by chunk position: position is a function of the
+#: chunk size, so the same corpus chunked differently holds the same rows at
+#: different offsets and a positional join silently pairs the wrong decision.
+JOIN_KEY_FIELDS: tuple[str, ...] = ("v1_task_identity_sha256", "entry_index")
+
+#: Addressing ONE trace needs the trace id as well.  A trace id is unique within
+#: a V1 task and nothing guarantees it across tasks, so a bare-id lookup merges
+#: two traces into an answer that merely looks longer than it should be.
+TRACE_KEY_FIELDS: tuple[str, ...] = (*JOIN_KEY_FIELDS, "trace_id")
+
+#: An action within a trace.
+ACTION_KEY_FIELDS: tuple[str, ...] = (*TRACE_KEY_FIELDS, "step_index")
+
+# ---- Candidate evidence: what admission is a function of ----
+
+#: Emitted per action by the production evaluator after checking only the
+#: teacher's declared family coordinate and replaying it through the production
+#: executor. Full quotient geometry is intentionally absent and belongs to the
+#: bounded release sentinel and cached T1 panel.
+#: `supported` and `exclusion_reason` are PUBLISHED, unlike the previous
+#: attempt, where they never crossed the seam and Gate 0 therefore could not
+#: enforce the clause its own contract declared.
+CANDIDATE_EVIDENCE_FIELDS: tuple[str, ...] = (
+    "supported",
+    "exclusion_reason",
+    "action_sha256",
+    "source_state_sha256",
+    "target_state_sha256",
+    "source_canonical_key",
+    "canonical_successor_key",
+    "teacher_coordinate_legal",
+    "teacher_executes_to_exact_successor",
+    "productive_canonical_successor",
+)
+
+#: Logical invariants every accepted action's evidence satisfies. Stated as data
+#: so the writer, reader and sentinel check one list rather than three copies.
+ACCEPTED_EVIDENCE_INVARIANTS: tuple[str, ...] = (
+    "teacher_coordinate_legal == true",
+    "teacher_executes_to_exact_successor == true",
+    "productive_canonical_successor == true",
+    "source_canonical_key != canonical_successor_key",
+)
+
+# ---- Classification: derived annotation, beside the evidence ----
+
+#: The capability cell and the RAW STRUCTURAL AXES it was derived from.  The
+#: axes travel with the cell so a consumer can audit the assignment without
+#: importing the classifier, which is what keeps Gate 0 free of it.
+#:
+#: `classification_affects_admission` is always False and is published rather
+#: than assumed: it is the field a reader checks to confirm the annotation did
+#: not participate in the decision.
+CLASSIFICATION_FIELDS: tuple[str, ...] = (
+    "capability_cell_id",
+    "model_family",
+    "family_context",
+    "audit_axes",
+    "audit_cycle_rank_delta",
+    "audit_touches_ring_system",
+    "audit_is_terminal_source",
+    "classification_affects_admission",
+)
+
+# ---- The Active8 decision row ----
+
+#: One published row per resolved trace.  `partition_role`, not `split`: this is
+#: a policy artifact a gate reads to decide eligibility, and the vocabulary it
+#: carries is REQUIRED_PARTITION_ROLES.  `split` is the data path's name for the
+#: same value and is correct in the cache and the rebind.
+ACTIVE8_ROW_FIELDS: tuple[str, ...] = (
+    *TRACE_KEY_FIELDS,
+    "task_identity_sha256",
+    "data_lane",
+    "partition_role",
+    "admission_status",
+    "rejection_category",
+    "upstream_rejection_code",
+    "path_length",
+    "actions",
+    "candidate_totals",
+    "action_family_histogram",
+    "row_sha256",
+)
+
+#: A trace the rebind already refused: never candidate-evaluated, present for
+#: the census.  Distinct from a trace Active8 evaluated and excluded -- merging
+#: them makes "we did not look" indistinguishable from "we looked and said no".
+UPSTREAM_REJECTED = "upstream_rebind_rejected"
+ACTIVE8_EXCLUDED = "active8_candidate_excluded"
+REJECTION_CATEGORIES: tuple[str, ...] = (UPSTREAM_REJECTED, ACTIVE8_EXCLUDED)
+
+#: Recomputed from the action evidence at every boundary, never carried forward
+#: as a trusted aggregate.  The previous attempt published these and re-read
+#: them; a resealed row could move a census by 1000 undetected.
+CANDIDATE_TOTAL_FIELDS: tuple[str, ...] = (
+    "evaluated_teachers",
+    "legal_teacher_coordinates",
+    "exact_teacher_successors",
+    "productive_teacher_successors",
+    "supported_teachers",
+)
+
+#: A POLICY-EXCLUDED action -- one outside ActionCodecV4, or a multi-neighbour
+#: insert -- publishes `candidate_evidence: null`.  The evaluator never ran, so
+#: there is no evidence to record, and a fabricated zero-filled payload would be
+#: indistinguishable from a real one that happened to measure zero.  Its trace
+#: still carries the trace-level `active8_candidate_excluded` category, which is
+#: what every census counts; no accepted-transition field and no aggregate reads
+#: the per-action reason.  Stated here so a consumer treats null as a declared
+#: value rather than a missing one.
+ACTIVE8_POLICY_EXCLUDED_EVIDENCE = None
+
+# ---- The accepted transition Gate 0 aggregates ----
+
+#: Everything Gate 0 needs, and nothing it must compute.  It carries the cell,
+#: the axes, the evidence and the counts, so Gate 0 opens no molecular state.
+#:
+#: `terminal` describes the teacher's SOURCE progress position and is therefore
+#: False for every accepted action, INCLUDING a final action whose successor is
+#: terminal: a transition exists precisely because its source has an outgoing
+#: step.  Reading it from the successor made `terminal_assignment_count_is_zero`
+#: unsatisfiable for any non-empty corpus.
+ACCEPTED_TRANSITION_FIELDS: tuple[str, ...] = (
+    *ACTION_KEY_FIELDS,
+    "task_identity_sha256",
+    "data_lane",
+    "partition_role",
+    "executor_rule",
+    "progress_index",
+    "terminal",
+    "capability_cell_id",
+    "model_family",
+    "family_context",
+    "audit_axes",
+    "candidate_evidence",
+    "assignment_sha256",
+)
+
+# ---- Census ----
+
+#: source == upstream_rejected + active8_accepted + active8_excluded.
+ACTIVE8_CENSUS_FIELDS: tuple[str, ...] = (
+    "source_entries",
+    "upstream_rejected_entries",
+    "active8_accepted_entries",
+    "active8_excluded_entries",
+)
+
+# ---- The Active8 task receipt: metadata a gate reads without opening rows ----
+
+#: Published per task BESIDE the transition rows, never inside them.  The split
+#: is load-bearing: Gate 0 reads every role's receipt to build the complete
+#: census and the sealed-role digests, and only constructs a transitions path
+#: inside the eligible-role loop.  Put the rows in the receipt and reading the
+#: census opens held-out molecular content, so "never opened" degrades to
+#: "never counted".
+#:
+#: `partition_role`, NOT `split`.  A receipt is exactly the artifact a gate
+#: reads to decide eligibility, so it carries the policy vocabulary
+#: (`REQUIRED_PARTITION_ROLES`).  `split` is the data path's name for the same
+#: value and stays correct in the cache and the rebind.  This field was left
+#: unnamed in the first version of this module and the producer and consumer
+#: each picked a spelling -- the exact failure the docstring above describes,
+#: reproduced one layer down, which is why receipt fields are now named too.
+ACTIVE8_RECEIPT_FIELDS: tuple[str, ...] = (
+    "schema",
+    "schema_version",
+    "status",
+    "task_identity_sha256",
+    "partition_role",
+    "data_lane",
+    "source_chunk_identity_sha256",
+    *ACTIVE8_CENSUS_FIELDS,
+    "transition_count",
+    "decision_shard_sha256",
+    "receipt_sha256",
+)
+
+#: Layout. The seam names fields; without naming these it does not name where
+#: they live, and two agents chose two layouts.
+ACTIVE8_TASKS_DIRNAME = "tasks"
+ACTIVE8_RECEIPT_FILENAME = "RECEIPT.json"
+#: The per-trace census rows (`ACTIVE8_ROW_FIELDS`).  A published artifact by
+#: this seam's own definition, so it gets a name here rather than being invented
+#: by whichever stage writes it first.  Gate 0 never opens it: it builds the
+#: census from receipt metadata and aggregates transitions, so rows exist for
+#: audit and for stages downstream of this pipeline.
+ACTIVE8_ROW_SHARD_FILENAME = "rows.jsonl.gz"
+
+#: The accepted transitions (`ACCEPTED_TRANSITION_FIELDS`).
+ACTIVE8_DECISION_SHARD_FILENAME = "transitions.jsonl.gz"
+
+#: Run/plan binding and the derived per-task histograms.  A fourth sibling so
+#: the receipt stays exactly `ACTIVE8_RECEIPT_FIELDS`: a derived aggregate does
+#: not belong in the artifact a gate reads to decide eligibility, and widening
+#: the receipt to hold it would break the key-set equality both sides assert.
+ACTIVE8_TASK_SUMMARY_FILENAME = "TASK_SUMMARY.json"
+GATE_ZERO_DECISION_FILENAME = "DECISION.json"
+ACTIVE8_REDUCTION_PREPARED_FILENAME = "PROCESS_V2_ACTIVE8_REDUCTION_PREPARED.json"
+SENTINEL_PARTITIONS_DIRNAME = "sentinel_partitions"
+SENTINEL_PARTITION_RESULT_FILENAME = "RESULT.json"
+
+# ---- The release sentinel ----
+
+#: Below this many unique accepted (source_state_sha256, action_sha256) pairs,
+#: the sentinel checks ALL of them.
+SENTINEL_EXHAUSTIVE_THRESHOLD = 6_784
+
+#: Above it: the deduplicated union of this many SHA-256-ranked examples per
+#: required capability cell, and this many globally ranked.
+SENTINEL_PER_CELL_EXAMPLES = 128
+SENTINEL_GLOBAL_EXAMPLES = 4_608
+
+#: Of the selected set, this many are additionally compared against the
+#: independent dictionary successor oracle.  The oracle is a BOUNDED test
+#: instrument and never appears in the production path.
+SENTINEL_ORACLE_EXAMPLES = 256
+
+#: Prospectively frozen: ranking must not be choosable after seeing results.
+SENTINEL_SALT = "process_v2_active8_release_sentinel_v1"
+
+SENTINEL_RESULT_FIELDS: tuple[str, ...] = (
+    "schema",
+    "schema_version",
+    "status",
+    "salt",
+    "binding_sha256",
+    "plan_sha256",
+    "run_identity_sha256",
+    "task_inventory_sha256",
+    "result_inventory_sha256",
+    "unique_accepted_pairs",
+    "selection_mode",
+    "selected_pairs",
+    "selected_pairs_sha256",
+    "per_cell_examples",
+    "global_examples",
+    "oracle_examples",
+    "evidence_mismatches",
+    "cell_mismatches",
+    "oracle_mismatches",
+    "sentinel_sha256",
+)
+
+#: The compact occurrence projection carried by the frozen sentinel plan.  It
+#: contains exactly the published fields the release check compares.  Keeping
+#: it beside the selected pair makes every worker independent of the mutable
+#: directory listing and preserves comparison against every occurrence rather
+#: than only one representative.
+SENTINEL_OCCURRENCE_FIELDS: tuple[str, ...] = (
+    "task_identity_sha256",
+    "v1_task_identity_sha256",
+    "entry_index",
+    "step_index",
+    "candidate_evidence",
+    "capability_cell_id",
+    "family_context",
+    "audit_axes",
+)
+
+SENTINEL_PAIR_FIELDS: tuple[str, ...] = (
+    "source_state_sha256",
+    "action_sha256",
+    "rank_sha256",
+    "source_task_identity_sha256",
+    "source_entry_index",
+    "source_step_index",
+    "source_model_family",
+    "oracle_required",
+    "occurrences",
+    "pair_sha256",
+)
+
+SENTINEL_PARTITION_FIELDS: tuple[str, ...] = (
+    "partition_index",
+    "source_task_identity_sha256",
+    "selected_pairs",
+    "selected_pairs_sha256",
+    "oracle_examples",
+    "pairs",
+    "partition_identity_sha256",
+)
+
+SENTINEL_PLAN_FIELDS: tuple[str, ...] = (
+    "schema",
+    "schema_version",
+    "status",
+    *AUTHORITY_FIELDS,
+    "salt",
+    "binding_sha256",
+    "plan_sha256",
+    "run_identity_sha256",
+    "task_inventory_sha256",
+    "result_inventory_sha256",
+    "unique_accepted_pairs",
+    "selection_mode",
+    "selected_pairs",
+    "selected_pairs_sha256",
+    "per_cell_examples",
+    "global_examples",
+    "oracle_examples",
+    "max_pairs_per_partition",
+    "partitions",
+    "partition_inventory_sha256",
+    "sentinel_plan_sha256",
+)
+
+SENTINEL_PARTITION_MATCHED = "SENTINEL_PARTITION_MATCHED"
+SENTINEL_PARTITION_MISMATCH = "SENTINEL_PARTITION_MISMATCH"
+
+SENTINEL_PARTITION_RESULT_FIELDS: tuple[str, ...] = (
+    "schema",
+    "schema_version",
+    "status",
+    *AUTHORITY_FIELDS,
+    "partition_outcome",
+    "sentinel_plan_sha256",
+    "partition_identity_sha256",
+    "partition_index",
+    "binding_sha256",
+    "plan_sha256",
+    "run_identity_sha256",
+    "task_inventory_sha256",
+    "result_inventory_sha256",
+    "selected_pairs",
+    "selected_pairs_sha256",
+    "evaluated_pairs",
+    "evaluated_pairs_sha256",
+    "oracle_examples",
+    "evidence_mismatches",
+    "cell_mismatches",
+    "oracle_mismatches",
+    "partition_result_sha256",
+)
+
+ACTIVE8_REDUCTION_PREPARED_FIELDS: tuple[str, ...] = (
+    "schema",
+    "schema_version",
+    "status",
+    *AUTHORITY_FIELDS,
+    "accepted_transitions",
+    "action_family_histogram",
+    "active8_exclusion_histogram",
+    "binding_sha256",
+    "candidate_totals",
+    "capability_cell_histogram",
+    "census",
+    "classification_affects_admission",
+    "plan_sha256",
+    "result_inventory",
+    "result_inventory_sha256",
+    "task_result_content_inventory",
+    "task_result_content_inventory_sha256",
+    "run_artifact_root",
+    "run_identity_sha256",
+    "sentinel_plan",
+    "task_inventory_sha256",
+    "preparation_sha256",
+)
+
+#: The sentinel runs AFTER task publication and BEFORE authoritative completion,
+#: and ANY mismatch blocks completion. It independently reconstructs complete
+#: quotient geometry only for its bounded sample while rechecking the published
+#: family-local teacher evidence for every selected occurrence.
+SENTINEL_BLOCKS_COMPLETION = True
+
+__all__ = [
+    "ACTIVE8_TASK_SUMMARY_FILENAME",
+    "ACTIVE8_POLICY_EXCLUDED_EVIDENCE",
+    "ACTIVE8_ROW_SHARD_FILENAME",
+    "GATE_ZERO_DECISION_FILENAME",
+    "ACTIVE8_TASKS_DIRNAME",
+    "ACTIVE8_RECEIPT_FILENAME",
+    "ACTIVE8_RECEIPT_FIELDS",
+    "ACTIVE8_DECISION_SHARD_FILENAME",
+    "ACCEPTED_EVIDENCE_INVARIANTS",
+    "ACCEPTED_TRANSITION_FIELDS",
+    "ACTION_KEY_FIELDS",
+    "ACTIVE8_CENSUS_FIELDS",
+    "ACTIVE8_COMPLETION_SCHEMA",
+    "ACTIVE8_COMPLETION_SCHEMA_VERSION",
+    "ACTIVE8_REDUCTION_PREPARED_FIELDS",
+    "ACTIVE8_REDUCTION_PREPARED_FILENAME",
+    "ACTIVE8_REDUCTION_PREPARED_SCHEMA",
+    "ACTIVE8_REDUCTION_PREPARED_SCHEMA_VERSION",
+    "ACTIVE8_EXCLUDED",
+    "ACTIVE8_ROW_FIELDS",
+    "ACTIVE8_TASK_SCHEMA",
+    "ACTIVE8_TASK_SCHEMA_VERSION",
+    "CANDIDATE_EVIDENCE_FIELDS",
+    "CANDIDATE_TOTAL_FIELDS",
+    "CLASSIFICATION_FIELDS",
+    "GATE_ZERO_DECISION_SCHEMA",
+    "GATE_ZERO_DECISION_SCHEMA_VERSION",
+    "GATE_ZERO_TASK_SCHEMA",
+    "GATE_ZERO_TASK_SCHEMA_VERSION",
+    "JOIN_KEY_FIELDS",
+    "PIPELINE_NAMESPACE",
+    "PIPELINE_STATUS_NO_AUTHORITY",
+    "PLAN_SCHEMA",
+    "PLAN_SCHEMA_VERSION",
+    "REJECTION_CATEGORIES",
+    "SENTINEL_BLOCKS_COMPLETION",
+    "SENTINEL_EXHAUSTIVE_THRESHOLD",
+    "SENTINEL_GLOBAL_EXAMPLES",
+    "SENTINEL_ORACLE_EXAMPLES",
+    "SENTINEL_PER_CELL_EXAMPLES",
+    "SENTINEL_OCCURRENCE_FIELDS",
+    "SENTINEL_PAIR_FIELDS",
+    "SENTINEL_PARTITION_FIELDS",
+    "SENTINEL_PARTITION_MATCHED",
+    "SENTINEL_PARTITION_MISMATCH",
+    "SENTINEL_PARTITION_RESULT_FIELDS",
+    "SENTINEL_PARTITION_RESULT_FILENAME",
+    "SENTINEL_PARTITION_RESULT_SCHEMA",
+    "SENTINEL_PARTITION_RESULT_SCHEMA_VERSION",
+    "SENTINEL_PARTITIONS_DIRNAME",
+    "SENTINEL_PLAN_FIELDS",
+    "SENTINEL_PLAN_SCHEMA",
+    "SENTINEL_PLAN_SCHEMA_VERSION",
+    "SENTINEL_RESULT_FIELDS",
+    "SENTINEL_SALT",
+    "SENTINEL_SCHEMA",
+    "SENTINEL_SCHEMA_VERSION",
+    "TRACE_KEY_FIELDS",
+    "UPSTREAM_REJECTED",
+]

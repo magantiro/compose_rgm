@@ -1,0 +1,1510 @@
+"""Immutable whole-trace representability inventory for the active-8 editor.
+
+This boundary is deliberately earlier than progress-row sampling.  A packed
+trace is admitted only after *every* nonterminal teacher step:
+
+* maps to one of the eight enabled model families;
+* is representable by RewriteActionCodecV2;
+* satisfies the frozen structural restrictions; and
+* is present, with its exact persistent-slot output, in the production marked
+  law for the corresponding source state.
+
+Only then are all ``path_length + 1`` progress positions emitted.  Therefore a
+trace with one bad middle step contributes neither neighboring nonterminal
+rows nor its terminal row.
+"""
+
+from __future__ import annotations
+
+import ast
+import gzip
+import hashlib
+import json
+import os
+import tempfile
+from collections import Counter, OrderedDict
+from collections.abc import Callable, Iterable, Mapping
+from dataclasses import dataclass
+from pathlib import Path, PurePosixPath
+from types import MappingProxyType
+from typing import Any, Protocol
+
+from compose_v4.chem.persistent_state_identity import (
+    PERSISTENT_STATE_DIGEST_SCHEMA,
+    PERSISTENT_STATE_DIGEST_VERSION,
+    persistent_slot_state_sha256,
+)
+from compose_v4.data.packed_trace_store import (
+    AddressedPackedTrace,
+    manifest_path_for,
+    read_frozen_source_addressed_packed_shard,
+)
+from compose_v4.data.provenance_overlay import overlay_path_for
+from compose_v4.experiments.factorized_successor_training import (
+    SuccessorTrainingError,
+    rewrite_action_codec_sha256,
+)
+from compose_v4.experiments.production_successor_kernel import (
+    FactorizedMarkedLaw,
+    enumerate_factorized_marked_law,
+)
+from compose_v4.rewrite.action_codec import ActionCodecError, canonical_family
+from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
+from compose_v4.rewrite.operators import AtomInsert
+
+ACTIVE8_TRACE_INVENTORY_SCHEMA = "compose.data.active8_trace_inventory"
+ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION = 1
+ACTIVE8_TRACE_INVENTORY_STATUS = "IMMUTABLE_WHOLE_TRACE_ACTIVE8_BOUNDARY"
+ACTIVE8_TRACE_DECISION_SCHEMA = "compose.data.active8_trace_decision"
+ACTIVE8_TRACE_DECISION_SCHEMA_VERSION = 1
+
+ACTIVE8_FAMILIES = (
+    "atom_insert",
+    "atom_delete",
+    "atom_restate",
+    "bond_reorder",
+    "bond_reroute",
+    "cycle_insert",
+    "cycle_attach",
+    "ring_system_restate",
+)
+_ACTIVE8_SET = frozenset(ACTIVE8_FAMILIES)
+_EXPLICITLY_DISALLOWED_RULES = frozenset(
+    {
+        "ring_system_delete",
+        "ring_system_grow",
+    }
+)
+_IMPLEMENTATION_IDENTITY_SCHEMA = "compose.data.active8_implementation_identity"
+_IMPLEMENTATION_IDENTITY_SCHEMA_VERSION = 2
+_IMPLEMENTATION_SEED_SOURCES = (
+    "src/compose_v4/data/active8_trace_inventory.py",
+    "src/compose_v4/data/packed_trace_store.py",
+    "src/compose_v4/chem/persistent_state_identity.py",
+    "src/compose_v4/rewrite/action_codec.py",
+    "src/compose_v4/experiments/factorized_successor_training.py",
+    "src/compose_v4/experiments/production_successor_kernel.py",
+    # The distributed production builder imports these dynamically. They bind
+    # the exact model capabilities and the physical source-shard resolution.
+    "src/compose_v4/experiments/editing_gate_zero_runtime.py",
+    "src/compose_v4/data/packed_charge_policy_audit.py",
+)
+
+
+class Active8TraceInventoryError(RuntimeError):
+    """The requested inventory cannot establish its fail-closed boundary."""
+
+
+@dataclass(frozen=True)
+class Active8TraceAdmission:
+    """Verified O(1) whole-trace admission index for production corpus loading.
+
+    The tuple for each physical packed shard is position-addressed by the
+    immutable packed ``entry_index``.  Each element stores the exact trace ID
+    and its accepted/excluded decision, so a reordered, missing, substituted or
+    previously unseen trace fails before it can become a ``PathRecord``.
+    """
+
+    manifest_path: Path
+    manifest_file_sha256: str
+    inventory_sha256: str
+    unified_packed_manifest_sha256: str
+    support_contract_sha256: str
+    effective_source_corpus_cache_sha256: str
+    decisions_by_digest: Mapping[str, tuple[tuple[str, bool], ...]]
+    shard_digest_by_lane: Mapping[tuple[str, str, str], str]
+    shard_metadata_by_digest: Mapping[str, Mapping[str, Any]]
+    counts: Mapping[str, int]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "manifest_path", Path(self.manifest_path))
+        for field in (
+            "manifest_file_sha256",
+            "inventory_sha256",
+            "unified_packed_manifest_sha256",
+            "support_contract_sha256",
+            "effective_source_corpus_cache_sha256",
+        ):
+            if not _is_sha256(getattr(self, field)):
+                raise ValueError(f"{field} must be a lowercase SHA-256")
+
+    def expected_source_digest(
+        self,
+        *,
+        packed_shard_name: str,
+        layer: str,
+        partition: str,
+    ) -> str:
+        lane = (str(layer), str(partition), str(packed_shard_name))
+        try:
+            return self.shard_digest_by_lane[lane]
+        except KeyError:
+            raise Active8TraceInventoryError(
+                "packed source shard is absent from the active-8 inventory: "
+                f"layer={layer!r}, partition={partition!r}, "
+                f"shard={packed_shard_name!r}"
+            ) from None
+
+    def is_accepted(self, address: object) -> bool:
+        """Return the frozen trace decision after verifying its exact address."""
+
+        digest = str(address.packed_shard_content_sha256)
+        entry_index = address.entry_index
+        trace_id = address.trace_id
+        if type(entry_index) is not int or entry_index < 0:
+            raise Active8TraceInventoryError("packed trace has an invalid active-8 entry index")
+        try:
+            decisions = self.decisions_by_digest[digest]
+        except KeyError:
+            raise Active8TraceInventoryError(
+                "packed trace shard digest is absent from the active-8 inventory"
+            ) from None
+        if entry_index >= len(decisions):
+            raise Active8TraceInventoryError(
+                "packed trace entry lies outside its active-8 shard census"
+            )
+        expected_trace_id, accepted = decisions[entry_index]
+        if trace_id != expected_trace_id:
+            raise Active8TraceInventoryError(
+                "packed trace ID disagrees with its active-8 inventory address"
+            )
+        return accepted
+
+    def assert_complete_source_shard(
+        self,
+        *,
+        packed_shard_name: str,
+        layer: str,
+        partition: str,
+        observed_digest: str | None,
+        observed_entries: int,
+    ) -> None:
+        """Require that a loader consumed the complete declared physical shard."""
+
+        expected_digest = self.expected_source_digest(
+            packed_shard_name=packed_shard_name,
+            layer=layer,
+            partition=partition,
+        )
+        if observed_digest != expected_digest:
+            raise Active8TraceInventoryError(
+                "loaded packed shard bytes disagree with the active-8 inventory: "
+                f"expected={expected_digest}, observed={observed_digest}"
+            )
+        expected_entries = len(self.decisions_by_digest[expected_digest])
+        if observed_entries != expected_entries:
+            raise Active8TraceInventoryError(
+                "loaded packed shard census disagrees with the active-8 inventory: "
+                f"expected={expected_entries}, observed={observed_entries}"
+            )
+
+    def assert_partition_shards(
+        self,
+        partition: str,
+        observed: Iterable[tuple[str, str, str]],
+    ) -> None:
+        """Require exact packed-shard coverage for one corpus partition."""
+
+        expected = {lane for lane in self.shard_digest_by_lane if lane[1] == partition}
+        actual = set(observed)
+        if actual != expected:
+            raise Active8TraceInventoryError(
+                "packed partition shard set disagrees with the active-8 inventory: "
+                f"missing={sorted(expected - actual)}, "
+                f"unexpected={sorted(actual - expected)}"
+            )
+
+
+@dataclass(frozen=True)
+class Active8SourceShard:
+    """One unified-manifest-declared packed shard."""
+
+    manifest_layer: str
+    envelope_layer: str
+    partition: str
+    relative_path: str
+    path: Path
+
+    def __post_init__(self) -> None:
+        if not self.manifest_layer or not self.envelope_layer or not self.partition:
+            raise ValueError("source shard lane fields must be non-empty")
+        relative = Path(self.relative_path)
+        if not self.relative_path or relative.is_absolute() or ".." in relative.parts:
+            raise ValueError("source shard relative_path must be safe and relative")
+        object.__setattr__(self, "path", Path(self.path))
+
+
+@dataclass(frozen=True)
+class ExactCandidateEvidence:
+    """Result of checking one teacher against the exact production marked law."""
+
+    supported: bool
+    action_sha256: str | None
+    reason: str | None = None
+    detail: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.supported:
+            if not _is_sha256(self.action_sha256):
+                raise ValueError("supported candidate evidence requires an action SHA-256")
+            if self.reason is not None:
+                raise ValueError("supported candidate evidence cannot carry a failure reason")
+        else:
+            if not isinstance(self.reason, str) or not self.reason:
+                raise ValueError("failed candidate evidence requires a reason")
+            if self.action_sha256 is not None and not _is_sha256(self.action_sha256):
+                raise ValueError("candidate evidence action digest is malformed")
+
+
+class ExactCandidateChecker(Protocol):
+    """Check one decoded teacher step against the exact active model support."""
+
+    def __call__(
+        self,
+        addressed: AddressedPackedTrace,
+        step_index: int,
+    ) -> ExactCandidateEvidence: ...
+
+
+def _is_sha256(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
+def _canonical_json_bytes(payload: object) -> bytes:
+    return json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+
+
+def _sha256_bytes(payload: object) -> str:
+    return hashlib.sha256(_canonical_json_bytes(payload)).hexdigest()
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        while block := handle.read(1 << 20):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _inventory_decision_path(
+    manifest_path: Path,
+    relative_path: object,
+) -> Path:
+    """Resolve a local or content-store decision object without path escape."""
+
+    if not isinstance(relative_path, str) or not relative_path:
+        raise Active8TraceInventoryError("active-8 decision path must be nonempty text")
+    pure = PurePosixPath(relative_path)
+    if (
+        pure.is_absolute()
+        or pure == PurePosixPath(".")
+        or "\\" in relative_path
+        or any(character in relative_path for character in "*?[]")
+    ):
+        raise Active8TraceInventoryError("active-8 decision path is unsafe")
+    manifest_parent = Path(manifest_path).parent.resolve()
+    if ".." not in pure.parts:
+        trusted_root = manifest_parent
+    elif (
+        pure.parts[0] == ".."
+        and pure.parts.count("..") == 1
+        and len(pure.parts) >= 3
+        and pure.parts[1] == "decisions"
+        and manifest_parent.name == "manifests"
+    ):
+        # The distributed content store places the manifest at
+        # objects/manifests/<sha>.json and decisions at
+        # objects/decisions/<prefix>/<sha>.jsonl.gz.
+        trusted_root = manifest_parent.parent
+    else:
+        raise Active8TraceInventoryError("active-8 decision path escapes its artifact namespace")
+    candidate = (manifest_parent / Path(*pure.parts)).resolve()
+    if not candidate.is_relative_to(trusted_root):
+        raise Active8TraceInventoryError("active-8 decision path escapes its trusted root")
+    return candidate
+
+
+def _module_name_for_source(relative: str) -> tuple[str, bool]:
+    path = Path(relative)
+    try:
+        package_parts = path.with_suffix("").parts[path.parts.index("src") + 1 :]
+    except ValueError as error:
+        raise Active8TraceInventoryError(
+            f"implementation source is outside the Python source tree: {relative}"
+        ) from error
+    is_package = bool(package_parts and package_parts[-1] == "__init__")
+    if is_package:
+        package_parts = package_parts[:-1]
+    return ".".join(package_parts), is_package
+
+
+def _module_source_paths(root: Path, module_name: str) -> tuple[str, ...]:
+    """Resolve one internal module plus every imported package initializer."""
+
+    if module_name != "compose_v4" and not module_name.startswith("compose_v4."):
+        return ()
+    module_parts = module_name.split(".")
+    resolved: list[str] = []
+    for stop in range(1, len(module_parts)):
+        initializer = Path("src", *module_parts[:stop], "__init__.py")
+        if (root / initializer).is_file():
+            resolved.append(initializer.as_posix())
+    module_file = Path("src", *module_parts).with_suffix(".py")
+    package_file = Path("src", *module_parts, "__init__.py")
+    if (root / module_file).is_file():
+        resolved.append(module_file.as_posix())
+    elif (root / package_file).is_file():
+        resolved.append(package_file.as_posix())
+    return tuple(dict.fromkeys(resolved))
+
+
+def _internal_import_modules(
+    source: Path,
+    *,
+    relative: str,
+) -> tuple[str, ...]:
+    try:
+        tree = ast.parse(source.read_text(), filename=str(source))
+    except (OSError, SyntaxError, UnicodeError) as error:
+        raise Active8TraceInventoryError(
+            f"cannot parse active-8 implementation source: {source}"
+        ) from error
+    current_module, is_package = _module_name_for_source(relative)
+    current_package = current_module.split(".") if is_package else current_module.split(".")[:-1]
+    modules: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            modules.update(
+                alias.name
+                for alias in node.names
+                if alias.name == "compose_v4" or alias.name.startswith("compose_v4.")
+            )
+            continue
+        if not isinstance(node, ast.ImportFrom):
+            continue
+        if node.level:
+            parents = node.level - 1
+            if parents > len(current_package):
+                raise Active8TraceInventoryError(
+                    f"relative import escapes compose_v4 in implementation source: {source}"
+                )
+            base_parts = current_package[: len(current_package) - parents]
+            if node.module:
+                base_parts.extend(node.module.split("."))
+            base = ".".join(base_parts)
+        else:
+            base = node.module or ""
+        if base != "compose_v4" and not base.startswith("compose_v4."):
+            continue
+        modules.add(base)
+        modules.update(f"{base}.{alias.name}" for alias in node.names if alias.name != "*")
+    return tuple(sorted(modules))
+
+
+def _implementation_source_closure(root: Path) -> tuple[str, ...]:
+    """Return the complete static internal import closure of Active8 admission.
+
+    Hashing only the top-level evaluator modules is insufficient because legal
+    candidates and executor results are defined in transitive model, rewrite,
+    chemistry, and codec modules. Import statements themselves are hashed, so
+    adding a new dependency invalidates the old identity and includes the new
+    module in the next closure.
+    """
+
+    pending = list(_IMPLEMENTATION_SEED_SOURCES)
+    observed: set[str] = set()
+    while pending:
+        relative = pending.pop()
+        if relative in observed:
+            continue
+        source = root / relative
+        if not source.is_file():
+            raise Active8TraceInventoryError(f"active-8 implementation source is absent: {source}")
+        observed.add(relative)
+        for module_name in _internal_import_modules(source, relative=relative):
+            for imported in _module_source_paths(root, module_name):
+                if imported not in observed:
+                    pending.append(imported)
+    return tuple(sorted(observed))
+
+
+def implementation_identity(*, repo_root: Path | None = None) -> dict[str, object]:
+    """Hash the transitive code surface defining admission and row identity."""
+
+    root = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[3]
+    sources = {
+        relative: _sha256_file(root / relative) for relative in _implementation_source_closure(root)
+    }
+    identity: dict[str, object] = {
+        "schema": _IMPLEMENTATION_IDENTITY_SCHEMA,
+        "schema_version": _IMPLEMENTATION_IDENTITY_SCHEMA_VERSION,
+        "closure_policy": "static_internal_import_closure_v1",
+        "seed_sources": list(_IMPLEMENTATION_SEED_SOURCES),
+        "sources": sources,
+    }
+    identity["implementation_sha256"] = _sha256_bytes(identity)
+    return identity
+
+
+def _selection_policy() -> dict[str, object]:
+    return {
+        "unit": "complete_packed_trace",
+        "active_families": list(ACTIVE8_FAMILIES),
+        "all_nonterminal_teachers_must_match_exact_candidates": True,
+        "excluded_trace_emits_progress_rows": False,
+        "accepted_trace_retains_terminal_row": True,
+        "multi_neighbor_atom_insert_supported": False,
+    }
+
+
+def _persistent_state_identity() -> dict[str, object]:
+    return {
+        "schema": PERSISTENT_STATE_DIGEST_SCHEMA,
+        "schema_version": PERSISTENT_STATE_DIGEST_VERSION,
+    }
+
+
+def _validate_inventory_semantics(
+    payload: Mapping[str, object],
+    *,
+    expected_versioned_implementation_sha256_for_read_only_audit: str | None = None,
+) -> None:
+    if payload.get("status") != ACTIVE8_TRACE_INVENTORY_STATUS:
+        raise Active8TraceInventoryError("active-8 inventory has an unauthorized boundary status")
+    if payload.get("training_authorized") is not False:
+        raise Active8TraceInventoryError("active-8 inventory cannot carry training authority")
+    if payload.get("selection_policy") != _selection_policy():
+        raise Active8TraceInventoryError(
+            "active-8 inventory selection policy differs from the complete-trace Active8 contract"
+        )
+    if payload.get("persistent_state_identity") != _persistent_state_identity():
+        raise Active8TraceInventoryError(
+            "active-8 inventory persistent-state identity differs from production"
+        )
+    stored_implementation = payload.get("implementation_identity")
+    if expected_versioned_implementation_sha256_for_read_only_audit is None:
+        if stored_implementation != implementation_identity():
+            raise Active8TraceInventoryError(
+                "active-8 inventory implementation identity differs from "
+                "the live admission implementation"
+            )
+    else:
+        expected_implementation = expected_versioned_implementation_sha256_for_read_only_audit
+        if not _is_sha256(expected_implementation):
+            raise Active8TraceInventoryError(
+                "read-only audit expected implementation identity is malformed"
+            )
+        if (
+            not isinstance(stored_implementation, Mapping)
+            or set(stored_implementation) != {"sources", "implementation_sha256"}
+            or not isinstance(stored_implementation.get("sources"), Mapping)
+            or not stored_implementation["sources"]
+            or any(
+                not isinstance(path, str) or not _is_sha256(digest)
+                for path, digest in stored_implementation["sources"].items()
+            )
+            or _sha256_bytes(stored_implementation["sources"])
+            != stored_implementation.get("implementation_sha256")
+            or stored_implementation.get("implementation_sha256") != expected_implementation
+        ):
+            raise Active8TraceInventoryError(
+                "versioned Active8 implementation identity is not the exact "
+                "self-consistent read-only audit input"
+            )
+
+    source_identity = payload.get("source_identity")
+    source_fields = (
+        "unified_packed_manifest_sha256",
+        "unified_packed_manifest_semantic_sha256",
+        "support_contract_sha256",
+        "physical_shard_binding_sha256",
+    )
+    if (
+        not isinstance(source_identity, Mapping)
+        or set(source_identity) != {*source_fields, "effective_source_corpus_cache_sha256"}
+        or any(not _is_sha256(source_identity.get(field)) for field in source_fields)
+    ):
+        raise Active8TraceInventoryError("active-8 inventory source identity is malformed")
+    expected_effective_sha256 = _sha256_bytes(
+        {field: source_identity[field] for field in source_fields}
+    )
+    if source_identity.get("effective_source_corpus_cache_sha256") != expected_effective_sha256:
+        raise Active8TraceInventoryError(
+            "active-8 inventory effective source identity is inconsistent"
+        )
+
+
+class ProductionExactCandidateChecker:
+    """Exact teacher support check using the live production marked law.
+
+    Model weights do not define support, but the model's immutable operator
+    capabilities do. A bounded LRU avoids re-enumerating frequently repeated
+    exact source states without retaining the entire multi-million-row corpus.
+
+    Active8 asks whether the exact teacher mark is legal and whether executing
+    that mark yields the stored persistent-slot successor. It does not require
+    constructing the complete canonical-successor quotient for every corpus
+    state. Consequently this checker validates the codec identity of every
+    enumerated legal mark, but executes only marks whose complete action digest
+    matches the teacher. Full quotient construction remains a separate Gate-0,
+    cache-building, and evaluator responsibility.
+    """
+
+    def __init__(
+        self,
+        model: object,
+        *,
+        cache_size: int = 4096,
+        time: float = 0.5,
+        system: object | None = None,
+    ) -> None:
+        if type(cache_size) is not int or cache_size <= 0:
+            raise ValueError("exact-candidate cache_size must be positive")
+        if not 0.0 < float(time) < 1.0:
+            raise ValueError("exact-candidate enumeration time must lie in (0, 1)")
+        self.model = model
+        self.cache_size = cache_size
+        self.time = float(time)
+        self.system = system
+        self._marked_laws: OrderedDict[str, FactorizedMarkedLaw] = OrderedDict()
+
+    def _marked_law(self, state: object) -> FactorizedMarkedLaw:
+        state_sha256 = persistent_slot_state_sha256(state)
+        cached = self._marked_laws.get(state_sha256)
+        if cached is not None:
+            self._marked_laws.move_to_end(state_sha256)
+            return cached
+        marked_law = enumerate_factorized_marked_law(
+            self.model,
+            state,
+            self.time,
+        )
+        self._marked_laws[state_sha256] = marked_law
+        self._marked_laws.move_to_end(state_sha256)
+        while len(self._marked_laws) > self.cache_size:
+            self._marked_laws.popitem(last=False)
+        return marked_law
+
+    def __call__(
+        self,
+        addressed: AddressedPackedTrace,
+        step_index: int,
+    ) -> ExactCandidateEvidence:
+        step = addressed.trace.steps[step_index]
+        action_sha256: str | None = None
+        try:
+            action_sha256 = rewrite_action_codec_sha256(
+                step.rule_name,
+                step.action,
+            )
+            source = addressed.path.state_at(step_index)
+            target_state_sha256 = persistent_slot_state_sha256(
+                addressed.path.state_at(step_index + 1)
+            )
+            marked_law = self._marked_law(source)
+            matching_marks = []
+            for mark in marked_law.marks:
+                mark_action_sha256 = rewrite_action_codec_sha256(
+                    mark.executor_rule_name,
+                    mark.action,
+                )
+                if mark_action_sha256 == action_sha256:
+                    matching_marks.append(mark)
+            if not matching_marks:
+                raise SuccessorTrainingError(
+                    "teacher action identity is absent from the production marked support"
+                )
+
+            runtime = self.system or de_novo_rewrite_system()
+            for mark in matching_marks:
+                successor = runtime.apply(
+                    source,
+                    mark.executor_rule_name,
+                    mark.action,
+                )
+                if (
+                    canonical_state_key(successor) != marked_law.source_key
+                    and persistent_slot_state_sha256(successor) == target_state_sha256
+                ):
+                    return ExactCandidateEvidence(
+                        supported=True,
+                        action_sha256=action_sha256,
+                    )
+            raise SuccessorTrainingError(
+                "teacher action does not yield the exact productive stored successor"
+            )
+        except SuccessorTrainingError as error:
+            return ExactCandidateEvidence(
+                supported=False,
+                action_sha256=action_sha256,
+                reason="teacher_not_in_exact_candidates",
+                detail=type(error).__name__,
+            )
+        except Exception as error:  # noqa: BLE001 -- any support defect excludes
+            return ExactCandidateEvidence(
+                supported=False,
+                action_sha256=action_sha256,
+                reason="unsupported_teacher_step",
+                detail=type(error).__name__,
+            )
+
+
+def _trace_key(addressed: AddressedPackedTrace) -> dict[str, object]:
+    address = addressed.address
+    return {
+        "packed_shard_content_sha256": address.packed_shard_content_sha256,
+        "entry_index": address.entry_index,
+        "trace_id": address.trace_id,
+    }
+
+
+def _base_decision(addressed: AddressedPackedTrace) -> dict[str, object]:
+    address = addressed.address
+    if address.path_length != addressed.path.path_length:
+        raise Active8TraceInventoryError(
+            "packed address and progress object disagree on path_length"
+        )
+    if len(addressed.trace.steps) != address.path_length:
+        raise Active8TraceInventoryError(
+            "packed trace and immutable address disagree on path_length"
+        )
+    return {
+        "schema": ACTIVE8_TRACE_DECISION_SCHEMA,
+        "schema_version": ACTIVE8_TRACE_DECISION_SCHEMA_VERSION,
+        "trace_key": _trace_key(addressed),
+        "packed_shard_name": address.packed_shard_name,
+        "layer": address.layer,
+        "partition": address.partition,
+        "source_key": address.source_key,
+        "target_key": address.target_key,
+        "path_length": address.path_length,
+    }
+
+
+def _family_exclusions(addressed: AddressedPackedTrace) -> list[dict[str, object]]:
+    exclusions: list[dict[str, object]] = []
+    for step_index, step in enumerate(addressed.trace.steps):
+        if step.rule_name in _EXPLICITLY_DISALLOWED_RULES:
+            exclusions.append(
+                {
+                    "step_index": step_index,
+                    "executor_rule": step.rule_name,
+                    "family": step.rule_name,
+                    "reason": "disallowed_family",
+                }
+            )
+            continue
+        try:
+            family = canonical_family(step.rule_name)
+        except ActionCodecError:
+            exclusions.append(
+                {
+                    "step_index": step_index,
+                    "executor_rule": step.rule_name,
+                    "family": None,
+                    "reason": "unknown_or_legacy_executor_rule",
+                }
+            )
+            continue
+        if family not in _ACTIVE8_SET:
+            exclusions.append(
+                {
+                    "step_index": step_index,
+                    "executor_rule": step.rule_name,
+                    "family": family,
+                    "reason": "disallowed_family",
+                }
+            )
+            continue
+        if (
+            step.rule_name == "atom_insert"
+            and isinstance(step.action, AtomInsert)
+            and len(step.action.neighbors) > 1
+        ):
+            exclusions.append(
+                {
+                    "step_index": step_index,
+                    "executor_rule": step.rule_name,
+                    "family": family,
+                    "reason": "unsupported_multi_neighbor_atom_insert",
+                }
+            )
+            continue
+        try:
+            rewrite_action_codec_sha256(step.rule_name, step.action)
+        except SuccessorTrainingError:
+            exclusions.append(
+                {
+                    "step_index": step_index,
+                    "executor_rule": step.rule_name,
+                    "family": family,
+                    "reason": "unsupported_action_encoding",
+                }
+            )
+    return exclusions
+
+
+def inventory_record_for_trace(
+    addressed: AddressedPackedTrace,
+    *,
+    exact_candidate_checker: ExactCandidateChecker,
+) -> dict[str, object]:
+    """Return one accepted/excluded decision; excluded records contain no rows."""
+
+    base = _base_decision(addressed)
+    exclusions = _family_exclusions(addressed)
+    evidence: dict[int, ExactCandidateEvidence] = {}
+    if not exclusions:
+        for step_index, step in enumerate(addressed.trace.steps):
+            try:
+                result = exact_candidate_checker(addressed, step_index)
+            except Exception as error:  # noqa: BLE001 -- fail closed on checker defects
+                result = ExactCandidateEvidence(
+                    supported=False,
+                    action_sha256=None,
+                    reason="exact_candidate_checker_failure",
+                    detail=type(error).__name__,
+                )
+            if not isinstance(result, ExactCandidateEvidence):
+                raise Active8TraceInventoryError(
+                    "exact candidate checker returned another result type"
+                )
+            if not result.supported:
+                exclusions.append(
+                    {
+                        "step_index": step_index,
+                        "executor_rule": step.rule_name,
+                        "family": canonical_family(step.rule_name),
+                        "reason": result.reason,
+                        "detail": result.detail,
+                    }
+                )
+            else:
+                expected = rewrite_action_codec_sha256(
+                    step.rule_name,
+                    step.action,
+                )
+                if result.action_sha256 != expected:
+                    exclusions.append(
+                        {
+                            "step_index": step_index,
+                            "executor_rule": step.rule_name,
+                            "family": canonical_family(step.rule_name),
+                            "reason": "candidate_evidence_action_identity_mismatch",
+                        }
+                    )
+                else:
+                    evidence[step_index] = result
+    if exclusions:
+        return {
+            **base,
+            "decision": "excluded",
+            # Crucial whole-trace invariant: an excluded trace never contains
+            # progress rows, including otherwise-valid prefix/suffix states.
+            "progress_rows": [],
+            "exclusions": sorted(
+                exclusions,
+                key=lambda item: (
+                    int(item["step_index"]),
+                    str(item["reason"]),
+                ),
+            ),
+        }
+
+    progress_rows = []
+    path_length = addressed.address.path_length
+    for progress_index in range(path_length + 1):
+        is_terminal = progress_index == path_length
+        progress_rows.append(
+            {
+                "progress_index": progress_index,
+                "is_terminal": is_terminal,
+                "exact_state_sha256": persistent_slot_state_sha256(
+                    addressed.path.state_at(progress_index)
+                ),
+                "teacher_family": (
+                    None
+                    if is_terminal
+                    else canonical_family(addressed.trace.steps[progress_index].rule_name)
+                ),
+                "teacher_action_sha256": (
+                    None if is_terminal else evidence[progress_index].action_sha256
+                ),
+            }
+        )
+    return {
+        **base,
+        "decision": "accepted",
+        "progress_rows": progress_rows,
+        "exclusions": [],
+    }
+
+
+def _decision_records_for_source(
+    source: Active8SourceShard,
+    *,
+    source_bytes_sha256: str,
+    packed_manifest_sha256: str,
+    packed_overlay_sha256: str | None,
+    exact_candidate_checker: ExactCandidateChecker,
+    current: Counter,
+    current_reasons: Counter[str],
+    current_families: Counter[str],
+    observed_digest: list[str | None],
+) -> Iterable[dict[str, object]]:
+    """Stream one source shard while accumulating its exact decision census."""
+
+    for addressed in read_frozen_source_addressed_packed_shard(
+        source.path,
+        expected_shard_sha256=source_bytes_sha256,
+        expected_manifest_sha256=packed_manifest_sha256,
+        expected_overlay_sha256=packed_overlay_sha256,
+        verify_fraction=0.0,
+    ):
+        address = addressed.address
+        if address.layer != source.envelope_layer or address.partition != source.partition:
+            raise Active8TraceInventoryError(
+                "packed trace envelope disagrees with unified-manifest lane"
+            )
+        if observed_digest[0] is None:
+            observed_digest[0] = address.packed_shard_content_sha256
+            if observed_digest[0] != source_bytes_sha256:
+                raise Active8TraceInventoryError(
+                    "addressed physical shard digest differs from exact file bytes"
+                )
+        elif address.packed_shard_content_sha256 != observed_digest[0]:
+            raise Active8TraceInventoryError(
+                "one source shard yielded more than one physical digest"
+            )
+        record = inventory_record_for_trace(
+            addressed,
+            exact_candidate_checker=exact_candidate_checker,
+        )
+        current["traces"] += 1
+        if record["decision"] == "accepted":
+            current["accepted_traces"] += 1
+            rows = record["progress_rows"]
+            current["accepted_progress_rows"] += len(rows)
+            current["accepted_nonterminal_rows"] += address.path_length
+            current["accepted_terminal_rows"] += 1
+            for row in rows:
+                family = row["teacher_family"]
+                if family is not None:
+                    current_families[str(family)] += 1
+        else:
+            current["excluded_traces"] += 1
+            for exclusion in record["exclusions"]:
+                current_reasons[str(exclusion["reason"])] += 1
+        yield record
+
+
+def _atomic_deterministic_gzip_jsonl(
+    path: Path,
+    records: Iterable[dict[str, object]],
+) -> tuple[int, str]:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        raise Active8TraceInventoryError(f"refusing to overwrite immutable inventory shard: {path}")
+    temporary_name: str | None = None
+    count = 0
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as raw:
+            temporary_name = raw.name
+            with gzip.GzipFile(
+                filename="",
+                mode="wb",
+                fileobj=raw,
+                mtime=0,
+            ) as compressed:
+                for record in records:
+                    compressed.write(_canonical_json_bytes(record) + b"\n")
+                    count += 1
+            raw.flush()
+            os.fsync(raw.fileno())
+        try:
+            os.link(temporary_name, path)
+        except FileExistsError as error:
+            raise Active8TraceInventoryError(
+                f"immutable inventory shard collision: {path}"
+            ) from error
+        Path(temporary_name).unlink()
+        temporary_name = None
+    finally:
+        if temporary_name is not None:
+            Path(temporary_name).unlink(missing_ok=True)
+    return count, _sha256_file(path)
+
+
+def _atomic_json(path: Path, payload: object) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        raise Active8TraceInventoryError(
+            f"refusing to overwrite immutable inventory manifest: {path}"
+        )
+    content = (
+        json.dumps(
+            payload,
+            indent=2,
+            sort_keys=True,
+            ensure_ascii=False,
+            allow_nan=False,
+        ).encode("utf-8")
+        + b"\n"
+    )
+    temporary_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary_name = handle.name
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        try:
+            os.link(temporary_name, path)
+        except FileExistsError as error:
+            raise Active8TraceInventoryError(
+                f"immutable inventory manifest collision: {path}"
+            ) from error
+        Path(temporary_name).unlink()
+        temporary_name = None
+    finally:
+        if temporary_name is not None:
+            Path(temporary_name).unlink(missing_ok=True)
+
+
+def build_active8_trace_inventory(
+    shards: Iterable[Active8SourceShard],
+    *,
+    exact_candidate_checker: ExactCandidateChecker,
+    source_manifest_path: Path,
+    source_manifest: Mapping[str, object],
+    support_contract_sha256: str,
+    output_dir: Path,
+    progress_callback: Callable[[dict[str, object]], None] | None = None,
+) -> dict[str, object]:
+    """Stream all source shards into immutable decision shards and a manifest."""
+
+    if not _is_sha256(support_contract_sha256):
+        raise ValueError("support_contract_sha256 must be a lowercase SHA-256")
+    source_manifest_path = Path(source_manifest_path)
+    if not source_manifest_path.is_file():
+        raise Active8TraceInventoryError("source unified manifest is absent")
+    source_manifest_sha256 = _sha256_file(source_manifest_path)
+    if _sha256_bytes(source_manifest) != _sha256_bytes(
+        json.loads(source_manifest_path.read_text())
+    ):
+        raise Active8TraceInventoryError(
+            "decoded source manifest differs from the exact manifest file"
+        )
+    ordered = tuple(
+        sorted(
+            shards,
+            key=lambda shard: (
+                shard.manifest_layer,
+                shard.partition,
+                shard.relative_path,
+            ),
+        )
+    )
+    if not ordered:
+        raise Active8TraceInventoryError("at least one source shard is required")
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = output_dir / "ACTIVE8_TRACE_INVENTORY.json"
+    if manifest_path.exists():
+        raise Active8TraceInventoryError(
+            f"immutable active-8 inventory already exists: {manifest_path}"
+        )
+
+    totals = Counter(
+        source_shards=0,
+        traces=0,
+        accepted_traces=0,
+        excluded_traces=0,
+        accepted_progress_rows=0,
+        accepted_nonterminal_rows=0,
+        accepted_terminal_rows=0,
+    )
+    exclusions_by_reason: Counter[str] = Counter()
+    family_rows: Counter[str] = Counter({family: 0 for family in ACTIVE8_FAMILIES})
+    shard_manifests: list[dict[str, object]] = []
+    seen_source_digests: set[str] = set()
+
+    for shard_index, source in enumerate(ordered):
+        if not source.path.is_file():
+            raise Active8TraceInventoryError(
+                f"manifest-declared source shard is absent: {source.path}"
+            )
+        source_bytes_sha256 = _sha256_file(source.path)
+        packed_manifest_path = manifest_path_for(source.path)
+        if not packed_manifest_path.is_file():
+            raise Active8TraceInventoryError(
+                f"packed source manifest is absent: {packed_manifest_path}"
+            )
+        packed_manifest_sha256 = _sha256_file(packed_manifest_path)
+        packed_overlay_path = overlay_path_for(source.path)
+        packed_overlay_sha256 = (
+            _sha256_file(packed_overlay_path) if packed_overlay_path.is_file() else None
+        )
+        current = Counter(
+            traces=0,
+            accepted_traces=0,
+            excluded_traces=0,
+            accepted_progress_rows=0,
+            accepted_nonterminal_rows=0,
+            accepted_terminal_rows=0,
+        )
+        current_reasons: Counter[str] = Counter()
+        current_families: Counter[str] = Counter()
+        observed_digest: list[str | None] = [None]
+
+        derivative_name = f"active8-decisions-{shard_index:05d}.jsonl.gz"
+        derivative_path = output_dir / derivative_name
+        written, derivative_sha256 = _atomic_deterministic_gzip_jsonl(
+            derivative_path,
+            _decision_records_for_source(
+                source,
+                source_bytes_sha256=source_bytes_sha256,
+                packed_manifest_sha256=packed_manifest_sha256,
+                packed_overlay_sha256=packed_overlay_sha256,
+                exact_candidate_checker=exact_candidate_checker,
+                current=current,
+                current_reasons=current_reasons,
+                current_families=current_families,
+                observed_digest=observed_digest,
+            ),
+        )
+        if written != current["traces"]:
+            raise Active8TraceInventoryError("derived inventory shard lost trace decisions")
+        source_digest = observed_digest[0] or source_bytes_sha256
+        if source_digest in seen_source_digests:
+            raise Active8TraceInventoryError("one physical packed shard is declared more than once")
+        seen_source_digests.add(source_digest)
+        totals["source_shards"] += 1
+        totals.update(current)
+        exclusions_by_reason.update(current_reasons)
+        family_rows.update(current_families)
+        shard_report = {
+            "manifest_layer": source.manifest_layer,
+            "envelope_layer": source.envelope_layer,
+            "partition": source.partition,
+            "relative_path": source.relative_path,
+            "packed_shard_name": source.path.name,
+            "packed_shard_content_sha256": source_digest,
+            "packed_manifest_sha256": packed_manifest_sha256,
+            "packed_provenance_overlay_sha256": packed_overlay_sha256,
+            "inventory_shard": derivative_name,
+            "inventory_shard_sha256": derivative_sha256,
+            "counts": dict(current),
+            "exclusions_by_reason": dict(sorted(current_reasons.items())),
+            "accepted_nonterminal_rows_by_family": {
+                family: current_families[family] for family in ACTIVE8_FAMILIES
+            },
+        }
+        shard_manifests.append(shard_report)
+        if progress_callback is not None:
+            progress_callback(shard_report)
+
+    if totals["traces"] != totals["accepted_traces"] + totals["excluded_traces"]:
+        raise Active8TraceInventoryError("trace decisions do not form an exact census")
+    if totals["accepted_progress_rows"] != (
+        totals["accepted_nonterminal_rows"] + totals["accepted_terminal_rows"]
+    ):
+        raise Active8TraceInventoryError(
+            "accepted progress rows do not retain exactly one terminal per trace"
+        )
+    source_identity = {
+        "unified_packed_manifest_sha256": source_manifest_sha256,
+        "unified_packed_manifest_semantic_sha256": _sha256_bytes(source_manifest),
+        "support_contract_sha256": support_contract_sha256,
+        "physical_shard_binding_sha256": _sha256_bytes(
+            [
+                {
+                    key: report[key]
+                    for key in (
+                        "manifest_layer",
+                        "partition",
+                        "relative_path",
+                        "packed_shard_content_sha256",
+                        "packed_manifest_sha256",
+                        "packed_provenance_overlay_sha256",
+                    )
+                }
+                for report in shard_manifests
+            ]
+        ),
+    }
+    source_identity["effective_source_corpus_cache_sha256"] = _sha256_bytes(source_identity)
+    payload: dict[str, object] = {
+        "schema": ACTIVE8_TRACE_INVENTORY_SCHEMA,
+        "schema_version": ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION,
+        "status": ACTIVE8_TRACE_INVENTORY_STATUS,
+        "training_authorized": False,
+        "selection_policy": _selection_policy(),
+        "persistent_state_identity": _persistent_state_identity(),
+        "source_identity": source_identity,
+        "implementation_identity": implementation_identity(),
+        "counts": dict(totals),
+        "exclusions_by_reason": dict(sorted(exclusions_by_reason.items())),
+        "accepted_nonterminal_rows_by_family": {
+            family: family_rows[family] for family in ACTIVE8_FAMILIES
+        },
+        "shards": shard_manifests,
+    }
+    payload["inventory_sha256"] = _sha256_bytes(payload)
+    _atomic_json(manifest_path, payload)
+    return payload
+
+
+def load_active8_trace_inventory(
+    path: Path,
+    *,
+    expected_versioned_implementation_sha256_for_read_only_audit: str | None = None,
+) -> dict[str, object]:
+    """Load and self-verify one immutable inventory manifest."""
+
+    source = Path(path)
+    try:
+        payload = json.loads(source.read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        raise Active8TraceInventoryError(
+            f"cannot read active-8 inventory manifest: {source}"
+        ) from error
+    if not isinstance(payload, dict):
+        raise Active8TraceInventoryError("active-8 inventory manifest must be a JSON object")
+    if payload.get("schema") != ACTIVE8_TRACE_INVENTORY_SCHEMA:
+        raise Active8TraceInventoryError("unexpected active-8 inventory schema")
+    if payload.get("schema_version") != ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION:
+        raise Active8TraceInventoryError("unexpected active-8 inventory schema version")
+    expected = payload.pop("inventory_sha256", None)
+    observed = _sha256_bytes(payload)
+    payload["inventory_sha256"] = expected
+    if not _is_sha256(expected) or expected != observed:
+        raise Active8TraceInventoryError("active-8 inventory self-hash mismatch")
+    _validate_inventory_semantics(
+        payload,
+        expected_versioned_implementation_sha256_for_read_only_audit=(
+            expected_versioned_implementation_sha256_for_read_only_audit
+        ),
+    )
+    return payload
+
+
+def load_active8_trace_admission(
+    path: Path,
+    *,
+    expected_manifest_file_sha256: str | None = None,
+    expected_inventory_sha256: str | None = None,
+    expected_effective_source_corpus_cache_sha256: str | None = None,
+    expected_support_contract_sha256: str | None = None,
+    expected_versioned_implementation_sha256_for_read_only_audit: str | None = None,
+) -> Active8TraceAdmission:
+    """Load every decision into a verified immutable admission index.
+
+    By default the stored implementation must equal the live implementation.
+    The explicitly named read-only-audit parameter permits a historical
+    inventory only when its stored source map is self-consistent and its exact
+    implementation SHA-256 is supplied alongside the normal physical,
+    inventory, source, and support-contract hashes. It grants no training
+    authority and must not be used as evidence of live-process admission.
+    """
+
+    manifest_path = Path(path)
+    manifest_file_sha256 = _sha256_file(manifest_path)
+    if (
+        expected_manifest_file_sha256 is not None
+        and manifest_file_sha256 != expected_manifest_file_sha256
+    ):
+        raise Active8TraceInventoryError(
+            "active-8 inventory file SHA-256 mismatch: "
+            f"expected={expected_manifest_file_sha256}, "
+            f"observed={manifest_file_sha256}"
+        )
+    manifest = load_active8_trace_inventory(
+        manifest_path,
+        expected_versioned_implementation_sha256_for_read_only_audit=(
+            expected_versioned_implementation_sha256_for_read_only_audit
+        ),
+    )
+    inventory_sha256 = manifest["inventory_sha256"]
+    if expected_inventory_sha256 is not None and inventory_sha256 != expected_inventory_sha256:
+        raise Active8TraceInventoryError("active-8 logical inventory SHA-256 mismatch")
+    source_identity = manifest.get("source_identity")
+    if not isinstance(source_identity, Mapping):
+        raise Active8TraceInventoryError("active-8 inventory lacks its source identity")
+    effective_source_sha256 = source_identity.get("effective_source_corpus_cache_sha256")
+    unified_packed_manifest_sha256 = source_identity.get("unified_packed_manifest_sha256")
+    support_contract_sha256 = source_identity.get("support_contract_sha256")
+    if (
+        not _is_sha256(effective_source_sha256)
+        or not _is_sha256(unified_packed_manifest_sha256)
+        or not _is_sha256(support_contract_sha256)
+    ):
+        raise Active8TraceInventoryError(
+            "active-8 inventory lacks its source or support-contract identity"
+        )
+    if (
+        expected_effective_source_corpus_cache_sha256 is not None
+        and effective_source_sha256 != expected_effective_source_corpus_cache_sha256
+    ):
+        raise Active8TraceInventoryError("active-8 effective source-corpus SHA-256 mismatch")
+    if (
+        expected_support_contract_sha256 is not None
+        and support_contract_sha256 != expected_support_contract_sha256
+    ):
+        raise Active8TraceInventoryError("active-8 Gate-0 support-contract SHA-256 mismatch")
+
+    decisions_by_digest: dict[str, tuple[tuple[str, bool], ...]] = {}
+    shard_digest_by_lane: dict[tuple[str, str, str], str] = {}
+    shard_metadata_by_digest: dict[str, Mapping[str, Any]] = {}
+    total_traces = 0
+    total_accepted = 0
+    total_excluded = 0
+    shards = manifest.get("shards")
+    if not isinstance(shards, list) or not shards:
+        raise Active8TraceInventoryError("active-8 inventory has no source shards")
+    for raw_shard in shards:
+        if not isinstance(raw_shard, Mapping):
+            raise Active8TraceInventoryError("active-8 shard manifest is not an object")
+        shard = dict(raw_shard)
+        digest = shard.get("packed_shard_content_sha256")
+        packed_shard_name = shard.get("packed_shard_name")
+        envelope_layer = shard.get("envelope_layer")
+        partition = shard.get("partition")
+        decision_name = shard.get("inventory_shard")
+        decision_sha256 = shard.get("inventory_shard_sha256")
+        counts = shard.get("counts")
+        if (
+            not _is_sha256(digest)
+            or not isinstance(packed_shard_name, str)
+            or not packed_shard_name
+            or not isinstance(envelope_layer, str)
+            or not envelope_layer
+            or not isinstance(partition, str)
+            or not partition
+            or not isinstance(decision_name, str)
+            or not _is_sha256(decision_sha256)
+            or not isinstance(counts, Mapping)
+        ):
+            raise Active8TraceInventoryError("active-8 source-shard identity is malformed")
+        if digest in decisions_by_digest:
+            raise Active8TraceInventoryError("active-8 inventory repeats a physical source shard")
+        lane = (envelope_layer, partition, packed_shard_name)
+        if lane in shard_digest_by_lane:
+            raise Active8TraceInventoryError("active-8 inventory repeats a source-shard lane")
+        decision_path = _inventory_decision_path(
+            manifest_path,
+            decision_name,
+        )
+        if not decision_path.is_file() or _sha256_file(decision_path) != decision_sha256:
+            raise Active8TraceInventoryError(
+                f"active-8 decision shard hash mismatch: {decision_path}"
+            )
+        decisions: list[tuple[str, bool]] = []
+        with gzip.open(decision_path, "rt") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    record = json.loads(line)
+                except json.JSONDecodeError as error:
+                    raise Active8TraceInventoryError(
+                        "active-8 decision shard contains invalid JSON"
+                    ) from error
+                key = record.get("trace_key")
+                if (
+                    record.get("schema") != ACTIVE8_TRACE_DECISION_SCHEMA
+                    or record.get("schema_version") != ACTIVE8_TRACE_DECISION_SCHEMA_VERSION
+                    or not isinstance(key, Mapping)
+                    or key.get("packed_shard_content_sha256") != digest
+                    or key.get("entry_index") != len(decisions)
+                    or not isinstance(key.get("trace_id"), str)
+                    or not key["trace_id"]
+                    or record.get("packed_shard_name") != packed_shard_name
+                    or record.get("layer") != envelope_layer
+                    or record.get("partition") != partition
+                    or record.get("decision") not in {"accepted", "excluded"}
+                ):
+                    raise Active8TraceInventoryError(
+                        "active-8 decision row disagrees with its source shard"
+                    )
+                accepted = record["decision"] == "accepted"
+                progress_rows = record.get("progress_rows")
+                if (
+                    not isinstance(progress_rows, list)
+                    or (accepted and len(progress_rows) != int(record.get("path_length", -1)) + 1)
+                    or (not accepted and progress_rows)
+                ):
+                    raise Active8TraceInventoryError(
+                        "active-8 decision row violates whole-trace admission"
+                    )
+                decisions.append((key["trace_id"], accepted))
+                total_accepted += int(accepted)
+                total_excluded += int(not accepted)
+        expected_traces = counts.get("traces")
+        if type(expected_traces) is not int or expected_traces != len(decisions):
+            raise Active8TraceInventoryError(
+                "active-8 decision shard disagrees with its trace census"
+            )
+        if counts.get("accepted_traces") != sum(
+            int(accepted) for _, accepted in decisions
+        ) or counts.get("excluded_traces") != sum(int(not accepted) for _, accepted in decisions):
+            raise Active8TraceInventoryError(
+                "active-8 decision shard disagrees with its admission census"
+            )
+        total_traces += len(decisions)
+        decisions_by_digest[digest] = tuple(decisions)
+        shard_digest_by_lane[lane] = digest
+        shard_metadata_by_digest[digest] = MappingProxyType(shard)
+
+    manifest_counts = manifest.get("counts")
+    if (
+        not isinstance(manifest_counts, Mapping)
+        or manifest_counts.get("source_shards") != len(decisions_by_digest)
+        or manifest_counts.get("traces") != total_traces
+        or manifest_counts.get("accepted_traces") != total_accepted
+        or manifest_counts.get("excluded_traces") != total_excluded
+        or total_traces != total_accepted + total_excluded
+    ):
+        raise Active8TraceInventoryError(
+            "active-8 admission index disagrees with the manifest census"
+        )
+    return Active8TraceAdmission(
+        manifest_path=manifest_path,
+        manifest_file_sha256=manifest_file_sha256,
+        inventory_sha256=inventory_sha256,
+        unified_packed_manifest_sha256=unified_packed_manifest_sha256,
+        support_contract_sha256=support_contract_sha256,
+        effective_source_corpus_cache_sha256=effective_source_sha256,
+        decisions_by_digest=MappingProxyType(decisions_by_digest),
+        shard_digest_by_lane=MappingProxyType(shard_digest_by_lane),
+        shard_metadata_by_digest=MappingProxyType(shard_metadata_by_digest),
+        counts=MappingProxyType(
+            {
+                "source_shards": len(decisions_by_digest),
+                "traces": total_traces,
+                "accepted_traces": total_accepted,
+                "excluded_traces": total_excluded,
+            }
+        ),
+    )
+
+
+def iter_inventory_decisions(
+    manifest_path: Path,
+) -> Iterable[dict[str, object]]:
+    """Yield every decision after verifying manifest and derivative bytes."""
+
+    manifest_path = Path(manifest_path)
+    manifest = load_active8_trace_inventory(manifest_path)
+    total = 0
+    for shard in manifest["shards"]:
+        path = _inventory_decision_path(
+            manifest_path,
+            shard["inventory_shard"],
+        )
+        if not path.is_file() or _sha256_file(path) != shard["inventory_shard_sha256"]:
+            raise Active8TraceInventoryError(f"active-8 decision shard hash mismatch: {path}")
+        with gzip.open(path, "rt") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                record = json.loads(line)
+                if (
+                    record.get("schema") != ACTIVE8_TRACE_DECISION_SCHEMA
+                    or record.get("schema_version") != ACTIVE8_TRACE_DECISION_SCHEMA_VERSION
+                ):
+                    raise Active8TraceInventoryError("active-8 decision row has another schema")
+                total += 1
+                yield record
+    if total != manifest["counts"]["traces"]:
+        raise Active8TraceInventoryError(
+            "active-8 decision shards disagree with manifest trace census"
+        )
+
+
+def accepted_trace_keys(manifest_path: Path) -> frozenset[tuple[str, int, str]]:
+    """Materialize the immutable keys allowed to reach row sampling."""
+
+    return frozenset(iter_accepted_trace_keys(manifest_path))
+
+
+def iter_accepted_trace_keys(
+    manifest_path: Path,
+) -> Iterable[tuple[str, int, str]]:
+    """Stream immutable admitted keys without materializing the full corpus."""
+
+    last_entry_by_digest: dict[str, int] = {}
+    for record in iter_inventory_decisions(manifest_path):
+        raw = record["trace_key"]
+        key = (
+            str(raw["packed_shard_content_sha256"]),
+            int(raw["entry_index"]),
+            str(raw["trace_id"]),
+        )
+        previous = last_entry_by_digest.get(key[0], -1)
+        if key[1] <= previous:
+            raise Active8TraceInventoryError(
+                "active-8 decision inventory repeats or reorders a physical trace key"
+            )
+        last_entry_by_digest[key[0]] = key[1]
+        if record["decision"] == "accepted":
+            rows = record["progress_rows"]
+            if len(rows) != int(record["path_length"]) + 1:
+                raise Active8TraceInventoryError(
+                    "accepted trace does not retain every progress row"
+                )
+            if not rows[-1]["is_terminal"]:
+                raise Active8TraceInventoryError("accepted trace does not retain its terminal row")
+            yield key
+        elif record["decision"] == "excluded":
+            if record["progress_rows"]:
+                raise Active8TraceInventoryError("excluded trace leaked progress rows")
+        else:
+            raise Active8TraceInventoryError("unknown active-8 trace decision")
+
+
+__all__ = [
+    "ACTIVE8_FAMILIES",
+    "ACTIVE8_TRACE_INVENTORY_SCHEMA",
+    "ACTIVE8_TRACE_INVENTORY_SCHEMA_VERSION",
+    "ACTIVE8_TRACE_INVENTORY_STATUS",
+    "Active8SourceShard",
+    "Active8TraceAdmission",
+    "Active8TraceInventoryError",
+    "ExactCandidateEvidence",
+    "ProductionExactCandidateChecker",
+    "accepted_trace_keys",
+    "build_active8_trace_inventory",
+    "implementation_identity",
+    "inventory_record_for_trace",
+    "iter_accepted_trace_keys",
+    "iter_inventory_decisions",
+    "load_active8_trace_admission",
+    "load_active8_trace_inventory",
+]

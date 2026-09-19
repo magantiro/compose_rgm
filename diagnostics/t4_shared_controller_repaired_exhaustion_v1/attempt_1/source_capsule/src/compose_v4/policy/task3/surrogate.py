@@ -1,0 +1,152 @@
+"""A lightweight five-objective surrogate, fit ONLY on molecules already paid for.
+
+It exists so a navigator can tell whether an edit moved toward a region without
+evaluating anything. Every label it learns from was charged to the strict budget
+when it was acquired; nothing here can obtain a new one. The oracle's
+`navigation_lockout` enforces that at the point of evaluation, so this class does
+not have to be trusted -- it has to be correct.
+
+⚠️ A WEIGHTED AVERAGE CANNOT EXCEED ITS INPUTS, WHICH BREAKS FRONTIER
+ACQUISITIONS. `predict` returns a convex combination of neighbour labels, so it
+can never predict above the largest label among them. Paired with an acquisition
+whose value is zero unless the prediction beats the incumbent front -- marginal
+hypervolume, probability of improvement -- the surrogate is mathematically unable
+to say yes, and the mechanism silently degrades into its tie-break while still
+returning plausible numbers. Measured here: 100% of predicted vectors interior to
+the archive box, 0.9% of candidates with any predicted gain, predicted max JNK3
+0.539 against an archive max of 0.720. Use `predict_with_spread` and an
+optimistic estimate for any frontier-based acquisition. Full write-up in
+diagnostics/task3_surrogate_acquisition_kind_mismatch.json.
+
+⚠️ THE REPRESENTATION IS AN OPTIMISTIC CONTROL, NOT THE ONE WE PLAN TO DEPLOY.
+Morgan bits are free, and they are also exactly what the JNK3 and GSK3B oracles
+are random forests over -- so this surrogate is fitting the same function class
+on the same features as the oracle it predicts. Measured ranking quality here is
+a CEILING. It is adequate for deciding whether the region-targeting MECHANISM is
+worth pursuing, and it is not evidence about a surrogate over frozen R_theta
+representations. That has to be measured on the representation we will actually
+steer with.
+
+Qualified separately before use: `scripts/task3_surrogate_signal.py`. At a few
+hundred paid labels it ranks SA well (rho 0.60-0.66) and JNK3/GSK3B poorly
+(0.22-0.32), because a random ZINC draw contains almost no actives. That is the
+reason the mechanism test seeds its archive.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+import numpy as np
+
+#: Neighbours averaged per prediction. Small, because the regime that matters is
+#: a few hundred labels, and there is nothing to tune it on that would not be
+#: the very data whose scarcity is the question.
+K = 5
+
+
+@dataclass
+class TanimotoKNN:
+    """Tanimoto-weighted k-NN over Morgan bits. No fitting step, so updating is
+    just appending -- which is what a policy needs as labels arrive."""
+
+    k: int = K
+    _fingerprints: list[np.ndarray] = field(default_factory=list, repr=False)
+    _values: list[tuple[float, ...]] = field(default_factory=list, repr=False)
+    _matrix: np.ndarray | None = field(default=None, init=False, repr=False)
+    _targets: np.ndarray | None = field(default=None, init=False, repr=False)
+    _norms: np.ndarray | None = field(default=None, init=False, repr=False)
+
+    def __len__(self) -> int:
+        return len(self._values)
+
+    def update(self, smiles: list[str], values: list[tuple[float, ...]]) -> int:
+        """Add paid-for labels. Returns how many were actually usable."""
+
+        from compose_v4.benchmark.oracles.forest import morgan_bits
+
+        added = 0
+        for item, value in zip(smiles, values):
+            row = morgan_bits(item)
+            if row is None:
+                continue
+            self._fingerprints.append(row)
+            self._values.append(tuple(float(v) for v in value))
+            added += 1
+        if added:
+            self._matrix = np.vstack(self._fingerprints)
+            self._targets = np.asarray(self._values, dtype=float)
+            self._norms = self._matrix.sum(axis=1)
+        return added
+
+    def predict_with_spread(self, smiles: list[str]) -> tuple[np.ndarray, np.ndarray]:
+        """Predictions AND the spread of the neighbours they were averaged from.
+
+        The spread is the only uncertainty signal a k-NN has, and it is needed
+        because of a structural limit of the mean itself: a weighted average can
+        never exceed the largest label among its neighbours, so a pure-mean
+        surrogate can essentially never say "this beats your current best".
+        Measured on real fibers, 100% of predicted vectors were interior to the
+        archive's box and only 0.9% of candidates had any predicted marginal
+        hypervolume -- not because the chemistry was absent but because the
+        estimator cannot express the claim.
+        """
+
+        from compose_v4.benchmark.oracles.forest import morgan_bits
+
+        mean = np.zeros((len(smiles), 5), dtype=float)
+        spread = np.zeros((len(smiles), 5), dtype=float)
+        if self._matrix is None or not len(self._matrix):
+            return mean, spread
+        rows, keep = [], []
+        for position, item in enumerate(smiles):
+            row = morgan_bits(item)
+            if row is not None:
+                rows.append(row)
+                keep.append(position)
+        if not rows:
+            return mean, spread
+        query = np.vstack(rows)
+        intersection = query @ self._matrix.T
+        union = (query.sum(axis=1)[:, None] + self._norms[None, :] - intersection)
+        similarity = intersection / np.maximum(union, 1e-9)
+        k = min(self.k, similarity.shape[1])
+        top = np.argpartition(-similarity, k - 1, axis=1)[:, :k]
+        weights = np.take_along_axis(similarity, top, axis=1)
+        weights = weights / np.maximum(weights.sum(axis=1, keepdims=True), 1e-9)
+        neighbours = self._targets[top]                  # (n, k, 5)
+        mean[keep] = np.einsum("ij,ijk->ik", weights, neighbours)
+        spread[keep] = neighbours.std(axis=1)
+        return mean, spread
+
+    def predict(self, smiles: list[str]) -> np.ndarray:
+        """Predicted five-objective vectors, one row per input molecule.
+
+        Unknown or unparseable molecules get the worst vector rather than a
+        neutral one: a surrogate that cannot see a molecule must not make it
+        look attractive.
+        """
+
+        from compose_v4.benchmark.oracles.forest import morgan_bits
+
+        out = np.zeros((len(smiles), 5), dtype=float)
+        if self._matrix is None or not len(self._matrix):
+            return out
+        rows, keep = [], []
+        for position, item in enumerate(smiles):
+            row = morgan_bits(item)
+            if row is not None:
+                rows.append(row)
+                keep.append(position)
+        if not rows:
+            return out
+        query = np.vstack(rows)
+        intersection = query @ self._matrix.T
+        union = (query.sum(axis=1)[:, None] + self._norms[None, :] - intersection)
+        similarity = intersection / np.maximum(union, 1e-9)
+        k = min(self.k, similarity.shape[1])
+        top = np.argpartition(-similarity, k - 1, axis=1)[:, :k]
+        weights = np.take_along_axis(similarity, top, axis=1)
+        weights = weights / np.maximum(weights.sum(axis=1, keepdims=True), 1e-9)
+        out[keep] = np.einsum("ij,ijk->ik", weights, self._targets[top])
+        return out
