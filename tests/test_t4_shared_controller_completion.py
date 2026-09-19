@@ -1,5 +1,6 @@
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -23,6 +24,7 @@ from compose_v4.experiments.t4_shared_controller_completion_contract import (
     FORBIDDEN_RUNTIME_KEYS,
     PREPARED_STATUS,
     assert_scored_launch_blocked,
+    build_exact_commit_capsule,
     cell_runtime_payload,
     payload_identity,
     validate_preparation_contract,
@@ -186,6 +188,61 @@ def test_exact_commit_capsule_verifies_complete_census(tmp_path):
     (capsule / "extra.py").write_text("unexpected = True\n")
     with pytest.raises(ValueError, match="file census mismatch"):
         verify_exact_commit_capsule(capsule, manifest)
+
+
+def test_exact_commit_capsule_builder_reads_only_exact_git_blobs(tmp_path):
+    revision = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
+    capsule = tmp_path / "capsule"
+    manifest = tmp_path / "capsule_manifest.json"
+    result = build_exact_commit_capsule(
+        repository_root=ROOT,
+        revision=revision,
+        include=(
+            "modal_apps/t4_shared_controller_completion_v1_app.py",
+            "src/compose_v4/experiments/t4_shared_controller_cell_runtime.py",
+        ),
+        capsule_root=capsule,
+        manifest_path=manifest,
+    )
+    assert result["verified"] is True
+    envelope = json.loads(manifest.read_text())
+    assert envelope["payload"]["code_revision"] == revision
+    assert list(envelope["payload"]["files"]) == sorted(envelope["payload"]["files"])
+    assert verify_exact_commit_capsule(capsule, manifest) == result
+    assert not (capsule / "AGENTS.md").exists()
+
+    with pytest.raises(FileExistsError, match="must not already exist"):
+        build_exact_commit_capsule(
+            repository_root=ROOT,
+            revision=revision,
+            include=("modal_apps/t4_shared_controller_completion_v1_app.py",),
+            capsule_root=capsule,
+            manifest_path=tmp_path / "second_manifest.json",
+        )
+
+
+def test_exact_commit_capsule_builder_rejects_empty_or_unsafe_selection(tmp_path):
+    revision = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
+    with pytest.raises(ValueError, match="must be nonempty"):
+        build_exact_commit_capsule(
+            repository_root=ROOT,
+            revision=revision,
+            include=(),
+            capsule_root=tmp_path / "empty",
+            manifest_path=tmp_path / "empty.json",
+        )
+    with pytest.raises(ValueError, match="unsafe capsule path"):
+        build_exact_commit_capsule(
+            repository_root=ROOT,
+            revision=revision,
+            include=("../escape",),
+            capsule_root=tmp_path / "unsafe",
+            manifest_path=tmp_path / "unsafe.json",
+        )
 
 
 def test_capsule_rejects_tampering_and_unsafe_paths(tmp_path):

@@ -10,6 +10,9 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -448,6 +451,110 @@ def verify_exact_commit_capsule(
     }
 
 
+def _git_output(root: Path, *arguments: str) -> bytes:
+    return subprocess.check_output(
+        ["git", *arguments], cwd=root, stderr=subprocess.STDOUT
+    )
+
+
+def build_exact_commit_capsule(
+    *,
+    repository_root: Path,
+    revision: str,
+    include: tuple[str, ...],
+    capsule_root: Path,
+    manifest_path: Path,
+) -> dict[str, Any]:
+    """Materialize a complete capsule from Git blobs at one exact revision.
+
+    ``include`` contains repository-relative files or directory prefixes.  The
+    working tree is never read, so dirty and untracked files cannot enter the
+    capsule accidentally.
+    """
+
+    repository_root = repository_root.resolve()
+    capsule_root = capsule_root.resolve()
+    manifest_path = manifest_path.resolve()
+    if capsule_root.exists() or manifest_path.exists():
+        raise FileExistsError("capsule and manifest outputs must not already exist")
+    if not include:
+        raise ValueError("source capsule include set must be nonempty")
+    requested = tuple(sorted({str(_safe_capsule_path(item)) for item in include}))
+    full_revision = _git_output(repository_root, "rev-parse", f"{revision}^{{commit}}")
+    full_revision_text = full_revision.decode().strip()
+    tree = (
+        _git_output(repository_root, "rev-parse", f"{full_revision_text}^{{tree}}")
+        .decode()
+        .strip()
+    )
+    listing = _git_output(
+        repository_root,
+        "ls-tree",
+        "-r",
+        "-z",
+        "--full-tree",
+        full_revision_text,
+        "--",
+        *requested,
+    )
+    entries: list[tuple[str, str]] = []
+    for raw in listing.split(b"\0"):
+        if not raw:
+            continue
+        metadata, raw_path = raw.split(b"\t", 1)
+        mode, kind, oid = metadata.decode().split()
+        relative = raw_path.decode()
+        _safe_capsule_path(relative)
+        if mode == "120000":
+            raise ValueError(f"source capsule may not contain symlinks: {relative}")
+        if kind != "blob" or mode not in {"100644", "100755"}:
+            raise ValueError(
+                f"unsupported Git object in source capsule: {mode} {kind} {relative}"
+            )
+        entries.append((relative, oid))
+    if not entries:
+        raise ValueError("source capsule include set selected no committed files")
+    if len(entries) != len({relative for relative, _ in entries}):
+        raise ValueError("source capsule Git listing contains duplicate paths")
+
+    capsule_root.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(
+        tempfile.mkdtemp(prefix=f".{capsule_root.name}.tmp-", dir=capsule_root.parent)
+    )
+    temporary_manifest = manifest_path.with_suffix(manifest_path.suffix + ".tmp")
+    try:
+        files: dict[str, dict[str, str]] = {}
+        for relative, oid in sorted(entries):
+            data = _git_output(repository_root, "cat-file", "blob", oid)
+            target = staging.joinpath(*PurePosixPath(relative).parts)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+            files[relative] = {
+                "git_blob_oid": oid,
+                "sha256": hashlib.sha256(data).hexdigest(),
+            }
+        payload = {
+            "schema_version": CAPSULE_MANIFEST_SCHEMA_VERSION,
+            "code_revision": full_revision_text,
+            "git_tree": tree,
+            "include": list(requested),
+            "files": files,
+        }
+        envelope = {"payload": payload, "payload_sha256": payload_identity(payload)}
+        temporary_manifest.write_text(
+            json.dumps(envelope, sort_keys=True, separators=(",", ":")) + "\n"
+        )
+        verification = verify_exact_commit_capsule(staging, temporary_manifest)
+        staging.replace(capsule_root)
+        temporary_manifest.replace(manifest_path)
+        return verification
+    except BaseException:
+        shutil.rmtree(staging, ignore_errors=True)
+        temporary_manifest.unlink(missing_ok=True)
+        raise
+
+
 __all__ = [
     "CAPSULE_MANIFEST_SCHEMA_VERSION",
     "CONTRACT_RELATIVE_PATH",
@@ -459,6 +566,7 @@ __all__ = [
     "RUNTIME_SCHEMA_VERSION",
     "SCHEMA_VERSION",
     "assert_scored_launch_blocked",
+    "build_exact_commit_capsule",
     "cell_runtime_payload",
     "payload_identity",
     "validate_preparation_contract",
