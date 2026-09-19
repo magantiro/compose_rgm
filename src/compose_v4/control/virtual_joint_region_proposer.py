@@ -29,8 +29,10 @@ from compose_v4.control.structural_subgoal import (
     instantiate_goal,
 )
 from compose_v4.control.structural_subgoal_policy import (
+    REWRITE_SCALE_BANDS,
     StructuralDeltaTemplate,
     materialize_template,
+    structural_rewrite_event_count,
     transfer_bindings,
 )
 from compose_v4.control.structural_subgoal_realizer import (
@@ -43,6 +45,8 @@ from compose_v4.rewrite.trace_shard import decode_state
 
 _SLOT_CAPACITY = 48
 _MAXIMUM_ACTIVE_ATOMS = 40
+_FLAT_ALLOCATION = "flat"
+_TEMPLATE_BINDING_PARTICLE_ALLOCATION = "template_binding_particle"
 
 
 @dataclass(frozen=True)
@@ -226,6 +230,9 @@ def _bound_constituents(
     expert: RouteDistilledGoalExpert,
     budgets: VirtualJointRegionBudgets,
     telemetry: Counter,
+    *,
+    constituent_allocation: str,
+    binding_particle_index: int | None,
 ) -> tuple[_BoundConstituent, ...]:
     """Bind generic templates on the root without isolated target validation."""
 
@@ -266,7 +273,18 @@ def _bound_constituents(
         ),
     )
     telemetry["bound_constituents"] = len(ordered)
-    selected = tuple(ordered[: budgets.expansion_width])
+    if constituent_allocation == _FLAT_ALLOCATION:
+        selected = tuple(ordered[: budgets.expansion_width])
+    else:
+        if binding_particle_index is None:
+            raise AssertionError("validated binding particle index is missing")
+        selected = _template_binding_particle_constituents(
+            ordered,
+            expert,
+            expansion_width=budgets.expansion_width,
+            binding_particle_index=binding_particle_index,
+            telemetry=telemetry,
+        )
     selected_keys = {row.constituent_key for row in selected}
     telemetry["selected_constituents"] = len(selected)
     telemetry["constituents_truncated_by_expansion_width"] = max(
@@ -282,7 +300,131 @@ def _bound_constituents(
         }
         for rank, row in enumerate(ordered, 1)
     ]
+    if constituent_allocation == _TEMPLATE_BINDING_PARTICLE_ALLOCATION:
+        selection_ranks = {
+            row.constituent_key: rank for rank, row in enumerate(selected, 1)
+        }
+        within_template_ranks = _within_template_ranks(ordered)
+        for rank, row in enumerate(telemetry["bound_constituent_ranks"], 1):
+            constituent_key = row["constituent_key"]
+            template_id = row["template_id"]
+            row.update(
+                {
+                    "global_rank": rank,
+                    "within_template_rank": within_template_ranks[constituent_key],
+                    "selection_rank": selection_ranks.get(constituent_key),
+                    "scale": _template_scale(
+                        next(
+                            item.template
+                            for item in ordered
+                            if item.template.template_id == template_id
+                        )
+                    ),
+                }
+            )
     return selected
+
+
+def _template_scale(template: StructuralDeltaTemplate) -> str:
+    events = structural_rewrite_event_count(template)
+    if events <= 3:
+        return "local"
+    if events <= 11:
+        return "medium"
+    return "large"
+
+
+def _within_template_ranks(
+    ordered: list[_BoundConstituent],
+) -> dict[str, int]:
+    grouped: dict[str, list[_BoundConstituent]] = {}
+    for row in ordered:
+        grouped.setdefault(row.template.template_id, []).append(row)
+    return {
+        row.constituent_key: rank
+        for rows in grouped.values()
+        for rank, row in enumerate(
+            sorted(rows, key=lambda item: item.constituent_key), 1
+        )
+    }
+
+
+def _template_binding_particle_constituents(
+    ordered: list[_BoundConstituent],
+    expert: RouteDistilledGoalExpert,
+    *,
+    expansion_width: int,
+    binding_particle_index: int,
+    telemetry: Counter,
+) -> tuple[_BoundConstituent, ...]:
+    """Allocate one rotated binding per template before repeated bindings."""
+
+    grouped: dict[str, list[_BoundConstituent]] = {}
+    templates: dict[str, StructuralDeltaTemplate] = {}
+    for row in ordered:
+        template_id = row.template.template_id
+        grouped.setdefault(template_id, []).append(row)
+        templates[template_id] = row.template
+    for rows in grouped.values():
+        rows.sort(key=lambda row: row.constituent_key)
+
+    buckets: dict[str, list[str]] = {band: [] for band in REWRITE_SCALE_BANDS}
+    for template_id, template in templates.items():
+        buckets[_template_scale(template)].append(template_id)
+    for rows in buckets.values():
+        rows.sort(
+            key=lambda template_id: (
+                -expert.marginal.score((templates[template_id],)),
+                template_id,
+            )
+        )
+    group_order: list[str] = []
+    positions = {band: 0 for band in REWRITE_SCALE_BANDS}
+    while len(group_order) < len(grouped):
+        for band in REWRITE_SCALE_BANDS:
+            position = positions[band]
+            if position >= len(buckets[band]):
+                continue
+            group_order.append(buckets[band][position])
+            positions[band] += 1
+
+    rotated: dict[str, tuple[_BoundConstituent, ...]] = {}
+    for template_id in group_order:
+        rows = grouped[template_id]
+        offset = binding_particle_index % len(rows)
+        rotated[template_id] = (*rows[offset:], *rows[:offset])
+    selected: list[_BoundConstituent] = []
+    round_index = 0
+    while len(selected) < expansion_width:
+        added = False
+        for template_id in group_order:
+            rows = rotated[template_id]
+            if round_index >= len(rows):
+                continue
+            selected.append(rows[round_index])
+            added = True
+            if len(selected) >= expansion_width:
+                break
+        if not added:
+            break
+        round_index += 1
+
+    telemetry["constituent_allocation_mode"] = _TEMPLATE_BINDING_PARTICLE_ALLOCATION
+    telemetry["binding_particle_index"] = binding_particle_index
+    telemetry["bound_template_group_count"] = len(grouped)
+    telemetry["scale_census"] = {
+        band: {
+            "template_groups": len(buckets[band]),
+            "bound_constituents": sum(
+                len(grouped[template_id]) for template_id in buckets[band]
+            ),
+            "selected_constituents": sum(
+                _template_scale(row.template) == band for row in selected
+            ),
+        }
+        for band in REWRITE_SCALE_BANDS
+    }
+    return tuple(selected)
 
 
 def _goal(
@@ -545,6 +687,8 @@ def propose_virtual_joint_region_paths(
     *,
     budgets: VirtualJointRegionBudgets | None = None,
     ranker: object | None = None,
+    constituent_allocation: str = _FLAT_ALLOCATION,
+    binding_particle_index: int | None = None,
 ) -> VirtualJointRegionProposalBatch:
     """Plan and exactly execute valid joint targets from generic same-root deltas.
 
@@ -558,6 +702,27 @@ def propose_virtual_joint_region_paths(
         raise TypeError("budgets must be VirtualJointRegionBudgets")
     if ranker is not None:
         raise ValueError("virtual joint region ranker support is not implemented")
+    if constituent_allocation not in {
+        _FLAT_ALLOCATION,
+        _TEMPLATE_BINDING_PARTICLE_ALLOCATION,
+    }:
+        raise ValueError(
+            "constituent_allocation must be 'flat' or " "'template_binding_particle'"
+        )
+    if constituent_allocation == _FLAT_ALLOCATION:
+        if binding_particle_index is not None:
+            raise ValueError(
+                "binding_particle_index is only valid for "
+                "template_binding_particle allocation"
+            )
+    elif (
+        type(binding_particle_index) is not int
+        or not 0 <= binding_particle_index < budgets.max_bindings_per_template
+    ):
+        raise ValueError(
+            "template_binding_particle allocation requires an integer "
+            "binding_particle_index within 0..max_bindings_per_template-1"
+        )
     if source.n_atoms != _SLOT_CAPACITY:
         raise ValueError("virtual joint region source must have exactly 48 slots")
     if (
@@ -571,7 +736,14 @@ def propose_virtual_joint_region_paths(
         raise ValueError("runtime template vocabulary and marginal disagree")
 
     telemetry: Counter = Counter()
-    constituents = _bound_constituents(source, expert, budgets, telemetry)
+    constituents = _bound_constituents(
+        source,
+        expert,
+        budgets,
+        telemetry,
+        constituent_allocation=constituent_allocation,
+        binding_particle_index=binding_particle_index,
+    )
     targets = _plan_targets(source, expert, constituents, budgets, telemetry)
     proposals = _realize_targets(source, targets, budgets, telemetry)
     result_telemetry = {

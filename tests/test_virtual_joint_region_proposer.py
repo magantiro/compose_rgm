@@ -99,6 +99,55 @@ def _append_expert():
     return source, _expert((append,))
 
 
+def _chain_append_template(output_count: int) -> StructuralDeltaTemplate:
+    output_atoms = tuple(
+        (
+            2,
+            0,
+            3 if index == output_count - 1 else 2,
+            1 if index == output_count - 1 else 2,
+        )
+        for index in range(output_count)
+    )
+    size = output_count + 1
+    target_bonds = [[0 for _ in range(size)] for _ in range(size)]
+    for left in range(size - 1):
+        target_bonds[left][left + 1] = 1
+        target_bonds[left + 1][left] = 1
+    return StructuralDeltaTemplate(
+        input_atoms=((2, 0, 4, 0),),
+        input_bonds=((0,),),
+        target_atoms=((2, 0, 3, 1),),
+        output_atoms=output_atoms,
+        target_bonds=tuple(tuple(row) for row in target_bonds),
+    )
+
+
+def _scale_cycling_expert():
+    source = _graph((2,), (4,), ())
+    templates = tuple(_chain_append_template(count) for count in (1, 2, 6))
+    weights = {
+        template.template_id: weight
+        for template, weight in zip(templates, (0.1, 0.2, 0.7), strict=True)
+    }
+    return source, templates, _expert(templates, weights=weights)
+
+
+def _eight_binding_expert():
+    atom_types = (2,) * 8
+    hydrogens = (2,) * 8
+    edges = tuple((index, (index + 1) % 8, 1) for index in range(8))
+    source = _graph(atom_types, hydrogens, edges)
+    replace_carbon = StructuralDeltaTemplate(
+        input_atoms=((2, 0, 2, 2),),
+        input_bonds=((0,),),
+        target_atoms=((3, 0, 1, 2),),
+        output_atoms=(),
+        target_bonds=((0,),),
+    )
+    return source, replace_carbon, _expert((replace_carbon,))
+
+
 def _crowded_shallow_expert():
     source, joint_template, _ = _co2_compensating_expert()
     shallow = tuple(
@@ -307,6 +356,160 @@ def test_expansion_width_truncation_reports_constituent_ranks() -> None:
     assert batch.telemetry["selected_constituents"] == 1
     assert batch.telemetry["constituents_truncated_by_expansion_width"] == 1
     assert batch.proposals == ()
+
+
+def test_flat_allocation_default_is_byte_equivalent() -> None:
+    source, _, expert = _co2_compensating_expert()
+    budgets = _budgets(max_depth=2)
+
+    default = propose_virtual_joint_region_paths(source, expert, budgets=budgets)
+    explicit = propose_virtual_joint_region_paths(
+        source,
+        expert,
+        budgets=budgets,
+        constituent_allocation="flat",
+    )
+
+    assert _signature(default) == _signature(explicit)
+    assert default.telemetry == explicit.telemetry
+    assert "constituent_allocation_mode" not in default.telemetry
+    assert "binding_particle_index" not in default.telemetry
+
+
+def test_template_binding_particle_is_deterministic_and_permutation_invariant() -> None:
+    source, templates, expert = _scale_cycling_expert()
+    permuted = _expert(
+        tuple(reversed(templates)),
+        weights={
+            template.template_id: weight
+            for template, weight in zip(templates, (0.1, 0.2, 0.7), strict=True)
+        },
+    )
+    budgets = _budgets(max_depth=1, expansion_width=3)
+
+    first = propose_virtual_joint_region_paths(
+        source,
+        expert,
+        budgets=budgets,
+        constituent_allocation="template_binding_particle",
+        binding_particle_index=0,
+    )
+    second = propose_virtual_joint_region_paths(
+        source,
+        permuted,
+        budgets=budgets,
+        constituent_allocation="template_binding_particle",
+        binding_particle_index=0,
+    )
+
+    assert _signature(first) == _signature(second)
+    assert first.telemetry == second.telemetry
+    selected = sorted(
+        (
+            row
+            for row in first.telemetry["bound_constituent_ranks"]
+            if row["selected_for_expansion"]
+        ),
+        key=lambda row: row["selection_rank"],
+    )
+    assert [row["scale"] for row in selected] == ["local", "medium", "large"]
+    assert [row["selection_rank"] for row in selected] == [1, 2, 3]
+    assert len({row["template_id"] for row in selected}) == 3
+    assert first.telemetry["bound_template_group_count"] == 3
+    assert first.telemetry["constituent_allocation_mode"] == (
+        "template_binding_particle"
+    )
+    assert first.telemetry["binding_particle_index"] == 0
+    assert {
+        band: census["template_groups"]
+        for band, census in first.telemetry["scale_census"].items()
+    } == {"local": 1, "medium": 1, "large": 1}
+    assert all(
+        {"global_rank", "within_template_rank", "selection_rank", "scale"} <= set(row)
+        for row in first.telemetry["bound_constituent_ranks"]
+    )
+
+
+def test_binding_particles_cover_every_declared_binding_without_widening() -> None:
+    source, template, expert = _eight_binding_expert()
+    budgets = _budgets(max_depth=1, expansion_width=1)
+    declared = transfer_bindings(
+        template,
+        source,
+        max_bindings=budgets.max_bindings_per_template,
+        max_visits=budgets.max_binding_visits,
+    ).assignments
+    selected_bindings: set[tuple[int, ...]] = set()
+
+    for particle_index in range(budgets.max_bindings_per_template):
+        batch = propose_virtual_joint_region_paths(
+            source,
+            expert,
+            budgets=budgets,
+            constituent_allocation="template_binding_particle",
+            binding_particle_index=particle_index,
+        )
+        selected = [
+            row
+            for row in batch.telemetry["bound_constituent_ranks"]
+            if row["selected_for_expansion"]
+        ]
+        assert len(selected) == budgets.expansion_width
+        assert batch.telemetry["selected_constituents"] <= budgets.expansion_width
+        assert selected[0]["within_template_rank"] == particle_index + 1
+        selected_bindings.add(tuple(selected[0]["binding"]))
+
+    assert selected_bindings == set(declared)
+    assert len(selected_bindings) == budgets.max_bindings_per_template
+
+
+def test_template_binding_particle_respects_maximum_expansion_width() -> None:
+    source, _, expert = _scale_cycling_expert()
+    budgets = _budgets(max_depth=1, expansion_width=2)
+
+    batch = propose_virtual_joint_region_paths(
+        source,
+        expert,
+        budgets=budgets,
+        constituent_allocation="template_binding_particle",
+        binding_particle_index=0,
+    )
+
+    assert batch.telemetry["bound_template_group_count"] == 3
+    assert batch.telemetry["selected_constituents"] == budgets.expansion_width
+    assert (
+        sum(
+            row["selected_for_expansion"]
+            for row in batch.telemetry["bound_constituent_ranks"]
+        )
+        == budgets.expansion_width
+    )
+
+
+@pytest.mark.parametrize(
+    ("allocation", "particle_index", "message"),
+    [
+        ("unknown", None, "constituent_allocation"),
+        ("flat", 0, "only valid"),
+        ("template_binding_particle", None, "requires an integer"),
+        ("template_binding_particle", True, "requires an integer"),
+        ("template_binding_particle", -1, "within 0"),
+        ("template_binding_particle", 8, "within 0"),
+    ],
+)
+def test_constituent_allocation_validation(
+    allocation: str, particle_index: int | None, message: str
+) -> None:
+    source, expert = _append_expert()
+
+    with pytest.raises(ValueError, match=message):
+        propose_virtual_joint_region_paths(
+            source,
+            expert,
+            budgets=_budgets(max_depth=1),
+            constituent_allocation=allocation,
+            binding_particle_index=particle_index,
+        )
 
 
 def test_created_role_to_virtual_slot_provenance_is_preserved() -> None:
