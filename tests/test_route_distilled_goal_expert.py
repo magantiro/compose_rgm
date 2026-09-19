@@ -178,6 +178,7 @@ def test_route_expert_discloses_realized_actions_only_when_requested(monkeypatch
     )
 
     assert candidates[0]["realized_actions"] == [realized_action]
+    assert candidates[0]["realized_endpoint_key"]
     assert telemetry["realized_actions_included"] is True
 
 

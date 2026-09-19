@@ -319,6 +319,7 @@ def propose_route_expert_candidates(
             if not isinstance(actions, list) or len(actions) != realized_primitives:
                 raise RuntimeError("route realization omitted its exact action receipt")
             record["realized_actions"] = actions
+            record["realized_endpoint_key"] = canonical_state_key(endpoint)
         records.append(record)
     telemetry = {
         **proposal_telemetry,

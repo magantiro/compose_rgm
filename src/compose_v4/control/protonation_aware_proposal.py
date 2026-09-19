@@ -21,9 +21,7 @@ import numpy as np
 from compose_v4.chem.molecular_graph import (
     MolecularGraph,
     molecular_graph_to_smiles,
-    smiles_to_molecular_graph,
 )
-from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.control.dynamic_program_synthesis import synthesize_dynamic_program
 from compose_v4.control.protonation_restate_program import execute_protonation_program
 from compose_v4.control.retained_core_pruning import enumerate_retained_core_prunes
@@ -167,7 +165,7 @@ def propose_protonation_aware_candidates(
         tail_actions: tuple[dict, ...],
         lane: str,
         provenance: dict,
-        expected: MolecularGraph,
+        expected_key: str,
     ) -> None:
         nonlocal exact_attempts, exact_successes
         lane_attempts[lane] += 1
@@ -181,7 +179,7 @@ def propose_protonation_aware_candidates(
         except (ValueError, KeyError) as error:
             abstentions[f"{lane}:exact_replay:{type(error).__name__}"] += 1
             return
-        if canonical_state_key(endpoint) != canonical_state_key(expected):
+        if canonical_state_key(endpoint) != expected_key:
             raise RuntimeError("protonation-aware exact replay changed its endpoint")
         exact_successes += 1
         lane_exact[lane] += 1
@@ -235,7 +233,7 @@ def propose_protonation_aware_candidates(
             tail_actions=(),
             lane="charge_only",
             provenance=action_provenance,
-            expected=rewritten,
+            expected_key=canonical_state_key(rewritten),
         )
         lane_generation_attempts["charge_only"] += 1
 
@@ -265,7 +263,7 @@ def propose_protonation_aware_candidates(
                     "draw": draw,
                     "modules": metadata.get("modules", []),
                 },
-                expected=expected,
+                expected_key=canonical_state_key(expected),
             )
 
         retained = enumerate_retained_core_prunes(
@@ -287,7 +285,7 @@ def propose_protonation_aware_candidates(
                     "proposal_rank": rank,
                     "stages": list(proposal.stages),
                 },
-                expected=proposal.product,
+                expected_key=canonical_state_key(proposal.product),
             )
 
         route_rows, telemetry = propose_route_expert_candidates(
@@ -307,10 +305,6 @@ def propose_protonation_aware_candidates(
         for row in route_rows:
             lane_generation_attempts["route_complete_region"] += 1
             tail = tuple(_lift_v4(record) for record in row["realized_actions"])
-            expected_smiles = str(row["smiles"])
-            expected = pad_molecular_graph(
-                smiles_to_molecular_graph(expected_smiles), config.persistent_slots
-            )
             commit(
                 protonation_record=protonation_record,
                 rewritten=rewritten,
@@ -323,7 +317,7 @@ def propose_protonation_aware_candidates(
                     "rewrite_scale": str(row["rewrite_scale"]),
                     "realized_primitive_band": str(row["realized_primitive_band"]),
                 },
-                expected=expected,
+                expected_key=str(row["realized_endpoint_key"]),
             )
 
     ordered = [candidates[key] for key in sorted(candidates)]
