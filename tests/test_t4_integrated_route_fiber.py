@@ -132,3 +132,108 @@ def test_route_scale_floor_uses_prior_rank_before_online_value_is_fit():
     }
     assert {row["route_proposal_rank"] for row in scale_floor} == {3}
     assert sum(row["selection_kind"] == "expert_floor" for row in selected) == 2
+
+
+def test_route_scale_floor_accepts_per_band_counts_without_changing_defaults():
+    state = SearchState(archive={"P": -8.0})
+    candidates = []
+    for band_index, band in enumerate(("small", "medium", "large")):
+        for rank in (9, 3, 6, 1):
+            row = _row(f"route-{band_index}-{rank}", "route_complete_region")
+            row["realized_primitive_band"] = band
+            row["route_proposal_rank"] = rank
+            row["features"] = integrated_features(row, state)
+            row["fingerprint"] = {band_index * 10 + rank}
+            candidates.append(row)
+    for expert in ("shallow", "anchored_replacement"):
+        row = _row(expert, expert)
+        row["features"] = integrated_features(row, state)
+        candidates.append(row)
+
+    defaults = select_batch(
+        candidates,
+        ProgramValue(),
+        state,
+        np.random.default_rng(7),
+        round_index=1,
+        batch=8,
+        exploration=2,
+        expert_floor_rounds=2,
+        route_scale_floor_rounds=1,
+    )
+    explicit_defaults = select_batch(
+        candidates,
+        ProgramValue(),
+        state,
+        np.random.default_rng(7),
+        round_index=1,
+        batch=8,
+        exploration=2,
+        expert_floor_rounds=2,
+        route_scale_floor_rounds=1,
+        route_scale_floor_counts={"small": 1, "medium": 1, "large": 1},
+    )
+    assert explicit_defaults == defaults
+
+    expanded = select_batch(
+        candidates,
+        ProgramValue(),
+        state,
+        np.random.default_rng(7),
+        round_index=1,
+        batch=8,
+        exploration=2,
+        expert_floor_rounds=2,
+        route_scale_floor_rounds=1,
+        route_scale_floor_counts={"small": 1, "medium": 1, "large": 4},
+    )
+    scale_floor = [row for row in expanded if row["selection_kind"] == "route_scale_floor"]
+    assert [
+        (row["realized_primitive_band"], row["route_proposal_rank"]) for row in scale_floor
+    ] == [
+        ("small", 1),
+        ("medium", 1),
+        ("large", 1),
+        ("large", 3),
+        ("large", 6),
+        ("large", 9),
+    ]
+    assert sum(row["selection_kind"] == "expert_floor" for row in expanded) == 2
+    assert len({row["smiles"] for row in expanded}) == len(expanded) == 8
+
+    duplicated = [*candidates, dict(candidates[-3])]
+    deduplicated = select_batch(
+        duplicated,
+        ProgramValue(),
+        state,
+        np.random.default_rng(7),
+        round_index=1,
+        batch=8,
+        exploration=2,
+        expert_floor_rounds=2,
+        route_scale_floor_rounds=1,
+        route_scale_floor_counts={"small": 1, "medium": 1, "large": 4},
+    )
+    assert len({row["smiles"] for row in deduplicated}) == len(deduplicated)
+
+
+def test_route_scale_floor_counts_reject_invalid_contract_values():
+    state = SearchState(archive={"P": -8.0})
+    common = {
+        "candidates": [],
+        "value": ProgramValue(),
+        "state": state,
+        "rng": np.random.default_rng(7),
+        "round_index": 1,
+        "batch": 8,
+        "exploration": 2,
+        "expert_floor_rounds": 2,
+        "route_scale_floor_rounds": 1,
+    }
+    for counts in ({"giant": 1}, {"large": -1}, {"large": True}, {"large": 1.5}):
+        try:
+            select_batch(**common, route_scale_floor_counts=counts)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"invalid route scale floor counts accepted: {counts}")

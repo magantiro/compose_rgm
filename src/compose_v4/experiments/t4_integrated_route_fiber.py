@@ -8,7 +8,7 @@ current cell, but no target name, comparator score, teacher endpoint, or route i
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 
 import numpy as np
 
@@ -144,34 +144,58 @@ def select_batch(
     exploration: int,
     expert_floor_rounds: int,
     route_scale_floor_rounds: int = 0,
+    route_scale_floor_counts: Mapping[str, int] | None = None,
 ) -> list[dict]:
-    """Select one batch, seeding each available expert only in early rounds."""
+    """Select one batch, seeding available route scales and experts early.
+
+    By default, the route-scale floor preserves the original policy of selecting
+    one proposal from each of the small, medium, and large primitive bands.  A
+    contract may request more than one proposal per band without changing the
+    ordering rule: proposals are selected by route-prior rank, then canonical
+    SMILES.
+    """
 
     if batch < 1 or exploration < 0 or exploration > batch or route_scale_floor_rounds < 0:
         raise ValueError("invalid batch or exploration quota")
+    route_bands = ("small", "medium", "large")
+    scale_counts = {band: 1 for band in route_bands}
+    if route_scale_floor_counts is not None:
+        unknown = set(route_scale_floor_counts).difference(route_bands)
+        if unknown:
+            raise ValueError(f"unknown route scale floor bands: {sorted(unknown)}")
+        for band, count in route_scale_floor_counts.items():
+            if isinstance(count, bool) or not isinstance(count, int) or count < 0:
+                raise ValueError(f"invalid route scale floor count for {band!r}: {count!r}")
+            scale_counts[band] = count
     available = [row for row in candidates if row["smiles"] not in state.archive]
     selected: list[dict] = []
     used: set[str] = set()
     if round_index <= route_scale_floor_rounds:
-        for band in ("small", "medium", "large"):
-            choices = [
-                row
-                for row in available
-                if "route_complete_region" in _experts(row)
-                and row.get("realized_primitive_band") == band
-                and row["smiles"] not in used
-            ]
-            if not choices or len(selected) >= batch:
-                continue
-            chosen = min(
-                choices,
+        for band in route_bands:
+            choices = sorted(
+                (
+                    row
+                    for row in available
+                    if "route_complete_region" in _experts(row)
+                    and row.get("realized_primitive_band") == band
+                    and row["smiles"] not in used
+                ),
                 key=lambda row: (
                     int(row.get("route_proposal_rank", 1 << 30)),
                     row["smiles"],
                 ),
             )
-            selected.append({**chosen, "selection_kind": "route_scale_floor"})
-            used.add(chosen["smiles"])
+            selected_in_band = 0
+            for chosen in choices:
+                if len(selected) >= batch:
+                    break
+                if chosen["smiles"] in used:
+                    continue
+                selected.append({**chosen, "selection_kind": "route_scale_floor"})
+                used.add(chosen["smiles"])
+                selected_in_band += 1
+                if selected_in_band >= scale_counts[band]:
+                    break
     if round_index <= expert_floor_rounds:
         for expert in EXPERTS:
             if any(expert in _experts(row) for row in selected):
