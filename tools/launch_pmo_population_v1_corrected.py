@@ -20,7 +20,7 @@ AUTH = ROOT / "diagnostics/pmo_population_controller_v1/corrected_scored_authori
 MANIFEST = ROOT / "diagnostics/pmo_population_controller_v1/source_capsule_manifest_v2.json"
 PREFLIGHT = ROOT / "diagnostics/pmo_population_controller_v1/corrected_preflight_receipt.json"
 LAUNCH = ROOT / "diagnostics/pmo_population_controller_v1/corrected_scored_launch_receipt.json"
-PAYLOAD = "2e3f9195f27c92e957af78b8f6f61f742fe2545fd46af0d303fd2e2e1e718406"
+PAYLOAD = "103d9d9273753732fb7fc03207834c88e317c4d1d9bab11b3f3b2f265fc50075"
 APP = "compose-pmo-population-v1-corrected"
 TASKS = ("gsk3b", "perindopril_mpo", "celecoxib_rediscovery")
 

@@ -27,9 +27,21 @@ AUTH = ROOT / "diagnostics/pmo_population_controller_v1/corrected_scored_authori
 MANIFEST = ROOT / "diagnostics/pmo_population_controller_v1/source_capsule_manifest_v2.json"
 PREFLIGHT = ROOT / "diagnostics/pmo_population_controller_v1/corrected_preflight_receipt.json"
 LAUNCH = ROOT / "diagnostics/pmo_population_controller_v1/corrected_scored_launch_receipt.json"
-ARCHIVE = ROOT / "diagnostics/pmo_population_controller_v1/dead_1000call_attempt"
+# Superseded receipts are archived under the payload hash they belonged to.  A fixed
+# directory name could not survive a second supersession: re-running this tool would
+# have overwritten the archived 1000-call receipts with the 250-call ones and erased
+# the record of the earlier attempt.
+SUPERSEDED = ROOT / "diagnostics/pmo_population_controller_v1/superseded"
 CREDIT = "src/compose_v4/control/pmo_credit.py"
 CONTINUITY = "src/compose_v4/control/bootstrap_pool_continuity.py"
+ORACLE_ASSETS = "src/compose_v4/experiments/pmo_oracle_assets.py"
+
+DEFAULT_REASON = (
+    "The 1000-call payload was authorized but its worker image omitted torch and "
+    "every task died at zero charged calls.  The image is fixed and proven by a "
+    "zero-oracle-call remote smoke.  This payload reduces the budget to 250 calls "
+    "per task so the three diagnostic curves are read before a larger spend."
+)
 
 CALLS_PER_TASK = 250
 INITIALIZATION = 16
@@ -74,6 +86,12 @@ def write(path: Path, value: dict, *, compact: bool) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument(
+        "--reason",
+        default=DEFAULT_REASON,
+        help="why this payload supersedes the previous one; it is recorded verbatim "
+             "in the authorization receipt and is part of the scientific record",
+    )
     args = parser.parse_args()
 
     envelope = json.loads(CONTRACT.read_text())
@@ -95,8 +113,12 @@ def main() -> None:
     envelope["payload_sha256"] = new_payload_sha256
 
     manifest = json.loads(MANIFEST.read_text())
+    # The capsule recorded the payload it was built for, but nothing updated that
+    # field, so it addressed a payload that no longer existed -- a pin resolving to
+    # nothing, which is worse than no pin because it reads as verified.
+    manifest["contract_payload_sha256"] = new_payload_sha256
     source_files = manifest["source_files"]
-    for dependency in (CREDIT, CONTINUITY):
+    for dependency in (CREDIT, CONTINUITY, ORACLE_ASSETS):
         source_files.setdefault(dependency, "")
     for relative in sorted(source_files):
         source_files[relative] = sha(ROOT / relative)
@@ -111,19 +133,29 @@ def main() -> None:
         print("dry run: pass --apply to write")
         return
 
-    if LAUNCH.exists():
-        ARCHIVE.mkdir(parents=True, exist_ok=True)
-        (ARCHIVE / "corrected_scored_launch_receipt.json").write_text(LAUNCH.read_text())
-        LAUNCH.unlink()
-    if PREFLIGHT.exists():
-        ARCHIVE.mkdir(parents=True, exist_ok=True)
-        (ARCHIVE / "corrected_preflight_receipt.json").write_text(PREFLIGHT.read_text())
-        PREFLIGHT.unlink()
+    # Name the archive after the payload each RECEIPT itself carries, not after the
+    # contract's current hash.  Those differ whenever the contract was re-sealed
+    # before this tool ran, and filing a receipt under a payload it never described
+    # is a pointer that resolves to the wrong thing.
+    archives: list[Path] = []
+    for receipt, name in ((LAUNCH, "corrected_scored_launch_receipt.json"),
+                          (PREFLIGHT, "corrected_preflight_receipt.json")):
+        if not receipt.exists():
+            continue
+        belongs_to = json.loads(receipt.read_text()).get(
+            "payload_sha256", previous_payload_sha256)
+        archive = SUPERSEDED / f"payload_{belongs_to[:16]}"
+        archive.mkdir(parents=True, exist_ok=True)
+        destination = archive / name
+        if destination.exists():
+            raise FileExistsError(
+                f"refusing to overwrite an archived receipt: {destination}"
+            )
+        destination.write_text(receipt.read_text())
+        receipt.unlink()
+        archives.append(archive)
 
     write(CONTRACT, envelope, compact=False)
-    # The contract file hash is itself pinned by the capsule, so re-hash after writing.
-    source_files[str(CONTRACT.relative_to(ROOT))] = sha(CONTRACT)
-    write(MANIFEST, manifest, compact=True)
 
     authorization = json.loads(AUTH.read_text())
     authorization.update({
@@ -131,22 +163,25 @@ def main() -> None:
         "supersedes_payload_sha256": previous_payload_sha256,
         "payload_sha256": new_payload_sha256,
         "oracle_calls_authorized": BUDGET["charged_calls_total"],
-        "reason_for_new_payload": (
-            "The 1000-call payload was authorized but its worker image omitted torch and "
-            "every task died at zero charged calls.  The image is fixed and proven by a "
-            "zero-oracle-call remote smoke.  This payload reduces the budget to 250 calls "
-            "per task so the three diagnostic curves are read before a larger spend."
-        ),
+        "reason_for_new_payload": args.reason,
         "authorized_at_utc": datetime.now(timezone.utc).isoformat(),
     })
     write(AUTH, authorization, compact=False)
+
+    # The capsule pins BOTH of the files just rewritten, so it has to be written last
+    # and re-hash both.  Writing the authorization receipt after the manifest left the
+    # capsule pinning a receipt that no longer existed -- and since `authorized_at_utc`
+    # moves on every run, the launcher's capsule check could never pass.
+    for pinned in (CONTRACT, AUTH):
+        source_files[str(pinned.relative_to(ROOT))] = sha(pinned)
+    write(MANIFEST, manifest, compact=True)
 
     print(json.dumps({
         "previous_payload_sha256": previous_payload_sha256,
         "new_payload_sha256": new_payload_sha256,
         "charged_calls_total": BUDGET["charged_calls_total"],
         "manifest_files": len(source_files),
-        "archived": str(ARCHIVE.relative_to(ROOT)),
+        "archived": sorted({str(a.relative_to(ROOT)) for a in archives}),
     }, indent=2, sort_keys=True))
 
 

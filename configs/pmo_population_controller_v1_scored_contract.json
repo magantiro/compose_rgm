@@ -13,13 +13,14 @@
       "queries_per_round": 16
     },
     "controller_contract": "configs/pmo_population_controller_v1.json",
-    "controller_contract_sha256": "aae6c15d20266afc886fbd7f32c8845f4350a16e8766ac10db64449d0e3bbfb3",
+    "controller_contract_sha256": "fcc79f9afc2541f8cfde657f195ccd3aeb27a219ce6f4269ab7368e9c2846a21",
     "implementation_sha256": {
-      "modal_apps/pmo_population_v1_app.py": "c1662ed2243abea36daa64f1c49af6e8f1ec54d5f28b27b6f8fa3e4a56ab551a",
+      "modal_apps/pmo_population_v1_app.py": "36f49f0ecf791e6ba823a1d3f19a2b34b69cc8e269d149f3c69d1ea1b61ad88a",
       "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",
       "src/compose_v4/control/pmo_credit.py": "ec1eb66589f241dec65eaa73a540f32ac8b032d7562889f7adf1a3b299834112",
       "src/compose_v4/control/pmo_population_controller.py": "f136d26fe248dab575dfef2d4eddc6741e3dbb8a934755d5cfad057a52a5466a",
       "src/compose_v4/control/program_campaign.py": "884f13cbbe49c06a94aafb59880daf38f313b6f4717af012c1fe8eb9074c469e",
+      "src/compose_v4/experiments/pmo_oracle_assets.py": "5ec0b7c9b9185cd2b8edd14c2529f37e825311a2b39d6ce71c68423ab9f4d558",
       "src/compose_v4/experiments/pmo_population_v1.py": "a553cf66264a88d3750ea26d3ddd29f3f04f7ddd1a122084bdfe5b659c9fb655"
     },
     "modal_launch_authorized": false,
@@ -69,5 +70,5 @@
       "celecoxib_rediscovery"
     ]
   },
-  "payload_sha256": "46985daa9f86378e41f24983c7a8828279e988aec36a0027d518e1961c16e12b"
+  "payload_sha256": "846c1c3e8ca4305108d72c93616069b86c7b6efd1630a2fb811cf10fe0df78f4"
 }

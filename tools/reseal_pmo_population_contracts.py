@@ -29,6 +29,11 @@ REMOTE_APP = "modal_apps/pmo_population_v1_app.py"
 # Archive-continuity bookkeeping decides which measured programs the archive admits,
 # so it is load-bearing for every number the controller produces.
 CONTINUITY = "src/compose_v4/control/bootstrap_pool_continuity.py"
+# Asset resolution and the pre-launch positive control sit on the scoring path: they
+# decide whether a score is the oracle's output or PyTDC's swallowed default, so a
+# contract that did not pin them could authorize a runtime whose numbers can change
+# without the identity moving.
+ORACLE_ASSETS = "src/compose_v4/experiments/pmo_oracle_assets.py"
 BASE = "configs/pmo_population_controller_v1.json"
 DEPENDENTS = (
     "configs/pmo_population_controller_v1_scored_contract.json",
@@ -69,7 +74,7 @@ def reseal(path: Path, *, base_payload_sha256: str | None) -> tuple[str, bool]:
     if implementation and CONTROLLER in implementation:
         # Declaring the new dependency is the ONE structural change this tool may make.
         # It is recorded so the guard below can allow exactly it and nothing else.
-        declared = (CREDIT, REMOTE_APP, CONTINUITY)
+        declared = (CREDIT, REMOTE_APP, CONTINUITY, ORACLE_ASSETS)
         additions = [name for name in declared if name not in implementation]
         declared_new_dependency = bool(additions)
         for name in declared:
