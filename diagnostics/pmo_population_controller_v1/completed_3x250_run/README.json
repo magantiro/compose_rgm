@@ -1,0 +1,12 @@
+{
+  "schema_version": "pmo_completed_run_archive_v1",
+  "run_id": "79fec4984821e97de6decefd213e45a47b3d2b901a1a9c021ee0dfd3ed1561f4",
+  "why_archived": "The launcher refuses to run while corrected_scored_launch_receipt.json exists, so a fresh gsk3b rerun required moving it aside. It is archived, not deleted: it is the record of a completed scored campaign that charged 750 oracle calls.",
+  "outcome": {
+    "perindopril_mpo": {"charged": 250, "best": 0.4864578310337349, "auc_at_250": 0.31650680077383925, "status": "VALID"},
+    "celecoxib_rediscovery": {"charged": 250, "best": 0.1958041958041958, "auc_at_250": 0.13420348390812484, "status": "VALID"},
+    "gsk3b": {"charged": 250, "best": 0.0, "auc_at_250": 0.0, "status": "INVALID_ORACLE_RUNTIME_RELATIVE_PATH"}
+  },
+  "charged_oracle_calls_total": 750,
+  "accounting_note": "All 750 calls were charged and are retained in cumulative development accounting. The gsk3b 250 bought no information but was still spent."
+}
