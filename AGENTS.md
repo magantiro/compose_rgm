@@ -505,6 +505,19 @@ repository's one-time clean-candidate verification boundary. If it is not ready
 by handoff, report that and leave an exact next command instead of bypassing it.
 This is a new development revision, not a relaxation of any previous failed gate.
 
+**Standing Modal source-egress and deployment authorization, 2026-09-19:** the
+user explicitly authorizes uploading clean, exact, sealed COMPOSE source capsules
+and Modal app definitions from this repository to the user's Modal workspace, and
+deploying bounded jobs there, without another source-egress or deployment
+confirmation. Every upload and deployment must remain bound to its exact commit,
+capsule or source-manifest hash, app identity and destination, and must preserve
+private volumes, credentials and immutable receipts. This standing authorization
+does not create or self-approve scientific scoring authority. A scored campaign
+still requires its applicable frozen candidate lock, self-hashed contract,
+bounded call authorization, oracle-accounting rules and retry/replacement policy.
+It does not authorize unbounded spending, mutation of frozen runs, hidden retries,
+candidate replacement, backfill, or weakening of any scientific gate.
+
 **Scoped zero-oracle T4 shared retained-subgraph proposal gate, 2026-09-19:**
 after the integrated JAK2 controller showed that coordinated proposal support can
 expose IVG-competitive chemistry, and the PARP1 transfer run showed that the live
