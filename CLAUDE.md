@@ -192,6 +192,7 @@ an open small-ring defect; the final-backbone decision is not settled.
 
 ## Context (auto-loaded)
 
+@.claude/context/mission.md
 @.claude/context/conventions.md
 @.claude/context/glossary.md
 @.claude/context/learnings.md
