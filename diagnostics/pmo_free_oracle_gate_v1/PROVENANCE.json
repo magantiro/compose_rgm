@@ -1,28 +1,59 @@
 {
-  "schema_version": "pmo_free_oracle_gate_provenance_v1",
-  "purpose": "Zero-oracle execution gate for the PMO scored pilot. Each run drove the real execute_task path with an injected free scorer; no oracle was ever constructed or called.",
-  "runs": {
-    "free_smoke": {
-      "budget": 1000,
-      "note": "First gate, on the pre-Defect-1 bytes. Stopped with pkill before writing result files; its evidence is the round counts below, which established that the bootstrap-pool continuity fix and the gsk3b_asset contract fix both hold far past the round-6 failure that killed the previous scored attempt.",
-      "max_round_reached": {"gsk3b": 33, "perindopril_mpo": 36, "celecoxib_rediscovery": 45},
-      "previous_failure_round": 6,
-      "result_files_present": false
+    "schema_version": "pmo_free_oracle_gate_provenance_v1",
+    "purpose": "Zero-oracle execution gate for the PMO scored pilot. Each run drove the real execute_task path with an injected free scorer; no oracle was ever constructed or called.",
+    "runs": {
+        "free_smoke": {
+            "budget": 1000,
+            "note": "First gate, on the pre-Defect-1 bytes. Stopped with pkill before writing result files; its evidence is the round counts below, which established that the bootstrap-pool continuity fix and the gsk3b_asset contract fix both hold far past the round-6 failure that killed the previous scored attempt.",
+            "max_round_reached": {
+                "gsk3b": 33,
+                "perindopril_mpo": 36,
+                "celecoxib_rediscovery": 45
+            },
+            "previous_failure_round": 6,
+            "result_files_present": false
+        },
+        "free_smoke_250": {
+            "budget": 250,
+            "note": "First gate at the contract budget.",
+            "result_files_present": true
+        },
+        "free_smoke_final": {
+            "budget": 250,
+            "note": "Re-run after the budget threading and AUC denominator fix.",
+            "result_files_present": true
+        },
+        "free_smoke_launch": {
+            "budget": 250,
+            "note": "Final gate on the exact sealed bytes the scored run launched from.",
+            "result_files_present": true
+        },
+        "free_smoke_oracle_fix": {
+            "budget": 250,
+            "note": "Re-run on the corrected worker and the re-sealed contract chain, after the gsk3b oracle asset-resolution fix. The chain refused the first attempt with an input identity mismatch on the edited worker, which is the guard working.",
+            "gate": {
+                "gsk3b": "PASS",
+                "perindopril_mpo": "PASS",
+                "celecoxib_rediscovery": "PASS"
+            },
+            "rounds_reached": {
+                "gsk3b": 14,
+                "perindopril_mpo": 14,
+                "celecoxib_rediscovery": 14
+            },
+            "result_files_present": true
+        }
     },
-    "free_smoke_250": {"budget": 250, "note": "First gate at the contract budget.", "result_files_present": true},
-    "free_smoke_final": {"budget": 250, "note": "Re-run after the budget threading and AUC denominator fix.", "result_files_present": true},
-    "free_smoke_launch": {"budget": 250, "note": "Final gate on the exact sealed bytes the scored run launched from.", "result_files_present": true}
-  },
-  "gate_criteria": [
-    "task completes normally",
-    "free_evaluations == budget (the authorized budget is fully exercised)",
-    "auc_budget == budget (no historical 1000/10000 denominator)",
-    "charged_oracle_calls == 0",
-    "joint credit activates",
-    "exploration floor live",
-    "at least one bootstrap pool recorded",
-    "archive grows beyond INIT_COUNT, i.e. children re-enter as parents"
-  ],
-  "known_limitation": "This gate calls execute_task directly and therefore never exercises the Modal worker's post-processing. A key rename in that post-processing would have recorded three completed runs as failures after charging the full budget; tests/test_pmo_worker_result_contract.py covers that path statically instead.",
-  "charged_oracle_calls": 0
+    "gate_criteria": [
+        "task completes normally",
+        "free_evaluations == budget (the authorized budget is fully exercised)",
+        "auc_budget == budget (no historical 1000/10000 denominator)",
+        "charged_oracle_calls == 0",
+        "joint credit activates",
+        "exploration floor live",
+        "at least one bootstrap pool recorded",
+        "archive grows beyond INIT_COUNT, i.e. children re-enter as parents"
+    ],
+    "known_limitation": "This gate calls execute_task directly with an injected free scorer, so it never exercises the Modal worker's post-processing AND never constructs or calls a TDC oracle. It therefore cannot see either of the two defects that reached a scored launch: a result-key rename, covered statically by tests/test_pmo_worker_result_contract.py, and an oracle whose asset never resolves, covered by the in-image positive control in diagnostics/pmo_oracle_asset_audit_v1.json and enforced by the worker before it charges a call.",
+    "charged_oracle_calls": 0
 }

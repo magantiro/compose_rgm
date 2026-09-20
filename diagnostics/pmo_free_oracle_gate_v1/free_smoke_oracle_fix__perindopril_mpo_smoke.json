@@ -1,0 +1,20 @@
+{
+  "active_basins": 98,
+  "archive_entries": 234,
+  "auc_budget": 250,
+  "budget": 250,
+  "charged_oracle_calls": 0,
+  "continuity_pool_id": "d96ae1055be7a511624ef81867deb5e7725e555e17bcc197334507d4d588b5b2",
+  "credit_cells": 193,
+  "error": null,
+  "exploration_floor": 0.2,
+  "free_evaluations": 250,
+  "gate": "PASS",
+  "gate_failures": [],
+  "physical_pools_absorbed": 2,
+  "productive_parents": 34,
+  "rounds_reached": 14,
+  "status": "COMPLETED",
+  "task": "perindopril_mpo",
+  "task_protocol_resolved": true
+}
