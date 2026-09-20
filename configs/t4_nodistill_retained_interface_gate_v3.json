@@ -1,0 +1,108 @@
+{
+  "payload": {
+    "schema_version": "t4_nodistill_retained_interface_gate_contract_v3",
+    "status": "FROZEN_ZERO_ORACLE_SUPPORT_GATE",
+    "scientific_problem": "test whether a route-free state-conditioned retained-interface macro allocator closes the autonomous proposal-support gap on three terminal T4 growth misses",
+    "primary_model_output": "a frozen lock of exact protected programs compiled from source-graph-only retained-interface macro particles",
+    "central_claim_under_test": "a task-independent allocator over retained interface roles, atom capacity, current cycle topology and remaining work budget can produce diverse selection-ready growth support on JAK2 seed 0 delta 0.6, PARP1 seed 0 delta 0.4 and 5HT1B seed 1 delta 0.4 without routes, templates, teachers or objective values",
+    "experimental_setting": "standalone zero-oracle NoDistill v3 support gate on three motivating growth cells and two near-capacity contrasting cells",
+    "preregistered_design_evidence": {
+      "six_miss_matrix": {
+        "path": "diagnostics/t4_shared_controller_matrix_20260919_v2/result.json",
+        "sha256": "84522729f4edb3bbb26fe9d47a49c0cfb21ca7133a74724eda8bd7ca2baeba49"
+      },
+      "known_good_transformation_forensics": {
+        "path": "diagnostics/t4_known_good_transformation_forensics/attempt_1/result.json",
+        "sha256": "b332e768d2ffd4b2b298d565aea4270fcef890c0e6c6e4b01add10ea8cc33724",
+        "payload_sha256": "2a324fbae3295fb54f867927d313fc57b4c1182bdc2bb4d0bfb7186c6cd1a0e7"
+      },
+      "generic_composer_v1": {
+        "path": "diagnostics/t4_nodistill_generic_composer_gate_v1/attempt_1/result.json",
+        "sha256": "4810d0893faa7b6f90deeff4a727f9eb21e7fbbda35b58eb1f4821c9a2a3cf98",
+        "payload_sha256": "3e579b9bc58d73014ce2ac9c424f0e08c3da0bc8d27ec39def2a1597b0ec4206"
+      },
+      "repeated_topology_v2": {
+        "path": "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/result.json",
+        "sha256": "29afab84042d6fe354b8774e893dfa21d660a1f36004cbacb9dc3365ae101b7b",
+        "payload_sha256": "d45c22a88d0b0bac1f5856ee881382a3ba06db8a68d831bd0199492ca6dd40db"
+      },
+      "production_admission_repair": {
+        "path": "diagnostics/t4_shared_controller_production_support_gate_v1/attempt_1/result.json",
+        "sha256": "ffc48740523613d7d0a11ba59a1265e54553a0952f8535d594cbf1a1dd733ec9",
+        "payload_sha256": "a587a846b031493077c31de97f63fdc18d2a33b2a7d2bf4b359da2d7a05b020d"
+      }
+    },
+    "inputs": {
+      "source_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      },
+      "teacher_library_diagnostic_only": {
+        "path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json",
+        "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5",
+        "load_phase": "after_all_candidate_locks_are_sealed"
+      }
+    },
+    "cells": [
+      {"cell_key": "jak2_0_d06", "source_index": 12, "delta": 0.6, "controller_seed": 913001, "evidence_role": "motivating_growth_miss"},
+      {"cell_key": "parp1_0_d04", "source_index": 0, "delta": 0.4, "controller_seed": 913002, "evidence_role": "motivating_growth_miss"},
+      {"cell_key": "5ht1b_1_d04", "source_index": 7, "delta": 0.4, "controller_seed": 913003, "evidence_role": "motivating_growth_miss"},
+      {"cell_key": "braf_0_d06", "source_index": 9, "delta": 0.6, "controller_seed": 913004, "evidence_role": "near_capacity_contrast"},
+      {"cell_key": "5ht1b_0_d04", "source_index": 6, "delta": 0.4, "controller_seed": 913005, "evidence_role": "near_capacity_contrast"}
+    ],
+    "support": {
+      "representable_heavy_atom_ceiling": 40,
+      "maximum_primitives": 32,
+      "maximum_blocks": 8,
+      "retained_fraction_floor": 0.8,
+      "created_attachment_interface_range": [1, 4],
+      "desired_delta_heavy_atom_grid": {
+        "small": [3, 6],
+        "medium": [7, 11],
+        "large": [12, 16]
+      },
+      "desired_delta_cycle_rank_grid": [1, 2, 3],
+      "generic_modes": ["grow", "replace", "open_grow"],
+      "state_features": ["retained_interface_roles", "available_heavy_atom_capacity", "current_cycle_rank", "current_ring_systems", "remaining_primitive_budget", "remaining_block_budget"]
+    },
+    "proposal": {
+      "attempts_per_particle": 64,
+      "candidate_quota_per_particle": 2,
+      "maximum_particles_per_source": 27,
+      "maximum_exact_candidates_per_source": 54,
+      "balanced_cartesian_grid": true,
+      "no_backfill_across_particles_or_cells": true,
+      "endpoint_constraints_applied_only_after_generation": true
+    },
+    "evaluation": {
+      "teacher_load_phase": "only after all five autonomous candidate locks exist and validate",
+      "production_endpoint_admission_order": ["compose_valid_fiber", "canonical_self_exclusion", "canonical_endpoint_deduplication", "source_archive_exclusion"],
+      "prospective_support_gate": {
+        "complete_five_cell_lock_census": true,
+        "exact_replay_precision": 1.0,
+        "minimum_archive_ready_unique_endpoints_per_motivating_cell": 2,
+        "minimum_archive_ready_macro_plan_identities_per_motivating_cell": 2,
+        "all_archive_ready_endpoints_within_40_heavy_atoms": true,
+        "all_programs_within_32_primitives_and_8_blocks": true,
+        "balanced_grid_identity_unchanged": true,
+        "no_teacher_route_template_objective_or_cell_runtime_input": true,
+        "post_lock_teacher_coarse_and_semantic_coverage_reported": true,
+        "exact_teacher_endpoint_recovery_not_required": true
+      }
+    },
+    "runtime_prohibitions": {
+      "no_target_or_cell_name": true,
+      "no_requested_cell_delta": true,
+      "no_fiber_or_endpoint_constraint": true,
+      "no_objective_or_comparator_score": true,
+      "no_route_or_route_identifier": true,
+      "no_trajectory_distilled_template": true,
+      "no_teacher_or_winner_endpoint": true,
+      "no_fitted_weights": true,
+      "no_runtime_teacher_data": true
+    },
+    "costs": {"oracle_calls": 0, "docking_calls": 0, "modal_launches": 0, "gpu_seconds": 0},
+    "claim_boundary": "proposal support, exact replay and free endpoint admission only; no docking utility, scored-controller selection, production integration or benchmark claim"
+  },
+  "payload_sha256": "17033a46ca7ecc9d026c69d904c5dca67517ac679ef6b897284258a66863d5f7"
+}
