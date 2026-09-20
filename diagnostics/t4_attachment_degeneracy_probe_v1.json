@@ -1,0 +1,291 @@
+{
+ "attachment_key_radius": 1,
+ "binding_selection": "census.assignments[0] (lowest-slot consistent match)",
+ "cells": {
+  "5ht1b_0": {
+   "atoms_in_degenerate_class": 18,
+   "class_size_histogram": {
+    "1": 21,
+    "2": 4,
+    "3": 2,
+    "4": 1
+   },
+   "degenerate_fraction": 0.46154,
+   "distinct_radius1_classes": 28,
+   "eligible_anchors_that_are_representative": 1,
+   "eligible_cut_anchors": [
+    {
+     "anchor": 4,
+     "class_size": 3,
+     "fragment_size": 6,
+     "is_class_representative": true,
+     "qed": 0.65908,
+     "representative_slot": 4,
+     "similarity": 0.73973
+    },
+    {
+     "anchor": 8,
+     "class_size": 3,
+     "fragment_size": 13,
+     "is_class_representative": false,
+     "qed": 0.85229,
+     "representative_slot": 4,
+     "similarity": 0.63889
+    }
+   ],
+   "heavy_atoms": 39,
+   "largest_class_size": 4,
+   "role": "control"
+  },
+  "5ht1b_1": {
+   "atoms_in_degenerate_class": 7,
+   "class_size_histogram": {
+    "1": 9,
+    "2": 2,
+    "3": 1
+   },
+   "degenerate_fraction": 0.4375,
+   "distinct_radius1_classes": 12,
+   "eligible_anchors_that_are_representative": 0,
+   "eligible_cut_anchors": [],
+   "heavy_atoms": 16,
+   "largest_class_size": 3,
+   "role": "control"
+  },
+  "5ht1b_2": {
+   "atoms_in_degenerate_class": 18,
+   "class_size_histogram": {
+    "1": 13,
+    "2": 3,
+    "3": 4
+   },
+   "degenerate_fraction": 0.58065,
+   "distinct_radius1_classes": 20,
+   "eligible_anchors_that_are_representative": 0,
+   "eligible_cut_anchors": [],
+   "heavy_atoms": 31,
+   "largest_class_size": 3,
+   "role": "failed"
+  },
+  "braf_0": {
+   "atoms_in_degenerate_class": 19,
+   "class_size_histogram": {
+    "1": 21,
+    "2": 6,
+    "3": 1,
+    "4": 1
+   },
+   "degenerate_fraction": 0.475,
+   "distinct_radius1_classes": 29,
+   "eligible_anchors_that_are_representative": 2,
+   "eligible_cut_anchors": [
+    {
+     "anchor": 20,
+     "class_size": 2,
+     "fragment_size": 14,
+     "is_class_representative": true,
+     "qed": 0.63547,
+     "representative_slot": 20,
+     "similarity": 0.63158
+    },
+    {
+     "anchor": 19,
+     "class_size": 2,
+     "fragment_size": 15,
+     "is_class_representative": true,
+     "qed": 0.71932,
+     "representative_slot": 19,
+     "similarity": 0.61644
+    }
+   ],
+   "heavy_atoms": 40,
+   "largest_class_size": 4,
+   "role": "failed"
+  },
+  "braf_1": {
+   "atoms_in_degenerate_class": 25,
+   "class_size_histogram": {
+    "1": 14,
+    "2": 7,
+    "3": 2,
+    "5": 1
+   },
+   "degenerate_fraction": 0.64103,
+   "distinct_radius1_classes": 24,
+   "eligible_anchors_that_are_representative": 2,
+   "eligible_cut_anchors": [
+    {
+     "anchor": 7,
+     "class_size": 2,
+     "fragment_size": 11,
+     "is_class_representative": true,
+     "qed": 0.66336,
+     "representative_slot": 7,
+     "similarity": 0.68571
+    },
+    {
+     "anchor": 8,
+     "class_size": 1,
+     "fragment_size": 12,
+     "is_class_representative": true,
+     "qed": 0.68443,
+     "representative_slot": 8,
+     "similarity": 0.63889
+    },
+    {
+     "anchor": 10,
+     "class_size": 2,
+     "fragment_size": 14,
+     "is_class_representative": false,
+     "qed": 0.77381,
+     "representative_slot": 7,
+     "similarity": 0.62857
+    },
+    {
+     "anchor": 11,
+     "class_size": 2,
+     "fragment_size": 15,
+     "is_class_representative": false,
+     "qed": 0.87829,
+     "representative_slot": 6,
+     "similarity": 0.62319
+    }
+   ],
+   "heavy_atoms": 39,
+   "largest_class_size": 5,
+   "role": "failed"
+  },
+  "braf_2": {
+   "atoms_in_degenerate_class": 23,
+   "class_size_histogram": {
+    "1": 14,
+    "2": 4,
+    "3": 3,
+    "6": 1
+   },
+   "degenerate_fraction": 0.62162,
+   "distinct_radius1_classes": 22,
+   "eligible_anchors_that_are_representative": 2,
+   "eligible_cut_anchors": [
+    {
+     "anchor": 7,
+     "class_size": 3,
+     "fragment_size": 11,
+     "is_class_representative": true,
+     "qed": 0.65394,
+     "representative_slot": 7,
+     "similarity": 0.65574
+    },
+    {
+     "anchor": 8,
+     "class_size": 1,
+     "fragment_size": 12,
+     "is_class_representative": true,
+     "qed": 0.67575,
+     "representative_slot": 8,
+     "similarity": 0.61905
+    },
+    {
+     "anchor": 10,
+     "class_size": 3,
+     "fragment_size": 14,
+     "is_class_representative": false,
+     "qed": 0.72279,
+     "representative_slot": 7,
+     "similarity": 0.62295
+    },
+    {
+     "anchor": 11,
+     "class_size": 3,
+     "fragment_size": 15,
+     "is_class_representative": false,
+     "qed": 0.79844,
+     "representative_slot": 6,
+     "similarity": 0.62712
+    }
+   ],
+   "heavy_atoms": 37,
+   "largest_class_size": 6,
+   "role": "control"
+  },
+  "fa7_0": {
+   "atoms_in_degenerate_class": 21,
+   "class_size_histogram": {
+    "1": 11,
+    "2": 3,
+    "3": 2,
+    "4": 1,
+    "5": 1
+   },
+   "degenerate_fraction": 0.65625,
+   "distinct_radius1_classes": 18,
+   "eligible_anchors_that_are_representative": 0,
+   "eligible_cut_anchors": [],
+   "heavy_atoms": 32,
+   "largest_class_size": 5,
+   "role": "failed"
+  },
+  "fa7_1": {
+   "atoms_in_degenerate_class": 11,
+   "class_size_histogram": {
+    "1": 18,
+    "2": 4,
+    "3": 1
+   },
+   "degenerate_fraction": 0.37931,
+   "distinct_radius1_classes": 23,
+   "eligible_anchors_that_are_representative": 1,
+   "eligible_cut_anchors": [
+    {
+     "anchor": 24,
+     "class_size": 1,
+     "fragment_size": 4,
+     "is_class_representative": true,
+     "qed": 0.69232,
+     "representative_slot": 24,
+     "similarity": 0.74603
+    },
+    {
+     "anchor": 23,
+     "class_size": 2,
+     "fragment_size": 5,
+     "is_class_representative": false,
+     "qed": 0.73378,
+     "representative_slot": 13,
+     "similarity": 0.71429
+    },
+    {
+     "anchor": 22,
+     "class_size": 2,
+     "fragment_size": 6,
+     "is_class_representative": false,
+     "qed": 0.76802,
+     "representative_slot": 14,
+     "similarity": 0.65625
+    }
+   ],
+   "heavy_atoms": 29,
+   "largest_class_size": 3,
+   "role": "control"
+  },
+  "fa7_2": {
+   "atoms_in_degenerate_class": 19,
+   "class_size_histogram": {
+    "1": 16,
+    "2": 3,
+    "3": 3,
+    "4": 1
+   },
+   "degenerate_fraction": 0.54286,
+   "distinct_radius1_classes": 23,
+   "eligible_anchors_that_are_representative": 0,
+   "eligible_cut_anchors": [],
+   "heavy_atoms": 35,
+   "largest_class_size": 4,
+   "role": "failed"
+  }
+ },
+ "oracle_calls": 0,
+ "schema_version": "t4_attachment_degeneracy_probe_v1",
+ "status": "DIAGNOSTIC_EVIDENCE_ONLY_ZERO_ORACLE_CALLS"
+}
