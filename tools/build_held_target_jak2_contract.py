@@ -15,7 +15,7 @@ BASE = ROOT / "configs/t4_integrated_route_fiber_parp1_v1.json"
 JAK2_BASE = ROOT / "configs/t4_shared_retained_fiber_jak2_v2.json"
 CHECKPOINT = "diagnostics/t4_held_target_distillation_quality_v1/jak2_checkpoint.json"
 SUPPORT = "diagnostics/t4_held_target_distillation_quality_v1/jak2_smoke.json"
-APP = "modal_apps/t4_integrated_route_fiber_held_jak2_app.py"
+APP = "modal_apps/t4_integrated_route_fiber_parp1_app.py"
 DEFAULT_OUTPUT = ROOT / "configs/t4_held_target_distilled_jak2_d06_v1.json"
 
 

@@ -1,0 +1,146 @@
+{
+  "payload": {
+    "batch": 8,
+    "cells": [
+      {
+        "cell": "jak2_0",
+        "controller_seed": 2026091912,
+        "smiles": "OCCCCc2nc1ccccc1c4ncnc3[nH]cc2c34",
+        "source_global_index": 12
+      },
+      {
+        "cell": "jak2_1",
+        "controller_seed": 2026091913,
+        "smiles": "COC(=O)CC2Nc1ccccc1c3ccnc4[nH]cc2c34",
+        "source_global_index": 13
+      },
+      {
+        "cell": "jak2_2",
+        "controller_seed": 2026091914,
+        "smiles": "Oc5ccc(C2NC(=O)c1ccccc1c3ccnc4[nH]cc2c34)c(F)c5",
+        "source_global_index": 14
+      }
+    ],
+    "central_claim_under_test": "the same multi-expert FiberControl algorithm can autonomously allocate docking calls on PARP1 without PARP1-specific controller changes",
+    "charged_calls_per_cell": 49,
+    "claim_boundary": "held-target JAK2 development panel under one docking seed; no JAK2 route enters the prior, and this is not benchmark-wide held-target evidence",
+    "declared_support": {
+      "endpoint_support": "compose_valid is a strict subset of the official T4 endpoint fiber",
+      "maximum_active_atoms": 40,
+      "objects": "complete connected molecular endpoints produced by three executable COMPOSE proposal experts",
+      "route_primitives": 32,
+      "route_regions": [
+        1,
+        4
+      ],
+      "shallow_and_anchored_horizon": 3,
+      "stereochemistry_claim": false
+    },
+    "delta": 0.6,
+    "docking_box": [
+      [
+        114.758,
+        65.496,
+        11.345
+      ],
+      [
+        19.033,
+        17.929,
+        20.283
+      ]
+    ],
+    "docking_seed": 20260918,
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "cb900f3f75dcf2ac3efe6538528ed1e87ec934a527b3b060c2b09dfe3a11d9b6"
+    },
+    "experimental_setting": "prospective three-cell PARP1 delta=0.6 cross-target development transfer; fixed 49-call ceiling per cell; candidate exhaustion and abstention are valid outcomes",
+    "expert_floor_rounds": 2,
+    "exploration": 2,
+    "frozen_from": {
+      "allowed_adapter_changes": [
+        "leave-JAK2-out route checkpoint",
+        "JAK2 cells and docking evaluator",
+        "held-target output namespace",
+        "payload-bound contract identity"
+      ],
+      "controller_contract": "configs/t4_integrated_route_fiber_parp1_v1.json",
+      "controller_contract_payload_sha256": "256563816a5d5b68706c7542bff1beae22f422e2c12109a55739dfe50680530c",
+      "controller_result": "diagnostics/t4_integrated_route_fiber_v1/final_result.json",
+      "forbidden_changes": "proposal families, proposal widths, FiberControl features or fitting, expert-floor schedule, parent selection, exploration, endpoint gates, call budget, retries, or per-cell tuning"
+    },
+    "parent_explore": 0.3,
+    "parents": 4,
+    "primary_baselines": "read-only measured roots and reported IVG delta=0.6 values; no comparator value enters runtime",
+    "primary_model_output": "FiberControl selection over complete shallow, anchored, and leave-JAK2-out route programs",
+    "promotion_criteria": {
+      "negative": "two or more cells exhaust without an eligible non-root candidate, or all cells remain no better than their measured roots",
+      "per_round_reporting": true,
+      "transfer_signal": "at least two cells reach their reported IVG delta=0.6 mean or one cell beats it by at least 0.5 while a second improves on its measured root"
+    },
+    "proposal": {
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "route_complete_region": {
+        "beam_width": 32,
+        "expansion_width": 24,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "pool_size": 64,
+        "realization_limit": 32,
+        "training_split": "leave-JAK2-out"
+      },
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      }
+    },
+    "reported_ivg_delta_0_6": {
+      "parp1_0": -12.3,
+      "parp1_1": -11.533333333333333,
+      "parp1_2": -10.1
+    },
+    "reported_ivg_source": {
+      "aggregation": "mean of the three published IVG run winners per exact cell, used only after the run for read-only comparison",
+      "artifact": "diagnostics/t4_delta06_route_corpus/attempt_1/training_corpus.json.gz",
+      "artifact_sha256": "d96265ca0f3364a118b10037b8312263f2e627ff629651bca22eca1ae834cded"
+    },
+    "round_lock_policy": {
+      "automatic_retries": 0,
+      "no_backfill": true,
+      "no_candidate_replacement": true,
+      "persist_after_every_round": true,
+      "publish_complete_candidate_pool_before_docking": true
+    },
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_held_target_distillation_quality_v1/jak2_checkpoint.json": "d9771225c7a9dc855330318ea4475246b7328107c9ad95da11c976098ca3fb25",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "modal_apps/t4_integrated_route_fiber_parp1_app.py": "d71b1012c89941ecb54cf9c5031894a7cbc7e5eff8d265120c5d9ef3bf712848",
+      "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+      "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "092eb28b6a115a328be7f94ab115317b8f9c196b1f510aaed7a216911cee215e",
+      "src/compose_v4/control/structural_subgoal_policy.py": "d45a2f6b92a69f7462f6c1e2cd5523bc529cedb0a24e5a993aa714a2ade3d2b4",
+      "src/compose_v4/control/structural_subgoal_realizer.py": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_integrated_route_fiber.py": "0c8de5f5607c7b73d5da327f09ccd150ffdc37b741686e7095a12cf905740007"
+    },
+    "schema_version": "t4_held_target_distilled_jak2_d06_contract_v1",
+    "scientific_problem": "test transfer of a route-trained structural-action prior to a target with every JAK2 route excluded from fitting",
+    "status": "SEALED_PENDING_EXACT_USER_AUTHORIZATION",
+    "support": "compose_valid",
+    "total_charged_call_ceiling": 147,
+    "value_penalty": 1,
+    "zero_oracle_route_support": {
+      "artifact": "diagnostics/t4_held_target_distillation_quality_v1/jak2_smoke.json",
+      "artifact_sha256": "5abd95d9d76023dda5a23b2534641e13c3c6dcacfb9aaea0ace588588b754170",
+      "interpretation": "support gate is sufficient for a scored held-target panel",
+      "result": "leave-JAK2-out route expert produced exact programs and eligible endpoints on all three JAK2 seeds"
+    }
+  },
+  "payload_sha256": "96bf8d1a9221e32b608605ebf769b2d8013dfe600ad139f17e6dd1018b8e994e"
+}
