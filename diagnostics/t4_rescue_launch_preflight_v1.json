@@ -554,5 +554,70 @@
    "the zero-oracle audit reproduces the production three-expert law faithfully and finds 0 of 6,140-9,527 distinct endpoints jointly passing sim, QED and SA for all five cells, with 0 eligible in every lane",
    "fa7_2 also exhausted at delta=0.4 with 1 charged call, so the deficit is not the similarity corridor"
   ]
+ },
+ "seed_reference_disagreement": {
+  "finding": "two different 'seed docking scores' exist and they are not the same quantity: configs/t4_seed_docking_scores_v1.json carries the PUBLISHED table's DS prefix, produced by the benchmark authors' docking setup, while our root call is our own qvina02 against our own receptor and box",
+  "consequence": "no single seed reference makes both seed-relative columns clean. COMPOSE-vs-seed is internally consistent only against OUR root; IVG-vs-seed is internally consistent only against the PUBLISHED seed. Any seed-relative table must state which reference each column uses and must not mix them within a column",
+  "second_hazard": "our own root is not reproducible across runs (spreads up to 0.4), so a seed-relative number carries that noise on top of the COMPOSE-vs-IVG noise",
+  "sign_convention": "more negative is better; improvement over seed = result - seed, negative means improved",
+  "cells": {
+   "braf_0": {
+    "published_seed_ds": -9.3,
+    "our_measured_root_scores": [
+     -9.6,
+     -9.5
+    ],
+    "our_best_root": -9.6,
+    "published_minus_our_best": 0.3,
+    "our_root_spread_across_runs": 0.1
+   },
+   "braf_1": {
+    "published_seed_ds": -9.4,
+    "our_measured_root_scores": [
+     -10.2
+    ],
+    "our_best_root": -10.2,
+    "published_minus_our_best": 0.8,
+    "our_root_spread_across_runs": 0.0
+   },
+   "fa7_0": {
+    "published_seed_ds": -6.4,
+    "our_measured_root_scores": [
+     -7.5
+    ],
+    "our_best_root": -7.5,
+    "published_minus_our_best": 1.1,
+    "our_root_spread_across_runs": 0.0
+   },
+   "fa7_2": {
+    "published_seed_ds": -8.5,
+    "our_measured_root_scores": [
+     -8.1,
+     -7.7
+    ],
+    "our_best_root": -8.1,
+    "published_minus_our_best": -0.4,
+    "our_root_spread_across_runs": 0.4
+   },
+   "5ht1b_2": {
+    "published_seed_ds": -9.8,
+    "our_measured_root_scores": [
+     -9.7,
+     -9.8
+    ],
+    "our_best_root": -9.8,
+    "published_minus_our_best": 0.0,
+    "our_root_spread_across_runs": 0.1
+   },
+   "fa7_2@d04": {
+    "published_seed_ds": -8.5,
+    "our_measured_root_scores": [
+     -8.4
+    ],
+    "our_best_root": -8.4,
+    "published_minus_our_best": -0.1,
+    "our_root_spread_across_runs": 0.0
+   }
+  }
  }
 }
