@@ -1,0 +1,1639 @@
+{
+ "by_objective": {
+  "albuterol_similarity": {
+   "created_dependency_edges_total": 4,
+   "dataflow_components": {
+    "maximum": 31.0,
+    "mean": 30.6,
+    "median": 31.0,
+    "minimum": 29.0,
+    "n": 15
+   },
+   "delta_heavy_atoms": {
+    "maximum": -10.0,
+    "mean": -10.0,
+    "median": -10.0,
+    "minimum": -10.0,
+    "n": 15
+   },
+   "delta_rings": {
+    "maximum": -2.0,
+    "mean": -2.0,
+    "median": -2.0,
+    "minimum": -2.0,
+    "n": 15
+   },
+   "direction": {
+    "replace": 15
+   },
+   "primary_regions": {
+    "maximum": 1.0,
+    "mean": 1.0,
+    "median": 1.0,
+    "minimum": 1.0,
+    "n": 15
+   },
+   "primitive_count": {
+    "maximum": 31.0,
+    "mean": 30.866666666666667,
+    "median": 31.0,
+    "minimum": 29.0,
+    "n": 15
+   },
+   "retained_fraction": {
+    "maximum": 0.5925925925925926,
+    "mean": 0.5679012345679013,
+    "median": 0.5555555555555556,
+    "minimum": 0.5555555555555556,
+    "n": 15
+   },
+   "routes": 15,
+   "routes_with_reused_created_handles": 4,
+   "rule_totals": {
+    "atom_delete": 179,
+    "atom_insert": 29,
+    "atom_restate_semantic": 135,
+    "bond_reorder": 105,
+    "cycle_close": 15
+   },
+   "strict_regions": {
+    "maximum": 5.0,
+    "mean": 5.0,
+    "median": 5.0,
+    "minimum": 5.0,
+    "n": 15
+   },
+   "task_families": {
+    "similarity": 15
+   },
+   "touches_ring_topology": 15
+  },
+  "celecoxib_rediscovery": {
+   "created_dependency_edges_total": 172,
+   "dataflow_components": {
+    "maximum": 20.0,
+    "mean": 19.266666666666666,
+    "median": 20.0,
+    "minimum": 18.0,
+    "n": 15
+   },
+   "delta_heavy_atoms": {
+    "maximum": 0.0,
+    "mean": -0.8666666666666667,
+    "median": -1.0,
+    "minimum": -1.0,
+    "n": 15
+   },
+   "delta_rings": {
+    "maximum": 0.0,
+    "mean": 0.0,
+    "median": 0.0,
+    "minimum": 0.0,
+    "n": 15
+   },
+   "direction": {
+    "replace": 15
+   },
+   "primary_regions": {
+    "maximum": 2.0,
+    "mean": 1.6,
+    "median": 2.0,
+    "minimum": 1.0,
+    "n": 15
+   },
+   "primitive_count": {
+    "maximum": 31.0,
+    "mean": 30.733333333333334,
+    "median": 31.0,
+    "minimum": 29.0,
+    "n": 15
+   },
+   "retained_fraction": {
+    "maximum": 0.5555555555555556,
+    "mean": 0.5333333333333332,
+    "median": 0.5185185185185185,
+    "minimum": 0.5185185185185185,
+    "n": 15
+   },
+   "routes": 15,
+   "routes_with_reused_created_handles": 15,
+   "rule_totals": {
+    "atom_delete": 192,
+    "atom_insert": 179,
+    "bond_reorder": 15,
+    "cycle_close": 45,
+    "cycle_open": 15,
+    "ring_system_restate": 15
+   },
+   "strict_regions": {
+    "maximum": 5.0,
+    "mean": 4.0,
+    "median": 4.0,
+    "minimum": 3.0,
+    "n": 15
+   },
+   "task_families": {
+    "rediscovery": 15
+   },
+   "touches_ring_topology": 15
+  },
+  "gsk3b": {
+   "created_dependency_edges_total": 37,
+   "dataflow_components": {
+    "maximum": 30.0,
+    "mean": 27.666666666666668,
+    "median": 27.0,
+    "minimum": 26.0,
+    "n": 24
+   },
+   "delta_heavy_atoms": {
+    "maximum": -1.0,
+    "mean": -3.875,
+    "median": -4.0,
+    "minimum": -5.0,
+    "n": 24
+   },
+   "delta_rings": {
+    "maximum": 0.0,
+    "mean": 0.0,
+    "median": 0.0,
+    "minimum": 0.0,
+    "n": 24
+   },
+   "direction": {
+    "replace": 24
+   },
+   "primary_regions": {
+    "maximum": 1.0,
+    "mean": 1.0,
+    "median": 1.0,
+    "minimum": 1.0,
+    "n": 24
+   },
+   "primitive_count": {
+    "maximum": 33.0,
+    "mean": 29.208333333333332,
+    "median": 29.0,
+    "minimum": 27.0,
+    "n": 24
+   },
+   "retained_fraction": {
+    "maximum": 0.7777777777777778,
+    "mean": 0.757716049382716,
+    "median": 0.7777777777777778,
+    "minimum": 0.7037037037037037,
+    "n": 24
+   },
+   "routes": 24,
+   "routes_with_reused_created_handles": 24,
+   "rule_totals": {
+    "atom_delete": 157,
+    "atom_insert": 64,
+    "atom_restate_semantic": 144,
+    "bond_reorder": 240,
+    "cycle_close": 48,
+    "cycle_open": 24,
+    "ring_system_restate": 24
+   },
+   "strict_regions": {
+    "maximum": 6.0,
+    "mean": 5.708333333333333,
+    "median": 6.0,
+    "minimum": 5.0,
+    "n": 24
+   },
+   "task_families": {
+    "bioactivity": 24
+   },
+   "touches_ring_topology": 24
+  },
+  "isomers_c7h8n2o2": {
+   "created_dependency_edges_total": 61,
+   "dataflow_components": {
+    "maximum": 9.0,
+    "mean": 7.0,
+    "median": 7.0,
+    "minimum": 4.0,
+    "n": 10
+   },
+   "delta_heavy_atoms": {
+    "maximum": 1.0,
+    "mean": 1.0,
+    "median": 1.0,
+    "minimum": 1.0,
+    "n": 10
+   },
+   "delta_rings": {
+    "maximum": 0.0,
+    "mean": 0.0,
+    "median": 0.0,
+    "minimum": 0.0,
+    "n": 10
+   },
+   "direction": {
+    "replace": 10
+   },
+   "primary_regions": {
+    "maximum": 2.0,
+    "mean": 1.4,
+    "median": 1.0,
+    "minimum": 1.0,
+    "n": 10
+   },
+   "primitive_count": {
+    "maximum": 16.0,
+    "mean": 13.1,
+    "median": 13.5,
+    "minimum": 6.0,
+    "n": 10
+   },
+   "retained_fraction": {
+    "maximum": 0.8,
+    "mean": 0.67,
+    "median": 0.7,
+    "minimum": 0.5,
+    "n": 10
+   },
+   "routes": 10,
+   "routes_with_reused_created_handles": 10,
+   "rule_totals": {
+    "atom_delete": 50,
+    "atom_insert": 60,
+    "cycle_close": 17,
+    "ring_system_restate": 4
+   },
+   "strict_regions": {
+    "maximum": 3.0,
+    "mean": 2.0,
+    "median": 2.0,
+    "minimum": 1.0,
+    "n": 10
+   },
+   "task_families": {
+    "formula": 10
+   },
+   "touches_ring_topology": 10
+  },
+  "jnk3": {
+   "created_dependency_edges_total": 425,
+   "dataflow_components": {
+    "maximum": 45.0,
+    "mean": 34.5,
+    "median": 31.0,
+    "minimum": 30.0,
+    "n": 24
+   },
+   "delta_heavy_atoms": {
+    "maximum": 12.0,
+    "mean": 9.25,
+    "median": 11.5,
+    "minimum": 4.0,
+    "n": 24
+   },
+   "delta_rings": {
+    "maximum": 3.0,
+    "mean": 2.6666666666666665,
+    "median": 3.0,
+    "minimum": 2.0,
+    "n": 24
+   },
+   "direction": {
+    "replace": 24
+   },
+   "primary_regions": {
+    "maximum": 2.0,
+    "mean": 1.625,
+    "median": 2.0,
+    "minimum": 1.0,
+    "n": 24
+   },
+   "primitive_count": {
+    "maximum": 73.0,
+    "mean": 50.833333333333336,
+    "median": 43.0,
+    "minimum": 42.0,
+    "n": 24
+   },
+   "retained_fraction": {
+    "maximum": 0.9629629629629629,
+    "mean": 0.8564814814814815,
+    "median": 0.9629629629629629,
+    "minimum": 0.6296296296296297,
+    "n": 24
+   },
+   "routes": 24,
+   "routes_with_reused_created_handles": 24,
+   "rule_totals": {
+    "atom_delete": 133,
+    "atom_insert": 355,
+    "atom_restate_semantic": 288,
+    "bond_reorder": 261,
+    "cycle_close": 130,
+    "cycle_open": 48,
+    "ring_system_restate": 5
+   },
+   "strict_regions": {
+    "maximum": 8.0,
+    "mean": 6.166666666666667,
+    "median": 7.0,
+    "minimum": 4.0,
+    "n": 24
+   },
+   "task_families": {
+    "bioactivity": 24
+   },
+   "touches_ring_topology": 24
+  },
+  "median1": {
+   "created_dependency_edges_total": 152,
+   "dataflow_components": {
+    "maximum": 10.0,
+    "mean": 4.4,
+    "median": 4.0,
+    "minimum": 3.0,
+    "n": 10
+   },
+   "delta_heavy_atoms": {
+    "maximum": 12.0,
+    "mean": 10.1,
+    "median": 12.0,
+    "minimum": 2.0,
+    "n": 10
+   },
+   "delta_rings": {
+    "maximum": 2.0,
+    "mean": 1.8,
+    "median": 2.0,
+    "minimum": 0.0,
+    "n": 10
+   },
+   "direction": {
+    "grow": 1,
+    "remodel": 1,
+    "replace": 8
+   },
+   "primary_regions": {
+    "maximum": 2.0,
+    "mean": 1.8,
+    "median": 2.0,
+    "minimum": 1.0,
+    "n": 10
+   },
+   "primitive_count": {
+    "maximum": 25.0,
+    "mean": 17.5,
+    "median": 16.0,
+    "minimum": 14.0,
+    "n": 10
+   },
+   "retained_fraction": {
+    "maximum": 1.0,
+    "mean": 0.9,
+    "median": 1.0,
+    "minimum": 0.125,
+    "n": 10
+   },
+   "routes": 10,
+   "routes_with_reused_created_handles": 10,
+   "rule_totals": {
+    "atom_delete": 26,
+    "atom_insert": 127,
+    "cycle_close": 22
+   },
+   "strict_regions": {
+    "maximum": 3.0,
+    "mean": 2.0,
+    "median": 2.0,
+    "minimum": 1.0,
+    "n": 10
+   },
+   "task_families": {
+    "multi_property": 10
+   },
+   "touches_ring_topology": 10
+  },
+  "mestranol_similarity": {
+   "created_dependency_edges_total": 5,
+   "dataflow_components": {
+    "maximum": 28.0,
+    "mean": 27.333333333333332,
+    "median": 27.0,
+    "minimum": 26.0,
+    "n": 15
+   },
+   "delta_heavy_atoms": {
+    "maximum": -3.0,
+    "mean": -3.8,
+    "median": -4.0,
+    "minimum": -4.0,
+    "n": 15
+   },
+   "delta_rings": {
+    "maximum": 1.0,
+    "mean": 1.0,
+    "median": 1.0,
+    "minimum": 1.0,
+    "n": 15
+   },
+   "direction": {
+    "replace": 15
+   },
+   "primary_regions": {
+    "maximum": 1.0,
+    "mean": 1.0,
+    "median": 1.0,
+    "minimum": 1.0,
+    "n": 15
+   },
+   "primitive_count": {
+    "maximum": 28.0,
+    "mean": 27.666666666666668,
+    "median": 28.0,
+    "minimum": 26.0,
+    "n": 15
+   },
+   "retained_fraction": {
+    "maximum": 0.8148148148148148,
+    "mean": 0.797530864197531,
+    "median": 0.8148148148148148,
+    "minimum": 0.7777777777777778,
+    "n": 15
+   },
+   "routes": 15,
+   "routes_with_reused_created_handles": 5,
+   "rule_totals": {
+    "atom_delete": 86,
+    "atom_insert": 29,
+    "atom_restate_semantic": 105,
+    "bond_reorder": 105,
+    "cycle_close": 60,
+    "cycle_open": 30
+   },
+   "strict_regions": {
+    "maximum": 7.0,
+    "mean": 5.866666666666666,
+    "median": 6.0,
+    "minimum": 5.0,
+    "n": 15
+   },
+   "task_families": {
+    "similarity": 15
+   },
+   "touches_ring_topology": 15
+  },
+  "perindopril_mpo": {
+   "created_dependency_edges_total": 193,
+   "dataflow_components": {
+    "maximum": 46.0,
+    "mean": 31.0625,
+    "median": 33.0,
+    "minimum": 18.0,
+    "n": 16
+   },
+   "delta_heavy_atoms": {
+    "maximum": 17.0,
+    "mean": 10.875,
+    "median": 11.0,
+    "minimum": -2.0,
+    "n": 16
+   },
+   "delta_rings": {
+    "maximum": 2.0,
+    "mean": 0.9375,
+    "median": 1.0,
+    "minimum": 0.0,
+    "n": 16
+   },
+   "direction": {
+    "remodel": 2,
+    "replace": 14
+   },
+   "primary_regions": {
+    "maximum": 3.0,
+    "mean": 2.5,
+    "median": 3.0,
+    "minimum": 1.0,
+    "n": 16
+   },
+   "primitive_count": {
+    "maximum": 67.0,
+    "mean": 42.5,
+    "median": 40.0,
+    "minimum": 38.0,
+    "n": 16
+   },
+   "retained_fraction": {
+    "maximum": 0.9629629629629629,
+    "mean": 0.8294064153439153,
+    "median": 0.9629629629629629,
+    "minimum": 0.375,
+    "n": 16
+   },
+   "routes": 16,
+   "routes_with_reused_created_handles": 16,
+   "rule_totals": {
+    "atom_delete": 87,
+    "atom_insert": 261,
+    "atom_restate_semantic": 120,
+    "bond_reorder": 106,
+    "cycle_close": 66,
+    "cycle_open": 39,
+    "ring_system_restate": 1
+   },
+   "strict_regions": {
+    "maximum": 7.0,
+    "mean": 6.625,
+    "median": 7.0,
+    "minimum": 4.0,
+    "n": 16
+   },
+   "task_families": {
+    "mpo": 16
+   },
+   "touches_ring_topology": 16
+  },
+  "qed": {
+   "created_dependency_edges_total": 24,
+   "dataflow_components": {
+    "maximum": 39.0,
+    "mean": 28.48,
+    "median": 26.0,
+    "minimum": 25.0,
+    "n": 25
+   },
+   "delta_heavy_atoms": {
+    "maximum": -3.0,
+    "mean": -3.56,
+    "median": -4.0,
+    "minimum": -4.0,
+    "n": 25
+   },
+   "delta_rings": {
+    "maximum": 1.0,
+    "mean": 1.0,
+    "median": 1.0,
+    "minimum": 1.0,
+    "n": 25
+   },
+   "direction": {
+    "prune": 2,
+    "replace": 23
+   },
+   "primary_regions": {
+    "maximum": 2.0,
+    "mean": 1.8,
+    "median": 2.0,
+    "minimum": 1.0,
+    "n": 25
+   },
+   "primitive_count": {
+    "maximum": 41.0,
+    "mean": 29.44,
+    "median": 26.0,
+    "minimum": 25.0,
+    "n": 25
+   },
+   "retained_fraction": {
+    "maximum": 0.8518518518518519,
+    "mean": 0.8103703703703702,
+    "median": 0.8518518518518519,
+    "minimum": 0.6296296296296297,
+    "n": 25
+   },
+   "routes": 25,
+   "routes_with_reused_created_handles": 9,
+   "rule_totals": {
+    "atom_delete": 128,
+    "atom_insert": 39,
+    "atom_restate_semantic": 200,
+    "bond_reorder": 197,
+    "cycle_close": 116,
+    "cycle_open": 54,
+    "ring_system_restate": 2
+   },
+   "strict_regions": {
+    "maximum": 8.0,
+    "mean": 6.24,
+    "median": 7.0,
+    "minimum": 3.0,
+    "n": 25
+   },
+   "task_families": {
+    "druglikeness": 25
+   },
+   "touches_ring_topology": 25
+  },
+  "thiothixene_rediscovery": {
+   "created_dependency_edges_total": 329,
+   "dataflow_components": {
+    "maximum": 24.0,
+    "mean": 22.6,
+    "median": 22.0,
+    "minimum": 22.0,
+    "n": 15
+   },
+   "delta_heavy_atoms": {
+    "maximum": 4.0,
+    "mean": 3.3333333333333335,
+    "median": 3.0,
+    "minimum": 3.0,
+    "n": 15
+   },
+   "delta_rings": {
+    "maximum": 1.0,
+    "mean": 1.0,
+    "median": 1.0,
+    "minimum": 1.0,
+    "n": 15
+   },
+   "direction": {
+    "remodel": 15
+   },
+   "primary_regions": {
+    "maximum": 2.0,
+    "mean": 1.8,
+    "median": 2.0,
+    "minimum": 1.0,
+    "n": 15
+   },
+   "primitive_count": {
+    "maximum": 43.0,
+    "mean": 42.53333333333333,
+    "median": 43.0,
+    "minimum": 41.0,
+    "n": 15
+   },
+   "retained_fraction": {
+    "maximum": 0.4074074074074074,
+    "mean": 0.39999999999999997,
+    "median": 0.4074074074074074,
+    "minimum": 0.37037037037037035,
+    "n": 15
+   },
+   "routes": 15,
+   "routes_with_reused_created_handles": 15,
+   "rule_totals": {
+    "atom_delete": 249,
+    "atom_insert": 299,
+    "cycle_close": 60,
+    "cycle_open": 15,
+    "ring_system_restate": 15
+   },
+   "strict_regions": {
+    "maximum": 4.0,
+    "mean": 3.2,
+    "median": 3.0,
+    "minimum": 3.0,
+    "n": 15
+   },
+   "task_families": {
+    "rediscovery": 15
+   },
+   "touches_ring_topology": 15
+  },
+  "troglitazone_rediscovery": {
+   "created_dependency_edges_total": 53,
+   "dataflow_components": {
+    "maximum": 32.0,
+    "mean": 31.333333333333332,
+    "median": 32.0,
+    "minimum": 30.0,
+    "n": 15
+   },
+   "delta_heavy_atoms": {
+    "maximum": 4.0,
+    "mean": 4.0,
+    "median": 4.0,
+    "minimum": 4.0,
+    "n": 15
+   },
+   "delta_rings": {
+    "maximum": 1.0,
+    "mean": 1.0,
+    "median": 1.0,
+    "minimum": 1.0,
+    "n": 15
+   },
+   "direction": {
+    "replace": 15
+   },
+   "primary_regions": {
+    "maximum": 1.0,
+    "mean": 1.0,
+    "median": 1.0,
+    "minimum": 1.0,
+    "n": 15
+   },
+   "primitive_count": {
+    "maximum": 35.0,
+    "mean": 34.86666666666667,
+    "median": 35.0,
+    "minimum": 33.0,
+    "n": 15
+   },
+   "retained_fraction": {
+    "maximum": 0.9629629629629629,
+    "mean": 0.9432098765432099,
+    "median": 0.9259259259259259,
+    "minimum": 0.9259259259259259,
+    "n": 15
+   },
+   "routes": 15,
+   "routes_with_reused_created_handles": 15,
+   "rule_totals": {
+    "atom_delete": 29,
+    "atom_insert": 89,
+    "atom_restate_semantic": 135,
+    "bond_reorder": 165,
+    "cycle_close": 60,
+    "cycle_open": 45
+   },
+   "strict_regions": {
+    "maximum": 5.0,
+    "mean": 5.0,
+    "median": 5.0,
+    "minimum": 5.0,
+    "n": 15
+   },
+   "task_families": {
+    "rediscovery": 15
+   },
+   "touches_ring_topology": 15
+  }
+ },
+ "collapse": {
+  "exact_replay_precision": 1.0,
+  "primary_rule": {
+   "component_count_distribution": {
+    "1": 104,
+    "2": 68,
+    "3": 12
+   },
+   "definition": "join_lifetime_neighbors=True (the runtime representation's rule)",
+   "summary": {
+    "primitives_per_region": 22.257246376811594,
+    "routes_at_most_1_region": 0.5652173913043478,
+    "routes_at_most_2_regions": 0.9347826086956522,
+    "routes_at_most_4_regions": 1.0,
+    "routes_at_most_8_regions": 1.0
+   }
+  },
+  "primitive_budget_abstentions": 78,
+  "strict_rule": {
+   "component_count_distribution": {
+    "1": 2,
+    "2": 16,
+    "3": 18,
+    "4": 17,
+    "5": 55,
+    "6": 34,
+    "7": 38,
+    "8": 4
+   },
+   "definition": "join_lifetime_neighbors=False (operand overlap and created-handle dataflow only)",
+   "summary": {
+    "primitives_per_region": 6.584137191854234,
+    "routes_at_most_1_region": 0.010869565217391304,
+    "routes_at_most_2_regions": 0.09782608695652174,
+    "routes_at_most_4_regions": 0.28804347826086957,
+    "routes_at_most_8_regions": 1.0
+   }
+  }
+ },
+ "comparison": {
+  "celecoxib_rediscovery": {
+   "gap": {
+    "jump_binding_failure_rate": 0.9795918367346939,
+    "jump_channel_attempts": 49,
+    "jump_channel_eligible": 1,
+    "jump_channel_rejected": 48,
+    "proposal_maximum_primitives": 20,
+    "proposals_at_teacher_scale": 0,
+    "scale_gap_primitives": 9,
+    "teacher_minimum_primitives": 29,
+    "teacher_scale_proposals": 0
+   },
+   "proposer": {
+    "attempts_by_channel": {
+     "joint_dependency_region_jump": 49,
+     "shallow_program_channel": 95,
+     "structured_program_channel": 92
+    },
+    "distinct_endpoints": 160,
+    "pool_candidates": 161,
+    "primitive_count": {
+     "maximum": 20,
+     "mean": 6.124223602484472,
+     "median": 5.0,
+     "minimum": 1
+    },
+    "primitive_count_by_channel": {
+     "joint_dependency_region_jump": {
+      "maximum": 14,
+      "median": 14.0,
+      "n": 1
+     },
+     "shallow_program_channel": {
+      "maximum": 20,
+      "median": 4.0,
+      "n": 80
+     },
+     "structured_program_channel": {
+      "maximum": 18,
+      "median": 7.0,
+      "n": 80
+     }
+    },
+    "proposals_by_channel": {
+     "joint_dependency_region_jump": 1,
+     "shallow_program_channel": 80,
+     "structured_program_channel": 80
+    },
+    "rejection_reasons_by_channel": {
+     "joint_dependency_region_jump": {
+      "joint plan has no legal binding on this parent": 48
+     },
+     "shallow_program_channel": {
+      "no context-compatible donor branch attachment": 2,
+      "no ready complete block fits the frozen peak-capacity limit": 2,
+      "program step 3: invalid atom_restate_semantic instance: SemanticAtomRestate(v=24, target_class_index=10)": 1,
+      "program step 3: invalid cycle_close instance: CycleCloseEdge(a=7, b=29, order=1)": 1,
+      "unbound, deleted or malformed atom reference: {'input': 0}": 1
+     },
+     "structured_program_channel": {
+      "no ready complete block fits the frozen peak-capacity limit": 1,
+      "program has no available bounded mutation": 4,
+      "program step 0: atom_delete violates a hard condition": 1,
+      "program step 13: invalid cycle_open instance: CycleOpenEdge(a=22, b=23)": 1,
+      "program step 8: atom_delete violates a hard condition": 1
+     }
+    },
+    "rounds": 5,
+    "status_by_channel": {
+     "joint_dependency_region_jump": {
+      "eligible": 1,
+      "execution_rejected": 48
+     },
+     "shallow_program_channel": {
+      "duplicate": 3,
+      "eligible": 80,
+      "execution_rejected": 12
+     },
+     "structured_program_channel": {
+      "duplicate": 2,
+      "eligible": 80,
+      "execution_rejected": 10
+     }
+    }
+   },
+   "teacher": {
+    "direction": {
+     "replace": 15
+    },
+    "distinct_endpoints": 15,
+    "primary_regions_median": 2.0,
+    "primitive_count_max": 31,
+    "primitive_count_median": 31.0,
+    "primitive_count_min": 29,
+    "retained_fraction_median": 0.5185185185185185,
+    "reused_created_handle_fraction": 1.0,
+    "routes": 15,
+    "strict_regions_median": 4.0,
+    "touches_ring_topology_fraction": 1.0,
+    "within_32_primitive_horizon_fraction": 1.0
+   }
+  },
+  "gsk3b": {
+   "gap": {
+    "jump_binding_failure_rate": 0.9795918367346939,
+    "jump_channel_attempts": 49,
+    "jump_channel_eligible": 1,
+    "jump_channel_rejected": 48,
+    "proposal_maximum_primitives": 20,
+    "proposals_at_teacher_scale": 0,
+    "scale_gap_primitives": 7,
+    "teacher_minimum_primitives": 27,
+    "teacher_scale_proposals": 0
+   },
+   "proposer": {
+    "attempts_by_channel": {
+     "joint_dependency_region_jump": 49,
+     "shallow_program_channel": 95,
+     "structured_program_channel": 92
+    },
+    "distinct_endpoints": 160,
+    "pool_candidates": 161,
+    "primitive_count": {
+     "maximum": 20,
+     "mean": 6.124223602484472,
+     "median": 5.0,
+     "minimum": 1
+    },
+    "primitive_count_by_channel": {
+     "joint_dependency_region_jump": {
+      "maximum": 14,
+      "median": 14.0,
+      "n": 1
+     },
+     "shallow_program_channel": {
+      "maximum": 20,
+      "median": 4.0,
+      "n": 80
+     },
+     "structured_program_channel": {
+      "maximum": 18,
+      "median": 7.0,
+      "n": 80
+     }
+    },
+    "proposals_by_channel": {
+     "joint_dependency_region_jump": 1,
+     "shallow_program_channel": 80,
+     "structured_program_channel": 80
+    },
+    "rejection_reasons_by_channel": {
+     "joint_dependency_region_jump": {
+      "joint plan has no legal binding on this parent": 48
+     },
+     "shallow_program_channel": {
+      "no context-compatible donor branch attachment": 2,
+      "no ready complete block fits the frozen peak-capacity limit": 2,
+      "program step 3: invalid atom_restate_semantic instance: SemanticAtomRestate(v=24, target_class_index=10)": 1,
+      "program step 3: invalid cycle_close instance: CycleCloseEdge(a=7, b=29, order=1)": 1,
+      "unbound, deleted or malformed atom reference: {'input': 0}": 1
+     },
+     "structured_program_channel": {
+      "no ready complete block fits the frozen peak-capacity limit": 1,
+      "program has no available bounded mutation": 4,
+      "program step 0: atom_delete violates a hard condition": 1,
+      "program step 13: invalid cycle_open instance: CycleOpenEdge(a=22, b=23)": 1,
+      "program step 8: atom_delete violates a hard condition": 1
+     }
+    },
+    "rounds": 5,
+    "status_by_channel": {
+     "joint_dependency_region_jump": {
+      "eligible": 1,
+      "execution_rejected": 48
+     },
+     "shallow_program_channel": {
+      "duplicate": 3,
+      "eligible": 80,
+      "execution_rejected": 12
+     },
+     "structured_program_channel": {
+      "duplicate": 2,
+      "eligible": 80,
+      "execution_rejected": 10
+     }
+    }
+   },
+   "teacher": {
+    "direction": {
+     "replace": 24
+    },
+    "distinct_endpoints": 24,
+    "primary_regions_median": 1.0,
+    "primitive_count_max": 33,
+    "primitive_count_median": 29.0,
+    "primitive_count_min": 27,
+    "retained_fraction_median": 0.7777777777777778,
+    "reused_created_handle_fraction": 1.0,
+    "routes": 24,
+    "strict_regions_median": 6.0,
+    "touches_ring_topology_fraction": 1.0,
+    "within_32_primitive_horizon_fraction": 0.9583333333333334
+   }
+  },
+  "perindopril_mpo": {
+   "gap": {
+    "jump_binding_failure_rate": 0.9066666666666666,
+    "jump_channel_attempts": 75,
+    "jump_channel_eligible": 7,
+    "jump_channel_rejected": 68,
+    "proposal_maximum_primitives": 23,
+    "proposals_at_teacher_scale": 0,
+    "scale_gap_primitives": 15,
+    "teacher_minimum_primitives": 38,
+    "teacher_scale_proposals": 0
+   },
+   "proposer": {
+    "attempts_by_channel": {
+     "joint_dependency_region_jump": 75,
+     "shallow_program_channel": 98,
+     "structured_program_channel": 100
+    },
+    "distinct_endpoints": 165,
+    "pool_candidates": 167,
+    "primitive_count": {
+     "maximum": 23,
+     "mean": 5.946107784431137,
+     "median": 4.0,
+     "minimum": 1
+    },
+    "primitive_count_by_channel": {
+     "joint_dependency_region_jump": {
+      "maximum": 23,
+      "median": 16.0,
+      "n": 7
+     },
+     "shallow_program_channel": {
+      "maximum": 18,
+      "median": 4.5,
+      "n": 80
+     },
+     "structured_program_channel": {
+      "maximum": 18,
+      "median": 2.5,
+      "n": 80
+     }
+    },
+    "proposals_by_channel": {
+     "joint_dependency_region_jump": 7,
+     "shallow_program_channel": 80,
+     "structured_program_channel": 80
+    },
+    "rejection_reasons_by_channel": {
+     "joint_dependency_region_jump": {
+      "joint plan has no legal binding on this parent": 68
+     },
+     "shallow_program_channel": {
+      "joint program exceeds its declared primitive/block budget": 1,
+      "program has no available bounded mutation": 5,
+      "program step 1: atom_delete violates a hard condition": 2,
+      "program step 7: atom_delete violates a hard condition": 1,
+      "program step 9: invalid atom_insert instance: AtomInsert(slot=3, atom_type=2, formal_charge=0, implicit_h_count=3, neigh": 1
+     },
+     "structured_program_channel": {
+      "current-state family has no applicable action: ring_system_restate": 2,
+      "program has no available bounded mutation": 4,
+      "program step 0: invalid cycle_close instance: CycleCloseEdge(a=4, b=7, order=1)": 1,
+      "program step 1: atom_delete violates a hard condition": 2,
+      "program step 6: invalid cycle_close instance: CycleCloseEdge(a=21, b=25, order=1)": 1
+     }
+    },
+    "rounds": 5,
+    "status_by_channel": {
+     "joint_dependency_region_jump": {
+      "eligible": 7,
+      "execution_rejected": 68
+     },
+     "shallow_program_channel": {
+      "duplicate": 6,
+      "eligible": 80,
+      "execution_rejected": 12
+     },
+     "structured_program_channel": {
+      "eligible": 80,
+      "execution_rejected": 20
+     }
+    }
+   },
+   "teacher": {
+    "direction": {
+     "remodel": 2,
+     "replace": 14
+    },
+    "distinct_endpoints": 11,
+    "primary_regions_median": 3.0,
+    "primitive_count_max": 67,
+    "primitive_count_median": 40.0,
+    "primitive_count_min": 38,
+    "retained_fraction_median": 0.9629629629629629,
+    "reused_created_handle_fraction": 1.0,
+    "routes": 16,
+    "strict_regions_median": 7.0,
+    "touches_ring_topology_fraction": 1.0,
+    "within_32_primitive_horizon_fraction": 0.0
+   }
+  }
+ },
+ "corpus": {
+  "objectives": {
+   "albuterol_similarity": 15,
+   "celecoxib_rediscovery": 15,
+   "gsk3b": 24,
+   "isomers_c7h8n2o2": 10,
+   "jnk3": 24,
+   "median1": 10,
+   "mestranol_similarity": 15,
+   "perindopril_mpo": 16,
+   "qed": 25,
+   "thiothixene_rediscovery": 15,
+   "troglitazone_rediscovery": 15
+  },
+  "path": "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz",
+  "routes": 184,
+  "task_families": {
+   "bioactivity": 48,
+   "druglikeness": 25,
+   "formula": 10,
+   "mpo": 16,
+   "multi_property": 10,
+   "rediscovery": 45,
+   "similarity": 30
+  }
+ },
+ "corpus_root_structure": {
+  "distinct_source_molecules": 7,
+  "most_shared_root_objective_count": 9,
+  "routes": 184,
+  "sources": [
+   {
+    "objectives": [
+     "albuterol_similarity",
+     "celecoxib_rediscovery",
+     "gsk3b",
+     "jnk3",
+     "mestranol_similarity",
+     "perindopril_mpo",
+     "qed",
+     "thiothixene_rediscovery",
+     "troglitazone_rediscovery"
+    ],
+    "source_smiles": "COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1"
+   },
+   {
+    "objectives": [
+     "perindopril_mpo"
+    ],
+    "source_smiles": "CCOn1nc(C(=O)O)c(CC(C)C(=O)NC2CC(c3ccc(O)cn3)C(C)(C=O)C(C3CCCC3)C2)c1CO"
+   },
+   {
+    "objectives": [
+     "median1"
+    ],
+    "source_smiles": "CC1CCCCC1O"
+   },
+   {
+    "objectives": [
+     "isomers_c7h8n2o2"
+    ],
+    "source_smiles": "CC(=O)Nc1ccccc1"
+   },
+   {
+    "objectives": [
+     "perindopril_mpo"
+    ],
+    "source_smiles": "Cc1n[nH]c(C)c1CC(C)C(=O)NC1CCC(C)(C)CC1"
+   },
+   {
+    "objectives": [
+     "perindopril_mpo"
+    ],
+    "source_smiles": "c1ccc(CNc2nc3ncccc3nc2-c2ccccc2)cc1"
+   },
+   {
+    "objectives": [
+     "perindopril_mpo"
+    ],
+    "source_smiles": "O=C(C=Cc1ccco1)Nc1ccc(NC(=O)c2ccco2)cc1"
+   }
+  ]
+ },
+ "findings": {
+  "evidence_against_or_limiting": [
+   {
+    "evidence": {
+     "primitives_per_region": 6.584137191854234,
+     "routes_at_most_1_region": 0.010869565217391304,
+     "routes_at_most_2_regions": 0.09782608695652174,
+     "routes_at_most_4_regions": 0.28804347826086957,
+     "routes_at_most_8_regions": 1.0
+    },
+    "point": "Under the STRICT rule (operand overlap and created-handle dataflow only) the same routes need a median of 5 regions and only 28.8% sit at 4 or fewer. The routes are therefore NOT 1-4 independent programs by dataflow; the tight collapse is a property of the runtime rule, which merges any two edits on bonded atoms."
+   },
+   {
+    "point": "Phase B substitutes a deterministic hash for the oracle. Proposal SCALE is a property of the synthesis law and is unaffected, but parent selection and therefore channel mix depend on scores, so the channel shares are indicative rather than a prediction of a scored run."
+   },
+   {
+    "point": "The whole 184-route corpus starts from only 7 distinct source molecules, and ONE of them is the root for 9 of the 11 objectives including all three relaunch tasks. gsk3b and celecoxib therefore produced byte-identical proposal pools under the task-blind proposer. The teacher-root binding rate is thus effectively an n=1 parent measurement; the production-init control (16 parents, 128 jump attempts, 99.2% failure) is what generalizes it."
+   },
+   {
+    "point": "A prior zero-oracle gap analysis (2026-09-19, pmo_complete_route_dynamic_gate_v1) already reported exact_endpoint_support 0 and finite_support 0 for teacher routes, and attributed the loss to WHERE/HOW decisions. That was measured on the PRE-jump architecture. This report refines rather than discovers: the jump channel supplied the missing scale, and the loss moved to binding."
+   },
+   {
+    "point": "Another session edited pmo_population_controller.py and bootstrap_pool_continuity.py at 17:27 during this run, so the perindopril_mpo leg ran with the contract's implementation pin unverified. The diff does not touch propose_batch, _generate_channel_pool, _generate_jump_pool or bind_joint_plan, so the proposal law is unchanged across the three legs; see each task's contract_verified field in the Phase B artifact."
+   }
+  ],
+  "inferred": [
+   {
+    "basis": "Read from pmo_joint_dependency_jump.bind_joint_plan and its call site pmo_population_controller.py (beam_width=4). NOT established by ablation: no beam-width or ranking sweep was run.",
+    "claim": "The binding failure is mechanistic: bind_joint_plan requires an EXACT role-identity match at each of ~28-31 consecutive steps, carried through a beam the controller sets to width 4, whose survivors are ranked by a content hash rather than by any compatibility or value signal. The chance of surviving every step is correspondingly small."
+   }
+  ],
+  "measured": [
+   {
+    "claim": "The primitive -> structural-program collapse DOES happen for PMO under the runtime region rule: 184 exact teacher routes of 6-73 primitives reduce to 1-3 dependency regions, never more.",
+    "evidence": {
+     "component_count_distribution": {
+      "1": 104,
+      "2": 68,
+      "3": 12
+     },
+     "primitives_per_region": 22.257246376811594,
+     "routes_at_most_4_regions": 1.0
+    }
+   },
+   {
+    "claim": "The executor CAN express every teacher transformation: all 184 routes replay exactly through the production executor.",
+    "evidence": {
+     "exact_replay_precision": 1.0
+    }
+   },
+   {
+    "claim": "The live proposer never emits a teacher-scale program and never reaches a teacher endpoint, on any of the three relaunch tasks.",
+    "evidence": {
+     "celecoxib_rediscovery": {
+      "proposal_maximum_primitives": 20,
+      "proposals": 161,
+      "proposals_at_teacher_scale": 0,
+      "teacher_minimum_primitives": 29
+     },
+     "gsk3b": {
+      "proposal_maximum_primitives": 20,
+      "proposals": 161,
+      "proposals_at_teacher_scale": 0,
+      "teacher_minimum_primitives": 27
+     },
+     "perindopril_mpo": {
+      "proposal_maximum_primitives": 23,
+      "proposals": 167,
+      "proposals_at_teacher_scale": 0,
+      "teacher_minimum_primitives": 38
+     }
+    }
+   },
+   {
+    "claim": "The joint-jump channel -- the only channel carrying teacher-scale plans -- fails at BINDING on 91-98% of attempts, with a single recorded reason, and therefore contributes under 5% of proposals.",
+    "evidence": {
+     "celecoxib_rediscovery": {
+      "binding_failure_rate": 0.9795918367346939,
+      "jump_attempts": 49,
+      "reason": {
+       "joint plan has no legal binding on this parent": 48
+      }
+     },
+     "gsk3b": {
+      "binding_failure_rate": 0.9795918367346939,
+      "jump_attempts": 49,
+      "reason": {
+       "joint plan has no legal binding on this parent": 48
+      }
+     },
+     "perindopril_mpo": {
+      "binding_failure_rate": 0.9066666666666666,
+      "jump_attempts": 75,
+      "reason": {
+       "joint plan has no legal binding on this parent": 68
+      }
+     }
+    }
+   },
+   {
+    "claim": "Scale and region structure are NOT the lost decision for gsk3b and celecoxib: the plan bank already carries teacher-scale, teacher-shaped plans.",
+    "evidence": {
+     "component_count_distribution": {
+      "1": 61,
+      "2": 34
+     },
+     "fit_scope": "shared_all_routes",
+     "mass_at_least_27_primitives": 0.5666666666666667,
+     "maximum_components": 8,
+     "maximum_primitives": 32,
+     "plans": 95,
+     "plans_at_least_27_primitives": 67,
+     "primitive_count": {
+      "maximum": 32,
+      "mean": 26.378947368421052,
+      "median": 28.0,
+      "minimum": 6
+     },
+     "source": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json",
+     "training_route_count": 106
+    }
+   },
+   {
+    "claim": "For perindopril_mpo the 32-primitive representation horizon structurally excludes EVERY teacher route, so binding cannot be the whole story there. Four of eleven objectives have zero coverage.",
+    "evidence": {
+     "gsk3b": {
+      "maximum_primitives": 33,
+      "median_primitives": 29.0,
+      "minimum_primitives": 27,
+      "routes": 24,
+      "within_32_primitive_horizon": 23,
+      "within_horizon_fraction": 0.9583333333333334
+     },
+     "jnk3": {
+      "maximum_primitives": 73,
+      "median_primitives": 43.0,
+      "minimum_primitives": 42,
+      "routes": 24,
+      "within_32_primitive_horizon": 0,
+      "within_horizon_fraction": 0.0
+     },
+     "perindopril_mpo": {
+      "maximum_primitives": 67,
+      "median_primitives": 40.0,
+      "minimum_primitives": 38,
+      "routes": 16,
+      "within_32_primitive_horizon": 0,
+      "within_horizon_fraction": 0.0
+     },
+     "qed": {
+      "maximum_primitives": 41,
+      "median_primitives": 26.0,
+      "minimum_primitives": 25,
+      "routes": 25,
+      "within_32_primitive_horizon": 18,
+      "within_horizon_fraction": 0.72
+     },
+     "thiothixene_rediscovery": {
+      "maximum_primitives": 43,
+      "median_primitives": 43.0,
+      "minimum_primitives": 41,
+      "routes": 15,
+      "within_32_primitive_horizon": 0,
+      "within_horizon_fraction": 0.0
+     },
+     "troglitazone_rediscovery": {
+      "maximum_primitives": 35,
+      "median_primitives": 35.0,
+      "minimum_primitives": 33,
+      "routes": 15,
+      "within_32_primitive_horizon": 0,
+      "within_horizon_fraction": 0.0
+     }
+    }
+   }
+  ]
+ },
+ "horizon_coverage": {
+  "albuterol_similarity": {
+   "maximum_primitives": 31,
+   "median_primitives": 31.0,
+   "minimum_primitives": 29,
+   "routes": 15,
+   "within_32_primitive_horizon": 15,
+   "within_horizon_fraction": 1.0
+  },
+  "celecoxib_rediscovery": {
+   "maximum_primitives": 31,
+   "median_primitives": 31.0,
+   "minimum_primitives": 29,
+   "routes": 15,
+   "within_32_primitive_horizon": 15,
+   "within_horizon_fraction": 1.0
+  },
+  "gsk3b": {
+   "maximum_primitives": 33,
+   "median_primitives": 29.0,
+   "minimum_primitives": 27,
+   "routes": 24,
+   "within_32_primitive_horizon": 23,
+   "within_horizon_fraction": 0.9583333333333334
+  },
+  "isomers_c7h8n2o2": {
+   "maximum_primitives": 16,
+   "median_primitives": 13.5,
+   "minimum_primitives": 6,
+   "routes": 10,
+   "within_32_primitive_horizon": 10,
+   "within_horizon_fraction": 1.0
+  },
+  "jnk3": {
+   "maximum_primitives": 73,
+   "median_primitives": 43.0,
+   "minimum_primitives": 42,
+   "routes": 24,
+   "within_32_primitive_horizon": 0,
+   "within_horizon_fraction": 0.0
+  },
+  "median1": {
+   "maximum_primitives": 25,
+   "median_primitives": 16.0,
+   "minimum_primitives": 14,
+   "routes": 10,
+   "within_32_primitive_horizon": 10,
+   "within_horizon_fraction": 1.0
+  },
+  "mestranol_similarity": {
+   "maximum_primitives": 28,
+   "median_primitives": 28.0,
+   "minimum_primitives": 26,
+   "routes": 15,
+   "within_32_primitive_horizon": 15,
+   "within_horizon_fraction": 1.0
+  },
+  "perindopril_mpo": {
+   "maximum_primitives": 67,
+   "median_primitives": 40.0,
+   "minimum_primitives": 38,
+   "routes": 16,
+   "within_32_primitive_horizon": 0,
+   "within_horizon_fraction": 0.0
+  },
+  "qed": {
+   "maximum_primitives": 41,
+   "median_primitives": 26.0,
+   "minimum_primitives": 25,
+   "routes": 25,
+   "within_32_primitive_horizon": 18,
+   "within_horizon_fraction": 0.72
+  },
+  "thiothixene_rediscovery": {
+   "maximum_primitives": 43,
+   "median_primitives": 43.0,
+   "minimum_primitives": 41,
+   "routes": 15,
+   "within_32_primitive_horizon": 0,
+   "within_horizon_fraction": 0.0
+  },
+  "troglitazone_rediscovery": {
+   "maximum_primitives": 35,
+   "median_primitives": 35.0,
+   "minimum_primitives": 33,
+   "routes": 15,
+   "within_32_primitive_horizon": 0,
+   "within_horizon_fraction": 0.0
+  }
+ },
+ "inputs": {
+  "jump_checkpoint": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json",
+  "prior_gap_analysis": "diagnostics/pmo_complete_route_dynamic_gate_v1/attempt_1/gap_analysis.json",
+  "teacher_corpus": "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz"
+ },
+ "jump_plan_bank": {
+  "component_count_distribution": {
+   "1": 61,
+   "2": 34
+  },
+  "fit_scope": "shared_all_routes",
+  "mass_at_least_27_primitives": 0.5666666666666667,
+  "maximum_components": 8,
+  "maximum_primitives": 32,
+  "plans": 95,
+  "plans_at_least_27_primitives": 67,
+  "primitive_count": {
+   "maximum": 32,
+   "mean": 26.378947368421052,
+   "median": 28.0,
+   "minimum": 6
+  },
+  "source": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json",
+  "training_route_count": 106
+ },
+ "new_oracle_calls": 0,
+ "objective_substitution": "Phase B scores with a deterministic sha256 hash in [0,1]; no TDC Oracle is constructed and no network call is made. Proposal geometry does not depend on the objective value, but parent SELECTION does, so channel mix is indicative rather than a prediction of a scored run.",
+ "production_init_control": {
+  "census": {
+   "attempts_by_channel": {
+    "joint_dependency_region_jump": 128,
+    "shallow_program_channel": 110,
+    "structured_program_channel": 137
+   },
+   "distinct_endpoints": 155,
+   "pool_candidates": 159,
+   "primitive_count": {
+    "maximum": 18,
+    "mean": 6.050314465408805,
+    "median": 6.0,
+    "minimum": 1
+   },
+   "primitive_count_by_channel": {
+    "joint_dependency_region_jump": {
+     "maximum": 14,
+     "median": 14.0,
+     "n": 1
+    },
+    "shallow_program_channel": {
+     "maximum": 18,
+     "median": 3.0,
+     "n": 80
+    },
+    "structured_program_channel": {
+     "maximum": 15,
+     "median": 7.0,
+     "n": 78
+    }
+   },
+   "proposals_by_channel": {
+    "joint_dependency_region_jump": 1,
+    "shallow_program_channel": 80,
+    "structured_program_channel": 78
+   },
+   "rejection_reasons_by_channel": {
+    "joint_dependency_region_jump": {
+     "joint plan has no legal binding on this parent": 127
+    },
+    "shallow_program_channel": {
+     "current-state family has no applicable action: cycle_open": 1,
+     "no context-compatible donor branch attachment": 6,
+     "program has no available bounded mutation": 4,
+     "program step 0: invalid cycle_close instance: CycleCloseEdge(a=9, b=13, order=1)": 1,
+     "unbound, deleted or malformed atom reference: {'input': 2}": 1
+    },
+    "structured_program_channel": {
+     "current-state family has no applicable action: cycle_close": 3,
+     "no context-compatible donor branch attachment": 8,
+     "program has no available bounded mutation": 4,
+     "program step 12: atom_delete violates a hard condition": 4,
+     "program step 6: atom_delete violates a hard condition": 4
+    }
+   },
+   "rounds": 5,
+   "status_by_channel": {
+    "joint_dependency_region_jump": {
+     "eligible": 1,
+     "execution_rejected": 127
+    },
+    "shallow_program_channel": {
+     "duplicate": 5,
+     "eligible": 80,
+     "execution_rejected": 25
+    },
+    "structured_program_channel": {
+     "cross_channel_duplicate": 2,
+     "duplicate": 5,
+     "eligible": 80,
+     "execution_rejected": 50
+    }
+   }
+  },
+  "initialization": "diagnostics/parent_edit_cycles/prepared/init_20260921.json",
+  "initialization_parents": 16,
+  "jump_binding_failure_rate": 0.9921875,
+  "ran": true,
+  "task": "gsk3b"
+ },
+ "schema_version": "pmo_teacher_route_gap_v1",
+ "teacher_route_success": {
+  "albuterol_similarity": {
+   "best_endpoint_score": 1.0,
+   "root_score": 0.2459546925566343,
+   "scored_endpoints": 15,
+   "source": "diagnostics/pmo_target_program_wave/result.json"
+  },
+  "celecoxib_rediscovery": {
+   "best_endpoint_score": 1.0,
+   "root_score": 0.15625,
+   "scored_endpoints": 15,
+   "source": "diagnostics/pmo_target_program_wave/result.json"
+  },
+  "gsk3b": {
+   "best_endpoint_score": 1.0,
+   "root_score": 0.03,
+   "scored_endpoints": 15,
+   "source": "diagnostics/pmo_property_program_wave/result.json"
+  },
+  "isomers_c7h8n2o2": {
+   "best_endpoint_score": 0.014625334709594222,
+   "root_score": null,
+   "scored_endpoints": 11,
+   "source": "diagnostics/pmo_formula_median_panel_wave/result.json"
+  },
+  "jnk3": {
+   "best_endpoint_score": 0.98,
+   "root_score": 0.0,
+   "scored_endpoints": 15,
+   "source": "diagnostics/pmo_property_program_wave/result.json"
+  },
+  "median1": {
+   "best_endpoint_score": 0.40648479068406884,
+   "root_score": null,
+   "scored_endpoints": 11,
+   "source": "diagnostics/pmo_formula_median_panel_wave/result.json"
+  },
+  "mestranol_similarity": {
+   "best_endpoint_score": 1.0,
+   "root_score": 0.1673414304993252,
+   "scored_endpoints": 15,
+   "source": "diagnostics/pmo_target_program_wave/result.json"
+  },
+  "perindopril_mpo": {
+   "best_endpoint_score": 0.8106434833777776,
+   "note": "single-ledger wave; root taken as the minimum scored row",
+   "root_score": 0.0021813608476254813,
+   "scored_endpoints": 15,
+   "source": "diagnostics/pmo_winner_program_curriculum/result.json"
+  },
+  "qed": {
+   "best_endpoint_score": 0.948442042791664,
+   "root_score": 0.7960834588871699,
+   "scored_endpoints": 15,
+   "source": "diagnostics/pmo_property_program_wave/result.json"
+  },
+  "thiothixene_rediscovery": {
+   "best_endpoint_score": 1.0,
+   "root_score": 0.24615384615384617,
+   "scored_endpoints": 15,
+   "source": "diagnostics/pmo_target_program_wave/result.json"
+  },
+  "troglitazone_rediscovery": {
+   "best_endpoint_score": 1.0,
+   "root_score": 0.12413793103448276,
+   "scored_endpoints": 15,
+   "source": "diagnostics/pmo_target_program_wave/result.json"
+  }
+ }
+}

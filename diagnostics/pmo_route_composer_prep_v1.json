@@ -1,0 +1,2543 @@
+{
+ "schema_version": "pmo_route_composer_prep_v1",
+ "role": "preparation only: a route-program dataset builder, a leave-one-task-out fitting routine and a zero-oracle comparison harness for a route-distilled PMO program composer. Nothing is wired into any controller and nothing was launched.",
+ "oracle_calls": 0,
+ "modal_jobs": 0,
+ "generated": "2026-09-20T21:53:00Z",
+ "code_revision": "b51d6e975b0c778a32404c0f4bf7401466ec6f86",
+ "inputs": {
+  "primary_route_corpus": "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz",
+  "primary_route_corpus_role": "frozen training-only dependency-region corpus; it already collects every PMO curriculum route plus the winner curriculum and the public perindopril witnesses"
+ },
+ "what_counts_as_successful": {
+  "definition": "a route whose recorded primitive trace replays exactly to its recorded terminal endpoint, and whose endpoint is the published task target or a target-known COMPOSE recovery witness",
+  "evidence_roles": {
+   "answer_known_complete_program": 181,
+   "answer_known_exact_witness": 5
+  },
+  "NOT_oracle_discovered": "every route is answer-known. task_scores_loaded is false in the corpus and new_oracle_calls is 0, so none of these is an oracle-discovered search success. They are reconstructions toward a known answer."
+ },
+ "corpus_census": {
+  "schema_version": "pmo_route_program_corpus_v1",
+  "routes": 184,
+  "route_tasks": [
+   "albuterol_similarity",
+   "celecoxib_rediscovery",
+   "gsk3b",
+   "isomers_c7h8n2o2",
+   "jnk3",
+   "median1",
+   "mestranol_similarity",
+   "perindopril_mpo",
+   "qed",
+   "thiothixene_rediscovery",
+   "troglitazone_rediscovery"
+  ],
+  "programs": 1452,
+  "program_tasks": [
+   "albuterol_similarity",
+   "celecoxib_rediscovery",
+   "gsk3b",
+   "isomers_c7h8n2o2",
+   "jnk3",
+   "median1",
+   "mestranol_similarity",
+   "perindopril_mpo",
+   "qed",
+   "thiothixene_rediscovery",
+   "troglitazone_rediscovery"
+  ],
+  "distinct_source_groups": 7,
+  "distinct_lineages": 18,
+  "lineages_per_task": {
+   "albuterol_similarity": 1,
+   "celecoxib_rediscovery": 1,
+   "gsk3b": 1,
+   "isomers_c7h8n2o2": 1,
+   "jnk3": 1,
+   "median1": 1,
+   "mestranol_similarity": 1,
+   "perindopril_mpo": 7,
+   "qed": 2,
+   "thiothixene_rediscovery": 1,
+   "troglitazone_rediscovery": 1
+  },
+  "routes_per_task": {
+   "albuterol_similarity": 15,
+   "celecoxib_rediscovery": 15,
+   "gsk3b": 24,
+   "isomers_c7h8n2o2": 10,
+   "jnk3": 24,
+   "median1": 10,
+   "mestranol_similarity": 15,
+   "perindopril_mpo": 16,
+   "qed": 25,
+   "thiothixene_rediscovery": 15,
+   "troglitazone_rediscovery": 15
+  },
+  "evidence_roles": {
+   "answer_known_complete_program": 179,
+   "answer_known_exact_witness": 5
+  },
+  "task_families": {
+   "bioactivity": 48,
+   "druglikeness": 25,
+   "formula": 10,
+   "mpo": 16,
+   "multi_property": 10,
+   "rediscovery": 45,
+   "similarity": 30
+  },
+  "distinct_templates": 421,
+  "programs_per_task": {
+   "albuterol_similarity": 102,
+   "celecoxib_rediscovery": 111,
+   "gsk3b": 183,
+   "isomers_c7h8n2o2": 35,
+   "jnk3": 289,
+   "median1": 46,
+   "mestranol_similarity": 105,
+   "perindopril_mpo": 159,
+   "qed": 143,
+   "thiothixene_rediscovery": 144,
+   "troglitazone_rediscovery": 135
+  },
+  "scale_distribution": {
+   "large": 408,
+   "medium": 1017,
+   "small": 27
+  },
+  "mode_distribution": {
+   "grow": 499,
+   "prune": 260,
+   "remodel": 137,
+   "replace": 556
+  },
+  "region_count_distribution": {
+   "1": 364,
+   "2": 536,
+   "3": 350,
+   "4": 202
+  },
+  "rewrite_events_five_number": {
+   "min": 3,
+   "p25": 8,
+   "median": 10,
+   "p75": 14,
+   "max": 35
+  },
+  "extraction_telemetry": {
+   "abstained_extractor_typeerror": 139,
+   "programs": 1452,
+   "source": "dependency_region_training_corpus",
+   "window": 4,
+   "windows": 1591
+  }
+ },
+ "route_provenance": {
+  "routes": 184,
+  "distinct_trace_identities": 184,
+  "distinct_lineages": 18,
+  "distinct_source_molecules": 7,
+  "lineages_per_task": {
+   "albuterol_similarity": 1,
+   "celecoxib_rediscovery": 1,
+   "gsk3b": 1,
+   "isomers_c7h8n2o2": 1,
+   "jnk3": 1,
+   "median1": 1,
+   "mestranol_similarity": 1,
+   "perindopril_mpo": 7,
+   "qed": 2,
+   "thiothixene_rediscovery": 1,
+   "troglitazone_rediscovery": 1
+  },
+  "routes_per_task": {
+   "albuterol_similarity": 15,
+   "celecoxib_rediscovery": 15,
+   "gsk3b": 24,
+   "isomers_c7h8n2o2": 10,
+   "jnk3": 24,
+   "median1": 10,
+   "mestranol_similarity": 15,
+   "perindopril_mpo": 16,
+   "qed": 25,
+   "thiothixene_rediscovery": 15,
+   "troglitazone_rediscovery": 15
+  },
+  "largest_source_share": {
+   "routes": 160,
+   "of": 184,
+   "tasks_served": 9,
+   "smiles": "COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1"
+  },
+  "interpretation": "184 routes is not 184 independent successes. They collapse to 18 lineages and 7 source molecules, one of which serves 9 of the 11 objectives. Ten of eleven tasks have exactly ONE lineage, so leave-one-task-out is effectively leave-one-lineage-out with n=1, and the held task's source graph is usually the same molecule the training tasks were routed from."
+ },
+ "structural_program_collapse": {
+  "routes": 184,
+  "primitive_transitions": {
+   "min": 6,
+   "median": 31,
+   "max": 73
+  },
+  "runtime_union_rule": {
+   "definition": "components joined by lifetime-overlap/observed-bond, created-handle producer-consumer, and cycle open/close-restate edges; this is the corpus's own component_count",
+   "region_count_distribution": {
+    "1": 104,
+    "2": 68,
+    "3": 12
+   },
+   "median_regions": 1,
+   "fraction_at_most_4_regions": 1.0
+  },
+  "strict_dataflow_rule": {
+   "definition": "components joined ONLY by created-handle producer->consumer edges; every other primitive is its own region",
+   "median_regions": 28,
+   "max_regions": 46,
+   "fraction_at_most_4_regions": 0.05434782608695652
+  },
+  "strict_dataflow_plus_cycle_rule": {
+   "definition": "created-handle producer->consumer plus cycle open/close-restate edges",
+   "median_regions": 26,
+   "fraction_at_most_4_regions": 0.05434782608695652
+  },
+  "reconstruction_check": {
+   "recomputed_equals_stored_component_count": 184,
+   "routes": 184
+  },
+  "interpretation": "Quoting only the runtime union rule overstates collapse. Under the rule the runtime actually uses, 100% of teacher routes are at most 4 regions (median 1). Under a strict dataflow rule only 5.4% are, at a median of 28 regions. The runtime rule merges on structural adjacency, which is most of the merging: structural_connectivity_edges dominate both other families."
+ },
+ "whole_route_extraction": {
+  "note": "extract_structural_goal at its own limits (32 primitives / 4 components) on whole base routes",
+  "base_routes_tried": 10,
+  "extracted": 3,
+  "abstentions": {
+   "component_budget_exceeded": 4,
+   "primitive_budget_exceeded": 3
+  },
+  "example_extracted": {
+   "task": "celecoxib_rediscovery",
+   "primitives": 29,
+   "regions": 4,
+   "rewrite_events_per_region": [
+    20,
+    16,
+    26,
+    14
+   ],
+   "total_rewrite_events": 76
+  },
+  "interpretation": "A whole PMO teacher route does not fit the T4 complete-region unit: 7 of 10 abstain, and the one that extracts is a 76-event four-region program, far above T4's large band (>11 events). Windowing is therefore required, and it makes the supervised unit a route SEGMENT, not a whole route."
+ },
+ "window_sensitivity": {
+  "note": "measured on the 11 deduplicated curriculum base routes, before the 184-route corpus was adopted",
+  "rows": [
+   {
+    "window": 1,
+    "programs": 287,
+    "distinct_templates": 139,
+    "template_instances": 287,
+    "singleton_template_fraction": 0.583,
+    "cross_task_template_coverage": 0.592
+   },
+   {
+    "window": 2,
+    "programs": 145,
+    "distinct_templates": 149,
+    "template_instances": 220,
+    "singleton_template_fraction": 0.678,
+    "cross_task_template_coverage": 0.297
+   },
+   {
+    "window": 3,
+    "programs": 93,
+    "distinct_templates": 128,
+    "template_instances": 182,
+    "singleton_template_fraction": 0.711,
+    "cross_task_template_coverage": 0.258
+   },
+   {
+    "window": 4,
+    "programs": 74,
+    "distinct_templates": 119,
+    "template_instances": 164,
+    "singleton_template_fraction": 0.714,
+    "cross_task_template_coverage": 0.226
+   },
+   {
+    "window": 6,
+    "programs": 39,
+    "distinct_templates": 76,
+    "template_instances": 90,
+    "singleton_template_fraction": 0.816,
+    "cross_task_template_coverage": 0.076
+   },
+   {
+    "window": 8,
+    "programs": 29,
+    "distinct_templates": 60,
+    "template_instances": 68,
+    "singleton_template_fraction": 0.883,
+    "cross_task_template_coverage": 0.095
+   }
+  ],
+  "interpretation": "Cross-task template reuse falls monotonically as the program unit grows. Window 1 reaches 59% only because a one-primitive patch is nearly generic; at any window large enough to be a coordinated multi-region program the shared vocabulary collapses. This is not a window-tuning problem."
+ },
+ "leave_task_out": {
+  "schema_version": "pmo_route_composer_leave_task_out_v1",
+  "config": {
+   "window": 4,
+   "exploration_floor": 0.1,
+   "shape_weight": 1.0,
+   "balance_key": "task",
+   "vocabulary_cap": 256,
+   "max_bindings_per_template": 4,
+   "pool_size": 128,
+   "beam_width": 16,
+   "expansion_width": 16,
+   "scale_balanced": true
+  },
+  "corpus_programs": 1452,
+  "corpus_tasks": [
+   "albuterol_similarity",
+   "celecoxib_rediscovery",
+   "gsk3b",
+   "isomers_c7h8n2o2",
+   "jnk3",
+   "median1",
+   "mestranol_similarity",
+   "perindopril_mpo",
+   "qed",
+   "thiothixene_rediscovery",
+   "troglitazone_rediscovery"
+  ],
+  "evaluated_tasks": [
+   "albuterol_similarity",
+   "celecoxib_rediscovery",
+   "gsk3b",
+   "isomers_c7h8n2o2",
+   "jnk3",
+   "median1",
+   "mestranol_similarity",
+   "perindopril_mpo",
+   "qed",
+   "thiothixene_rediscovery",
+   "troglitazone_rediscovery"
+  ],
+  "cells": [
+   {
+    "held_task": "albuterol_similarity",
+    "fit_audit": {
+     "held_task": "albuterol_similarity",
+     "balance_key": "task",
+     "corpus_programs": 1452,
+     "training_programs": 1350,
+     "excluded_held_task_programs": 102,
+     "training_tasks": [
+      "celecoxib_rediscovery",
+      "gsk3b",
+      "isomers_c7h8n2o2",
+      "jnk3",
+      "median1",
+      "mestranol_similarity",
+      "perindopril_mpo",
+      "qed",
+      "thiothixene_rediscovery",
+      "troglitazone_rediscovery"
+     ],
+     "held_task_absent_from_training": true,
+     "training_lineages": 17,
+     "balance_groups": 10,
+     "template_vocabulary": 404,
+     "exploration_floor": 0.1,
+     "shape_weight": 1.0,
+     "shape_cells": {
+      "small|grow": 0.012267759562841526,
+      "small|prune": 0.010904761904761903,
+      "small|replace": 0.02276283816378545,
+      "small|remodel": 0.008333333333333333,
+      "medium|grow": 0.25240900737475536,
+      "medium|prune": 0.11507016969343323,
+      "medium|replace": 0.1558670789163012,
+      "medium|remodel": 0.12430408024569083,
+      "large|grow": 0.08438317460066824,
+      "large|prune": 0.052542780546850694,
+      "large|replace": 0.13119617660038868,
+      "large|remodel": 0.029958839057189532
+     },
+     "region_count_law": [
+      0.24207396655920232,
+      0.3874491281509403,
+      0.2516435550863748,
+      0.11883335020348265
+     ],
+     "training_identity": "e07df527b5865ecc6c38027af1417f344277394a21627dd83bdabf7ecc42419d"
+    },
+    "expressibility": {
+     "held_task": "albuterol_similarity",
+     "held_programs": 102,
+     "held_distinct_templates": 22,
+     "held_template_instances": 229,
+     "covered_distinct_templates": 5,
+     "distinct_template_coverage": 0.22727272727272727,
+     "covered_template_instances": 105,
+     "instance_template_coverage": 0.4585152838427948,
+     "fully_expressible_programs": 45,
+     "fully_expressible_rate": 0.4411764705882353,
+     "held_shapes": [
+      "large|replace",
+      "medium|grow",
+      "medium|prune",
+      "medium|remodel",
+      "medium|replace",
+      "small|replace"
+     ],
+     "shape_coverage": 1.0
+    },
+    "vocabulary_restriction": {
+     "restricted": true,
+     "vocabulary": 256,
+     "full_vocabulary": 404,
+     "retained_mass": 0.9256023368708821
+    },
+    "source_real_atoms": 27,
+    "source_slots": 48,
+    "arms": {
+     "route_distilled": {
+      "arm": "route_distilled",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 1.477607957989676,
+      "scale_distribution": {
+       "large": 28,
+       "medium": 50,
+       "small": 50
+      },
+      "mode_distribution": {
+       "grow": 74,
+       "prune": 11,
+       "remodel": 8,
+       "replace": 35
+      },
+      "region_count_distribution": {
+       "1": 100,
+       "2": 8,
+       "3": 8,
+       "4": 12
+      },
+      "rewrite_events_max": 18,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 28,
+       "available_local_rewrite_proposals": 68,
+       "available_medium_rewrite_proposals": 122,
+       "binding_truncations": 62,
+       "binding_visits": 1625,
+       "candidate_shortfall": 0,
+       "composition_aliases": 221,
+       "composition_attempts": 768,
+       "composition_rejections": 249,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 363,
+       "materialization_rejections": 141,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 28,
+       "selected_local_rewrite_proposals": 50,
+       "selected_medium_rewrite_proposals": 50,
+       "single_aliases": 12,
+       "templates_with_bindings": 141,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 61,
+       "valid_depth_3": 76,
+       "valid_depth_4": 65,
+       "valid_unique_single_goals": 210
+      }
+     },
+     "uniform_same_pool": {
+      "arm": "uniform_same_pool",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 1.55315654099104,
+      "scale_distribution": {
+       "large": 4,
+       "medium": 62,
+       "small": 62
+      },
+      "mode_distribution": {
+       "grow": 82,
+       "prune": 10,
+       "remodel": 4,
+       "replace": 32
+      },
+      "region_count_distribution": {
+       "1": 124,
+       "4": 4
+      },
+      "rewrite_events_max": 14,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 4,
+       "available_local_rewrite_proposals": 72,
+       "available_medium_rewrite_proposals": 123,
+       "binding_truncations": 62,
+       "binding_visits": 1625,
+       "candidate_shortfall": 0,
+       "composition_aliases": 256,
+       "composition_attempts": 768,
+       "composition_rejections": 251,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 363,
+       "materialization_rejections": 141,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 4,
+       "selected_local_rewrite_proposals": 62,
+       "selected_medium_rewrite_proposals": 62,
+       "single_aliases": 12,
+       "templates_with_bindings": 141,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 50,
+       "valid_depth_3": 64,
+       "valid_depth_4": 51,
+       "valid_unique_single_goals": 210
+      }
+     }
+    },
+    "teacher_rank": {
+     "route_distilled": {
+      "teacher_endpoints": 18,
+      "exact_endpoint_hits": 1,
+      "first_exact_endpoint_rank": 8,
+      "shape_matched_proposals": 81,
+      "first_shape_match_rank": 2,
+      "shape_match_rate": 0.6328125
+     },
+     "uniform_same_pool": {
+      "teacher_endpoints": 18,
+      "exact_endpoint_hits": 1,
+      "first_exact_endpoint_rank": 20,
+      "shape_matched_proposals": 92,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.71875
+     }
+    }
+   },
+   {
+    "held_task": "celecoxib_rediscovery",
+    "fit_audit": {
+     "held_task": "celecoxib_rediscovery",
+     "balance_key": "task",
+     "corpus_programs": 1452,
+     "training_programs": 1341,
+     "excluded_held_task_programs": 111,
+     "training_tasks": [
+      "albuterol_similarity",
+      "gsk3b",
+      "isomers_c7h8n2o2",
+      "jnk3",
+      "median1",
+      "mestranol_similarity",
+      "perindopril_mpo",
+      "qed",
+      "thiothixene_rediscovery",
+      "troglitazone_rediscovery"
+     ],
+     "held_task_absent_from_training": true,
+     "training_lineages": 17,
+     "balance_groups": 10,
+     "template_vocabulary": 407,
+     "exploration_floor": 0.1,
+     "shape_weight": 1.0,
+     "shape_cells": {
+      "small|grow": 0.012267759562841526,
+      "small|prune": 0.010904761904761903,
+      "small|replace": 0.022834380294151108,
+      "small|remodel": 0.008333333333333333,
+      "medium|grow": 0.22753619338429504,
+      "medium|prune": 0.11721643360440277,
+      "medium|replace": 0.16910237303394798,
+      "medium|remodel": 0.13157753016619955,
+      "large|grow": 0.07222101243850601,
+      "large|prune": 0.04038061838468849,
+      "large|replace": 0.15766676483568265,
+      "large|remodel": 0.029958839057189532
+     },
+     "region_count_law": [
+      0.23484821139227094,
+      0.41685294373122644,
+      0.20299490643772594,
+      0.1453039384387767
+     ],
+     "training_identity": "3407394790badfa29c957149dfdb452db79643d73ee74dcec058c813e302bac3"
+    },
+    "expressibility": {
+     "held_task": "celecoxib_rediscovery",
+     "held_programs": 111,
+     "held_distinct_templates": 20,
+     "held_template_instances": 235,
+     "covered_distinct_templates": 6,
+     "distinct_template_coverage": 0.3,
+     "covered_template_instances": 81,
+     "instance_template_coverage": 0.3446808510638298,
+     "fully_expressible_programs": 32,
+     "fully_expressible_rate": 0.2882882882882883,
+     "held_shapes": [
+      "large|grow",
+      "large|prune",
+      "medium|grow",
+      "medium|prune",
+      "medium|remodel",
+      "small|replace"
+     ],
+     "shape_coverage": 1.0
+    },
+    "vocabulary_restriction": {
+     "restricted": true,
+     "vocabulary": 256,
+     "full_vocabulary": 407,
+     "retained_mass": 0.9240172243560414
+    },
+    "source_real_atoms": 27,
+    "source_slots": 48,
+    "arms": {
+     "route_distilled": {
+      "arm": "route_distilled",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 1.4317082909983583,
+      "scale_distribution": {
+       "large": 19,
+       "medium": 54,
+       "small": 55
+      },
+      "mode_distribution": {
+       "grow": 65,
+       "prune": 17,
+       "remodel": 10,
+       "replace": 36
+      },
+      "region_count_distribution": {
+       "1": 109,
+       "2": 5,
+       "3": 6,
+       "4": 8
+      },
+      "rewrite_events_max": 16,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 19,
+       "available_local_rewrite_proposals": 75,
+       "available_medium_rewrite_proposals": 120,
+       "binding_truncations": 59,
+       "binding_visits": 1554,
+       "candidate_shortfall": 0,
+       "composition_aliases": 180,
+       "composition_attempts": 768,
+       "composition_rejections": 171,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 349,
+       "materialization_rejections": 131,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 19,
+       "selected_local_rewrite_proposals": 55,
+       "selected_medium_rewrite_proposals": 54,
+       "single_aliases": 11,
+       "templates_with_bindings": 137,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 102,
+       "valid_depth_3": 121,
+       "valid_depth_4": 98,
+       "valid_unique_single_goals": 207
+      }
+     },
+     "uniform_same_pool": {
+      "arm": "uniform_same_pool",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 1.3402739169832785,
+      "scale_distribution": {
+       "large": 4,
+       "medium": 62,
+       "small": 62
+      },
+      "mode_distribution": {
+       "grow": 78,
+       "prune": 11,
+       "remodel": 4,
+       "replace": 35
+      },
+      "region_count_distribution": {
+       "1": 124,
+       "4": 4
+      },
+      "rewrite_events_max": 14,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 4,
+       "available_local_rewrite_proposals": 69,
+       "available_medium_rewrite_proposals": 122,
+       "binding_truncations": 59,
+       "binding_visits": 1554,
+       "candidate_shortfall": 0,
+       "composition_aliases": 256,
+       "composition_attempts": 768,
+       "composition_rejections": 251,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 349,
+       "materialization_rejections": 131,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 4,
+       "selected_local_rewrite_proposals": 62,
+       "selected_medium_rewrite_proposals": 62,
+       "single_aliases": 11,
+       "templates_with_bindings": 137,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 50,
+       "valid_depth_3": 64,
+       "valid_depth_4": 51,
+       "valid_unique_single_goals": 207
+      }
+     }
+    },
+    "teacher_rank": {
+     "route_distilled": {
+      "teacher_endpoints": 13,
+      "exact_endpoint_hits": 1,
+      "first_exact_endpoint_rank": 2,
+      "shape_matched_proposals": 91,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.7109375
+     },
+     "uniform_same_pool": {
+      "teacher_endpoints": 13,
+      "exact_endpoint_hits": 1,
+      "first_exact_endpoint_rank": 20,
+      "shape_matched_proposals": 93,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.7265625
+     }
+    }
+   },
+   {
+    "held_task": "gsk3b",
+    "fit_audit": {
+     "held_task": "gsk3b",
+     "balance_key": "task",
+     "corpus_programs": 1452,
+     "training_programs": 1269,
+     "excluded_held_task_programs": 183,
+     "training_tasks": [
+      "albuterol_similarity",
+      "celecoxib_rediscovery",
+      "isomers_c7h8n2o2",
+      "jnk3",
+      "median1",
+      "mestranol_similarity",
+      "perindopril_mpo",
+      "qed",
+      "thiothixene_rediscovery",
+      "troglitazone_rediscovery"
+     ],
+     "held_task_absent_from_training": true,
+     "training_lineages": 17,
+     "balance_groups": 10,
+     "template_vocabulary": 392,
+     "exploration_floor": 0.1,
+     "shape_weight": 1.0,
+     "shape_cells": {
+      "small|grow": 0.008333333333333333,
+      "small|prune": 0.010904761904761903,
+      "small|replace": 0.02364519110496192,
+      "small|remodel": 0.008333333333333333,
+      "medium|grow": 0.25679184247600906,
+      "medium|prune": 0.11793420055167808,
+      "medium|replace": 0.13369253696837466,
+      "medium|remodel": 0.12761651997568121,
+      "large|grow": 0.08438317460066826,
+      "large|prune": 0.05254278054685071,
+      "large|replace": 0.1458634861471581,
+      "large|remodel": 0.02995883905718954
+     },
+     "region_count_law": [
+      0.250825171959395,
+      0.3758338918925028,
+      0.23984027639785022,
+      0.13350065975025202
+     ],
+     "training_identity": "8a4448c80de0464db535247b248e3bcd9c78680a7591f30aa81afd3c456d1136"
+    },
+    "expressibility": {
+     "held_task": "gsk3b",
+     "held_programs": 183,
+     "held_distinct_templates": 38,
+     "held_template_instances": 393,
+     "covered_distinct_templates": 9,
+     "distinct_template_coverage": 0.23684210526315788,
+     "covered_template_instances": 42,
+     "instance_template_coverage": 0.10687022900763359,
+     "fully_expressible_programs": 4,
+     "fully_expressible_rate": 0.02185792349726776,
+     "held_shapes": [
+      "large|replace",
+      "medium|grow",
+      "medium|prune",
+      "medium|remodel",
+      "medium|replace",
+      "small|grow"
+     ],
+     "shape_coverage": 0.8333333333333334
+    },
+    "vocabulary_restriction": {
+     "restricted": true,
+     "vocabulary": 256,
+     "full_vocabulary": 392,
+     "retained_mass": 0.9314260040241193
+    },
+    "source_real_atoms": 27,
+    "source_slots": 48,
+    "arms": {
+     "route_distilled": {
+      "arm": "route_distilled",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 1.5184694580093492,
+      "scale_distribution": {
+       "large": 21,
+       "medium": 53,
+       "small": 54
+      },
+      "mode_distribution": {
+       "grow": 63,
+       "prune": 15,
+       "remodel": 15,
+       "replace": 35
+      },
+      "region_count_distribution": {
+       "1": 107,
+       "2": 6,
+       "3": 7,
+       "4": 8
+      },
+      "rewrite_events_max": 20,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 21,
+       "available_local_rewrite_proposals": 69,
+       "available_medium_rewrite_proposals": 117,
+       "binding_truncations": 54,
+       "binding_visits": 1555,
+       "candidate_shortfall": 0,
+       "composition_aliases": 203,
+       "composition_attempts": 768,
+       "composition_rejections": 204,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 311,
+       "materialization_rejections": 102,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 21,
+       "selected_local_rewrite_proposals": 54,
+       "selected_medium_rewrite_proposals": 53,
+       "single_aliases": 11,
+       "templates_with_bindings": 125,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 85,
+       "valid_depth_3": 98,
+       "valid_depth_4": 82,
+       "valid_unique_single_goals": 198
+      }
+     },
+     "uniform_same_pool": {
+      "arm": "uniform_same_pool",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 1.168437582993647,
+      "scale_distribution": {
+       "large": 12,
+       "medium": 58,
+       "small": 58
+      },
+      "mode_distribution": {
+       "grow": 74,
+       "prune": 19,
+       "remodel": 3,
+       "replace": 32
+      },
+      "region_count_distribution": {
+       "1": 116,
+       "2": 5,
+       "3": 3,
+       "4": 4
+      },
+      "rewrite_events_max": 16,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 12,
+       "available_local_rewrite_proposals": 69,
+       "available_medium_rewrite_proposals": 109,
+       "binding_truncations": 54,
+       "binding_visits": 1555,
+       "candidate_shortfall": 0,
+       "composition_aliases": 229,
+       "composition_attempts": 768,
+       "composition_rejections": 303,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 311,
+       "materialization_rejections": 102,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 12,
+       "selected_local_rewrite_proposals": 58,
+       "selected_medium_rewrite_proposals": 58,
+       "single_aliases": 11,
+       "templates_with_bindings": 125,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 43,
+       "valid_depth_3": 54,
+       "valid_depth_4": 43,
+       "valid_unique_single_goals": 198
+      }
+     }
+    },
+    "teacher_rank": {
+     "route_distilled": {
+      "teacher_endpoints": 35,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 75,
+      "first_shape_match_rank": 2,
+      "shape_match_rate": 0.5859375
+     },
+     "uniform_same_pool": {
+      "teacher_endpoints": 35,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 85,
+      "first_shape_match_rank": 2,
+      "shape_match_rate": 0.6640625
+     }
+    }
+   },
+   {
+    "held_task": "isomers_c7h8n2o2",
+    "fit_audit": {
+     "held_task": "isomers_c7h8n2o2",
+     "balance_key": "task",
+     "corpus_programs": 1452,
+     "training_programs": 1417,
+     "excluded_held_task_programs": 35,
+     "training_tasks": [
+      "albuterol_similarity",
+      "celecoxib_rediscovery",
+      "gsk3b",
+      "jnk3",
+      "median1",
+      "mestranol_similarity",
+      "perindopril_mpo",
+      "qed",
+      "thiothixene_rediscovery",
+      "troglitazone_rediscovery"
+     ],
+     "held_task_absent_from_training": true,
+     "training_lineages": 17,
+     "balance_groups": 10,
+     "template_vocabulary": 391,
+     "exploration_floor": 0.1,
+     "shape_weight": 1.0,
+     "shape_cells": {
+      "small|grow": 0.01226775956284153,
+      "small|prune": 0.008333333333333333,
+      "small|replace": 0.02107376253353336,
+      "small|remodel": 0.008333333333333333,
+      "medium|grow": 0.2527871586352597,
+      "medium|prune": 0.1415407579287273,
+      "medium|replace": 0.16653094446251956,
+      "medium|remodel": 0.0774385340272034,
+      "large|grow": 0.08181174602923973,
+      "large|prune": 0.05254278054685073,
+      "large|replace": 0.15766676483568282,
+      "large|remodel": 0.019673124771475287
+     },
+     "region_count_law": [
+      0.23952774807180718,
+      0.3738104726887557,
+      0.24135784080066056,
+      0.1453039384387767
+     ],
+     "training_identity": "d2b08d477aa14291b9d9e00bfeb7ea5772e5fb0e4f719aec1cf2d6bbd97393a8"
+    },
+    "expressibility": {
+     "held_task": "isomers_c7h8n2o2",
+     "held_programs": 35,
+     "held_distinct_templates": 35,
+     "held_template_instances": 61,
+     "covered_distinct_templates": 5,
+     "distinct_template_coverage": 0.14285714285714285,
+     "covered_template_instances": 5,
+     "instance_template_coverage": 0.08196721311475409,
+     "fully_expressible_programs": 2,
+     "fully_expressible_rate": 0.05714285714285714,
+     "held_shapes": [
+      "large|grow",
+      "large|remodel",
+      "medium|grow",
+      "medium|remodel",
+      "medium|replace",
+      "small|prune",
+      "small|replace"
+     ],
+     "shape_coverage": 0.8571428571428571
+    },
+    "vocabulary_restriction": {
+     "restricted": true,
+     "vocabulary": 256,
+     "full_vocabulary": 391,
+     "retained_mass": 0.9320752453267653
+    },
+    "source_real_atoms": 10,
+    "source_slots": 48,
+    "arms": {
+     "route_distilled": {
+      "arm": "route_distilled",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 0.7911889590031933,
+      "scale_distribution": {
+       "large": 26,
+       "medium": 55,
+       "small": 47
+      },
+      "mode_distribution": {
+       "grow": 97,
+       "prune": 6,
+       "remodel": 4,
+       "replace": 21
+      },
+      "region_count_distribution": {
+       "1": 101,
+       "2": 8,
+       "3": 8,
+       "4": 11
+      },
+      "rewrite_events_max": 18,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 26,
+       "available_local_rewrite_proposals": 47,
+       "available_medium_rewrite_proposals": 93,
+       "binding_truncations": 49,
+       "binding_visits": 861,
+       "candidate_shortfall": 0,
+       "composition_aliases": 243,
+       "composition_attempts": 768,
+       "composition_rejections": 227,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 275,
+       "materialization_rejections": 92,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 26,
+       "selected_local_rewrite_proposals": 47,
+       "selected_medium_rewrite_proposals": 55,
+       "single_aliases": 30,
+       "templates_with_bindings": 119,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 63,
+       "valid_depth_3": 78,
+       "valid_depth_4": 61,
+       "valid_unique_single_goals": 153
+      }
+     },
+     "uniform_same_pool": {
+      "arm": "uniform_same_pool",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 0.7195350420079194,
+      "scale_distribution": {
+       "large": 19,
+       "medium": 63,
+       "small": 46
+      },
+      "mode_distribution": {
+       "grow": 83,
+       "prune": 6,
+       "remodel": 16,
+       "replace": 23
+      },
+      "region_count_distribution": {
+       "1": 108,
+       "2": 8,
+       "3": 7,
+       "4": 5
+      },
+      "rewrite_events_max": 22,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 19,
+       "available_local_rewrite_proposals": 46,
+       "available_medium_rewrite_proposals": 91,
+       "binding_truncations": 49,
+       "binding_visits": 861,
+       "candidate_shortfall": 0,
+       "composition_aliases": 159,
+       "composition_attempts": 768,
+       "composition_rejections": 277,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 275,
+       "materialization_rejections": 92,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 19,
+       "selected_local_rewrite_proposals": 46,
+       "selected_medium_rewrite_proposals": 63,
+       "single_aliases": 30,
+       "templates_with_bindings": 119,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 74,
+       "valid_depth_3": 97,
+       "valid_depth_4": 65,
+       "valid_unique_single_goals": 153
+      }
+     }
+    },
+    "teacher_rank": {
+     "route_distilled": {
+      "teacher_endpoints": 24,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 98,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.765625
+     },
+     "uniform_same_pool": {
+      "teacher_endpoints": 24,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 98,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.765625
+     }
+    }
+   },
+   {
+    "held_task": "jnk3",
+    "fit_audit": {
+     "held_task": "jnk3",
+     "balance_key": "task",
+     "corpus_programs": 1452,
+     "training_programs": 1163,
+     "excluded_held_task_programs": 289,
+     "training_tasks": [
+      "albuterol_similarity",
+      "celecoxib_rediscovery",
+      "gsk3b",
+      "isomers_c7h8n2o2",
+      "median1",
+      "mestranol_similarity",
+      "perindopril_mpo",
+      "qed",
+      "thiothixene_rediscovery",
+      "troglitazone_rediscovery"
+     ],
+     "held_task_absent_from_training": true,
+     "training_lineages": 17,
+     "balance_groups": 10,
+     "template_vocabulary": 359,
+     "exploration_floor": 0.1,
+     "shape_weight": 1.0,
+     "shape_cells": {
+      "small|grow": 0.012267759562841533,
+      "small|prune": 0.010904761904761907,
+      "small|replace": 0.022710935049598625,
+      "small|remodel": 0.008333333333333333,
+      "medium|grow": 0.23387959561004976,
+      "medium|prune": 0.1359352215965474,
+      "medium|replace": 0.1463688090201071,
+      "medium|remodel": 0.13183003180278444,
+      "large|grow": 0.07628628878751943,
+      "large|prune": 0.05191994317660856,
+      "large|replace": 0.1424072492647484,
+      "large|remodel": 0.027156070891099615
+     },
+     "region_count_law": [
+      0.2492884994311746,
+      0.3961169482201447,
+      0.22423871079571733,
+      0.13035584155296348
+     ],
+     "training_identity": "32a60146a5c4f42749295956ff32d28c53682cbe548f66df06807a63141f1f90"
+    },
+    "expressibility": {
+     "held_task": "jnk3",
+     "held_programs": 289,
+     "held_distinct_templates": 72,
+     "held_template_instances": 686,
+     "covered_distinct_templates": 10,
+     "distinct_template_coverage": 0.1388888888888889,
+     "covered_template_instances": 177,
+     "instance_template_coverage": 0.25801749271137026,
+     "fully_expressible_programs": 11,
+     "fully_expressible_rate": 0.03806228373702422,
+     "held_shapes": [
+      "large|grow",
+      "large|prune",
+      "large|remodel",
+      "large|replace",
+      "medium|grow",
+      "medium|prune",
+      "medium|remodel",
+      "medium|replace",
+      "small|replace"
+     ],
+     "shape_coverage": 1.0
+    },
+    "vocabulary_restriction": {
+     "restricted": true,
+     "vocabulary": 256,
+     "full_vocabulary": 359,
+     "retained_mass": 0.9437514245931259
+    },
+    "source_real_atoms": 27,
+    "source_slots": 48,
+    "arms": {
+     "route_distilled": {
+      "arm": "route_distilled",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 1.6570418749761302,
+      "scale_distribution": {
+       "large": 19,
+       "medium": 54,
+       "small": 55
+      },
+      "mode_distribution": {
+       "grow": 63,
+       "prune": 15,
+       "remodel": 14,
+       "replace": 36
+      },
+      "region_count_distribution": {
+       "1": 109,
+       "2": 5,
+       "3": 6,
+       "4": 8
+      },
+      "rewrite_events_max": 18,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 19,
+       "available_local_rewrite_proposals": 69,
+       "available_medium_rewrite_proposals": 112,
+       "binding_truncations": 57,
+       "binding_visits": 1583,
+       "candidate_shortfall": 0,
+       "composition_aliases": 182,
+       "composition_attempts": 768,
+       "composition_rejections": 154,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 338,
+       "materialization_rejections": 139,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 19,
+       "selected_local_rewrite_proposals": 55,
+       "selected_medium_rewrite_proposals": 54,
+       "single_aliases": 12,
+       "templates_with_bindings": 132,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 102,
+       "valid_depth_3": 126,
+       "valid_depth_4": 108,
+       "valid_unique_single_goals": 187
+      }
+     },
+     "uniform_same_pool": {
+      "arm": "uniform_same_pool",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 2.2260501669952646,
+      "scale_distribution": {
+       "large": 17,
+       "medium": 55,
+       "small": 56
+      },
+      "mode_distribution": {
+       "grow": 71,
+       "prune": 10,
+       "remodel": 14,
+       "replace": 33
+      },
+      "region_count_distribution": {
+       "1": 111,
+       "2": 5,
+       "3": 6,
+       "4": 6
+      },
+      "rewrite_events_max": 16,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 17,
+       "available_local_rewrite_proposals": 63,
+       "available_medium_rewrite_proposals": 109,
+       "binding_truncations": 57,
+       "binding_visits": 1583,
+       "candidate_shortfall": 0,
+       "composition_aliases": 207,
+       "composition_attempts": 768,
+       "composition_rejections": 266,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 338,
+       "materialization_rejections": 139,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 17,
+       "selected_local_rewrite_proposals": 56,
+       "selected_medium_rewrite_proposals": 55,
+       "single_aliases": 12,
+       "templates_with_bindings": 132,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 58,
+       "valid_depth_3": 81,
+       "valid_depth_4": 60,
+       "valid_unique_single_goals": 187
+      }
+     }
+    },
+    "teacher_rank": {
+     "route_distilled": {
+      "teacher_endpoints": 62,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 105,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.8203125
+     },
+     "uniform_same_pool": {
+      "teacher_endpoints": 62,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 103,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.8046875
+     }
+    }
+   },
+   {
+    "held_task": "median1",
+    "fit_audit": {
+     "held_task": "median1",
+     "balance_key": "task",
+     "corpus_programs": 1452,
+     "training_programs": 1406,
+     "excluded_held_task_programs": 46,
+     "training_tasks": [
+      "albuterol_similarity",
+      "celecoxib_rediscovery",
+      "gsk3b",
+      "isomers_c7h8n2o2",
+      "jnk3",
+      "mestranol_similarity",
+      "perindopril_mpo",
+      "qed",
+      "thiothixene_rediscovery",
+      "troglitazone_rediscovery"
+     ],
+     "held_task_absent_from_training": true,
+     "training_lineages": 17,
+     "balance_groups": 10,
+     "template_vocabulary": 399,
+     "exploration_floor": 0.1,
+     "shape_weight": 1.0,
+     "shape_cells": {
+      "small|grow": 0.01226775956284153,
+      "small|prune": 0.010904761904761905,
+      "small|replace": 0.019732147626701065,
+      "small|remodel": 0.008333333333333333,
+      "medium|grow": 0.2441225623619679,
+      "medium|prune": 0.13567119271133601,
+      "medium|replace": 0.16910237303394812,
+      "medium|remodel": 0.12031431042471903,
+      "large|grow": 0.045252739818059384,
+      "large|prune": 0.050586258807720295,
+      "large|replace": 0.1576667648356828,
+      "large|remodel": 0.026045795578928693
+     },
+     "region_count_law": [
+      0.2592606673264656,
+      0.3457483608875134,
+      0.24968703334724437,
+      0.14530393843877668
+     ],
+     "training_identity": "b6cf9e20458457ba12b2f0ab99ecdb17a3ee2b67d24e05e8db1390b9e79b6c34"
+    },
+    "expressibility": {
+     "held_task": "median1",
+     "held_programs": 46,
+     "held_distinct_templates": 23,
+     "held_template_instances": 86,
+     "covered_distinct_templates": 1,
+     "distinct_template_coverage": 0.043478260869565216,
+     "covered_template_instances": 11,
+     "instance_template_coverage": 0.12790697674418605,
+     "fully_expressible_programs": 0,
+     "fully_expressible_rate": 0.0,
+     "held_shapes": [
+      "large|grow",
+      "large|prune",
+      "large|remodel",
+      "medium|grow",
+      "medium|prune",
+      "medium|remodel",
+      "small|replace"
+     ],
+     "shape_coverage": 1.0
+    },
+    "vocabulary_restriction": {
+     "restricted": true,
+     "vocabulary": 256,
+     "full_vocabulary": 399,
+     "retained_mass": 0.9280630679063917
+    },
+    "source_real_atoms": 8,
+    "source_slots": 48,
+    "arms": {
+     "route_distilled": {
+      "arm": "route_distilled",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 1.8346807500056457,
+      "scale_distribution": {
+       "large": 31,
+       "medium": 48,
+       "small": 49
+      },
+      "mode_distribution": {
+       "grow": 76,
+       "prune": 2,
+       "remodel": 22,
+       "replace": 28
+      },
+      "region_count_distribution": {
+       "1": 97,
+       "2": 8,
+       "3": 8,
+       "4": 15
+      },
+      "rewrite_events_max": 28,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 31,
+       "available_local_rewrite_proposals": 87,
+       "available_medium_rewrite_proposals": 132,
+       "binding_truncations": 6,
+       "binding_visits": 786,
+       "candidate_shortfall": 0,
+       "composition_aliases": 206,
+       "composition_attempts": 768,
+       "composition_rejections": 221,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 257,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 31,
+       "selected_local_rewrite_proposals": 49,
+       "selected_medium_rewrite_proposals": 48,
+       "single_aliases": 5,
+       "templates_with_bindings": 104,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 84,
+       "valid_depth_3": 98,
+       "valid_depth_4": 63,
+       "valid_unique_single_goals": 252
+      }
+     },
+     "uniform_same_pool": {
+      "arm": "uniform_same_pool",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 1.4861645409837365,
+      "scale_distribution": {
+       "large": 40,
+       "medium": 44,
+       "small": 44
+      },
+      "mode_distribution": {
+       "grow": 123,
+       "prune": 1,
+       "remodel": 1,
+       "replace": 3
+      },
+      "region_count_distribution": {
+       "1": 88,
+       "2": 8,
+       "3": 16,
+       "4": 16
+      },
+      "rewrite_events_max": 27,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 40,
+       "available_local_rewrite_proposals": 85,
+       "available_medium_rewrite_proposals": 126,
+       "binding_truncations": 6,
+       "binding_visits": 786,
+       "candidate_shortfall": 0,
+       "composition_aliases": 126,
+       "composition_attempts": 768,
+       "composition_rejections": 356,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 257,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 40,
+       "selected_local_rewrite_proposals": 44,
+       "selected_medium_rewrite_proposals": 44,
+       "single_aliases": 5,
+       "templates_with_bindings": 104,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 86,
+       "valid_depth_3": 60,
+       "valid_depth_4": 44,
+       "valid_unique_single_goals": 252
+      }
+     }
+    },
+    "teacher_rank": {
+     "route_distilled": {
+      "teacher_endpoints": 19,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 103,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.8046875
+     },
+     "uniform_same_pool": {
+      "teacher_endpoints": 19,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 87,
+      "first_shape_match_rank": 2,
+      "shape_match_rate": 0.6796875
+     }
+    }
+   },
+   {
+    "held_task": "mestranol_similarity",
+    "fit_audit": {
+     "held_task": "mestranol_similarity",
+     "balance_key": "task",
+     "corpus_programs": 1452,
+     "training_programs": 1347,
+     "excluded_held_task_programs": 105,
+     "training_tasks": [
+      "albuterol_similarity",
+      "celecoxib_rediscovery",
+      "gsk3b",
+      "isomers_c7h8n2o2",
+      "jnk3",
+      "median1",
+      "perindopril_mpo",
+      "qed",
+      "thiothixene_rediscovery",
+      "troglitazone_rediscovery"
+     ],
+     "held_task_absent_from_training": true,
+     "training_lineages": 17,
+     "balance_groups": 10,
+     "template_vocabulary": 395,
+     "exploration_floor": 0.1,
+     "shape_weight": 1.0,
+     "shape_cells": {
+      "small|grow": 0.012267759562841528,
+      "small|prune": 0.010904761904761903,
+      "small|replace": 0.02364519110496192,
+      "small|remodel": 0.008333333333333333,
+      "medium|grow": 0.2502157300638314,
+      "medium|prune": 0.12868361507158435,
+      "medium|replace": 0.1553880873196623,
+      "medium|remodel": 0.12800996259863204,
+      "large|grow": 0.08438317460066826,
+      "large|prune": 0.03968563768970782,
+      "large|replace": 0.13195247912139696,
+      "large|remodel": 0.02653026762861812
+     },
+     "region_count_law": [
+      0.2729563195003788,
+      0.4149533298316128,
+      0.17964355508637467,
+      0.13244679558163383
+     ],
+     "training_identity": "651bd07fd9afa23a2a4f8eaca472f99e8937fc42305948809e243a75b8dac58d"
+    },
+    "expressibility": {
+     "held_task": "mestranol_similarity",
+     "held_programs": 105,
+     "held_distinct_templates": 34,
+     "held_template_instances": 324,
+     "covered_distinct_templates": 8,
+     "distinct_template_coverage": 0.23529411764705882,
+     "covered_template_instances": 92,
+     "instance_template_coverage": 0.2839506172839506,
+     "fully_expressible_programs": 0,
+     "fully_expressible_rate": 0.0,
+     "held_shapes": [
+      "large|prune",
+      "large|remodel",
+      "large|replace",
+      "medium|grow",
+      "medium|prune",
+      "medium|remodel",
+      "medium|replace"
+     ],
+     "shape_coverage": 1.0
+    },
+    "vocabulary_restriction": {
+     "restricted": true,
+     "vocabulary": 256,
+     "full_vocabulary": 395,
+     "retained_mass": 0.9297159381402518
+    },
+    "source_real_atoms": 27,
+    "source_slots": 48,
+    "arms": {
+     "route_distilled": {
+      "arm": "route_distilled",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 2.049809374992037,
+      "scale_distribution": {
+       "large": 23,
+       "medium": 52,
+       "small": 53
+      },
+      "mode_distribution": {
+       "grow": 67,
+       "prune": 10,
+       "remodel": 17,
+       "replace": 34
+      },
+      "region_count_distribution": {
+       "1": 105,
+       "2": 7,
+       "3": 8,
+       "4": 8
+      },
+      "rewrite_events_max": 26,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 23,
+       "available_local_rewrite_proposals": 66,
+       "available_medium_rewrite_proposals": 123,
+       "binding_truncations": 58,
+       "binding_visits": 1506,
+       "candidate_shortfall": 0,
+       "composition_aliases": 198,
+       "composition_attempts": 768,
+       "composition_rejections": 262,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 345,
+       "materialization_rejections": 133,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 23,
+       "selected_local_rewrite_proposals": 53,
+       "selected_medium_rewrite_proposals": 52,
+       "single_aliases": 9,
+       "templates_with_bindings": 136,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 71,
+       "valid_depth_3": 82,
+       "valid_depth_4": 59,
+       "valid_unique_single_goals": 203
+      }
+     },
+     "uniform_same_pool": {
+      "arm": "uniform_same_pool",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 2.209323459013831,
+      "scale_distribution": {
+       "large": 1,
+       "medium": 63,
+       "small": 64
+      },
+      "mode_distribution": {
+       "grow": 87,
+       "prune": 8,
+       "remodel": 1,
+       "replace": 32
+      },
+      "region_count_distribution": {
+       "1": 127,
+       "4": 1
+      },
+      "rewrite_events_max": 12,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 1,
+       "available_local_rewrite_proposals": 69,
+       "available_medium_rewrite_proposals": 127,
+       "binding_truncations": 58,
+       "binding_visits": 1506,
+       "candidate_shortfall": 0,
+       "composition_aliases": 162,
+       "composition_attempts": 768,
+       "composition_rejections": 339,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 345,
+       "materialization_rejections": 133,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 1,
+       "selected_local_rewrite_proposals": 64,
+       "selected_medium_rewrite_proposals": 63,
+       "single_aliases": 9,
+       "templates_with_bindings": 136,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 65,
+       "valid_depth_3": 64,
+       "valid_depth_4": 42,
+       "valid_unique_single_goals": 203
+      }
+     }
+    },
+    "teacher_rank": {
+     "route_distilled": {
+      "teacher_endpoints": 21,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 72,
+      "first_shape_match_rank": 2,
+      "shape_match_rate": 0.5625
+     },
+     "uniform_same_pool": {
+      "teacher_endpoints": 21,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 64,
+      "first_shape_match_rank": 2,
+      "shape_match_rate": 0.5
+     }
+    }
+   },
+   {
+    "held_task": "perindopril_mpo",
+    "fit_audit": {
+     "held_task": "perindopril_mpo",
+     "balance_key": "task",
+     "corpus_programs": 1452,
+     "training_programs": 1293,
+     "excluded_held_task_programs": 159,
+     "training_tasks": [
+      "albuterol_similarity",
+      "celecoxib_rediscovery",
+      "gsk3b",
+      "isomers_c7h8n2o2",
+      "jnk3",
+      "median1",
+      "mestranol_similarity",
+      "qed",
+      "thiothixene_rediscovery",
+      "troglitazone_rediscovery"
+     ],
+     "held_task_absent_from_training": true,
+     "training_lineages": 11,
+     "balance_groups": 10,
+     "template_vocabulary": 326,
+     "exploration_floor": 0.1,
+     "shape_weight": 1.0,
+     "shape_cells": {
+      "small|grow": 0.012267759562841526,
+      "small|prune": 0.010904761904761901,
+      "small|replace": 0.022513115633263803,
+      "small|remodel": 0.008333333333333333,
+      "medium|grow": 0.22205939583202558,
+      "medium|prune": 0.13644641830608564,
+      "medium|replace": 0.14872501454338233,
+      "medium|remodel": 0.12778354750429233,
+      "large|grow": 0.08155298592142289,
+      "large|prune": 0.049712591867605405,
+      "large|replace": 0.15030827426964488,
+      "large|remodel": 0.02939280132134047
+     },
+     "region_count_law": [
+      0.24522047044377496,
+      0.3838697718801303,
+      0.23409638527505405,
+      0.1368133724010408
+     ],
+     "training_identity": "e90d6be9881ec9c6df9d7c7e486fd9b65abca1ad9e4b67e975f1f54e3bcd1a26"
+    },
+    "expressibility": {
+     "held_task": "perindopril_mpo",
+     "held_programs": 159,
+     "held_distinct_templates": 106,
+     "held_template_instances": 330,
+     "covered_distinct_templates": 11,
+     "distinct_template_coverage": 0.10377358490566038,
+     "covered_template_instances": 48,
+     "instance_template_coverage": 0.14545454545454545,
+     "fully_expressible_programs": 0,
+     "fully_expressible_rate": 0.0,
+     "held_shapes": [
+      "large|grow",
+      "large|prune",
+      "large|remodel",
+      "large|replace",
+      "medium|grow",
+      "medium|prune",
+      "medium|remodel",
+      "medium|replace",
+      "small|replace"
+     ],
+     "shape_coverage": 1.0
+    },
+    "vocabulary_restriction": {
+     "restricted": true,
+     "vocabulary": 256,
+     "full_vocabulary": 326,
+     "retained_mass": 0.9618875245627214
+    },
+    "source_real_atoms": 40,
+    "source_slots": 48,
+    "arms": {
+     "route_distilled": {
+      "arm": "route_distilled",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 3.946213749994058,
+      "scale_distribution": {
+       "large": 18,
+       "medium": 53,
+       "small": 57
+      },
+      "mode_distribution": {
+       "prune": 10,
+       "remodel": 27,
+       "replace": 91
+      },
+      "region_count_distribution": {
+       "1": 88,
+       "2": 14,
+       "3": 10,
+       "4": 16
+      },
+      "rewrite_events_max": 14,
+      "rewrite_events_median": 4,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 18,
+       "available_local_rewrite_proposals": 65,
+       "available_medium_rewrite_proposals": 53,
+       "binding_truncations": 72,
+       "binding_visits": 5017,
+       "candidate_shortfall": 0,
+       "composition_aliases": 158,
+       "composition_attempts": 768,
+       "composition_rejections": 108,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 417,
+       "materialization_rejections": 281,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 18,
+       "selected_local_rewrite_proposals": 57,
+       "selected_medium_rewrite_proposals": 53,
+       "single_aliases": 10,
+       "templates_with_bindings": 144,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 99,
+       "valid_depth_3": 163,
+       "valid_depth_4": 144,
+       "valid_unique_single_goals": 126
+      }
+     },
+     "uniform_same_pool": {
+      "arm": "uniform_same_pool",
+      "proposals": 123,
+      "distinct_endpoints": 123,
+      "seconds": 2.7421927920076996,
+      "scale_distribution": {
+       "large": 16,
+       "medium": 53,
+       "small": 54
+      },
+      "mode_distribution": {
+       "prune": 25,
+       "remodel": 32,
+       "replace": 66
+      },
+      "region_count_distribution": {
+       "1": 88,
+       "2": 14,
+       "3": 11,
+       "4": 10
+      },
+      "rewrite_events_max": 19,
+      "rewrite_events_median": 4,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 16,
+       "available_local_rewrite_proposals": 54,
+       "available_medium_rewrite_proposals": 53,
+       "binding_truncations": 72,
+       "binding_visits": 5017,
+       "candidate_shortfall": 5,
+       "composition_aliases": 216,
+       "composition_attempts": 768,
+       "composition_rejections": 287,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 417,
+       "materialization_rejections": 281,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 16,
+       "selected_local_rewrite_proposals": 54,
+       "selected_medium_rewrite_proposals": 53,
+       "single_aliases": 10,
+       "templates_with_bindings": 144,
+       "unique_ranked_endpoints": 123,
+       "valid_depth_2": 52,
+       "valid_depth_3": 75,
+       "valid_depth_4": 42,
+       "valid_unique_single_goals": 126
+      }
+     }
+    },
+    "teacher_rank": {
+     "route_distilled": {
+      "teacher_endpoints": 64,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 125,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.9765625
+     },
+     "uniform_same_pool": {
+      "teacher_endpoints": 64,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 120,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.975609756097561
+     }
+    }
+   },
+   {
+    "held_task": "qed",
+    "fit_audit": {
+     "held_task": "qed",
+     "balance_key": "task",
+     "corpus_programs": 1452,
+     "training_programs": 1309,
+     "excluded_held_task_programs": 143,
+     "training_tasks": [
+      "albuterol_similarity",
+      "celecoxib_rediscovery",
+      "gsk3b",
+      "isomers_c7h8n2o2",
+      "jnk3",
+      "median1",
+      "mestranol_similarity",
+      "perindopril_mpo",
+      "thiothixene_rediscovery",
+      "troglitazone_rediscovery"
+     ],
+     "held_task_absent_from_training": true,
+     "training_lineages": 16,
+     "balance_groups": 10,
+     "template_vocabulary": 368,
+     "exploration_floor": 0.1,
+     "shape_weight": 1.0,
+     "shape_cells": {
+      "small|grow": 0.012267759562841528,
+      "small|prune": 0.010904761904761903,
+      "small|replace": 0.01986896732873815,
+      "small|remodel": 0.008333333333333333,
+      "medium|grow": 0.25368625953436064,
+      "medium|prune": 0.14091138729935662,
+      "medium|replace": 0.13637510030667546,
+      "medium|remodel": 0.13212185071052016,
+      "large|grow": 0.08312443334192698,
+      "large|prune": 0.0481371861412563,
+      "large|replace": 0.12493949210840995,
+      "large|remodel": 0.02932946842781891
+     },
+     "region_count_law": [
+      0.26477450131856045,
+      0.3716346485129317,
+      0.23402117746399703,
+      0.12956967270451084
+     ],
+     "training_identity": "cb2bdbff3769f132ce0d606ec1b852b019a846688836084b901afa0704b3c3c5"
+    },
+    "expressibility": {
+     "held_task": "qed",
+     "held_programs": 143,
+     "held_distinct_templates": 65,
+     "held_template_instances": 351,
+     "covered_distinct_templates": 12,
+     "distinct_template_coverage": 0.18461538461538463,
+     "covered_template_instances": 95,
+     "instance_template_coverage": 0.2706552706552707,
+     "fully_expressible_programs": 12,
+     "fully_expressible_rate": 0.08391608391608392,
+     "held_shapes": [
+      "large|grow",
+      "large|prune",
+      "large|remodel",
+      "large|replace",
+      "medium|grow",
+      "medium|prune",
+      "medium|remodel",
+      "medium|replace",
+      "small|replace"
+     ],
+     "shape_coverage": 1.0
+    },
+    "vocabulary_restriction": {
+     "restricted": true,
+     "vocabulary": 256,
+     "full_vocabulary": 368,
+     "retained_mass": 0.9428221966495021
+    },
+    "source_real_atoms": 27,
+    "source_slots": 48,
+    "arms": {
+     "route_distilled": {
+      "arm": "route_distilled",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 2.7279283340030815,
+      "scale_distribution": {
+       "large": 23,
+       "medium": 52,
+       "small": 53
+      },
+      "mode_distribution": {
+       "grow": 63,
+       "prune": 15,
+       "remodel": 17,
+       "replace": 33
+      },
+      "region_count_distribution": {
+       "1": 105,
+       "2": 7,
+       "3": 8,
+       "4": 8
+      },
+      "rewrite_events_max": 22,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 23,
+       "available_local_rewrite_proposals": 69,
+       "available_medium_rewrite_proposals": 121,
+       "binding_truncations": 55,
+       "binding_visits": 1453,
+       "candidate_shortfall": 0,
+       "composition_aliases": 213,
+       "composition_attempts": 768,
+       "composition_rejections": 242,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 332,
+       "materialization_rejections": 113,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 23,
+       "selected_local_rewrite_proposals": 53,
+       "selected_medium_rewrite_proposals": 52,
+       "single_aliases": 11,
+       "templates_with_bindings": 133,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 73,
+       "valid_depth_3": 81,
+       "valid_depth_4": 63,
+       "valid_unique_single_goals": 208
+      }
+     },
+     "uniform_same_pool": {
+      "arm": "uniform_same_pool",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 2.6601453330076765,
+      "scale_distribution": {
+       "large": 4,
+       "medium": 62,
+       "small": 62
+      },
+      "mode_distribution": {
+       "grow": 83,
+       "prune": 10,
+       "remodel": 4,
+       "replace": 31
+      },
+      "region_count_distribution": {
+       "1": 124,
+       "4": 4
+      },
+      "rewrite_events_max": 14,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 4,
+       "available_local_rewrite_proposals": 72,
+       "available_medium_rewrite_proposals": 118,
+       "binding_truncations": 55,
+       "binding_visits": 1453,
+       "candidate_shortfall": 0,
+       "composition_aliases": 256,
+       "composition_attempts": 768,
+       "composition_rejections": 251,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 332,
+       "materialization_rejections": 113,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 4,
+       "selected_local_rewrite_proposals": 62,
+       "selected_medium_rewrite_proposals": 62,
+       "single_aliases": 11,
+       "templates_with_bindings": 133,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 50,
+       "valid_depth_3": 64,
+       "valid_depth_4": 51,
+       "valid_unique_single_goals": 208
+      }
+     }
+    },
+    "teacher_rank": {
+     "route_distilled": {
+      "teacher_endpoints": 49,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 105,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.8203125
+     },
+     "uniform_same_pool": {
+      "teacher_endpoints": 49,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 96,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.75
+     }
+    }
+   },
+   {
+    "held_task": "thiothixene_rediscovery",
+    "fit_audit": {
+     "held_task": "thiothixene_rediscovery",
+     "balance_key": "task",
+     "corpus_programs": 1452,
+     "training_programs": 1308,
+     "excluded_held_task_programs": 144,
+     "training_tasks": [
+      "albuterol_similarity",
+      "celecoxib_rediscovery",
+      "gsk3b",
+      "isomers_c7h8n2o2",
+      "jnk3",
+      "median1",
+      "mestranol_similarity",
+      "perindopril_mpo",
+      "qed",
+      "troglitazone_rediscovery"
+     ],
+     "held_task_absent_from_training": true,
+     "training_lineages": 17,
+     "balance_groups": 10,
+     "template_vocabulary": 405,
+     "exploration_floor": 0.1,
+     "shape_weight": 1.0,
+     "shape_cells": {
+      "small|grow": 0.012267759562841525,
+      "small|prune": 0.010904761904761901,
+      "small|replace": 0.02302019110496191,
+      "small|remodel": 0.008333333333333333,
+      "medium|grow": 0.21564430149240316,
+      "medium|prune": 0.12279075792872723,
+      "medium|replace": 0.1691023730339479,
+      "medium|remodel": 0.12275996259863194,
+      "large|grow": 0.08438317460066819,
+      "large|prune": 0.04316778054685065,
+      "large|replace": 0.1576667648356826,
+      "large|remodel": 0.029958839057189525
+     },
+     "region_count_law": [
+      0.23483131950037886,
+      0.37759618697446967,
+      0.24226855508637488,
+      0.14530393843877668
+     ],
+     "training_identity": "065d142b30a047b88dfd5d26e71dd009eb2d0a99d48846b53a52c5ef59f1b766"
+    },
+    "expressibility": {
+     "held_task": "thiothixene_rediscovery",
+     "held_programs": 144,
+     "held_distinct_templates": 20,
+     "held_template_instances": 242,
+     "covered_distinct_templates": 4,
+     "distinct_template_coverage": 0.2,
+     "covered_template_instances": 29,
+     "instance_template_coverage": 0.11983471074380166,
+     "fully_expressible_programs": 6,
+     "fully_expressible_rate": 0.041666666666666664,
+     "held_shapes": [
+      "large|prune",
+      "medium|grow",
+      "medium|prune",
+      "medium|remodel",
+      "small|replace"
+     ],
+     "shape_coverage": 1.0
+    },
+    "vocabulary_restriction": {
+     "restricted": true,
+     "vocabulary": 256,
+     "full_vocabulary": 405,
+     "retained_mass": 0.9249796237142742
+    },
+    "source_real_atoms": 27,
+    "source_slots": 48,
+    "arms": {
+     "route_distilled": {
+      "arm": "route_distilled",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 2.205292583996197,
+      "scale_distribution": {
+       "large": 21,
+       "medium": 53,
+       "small": 54
+      },
+      "mode_distribution": {
+       "grow": 63,
+       "prune": 16,
+       "remodel": 14,
+       "replace": 35
+      },
+      "region_count_distribution": {
+       "1": 107,
+       "2": 6,
+       "3": 7,
+       "4": 8
+      },
+      "rewrite_events_max": 18,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 21,
+       "available_local_rewrite_proposals": 68,
+       "available_medium_rewrite_proposals": 116,
+       "binding_truncations": 60,
+       "binding_visits": 1609,
+       "candidate_shortfall": 0,
+       "composition_aliases": 204,
+       "composition_attempts": 768,
+       "composition_rejections": 203,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 352,
+       "materialization_rejections": 142,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 21,
+       "selected_local_rewrite_proposals": 54,
+       "selected_medium_rewrite_proposals": 53,
+       "single_aliases": 12,
+       "templates_with_bindings": 135,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 87,
+       "valid_depth_3": 98,
+       "valid_depth_4": 80,
+       "valid_unique_single_goals": 198
+      }
+     },
+     "uniform_same_pool": {
+      "arm": "uniform_same_pool",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 1.9818509170145262,
+      "scale_distribution": {
+       "large": 4,
+       "medium": 62,
+       "small": 62
+      },
+      "mode_distribution": {
+       "grow": 79,
+       "prune": 10,
+       "remodel": 4,
+       "replace": 35
+      },
+      "region_count_distribution": {
+       "1": 124,
+       "4": 4
+      },
+      "rewrite_events_max": 14,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 4,
+       "available_local_rewrite_proposals": 68,
+       "available_medium_rewrite_proposals": 114,
+       "binding_truncations": 60,
+       "binding_visits": 1609,
+       "candidate_shortfall": 0,
+       "composition_aliases": 256,
+       "composition_attempts": 768,
+       "composition_rejections": 251,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 352,
+       "materialization_rejections": 142,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 4,
+       "selected_local_rewrite_proposals": 62,
+       "selected_medium_rewrite_proposals": 62,
+       "single_aliases": 12,
+       "templates_with_bindings": 135,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 50,
+       "valid_depth_3": 64,
+       "valid_depth_4": 51,
+       "valid_unique_single_goals": 198
+      }
+     }
+    },
+    "teacher_rank": {
+     "route_distilled": {
+      "teacher_endpoints": 18,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 89,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.6953125
+     },
+     "uniform_same_pool": {
+      "teacher_endpoints": 18,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 93,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.7265625
+     }
+    }
+   },
+   {
+    "held_task": "troglitazone_rediscovery",
+    "fit_audit": {
+     "held_task": "troglitazone_rediscovery",
+     "balance_key": "task",
+     "corpus_programs": 1452,
+     "training_programs": 1317,
+     "excluded_held_task_programs": 135,
+     "training_tasks": [
+      "albuterol_similarity",
+      "celecoxib_rediscovery",
+      "gsk3b",
+      "isomers_c7h8n2o2",
+      "jnk3",
+      "median1",
+      "mestranol_similarity",
+      "perindopril_mpo",
+      "qed",
+      "thiothixene_rediscovery"
+     ],
+     "held_task_absent_from_training": true,
+     "training_lineages": 17,
+     "balance_groups": 10,
+     "template_vocabulary": 395,
+     "exploration_floor": 0.1,
+     "shape_weight": 1.0,
+     "shape_cells": {
+      "small|grow": 0.01226775956284153,
+      "small|prune": 0.010904761904761905,
+      "small|replace": 0.02297852443829526,
+      "small|remodel": 0.008333333333333333,
+      "medium|grow": 0.25564430149240247,
+      "medium|prune": 0.13154075792872727,
+      "medium|replace": 0.1491023730339484,
+      "medium|remodel": 0.12467662926529871,
+      "large|grow": 0.0743831746006682,
+      "large|prune": 0.05254278054685071,
+      "large|replace": 0.12766676483568273,
+      "large|remodel": 0.029958839057189546
+     },
+     "region_count_law": [
+      0.2609563195003787,
+      0.38209618697447,
+      0.2416435550863748,
+      0.1153039384387766
+     ],
+     "training_identity": "5fc69e153a0d05f3514e176838d20ed6d649c00ae98f9aef9182945ef3575334"
+    },
+    "expressibility": {
+     "held_task": "troglitazone_rediscovery",
+     "held_programs": 135,
+     "held_distinct_templates": 31,
+     "held_template_instances": 357,
+     "covered_distinct_templates": 5,
+     "distinct_template_coverage": 0.16129032258064516,
+     "covered_template_instances": 75,
+     "instance_template_coverage": 0.21008403361344538,
+     "fully_expressible_programs": 0,
+     "fully_expressible_rate": 0.0,
+     "held_shapes": [
+      "large|grow",
+      "large|replace",
+      "medium|grow",
+      "medium|prune",
+      "medium|remodel",
+      "medium|replace",
+      "small|replace"
+     ],
+     "shape_coverage": 1.0
+    },
+    "vocabulary_restriction": {
+     "restricted": true,
+     "vocabulary": 256,
+     "full_vocabulary": 395,
+     "retained_mass": 0.9302006546815721
+    },
+    "source_real_atoms": 27,
+    "source_slots": 48,
+    "arms": {
+     "route_distilled": {
+      "arm": "route_distilled",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 2.2322692919988185,
+      "scale_distribution": {
+       "large": 23,
+       "medium": 52,
+       "small": 53
+      },
+      "mode_distribution": {
+       "grow": 59,
+       "prune": 15,
+       "remodel": 17,
+       "replace": 37
+      },
+      "region_count_distribution": {
+       "1": 105,
+       "2": 7,
+       "3": 8,
+       "4": 8
+      },
+      "rewrite_events_max": 22,
+      "rewrite_events_median": 5,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 23,
+       "available_local_rewrite_proposals": 65,
+       "available_medium_rewrite_proposals": 124,
+       "binding_truncations": 60,
+       "binding_visits": 1565,
+       "candidate_shortfall": 0,
+       "composition_aliases": 198,
+       "composition_attempts": 768,
+       "composition_rejections": 248,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 355,
+       "materialization_rejections": 137,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 23,
+       "selected_local_rewrite_proposals": 53,
+       "selected_medium_rewrite_proposals": 52,
+       "single_aliases": 11,
+       "templates_with_bindings": 139,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 73,
+       "valid_depth_3": 85,
+       "valid_depth_4": 68,
+       "valid_unique_single_goals": 207
+      }
+     },
+     "uniform_same_pool": {
+      "arm": "uniform_same_pool",
+      "proposals": 128,
+      "distinct_endpoints": 128,
+      "seconds": 1.9605830420041457,
+      "scale_distribution": {
+       "medium": 64,
+       "small": 64
+      },
+      "mode_distribution": {
+       "grow": 80,
+       "prune": 11,
+       "replace": 37
+      },
+      "region_count_distribution": {
+       "1": 128
+      },
+      "rewrite_events_max": 11,
+      "rewrite_events_median": 4,
+      "generation_telemetry": {
+       "available_large_rewrite_proposals": 0,
+       "available_local_rewrite_proposals": 65,
+       "available_medium_rewrite_proposals": 125,
+       "binding_truncations": 60,
+       "binding_visits": 1565,
+       "candidate_shortfall": 0,
+       "composition_aliases": 244,
+       "composition_attempts": 768,
+       "composition_rejections": 297,
+       "composition_repeated_constituent": 96,
+       "materialization_attempts": 355,
+       "materialization_rejections": 137,
+       "scale_balanced": 1,
+       "selected_large_rewrite_proposals": 0,
+       "selected_local_rewrite_proposals": 64,
+       "selected_medium_rewrite_proposals": 64,
+       "single_aliases": 11,
+       "templates_with_bindings": 139,
+       "unique_ranked_endpoints": 128,
+       "valid_depth_2": 47,
+       "valid_depth_3": 57,
+       "valid_depth_4": 27,
+       "valid_unique_single_goals": 207
+      }
+     }
+    },
+    "teacher_rank": {
+     "route_distilled": {
+      "teacher_endpoints": 23,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 87,
+      "first_shape_match_rank": 2,
+      "shape_match_rate": 0.6796875
+     },
+     "uniform_same_pool": {
+      "teacher_endpoints": 23,
+      "exact_endpoint_hits": 0,
+      "first_exact_endpoint_rank": null,
+      "shape_matched_proposals": 97,
+      "first_shape_match_rank": 1,
+      "shape_match_rate": 0.7578125
+     }
+    }
+   }
+  ],
+  "summary": {
+   "mean_distinct_template_coverage": 0.17948295771820283,
+   "mean_instance_template_coverage": 0.21890338402141654,
+   "mean_fully_expressible_rate": 0.08837368853058393,
+   "mean_proposals_distilled": 128.0,
+   "mean_proposals_uniform": 127.54545454545455,
+   "exact_endpoint_hits_distilled": 2,
+   "exact_endpoint_hits_uniform": 2,
+   "mean_shape_match_rate_distilled": 0.7322443181818182,
+   "mean_shape_match_rate_uniform": 0.7335781596452329
+  }
+ },
+ "verdict": {
+  "headline": "THE ROUTE CORPUS IS TOO THIN TO FIT A TRANSFERABLE PMO PROGRAM PRIOR. Do not fit one for production.",
+  "measured_reasons": [
+   "mean held-task distinct template coverage 0.179 (range 0.043-0.300): 82% of a held objective's teacher patch vocabulary does not occur in the other ten objectives",
+   "mean fully expressible held program rate 0.088: 91% of held teacher programs contain at least one template the training fold has never seen, so they are unreachable before any ranking",
+   "18 lineages / 7 source molecules / 1 lineage per task for 10 of 11 tasks",
+   "cross-task template reuse falls monotonically with program size (0.592 at window 1 to 0.076 at window 6)"
+  ],
+  "what_the_distillation_DID_buy": [
+   "on the 2 of 11 held tasks where a teacher endpoint was generated at all, the distilled prior ranked it 2nd and 8th against 20th and 20th for the matched uniform arm",
+   "the distilled arm proposes markedly more large-scale programs (19-28 of 128 vs 4-12 for uniform) and more remodel-mode programs (8-15 vs 3-4)"
+  ],
+  "why_that_is_not_enough": [
+   "2 of 11 tasks is the whole reachable set; on the other 9 neither arm ever generated a teacher endpoint",
+   "aggregate shape-match rate is identical (0.732 distilled vs 0.734 uniform), i.e. the weak criterion does not separate the arms",
+   "these are window-scale programs (4 primitives, median 10 rewrite events), NOT the ~28-primitive whole teacher routes; the scale shift measured here must not be read as reaching teacher route scale"
+  ],
+  "consistency_with_the_realization_bottleneck": "This is independent evidence pointing the same way as the sibling route archaeology. Even granting a perfect ranking over the plan vocabulary, 91% of held-objective teacher programs are not in the vocabulary at all, so sharpening the choice among available plans cannot be where the mass is. Nothing here measures the binding gate, and nothing here should be read as evidence about it."
+ },
+ "latent_defect_found_not_fixed": {
+  "location": "src/compose_v4/control/structural_subgoal.py:247, in _extract_component",
+  "symptom": "TypeError: '<' not supported between instances of 'NoneType' and 'tuple'",
+  "cause": "the source_order sort key includes _signature(target, final_token_slots.get(token)), which is None whenever that source role is RELEASED by the program; Python cannot order None against the tuple returned for a retained role",
+  "incidence": {
+   "windows_attempted": 1591,
+   "windows_lost": 139,
+   "rate": 0.08736643620364551
+  },
+  "status": "NOT FIXED. src/compose_v4/control/ is pinned by content hash into sealed contracts and a scored PMO relaunch is imminent, so the dataset builder catches TypeError and abstains, recording it as abstained_extractor_typeerror. Any future fix is a deliberate process revision, not an incidental patch.",
+  "consequence_for_this_report": "8.7% of route windows are silently absent from the corpus, and they are not a random 8.7%: they are windows containing atom releases, so prune- and remodel-mode programs are under-represented by an unknown amount. Every mode distribution here inherits that bias."
+ }
+}

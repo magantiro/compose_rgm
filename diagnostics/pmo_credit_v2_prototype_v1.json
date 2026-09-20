@@ -1,0 +1,2792 @@
+{
+  "a_hierarchy_selection": {
+    "best_by_mean_rank": "basin_scale_context_parent",
+    "kappa_used": 1.0,
+    "method": "leave-one-cell-out: drop a cell's evidence, predict its true upside from the rest of the joint through each chain, score MAE and rank correlation",
+    "per_landscape": {
+      "all_negative": {
+        "basin_context_parent": {
+          "median_held_out_mae": 0.0009,
+          "median_rank_correlation": null,
+          "n_worlds": 25
+        },
+        "basin_family_context_parent": {
+          "median_held_out_mae": 0.0008,
+          "median_rank_correlation": null,
+          "n_worlds": 25
+        },
+        "basin_scale_context_parent": {
+          "median_held_out_mae": 0.0009,
+          "median_rank_correlation": null,
+          "n_worlds": 25
+        },
+        "context_first": {
+          "median_held_out_mae": 0.001,
+          "median_rank_correlation": null,
+          "n_worlds": 25
+        },
+        "context_only": {
+          "median_held_out_mae": 0.0014,
+          "median_rank_correlation": null,
+          "n_worlds": 25
+        },
+        "flat": {
+          "median_held_out_mae": 0.0048,
+          "median_rank_correlation": null,
+          "n_worlds": 25
+        }
+      },
+      "basin": {
+        "basin_context_parent": {
+          "median_held_out_mae": 0.0629,
+          "median_rank_correlation": 0.9635,
+          "n_worlds": 25
+        },
+        "basin_family_context_parent": {
+          "median_held_out_mae": 0.0666,
+          "median_rank_correlation": 0.959,
+          "n_worlds": 25
+        },
+        "basin_scale_context_parent": {
+          "median_held_out_mae": 0.0643,
+          "median_rank_correlation": 0.9632,
+          "n_worlds": 25
+        },
+        "context_first": {
+          "median_held_out_mae": 0.1048,
+          "median_rank_correlation": 0.9385,
+          "n_worlds": 25
+        },
+        "context_only": {
+          "median_held_out_mae": 0.098,
+          "median_rank_correlation": 0.9399,
+          "n_worlds": 25
+        },
+        "flat": {
+          "median_held_out_mae": 0.8596,
+          "median_rank_correlation": -0.8265,
+          "n_worlds": 25
+        }
+      },
+      "basin_family": {
+        "basin_context_parent": {
+          "median_held_out_mae": 0.07,
+          "median_rank_correlation": 0.9691,
+          "n_worlds": 25
+        },
+        "basin_family_context_parent": {
+          "median_held_out_mae": 0.0681,
+          "median_rank_correlation": 0.972,
+          "n_worlds": 25
+        },
+        "basin_scale_context_parent": {
+          "median_held_out_mae": 0.0722,
+          "median_rank_correlation": 0.9691,
+          "n_worlds": 25
+        },
+        "context_first": {
+          "median_held_out_mae": 0.1408,
+          "median_rank_correlation": 0.9475,
+          "n_worlds": 25
+        },
+        "context_only": {
+          "median_held_out_mae": 0.1467,
+          "median_rank_correlation": 0.9537,
+          "n_worlds": 25
+        },
+        "flat": {
+          "median_held_out_mae": 1.0131,
+          "median_rank_correlation": -0.8345,
+          "n_worlds": 25
+        }
+      },
+      "basin_scale": {
+        "basin_context_parent": {
+          "median_held_out_mae": 0.0724,
+          "median_rank_correlation": 0.9637,
+          "n_worlds": 25
+        },
+        "basin_family_context_parent": {
+          "median_held_out_mae": 0.077,
+          "median_rank_correlation": 0.9474,
+          "n_worlds": 25
+        },
+        "basin_scale_context_parent": {
+          "median_held_out_mae": 0.0694,
+          "median_rank_correlation": 0.972,
+          "n_worlds": 25
+        },
+        "context_first": {
+          "median_held_out_mae": 0.1375,
+          "median_rank_correlation": 0.9431,
+          "n_worlds": 25
+        },
+        "context_only": {
+          "median_held_out_mae": 0.1312,
+          "median_rank_correlation": 0.9487,
+          "n_worlds": 25
+        },
+        "flat": {
+          "median_held_out_mae": 1.0431,
+          "median_rank_correlation": -0.8321,
+          "n_worlds": 25
+        }
+      },
+      "context": {
+        "basin_context_parent": {
+          "median_held_out_mae": 0.0812,
+          "median_rank_correlation": 0.9694,
+          "n_worlds": 25
+        },
+        "basin_family_context_parent": {
+          "median_held_out_mae": 0.0734,
+          "median_rank_correlation": 0.972,
+          "n_worlds": 25
+        },
+        "basin_scale_context_parent": {
+          "median_held_out_mae": 0.0719,
+          "median_rank_correlation": 0.9742,
+          "n_worlds": 25
+        },
+        "context_first": {
+          "median_held_out_mae": 0.1218,
+          "median_rank_correlation": 0.9539,
+          "n_worlds": 25
+        },
+        "context_only": {
+          "median_held_out_mae": 0.1327,
+          "median_rank_correlation": 0.9665,
+          "n_worlds": 25
+        },
+        "flat": {
+          "median_held_out_mae": 1.1438,
+          "median_rank_correlation": -0.8039,
+          "n_worlds": 25
+        }
+      },
+      "interaction": {
+        "basin_context_parent": {
+          "median_held_out_mae": 2.0777,
+          "median_rank_correlation": 0.305,
+          "n_worlds": 25
+        },
+        "basin_family_context_parent": {
+          "median_held_out_mae": 2.0735,
+          "median_rank_correlation": 0.4594,
+          "n_worlds": 25
+        },
+        "basin_scale_context_parent": {
+          "median_held_out_mae": 1.9615,
+          "median_rank_correlation": 0.4779,
+          "n_worlds": 25
+        },
+        "context_first": {
+          "median_held_out_mae": 2.3871,
+          "median_rank_correlation": 0.1846,
+          "n_worlds": 25
+        },
+        "context_only": {
+          "median_held_out_mae": 2.5032,
+          "median_rank_correlation": 0.1299,
+          "n_worlds": 25
+        },
+        "flat": {
+          "median_held_out_mae": 4.5248,
+          "median_rank_correlation": -0.1655,
+          "n_worlds": 25
+        }
+      },
+      "jackpot": {
+        "basin_context_parent": {
+          "median_held_out_mae": 2.8462,
+          "median_rank_correlation": -0.2426,
+          "n_worlds": 25
+        },
+        "basin_family_context_parent": {
+          "median_held_out_mae": 2.4735,
+          "median_rank_correlation": -0.0452,
+          "n_worlds": 25
+        },
+        "basin_scale_context_parent": {
+          "median_held_out_mae": 2.6378,
+          "median_rank_correlation": -0.0753,
+          "n_worlds": 25
+        },
+        "context_first": {
+          "median_held_out_mae": 3.4558,
+          "median_rank_correlation": -0.226,
+          "n_worlds": 25
+        },
+        "context_only": {
+          "median_held_out_mae": 4.9537,
+          "median_rank_correlation": -0.2928,
+          "n_worlds": 25
+        },
+        "flat": {
+          "median_held_out_mae": 12.8748,
+          "median_rank_correlation": -0.2928,
+          "n_worlds": 25
+        }
+      },
+      "mixed": {
+        "basin_context_parent": {
+          "median_held_out_mae": 0.1888,
+          "median_rank_correlation": 0.9202,
+          "n_worlds": 25
+        },
+        "basin_family_context_parent": {
+          "median_held_out_mae": 0.1912,
+          "median_rank_correlation": 0.9112,
+          "n_worlds": 25
+        },
+        "basin_scale_context_parent": {
+          "median_held_out_mae": 0.1854,
+          "median_rank_correlation": 0.9229,
+          "n_worlds": 25
+        },
+        "context_first": {
+          "median_held_out_mae": 0.2336,
+          "median_rank_correlation": 0.8993,
+          "n_worlds": 25
+        },
+        "context_only": {
+          "median_held_out_mae": 0.2194,
+          "median_rank_correlation": 0.8955,
+          "n_worlds": 25
+        },
+        "flat": {
+          "median_held_out_mae": 1.1352,
+          "median_rank_correlation": -0.8788,
+          "n_worlds": 25
+        }
+      },
+      "parent_dominant": {
+        "basin_context_parent": {
+          "median_held_out_mae": 1.6097,
+          "median_rank_correlation": 0.0068,
+          "n_worlds": 25
+        },
+        "basin_family_context_parent": {
+          "median_held_out_mae": 1.6242,
+          "median_rank_correlation": 0.0026,
+          "n_worlds": 25
+        },
+        "basin_scale_context_parent": {
+          "median_held_out_mae": 1.6518,
+          "median_rank_correlation": -0.0216,
+          "n_worlds": 25
+        },
+        "context_first": {
+          "median_held_out_mae": 1.6637,
+          "median_rank_correlation": -0.1049,
+          "n_worlds": 25
+        },
+        "context_only": {
+          "median_held_out_mae": 1.6271,
+          "median_rank_correlation": -0.1049,
+          "n_worlds": 25
+        },
+        "flat": {
+          "median_held_out_mae": 1.5576,
+          "median_rank_correlation": -0.891,
+          "n_worlds": 25
+        }
+      },
+      "sparse_positive": {
+        "basin_context_parent": {
+          "median_held_out_mae": 0.4175,
+          "median_rank_correlation": -0.2615,
+          "n_worlds": 25
+        },
+        "basin_family_context_parent": {
+          "median_held_out_mae": 0.3194,
+          "median_rank_correlation": -0.2007,
+          "n_worlds": 25
+        },
+        "basin_scale_context_parent": {
+          "median_held_out_mae": 0.3166,
+          "median_rank_correlation": -0.1429,
+          "n_worlds": 25
+        },
+        "context_first": {
+          "median_held_out_mae": 0.4146,
+          "median_rank_correlation": -0.2573,
+          "n_worlds": 25
+        },
+        "context_only": {
+          "median_held_out_mae": 0.6086,
+          "median_rank_correlation": -0.2807,
+          "n_worlds": 25
+        },
+        "flat": {
+          "median_held_out_mae": 1.2395,
+          "median_rank_correlation": -0.3614,
+          "n_worlds": 25
+        }
+      }
+    },
+    "selected": "basin_scale_context_parent",
+    "summary": {
+      "basin_context_parent": {
+        "mean_mae_rank_across_landscapes": 2.4,
+        "wins": 1
+      },
+      "basin_family_context_parent": {
+        "mean_mae_rank_across_landscapes": 2.1,
+        "wins": 3
+      },
+      "basin_scale_context_parent": {
+        "mean_mae_rank_across_landscapes": 2.0,
+        "wins": 5
+      },
+      "context_first": {
+        "mean_mae_rank_across_landscapes": 4.4,
+        "wins": 0
+      },
+      "context_only": {
+        "mean_mae_rank_across_landscapes": 4.6,
+        "wins": 0
+      },
+      "flat": {
+        "mean_mae_rank_across_landscapes": 5.5,
+        "wins": 1
+      }
+    }
+  },
+  "a_kappa_selection": {
+    "best_by_noise_level": {
+      "0.1": {
+        "best_kappa_by_held_out_mae": 0.5,
+        "best_kappa_by_true_gain": 0.25,
+        "gain_at_best": 2.6714,
+        "mae_at_best": 0.2246
+      },
+      "1.0": {
+        "best_kappa_by_held_out_mae": 1.0,
+        "best_kappa_by_true_gain": 0.5,
+        "gain_at_best": 2.1612,
+        "mae_at_best": 0.3954
+      },
+      "8.0": {
+        "best_kappa_by_held_out_mae": 64.0,
+        "best_kappa_by_true_gain": 0.25,
+        "gain_at_best": 1.376,
+        "mae_at_best": 2.2005
+      }
+    },
+    "criteria_disagree": "held-out MAE wants kappa to TRACK the observation noise (best 1.0 at noise 0.1, 4.0 at noise 1.0, 64.0 at noise 8.0) while realized gain prefers the smallest kappa at every noise level.  The rule breaks the tie on the stability of an established lineage, which is the property the v1 defect is about; production reward noise is UNMEASURED, so this is not settled.",
+    "eligible_under_rule": [
+      1.0
+    ],
+    "grid": [
+      {
+        "kappa": 0.25,
+        "mean_true_gain_per_draw": 2.6714,
+        "median_held_out_mae": 0.2258,
+        "noise": 0.1
+      },
+      {
+        "kappa": 0.5,
+        "mean_true_gain_per_draw": 2.4654,
+        "median_held_out_mae": 0.2246,
+        "noise": 0.1
+      },
+      {
+        "kappa": 1.0,
+        "mean_true_gain_per_draw": 2.3184,
+        "median_held_out_mae": 0.2257,
+        "noise": 0.1
+      },
+      {
+        "kappa": 2.0,
+        "mean_true_gain_per_draw": 1.975,
+        "median_held_out_mae": 0.2434,
+        "noise": 0.1
+      },
+      {
+        "kappa": 4.0,
+        "mean_true_gain_per_draw": 1.5584,
+        "median_held_out_mae": 0.3012,
+        "noise": 0.1
+      },
+      {
+        "kappa": 8.0,
+        "mean_true_gain_per_draw": 1.5692,
+        "median_held_out_mae": 0.3763,
+        "noise": 0.1
+      },
+      {
+        "kappa": 16.0,
+        "mean_true_gain_per_draw": 1.3813,
+        "median_held_out_mae": 0.4102,
+        "noise": 0.1
+      },
+      {
+        "kappa": 64.0,
+        "mean_true_gain_per_draw": 1.3774,
+        "median_held_out_mae": 0.6301,
+        "noise": 0.1
+      },
+      {
+        "kappa": 0.25,
+        "mean_true_gain_per_draw": 2.0745,
+        "median_held_out_mae": 0.4784,
+        "noise": 1.0
+      },
+      {
+        "kappa": 0.5,
+        "mean_true_gain_per_draw": 2.1612,
+        "median_held_out_mae": 0.4353,
+        "noise": 1.0
+      },
+      {
+        "kappa": 1.0,
+        "mean_true_gain_per_draw": 1.7985,
+        "median_held_out_mae": 0.3954,
+        "noise": 1.0
+      },
+      {
+        "kappa": 2.0,
+        "mean_true_gain_per_draw": 1.6557,
+        "median_held_out_mae": 0.3993,
+        "noise": 1.0
+      },
+      {
+        "kappa": 4.0,
+        "mean_true_gain_per_draw": 1.4398,
+        "median_held_out_mae": 0.417,
+        "noise": 1.0
+      },
+      {
+        "kappa": 8.0,
+        "mean_true_gain_per_draw": 1.5311,
+        "median_held_out_mae": 0.4202,
+        "noise": 1.0
+      },
+      {
+        "kappa": 16.0,
+        "mean_true_gain_per_draw": 1.4539,
+        "median_held_out_mae": 0.561,
+        "noise": 1.0
+      },
+      {
+        "kappa": 64.0,
+        "mean_true_gain_per_draw": 1.2833,
+        "median_held_out_mae": 0.7224,
+        "noise": 1.0
+      },
+      {
+        "kappa": 0.25,
+        "mean_true_gain_per_draw": 1.376,
+        "median_held_out_mae": 2.5325,
+        "noise": 8.0
+      },
+      {
+        "kappa": 0.5,
+        "mean_true_gain_per_draw": 1.3533,
+        "median_held_out_mae": 2.4625,
+        "noise": 8.0
+      },
+      {
+        "kappa": 1.0,
+        "mean_true_gain_per_draw": 1.3446,
+        "median_held_out_mae": 2.4809,
+        "noise": 8.0
+      },
+      {
+        "kappa": 2.0,
+        "mean_true_gain_per_draw": 1.3319,
+        "median_held_out_mae": 2.5391,
+        "noise": 8.0
+      },
+      {
+        "kappa": 4.0,
+        "mean_true_gain_per_draw": 1.2448,
+        "median_held_out_mae": 2.5177,
+        "noise": 8.0
+      },
+      {
+        "kappa": 8.0,
+        "mean_true_gain_per_draw": 1.2439,
+        "median_held_out_mae": 2.5865,
+        "noise": 8.0
+      },
+      {
+        "kappa": 16.0,
+        "mean_true_gain_per_draw": 1.2051,
+        "median_held_out_mae": 2.5238,
+        "noise": 8.0
+      },
+      {
+        "kappa": 64.0,
+        "mean_true_gain_per_draw": 1.2055,
+        "median_held_out_mae": 2.2005,
+        "noise": 8.0
+      }
+    ],
+    "kappa_free_property": "an untried cell has n=0, so it inherits its parent exactly for EVERY kappa>0; kappa governs only how fast a measured cell moves off the inherited value",
+    "method": "sweep kappa x observation noise over all landscape kinds; score held-out MAE and TRUE gain per draw (the landscape value of what was drawn, not the noisy realization, so noise does not inflate the score it is being swept against)",
+    "minimax_regret_kappa": 0.25,
+    "selected": 1.0,
+    "selected_by_rule": 1.0,
+    "selection_rule": "smallest kappa with single-observation weight 1/(1+kappa) <= 0.5 AND worst-case relative gain regret <= 0.25",
+    "single_observation_weight_by_kappa": {
+      "0.25": 0.8,
+      "0.5": 0.6667,
+      "1.0": 0.5,
+      "16.0": 0.0588,
+      "2.0": 0.3333,
+      "4.0": 0.2,
+      "64.0": 0.0154,
+      "8.0": 0.1111
+    },
+    "worst_case_relative_gain_regret_by_kappa": {
+      "0.25": 0.0401,
+      "0.5": 0.0771,
+      "1.0": 0.1678,
+      "2.0": 0.2607,
+      "4.0": 0.4166,
+      "8.0": 0.4126,
+      "16.0": 0.4829,
+      "64.0": 0.4844
+    }
+  },
+  "b_targeted_invariants": {
+    "i1_proliferation_invariance": {
+      "measured": "MEASURED",
+      "statement": "for untried cells U_N sharing a parent node, the summed EXPLOITATION share E(U_N) <= E(U_1) + 1e-12 for all N; the deliberate eps floor is excluded because it is reserved exploration, not credit",
+      "sweep": [
+        {
+          "arm": "v1",
+          "productive_total_share": 0.8534,
+          "ratio_to_single_cell": 1.0,
+          "region_exploitation_mass": 0.058288,
+          "region_total_share": 0.1466,
+          "untried_cells": 1
+        },
+        {
+          "arm": "v1",
+          "productive_total_share": 0.6443,
+          "ratio_to_single_cell": 4.0546,
+          "region_exploitation_mass": 0.236338,
+          "region_total_share": 0.3557,
+          "untried_cells": 5
+        },
+        {
+          "arm": "v1",
+          "productive_total_share": 0.5123,
+          "ratio_to_single_cell": 6.5591,
+          "region_exploitation_mass": 0.382319,
+          "region_total_share": 0.4877,
+          "untried_cells": 10
+        },
+        {
+          "arm": "v1",
+          "productive_total_share": 0.367,
+          "ratio_to_single_cell": 9.49,
+          "region_exploitation_mass": 0.553156,
+          "region_total_share": 0.633,
+          "untried_cells": 20
+        },
+        {
+          "arm": "v1",
+          "productive_total_share": 0.2865,
+          "ratio_to_single_cell": 11.151,
+          "region_exploitation_mass": 0.649967,
+          "region_total_share": 0.7135,
+          "untried_cells": 30
+        },
+        {
+          "arm": "v1",
+          "productive_total_share": 0.235,
+          "ratio_to_single_cell": 12.2203,
+          "region_exploitation_mass": 0.712299,
+          "region_total_share": 0.765,
+          "untried_cells": 40
+        },
+        {
+          "arm": "v1",
+          "productive_total_share": 0.173,
+          "ratio_to_single_cell": 13.5166,
+          "region_exploitation_mass": 0.787855,
+          "region_total_share": 0.827,
+          "untried_cells": 60
+        },
+        {
+          "arm": "v2",
+          "productive_total_share": 0.5045,
+          "ratio_to_single_cell": 1.0,
+          "region_exploitation_mass": 0.494357,
+          "region_total_share": 0.4955,
+          "untried_cells": 1
+        },
+        {
+          "arm": "v2",
+          "productive_total_share": 0.4378,
+          "ratio_to_single_cell": 1.0,
+          "region_exploitation_mass": 0.494357,
+          "region_total_share": 0.5622,
+          "untried_cells": 5
+        },
+        {
+          "arm": "v2",
+          "productive_total_share": 0.4227,
+          "ratio_to_single_cell": 1.0,
+          "region_exploitation_mass": 0.494357,
+          "region_total_share": 0.5773,
+          "untried_cells": 10
+        },
+        {
+          "arm": "v2",
+          "productive_total_share": 0.414,
+          "ratio_to_single_cell": 1.0,
+          "region_exploitation_mass": 0.494357,
+          "region_total_share": 0.586,
+          "untried_cells": 20
+        },
+        {
+          "arm": "v2",
+          "productive_total_share": 0.411,
+          "ratio_to_single_cell": 1.0,
+          "region_exploitation_mass": 0.494357,
+          "region_total_share": 0.589,
+          "untried_cells": 30
+        },
+        {
+          "arm": "v2",
+          "productive_total_share": 0.4094,
+          "ratio_to_single_cell": 1.0,
+          "region_exploitation_mass": 0.494357,
+          "region_total_share": 0.5906,
+          "untried_cells": 40
+        },
+        {
+          "arm": "v2",
+          "productive_total_share": 0.4078,
+          "ratio_to_single_cell": 1.0,
+          "region_exploitation_mass": 0.494357,
+          "region_total_share": 0.5922,
+          "untried_cells": 60
+        }
+      ],
+      "v1_exploitation_ratio_at_60_cells": 13.5166,
+      "v1_productive_share_at_60_cells": 0.173,
+      "v2_exploitation_mass_spread_over_1_to_60_cells": 0.0,
+      "v2_exploitation_ratio_at_60_cells": 1.0,
+      "v2_productive_share_at_60_cells": 0.4078,
+      "verdict": "PASS"
+    },
+    "i2_lineage_inheritance": {
+      "arms": {
+        "v1": {
+          "share_child_of_barren": 0.0859,
+          "share_child_of_proven": 0.0859,
+          "share_ratio_proven_over_barren": 1.0,
+          "value_child_of_barren": 0.25,
+          "value_child_of_proven": 0.25,
+          "values_identical": true
+        },
+        "v2": {
+          "share_child_of_barren": 0.0564,
+          "share_child_of_proven": 0.4467,
+          "share_ratio_proven_over_barren": 7.92,
+          "value_child_of_barren": 0.0,
+          "value_child_of_proven": 5.0,
+          "values_identical": false
+        }
+      },
+      "measured": "MEASURED",
+      "statement": "with a 60-trial +5.0 lineage in basin PROVEN and a 60-trial +0.0 lineage in basin BARREN, an UNSEEN child in PROVEN must be valued above an unseen child in BARREN",
+      "v1_reference": "v1 values both children at exactly the flat prior 0.25",
+      "verdict": "PASS"
+    },
+    "i3_negative_evidence_overrides": {
+      "decay_factor": 0.0028,
+      "measured": "MEASURED",
+      "monotone_non_increasing": true,
+      "statement": "an unseen child of a +5.0 lineage starts at the inherited value; feeding it only zero-improvement trials must drive its value monotonically down toward its own estimate, so backoff is a loan and not a subsidy",
+      "sweep": [
+        {
+          "bad_trials": 0,
+          "exploitation_share": 0.5,
+          "shrunk_value": 5.0,
+          "total_share": 0.5
+        },
+        {
+          "bad_trials": 1,
+          "exploitation_share": 0.3297,
+          "shrunk_value": 2.459,
+          "total_share": 0.3638
+        },
+        {
+          "bad_trials": 2,
+          "exploitation_share": 0.244,
+          "shrunk_value": 1.6129,
+          "total_share": 0.2952
+        },
+        {
+          "bad_trials": 5,
+          "exploitation_share": 0.1335,
+          "shrunk_value": 0.7692,
+          "total_share": 0.2068
+        },
+        {
+          "bad_trials": 10,
+          "exploitation_share": 0.0724,
+          "shrunk_value": 0.3896,
+          "total_share": 0.158
+        },
+        {
+          "bad_trials": 20,
+          "exploitation_share": 0.0346,
+          "shrunk_value": 0.1786,
+          "total_share": 0.1277
+        },
+        {
+          "bad_trials": 40,
+          "exploitation_share": 0.0145,
+          "shrunk_value": 0.0732,
+          "total_share": 0.1116
+        },
+        {
+          "bad_trials": 60,
+          "exploitation_share": 0.0082,
+          "shrunk_value": 0.041,
+          "total_share": 0.1066
+        },
+        {
+          "bad_trials": 120,
+          "exploitation_share": 0.0028,
+          "shrunk_value": 0.0138,
+          "total_share": 0.1022
+        }
+      ],
+      "value_at_120_bad_trials": 0.0138,
+      "value_at_zero_bad_trials": 5.0,
+      "verdict": "PASS"
+    },
+    "i4_exploration_floor_isolated": {
+      "cells": 15,
+      "cells_never_drawn": [],
+      "exploration_budget_equals_eps": true,
+      "measured": "MEASURED",
+      "observed_minimum_share": 0.041898,
+      "single_slot_draws": 4000,
+      "statement": "share(c) >= eps/|K| > 0 for every live cell c, and the TOTAL exploration budget sum(share) - (1-eps)*sum(exploit) equals eps exactly regardless of how many cells are live",
+      "theoretical_minimum_share": 0.013333,
+      "total_exploration_budget": 0.2,
+      "verdict": "PASS",
+      "winner_share": 0.4134
+    },
+    "i5_interaction_recovery": {
+      "max_relative_shrinkage_at_n_ge_64": 0.0124,
+      "measured": "MEASURED",
+      "statement": "a joint cell paying 9.0 inside a context whose other six parents pay 0.2 must overtake its own marginals, and |Q~ - Q_raw|/Q_raw must go to 0 as n_c grows",
+      "sweep": [
+        {
+          "beats_peers": true,
+          "exploitation_share": 0.1429,
+          "fraction_of_own_estimate": 0.0,
+          "own_raw_value": 0.0,
+          "peer_shrunk_value": 0.2,
+          "shrunk_value": 0.2,
+          "star_trials": 0
+        },
+        {
+          "beats_peers": true,
+          "exploitation_share": 0.7932,
+          "fraction_of_own_estimate": 0.5,
+          "own_raw_value": 9.0,
+          "peer_shrunk_value": 0.2006,
+          "shrunk_value": 4.6146,
+          "star_trials": 1
+        },
+        {
+          "beats_peers": true,
+          "exploitation_share": 0.8345,
+          "fraction_of_own_estimate": 0.6667,
+          "own_raw_value": 9.0,
+          "peer_shrunk_value": 0.2011,
+          "shrunk_value": 6.0861,
+          "star_trials": 2
+        },
+        {
+          "beats_peers": true,
+          "exploitation_share": 0.8568,
+          "fraction_of_own_estimate": 0.8,
+          "own_raw_value": 9.0,
+          "peer_shrunk_value": 0.2023,
+          "shrunk_value": 7.2632,
+          "star_trials": 4
+        },
+        {
+          "beats_peers": true,
+          "exploitation_share": 0.8677,
+          "fraction_of_own_estimate": 0.8889,
+          "own_raw_value": 9.0,
+          "peer_shrunk_value": 0.2045,
+          "shrunk_value": 8.0476,
+          "star_trials": 8
+        },
+        {
+          "beats_peers": true,
+          "exploitation_share": 0.8717,
+          "fraction_of_own_estimate": 0.9412,
+          "own_raw_value": 9.0,
+          "peer_shrunk_value": 0.2087,
+          "shrunk_value": 8.5086,
+          "star_trials": 16
+        },
+        {
+          "beats_peers": true,
+          "exploitation_share": 0.8708,
+          "fraction_of_own_estimate": 0.9697,
+          "own_raw_value": 9.0,
+          "peer_shrunk_value": 0.2166,
+          "shrunk_value": 8.759,
+          "star_trials": 32
+        },
+        {
+          "beats_peers": true,
+          "exploitation_share": 0.8654,
+          "fraction_of_own_estimate": 0.9846,
+          "own_raw_value": 9.0,
+          "peer_shrunk_value": 0.2303,
+          "shrunk_value": 8.8884,
+          "star_trials": 64
+        },
+        {
+          "beats_peers": true,
+          "exploitation_share": 0.8557,
+          "fraction_of_own_estimate": 0.9922,
+          "own_raw_value": 9.0,
+          "peer_shrunk_value": 0.2516,
+          "shrunk_value": 8.9522,
+          "star_trials": 128
+        },
+        {
+          "beats_peers": true,
+          "exploitation_share": 0.8427,
+          "fraction_of_own_estimate": 0.9961,
+          "own_raw_value": 9.0,
+          "peer_shrunk_value": 0.2794,
+          "shrunk_value": 8.9815,
+          "star_trials": 256
+        },
+        {
+          "beats_peers": true,
+          "exploitation_share": 0.8292,
+          "fraction_of_own_estimate": 0.9981,
+          "own_raw_value": 9.0,
+          "peer_shrunk_value": 0.3088,
+          "shrunk_value": 8.9937,
+          "star_trials": 512
+        }
+      ],
+      "trials_to_beat_context_peers": 0,
+      "verdict": "PASS"
+    }
+  },
+  "c_fuzz": {
+    "chain": "basin_scale_context_parent",
+    "checks": {
+      "p1_proliferation_invariance": {
+        "metric_max": 1.0,
+        "metric_median": 1.0,
+        "metric_p99": 1.0,
+        "qualified_violation_rate": 0.0,
+        "qualified_violations": 0,
+        "qualified_worlds_checked": 600,
+        "violation_rate": 0.0,
+        "violation_rate_excluding_flat_control": 0.0,
+        "violations": 0,
+        "violations_by_chain": {},
+        "violations_by_landscape_kind": {},
+        "violations_by_prior_weight": {},
+        "worlds_checked": 600,
+        "worlds_checked_by_chain": {
+          "basin_scale_context_parent": 600
+        },
+        "worlds_checked_by_prior_weight": {
+          "0.0": 116,
+          "0.01": 117,
+          "0.25": 115,
+          "1.0": 133,
+          "5.0": 119
+        },
+        "worlds_skipped_precondition_unmet": 0
+      },
+      "p2_lineage_inheritance": {
+        "metric_max": 29.897821,
+        "metric_median": 4.27306,
+        "metric_p99": 26.179618,
+        "qualified_violation_rate": 0.0,
+        "qualified_violations": 0,
+        "qualified_worlds_checked": 504,
+        "violation_rate": 0.0,
+        "violation_rate_excluding_flat_control": 0.0,
+        "violations": 0,
+        "violations_by_chain": {},
+        "violations_by_landscape_kind": {},
+        "violations_by_prior_weight": {},
+        "worlds_checked": 569,
+        "worlds_checked_by_chain": {
+          "basin_scale_context_parent": 569
+        },
+        "worlds_checked_by_prior_weight": {
+          "0.0": 113,
+          "0.01": 111,
+          "0.25": 108,
+          "1.0": 128,
+          "5.0": 109
+        },
+        "worlds_skipped_precondition_unmet": 31
+      },
+      "p3_negative_evidence_overrides": {
+        "metric_max": 0.007794,
+        "metric_median": 0.001618,
+        "metric_p99": 0.007013,
+        "qualified_violation_rate": 0.0,
+        "qualified_violations": 0,
+        "qualified_worlds_checked": 573,
+        "violation_rate": 0.0,
+        "violation_rate_excluding_flat_control": 0.0,
+        "violations": 0,
+        "violations_by_chain": {},
+        "violations_by_landscape_kind": {},
+        "violations_by_prior_weight": {},
+        "worlds_checked": 573,
+        "worlds_checked_by_chain": {
+          "basin_scale_context_parent": 573
+        },
+        "worlds_checked_by_prior_weight": {
+          "0.0": 114,
+          "0.01": 111,
+          "0.25": 109,
+          "1.0": 128,
+          "5.0": 111
+        },
+        "worlds_skipped_precondition_unmet": 27
+      },
+      "p4_interaction_recovery": {
+        "metric_max": 0.000579,
+        "metric_median": 1.9e-05,
+        "metric_p99": 0.000287,
+        "qualified_violation_rate": 0.0,
+        "qualified_violations": 0,
+        "qualified_worlds_checked": 600,
+        "violation_rate": 0.0,
+        "violation_rate_excluding_flat_control": 0.0,
+        "violations": 0,
+        "violations_by_chain": {},
+        "violations_by_landscape_kind": {},
+        "violations_by_prior_weight": {},
+        "worlds_checked": 600,
+        "worlds_checked_by_chain": {
+          "basin_scale_context_parent": 600
+        },
+        "worlds_checked_by_prior_weight": {
+          "0.0": 116,
+          "0.01": 117,
+          "0.25": 115,
+          "1.0": 133,
+          "5.0": 119
+        },
+        "worlds_skipped_precondition_unmet": 0
+      },
+      "p5_exploration_budget_fixed": {
+        "metric_max": 0.35,
+        "metric_median": 0.2,
+        "metric_p99": 0.35,
+        "qualified_violation_rate": 0.0,
+        "qualified_violations": 0,
+        "qualified_worlds_checked": 600,
+        "violation_rate": 0.0,
+        "violation_rate_excluding_flat_control": 0.0,
+        "violations": 0,
+        "violations_by_chain": {},
+        "violations_by_landscape_kind": {},
+        "violations_by_prior_weight": {},
+        "worlds_checked": 600,
+        "worlds_checked_by_chain": {
+          "basin_scale_context_parent": 600
+        },
+        "worlds_checked_by_prior_weight": {
+          "0.0": 116,
+          "0.01": 117,
+          "0.25": 115,
+          "1.0": 133,
+          "5.0": 119
+        },
+        "worlds_skipped_precondition_unmet": 0
+      }
+    },
+    "counterexamples": {},
+    "kappa": 1.0,
+    "landscape_kind_counts": {
+      "all_negative": 52,
+      "all_zeros": 46,
+      "basin": 52,
+      "basin_family": 58,
+      "basin_scale": 53,
+      "context": 52,
+      "interaction": 51,
+      "jackpot": 71,
+      "mixed": 48,
+      "parent_dominant": 66,
+      "sparse_positive": 51
+    },
+    "measured": "MEASURED",
+    "worlds": 600
+  },
+  "c_fuzz_arm_controls": {
+    "arms": {
+      "v1_frozen": {
+        "p1_proliferation_invariance": {
+          "metric_max": 97.912837,
+          "metric_median": 2.085052,
+          "violation_rate": 0.965,
+          "violations": 386,
+          "worlds_checked": 400
+        },
+        "p2_lineage_inheritance": {
+          "metric_max": 0.0,
+          "metric_median": 0.0,
+          "violation_rate": 1.0,
+          "violations": 385,
+          "worlds_checked": 385
+        },
+        "p3_negative_evidence_overrides": {
+          "metric_max": 0.111111,
+          "metric_median": 0.111111,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 389
+        },
+        "p4_interaction_recovery": {
+          "metric_max": 0.000254,
+          "metric_median": 0.00025,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 400
+        },
+        "p5_exploration_budget_fixed": {
+          "metric_max": 0.2,
+          "metric_median": 0.2,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 400
+        }
+      },
+      "v2_flat_chain_no_hierarchy": {
+        "p1_proliferation_invariance": {
+          "metric_max": 1.0,
+          "metric_median": 1.0,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 400
+        },
+        "p2_lineage_inheritance": {
+          "metric_max": 0.0,
+          "metric_median": 0.0,
+          "violation_rate": 1.0,
+          "violations": 385,
+          "worlds_checked": 385
+        },
+        "p3_negative_evidence_overrides": {
+          "metric_max": 0.009647,
+          "metric_median": 0.006604,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 389
+        },
+        "p4_interaction_recovery": {
+          "metric_max": 0.000973,
+          "metric_median": 0.000421,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 400
+        },
+        "p5_exploration_budget_fixed": {
+          "metric_max": 0.2,
+          "metric_median": 0.2,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 400
+        }
+      },
+      "v2_hierarchy_without_untried_pooling": {
+        "p1_proliferation_invariance": {
+          "metric_max": 6.994747,
+          "metric_median": 1.774812,
+          "violation_rate": 0.8525,
+          "violations": 341,
+          "worlds_checked": 400
+        },
+        "p2_lineage_inheritance": {
+          "metric_max": 29.881531,
+          "metric_median": 3.82554,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 385
+        },
+        "p3_negative_evidence_overrides": {
+          "metric_max": 0.007597,
+          "metric_median": 0.001655,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 389
+        },
+        "p4_interaction_recovery": {
+          "metric_max": 0.000374,
+          "metric_median": 1.9e-05,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 400
+        },
+        "p5_exploration_budget_fixed": {
+          "metric_max": 0.2,
+          "metric_median": 0.2,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 400
+        }
+      },
+      "v2_production": {
+        "p1_proliferation_invariance": {
+          "metric_max": 1.0,
+          "metric_median": 1.0,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 400
+        },
+        "p2_lineage_inheritance": {
+          "metric_max": 29.881531,
+          "metric_median": 3.82554,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 385
+        },
+        "p3_negative_evidence_overrides": {
+          "metric_max": 0.007597,
+          "metric_median": 0.001655,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 389
+        },
+        "p4_interaction_recovery": {
+          "metric_max": 0.000374,
+          "metric_median": 1.9e-05,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 400
+        },
+        "p5_exploration_budget_fixed": {
+          "metric_max": 0.2,
+          "metric_median": 0.2,
+          "violation_rate": 0.0,
+          "violations": 0,
+          "worlds_checked": 400
+        }
+      }
+    },
+    "evidence": "generated once per world by the production arm and transplanted to every arm",
+    "measured": "MEASURED",
+    "worlds": 400
+  },
+  "c_fuzz_kappa_sweep": {
+    "interpretation": {
+      "p1_proliferation_invariance": "NO VIOLATION AT ANY KAPPA (structural property holds)",
+      "p2_lineage_inheritance": "MOVES WITH KAPPA -> tuning artifact (rate 0.0 at kappa 0.25 vs 0.034483 at kappa 64.0)",
+      "p3_negative_evidence_overrides": "NO VIOLATION AT ANY KAPPA (structural property holds)",
+      "p4_interaction_recovery": "NO VIOLATION AT ANY KAPPA (structural property holds)",
+      "p5_exploration_budget_fixed": "NO VIOLATION AT ANY KAPPA (structural property holds)"
+    },
+    "sweep": [
+      {
+        "kappa": 0.25,
+        "p1_proliferation_invariance": 0.0,
+        "p2_lineage_inheritance": 0.0,
+        "p3_negative_evidence_overrides": 0.0,
+        "p4_interaction_recovery": 0.0,
+        "p5_exploration_budget_fixed": 0.0
+      },
+      {
+        "kappa": 0.5,
+        "p1_proliferation_invariance": 0.0,
+        "p2_lineage_inheritance": 0.0,
+        "p3_negative_evidence_overrides": 0.0,
+        "p4_interaction_recovery": 0.0,
+        "p5_exploration_budget_fixed": 0.0
+      },
+      {
+        "kappa": 1.0,
+        "p1_proliferation_invariance": 0.0,
+        "p2_lineage_inheritance": 0.0,
+        "p3_negative_evidence_overrides": 0.0,
+        "p4_interaction_recovery": 0.0,
+        "p5_exploration_budget_fixed": 0.0
+      },
+      {
+        "kappa": 2.0,
+        "p1_proliferation_invariance": 0.0,
+        "p2_lineage_inheritance": 0.0,
+        "p3_negative_evidence_overrides": 0.0,
+        "p4_interaction_recovery": 0.0,
+        "p5_exploration_budget_fixed": 0.0
+      },
+      {
+        "kappa": 4.0,
+        "p1_proliferation_invariance": 0.0,
+        "p2_lineage_inheritance": 0.0,
+        "p3_negative_evidence_overrides": 0.0,
+        "p4_interaction_recovery": 0.0,
+        "p5_exploration_budget_fixed": 0.0
+      },
+      {
+        "kappa": 8.0,
+        "p1_proliferation_invariance": 0.0,
+        "p2_lineage_inheritance": 0.0,
+        "p3_negative_evidence_overrides": 0.0,
+        "p4_interaction_recovery": 0.0,
+        "p5_exploration_budget_fixed": 0.0
+      },
+      {
+        "kappa": 16.0,
+        "p1_proliferation_invariance": 0.0,
+        "p2_lineage_inheritance": 0.0,
+        "p3_negative_evidence_overrides": 0.0,
+        "p4_interaction_recovery": 0.0,
+        "p5_exploration_budget_fixed": 0.0
+      },
+      {
+        "kappa": 64.0,
+        "p1_proliferation_invariance": 0.0,
+        "p2_lineage_inheritance": 0.034483,
+        "p3_negative_evidence_overrides": 0.0,
+        "p4_interaction_recovery": 0.0,
+        "p5_exploration_budget_fixed": 0.0
+      }
+    ],
+    "worlds_per_kappa": 150
+  },
+  "d_matched_ab": {
+    "graded_basins": {
+      "allocation_path": "ctrl._allocate -- the full production path",
+      "landscape_regime": "STATIC 15-cell layout, fully tried within two rounds: no proliferation and no parent churn, so the v1 defect is not exercised here",
+      "mean_gain_per_call_delta": -0.0244,
+      "median_active_cells_v2": 15,
+      "median_gain_per_call_delta": -0.0266,
+      "median_productive_share_v1": 0.3828,
+      "median_productive_share_v2": 0.3906,
+      "n_seeds": 9,
+      "seeds_where_v1_wins": 9,
+      "seeds_where_v2_wins": 0,
+      "trials": [
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0247,
+          "seed": 20260920,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.244,
+            "productive_basin_share_overall": 0.3828,
+            "productive_basin_share_second_half": 0.4375,
+            "total_realized_gain": 574.4528
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.2193,
+            "productive_basin_share_overall": 0.3789,
+            "productive_basin_share_second_half": 0.4375,
+            "total_realized_gain": 568.1523
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0333,
+          "seed": 7,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.2315,
+            "productive_basin_share_overall": 0.3672,
+            "productive_basin_share_second_half": 0.3672,
+            "total_realized_gain": 571.2595
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.1982,
+            "productive_basin_share_overall": 0.3594,
+            "productive_basin_share_second_half": 0.3672,
+            "total_realized_gain": 562.7323
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.029,
+          "seed": 101,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.1434,
+            "productive_basin_share_overall": 0.3438,
+            "productive_basin_share_second_half": 0.3672,
+            "total_realized_gain": 548.708
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.1144,
+            "productive_basin_share_overall": 0.3398,
+            "productive_basin_share_second_half": 0.3672,
+            "total_realized_gain": 541.2988
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0266,
+          "seed": 4242,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.3212,
+            "productive_basin_share_overall": 0.4102,
+            "productive_basin_share_second_half": 0.4766,
+            "total_realized_gain": 594.2235
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.2946,
+            "productive_basin_share_overall": 0.4023,
+            "productive_basin_share_second_half": 0.4766,
+            "total_realized_gain": 587.4078
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0129,
+          "seed": 55555,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.3647,
+            "productive_basin_share_overall": 0.4219,
+            "productive_basin_share_second_half": 0.3828,
+            "total_realized_gain": 605.3674
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.3518,
+            "productive_basin_share_overall": 0.4219,
+            "productive_basin_share_second_half": 0.3828,
+            "total_realized_gain": 602.0537
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0407,
+          "seed": 13,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.357,
+            "productive_basin_share_overall": 0.4102,
+            "productive_basin_share_second_half": 0.3984,
+            "total_realized_gain": 603.387
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.3163,
+            "productive_basin_share_overall": 0.4023,
+            "productive_basin_share_second_half": 0.3984,
+            "total_realized_gain": 592.9733
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0266,
+          "seed": 271828,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.3127,
+            "productive_basin_share_overall": 0.4141,
+            "productive_basin_share_second_half": 0.3906,
+            "total_realized_gain": 592.049
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.2861,
+            "productive_basin_share_overall": 0.4023,
+            "productive_basin_share_second_half": 0.3906,
+            "total_realized_gain": 585.2308
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0101,
+          "seed": 31337,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.2184,
+            "productive_basin_share_overall": 0.3789,
+            "productive_basin_share_second_half": 0.3828,
+            "total_realized_gain": 567.9002
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.2083,
+            "productive_basin_share_overall": 0.3789,
+            "productive_basin_share_second_half": 0.3906,
+            "total_realized_gain": 565.3242
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.016,
+          "seed": 900001,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.1782,
+            "productive_basin_share_overall": 0.3633,
+            "productive_basin_share_second_half": 0.3359,
+            "total_realized_gain": 557.6256
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.1622,
+            "productive_basin_share_overall": 0.3594,
+            "productive_basin_share_second_half": 0.3359,
+            "total_realized_gain": 553.522
+          }
+        }
+      ],
+      "verdict": "V2 WORSE"
+    },
+    "late_basin": {
+      "allocation_path": "ctrl._allocate -- the full production path",
+      "landscape_regime": "STATIC 15-cell layout, fully tried within two rounds: no proliferation and no parent churn, so the v1 defect is not exercised here",
+      "mean_gain_per_call_delta": 0.0688,
+      "median_active_cells_v2": 15,
+      "median_gain_per_call_delta": 0.0942,
+      "median_productive_share_v1": 0.375,
+      "median_productive_share_v2": 0.4141,
+      "n_seeds": 9,
+      "seeds_where_v1_wins": 2,
+      "seeds_where_v2_wins": 7,
+      "trials": [
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.225,
+          "seed": 20260920,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 0.799,
+            "productive_basin_share_overall": 0.1758,
+            "productive_basin_share_second_half": 0.2188,
+            "total_realized_gain": 204.5489
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.024,
+            "productive_basin_share_overall": 0.207,
+            "productive_basin_share_second_half": 0.3125,
+            "total_realized_gain": 262.1452
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.0757,
+          "seed": 7,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.2035,
+            "productive_basin_share_overall": 0.2617,
+            "productive_basin_share_second_half": 0.3906,
+            "total_realized_gain": 308.0862
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.2792,
+            "productive_basin_share_overall": 0.2695,
+            "productive_basin_share_second_half": 0.4219,
+            "total_realized_gain": 327.4752
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.1801,
+          "seed": 101,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.1851,
+            "productive_basin_share_overall": 0.2578,
+            "productive_basin_share_second_half": 0.3828,
+            "total_realized_gain": 303.381
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.005,
+            "productive_basin_share_overall": 0.207,
+            "productive_basin_share_second_half": 0.3047,
+            "total_realized_gain": 257.2713
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.1882,
+          "seed": 4242,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 0.8201,
+            "productive_basin_share_overall": 0.1719,
+            "productive_basin_share_second_half": 0.2266,
+            "total_realized_gain": 209.9442
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.0083,
+            "productive_basin_share_overall": 0.1953,
+            "productive_basin_share_second_half": 0.3047,
+            "total_realized_gain": 258.1371
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.0035,
+          "seed": 55555,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.2575,
+            "productive_basin_share_overall": 0.2773,
+            "productive_basin_share_second_half": 0.4141,
+            "total_realized_gain": 321.9139
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.261,
+            "productive_basin_share_overall": 0.2656,
+            "productive_basin_share_second_half": 0.4141,
+            "total_realized_gain": 322.8195
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.0942,
+          "seed": 13,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.1666,
+            "productive_basin_share_overall": 0.2539,
+            "productive_basin_share_second_half": 0.375,
+            "total_realized_gain": 298.6484
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.2608,
+            "productive_basin_share_overall": 0.2656,
+            "productive_basin_share_second_half": 0.4141,
+            "total_realized_gain": 322.7614
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.2238,
+          "seed": 271828,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.0563,
+            "productive_basin_share_overall": 0.2305,
+            "productive_basin_share_second_half": 0.3281,
+            "total_realized_gain": 270.4067
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.2801,
+            "productive_basin_share_overall": 0.2656,
+            "productive_basin_share_second_half": 0.4219,
+            "total_realized_gain": 327.7097
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.108,
+          "seed": 31337,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.0919,
+            "productive_basin_share_overall": 0.2422,
+            "productive_basin_share_second_half": 0.3438,
+            "total_realized_gain": 279.5308
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 0.9839,
+            "productive_basin_share_overall": 0.2109,
+            "productive_basin_share_second_half": 0.2969,
+            "total_realized_gain": 251.8878
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.0965,
+          "seed": 900001,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.2231,
+            "productive_basin_share_overall": 0.2617,
+            "productive_basin_share_second_half": 0.3984,
+            "total_realized_gain": 313.1184
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.3196,
+            "productive_basin_share_overall": 0.2656,
+            "productive_basin_share_second_half": 0.4375,
+            "total_realized_gain": 337.8232
+          }
+        }
+      ],
+      "verdict": "V2 BETTER"
+    },
+    "mixed_basin_and_scale": {
+      "allocation_path": "ctrl._allocate -- the full production path",
+      "landscape_regime": "STATIC 15-cell layout, fully tried within two rounds: no proliferation and no parent churn, so the v1 defect is not exercised here",
+      "mean_gain_per_call_delta": -0.0092,
+      "median_active_cells_v2": 15,
+      "median_gain_per_call_delta": -0.0154,
+      "median_productive_share_v1": 0.3828,
+      "median_productive_share_v2": 0.3828,
+      "n_seeds": 9,
+      "seeds_where_v1_wins": 7,
+      "seeds_where_v2_wins": 2,
+      "trials": [
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.0373,
+          "seed": 20260920,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.0901,
+            "productive_basin_share_overall": 0.3789,
+            "productive_basin_share_second_half": 0.4453,
+            "total_realized_gain": 535.0763
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.1274,
+            "productive_basin_share_overall": 0.4102,
+            "productive_basin_share_second_half": 0.4688,
+            "total_realized_gain": 544.6223
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0189,
+          "seed": 7,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.982,
+            "productive_basin_share_overall": 0.3633,
+            "productive_basin_share_second_half": 0.3594,
+            "total_realized_gain": 507.3821
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.9631,
+            "productive_basin_share_overall": 0.3594,
+            "productive_basin_share_second_half": 0.375,
+            "total_realized_gain": 502.5469
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0008,
+          "seed": 101,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.9029,
+            "productive_basin_share_overall": 0.3359,
+            "productive_basin_share_second_half": 0.3438,
+            "total_realized_gain": 487.154
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.9021,
+            "productive_basin_share_overall": 0.3359,
+            "productive_basin_share_second_half": 0.3594,
+            "total_realized_gain": 486.9474
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0154,
+          "seed": 4242,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.1468,
+            "productive_basin_share_overall": 0.4102,
+            "productive_basin_share_second_half": 0.4688,
+            "total_realized_gain": 549.5762
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.1314,
+            "productive_basin_share_overall": 0.4102,
+            "productive_basin_share_second_half": 0.4766,
+            "total_realized_gain": 545.6461
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0043,
+          "seed": 55555,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.0856,
+            "productive_basin_share_overall": 0.4102,
+            "productive_basin_share_second_half": 0.375,
+            "total_realized_gain": 533.9237
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.0813,
+            "productive_basin_share_overall": 0.4102,
+            "productive_basin_share_second_half": 0.375,
+            "total_realized_gain": 532.8137
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0445,
+          "seed": 13,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.2027,
+            "productive_basin_share_overall": 0.4023,
+            "productive_basin_share_second_half": 0.3906,
+            "total_realized_gain": 563.892
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.1582,
+            "productive_basin_share_overall": 0.4023,
+            "productive_basin_share_second_half": 0.3906,
+            "total_realized_gain": 552.4954
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0371,
+          "seed": 271828,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.027,
+            "productive_basin_share_overall": 0.3984,
+            "productive_basin_share_second_half": 0.3828,
+            "total_realized_gain": 518.92
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.9899,
+            "productive_basin_share_overall": 0.3828,
+            "productive_basin_share_second_half": 0.3828,
+            "total_realized_gain": 509.415
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": -0.0222,
+          "seed": 31337,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.922,
+            "productive_basin_share_overall": 0.3789,
+            "productive_basin_share_second_half": 0.3906,
+            "total_realized_gain": 492.0306
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 1.8998,
+            "productive_basin_share_overall": 0.3789,
+            "productive_basin_share_second_half": 0.3906,
+            "total_realized_gain": 486.3452
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.0227,
+          "seed": 900001,
+          "v1_flat_cell": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.1352,
+            "productive_basin_share_overall": 0.3711,
+            "productive_basin_share_second_half": 0.3438,
+            "total_realized_gain": 546.6226
+          },
+          "v2_hierarchical": {
+            "active_cells": 15,
+            "basins_touched": 5,
+            "candidates_drawn": 256,
+            "gain_per_call": 2.1579,
+            "productive_basin_share_overall": 0.375,
+            "productive_basin_share_second_half": 0.3516,
+            "total_realized_gain": 552.4309
+          }
+        }
+      ],
+      "verdict": "V2 WORSE"
+    }
+  },
+  "d_matched_ab_churn": {
+    "churn_compounding_lineage": {
+      "allocation_path": "ctrl._credit_allocate directly -- isolates the credit decision from the per-channel slot reservation that ctrl._allocate performs first",
+      "interpretation": "v2 does not reduce the mass reaching untried cells -- it replaces a FLAT prior with an INHERITED one.  The arms are distinguished by whether that mass is informative: v1 values every untried cell identically, so it has one distinct share and zero rank correlation with context productivity by construction.",
+      "mean_gain_per_call_delta": 0.1935,
+      "median_distinct_untried_shares_v1": 1.0,
+      "median_distinct_untried_shares_v2": 9.0,
+      "median_fraction_untried_v1": 0.8889,
+      "median_fraction_untried_v2": 0.869,
+      "median_gain_per_call_delta": 0.1865,
+      "median_prior_mass_on_untried_v1": 0.5816,
+      "median_prior_mass_on_untried_v2": 0.6894,
+      "median_productive_share_v1": 0.3516,
+      "median_productive_share_v2": 0.4945,
+      "median_untried_informativeness_v1": 0.0,
+      "median_untried_informativeness_v2": 0.9335,
+      "n_seeds": 9,
+      "seeds_where_v1_wins": 0,
+      "seeds_where_v2_wins": 9,
+      "trials": [
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.1597,
+          "seed": 20260920,
+          "v1_flat_cell": {
+            "active_cells_final": 119,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.1736,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5964,
+            "mean_fraction_of_pool_untried_second_half": 0.8928,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3846,
+            "total_realized_gain": 213.592
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 117,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.3333,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.7062,
+            "mean_fraction_of_pool_untried_second_half": 0.881,
+            "mean_untried_informativeness_second_half": 0.9475,
+            "productive_basin_share_second_half": 0.4835,
+            "total_realized_gain": 242.6571
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.1865,
+          "seed": 7,
+          "v1_flat_cell": {
+            "active_cells_final": 111,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.1011,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5715,
+            "mean_fraction_of_pool_untried_second_half": 0.8889,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3626,
+            "total_realized_gain": 200.3963
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 110,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.2876,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6894,
+            "mean_fraction_of_pool_untried_second_half": 0.8651,
+            "mean_untried_informativeness_second_half": 0.9173,
+            "productive_basin_share_second_half": 0.4945,
+            "total_realized_gain": 234.349
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.2074,
+          "seed": 101,
+          "v1_flat_cell": {
+            "active_cells_final": 118,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.0194,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5816,
+            "mean_fraction_of_pool_untried_second_half": 0.873,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.2637,
+            "total_realized_gain": 185.526
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 123,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.2268,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.7372,
+            "mean_fraction_of_pool_untried_second_half": 0.873,
+            "mean_untried_informativeness_second_half": 0.9335,
+            "productive_basin_share_second_half": 0.4615,
+            "total_realized_gain": 223.2764
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.1647,
+          "seed": 4242,
+          "v1_flat_cell": {
+            "active_cells_final": 117,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.2187,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5012,
+            "mean_fraction_of_pool_untried_second_half": 0.8651,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.4725,
+            "total_realized_gain": 221.8024
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 124,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.3834,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6595,
+            "mean_fraction_of_pool_untried_second_half": 0.8532,
+            "mean_untried_informativeness_second_half": 0.9477,
+            "productive_basin_share_second_half": 0.5934,
+            "total_realized_gain": 251.7723
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.2493,
+          "seed": 55555,
+          "v1_flat_cell": {
+            "active_cells_final": 111,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.0895,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5799,
+            "mean_fraction_of_pool_untried_second_half": 0.881,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3516,
+            "total_realized_gain": 198.2885
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 119,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.3388,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6825,
+            "mean_fraction_of_pool_untried_second_half": 0.869,
+            "mean_untried_informativeness_second_half": 0.9416,
+            "productive_basin_share_second_half": 0.5495,
+            "total_realized_gain": 243.6697
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.2469,
+          "seed": 13,
+          "v1_flat_cell": {
+            "active_cells_final": 107,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.1369,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.618,
+            "mean_fraction_of_pool_untried_second_half": 0.881,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3297,
+            "total_realized_gain": 206.915
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 119,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.3838,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6548,
+            "mean_fraction_of_pool_untried_second_half": 0.8572,
+            "mean_untried_informativeness_second_half": 0.9143,
+            "productive_basin_share_second_half": 0.5495,
+            "total_realized_gain": 251.8549
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.1617,
+          "seed": 271828,
+          "v1_flat_cell": {
+            "active_cells_final": 116,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.1822,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5801,
+            "mean_fraction_of_pool_untried_second_half": 0.8968,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3736,
+            "total_realized_gain": 215.1553
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 126,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.3439,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6766,
+            "mean_fraction_of_pool_untried_second_half": 0.8651,
+            "mean_untried_informativeness_second_half": 0.915,
+            "productive_basin_share_second_half": 0.5055,
+            "total_realized_gain": 244.587
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.1878,
+          "seed": 31337,
+          "v1_flat_cell": {
+            "active_cells_final": 117,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.0846,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6191,
+            "mean_fraction_of_pool_untried_second_half": 0.8889,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3516,
+            "total_realized_gain": 197.3912
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 123,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.2724,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.7631,
+            "mean_fraction_of_pool_untried_second_half": 0.8849,
+            "mean_untried_informativeness_second_half": 0.9594,
+            "productive_basin_share_second_half": 0.4615,
+            "total_realized_gain": 231.5849
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.1776,
+          "seed": 900001,
+          "v1_flat_cell": {
+            "active_cells_final": 120,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.0684,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6177,
+            "mean_fraction_of_pool_untried_second_half": 0.8968,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3077,
+            "total_realized_gain": 194.4464
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 122,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.246,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.7321,
+            "mean_fraction_of_pool_untried_second_half": 0.8849,
+            "mean_untried_informativeness_second_half": 0.9292,
+            "productive_basin_share_second_half": 0.4396,
+            "total_realized_gain": 226.7643
+          }
+        }
+      ],
+      "verdict": "V2 BETTER"
+    },
+    "churn_graded_basins": {
+      "allocation_path": "ctrl._credit_allocate directly -- isolates the credit decision from the per-channel slot reservation that ctrl._allocate performs first",
+      "interpretation": "v2 does not reduce the mass reaching untried cells -- it replaces a FLAT prior with an INHERITED one.  The arms are distinguished by whether that mass is informative: v1 values every untried cell identically, so it has one distinct share and zero rank correlation with context productivity by construction.",
+      "mean_gain_per_call_delta": 0.0943,
+      "median_distinct_untried_shares_v1": 1.0,
+      "median_distinct_untried_shares_v2": 9.0,
+      "median_fraction_untried_v1": 0.873,
+      "median_fraction_untried_v2": 0.8651,
+      "median_gain_per_call_delta": 0.0871,
+      "median_prior_mass_on_untried_v1": 0.693,
+      "median_prior_mass_on_untried_v2": 0.7005,
+      "median_productive_share_v1": 0.3626,
+      "median_productive_share_v2": 0.4945,
+      "median_untried_informativeness_v1": 0.0,
+      "median_untried_informativeness_v2": 0.9388,
+      "n_seeds": 9,
+      "seeds_where_v1_wins": 0,
+      "seeds_where_v2_wins": 9,
+      "trials": [
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.0842,
+          "seed": 20260920,
+          "v1_flat_cell": {
+            "active_cells_final": 128,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.6195,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.7251,
+            "mean_fraction_of_pool_untried_second_half": 0.8929,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3736,
+            "total_realized_gain": 112.7401
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 125,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.7037,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.739,
+            "mean_fraction_of_pool_untried_second_half": 0.877,
+            "mean_untried_informativeness_second_half": 0.9528,
+            "productive_basin_share_second_half": 0.4835,
+            "total_realized_gain": 128.0806
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.1187,
+          "seed": 7,
+          "v1_flat_cell": {
+            "active_cells_final": 121,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.5647,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.7231,
+            "mean_fraction_of_pool_untried_second_half": 0.873,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.2967,
+            "total_realized_gain": 102.7821
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 115,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.6834,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.7005,
+            "mean_fraction_of_pool_untried_second_half": 0.8611,
+            "mean_untried_informativeness_second_half": 0.9388,
+            "productive_basin_share_second_half": 0.4945,
+            "total_realized_gain": 124.3767
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.0738,
+          "seed": 101,
+          "v1_flat_cell": {
+            "active_cells_final": 122,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.5638,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6535,
+            "mean_fraction_of_pool_untried_second_half": 0.8453,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3297,
+            "total_realized_gain": 102.618
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 130,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.6376,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.7194,
+            "mean_fraction_of_pool_untried_second_half": 0.8651,
+            "mean_untried_informativeness_second_half": 0.9284,
+            "productive_basin_share_second_half": 0.4396,
+            "total_realized_gain": 116.0374
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.0871,
+          "seed": 4242,
+          "v1_flat_cell": {
+            "active_cells_final": 124,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.6375,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.656,
+            "mean_fraction_of_pool_untried_second_half": 0.8651,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.4725,
+            "total_realized_gain": 116.0238
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 126,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.7246,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6644,
+            "mean_fraction_of_pool_untried_second_half": 0.8452,
+            "mean_untried_informativeness_second_half": 0.9658,
+            "productive_basin_share_second_half": 0.5934,
+            "total_realized_gain": 131.871
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.1233,
+          "seed": 55555,
+          "v1_flat_cell": {
+            "active_cells_final": 115,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.5849,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.693,
+            "mean_fraction_of_pool_untried_second_half": 0.8571,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3626,
+            "total_realized_gain": 106.4504
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 124,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.7082,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6984,
+            "mean_fraction_of_pool_untried_second_half": 0.8492,
+            "mean_untried_informativeness_second_half": 0.9544,
+            "productive_basin_share_second_half": 0.5604,
+            "total_realized_gain": 128.89
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.0785,
+          "seed": 13,
+          "v1_flat_cell": {
+            "active_cells_final": 118,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.649,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6487,
+            "mean_fraction_of_pool_untried_second_half": 0.8453,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.4176,
+            "total_realized_gain": 118.1228
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 117,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.7275,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6846,
+            "mean_fraction_of_pool_untried_second_half": 0.8611,
+            "mean_untried_informativeness_second_half": 0.924,
+            "productive_basin_share_second_half": 0.5385,
+            "total_realized_gain": 132.3966
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.0949,
+          "seed": 271828,
+          "v1_flat_cell": {
+            "active_cells_final": 123,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.6141,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6921,
+            "mean_fraction_of_pool_untried_second_half": 0.873,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3736,
+            "total_realized_gain": 111.7579
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 128,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.709,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6915,
+            "mean_fraction_of_pool_untried_second_half": 0.8651,
+            "mean_untried_informativeness_second_half": 0.9355,
+            "productive_basin_share_second_half": 0.4945,
+            "total_realized_gain": 129.0445
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.1121,
+          "seed": 31337,
+          "v1_flat_cell": {
+            "active_cells_final": 119,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.5558,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.7268,
+            "mean_fraction_of_pool_untried_second_half": 0.873,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.2747,
+            "total_realized_gain": 101.164
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 127,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.6679,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.7677,
+            "mean_fraction_of_pool_untried_second_half": 0.877,
+            "mean_untried_informativeness_second_half": 0.9574,
+            "productive_basin_share_second_half": 0.4615,
+            "total_realized_gain": 121.5645
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.0757,
+          "seed": 900001,
+          "v1_flat_cell": {
+            "active_cells_final": 129,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.5979,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.7286,
+            "mean_fraction_of_pool_untried_second_half": 0.8929,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3516,
+            "total_realized_gain": 108.8112
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 123,
+            "candidates_drawn": 182,
+            "gain_per_call": 0.6736,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.7171,
+            "mean_fraction_of_pool_untried_second_half": 0.8691,
+            "mean_untried_informativeness_second_half": 0.9262,
+            "productive_basin_share_second_half": 0.4396,
+            "total_realized_gain": 122.6026
+          }
+        }
+      ],
+      "verdict": "V2 BETTER"
+    },
+    "churn_late_basin": {
+      "allocation_path": "ctrl._credit_allocate directly -- isolates the credit decision from the per-channel slot reservation that ctrl._allocate performs first",
+      "interpretation": "v2 does not reduce the mass reaching untried cells -- it replaces a FLAT prior with an INHERITED one.  The arms are distinguished by whether that mass is informative: v1 values every untried cell identically, so it has one distinct share and zero rank correlation with context productivity by construction.",
+      "mean_gain_per_call_delta": 0.3595,
+      "median_distinct_untried_shares_v1": 1.0,
+      "median_distinct_untried_shares_v2": 9.0,
+      "median_fraction_untried_v1": 0.8691,
+      "median_fraction_untried_v2": 0.873,
+      "median_gain_per_call_delta": 0.3603,
+      "median_prior_mass_on_untried_v1": 0.5349,
+      "median_prior_mass_on_untried_v2": 0.6316,
+      "median_productive_share_v1": 0.4066,
+      "median_productive_share_v2": 0.5604,
+      "median_untried_informativeness_v1": 0.0,
+      "median_untried_informativeness_v2": 0.7164,
+      "n_seeds": 9,
+      "seeds_where_v1_wins": 0,
+      "seeds_where_v2_wins": 9,
+      "trials": [
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.3086,
+          "seed": 20260920,
+          "v1_flat_cell": {
+            "active_cells_final": 123,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.2952,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5816,
+            "mean_fraction_of_pool_untried_second_half": 0.8691,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.4396,
+            "total_realized_gain": 235.7305
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 114,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.6038,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6678,
+            "mean_fraction_of_pool_untried_second_half": 0.881,
+            "mean_untried_informativeness_second_half": 0.6976,
+            "productive_basin_share_second_half": 0.5604,
+            "total_realized_gain": 291.8876
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.5362,
+          "seed": 7,
+          "v1_flat_cell": {
+            "active_cells_final": 130,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.0855,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6184,
+            "mean_fraction_of_pool_untried_second_half": 0.881,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3516,
+            "total_realized_gain": 197.5563
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 114,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.6217,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6503,
+            "mean_fraction_of_pool_untried_second_half": 0.8611,
+            "mean_untried_informativeness_second_half": 0.672,
+            "productive_basin_share_second_half": 0.5714,
+            "total_realized_gain": 295.1409
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.3603,
+          "seed": 101,
+          "v1_flat_cell": {
+            "active_cells_final": 121,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.1662,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5349,
+            "mean_fraction_of_pool_untried_second_half": 0.8691,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3846,
+            "total_realized_gain": 212.2495
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 118,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.5265,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6707,
+            "mean_fraction_of_pool_untried_second_half": 0.873,
+            "mean_untried_informativeness_second_half": 0.7547,
+            "productive_basin_share_second_half": 0.5275,
+            "total_realized_gain": 277.8272
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.3622,
+          "seed": 4242,
+          "v1_flat_cell": {
+            "active_cells_final": 120,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.4193,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5253,
+            "mean_fraction_of_pool_untried_second_half": 0.8611,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.4945,
+            "total_realized_gain": 258.3046
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 116,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.7815,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5685,
+            "mean_fraction_of_pool_untried_second_half": 0.8532,
+            "mean_untried_informativeness_second_half": 0.7304,
+            "productive_basin_share_second_half": 0.6374,
+            "total_realized_gain": 324.2382
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.3054,
+          "seed": 55555,
+          "v1_flat_cell": {
+            "active_cells_final": 116,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.2921,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5043,
+            "mean_fraction_of_pool_untried_second_half": 0.8532,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.4396,
+            "total_realized_gain": 235.1593
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 114,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.5975,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5536,
+            "mean_fraction_of_pool_untried_second_half": 0.873,
+            "mean_untried_informativeness_second_half": 0.6417,
+            "productive_basin_share_second_half": 0.5604,
+            "total_realized_gain": 290.7403
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.2072,
+          "seed": 13,
+          "v1_flat_cell": {
+            "active_cells_final": 122,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.3595,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5239,
+            "mean_fraction_of_pool_untried_second_half": 0.8809,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.4725,
+            "total_realized_gain": 247.4246
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 122,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.5667,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5831,
+            "mean_fraction_of_pool_untried_second_half": 0.8492,
+            "mean_untried_informativeness_second_half": 0.7243,
+            "productive_basin_share_second_half": 0.5495,
+            "total_realized_gain": 285.1447
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.2022,
+          "seed": 271828,
+          "v1_flat_cell": {
+            "active_cells_final": 120,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.2162,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5042,
+            "mean_fraction_of_pool_untried_second_half": 0.869,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.4066,
+            "total_realized_gain": 221.3534
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 119,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.4184,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6007,
+            "mean_fraction_of_pool_untried_second_half": 0.873,
+            "mean_untried_informativeness_second_half": 0.4978,
+            "productive_basin_share_second_half": 0.4835,
+            "total_realized_gain": 258.1543
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.5379,
+          "seed": 31337,
+          "v1_flat_cell": {
+            "active_cells_final": 128,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.0646,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5757,
+            "mean_fraction_of_pool_untried_second_half": 0.873,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3407,
+            "total_realized_gain": 193.7599
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 116,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.6025,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6608,
+            "mean_fraction_of_pool_untried_second_half": 0.8651,
+            "mean_untried_informativeness_second_half": 0.7164,
+            "productive_basin_share_second_half": 0.5604,
+            "total_realized_gain": 291.6599
+          }
+        },
+        {
+          "gain_per_call_delta_v2_minus_v1": 0.4154,
+          "seed": 900001,
+          "v1_flat_cell": {
+            "active_cells_final": 125,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.1095,
+            "mean_distinct_share_values_among_untried": 1.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.5594,
+            "mean_fraction_of_pool_untried_second_half": 0.8691,
+            "mean_untried_informativeness_second_half": 0.0,
+            "productive_basin_share_second_half": 0.3626,
+            "total_realized_gain": 201.9371
+          },
+          "v2_hierarchical": {
+            "active_cells_final": 118,
+            "candidates_drawn": 182,
+            "gain_per_call": 1.5249,
+            "mean_distinct_share_values_among_untried": 9.0,
+            "mean_exploitation_mass_on_untried_second_half": 0.6316,
+            "mean_fraction_of_pool_untried_second_half": 0.8849,
+            "mean_untried_informativeness_second_half": 0.7467,
+            "productive_basin_share_second_half": 0.5275,
+            "total_realized_gain": 277.5385
+          }
+        }
+      ],
+      "verdict": "V2 BETTER"
+    }
+  },
+  "e_where_v2_is_worse": {
+    "explanation": "the fixed-layout landscapes hold a static 15-cell pool that is fully tried within two rounds, so there is no proliferation and no parent churn for the hierarchy to protect against.  In that regime the count shrinkage is pure bias: it pulls each cell toward its basin and root means and blurs exactly the per-cell distinctions the landscape rewards.  v2 is a fix for the churn regime and costs a little where there is no churn.",
+    "honest_summary": "v2 is not uniformly better than v1.  It wins where cells churn and most of the pool is untried, and loses slightly on a small static pool.",
+    "landscapes_where_v2_loses": [
+      {
+        "block": "d_matched_ab",
+        "landscape": "graded_basins",
+        "median_gain_per_call_delta_v2_minus_v1": -0.0266,
+        "seeds_v1_wins": 9,
+        "seeds_v2_wins": 0,
+        "verdict": "V2 WORSE"
+      },
+      {
+        "block": "d_matched_ab",
+        "landscape": "mixed_basin_and_scale",
+        "median_gain_per_call_delta_v2_minus_v1": -0.0154,
+        "seeds_v1_wins": 7,
+        "seeds_v2_wins": 2,
+        "verdict": "V2 WORSE"
+      }
+    ]
+  },
+  "f_production_wiring_requirements": [
+    {
+      "detail": "`scripts/pmo_credit_v2.py` carries a rule and an invariant, so by the repo's own scratchpad test it belongs in `src/compose_v4/control/` WITH its tests when it is adopted -- not promoted afterwards.  `tests/test_pmo_credit_v2.py` already exists and would move with it.",
+      "item": "promote the module out of scripts/"
+    },
+    {
+      "detail": "`HierarchicalCredit` inherits `payload`/`restore`, which emit `schema_version = 'pmo_credit_v1'` and do NOT carry `kappa` or the chain.  A restored controller would silently fall back to the defaults.  Adopting v2 needs a v2 schema plus a documented read path for v1 snapshots.",
+      "item": "serialization schema"
+    },
+    {
+      "detail": "`PmoPopulationController.__init__` line 193 constructs `PopulationCredit()` and `restore` line 828 reconstructs it; `_credit_allocate` line 561 calls `self.credit.allocate(cells)`.  Those three sites are the entire seam -- v2 needs no other controller change, which is why the A/B could swap the attribute.",
+      "item": "controller seam"
+    },
+    {
+      "detail": "`pmo_credit.py` and `pmo_population_controller.py` are pinned by content hash and a scored 3x250 run is launching against those bytes.  Adoption is a deliberate re-pin of the whole chain, not an edit -- and every number measured under v1 stays a v1 number.",
+      "item": "content-hash re-pin"
+    },
+    {
+      "detail": "`exploitation_shares` rebuilds `_stats_table()` on every call, which is O(cells x levels) and is recomputed once per allocation.  Harmless at the prototype's scale and at the controller's (hundreds of cells), but it should be memoised behind an observe-counter before it sits in a long run.",
+      "item": "cache the node statistics"
+    },
+    {
+      "detail": "the kappa optimum is a function of how informative one oracle call is, and that has not been measured on a real PMO run.  Re-run `select_kappa` against the observed per-cell improvement variance before freezing it.",
+      "item": "choose kappa against REAL reward noise"
+    },
+    {
+      "detail": "v2 makes the basin axis load-bearing -- it is now the level a whole lineage inherits through.  `pmo_credit.basin_label` uses the Bemis-Murcko scaffold, which its own docstring adopted because the controller's `basin_id` was a per-molecule key.  A scaffold-hopping jump changes basin and so resets inheritance by design; whether that is wanted is a chemistry decision.",
+      "item": "decide the basin label first"
+    }
+  ],
+  "frozen_v1_untouched": [
+    "src/compose_v4/control/pmo_credit.py",
+    "src/compose_v4/control/pmo_population_controller.py",
+    "src/compose_v4/control/bootstrap_pool_continuity.py"
+  ],
+  "g_measured_vs_inferred": {
+    "INFERRED": [
+      "that any of this transfers to a scored PMO oracle run.  No real credit snapshot exists on disk, so the landscapes are stand-ins for a reward surface nobody has measured.",
+      "that the churn A/B regime resembles production.  It was built to match two measured production numbers (90.1% of pool untried, 13 -> 114 active cells in 14 rounds); matching two summary statistics is not matching the process.",
+      "the chain ranking.  Family and scale are collinear in the controller (`RULES_BY_CHANNEL` is one family per channel), so the two leading chains are indistinguishable there and the ranking between them rests entirely on synthetic worlds where they are not collinear."
+    ],
+    "MEASURED": [
+      "every number in parts A-D: they are computed here from synthetic landscapes",
+      "the v1 failure rates, on the same worlds and the same check functions as v2",
+      "the exploitation-mass count invariance, to machine precision (spread < 1e-12)",
+      "that v2 is WORSE than v1 on the fixed-layout landscapes (part D, d_matched_ab)"
+    ],
+    "NOT CLAIMED": [
+      "any calibrated uncertainty; kappa and the floor are search settings",
+      "that v2 improves final PMO score -- allocation was measured, not chemistry"
+    ]
+  },
+  "oracle_calls": 0,
+  "reward_source": "closed-form and pseudo-random synthetic landscapes; no TDC Oracle, no network",
+  "schema_version": "pmo_credit_v2_prototype_v1",
+  "status": "PROTOTYPE -- NOT WIRED into PmoPopulationController; nothing re-pinned",
+  "v2_rule": {
+    "chain": [
+      [],
+      [
+        "basin"
+      ],
+      [
+        "basin",
+        "scale"
+      ],
+      [
+        "basin",
+        "family",
+        "scale"
+      ],
+      [
+        "basin",
+        "family",
+        "scale",
+        "parent"
+      ]
+    ],
+    "class": "HierarchicalCredit(PopulationCredit)",
+    "exploration": "unchanged from v1: q = (1-eps)*q_exploit + eps*uniform, eps = 0.2",
+    "factorisation": "P(b,p,f,s) = P(b,f,s) * P(p | b,f,s), with a basin level above the context",
+    "kappa": 1.0,
+    "module": "scripts/pmo_credit_v2.py",
+    "shrinkage": "Q~(v) = n/(n+kappa) * Q_raw(v) + kappa/(n+kappa) * Q~(parent(v))",
+    "untried_pool": "untried children of a node are ONE pseudo-sibling carrying the node's backoff value, split evenly among them"
+  }
+}
