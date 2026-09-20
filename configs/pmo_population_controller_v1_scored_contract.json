@@ -1,0 +1,58 @@
+{
+  "payload": {
+    "schema_version": "pmo_population_controller_v1_scored_contract",
+    "scientific_question": "Does the shared COMPOSE program backbone plus PMO population control, FiberControl and recursive descendants achieve competitive no-prescreen PMO performance on three prospectively selected tasks?",
+    "controller_contract": "configs/pmo_population_controller_v1.json",
+    "controller_contract_sha256": "bf0ab7de1f4b99c93465b3c11259f05e7cf90da6cddbe6108d6351bd890b22db",
+    "tasks": ["gsk3b", "perindopril_mpo", "celecoxib_rediscovery"],
+    "task_roles": {
+      "gsk3b": "basin-discovery black-box",
+      "perindopril_mpo": "jump to multi-generation refinement",
+      "celecoxib_rediscovery": "long-program reachability control"
+    },
+    "budget": {
+      "charged_calls_per_task": 1000,
+      "charged_calls_total": 3000,
+      "initialization_calls_per_task": 16,
+      "candidate_calls_per_task": 984,
+      "queries_per_round": 16,
+      "max_rounds": 64,
+      "automatic_retries": 0,
+      "backfill": false,
+      "cpu_per_worker": 1,
+      "gpu": false
+    },
+    "oracle": {
+      "adapter": "native PyTDC Oracle(name=task)",
+      "prescreen": false,
+      "direction": "maximize",
+      "calls_include_initialization": true
+    },
+    "runtime": {
+      "task_to_route_lookup": false,
+      "task_to_endpoint_lookup": false,
+      "winner_injection": false,
+      "recursive_descendants": true,
+      "parent_modes": ["global_explore", "jump_from_elite", "refine_elite"],
+      "live_parent_support_gate": "configs/pmo_population_live_parent_gate_v2.json",
+      "live_parent_support_gate_sha256": "510f6920e947e128557d48f52baa43392e7fb4bf9b0469aa864010ca85651ef0"
+    },
+    "promotion": {
+      "ivg_targets_postrun_only": {"celecoxib_rediscovery": 0.798, "gsk3b": 0.952, "perindopril_mpo": 0.645},
+      "beat_at_least": 2,
+      "third_task_within": 0.02,
+      "route_scale_descendant_required": true,
+      "official_10000_call_claim": false
+    },
+    "implementation_sha256": {
+      "src/compose_v4/control/pmo_population_controller.py": "9108e0fcfe1b6478964c875a213bef438a89f9b44589bd6de313442bca7ccec9",
+      "src/compose_v4/control/program_campaign.py": "884f13cbbe49c06a94aafb59880daf38f313b6f4717af012c1fe8eb9074c469e",
+      "src/compose_v4/experiments/pmo_population_v1.py": "a46e105573557af2e9b4fdf9f08ba6399c88f912ebb4e16bcf73d8d6e5e26056"
+    },
+    "scored_launch_authorized": false,
+    "modal_launch_authorized": false,
+    "oracle_calls_authorized": 0,
+    "status": "FROZEN_FAIL_CLOSED_PENDING_EXPLICIT_PAYLOAD_AUTHORIZATION"
+  },
+  "payload_sha256": "61c1fdf3995f0635b2f46a517e6e5ddd566f3ec9a26ce53ea3dec1c6e5a0b582"
+}

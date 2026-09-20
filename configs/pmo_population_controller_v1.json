@@ -1,0 +1,87 @@
+{
+  "payload": {
+    "schema_version": "pmo_population_controller_v1",
+    "scientific_question": "Can a PMO population controller combine task-blind route-scale dependency jumps, ordinary exploration, FiberControl allocation, and recursive descendants without restarting from frozen parents?",
+    "tasks": ["gsk3b", "perindopril_mpo", "celecoxib_rediscovery"],
+    "task_roles": {
+      "gsk3b": "highest-priority basin-discovery black-box test",
+      "perindopril_mpo": "jump then multi-generation descendant-refinement stress",
+      "celecoxib_rediscovery": "long-program reachability and debugging control"
+    },
+    "initialization": {
+      "path": "diagnostics/parent_edit_cycles/prepared/init_20260921.json",
+      "sha256": "a1f7840df1f75567565de633c4df3d013c3165df3e43cbf2ac87b156d5f206ff",
+      "lock_sha256": "c8032311daa067628048679465fb4397d2a26bf0593143e3ed0a4cbec7195478",
+      "source_sha256": "b679b4dc54006acf570fefb80f49d83a46c18c979c9e376fdd4d37b2cec5f860",
+      "count": 16,
+      "task_independent": true,
+      "all_scores_charged": true
+    },
+    "joint_checkpoint": {
+      "path": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json",
+      "sha256": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43",
+      "payload_sha256": "730bc905c128b9feb802262e1f98bdcb6479431b88347a05defb26c2b84fab35",
+      "fit_scope": "shared_all_routes"
+    },
+    "controller": {
+      "seed": 20260920,
+      "program_max_primitives": 32,
+      "program_max_blocks": 8,
+      "calls_per_task": 1000,
+      "queries_per_round": 16,
+      "max_rounds": 64,
+      "proposal_modes": ["global_explore", "jump_from_elite", "refine_elite"],
+      "continuous_retention": [0.0, 1.0],
+      "recursive_archive": true,
+      "early_family_niche_floor": true,
+      "plateau_escape": true,
+      "task_conditioning_in_proposal_law": false
+    },
+    "oracle": {
+      "adapter": "native PyTDC Oracle(name=task)",
+      "environment": {
+        "pytdc": "1.1.15",
+        "rdkit": "2023.09.6",
+        "numpy": "1.26.4",
+        "scikit_learn": "1.2.2",
+        "pandas": "2.1.4",
+        "scipy": "1.15.0",
+        "seaborn": "0.13.2",
+        "requests": "2.32.4",
+        "setuptools": "75.6.0"
+      },
+      "source_files": {
+        "pytdc_metadata": "0925dc34498dd5502429c6d278be70758f1d536417af9cc95392c28e014fe6e6",
+        "tdc_oracles_py": "d2b2194e3573eb620759998e83d8803eacfd5cbd00531e862ebe3283c301cabe",
+        "tdc_oracle_py": "211be401ec5f3c06ddca37e72064bbeb4de52437b218bb3f4a4a381eec1de1f5"
+      },
+      "direction": "maximize",
+      "prescreen": false,
+      "calls_include_initialization": true
+    },
+    "implementation_sha256": {
+      "src/compose_v4/control/pmo_population_controller.py": "9108e0fcfe1b6478964c875a213bef438a89f9b44589bd6de313442bca7ccec9",
+      "src/compose_v4/control/adaptive_program_optimizer.py": "dabaff25d07654abebafa3ed42ecc3c454f2d16287bd2a0f2c52f440ed7c04c7",
+      "src/compose_v4/control/program_campaign.py": "884f13cbbe49c06a94aafb59880daf38f313b6f4717af012c1fe8eb9074c469e",
+      "src/compose_v4/experiments/pmo_population_v1.py": "a46e105573557af2e9b4fdf9f08ba6399c88f912ebb4e16bcf73d8d6e5e26056",
+      "src/compose_v4/experiments/pmo_population_live_parent_gate.py": "518045a7941e5073ed75abfe0d0098d3d98c11f5267b2d217895a0fb40c095c5"
+    },
+    "promotion": {
+      "ivg_targets_postrun_only": {"celecoxib_rediscovery": 0.798, "gsk3b": 0.952, "perindopril_mpo": 0.645},
+      "require_beating_two_of_three": true,
+      "third_within": 0.02,
+      "require_route_scale_descendant_lineage": true,
+      "official_10000_call_claim": false
+    },
+    "scored_launch_authorized": false,
+    "modal_launch_authorized": false,
+    "oracle_calls_authorized": 0,
+    "prohibitions": [
+      "no oracle or Modal call under this preflight contract",
+      "no task-to-route or task-to-endpoint lookup",
+      "no frozen-parent restart described as recursive search",
+      "no T4 artifact changes"
+    ]
+  },
+  "payload_sha256": "bf0ab7de1f4b99c93465b3c11259f05e7cf90da6cddbe6108d6351bd890b22db"
+}
