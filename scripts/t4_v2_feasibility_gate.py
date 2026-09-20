@@ -120,6 +120,16 @@ def summarise_arm(result: dict) -> dict:
     sim_qed = [row for row in sim_pass if row["qed_ok"]]
     eligible = result["eligible"]
     unique_eligible = {row["smiles"]: row for row in eligible}
+    # The UNFILTERED benchmark pool, recomputed from the rows so the filter's cost is
+    # visible in the same artifact that reports what it kept.
+    unique_benchmark = {
+        row["smiles"]: row for row in reached if row.get("benchmark_eligible")
+    }
+    pathological_benchmark = {
+        smiles: row
+        for smiles, row in unique_benchmark.items()
+        if not row.get("chemistry_sane", True)
+    }
     scaffolds = set()
     for smiles in unique_eligible:
         molecule = Chem.MolFromSmiles(smiles)
@@ -141,6 +151,18 @@ def summarise_arm(result: dict) -> dict:
             "similarity_and_qed_pass": len(sim_qed),
             "all_three_pass": sum(1 for row in sim_qed if row["sa_ok"]),
             "eligible": len(unique_eligible),
+        },
+        "chemistry_filter": {
+            "enabled": result["arm"].get("chemistry_filter"),
+            "prune_pathological_parents": result["arm"].get("prune_pathological_parents"),
+            "benchmark_eligible_distinct": len(unique_benchmark),
+            "clean_eligible_distinct": len(unique_benchmark) - len(pathological_benchmark),
+            "pathological_eligible_distinct": len(pathological_benchmark),
+            "motif_census": result.get("pathological_motif_census", {}),
+            "removed_examples": [
+                {"smiles": smiles, "motifs": row["pathological_motifs"]}
+                for smiles, row in list(pathological_benchmark.items())[:6]
+            ],
         },
         "distinct_eligible_scaffolds": len(scaffolds),
         "gate_reconstruction_disagreements": result["gate_reconstruction_disagreements"],
@@ -176,7 +198,10 @@ def summarise_arm(result: dict) -> dict:
 
 
 def run_cell(cell: str, smiles: str, audit: dict, *, budget: int, seed: int,
-             ablate: bool) -> dict:
+             ablate: bool, arms: tuple[str, ...] = tuple(ARMS),
+             chemistry_filter: bool = True,
+             prune_pathological_parents: bool = True,
+             attribution: bool = True) -> dict:
     started = time.time()
     payload: dict = {
         "cell": cell,
@@ -187,17 +212,26 @@ def run_cell(cell: str, smiles: str, audit: dict, *, budget: int, seed: int,
         "arms": {},
         "h_component_freeze": {},
     }
-    payload["attribution"] = law.attribute_failure(
-        smiles, 0.6, v1_endpoint_sample(audit, cell)
-    )
+    if attribution:
+        payload["attribution"] = law.attribute_failure(
+            smiles, 0.6, v1_endpoint_sample(audit, cell)
+        )
+    filter_kwargs = {
+        "chemistry_filter": chemistry_filter,
+        "prune_pathological_parents": prune_pathological_parents,
+    }
     for name, configuration in ARMS.items():
-        result = law.run_search(smiles, 0.6, budget=budget, seed=seed, **configuration)
+        if name not in arms:
+            continue
+        result = law.run_search(
+            smiles, 0.6, budget=budget, seed=seed, **configuration, **filter_kwargs
+        )
         payload["arms"][name] = summarise_arm(result)
         payload.setdefault("slot_preflight", result["slot_preflight"])
     if ablate:
         for component in FREEZES:
             result = law.run_search(
-                smiles, 0.6, budget=budget, seed=seed, frozen=(component,)
+                smiles, 0.6, budget=budget, seed=seed, frozen=(component,), **filter_kwargs
             )
             payload["h_component_freeze"][component] = summarise_arm(result)["funnel"]
     payload["elapsed_seconds"] = round(time.time() - started, 2)
@@ -211,6 +245,19 @@ def main() -> None:
     parser.add_argument("--budget", type=int, default=6000)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--ablate", action="store_true")
+    parser.add_argument("--arms", default=",".join(ARMS))
+    parser.add_argument(
+        "--no-chemistry-filter",
+        action="store_true",
+        help="run the proposal law WITHOUT the pathological-motif filter (the baseline arm)",
+    )
+    parser.add_argument(
+        "--keep-pathological-parents",
+        action="store_true",
+        help="filter what is EMITTED but still allow the search to grow out of a "
+             "pathological intermediate",
+    )
+    parser.add_argument("--no-attribution", action="store_true")
     parser.add_argument("--out", required=True)
     parser.add_argument("--shards", default="")
     # Explicit, because the shard directory may be shared with other work: a bare
@@ -236,6 +283,8 @@ def main() -> None:
             "schema_version": law.SCHEMA_VERSION,
             "budget": arguments.budget,
             "seed": arguments.seed,
+            "chemistry_filter": not arguments.no_chemistry_filter,
+            "prune_pathological_parents": not arguments.keep_pathological_parents,
             "cells": {},
         }
         for cell in cells:
@@ -246,6 +295,10 @@ def main() -> None:
                 budget=arguments.budget,
                 seed=arguments.seed,
                 ablate=arguments.ablate,
+                arms=tuple(a for a in arguments.arms.split(",") if a),
+                chemistry_filter=not arguments.no_chemistry_filter,
+                prune_pathological_parents=not arguments.keep_pathological_parents,
+                attribution=not arguments.no_attribution,
             )
             print(f"[{cell}] done", flush=True)
         Path(arguments.out).write_text(json.dumps(payload, indent=1, default=str))

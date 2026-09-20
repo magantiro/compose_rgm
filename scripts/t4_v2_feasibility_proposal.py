@@ -110,6 +110,59 @@ TCHEBYCHEFF_LAMBDA = 0.05
 #: A fragment smaller than this is not a molecule anyone would return.
 MIN_FRAGMENT_HEAVY = 5
 
+#: NARROW chemistry-sanity filter over heteroatom-halogen bonds.
+#:
+#: This is NOT a med-chem rulebook and it is NOT a halogen ban.  It removes exactly the
+#: motifs that are chemically pathological as isolated small-molecule substructures --
+#: hypohalites and N-halo/S-halo species (``C(=O)OF`` acyl hypofluorite, ``C(=O)OCl``,
+#: ``CCN(F)`` N-fluoroamine, aryl ``OF``) and halogenated imidoyl carbons
+#: (``C(=N)F`` / ``C(=N)Cl``).  Every one of them is a heteroatom-HALOGEN bond or an
+#: imine-carbon halide; NONE of them is a carbon-halogen bond.
+#:
+#: Ordinary medicinal-chemistry halogen chemistry is deliberately untouched: C-F, aryl-F,
+#: CF3, fluoroethyl, aryl-Cl, aryl-Br, alkyl halides and acyl halides all match nothing
+#: here, because every pattern requires the halogen to sit on N, O or S, or on an
+#: sp2 carbon that is DOUBLE-BONDED TO NITROGEN.
+#:
+#: The filter narrows what the PROPOSER emits.  It is not part of the benchmark gate:
+#: the published thresholds (sim >= delta, QED >= 0.6, SA <= 4.0) and ``Fiber.check`` are
+#: untouched, and every row still records the unfiltered benchmark verdict so the two can
+#: never be confused.
+PATHOLOGICAL_MOTIF_SMARTS = (
+    ("N-F", "[N;!$(N=O)]-[F]"),
+    ("O-F", "[O]-[F]"),
+    ("S-F", "[S]-[F]"),
+    ("N-Cl", "[N]-[Cl]"),
+    ("O-Cl", "[O]-[Cl]"),
+    ("S-Cl", "[S]-[Cl]"),
+    ("N-Br", "[N]-[Br]"),
+    ("O-Br", "[O]-[Br]"),
+    ("C(=N)-halogen", "[CX3](=[NX2])-[F,Cl,Br,I]"),
+)
+
+_PATHOLOGICAL_PATTERNS: tuple[tuple[str, object], ...] = tuple(
+    (name, Chem.MolFromSmarts(smarts)) for name, smarts in PATHOLOGICAL_MOTIF_SMARTS
+)
+for _name, _pattern in _PATHOLOGICAL_PATTERNS:
+    if _pattern is None:  # pragma: no cover -- a malformed SMARTS must never be silent
+        raise RuntimeError(f"pathological motif SMARTS failed to compile: {_name}")
+
+
+def pathological_motifs(mol) -> tuple[str, ...]:
+    """Names of the pathological heteroatom-halogen motifs present in ``mol``."""
+
+    if mol is None:
+        return ()
+    return tuple(
+        name for name, pattern in _PATHOLOGICAL_PATTERNS if mol.HasSubstructMatch(pattern)
+    )
+
+
+def chemistry_sane(mol) -> bool:
+    """True when the molecule carries none of the pathological motifs."""
+
+    return not pathological_motifs(mol)
+
 MODES = ("prune", "replace", "remodel", "grow")
 
 #: Scale buckets, in heavy atoms touched by one program.
@@ -211,9 +264,17 @@ class FeasibilityContext:
     ``Fiber.check`` on every row.
     """
 
-    def __init__(self, source_smiles: str, delta: float, *, support: str = "compose_valid"):
+    def __init__(
+        self,
+        source_smiles: str,
+        delta: float,
+        *,
+        support: str = "compose_valid",
+        chemistry_filter: bool = True,
+    ):
         self.source_smiles = source_smiles
         self.delta = delta
+        self.chemistry_filter = chemistry_filter
         self.fiber = Fiber(source_smiles, delta, support=support)
         self.source_mol = Chem.MolFromSmiles(source_smiles)
         if self.source_mol is None:
@@ -223,6 +284,10 @@ class FeasibilityContext:
         self.cache: dict[str, dict] = {}
         self.gate_calls = 0
         self.disagreements = 0
+        #: Benchmark-eligible endpoints REMOVED by the chemistry filter.  Counted so the
+        #: cost of the filter is always visible next to what it keeps.
+        self.filtered_pathological = 0
+        self.motif_census: dict[str, int] = {}
 
     # -- preflight --
 
@@ -337,9 +402,23 @@ class FeasibilityContext:
         row["all_three"] = True
         ok = bool(structurally_valid(smiles))
         row["med_chem_ok"] = ok
+        # The UNFILTERED verdict.  This is what ``Fiber.check`` reconstructs and what the
+        # published benchmark gate means; the chemistry filter never moves it.
+        row["benchmark_eligible"] = ok
+        self._cross_check(smiles, ok)
+        motifs = pathological_motifs(mol)
+        row["pathological_motifs"] = list(motifs)
+        row["chemistry_sane"] = not motifs
+        if ok and motifs:
+            self.filtered_pathological += 1
+            for name in motifs:
+                self.motif_census[name] = self.motif_census.get(name, 0) + 1
+        if self.chemistry_filter and motifs:
+            row["stage"] = "chemistry_sanity" if ok else "med_chem_valid"
+            row["eligible"] = False
+            return row
         row["stage"] = "eligible" if ok else "med_chem_valid"
         row["eligible"] = ok
-        self._cross_check(smiles, ok)
         return row
 
     def _cross_check(self, smiles: str, verdict: bool) -> None:
@@ -734,6 +813,8 @@ def run_search(
     restart_probability: float = 0.08,
     support: str = "compose_valid",
     max_steps: int = 40000,
+    chemistry_filter: bool = True,
+    prune_pathological_parents: bool = True,
 ) -> dict:
     """Budgeted feasible-proposal search from one source.  Zero oracle calls.
 
@@ -742,7 +823,9 @@ def run_search(
     """
 
     rng = random.Random(seed)
-    context = FeasibilityContext(source_smiles, delta, support=support)
+    context = FeasibilityContext(
+        source_smiles, delta, support=support, chemistry_filter=chemistry_filter
+    )
     preflight = context.slot_preflight()
 
     root_row = context.evaluate(Chem.MolToSmiles(context.source_mol))
@@ -812,6 +895,14 @@ def run_search(
             if row["eligible"]:
                 eligible.append(row)
                 mode_census_eligible[meta["mode"]] += 1
+            if (
+                chemistry_filter
+                and prune_pathological_parents
+                and not row.get("chemistry_sane", True)
+            ):
+                # Do not grow the search out of a molecule nobody would make.  The gate
+                # call is still spent, so the budget accounting is unchanged.
+                continue
             molecule = Chem.MolFromSmiles(smiles)
             if molecule is not None:
                 children.append((Node(smiles, molecule, child_head, parent.depth + 1), utility))
@@ -849,12 +940,16 @@ def run_search(
             "frozen": list(frozen),
             "budget": budget,
             "seed": seed,
+            "chemistry_filter": chemistry_filter,
+            "prune_pathological_parents": prune_pathological_parents,
         },
         "rows": rows,
         "eligible": eligible,
         "steps": steps,
         "gate_calls": context.gate_calls,
         "gate_reconstruction_disagreements": context.disagreements,
+        "benchmark_eligible_filtered_out": context.filtered_pathological,
+        "pathological_motif_census": dict(sorted(context.motif_census.items())),
         "mode_census": mode_census,
         "mode_census_eligible": mode_census_eligible,
         "policy_contexts": len({key[0] for key in policy.stats}),
