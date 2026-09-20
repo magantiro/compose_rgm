@@ -43,7 +43,10 @@ image = (
         "mkdir -p /opt/dock/receptors",
         f"curl --fail -sSL -o /opt/dock/qvina02 {MOOD}/qvina02",
         "chmod +x /opt/dock/qvina02",
-        f"curl --fail -sSL -o {RECEPTOR_PATH} {MOOD}/receptors/{RECEPTOR_NAME}.pdbqt",
+        *[
+            f"curl --fail -sSL -o /opt/dock/receptors/{name}.pdbqt {MOOD}/receptors/{name}.pdbqt"
+            for name in ("parp1", "jak2", "braf", "5ht1b", "fa7")
+        ],
     )
     .add_local_dir(ROOT / "src", str(REMOTE / "src"), copy=True, ignore=["**/__pycache__/**"])
     .add_local_file(ROOT / CONTRACT, str(REMOTE / CONTRACT), copy=True)
@@ -65,6 +68,7 @@ image = (
             "COMPOSE_HELD_CHECKPOINT": CHECKPOINT,
             "COMPOSE_HELD_VOLUME": VOLUME_NAME,
             "COMPOSE_HELD_OUTPUT": str(OUTPUT),
+            "COMPOSE_HELD_RECEPTOR_NAME": RECEPTOR_NAME,
             "OMP_NUM_THREADS": "1",
             "OPENBLAS_NUM_THREADS": "1",
         }
