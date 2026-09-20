@@ -1,0 +1,203 @@
+{
+  "payload": {
+    "batch": 8,
+    "causal_ablation_status": "dormant unless the conditional striking-result trigger in AGENTS.md activates",
+    "cells": [
+      {
+        "cell": "fa7_0",
+        "controller_seed": 2026091903,
+        "smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+        "source_global_index": 3
+      },
+      {
+        "cell": "fa7_1",
+        "controller_seed": 2026091904,
+        "smiles": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+        "source_global_index": 4
+      },
+      {
+        "cell": "fa7_2",
+        "controller_seed": 2026091905,
+        "smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+        "source_global_index": 5
+      }
+    ],
+    "central_claim_under_test": "the same frozen held-target controller can use the broader delta=0.4 corridor to match or exceed reported InVirtuoGen fa7 utility",
+    "charged_calls_per_cell": 250,
+    "claim_boundary": "held-target fa7 panel at delta 0.4 with 250 charged calls per cell; no fa7 route enters the prior",
+    "declared_support": "connected neutral charge-preserving 2D molecular graphs in the existing COMPOSE vocabulary with at most 40 active atoms, exact protected programs of at most 32 primitives, no stereochemical or formal-charge editing, and strict endpoint similarity, QED and SA gates",
+    "delta": 0.4,
+    "docking_box": [
+      [
+        10.131,
+        41.879,
+        32.097
+      ],
+      [
+        20.673,
+        20.198,
+        21.362
+      ]
+    ],
+    "docking_seed": 20260919,
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "bfd705fb8220c52e1b447afce23a3810bc6deddb06983e98a2b0934b24ba092d"
+    },
+    "experimental_setting": "prospective three-cell fa7 delta=0.4 held-target panel; fixed 250-call ceiling per cell; candidate exhaustion and abstention are valid outcomes; this is the paired delta=0.4 arm of the frozen fa7 delta=0.6 250-call contract and differs from it in the similarity corridor alone",
+    "expert_floor_rounds": 2,
+    "exploration": 2,
+    "frozen_from": {
+      "allowed_adapter_changes": [
+        "leave-fa7-out route checkpoint",
+        "fa7 cells and docking evaluator",
+        "held-target delta=0.4 output namespace",
+        "delta=0.4 payload-bound contract identity"
+      ],
+      "controller_contract": "configs/t4_shared_retained_fiber_fa7_d06_v1.json"
+    },
+    "paired_delta_arm": {
+      "delta_0_6_contract": "configs/t4_held_target_distilled_fa7_d06_250.json",
+      "delta_0_6_contract_payload_sha256": "cb34d1d1ecfec41d683dbfe18b082aeb4dc65b0f0dbf8baae9d7186d097cc5ef",
+      "inherited_unchanged": [
+        "cells",
+        "proposal",
+        "parents",
+        "parent_explore",
+        "exploration",
+        "expert_floor_rounds",
+        "batch",
+        "value_penalty",
+        "support",
+        "docking_box",
+        "docking_seed",
+        "evaluator_sha256",
+        "charged_calls_per_cell",
+        "total_charged_call_ceiling"
+      ],
+      "only_executable_change": "delta 0.6 -> 0.4"
+    },
+    "parent_explore": 0.3,
+    "parents": 4,
+    "phase_poll_seconds": 5,
+    "primary_baselines": "read-only measured roots and the authoritative published InVirtuoGen delta=0.4 table resolved by exact (target, seed_index, delta) identity; no comparator value enters runtime",
+    "primary_model_output": "FiberControl selection over complete shallow, anchored, and leave-target-out route programs",
+    "prior_operational_waste": 0,
+    "proposal": {
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "route_complete_region": {
+        "beam_width": 48,
+        "expansion_width": 48,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "pool_size": 64,
+        "realization_limit": 64,
+        "scale_balanced": true,
+        "training_scope": "one shared task-independent expert fit on all 77 locked routes",
+        "training_split": "leave-fa7-out"
+      },
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      }
+    },
+    "proposal_wait_seconds": 2400,
+    "query_wait_seconds": 1200,
+    "reported_ivg": {
+      "delta": 0.6,
+      "means": {
+        "fa7_0": -7.7,
+        "fa7_1": -7.5,
+        "fa7_2": -7.4
+      },
+      "uncertainty": {
+        "fa7_0": 0.4,
+        "fa7_1": 0.3,
+        "fa7_2": 0.4
+      }
+    },
+    "reported_ivg_delta_0_4": {
+      "fa7_0": -8.4,
+      "fa7_1": -8.9,
+      "fa7_2": -8.0
+    },
+    "reported_ivg_source": {
+      "aggregation": "published InVirtuoGen per-cell mean, used only after the run for read-only comparison",
+      "artifact": "configs/t4_published_invirtuogen_baseline.json",
+      "artifact_sha256": "b2945ec50fd20b8aff0f69d25ed4663f8cc97cc0ca10cebb86b47ce3ed3c8dab",
+      "join": "exact (target, seed_index, delta=0.4) identity, resolved in code",
+      "sign_convention": "docking score, more negative is better; gap = COMPOSE - IVG, negative means COMPOSE wins",
+      "supersedes": "CSV-derived values in configs/t4_frozen_program_benchmark.json must not be substituted"
+    },
+    "round_lock_policy": {
+      "automatic_retries": 0,
+      "continue_after_deadline_with_unresolved_calls_charged": true,
+      "never_resubmit_reserved_or_missing_query_receipt": true,
+      "no_backfill": true,
+      "per_expert_proposal_receipts": true,
+      "per_query_receipts": true,
+      "publish_before_docking": true,
+      "resume_complete_receipts_only": true
+    },
+    "route_scale_floor_rounds": 2,
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_held_target_distillation_quality_v1/fa7_checkpoint.json": "c86bd1a58b747e9807cfb4ad6171b39e668eb0db2d01c6bcef6ad991994270a0",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "modal_apps/t4_integrated_route_fiber_parp1_app.py": "aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3",
+      "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+      "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "092eb28b6a115a328be7f94ab115317b8f9c196b1f510aaed7a216911cee215e",
+      "src/compose_v4/control/structural_subgoal_policy.py": "d45a2f6b92a69f7462f6c1e2cd5523bc529cedb0a24e5a993aa714a2ade3d2b4",
+      "src/compose_v4/control/structural_subgoal_realizer.py": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_integrated_route_fiber.py": "0c8de5f5607c7b73d5da327f09ccd150ffdc37b741686e7095a12cf905740007",
+      "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "aeee1616ed67c5af77de7da8eae4519ddedda929618286d6d966868d543503ed"
+    },
+    "schema_version": "t4_held_target_distilled_fa7_d04_250_contract_v1",
+    "scientific_problem": "test transfer of a route-trained structural-action prior to fa7 with every fa7 route excluded from fitting",
+    "status": "AUTHORIZED_BY_OWNER_FOR_250_CALL_DELTA_0_4_PANEL",
+    "support": "compose_valid",
+    "total_charged_call_ceiling": 750,
+    "value_penalty": 1.0,
+    "zero_oracle_route_support": {
+      "artifact": "diagnostics/t4_held_target_distillation_quality_v1/fa7_smoke.json",
+      "artifact_sha256": "b8f89d6669263bff366f7289c7343bcfad374d6b7d8ae665a30c632179b978cc",
+      "interpretation": "support outcome is preserved and is not treated as oracle evidence",
+      "result": "leave-fa7-out route support artifact is frozen for the scored panel"
+    },
+    "zero_oracle_support": {
+      "artifacts": [
+        {
+          "complete_programs": 75,
+          "eligible_delta_0_4": 8,
+          "eligible_delta_0_6": 2,
+          "path": "diagnostics/t4_shared_retained_rewrite_v1/shards/fa7_0.json",
+          "sha256": "4920bb3ea0ca36bea44b572fa6a5bd97125ae60ca044ade04f79eeeef1c81864"
+        },
+        {
+          "complete_programs": 89,
+          "eligible_delta_0_4": 8,
+          "eligible_delta_0_6": 1,
+          "path": "diagnostics/t4_shared_retained_rewrite_v1/shards/fa7_1.json",
+          "sha256": "28096af5fd72e46878e1365435e18cfbeb035cf36d456ab7787f65e57c6ad5d3"
+        },
+        {
+          "complete_programs": 84,
+          "eligible_delta_0_4": 15,
+          "eligible_delta_0_6": 4,
+          "path": "diagnostics/t4_shared_retained_fiber_fa7_preflight/fa7_2.json",
+          "sha256": "986c801613b7df5326297fb65b8963c609508237070e2ff4deffce4f010198cd"
+        }
+      ],
+      "checkpoint_payload_sha256": "5476be572dd40ee3f068cc8f1df238eec54e23a82cb84f803905ac891701e07d",
+      "result": "all three FA7 cells emitted exact small, medium and large protected programs; strict eligible counts were 8, 8 and 15 at delta 0.4 and 2, 1 and 4 at delta 0.6"
+    }
+  },
+  "payload_sha256": "d2276882179afb134ea53ec44665864fff56a6febed248a30039e0233c3687a0"
+}
