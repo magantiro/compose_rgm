@@ -1185,5 +1185,146 @@
   "controls_regressed": [],
   "max_gate_reconstruction_disagreements": 0,
   "passed": true
+ },
+ "standalone_finding": {
+  "claim": "Five T4 delta=0.6 cells that return ZERO eligible endpoints under the production three-expert proposal law have ample clean eligible support under a feasibility-conditioned proposal law, recoverable inside a bounded proposal budget at negligible wall-clock cost and at zero oracle cost.",
+  "independent_of": "any launch decision, any runtime, and any docking call",
+  "evidence": {
+   "production_law_baseline": "0 of 6,140-9,527 distinct endpoints jointly pass sim>=delta, QED>=0.6 and SA<=4.0 for each of the five cells, and 0 eligible in each of the three lanes (diagnostics/t4_support_stage_audit_v1.json, which calls the production functions with the production arguments)",
+   "feasibility_law_support": {
+    "braf_0": 39,
+    "braf_1": 226,
+    "fa7_0": 5,
+    "fa7_2": 16,
+    "5ht1b_2": 4
+   },
+   "controls_do_not_regress": {
+    "braf_2": [
+     3,
+     100
+    ],
+    "fa7_1": [
+     7,
+     218
+    ],
+    "5ht1b_0": [
+     38,
+     158
+    ],
+    "5ht1b_1": [
+     28,
+     87
+    ]
+   },
+   "bounded_recovery": {
+    "braf_0@d06": {
+     "delta": 0.6,
+     "proposals_to_first_clean": 1523,
+     "proposals_to_k_clean": 1618,
+     "stage_for_k_clean": "stage_3_cum_1792",
+     "within_ceiling": true,
+     "clean_eligible_total": 109,
+     "distinct_scaffolds_in_first_k": 1,
+     "wall_seconds": 90.7,
+     "clean_yield_per_1k": 13.73,
+     "proposals_evaluated": 7936
+    },
+    "braf_1@d06": {
+     "delta": 0.6,
+     "proposals_to_first_clean": 41,
+     "proposals_to_k_clean": 49,
+     "stage_for_k_clean": "stage_1_cum_256",
+     "within_ceiling": true,
+     "clean_eligible_total": 560,
+     "distinct_scaffolds_in_first_k": 1,
+     "wall_seconds": 88.0,
+     "clean_yield_per_1k": 70.56,
+     "proposals_evaluated": 7936
+    },
+    "fa7_0@d06": {
+     "delta": 0.6,
+     "proposals_to_first_clean": 504,
+     "proposals_to_k_clean": 1977,
+     "stage_for_k_clean": "stage_4_cum_3840",
+     "within_ceiling": true,
+     "clean_eligible_total": 5,
+     "distinct_scaffolds_in_first_k": 1,
+     "wall_seconds": 78.2,
+     "clean_yield_per_1k": 0.63,
+     "proposals_evaluated": 7936
+    },
+    "fa7_2@d06": {
+     "delta": 0.6,
+     "proposals_to_first_clean": 180,
+     "proposals_to_k_clean": 382,
+     "stage_for_k_clean": "stage_2_cum_768",
+     "within_ceiling": true,
+     "clean_eligible_total": 58,
+     "distinct_scaffolds_in_first_k": 1,
+     "wall_seconds": 92.2,
+     "clean_yield_per_1k": 7.31,
+     "proposals_evaluated": 7936
+    },
+    "5ht1b_2@d06": {
+     "delta": 0.6,
+     "proposals_to_first_clean": 396,
+     "proposals_to_k_clean": 848,
+     "stage_for_k_clean": "stage_3_cum_1792",
+     "within_ceiling": true,
+     "clean_eligible_total": 5,
+     "distinct_scaffolds_in_first_k": 2,
+     "wall_seconds": 81.9,
+     "clean_yield_per_1k": 0.63,
+     "proposals_evaluated": 7936
+    },
+    "fa7_2@d04": {
+     "delta": 0.4,
+     "proposals_to_first_clean": 137,
+     "proposals_to_k_clean": 184,
+     "stage_for_k_clean": "stage_1_cum_256",
+     "within_ceiling": true,
+     "clean_eligible_total": 1518,
+     "distinct_scaffolds_in_first_k": 1,
+     "wall_seconds": 89.6,
+     "clean_yield_per_1k": 191.28,
+     "proposals_evaluated": 7936
+    }
+   },
+   "delta_0_4_replication": {
+    "cell": "fa7_2",
+    "production_eligible": 0,
+    "arms": {
+     "unfiltered": {
+      "eligible": 318,
+      "scaffolds": 20,
+      "disagreements": 0
+     },
+     "filtered": {
+      "eligible": 304,
+      "scaffolds": 21,
+      "disagreements": 0
+     }
+    }
+   },
+   "filter_specificity": {
+    "real_drug_like_molecules": 1326,
+    "containing_F_Cl_Br_I": 460,
+    "flagged_false_positives": 0,
+    "source": "configs/benchmarks/jin_iclr19_qed_test_exact_v1.csv"
+   },
+   "wall_clock_reference_one_docking_round_seconds": [
+    639,
+    764,
+    960,
+    1093,
+    1321
+   ]
+  },
+  "limits": [
+   "the feasibility law lives in scripts/ and is NOT wired into any production runtime, so this is a statement about the FIBER's support, not about a controller's realised behaviour",
+   "eligible support is not the same as a good docking score; nothing here predicts the scored outcome",
+   "K=4 distinct canonical endpoints buys only ONE Murcko scaffold for five of the six cells, so distinctness is not diversity here",
+   "fa7_0 holds only 5 clean endpoints in 7,936 proposals and reaches K=4 at 1,977, in the last ladder stage -- it is a genuinely hard instance, not a comfortable pass"
+  ]
  }
 }

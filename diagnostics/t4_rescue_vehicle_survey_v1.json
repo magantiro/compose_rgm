@@ -14,8 +14,8 @@
  ],
  "reconciled_budgets": {
   "braf_0_d06": 248,
-  "braf_1_d06": 249,
-  "fa7_0_d06": 249,
+  "braf_1_d06": 248,
+  "fa7_0_d06": 248,
   "fa7_2_d06": 248,
   "5ht1b_2_d06": 248,
   "fa7_2_d04": 249
@@ -107,10 +107,14 @@
  "authorization_requirement": {
   "mechanism": "validate_scored_contract requires a payload-bound authorization envelope whose user_statement names the exact contract payload sha256, the per-cell cap and the total cap",
   "example_existing_statement_field": "user_statement",
-  "consequence": "a rescue contract has a NEW payload hash and NEW caps, so it needs a NEW first-person user authorization naming that hash. This is a user action; it cannot be authored on the user's behalf, and an agent instruction is not a substitute for it."
+  "consequence": "a rescue contract has a NEW payload hash and NEW caps, so it needs a NEW first-person user authorization naming that hash. This is a user action; it cannot be authored on the user's behalf, and an agent instruction is not a substitute for it.",
+  "user_statement_template": "I authorize the six-cell T4 rescue campaign under scored-contract payload SHA-256 <COMPUTED_AFTER_THE_CONTRACT_MODULE_EXISTS>, capped at 248 charged docking calls each for braf_0_d06, braf_1_d06, fa7_0_d06, fa7_2_d06 and 5ht1b_2_d06 and 249 for fa7_2_d04, 1489 total, with zero retry, replacement, backfill, prior-outcome reuse, winner injection, endpoint injection, teacher injection, or runtime comparator.",
+  "why_the_hash_is_a_placeholder": "the payload sha256 is a function of the contract module's pinned constants, the source-capsule manifest and the bound support-gate hashes, none of which exist yet. Quoting a hash now would be false precision: it would change the moment the module is written, and an authorization naming a stale hash fails closed at validate time."
  },
  "launch_decision": {
   "launched": false,
   "docking_calls_spent": 0
- }
+ },
+ "reconciled_budgets_source": "lock-derived; see diagnostics/t4_rescue_launch_preflight_v1.json",
+ "total_authorizable_calls": 1489
 }
