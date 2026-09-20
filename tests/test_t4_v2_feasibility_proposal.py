@@ -255,3 +255,100 @@ def test_every_arm_and_freeze_the_report_claims_is_actually_run():
     row = context.evaluate(Chem.MolToSmiles(context.source_mol))
     assert set(gate.FREEZES) <= set(row["headroom"].z())
     assert set(gate.FAILED) & set(gate.CONTROLS) == set()
+
+
+# ---- Narrow chemistry-sanity filter ----
+
+#: Motifs no chemist would make, one per SMARTS in the table.  Each is a heteroatom-halogen
+#: bond or a halogenated imine carbon.
+PATHOLOGICAL = (
+    ("CC(=O)OF", "O-F"),
+    ("CC(=O)OCl", "O-Cl"),
+    ("c1ccccc1OF", "O-F"),
+    ("CCN(F)CC", "N-F"),
+    ("CCN(Cl)C", "N-Cl"),
+    ("CCN(Br)C", "N-Br"),
+    ("CCOBr", "O-Br"),
+    ("CCSF", "S-F"),
+    ("CCSCl", "S-Cl"),
+    ("CC(=N)F", "C(=N)-halogen"),
+    ("CC(=NC)Cl", "C(=N)-halogen"),
+)
+
+#: Ordinary medicinal chemistry that must survive.  Every entry carries a halogen, so a
+#: filter that merely banned F or Cl would fail this list outright.
+ORDINARY_HALOGEN_CHEMISTRY = (
+    "Fc1ccccc1",
+    "FC(F)(F)c1ccccc1",
+    "CCF",
+    "Clc1ccccc1",
+    "Brc1ccccc1",
+    "Ic1ccccc1",
+    "CCCCl",
+    "CC(=O)Cl",
+    "Oc1ccc(F)cc1",
+    "FC(F)Oc1ccccc1",
+    "O=c1[nH]cc(F)c(=O)[nH]1",
+    "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+    "CCN(CC)CCCC(C)Nc1ccnc2cc(Cl)ccc12",
+)
+
+
+@pytest.mark.parametrize(("smiles", "motif"), PATHOLOGICAL)
+def test_pathological_heteroatom_halogen_motifs_are_named(smiles, motif):
+    assert motif in law.pathological_motifs(_mol(smiles))
+    assert not law.chemistry_sane(_mol(smiles))
+
+
+@pytest.mark.parametrize("smiles", ORDINARY_HALOGEN_CHEMISTRY)
+def test_ordinary_halogen_chemistry_is_untouched(smiles):
+    """The filter is not a halogen ban: every probe here carries F, Cl, Br or I."""
+
+    molecule = _mol(smiles)
+    assert any(atom.GetSymbol() in {"F", "Cl", "Br", "I"} for atom in molecule.GetAtoms())
+    assert law.pathological_motifs(molecule) == ()
+    assert law.chemistry_sane(molecule)
+
+
+def test_every_declared_smarts_compiles_and_is_exercised():
+    """A table entry nothing tests is a table entry that can rot."""
+
+    declared = {name for name, _ in law.PATHOLOGICAL_MOTIF_SMARTS}
+    assert len(declared) == len(law.PATHOLOGICAL_MOTIF_SMARTS)
+    assert all(pattern is not None for _, pattern in law._PATHOLOGICAL_PATTERNS)
+    assert declared == {motif for _, motif in PATHOLOGICAL}
+
+
+def test_the_filter_narrows_the_proposer_and_never_the_benchmark_gate():
+    """``eligible`` may shrink; the Fiber verdict recorded beside it must not move."""
+
+    unfiltered = law.run_search(PROBE, 0.6, budget=160, seed=3, chemistry_filter=False)
+    filtered = law.run_search(PROBE, 0.6, budget=160, seed=3, chemistry_filter=True)
+    for result in (unfiltered, filtered):
+        assert result["gate_reconstruction_disagreements"] == 0
+        for row in result["rows"]:
+            if not row.get("reached_gate") or "benchmark_eligible" not in row:
+                continue
+            # The published gate is sim/QED/SA plus the production med-chem gate, and the
+            # filter is applied strictly after it -- never instead of it.
+            assert row["benchmark_eligible"] == (
+                row["sim_ok"] and row["qed_ok"] and row["sa_ok"] and row["med_chem_ok"]
+            )
+            if row["eligible"]:
+                assert row["benchmark_eligible"]
+
+
+def test_a_filtered_run_emits_no_pathological_endpoint():
+    result = law.run_search(PROBE, 0.6, budget=240, seed=5, chemistry_filter=True)
+    assert all(law.chemistry_sane(_mol(row["smiles"])) for row in result["eligible"])
+
+
+def test_disabling_the_filter_reproduces_the_unfiltered_pool_exactly():
+    """Filter OFF must be behaviour-preserving, so the baseline stays comparable."""
+
+    first = law.run_search(PROBE, 0.6, budget=200, seed=7, chemistry_filter=False)
+    second = law.run_search(PROBE, 0.6, budget=200, seed=7, chemistry_filter=False)
+    assert [row["smiles"] for row in first["eligible"]] == [
+        row["smiles"] for row in second["eligible"]
+    ]
+    assert first["gate_calls"] == second["gate_calls"]

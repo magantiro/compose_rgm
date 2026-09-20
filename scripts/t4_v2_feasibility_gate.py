@@ -198,7 +198,7 @@ def summarise_arm(result: dict) -> dict:
 
 
 def run_cell(cell: str, smiles: str, audit: dict, *, budget: int, seed: int,
-             ablate: bool, arms: tuple[str, ...] = tuple(ARMS),
+             ablate: bool, delta: float = 0.6, arms: tuple[str, ...] = tuple(ARMS),
              chemistry_filter: bool = True,
              prune_pathological_parents: bool = True,
              attribution: bool = True) -> dict:
@@ -206,6 +206,10 @@ def run_cell(cell: str, smiles: str, audit: dict, *, budget: int, seed: int,
     payload: dict = {
         "cell": cell,
         "source_smiles": smiles,
+        # The OPERATIVE similarity corridor.  ``v1`` below is the delta=0.6 audit, so a
+        # run at another delta must not be read as a paired before/after against it.
+        "delta": delta,
+        "v1_reference_delta": 0.6,
         "observed_status": audit["cells"][cell]["observed_status"],
         "source": audit["cells"][cell]["source"],
         "v1": v1_funnel(audit, cell),
@@ -214,7 +218,7 @@ def run_cell(cell: str, smiles: str, audit: dict, *, budget: int, seed: int,
     }
     if attribution:
         payload["attribution"] = law.attribute_failure(
-            smiles, 0.6, v1_endpoint_sample(audit, cell)
+            smiles, delta, v1_endpoint_sample(audit, cell)
         )
     filter_kwargs = {
         "chemistry_filter": chemistry_filter,
@@ -224,14 +228,14 @@ def run_cell(cell: str, smiles: str, audit: dict, *, budget: int, seed: int,
         if name not in arms:
             continue
         result = law.run_search(
-            smiles, 0.6, budget=budget, seed=seed, **configuration, **filter_kwargs
+            smiles, delta, budget=budget, seed=seed, **configuration, **filter_kwargs
         )
         payload["arms"][name] = summarise_arm(result)
         payload.setdefault("slot_preflight", result["slot_preflight"])
     if ablate:
         for component in FREEZES:
             result = law.run_search(
-                smiles, 0.6, budget=budget, seed=seed, frozen=(component,), **filter_kwargs
+                smiles, delta, budget=budget, seed=seed, frozen=(component,), **filter_kwargs
             )
             payload["h_component_freeze"][component] = summarise_arm(result)["funnel"]
     payload["elapsed_seconds"] = round(time.time() - started, 2)
@@ -240,7 +244,7 @@ def run_cell(cell: str, smiles: str, audit: dict, *, budget: int, seed: int,
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("stage", choices=("run", "reduce", "sensitivity"))
+    parser.add_argument("stage", choices=("run", "reduce", "sensitivity", "fallback"))
     parser.add_argument("--cells", default="")
     parser.add_argument("--budget", type=int, default=6000)
     parser.add_argument("--seed", type=int, default=1)
@@ -258,6 +262,12 @@ def main() -> None:
              "pathological intermediate",
     )
     parser.add_argument("--no-attribution", action="store_true")
+    parser.add_argument(
+        "--delta",
+        type=float,
+        default=0.6,
+        help="the OPERATIVE similarity corridor the fiber is built with",
+    )
     parser.add_argument("--out", required=True)
     parser.add_argument("--shards", default="")
     # Explicit, because the shard directory may be shared with other work: a bare
@@ -267,6 +277,26 @@ def main() -> None:
     arguments = parser.parse_args()
 
     audit = load_v1()
+    if arguments.stage == "fallback":
+        sources = v1_sources(audit)
+        payload = {
+            "schema_version": "t4_v2_bounded_support_expansion_v1",
+            "generated": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "oracle_calls": 0,
+            "docking_calls": 0,
+            "delta": arguments.delta,
+            "seed": arguments.seed,
+            "ladder": list(EXPANSION_LADDER),
+            "k_required": EXPANSION_K,
+            "cells": {},
+        }
+        for cell in (c for c in arguments.cells.split(",") if c):
+            payload["cells"][cell] = expansion_fallback(
+                cell, sources[cell], delta=arguments.delta, seed=arguments.seed
+            )
+            print(f"[{cell}] {json.dumps(payload['cells'][cell]['proposals_to_k_clean'])}", flush=True)
+        Path(arguments.out).write_text(json.dumps(payload, indent=1, default=str) + "\n")
+        return
     if arguments.stage == "sensitivity":
         sources = v1_sources(audit)
         cells = [cell for cell in arguments.cells.split(",") if cell]
@@ -283,6 +313,7 @@ def main() -> None:
             "schema_version": law.SCHEMA_VERSION,
             "budget": arguments.budget,
             "seed": arguments.seed,
+            "delta": arguments.delta,
             "chemistry_filter": not arguments.no_chemistry_filter,
             "prune_pathological_parents": not arguments.keep_pathological_parents,
             "cells": {},
@@ -295,6 +326,7 @@ def main() -> None:
                 budget=arguments.budget,
                 seed=arguments.seed,
                 ablate=arguments.ablate,
+                delta=arguments.delta,
                 arms=tuple(a for a in arguments.arms.split(",") if a),
                 chemistry_filter=not arguments.no_chemistry_filter,
                 prune_pathological_parents=not arguments.keep_pathological_parents,
@@ -370,6 +402,94 @@ def cross_check_attributions(merged: dict) -> dict:
             row["region_law_best_smiles"] = (arms.get("both") or {}).get("best_eligible_smiles")
         out["per_cell"][cell] = row
     return out
+
+
+#: The bounded support-expansion ladder, in ADDITIONAL distinct endpoint evaluations per
+#: stage.  Cumulative ceiling 3,840; the trailing 4096 block is a diagnostic extension for
+#: a cell still at literally zero support after the ceiling, never the default.
+EXPANSION_LADDER = (256, 512, 1024, 2048)
+EXPANSION_OVERRUN_BLOCK = 4096
+
+#: Distinct CLEAN eligible endpoints required before the expansion stops.  Deliberately
+#: above one: a cell must not qualify on a single boundary molecule.
+EXPANSION_K = 4
+
+
+def expansion_fallback(cell: str, smiles: str, *, delta: float, seed: int,
+                       allow_overrun: bool = True) -> dict:
+    """Cost of recovering K clean eligible endpoints by bounded proposal expansion.
+
+    One search is run to the ceiling and the ladder is read off it, rather than restarting
+    per stage: an expansion that threw away the previous stage's work would overstate the
+    cost of every stage after the first.  ``proposals`` are DISTINCT endpoint evaluations,
+    which is the same denominator the funnel uses, and no oracle call is made.
+    """
+
+    ceiling = sum(EXPANSION_LADDER)
+    budget = ceiling + (EXPANSION_OVERRUN_BLOCK if allow_overrun else 0)
+    started = time.time()
+    result = law.run_search(smiles, delta, budget=budget, seed=seed)
+    elapsed = time.time() - started
+
+    # Cache insertion order is evaluation order, and one new SMILES is exactly one gate
+    # call, so a row's position in that order IS the proposal count at which it was found.
+    order = {row["smiles"]: index + 1 for index, row in enumerate(result["rows"])}
+    clean = sorted({row["smiles"] for row in result["eligible"]}, key=lambda s: order[s])
+    at = [order[s] for s in clean]
+
+    def stage_of(count: int | None) -> str | None:
+        if count is None:
+            return None
+        used = 0
+        for index, block in enumerate(EXPANSION_LADDER):
+            used += block
+            if count <= used:
+                return f"stage_{index + 1}_cum_{used}"
+        return f"overrun_cum_{ceiling + EXPANSION_OVERRUN_BLOCK}"
+
+    first = at[0] if at else None
+    kth = at[EXPANSION_K - 1] if len(at) >= EXPANSION_K else None
+    scaffolds = set()
+    for endpoint in clean[: max(EXPANSION_K, 1)]:
+        molecule = Chem.MolFromSmiles(endpoint)
+        if molecule is None:
+            continue
+        try:
+            scaffolds.add(MurckoScaffold.MurckoScaffoldSmiles(mol=molecule))
+        except (ValueError, RuntimeError):
+            pass
+    return {
+        "cell": cell,
+        "delta": delta,
+        "seed": seed,
+        "ladder": list(EXPANSION_LADDER),
+        "cumulative_ceiling": ceiling,
+        "overrun_block": EXPANSION_OVERRUN_BLOCK if allow_overrun else 0,
+        "proposals_evaluated": result["gate_calls"],
+        "k_required": EXPANSION_K,
+        "proposals_to_first_clean": first,
+        "proposals_to_k_clean": kth,
+        "stage_for_first_clean": stage_of(first),
+        "stage_for_k_clean": stage_of(kth),
+        "within_ceiling": bool(kth is not None and kth <= ceiling),
+        "clean_eligible_total": len(clean),
+        "distinct_scaffolds_in_first_k": len(scaffolds),
+        "wall_seconds": round(elapsed, 1),
+        "seconds_per_1k_proposals": round(1000.0 * elapsed / max(result["gate_calls"], 1), 1),
+        "clean_yield_per_1k": round(1000.0 * len(clean) / max(result["gate_calls"], 1), 2),
+        "gate_reconstruction_disagreements": result["gate_reconstruction_disagreements"],
+        "benchmark_eligible_filtered_out": result["benchmark_eligible_filtered_out"],
+        "first_k_witnesses": [
+            {
+                "smiles": endpoint,
+                "found_at_proposal": order[endpoint],
+                "qed": round(result["rows"][order[endpoint] - 1]["qed"], 4),
+                "similarity": round(result["rows"][order[endpoint] - 1]["similarity"], 4),
+                "sa": round(result["rows"][order[endpoint] - 1]["sa"], 3),
+            }
+            for endpoint in clean[:EXPANSION_K]
+        ],
+    }
 
 
 def gate_verdict(merged: dict) -> dict:

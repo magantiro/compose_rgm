@@ -1,0 +1,558 @@
+{
+ "schema_version": "t4_rescue_launch_preflight_v1",
+ "generated": "2026-09-20T19:15:47",
+ "oracle_calls_spent_by_this_work": 0,
+ "docking_calls_spent_by_this_work": 0,
+ "sign_convention": "docking score: MORE NEGATIVE IS BETTER. gap = COMPOSE - IVG; a NEGATIVE gap means COMPOSE wins. seed-relative columns use the same convention against the measured root score.",
+ "cumulative_oracle_ledger": {
+  "ceiling_per_cell": 250,
+  "method": "read from the campaign Modal volumes' summary.json and per-cell result.json; no run was modified, resumed or relaunched",
+  "cells": {
+   "braf_0": {
+    "delta": 0.6,
+    "runs": [
+     {
+      "run_id": "6bb679e5cd0ec30416993daf29630c509eff9474c9c5fdfa39472665d9fa6517",
+      "contract_payload_sha256": "86d960f50c0070eb96d3b241f3294480e47d985058f9cdf1d031fc9266d3a0e9",
+      "status": "candidate_exhaustion",
+      "charged_calls": 1,
+      "root_score": -9.6
+     },
+     {
+      "run_id": "a383552caac2952a601ce96f03e36310eef7a78629e0951e8039b2158632fd6b",
+      "contract_payload_sha256": "86d960f50c0070eb96d3b241f3294480e47d985058f9cdf1d031fc9266d3a0e9",
+      "status": "candidate_exhaustion",
+      "charged_calls": 1,
+      "root_score": -9.5
+     }
+    ],
+    "charged_calls_cumulative": 2,
+    "remaining_against_250_ceiling": 248,
+    "root_scores_observed": [
+     -9.6,
+     -9.5
+    ],
+    "root_score_spread": 0.1,
+    "best_root_score": -9.6,
+    "published_ivg": -9.7,
+    "ivg_minus_seed": -0.1
+   },
+   "braf_1": {
+    "delta": 0.6,
+    "runs": [
+     {
+      "run_id": "6bb679e5cd0ec30416993daf29630c509eff9474c9c5fdfa39472665d9fa6517",
+      "contract_payload_sha256": "86d960f50c0070eb96d3b241f3294480e47d985058f9cdf1d031fc9266d3a0e9",
+      "status": "candidate_exhaustion",
+      "charged_calls": 1,
+      "root_score": -10.2
+     }
+    ],
+    "charged_calls_cumulative": 1,
+    "remaining_against_250_ceiling": 249,
+    "root_scores_observed": [
+     -10.2
+    ],
+    "root_score_spread": 0.0,
+    "best_root_score": -10.2,
+    "published_ivg": -10.4,
+    "ivg_minus_seed": -0.2
+   },
+   "fa7_0": {
+    "delta": 0.6,
+    "runs": [
+     {
+      "run_id": "71d3b6d96ecdb78ac6ad37a3ef3ee530c5ae1ba0b19897e38c7df6186cdc08e9",
+      "contract_payload_sha256": "935e577fcc9172b7ddf97dd73c0aee89f1a431f6f96f880a8c182414e2d939b2",
+      "status": "candidate_exhaustion",
+      "charged_calls": 1,
+      "root_score": -7.5
+     }
+    ],
+    "charged_calls_cumulative": 1,
+    "remaining_against_250_ceiling": 249,
+    "root_scores_observed": [
+     -7.5
+    ],
+    "root_score_spread": 0.0,
+    "best_root_score": -7.5,
+    "published_ivg": -7.7,
+    "ivg_minus_seed": -0.2
+   },
+   "fa7_2": {
+    "delta": 0.6,
+    "runs": [
+     {
+      "run_id": "71d3b6d96ecdb78ac6ad37a3ef3ee530c5ae1ba0b19897e38c7df6186cdc08e9",
+      "contract_payload_sha256": "935e577fcc9172b7ddf97dd73c0aee89f1a431f6f96f880a8c182414e2d939b2",
+      "status": "candidate_exhaustion",
+      "charged_calls": 1,
+      "root_score": -8.1
+     },
+     {
+      "run_id": "d907ab0b7a829e90ae482d2592f2ee834312a84469201a24b0df3177f7dfbf81",
+      "contract_payload_sha256": "80f472c8c26113a10e07952c479d3856baae9bf841e8930e61b1ed3993a0ba89",
+      "status": "candidate_exhaustion",
+      "charged_calls": 1,
+      "root_score": -7.7
+     }
+    ],
+    "charged_calls_cumulative": 2,
+    "remaining_against_250_ceiling": 248,
+    "root_scores_observed": [
+     -8.1,
+     -7.7
+    ],
+    "root_score_spread": 0.4,
+    "best_root_score": -8.1,
+    "published_ivg": -7.4,
+    "ivg_minus_seed": 0.7
+   },
+   "5ht1b_2": {
+    "delta": 0.6,
+    "runs": [
+     {
+      "run_id": "9332ca69134dbcf8b0358af9c7438d52fa24de1797683355a018060b6e6c5609",
+      "contract_payload_sha256": "4eb6019e0b3600efb48be1b43b0a628bbee155ed7243caa2826653d9af0e1bef",
+      "status": "candidate_exhaustion",
+      "charged_calls": 1,
+      "root_score": -9.7
+     },
+     {
+      "run_id": "5f08e547828dd27af91caa2266b3d7f7ec0053021e2695c9802585745f310b1b",
+      "contract_payload_sha256": "697a82c989cf62503e66bec887c4ca4163c0ee4c42913b82a2a4038c806fb528",
+      "status": "candidate_exhaustion",
+      "charged_calls": 1,
+      "root_score": -9.8
+     }
+    ],
+    "charged_calls_cumulative": 2,
+    "remaining_against_250_ceiling": 248,
+    "root_scores_observed": [
+     -9.7,
+     -9.8
+    ],
+    "root_score_spread": 0.1,
+    "best_root_score": -9.8,
+    "published_ivg": -10.6,
+    "ivg_minus_seed": -0.8
+   },
+   "fa7_2@d04": {
+    "delta": 0.4,
+    "runs": [
+     {
+      "run_id": "b710c7c68a352e84e443e3237ff018e86d78f5fd4ab8ce3a70b1794949092734",
+      "contract_payload_sha256": null,
+      "status": "candidate_exhaustion",
+      "charged_calls": 1,
+      "root_score": -8.4
+     }
+    ],
+    "charged_calls_cumulative": 1,
+    "remaining_against_250_ceiling": 249,
+    "root_scores_observed": [
+     -8.4
+    ],
+    "root_score_spread": 0.0,
+    "best_root_score": -8.4,
+    "published_ivg": null
+   }
+  },
+  "finding": "the authorization premise of one charged call per cell is WRONG for three of five: braf_0, fa7_2 and 5ht1b_2 each recorded TWO charged root calls across two runs, so a uniform 249 over-authorizes them by one call each"
+ },
+ "delta_0_4_support_check": {
+  "cell": "fa7_2",
+  "delta": 0.4,
+  "budget": 3000,
+  "v1_production_eligible": 0,
+  "arms": {
+   "unfiltered": {
+    "eligible": 318,
+    "reached_gate": 2997,
+    "scaffolds": 20,
+    "disagreements": 0,
+    "pathological": 18
+   },
+   "filtered": {
+    "eligible": 304,
+    "reached_gate": 2988,
+    "scaffolds": 21,
+    "disagreements": 0,
+    "pathological": 14
+   }
+  }
+ },
+ "bounded_support_expansion": {
+  "ladder": [
+   256,
+   512,
+   1024,
+   2048
+  ],
+  "cumulative_ceiling": 3840,
+  "overrun_block": 4096,
+  "k_required": 4,
+  "cells": {
+   "braf_0@d06": {
+    "cell": "braf_0",
+    "delta": 0.6,
+    "seed": 1,
+    "ladder": [
+     256,
+     512,
+     1024,
+     2048
+    ],
+    "cumulative_ceiling": 3840,
+    "overrun_block": 4096,
+    "proposals_evaluated": 7936,
+    "k_required": 4,
+    "proposals_to_first_clean": 1523,
+    "proposals_to_k_clean": 1618,
+    "stage_for_first_clean": "stage_3_cum_1792",
+    "stage_for_k_clean": "stage_3_cum_1792",
+    "within_ceiling": true,
+    "clean_eligible_total": 109,
+    "distinct_scaffolds_in_first_k": 1,
+    "wall_seconds": 90.7,
+    "seconds_per_1k_proposals": 11.4,
+    "clean_yield_per_1k": 13.73,
+    "gate_reconstruction_disagreements": 0,
+    "benchmark_eligible_filtered_out": 6,
+    "first_k_witnesses": [
+     {
+      "smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(N)c3)ccnc12",
+      "found_at_proposal": 1523,
+      "qed": 0.6355,
+      "similarity": 0.6316,
+      "sa": 2.414
+     },
+     {
+      "smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(O)c3)ccnc12",
+      "found_at_proposal": 1575,
+      "qed": 0.6802,
+      "similarity": 0.64,
+      "sa": 2.401
+     },
+     {
+      "smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(Cl)c3)ccnc12",
+      "found_at_proposal": 1593,
+      "qed": 0.6927,
+      "similarity": 0.6757,
+      "sa": 2.333
+     },
+     {
+      "smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(F)c3)ccnc12",
+      "found_at_proposal": 1618,
+      "qed": 0.7076,
+      "similarity": 0.6533,
+      "sa": 2.342
+     }
+    ]
+   },
+   "braf_1@d06": {
+    "cell": "braf_1",
+    "delta": 0.6,
+    "seed": 1,
+    "ladder": [
+     256,
+     512,
+     1024,
+     2048
+    ],
+    "cumulative_ceiling": 3840,
+    "overrun_block": 4096,
+    "proposals_evaluated": 7936,
+    "k_required": 4,
+    "proposals_to_first_clean": 41,
+    "proposals_to_k_clean": 49,
+    "stage_for_first_clean": "stage_1_cum_256",
+    "stage_for_k_clean": "stage_1_cum_256",
+    "within_ceiling": true,
+    "clean_eligible_total": 560,
+    "distinct_scaffolds_in_first_k": 1,
+    "wall_seconds": 88.0,
+    "seconds_per_1k_proposals": 11.1,
+    "clean_yield_per_1k": 70.56,
+    "gate_reconstruction_disagreements": 0,
+    "benchmark_eligible_filtered_out": 17,
+    "first_k_witnesses": [
+     {
+      "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccccc2)ccn1",
+      "found_at_proposal": 41,
+      "qed": 0.8783,
+      "similarity": 0.6232,
+      "sa": 1.997
+     },
+     {
+      "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccccc2C(F)(F)F)ccn1",
+      "found_at_proposal": 44,
+      "qed": 0.815,
+      "similarity": 0.6438,
+      "sa": 2.278
+     },
+     {
+      "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2cccc(C(F)(F)F)c2)ccn1",
+      "found_at_proposal": 46,
+      "qed": 0.815,
+      "similarity": 0.6301,
+      "sa": 2.25
+     },
+     {
+      "smiles": "CC(C)c1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+      "found_at_proposal": 49,
+      "qed": 0.8126,
+      "similarity": 0.625,
+      "sa": 2.135
+     }
+    ]
+   },
+   "fa7_0@d06": {
+    "cell": "fa7_0",
+    "delta": 0.6,
+    "seed": 1,
+    "ladder": [
+     256,
+     512,
+     1024,
+     2048
+    ],
+    "cumulative_ceiling": 3840,
+    "overrun_block": 4096,
+    "proposals_evaluated": 7936,
+    "k_required": 4,
+    "proposals_to_first_clean": 504,
+    "proposals_to_k_clean": 1977,
+    "stage_for_first_clean": "stage_2_cum_768",
+    "stage_for_k_clean": "stage_4_cum_3840",
+    "within_ceiling": true,
+    "clean_eligible_total": 5,
+    "distinct_scaffolds_in_first_k": 1,
+    "wall_seconds": 78.2,
+    "seconds_per_1k_proposals": 9.9,
+    "clean_yield_per_1k": 0.63,
+    "gate_reconstruction_disagreements": 0,
+    "benchmark_eligible_filtered_out": 4,
+    "first_k_witnesses": [
+     {
+      "smiles": "COC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1",
+      "found_at_proposal": 504,
+      "qed": 0.6264,
+      "similarity": 0.661,
+      "sa": 2.331
+     },
+     {
+      "smiles": "CSC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1",
+      "found_at_proposal": 828,
+      "qed": 0.6009,
+      "similarity": 0.661,
+      "sa": 2.598
+     },
+     {
+      "smiles": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)CF",
+      "found_at_proposal": 920,
+      "qed": 0.603,
+      "similarity": 0.661,
+      "sa": 2.467
+     },
+     {
+      "smiles": "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1",
+      "found_at_proposal": 1977,
+      "qed": 0.6328,
+      "similarity": 0.6964,
+      "sa": 2.266
+     }
+    ]
+   },
+   "fa7_2@d06": {
+    "cell": "fa7_2",
+    "delta": 0.6,
+    "seed": 1,
+    "ladder": [
+     256,
+     512,
+     1024,
+     2048
+    ],
+    "cumulative_ceiling": 3840,
+    "overrun_block": 4096,
+    "proposals_evaluated": 7936,
+    "k_required": 4,
+    "proposals_to_first_clean": 180,
+    "proposals_to_k_clean": 382,
+    "stage_for_first_clean": "stage_1_cum_256",
+    "stage_for_k_clean": "stage_2_cum_768",
+    "within_ceiling": true,
+    "clean_eligible_total": 58,
+    "distinct_scaffolds_in_first_k": 1,
+    "wall_seconds": 92.2,
+    "seconds_per_1k_proposals": 11.6,
+    "clean_yield_per_1k": 7.31,
+    "gate_reconstruction_disagreements": 0,
+    "benchmark_eligible_filtered_out": 7,
+    "first_k_witnesses": [
+     {
+      "smiles": "CCC(=O)Cn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O",
+      "found_at_proposal": 180,
+      "qed": 0.6563,
+      "similarity": 0.6515,
+      "sa": 2.667
+     },
+     {
+      "smiles": "CSC(=O)Cn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O",
+      "found_at_proposal": 272,
+      "qed": 0.6646,
+      "similarity": 0.6418,
+      "sa": 2.88
+     },
+     {
+      "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(Cl)c1=O",
+      "found_at_proposal": 356,
+      "qed": 0.752,
+      "similarity": 0.6094,
+      "sa": 2.812
+     },
+     {
+      "smiles": "CC(=O)Cn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O",
+      "found_at_proposal": 382,
+      "qed": 0.6929,
+      "similarity": 0.6719,
+      "sa": 2.599
+     }
+    ]
+   },
+   "5ht1b_2@d06": {
+    "cell": "5ht1b_2",
+    "delta": 0.6,
+    "seed": 1,
+    "ladder": [
+     256,
+     512,
+     1024,
+     2048
+    ],
+    "cumulative_ceiling": 3840,
+    "overrun_block": 4096,
+    "proposals_evaluated": 7936,
+    "k_required": 4,
+    "proposals_to_first_clean": 396,
+    "proposals_to_k_clean": 848,
+    "stage_for_first_clean": "stage_2_cum_768",
+    "stage_for_k_clean": "stage_3_cum_1792",
+    "within_ceiling": true,
+    "clean_eligible_total": 5,
+    "distinct_scaffolds_in_first_k": 2,
+    "wall_seconds": 81.9,
+    "seconds_per_1k_proposals": 10.3,
+    "clean_yield_per_1k": 0.63,
+    "gate_reconstruction_disagreements": 0,
+    "benchmark_eligible_filtered_out": 0,
+    "first_k_witnesses": [
+     {
+      "smiles": "C1=CC2=NC=C(CCCc3ccccc3)[C@H]2C=C1n1cnnc1",
+      "found_at_proposal": 396,
+      "qed": 0.8455,
+      "similarity": 0.6842,
+      "sa": 3.853
+     },
+     {
+      "smiles": "C1=CC2=NC=C(CCCCc3ccccc3)[C@H]2C=C1n1cnnc1",
+      "found_at_proposal": 548,
+      "qed": 0.7544,
+      "similarity": 0.6842,
+      "sa": 3.802
+     },
+     {
+      "smiles": "C1=CC2=NC=C(CCCc3ccccc3)C2C=C1n1cnnc1",
+      "found_at_proposal": 593,
+      "qed": 0.8455,
+      "similarity": 0.6842,
+      "sa": 3.853
+     },
+     {
+      "smiles": "C1=CC2=NC=C(CCCCc3ccccc3)C2C=C1n1cnnc1",
+      "found_at_proposal": 848,
+      "qed": 0.7544,
+      "similarity": 0.6842,
+      "sa": 3.802
+     }
+    ]
+   },
+   "fa7_2@d04": {
+    "cell": "fa7_2",
+    "delta": 0.4,
+    "seed": 1,
+    "ladder": [
+     256,
+     512,
+     1024,
+     2048
+    ],
+    "cumulative_ceiling": 3840,
+    "overrun_block": 4096,
+    "proposals_evaluated": 7936,
+    "k_required": 4,
+    "proposals_to_first_clean": 137,
+    "proposals_to_k_clean": 184,
+    "stage_for_first_clean": "stage_1_cum_256",
+    "stage_for_k_clean": "stage_1_cum_256",
+    "within_ceiling": true,
+    "clean_eligible_total": 1518,
+    "distinct_scaffolds_in_first_k": 1,
+    "wall_seconds": 89.6,
+    "seconds_per_1k_proposals": 11.3,
+    "clean_yield_per_1k": 191.28,
+    "gate_reconstruction_disagreements": 0,
+    "benchmark_eligible_filtered_out": 53,
+    "first_k_witnesses": [
+     {
+      "smiles": "Cc1ccc(-c2cccc(C(=O)O)c2)n(CC(=O)NCc2ccccc2)c1=O",
+      "found_at_proposal": 137,
+      "qed": 0.6924,
+      "similarity": 0.4722,
+      "sa": 2.036
+     },
+     {
+      "smiles": "CC(C)Cc1ccc(-c2ccccc2)n(CC(=O)NCc2ccccc2)c1=O",
+      "found_at_proposal": 138,
+      "qed": 0.6788,
+      "similarity": 0.4247,
+      "sa": 2.071
+     },
+     {
+      "smiles": "O=C(Cn1c(-c2cccc(C(=O)O)c2)cccc1=O)NCc1ccccc1",
+      "found_at_proposal": 139,
+      "qed": 0.7052,
+      "similarity": 0.411,
+      "sa": 1.997
+     },
+     {
+      "smiles": "Cc1ccc(-c2cccc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(F)(F)F)cc2)c1=O",
+      "found_at_proposal": 184,
+      "qed": 0.6045,
+      "similarity": 0.4487,
+      "sa": 2.267
+     }
+    ]
+   }
+  },
+  "wall_clock_reference_seconds_one_docking_round": [
+   639,
+   764,
+   960,
+   1093,
+   1321
+  ]
+ },
+ "launch_decision": {
+  "launched": false,
+  "reason": "the authorized launch vehicle cannot execute the repaired proposal law",
+  "evidence": [
+   "modal_apps/t4_integrated_route_fiber_parp1_app.py run_cell iterates the module constant EXPERTS = (shallow, anchored_replacement, route_complete_region); proposal_worker raises on any other expert name, and no contract field selects an expert vocabulary",
+   "the app image ships src/, the contract, the checkpoint, docs/GENMOL_T4_SEEDS.json and the app file itself -- scripts/ is NOT shipped, so scripts/t4_v2_feasibility_proposal.py does not exist in the container",
+   "scripts/t4_v2_feasibility_proposal.py is imported by nothing under src/, modal_apps/, tools/ or configs/",
+   "the zero-oracle audit reproduces the production three-expert law faithfully and finds 0 of 6,140-9,527 distinct endpoints jointly passing sim, QED and SA for all five cells, with 0 eligible in every lane",
+   "fa7_2 also exhausted at delta=0.4 with 1 charged call, so the deficit is not the similarity corridor"
+  ]
+ }
+}
