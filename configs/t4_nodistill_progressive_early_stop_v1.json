@@ -1,0 +1,81 @@
+{
+  "schema_version": "t4_nodistill_progressive_early_stop_contract_v1",
+  "contract_payload_sha256": "e4d698aed8a02ca3635eba0ff0f9aee0183a383db02ba695142c080afce40d45",
+  "status": "FROZEN_ZERO_ORACLE_DESIGN_ONLY",
+  "authorization": "User authorized stopping the frozen v4 scored app; this contract prepares a faster zero-oracle support revision and authorizes no scored or Modal launch.",
+  "lineage": {
+    "frozen_v4_contract": "configs/t4_nodistill_feasibility_headroom_gate_v4.json",
+    "frozen_v4_payload_sha256": "bede1c39cbd39fdea8c3a5981192bac98597b839bdb6bae1d0e1e886188816ae",
+    "stopped_app_id": "ap-cNHA9iwHL0M1NbUqgHbu9X",
+    "stopped_at": "2026-09-20T01:34:28-04:00",
+    "preserved_partial_run": "3a4c929ba4986e7d5e4c3cee81dd3706611ab904f669a99e938cd05dbaeae89f",
+    "sealed_v4_receipt": {
+      "cell": "5ht1b_1_d04",
+      "volume": "compose-t4-nodistill-feasibility-v4-5ht1b-1-d04",
+      "path": "3a4c929ba4986e7d5e4c3cee81dd3706611ab904f669a99e938cd05dbaeae89f/rounds/001/proposal_receipts/p00_generic_feasibility_headroom_v4.json",
+      "payload_sha256": "62ce053fda70af88f3d79308b15e5800e248b91d59bb703166b435c29c75616e",
+      "elapsed_seconds": 5156.253377199173,
+      "raw_exact_candidates": 176,
+      "eligible_unique": 164
+    }
+  },
+  "scientific_question": "Can the same route-free retained-interface and joint-STOP support be found with durable progressive plan shards that stop once a small diverse eligible lock exists, without teacher, target, cell, route, template, objective or oracle inputs?",
+  "generated_object": "complete exact-replay COMPOSE edit programs within 40 heavy atoms, 32 primitives and eight blocks",
+  "proposal": {
+    "initial_attempts_per_plan": 8,
+    "expansion_attempts_per_plan": [8, 16, 32, 64, 128],
+    "maximum_local_plans_per_source": 24,
+    "maximum_candidates_per_source": 192,
+    "stop_minimum_unique_eligible": 16,
+    "stop_maximum_locked_unique_eligible": 32,
+    "diversity_floors": {
+      "macro_plan_identities": 3,
+      "macro_modes": 3,
+      "structural_signatures": 3
+    },
+    "adaptive_expansion": "expand only after a complete durable plan receipt whose census fails the diverse lock; never backfill across plans or cells",
+    "candidate_order": "canonical endpoint key, then deterministic proposal rank",
+    "endpoint_admission": "shared free Fiber/archive admission after every autonomous producer for a stage completes"
+  },
+  "receipts": {
+    "schema": "t4_nodistill_progressive_plan_receipt_v1",
+    "unit": "one source-only plan shard and one progressive stage",
+    "write": "atomic self-hashed payload after exact replay and census",
+    "resume": "verify contract, source, plan, stage and payload hashes; skip only a complete valid receipt",
+    "required_fields": [
+      "contract_payload_sha256",
+      "plan_id",
+      "stage",
+      "attempts_per_plan",
+      "source_key_sha256",
+      "candidates",
+      "census",
+      "status"
+    ],
+    "incomplete_receipt_policy": "rerun only the missing independent plan stage after preserving the incomplete record"
+  },
+  "gates": {
+    "exact_replay_precision": 1.0,
+    "minimum_unique_eligible": 16,
+    "maximum_locked_unique_eligible": 32,
+    "all_programs_within_32_primitives_and_8_blocks": true,
+    "no_support_drift": true,
+    "no_teacher_or_objective_runtime_input": true,
+    "no_scored_call": true,
+    "no_modal_launch": true,
+    "failure": "preserve NO_SUPPORT or SUPPORT_SHORTFALL at the last complete stage; never weaken floors or inject a teacher"
+  },
+  "runtime": {
+    "allowed_inputs": ["current molecular graph", "generic numeric thresholds", "deterministic seed", "frozen plan settings"],
+    "forbidden_inputs": ["target", "cell", "teacher", "route", "route identifier", "template", "objective", "docking score", "teacher endpoint", "teacher action"],
+    "oracle_calls": 0,
+    "docking_calls": 0,
+    "modal_launch_authorized": false,
+    "scored_launch_authorized": false
+  },
+  "implementation": {
+    "policy_module": "src/compose_v4/control/progressive_early_stop_v1.py",
+    "policy_schema": "t4_nodistill_progressive_early_stop_v1",
+    "preserve_frozen_v4": true
+  }
+}
