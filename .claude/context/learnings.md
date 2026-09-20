@@ -1433,3 +1433,30 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   23** per-task values are transcribed, so no 23-task suite-sum comparison is possible yet. Record
   ABSENT rather than substituting the prescreened value; the two columns differ by a 250,000-call
   prescreen.
+
+## 2026-09-20 (an asset-backed oracle can fail silently for a whole budget)
+
+- **A TDC oracle that CONSTRUCTS is not an oracle that SCORES, and the gap cost a full 250-call
+  budget.** `Oracle("gsk3b")` loads its RandomForest **lazily on the first call**, from the
+  **relative** path `oracle/gsk3b_current.pkl`. `modal_apps/pmo_population_v1_app.py` chdirs into
+  the assets directory only around CONSTRUCTION and restores cwd in a `finally`, so every call
+  resolves that path against `/root`, raises `FileNotFoundError`, and TDC's `Oracle.__call__` has a
+  **bare `except:`** returning `default_property` = **0.0**. The module global is never set, so the
+  failing load repeats and is swallowed forever. Counterfactual on five known actives, same oracle
+  object / image / asset, differing only in cwd at call time: production pattern `[0.0]*5`, cwd held
+  during the call `[1.0]*5`. The asset was innocent -- sha256 matched the contract and the same
+  pickle loaded directly reproduced the frozen reference exactly.
+- **The zero-call smoke could not catch it, by construction.** The smoke set `oracle_called: False`
+  deliberately to avoid spending budget, and the defect lives in the lazy load on FIRST CALL.
+  "The oracle imports" was verified; "the oracle scores" never was. **FIX: any asset-backed oracle
+  needs a positive-control assertion before the first charged call -- a known ACTIVE must score > 0.**
+  A silent-by-construction defect is only caught by a nonzero expectation.
+- **Do not read an all-zero ledger as self-evidently broken.** On the frozen 400-molecule panel
+  **34% of random ZINC-like molecules genuinely score exactly 0.0** on this oracle (mean 0.028),
+  while **0% of known actives do**. The ledger distribution is NOT the tell; the positive control is.
+  Timing was a real signal though: 0.09-0.60 ms is parse + fingerprint + a FAILED `open()`, far too
+  fast for a 100-tree depth-78 forest (perindopril_mpo's 1.1 ms is genuine descriptor work).
+- **INFERRED blast radius:** `jnk3` and `drd2` share the relative-path lazy-load idiom and are
+  exposed to the same construct-then-restore-cwd pattern. Not measured. This bites the 5-task rung
+  (jnk3) and the 23-task rung. `perindopril_mpo` and `celecoxib_rediscovery` are pure-RDKit
+  evaluators with no asset file and no cwd dependency -- measured unaffected.

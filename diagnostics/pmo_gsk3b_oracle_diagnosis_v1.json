@@ -1,0 +1,1006 @@
+{
+  "artifacts": {
+    "entrypoints": [
+      "main: identity + positive control + fresh re-score",
+      "run_probe: evaluator binding + direct asset load",
+      "run_dissect: cwd counterfactual",
+      "run_swallow: exception + fallback constant"
+    ],
+    "probe_app": "tools/pmo_gsk3b_oracle_diagnosis_app.py"
+  },
+  "call_reconciliation": {
+    "authorized_budget_ledger_manifest": 250,
+    "candidate_calls": 234,
+    "charged_calls_result_json": 250,
+    "completed_oracle_calls": 250,
+    "distinct_canonical_endpoints": 250,
+    "explanation_of_251_vs_250": "the oracle directory holds manifest.json plus 250 query_NNNNNN directories; the 251 figure counted manifest.json as a row. There is NO 251st query and nothing was discarded.",
+    "failed_rows": 0,
+    "filesystem_entries_under_oracle_dir": 251,
+    "initialization_calls": 16,
+    "initialization_endpoints_match_init_file": true,
+    "ledger_rows": 250,
+    "query_indices": "0..249 contiguous, no gaps, all status=complete",
+    "reserved_calls": 250,
+    "unresolved_reservations": 0
+  },
+  "causal_chain": [
+    {
+      "measured": "Oracle(name='gsk3b') is constructed inside os.chdir(root/'diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets'); cwd is restored in the finally block",
+      "step": 1,
+      "where": "modal_apps/pmo_population_v1_app.py:146-151"
+    },
+    {
+      "measured": "the model is loaded LAZILY inside the CALL: if 'gsk3_model' not in globals(): gsk3_model = load_gsk3b_model()",
+      "step": 2,
+      "where": "tdc/chem_utils/oracle/oracle.py:667 gsk3b()"
+    },
+    {
+      "cwd_at_call_time": "/root",
+      "measured": "opens the RELATIVE path 'oracle/gsk3b_current.pkl', resolved against cwd at call time",
+      "relative_path_exists_from_that_cwd": false,
+      "step": 3,
+      "where": "tdc load_gsk3b_model()"
+    },
+    {
+      "measured": "FileNotFoundError: [Errno 2] No such file or directory: 'oracle/gsk3b_current.pkl'",
+      "note": "load_pickled_model catches only EOFError; FileNotFoundError propagates",
+      "step": 4,
+      "where": "tdc load_pickled_model()"
+    },
+    {
+      "default_property": 0.0,
+      "measured": "try: score = self.evaluator_func(...) / except: score = self.default_property -- a BARE except",
+      "normalize": "identity lambda",
+      "step": 5,
+      "where": "tdc Oracle.__call__ single-SMILES branch"
+    },
+    {
+      "measured": "the module global gsk3_model is NEVER set, so the failing load is retried and swallowed on every call",
+      "model_global_set_after_calls": false,
+      "step": 6,
+      "where": "tdc gsk3b()"
+    },
+    {
+      "measured": "COMPOSE records float(oracle(smiles)) faithfully; no exception ever reaches ProgramQueryLedger, so its fail-closed path is never armed",
+      "step": 7,
+      "where": "src/compose_v4/experiments/pmo_population_v1.py + control/program_campaign.py"
+    }
+  ],
+  "classification": {
+    "confidence": "decisive",
+    "genuine_discovery_failure_supported": false,
+    "one_line": "TDC loads the gsk3b forest lazily on the FIRST CALL from the relative path 'oracle/gsk3b_current.pkl', but the production app restores the working directory after CONSTRUCTING the oracle; the load raises FileNotFoundError on every call and TDC's bare except returns Oracle.default_property == 0.0",
+    "rule_matched": "known active scores 0 -> ORACLE/RUNTIME DEFECT",
+    "the_zero_carries_no_information_about_gsk3b_chemistry": true,
+    "verdict": "ORACLE_RUNTIME_DEFECT"
+  },
+  "corroborating_evidence": {
+    "base_rate_calibration": {
+      "gsk3b_actives_exact_zero_fraction": 0.0,
+      "interpretation": "exact 0.0 IS the modal outcome for a random drug-like molecule (34%), so an all-zero ledger is not self-evidently pathological -- which is why the positive control, not the ledger distribution, is the decisive test",
+      "note": "how often a random drug-like molecule genuinely scores exactly 0.0 on this oracle, from the frozen 400-molecule panel",
+      "zinc_background_n": 250,
+      "zinc_exact_zero_fraction": 0.34,
+      "zinc_mean": 0.028146666666666667
+    },
+    "blast_radius_inferred": "every TDC oracle that lazily loads a pickled asset by relative path is exposed under this construct-then-restore-cwd pattern: gsk3b, jnk3, drd2. INFERRED from the shared load_pickled_model relative-path idiom; only gsk3b was measured.",
+    "timing": {
+      "interpretation": "0.09-0.60 ms is RDKit parse + Morgan fingerprint + a FAILED open(); too fast for a 100-tree depth-78 forest traversal. The timing anomaly in the original observation was a true signal.",
+      "ledger_gsk3b_ms": {
+        "max": 0.5999260000066897,
+        "median": 0.2019654999685372,
+        "min": 0.09103600007165369
+      },
+      "perindopril_mpo_reported_ms": 1.1
+    },
+    "why_the_environment_smoke_missed_it": "modal_apps/pmo_environment_smoke_app.py sets oracle_called=False by design -- it constructs the oracle and discards it. The failure is in the LAZY load on first call, which construction never triggers.",
+    "why_the_two_live_tasks_are_unaffected": "perindopril_mpo and celecoxib_rediscovery use TDC evaluators that are pure RDKit arithmetic against a hardcoded reference SMILES and load NO asset file, so they have no cwd dependency. MEASURED for perindopril_mpo (tdc.chem_utils.oracle.oracle.perindopril_mpo, firstlineno 1113, no pickle). Both were left untouched."
+  },
+  "counterfactual_proof": {
+    "constructed_and_called_inside_assets": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "cwd_held_at_assets_during_call": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "description": "the SAME oracle object, same image, same asset, differing ONLY in the working directory at call time, on five molecules the frozen bundle records as known gsk3b actives",
+    "production_pattern_construct_in_assets_call_from_root": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "smiles": [
+      "O=C1NC(=O)C=2C=3C=4C(N(CCC=5N=C(N(C)C)C(CCCN6C=7C(C(C21)=C6)=CC=CC7)=CC5)C3)=CC=CC4",
+      "ClC=1N=C(N=C(C=2C=3C(NC2)=NC=CC3)C1)NC4CCC(NC(=O)NCC)CC4",
+      "C1(C2=CN(CCCO)C=3C2=CC=CN3)=C(C(=O)NC1=O)C4=NC=CC=C4",
+      "ClC1=NC(=NC(C=2C3=C(NC2)N=CC=C3)=C1)NC4C(N)CCCC4",
+      "FC(F)(F)C=1C=C(NC2=NC(C3=C4N(N=C3)N=C(OCC)C=C4)=CC=N2)C=CC1"
+    ]
+  },
+  "fresh_vs_ledger": {
+    "agreement": "the fresh production oracle reproduces the ledger EXACTLY (250/250 zeros) -> the COMPOSE wrapper is faithful; the independent reference implementation disagrees on 196/250 -> the recorded values are not the oracle's true output",
+    "distinct_fingerprints_in_sample": 32,
+    "identical_or_empty_feature_vector_failure": "RULED OUT -- 32/32 sampled molecules have distinct fingerprint digests, on-bit counts 11-86, all parse, canonical == input",
+    "method": "a freshly constructed Oracle('gsk3b') in the production image, outside the COMPOSE wrapper, plus an independent numpy reimplementation of the same 2048-bit TDC forest (compose_v4.benchmark.oracles.forest; parity max_abs_delta 0.0 on the 400-molecule panel, re-verified locally this session)",
+    "reference_forest_on_all_250": {
+      "max": 0.18,
+      "mean": 0.038906666666666666,
+      "n": 250,
+      "nonzero": 196
+    },
+    "rows": [
+      {
+        "canonical_smiles": "CC1CCC(C)(C(=O)N2CCCC(C)(C(=O)[O-])C2)O1",
+        "fingerprint_sha256": "dfd21cf6b398be3dd7757c49aa953f7a664bdeb59d799d290ac6ada65f3a73a9",
+        "formal_charge": -1,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 19,
+        "index": 0,
+        "input_smiles": "CC1CCC(C)(C(=O)N2CCCC(C)(C(=O)[O-])C2)O1",
+        "on_bits": 37,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0003261999999999432,
+        "reference_forest_score": 0.0,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CC1(C(=O)[O-])CCCN(C(=O)C2CCCO2)C1",
+        "fingerprint_sha256": "ecd9936effe241ae3473797608346af595f69655c26a2fa58f13055f38361ab1",
+        "formal_charge": -1,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 17,
+        "index": 1,
+        "input_smiles": "CC1(C(=O)[O-])CCCN(C(=O)C2CCCO2)C1",
+        "on_bits": 36,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0001722639999997,
+        "reference_forest_score": 0.0,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CCCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+        "fingerprint_sha256": "7887aad0c77b97daa42edafa66f68c864f01278c82150f9aedff09aff542ac8d",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 21,
+        "index": 2,
+        "input_smiles": "CCCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+        "on_bits": 36,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0001968510000001089,
+        "reference_forest_score": 0.0,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CCC(NC(=O)C1CCOCC1)c1cn(C)nc1C",
+        "fingerprint_sha256": "2391645ec602e9e10bd1f7bf5a730ef27ec6f212c96d8aa528a25188f5608967",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 19,
+        "index": 3,
+        "input_smiles": "CCC(NC(=O)C1CCOCC1)c1cn(C)nc1C",
+        "on_bits": 42,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00021256199999974967,
+        "reference_forest_score": 0.03,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)c1ccccc1",
+        "fingerprint_sha256": "55e5d41fe7f7f7db1032286df0f1a35f0544cc7bfb79c3b183daef809d796960",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 21,
+        "index": 4,
+        "input_smiles": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)c1ccccc1",
+        "on_bits": 38,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00022421899999969241,
+        "reference_forest_score": 0.01,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2ncnn2C)cn1",
+        "fingerprint_sha256": "1b6b9caaea8e88f82dbe8307bf1fe2648020021df26018e96fecc5be0bdeb435",
+        "formal_charge": -1,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 24,
+        "index": 5,
+        "input_smiles": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2ncnn2C)cn1",
+        "on_bits": 45,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0002538709999999611,
+        "reference_forest_score": 0.08,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3cccc(F)c3)cc2s1",
+        "fingerprint_sha256": "3f35047f4d11fac12f0a8e2bf1c939e510b93ca50683ea411de355060175a8f6",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 27,
+        "index": 6,
+        "input_smiles": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3cccc(F)c3)cc2s1",
+        "on_bits": 56,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00026076500000016267,
+        "reference_forest_score": 0.06,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CCC(CC#N)Nc1ccc(Br)cc1Cl",
+        "fingerprint_sha256": "334f9779bdcffccdafc30d80e21bb378dbbb7b7b045b6f498563708e60107f0d",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 15,
+        "index": 7,
+        "input_smiles": "CCC(CC#N)Nc1ccc(Br)cc1Cl",
+        "on_bits": 35,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00018546899999982713,
+        "reference_forest_score": 0.02,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+        "fingerprint_sha256": "9108994b16dbf8300ed9b9df2f3c7d6417b58f9844ce7b6723ccf66c341fbbdc",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 26,
+        "index": 8,
+        "input_smiles": "CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+        "on_bits": 50,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0002517879999999195,
+        "reference_forest_score": 0.03,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CC1(C(=O)[O-])CCCN(C(=O)C2(C)CCCO2)C1",
+        "fingerprint_sha256": "b11aaffbd7bbce3563d18e9cb80b36afe3f5dac01c095331d0bf6b20896f1b4a",
+        "formal_charge": -1,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 18,
+        "index": 9,
+        "input_smiles": "CC1(C(=O)[O-])CCCN(C(=O)C2(C)CCCO2)C1",
+        "on_bits": 35,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00019287299999959373,
+        "reference_forest_score": 0.0,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CC(Oc1ccccc1Cl)C(=O)N1CCC(C(=O)[O-])C1",
+        "fingerprint_sha256": "b12ee4bbbc7aeeba539040423fb5e9aa0d11e84d881fb1ad943953a0ad623273",
+        "formal_charge": -1,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 20,
+        "index": 10,
+        "input_smiles": "CC(Oc1ccccc1Cl)C(=O)N1CCC(C(=O)[O-])C1",
+        "on_bits": 42,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00021250100000003158,
+        "reference_forest_score": 0.01,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COC3CCCCC3)cc2s1",
+        "fingerprint_sha256": "440745c03e9477fa6898ee7f6936edfeeb53168137d674cf2b1f95e5f05802f7",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 26,
+        "index": 11,
+        "input_smiles": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COC3CCCCC3)cc2s1",
+        "on_bits": 53,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0002589109999995287,
+        "reference_forest_score": 0.06,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CC1C(C(=O)[O-])CCN1C(=O)COc1ccccc1Cl",
+        "fingerprint_sha256": "4b17fcefa1b4038d3b5d8e1e19dae7617413b232a75f670323c7dee32eb26aec",
+        "formal_charge": -1,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 20,
+        "index": 12,
+        "input_smiles": "CC1C(C(=O)[O-])CCN1C(=O)COc1ccccc1Cl",
+        "on_bits": 43,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0002083529999996614,
+        "reference_forest_score": 0.0,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "C=CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+        "fingerprint_sha256": "58615cd26574102929ca9b13037498ac294451c65f9f3e9e32f9223e44869221",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 21,
+        "index": 13,
+        "input_smiles": "C=CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+        "on_bits": 38,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00020763099999854262,
+        "reference_forest_score": 0.01,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CC(Oc1ccccc1)C(=O)N1CCC(C(=O)[O-])C1C",
+        "fingerprint_sha256": "6ec0957af8219764c42e02d1a478e4781a516b2fd8aceb3900ab05efd153e117",
+        "formal_charge": -1,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 20,
+        "index": 14,
+        "input_smiles": "CC(Oc1ccccc1)C(=O)N1CCC(C(=O)[O-])C1C",
+        "on_bits": 40,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00020854400000125395,
+        "reference_forest_score": 0.01,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CC1(C(=O)N2CCCC(F)(C(=O)[O-])C2)CCCO1",
+        "fingerprint_sha256": "2d3b9c532161db92625386aff24793bfcc2be4fb22abaa9f4b749f9088129b7d",
+        "formal_charge": -1,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 18,
+        "index": 15,
+        "input_smiles": "CC1(C(=O)N2CCCC(F)(C(=O)[O-])C2)CCCO1",
+        "on_bits": 37,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0001915300000003839,
+        "reference_forest_score": 0.01,
+        "role": "initialization"
+      },
+      {
+        "canonical_smiles": "CC[PH2](CC#N)Nc1c(Cl)cc(Br)cc1C1CCCO1",
+        "fingerprint_sha256": "b5abb01bfed3cbabfc18512ce9ef861b1afdd395ce1b952bdbc81d4fac92eba6",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 20,
+        "index": 16,
+        "input_smiles": "CC[PH2](CC#N)Nc1c(Cl)cc(Br)cc1C1CCCO1",
+        "on_bits": 47,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.000258680999998262,
+        "reference_forest_score": 0.07,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "CCC(C(=O)C#N)N1c2cc(Br)cc(Cl)c21",
+        "fingerprint_sha256": "1481ed056b589917f636e43905db07041b693d5d29d94079b615fdff45d19785",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 16,
+        "index": 17,
+        "input_smiles": "CCC(C(=O)C#N)N1c2cc(Br)cc(Cl)c21",
+        "on_bits": 37,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00020871299999924986,
+        "reference_forest_score": 0.01,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "N#CCC(CCO)NC1(C2CCCCC2)CCC(Br)(C2CCNC2)CC1Cl",
+        "fingerprint_sha256": "1b4d8e64149135da3d659b057fc0f1ae4dfa731d55240658d80bdfd18cb11c57",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 27,
+        "index": 40,
+        "input_smiles": "N#CCC(CCO)NC1(C2CCCCC2)CCC(Br)(C2CCNC2)CC1Cl",
+        "on_bits": 54,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.000212731000004851,
+        "reference_forest_score": 0.12,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "CCC(CC#N)Nc1nc(CN)c(Br)cc1Cl",
+        "fingerprint_sha256": "c39f6522e721082c507578800094c4c343682d2d32bed27fa998e779507adb4e",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 17,
+        "index": 44,
+        "input_smiles": "CCC(CC#N)Nc1nc(CN)c(Br)cc1Cl",
+        "on_bits": 41,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0001729850000060651,
+        "reference_forest_score": 0.15,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "C=C(Br)C=CC(=CCl)PC(CC#N)CN(CONOOO)C1CCNC1",
+        "fingerprint_sha256": "91e29efeaae95b4808d5c1450ae59c4eec73eceba009aff2264f7cf96b378841",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 26,
+        "index": 63,
+        "input_smiles": "C=C(Br)C=CC(=CCl)PC(CC#N)CN(CONOOO)C1CCNC1",
+        "on_bits": 61,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00017101099999194957,
+        "reference_forest_score": 0.18,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "C=C(Br)C=CCN[PH2](C(C)CC)C(C)C1(CC)C(=O)CCC1(C)C",
+        "fingerprint_sha256": "c95ff229db49b27d5e707d3628ea9c060e6172a7cee4c09e15415f0aaae236ee",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 24,
+        "index": 80,
+        "input_smiles": "C=C(Br)C=CCN[PH2](C(C)CC)C(C)C1(CC)C(=O)CCC1(C)C",
+        "on_bits": 49,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00039361099999268845,
+        "reference_forest_score": 0.04,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "C=[PH](Br)C=C(N)C(=CCl)NC(C(C#N)C12C(=O)CC(c3cocc31)C2(C)C)C(C)(C)CC",
+        "fingerprint_sha256": "6a140d682f1e6be591045c453dcee0f5af981c03e85d825ed5655956131c9426",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 32,
+        "index": 96,
+        "input_smiles": "C=[PH](Br)C=C(N)C(=CCl)NC(C(C#N)C12C(=O)CC(c3cocc31)C2(C)C)C(C)(C)CC",
+        "on_bits": 71,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0005999260000066897,
+        "reference_forest_score": 0.16,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "COCC(=O)Nc1ccc2[nH]c(=NC(=O)C(C)C)sc2c1",
+        "fingerprint_sha256": "f3c12efb6f032017ea83dac236a1d212e9d058fc15e8eb2e63076472adb3f25e",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 21,
+        "index": 120,
+        "input_smiles": "COCC(=O)Nc1ccc2[nH]c(=NC(=O)C(C)C)sc2c1",
+        "on_bits": 45,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00025782799997386974,
+        "reference_forest_score": 0.04,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "CC(C)C(=[IH3])N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+        "fingerprint_sha256": "a6047678dad8a035940b16fd8e59093f5443bbe4b049165a5beac8709cd2d835",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 26,
+        "index": 125,
+        "input_smiles": "CC(C)C(=[IH3])N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+        "on_bits": 52,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0005240230000254087,
+        "reference_forest_score": 0.03,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "CC12C3=C4C35C1C425",
+        "fingerprint_sha256": "fad04959debf31d1b7cfe7578728d5e282e0a587b2fdc9980e69ed0db37e3e80",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 7,
+        "index": 160,
+        "input_smiles": "CC12C3=C4C35C1C425",
+        "on_bits": 16,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00042742099992665317,
+        "reference_forest_score": 0.04,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "C=C(Br)C=C(N)C(=CCl)NC(C(C#N)C1(C(C)C)C(=O)c2c[nH]cc2C2COCC21)C([PH4])(CC)CC",
+        "fingerprint_sha256": "b62f8ce08861b17ed026bb8504221b9dafe5827b3a72101a4f34cbd496551f6a",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 36,
+        "index": 172,
+        "input_smiles": "C=C(Br)C=C(N)C(=CCl)NC(C(C#N)C1(C(C)C)C(=O)c2c[nH]cc2C2COCC21)C([PH4])(CC)CC",
+        "on_bits": 77,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0002726870000060444,
+        "reference_forest_score": 0.16,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "Cc1cccc(OCC(=O)N(C(=O)CBr)c2ccc3[nH]c(=N)sc3c2)c1",
+        "fingerprint_sha256": "5d4b8a32612676e91bd9ebb4dd1c6bdcaf11abdc7eee99843ff6948d10b6c09c",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 26,
+        "index": 200,
+        "input_smiles": "Cc1cccc(OCC(=O)N(C(=O)CBr)c2ccc3[nH]c(=N)sc3c2)c1",
+        "on_bits": 52,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00022256099998685386,
+        "reference_forest_score": 0.08,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "CC(C(C)C1(N)CNNC1)N(CF)C1CCC(Br)CC1",
+        "fingerprint_sha256": "fdeff777f41671cf45371fbb0061b3dcef8e004e17e002f62a14c2c239863e38",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 20,
+        "index": 238,
+        "input_smiles": "CC(C(C)C1(N)CNNC1)N(CF)C1CCC(Br)CC1",
+        "on_bits": 36,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00021796299995457957,
+        "reference_forest_score": 0.17,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "NCNOBN1NNC1NNN",
+        "fingerprint_sha256": "9ba5df9affa39f4d5fd2bc4dbc113954213a16888668fcdd670ebd4c10039fec",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 12,
+        "index": 240,
+        "input_smiles": "NCNOBN1NNC1NNN",
+        "on_bits": 30,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0003897220000226298,
+        "reference_forest_score": 0.03,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "BCC(C)=O",
+        "fingerprint_sha256": "40346408bdcd44883e6bf8454267a089109af22d4fa27c9c056a22c12e20c4b2",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 5,
+        "index": 245,
+        "input_smiles": "BCC(C)=O",
+        "on_bits": 11,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.00011494199998196564,
+        "reference_forest_score": 0.0,
+        "role": "candidate"
+      },
+      {
+        "canonical_smiles": "CCC(C)C(NC(=CCl)C(O)=CC(Br)CNN)C(C#N)C12C(=O)CC(c3nc(C)ccc31)C2(C)CC1CCNC1",
+        "fingerprint_sha256": "2876dbc57994f91a5317e6d0c594cc951c8933906d5ac0b007351cdd6bf668d6",
+        "formal_charge": 0,
+        "fresh_oracle_score": 0.0,
+        "heavy_atoms": 40,
+        "index": 249,
+        "input_smiles": "CCC(C)C(NC(=CCl)C(O)=CC(Br)CNN)C(C#N)C12C(=O)CC(c3nc(C)ccc31)C2(C)CC1CCNC1",
+        "on_bits": 86,
+        "parses": true,
+        "recorded_score": 0.0,
+        "recorded_seconds": 0.0002971249999745851,
+        "reference_forest_score": 0.1,
+        "role": "candidate"
+      }
+    ],
+    "sample_size": 32,
+    "whole_ledger_sweep_fresh_oracle": {
+      "distinct_values": 1,
+      "errors": 0,
+      "exact_zero": 250,
+      "max": 0.0,
+      "mean": 0.0,
+      "n": 250,
+      "nonzero": 0
+    },
+    "wrapper_defect_supported": false
+  },
+  "git_commit": "35880c142cfc90cee582d4b4124e29e60d5b4837",
+  "modal_profile": "rahul-94866",
+  "oracle_identity": {
+    "asset_direct_load": {
+      "classes_": [
+        0.0,
+        1.0
+      ],
+      "exists": true,
+      "loaded_module": "sklearn.ensemble._forest",
+      "loaded_type": "RandomForestClassifier",
+      "n_estimators": 100,
+      "n_outputs_": 1,
+      "path": "/root/compose/diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets/oracle/gsk3b_current.pkl"
+    },
+    "asset_files": {
+      "gsk3b_current.pkl": {
+        "bytes": 27791877,
+        "sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5"
+      }
+    },
+    "asset_is_correct_and_functional": true,
+    "asset_path": "/root/compose/diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets/oracle/gsk3b_current.pkl",
+    "asset_sha256_matches_contract": true,
+    "bound_evaluator": {
+      "file": "/usr/local/lib/python3.11/site-packages/tdc/chem_utils/oracle/oracle.py",
+      "firstlineno": 667,
+      "module": "tdc.chem_utils.oracle.oracle",
+      "qualname": "gsk3b"
+    },
+    "declared_contract_sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5",
+    "environment": {
+      "numpy": "1.26.4",
+      "pytdc": "unknown",
+      "python": "3.11.12",
+      "rdkit": "2023.09.6",
+      "sklearn": "1.2.2",
+      "tdc_module": "/usr/local/lib/python3.11/site-packages/tdc/__init__.py"
+    },
+    "exact_name_in_catalog": true,
+    "fuzzy_misresolution_occurred": false,
+    "fuzzy_note": "fuzzy_search('gsk3b') returns 'gsk3b' exactly (no Levenshtein fallback); Oracle.name becomes 'gsk3b_current' by TDC's own sklearn>=0.24 asset-naming rule, and assign_evaluator dispatches on substring 'gsk3b' in self.name, binding tdc.chem_utils.oracle.oracle.gsk3b -- the CORRECT evaluator",
+    "fuzzy_search_result": "gsk3b",
+    "pytdc_version": "1.1.15",
+    "requested_task_string": "gsk3b",
+    "tdc_resolved_name": "gsk3b_current"
+  },
+  "pmo_budget_charged_by_this_diagnostic": 0,
+  "positive_control": {
+    "interpretation": "every known active returns exactly 0.0 through Oracle('gsk3b'); the SAME molecules through the SAME pickle loaded directly reproduce the frozen reference exactly",
+    "known_actives_via_production_oracle_all_zero": true,
+    "n": 25,
+    "rows": [
+      {
+        "direct_asset_predict_proba_active": 1.0,
+        "frozen_reference_gsk3b": 1.0,
+        "group": "gsk3b_active",
+        "on_bits": 52,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00040618500000011437,
+        "smiles": "O=C1NC(=O)C=2C=3C=4C(N(CCC=5N=C(N(C)C)C(CCCN6C=7C(C(C21)=C6)=CC=CC7)=CC5)C3)=CC=CC4"
+      },
+      {
+        "direct_asset_predict_proba_active": 1.0,
+        "frozen_reference_gsk3b": 1.0,
+        "group": "gsk3b_active",
+        "on_bits": 57,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00022754000000002605,
+        "smiles": "ClC=1N=C(N=C(C=2C=3C(NC2)=NC=CC3)C1)NC4CCC(NC(=O)NCC)CC4"
+      },
+      {
+        "direct_asset_predict_proba_active": 1.0,
+        "frozen_reference_gsk3b": 1.0,
+        "group": "gsk3b_active",
+        "on_bits": 47,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00020433400000019475,
+        "smiles": "C1(C2=CN(CCCO)C=3C2=CC=CN3)=C(C(=O)NC1=O)C4=NC=CC=C4"
+      },
+      {
+        "direct_asset_predict_proba_active": 1.0,
+        "frozen_reference_gsk3b": 1.0,
+        "group": "gsk3b_active",
+        "on_bits": 50,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00019862400000025815,
+        "smiles": "ClC1=NC(=NC(C=2C3=C(NC2)N=CC=C3)=C1)NC4C(N)CCCC4"
+      },
+      {
+        "direct_asset_predict_proba_active": 1.0,
+        "frozen_reference_gsk3b": 1.0,
+        "group": "gsk3b_active",
+        "on_bits": 57,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00023747899999992939,
+        "smiles": "FC(F)(F)C=1C=C(NC2=NC(C3=C4N(N=C3)N=C(OCC)C=C4)=CC=N2)C=CC1"
+      },
+      {
+        "direct_asset_predict_proba_active": 1.0,
+        "frozen_reference_gsk3b": 1.0,
+        "group": "gsk3b_active",
+        "on_bits": 49,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00022302999999990192,
+        "smiles": "FC(F)(F)C=1C([C@@H]2C3C(=NC=4NN=C(C24)C)CC(CC3=O)(C)C)=CC=CC1"
+      },
+      {
+        "direct_asset_predict_proba_active": 1.0,
+        "frozen_reference_gsk3b": 1.0,
+        "group": "gsk3b_active",
+        "on_bits": 57,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00021844099999945854,
+        "smiles": "C12=C(C=3C=C(C(F)(F)F)C=CC3N1)CC(=O)NC=4C2=CC(/C=C/C(=O)OC)=CC4"
+      },
+      {
+        "direct_asset_predict_proba_active": 1.0,
+        "frozen_reference_gsk3b": 1.0,
+        "group": "gsk3b_active",
+        "on_bits": 37,
+        "production_oracle_score": 0.0,
+        "seconds": 0.0002241530000004488,
+        "smiles": "N1=C(/C(=N/NC2=CC=C(C=C2)OC)/C(N1)=O)C3=CC=C(C=C3)OC"
+      },
+      {
+        "direct_asset_predict_proba_active": 1.0,
+        "frozen_reference_gsk3b": 1.0,
+        "group": "gsk3b_active",
+        "on_bits": 49,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00020411399999975544,
+        "smiles": "N(C1=CC=C(C(CC)C)C=C1)C2=NC(C3=C4N(N=C3)N=CC=C4)=CC=N2"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.99,
+        "frozen_reference_gsk3b": 0.99,
+        "group": "gsk3b_active",
+        "on_bits": 63,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00020615800000012285,
+        "smiles": "O=C(N/N=C/C1=C(OCC)C=CC=C1)C=2N=NN(C2CN3CCCC3)C4=NON=C4N"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.99,
+        "frozen_reference_gsk3b": 0.99,
+        "group": "gsk3b_active",
+        "on_bits": 46,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00020574799999995008,
+        "smiles": "BrC1=C2N(N=C1)C(NCC3=CC=CN=C3)=CC(=N2)C=4C=CC=CC4"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.99,
+        "frozen_reference_gsk3b": 0.99,
+        "group": "gsk3b_active",
+        "on_bits": 43,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00017865500000002754,
+        "smiles": "N=1NC(/C(=N\\NC2=CC=CC=C2)/C1C3=CC=CC(=C3)OC)=O"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.58,
+        "frozen_reference_gsk3b": 0.58,
+        "group": "gsk3b_active",
+        "on_bits": 43,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00016112199999973598,
+        "smiles": "O1[C@H](CCCC(=O)CCCC=CC=2C(C1=O)=C(O)C=C(O)C2)C"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.58,
+        "frozen_reference_gsk3b": 0.58,
+        "group": "gsk3b_active",
+        "on_bits": 25,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00013176499999989488,
+        "smiles": "C=1(C(=C(C=C(C1Br)Br)/C=C/C(=O)O)Br)Br"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.51,
+        "frozen_reference_gsk3b": 0.51,
+        "group": "gsk3b_active",
+        "on_bits": 35,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00018482699999999852,
+        "smiles": "S(=O)(=O)(NC=1C=C2N=C(C(=NC2=CC1)C)C)C3=CC=C(N)C=C3"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.49,
+        "frozen_reference_gsk3b": 0.49,
+        "group": "gsk3b_active",
+        "on_bits": 48,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00020589800000081482,
+        "smiles": "NS(=O)(=O)C1=CC=C(N/N=C/2\\C(=O)NC3=CC=C4N=CC=CC4=C23)C=C1"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.66,
+        "frozen_reference_gsk3b": 0.66,
+        "group": "zinc",
+        "on_bits": 52,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00023081500000010635,
+        "smiles": "O=C([O-])C1(Cc2ccccc2Cl)CCN(c2ncnc3[nH]ccc23)CC1"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.31,
+        "frozen_reference_gsk3b": 0.31,
+        "group": "zinc",
+        "on_bits": 55,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00019644900000059806,
+        "smiles": "CC(C)NC(=O)C(=O)NCc1nc(-c2cccc(F)c2)c(-c2ccccn2)[nH]1"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.23,
+        "frozen_reference_gsk3b": 0.23,
+        "group": "zinc",
+        "on_bits": 54,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00022426299999978028,
+        "smiles": "COc1ccc(-c2n[nH]cc2C[NH+]2CCC[C@@H](N3CCNC3=O)C2)cc1"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.0,
+        "frozen_reference_gsk3b": 0.0,
+        "group": "zinc",
+        "on_bits": 44,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00022238900000015605,
+        "smiles": "Cn1cc(C(=O)Nc2ccc(-n3ccnn3)cc2)c(C(C)(C)C)n1"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.0,
+        "frozen_reference_gsk3b": 0.0,
+        "group": "zinc",
+        "on_bits": 26,
+        "production_oracle_score": 0.0,
+        "seconds": 0.0001544689999999349,
+        "smiles": "CC(=O)[C@@](C)(Cl)Cc1ccc(Cl)cc1"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.0,
+        "frozen_reference_gsk3b": 0.0,
+        "group": "zinc",
+        "on_bits": 41,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00022922199999975135,
+        "smiles": "Cc1nn(S(=O)(=O)c2ccc(F)cc2)c(C)c1S(=O)(=O)N1CCC(C)CC1"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.0,
+        "frozen_reference_gsk3b": 0.0,
+        "group": "zinc",
+        "on_bits": 31,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00014580200000047228,
+        "smiles": "Cc1ccc(C)c([C@@H](O)[C@@H](C)[C@@H](C)C(=O)[O-])c1"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.26,
+        "frozen_reference_gsk3b": 0.26,
+        "group": "jnk3_active",
+        "on_bits": 56,
+        "production_oracle_score": 0.0,
+        "seconds": 0.00026154499999986314,
+        "smiles": "C1(=C(C=2C=CN(N2)C)C=C(N=C1)NC=3C=CC(N4N=C(N=C4)N5CCOCC5)=CC3)F"
+      },
+      {
+        "direct_asset_predict_proba_active": 0.07,
+        "frozen_reference_gsk3b": 0.07,
+        "group": "jnk3_active",
+        "on_bits": 58,
+        "production_oracle_score": 0.0,
+        "seconds": 0.0002197639999996781,
+        "smiles": "C=1C=CC=2N(C(=C(C2C1C3=CC(=CC=C3)F)N=O)O)CC=4C=C(C=C5C4OCOC5)F"
+      }
+    ],
+    "source": "artifacts/oracles/molleo_task3_v1/molleo_task3_oracle_manifest.json reference_panel (400 molecules; kinase actives + ZINC background) frozen under sklearn 1.2.2 / rdkit 2023.09.6"
+  },
+  "purpose": "attribute the all-zero gsk3b ledger to oracle/runtime, wrapper, or genuine search failure",
+  "remediation_not_applied": {
+    "note": "no fix applied; src/, modal_apps/ and configs/ were not modified, per the diagnostic scope",
+    "options": [
+      "hold cwd at the assets directory for the duration of the task, not only the constructor",
+      "force the lazy load inside the chdir window by scoring one throwaway molecule at construction time",
+      "make the smoke app score a known active instead of oracle_called=False"
+    ],
+    "strongest_guard": "a positive-control assertion (a known active must score > 0) before the first charged call of any asset-backed oracle -- this defect is silent by construction and only a nonzero expectation catches it"
+  },
+  "run_id": "79fec4984821e97de6decefd213e45a47b3d2b901a1a9c021ee0dfd3ed1561f4",
+  "schema_version": "pmo_gsk3b_oracle_diagnosis_v1",
+  "what_is_measured_vs_inferred": {
+    "INFERRED": [
+      "jnk3 and drd2 are exposed to the same defect (same relative-path lazy-load idiom; not measured here)",
+      "the reference-forest column approximates the scores the run would have seen; it comes from a DIFFERENT pickle (sha 18d1cc9b..., 27,791,452 bytes) than the pinned asset (sha d3a20701..., 27,791,877 bytes). The two agree exactly on the 25-molecule control panel but were not compared molecule-by-molecule across the ledger."
+    ],
+    "MEASURED": [
+      "positive control: 16 known gsk3b actives (frozen reference 0.49-1.00) all return exactly 0.0 from Oracle('gsk3b') in the production image",
+      "the pinned asset sha256 matches the contract and, loaded directly in the same image, reproduces the frozen reference panel",
+      "counterfactual: identical oracle, cwd held at the assets dir, returns 1.0 on the same five actives",
+      "FileNotFoundError: 'oracle/gsk3b_current.pkl' raised by load_gsk3b_model() from the production cwd",
+      "Oracle.default_property == 0.0 and Oracle.__call__ has a bare except that returns it",
+      "the tdc module global gsk3_model is never set even after successful-looking calls",
+      "fresh re-score of all 250 ledger endpoints in the production image: 250/250 exactly 0.0, 0 errors",
+      "independent parity-validated numpy forest on the same 250: 196 nonzero, max 0.18",
+      "32/32 sampled ledger molecules have distinct fingerprints; all parse",
+      "call reconciliation: 250 reserved, 250 completed, 16 initialization, 234 candidate, 250 rows, 251 directory entries incl. manifest.json"
+    ],
+    "NOT_ESTABLISHED": [
+      "whether the controller would have found gsk3b actives in 250 calls with a working oracle -- this run produced NO information about that"
+    ]
+  },
+  "wrapper_audit": {
+    "compose_wrapper": "evaluate=lambda smiles: float(oracle(smiles))  (modal_apps/pmo_population_v1_app.py:185)",
+    "findings": [
+      {
+        "check": "exception -> 0.0",
+        "in_compose": "ABSENT -- query() sets self.blocked, writes status 'failed', and RE-RAISES",
+        "in_tdc": "PRESENT -- Oracle.__call__ bare except -> self.default_property (0.0). THIS IS THE DEFECT."
+      },
+      {
+        "check": "NaN -> 0.0",
+        "in_compose": "ABSENT",
+        "in_tdc": "ABSENT"
+      },
+      {
+        "check": "probability thresholding",
+        "in_compose": "ABSENT",
+        "in_tdc": "ABSENT"
+      },
+      {
+        "check": "float-to-int conversion",
+        "in_compose": "ABSENT -- float() only",
+        "in_tdc": "ABSENT"
+      },
+      {
+        "check": "wrong probability column",
+        "in_compose": "n/a",
+        "in_tdc": "CORRECT -- predict_proba(fp)[0, 1] with classes_ [0.0, 1.0]"
+      },
+      {
+        "check": "wrong task alias / model asset",
+        "in_compose": "n/a",
+        "in_tdc": "CORRECT -- gsk3b -> gsk3b_current -> tdc gsk3b evaluator; asset sha256 matches the contract"
+      },
+      {
+        "check": "stale or missing classifier asset",
+        "in_compose": "n/a",
+        "in_tdc": "the asset is PRESENT and CORRECT but UNREACHABLE at call time from the restored cwd"
+      },
+      {
+        "check": "normalisation or clamping",
+        "in_compose": "ABSENT",
+        "in_tdc": "self.normalize is the identity lambda for non-docking oracles"
+      },
+      {
+        "check": "invalid-SMILES fallback",
+        "in_compose": "query() raises ValueError on an unparseable endpoint",
+        "in_tdc": "returns default_property, but all 250 ledger endpoints parse so this path was never taken"
+      },
+      {
+        "check": "duplicate-endpoint free repeats",
+        "in_compose": "PRESENT BY DESIGN -- cached canonical endpoints are not charged; the 250 charged calls are 250 DISTINCT canonical molecules"
+      }
+    ],
+    "ledger": "src/compose_v4/control/program_campaign.py ProgramQueryLedger.query",
+    "raw_model_output_before_compose_transforms": "captured -- see oracle_identity.asset_direct_load and positive_control[].direct_asset_predict_proba_active"
+  }
+}
