@@ -1,0 +1,29 @@
+{
+ "schema_version": "t4_rescue_blast_radius_v1",
+ "generated": "2026-09-20T19:41:03",
+ "oracle_calls": 0,
+ "docking_calls": 0,
+ "modal_launches": 0,
+ "held_target_d04_resume": {
+  "question": "does adding a NEW module under src/compose_v4/experiments/ break the resume-time validation of the four live delta=0.4 arms",
+  "method": "recomputed every pinned runtime_inputs_sha256 of all four live d04 contracts before and after creating a probe module, then deleted the probe",
+  "live_d04_contracts": 4,
+  "distinct_pinned_inputs": 17,
+  "pinned_mismatched_on_disk_before": 0,
+  "pinned_hashes_moved_after_adding_a_new_src_module": 0,
+  "status": "PROVEN for the validation gate: _validate_task hashes runtime_inputs PER FILE, and no pinned file changes. ",
+  "still_inferred": "that Modal's image rebuild and container resume behave normally otherwise. That cannot be tested without launching against a live arm, so it stays INFERRED rather than rounded up."
+ },
+ "shared_controller_capsule": {
+  "question": "which capsule manifests does a _VARIANT_APPS entry invalidate",
+  "method": "hashed modal_apps/t4_shared_controller_completion_v1_app.py before and after inserting a variant entry, then restored the file byte-for-byte",
+  "manifests_pinning_the_launcher": 7,
+  "manifests_currently_matching_on_disk": 1,
+  "manifests_actually_broken_by_the_change": [
+   "diagnostics/t4_nodistill_feasibility_campaign_v4/attempt_1/source_capsule_manifest.json"
+  ],
+  "correction": "an earlier estimate said FIVE shared-controller variants would be invalidated. Measured, only ONE manifest currently matches the launcher on disk; the other six already pin superseded versions and are therefore already un-relaunchable, so the change costs them nothing.",
+  "that_campaign_is_live": false
+ },
+ "conclusion": "the change is materially safer than estimated: it provably moves no pinned input of any live delta=0.4 arm, and it invalidates exactly one capsule manifest, belonging to a campaign that is not running."
+}

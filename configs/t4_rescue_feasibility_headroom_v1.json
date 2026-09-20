@@ -1,0 +1,232 @@
+{
+ "campaign_cell_count": 6,
+ "cells": [
+  {
+   "cell_key": "braf_0_d06",
+   "charged_calls_remaining": 248,
+   "controller_seed": 2026091800,
+   "delta": 0.6,
+   "evaluator": {
+    "docking_box": [
+     [
+      84.194,
+      6.949,
+      -7.081
+     ],
+     [
+      22.032,
+      19.211,
+      14.106
+     ]
+    ],
+    "docking_seed": 20260918,
+    "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor_sha256": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a"
+   },
+   "prior_charged_calls": 2,
+   "prior_charged_calls_basis": "root query locks counted on the campaign volume",
+   "source_cell": "braf_0",
+   "source_global_index": 9,
+   "source_smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34",
+   "target": "braf",
+   "volume": "compose-t4-rescue-v1-braf-0-d06"
+  },
+  {
+   "cell_key": "braf_1_d06",
+   "charged_calls_remaining": 248,
+   "controller_seed": 2026091801,
+   "delta": 0.6,
+   "evaluator": {
+    "docking_box": [
+     [
+      84.194,
+      6.949,
+      -7.081
+     ],
+     [
+      22.032,
+      19.211,
+      14.106
+     ]
+    ],
+    "docking_seed": 20260918,
+    "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor_sha256": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a"
+   },
+   "prior_charged_calls": 2,
+   "prior_charged_calls_basis": "root query locks counted on the campaign volume",
+   "source_cell": "braf_1",
+   "source_global_index": 10,
+   "source_smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+   "target": "braf",
+   "volume": "compose-t4-rescue-v1-braf-1-d06"
+  },
+  {
+   "cell_key": "fa7_0_d06",
+   "charged_calls_remaining": 248,
+   "controller_seed": 2026091903,
+   "delta": 0.6,
+   "evaluator": {
+    "docking_box": [
+     [
+      10.131,
+      41.879,
+      32.097
+     ],
+     [
+      20.673,
+      20.198,
+      21.362
+     ]
+    ],
+    "docking_seed": 20260919,
+    "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor_sha256": "bfd705fb8220c52e1b447afce23a3810bc6deddb06983e98a2b0934b24ba092d"
+   },
+   "prior_charged_calls": 2,
+   "prior_charged_calls_basis": "root query locks counted on the campaign volume",
+   "source_cell": "fa7_0",
+   "source_global_index": 3,
+   "source_smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+   "target": "fa7",
+   "volume": "compose-t4-rescue-v1-fa7-0-d06"
+  },
+  {
+   "cell_key": "fa7_2_d06",
+   "charged_calls_remaining": 248,
+   "controller_seed": 2026091905,
+   "delta": 0.6,
+   "evaluator": {
+    "docking_box": [
+     [
+      10.131,
+      41.879,
+      32.097
+     ],
+     [
+      20.673,
+      20.198,
+      21.362
+     ]
+    ],
+    "docking_seed": 20260919,
+    "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor_sha256": "bfd705fb8220c52e1b447afce23a3810bc6deddb06983e98a2b0934b24ba092d"
+   },
+   "prior_charged_calls": 2,
+   "prior_charged_calls_basis": "root query locks counted on the campaign volume",
+   "source_cell": "fa7_2",
+   "source_global_index": 5,
+   "source_smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+   "target": "fa7",
+   "volume": "compose-t4-rescue-v1-fa7-2-d06"
+  },
+  {
+   "cell_key": "5ht1b_2_d06",
+   "charged_calls_remaining": 248,
+   "controller_seed": 2026091908,
+   "delta": 0.6,
+   "evaluator": {
+    "docking_box": [
+     [
+      -26.602,
+      5.277,
+      17.898
+     ],
+     [
+      22.5,
+      22.5,
+      22.5
+     ]
+    ],
+    "docking_seed": 20260919,
+    "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor_sha256": "6ab5ac2d63be05c4d7992f96175258c2b253ccc41539833af4fb12465ee3a59f"
+   },
+   "prior_charged_calls": 2,
+   "prior_charged_calls_basis": "root query locks counted on the campaign volume",
+   "source_cell": "5ht1b_2",
+   "source_global_index": 8,
+   "source_smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1",
+   "target": "5ht1b",
+   "volume": "compose-t4-rescue-v1-5ht1b-2-d06"
+  },
+  {
+   "cell_key": "fa7_2_d04",
+   "charged_calls_remaining": 249,
+   "controller_seed": 2026091905,
+   "delta": 0.4,
+   "evaluator": {
+    "docking_box": [
+     [
+      10.131,
+      41.879,
+      32.097
+     ],
+     [
+      20.673,
+      20.198,
+      21.362
+     ]
+    ],
+    "docking_seed": 20260919,
+    "qvina02_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor_sha256": "bfd705fb8220c52e1b447afce23a3810bc6deddb06983e98a2b0934b24ba092d"
+   },
+   "prior_charged_calls": 1,
+   "prior_charged_calls_basis": "root query locks counted on the campaign volume",
+   "source_cell": "fa7_2",
+   "source_global_index": 5,
+   "source_smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+   "target": "fa7",
+   "volume": "compose-t4-rescue-v1-fa7-2-d04"
+  }
+ ],
+ "central_claim_under_test": "one identical generic four-expert shared controller restores feasible support on cells whose exhaustion is a proposal-law deficit, with no cell-specific proposal change",
+ "charged_calls_per_cell": {
+  "5ht1b_2_d06": 248,
+  "braf_0_d06": 248,
+  "braf_1_d06": 248,
+  "fa7_0_d06": 248,
+  "fa7_2_d04": 249,
+  "fa7_2_d06": 248
+ },
+ "claim_boundary": "prospective six-cell RESCUE panel, separately versioned. It is a DIFFERENT configuration from the three-expert held-target panel and its results must never be spliced into that panel's table as if unchanged.",
+ "controller": {
+  "batch": 8,
+  "expert_floor_rounds": 2,
+  "exploration": 2,
+  "parent_explore": 0.3,
+  "parents": 4,
+  "proposal_experts": [
+   "shallow",
+   "anchored_replacement",
+   "route_complete_region",
+   "generic_feasibility_headroom_v4"
+  ],
+  "route_scale_floor_rounds": 2,
+  "value_penalty": 1.0
+ },
+ "cumulative_accounting": "each cell's ceiling is 250 minus its lock-derived prior charged calls; no cell receives a fresh budget",
+ "endpoint_gates_unchanged": {
+  "maximum_active_atoms": 40,
+  "qed_minimum": 0.6,
+  "sa_maximum": 4.0,
+  "similarity_minimum": "per-cell delta"
+ },
+ "experimental_setting": "six-cell rescue panel; per-cell remaining ceilings {braf_0_d06: 248, braf_1_d06: 248, fa7_0_d06: 248, fa7_2_d06: 248, 5ht1b_2_d06: 248, fa7_2_d04: 249}; 1489 charged docking calls total; one docking seed per target; no retries, replacement or backfill; candidate exhaustion remains a valid terminal outcome",
+ "expert_vocabulary_rationale": "plain (*EXPERTS, FEASIBILITY_HEADROOM_V4_EXPERT). protonation_aware_retained_subgraph is deliberately EXCLUDED: protonation_aware_records has no charge-conditional gate, so 'the source carries a formal charge' would be a rule invented to select the one rescue cell that happens to be +1, which is per-cell selection in general clothing.",
+ "oracle_policy": {
+  "automatic_retries": 0,
+  "backfill": false,
+  "prior_scored_outcomes_read": false,
+  "replacement": false,
+  "runtime_comparator": false,
+  "teacher_or_endpoint_injection": false
+ },
+ "rescue_trigger_rule": "a cell qualifies ONLY on measured mechanistic failure -- candidate exhaustion with zero eligible support. Never on target identity and never on whether COMPOSE trails the published baseline.",
+ "schema_version": "t4_rescue_feasibility_headroom_preparation_v1",
+ "scientific_problem": "test whether a generic feasibility-conditioned proposal expert converts six terminally exhausted T4 cells into recursively searchable trajectories, without relaxing any benchmark constraint",
+ "support": "compose_valid",
+ "total_charged_call_ceiling": 1489
+}
