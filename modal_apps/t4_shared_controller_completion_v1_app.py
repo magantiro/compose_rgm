@@ -61,6 +61,17 @@ elif _CAMPAIGN_VARIANT == "repaired_exhaustion_v1":
     from compose_v4.experiments.t4_repaired_exhaustion_contract import (
         PREPARATION_RELATIVE_PATH as CONTRACT_RELATIVE_PATH,
     )
+elif _CAMPAIGN_VARIANT == "nodistill_feasibility_v4":
+    from compose_v4.experiments.t4_nodistill_feasibility_campaign_v4_contract import (
+        AUTHORIZATION_RELATIVE_PATH,
+        CAPSULE_MANIFEST_RELATIVE_PATH,
+        CAPSULE_ROOT_RELATIVE_PATH,
+        FINAL_CONTRACT_RELATIVE_PATH,
+        validate_scored_contract,
+    )
+    from compose_v4.experiments.t4_nodistill_feasibility_campaign_v4_contract import (
+        PREPARATION_RELATIVE_PATH as CONTRACT_RELATIVE_PATH,
+    )
 else:
     from compose_v4.experiments.t4_shared_controller_completion_contract import (
         CONTRACT_RELATIVE_PATH,
@@ -99,6 +110,10 @@ _VARIANT_APPS = {
         "compose-t4-repaired-exhaustion-v1",
         "modal_apps/t4_shared_controller_repaired_exhaustion_v1_app.py",
     ),
+    "nodistill_feasibility_v4": (
+        "compose-t4-nodistill-feasibility-v4",
+        "modal_apps/t4_nodistill_feasibility_v4_app.py",
+    ),
 }
 try:
     APP_NAME, APP_RELATIVE_PATH = _VARIANT_APPS[_CAMPAIGN_VARIANT]
@@ -134,6 +149,7 @@ _EXPECTED_CELL_COUNTS = {
     "nodistill_parp1_v1": 3,
     "nodistill_transfer_v1": 3,
     "repaired_exhaustion_v1": 2,
+    "nodistill_feasibility_v4": 3,
 }
 _EXPECTED_CELL_COUNT = _EXPECTED_CELL_COUNTS[_CAMPAIGN_VARIANT]
 if len(CELLS) != _EXPECTED_CELL_COUNT:
@@ -350,6 +366,7 @@ def _proposal_answer(
     from compose_v4.experiments.t4_shared_controller_scored_runtime import (
         attach_endpoint_fingerprints,
         attach_generic_scale_band,
+        feasibility_headroom_v4_records,
         generic_topology_macro_records,
         protonation_aware_records,
         retained_core_route_records,
@@ -445,6 +462,16 @@ def _proposal_answer(
         for row in records:
             row["parent_score"] = request["parent_score"]
             row["delta"] = cell["delta"]
+    elif expert_name == "generic_feasibility_headroom_v4":
+        records, telemetry = feasibility_headroom_v4_records(
+            parent=request["parent"],
+            proposal_seed_value=request["proposal_seed"],
+            similarity_minimum=cell["delta"],
+            settings=controller["proposal"][expert_name],
+        )
+        for row in records:
+            row["parent_score"] = request["parent_score"]
+            row["delta"] = cell["delta"]
     else:
         raise ValueError(f"unknown proposal expert: {expert_name}")
     if not contract.get("trajectory_distillation", {"enabled": True})["enabled"]:
@@ -528,7 +555,12 @@ def _register_cell(cell_binding: dict[str, Any]) -> dict[str, Any]:
         "serialized": True,
     }
 
-    @app.function(**common, name=f"proposal_{safe}", max_containers=16, timeout=3000)
+    @app.function(
+        **common,
+        name=f"proposal_{safe}",
+        max_containers=16,
+        timeout=7_200 if _CAMPAIGN_VARIANT == "nodistill_feasibility_v4" else 3_000,
+    )
     def proposal_worker(task: dict[str, Any]) -> dict[str, Any]:
         from compose_v4.experiments.t4_shared_controller_cell_runtime import (
             ReceiptStore,
@@ -1215,6 +1247,12 @@ def _launch_receipt_path(run_id: str) -> Path:
         return (
             ROOT
             / "diagnostics/t4_shared_controller_repaired_exhaustion_v1/attempt_1/launches"
+            / f"{run_id}.json"
+        )
+    if _CAMPAIGN_VARIANT == "nodistill_feasibility_v4":
+        return (
+            ROOT
+            / "diagnostics/t4_nodistill_feasibility_campaign_v4/attempt_1/launches"
             / f"{run_id}.json"
         )
     return (

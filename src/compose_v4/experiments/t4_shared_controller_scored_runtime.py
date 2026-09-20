@@ -26,7 +26,21 @@ from compose_v4.control.generic_complete_program_composer import primitive_scale
 from compose_v4.control.generic_complete_program_composer_v2 import (
     propose_generic_topology_macro_programs,
 )
+from compose_v4.control.generic_feasibility_headroom_composer_v4 import (
+    FreeFeasibilitySpec,
+    allocate_feasibility_headroom_plans,
+    free_endpoint_headrooms,
+    propose_feasibility_headroom_programs,
+)
 from compose_v4.control.generic_legal_action_policy import enumerate_rule_successors
+from compose_v4.control.generic_retained_interface_composer_v3 import (
+    _created_attachment_interface_count,
+)
+from compose_v4.control.graph_geometry import topology
+from compose_v4.control.nodistill_joint_stop_adapter_v1 import (
+    JointStopAdapterSettings,
+    propose_joint_stop_candidates,
+)
 from compose_v4.control.protonation_aware_proposal import (
     ProtonationAwareProposalConfig,
     propose_protonation_aware_candidates,
@@ -39,6 +53,7 @@ from compose_v4.control.route_distilled_goal_expert import RouteDistilledGoalExp
 from compose_v4.experiments.t4_fiber_campaign import Fiber
 from compose_v4.experiments.t4_integrated_route_fiber import (
     EXPERTS,
+    FEASIBILITY_HEADROOM_V4_EXPERT,
     GENERIC_TOPOLOGY_MACRO_EXPERT,
     PROTONATION_AWARE_EXPERT,
     validate_expert_vocabulary,
@@ -775,6 +790,182 @@ def generic_topology_macro_records(
     }
 
 
+def feasibility_headroom_v4_records(
+    *,
+    parent: str,
+    proposal_seed_value: int,
+    similarity_minimum: float,
+    settings: Mapping[str, Any],
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Adapt the passed route-free v4 union to one production expert pool.
+
+    The retained-interface composer receives only the current graph, a seed, generic
+    numeric endpoint thresholds and frozen work settings.  Joint STOP receives only
+    the current graph, seed and its generic work settings.  Neither producer applies
+    endpoint admission; the shared production admission path runs after this function.
+    """
+
+    attempts = _positive_integer(
+        settings.get("attempts_per_local_plan"),
+        label="v4 attempts per local plan",
+    )
+    quota = _positive_integer(
+        settings.get("candidate_quota_per_local_plan"),
+        label="v4 candidate quota per local plan",
+    )
+    maximum_primitives = settings.get("maximum_primitives", 32)
+    maximum_blocks = settings.get("maximum_blocks", 8)
+    maximum_heavy = settings.get("maximum_heavy_atoms", 40)
+    if (maximum_primitives, maximum_blocks, maximum_heavy) != (32, 8, 40):
+        raise ValueError(
+            "v4 production support must remain 40 atoms/32 primitives/8 blocks"
+        )
+    feasibility = FreeFeasibilitySpec(
+        similarity_minimum=float(similarity_minimum),
+        qed_minimum=float(settings.get("qed_minimum", 0.6)),
+        sa_maximum=float(settings.get("sa_maximum", 4.0)),
+        heavy_atom_maximum=int(maximum_heavy),
+    )
+    source = pad_molecular_graph(smiles_to_molecular_graph(parent), 48)
+    local = propose_feasibility_headroom_programs(
+        source,
+        seed=int(proposal_seed_value),
+        feasibility=feasibility,
+        attempts_per_plan=attempts,
+        candidate_quota_per_plan=quota,
+        maximum_primitives=int(maximum_primitives),
+        maximum_blocks=int(maximum_blocks),
+    )
+    joint_settings = settings.get("joint_stop")
+    if not isinstance(joint_settings, Mapping):
+        raise TypeError("v4 production settings omitted joint STOP")
+    joint = propose_joint_stop_candidates(
+        source,
+        seed=int(proposal_seed_value),
+        settings=JointStopAdapterSettings(**dict(joint_settings)),
+    )
+    _features, source_headrooms, _plans, allocation = (
+        allocate_feasibility_headroom_plans(
+            source,
+            feasibility=feasibility,
+            attempts_per_plan=attempts,
+            candidate_quota_per_plan=quota,
+            maximum_primitives=int(maximum_primitives),
+            maximum_blocks=int(maximum_blocks),
+        )
+    )
+    before = topology(source)
+    records = []
+    component_counts: Counter[str] = Counter()
+    for component, proposals in (
+        ("retained_interface_headroom", local.proposals),
+        ("joint_stop", joint.candidates),
+    ):
+        for proposal in proposals:
+            actions = list(proposal.actions)
+            replayed, _receipt = execute_program(source, actions)
+            if canonical_state_key(replayed) != canonical_state_key(proposal.endpoint):
+                raise RuntimeError("v4 production program changed on exact replay")
+            primitives = len(actions)
+            if not 1 <= primitives <= maximum_primitives:
+                raise RuntimeError("v4 production program escaped primitive support")
+            if len(proposal.program["blocks"]) > maximum_blocks:
+                raise RuntimeError("v4 production program escaped block support")
+            after = topology(proposal.endpoint)
+            changes = proposal.actual_changes
+            retained_fraction = 1.0 - int(changes["deleted_original_atoms"]) / max(
+                1, int(before["n_heavy"])
+            )
+            interface_count = _created_attachment_interface_count(
+                source, proposal.actions
+            )
+            macro_plan = copy.deepcopy(dict(proposal.metadata["macro_plan"]))
+            macro_identity = str(
+                macro_plan.get("identity") or payload_identity(macro_plan)
+            )
+            macro_mode = str(macro_plan.get("mode") or component)
+            headrooms = copy.deepcopy(proposal.metadata.get("endpoint_headrooms"))
+            if headrooms is None:
+                desired_cycle = max(0, int(after["cycle_rank"] - before["cycle_rank"]))
+                headrooms = free_endpoint_headrooms(
+                    source,
+                    proposal.endpoint,
+                    feasibility=feasibility,
+                    retained_fraction=retained_fraction,
+                    interface_count=interface_count,
+                    desired_cycle_rank=desired_cycle,
+                    available_cycle_capacity=int(
+                        source_headrooms["available_cycle_capacity"]
+                    ),
+                )
+            smiles = molecular_graph_to_smiles(proposal.endpoint)
+            row = attach_generic_scale_band(
+                {
+                    "smiles": smiles,
+                    "proposal_lane": FEASIBILITY_HEADROOM_V4_EXPERT,
+                    "proposal_experts": [FEASIBILITY_HEADROOM_V4_EXPERT],
+                    "families": list(proposal.families),
+                    "program_families": list(proposal.families),
+                    "program_kind": FEASIBILITY_HEADROOM_V4_EXPERT,
+                    "structural_lane": component,
+                    "parent": parent,
+                    "regions": int(changes["changed_site_count"]),
+                    "created": int(changes["surviving_new_atoms"]),
+                    "deleted": int(changes["deleted_original_atoms"]),
+                    "realized_primitives": primitives,
+                    "realized_primitive_band": primitive_scale(primitives),
+                    "proposal_program_sha256": payload_identity(actions),
+                    "protected_program_actions": actions,
+                    "protected_program_sha256": payload_identity(actions),
+                    "protected_program": copy.deepcopy(proposal.program),
+                    "protected_program_graph": copy.deepcopy(proposal.program_graph),
+                    "macro_plan": macro_plan,
+                    "macro_plan_identity": macro_identity,
+                    "macro_mode": macro_mode,
+                    "endpoint_headrooms": headrooms,
+                    "observed_macro_fields": {
+                        "delta_heavy_atoms": int(after["n_heavy"] - before["n_heavy"]),
+                        "delta_cycle_rank": int(
+                            after["cycle_rank"] - before["cycle_rank"]
+                        ),
+                        "retained_fraction": retained_fraction,
+                        "created_attachment_interface_count": interface_count,
+                        "primitive_count": primitives,
+                        "block_count": len(proposal.program["blocks"]),
+                    },
+                    "v4_component": component,
+                    "exact_execution_verified": True,
+                    "endpoint_admission_applied_during_generation": False,
+                    "intermediate_endpoint_queried": False,
+                    "route_templates_loaded": 0,
+                    "route_weights_loaded": 0,
+                    "fitted_weights_loaded": 0,
+                    "runtime_task_cell_or_target_input": False,
+                    "runtime_teacher_action_endpoint_or_proximity_input": False,
+                    "runtime_objective_or_docking_score_input": False,
+                }
+            )
+            records.append(row)
+            component_counts[component] += 1
+    return records, {
+        "schema_version": "generic_feasibility_headroom_production_v4",
+        "proposal_expert": FEASIBILITY_HEADROOM_V4_EXPERT,
+        "candidate_order": "retained_interface_headroom_then_joint_stop",
+        "raw_exact_candidates": len(records),
+        "raw_exact_by_component": dict(sorted(component_counts.items())),
+        "local_telemetry": copy.deepcopy(local.telemetry),
+        "joint_stop_telemetry": copy.deepcopy(joint.telemetry),
+        "allocation": allocation,
+        "endpoint_constraints_applied_during_generation": False,
+        "route_templates_loaded": 0,
+        "route_weights_loaded": 0,
+        "fitted_weights_loaded": 0,
+        "runtime_task_cell_or_target_input": False,
+        "runtime_teacher_action_endpoint_or_proximity_input": False,
+        "runtime_objective_or_docking_score_input": False,
+    }
+
+
 def admit_runtime_proposal_pools(
     proposal_pools: Mapping[str, Iterable[Mapping[str, Any]]],
     *,
@@ -1023,6 +1214,7 @@ __all__ = [
     "attach_endpoint_fingerprints",
     "attach_generic_scale_band",
     "checkpoint_controller_config",
+    "feasibility_headroom_v4_records",
     "filter_stale_braf_candidates",
     "generic_topology_macro_records",
     "make_launch_task",

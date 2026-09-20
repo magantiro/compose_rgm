@@ -23,11 +23,21 @@ SCHEMA_VERSION = "t4_integrated_route_fiber_policy_v1"
 EXPERTS = ("shallow", "anchored_replacement", "route_complete_region")
 PROTONATION_AWARE_EXPERT = "protonation_aware_retained_subgraph"
 GENERIC_TOPOLOGY_MACRO_EXPERT = "generic_topology_macro_v2"
+FEASIBILITY_HEADROOM_V4_EXPERT = "generic_feasibility_headroom_v4"
 SUPPORTED_EXPERT_VOCABULARIES = (
     EXPERTS,
     (*EXPERTS, PROTONATION_AWARE_EXPERT),
     (*EXPERTS, GENERIC_TOPOLOGY_MACRO_EXPERT),
     (*EXPERTS, PROTONATION_AWARE_EXPERT, GENERIC_TOPOLOGY_MACRO_EXPERT),
+    (*EXPERTS, FEASIBILITY_HEADROOM_V4_EXPERT),
+    (*EXPERTS, PROTONATION_AWARE_EXPERT, FEASIBILITY_HEADROOM_V4_EXPERT),
+    (*EXPERTS, GENERIC_TOPOLOGY_MACRO_EXPERT, FEASIBILITY_HEADROOM_V4_EXPERT),
+    (
+        *EXPERTS,
+        PROTONATION_AWARE_EXPERT,
+        GENERIC_TOPOLOGY_MACRO_EXPERT,
+        FEASIBILITY_HEADROOM_V4_EXPERT,
+    ),
 )
 
 
@@ -94,6 +104,8 @@ def merge_expert_pools(
                 "proposal_program_sha256",
                 "program_kind",
                 "structural_lane",
+                "macro_plan_identity",
+                "macro_mode",
             ):
                 if row.get(field) is not None:
                     origin[field] = row[field]
@@ -324,6 +336,7 @@ def expert_census(
 
 __all__ = [
     "EXPERTS",
+    "FEASIBILITY_HEADROOM_V4_EXPERT",
     "PROTONATION_AWARE_EXPERT",
     "SCHEMA_VERSION",
     "SUPPORTED_EXPERT_VOCABULARIES",
