@@ -106,3 +106,11 @@ artifacts/tdc_originals/
 
 # Downloaded upstream datasets (rebuild with tools/build_dude_pool.py)
 .cache/
+
+# Launch source capsules: verbatim copies of every file a run read, 12-17 MB each and
+# one per attempt.  The sibling source_capsule_manifest*.json records git_blob_oid plus
+# sha256 for every entry and IS committed, so the tree is reconstructible exactly:
+#   python3 tools/rebuild_source_capsule.py <manifest.json> --out <dir>
+# Capsules committed before this rule stay tracked; .gitignore does not affect them.
+diagnostics/**/source_capsule/
+diagnostics/**/source_capsule_v[0-9]/
