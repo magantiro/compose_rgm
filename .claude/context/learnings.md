@@ -1460,3 +1460,159 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   exposed to the same construct-then-restore-cwd pattern. Not measured. This bites the 5-task rung
   (jnk3) and the 23-task rung. `perindopril_mpo` and `celecoxib_rediscovery` are pure-RDKit
   evaluators with no asset file and no cwd dependency -- measured unaffected.
+
+## 2026-09-20 (PMO binder: the 96.7% failure decomposed; and a worker leak that corrupts timing)
+
+- **The single reason string `"joint plan has no legal binding on this parent"` conflated three
+  outcomes, and the beam-width/ranking hypothesis was the WRONG one.** Decomposed with an
+  exhaustive referee (beam removed, deduped on the full determinant of a prefix's future --
+  state + created-handle map + next ordinal -- so collapsing it preserves the EXISTENCE answer):
+  **(a) 66.9% of all 2,185 (plan, parent) pairs are PROVEN unbindable before any search**, in 1.0 s,
+  because role 0 demands operand descriptors no atom of the parent carries. That caps the achievable
+  binding rate at 33.1% for any beam width, any ranking, any budget. Among step-0-feasible
+  production pairs the referee still proves no-binding for 27/30, and widths 4->8->16->32->64 all
+  return **0.000**. (b) DISCARDED_BY_SEARCH is real but marginal: 2 of 80 pairs -- and widening the
+  beam did NOT recover them, the wider arms exhausted their wall budget first. (c) budget exhaustion
+  dominates the teacher strata. **Do not size a search-side repair before measuring how much of the
+  failure is reachable by search at all.**
+- **Under a fixed wall budget a wider beam is strictly NEGATIVE here**: complete programs fall
+  17 (w4) -> 12 (w8) -> 6 (w16/32/64). Breadth is paid for in the time the arm does not have.
+- **The one intervention that moved the rate is not a fix, and the yield metric is what caught it.**
+  Compatibility ranking (rank survivors by an exact one-step-lookahead operand-availability count
+  instead of the content hash) gave +82% complete programs at w4 -- at identical median scale (16.0),
+  identical max (23) and identical retained fraction (**1.000**, i.e. purely additive, removing
+  nothing) against teachers at 29-40 primitives and 0.52-0.96 retained. **Zero programs at teacher
+  scale in ANY arm.** Always report realized program scale and retained fraction beside a binding
+  rate; a rate that rises while scale does not has not solved the problem.
+- **The defect is OVER-SPECIFICATION in the plan representation, and it attributes to ONE field.**
+  Projecting the operand descriptor: dropping `neighbor_element_histogram` lifts step-0 feasibility
+  **33.1% -> 84.4% (2.55x)**, while dropping `implicit_hydrogens` or `bond_class_histogram` changes
+  *nothing*. A v1 role pins each operand's complete elemental neighbourhood -- a whole-environment
+  fingerprint -- and 63 of 95 plans additionally pin the teacher's step ORDER through
+  `created_ordinal`/`creation_lag`. NB this projection is a DIAGNOSTIC: a match under a coarser view
+  realizes a *different* transformation, so it locates the constraint, it does not license relaxing it.
+- **`pkill -f <script.py>` does NOT kill ProcessPoolExecutor children under the spawn start method.**
+  Their cmdline is `python -c from multiprocessing.spawn import spawn_main...`, which the pattern never
+  matches, so they orphan to ppid=1 and keep burning ~30% CPU each. Ten orphans from two killed runs
+  silently halved the throughput of the next run and contaminated its wall-clock timings. Kill by
+  `ppid`, or `pkill -f "from multiprocessing"` as well -- and report `successors_enumerated` (or any
+  load-independent work counter) as the cost metric, never seconds alone. Generalizes the 2026-07-21
+  `tracelet_sampling_worker` note to every spawn pool.
+- **A wait loop of the form `until ! pgrep -f "<name>"; do sleep; done` matches its OWN command line
+  and never exits.** Poll for the artifact the job produces instead of for the absence of a process.
+
+## 2026-09-20 (PMO oracle assets: a complete 250-call ledger of swallowed defaults)
+
+- **A relative asset path plus a lazy load plus a bare `except` is a silent zero
+  generator, and a constructor-scoped `chdir` does not fix it.** PyTDC's `gsk3b` and
+  `drd2` evaluators open `oracle/<name>.pkl` **on the first CALL**, cached in a module
+  global, and `tdc.Oracle.__call__` wraps the evaluator in a bare `except` returning
+  `default_property == 0.0`. The PMO worker entered the asset directory only around
+  `Oracle(name=...)` **construction** and restored cwd in a `finally`, so every call
+  raised `FileNotFoundError` from `/root`, was swallowed, and — because the module
+  global is only set on success — the failing load repeated forever. Result: a gsk3b
+  task that charged 250/250 calls on 250 distinct molecules and recorded `best_score
+  0.0`, with nothing in the artifact to distinguish it from a real result. MEASURED
+  counterfactual, same oracle/image/asset, differing only in cwd at call time: `[0.0]*5`
+  vs `[1.0]*5` on five known actives.
+- **The invariant is over the oracle's LIFETIME, not its constructor.** Fix =
+  `compose_v4.experiments.pmo_oracle_assets.AssetPinnedOracle`: pin the working
+  directory around **every call**, and `prime()` the lazy load inside that window so a
+  caching evaluator never touches the filesystem again. The two are deliberately
+  redundant — priming covers the cached case, per-call pinning covers evaluators that
+  do not cache — and the working directory is restored in a `finally` so a raising call
+  cannot strand the process.
+- **Construction success is not evidence, and `score > 0` is not evidence either.**
+  `pmo_environment_smoke_app.py` records `oracle_called: False` **by design** and passed
+  throughout the defect's life, because construction never triggers a lazy load. The
+  replacement gate CALLS each asset-backed oracle against pinned reference molecules
+  with **expected values and tolerances**, including graded intermediates — a
+  constant-0.87 oracle passes every nonzero check and fails this one. Measured in the
+  pinned image: gsk3b 13/13, jnk3 10/10, drd2 6/6, **max_abs_delta 0.0** against the
+  frozen 400-molecule panel. The control runs BEFORE `started.json`, so a failure leaves
+  the task re-runnable instead of burning its one no-retry attempt.
+- **AUDIT, all 23 PMO tasks, MEASURED against PyTDC 1.1.15 in the pinned image**
+  (`diagnostics/pmo_oracle_asset_audit_v1.json`; 20 of 23 are pure RDKit and open no
+  file):
+    gsk3b  `gsk3b_current`  LAZY relative at CALL   cwd-dependent TRUE   control 13/13
+    drd2   `drd2_current`   LAZY relative at CALL   cwd-dependent TRUE   control 6/6
+    jnk3   `jnk3_current`   EAGER relative at CONSTRUCTION  cwd-dep FALSE  control 10/10
+  **The pre-diagnosis inference that jnk3 shared gsk3b's failure mode is FALSIFIED.**
+  `class jnk3.__init__` loads the pickle eagerly and caches it on the instance, so it
+  raises `FileNotFoundError` at construction rather than returning a swallowed score,
+  and a correctly constructed jnk3 is not cwd-dependent at call time. Lazy and eager are
+  different exposures: only the lazy form can manufacture a plausible ledger. drd2, by
+  contrast, was confirmed — it was INFERRED and is now MEASURED.
+- **To audit a dispatch, run the shipped dispatch — but stub the NETWORK, not the
+  resolver.** The first pass stubbed `oracle_load` itself; it returns the *exact asset
+  name* (`gsk3b` -> `gsk3b_current`) to `Oracle.__init__`, so stubbing it returned None
+  and all three asset-backed tasks failed to construct — reported as `asset_backed: []`,
+  i.e. exactly "nothing is affected". Stub `dataverse_download` instead. Second trap:
+  TDC evaluators are a mix of plain functions and **instances** of callable classes;
+  `inspect.getsource` on an instance raises, which silently produced an empty call graph
+  and classified every class-backed oracle as asset-free. Resolve an instance to
+  `type(obj)` before taking source.
+- **Void per TASK, never per run.** The same run's `perindopril_mpo` (0.486) and
+  `celecoxib_rediscovery` (0.196) use pure-RDKit evaluators with no asset and no cwd
+  dependency, measured unaffected. Voiding the run would have discarded two sound
+  measurements; voiding nothing would have kept a defect as a published number.
+  `diagnostics/pmo_run_status_ledger.json` + `compose_v4.experiments.pmo_run_status`
+  record the exception and `assert_admissible` **raises** — a warning beside a plausible
+  score gets read as a caveat and the score gets quoted anyway.
+- **Retrospective rescoring is a counterfactual, not a correction.** An independent
+  parity-validated forest scored 196/250 of the voided endpoints nonzero (max 0.18, mean
+  0.039; 11 of 16 initialization molecules at 0.01-0.08). That bounds the signal the
+  defect hid. It is NOT the corrected trajectory: FiberControl never observed those
+  values online, so every selection and credit assignment in the voided run was made
+  against a constant, and the corrected run's policy diverges from the first decision.
+- **Three latent defects in the PMO launch chain, all found by exercising it rather than
+  reading it.** (1) `prepare_pmo_250_pilot.py` wrote the authorization receipt AFTER the
+  capsule manifest that pins it, and `authorized_at_utc` moves every run, so the
+  launcher's capsule check could never pass — write the manifest LAST and re-hash both
+  files it pins. (2) It archived superseded receipts into a fixed
+  `dead_1000call_attempt/`, so a second supersession would have overwritten the first
+  attempt's record; archive under the payload hash the RECEIPT itself carries, not the
+  contract's current hash (they differ whenever a re-seal ran first). (3) The capsule's
+  own `contract_payload_sha256` was never updated and addressed a payload that no longer
+  existed — an unresolvable pin that reads as verified.
+- **Anything on the scoring path must be in the contract's `implementation_sha256`.**
+  `pmo_oracle_assets.py` decides whether a number is the oracle's output or PyTDC's
+  swallowed default, so it is pinned in both the contract and the source capsule. The
+  chain caught the worker edit immediately and correctly: `load_contract` refused with
+  `input identity mismatch` before the free-oracle gate could run.
+
+## 2026-09-20 (campaign state: locks are authority, checkpoints are not)
+
+- **`modal volume get <vol> <dir> <dest>` SILENTLY COLLAPSES a directory onto one path when
+  `<dest>` does not already exist as a directory.** Twenty-one files land on the single path
+  `<dest>`, the CLI prints `OK Finished downloading files to local!` and exits **0**. This
+  produced two FALSE readings in one session -- a "no better score" verdict that was the exact
+  opposite of the truth, and a `json.JSONDecodeError: Extra data: line 2` that looked like a
+  schema problem. **Pre-create the destination directory**, and verify every file is present,
+  non-empty and parseable BEFORE computing any verdict. Also never parse `modal volume get ... -`
+  from stdout: the CLI mixes its success banner into the stream.
+- **A checkpoint is overwritable; a round lock is not.** `run_cell` in the T4 apps reads
+  `result.json` and `checkpoint.json` off the mounted volume with **no `volume.reload()`** (the
+  only reload sits in the driver, and the ten `t4_integrated_route_fiber_held_*_app.py` wrappers
+  have none at all). A Modal volume shows a snapshot from mount time, so a container that restarts
+  after preemption reads a STALE view, resumes from an older checkpoint and overwrites the newer
+  one. Measured: `parp1_0` d0.6 locks prove -12.6 at 145 charged calls while its checkpoint read
+  -11.4 at 129 -- a verdict flip from a 0.90 loss to a 0.30 win. `parp1_2` sat **eleven rounds**
+  behind with `rounds == [1, 7, 8]`. `_resume_state` already rebuilds the archive from locks
+  correctly; it failed only because it globs them off the same stale mount.
+  **Reconstruct final results from locks: a round lock carries, per query, the docked
+  `parent_score` of the parent it came from, which is direct evidence the molecule was scored.**
+- **`reconciled_charged_calls` is a LOWER BOUND in both directions.** Locks are written per round
+  INDEX, so a round that rolled back and was redone rewrites its own lock with a smaller
+  `charged_before`. Check ladder monotonicity per cell (0 of 45 were overwritten in the one sweep
+  that checked); where a cell rolled back and advanced past it, true lifetime spend exceeds every
+  surviving artifact.
+- **`retries: 0` means a preempted container STOPS and waits for a human** -- it does not silently
+  restart from its baked image. With detached ephemeral apps this is invisible: the app still reads
+  as alive. Watch for `tasks == 0` on an ephemeral app, and never assume a campaign is progressing
+  because its app exists.
+- **Never cache `checkpoint.json` or `result.json`.** They are mutable committed state; a cached
+  copy reported a stale best. Caching the mutable state is the same error class as the overwrite
+  defect being measured.
+- **`compose-t4-held-target-distilled-jak2-d06-250` is the delta=0.4 arm** despite its name -- its
+  frozen contract declares `delta: 0.4`. Always read delta from the contract, never the volume name.
