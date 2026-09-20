@@ -1,0 +1,77 @@
+{
+  "payload": {
+    "schema_version": "t4_nodistill_feasibility_headroom_gate_contract_v4",
+    "status": "FROZEN_ZERO_ORACLE_SUPPORT_GATE",
+    "scientific_problem": "test whether one general route-free mechanism combining coherent retained-interface complete programs, continuous free-feasibility headroom allocation and joint STOP yields diverse selection-ready support on all three terminal growth misses",
+    "primary_model_output": "a frozen union of exact complete programs ranked by source and endpoint feasibility headrooms before binary free endpoint admission",
+    "central_claim_under_test": "current-graph retained-interface allocation using only continuous similarity, QED, SA, capacity, retained-fraction, interface and cycle headrooms can produce at least eight structurally distinct archive-ready candidates from at least three macro plans and three modes on each motivating growth cell without target, cell, route, template, teacher or objective inputs",
+    "experimental_setting": "standalone zero-oracle NoDistill v4 support gate on JAK2 seed 0 delta 0.6, PARP1 seed 0 delta 0.4, 5HT1B seed 1 delta 0.4 and two near-capacity contrasts",
+    "inputs": {
+      "source_registry": {"path": "docs/GENMOL_T4_SEEDS.json", "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"},
+      "v3_verified_negative": {"path": "diagnostics/t4_nodistill_retained_interface_gate_v3/attempt_1/verified_result.json", "sha256": "181457728b088060934fc69e82edce469642d3f20381565d35f8c5c1c7437c9e", "payload_sha256": "0bd9a932d16d5c286e76f9e43ea77fa90d53e594c21a4f4bd535f05dea261c7f"},
+      "v3_jak2_failure_margin_audit": {"path": "diagnostics/t4_nodistill_retained_interface_gate_v3/attempt_1/jak2_failure_margin_audit.json", "sha256": "a4a384acfa27310c44c3087f30eb2b6292e7301af71f2132564477e6a5e7bc55", "payload_sha256": "6a309333de709993aef94092e1f06caf10233941b37fea7f11e35d286683055d"},
+      "joint_stop_adapter": {"path": "src/compose_v4/control/nodistill_joint_stop_adapter_v1.py", "sha256": "6b24825ed2dbdd0aa2dfc7bcdc1ff66ab55e9ef833ed1dcdc19aea64f2106a6b", "code_revision": "6b1f1e29b"},
+      "teacher_library_diagnostic_only": {"path": "diagnostics/t4_shared_program_controller/attempt_2/shared_library.json", "sha256": "732c67d04af3a0824cfa700906fd73982689af416f337c8eb109499af79afdb5", "load_phase": "after_all_candidate_locks_are_sealed"}
+    },
+    "cells": [
+      {"cell_key": "jak2_0_d06", "source_index": 12, "similarity_minimum": 0.6, "controller_seed": 914001, "evidence_role": "motivating_growth_miss"},
+      {"cell_key": "parp1_0_d04", "source_index": 0, "similarity_minimum": 0.4, "controller_seed": 914002, "evidence_role": "motivating_growth_miss"},
+      {"cell_key": "5ht1b_1_d04", "source_index": 7, "similarity_minimum": 0.4, "controller_seed": 914003, "evidence_role": "motivating_growth_miss"},
+      {"cell_key": "braf_0_d06", "source_index": 9, "similarity_minimum": 0.6, "controller_seed": 914004, "evidence_role": "near_capacity_contrast"},
+      {"cell_key": "5ht1b_0_d04", "source_index": 6, "similarity_minimum": 0.4, "controller_seed": 914005, "evidence_role": "near_capacity_contrast"}
+    ],
+    "support": {
+      "representable_heavy_atom_ceiling": 40,
+      "maximum_primitives": 32,
+      "maximum_blocks": 8,
+      "qed_minimum": 0.6,
+      "sa_maximum": 4.0,
+      "retained_fraction_target_formula": "0.75 + 0.25 * similarity_minimum",
+      "created_attachment_interface_target": [1, 3],
+      "cycle_gain_support": [1, 2],
+      "retained_interface_roles": ["terminal", "linker", "ring", "junction"],
+      "macro_modes": ["direct_ring_growth", "grow_then_close", "grow_then_ring", "replace_then_ring", "double_ring_growth", "grow_then_double_ring"],
+      "continuous_headroom_features": ["current_similarity_headroom", "current_qed_margin", "current_sa_margin", "heavy_atom_capacity", "endpoint_similarity_margin", "endpoint_qed_margin", "endpoint_sa_margin", "retained_fraction_margin", "interface_count_margin", "cycle_capacity"]
+    },
+    "proposal": {
+      "attempts_per_local_plan": 128,
+      "candidate_quota_per_local_plan": 8,
+      "maximum_local_plans_per_source": 24,
+      "maximum_local_candidates_per_source": 192,
+      "headroom_ranking_precedes_binary_admission": true,
+      "canonical_deduplication_after_both_experts_finish": true,
+      "no_backfill_across_plans_or_cells": true,
+      "joint_stop": {"min_depth": 2, "max_depth": 4, "beam_width": 24, "lock_width": 32, "candidates_per_family": 6, "expansions_per_parent": 24, "max_primitives": 32, "max_blocks": 8, "max_active_atoms": 40}
+    },
+    "evaluation": {
+      "teacher_load_phase": "only after all five autonomous candidate locks exist and validate",
+      "production_endpoint_admission_order": ["compose_valid_fiber", "canonical_self_exclusion", "canonical_endpoint_deduplication", "source_archive_exclusion"],
+      "prospective_support_gate": {
+        "complete_five_cell_lock_census": true,
+        "exact_replay_precision": 1.0,
+        "minimum_archive_ready_unique_endpoints_per_motivating_cell": 8,
+        "minimum_archive_ready_macro_plan_identities_per_motivating_cell": 3,
+        "minimum_archive_ready_macro_modes_per_motivating_cell": 3,
+        "minimum_archive_ready_structural_signatures_per_motivating_cell": 3,
+        "all_endpoints_within_40_heavy_atoms": true,
+        "all_programs_within_32_primitives_and_8_blocks": true,
+        "no_support_drift": true,
+        "no_teacher_proximity_or_forbidden_runtime_inputs": true,
+        "exact_teacher_endpoint_recovery_not_required": true
+      }
+    },
+    "runtime_prohibitions": {
+      "no_target_or_cell_name": true,
+      "no_route_or_route_identifier": true,
+      "no_trajectory_distilled_template": true,
+      "no_teacher_action_endpoint_or_proximity": true,
+      "no_objective_comparator_or_docking_score": true,
+      "no_fitted_weights": true,
+      "no_absolute_route_or_atom_address": true,
+      "no_intermediate_oracle_or_docking_call": true
+    },
+    "costs": {"oracle_calls": 0, "docking_calls": 0, "modal_launches": 0, "gpu_seconds": 0},
+    "claim_boundary": "free feasibility, exact replay and route-free proposal-support evidence only; no docking utility, scored selection, production integration or benchmark claim"
+  },
+  "payload_sha256": "bede1c39cbd39fdea8c3a5981192bac98597b839bdb6bae1d0e1e886188816ae"
+}
