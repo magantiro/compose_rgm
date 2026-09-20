@@ -1383,3 +1383,53 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   a source AT 40 heavy atoms has a proposal distribution with literally **0% grow** (braf_0), versus
   19.7% at 39 (braf_1) and 36.6% at 37 (braf_2). Headroom shapes the direction mix; it does not by
   itself decide feasibility, since 5ht1b_0 at 39 heavy atoms searches fine.
+
+## 2026-09-20 (PMO scale-up prep: the budget a contract declares is not the budget that runs)
+
+- **A contract budget is only real if the runtime READS it. `pmo_population_v1.execute_task` does
+  not.** The corrected scored contract declares `charged_calls_per_task: 250` and
+  `launch_pmo_population_v1_corrected.py` verifies that block byte-for-byte -- but `execute_task`
+  builds its ledger as `ProgramQueryLedger(..., budget=QUERY_BUDGET)` with the MODULE CONSTANT
+  `QUERY_BUDGET = 1000`, and computes the AUC with `budget=QUERY_BUDGET` too. The string
+  `contract["budget"]` appears nowhere in the module, and `modal_apps/pmo_population_v1_app.py` has
+  zero occurrences of `budget`. `run_program_campaign`'s only call-count authority is
+  `ledger.remaining`; `stagnation_rounds=None` disables the stagnation break, leaving only a
+  wall-clock guard. 64 rounds x 16 queries + 16 init = 1040 > 1000, so the ledger binds at 1000.
+  **Consequence: the "3x250" pilot would charge up to ~3,000 oracle calls, 4x its declared 750, and
+  report `auc_top10_development_1000` normalised by 1000 rather than 250.** The launcher's budget
+  check is a contract-consistency check, not an enforcement. LESSON: when a re-budget moves a
+  contract, grep the RUNTIME for the key that contract sets; a fail-closed chain that validates a
+  number nothing consumes is fail-closed about the wrong thing.
+- **`top_auc` trapezoids up from (0, 0), so a short-budget AUC is structurally DEPRESSED.** Closed
+  form, verified exactly against the production `pmo_top_ten_auc`: a run holding a constant top-10
+  level `c` scores `c * (1 - frequency / (2 * budget))`. At the official 10,000-call budget that
+  removes 0.5% of the level; at 1,000 it removes 5%; **at 250 it removes 20%**. So comparing a
+  250-call AUC against a published 10,000-call baseline does not merely compare different budgets,
+  it understates COMPOSE by a fifth at identical performance -- the error points toward a false
+  NEGATIVE. Also note the log grid: at budget 250 with frequency 100 the metric evaluates at only
+  (100, 200, 250), three points against the official 100.
+- **PyTDC does NOT define the PMO suite and ships NO oracle-direction metadata.** There is no `pmo`
+  benchmark group in `tdc/benchmark_group/`, and no `direction`/`higher_is_better` field anywhere in
+  `metadata.py`. PyTDC supplies the oracles; the 23-task membership comes from the PMO paper. Take
+  suite membership from the published transcriptions (`docs/invirtuogen_pmo_targets.json` and
+  `docs/genmol_pmo_targets.json` agree exactly, 23/23), and treat "maximize on [0,1]" as the
+  PMO/mol_opt convention -- independently enforced by `pmo_top_ten_auc`, which rejects any reward
+  outside [0,1].
+- **Verify oracle names WITHOUT constructing an Oracle.** `Oracle.__init__` calls
+  `fuzzy_search(name, oracle_names)`, which returns the name unchanged when it is an exact lowercased
+  registry member and otherwise falls back to a Levenshtein match at **threshold 0.8** -- a near-miss
+  name does not raise, it silently resolves to a DIFFERENT oracle, and `sitagliptin_mpo_prev` /
+  `zaleplon_mpo_prev` sit one token from two PMO tasks. So exact membership in
+  `tdc.metadata.oracle_names` is equivalent to resolution, and can be checked by loading
+  `tdc/metadata.py` standalone (stub `pkg_resources`; it is imported but unused by the registry
+  lists). Constructing the oracle would download predictor pickles for drd2/gsk3b/jnk3.
+  `tools/verify_pmo_task_registry.py` does this offline from a cached wheel; all 23 resolve exactly
+  against PyTDC 1.1.15, the version `pmo_population_v1_app.py` pins.
+- **`gsk3b: 0.952` is an unsourced promotion target pinned in three contracts.** The other two IVG
+  targets match `docs/invirtuogen_pmo_targets.json`'s no-prescreen table exactly (celecoxib 0.798,
+  perindopril 0.645), but **gsk3b is ABSENT from that table** -- its prescreened value is 0.988 --
+  and 0.952 appears nowhere in `docs/`. Promotion requires beating 2 of 3, so an unsourced number can
+  decide it. Related: the published no-prescreen column sums to 16.676 over 23 tasks but only **7 of
+  23** per-task values are transcribed, so no 23-task suite-sum comparison is possible yet. Record
+  ABSENT rather than substituting the prescreened value; the two columns differ by a 250,000-call
+  prescreen.

@@ -1,0 +1,1001 @@
+{
+ "schema_version": "contract_authority_audit_v1",
+ "generated_utc": "2026-09-20T21:38:51Z",
+ "git_commit": "af9fa3b6df7fe5497af21538f7e1e459391b5a7d",
+ "oracle_calls": 0,
+ "modal_launches": 0,
+ "files_modified": [
+  "none - read-only audit; new files only: scripts/contract_authority_audit.py, this file"
+ ],
+ "scope_note": "Audited entrypoints: (a) the six T4 250-call held-target campaigns, whose single shared runtime is modal_apps/t4_integrated_route_fiber_parp1_app.py reached through per-target 22-line env shims; (b) the T4 nodistill/shared-controller campaign (modal_apps/t4_shared_controller_completion_v1_app.py); (c) PMO population v1; (d) the QED-editing frozen-residual trainer and the GridDD QED benchmark app; (e) the fragment-constrained proposal panel.",
+ "method": {
+  "mechanical_pass": "scripts/contract_authority_audit.py enumerates every scalar leaf of each contract and greps src/ modal_apps/ tools/ scripts/ for the leaf KEY NAME. diagnostics/ is excluded because it holds frozen source capsules (copies), where a hit is not a live consumption.",
+  "human_pass": "Every mentioned key was then read at its consumption site to separate OPERATIVE from RECEIPT-ONLY.",
+  "soundness": "MEASURED. The 'never mentioned' set is SOUND: a key absent from every runtime module cannot be read by name.",
+  "incompleteness": "MEASURED. It is NOT complete, in two directions. (1) FALSE DEAD POSITIVES for map-valued fields whose KEYS are file paths: runtime_inputs_sha256.* and implementation_sha256.* were flagged 'never mentioned' because the script keys on the leaf name (a path), while the PARENT field is operative (t4_integrated_route_fiber_parp1_app.py:106-109; pmo_population_v1.py:128-129). A per-field check must treat a path-keyed map as ONE field. (2) FALSE NEGATIVES: a key that is mentioned may still be receipt-only; claim_boundary is the worst case, mentioned twice and operative zero times.",
+  "classification_vocabulary": {
+   "OPERATIVE": "read at runtime and changes behaviour",
+   "GUARD-ONLY": "read, but only compared against a hardcoded constant; cannot be varied without editing code",
+   "DERIVED": "computed from other fields; derivation verified",
+   "RECEIPT-ONLY": "read, but only copied into an output artifact. NOT operative.",
+   "PROSE-ONLY": "human-readable narrative, never read. Acceptable if distinguishable.",
+   "DEAD": "declared, looks scientific, nothing reads it. The dangerous class."
+  }
+ },
+ "concurrency_warning": {
+  "severity": "affects reproducibility of THIS audit",
+  "measured": "The PMO contracts were rewritten by another process DURING this audit. configs/pmo_population_controller_v1_scored_contract_corrected.json payload_sha256 moved from a3d343878e740a38ebb3509612faabfd7355914e63df8919f63279e80848dd1d to 8d79ed2506506bab2baf8125aaf4152a4221a852251af631e5156bf1c83da2e6 between two reads ~7 minutes apart; mtime 2026-09-20 17:32:52. tools/reseal_pmo_population_contracts.py re-pinned control/pmo_population_controller.py e01d2f16->f136d26f and control/bootstrap_pool_continuity.py 00408671->ed4da890. tools/launch_pmo_population_v1_corrected.py:23 PAYLOAD already tracks the NEW hash, so the launch path is current.",
+  "consequence": "All PMO findings below are pinned to the file hashes in audited_contract_sha256 and must be re-checked if those moved again."
+ },
+ "audited_contract_sha256": {
+  "configs/t4_held_target_distilled_jak2_d06_250.json": "b54059ccd9d9d5f5bebf90e731b8dd1ffdf977de58b852f2c7319797b4137abf",
+  "configs/t4_held_target_distilled_jak2_true_d06_250.json": "d79d276f15bc4e7c22d6b65f3984156364d193e51ac7f5636dd7ca5f2e79d649",
+  "configs/t4_held_target_distilled_fa7_d06_250.json": "935bb794540b6632520675d4a09dbed167313a12b5e3e7eda693bbca93450de0",
+  "configs/t4_held_target_distilled_5ht1b_d06_250.json": "9ffd0598575575e71f07f543ec9fbc327b8ba4958ff93c7086d373de9034e81b",
+  "configs/t4_held_target_distilled_braf_d06_250.json": "fc2bd52288ecb0f8d258fcf1839ecae25d5a8b5ea4b121047371c964099796be",
+  "configs/t4_held_target_distilled_parp1_d06_250.json": "13833a454918a944c11ba70ba09ba16459c1065b5810d792e5847fc78affdfe5",
+  "configs/t4_compose_nodistill_parp1_v1.json": "1ea9351d377e6741ebc9de4353d3fe411115f92c108278879c0e206c29e9e412",
+  "configs/pmo_population_controller_v1.json": "636b34abc9500729f36c503c69089eac7409a9cc9905133804be429b751da40d",
+  "configs/pmo_population_controller_v1_scored_contract_corrected.json": "e12a2141b54cfc2372f096c90eef65cf7c0ce2594350e133ff6b3d17f8142941",
+  "configs/pmo_population_live_parent_gate_v2.json": "03b2a36f5aab2fc9e02ca0dbb6ff7f80fcfbd1681001a12aeb340ec7545c2ed6",
+  "configs/experiments/griddd_qed_frozen_residual_pilot_v5_canonical.json": "6a63c154bdab9d97c82c8ce391e3e4e0a8589385993ff2948ce2396fc19fba01",
+  "configs/fragment_constrained_proposal_panel_v1.json": "2feeaa6be98ce1fec126d00b931de985b0610e3fbeadbfbac5488a54400e6081",
+  "configs/fragment_constrained_proposal_panel_v2.json": "8b2eaf148c730632068344fa2b724d1660c658f8e1c695a9dbdccc04041a5c38"
+ },
+ "runtime_file_sha256": {
+  "modal_apps/t4_integrated_route_fiber_parp1_app.py": "aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3",
+  "modal_apps/t4_shared_controller_completion_v1_app.py": "3a3b55662194145e2545ff6820bcfa1ee0dc47f06ed8ea9ad625ebddd94a60fc",
+  "modal_apps/pmo_population_v1_app.py": "4b6745894126768a7c9d23a521e157b74c7acba479292c985f724a27d5c029bf",
+  "src/compose_v4/experiments/pmo_population_v1.py": "a553cf66264a88d3750ea26d3ddd29f3f04f7ddd1a122084bdfe5b659c9fb655",
+  "src/compose_v4/experiments/pmo_population_live_parent_gate.py": "518045a7941e5073ed75abfe0d0098d3d98c11f5267b2d217895a0fb40c095c5",
+  "modal_apps/train_qed_frozen_residual.py": "6406cb51825383bd01e3136fabcfda6b29eb6cd8651005fe5b2ef156536e1a21",
+  "modal_apps/griddd_qed_app.py": "415c7e387dd380b60f9e4194344ea65dcda210a73868bb760e67bd9e950463a2",
+  "tools/fragment_constrained_proposal_panel.py": "8cbcca118ac98ea3f4111d377c56b51332605f9f1545ea5d32a68db2ef880914",
+  "src/compose_v4/benchmark/fragment_constrained.py": "cd9113a6afd22e833de462a0ad7d816ed170e8bde0d9d5577d7cae98caf0ddc6",
+  "src/compose_v4/experiments/t4_integrated_route_fiber.py": "0c8de5f5607c7b73d5da327f09ccd150ffdc37b741686e7095a12cf905740007",
+  "src/compose_v4/experiments/t4_shared_controller_checkpoint.py": "cfe328c36870a84f1cdd60d0b937443ea79e4789cd6465ece8b3a2b3c3a10b7a"
+ },
+ "known_instance_recall": {
+  "summary": "5 of 5 re-found independently. MEASURED.",
+  "detail": [
+   {
+    "id": 1,
+    "instance": "jak2 250 contract: claim_boundary prose says delta 0.6, executable delta is 0.4",
+    "re_found": true,
+    "how": "contract-vs-contract scan of all six 250 configs + reading the Fiber construction",
+    "measured": "configs/t4_held_target_distilled_jak2_d06_250.json delta=0.4 while claim_boundary='held-target jak2 panel at delta 0.6...'. The five sibling contracts all declare 0.6. delta is OPERATIVE at modal_apps/t4_integrated_route_fiber_parp1_app.py:257 and :387 (Fiber(..., contract['delta'], ...)). AGGRAVATING, new: claim_boundary is not merely prose - it is RECEIPT-ONLY, copied verbatim into the published result at t4_integrated_route_fiber_parp1_app.py:646 and :681, so the wrong delta is stamped into the artifact a reader would trust."
+   },
+   {
+    "id": 2,
+    "instance": "five T4 250-call contracts still say '49-call ceiling' in experimental_setting while charged_calls_per_cell=250",
+    "re_found": true,
+    "how": "mechanical: experimental_setting has 0 runtime readers; then string scan for '49' vs '250'",
+    "measured": "charged_calls_per_cell=250 in all six and is OPERATIVE at t4_integrated_route_fiber_parp1_app.py:411 (SearchState(budget=contract['charged_calls_per_cell'])). experimental_setting mentions 49-and-not-250 in exactly five: jak2_d06_250, fa7_d06_250, 5ht1b_d06_250, braf_d06_250, parp1_d06_250. jak2_true_d06_250 is the one corrected copy. experimental_setting has zero readers in src/ modal_apps/ -> PROSE-ONLY, so nothing could catch the contradiction."
+   },
+   {
+    "id": 3,
+    "instance": "pmo_population_v1.execute_task took its ledger budget from module constant QUERY_BUDGET=1000 while the contract declared 250",
+    "re_found": true,
+    "how": "module-constant sweep of the PMO runtime",
+    "measured": "Confirmed FIXED: charged_calls_per_task is now a required keyword with no default (pmo_population_v1.py:140,151-152) and the app passes the contract value at pmo_population_v1_app.py:187-189. QUERY_BUDGET=1000 still exists at pmo_population_v1.py:38 and is still exported in __all__ (:210), but is now referenced only by the non-runtime descriptor controller_payload() at :94-95. RESIDUE, new: configs/pmo_population_controller_v1.json still declares controller.calls_per_task=1000, which is DEAD and contradicts the operative 250."
+   },
+   {
+    "id": 4,
+    "instance": "execute_task reported auc_top10_development_1000, a hardcoded 1000-call AUC denominator, regardless of budget",
+    "re_found": true,
+    "how": "tree-wide grep for the literal key name",
+    "measured": "Half-fixed, and the half-fix is a LIVE CRASH. execute_task now correctly returns auc_top10_at_budget + auc_budget (pmo_population_v1.py:198-201), but modal_apps/pmo_population_v1_app.py:197-198 still selects the OLD key: return {key: result[key] for key in ('task','charged_oracle_calls','best_score','auc_top10_development_1000')}. That key no longer exists -> KeyError. See failing_list entry PMO-1."
+   },
+   {
+    "id": 5,
+    "instance": "fa7/5ht1b 250 contracts declare proposal.route_complete_region.scale_balanced=true but the pinned app never forwards it",
+    "re_found": true,
+    "how": "mechanical: scale_balanced has 0 occurrences in the held-target runtime while 6 of its 7 sibling keys are forwarded",
+    "measured": "MEASURED 0 occurrences of scale_balanced in modal_apps/t4_integrated_route_fiber_parp1_app.py, while :281-286 forwards pool_size, realization_limit, beam_width, expansion_width, max_bindings_per_template and maximum_expansions from the same dict. Default is False at src/compose_v4/control/structural_subgoal_policy.py:687. Eleven OTHER T4 apps do forward it (e.g. t4_shared_retained_fiber_jak2_v2_app.py:193). BROADER THAN REPORTED: scale_balanced=true is declared in FOUR 250-call contracts - jak2_d06_250, jak2_true_d06_250, fa7_d06_250, 5ht1b_d06_250 - not two."
+   }
+  ],
+  "precision_note": "MEASURED. The mechanical pass also produced false DEAD positives (runtime_inputs_sha256.*, implementation_sha256.*) which the human pass cleared. Recall 5/5; raw mechanical precision on 'scientific-looking' keys is roughly 0.8 before the human pass."
+ },
+ "entrypoints": {
+  "T4_held_target_250": {
+   "runtime": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
+   "shims": [
+    "modal_apps/t4_integrated_route_fiber_held_jak2_app.py",
+    "modal_apps/t4_integrated_route_fiber_held_jak2_d06_app.py",
+    "modal_apps/t4_integrated_route_fiber_held_fa7_app.py",
+    "modal_apps/t4_integrated_route_fiber_held_5ht1b_app.py",
+    "modal_apps/t4_integrated_route_fiber_held_braf_app.py",
+    "modal_apps/t4_integrated_route_fiber_held_parp1_app.py"
+   ],
+   "shim_mechanism": "MEASURED. Each shim sets COMPOSE_HELD_CONTRACT/CHECKPOINT/VOLUME/OUTPUT/APP/RECEPTOR_NAME then imports app+main from the parp1 app (read back at t4_integrated_route_fiber_parp1_app.py:17-30).",
+   "fields": [
+    {
+     "field": "delta",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:257, modal_apps/t4_integrated_route_fiber_parp1_app.py:387",
+     "note": "Fiber(seed, contract['delta'], support=...). Sets the similarity corridor.",
+     "verdict": "PASS (mechanism); FAIL for jak2_d06_250 where prose contradicts it"
+    },
+    {
+     "field": "support",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:257, modal_apps/t4_integrated_route_fiber_parp1_app.py:387",
+     "note": "support= kwarg of Fiber.",
+     "verdict": "PASS"
+    },
+    {
+     "field": "charged_calls_per_cell",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:411",
+     "note": "SearchState(budget=...). The oracle ceiling.",
+     "verdict": "PASS (mechanism); FAIL for the five whose prose says 49"
+    },
+    {
+     "field": "parents",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:458-459",
+     "note": "state.parents(limit=...)",
+     "verdict": "PASS"
+    },
+    {
+     "field": "parent_explore",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:458-459",
+     "note": "state.parents(explore=...). Parent-selection exploration rate.",
+     "verdict": "PASS"
+    },
+    {
+     "field": "batch",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:501",
+     "note": "room = min(contract['batch'], state.budget)",
+     "verdict": "PASS"
+    },
+    {
+     "field": "exploration",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:509",
+     "note": "exploration=min(contract['exploration'], room). The epsilon quota.",
+     "verdict": "PASS"
+    },
+    {
+     "field": "expert_floor_rounds",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:510",
+     "note": "select_batch(expert_floor_rounds=...)",
+     "verdict": "PASS"
+    },
+    {
+     "field": "route_scale_floor_rounds",
+     "class": "DEAD",
+     "site": "declared in 4 of 6 contracts; 0 readers in the held runtime",
+     "note": "MEASURED. select_batch's signature has route_scale_floor_rounds: int = 0 (src/compose_v4/experiments/t4_integrated_route_fiber.py:207) and gates the small/medium/large primitive-band floor at :246 (if round_index <= route_scale_floor_rounds). The held app's call at :502-510 passes expert_floor_rounds and NOT route_scale_floor_rounds, so it runs at 0 while the contract declares 2. Every other T4 app forwards it (e.g. modal_apps/t4_shared_retained_fiber_jak2_v2_app.py:468,769).",
+     "verdict": "FAIL - NEW, not among the five known"
+    },
+    {
+     "field": "proposal.route_complete_region.scale_balanced",
+     "class": "DEAD",
+     "site": "0 readers in the held runtime",
+     "note": "Default False at src/compose_v4/control/structural_subgoal_policy.py:687; behaviour at :721-723, :790-791, :812.",
+     "verdict": "FAIL - known instance 5, re-found and broadened to 4 contracts"
+    },
+    {
+     "field": "proposal.<expert>.draws",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:265, modal_apps/t4_integrated_route_fiber_parp1_app.py:270",
+     "verdict": "PASS"
+    },
+    {
+     "field": "proposal.<expert>.horizon",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:267",
+     "verdict": "PASS"
+    },
+    {
+     "field": "proposal.route_complete_region.{pool_size,realization_limit,beam_width,expansion_width,max_bindings_per_template,maximum_expansions}",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:281-286",
+     "note": "Candidate pool size and search widths.",
+     "verdict": "PASS"
+    },
+    {
+     "field": "proposal.route_complete_region.training_scope",
+     "class": "DEAD",
+     "site": "0 readers anywhere",
+     "note": "'one shared task-independent expert fit on all 77 locked routes'. The expert is loaded from the pinned checkpoint; this string does not select it.",
+     "verdict": "FAIL (low damage - checkpoint hash is the real binding)"
+    },
+    {
+     "field": "proposal.route_complete_region.training_split",
+     "class": "DEAD",
+     "site": "0 readers anywhere",
+     "note": "'leave-jak2-out'. The leave-target-out guarantee - the central claim of a held-target run - rests on the pinned checkpoint file, not on this field.",
+     "verdict": "FAIL (claim-bearing)"
+    },
+    {
+     "field": "cells[].smiles / controller_seed / source_global_index",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:386-387",
+     "note": "rng = default_rng(cell['controller_seed']); Fiber(cell['smiles'],...)",
+     "verdict": "PASS"
+    },
+    {
+     "field": "docking_seed",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:336",
+     "note": "dock_t4(..., contract['docking_seed'], ...)",
+     "verdict": "PASS"
+    },
+    {
+     "field": "docking_box",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:338",
+     "note": "box={'coordinates': contract['docking_box'], ...}. Flagged DEAD by the mechanical pass only because its leaves are anonymous list entries.",
+     "verdict": "PASS"
+    },
+    {
+     "field": "evaluator_sha256",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:330",
+     "note": "Fail-closed identity guard on qvina02 + receptor.",
+     "verdict": "PASS"
+    },
+    {
+     "field": "runtime_inputs_sha256",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:106-109",
+     "note": "Per-file fail-closed guard. Mechanical false-DEAD (path-keyed map).",
+     "verdict": "PASS"
+    },
+    {
+     "field": "resume_predecessor.contract_payload_sha256",
+     "class": "OPERATIVE",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:159",
+     "note": "Admits exactly one predecessor contract when resuming.",
+     "verdict": "PASS"
+    },
+    {
+     "field": "legacy_resume.*",
+     "class": "DEAD",
+     "site": "0 readers; 21 leaves in jak2_d06_250 and jak2_true_d06_250",
+     "note": "MEASURED. _resume_state (modal_apps/t4_integrated_route_fiber_parp1_app.py:127-215) resumes ONLY from folder/'checkpoint.json' under the CURRENT run's OUTPUT namespace and from folder-local round_*_lock.json. It never opens legacy_resume.checkpoint_path, which points into a DIFFERENT run id (d9db07f0.../jak2_N/checkpoint.json). So the contract declares which prior-run checkpoints the continuation resumes from and the runtime does not consult them.",
+     "verdict": "FAIL - NEW, and it governs whether oracle calls are double-spent"
+    },
+    {
+     "field": "proposal_wait_seconds",
+     "class": "DEAD + CONTRADICTED",
+     "site": "0 readers",
+     "note": "Declares 2400 s. The runtime proposal worker is decorated timeout=1800 at modal_apps/t4_integrated_route_fiber_parp1_app.py:236. Contract value is 33% larger than the enforced one.",
+     "verdict": "FAIL"
+    },
+    {
+     "field": "query_wait_seconds",
+     "class": "DEAD + CONTRADICTED",
+     "site": "0 readers",
+     "note": "Declares 1200 s. The runtime dock worker is decorated timeout=720 at modal_apps/t4_integrated_route_fiber_parp1_app.py:316.",
+     "verdict": "FAIL"
+    },
+    {
+     "field": "phase_poll_seconds",
+     "class": "DEAD",
+     "site": "0 readers",
+     "note": "Declares 5 s. No poll interval is read from the contract.",
+     "verdict": "FAIL (low damage)"
+    },
+    {
+     "field": "round_lock_policy.* (7 sub-fields incl. no_backfill, automatic_retries, resume_complete_receipts_only, continue_after_deadline_with_unresolved_calls_charged)",
+     "class": "DEAD",
+     "site": "0 readers",
+     "note": "The round-lock/no-retry semantics ARE implemented, structurally, at modal_apps/t4_integrated_route_fiber_parp1_app.py:127-215 and :418/:541, and automatic_retries is emitted as a hardcoded 0 literal at modal_apps/t4_integrated_route_fiber_parp1_app.py:756. But none of the seven declared policy booleans is read, so flipping any to false would change nothing.",
+     "verdict": "FAIL (retry/backfill policy is entirely unbound)"
+    },
+    {
+     "field": "claim_boundary",
+     "class": "RECEIPT-ONLY",
+     "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:646, modal_apps/t4_integrated_route_fiber_parp1_app.py:681",
+     "note": "Copied verbatim into the published result. Carries the delta claim.",
+     "verdict": "FAIL as a safeguard - see known instance 1"
+    },
+    {
+     "field": "experimental_setting / central_claim_under_test / primary_model_output / primary_baselines / scientific_problem",
+     "class": "PROSE-ONLY",
+     "site": "0 readers",
+     "verdict": "ACCEPTABLE but see known instance 2"
+    },
+    {
+     "field": "reported_ivg_* / zero_oracle_support / prior_operational_waste / total_charged_call_ceiling / value_penalty / frozen_from / declared_support / promotion_criteria / causal_ablation_status",
+     "class": "DEAD",
+     "site": "0 readers in the held runtime",
+     "note": "value_penalty is notable: it IS operative in the shared-controller lane (t4_shared_controller_checkpoint.py:150-153) but the held runtime never reads it.",
+     "verdict": "FAIL for value_penalty; low damage for the accounting/narrative fields"
+    }
+   ],
+   "panel_shape_drift": {
+    "severity": "undermines the 'matched five-target panel' framing",
+    "measured": "The six 250-call contracts are NOT field-homogeneous. jak2_d06_250, jak2_true_d06_250, fa7_d06_250 and 5ht1b_d06_250 declare route_scale_floor_rounds, proposal.route_complete_region.scale_balanced, training_scope, phase_poll_seconds, proposal_wait_seconds, query_wait_seconds, prior_operational_waste and zero_oracle_support. braf_d06_250 and parp1_d06_250 declare NONE of those, and instead carry declared_support and promotion_criteria. Because every one of the divergent keys is DEAD, the six runs do execute identically - but the contracts cannot be read as evidence of that, and a reader comparing them would conclude the arms differ."
+   }
+  },
+  "T4_nodistill_shared_controller": {
+   "runtime": "modal_apps/t4_shared_controller_completion_v1_app.py",
+   "contracts": [
+    "configs/t4_compose_nodistill_parp1_v1.json (PREPARATION)",
+    "diagnostics/t4_compose_nodistill_parp1_v1/attempt_*/scored_contract.json (RUNTIME AUTHORITY)"
+   ],
+   "verdict": "HEALTHIEST LANE AUDITED - and it is the counterexample that proves the T4-250 findings are defects, not intent",
+   "measured": "The runtime reads the SCORED contract, not the preparation config (variant selection at modal_apps/t4_shared_controller_completion_v1_app.py:22-31, FINAL_CONTRACT_PATH at :127). It passes the controller block WHOLESALE as controller_config=checkpoint_controller_config(contract) (:820, :1129-1138) instead of as hand-listed kwargs, and src/compose_v4/experiments/t4_shared_controller_checkpoint.py:122-134 enforces a REQUIRED set {parents, parent_explore, batch, exploration, expert_floor_rounds, route_scale_floor_rounds, value_penalty} with `missing -> ValueError`, then range-validates each (:135-152) and forwards route_scale_floor_rounds at :625 and scale_floor_scope at :163-165. It also reads the operational timing fields the held lane drops: settings['query_wait_seconds'] (:859,:1137), settings['proposal_wait_seconds'] (:962), settings['driver_poll_seconds'] (:886,:1043,:1180), and settings['scale_balanced'] (:411).",
+   "consequence": "Same contract vocabulary, two runtimes, opposite outcomes. The held-target app enumerates kwargs one at a time and silently drops two; the shared-controller app passes a mapping through a fail-closed normalizer. The per-kwarg style IS the defect generator, and the required-set normalizer is the in-repo precedent for the CI check proposed below.",
+   "fields_not_yet_bound": [
+    {
+     "field": "operational_settings.retained_core.{maximum_fragment_atoms:16, maximum_stages:2, maximum_primitives:32, maximum_prefixes:4096}",
+     "class": "OPERATIVE",
+     "site": "src/compose_v4/experiments/t4_nodistill_generic_composer_gate.py:234-237",
+     "note": "Atom and capacity limits are genuinely contract-bound here.",
+     "verdict": "PASS"
+    },
+    {
+     "field": "preparation contract configs/t4_compose_nodistill_parp1_v1.json (all leaves)",
+     "class": "NOT-RUNTIME",
+     "note": "Superseded by the scored contract at runtime. Its controller.route_scale_floor_rounds=2 and scale_floor_scope='all_generic' do survive into the scored contract (verified in attempt_2/3/4).",
+     "verdict": "PASS with a naming caveat - a reader may mistake the prepared config for the authority"
+    }
+   ]
+  },
+  "PMO_population_v1": {
+   "runtime": [
+    "modal_apps/pmo_population_v1_app.py",
+    "src/compose_v4/experiments/pmo_population_v1.py"
+   ],
+   "launcher": "tools/launch_pmo_population_v1_corrected.py",
+   "authorizing_contract": "configs/pmo_population_controller_v1_scored_contract_corrected.json",
+   "base_contract": "configs/pmo_population_controller_v1.json",
+   "fields": [
+    {
+     "field": "budget.charged_calls_per_task",
+     "class": "OPERATIVE",
+     "site": "modal_apps/pmo_population_v1_app.py:187-189 -> src/compose_v4/experiments/pmo_population_v1.py:140,151-152,161",
+     "note": "ProgramQueryLedger(budget=...). Also the AUC denominator at src/compose_v4/experiments/pmo_population_v1.py:198-201.",
+     "verdict": "PASS (this is the repaired instance 3)"
+    },
+    {
+     "field": "budget.charged_calls_total",
+     "class": "DERIVED + GUARD-ONLY",
+     "site": "tools/launch_pmo_population_v1_corrected.py:64-77",
+     "note": "750 = 250 x 3 tasks. Derivation holds (MEASURED). Only checked against a hardcoded expected dict in the launcher.",
+     "verdict": "PASS (derivation) / WEAK (guard is constant-vs-constant)"
+    },
+    {
+     "field": "budget.candidate_calls_per_task",
+     "class": "DERIVED + GUARD-ONLY",
+     "site": "tools/launch_pmo_population_v1_corrected.py:64-77",
+     "note": "234 = 250 - 16. Derivation holds (MEASURED).",
+     "verdict": "PASS / WEAK"
+    },
+    {
+     "field": "budget.max_rounds",
+     "class": "DEAD",
+     "site": "0 runtime readers",
+     "note": "Declares 64. Runtime uses module constant MAX_ROUNDS=64 (src/compose_v4/experiments/pmo_population_v1.py:40) passed at src/compose_v4/experiments/pmo_population_v1.py:173. Launcher asserts the contract equals 64 at tools/launch_pmo_population_v1_corrected.py:70, so contract and code are two copies that agree by maintenance, not by dataflow. Editing both to 32 would still run 64 rounds.",
+     "verdict": "FAIL - the exact shape of instance 3"
+    },
+    {
+     "field": "budget.queries_per_round",
+     "class": "DEAD",
+     "site": "0 runtime readers",
+     "note": "Declares 16. Runtime uses QUERIES_PER_ROUND=16 (src/compose_v4/experiments/pmo_population_v1.py:39) at src/compose_v4/experiments/pmo_population_v1.py:174 and src/compose_v4/experiments/pmo_population_v1.py:57.",
+     "verdict": "FAIL - same shape"
+    },
+    {
+     "field": "budget.initialization_calls_per_task",
+     "class": "DEAD",
+     "site": "0 runtime readers",
+     "note": "Declares 16. The enforced count comes from the initialization FILE compared to INIT_COUNT=16 (src/compose_v4/experiments/pmo_population_v1.py:37,125) and INITIALIZATION_COUNT (src/compose_v4/experiments/pmo_dynamic_v21.py:204-205).",
+     "verdict": "FAIL"
+    },
+    {
+     "field": "budget.{automatic_retries,backfill,cpu_per_worker,gpu}",
+     "class": "DEAD",
+     "site": "0 runtime readers",
+     "note": "No-retry is enforced structurally at modal_apps/pmo_population_v1_app.py:157-158 (raises if started.json or result.json exists) and automatic_retries is emitted as a hardcoded 0 at modal_apps/pmo_population_v1_app.py:194.",
+     "verdict": "FAIL (retry/backfill policy unbound)"
+    },
+    {
+     "field": "initialization.{path,sha256,source_sha256,lock_sha256}",
+     "class": "OPERATIVE",
+     "site": "src/compose_v4/experiments/pmo_dynamic_v21.py:196-213",
+     "note": "Fail-closed file + lock + provenance verification.",
+     "verdict": "PASS"
+    },
+    {
+     "field": "initialization.count",
+     "class": "DEAD",
+     "site": "0 readers of the CONTRACT field",
+     "note": "src/compose_v4/experiments/pmo_population_v1.py:125 checks the loaded FILE's count against module INIT_COUNT=16, never contract['initialization']['count'].",
+     "verdict": "FAIL (low damage - the file is hash-pinned)"
+    },
+    {
+     "field": "initialization.task_independent / all_scores_charged",
+     "class": "DEAD",
+     "site": "0 readers",
+     "note": "Task-independence IS enforced structurally at src/compose_v4/experiments/pmo_dynamic_v21.py:212-213 (raises if any candidate carries 'score' or 'task').",
+     "verdict": "FAIL (low damage)"
+    },
+    {
+     "field": "controller.seed",
+     "class": "OPERATIVE",
+     "site": "src/compose_v4/experiments/pmo_population_v1.py:164",
+     "note": "config = configuration(contract['controller']['seed']) -> ProgramSearchConfig seed.",
+     "verdict": "PASS"
+    },
+    {
+     "field": "controller.calls_per_task",
+     "class": "DEAD",
+     "site": "0 runtime readers",
+     "note": "Declares 1000 in the base contract while the operative budget is 250. This is the un-removed residue of instance 3 and it actively contradicts the authorizing contract.",
+     "verdict": "FAIL - HIGH, contradicts the operative budget by 4x"
+    },
+    {
+     "field": "controller.{program_max_blocks:8, program_max_primitives:32}",
+     "class": "DEAD",
+     "site": "0 readers anywhere in src/ modal_apps/ tools/ scripts/",
+     "note": "Program capacity limits. Nothing reads them; the ProgramSearchConfig built at src/compose_v4/experiments/pmo_population_v1.py:50-60 has no such fields.",
+     "verdict": "FAIL - capacity limits unbound"
+    },
+    {
+     "field": "controller.{proposal_modes,early_family_niche_floor,task_conditioning_in_proposal_law,plateau_escape,recursive_archive,continuous_retention,max_rounds,queries_per_round}",
+     "class": "DEAD",
+     "site": "0 readers",
+     "note": "The channel->mode map is hardcoded at src/compose_v4/control/pmo_population_controller.py:61-63 with a 'global_explore' default at :391.",
+     "verdict": "FAIL - lane/expert enables unbound"
+    },
+    {
+     "field": "oracle.{prescreen:false, direction:'maximize', calls_include_initialization:true}",
+     "class": "DEAD",
+     "site": "0 readers of the contract fields",
+     "note": "src/compose_v4/experiments/pmo_dynamic_v21.py:178-193 _runtime_protocol HARDCODES prescreen=False (:191), direction='maximize' (:189), range=[0,1] (:190), calls_include_initialization=True (:192). Separately src/compose_v4/experiments/pmo_population_v1.py:54 hardcodes score_direction='maximize'. The protocol dict is then hashed into the ProgramTask identity, so these appear in receipts as though honoured.",
+     "verdict": "FAIL - the prescreen flag, a headline no-prescreen claim, is not contract-bound"
+    },
+    {
+     "field": "oracle.{environment,source_files,gsk3b_asset.sha256}",
+     "class": "OPERATIVE",
+     "site": "src/compose_v4/experiments/pmo_dynamic_v21.py:182-188 + verify_runtime_environment at modal_apps/pmo_population_v1_app.py:141",
+     "verdict": "PASS"
+    },
+    {
+     "field": "tasks",
+     "class": "OPERATIVE",
+     "site": "src/compose_v4/experiments/pmo_population_v1.py:154-155",
+     "note": "raise unless task_name in module TASKS; TASKS is a module constant (src/compose_v4/experiments/pmo_population_v1.py:41) that duplicates the contract list. GUARD-ONLY in practice.",
+     "verdict": "WEAK PASS"
+    },
+    {
+     "field": "joint_checkpoint.{path,sha256,payload_sha256,fit_scope}",
+     "class": "OPERATIVE",
+     "site": "src/compose_v4/experiments/pmo_population_v1.py:103-112",
+     "note": "fit_scope is checked against the literal 'shared_all_routes' at :108 - task-blindness guard.",
+     "verdict": "PASS"
+    },
+    {
+     "field": "implementation_sha256",
+     "class": "OPERATIVE",
+     "site": "src/compose_v4/experiments/pmo_population_v1.py:128-129",
+     "note": "Mechanical false-DEAD (path-keyed map). Verified green against disk at audit time.",
+     "verdict": "PASS"
+    },
+    {
+     "field": "scored_launch_authorized / modal_launch_authorized",
+     "class": "OPERATIVE",
+     "site": "src/compose_v4/experiments/pmo_population_v1.py:122-123, src/compose_v4/experiments/pmo_population_v1.py:156-157, tools/launch_pmo_population_v1_corrected.py:52-53",
+     "note": "Fail-closed on disk; overridden in memory only after a separate authorization receipt binds the payload hash (modal_apps/pmo_population_v1_app.py:154-156).",
+     "verdict": "PASS"
+    },
+    {
+     "field": "runtime.{parent_modes,recursive_descendants,task_to_route_lookup,task_to_endpoint_lookup,winner_injection}",
+     "class": "DEAD",
+     "site": "0 readers",
+     "note": "These are the NEGATIVE CONTROLS for task leakage - 'no task-to-route lookup', 'no winner injection'. None is read or asserted at runtime.",
+     "verdict": "FAIL - claim-bearing negative controls unbound"
+    },
+    {
+     "field": "runtime.live_parent_support_gate(_sha256)",
+     "class": "DEAD",
+     "site": "0 readers",
+     "note": "Points at configs/pmo_population_live_parent_gate_v2.json, which is referenced ONLY by tools/reseal_pmo_population_contracts.py:36. src/compose_v4/experiments/pmo_population_live_parent_gate.py never opens it (it loads only INITIALIZATION at :122 and CHECKPOINTS at :123).",
+     "verdict": "FAIL - a declared runtime gate that runtime never consults"
+    },
+    {
+     "field": "promotion.{beat_at_least,third_task_within,route_scale_descendant_required,official_10000_call_claim,ivg_targets_postrun_only}",
+     "class": "DEAD",
+     "site": "0 readers",
+     "note": "Post-run promotion criteria. Acceptable as preregistration IF a scoring tool reads them; none does.",
+     "verdict": "FAIL (deferred damage - promotion could be judged by a different rule than the one preregistered)"
+    },
+    {
+     "field": "prohibitions / scientific_question / task_roles / status / prior_launch_terminal_failure / corrected_worker_*",
+     "class": "PROSE-ONLY",
+     "site": "0 readers",
+     "note": "task_roles IS read at src/compose_v4/experiments/pmo_population_v1.py:191 but only to stamp a label into the result -> RECEIPT-ONLY.",
+     "verdict": "ACCEPTABLE"
+    }
+   ],
+   "parent_gate_constants": {
+    "contract": "configs/pmo_population_live_parent_gate_v2.json",
+    "measured": "Every scientific threshold in that config is duplicated as a module constant in src/compose_v4/experiments/pmo_population_live_parent_gate.py and read from there: parent_policy.minimum_route_scale_primitives=8 vs MIN_ROUTE_SCALE_PRIMITIVES=8 (:37); parent_policy.minimum_supported_non_root_parents=4 vs MIN_SUPPORTED_PARENTS=4 (:38); FAMILIES tuple (:32-39) has no contract counterpart at all. plan_policy.plans_per_batch=32 does NOT correspond to PLAN_SAMPLE_PER_BAND=4 (:41, used :57) - the sampled path yields 4 per band over 3 bands = 12, while the exhaustive path (:125) uses all plan latents; the '32-plan chunk' rule survives only as a string at :246.",
+    "verdict": "FAIL - the entire gate config is DEAD; the gate's thresholds are code"
+   }
+  },
+  "QED_editing": {
+   "provenance": "Traced by a delegated read-only subagent; four load-bearing claims independently spot-verified by the lead auditor (marked SPOT-VERIFIED).",
+   "runtimes": [
+    "modal_apps/train_qed_frozen_residual.py",
+    "modal_apps/griddd_qed_app.py"
+   ],
+   "contract": "configs/experiments/griddd_qed_frozen_residual_pilot_v5_canonical.json (52 leaves)",
+   "tally": "27 OPERATIVE (2 performance-only, 1 guard-only), 2 RECEIPT-ONLY, 23 DEAD, 0 PROSE-ONLY. 44% dead.",
+   "headline": [
+    {
+     "finding": "modal_apps/griddd_qed_app.py reads NO contract at all",
+     "class": "HIDDEN-CONSTANT ENTRYPOINT",
+     "measured": "SPOT-VERIFIED. modal_apps/griddd_qed_app.py:66-71 defines TIME_POINT=0.5, CANONICAL_SLOTS=48, HORIZON=6, N_REPLICATES=20, PROTOCOL_VERSION='griddd-jin-qed-v1'; modal_apps/griddd_qed_app.py:230 hardcodes the success rule bool(q_end >= 0.9 and sim >= 0.4). The benchmark's QED threshold, similarity threshold, AUC/edit horizon, replicate count, scoring time and slot width are inline literals bound by no contract.",
+     "verdict": "FAIL - HIGHEST. The entire published benchmark specification is editable with no gate."
+    },
+    {
+     "finding": "the 800-lead benchmark identity is bound only by a length assert",
+     "measured": "Subagent-traced: modal_apps/griddd_qed_app.py:314 reads data/jin/qed_test.txt and :318/:322 assert len==800/64. configs/benchmarks/griddd_qed_lead_manifest_v1.json is referenced only by its builder (scripts/build_griddd_qed_lead_manifest.py:279) and a pytest; no runtime module loads it. The file's sha256 does match the manifest's frozen value, so the right leads ARE used - nothing verifies it at runtime.",
+     "verdict": "FAIL - task/oracle identity unbound"
+    },
+    {
+     "finding": "base.small_ring_log_rate_adjustment (-1.5) and base.small_ring_maximum_size (4) are declared but not applied in training",
+     "measured": "SPOT-VERIFIED. src/compose_v4/experiments/canonical_successor_distillation.py:168-180 - PancakeQuotientCalibration carries only atom_delete_log_rate_adjustment=-0.5 and its docstring states the small-ring multiplier is 'intentionally excluded here'. The -1.5/4 pair are defaults on FrozenResidualConditionalBackbone (griddd_conditional.py:637-638), a class the trainer never constructs.",
+     "verdict": "FAIL - a declared calibration the run does not perform"
+    },
+    {
+     "finding": "base.checkpoint_sha256 is RECEIPT-ONLY, not the model gate",
+     "measured": "Subagent-traced: the guard at modal_apps/train_qed_frozen_residual.py:181 compares the embedded file against module constant RETAINED_PANCAKE_CHECKPOINT_SHA256 (griddd_conditional.py:74), not against the contract value; the contract value is copied into the checkpoint payload at modal_apps/train_qed_frozen_residual.py:112-114. The two strings are equal, so editing the contract would change nothing.",
+     "verdict": "FAIL - reads like the model gate, is not"
+    },
+    {
+     "finding": "the only v4->v5 methodological change is receipt-only",
+     "measured": "Subagent-traced: data.ring_catalog_support_policy 'compile_typed_then_filter_to_frozen_catalog' -> 'structured_topology_support_projection_v3' is copied into the manifest at modal_apps/train_qed_frozen_residual.py:298-300 while the filter at modal_apps/train_qed_frozen_residual.py:275-290 calls structured_ring_trace_supported unconditionally in both versions. The operative v4->v5 delta is only minimum_supported_train_records 1->128 (modal_apps/train_qed_frozen_residual.py:315) and minimum_supported_validation_records 1->16 (modal_apps/train_qed_frozen_residual.py:320).",
+     "verdict": "FAIL - a version bump that records a change that did not occur"
+    },
+    {
+     "finding": "no SA threshold exists anywhere in the QED-editing path",
+     "measured": "Subagent-traced: zero hits for sascore/sa_score/synthetic_accessib/sascorer across both apps, canonical_successor_distillation.py, griddd_conditional.py, the v5 contract and the lead manifest.",
+     "verdict": "REPORTED ABSENCE - if an SA constraint is believed in force here, it is not"
+    },
+    {
+     "finding": "23 dead keys are serialized into every receipt as if honoured",
+     "measured": "Subagent-traced: modal_apps/train_qed_frozen_residual.py:197 embeds the whole config into run_config.json and modal_apps/train_qed_frozen_residual.py:125 into every checkpoint payload, so a downstream reader sees qualification_required_passed/independent_total_hazard_residual/subset_selection and cannot tell they were never read.",
+     "verdict": "FAIL - receipts assert compliance with unenforced fields"
+    }
+   ],
+   "operative_examples": [
+    {
+     "field": "property.normalizer_mean / _standard_deviation",
+     "site": "modal_apps/train_qed_frozen_residual.py:216-219 -> canonical_successor_distillation.py:824-831"
+    },
+    {
+     "field": "property.condition_dropout_probability",
+     "site": "modal_apps/train_qed_frozen_residual.py:351 -> factorized_mark_conditional.py:287",
+     "note": "train only; validation hardcoded 0.0 at modal_apps/train_qed_frozen_residual.py:366"
+    },
+    {
+     "field": "data.train_endpoint_subset / validation_endpoint_subset",
+     "site": "modal_apps/train_qed_frozen_residual.py:238-243"
+    },
+    {
+     "field": "optimization.seed",
+     "site": "modal_apps/train_qed_frozen_residual.py:208,209,236 (+ derived stream offsets +1 at :268 and +2 at :359, which are module literals)"
+    },
+    {
+     "field": "optimization.steps",
+     "site": "modal_apps/train_qed_frozen_residual.py:176-177 (hard-pinned to exactly 500), :342, :497",
+     "note": "GUARD+OPERATIVE: pinned, so not a free parameter"
+    },
+    {
+     "field": "optimization.early_stopping_patience / _min_relative_improvement",
+     "site": "modal_apps/train_qed_frozen_residual.py:530-531, :567-571"
+    },
+    {
+     "field": "optimization.operational_horizon / late_time_fraction / progress_stratification_fraction",
+     "site": "modal_apps/train_qed_frozen_residual.py:344-346,:360-362 -> factorized_mark_conditional.py:243-252"
+    },
+    {
+     "field": "data.partition_manifest_sha256",
+     "site": "modal_apps/train_qed_frozen_residual.py:184-186",
+     "note": "the one contract-supplied hash actually enforced"
+    }
+   ],
+   "dead_examples": [
+    "property.name",
+    "base.qualification_manifest",
+    "base.qualification_required_passed",
+    "base.execution_kind",
+    "base.atom_delete_log_rate_adjustment",
+    "base.small_ring_log_rate_adjustment",
+    "base.small_ring_maximum_size",
+    "data.subset_selection",
+    "adapter.kind",
+    "adapter.base_parameters_frozen",
+    "adapter.base_weights_in_sidecar_state_dict",
+    "adapter.family_hazard_residual",
+    "adapter.within_family_residual",
+    "adapter.independent_total_hazard_residual",
+    "adapter.missing_condition_identity",
+    "outputs.volume",
+    "outputs.checkpoint_every_evaluation",
+    "outputs.persist_step_evaluations",
+    "outputs.persist_recovery_checkpoint",
+    "outputs.persist_best_checkpoint",
+    "protocol_a_launch",
+    "protocol_b_evaluation_after_training"
+   ]
+  },
+  "fragment_benchmark": {
+   "provenance": "Traced by a delegated read-only subagent; the QED/SA threshold line and the argparse default pinning independently spot-verified (marked SPOT-VERIFIED).",
+   "runtime": "tools/fragment_constrained_proposal_panel.py",
+   "contracts": [
+    "configs/fragment_constrained_proposal_panel_v1.json",
+    "configs/fragment_constrained_proposal_panel_v2.json"
+   ],
+   "tally": "8 operative leaf paths (+6 material hashes +1 envelope hash), 6 prose, 5 receipt-only, 17 DEAD.",
+   "no_modal_driver": "MEASURED by subagent: grep -rln fragment_constrained modal_apps/ is empty. This benchmark has no cloud entrypoint.",
+   "headline": [
+    {
+     "finding": "the QED and SA thresholds are hardcoded and appear in no config in the repo",
+     "measured": "SPOT-VERIFIED. src/compose_v4/benchmark/fragment_constrained.py:321-323: quality_count = sum(QED.qed(mol) >= 0.6 and sascorer.calculateScore(mol) <= 4.0 for mol in molecules).",
+     "verdict": "FAIL - HIGHEST for this lane"
+    },
+    {
+     "finding": "outputs.result is DEAD and the tool's default output is pinned to the v1 artifact",
+     "measured": "SPOT-VERIFIED. tools/fragment_constrained_proposal_panel.py:34-35: DEFAULT_CONTRACT=...panel_v1.json and DEFAULT_OUTPUT=...panel_v1/result.json are INDEPENDENT argparse defaults, and outputs.result is never cross-checked against --output. Passing only --contract for v2 would overwrite the v1 result - the very artifact v2's revision.preserved_negative_result_sha256 pins. The committed v2 artifact did record correct paths, so this has not fired.",
+     "verdict": "FAIL - a latent artifact-destruction path"
+    },
+    {
+     "finding": "the entire prohibitions block is DEAD and the metrics block is invisible",
+     "measured": "Subagent-traced: prohibitions[0..5] (incl. 'no oracle, docking, QED, SA, similarity') has zero readers; tools/fragment_constrained_proposal_panel.py:249-251 hardcodes oracle_calls/scoring_calls/modal_launches = 0 as DECLARATIONS, not measurements - no counter exists. The whole metrics block is not even copied into result.json.",
+     "verdict": "FAIL - see the pilot finding below"
+    },
+    {
+     "finding": "the motif-extension pilot has no contract and computes QED/SA while recording scoring_calls: 0",
+     "measured": "Subagent-traced: scripts/fragment_motif_extension_pilot_v1.py:176 calls evaluate_prompt, which runs QED.qed + sascorer.calculateScore (src/compose_v4/benchmark/fragment_constrained.py:321-323) and Tanimoto against prompt.original_smiles, while the emitted artifact reports provenance.scoring_calls: 0. These are zero-ORACLE but not zero-SCORING. Proposal independence survives (prompt_id hashes only task+fragments, src/compose_v4/benchmark/fragment_constrained_runner.py:128-133); the receipt does not.",
+     "verdict": "FAIL - a receipt that asserts a prohibition the run violated on its own terms"
+    },
+    {
+     "finding": "unique_endpoints is structurally capped at 0.80 and is not a diversity measurement",
+     "measured": "Subagent-traced: src/compose_v4/benchmark/fragment_constrained.py:45-47 _TASK_COLUMN maps scaffold_morphing to the linker_design column, so those two tasks carry byte-identical fragments; the v2 artifact's endpoints are identical for all 10 drugs, giving 40/50 = 0.8. No proposal law can exceed it.",
+     "verdict": "FAIL - a reported metric whose ceiling is an input-duplication artifact"
+    },
+    {
+     "finding": "proposal_law.conditioning_fields, excluded_proposal_inputs, deterministic and random_seed are DEAD",
+     "measured": "Subagent-traced: src/compose_v4/benchmark/fragment_constrained_runner.py:618-621 hardcodes a separate identical conditioning_fields list and asserts reference_original_used_for_proposal=False as a literal; tools/fragment_constrained_proposal_panel.py:246-248 hardcodes deterministic=True and random_seed=None into provenance regardless of contract value.",
+     "verdict": "FAIL"
+    }
+   ],
+   "operative_examples": [
+    {
+     "field": "envelope payload_sha256",
+     "site": "tools/fragment_constrained_proposal_panel.py:68-71"
+    },
+    {
+     "field": "material_code_sha256.* (6 files incl. the driver's own self-hash)",
+     "site": "tools/fragment_constrained_proposal_panel.py:79-87",
+     "note": "The strongest gate in this family: the panel cannot be edited without breaking its own contract. Subagent measured that v1 now DRIFTS on fragment_constrained_runner.py and is un-runnable - the gate working."
+    },
+    {
+     "field": "inputs.prompt_manifest.{path,sha256}",
+     "site": "tools/fragment_constrained_proposal_panel.py:78-87, :183-184"
+    },
+    {
+     "field": "selection.expected_prompt_count",
+     "site": "tools/fragment_constrained_proposal_panel.py:185-189"
+    },
+    {
+     "field": "proposal_law.variant_index",
+     "site": "tools/fragment_constrained_proposal_panel.py:193,:197 -> src/compose_v4/benchmark/fragment_constrained_runner.py:216,:280,:294"
+    },
+    {
+     "field": "proposal_law.limits.{max_active_atoms,max_primitives,max_blocks}",
+     "site": "tools/fragment_constrained_proposal_panel.py:192 -> src/compose_v4/benchmark/fragment_constrained_runner.py:538-558 and src/compose_v4/benchmark/fragment_constrained_runner.py:631-632",
+     "note": "Atom and capacity limits ARE contract-bound here - the best-bound limits in the whole audit."
+    }
+   ],
+   "dead_examples": [
+    "inputs.prompt_manifest.expected_prompt_count (duplicate)",
+    "selection.expected_prompts_per_task",
+    "selection.task_labels",
+    "proposal_law.random_seed",
+    "proposal_law.deterministic",
+    "proposal_law.conditioning_fields",
+    "proposal_law.excluded_proposal_inputs",
+    "metrics.* (5)",
+    "outputs.result",
+    "outputs.report",
+    "prohibitions[0..5]",
+    "revision.* (as gates)"
+   ]
+  }
+ },
+ "failing_list_ranked": [
+  {
+   "rank": 1,
+   "id": "PMO-1",
+   "severity": "CRASHES AFTER THE MONEY IS SPENT",
+   "class": "runtime/contract desync",
+   "measured": "modal_apps/pmo_population_v1_app.py:197-198 selects result['auc_top10_development_1000'], but src/compose_v4/experiments/pmo_population_v1.py:198-201 now returns auc_top10_at_budget + auc_budget. The old key does not exist anywhere in that return dict (grep over src/ modal_apps/ confirms the only other producers are pmo_dynamic_v21.py:434 and pmo_dynamic_v21_recovery.py:533, different functions). result.json IS written first (app:190-191) so the artifact survives, but the KeyError is raised, caught by app:196, written as failure.json and re-raised - so a completed 250-call task is recorded as a FAILURE. With no-retry enforced at app:157-158, the task cannot be re-run without manual intervention.",
+   "damage": "750 authorized oracle calls spend, three tasks record as failures, and the Modal function reports an error.",
+   "caveat": "MEASURED statically. Not executed - no run was launched.",
+   "fix_shape": "Select the keys the function now returns. This is the unfinished half of known instance 4."
+  },
+  {
+   "rank": 2,
+   "id": "T4-1",
+   "severity": "WRONG SCIENCE, SILENTLY",
+   "class": "DEAD scientific field",
+   "measured": "route_scale_floor_rounds=2 is declared in four live 250-call contracts and never forwarded. modal_apps/t4_integrated_route_fiber_parp1_app.py:502-510 calls select_batch with expert_floor_rounds only; the parameter defaults to 0 at src/compose_v4/experiments/t4_integrated_route_fiber.py:207 and gates the small/medium/large band floor at :246.",
+   "damage": "The route-scale diversity floor never fires. Combined with T4-2 below, BOTH declared route-scale diversity mechanisms are off in the live held-target campaigns, so early-round exploration is narrower than authorized and the published 'controller explores all primitive scales' framing is unsupported by the runs.",
+   "novel": "NOT among the five known instances."
+  },
+  {
+   "rank": 3,
+   "id": "T4-2",
+   "severity": "WRONG SCIENCE, SILENTLY",
+   "class": "DEAD scientific field (known instance 5, broadened)",
+   "measured": "proposal.route_complete_region.scale_balanced=true in four 250-call contracts; 0 occurrences in modal_apps/t4_integrated_route_fiber_parp1_app.py; default False at src/compose_v4/control/structural_subgoal_policy.py:687.",
+   "damage": "Route-complete-region proposals are ranked unbalanced across primitive scales.",
+   "novel": "Known (instance 5), but the brief named two contracts; there are four."
+  },
+  {
+   "rank": 4,
+   "id": "T4-3",
+   "severity": "DOUBLE-SPEND RISK",
+   "class": "DEAD scientific field",
+   "measured": "legacy_resume.* (21 leaves across jak2_d06_250 and jak2_true_d06_250) has 0 readers. modal_apps/t4_integrated_route_fiber_parp1_app.py:127-215 _resume_state resumes only from folder-local checkpoint.json / round_*_lock.json under the CURRENT run's OUTPUT namespace, while legacy_resume.checkpoint_path points into run id d9db07f0...",
+   "damage": "experimental_setting asserts 'completed v1 calls count against the unchanged ceiling and are never repeated'. Nothing in the runtime implements that against the declared v1 checkpoints. If the launch run id differs from the legacy one, the cells start fresh at the full 250-call budget and the v1 calls are spent twice.",
+   "novel": "NOT among the five known instances.",
+   "caveat": "INFERRED that the run ids differ; I did not inspect the launch invocation. The DEAD classification is MEASURED."
+  },
+  {
+   "rank": 5,
+   "id": "QED-1",
+   "severity": "ENTIRE BENCHMARK UNBOUND",
+   "class": "hidden-constant entrypoint",
+   "measured": "modal_apps/griddd_qed_app.py reads no contract. QED>=0.9 and sim>=0.4 at :230; TIME_POINT=0.5, CANONICAL_SLOTS=48, HORIZON=6, N_REPLICATES=20, PROTOCOL_VERSION at :66-71.",
+   "damage": "Every headline number of the QED-editing benchmark rests on editable literals. PROTOCOL_VERSION additionally salts every replicate seed (:78), so a one-word edit reseeds the whole benchmark."
+  },
+  {
+   "rank": 6,
+   "id": "PMO-2",
+   "severity": "CONTRADICTS THE AUTHORIZING BUDGET",
+   "class": "DEAD scientific field",
+   "measured": "configs/pmo_population_controller_v1.json controller.calls_per_task=1000, 0 readers, while the operative budget is budget.charged_calls_per_task=250.",
+   "damage": "A reader of the base contract sees a 4x larger budget than the run will spend. Un-removed residue of known instance 3."
+  },
+  {
+   "rank": 7,
+   "id": "PMO-3",
+   "severity": "CLAIM-BEARING NEGATIVE CONTROLS UNBOUND",
+   "class": "DEAD scientific field",
+   "measured": "runtime.{task_to_route_lookup,task_to_endpoint_lookup,winner_injection,parent_modes,recursive_descendants} and oracle.prescreen all have 0 readers; _runtime_protocol hardcodes prescreen=False at pmo_dynamic_v21.py:191.",
+   "damage": "The no-prescreen and no-task-leakage claims are true by construction but not enforced by the contract, so a future code change could break them with the contract still reading 'false'."
+  },
+  {
+   "rank": 8,
+   "id": "FRAG-1",
+   "severity": "THRESHOLDS INVISIBLE",
+   "class": "hidden constant",
+   "measured": "src/compose_v4/benchmark/fragment_constrained.py:321-323 hardcodes QED>=0.6 and SA<=4.0; no config in the repo carries them.",
+   "damage": "The fragment benchmark's quality criterion cannot be reviewed from any contract."
+  },
+  {
+   "rank": 9,
+   "id": "QED-2",
+   "severity": "DECLARED CALIBRATION NOT PERFORMED",
+   "class": "DEAD scientific field",
+   "measured": "base.small_ring_log_rate_adjustment=-1.5 and base.small_ring_maximum_size=4 are not fields of PancakeQuotientCalibration (canonical_successor_distillation.py:168-180) and the class the defaults live on is never constructed by the trainer.",
+   "damage": "A stated rate calibration does not happen; the receipt says it did."
+  },
+  {
+   "rank": 10,
+   "id": "T4-4",
+   "severity": "CONTRADICTED TIMEOUTS",
+   "class": "hidden constant contradicting a declared value",
+   "measured": "proposal_wait_seconds=2400 vs modal_apps/t4_integrated_route_fiber_parp1_app.py:236 timeout=1800; query_wait_seconds=1200 vs modal_apps/t4_integrated_route_fiber_parp1_app.py:316 timeout=720.",
+   "damage": "Expert proposals and docking calls are killed earlier than the contract permits, biasing which proposals survive. The sibling shared-controller app DOES read these fields, so this is a defect, not a convention."
+  },
+  {
+   "rank": 11,
+   "id": "T4-5",
+   "severity": "RETRY/BACKFILL POLICY UNBOUND",
+   "class": "DEAD scientific field",
+   "measured": "round_lock_policy.* (7 booleans) has 0 readers; modal_apps/t4_integrated_route_fiber_parp1_app.py:756 emits automatic_retries=0 as a literal. Same in PMO (budget.automatic_retries/backfill, 0 readers).",
+   "damage": "The no-retry/no-backfill guarantee is implemented structurally and correctly, but the declared policy is decorative, so the two could diverge without any check."
+  },
+  {
+   "rank": 12,
+   "id": "FRAG-2",
+   "severity": "LATENT ARTIFACT DESTRUCTION",
+   "class": "DEAD scientific field",
+   "measured": "tools/fragment_constrained_proposal_panel.py:34-35 pins DEFAULT_OUTPUT to the v1 result path independently of DEFAULT_CONTRACT; outputs.result is never cross-checked against --output.",
+   "damage": "Running v2 with only --contract overwrites the preserved v1 negative result that v2's own revision hash pins. Has not fired."
+  },
+  {
+   "rank": 13,
+   "id": "PMO-4",
+   "severity": "DECLARED GATE NEVER CONSULTED",
+   "class": "DEAD contract file",
+   "measured": "configs/pmo_population_live_parent_gate_v2.json is referenced only by tools/reseal_pmo_population_contracts.py:36; src/compose_v4/experiments/pmo_population_live_parent_gate.py reads its thresholds from module constants MIN_ROUTE_SCALE_PRIMITIVES=8 (:37) and MIN_SUPPORTED_PARENTS=4 (:38).",
+   "damage": "An entire pinned-and-hashed config is inert."
+  },
+  {
+   "rank": 14,
+   "id": "T4-6",
+   "severity": "CLAIM-BEARING",
+   "class": "DEAD scientific field",
+   "measured": "proposal.route_complete_region.training_split='leave-jak2-out' and training_scope have 0 readers.",
+   "damage": "The leave-target-out guarantee - the whole point of a held-target run - is carried by the pinned checkpoint hash, not by the field that states it. Correct in practice, unverifiable from the contract."
+  },
+  {
+   "rank": 15,
+   "id": "META-1",
+   "severity": "MISLEADING PANEL",
+   "class": "contract shape drift",
+   "measured": "braf_d06_250 and parp1_d06_250 omit route_scale_floor_rounds, scale_balanced, training_scope and all three timing fields that the other four declare, and add declared_support/promotion_criteria.",
+   "damage": "The six-contract panel cannot be read as a matched design. Because every divergent key is DEAD, the runs are in fact identical - but only this audit establishes that."
+  },
+  {
+   "rank": 16,
+   "id": "QED-3",
+   "severity": "VERSION BUMP WITHOUT A CHANGE",
+   "class": "RECEIPT-ONLY masquerading as methodological",
+   "measured": "data.ring_catalog_support_policy is the only methodological key differing v4->v5 and the filtering code is identical in both.",
+   "damage": "A version increment that records a change that did not occur."
+  },
+  {
+   "rank": 17,
+   "id": "FRAG-3",
+   "severity": "RECEIPT CONTRADICTS THE RUN",
+   "class": "DEAD prohibition + unmeasured counter",
+   "measured": "prohibitions[0..5] has 0 readers; oracle_calls/scoring_calls/modal_launches are hardcoded 0 at panel:249-251; the contract-less motif pilot computes QED/SA/Tanimoto while reporting scoring_calls: 0.",
+   "damage": "A zero-scoring claim in a receipt for a run that scored. Zero-ORACLE is still true."
+  }
+ ],
+ "hidden_constants_ranked": [
+  {
+   "rank": 1,
+   "constant": "QED>=0.9, similarity>=0.4, HORIZON=6, N_REPLICATES=20, TIME_POINT=0.5, CANONICAL_SLOTS=48, PROTOCOL_VERSION",
+   "site": "modal_apps/griddd_qed_app.py:66-71, :230, :78",
+   "why": "The complete specification of a published benchmark, in no contract."
+  },
+  {
+   "rank": 2,
+   "constant": "QED>=0.6 and SA<=4.0",
+   "site": "src/compose_v4/benchmark/fragment_constrained.py:321-323",
+   "why": "The fragment benchmark's quality criterion; no config anywhere carries it."
+  },
+  {
+   "rank": 3,
+   "constant": "route_scale_floor_rounds default 0; scale_balanced default False",
+   "site": "src/compose_v4/experiments/t4_integrated_route_fiber.py:207; src/compose_v4/control/structural_subgoal_policy.py:687",
+   "why": "Permissive defaults that silently absorb a dropped contract field. A required-kwarg or a fail-closed normalizer would have caught both."
+  },
+  {
+   "rank": 4,
+   "constant": "MAX_ROUNDS=64, QUERIES_PER_ROUND=16, INIT_COUNT=16, QUERY_BUDGET=1000",
+   "site": "src/compose_v4/experiments/pmo_population_v1.py:37-40",
+   "why": "Budget/round structure. QUERY_BUDGET is the disarmed instance-3 constant, still exported in __all__ at :210."
+  },
+  {
+   "rank": 5,
+   "constant": "_runtime_protocol literals: prescreen=False, direction='maximize', range=[0,1], calls_include_initialization=True",
+   "site": "src/compose_v4/experiments/pmo_dynamic_v21.py:189-192",
+   "why": "Oracle semantics hashed into the task identity, so they appear in receipts as though contract-derived."
+  },
+  {
+   "rank": 6,
+   "constant": "timeout=1800 (proposal), timeout=720 (dock)",
+   "site": "modal_apps/t4_integrated_route_fiber_parp1_app.py:236, :316",
+   "why": "Contradict the declared 2400/1200."
+  },
+  {
+   "rank": 7,
+   "constant": "MIN_ROUTE_SCALE_PRIMITIVES=8, MIN_SUPPORTED_PARENTS=4, PLAN_SAMPLE_PER_BAND=4, FAMILIES tuple",
+   "site": "src/compose_v4/experiments/pmo_population_live_parent_gate.py:32-41",
+   "why": "The support gate's entire decision rule; its config is inert."
+  },
+  {
+   "rank": 8,
+   "constant": "chain_length = 1 + variant_index % 3; Chem.Atom(6); BondType.SINGLE",
+   "site": "src/compose_v4/benchmark/fragment_constrained_runner.py:216,280,294-296,217,219",
+   "why": "Subagent-traced. Caps distinct completions at 3 per prompt and makes every completion an n-alkyl chain - the mechanism behind the pilot's uniqueness 0.25 and quality 0.092. For scaffold_decoration the only contract-operative knob (variant_index) is inert."
+  },
+  {
+   "rank": 9,
+   "constant": "_TASK_COLUMN maps scaffold_morphing -> linker_design",
+   "site": "src/compose_v4/benchmark/fragment_constrained.py:45-47",
+   "why": "Caps unique_endpoints at 0.8 by input duplication."
+  },
+  {
+   "rank": 10,
+   "constant": "n_slots=40 (trainer) vs CANONICAL_SLOTS=48 (benchmark app)",
+   "site": "modal_apps/train_qed_frozen_residual.py:252,264,332 vs modal_apps/griddd_qed_app.py:68",
+   "why": "Per the 2026-08-08 learning, slot width changes which families are in legal support (atom_insert needs a free slot). Train and eval differ, and neither is contract-bound."
+  },
+  {
+   "rank": 11,
+   "constant": "RETAINED_PANCAKE_CHECKPOINT_SHA256",
+   "site": "src/compose_v4/experiments/griddd_conditional.py:74",
+   "why": "The real model gate, while base.checkpoint_sha256 looks like it."
+  },
+  {
+   "rank": 12,
+   "constant": "MODE_BY_CHANNEL map + 'global_explore' default",
+   "site": "src/compose_v4/control/pmo_population_controller.py:61-63, :391",
+   "why": "The proposal-mode vocabulary the contract declares but does not bind."
+  },
+  {
+   "rank": 13,
+   "constant": "max_primitives=24, max_blocks=5",
+   "site": "src/compose_v4/control/edit_program_graph.py:251-252",
+   "why": "Capacity defaults. The fragment contract correctly overrides them to 32/8 - noted as the healthy pattern, not a defect."
+  }
+ ],
+ "proposed_ci_check": {
+  "status": "PROPOSED ONLY - deliberately NOT wired into prelaunch_gate.py or any existing gate, per the audit brief.",
+  "name": "scripts/check_contract_authority.py (not yet written)",
+  "principle": "Every contract field must be in exactly one declared authority class, and the class must be provable from code. The check does not guess which fields are scientific; the contract declares it, and the check proves the declaration.",
+  "design": {
+   "step_1_registry": {
+    "what": "Each audited contract gains a sibling file configs/authority/<contract-stem>.authority.json mapping every leaf path to one of OPERATIVE | GUARD | DERIVED | RECEIPT | PROSE | ACKNOWLEDGED_DEAD.",
+    "why": "The registry, not the check, carries the judgement. ACKNOWLEDGED_DEAD requires a one-line reason, so a dead field becomes a visible, reviewable decision instead of an accident.",
+    "bootstrap": "diagnostics/contract_authority_audit_v1.json (this file) is the seed content for the first registries."
+   },
+   "step_2_completeness": {
+    "what": "Enumerate the contract's leaf paths (scripts/contract_authority_audit.py leaf_paths(), already written) and fail if any leaf is absent from the registry or any registry entry names a leaf that no longer exists.",
+    "catches": "A new field added to a contract with no authority decision - the entry point for every instance in this audit.",
+    "note": "Treat a map whose keys are repo-relative paths (runtime_inputs_sha256, implementation_sha256, material_code_sha256) as ONE leaf keyed by the parent name. This is the false-DEAD-positive class the mechanical pass hit."
+   },
+   "step_3_operative_proof": {
+    "what": "For each OPERATIVE leaf, require at least one runtime reference under src/ modal_apps/ tools/ scripts/ (diagnostics/ excluded) of the form contract[\"<leaf>\"], contract.get(\"<leaf>\"), payload[\"<leaf>\"], <var>[\"<leaf>\"] or a kwarg <leaf>=. Fail with the leaf name if there are zero.",
+    "catches": "scale_balanced, route_scale_floor_rounds, legacy_resume, controller.calls_per_task, budget.max_rounds, runtime.*, round_lock_policy.*, base.small_ring_*, prohibitions.*, metrics.*, outputs.result.",
+    "precision_note": "MEASURED on this audit's data: this grep-level rule produced ~0.8 precision before human review, with all false positives in the path-keyed-map class that step 2's note removes. Recall against the five known instances was 5/5 for the combination of steps 3 and 5."
+   },
+   "step_4_receipt_is_not_operative": {
+    "what": "For each OPERATIVE leaf, require at least one reference that is NOT inside a dict literal being written to an artifact. Implement by AST, not regex: parse each runtime module, find Subscript/keyword reads of the leaf, and reject a read whose enclosing expression is a Dict value that flows into a function named publish*/write*/_publish/_write_json/json.dumps.",
+    "catches": "claim_boundary (2 reads, both into receipts), base.checkpoint_sha256, data.ring_catalog_support_policy, task_roles.",
+    "why": "This is the rule the brief states and the one a plain grep cannot express."
+   },
+   "step_5_no_shadow_constant": {
+    "what": "For each OPERATIVE or GUARD leaf with a numeric or boolean value, scan the runtime modules that reference the contract for a module-level assignment whose literal equals that value and whose name upper-cases to the leaf name (route_scale_floor_rounds ~ ROUTE_SCALE_FLOOR_ROUNDS, max_rounds ~ MAX_ROUNDS, queries_per_round ~ QUERIES_PER_ROUND). Report as WARN, not FAIL, naming both sites.",
+    "catches": "MAX_ROUNDS/QUERIES_PER_ROUND/INIT_COUNT vs the PMO budget block - the instance-3 shape where contract and constant agree today and drift tomorrow.",
+    "note": "WARN not FAIL because a validating duplicate is sometimes deliberate; the point is that it must be seen."
+   },
+   "step_6_derivation": {
+    "what": "Each DERIVED entry carries a python expression over sibling leaves; evaluate it and fail on mismatch.",
+    "catches": "charged_calls_total == charged_calls_per_task * len(tasks); candidate_calls_per_task == charged_calls_per_task - initialization_calls_per_task; exact_oracle_calls_per_start_seed_arm == 1 + replicates*(slots+1). All three MEASURED as currently holding."
+   },
+   "step_7_prose_consistency": {
+    "what": "For every PROSE or RECEIPT leaf whose value is a string, extract numeric tokens and any token matching (delta|d)\\s*=?\\s*0\\.\\d+, and fail if a token contradicts the OPERATIVE leaf of the same name. Seed the name map with {delta, charged_calls_per_cell, charged_calls_per_task, calls_per_task, steps, horizon}.",
+    "catches": "known instances 1 and 2 directly - claim_boundary 'delta 0.6' vs delta: 0.4, and experimental_setting '49-call ceiling' vs charged_calls_per_cell: 250.",
+    "caveat": "INFERRED that a numeric-token rule is tractable here; MEASURED that both known prose defects carry the number as a bare token in the same string, so the seed rule does fire on both. Expect false positives on narrative numbers (e.g. '77 locked routes'), which is why the name map is an allowlist rather than 'any number'."
+   },
+   "step_8_sibling_parity": {
+    "what": "Group contracts by schema_version. Within a group, fail if a leaf path is present in some members and absent in others without an explicit registry waiver.",
+    "catches": "META-1, the braf/parp1-vs-others shape drift across the six 250-call contracts."
+   }
+  },
+  "cost": "INFERRED. Steps 2,3,5,6,7,8 are text/AST over ~13 contracts and ~15 runtime modules: well under a second. Step 4 needs one ast.parse per runtime module, still sub-second. No chemistry, no RDKit, no oracle, no network.",
+  "strongest_single_step_if_only_one_is_adopted": "Step 3, which alone re-finds instances 3 and 5 plus T4-1 and T4-3, followed by step 7, which alone re-finds instances 1 and 2."
+ },
+ "what_this_audit_did_not_cover": [
+  "MEASURED: only 13 contracts were traced leaf-by-leaf. configs/ holds 245 entries; T4 lanes not audited include the anchored-replacement, dynamic-v2x, frozen-program and target-conditioned-utility families.",
+  "INFERRED: the T4-250 findings are asserted for the single shared runtime modal_apps/t4_integrated_route_fiber_parp1_app.py. The six shims were read and set only env vars, but I did not execute any launch to confirm the import path at runtime.",
+  "NOT DONE: no run, no Modal call, no oracle call, no docking. Nothing was executed; all findings are static reads.",
+  "NOT DONE: I did not verify which run_id the live jak2 continuation was launched with, which is what would turn the legacy_resume finding (T4-3) from a DEAD-field finding into a measured double-spend.",
+  "CAVEAT: the PMO contracts were rewritten mid-audit (see concurrency_warning). Re-verify PMO rows against audited_contract_sha256 before acting."
+ ],
+ "files_written": [
+  "diagnostics/contract_authority_audit_v1.json (this file)",
+  "scripts/contract_authority_audit.py (mechanical leaf/grep pass)"
+ ]
+}
