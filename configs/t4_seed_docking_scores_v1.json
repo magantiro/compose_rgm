@@ -1,0 +1,35 @@
+{
+  "corroboration": "Sign-flipped published_ds in docs/GENMOL_T4_SEEDS.json; the QED and SA components of the same prefix were independently verified against every seed SMILES.",
+  "schema_version": "t4_seed_docking_scores_v1",
+  "seed_docking_score": {
+    "5ht1b": [
+      -4.5,
+      -7.6,
+      -9.8
+    ],
+    "braf": [
+      -9.3,
+      -9.4,
+      -9.8
+    ],
+    "fa7": [
+      -6.4,
+      -6.7,
+      -8.5
+    ],
+    "jak2": [
+      -7.7,
+      -8.0,
+      -8.6
+    ],
+    "parp1": [
+      -7.3,
+      -7.8,
+      -8.2
+    ]
+  },
+  "sign_convention": "docking score, more negative is better; improvement over seed = result - seed, negative means improved",
+  "source": "First component of each published row's DS/QED/SA prefix, i.e. the starting molecule's own docking score.",
+  "usage": "DIAGNOSTIC ONLY. Never substitute a seed for a generated candidate and never use seed-relative improvement to manufacture a score. The official protocol governs what enters the reported pool.",
+  "why_separate_file": "Kept out of t4_published_invirtuogen_baseline.json because four live delta=0.4 contracts pin that file by physical sha256 in reported_ivg_source.artifact_sha256. Editing it moves the hash and fails tools/verify_t4_d04_panel.py while those campaigns are running."
+}
