@@ -182,6 +182,11 @@ def run_task(spec: dict) -> dict:
         result = execute_task(
             runtime_contract, root, folder, task_name,
             evaluate=lambda smiles: float(oracle(smiles)),
+            # The authorizing contract is the only budget authority; the runtime must not
+            # fall back to a module default it was never authorized for.
+            charged_calls_per_task=int(
+                contract_envelope["payload"]["budget"]["charged_calls_per_task"]
+            ),
             progress=progress,
         )
         result["run_id"] = run_id
@@ -189,8 +194,13 @@ def run_task(spec: dict) -> dict:
         result["automatic_retries"] = 0
         _write_json(result_path, result)
         volume.commit()
+        # The AUC key carries the budget it was computed at; a fixed 1000-call denominator
+        # was removed because it silently understated a 250-call run and was not comparable
+        # to a published 10000-call figure.  Selecting a stale key here would KeyError AFTER
+        # the full budget is charged, recording a completed run as a failure.
         return {key: result[key] for key in
-                ("task", "charged_oracle_calls", "best_score", "auc_top10_development_1000")}
+                ("task", "charged_oracle_calls", "best_score", "auc_top10_at_budget",
+                 "auc_budget")}
     except Exception as error:
         _write_json(folder / "failure.json", {
             "schema_version": "pmo_population_task_failure_v1",

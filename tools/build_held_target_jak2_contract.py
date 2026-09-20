@@ -16,7 +16,7 @@ JAK2_BASE = ROOT / "configs/t4_shared_retained_fiber_jak2_v2.json"
 CHECKPOINT = "diagnostics/t4_held_target_distillation_quality_v1/jak2_checkpoint.json"
 SUPPORT = "diagnostics/t4_held_target_distillation_quality_v1/jak2_smoke.json"
 APP = "modal_apps/t4_integrated_route_fiber_parp1_app.py"
-DEFAULT_OUTPUT = ROOT / "configs/t4_held_target_distilled_jak2_d06_v1.json"
+DEFAULT_OUTPUT = ROOT / "configs/t4_held_target_distilled_jak2_d06_v4.json"
 
 
 def sha256(path: Path) -> str:
@@ -36,7 +36,7 @@ def main() -> None:
     jak2 = unseal(JAK2_BASE)
     payload.update(
         {
-            "schema_version": "t4_held_target_distilled_jak2_d06_contract_v1",
+            "schema_version": "t4_held_target_distilled_jak2_d06_contract_v4",
             "status": "SEALED_PENDING_EXACT_USER_AUTHORIZATION",
             "scientific_problem": "test transfer of a route-trained structural-action prior to a target with every JAK2 route excluded from fitting",
             "primary_model_output": "FiberControl selection over complete shallow, anchored, and leave-JAK2-out route programs",

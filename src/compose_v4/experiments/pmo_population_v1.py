@@ -137,9 +137,19 @@ def execute_task(
     task_name: str,
     *,
     evaluate: Callable[[str], float],
+    charged_calls_per_task: int,
     progress=None,
 ) -> dict:
-    """Run one PMO-v1 task after a separately authorized scored launch."""
+    """Run one PMO-v1 task after a separately authorized scored launch.
+
+    ``charged_calls_per_task`` is REQUIRED and has no default on purpose.  The ledger
+    budget used to come from the module constant ``QUERY_BUDGET`` while the authorizing
+    contract declared its own, smaller, figure, so the contract's budget was decorative:
+    a run authorized for 250 calls per task would have charged up to 1000.  A required
+    argument makes it impossible for a caller to inherit a budget it never stated.
+    """
+    if not isinstance(charged_calls_per_task, int) or charged_calls_per_task <= 0:
+        raise ValueError("charged_calls_per_task must be a positive integer")
 
     if task_name not in TASKS:
         raise ValueError("task is outside the PMO-v1 three-task lock")
@@ -147,7 +157,9 @@ def execute_task(
         raise ValueError("PMO-v1 scored launch is not authorized by this contract")
     initialized = _load_initialization(root, {"initialization": contract["initialization"]})
     task = ProgramTask(task_name, identity(_runtime_protocol(contract, task_name)), "pmo")
-    ledger = ProgramQueryLedger(folder / "oracle", task, evaluate, budget=QUERY_BUDGET)
+    ledger = ProgramQueryLedger(
+        folder / "oracle", task, evaluate, budget=charged_calls_per_task
+    )
     checkpoint = _load_checkpoint(root, contract)
     config = configuration(contract["controller"]["seed"])
     report = progress or (lambda row: None)
@@ -180,7 +192,13 @@ def execute_task(
         "charged_oracle_calls": len(ledger.rows),
         "best_score": curve[-1]["best_score"] if curve else None,
         "score_curve": curve,
-        "auc_top10_development_1000": pmo_top_ten_auc(values, budget=QUERY_BUDGET, finish=True),
+        # The denominator is the budget this run was authorized for, not a fixed 1000:
+        # an AUC over a 1000-call denominator computed from a 250-call run understates it,
+        # and neither is comparable to a published 10000-call figure.
+        "auc_top10_at_budget": pmo_top_ten_auc(
+            values, budget=charged_calls_per_task, finish=True
+        ),
+        "auc_budget": charged_calls_per_task,
         "campaign": campaign,
     }
 

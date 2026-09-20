@@ -26,6 +26,9 @@ CREDIT = "src/compose_v4/control/pmo_credit.py"
 # smoke that passes on one image and a launch that runs on another must not be able
 # to share a contract hash.
 REMOTE_APP = "modal_apps/pmo_population_v1_app.py"
+# Archive-continuity bookkeeping decides which measured programs the archive admits,
+# so it is load-bearing for every number the controller produces.
+CONTINUITY = "src/compose_v4/control/bootstrap_pool_continuity.py"
 BASE = "configs/pmo_population_controller_v1.json"
 DEPENDENTS = (
     "configs/pmo_population_controller_v1_scored_contract.json",
@@ -66,9 +69,10 @@ def reseal(path: Path, *, base_payload_sha256: str | None) -> tuple[str, bool]:
     if implementation and CONTROLLER in implementation:
         # Declaring the new dependency is the ONE structural change this tool may make.
         # It is recorded so the guard below can allow exactly it and nothing else.
-        additions = [name for name in (CREDIT, REMOTE_APP) if name not in implementation]
+        declared = (CREDIT, REMOTE_APP, CONTINUITY)
+        additions = [name for name in declared if name not in implementation]
         declared_new_dependency = bool(additions)
-        for name in (CREDIT, REMOTE_APP):
+        for name in declared:
             implementation.setdefault(name, "")
         for relative in sorted(implementation):
             implementation[relative] = sha256(relative)

@@ -23,6 +23,7 @@ from rdkit.Chem import rdFingerprintGenerator
 
 from compose_v4.chem.molecular_graph import is_element
 from compose_v4.control.adaptive_program_optimizer import ProgramOptimizer
+from compose_v4.control.bootstrap_pool_continuity import BootstrapPoolContinuity
 from compose_v4.control.docking_value import identity
 from compose_v4.control.dynamic_program_synthesis_v2 import (
     SHALLOW_CHANNEL,
@@ -188,6 +189,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         self.jump_rng = np.random.default_rng(np.random.SeedSequence([self.config.seed, 311, 2]))
         self.population_state = initial_population_state()
         self._population_bootstrap_pool_id = None
+        self._pool_continuity = BootstrapPoolContinuity()
         self.credit = PopulationCredit()
 
     def selection(self):
@@ -707,15 +709,18 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
     def add_measured_program(self, record, *, receipt_id, score, static_score=None):
         if "fiber_features" not in record:
             record = self._augment(record)
+        # A recursive campaign creates a new physical cold-start pool whenever it revisits
+        # an initialization parent, so requiring one pool identity forever refuses the
+        # surviving-descendant behaviour this optimizer exists to test.  Absorb each
+        # physical pool under one continuity identity instead of refusing it.
+        record, new_generation_pool = self._pool_continuity.adapt(record)
         bootstrap = record.get("provenance", {}).get("dynamic_v21_bootstrap")
-        if bootstrap is not None:
-            pool_id = bootstrap["pool_id"]
-            if self._population_bootstrap_pool_id is None:
-                self._population_bootstrap_pool_id = pool_id
-                self.shallow_rng.bit_generator.state = bootstrap["shallow_rng"]
-                self.structured_rng.bit_generator.state = bootstrap["structured_rng"]
-            elif self._population_bootstrap_pool_id != pool_id:
-                raise ValueError("PMO bootstrap candidates came from different pools")
+        if bootstrap is not None and new_generation_pool:
+            # A fresh pool carries its own sampler state; keeping the previous pool's
+            # would desynchronise the proposal streams from the candidates they produced.
+            self.shallow_rng.bit_generator.state = bootstrap["shallow_rng"]
+            self.structured_rng.bit_generator.state = bootstrap["structured_rng"]
+        self._population_bootstrap_pool_id = self._pool_continuity.continuity_pool_id
         return ProgramOptimizer.add_measured_program(
             self,
             record,
@@ -788,6 +793,12 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             "structured_rng": self.structured_rng.bit_generator.state,
             "population_state": self.population_state,
             "bootstrap_pool_id": self._population_bootstrap_pool_id,
+            # The joint credit IS the allocation authority, and the continuity adapter
+            # decides which measured programs the archive admits.  Omitting them made a
+            # resumed campaign silently revert to the cold-start acquisition path and
+            # re-learn from nothing, which is measurably worse than the credit path.
+            "credit": self.credit.payload(),
+            "pool_continuity": self._pool_continuity.payload(),
         }
         return json.loads(json.dumps({**body, "snapshot_id": identity(body)}))
 
@@ -812,6 +823,10 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         result.structured_rng.bit_generator.state = state["structured_rng"]
         result.population_state = json.loads(json.dumps(state["population_state"]))
         result._population_bootstrap_pool_id = state["bootstrap_pool_id"]
+        # Absent keys restore empty objects so a snapshot taken before these were
+        # persisted still loads, rather than failing a resume outright.
+        result.credit = PopulationCredit.restore(state["credit"]) if state.get("credit") else PopulationCredit()
+        result._pool_continuity = BootstrapPoolContinuity.restore(state.get("pool_continuity"))
         return result
 
 

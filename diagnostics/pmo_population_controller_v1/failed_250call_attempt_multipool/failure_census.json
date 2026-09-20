@@ -1,0 +1,39 @@
+{
+  "schema_version": "pmo_population_multipool_failure_census_v1",
+  "run_id": "5484472c8a2abe5195d0c750d87a90b9e353ebbe171b4df10fd4da16cae5bd47",
+  "contract_payload_sha256": "047f6a0fd094ad548553fa1c28641284990a11e221263aa07948aec6eb18200a",
+  "app": "compose-pmo-population-v1-corrected",
+  "outcome": "all three tasks terminally failed; this attempt is preserved and invalidated",
+  "charged_oracle_calls_observed": {
+    "gsk3b": 0,
+    "perindopril_mpo": 112,
+    "celecoxib_rediscovery": 112,
+    "total": 224
+  },
+  "calls": {
+    "gsk3b": {
+      "error_type": "KeyError",
+      "error": "gsk3b_asset",
+      "cause": "verify_runtime_environment indexes contract['oracle']['gsk3b_asset'], a key the development oracle contract carries and the scored contract does not",
+      "rounds_reached": 0
+    },
+    "perindopril_mpo": {
+      "error_type": "ValueError",
+      "error": "PMO bootstrap candidates came from different pools",
+      "cause": "the Dynamic-v2.1 archive invariant treats a round-local pool_id as a permanent continuity identity; a recursive campaign creates a new physical cold-start pool when it revisits an initialization parent",
+      "rounds_reached": 6
+    },
+    "celecoxib_rediscovery": {
+      "error_type": "ValueError",
+      "error": "PMO bootstrap candidates came from different pools",
+      "cause": "same as perindopril_mpo",
+      "rounds_reached": 6
+    }
+  },
+  "credit_wiring_implicated": false,
+  "credit_wiring_evidence": "a zero-oracle reproduction of the real execute_task path failed identically at round 6 with joint-credit allocation ACTIVE and with PopulationCredit.observe made inert, so the refusal is a property of the pool bookkeeping and not of the allocator",
+  "partial_results_usable_as_benchmark": false,
+  "automatic_retries": 0,
+  "backfill": false,
+  "replacements": false
+}

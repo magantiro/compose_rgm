@@ -29,6 +29,7 @@ PREFLIGHT = ROOT / "diagnostics/pmo_population_controller_v1/corrected_preflight
 LAUNCH = ROOT / "diagnostics/pmo_population_controller_v1/corrected_scored_launch_receipt.json"
 ARCHIVE = ROOT / "diagnostics/pmo_population_controller_v1/dead_1000call_attempt"
 CREDIT = "src/compose_v4/control/pmo_credit.py"
+CONTINUITY = "src/compose_v4/control/bootstrap_pool_continuity.py"
 
 CALLS_PER_TASK = 250
 INITIALIZATION = 16
@@ -95,7 +96,8 @@ def main() -> None:
 
     manifest = json.loads(MANIFEST.read_text())
     source_files = manifest["source_files"]
-    source_files.setdefault(CREDIT, "")
+    for dependency in (CREDIT, CONTINUITY):
+        source_files.setdefault(dependency, "")
     for relative in sorted(source_files):
         source_files[relative] = sha(ROOT / relative)
 
