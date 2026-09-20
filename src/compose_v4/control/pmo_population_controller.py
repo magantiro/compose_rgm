@@ -41,6 +41,12 @@ from compose_v4.control.edit_program_graph import (
     program_size_profile,
 )
 from compose_v4.control.fiber_control import ProgramValue, SearchState, acquisition
+from compose_v4.control.pmo_credit import (
+    PopulationCredit,
+    basin_label,
+    credit_key_from_candidate,
+    improvement,
+)
 from compose_v4.control.pmo_joint_dependency_jump import (
     CHECKPOINT_SCHEMA,
     bind_joint_plan,
@@ -83,6 +89,7 @@ def initial_population_state() -> dict[str, Any]:
         "escape_rounds_remaining": 0,
         "allocation_decisions": 0,
         "parent_outcomes": {},
+        "credit_key_failures": 0,
     }
 
 
@@ -181,6 +188,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         self.jump_rng = np.random.default_rng(np.random.SeedSequence([self.config.seed, 311, 2]))
         self.population_state = initial_population_state()
         self._population_bootstrap_pool_id = None
+        self.credit = PopulationCredit()
 
     def selection(self):
         """Preserve structural niches, then tilt toward parents with measured upside."""
@@ -380,12 +388,11 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         channel = str(candidate["provenance"].get("planner_channel", SHALLOW_CHANNEL))
         candidate["provenance"].setdefault("mode", MODE_BY_CHANNEL.get(channel, "global_explore"))
         candidate["fiber_fingerprint"] = sorted(_fingerprint(candidate["endpoint"]))
-        candidate["provenance"]["basin_id"] = identity(
-            {
-                "fingerprint_prefix": candidate["fiber_fingerprint"][:64],
-                "heavy_atoms": Chem.MolFromSmiles(candidate["endpoint"]).GetNumHeavyAtoms(),
-            }
-        )
+        # Basin is the canonical Bemis-Murcko scaffold, deliberately coarse: analogues that
+        # share a scaffold must share a basin or the joint credit cell degenerates into a
+        # second parent id and nothing can accumulate evidence.  Acyclic endpoints fall back
+        # to an explicit sentinel rather than an empty-string bucket.
+        candidate["provenance"]["basin_id"] = basin_label(candidate["endpoint"])
         incumbent = self.population_state["best_score"]
         candidate["fiber_features"] = population_features(
             candidate, incumbent_reward=incumbent
@@ -461,6 +468,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         remaining = [row for row in candidates if row["candidate_id"] not in chosen_ids]
         value, state = self._fit_value()
         room = limit - len(chosen)
+        credit_detail: dict[str, Any] = {"mode": "floor_only"}
         if room > 0 and remaining:
             prepared = [
                 {
@@ -471,19 +479,25 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
                 }
                 for row in remaining
             ]
-            selected = acquisition(
-                prepared,
-                value,
-                state,
-                self.rng,
-                batch=room,
-                diversity=0.5,
-                exploration=min(2, room),
-            )
-            selected_rows = [remaining[index] for index in selected]
+            if self.credit.cells:
+                selected_rows, credit_detail = self._credit_allocate(remaining, value, room)
+                allocation_role = "joint_credit"
+            else:
+                # Cold start: no credit evidence exists yet, so allocation is unchanged.
+                selected = acquisition(
+                    prepared,
+                    value,
+                    state,
+                    self.rng,
+                    batch=room,
+                    diversity=0.5,
+                    exploration=min(2, room),
+                )
+                selected_rows = [remaining[index] for index in selected]
+                credit_detail = {"mode": "cold_start_acquisition"}
+                # With an unfitted value function acquisition is deliberately random.
+                allocation_role = "fiber_control" if value.weights is not None else "exploration"
             chosen.extend(selected_rows)
-            # With an unfitted value function acquisition is deliberately random.
-            allocation_role = "fiber_control" if value.weights is not None else "exploration"
             allocation_roles.update({row["candidate_id"]: allocation_role for row in selected_rows})
         chosen = chosen[:limit]
         if escape:
@@ -519,6 +533,89 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
                 zip((row["candidate_id"] for row in candidates), predicted, strict=True)
             ),
             "program_value_observations": value.n,
+            "credit_allocation": credit_detail,
+            "credit_summary": self.credit_report(),
+        }
+
+    def _credit_allocate(self, remaining, value, room):
+        """Spend `room` oracle slots across joint credit cells, then rank inside each cell.
+
+        The cell share comes from `PopulationCredit.allocate`, which mixes measured credit
+        with a uniform floor, so a cell that has never won can still be drawn and reward
+        feedback cannot starve global exploration.  The credit decides WHERE to spend; the
+        fitted program value decides WHICH candidate inside the drawn cell.
+        """
+        by_cell: dict[Any, list[dict[str, Any]]] = {}
+        for row in remaining:
+            try:
+                key = credit_key_from_candidate(row)
+            except (ValueError, KeyError):
+                self.population_state["credit_key_failures"] += 1
+                continue
+            by_cell.setdefault(key, []).append(row)
+        if not by_cell:
+            return [], {"mode": "no_credit_keys"}
+        cells = sorted(by_cell, key=lambda key: (key.basin, key.parent, key.family, key.scale))
+        shares = self.credit.allocate(cells)
+        predicted: dict[str, float] = {}
+        if value.weights is not None:
+            for rows in by_cell.values():
+                features = np.asarray([row["fiber_features"] for row in rows], dtype=float)
+                scores = map(float, value.predict(features))
+                for row, score in zip(rows, scores, strict=True):
+                    predicted[row["candidate_id"]] = score
+        for rows in by_cell.values():
+            rows.sort(key=lambda row: (-predicted.get(row["candidate_id"], 0.0), row["candidate_id"]))
+        chosen: list[dict[str, Any]] = []
+        draws: list[dict[str, str]] = []
+        while len(chosen) < room:
+            live = [index for index, key in enumerate(cells) if by_cell[key]]
+            if not live:
+                break
+            weights = np.asarray([shares[index] for index in live], dtype=float)
+            weights = weights / weights.sum()
+            pick = int(self.rng.choice(live, p=weights))
+            key = cells[pick]
+            chosen.append(by_cell[key].pop(0))
+            draws.append(key.payload())
+        return chosen, {
+            "mode": "joint_credit_cell_allocation",
+            "exploration_floor": self.credit.exploration_floor,
+            "cells_available": len(cells),
+            "minimum_share": float(min(shares)) if len(shares) else 0.0,
+            "drawn_cells": draws,
+        }
+
+    def credit_report(self) -> dict[str, Any]:
+        """Diagnostic view of the joint credit: what is earning, and where budget goes."""
+
+        cells = self.credit.cells
+        earning = [
+            {**key.payload(), "trials": cell.trials, "improvements": cell.improvements,
+             "positive_improvement_sum": round(cell.positive_improvement_sum, 6)}
+            for key, cell in cells.items()
+            if cell.improvements > 0
+        ]
+        earning.sort(key=lambda row: -row["positive_improvement_sum"])
+        scale_trials: dict[str, int] = {}
+        for key, cell in cells.items():
+            scale_trials[key.scale] = scale_trials.get(key.scale, 0) + cell.trials
+        total = sum(scale_trials.values())
+        productive_parents = {
+            key.parent for key, cell in cells.items() if cell.improvements > 0
+        }
+        return {
+            "active_basins": len({key.basin for key in cells}),
+            "active_cells": len(cells),
+            "cells_with_positive_credit": len(earning),
+            "trial_fraction_by_scale": (
+                {scale: round(count / total, 4) for scale, count in sorted(scale_trials.items())}
+                if total
+                else {}
+            ),
+            "productive_parents": len(productive_parents),
+            "top_earning_cells": earning[:10],
+            "credit_key_failures": self.population_state.get("credit_key_failures", 0),
         }
 
     def propose_batch(self, eligibility):
@@ -659,6 +756,18 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
                     counts["parent_improvements"] += 1
                     counts["positive_improvement_sum"] += gain
                     stats["positive_improvement_sum"] += gain
+                # Joint credit is the allocation authority; the marginals above stay as
+                # telemetry.  PMO maximizes, so the direction is named explicitly rather
+                # than inferred from the sign of the gain.
+                try:
+                    key = credit_key_from_candidate(candidate)
+                except (ValueError, KeyError):
+                    self.population_state["credit_key_failures"] += 1
+                else:
+                    self.credit.observe(
+                        key,
+                        improvement(score, float(parent_score), direction="maximize"),
+                    )
         ProgramOptimizer.observe_batch(self, batch_id, outcomes)
         current = max(scored, default=prior_best if prior_best is not None else -math.inf)
         if prior_best is None or current > prior_best:
