@@ -65,7 +65,9 @@ transformation.
 Keep the chemistry screen narrow. Separate benchmark eligibility / quality screening /
 synthetic-suitability claims. Do not add filters until support vanishes.
 
-Subtract the **reconciled** charged-call count, never an assumed history.
+Subtract the **reconciled** charged-call count, never an assumed history. **Version every
+rescue.** It must never splice silently into an "unchanged v1" table -- name the
+configuration and the rescue phase, or run the matched confirmation.
 
 ## PMO
 
@@ -84,6 +86,18 @@ No-prescreen only. Ladder 250 -> 1k -> broader panel -> 10k matched with multipl
 **Never scale a 250-call AUC and compare it to a 10k result.** Reproduce the official AUC
 implementation for official comparisons.
 
+## QED and fragments
+
+QED gets a **dedicated task** -- never a T4 label that silently imports docking thresholds
+or the SA <= 4 restriction. Verify operative thresholds, maximization direction, source
+panel, returned-output rule and atom-capacity semantics. Match sources and **actual work**,
+not returned K alone: primitive transitions, molecules scored, endpoints generated and CPU
+time are not interchangeable. Verify the GrIDDD source and panel before any comparison.
+
+Fragments are lower priority and must not delay PMO scoring or T4 rescues. The gap is the
+repeated-completion sampler, not the executor. Test constraint satisfaction, uniqueness,
+diversity and the official quality metrics -- not validity alone.
+
 ## Runtime correctness
 
 One executable configuration authority for budgets, thresholds, task identity, lanes,
@@ -95,11 +109,12 @@ by impact.
 
 State recovery is not optional. A run that rolls back its ledger is not self-healing.
 Persist reservations, archive, credit state, RNG, pool identity, remaining budget. Never
-resolve conflicts by blind min/max. Uncertain calls must not become free calls.
+resolve conflicts by blind min/max. Uncertain calls must not become free calls. **Never delete an active artifact**; preserve
+before removing, and verify the copy is readable from its durable home first.
 
 ## Agents
 
-Fable agents, one coordinator owning integration and launches. Each writer gets its own
+**Every delegated agent must use Fable.** One coordinator owns integration and launches. Each writer gets its own
 worktree and output namespace; assign file ownership. No shared-scratch globbing, no broad
 `git add`, no concurrent edits to one pinned module. Reuse existing agents before spawning
 duplicates. Schedule computation against real resources.
