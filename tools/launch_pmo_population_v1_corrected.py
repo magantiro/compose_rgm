@@ -22,6 +22,8 @@ PREFLIGHT = ROOT / "diagnostics/pmo_population_controller_v1/corrected_preflight
 LAUNCH = ROOT / "diagnostics/pmo_population_controller_v1/corrected_scored_launch_receipt.json"
 PAYLOAD = "103d9d9273753732fb7fc03207834c88e317c4d1d9bab11b3f3b2f265fc50075"
 APP = "compose-pmo-population-v1-corrected"
+# The contract's locked task set.  It is what the payload authorizes, and it never
+# widens: a launch may spend LESS than its authorization but may never spend more.
 TASKS = ("gsk3b", "perindopril_mpo", "celecoxib_rediscovery")
 
 
@@ -98,10 +100,27 @@ def _validate() -> tuple[dict, dict]:
     return payload, auth
 
 
-def preflight() -> dict:
+def _selected(tasks: tuple[str, ...] | None) -> tuple[str, ...]:
+    """The subset of the locked task set this launch will actually spawn.
+
+    A re-run forced by a per-task defect should re-run that task, not re-spend the
+    budget of the tasks whose readings are still valid.  The subset is recorded in
+    both receipts and folded into the run identity, so a one-task run and a
+    three-task run under the same payload can never share a run_id.
+    """
+    if tasks is None:
+        return TASKS
+    unknown = [task for task in tasks if task not in TASKS]
+    if unknown:
+        raise RuntimeError(f"tasks outside the locked contract set: {unknown}")
+    return tuple(task for task in TASKS if task in set(tasks))
+
+
+def preflight(tasks: tuple[str, ...] | None = None) -> dict:
     if LAUNCH.exists():
         raise RuntimeError("corrected scored launch receipt already exists; do not duplicate launch")
     payload, auth = _validate_contract_auth()
+    selected = _selected(tasks)
     receipt = {
         "schema_version": "pmo_population_corrected_scored_preflight_receipt_v1",
         "status": "PASS_CORRECTED_SOURCE_CONTRACT_AUTHORIZED",
@@ -111,8 +130,12 @@ def preflight() -> dict:
         "authorization_receipt_sha256": _sha(AUTH),
         "source_capsule_manifest_sha256": _sha(MANIFEST),
         "worker_sha256": _sha(ROOT / "modal_apps/pmo_population_v1_app.py"),
-        "tasks": list(TASKS),
-        "charged_calls_total": payload["budget"]["charged_calls_total"],
+        "tasks": list(selected),
+        "authorized_tasks": list(TASKS),
+        "charged_calls_total": (
+            len(selected) * payload["budget"]["charged_calls_per_task"]
+        ),
+        "authorized_charged_calls_total": payload["budget"]["charged_calls_total"],
         "automatic_retries": 0,
         "backfill": False,
         "modal_source_upload_authorized": auth["modal_source_upload_authorized"],
@@ -126,10 +149,17 @@ def preflight() -> dict:
     return receipt
 
 
-def launch() -> dict:
+def launch(tasks: tuple[str, ...] | None = None) -> dict:
     if LAUNCH.exists():
         raise RuntimeError("corrected scored launch receipt exists; no duplicate launch")
     payload, _ = _validate()
+    selected = _selected(tasks)
+    pre = json.loads(PREFLIGHT.read_text())
+    if tuple(pre.get("tasks", ())) != selected:
+        raise RuntimeError(
+            f"preflight covers {pre.get('tasks')}, this launch would spawn "
+            f"{list(selected)}; re-run preflight for the tasks being launched"
+        )
     from modal import Function
 
     preflight_id = _sha(PREFLIGHT)
@@ -138,6 +168,7 @@ def launch() -> dict:
         "contract_payload_sha256": PAYLOAD,
         "preflight_sha256": preflight_id,
         "source_capsule_manifest_sha256": _sha(MANIFEST),
+        "tasks": list(selected),
     })
     receipt = {
         "schema_version": "pmo_population_corrected_scored_launch_v1",
@@ -145,16 +176,20 @@ def launch() -> dict:
         "app": APP,
         "contract_payload_sha256": PAYLOAD,
         "preflight_sha256": preflight_id,
-        "tasks": list(TASKS),
+        "tasks": list(selected),
+        "authorized_tasks": list(TASKS),
         "automatic_retries": 0,
         "backfill": False,
         "calls_per_task": payload["budget"]["charged_calls_per_task"],
+        "charged_calls_total": (
+            len(selected) * payload["budget"]["charged_calls_per_task"]
+        ),
         "status": "SPAWNING",
         "calls": {},
     }
     _write(LAUNCH, receipt)
     function = Function.from_name(APP, "run_task")
-    for task in TASKS:
+    for task in selected:
         call = function.spawn({"run_id": run_id, "task": task, "contract_payload_sha256": PAYLOAD})
         receipt["calls"][task] = {"call_id": call.object_id, "status": "SPAWNED"}
         _write(LAUNCH, receipt)
@@ -185,8 +220,20 @@ def status() -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("command", choices=("preflight", "launch", "status"))
+    parser.add_argument(
+        "--tasks",
+        nargs="+",
+        choices=TASKS,
+        default=None,
+        help="the subset of the locked task set to launch; the default is all of "
+             "them. A subset spends less than the authorization, never more.",
+    )
     args = parser.parse_args()
-    {"preflight": preflight, "launch": launch, "status": status}[args.command]()
+    tasks = tuple(args.tasks) if args.tasks else None
+    if args.command == "status":
+        status()
+    else:
+        {"preflight": preflight, "launch": launch}[args.command](tasks)
 
 
 if __name__ == "__main__":
