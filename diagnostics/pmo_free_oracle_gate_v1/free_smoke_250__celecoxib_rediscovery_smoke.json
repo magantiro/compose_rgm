@@ -1,0 +1,19 @@
+{
+  "active_basins": 104,
+  "archive_entries": 234,
+  "budget": 250,
+  "charged_oracle_calls": 0,
+  "continuity_pool_id": "52eb630eb49674c25d63db94e76f12f0bb071588ba12d427344a2ed8c58e66ac",
+  "credit_cells": 186,
+  "error": null,
+  "exploration_floor": 0.2,
+  "free_evaluations": 250,
+  "gate": "PASS",
+  "gate_failures": [],
+  "physical_pools_absorbed": 2,
+  "productive_parents": 36,
+  "rounds_reached": 14,
+  "status": "COMPLETED",
+  "task": "celecoxib_rediscovery",
+  "task_protocol_resolved": true
+}

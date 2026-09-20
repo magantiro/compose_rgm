@@ -1,0 +1,19 @@
+{
+  "active_basins": 82,
+  "archive_entries": 234,
+  "budget": 250,
+  "charged_oracle_calls": 0,
+  "continuity_pool_id": "d64b1feca08efd56b250a17084a78fa13cf47de160ea658294d1b41638f9a8dc",
+  "credit_cells": 188,
+  "error": null,
+  "exploration_floor": 0.2,
+  "free_evaluations": 250,
+  "gate": "PASS",
+  "gate_failures": [],
+  "physical_pools_absorbed": 2,
+  "productive_parents": 31,
+  "rounds_reached": 14,
+  "status": "COMPLETED",
+  "task": "gsk3b",
+  "task_protocol_resolved": true
+}
