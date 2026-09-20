@@ -73,7 +73,7 @@
         "max_bindings_per_template": 4,
         "maximum_expansions": 4000,
         "pool_size": 64,
-        "realization_limit": 96,
+        "realization_limit": 64,
         "scale_balanced": true,
         "training_scope": "one shared task-independent expert fit on all 77 locked routes",
         "training_split": "leave-fa7-out"
@@ -172,5 +172,5 @@
       "result": "all three FA7 cells emitted exact small, medium and large protected programs; strict eligible counts were 8, 8 and 15 at delta 0.4 and 2, 1 and 4 at delta 0.6"
     }
   },
-  "payload_sha256": "935e577fcc9172b7ddf97dd73c0aee89f1a431f6f96f880a8c182414e2d939b2"
+  "payload_sha256": "80f472c8c26113a10e07952c479d3856baae9bf841e8930e61b1ed3993a0ba89"
 }

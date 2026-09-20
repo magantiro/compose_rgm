@@ -71,7 +71,7 @@
         "max_bindings_per_template": 4,
         "maximum_expansions": 4000,
         "pool_size": 64,
-        "realization_limit": 96,
+        "realization_limit": 64,
         "scale_balanced": true,
         "training_scope": "one shared task-independent expert fit on all 77 locked routes",
         "training_split": "leave-5ht1b-out"
@@ -144,5 +144,5 @@
       "sha256": "d4047c8556133db262d630c60feac88f1c743418c069448c2acebd9155896eb8"
     }
   },
-  "payload_sha256": "4eb6019e0b3600efb48be1b43b0a628bbee155ed7243caa2826653d9af0e1bef"
+  "payload_sha256": "697a82c989cf62503e66bec887c4ca4163c0ee4c42913b82a2a4038c806fb528"
 }

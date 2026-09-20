@@ -112,7 +112,7 @@
         "max_bindings_per_template": 4,
         "maximum_expansions": 4000,
         "pool_size": 64,
-        "realization_limit": 96,
+        "realization_limit": 64,
         "scale_balanced": true,
         "training_scope": "one shared task-independent expert fit on all 77 locked routes",
         "training_split": "leave-jak2-out"
@@ -194,5 +194,5 @@
       ]
     }
   },
-  "payload_sha256": "5cb41f3530c611f3eab8ddd456a7a85493a17d5bf7cba064b9e0bd84e03c686e"
+  "payload_sha256": "931cbc1aa9eaa53450ae56f4fdac60f221d9ad40365f734d58a2b5151261ca22"
 }
