@@ -23,6 +23,11 @@ RUN_APP = "compose-pmo-population-v1-corrected"
 CONTRACT = "configs/pmo_population_controller_v1_scored_contract_corrected.json"
 CONTROLLER_CONTRACT = "configs/pmo_population_controller_v1.json"
 ORACLE_CONTRACT = "configs/pmo_dynamic_v21_development_v1.json"
+# The pinned oracle-asset capsule.  PyTDC resolves `oracle/<name>.pkl` RELATIVE to the
+# working directory, lazily, on the first call -- so this directory has to be the
+# working directory when the oracle is CALLED, not when it is constructed.  See
+# `compose_v4.experiments.pmo_oracle_assets`.
+ASSET_DIR = "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets"
 AUTHORIZATION = "diagnostics/pmo_population_controller_v1/corrected_scored_authorization_receipt.json"
 SOURCE_MANIFEST = "diagnostics/pmo_population_controller_v1/source_capsule_manifest_v2.json"
 
@@ -65,9 +70,7 @@ image = (
         copy=True,
     )
     .add_local_dir(
-        ROOT / "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets",
-        str(REMOTE_ROOT / "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets"),
-        copy=True,
+        ROOT / ASSET_DIR, str(REMOTE_ROOT / ASSET_DIR), copy=True,
     )
     .env({
         "PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}",
@@ -115,12 +118,18 @@ def _rdkit_six_shim() -> None:
 def run_task(spec: dict) -> dict:
     """Run one task once, with no retry/backfill semantics."""
 
-    import os
     from datetime import datetime, timezone
 
     from compose_v4.control.docking_value import identity
     from compose_v4.experiments.continuation_profile import verify_file
     from compose_v4.experiments.pmo_dynamic_v21 import verify_runtime_environment
+    from compose_v4.experiments.pmo_oracle_assets import (
+        PMO_ORACLE_ASSET_ROOT,
+        AssetPinnedOracle,
+        assert_positive_control,
+        pinned_working_directory,
+        requires_positive_control,
+    )
     from compose_v4.experiments.pmo_population_v1 import (
         execute_task,
         load_contract,
@@ -142,23 +151,54 @@ def run_task(spec: dict) -> dict:
     _rdkit_six_shim()
     from tdc import Oracle
 
-    previous = Path.cwd()
-    os.chdir(root / "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets")
-    try:
+    # The oracle's asset must resolve for the oracle's whole LIFETIME, not only
+    # around its constructor.  PyTDC loads the pickle lazily on the first CALL from
+    # the relative path `oracle/<name>.pkl` and swallows any failure into a constant
+    # 0.0, so a constructor-only chdir produces a complete, plausible, entirely
+    # uninformative ledger.  `AssetPinnedOracle` pins the working directory around
+    # every call and primes the lazy load inside that window.
+    assert ASSET_DIR == PMO_ORACLE_ASSET_ROOT, "worker and library disagree on the asset root"
+    asset_root = root / ASSET_DIR
+    with pinned_working_directory(asset_root):
         oracle = Oracle(name=task_name)
-    finally:
-        os.chdir(previous)
+    scorer = AssetPinnedOracle(oracle, asset_root, name=task_name)
+
+    folder = ARTIFACT_ROOT / "pmo_population_controller_v1" / run_id / task_name
+    started = folder / "started.json"
+    result_path = folder / "result.json"
+    if result_path.exists() or started.exists():
+        raise RuntimeError("task already started or completed; retries/backfill forbidden")
+
+    # The positive control runs BEFORE `started.json` is written, so a control
+    # failure leaves the task re-runnable instead of consuming its one attempt.  It
+    # charges no PMO budget: these are local scikit-learn evaluations outside every
+    # contract ledger, and they are counted and reported rather than hidden.
+    positive_control = None
+    if requires_positive_control(task_name):
+        try:
+            positive_control = assert_positive_control(scorer, task_name)
+        except Exception as failure:
+            _write_json(folder / "oracle_positive_control_failure.json", {
+                "schema_version": "pmo_oracle_positive_control_failure_v1",
+                "run_id": run_id,
+                "task": task_name,
+                "error_type": type(failure).__name__,
+                "error": str(failure),
+                "charged_oracle_calls": 0,
+                "task_remains_runnable": True,
+            })
+            volume.commit()
+            raise
+        _write_json(folder / "oracle_positive_control.json",
+                    {**positive_control, "run_id": run_id})
+        volume.commit()
+    control_calls = scorer.calls
 
     # The frozen contract stays fail-closed on disk.  The separately authorized
     # receipt is the only source of runtime scoring authority, bound in memory.
     runtime_contract = dict(contract)
     runtime_contract["scored_launch_authorized"] = True
     runtime_contract["modal_launch_authorized"] = True
-    folder = ARTIFACT_ROOT / "pmo_population_controller_v1" / run_id / task_name
-    started = folder / "started.json"
-    result_path = folder / "result.json"
-    if result_path.exists() or started.exists():
-        raise RuntimeError("task already started or completed; retries/backfill forbidden")
     _write_json(started, {
         "schema_version": "pmo_population_task_started_v1",
         "run_id": run_id,
@@ -166,6 +206,13 @@ def run_task(spec: dict) -> dict:
         "contract_payload_sha256": spec["contract_payload_sha256"],
         "started_at_utc": datetime.now(timezone.utc).isoformat(),
         "automatic_retry": False,
+        "oracle_positive_control": (
+            None if positive_control is None
+            else {key: positive_control[key] for key in
+                  ("task", "passed", "n_references", "n_agreeing",
+                   "distinct_observed_values", "max_abs_delta", "reference_status")}
+        ),
+        "uncharged_positive_control_calls": control_calls,
     })
     volume.commit()
 
@@ -181,7 +228,7 @@ def run_task(spec: dict) -> dict:
     try:
         result = execute_task(
             runtime_contract, root, folder, task_name,
-            evaluate=lambda smiles: float(oracle(smiles)),
+            evaluate=lambda smiles: float(scorer(smiles)),
             # The authorizing contract is the only budget authority; the runtime must not
             # fall back to a module default it was never authorized for.
             charged_calls_per_task=int(
@@ -192,6 +239,11 @@ def run_task(spec: dict) -> dict:
         result["run_id"] = run_id
         result["contract_payload_sha256"] = spec["contract_payload_sha256"]
         result["automatic_retries"] = 0
+        result["oracle_positive_control"] = positive_control
+        result["oracle_positive_control_passed"] = (
+            True if positive_control is None else bool(positive_control["passed"])
+        )
+        result["uncharged_positive_control_calls"] = control_calls
         _write_json(result_path, result)
         volume.commit()
         # The AUC key carries the budget it was computed at; a fixed 1000-call denominator
@@ -200,7 +252,7 @@ def run_task(spec: dict) -> dict:
         # the full budget is charged, recording a completed run as a failure.
         return {key: result[key] for key in
                 ("task", "charged_oracle_calls", "best_score", "auc_top10_at_budget",
-                 "auc_budget")}
+                 "auc_budget", "oracle_positive_control_passed")}
     except Exception as error:
         _write_json(folder / "failure.json", {
             "schema_version": "pmo_population_task_failure_v1",
