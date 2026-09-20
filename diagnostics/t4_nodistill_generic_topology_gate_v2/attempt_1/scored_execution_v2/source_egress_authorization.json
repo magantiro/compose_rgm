@@ -1,0 +1,54 @@
+{
+  "payload": {
+    "app_name": "compose-t4-nodistill-topology-four-call-v1",
+    "authorization_state": "AUTHORIZED",
+    "authorized_at_utc": "2026-09-20T00:58:42Z",
+    "destination": {
+      "profile": "nitya",
+      "provider": "Modal"
+    },
+    "exact_execution_binding": {
+      "path": "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/scored_execution_v2/execution_contract.json",
+      "payload_sha256": "1b930b39e8491c293664787faf984c999e3663f7ad625016faa9517ed5aa7a2f",
+      "sealed_commit": "996e68c28b6b53ad8b6b2b08e8bf45f2c5516a4f",
+      "sealed_commit_tree": "21e24f2aff6f4b9cfbe097842b9b9bb24da59994"
+    },
+    "exact_source_capsule": {
+      "code_revision": "82e09889c47ea713d41aa6ca23e673e653728713",
+      "file_count": 12,
+      "git_tree": "6e0afe380ebeddf11dfab69062ab3adb97d5e48e",
+      "manifest_payload_sha256": "953201c457dc9c251eb97cd15d825b469482e48272041ae6f57658423797583c",
+      "manifest_relative_path": "diagnostics/t4_nodistill_generic_topology_gate_v2/attempt_1/scored_execution_v2/source_capsule_manifest.json",
+      "manifest_sha256": "a71b899794866c881ac36a593548d504dba953c216ae45fbabe27e6b191aa6ab"
+    },
+    "private_volume": "compose-t4-nodistill-topology-four-call-v1",
+    "schema_version": "t4_nodistill_topology_four_call_source_egress_authorization_v1",
+    "scope": {
+      "allowed": [
+        "upload_the_exact_bound_source_capsule_to_Modal",
+        "deploy_the_exact_standalone_bound_app",
+        "create_or_use_only_the_bound_private_volume",
+        "run_the_remote_zero_score_asset_and_app_preflight",
+        "publish_the_complete_four_query_lock_and_all_four_reservations_before_worker_spawn",
+        "execute_each_of_the_four_locked_queries_exactly_once",
+        "monitor_durable_receipts",
+        "reduce_and_publish_the_bound_results"
+      ],
+      "forbidden": [
+        "candidate_or_protocol_mutation",
+        "automatic_retry",
+        "replacement_query",
+        "backfill_query",
+        "replicate_call",
+        "local_Docker_fallback",
+        "other_campaign_access_or_mutation",
+        "source_or_image_egress_to_any_destination_other_than_Modal"
+      ],
+      "scientific_contract_payload_sha256": "4f973c171dd9392f23819b362c6b1946d846e712103d8f58b8a2ce29f70a8da6",
+      "scored_authorization_payload_sha256": "fa086fb8e3175a38873fa620878bc66eec636385cb0c35679cfcc9e01a28492e",
+      "total_scored_call_ceiling": 4
+    },
+    "user_statement": "User has now explicitly authorized pushing/uploading Modal source for this project and instructed us not to ask again. Proceed with the CURRENT already-authorized four-call PARP topology execution only, using the exact sealed Modal execution binding at commit 996e68c2 and payload 1b930b39e8491c293664787faf984c999e3663f7ad625016faa9517ed5aa7a2f. First publish a self-hashed source-egress authorization receipt quoting/binding this user message, destination Modal, exact app/capsule/commit/execution payload, and scope. Then deploy the exact standalone app/capsule, create/use only its bound private volume, run remote zero-score asset/app preflight, publish the complete query lock and reserve all four exact query identities before spawning, execute each exactly once with zero retry/replacement/backfill, monitor durable receipts, reduce and publish results. Do not use the local Docker fallback, do not touch other campaigns, do not change candidates/protocol, and fail closed on any mismatch. Use approved Modal commands/escalation as needed. Keep me updated after deployment, preflight, reservations, and each terminal result."
+  },
+  "payload_sha256": "2dfe92816a72a4421c5961788486a0f8de164319ec5a6f2341f556518c1d459a"
+}
