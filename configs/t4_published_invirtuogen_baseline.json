@@ -1,0 +1,31 @@
+{
+  "schema_version": "t4_published_invirtuogen_baseline_v1",
+  "source": "user-provided published InVirtuoGen table (paper figure), transcribed 2026-09-20",
+  "authority": "AUTHORITATIVE for all headline COMPOSE-vs-IVG comparisons. Supersedes any CSV-derived values in configs/t4_frozen_program_benchmark.json, which must NOT be substituted.",
+  "metric": "docking score (lower is better); value is InVirtuoGen mean, stderr in parentheses in the source",
+  "notes": {
+    "parenthesised_cells": "fa7 cell 2 is parenthesised in the published table at both delta values; treat its status as unresolved rather than a plain mean.",
+    "published_sum_delta_0_6": "-145.7 (-153.1)"
+  },
+  "delta_0_6": {
+    "parp1": [-12.3, -11.7, -10.7],
+    "fa7":   [-7.7, -7.5, -7.4],
+    "5ht1b": [-12.4, -12.0, -10.6],
+    "braf":  [-9.7, -10.4, -10.3],
+    "jak2":  [-9.7, -10.4, -10.3]
+  },
+  "delta_0_6_stderr": {
+    "parp1": [0.2, 0.5, 0.9],
+    "fa7":   [0.4, 0.3, 0.4],
+    "5ht1b": [0.5, 0.4, 0.1],
+    "braf":  [0.1, 0.3, 0.3],
+    "jak2":  [0.3, 0.1, 0.2]
+  },
+  "delta_0_4": {
+    "parp1": [-14.1, -13.4, -9.0],
+    "fa7":   [-8.4, -8.9, -8.0],
+    "5ht1b": [-13.3, -12.0, -10.9],
+    "braf":  [-10.1, -10.8, -10.6],
+    "jak2":  [-10.2, -10.5, -10.2]
+  }
+}
