@@ -1,0 +1,14 @@
+{
+  "payload": {
+    "arm": "held_fold_clean_0",
+    "bound_candidates": [],
+    "contract_sha256": "bc5c02170bdef89714fa2d092cc78fdde4f56118fb5829f6cebc4a2373d2378a",
+    "new_oracle_calls": 0,
+    "plan_id": "3058e28dc5e2c3b200b8d5e6ce32fe245fc46a0a4d4abc5b63ee048b056fb59f",
+    "plan_mass": 0.025,
+    "primitive_count": 26,
+    "schema_version": "pmo_joint_dependency_jump_plan_receipt_v1",
+    "source_id": "8d63a3d3d0e801f146f11f5d36592562efbd1a4cd63bf3e3e36534c7a008f227"
+  },
+  "payload_sha256": "4dc8692b4eaa68551a448cce3d64f1e6b9c2485f404cfa93f3ed143b1741f8d8"
+}

@@ -1,0 +1,14 @@
+{
+  "payload": {
+    "arm": "shared_all_routes",
+    "bound_candidates": [],
+    "contract_sha256": "bc5c02170bdef89714fa2d092cc78fdde4f56118fb5829f6cebc4a2373d2378a",
+    "new_oracle_calls": 0,
+    "plan_id": "10b322d07481c7f2b6155295489e6b0b0a0a9646dfa8658e43d92e51774f0925",
+    "plan_mass": 0.011111111111111112,
+    "primitive_count": 31,
+    "schema_version": "pmo_joint_dependency_jump_plan_receipt_v1",
+    "source_id": "8d63a3d3d0e801f146f11f5d36592562efbd1a4cd63bf3e3e36534c7a008f227"
+  },
+  "payload_sha256": "4d9f0bbeedd50e1aa406b57d2bf3fbb572792d5df0e22809a94e0698f9cda34c"
+}

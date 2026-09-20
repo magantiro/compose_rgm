@@ -1,0 +1,30 @@
+{
+  "payload": {
+    "attempt": "attempt_1",
+    "authoritative_scientific_result": false,
+    "commands": [
+      "PYTHONPATH=src .venv/bin/python tools/pmo_joint_dependency_jump_gate.py --workers 12"
+    ],
+    "contract_file_sha256": "a2692f1422b29dd64c5f9a58b4a37188d99d2ac48c57491122ff28a0b827460a",
+    "contract_path": "configs/pmo_joint_dependency_jump_gate_v1.json",
+    "contract_payload_sha256": "386551fe8d7b43a8afdd703b860eff8c4ba23c116a17ca3bc0472ab53053e20f",
+    "durable_candidate_lock": false,
+    "durable_result": false,
+    "implementation_hash_gap": "The experiment orchestrator was uncommitted and changed before a stable interrupted-attempt hash was recorded; this is itself a provenance failure and attempt_1 is invalidated rather than reconstructed.",
+    "modal_launches": 0,
+    "new_oracle_calls": 0,
+    "operational_history": [
+      "48-plan-prefix-per-arm monolithic run interrupted after approximately eight minutes with no durable per-plan receipts",
+      "16-plan scale-diverse restart was stopped before result because it did not guarantee the frozen 32-candidate-per-arm budget and its plan selection followed an answer-known smoke probe"
+    ],
+    "schema_version": "pmo_joint_dependency_jump_attempt_invalidation_v1",
+    "stable_implementation_hashes": {
+      "src/compose_v4/control/pmo_action_roles.py": "686988c0755168218a2c22c74be33471d271dd2d82eaab3efa5e0287935cc1b5",
+      "src/compose_v4/control/pmo_joint_dependency_jump.py": "51b958361953ecea81a87a1465d5307b1ca3e3f0b8ba5752465f1fb8d2d91732",
+      "tools/pmo_joint_dependency_jump_gate.py": "d0b2b7b9359eef342eef6fde26919372a747141049124b91eab3e8461e3ecfc4"
+    },
+    "status": "INTERRUPTED_INVALID_NO_RESULT",
+    "superseded_by": "configs/pmo_joint_dependency_jump_gate_v2.json"
+  },
+  "payload_sha256": "24b57793c9eedc8a7afff6068f7db0057f1e5e6e493788fd03fd9bea2963f46a"
+}

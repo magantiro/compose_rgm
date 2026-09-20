@@ -17,9 +17,12 @@ from pathlib import Path
 import numpy as np
 from rdkit import rdBase
 
-from compose_v4.chem.molecular_graph import ELEMENTS, is_element
 from compose_v4.control.docking_value import identity
 from compose_v4.control.option_demonstrations import descriptor_menu, recognize_trace
+from compose_v4.control.pmo_action_roles import (
+    ACTION_ROLE_SCHEMA,
+    action_role_supervision,
+)
 from compose_v4.control.route_distilled_program_policy import SCHEMA as POLICY_SCHEMA
 from compose_v4.control.route_distilled_program_policy import (
     STAGE_DESCRIPTOR_NAMES,
@@ -33,7 +36,6 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = Path("configs/pmo_route_distillation_export_v1.json")
 DATASET_SCHEMA = "pmo_route_distillation_training_dataset_v1"
 RESULT_SCHEMA = "pmo_route_distillation_export_result_v1"
-ACTION_ROLE_SCHEMA = "generic_primitive_action_role_v1"
 
 FORBIDDEN_GENERIC_KEYS = {
     "assignment",
@@ -123,9 +125,9 @@ def _verified_json(root: Path, relative: str, expected_sha256: str) -> dict:
 
 def _verified_envelope(root: Path, relative: str, expected_sha256: str) -> dict:
     envelope = _verified_json(root, relative, expected_sha256)
-    if not isinstance(envelope.get("payload"), dict) or envelope.get(
-        "payload_sha256"
-    ) != identity(envelope["payload"]):
+    if not isinstance(envelope.get("payload"), dict) or envelope.get("payload_sha256") != identity(
+        envelope["payload"]
+    ):
         raise ValueError(f"source envelope self-hash mismatch: {relative}")
     return envelope["payload"]
 
@@ -167,21 +169,15 @@ def _program_member_id(program: dict, index: int) -> str:
     return f"program_{index:04d}"
 
 
-def collect_routes(
-    contract: dict, root: Path = ROOT
-) -> tuple[list[RouteInstance], dict]:
+def collect_routes(contract: dict, root: Path = ROOT) -> tuple[list[RouteInstance], dict]:
     routes: list[RouteInstance] = []
     source_checks = {}
     endpoint_identities = set()
     for source in contract["curricula"]:
         curriculum = _verified_envelope(root, source["path"], source["sha256"])
-        result = _verified_envelope(
-            root, source["result_path"], source["result_sha256"]
-        )
+        result = _verified_envelope(root, source["result_path"], source["result_sha256"])
         if result.get("curriculum_sha256") != source["sha256"]:
-            raise ValueError(
-                f"result does not bind its curriculum bytes: {source['result_path']}"
-            )
+            raise ValueError(f"result does not bind its curriculum bytes: {source['result_path']}")
         source_checks[source["path"]] = {
             "sha256": source["sha256"],
             "payload_sha256_verified": True,
@@ -207,13 +203,8 @@ def collect_routes(
                 states = tuple(receipt.get("states", ()))
                 if base_route is None:
                     blocks = program.get("program", {}).get("blocks", ())
-                    if (
-                        not blocks
-                        or blocks[0].get("label") != "public_endpoint_recovery"
-                    ):
-                        raise ValueError(
-                            "Perindopril program lost its common recovery prefix"
-                        )
+                    if not blocks or blocks[0].get("label") != "public_endpoint_recovery":
+                        raise ValueError("Perindopril program lost its common recovery prefix")
                     base_steps = int(blocks[0]["stop"])
                     base_marks = program["program"]["marks"][:base_steps]
                     lineage_identity = identity(
@@ -250,9 +241,7 @@ def collect_routes(
                 )
                 count += 1
         if count != source["programs"]:
-            raise ValueError(
-                f"program census mismatch for {source['collection']}: {count}"
-            )
+            raise ValueError(f"program census mismatch for {source['collection']}: {count}")
 
     witness = contract["witnesses"]
     audit = _verified_json(root, witness["audit_path"], witness["audit_sha256"])
@@ -280,9 +269,7 @@ def collect_routes(
                 actions=actions,
                 endpoint=canonical_state_key(decode_state(states[-1])),
                 base_steps=len(actions),
-                lineage_identity=identity(
-                    {"source_state": states[0], "base_actions": actions}
-                ),
+                lineage_identity=identity({"source_state": states[0], "base_actions": actions}),
                 evidence_role="answer_known_exact_witness",
             )
         )
@@ -302,148 +289,17 @@ def collect_routes(
     }
 
 
-def _atom_role(
-    graph, address: int, created: dict[int, tuple[int, int]], step: int
-) -> dict:
-    if not 0 <= address < graph.n_atoms or not bool(
-        is_element(graph.atom_types)[address]
-    ):
-        raise ValueError("action operand is not an active atom")
-    bonds = np.asarray(graph.bonds[address], dtype=int)
-    neighbors = np.flatnonzero(bonds)
-    element_histogram = [0] * len(ELEMENTS)
-    bond_histogram = [0] * 4
-    for neighbor in neighbors:
-        element_histogram[int(graph.atom_types[neighbor])] += 1
-        order = int(bonds[neighbor])
-        if not 1 <= order <= 4:
-            raise ValueError("action operand has an invalid bond class")
-        bond_histogram[order - 1] += 1
-    result = {
-        "origin": "route_created" if address in created else "preexisting",
-        "atom_type": int(graph.atom_types[address]),
-        "formal_charge": int(graph.formal_charges[address]),
-        "implicit_hydrogens": int(graph.implicit_h_counts[address]),
-        "degree": len(neighbors),
-        "bond_class_histogram": bond_histogram,
-        "neighbor_element_histogram": element_histogram,
-    }
-    if address in created:
-        ordinal, created_at = created[address]
-        result.update(
-            {
-                "created_ordinal": ordinal,
-                "creation_lag": step - created_at,
-            }
-        )
-    return result
-
-
-def action_role_supervision(
-    graph,
-    record: dict,
-    created: dict[int, tuple[int, int]],
-    step: int,
-    next_ordinal: int,
-) -> tuple[dict, int]:
-    """Remove persistent addresses while preserving action semantics and dependencies."""
-    rule = str(record["executor_rule"])
-    payload = record["payload"]
-
-    def operand(name: str, address: int) -> dict:
-        return {
-            "role": name,
-            "descriptor": _atom_role(graph, int(address), created, step),
-        }
-
-    operands, parameters = [], {}
-    created_output = None
-    deleted = None
-    if rule == "atom_insert":
-        parameters = {
-            "atom_type": int(payload["atom_type"]),
-            "formal_charge": int(payload["formal_charge"]),
-            "implicit_hydrogens": int(payload["implicit_h_count"]),
-            "neighbor_bond_classes": [int(row[1]) for row in payload["neighbors"]],
-        }
-        operands = [
-            operand(f"neighbor_{index}", address)
-            for index, (address, _) in enumerate(payload["neighbors"])
-        ]
-        created_output = next_ordinal
-        created[int(payload["slot"])] = (next_ordinal, step)
-        next_ordinal += 1
-    elif rule in ("atom_delete", "atom_restate_semantic"):
-        address = int(payload["v"])
-        operands = [operand("atom", address)]
-        if rule == "atom_restate_semantic":
-            parameters = {"target_class_index": int(payload["target_class_index"])}
-        else:
-            deleted = address
-    elif rule in ("cycle_close", "cycle_open", "bond_reorder"):
-        operands = [
-            operand("endpoint_a", payload["a"]),
-            operand("endpoint_b", payload["b"]),
-        ]
-        if rule == "cycle_close":
-            parameters = {"bond_class": int(payload["order"])}
-        elif rule == "bond_reorder":
-            parameters = {"new_bond_class": int(payload["new_order"])}
-    elif rule == "bond_reroute":
-        operands = [operand(name, payload[name]) for name in ("a", "b", "u", "v")]
-    elif rule == "ring_system_restate":
-        parameters = {
-            "new_bond_classes": [int(row["new_order"]) for row in payload["changes"]]
-        }
-        for index, change in enumerate(payload["changes"]):
-            operands.extend(
-                (
-                    operand(f"change_{index}_a", change["a"]),
-                    operand(f"change_{index}_b", change["b"]),
-                )
-            )
-    else:
-        raise ValueError(f"unsupported generic primitive rule: {rule}")
-    dependencies = [
-        {
-            "operand": row["role"],
-            "created_ordinal": row["descriptor"]["created_ordinal"],
-            "creation_lag": row["descriptor"]["creation_lag"],
-        }
-        for row in operands
-        if row["descriptor"]["origin"] == "route_created"
-    ]
-    result = {
-        "schema_version": ACTION_ROLE_SCHEMA,
-        "executor_rule": rule,
-        "model_family": str(record["model_family"]),
-        "parameters": parameters,
-        "operands": operands,
-        "created_handle_dependencies": dependencies,
-        "created_output_ordinal": created_output,
-    }
-    if deleted is not None:
-        created.pop(deleted, None)
-    return result, next_ordinal
-
-
 def _validate_and_recognize(route: RouteInstance) -> tuple:
     if len(route.states) != len(route.actions) + 1 or not route.actions:
         raise ValueError(f"noncontiguous trace: {route.instance_identity}")
     graphs = [decode_state(state) for state in route.states]
-    if any(
-        graph.n_atoms != 48 or not 1 <= graph.n_real_atoms <= 40 for graph in graphs
-    ):
+    if any(graph.n_atoms != 48 or not 1 <= graph.n_real_atoms <= 40 for graph in graphs):
         raise ValueError(f"trace exceeds frozen support: {route.instance_identity}")
     if canonical_state_key(graphs[-1]) != route.endpoint:
         raise ValueError(f"trace endpoint mismatch: {route.instance_identity}")
     segments = recognize_trace(list(route.states), list(route.actions))
-    if any(
-        segment.start + 1 != segment.stop or segment.compound for segment in segments
-    ):
-        raise ValueError(
-            "compound PMO stages require a separately authorized schema revision"
-        )
+    if any(segment.start + 1 != segment.stop or segment.compound for segment in segments):
+        raise ValueError("compound PMO stages require a separately authorized schema revision")
     if len(segments) != len(route.actions):
         raise RuntimeError("primitive recognizer lost an action")
     return graphs, segments
@@ -497,9 +353,7 @@ def build_dataset(
     families = sorted(set(lineage_family.values()))
     family_lineages = {
         family: sorted(
-            lineage
-            for lineage, observed in lineage_family.items()
-            if observed == family
+            lineage for lineage, observed in lineage_family.items() if observed == family
         )
         for family in families
     }
@@ -510,9 +364,7 @@ def build_dataset(
         graphs, segments = recognized[trace_identity]
         family = route.task_family
         denominator = (
-            len(families)
-            * len(family_lineages[family])
-            * lineage_decisions[route.lineage_identity]
+            len(families) * len(family_lineages[family]) * lineage_decisions[route.lineage_identity]
         )
         weight = 1.0 / denominator
         created: dict[int, tuple[int, int]] = {}
@@ -550,9 +402,7 @@ def build_dataset(
             generic_rows.append(
                 {
                     "row_index": row_index,
-                    "state_features": molecule_features(
-                        canonical_state_key(graph)
-                    ).tolist(),
+                    "state_features": molecule_features(canonical_state_key(graph)).tolist(),
                     "option": segment.option,
                     "stage_descriptor": descriptor.tolist(),
                     "action_supervision": action_supervision,
@@ -561,9 +411,7 @@ def build_dataset(
                         "domain_count": 1,
                         "family_count": len(families),
                         "lineage_count_within_family": len(family_lineages[family]),
-                        "decision_count_within_lineage": lineage_decisions[
-                            route.lineage_identity
-                        ],
+                        "decision_count_within_lineage": lineage_decisions[route.lineage_identity],
                         "weight": weight,
                     },
                 }
@@ -680,9 +528,7 @@ def build_dataset(
         "runtime_supported_unique_traces",
         "long_route_local_only_unique_traces",
     ):
-        observed_key = (
-            "emitted_deduplicated_decisions" if key == "deduplicated_decisions" else key
-        )
+        observed_key = "emitted_deduplicated_decisions" if key == "deduplicated_decisions" else key
         if summary[observed_key] != expected[key]:
             raise ValueError(
                 f"frozen PMO route statistic changed for {key}: "
@@ -702,19 +548,13 @@ def _publish(path: Path, payload: dict, *, compressed: bool = False) -> None:
 
 def run(output: Path, root: Path = ROOT) -> dict:
     if output.exists():
-        raise ValueError(
-            f"refusing to overwrite PMO route-distillation output: {output}"
-        )
+        raise ValueError(f"refusing to overwrite PMO route-distillation output: {output}")
     contract = load_contract(root)
     routes, source_audit = collect_routes(contract, root)
     dataset, summary = build_dataset(contract, routes, source_audit)
-    revision = subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=root, text=True
-    ).strip()
+    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
     dirty = bool(
-        subprocess.check_output(
-            ["git", "status", "--porcelain"], cwd=root, text=True
-        ).strip()
+        subprocess.check_output(["git", "status", "--porcelain"], cwd=root, text=True).strip()
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix=f".{output.name}.", dir=output.parent))
@@ -777,8 +617,4 @@ if __name__ == "__main__":
         default=ROOT / "diagnostics/pmo_route_distillation/attempt_1",
     )
     result = run(parser.parse_args().output)
-    print(
-        json.dumps(
-            {"decision": result["decision"], "summary": result["summary"]}, indent=2
-        )
-    )
+    print(json.dumps({"decision": result["decision"], "summary": result["summary"]}, indent=2))

@@ -1,0 +1,62 @@
+{
+  "schema_version": "pmo_joint_dependency_jump_gate_contract_v1",
+  "contract_sha256": "386551fe8d7b43a8afdd703b860eff8c4ba23c116a17ca3bc0472ab53053e20f",
+  "authorization": "2026-09-19 user authorized a parallel zero-oracle PMO controller-development lane; this contract authorizes no oracle calls and no scored launch",
+  "scientific_question": "Can one task-blind joint dependency-role latent generate and exactly bind route-scale PMO jumps, then admit their descendants into a recursive archive, where the previous factorized proposal law assigned zero complete-route support?",
+  "generated_object": "a complete executable COMPOSE program of at most 32 primitives and eight dependency regions, optionally followed by one independently sampled generic Dynamic-v0 refinement program from its endpoint",
+  "inputs": {
+    "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz": "9b35529eae0975dcf977bc1fc51f3bd838e0184d51de3a7d2822edd0bc3d8b54",
+    "diagnostics/pmo_complete_route_dynamic_gate_v1/attempt_1/gap_analysis.json": "4f8d783385d08dab8116511fd3060ced2f40f5b90bea7b794c4664e88c475597",
+    "diagnostics/pmo_online_policy/result_sealed.json": "627f2e8a86107f54080902c53d8ac11fc307275c8d522541bfdc4e3d99287946"
+  },
+  "selected_tasks": [
+    {"task": "celecoxib_rediscovery", "fold": 1, "selection_reason": "29-31 primitive complete dependency-rich rediscovery routes"},
+    {"task": "gsk3b", "fold": 0, "selection_reason": "27-33 primitive complete bioactivity routes with a distinct task-family fold"},
+    {"task": "perindopril_mpo", "fold": 2, "selection_reason": "38-67 primitive routes requiring jump-plus-refinement continuation beyond the single-program runtime"}
+  ],
+  "arms": {
+    "held_fold_clean": "fit after excluding the complete selected task-family fold; reports transfer and may abstain",
+    "shared_all_routes": "one task-independent checkpoint fit from all legitimate route supervision; trained-on-task production evidence, never described as held-out transfer"
+  },
+  "runtime": {
+    "maximum_primitives": 32,
+    "maximum_components": 8,
+    "maximum_heavy_atoms": 40,
+    "candidate_budget_per_source_arm": 32,
+    "binding_beam_width": 8,
+    "minimum_route_scale_primitives": 8,
+    "refinement_tails_per_route_scale_jump": 1,
+    "seed": 20260919
+  },
+  "candidate_lock": {
+    "generation_must_finish_before_teacher_endpoint_comparison": true,
+    "runtime_inputs": ["current molecular graph", "task-independent checkpoint", "deterministic seed"],
+    "runtime_forbidden": ["task name", "route identifier", "endpoint", "SMILES", "absolute atom address", "source graph stored in checkpoint", "task-to-program map", "executable teacher route", "teacher continuation injection"],
+    "checkpoint_content": "generic address-free action roles, relative created-handle dependencies, complete-program control and weights only"
+  },
+  "gate": {
+    "required": [
+      "all emitted complete programs exact-replay under the production executor",
+      "nonzero exact-endpoint or transformation-equivalent autonomous support on Celecoxib or GSK3B in the shared production arm",
+      "at least one autonomous program longer than seven primitives enters the recursive proposal archive",
+      "at least one executable generic refinement descendant is sampled from a route-scale jump endpoint",
+      "Perindopril is never truncated or represented as one complete 32-primitive teacher program"
+    ],
+    "kill": "preserve NO_SCORED_LAUNCH if route-scale support or recursive continuation remains zero; do not weaken the gate or inject a teacher",
+    "promotion": "freeze a separate scored pilot contract only; a scored launch still requires exact payload-specific authorization"
+  },
+  "oracle_calls_authorized": 0,
+  "modal_launch_authorized": false,
+  "prohibitions": [
+    "no PMO oracle call or score access during candidate generation",
+    "no scored or Modal launch",
+    "no mutation of the prior static factorial or complete-route forensic gate",
+    "no T4 artifact changes",
+    "no frozen-parent restart described as recursive search"
+  ],
+  "outputs": {
+    "checkpoint": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_1/checkpoints.json",
+    "candidate_lock": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_1/candidate_lock.json",
+    "result": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_1/result.json"
+  }
+}

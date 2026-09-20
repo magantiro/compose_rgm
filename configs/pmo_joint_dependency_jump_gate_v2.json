@@ -1,0 +1,95 @@
+{
+  "schema_version": "pmo_joint_dependency_jump_gate_contract_v2",
+  "contract_sha256": "bc5c02170bdef89714fa2d092cc78fdde4f56118fb5829f6cebc4a2373d2378a",
+  "authorization": "2026-09-19 user authorized a parallel zero-oracle PMO controller-development lane; this attempt-2 contract authorizes no oracle calls and no scored launch",
+  "attempt_lineage": {
+    "attempt": "attempt_2",
+    "supersedes_invalid_attempt": "attempt_1",
+    "invalidation_receipt": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_1/invalidation.json",
+    "reason": "attempt_1 had no durable per-plan receipts and a stopped restart did not guarantee its frozen 32-candidate arm budget"
+  },
+  "scientific_question": "Can one task-blind joint dependency-role latent generate and exactly bind route-scale PMO jumps, then admit every locked route-scale jump to an ordinary COMPOSE refinement generation, where the previous factorized proposal law assigned zero complete-route support?",
+  "generated_object": "a complete executable COMPOSE program of at most 32 primitives and eight dependency regions, optionally followed by exactly one independently sampled generic Dynamic-v0 refinement program from every locked route-scale endpoint",
+  "generation_inputs": {
+    "configs/pmo_joint_dependency_jump_gate_v1.json": "a2692f1422b29dd64c5f9a58b4a37188d99d2ac48c57491122ff28a0b827460a",
+    "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_1/invalidation.json": "0db3a97d520ad60ca398e21e224e512e753862f6a1e1877b6700d3c42b3cd70a",
+    "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz": "9b35529eae0975dcf977bc1fc51f3bd838e0184d51de3a7d2822edd0bc3d8b54"
+  },
+  "postlock_diagnostic_inputs": {
+    "diagnostics/pmo_complete_route_dynamic_gate_v1/attempt_1/gap_analysis.json": "4f8d783385d08dab8116511fd3060ced2f40f5b90bea7b794c4664e88c475597"
+  },
+  "implementation_sha256": {
+    "src/compose_v4/control/pmo_action_roles.py": "686988c0755168218a2c22c74be33471d271dd2d82eaab3efa5e0287935cc1b5",
+    "src/compose_v4/control/pmo_joint_dependency_jump.py": "51b958361953ecea81a87a1465d5307b1ca3e3f0b8ba5752465f1fb8d2d91732",
+    "src/compose_v4/experiments/pmo_joint_dependency_jump_gate.py": "4fa91b1433a0bf482caed89e9f20397e1170299bca8ec6d2963f68783959f773",
+    "tools/pmo_joint_dependency_jump_gate.py": "70eb3e7264c22c569a40862821f08a4d101a5f7ce38753da8e80b788e4f19d5a"
+  },
+  "expected_source_id": "8d63a3d3d0e801f146f11f5d36592562efbd1a4cd63bf3e3e36534c7a008f227",
+  "expected_split_identity": "a8495010f23ee78bd2287837578a6167b933395bfe1343028ddab32eb4e5070d",
+  "selected_tasks": [
+    {"task": "gsk3b", "fold": 0, "role": "highest-priority basin-discovery black-box test", "selection_reason": "27-33 primitive complete bioactivity routes"},
+    {"task": "perindopril_mpo", "fold": 2, "role": "jump then multi-generation descendant-refinement stress", "selection_reason": "38-67 primitive routes exceed the one-program runtime"},
+    {"task": "celecoxib_rediscovery", "fold": 1, "role": "long-program reachability and debugging control", "selection_reason": "29-31 primitive complete dependency-rich routes"}
+  ],
+  "arms": {
+    "held_fold_clean": "fit after excluding the complete selected task-family fold; reports transfer and may abstain",
+    "shared_all_routes": "one task-independent checkpoint fit from all legitimate route supervision; trained-on-task production evidence, never described as held-out transfer"
+  },
+  "runtime": {
+    "maximum_primitives": 32,
+    "maximum_components": 8,
+    "maximum_heavy_atoms": 40,
+    "candidate_budget_per_source_arm": 32,
+    "candidate_budget_is_exact": true,
+    "binding_beam_width": 8,
+    "minimum_route_scale_primitives": 8,
+    "refinement_tails_per_locked_route_scale_jump": 1,
+    "seed": 20260919
+  },
+  "enumeration_and_resume": {
+    "plan_selection": "enumerate every plan latent in every checkpoint arm; no top-k or outcome-informed plan selection",
+    "receipt_unit": "one arm and one plan latent",
+    "receipt_path_template": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/receipts/{arm}/{plan_id}.json",
+    "receipt_write": "atomic self-hashed write after each independent unit",
+    "resume": "verify contract, source, arm, plan and payload hashes; skip only a complete valid receipt",
+    "reduction_requires_full_plan_census": true,
+    "candidate_deduplication": "canonical endpoint within arm",
+    "candidate_order": "route-scale first, then descending task-independent plan mass, plan id and canonical endpoint",
+    "candidate_shortfall": "if any arm has fewer than 32 unique endpoints after full enumeration, lock the shortfall and fail without teacher evaluation or backfill"
+  },
+  "candidate_lock": {
+    "generation_must_finish_before_teacher_endpoint_comparison": true,
+    "runtime_inputs": ["current molecular graph", "task-independent checkpoint", "deterministic seed"],
+    "runtime_forbidden": ["task name", "route identifier", "endpoint", "SMILES", "absolute atom address", "source graph stored in checkpoint", "task-to-program map", "executable teacher route", "teacher continuation injection"],
+    "checkpoint_content": "generic address-free action roles, relative created-handle dependencies, complete-program control and weights only",
+    "worker_payload_fields": ["source_state", "sanitized address-free plan", "binding_beam_width", "contract_sha256", "arm label"],
+    "worker_payload_forbidden": ["teacher endpoint", "teacher action", "task name", "historical score", "gap diagnostic"]
+  },
+  "gate": {
+    "required": [
+      "all arm plan-latent censuses are complete and every arm locks exactly 32 unique endpoints",
+      "all emitted complete programs exact-replay under the production executor",
+      "nonzero exact-endpoint or transformation-equivalent autonomous support on Celecoxib or GSK3B in the shared production arm",
+      "at least one autonomous program longer than seven primitives enters the recursive proposal archive",
+      "exactly one attempted generic refinement tail is recorded for every locked shared route-scale jump, with at least one executable descendant",
+      "Perindopril is never truncated or represented as one complete 32-primitive teacher program"
+    ],
+    "kill": "preserve NO_SCORED_LAUNCH if arm census, exact candidate count, route-scale support or recursive continuation remains incomplete; do not weaken the gate or inject a teacher",
+    "promotion": "freeze a separate PMO population-controller scored contract only; a scored launch still requires exact payload-specific authorization"
+  },
+  "oracle_calls_authorized": 0,
+  "modal_launch_authorized": false,
+  "prohibitions": [
+    "no PMO oracle call or score access during candidate generation",
+    "no scored or Modal launch",
+    "no mutation of the prior static factorial or complete-route forensic gate",
+    "no T4 artifact changes",
+    "no frozen-parent restart described as recursive search",
+    "no plan selection based on the answer-known smoke probe"
+  ],
+  "outputs": {
+    "checkpoint": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json",
+    "candidate_lock": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/candidate_lock.json",
+    "result": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/result.json"
+  }
+}
