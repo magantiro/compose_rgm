@@ -1,0 +1,1040 @@
+"""Executable adapter for continuation inside a fixed (parent, region, option).
+
+The outer region and option draws are supplied by the caller and never cloned.
+Intermediate graphs come only from the supplied production executor. Exact
+slot/context/lineage identity, not canonical SMILES, keys continuation work.
+"""
+
+from __future__ import annotations
+
+import math
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Any
+
+import numpy as np
+
+from compose_v4.chem.molecular_graph import MolecularGraph, is_element
+from compose_v4.control.carbonyl_option import (
+    ADD_CARBONYL_OPTION,
+    INSERT_RING_CARBONYL_OPTION,
+    CarbonylProgress,
+    carbonyl_indices,
+    completed_core_carbonyl,
+    core_descriptor_indices,
+    eligible_core_edges,
+)
+from compose_v4.control.continuation import (
+    ContinuationBudgetExceeded,
+    ContinuationWork,
+    ControlledDecision,
+    FiniteHorizonContinuation,
+    ReferenceRow,
+    continuation_decision,
+)
+from compose_v4.control.fused_option import (
+    BUILD_FUSED_RING_OPTION,
+    FusedProgress,
+    completed_fused_cycle,
+    descriptor_indices,
+    eligible_fusion_edges,
+)
+from compose_v4.control.lazy_reference import LazyReferenceBranch, LazyReferenceRow
+from compose_v4.control.macro_engine import state_contract_for
+from compose_v4.control.option_selector import (
+    ConditionedActionDistribution,
+    conditioned_action_distribution,
+    option_horizon,
+    primitive_option_at_step,
+)
+from compose_v4.control.region_replacement import (
+    ReplacementProgress,
+    maximum_horizon,
+    released_slots,
+    replacement_spec,
+)
+from compose_v4.control.region_rewrite import (
+    Lineage,
+    RewriteContext,
+    admissible_indices,
+    context_preserved,
+    created_slot,
+    graph_connected,
+)
+from compose_v4.control.ring_expansion import (
+    EXPAND_RING_OPTION,
+    ExpansionProgress,
+    completed_expansion,
+    eligible_expansion_edges,
+    expansion_descriptor_indices,
+)
+from compose_v4.control.ring_program import (
+    RingProgress,
+    completed_construction,
+    construction_branches,
+    construction_indices,
+    ring_spec,
+)
+from compose_v4.data.charge_policy import charge_policy_preserved
+from compose_v4.gates.med_chem_gate import is_executable, is_valid
+from compose_v4.rewrite.kernel import InvalidRewrite, RewriteSystem, canonical_state_key
+
+
+def exact_graph_key(graph: MolecularGraph) -> tuple:
+    """Full persistent coordinates, including charge/H channels and array layouts."""
+    return tuple(
+        (a.dtype.str, a.shape, a.tobytes())
+        for a in (
+            np.asarray(graph.atom_types),
+            np.asarray(graph.bonds),
+            np.asarray(graph.formal_charges),
+            np.asarray(graph.implicit_h_counts),
+        )
+    )
+
+
+@dataclass(frozen=True)
+class OptionState:
+    graph: MolecularGraph
+    origin: MolecularGraph
+    context: RewriteContext
+    lineage: Lineage
+    option: str
+    step: int
+    horizon: int
+    bundle_id: str
+    fused_progress: FusedProgress | None = None
+    expansion_progress: ExpansionProgress | None = None
+    ring_progress: RingProgress | None = None
+    carbonyl_progress: CarbonylProgress | None = None
+    replacement_progress: ReplacementProgress | None = None
+
+    def __post_init__(self) -> None:
+        if not self.bundle_id:
+            raise ValueError("bundle_id is required; outer draws must retain their identity")
+        if not 0 < self.graph.n_real_atoms <= 40 or not 0 < self.origin.n_real_atoms <= 40:
+            raise ValueError("option states require 1..40 real atoms; null is not a molecule")
+        for name, value in (("step", self.step), ("horizon", self.horizon)):
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"{name} must be a nonnegative integer")
+        replacement = replacement_spec(self.option)
+        expected = (
+            maximum_horizon(self.origin, self.context, replacement)
+            if replacement
+            else option_horizon(self.option, self.horizon)
+        )
+        if self.horizon < 1 or expected != self.horizon or self.step > self.horizon:
+            raise ValueError("option phase/horizon does not match the registered program")
+        if set(self.lineage.slot_of) != set(self.lineage.id_of.values()) or any(
+            self.lineage.slot_of.get(identity) != slot
+            for slot, identity in self.lineage.id_of.items()
+        ):
+            raise ValueError("lineage maps are not mutual inverses")
+        real_slots = {
+            i for i, atom_type in enumerate(self.graph.atom_types) if is_element(atom_type)
+        }
+        if set(self.lineage.id_of) != real_slots:
+            raise ValueError("lineage must identify every real atom slot exactly once")
+        if self.lineage.next_id <= max(self.lineage.slot_of, default=-1):
+            raise ValueError("lineage next_id must exceed every existing atom identity")
+        if self.option == BUILD_FUSED_RING_OPTION:
+            if not isinstance(self.fused_progress, FusedProgress):
+                raise ValueError("build_fused_ring requires explicit FusedProgress")
+            self.fused_progress.validate(self.graph, self.origin, self.context.locus, self.step)
+            if self.step == 0 and exact_graph_key(self.graph) != exact_graph_key(self.origin):
+                raise ValueError("fused program must start from its exact origin state")
+        elif self.fused_progress is not None:
+            raise ValueError("fused progress is only valid for build_fused_ring")
+        if self.option == EXPAND_RING_OPTION:
+            if not isinstance(self.expansion_progress, ExpansionProgress):
+                raise ValueError("expand_ring requires explicit ExpansionProgress")
+            self.expansion_progress.validate(self.graph, self.origin, self.context.locus, self.step)
+            if self.step == 0 and exact_graph_key(self.graph) != exact_graph_key(self.origin):
+                raise ValueError("expansion program must start from its exact origin state")
+        elif self.expansion_progress is not None:
+            raise ValueError("expansion progress is only valid for expand_ring")
+        spec = ring_spec(self.option)
+        if spec is not None:
+            if not isinstance(self.ring_progress, RingProgress):
+                raise ValueError("parameterized construction requires RingProgress")
+            self.ring_progress.validate(
+                self.graph, self.origin, self.context.locus, self.step, spec
+            )
+            if self.step == 0 and exact_graph_key(self.graph) != exact_graph_key(self.origin):
+                raise ValueError("ring program must start from its exact origin state")
+        elif self.ring_progress is not None:
+            raise ValueError("ring progress requires a parameterized construction option")
+        if self.option == INSERT_RING_CARBONYL_OPTION:
+            if not isinstance(self.carbonyl_progress, CarbonylProgress):
+                raise ValueError("insert_ring_carbonyl requires explicit CarbonylProgress")
+            self.carbonyl_progress.validate(self.graph, self.origin, self.context.locus, self.step)
+            if self.step == 0 and exact_graph_key(self.graph) != exact_graph_key(self.origin):
+                raise ValueError("core carbonyl program must start at its exact origin")
+        elif self.carbonyl_progress is not None:
+            raise ValueError("carbonyl progress is only valid for insert_ring_carbonyl")
+        if replacement is not None:
+            if not isinstance(self.replacement_progress, ReplacementProgress):
+                raise ValueError("region replacement requires explicit phase/provenance")
+            self.replacement_progress.validate(
+                self.graph, self.origin, self.context, self.step, replacement
+            )
+            if self.step == 0 and exact_graph_key(self.graph) != exact_graph_key(self.origin):
+                raise ValueError("region replacement must start at its exact origin")
+        elif self.replacement_progress is not None:
+            raise ValueError("replacement progress is only valid for a region replacement")
+
+    @property
+    def remaining(self) -> int:
+        if self.replacement_progress is not None and self.replacement_progress.complete(
+            replacement_spec(self.option)
+        ):
+            return 0
+        return self.horizon - self.step
+
+    def key(self) -> tuple:
+        ctx, lin = self.context, self.lineage
+        legacy = (
+            self.bundle_id,
+            exact_graph_key(self.graph),
+            exact_graph_key(self.origin),
+            ctx.frozen,
+            ctx.locus,
+            ctx.terminals,
+            ctx.interface,
+            ctx.k_components,
+            ctx.phase,
+            tuple(sorted(lin.slot_of.items())),
+            tuple(sorted(lin.id_of.items())),
+            lin.next_id,
+            self.option,
+            self.step,
+            self.horizon,
+        )
+        # Preserve every existing cache identity; only the opt-in state extends it.
+        if self.replacement_progress is not None:
+            return legacy + (self.replacement_progress.key(),)
+        if self.carbonyl_progress is not None:
+            return legacy + (self.carbonyl_progress,)
+        if self.ring_progress is not None:
+            return legacy + (self.ring_progress,)
+        if self.expansion_progress is not None:
+            return legacy + (self.expansion_progress,)
+        return legacy if self.fused_progress is None else legacy + (self.fused_progress,)
+
+
+@dataclass
+class OptionKernelWork:
+    law_enumerations: int = 0
+    executor_applications: int = 0
+    rejected_products: int = 0
+    legal_products: int = 0
+    row_cache_hits: int = 0
+    product_cache_hits: int = 0
+
+
+LEGACY_PRODUCT_GATE = "endpoint_every_step_v1"
+EXECUTABLE_PRODUCT_GATE = "executable_intermediates_v1"
+
+
+def validate_product_gate(policy: str) -> None:
+    if policy not in (LEGACY_PRODUCT_GATE, EXECUTABLE_PRODUCT_GATE):
+        raise ValueError(f"unknown product gate policy: {policy!r}")
+
+
+def product_gate_accepts(smiles: str, policy: str) -> bool:
+    validate_product_gate(policy)
+    return is_executable(smiles) if policy == EXECUTABLE_PRODUCT_GATE else is_valid(smiles)
+
+
+class OptionContinuationKernel:
+    """Existing option support and executor, with an explicit application ceiling.
+
+    ``enumerate_law`` returns rule names, slot-addressed actions, probabilities.
+    In production use ``from_runtime`` to delegate to the one model evaluator.
+    Fixture callbacks are permitted only as explicitly labeled test references.
+    No top-k or additional chemistry catalog is introduced here.
+    """
+
+    def __init__(
+        self,
+        enumerate_law: Callable[[MolecularGraph], tuple],
+        system: RewriteSystem,
+        *,
+        max_executor_applications: int | None,
+        macro_temperature: float = 2.0,
+        macro_exploration: float = 0.15,
+        product_gate: str = LEGACY_PRODUCT_GATE,
+    ) -> None:
+        if max_executor_applications is not None and (
+            isinstance(max_executor_applications, bool)
+            or not isinstance(max_executor_applications, int)
+            or max_executor_applications < 0
+        ):
+            raise ValueError("max_executor_applications must be a nonnegative integer or None")
+        if macro_temperature != 2.0 or macro_exploration != 0.15:
+            raise ValueError("the inherited macro temperature/exploration are frozen at 2.0/0.15")
+        validate_product_gate(product_gate)
+        self.product_gate = product_gate
+        self.enumerate_law = enumerate_law
+        self.system = system
+        self.max_executor_applications = max_executor_applications
+        self.macro_temperature, self.macro_exploration = macro_temperature, macro_exploration
+        self.work = OptionKernelWork()
+        self._marks: dict[tuple, tuple[tuple[str, Any], ...]] = {}
+        self._rows: dict[tuple, ReferenceRow[OptionState]] = {}
+        self._fused_support: dict[tuple, dict] = {}
+        self._expansion_support: dict[tuple, dict] = {}
+        self._construction_support: dict[tuple, dict] = {}
+        self._carbonyl_support: dict[tuple, dict] = {}
+        self._primitive_products: dict[tuple, tuple[MolecularGraph, str] | None] = {}
+        self._lazy_rows: dict[tuple, LazyReferenceRow[OptionState]] = {}
+
+    @classmethod
+    def from_runtime(
+        cls,
+        model,
+        system,
+        *,
+        time_point: float,
+        max_executor_applications: int | None,
+        product_gate: str = LEGACY_PRODUCT_GATE,
+    ):
+        from compose_v4.experiments.production_successor_kernel import (
+            enumerate_factorized_marked_law,
+        )
+
+        def enumerate_law(graph):
+            law = enumerate_factorized_marked_law(model, graph, time_point)
+            return (
+                tuple(m.executor_rule_name for m in law.marks),
+                tuple(m.action for m in law.marks),
+                tuple(m.probability for m in law.marks),
+            )
+
+        return cls(
+            enumerate_law,
+            system,
+            max_executor_applications=max_executor_applications,
+            product_gate=product_gate,
+        )
+
+    def row(self, node: OptionState) -> ReferenceRow[OptionState]:
+        return self._row(node, lazy=False)
+
+    def lazy_row(self, node: OptionState) -> LazyReferenceRow[OptionState]:
+        """Same reference law, resolving products only as needed for a draw."""
+        key = node.key()
+        if key not in self._lazy_rows:
+            self._lazy_rows[key] = self._row(node, lazy=True)
+        return self._lazy_rows[key]
+
+    def _physical_product(self, node, family, action):
+        physical_key = (exact_graph_key(node.graph), family, repr(action))
+        if physical_key in self._primitive_products:
+            self.work.product_cache_hits += 1
+            return self._primitive_products[physical_key]
+        if (
+            self.max_executor_applications is not None
+            and self.work.executor_applications >= self.max_executor_applications
+        ):
+            raise ContinuationBudgetExceeded("executor-application budget exhausted")
+        self.work.executor_applications += 1
+        try:
+            product = self.system.apply(node.graph, family, action)
+            executed = (product, canonical_state_key(product))
+        except InvalidRewrite:
+            executed = None
+        self._primitive_products[physical_key] = executed
+        return executed
+
+    def _clean_product(self, node, family, action, contract):
+        executed = self._physical_product(node, family, action)
+        if executed is not None:
+            product, key = executed
+            if (
+                0 < product.n_real_atoms <= 40
+                and graph_connected(product)
+                and charge_policy_preserved(node.graph, product)
+                and product_gate_accepts(key, self.product_gate)
+                and context_preserved(
+                    node.origin, product, node.context.frozen, node.context.terminal_context_slots
+                )
+                and (contract is None or contract(product))
+            ):
+                return product
+        self.work.rejected_products += 1
+        return None
+
+    def _row(self, node: OptionState, *, lazy: bool):
+        cache_key = node.key()
+        if not lazy and cache_key in self._rows:
+            self.work.row_cache_hits += 1
+            return self._rows[cache_key]
+        if node.remaining == 0:
+            return LazyReferenceRow({}) if lazy else ReferenceRow((), ())
+        if node.replacement_progress is not None:
+            return self._replacement_row(node, lazy=lazy)
+        self.work.law_enumerations += 1
+        families, actions, probabilities = self.enumerate_law(node.graph)
+        p = np.asarray(probabilities, dtype=float)
+        if (
+            p.ndim != 1
+            or len(p) != len(families)
+            or len(p) != len(actions)
+            or not np.isfinite(p).all()
+            or (p < 0).any()
+            or (len(p) and p.sum() <= 0)
+        ):
+            raise ValueError("marked law must have aligned finite nonnegative positive-mass rows")
+        indices, _ = admissible_indices(families, actions, node.context)
+        if (
+            node.option
+            in (BUILD_FUSED_RING_OPTION, EXPAND_RING_OPTION, INSERT_RING_CARBONYL_OPTION)
+            or node.ring_progress is not None
+        ):
+            return self._descriptor_row(node, families, actions, p, indices, lazy=lazy)
+
+        def condition(clean=None):
+            if node.option != ADD_CARBONYL_OPTION:
+                return conditioned_action_distribution(
+                    families, p, indices, node.option, step=node.step, clean=clean
+                )
+            # Restrict this optional descriptor before the inherited cap, just
+            # like the other new descriptor channels. Preserve old grow law.
+            subset = np.asarray(
+                sorted(set(indices) & set(carbonyl_indices(node.graph, families, actions))),
+                dtype=int,
+            )
+            local = conditioned_action_distribution(
+                [families[i] for i in subset],
+                p[subset],
+                range(len(subset)),
+                "grow",
+                clean=None if clean is None else clean[subset],
+            )
+            return ConditionedActionDistribution(
+                node.option, "grow", subset[local.indices], local.probabilities
+            )
+
+        pre = condition()
+        active = primitive_option_at_step(node.option, node.step)
+        contract = state_contract_for(active, node.graph) if active else None
+
+        def successor(index):
+            product = self._clean_product(node, families[index], actions[index], contract)
+            if product is None:
+                return None
+            lineage = node.lineage.observe(families[index], actions[index])
+            new_slot = created_slot(actions[index])
+            context = node.context.with_locus(new_slot) if new_slot is not None else node.context
+            result = OptionState(
+                product,
+                node.origin,
+                context,
+                lineage,
+                node.option,
+                node.step + 1,
+                node.horizon,
+                node.bundle_id,
+            )
+            self.work.legal_products += 1
+            return result
+
+        if lazy:
+            generic = node.option == "generic"
+            weights = (
+                p[pre.indices]
+                if generic
+                else np.maximum(p[pre.indices], 1e-300) ** (1 / self.macro_temperature)
+            )
+            return LazyReferenceRow(
+                {
+                    None: LazyReferenceBranch(
+                        tuple(map(int, pre.indices)),
+                        tuple(weights),
+                        0.0 if generic else self.macro_exploration,
+                        successor,
+                    )
+                }
+            )
+        clean = np.zeros(len(p), dtype=bool)
+        products = {}
+        for raw_index in pre.indices:
+            index = int(raw_index)
+            product = successor(index)
+            if product is not None:
+                products[index] = product
+                clean[index] = True
+        conditioned = condition(clean)
+        self._marks[cache_key] = tuple(
+            (families[int(i)], actions[int(i)]) for i in conditioned.indices
+        )
+        row = ReferenceRow(
+            tuple(products[int(i)] for i in conditioned.indices),
+            tuple(float(p) for p in conditioned.probabilities),
+        )
+        self._rows[cache_key] = row
+        return row
+
+    def _replacement_row(self, node, *, lazy):
+        """One primitive of prune-then-construct; no task score between phases."""
+        from dataclasses import replace
+
+        spec, progress = replacement_spec(node.option), node.replacement_progress
+        if progress.build_origin is not None:
+            inner = OptionState(
+                node.graph,
+                progress.build_origin,
+                node.context,
+                node.lineage,
+                spec.option,
+                progress.build_step,
+                spec.horizon,
+                node.bundle_id + "/build",
+                ring_progress=progress.ring,
+            )
+
+            def wrap(child):
+                if child is None:
+                    return None
+                return replace(
+                    node,
+                    graph=child.graph,
+                    context=child.context,
+                    lineage=child.lineage,
+                    step=node.step + 1,
+                    replacement_progress=ReplacementProgress(
+                        progress.removed,
+                        progress.opened,
+                        progress.build_origin,
+                        child.step,
+                        child.ring_progress,
+                    ),
+                )
+
+            if lazy:
+                row = self.lazy_row(inner)
+                return LazyReferenceRow(
+                    {
+                        key: LazyReferenceBranch(
+                            branch.indices,
+                            tuple(branch.weights),
+                            branch.uniform_fraction,
+                            lambda i, branch=branch: wrap(branch.resolve(i)),
+                        )
+                        for key, branch in row.branches.items()
+                    }
+                )
+            row = self.row(inner)
+            self._marks[node.key()] = self.marks(inner)
+            result = ReferenceRow(tuple(wrap(child) for child in row.successors), row.probabilities)
+            self._rows[node.key()] = result
+            return result
+
+        self.work.law_enumerations += 1
+        families, actions, probabilities = self.enumerate_law(node.graph)
+        p = np.asarray(probabilities, dtype=float)
+        if (
+            p.ndim != 1
+            or len(p) != len(families)
+            or len(p) != len(actions)
+            or not np.isfinite(p).all()
+            or np.any(p < 0)
+        ):
+            raise ValueError("replacement requires aligned finite production probabilities")
+        admissible, _ = admissible_indices(families, actions, node.context)
+        live_region = released_slots(node.graph, node.context)
+
+        def product(index):
+            family, action = families[index], actions[index]
+            child = self._clean_product(node, family, action, None)
+            if child is None:
+                return None
+            removed = progress.removed + int(family == "atom_delete")
+            opened = progress.opened + int(family in ("cycle_open", "bond_delete"))
+            context = node.context
+            next_progress = ReplacementProgress(removed, opened)
+            if not released_slots(child, context):
+                # Growth may attach at a preserved boundary atom. Frozen
+                # identity/context bonds still pass the original context guard.
+                for slot in context.terminal_context_slots:
+                    context = context.with_locus(slot)
+                next_progress = ReplacementProgress(removed, opened, child, 0, RingProgress())
+            result = replace(
+                node,
+                graph=child,
+                context=context,
+                lineage=node.lineage.observe(family, action),
+                step=node.step + 1,
+                replacement_progress=next_progress,
+            )
+            self.work.legal_products += 1
+            return result
+
+        def branch(allowed_families):
+            idx = tuple(
+                int(i)
+                for i in admissible
+                if families[i] in allowed_families
+                and p[i] > 0
+                and (families[i] != "atom_delete" or actions[i].v in live_region)
+            )
+            return LazyReferenceBranch(
+                idx,
+                tuple(p[list(idx)] ** (1 / self.macro_temperature)),
+                self.macro_exploration,
+                product,
+            )
+
+        # Remove a legal released atom when possible; opening a cycle is an
+        # enabling step only when no such deletion is currently executable.
+        selected = branch(("atom_delete",))
+        if not selected.has_product():
+            selected = branch(("cycle_open", "bond_delete"))
+        if lazy:
+            return LazyReferenceRow({"prune": selected})
+        indices = [i for i in selected.indices if selected.resolve(i) is not None]
+        weights = p[indices] ** (1 / self.macro_temperature)
+        q = (
+            (
+                (1 - self.macro_exploration) * weights / weights.sum()
+                + self.macro_exploration / len(weights)
+            )
+            if len(weights)
+            else []
+        )
+        self._marks[node.key()] = tuple((families[i], actions[i]) for i in indices)
+        result = ReferenceRow(tuple(selected.resolve(i) for i in indices), tuple(q))
+        self._rows[node.key()] = result
+        return result
+
+    def _descriptor_row(self, node, families, actions, probabilities, admissible, *, lazy=False):
+        """Joint edge/mark reference; share executor work, not augmented states."""
+        spec = ring_spec(node.option)
+        expansion = node.option == EXPAND_RING_OPTION
+        carbonyl = node.option == INSERT_RING_CARBONYL_OPTION
+        progress = (
+            node.carbonyl_progress
+            if carbonyl
+            else node.ring_progress
+            if spec
+            else node.expansion_progress
+            if expansion
+            else node.fused_progress
+        )
+        eligible_edges = (
+            eligible_core_edges
+            if carbonyl
+            else eligible_expansion_edges
+            if expansion
+            else eligible_fusion_edges
+        )
+        match_indices = (
+            core_descriptor_indices
+            if carbonyl
+            else expansion_descriptor_indices
+            if expansion
+            else descriptor_indices
+        )
+        if spec:
+            edges = (
+                construction_branches(node.origin, node.context.locus, spec)
+                if not progress.anchors
+                else ((progress.anchors, progress.pattern),)
+            )
+        else:
+            edges = (
+                eligible_edges(node.origin, node.context.locus)
+                if progress.edge is None
+                else (progress.edge,)
+            )
+        active = primitive_option_at_step(node.option, node.step)
+        contract = state_contract_for(active, node.graph)
+
+        def condition(matches):
+            if not (expansion or carbonyl) and spec is None:
+                return conditioned_action_distribution(families, probabilities, matches, active)
+            # This NEW channel conditions descriptors before applying the
+            # inherited cap. Unrelated marks must not erase its sole closure.
+            # Existing fused/generic/macro laws retain their frozen cap order.
+            idx = np.asarray(matches, dtype=int)
+            local = conditioned_action_distribution(
+                [families[i] for i in idx], probabilities[idx], range(len(idx)), active
+            )
+            return ConditionedActionDistribution(
+                node.option, active, idx[local.indices], local.probabilities
+            )
+
+        in_region = set(admissible)
+        pre_rows, audit = {}, []
+        for edge in edges:
+            matches = sorted(
+                in_region.intersection(
+                    construction_indices(
+                        families,
+                        actions,
+                        probabilities,
+                        node.graph,
+                        spec,
+                        progress,
+                        edge,
+                        node.step,
+                    )
+                    if spec
+                    else match_indices(families, actions, probabilities, progress, edge, node.step)
+                )
+            )
+            pre = condition(matches)
+            pre_rows[edge] = pre
+            audit.append(
+                {
+                    **(
+                        {"branch": [list(items) for items in edge]}
+                        if spec
+                        else {"edge": list(edge)}
+                    ),
+                    "descriptor_region_marks": len(matches),
+                    "after_inherited_cap": len(pre.indices),
+                }
+            )
+
+        # Physical products are shared; branch/context checks are not.
+        products = {}
+
+        def successor(edge, index):
+            if index not in products:
+                products[index] = self._clean_product(
+                    node, families[index], actions[index], contract
+                )
+            product = products[index]
+            if product is None:
+                return None
+            slot = created_slot(actions[index])
+            next_progress = (
+                progress.advance(edge, slot, node.step)
+                if carbonyl
+                else RingProgress(
+                    edge[0],
+                    edge[1],
+                    progress.path + (slot,) if slot is not None else progress.path,
+                )
+                if spec
+                else ExpansionProgress(edge, slot if slot is not None else progress.new_slot)
+                if expansion
+                else FusedProgress(
+                    edge, progress.path + (slot,) if slot is not None else progress.path
+                )
+            )
+            completes = (
+                completed_core_carbonyl
+                if carbonyl
+                else completed_expansion
+                if expansion
+                else completed_fused_cycle
+            )
+            completion_failed = (
+                spec is not None
+                and node.step in (spec.growth, spec.horizon - 1)
+                and not completed_construction(
+                    node.origin, product, next_progress, spec, refined=node.step > spec.growth
+                )
+            ) or (
+                spec is None
+                and node.step == node.horizon - 1
+                and not completes(node.origin, product, next_progress)
+            )
+            if completion_failed:
+                self.work.rejected_products += 1
+                return None
+            context = node.context.with_locus(slot) if slot is not None else node.context
+            if expansion or carbonyl or spec:
+                try:
+                    if spec:
+                        next_progress.validate(
+                            product, node.origin, context.locus, node.step + 1, spec
+                        )
+                    else:
+                        next_progress.validate(product, node.origin, context.locus, node.step + 1)
+                except ValueError:
+                    self.work.rejected_products += 1
+                    return None
+            return OptionState(
+                product,
+                node.origin,
+                context,
+                node.lineage.observe(families[index], actions[index]),
+                node.option,
+                node.step + 1,
+                node.horizon,
+                node.bundle_id,
+                fused_progress=None if expansion or carbonyl or spec else next_progress,
+                expansion_progress=next_progress if expansion else None,
+                ring_progress=next_progress if spec else None,
+                carbonyl_progress=next_progress if carbonyl else None,
+            )
+
+        if lazy:
+            return LazyReferenceRow(
+                {
+                    edge: LazyReferenceBranch(
+                        tuple(map(int, pre.indices)),
+                        tuple(
+                            np.maximum(probabilities[pre.indices], 1e-300)
+                            ** (1 / self.macro_temperature)
+                        ),
+                        self.macro_exploration,
+                        lambda index, edge=edge: successor(edge, index),
+                    )
+                    for edge, pre in pre_rows.items()
+                }
+            )
+
+        for index in sorted({int(i) for pre in pre_rows.values() for i in pre.indices}):
+            products[index] = self._clean_product(node, families[index], actions[index], contract)
+
+        branches = []
+        for edge, receipt in zip(edges, audit):
+            successors = {}
+            for raw_index in pre_rows[edge].indices:
+                index = int(raw_index)
+                product = successor(edge, index)
+                if product is not None:
+                    successors[index] = product
+            receipt["after_product_contract"] = len(successors)
+            conditioned = condition(sorted(successors))
+            if len(conditioned.indices):
+                branches.append((successors, conditioned))
+        nodes, mass, marks = [], [], []
+        for successors, conditioned in branches:
+            for index, probability in zip(conditioned.indices, conditioned.probabilities):
+                index = int(index)
+                nodes.append(successors[index])
+                mass.append(float(probability) / len(branches))
+                marks.append((families[index], actions[index]))
+        row = ReferenceRow(tuple(nodes), tuple(mass))
+        cache_key = node.key()
+        self.work.legal_products += len({i for successors, _ in branches for i in successors})
+        self._marks[cache_key] = tuple(marks)
+        support = (
+            self._carbonyl_support
+            if carbonyl
+            else self._construction_support
+            if spec
+            else self._expansion_support
+            if expansion
+            else self._fused_support
+        )
+        support[cache_key] = {
+            **(
+                {"eligible_branches": len(edges), "product_applicable_branches": len(branches)}
+                if spec
+                else {
+                    "eligible_oriented_edges": len(edges),
+                    "product_applicable_oriented_edges": len(branches),
+                }
+            ),
+            "augmented_successors": len(nodes),
+            "physical_marks": len({i for successors, _ in branches for i in successors}),
+            "edges": audit,
+        }
+        self._rows[cache_key] = row
+        return row
+
+    def fused_support(self, node: OptionState) -> dict:
+        """Completed-row funnel only; never exposes partially normalized work."""
+        from copy import deepcopy
+
+        return deepcopy(self._fused_support[node.key()])
+
+    def expansion_support(self, node: OptionState) -> dict:
+        from copy import deepcopy
+
+        return deepcopy(self._expansion_support[node.key()])
+
+    def construction_support(self, node: OptionState) -> dict:
+        from copy import deepcopy
+
+        return deepcopy(self._construction_support[node.key()])
+
+    def carbonyl_support(self, node: OptionState) -> dict:
+        from copy import deepcopy
+
+        return deepcopy(self._carbonyl_support[node.key()])
+
+    def marks(self, node: OptionState) -> tuple[tuple[str, Any], ...]:
+        return self._marks[node.key()]
+
+
+def sample_option_trajectory(
+    initial: OptionState,
+    kernel: OptionContinuationKernel,
+    terminal_weight: Callable[[OptionState], float],
+    fallback_weight: Callable[[OptionState], float],
+    *,
+    snapshot_id: str,
+    seed: int,
+    max_expansions: int,
+    max_terminal_evaluations: int,
+    estimator: str = "exact",
+    samples_per_successor: int = 32,
+    confidence_alpha: float = 0.05,
+    max_rollouts: int = 1024,
+) -> dict:
+    """Run one fixed bundle; no extra outer draws or hidden retry-until-success.
+
+    Reference exploration branches are counterfactual executor products, not
+    sampled offspring. Only the committed path's completed endpoint is emitted.
+    A terminal callback is invoked only at the option's complete horizon.
+    """
+    from dataclasses import asdict
+    from time import perf_counter
+
+    from compose_v4.control.sampled_continuation import (
+        SampledContinuation,
+        sampled_continuation_decision,
+    )
+
+    started = perf_counter()
+    common = {
+        "snapshot_id": snapshot_id,
+        "max_expansions": max_expansions,
+        "max_terminal_evaluations": max_terminal_evaluations,
+    }
+    planner_seed = None
+    if estimator == "reference":
+        continuation = None
+        rng = np.random.default_rng(seed)
+    elif estimator == "exact":
+        continuation = FiniteHorizonContinuation(
+            kernel.row, terminal_weight, OptionState.key, **common
+        )
+        rng = np.random.default_rng(seed)  # preserve the existing exact fixture stream
+    elif estimator == "sampled":
+        planner_stream, path_stream = np.random.SeedSequence(seed).spawn(2)
+        planner_seed = int(planner_stream.generate_state(1, dtype=np.uint64)[0])
+        continuation = SampledContinuation(
+            kernel.row,
+            terminal_weight,
+            OptionState.key,
+            **common,
+            seed=planner_seed,
+            samples_per_successor=samples_per_successor,
+            alpha=confidence_alpha,
+            max_rollouts=max_rollouts,
+        )
+        rng = np.random.default_rng(path_stream)
+    else:
+        raise ValueError(f"unknown continuation estimator: {estimator!r}")
+    node, trace, logp, logq, status = initial, [], 0.0, 0.0, "complete"
+    while node.remaining:
+        try:
+            row = kernel.row(node)
+        except ContinuationBudgetExceeded:
+            status = "executor_budget_exhausted"
+            break
+        estimate = None
+        kwargs = (
+            {}
+            if estimator == "reference"
+            else {"fallback_values": tuple(fallback_weight(s) for s in row.successors)}
+        )
+        if estimator == "reference":
+            decision = ControlledDecision(row.probabilities, "reference", None, 0.0, 0.0)
+        elif estimator == "sampled":
+            sampled = sampled_continuation_decision(row, node.remaining, continuation, **kwargs)
+            decision, estimate = sampled.decision, sampled.estimate
+        else:
+            decision = continuation_decision(row, node.remaining, continuation, **kwargs)
+        if not decision.probabilities:
+            status = "no_admissible_action"
+            break
+        selected = int(rng.choice(len(row.successors), p=decision.probabilities))
+        next_node = row.successors[selected]
+        probability = decision.probabilities[selected]
+        logp += math.log(row.probabilities[selected])
+        logq += math.log(probability)
+        family, action = kernel.marks(node)[selected]
+        trace.append(
+            {
+                "step": next_node.step,
+                "before": canonical_state_key(node.graph),
+                "after": canonical_state_key(next_node.graph),
+                "family": family,
+                "action": asdict(action),
+                "reference_probability": row.probabilities[selected],
+                "probability": probability,
+                "decision_status": decision.status,
+                "eta": decision.eta,
+                "kl": decision.kl,
+                "sampled_estimate": asdict(estimate) if estimate is not None else None,
+            }
+        )
+        if next_node.fused_progress is not None:
+            from compose_v4.rewrite.trace_shard import encode_state
+
+            trace[-1]["fused_progress"] = next_node.fused_progress.payload()
+            trace[-1]["exact_state"] = encode_state(next_node.graph)
+            trace[-1]["support_funnel"] = kernel.fused_support(node)
+        if next_node.expansion_progress is not None:
+            from compose_v4.rewrite.trace_shard import encode_state
+
+            trace[-1]["expansion_progress"] = next_node.expansion_progress.payload()
+            trace[-1]["exact_state"] = encode_state(next_node.graph)
+            trace[-1]["support_funnel"] = kernel.expansion_support(node)
+        if next_node.ring_progress is not None:
+            from compose_v4.rewrite.trace_shard import encode_state
+
+            trace[-1]["ring_progress"] = next_node.ring_progress.payload()
+            trace[-1]["exact_state"] = encode_state(next_node.graph)
+            trace[-1]["support_funnel"] = kernel.construction_support(node)
+        if next_node.carbonyl_progress is not None:
+            from compose_v4.rewrite.trace_shard import encode_state
+
+            trace[-1]["carbonyl_progress"] = next_node.carbonyl_progress.payload()
+            trace[-1]["exact_state"] = encode_state(next_node.graph)
+            trace[-1]["support_funnel"] = kernel.carbonyl_support(node)
+        node = next_node
+    result = {
+        "bundle_id": initial.bundle_id,
+        "option": initial.option,
+        "estimator": estimator,
+        "randomness": {
+            "seed": seed,
+            "planner_seed": planner_seed,
+            "derivation": "SeedSequence(seed).spawn(2): planner uint64 seed, path stream"
+            if estimator == "sampled"
+            else "default_rng(seed), no planner"
+            if estimator == "reference"
+            else "default_rng(seed), exact deterministic planner",
+        },
+        "path_probability_role": "conditional on realized planner randomness, not marginalized over lookahead samples",
+        "status": status,
+        "endpoint": canonical_state_key(node.graph) if status == "complete" else None,
+        "conditional_reference_path_logp": logp,
+        "conditional_path_logq": logq,
+        "trace": trace,
+        "continuation_work": asdict(continuation.work if continuation else ContinuationWork()),
+        "kernel_work": asdict(kernel.work),
+        "seconds": perf_counter() - started,
+    }
+    if status == "complete":
+        from compose_v4.experiments.continuation_profile import state_payload
+
+        result["final_option_state"] = state_payload(node)
+    if node.fused_progress is not None:
+        result["final_fused_progress"] = node.fused_progress.payload()
+        if status == "no_admissible_action":
+            result["failure_support_funnel"] = kernel.fused_support(node)
+    if node.expansion_progress is not None:
+        result["final_expansion_progress"] = node.expansion_progress.payload()
+        if status == "no_admissible_action":
+            result["failure_support_funnel"] = kernel.expansion_support(node)
+    if node.ring_progress is not None:
+        result["final_ring_progress"] = node.ring_progress.payload()
+        if status == "no_admissible_action":
+            result["failure_support_funnel"] = kernel.construction_support(node)
+    if node.carbonyl_progress is not None:
+        result["final_carbonyl_progress"] = node.carbonyl_progress.payload()
+        if status == "no_admissible_action":
+            result["failure_support_funnel"] = kernel.carbonyl_support(node)
+    return result

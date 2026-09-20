@@ -1,0 +1,137 @@
+[
+ {
+  "idx": 0,
+  "target": "parp1",
+  "smiles": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+  "published_ds": 7.3,
+  "seed_qed": 0.8879,
+  "seed_sa": 2.609,
+  "heavy": 19
+ },
+ {
+  "idx": 1,
+  "target": "parp1",
+  "smiles": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+  "published_ds": 7.8,
+  "seed_qed": 0.7579,
+  "seed_sa": 2.744,
+  "heavy": 16
+ },
+ {
+  "idx": 2,
+  "target": "parp1",
+  "smiles": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+  "published_ds": 8.2,
+  "seed_qed": 0.438,
+  "seed_sa": 2.914,
+  "heavy": 17
+ },
+ {
+  "idx": 3,
+  "target": "fa7",
+  "smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+  "published_ds": 6.4,
+  "seed_qed": 0.2841,
+  "seed_sa": 2.287,
+  "heavy": 32
+ },
+ {
+  "idx": 4,
+  "target": "fa7",
+  "smiles": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+  "published_ds": 6.7,
+  "seed_qed": 0.1859,
+  "seed_sa": 3.39,
+  "heavy": 29
+ },
+ {
+  "idx": 5,
+  "target": "fa7",
+  "smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+  "published_ds": 8.5,
+  "seed_qed": 0.1557,
+  "seed_sa": 2.657,
+  "heavy": 35
+ },
+ {
+  "idx": 6,
+  "target": "5ht1b",
+  "smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)[C@]4(CC[N@H+](C)CC4)CO6)cc3)c(C)c2)no1",
+  "published_ds": 4.5,
+  "seed_qed": 0.4384,
+  "seed_sa": 3.929,
+  "heavy": 39
+ },
+ {
+  "idx": 7,
+  "target": "5ht1b",
+  "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+  "published_ds": 7.6,
+  "seed_qed": 0.7666,
+  "seed_sa": 3.287,
+  "heavy": 16
+ },
+ {
+  "idx": 8,
+  "target": "5ht1b",
+  "smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1",
+  "published_ds": 9.8,
+  "seed_qed": 0.7162,
+  "seed_sa": 4.687,
+  "heavy": 31
+ },
+ {
+  "idx": 9,
+  "target": "braf",
+  "smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34",
+  "published_ds": 9.3,
+  "seed_qed": 0.2353,
+  "seed_sa": 2.692,
+  "heavy": 40
+ },
+ {
+  "idx": 10,
+  "target": "braf",
+  "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+  "published_ds": 9.4,
+  "seed_qed": 0.3456,
+  "seed_sa": 2.494,
+  "heavy": 39
+ },
+ {
+  "idx": 11,
+  "target": "braf",
+  "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+  "published_ds": 9.8,
+  "seed_qed": 0.2545,
+  "seed_sa": 2.382,
+  "heavy": 37
+ },
+ {
+  "idx": 12,
+  "target": "jak2",
+  "smiles": "OCCCCc2nc1ccccc1c4ncnc3[nH]cc2c34",
+  "published_ds": 7.7,
+  "seed_qed": 0.725,
+  "seed_sa": 2.889,
+  "heavy": 22
+ },
+ {
+  "idx": 13,
+  "target": "jak2",
+  "smiles": "COC(=O)CC2Nc1ccccc1c3ccnc4[nH]cc2c34",
+  "published_ds": 8.0,
+  "seed_qed": 0.7117,
+  "seed_sa": 3.09,
+  "heavy": 22
+ },
+ {
+  "idx": 14,
+  "target": "jak2",
+  "smiles": "Oc5ccc(C2NC(=O)c1ccccc1c3ccnc4[nH]cc2c34)c(F)c5",
+  "published_ds": 8.6,
+  "seed_qed": 0.4822,
+  "seed_sa": 3.098,
+  "heavy": 27
+ }
+]
