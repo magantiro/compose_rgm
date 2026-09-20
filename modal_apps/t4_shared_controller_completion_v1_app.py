@@ -350,6 +350,7 @@ def _proposal_answer(
     from compose_v4.experiments.t4_shared_controller_scored_runtime import (
         attach_endpoint_fingerprints,
         attach_generic_scale_band,
+        generic_topology_macro_records,
         protonation_aware_records,
         retained_core_route_records,
     )
@@ -435,6 +436,15 @@ def _proposal_answer(
             route_expert=_load_route_expert(contract),
             settings=controller["proposal"][expert_name],
         )
+    elif expert_name == "generic_topology_macro_v2":
+        records, telemetry = generic_topology_macro_records(
+            parent=request["parent"],
+            proposal_seed_value=request["proposal_seed"],
+            settings=controller["proposal"][expert_name],
+        )
+        for row in records:
+            row["parent_score"] = request["parent_score"]
+            row["delta"] = cell["delta"]
     else:
         raise ValueError(f"unknown proposal expert: {expert_name}")
     if not contract.get("trajectory_distillation", {"enabled": True})["enabled"]:

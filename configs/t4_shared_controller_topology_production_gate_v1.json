@@ -1,0 +1,108 @@
+{
+  "payload": {
+    "schema_version": "t4_shared_controller_topology_production_gate_contract_v1",
+    "status": "FROZEN_ZERO_ORACLE_PRODUCTION_PATH_GATE",
+    "scientific_problem": "determine whether the route-free repeated-topology composer supplies exact, eligible, diverse candidates through the unchanged shared-controller production admission path on all current terminal losses without regressing contrasting wins",
+    "primary_model_output": "an optional generic_topology_macro_v2 expert pool of exact protected complete programs",
+    "central_claim_under_test": "one task-independent topology expert can be appended to the shared controller with identical settings in every cell while preserving endpoint-only Fiber admission, archive deduplication, and legacy behavior when disabled",
+    "experimental_setting": "offline zero-oracle production-path replay on six current terminal-loss cells and two contrasting terminal wins",
+    "inputs": {
+      "source_registry": {
+        "path": "docs/GENMOL_T4_SEEDS.json",
+        "sha256": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447"
+      },
+      "terminal_matrix": {
+        "path": "diagnostics/t4_shared_controller_matrix_20260919_v2/result.json",
+        "sha256": "84522729f4edb3bbb26fe9d47a49c0cfb21ca7133a74724eda8bd7ca2baeba49"
+      },
+      "production_stale_reconciliation": {
+        "path": "diagnostics/t4_shared_controller_completion_v1/scored_contract_v4.json",
+        "sha256": "02b65d0cd27c5a49a9e49839ed14cf0af653ab772d9cf4f49846b358f9f97381"
+      },
+      "generic_topology_macro_v2": {
+        "path": "src/compose_v4/control/generic_complete_program_composer_v2.py",
+        "sha256": "67b18f3da87cc4bdff7e08fd0911c576c7dd4dbe048f20cf0ba07a9a93e3f876",
+        "commit": "7c2f34f8"
+      }
+    },
+    "cells": [
+      {"cell_key": "jak2_0_d06", "source_index": 12, "delta": 0.6, "controller_seed": 2026091912, "evidence_role": "terminal_loss"},
+      {"cell_key": "parp1_0_d04", "source_index": 0, "delta": 0.4, "controller_seed": 2026091900, "evidence_role": "terminal_loss"},
+      {"cell_key": "braf_0_d06", "source_index": 9, "delta": 0.6, "controller_seed": 2026091909, "evidence_role": "terminal_loss"},
+      {"cell_key": "5ht1b_0_d04", "source_index": 6, "delta": 0.4, "controller_seed": 2026091906, "evidence_role": "terminal_loss"},
+      {"cell_key": "5ht1b_1_d04", "source_index": 7, "delta": 0.4, "controller_seed": 2026091907, "evidence_role": "terminal_loss"},
+      {"cell_key": "5ht1b_2_d06", "source_index": 8, "delta": 0.6, "controller_seed": 2026091908, "evidence_role": "terminal_loss"},
+      {"cell_key": "jak2_1_d06", "source_index": 13, "delta": 0.6, "controller_seed": 2026091913, "evidence_role": "contrasting_win"},
+      {"cell_key": "braf_1_d04", "source_index": 10, "delta": 0.4, "controller_seed": 2026091910, "evidence_role": "contrasting_win"}
+    ],
+    "support": "compose_valid",
+    "trajectory_distillation": {"enabled": false},
+    "controller": {
+      "parents": 4,
+      "parent_explore": 0.3,
+      "batch": 8,
+      "exploration": 2,
+      "expert_floor_rounds": 2,
+      "route_scale_floor_rounds": 2,
+      "value_penalty": 1.0,
+      "docking_seed": 20260919,
+      "proposal_experts": ["shallow", "anchored_replacement", "route_complete_region", "generic_topology_macro_v2"],
+      "proposal": {
+        "shallow": {"draws": 480, "horizon": 3},
+        "anchored_replacement": {"draws": 512, "horizon": 3},
+        "route_complete_region": {
+          "pool_size": 192,
+          "realization_limit": 96,
+          "beam_width": 48,
+          "expansion_width": 48,
+          "max_bindings_per_template": 4,
+          "maximum_expansions": 4000,
+          "scale_balanced": true,
+          "training_scope": "one shared task-independent expert fit on all 77 locked routes"
+        },
+        "generic_topology_macro_v2": {
+          "attempts_per_plan": 24,
+          "maximum_primitives": 32,
+          "maximum_blocks": 8
+        }
+      }
+    },
+    "production_path": [
+      "generic_topology_macro_records",
+      "admit_runtime_proposal_pools",
+      "admit_candidate_union"
+    ],
+    "next_scored_cell_policy": {
+      "eligible_roles": ["terminal_loss"],
+      "ranking": ["selection_ready_unique_desc", "macro_plan_diversity_desc", "cycle_gain_diversity_desc", "heavy_atom_delta_span_desc", "cell_key_asc"],
+      "requires_nonzero_selection_ready_unique": true,
+      "authority": "recommendation_only_no_scored_calls_authorized"
+    },
+    "promotion_gate": {
+      "complete_eight_cell_census": true,
+      "complete_six_terminal_loss_census": true,
+      "complete_two_contrasting_win_census": true,
+      "exact_execution_precision": 1.0,
+      "same_expert_vocabulary_and_settings_all_cells": true,
+      "endpoint_only_runtime_constraints": true,
+      "no_cell_specific_generation_branch": true,
+      "aggregate_nonzero_selection_ready_unique": true,
+      "aggregate_cycle_gain_diversity_at_least": 2,
+      "concrete_next_scored_cell_recommendation": true
+    },
+    "runtime_prohibitions": {
+      "no_oracle_calls": true,
+      "no_docking_calls": true,
+      "no_modal_launch": true,
+      "no_route_templates_or_weights": true,
+      "no_target_or_cell_input_to_generation": true,
+      "no_teacher_or_winner_endpoint_input": true,
+      "no_objective_input_to_generation": true,
+      "no_intermediate_endpoint_constraint": true,
+      "no_cross_cell_backfill": true
+    },
+    "costs": {"oracle_calls": 0, "docking_calls": 0, "modal_launches": 0, "gpu_seconds": 0},
+    "claim_boundary": "zero-oracle production-path support evidence only; the recommendation is not scored authorization and does not establish objective utility"
+  },
+  "payload_sha256": "7f494af622dbcb8ca9c0eff65545143a70e366c487aa6d61899b1612ec54f46a"
+}

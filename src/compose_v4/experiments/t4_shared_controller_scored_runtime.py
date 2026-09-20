@@ -22,6 +22,10 @@ from compose_v4.chem.molecular_graph import (
     smiles_to_molecular_graph,
 )
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.control.generic_complete_program_composer import primitive_scale
+from compose_v4.control.generic_complete_program_composer_v2 import (
+    propose_generic_topology_macro_programs,
+)
 from compose_v4.control.generic_legal_action_policy import enumerate_rule_successors
 from compose_v4.control.protonation_aware_proposal import (
     ProtonationAwareProposalConfig,
@@ -35,6 +39,7 @@ from compose_v4.control.route_distilled_goal_expert import RouteDistilledGoalExp
 from compose_v4.experiments.t4_fiber_campaign import Fiber
 from compose_v4.experiments.t4_integrated_route_fiber import (
     EXPERTS,
+    GENERIC_TOPOLOGY_MACRO_EXPERT,
     PROTONATION_AWARE_EXPERT,
     validate_expert_vocabulary,
 )
@@ -663,6 +668,113 @@ def protonation_aware_records(
     }
 
 
+def generic_topology_macro_records(
+    *,
+    parent: str,
+    proposal_seed_value: int,
+    settings: Mapping[str, Any],
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Adapt the fixed route-free topology composer to a production expert pool.
+
+    Generation sees only the current molecular graph, a deterministic seed, and
+    the shared generic support settings.  In particular, this boundary does not
+    accept a cell, target, Fiber threshold, objective, route expert, template, or
+    teacher endpoint.  The ordinary runtime admission path applies endpoint-only
+    constraints after generation.
+    """
+
+    attempts_per_plan = _positive_integer(
+        settings.get("attempts_per_plan"), label="topology attempts per plan"
+    )
+    maximum_primitives = settings.get("maximum_primitives", 32)
+    maximum_blocks = settings.get("maximum_blocks", 8)
+    if maximum_primitives != 32 or maximum_blocks != 8:
+        raise ValueError(
+            "generic topology-macro support must remain 32 primitives/8 blocks"
+        )
+
+    source = pad_molecular_graph(smiles_to_molecular_graph(parent), 48)
+    proposed = propose_generic_topology_macro_programs(
+        source,
+        seed=int(proposal_seed_value),
+        attempts_per_plan=attempts_per_plan,
+        maximum_primitives=maximum_primitives,
+        maximum_blocks=maximum_blocks,
+    )
+    by_smiles: dict[str, dict[str, Any]] = {}
+    for proposal in proposed.proposals:
+        actions = list(proposal.actions)
+        replayed, _ = execute_program(source, actions)
+        if canonical_state_key(replayed) != canonical_state_key(proposal.endpoint):
+            raise RuntimeError("generic topology program changed on exact replay")
+        smiles = molecular_graph_to_smiles(proposal.endpoint)
+        primitives = len(actions)
+        if primitives < 1 or primitives > maximum_primitives:
+            raise RuntimeError("generic topology program escaped primitive support")
+        if (
+            primitive_scale(primitives) != "large"
+            or proposal.requested_scale != "large"
+            or proposal.realized_scale != "large"
+        ):
+            raise RuntimeError("generic topology program escaped frozen large scale")
+        observed = proposal.metadata.get("observed_macro_fields")
+        macro_plan = proposal.metadata.get("macro_plan")
+        if not isinstance(observed, Mapping) or not isinstance(macro_plan, Mapping):
+            raise TypeError("generic topology proposal omitted its plan evidence")
+        row = attach_generic_scale_band(
+            {
+                "smiles": smiles,
+                "proposal_lane": GENERIC_TOPOLOGY_MACRO_EXPERT,
+                "proposal_experts": [GENERIC_TOPOLOGY_MACRO_EXPERT],
+                "families": list(proposal.families),
+                "program_families": list(proposal.families),
+                "program_kind": GENERIC_TOPOLOGY_MACRO_EXPERT,
+                "structural_lane": "route_free_repeated_topology",
+                "parent": parent,
+                "regions": int(proposal.actual_changes["changed_site_count"]),
+                "created": int(proposal.actual_changes["surviving_new_atoms"]),
+                "deleted": int(proposal.actual_changes["deleted_original_atoms"]),
+                "realized_primitives": primitives,
+                "realized_primitive_band": proposal.realized_scale,
+                "proposal_program_sha256": payload_identity(actions),
+                "protected_program_actions": actions,
+                "protected_program_sha256": payload_identity(actions),
+                "protected_program": copy.deepcopy(proposal.program),
+                "protected_program_graph": copy.deepcopy(proposal.program_graph),
+                "macro_plan": copy.deepcopy(dict(macro_plan)),
+                "observed_macro_fields": copy.deepcopy(dict(observed)),
+                "exact_execution_verified": True,
+                "intermediate_endpoint_queried": False,
+                "route_templates_loaded": 0,
+                "route_weights_loaded": 0,
+                "runtime_task_cell_or_target_input": False,
+                "runtime_teacher_endpoint_input": False,
+                "runtime_objective_input": False,
+            }
+        )
+        previous = by_smiles.get(smiles)
+        rank = (primitives, row["protected_program_sha256"])
+        previous_rank = (
+            (
+                int(previous["realized_primitives"]),
+                str(previous["protected_program_sha256"]),
+            )
+            if previous is not None
+            else None
+        )
+        if previous_rank is None or rank < previous_rank:
+            by_smiles[smiles] = row
+
+    records = [by_smiles[smiles] for smiles in sorted(by_smiles)]
+    return records, {
+        **copy.deepcopy(proposed.telemetry),
+        "proposal_expert": GENERIC_TOPOLOGY_MACRO_EXPERT,
+        "raw_exact_unique": len(records),
+        "endpoint_constraints_applied_during_generation": False,
+        "intermediate_endpoints_queried": 0,
+    }
+
+
 def admit_runtime_proposal_pools(
     proposal_pools: Mapping[str, Iterable[Mapping[str, Any]]],
     *,
@@ -912,6 +1024,7 @@ __all__ = [
     "attach_generic_scale_band",
     "checkpoint_controller_config",
     "filter_stale_braf_candidates",
+    "generic_topology_macro_records",
     "make_launch_task",
     "make_proposal_manifest",
     "particle_parent_manifest",

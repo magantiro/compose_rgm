@@ -22,9 +22,12 @@ from compose_v4.control.fiber_control import (
 SCHEMA_VERSION = "t4_integrated_route_fiber_policy_v1"
 EXPERTS = ("shallow", "anchored_replacement", "route_complete_region")
 PROTONATION_AWARE_EXPERT = "protonation_aware_retained_subgraph"
+GENERIC_TOPOLOGY_MACRO_EXPERT = "generic_topology_macro_v2"
 SUPPORTED_EXPERT_VOCABULARIES = (
     EXPERTS,
     (*EXPERTS, PROTONATION_AWARE_EXPERT),
+    (*EXPERTS, GENERIC_TOPOLOGY_MACRO_EXPERT),
+    (*EXPERTS, PROTONATION_AWARE_EXPERT, GENERIC_TOPOLOGY_MACRO_EXPERT),
 )
 
 
