@@ -158,7 +158,77 @@
     "published_ivg": null
    }
   },
-  "finding": "the authorization premise of one charged call per cell is WRONG for three of five: braf_0, fa7_2 and 5ht1b_2 each recorded TWO charged root calls across two runs, so a uniform 249 over-authorizes them by one call each"
+  "finding": "the authorization premise of one charged call per cell is WRONG for three of five: braf_0, fa7_2 and 5ht1b_2 each recorded TWO charged root calls across two runs, so a uniform 249 over-authorizes them by one call each",
+  "lock_derived_correction": {
+   "why": "a published query lock is charged whether or not a result returns (round_lock_policy: publish_complete_candidate_pool_before_docking, automatic_retries 0, no_backfill, no_candidate_replacement), and the held-target run_cell never calls volume.reload() -- only remote_status does (modal_apps/t4_integrated_route_fiber_parp1_app.py:694) -- so a resumed container can read a stale checkpoint. Locks are per-run-id files that are never overwritten, so they are the reliable denominator; checkpoints are not.",
+   "method": "counted round_000_lock.json queries on every run directory of every rescue cell's campaign volume, read-only",
+   "cells": {
+    "braf_0": {
+     "root_query_locks_published": 2,
+     "queries_per_lock": 1,
+     "locks_that_returned_a_result": 2,
+     "charged_calls_lock_derived": 2,
+     "charged_calls_result_derived": 2,
+     "remaining_against_250_ceiling": 248,
+     "differs_from_result_derived": false
+    },
+    "braf_1": {
+     "root_query_locks_published": 2,
+     "queries_per_lock": 1,
+     "locks_that_returned_a_result": 1,
+     "charged_calls_lock_derived": 2,
+     "charged_calls_result_derived": 1,
+     "remaining_against_250_ceiling": 248,
+     "differs_from_result_derived": true
+    },
+    "fa7_0": {
+     "root_query_locks_published": 2,
+     "queries_per_lock": 1,
+     "locks_that_returned_a_result": 1,
+     "charged_calls_lock_derived": 2,
+     "charged_calls_result_derived": 1,
+     "remaining_against_250_ceiling": 248,
+     "differs_from_result_derived": true
+    },
+    "fa7_2": {
+     "root_query_locks_published": 2,
+     "queries_per_lock": 1,
+     "locks_that_returned_a_result": 2,
+     "charged_calls_lock_derived": 2,
+     "charged_calls_result_derived": 2,
+     "remaining_against_250_ceiling": 248,
+     "differs_from_result_derived": false
+    },
+    "5ht1b_2": {
+     "root_query_locks_published": 2,
+     "queries_per_lock": 1,
+     "locks_that_returned_a_result": 2,
+     "charged_calls_lock_derived": 2,
+     "charged_calls_result_derived": 2,
+     "remaining_against_250_ceiling": 248,
+     "differs_from_result_derived": false
+    },
+    "fa7_2@d04": {
+     "root_query_locks_published": 1,
+     "queries_per_lock": 1,
+     "locks_that_returned_a_result": 1,
+     "charged_calls_lock_derived": 1,
+     "charged_calls_result_derived": 1,
+     "remaining_against_250_ceiling": 249,
+     "differs_from_result_derived": false
+    }
+   },
+   "corrected_budgets": {
+    "braf_0": 248,
+    "braf_1": 248,
+    "fa7_0": 248,
+    "fa7_2": 248,
+    "5ht1b_2": 248,
+    "fa7_2@d04": 249
+   },
+   "total_authorizable": 1489,
+   "supersedes": "the result-derived figures in cells{}: braf_1 and fa7_0 were UNDERSTATED at 249; both locked a second root query that returned no result, so both are 248"
+  }
  },
  "delta_0_4_support_check": {
   "cell": "fa7_2",
@@ -619,5 +689,18 @@
     "our_root_spread_across_runs": 0.0
    }
   }
+ },
+ "blast_radius": {
+  "question": "can a local tree change reach a live campaign",
+  "measured": [
+   "both apps set retries: 0, so Modal does not auto-retry a preempted container; resumption is a MANUAL relaunch (the second run of each d06-250 arm is mode='resume' in its launch receipt)",
+   "the held-target image bakes src/, the contract, the checkpoint, the seeds file and the app file with copy=True at image build time, and _validate_task hashes the BAKED copies under /compose, not the local tree",
+   "the shared-controller remote path validates against /capsule, also baked",
+   "12 apps are in ephemeral-detached state including all five d06-250 arms and all four d04-250 arms; no new run directory has appeared on any d06-250 volume, and every d06-250 summary reports finished: true"
+  ],
+  "conclusion_running_containers": "a local tree edit CANNOT reach a container that is already running or that restarts from an already-built image. The coordinator's reading is correct on this point.",
+  "conclusion_future_launches": "it CAN break the next launch. local_scored_context compares the LOCAL launcher against the capsule manifest and raises 'local launcher differs from the exact source capsule', so adding a _VARIANT_APPS entry to modal_apps/t4_shared_controller_completion_v1_app.py invalidates that check for EVERY shared-controller variant until each capsule manifest is regenerated: full, repaired_exhaustion_v1, nodistill_parp1_v1, nodistill_transfer_v1, nodistill_feasibility_v4.",
+  "conclusion_held_target_arms": "adding a NEW module under src/compose_v4/experiments/ changes the held-target image layer but no file pinned in runtime_inputs_sha256, and the held-target app does not import it, so a d04 resume would still validate. This is inference from the per-file hash check, not an executed relaunch.",
+  "residual_risk": "the four d04-250 arms are mid-flight (fa7_0, fa7_1, 5ht1b_0, 5ht1b_1 carry checkpoints and round_002/003 locks). With retries: 0 they need a manual resume if preempted, so any tree change must be verified against a resume BEFORE it is applied, not after."
  }
 }
