@@ -1,0 +1,10 @@
+{
+ "capsule_sha256": "3a0f9bbd8b10f2e5673bc984df3347493b3dc170fdd460bc1e4862ccb4f64e02",
+ "contract_payload_sha256": "951425eea1146f6667b7ab735e6c03ec9e7b8969c676f058c820afd0ebbb7dda",
+ "modal_launch_authorized": false,
+ "oracle_calls_authorized": 0,
+ "receipt_sha256": "5af9bb0889cd0e2d0bd25196919ff627aafaba8871fd7727638b711caf2d620d",
+ "schema_version": "qed_griddd_controller_comparison_receipt_v1",
+ "scored_launch_authorized": false,
+ "statement": "Preparation and local free-scorer execution only. This receipt authorizes no scored launch, no Modal operation and no paid oracle call."
+}

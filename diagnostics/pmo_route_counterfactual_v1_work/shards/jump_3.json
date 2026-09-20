@@ -1,0 +1,1 @@
+{"pools": [{"attempt_status": {"execution_rejected": 128}, "distinct_plans_realized": 0, "offsets": 4, "parent_key": "08b256413b127d4f3cd50d4d91e55915def782cd0f20761aab4afe7b41f6c677", "parent_smiles": "CCOn1nc(C(=O)O)c(CC(C)C(=O)NC2CC(c3ccc(O)cn3)C(C)(C=O)C(C3CCCC3)C2)c1CO", "proposals": []}], "schema_version": "pmo_route_counterfactual_v1_jump_shard", "shard": 3}

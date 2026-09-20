@@ -1,0 +1,1036 @@
+{
+ "cells": {
+  "5ht1b_0": {
+   "attachment": {
+    "eligible_anchors_selected_by_assignments_zero": 1,
+    "eligible_cut_anchors": 2,
+    "largest_radius1_class": 4,
+    "radius1_degenerate_fraction": 0.46154
+   },
+   "attributed_axis": "control: reached eligibility via bounded-prune composition",
+   "best_qed_margin_among_similarity_passing": 0.25229,
+   "best_sa_margin_among_similarity_and_qed_passing": 0.34674,
+   "best_similarity_margin_among_qed_passing": 0.17778,
+   "binding_gate": null,
+   "counterfactual_arms": {
+    "both": {
+     "best_eligible_rank": 1,
+     "closure_states": 30,
+     "eligible_mass_share": 0.27769286
+    },
+    "similarity_conditioned": {
+     "best_eligible_rank": 1,
+     "closure_states": 26,
+     "eligible_mass_share": 0.26853429
+    },
+    "v1": {
+     "best_eligible_rank": 1,
+     "closure_states": 26,
+     "eligible_mass_share": 0.16388889
+    },
+    "wider_scale": {
+     "best_eligible_rank": 1,
+     "closure_states": 30,
+     "eligible_mass_share": 0.19296296
+    }
+   },
+   "expected_yield_from_prune_route": {
+    "all_prune_share_by_depth": {
+     "1": 0.075,
+     "2": 0.115,
+     "3": 0.01
+    },
+    "covers": "pure-prune programs only; a LOWER bound on the lane's yield",
+    "draws": 480,
+    "eligible_closure_mass_by_depth": {
+     "1": 0.25,
+     "2": 0.21666667
+    },
+    "expected_eligible_endpoints": 20.96,
+    "mode_law_borrowed_from": "braf_1",
+    "mode_law_measured_on_this_cell": false,
+    "near_capacity": true,
+    "per_draw_probability": 0.04366667,
+    "poisson_probability_of_zero": 0.0
+   },
+   "explanation": "This cell produced eligible candidates in round one. It is carried here as the same-target control, because it shares the protein, delta, contract payload and learned route prior with the failed cell byte for byte.",
+   "known_feasible_witness": {
+    "depth": 1,
+    "heavy_delta": -13,
+    "qed": 0.85229,
+    "sa": 3.83335,
+    "similarity": 0.63889,
+    "smiles": "C[N@H+]1CC[C@]2(CC1)COc1cc3c(cc12)N(C(=O)c1ccccc1)CC3"
+   },
+   "observed_round_one": {
+    "distinct_endpoints": 6037,
+    "fully_eligible": 38,
+    "qed_pass": 566,
+    "selected": 8,
+    "similarity_and_qed_pass": 57,
+    "similarity_pass": 1420
+   },
+   "proposal_support": {
+    "closure_states": 26,
+    "eligible_states": 3,
+    "max_segment_length": 8,
+    "minimum_depth_to_eligible": 1,
+    "minimum_single_cut_size_for_eligibility": 6,
+    "single_edit_actions_enumerated": 515,
+    "single_edit_charge_changing": 0,
+    "single_edit_eligible": 0
+   },
+   "protein": "5ht1b",
+   "role": "control",
+   "single_gate_relaxation": {
+    "all_thresholds_off_by_0.10_and_1.0": 550,
+    "no_relaxation": 40,
+    "qed_minus_0.05": 55,
+    "qed_minus_0.10": 61,
+    "qed_minus_0.20": 127,
+    "sa_plus_0.5": 51,
+    "sa_plus_1.0": 57,
+    "similarity_minus_0.05": 44,
+    "similarity_minus_0.10": 55,
+    "similarity_minus_0.20": 90
+   },
+   "smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)[C@]4(CC[N@H+](C)CC4)CO6)cc3)c(C)c2)no1",
+   "source_heavy_atoms": 39,
+   "source_qed": 0.43841,
+   "source_sa": 3.92931,
+   "v1_rank_and_mass": {
+    "best_eligible_rank": 1,
+    "best_eligible_smiles": "Cc1ccccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)[C@]2(CC[N@H+](C)CC2)CO4)cc1",
+    "eligible_mass_share": 0.16388889,
+    "of_states": 26
+   }
+  },
+  "5ht1b_1": {
+   "attachment": {
+    "eligible_anchors_selected_by_assignments_zero": 0,
+    "eligible_cut_anchors": 0,
+    "largest_radius1_class": 3,
+    "radius1_degenerate_fraction": 0.4375
+   },
+   "attributed_axis": "control: reached eligibility via single current-state edit",
+   "best_qed_margin_among_similarity_passing": 0.30419,
+   "best_sa_margin_among_similarity_and_qed_passing": 1.01005,
+   "best_similarity_margin_among_qed_passing": 0.27879,
+   "binding_gate": null,
+   "counterfactual_arms": {
+    "both": {
+     "best_eligible_rank": null,
+     "closure_states": 27,
+     "eligible_mass_share": 0.0
+    },
+    "similarity_conditioned": {
+     "best_eligible_rank": null,
+     "closure_states": 24,
+     "eligible_mass_share": 0.0
+    },
+    "v1": {
+     "best_eligible_rank": null,
+     "closure_states": 24,
+     "eligible_mass_share": 0.0
+    },
+    "wider_scale": {
+     "best_eligible_rank": null,
+     "closure_states": 27,
+     "eligible_mass_share": 0.0
+    }
+   },
+   "explanation": "This cell produced eligible candidates in round one. It is carried here as the same-target control, because it shares the protein, delta, contract payload and learned route prior with the failed cell byte for byte.",
+   "known_feasible_witness": {
+    "depth": 1,
+    "qed": 0.80398,
+    "sa": 3.52071,
+    "similarity": 0.76471,
+    "smiles": "CC(F)(F)c1cccc(N2CC[NH2+]CC2)c1"
+   },
+   "observed_round_one": {
+    "distinct_endpoints": 3494,
+    "fully_eligible": 28,
+    "qed_pass": 1810,
+    "selected": 8,
+    "similarity_and_qed_pass": 32,
+    "similarity_pass": 38
+   },
+   "proposal_support": {
+    "closure_states": 24,
+    "eligible_states": 0,
+    "max_segment_length": 8,
+    "minimum_depth_to_eligible": null,
+    "minimum_single_cut_size_for_eligibility": null,
+    "single_edit_actions_enumerated": 178,
+    "single_edit_charge_changing": 0,
+    "single_edit_eligible": 35
+   },
+   "protein": "5ht1b",
+   "role": "control",
+   "single_gate_relaxation": {
+    "all_thresholds_off_by_0.10_and_1.0": 132,
+    "no_relaxation": 31,
+    "qed_minus_0.05": 33,
+    "qed_minus_0.10": 33,
+    "qed_minus_0.20": 34,
+    "sa_plus_0.5": 32,
+    "sa_plus_1.0": 32,
+    "similarity_minus_0.05": 53,
+    "similarity_minus_0.10": 105,
+    "similarity_minus_0.20": 194
+   },
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+   "source_heavy_atoms": 16,
+   "source_qed": 0.76659,
+   "source_sa": 3.28702,
+   "v1_rank_and_mass": {
+    "best_eligible_rank": null,
+    "best_eligible_smiles": null,
+    "eligible_mass_share": 0.0,
+    "of_states": 24
+   }
+  },
+  "5ht1b_2": {
+   "attachment": {
+    "eligible_anchors_selected_by_assignments_zero": 0,
+    "eligible_cut_anchors": 0,
+    "largest_radius1_class": 3,
+    "radius1_degenerate_fraction": 0.58065
+   },
+   "attributed_axis": "topology / element vocabulary (H): net-charge coordinate absent",
+   "best_qed_margin_among_similarity_passing": 0.26337,
+   "best_sa_margin_among_similarity_and_qed_passing": -0.33217,
+   "best_similarity_margin_among_qed_passing": 0.4,
+   "binding_gate": "sa",
+   "counterfactual_arms": {
+    "both": {
+     "best_eligible_rank": null,
+     "closure_states": 43,
+     "eligible_mass_share": 0.0
+    },
+    "similarity_conditioned": {
+     "best_eligible_rank": null,
+     "closure_states": 14,
+     "eligible_mass_share": 0.0
+    },
+    "v1": {
+     "best_eligible_rank": null,
+     "closure_states": 14,
+     "eligible_mass_share": 0.0
+    },
+    "wider_scale": {
+     "best_eligible_rank": null,
+     "closure_states": 43,
+     "eligible_mass_share": 0.0
+    }
+   },
+   "explanation": "The witness changes the source's net formal charge. Across every action the five current_state_edits families enumerate, ZERO change net charge, and no bounded prune can reach the charged ring atom. The axis the witness moves along is not a proposal axis at all.",
+   "known_feasible_witness": {
+    "depth": 1,
+    "qed": 0.6263,
+    "sa": 3.77388,
+    "similarity": 0.75806,
+    "smiles": "C1=CC2=NC=C(CCCN3CCC(CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1"
+   },
+   "observed_round_one": {
+    "distinct_endpoints": 8845,
+    "fully_eligible": 0,
+    "qed_pass": 1648,
+    "selected": 0,
+    "similarity_and_qed_pass": 474,
+    "similarity_pass": 1994
+   },
+   "proposal_support": {
+    "closure_states": 14,
+    "eligible_states": 0,
+    "max_segment_length": 8,
+    "minimum_depth_to_eligible": null,
+    "minimum_single_cut_size_for_eligibility": null,
+    "single_edit_actions_enumerated": 482,
+    "single_edit_charge_changing": 0,
+    "single_edit_eligible": 0
+   },
+   "protein": "5ht1b",
+   "role": "failed",
+   "single_gate_relaxation": {
+    "all_thresholds_off_by_0.10_and_1.0": 447,
+    "no_relaxation": 0,
+    "qed_minus_0.05": 0,
+    "qed_minus_0.10": 0,
+    "qed_minus_0.20": 0,
+    "sa_plus_0.5": 6,
+    "sa_plus_1.0": 163,
+    "similarity_minus_0.05": 0,
+    "similarity_minus_0.10": 1,
+    "similarity_minus_0.20": 22
+   },
+   "smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1",
+   "source_heavy_atoms": 31,
+   "source_qed": 0.7162,
+   "source_sa": 4.6872,
+   "v1_rank_and_mass": {
+    "best_eligible_rank": null,
+    "best_eligible_smiles": null,
+    "eligible_mass_share": 0.0,
+    "of_states": 14
+   }
+  },
+  "braf_0": {
+   "attachment": {
+    "eligible_anchors_selected_by_assignments_zero": 2,
+    "eligible_cut_anchors": 2,
+    "largest_radius1_class": 4,
+    "radius1_degenerate_fraction": 0.475
+   },
+   "attributed_axis": "scale x retained-region-choice (R), compounded over modules",
+   "best_qed_margin_among_similarity_passing": -0.18528,
+   "best_sa_margin_among_similarity_and_qed_passing": null,
+   "best_similarity_margin_among_qed_passing": -0.11163,
+   "binding_gate": "qed_similarity_jointly",
+   "counterfactual_arms": {
+    "both": {
+     "best_eligible_rank": 1,
+     "closure_states": 489,
+     "eligible_mass_share": 0.11472168
+    },
+    "similarity_conditioned": {
+     "best_eligible_rank": 109,
+     "closure_states": 319,
+     "eligible_mass_share": 0.00372156
+    },
+    "v1": {
+     "best_eligible_rank": 309,
+     "closure_states": 319,
+     "eligible_mass_share": 0.00096506
+    },
+    "wider_scale": {
+     "best_eligible_rank": 2,
+     "closure_states": 489,
+     "eligible_mass_share": 0.0585679
+    }
+   },
+   "expected_yield_from_prune_route": {
+    "all_prune_share_by_depth": {
+     "1": 0.075,
+     "2": 0.115,
+     "3": 0.01
+    },
+    "covers": "pure-prune programs only; a LOWER bound on the lane's yield",
+    "draws": 480,
+    "eligible_closure_mass_by_depth": {
+     "3": 0.00289518
+    },
+    "expected_eligible_endpoints": 0.0139,
+    "mode_law_borrowed_from": "braf_1",
+    "mode_law_measured_on_this_cell": false,
+    "near_capacity": true,
+    "per_draw_probability": 2.895e-05,
+    "poisson_probability_of_zero": 0.9862
+   },
+   "explanation": "The witness IS inside v1's support. It requires removing one chemically coherent substituent larger than MAX_SEGMENT_LENGTH, which the vocabulary can only express as 2-3 independent bounded pendant cuts. The region law inside each cut is uniform and unconditioned, so the joint mass is the product of ~1/|cuts| per module.",
+   "known_feasible_witness": {
+    "depth": 1,
+    "heavy_delta": -14,
+    "qed": 0.63547,
+    "sa": 2.4136,
+    "similarity": 0.63158,
+    "smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(N)c3)ccnc12"
+   },
+   "observed_round_one": {
+    "distinct_endpoints": 6140,
+    "fully_eligible": 0,
+    "qed_pass": 22,
+    "selected": 0,
+    "similarity_and_qed_pass": 0,
+    "similarity_pass": 1638
+   },
+   "proposal_support": {
+    "closure_states": 319,
+    "eligible_states": 3,
+    "max_segment_length": 8,
+    "minimum_depth_to_eligible": 3,
+    "minimum_single_cut_size_for_eligibility": 14,
+    "single_edit_actions_enumerated": 691,
+    "single_edit_charge_changing": 0,
+    "single_edit_eligible": 0
+   },
+   "protein": "braf",
+   "role": "failed",
+   "single_gate_relaxation": {
+    "all_thresholds_off_by_0.10_and_1.0": 3,
+    "no_relaxation": 0,
+    "qed_minus_0.05": 0,
+    "qed_minus_0.10": 0,
+    "qed_minus_0.20": 2,
+    "sa_plus_0.5": 0,
+    "sa_plus_1.0": 0,
+    "similarity_minus_0.05": 0,
+    "similarity_minus_0.10": 0,
+    "similarity_minus_0.20": 6
+   },
+   "smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34",
+   "source_heavy_atoms": 40,
+   "source_qed": 0.23532,
+   "source_sa": 2.6916,
+   "v1_rank_and_mass": {
+    "best_eligible_rank": 309,
+    "best_eligible_smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC)c3)ccnc12",
+    "eligible_mass_share": 0.00096506,
+    "of_states": 319
+   }
+  },
+  "braf_1": {
+   "attachment": {
+    "eligible_anchors_selected_by_assignments_zero": 2,
+    "eligible_cut_anchors": 4,
+    "largest_radius1_class": 5,
+    "radius1_degenerate_fraction": 0.64103
+   },
+   "attributed_axis": "scale x retained-region-choice (R), compounded over modules",
+   "best_qed_margin_among_similarity_passing": -0.0887,
+   "best_sa_margin_among_similarity_and_qed_passing": null,
+   "best_similarity_margin_among_qed_passing": -0.03421,
+   "binding_gate": "qed_similarity_jointly",
+   "counterfactual_arms": {
+    "both": {
+     "best_eligible_rank": 1,
+     "closure_states": 314,
+     "eligible_mass_share": 0.31389686
+    },
+    "similarity_conditioned": {
+     "best_eligible_rank": 13,
+     "closure_states": 157,
+     "eligible_mass_share": 0.05592958
+    },
+    "v1": {
+     "best_eligible_rank": 46,
+     "closure_states": 157,
+     "eligible_mass_share": 0.01947751
+    },
+    "wider_scale": {
+     "best_eligible_rank": 1,
+     "closure_states": 314,
+     "eligible_mass_share": 0.15065273
+    }
+   },
+   "expected_yield_from_prune_route": {
+    "all_prune_share_by_depth": {
+     "1": 0.075,
+     "2": 0.115,
+     "3": 0.01
+    },
+    "covers": "pure-prune programs only; a LOWER bound on the lane's yield",
+    "draws": 480,
+    "eligible_closure_mass_by_depth": {
+     "2": 0.03330853,
+     "3": 0.01679067
+    },
+    "expected_eligible_endpoints": 1.9192,
+    "mode_law_borrowed_from": null,
+    "mode_law_measured_on_this_cell": true,
+    "near_capacity": true,
+    "per_draw_probability": 0.00399839,
+    "poisson_probability_of_zero": 0.1467
+   },
+   "explanation": "The witness IS inside v1's support. It requires removing one chemically coherent substituent larger than MAX_SEGMENT_LENGTH, which the vocabulary can only express as 2-3 independent bounded pendant cuts. The region law inside each cut is uniform and unconditioned, so the joint mass is the product of ~1/|cuts| per module.",
+   "known_feasible_witness": {
+    "depth": 1,
+    "heavy_delta": -11,
+    "qed": 0.66336,
+    "sa": 2.1934,
+    "similarity": 0.68571,
+    "smiles": "NC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+   },
+   "observed_round_one": {
+    "distinct_endpoints": 6140,
+    "fully_eligible": 0,
+    "qed_pass": 57,
+    "selected": 0,
+    "similarity_and_qed_pass": 0,
+    "similarity_pass": 1445
+   },
+   "proposal_support": {
+    "closure_states": 157,
+    "eligible_states": 6,
+    "max_segment_length": 8,
+    "minimum_depth_to_eligible": 2,
+    "minimum_single_cut_size_for_eligibility": 11,
+    "single_edit_actions_enumerated": 539,
+    "single_edit_charge_changing": 0,
+    "single_edit_eligible": 0
+   },
+   "protein": "braf",
+   "realized_mode_law": {
+    "all_prune_share": 0.2,
+    "all_prune_share_by_depth": {
+     "1": 0.075,
+     "2": 0.115,
+     "3": 0.01
+    },
+    "draws": 200,
+    "measured_on_this_cell": true,
+    "module_count_distribution": {
+     "1": 0.155,
+     "2": 0.61,
+     "3": 0.235
+    }
+   },
+   "role": "failed",
+   "single_gate_relaxation": {
+    "all_thresholds_off_by_0.10_and_1.0": 18,
+    "no_relaxation": 0,
+    "qed_minus_0.05": 0,
+    "qed_minus_0.10": 2,
+    "qed_minus_0.20": 72,
+    "sa_plus_0.5": 0,
+    "sa_plus_1.0": 0,
+    "similarity_minus_0.05": 1,
+    "similarity_minus_0.10": 1,
+    "similarity_minus_0.20": 19
+   },
+   "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+   "source_heavy_atoms": 39,
+   "source_qed": 0.34565,
+   "source_sa": 2.49417,
+   "v1_rank_and_mass": {
+    "best_eligible_rank": 46,
+    "best_eligible_smiles": "O=CNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+    "eligible_mass_share": 0.01947751,
+    "of_states": 157
+   }
+  },
+  "braf_2": {
+   "attachment": {
+    "eligible_anchors_selected_by_assignments_zero": 2,
+    "eligible_cut_anchors": 4,
+    "largest_radius1_class": 6,
+    "radius1_degenerate_fraction": 0.62162
+   },
+   "attributed_axis": "control: reached eligibility via bounded-prune composition",
+   "best_qed_margin_among_similarity_passing": 0.15147,
+   "best_sa_margin_among_similarity_and_qed_passing": 1.98334,
+   "best_similarity_margin_among_qed_passing": 0.05,
+   "binding_gate": null,
+   "counterfactual_arms": {
+    "both": {
+     "best_eligible_rank": 1,
+     "closure_states": 264,
+     "eligible_mass_share": 0.30935978
+    },
+    "similarity_conditioned": {
+     "best_eligible_rank": 15,
+     "closure_states": 129,
+     "eligible_mass_share": 0.05854667
+    },
+    "v1": {
+     "best_eligible_rank": 21,
+     "closure_states": 129,
+     "eligible_mass_share": 0.02442366
+    },
+    "wider_scale": {
+     "best_eligible_rank": 1,
+     "closure_states": 264,
+     "eligible_mass_share": 0.14663969
+    }
+   },
+   "expected_yield_from_prune_route": {
+    "all_prune_share_by_depth": {
+     "1": 0.075,
+     "2": 0.115,
+     "3": 0.01
+    },
+    "covers": "pure-prune programs only; a LOWER bound on the lane's yield",
+    "draws": 480,
+    "eligible_closure_mass_by_depth": {
+     "2": 0.04393424,
+     "3": 0.01743197
+    },
+    "expected_eligible_endpoints": 2.5088,
+    "mode_law_borrowed_from": "braf_1",
+    "mode_law_measured_on_this_cell": false,
+    "near_capacity": true,
+    "per_draw_probability": 0.00522676,
+    "poisson_probability_of_zero": 0.0814
+   },
+   "explanation": "This cell produced eligible candidates in round one. It is carried here as the same-target control, because it shares the protein, delta, contract payload and learned route prior with the failed cell byte for byte.",
+   "known_feasible_witness": {
+    "depth": 1,
+    "heavy_delta": -11,
+    "qed": 0.65394,
+    "sa": 2.07139,
+    "similarity": 0.65574,
+    "smiles": "NC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+   },
+   "observed_round_one": {
+    "distinct_endpoints": 7420,
+    "fully_eligible": 3,
+    "qed_pass": 63,
+    "selected": 3,
+    "similarity_and_qed_pass": 3,
+    "similarity_pass": 1373
+   },
+   "proposal_support": {
+    "closure_states": 129,
+    "eligible_states": 5,
+    "max_segment_length": 8,
+    "minimum_depth_to_eligible": 2,
+    "minimum_single_cut_size_for_eligibility": 11,
+    "single_edit_actions_enumerated": 422,
+    "single_edit_charge_changing": 0,
+    "single_edit_eligible": 0
+   },
+   "protein": "braf",
+   "role": "control",
+   "single_gate_relaxation": {
+    "all_thresholds_off_by_0.10_and_1.0": 24,
+    "no_relaxation": 3,
+    "qed_minus_0.05": 4,
+    "qed_minus_0.10": 8,
+    "qed_minus_0.20": 64,
+    "sa_plus_0.5": 3,
+    "sa_plus_1.0": 3,
+    "similarity_minus_0.05": 4,
+    "similarity_minus_0.10": 5,
+    "similarity_minus_0.20": 34
+   },
+   "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+   "source_heavy_atoms": 37,
+   "source_qed": 0.25454,
+   "source_sa": 2.38238,
+   "v1_rank_and_mass": {
+    "best_eligible_rank": 21,
+    "best_eligible_smiles": "O=CNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+    "eligible_mass_share": 0.02442366,
+    "of_states": 129
+   }
+  },
+  "fa7_0": {
+   "attachment": {
+    "eligible_anchors_selected_by_assignments_zero": 0,
+    "eligible_cut_anchors": 0,
+    "largest_radius1_class": 5,
+    "radius1_degenerate_fraction": 0.65625
+   },
+   "attributed_axis": "none: not a proposal failure",
+   "best_qed_margin_among_similarity_passing": -0.00166,
+   "best_sa_margin_among_similarity_and_qed_passing": null,
+   "best_similarity_margin_among_qed_passing": -0.06269,
+   "binding_gate": "qed_similarity_jointly",
+   "counterfactual_arms": {
+    "both": {
+     "best_eligible_rank": null,
+     "closure_states": 203,
+     "eligible_mass_share": 0.0
+    },
+    "similarity_conditioned": {
+     "best_eligible_rank": null,
+     "closure_states": 59,
+     "eligible_mass_share": 0.0
+    },
+    "v1": {
+     "best_eligible_rank": null,
+     "closure_states": 59,
+     "eligible_mass_share": 0.0
+    },
+    "wider_scale": {
+     "best_eligible_rank": null,
+     "closure_states": 203,
+     "eligible_mass_share": 0.0
+    }
+   },
+   "explanation": "No arm and no single edit reaches an eligible endpoint, and the audit's own conditional margins show the similarity-passing set misses the binding gate by a margin no region law can close. The feasible region under this support is effectively empty.",
+   "known_feasible_witness": null,
+   "observed_round_one": {
+    "distinct_endpoints": 9527,
+    "fully_eligible": 0,
+    "qed_pass": 160,
+    "selected": 0,
+    "similarity_and_qed_pass": 0,
+    "similarity_pass": 1537
+   },
+   "proposal_support": {
+    "closure_states": 59,
+    "eligible_states": 0,
+    "max_segment_length": 8,
+    "minimum_depth_to_eligible": null,
+    "minimum_single_cut_size_for_eligibility": null,
+    "single_edit_actions_enumerated": 508,
+    "single_edit_charge_changing": 0,
+    "single_edit_eligible": 0
+   },
+   "protein": "fa7",
+   "role": "failed",
+   "single_gate_relaxation": {
+    "all_thresholds_off_by_0.10_and_1.0": 23,
+    "no_relaxation": 0,
+    "qed_minus_0.05": 3,
+    "qed_minus_0.10": 5,
+    "qed_minus_0.20": 39,
+    "sa_plus_0.5": 0,
+    "sa_plus_1.0": 0,
+    "similarity_minus_0.05": 0,
+    "similarity_minus_0.10": 2,
+    "similarity_minus_0.20": 21
+   },
+   "smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+   "source_heavy_atoms": 32,
+   "source_qed": 0.2841,
+   "source_sa": 2.28723,
+   "v1_rank_and_mass": {
+    "best_eligible_rank": null,
+    "best_eligible_smiles": null,
+    "eligible_mass_share": 0.0,
+    "of_states": 59
+   }
+  },
+  "fa7_1": {
+   "attachment": {
+    "eligible_anchors_selected_by_assignments_zero": 1,
+    "eligible_cut_anchors": 3,
+    "largest_radius1_class": 3,
+    "radius1_degenerate_fraction": 0.37931
+   },
+   "attributed_axis": "control: reached eligibility via bounded-prune composition",
+   "best_qed_margin_among_similarity_passing": 0.16802,
+   "best_sa_margin_among_similarity_and_qed_passing": 1.26315,
+   "best_similarity_margin_among_qed_passing": 0.17778,
+   "binding_gate": null,
+   "counterfactual_arms": {
+    "both": {
+     "best_eligible_rank": 2,
+     "closure_states": 488,
+     "eligible_mass_share": 0.18091787
+    },
+    "similarity_conditioned": {
+     "best_eligible_rank": 2,
+     "closure_states": 293,
+     "eligible_mass_share": 0.19579191
+    },
+    "v1": {
+     "best_eligible_rank": 2,
+     "closure_states": 293,
+     "eligible_mass_share": 0.10799226
+    },
+    "wider_scale": {
+     "best_eligible_rank": 6,
+     "closure_states": 488,
+     "eligible_mass_share": 0.06751222
+    }
+   },
+   "expected_yield_from_prune_route": {
+    "near_capacity": false,
+    "unavailable": "no mode law measured on this side of CAPACITY_AWARE_THRESHOLD; the family weighting differs"
+   },
+   "explanation": "This cell produced eligible candidates in round one. It is carried here as the same-target control, because it shares the protein, delta, contract payload and learned route prior with the failed cell byte for byte.",
+   "known_feasible_witness": {
+    "depth": 1,
+    "heavy_delta": -4,
+    "qed": 0.69232,
+    "sa": 3.13557,
+    "similarity": 0.74603,
+    "smiles": "CCC[C@@H](CCl)NC(=O)[C@@H]1CCCN1C(=O)[C@H](N)Cc1ccccc1"
+   },
+   "observed_round_one": {
+    "distinct_endpoints": 8583,
+    "fully_eligible": 7,
+    "qed_pass": 181,
+    "selected": 7,
+    "similarity_and_qed_pass": 7,
+    "similarity_pass": 2266
+   },
+   "proposal_support": {
+    "closure_states": 293,
+    "eligible_states": 5,
+    "max_segment_length": 8,
+    "minimum_depth_to_eligible": 1,
+    "minimum_single_cut_size_for_eligibility": 4,
+    "single_edit_actions_enumerated": 668,
+    "single_edit_charge_changing": 0,
+    "single_edit_eligible": 0
+   },
+   "protein": "fa7",
+   "role": "control",
+   "single_gate_relaxation": {
+    "all_thresholds_off_by_0.10_and_1.0": 100,
+    "no_relaxation": 7,
+    "qed_minus_0.05": 15,
+    "qed_minus_0.10": 23,
+    "qed_minus_0.20": 46,
+    "sa_plus_0.5": 7,
+    "sa_plus_1.0": 7,
+    "similarity_minus_0.05": 23,
+    "similarity_minus_0.10": 49,
+    "similarity_minus_0.20": 68
+   },
+   "smiles": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+   "source_heavy_atoms": 29,
+   "source_qed": 0.18595,
+   "source_sa": 3.38992,
+   "v1_rank_and_mass": {
+    "best_eligible_rank": 2,
+    "best_eligible_smiles": "C[C@@H](CCl)NC(=O)[C@@H]1CCCN1C(=O)[C@H](N)Cc1ccccc1",
+    "eligible_mass_share": 0.10799226,
+    "of_states": 293
+   }
+  },
+  "fa7_2": {
+   "attachment": {
+    "eligible_anchors_selected_by_assignments_zero": 0,
+    "eligible_cut_anchors": 0,
+    "largest_radius1_class": 4,
+    "radius1_degenerate_fraction": 0.54286
+   },
+   "attributed_axis": "scale x retained-region-choice (R), compounded over modules",
+   "best_qed_margin_among_similarity_passing": -0.07439,
+   "best_sa_margin_among_similarity_and_qed_passing": null,
+   "best_similarity_margin_among_qed_passing": -0.13846,
+   "binding_gate": "qed_similarity_jointly",
+   "counterfactual_arms": {
+    "both": {
+     "best_eligible_rank": 2,
+     "closure_states": 457,
+     "eligible_mass_share": 0.04760889
+    },
+    "similarity_conditioned": {
+     "best_eligible_rank": 25,
+     "closure_states": 247,
+     "eligible_mass_share": 0.01329428
+    },
+    "v1": {
+     "best_eligible_rank": 145,
+     "closure_states": 247,
+     "eligible_mass_share": 0.00200278
+    },
+    "wider_scale": {
+     "best_eligible_rank": 46,
+     "closure_states": 457,
+     "eligible_mass_share": 0.00471557
+    }
+   },
+   "expected_yield_from_prune_route": {
+    "near_capacity": false,
+    "unavailable": "no mode law measured on this side of CAPACITY_AWARE_THRESHOLD; the family weighting differs"
+   },
+   "explanation": "The witness IS inside v1's support. It requires removing one chemically coherent substituent larger than MAX_SEGMENT_LENGTH, which the vocabulary can only express as 2-3 independent bounded pendant cuts. The region law inside each cut is uniform and unconditioned, so the joint mass is the product of ~1/|cuts| per module.",
+   "known_feasible_witness": {
+    "depth": 3,
+    "heavy_delta": -7,
+    "qed": 0.66253,
+    "sa": 2.07861,
+    "similarity": 0.6,
+    "smiles": "CC(C)Nc1ccc(-c2ccccc2)n(CC(=O)NCc2ccccc2)c1=O"
+   },
+   "observed_round_one": {
+    "distinct_endpoints": 8377,
+    "fully_eligible": 0,
+    "qed_pass": 34,
+    "selected": 0,
+    "similarity_and_qed_pass": 0,
+    "similarity_pass": 2475
+   },
+   "proposal_support": {
+    "closure_states": 247,
+    "eligible_states": 2,
+    "max_segment_length": 8,
+    "minimum_depth_to_eligible": 3,
+    "minimum_single_cut_size_for_eligibility": null,
+    "single_edit_actions_enumerated": 608,
+    "single_edit_charge_changing": 0,
+    "single_edit_eligible": 0
+   },
+   "protein": "fa7",
+   "role": "failed",
+   "single_gate_relaxation": {
+    "all_thresholds_off_by_0.10_and_1.0": 6,
+    "no_relaxation": 0,
+    "qed_minus_0.05": 0,
+    "qed_minus_0.10": 2,
+    "qed_minus_0.20": 12,
+    "sa_plus_0.5": 0,
+    "sa_plus_1.0": 0,
+    "similarity_minus_0.05": 0,
+    "similarity_minus_0.10": 0,
+    "similarity_minus_0.20": 1
+   },
+   "smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+   "source_heavy_atoms": 35,
+   "source_qed": 0.15573,
+   "source_sa": 2.65695,
+   "v1_rank_and_mass": {
+    "best_eligible_rank": 145,
+    "best_eligible_smiles": "CC(C)Nc1ccc(-c2ccccc2)n(CC(=O)NCc2ccccc2)c1=O",
+    "eligible_mass_share": 0.00200278,
+    "of_states": 247
+   }
+  }
+ },
+ "control_cells": [
+  "braf_2",
+  "fa7_1",
+  "5ht1b_0",
+  "5ht1b_1"
+ ],
+ "docking_calls": 0,
+ "failed_cells": [
+  "braf_0",
+  "braf_1",
+  "fa7_0",
+  "fa7_2",
+  "5ht1b_2"
+ ],
+ "failed_versus_same_target_control": {
+  "5ht1b_2_vs_5ht1b_0": {
+   "binding_gate": [
+    "sa",
+    null
+   ],
+   "control": "5ht1b_0",
+   "failed": "5ht1b_2",
+   "minimum_depth_to_eligible": [
+    null,
+    1
+   ],
+   "radius1_degenerate_fraction": [
+    0.58065,
+    0.46154
+   ],
+   "single_edit_eligible": [
+    0,
+    0
+   ],
+   "v1_best_eligible_rank": [
+    null,
+    1
+   ],
+   "v1_eligible_mass_share": [
+    0.0,
+    0.16388889
+   ]
+  },
+  "braf_0_vs_braf_2": {
+   "binding_gate": [
+    "qed_similarity_jointly",
+    null
+   ],
+   "control": "braf_2",
+   "failed": "braf_0",
+   "minimum_depth_to_eligible": [
+    3,
+    2
+   ],
+   "radius1_degenerate_fraction": [
+    0.475,
+    0.62162
+   ],
+   "single_edit_eligible": [
+    0,
+    0
+   ],
+   "v1_best_eligible_rank": [
+    309,
+    21
+   ],
+   "v1_eligible_mass_share": [
+    0.00096506,
+    0.02442366
+   ]
+  },
+  "braf_1_vs_braf_2": {
+   "binding_gate": [
+    "qed_similarity_jointly",
+    null
+   ],
+   "control": "braf_2",
+   "failed": "braf_1",
+   "minimum_depth_to_eligible": [
+    2,
+    2
+   ],
+   "radius1_degenerate_fraction": [
+    0.64103,
+    0.62162
+   ],
+   "single_edit_eligible": [
+    0,
+    0
+   ],
+   "v1_best_eligible_rank": [
+    46,
+    21
+   ],
+   "v1_eligible_mass_share": [
+    0.01947751,
+    0.02442366
+   ]
+  },
+  "fa7_0_vs_fa7_1": {
+   "binding_gate": [
+    "qed_similarity_jointly",
+    null
+   ],
+   "control": "fa7_1",
+   "failed": "fa7_0",
+   "minimum_depth_to_eligible": [
+    null,
+    1
+   ],
+   "radius1_degenerate_fraction": [
+    0.65625,
+    0.37931
+   ],
+   "single_edit_eligible": [
+    0,
+    0
+   ],
+   "v1_best_eligible_rank": [
+    null,
+    2
+   ],
+   "v1_eligible_mass_share": [
+    0.0,
+    0.10799226
+   ]
+  },
+  "fa7_2_vs_fa7_1": {
+   "binding_gate": [
+    "qed_similarity_jointly",
+    null
+   ],
+   "control": "fa7_1",
+   "failed": "fa7_2",
+   "minimum_depth_to_eligible": [
+    3,
+    1
+   ],
+   "radius1_degenerate_fraction": [
+    0.54286,
+    0.37931
+   ],
+   "single_edit_eligible": [
+    0,
+    0
+   ],
+   "v1_best_eligible_rank": [
+    145,
+    2
+   ],
+   "v1_eligible_mass_share": [
+    0.00200278,
+    0.10799226
+   ]
+  }
+ },
+ "inputs": {
+  "anchors": "t4_attachment_degeneracy_probe_v1",
+  "arms": "t4_region_law_counterfactual_v1",
+  "audit": "t4_support_stage_audit_v1",
+  "closure": "t4_prune_closure_probe_v1",
+  "cuts": "t4_bridge_cut_census_v1",
+  "edits": "t4_single_edit_family_census_v1"
+ },
+ "modal_launches": 0,
+ "oracle_calls": 0,
+ "schema_version": "t4_failure_counterfactual_v1",
+ "seed_derivation": "shallow lane proposal seed = cell.controller_seed + 1_000_003 * round_index + 10_007 * 0 + 101 * expert_index, with round_index=1 and expert_index=0 because EXPERTS = ('shallow', 'anchored_replacement', 'route_complete_region'); round one is therefore deterministic given the cell.",
+ "status": "DIAGNOSTIC_EVIDENCE_ONLY_ZERO_ORACLE_CALLS"
+}

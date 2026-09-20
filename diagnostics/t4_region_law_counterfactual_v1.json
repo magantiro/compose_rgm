@@ -1,0 +1,597 @@
+{
+ "arms": {
+  "both": {
+   "cap": 16,
+   "conditioned": true
+  },
+  "similarity_conditioned": {
+   "cap": 8,
+   "conditioned": true
+  },
+  "v1": {
+   "cap": 8,
+   "conditioned": false
+  },
+  "wider_scale": {
+   "cap": 16,
+   "conditioned": false
+  }
+ },
+ "cells": {
+  "5ht1b_0": {
+   "arms": {
+    "both": {
+     "best_eligible_mass": 0.46199384,
+     "best_eligible_rank": 1,
+     "best_eligible_smiles": "C[N@H+]1CC[C@]2(CC1)COc1cc3c(cc12)N(C(=O)c1ccccc1)CC3",
+     "cap": 16,
+     "closure_states": 30,
+     "conditioned": true,
+     "eligible_mass_share": 0.27769286,
+     "eligible_ranks": [
+      1,
+      2,
+      8
+     ],
+     "eligible_states": 3
+    },
+    "similarity_conditioned": {
+     "best_eligible_mass": 0.28153076,
+     "best_eligible_rank": 1,
+     "best_eligible_smiles": "C[N@H+]1CC[C@]2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccc2)cc1)CC3",
+     "cap": 8,
+     "closure_states": 26,
+     "conditioned": true,
+     "eligible_mass_share": 0.26853429,
+     "eligible_ranks": [
+      1,
+      2,
+      3
+     ],
+     "eligible_states": 3
+    },
+    "v1": {
+     "best_eligible_mass": 0.25,
+     "best_eligible_rank": 1,
+     "best_eligible_smiles": "Cc1ccccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)[C@]2(CC[N@H+](C)CC2)CO4)cc1",
+     "cap": 8,
+     "closure_states": 26,
+     "conditioned": false,
+     "eligible_mass_share": 0.16388889,
+     "eligible_ranks": [
+      1,
+      8,
+      22
+     ],
+     "eligible_states": 3
+    },
+    "wider_scale": {
+     "best_eligible_mass": 0.29555556,
+     "best_eligible_rank": 1,
+     "best_eligible_smiles": "C[N@H+]1CC[C@]2(CC1)COc1cc3c(cc12)N(C(=O)c1ccccc1)CC3",
+     "cap": 16,
+     "closure_states": 30,
+     "conditioned": false,
+     "eligible_mass_share": 0.19296296,
+     "eligible_ranks": [
+      1,
+      2,
+      14
+     ],
+     "eligible_states": 3
+    }
+   },
+   "role": "control",
+   "smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)[C@]4(CC[N@H+](C)CC4)CO6)cc3)c(C)c2)no1"
+  },
+  "5ht1b_1": {
+   "arms": {
+    "both": {
+     "best_eligible_mass": null,
+     "best_eligible_rank": null,
+     "best_eligible_smiles": null,
+     "cap": 16,
+     "closure_states": 27,
+     "conditioned": true,
+     "eligible_mass_share": 0.0,
+     "eligible_ranks": [],
+     "eligible_states": 0
+    },
+    "similarity_conditioned": {
+     "best_eligible_mass": null,
+     "best_eligible_rank": null,
+     "best_eligible_smiles": null,
+     "cap": 8,
+     "closure_states": 24,
+     "conditioned": true,
+     "eligible_mass_share": 0.0,
+     "eligible_ranks": [],
+     "eligible_states": 0
+    },
+    "v1": {
+     "best_eligible_mass": null,
+     "best_eligible_rank": null,
+     "best_eligible_smiles": null,
+     "cap": 8,
+     "closure_states": 24,
+     "conditioned": false,
+     "eligible_mass_share": 0.0,
+     "eligible_ranks": [],
+     "eligible_states": 0
+    },
+    "wider_scale": {
+     "best_eligible_mass": null,
+     "best_eligible_rank": null,
+     "best_eligible_smiles": null,
+     "cap": 16,
+     "closure_states": 27,
+     "conditioned": false,
+     "eligible_mass_share": 0.0,
+     "eligible_ranks": [],
+     "eligible_states": 0
+    }
+   },
+   "role": "control",
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1"
+  },
+  "5ht1b_2": {
+   "arms": {
+    "both": {
+     "best_eligible_mass": null,
+     "best_eligible_rank": null,
+     "best_eligible_smiles": null,
+     "cap": 16,
+     "closure_states": 43,
+     "conditioned": true,
+     "eligible_mass_share": 0.0,
+     "eligible_ranks": [],
+     "eligible_states": 0
+    },
+    "similarity_conditioned": {
+     "best_eligible_mass": null,
+     "best_eligible_rank": null,
+     "best_eligible_smiles": null,
+     "cap": 8,
+     "closure_states": 14,
+     "conditioned": true,
+     "eligible_mass_share": 0.0,
+     "eligible_ranks": [],
+     "eligible_states": 0
+    },
+    "v1": {
+     "best_eligible_mass": null,
+     "best_eligible_rank": null,
+     "best_eligible_smiles": null,
+     "cap": 8,
+     "closure_states": 14,
+     "conditioned": false,
+     "eligible_mass_share": 0.0,
+     "eligible_ranks": [],
+     "eligible_states": 0
+    },
+    "wider_scale": {
+     "best_eligible_mass": null,
+     "best_eligible_rank": null,
+     "best_eligible_smiles": null,
+     "cap": 16,
+     "closure_states": 43,
+     "conditioned": false,
+     "eligible_mass_share": 0.0,
+     "eligible_ranks": [],
+     "eligible_states": 0
+    }
+   },
+   "role": "failed",
+   "smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1"
+  },
+  "braf_0": {
+   "arms": {
+    "both": {
+     "best_eligible_mass": 0.18614814,
+     "best_eligible_rank": 1,
+     "best_eligible_smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3ccccc3)ccnc12",
+     "cap": 16,
+     "closure_states": 489,
+     "conditioned": true,
+     "eligible_mass_share": 0.11472168,
+     "eligible_ranks": [
+      1,
+      2,
+      23
+     ],
+     "eligible_states": 3
+    },
+    "similarity_conditioned": {
+     "best_eligible_mass": 0.00528836,
+     "best_eligible_rank": 109,
+     "best_eligible_smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC)c3)ccnc12",
+     "cap": 8,
+     "closure_states": 319,
+     "conditioned": true,
+     "eligible_mass_share": 0.00372156,
+     "eligible_ranks": [
+      109,
+      178,
+      179
+     ],
+     "eligible_states": 3
+    },
+    "v1": {
+     "best_eligible_mass": 0.00125153,
+     "best_eligible_rank": 309,
+     "best_eligible_smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC)c3)ccnc12",
+     "cap": 8,
+     "closure_states": 319,
+     "conditioned": false,
+     "eligible_mass_share": 0.00096506,
+     "eligible_ranks": [
+      309,
+      318,
+      319
+     ],
+     "eligible_states": 3
+    },
+    "wider_scale": {
+     "best_eligible_mass": 0.08598094,
+     "best_eligible_rank": 2,
+     "best_eligible_smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3ccccc3)ccnc12",
+     "cap": 16,
+     "closure_states": 489,
+     "conditioned": false,
+     "eligible_mass_share": 0.0585679,
+     "eligible_ranks": [
+      2,
+      3,
+      82
+     ],
+     "eligible_states": 3
+    }
+   },
+   "role": "failed",
+   "smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34"
+  },
+  "braf_1": {
+   "arms": {
+    "both": {
+     "best_eligible_mass": 0.32895833,
+     "best_eligible_rank": 1,
+     "best_eligible_smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccccc2)ccn1",
+     "cap": 16,
+     "closure_states": 314,
+     "conditioned": true,
+     "eligible_mass_share": 0.31389686,
+     "eligible_ranks": [
+      1,
+      2,
+      3,
+      5,
+      15,
+      16
+     ],
+     "eligible_states": 6
+    },
+    "similarity_conditioned": {
+     "best_eligible_mass": 0.05454295,
+     "best_eligible_rank": 13,
+     "best_eligible_smiles": "O=CNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "cap": 8,
+     "closure_states": 157,
+     "conditioned": true,
+     "eligible_mass_share": 0.05592958,
+     "eligible_ranks": [
+      13,
+      15,
+      48,
+      50,
+      51,
+      52
+     ],
+     "eligible_states": 6
+    },
+    "v1": {
+     "best_eligible_mass": 0.02160218,
+     "best_eligible_rank": 46,
+     "best_eligible_smiles": "O=CNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "cap": 8,
+     "closure_states": 157,
+     "conditioned": false,
+     "eligible_mass_share": 0.01947751,
+     "eligible_ranks": [
+      46,
+      53,
+      145,
+      148,
+      156,
+      157
+     ],
+     "eligible_states": 6
+    },
+    "wider_scale": {
+     "best_eligible_mass": 0.12222448,
+     "best_eligible_rank": 1,
+     "best_eligible_smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccccc2)ccn1",
+     "cap": 16,
+     "closure_states": 314,
+     "conditioned": false,
+     "eligible_mass_share": 0.15065273,
+     "eligible_ranks": [
+      1,
+      2,
+      3,
+      4,
+      45,
+      51
+     ],
+     "eligible_states": 6
+    }
+   },
+   "role": "failed",
+   "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl"
+  },
+  "braf_2": {
+   "arms": {
+    "both": {
+     "best_eligible_mass": 0.33774872,
+     "best_eligible_rank": 1,
+     "best_eligible_smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccccc2)ccn1",
+     "cap": 16,
+     "closure_states": 264,
+     "conditioned": true,
+     "eligible_mass_share": 0.30935978,
+     "eligible_ranks": [
+      1,
+      2,
+      4,
+      5,
+      16
+     ],
+     "eligible_states": 5
+    },
+    "similarity_conditioned": {
+     "best_eligible_mass": 0.06417044,
+     "best_eligible_rank": 15,
+     "best_eligible_smiles": "O=CNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+     "cap": 8,
+     "closure_states": 129,
+     "conditioned": true,
+     "eligible_mass_share": 0.05854667,
+     "eligible_ranks": [
+      15,
+      17,
+      35,
+      45,
+      46
+     ],
+     "eligible_states": 5
+    },
+    "v1": {
+     "best_eligible_mass": 0.02905329,
+     "best_eligible_rank": 21,
+     "best_eligible_smiles": "O=CNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1",
+     "cap": 8,
+     "closure_states": 129,
+     "conditioned": false,
+     "eligible_mass_share": 0.02442366,
+     "eligible_ranks": [
+      21,
+      33,
+      112,
+      121,
+      122
+     ],
+     "eligible_states": 5
+    },
+    "wider_scale": {
+     "best_eligible_mass": 0.12222448,
+     "best_eligible_rank": 1,
+     "best_eligible_smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccccc2)ccn1",
+     "cap": 16,
+     "closure_states": 264,
+     "conditioned": false,
+     "eligible_mass_share": 0.14663969,
+     "eligible_ranks": [
+      1,
+      2,
+      3,
+      4,
+      48
+     ],
+     "eligible_states": 5
+    }
+   },
+   "role": "control",
+   "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl"
+  },
+  "fa7_0": {
+   "arms": {
+    "both": {
+     "best_eligible_mass": null,
+     "best_eligible_rank": null,
+     "best_eligible_smiles": null,
+     "cap": 16,
+     "closure_states": 203,
+     "conditioned": true,
+     "eligible_mass_share": 0.0,
+     "eligible_ranks": [],
+     "eligible_states": 0
+    },
+    "similarity_conditioned": {
+     "best_eligible_mass": null,
+     "best_eligible_rank": null,
+     "best_eligible_smiles": null,
+     "cap": 8,
+     "closure_states": 59,
+     "conditioned": true,
+     "eligible_mass_share": 0.0,
+     "eligible_ranks": [],
+     "eligible_states": 0
+    },
+    "v1": {
+     "best_eligible_mass": null,
+     "best_eligible_rank": null,
+     "best_eligible_smiles": null,
+     "cap": 8,
+     "closure_states": 59,
+     "conditioned": false,
+     "eligible_mass_share": 0.0,
+     "eligible_ranks": [],
+     "eligible_states": 0
+    },
+    "wider_scale": {
+     "best_eligible_mass": null,
+     "best_eligible_rank": null,
+     "best_eligible_smiles": null,
+     "cap": 16,
+     "closure_states": 203,
+     "conditioned": false,
+     "eligible_mass_share": 0.0,
+     "eligible_ranks": [],
+     "eligible_states": 0
+    }
+   },
+   "role": "failed",
+   "smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34"
+  },
+  "fa7_1": {
+   "arms": {
+    "both": {
+     "best_eligible_mass": 0.17699289,
+     "best_eligible_rank": 2,
+     "best_eligible_smiles": "C[C@@H](CCl)NC(=O)[C@@H]1CCCN1C(=O)[C@H](N)Cc1ccccc1",
+     "cap": 16,
+     "closure_states": 488,
+     "conditioned": true,
+     "eligible_mass_share": 0.18091787,
+     "eligible_ranks": [
+      2,
+      3,
+      4,
+      7,
+      21
+     ],
+     "eligible_states": 5
+    },
+    "similarity_conditioned": {
+     "best_eligible_mass": 0.19111344,
+     "best_eligible_rank": 2,
+     "best_eligible_smiles": "C[C@@H](CCl)NC(=O)[C@@H]1CCCN1C(=O)[C@H](N)Cc1ccccc1",
+     "cap": 8,
+     "closure_states": 293,
+     "conditioned": true,
+     "eligible_mass_share": 0.19579191,
+     "eligible_ranks": [
+      2,
+      3,
+      4,
+      6,
+      21
+     ],
+     "eligible_states": 5
+    },
+    "v1": {
+     "best_eligible_mass": 0.10475075,
+     "best_eligible_rank": 2,
+     "best_eligible_smiles": "C[C@@H](CCl)NC(=O)[C@@H]1CCCN1C(=O)[C@H](N)Cc1ccccc1",
+     "cap": 8,
+     "closure_states": 293,
+     "conditioned": false,
+     "eligible_mass_share": 0.10799226,
+     "eligible_ranks": [
+      2,
+      3,
+      4,
+      29,
+      52
+     ],
+     "eligible_states": 5
+    },
+    "wider_scale": {
+     "best_eligible_mass": 0.06541241,
+     "best_eligible_rank": 6,
+     "best_eligible_smiles": "C[C@@H](CCl)NC(=O)[C@@H]1CCCN1C(=O)[C@H](N)Cc1ccccc1",
+     "cap": 16,
+     "closure_states": 488,
+     "conditioned": false,
+     "eligible_mass_share": 0.06751222,
+     "eligible_ranks": [
+      6,
+      8,
+      9,
+      84,
+      125
+     ],
+     "eligible_states": 5
+    }
+   },
+   "role": "control",
+   "smiles": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N"
+  },
+  "fa7_2": {
+   "arms": {
+    "both": {
+     "best_eligible_mass": 0.11582789,
+     "best_eligible_rank": 2,
+     "best_eligible_smiles": "CCn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O",
+     "cap": 16,
+     "closure_states": 457,
+     "conditioned": true,
+     "eligible_mass_share": 0.04760889,
+     "eligible_ranks": [
+      2,
+      30
+     ],
+     "eligible_states": 2
+    },
+    "similarity_conditioned": {
+     "best_eligible_mass": 0.02895947,
+     "best_eligible_rank": 25,
+     "best_eligible_smiles": "CC(C)Nc1ccc(-c2ccccc2)n(CC(=O)NCc2ccccc2)c1=O",
+     "cap": 8,
+     "closure_states": 247,
+     "conditioned": true,
+     "eligible_mass_share": 0.01329428,
+     "eligible_ranks": [
+      25,
+      89
+     ],
+     "eligible_states": 2
+    },
+    "v1": {
+     "best_eligible_mass": 0.00354126,
+     "best_eligible_rank": 145,
+     "best_eligible_smiles": "CC(C)Nc1ccc(-c2ccccc2)n(CC(=O)NCc2ccccc2)c1=O",
+     "cap": 8,
+     "closure_states": 247,
+     "conditioned": false,
+     "eligible_mass_share": 0.00200278,
+     "eligible_ranks": [
+      145,
+      241
+     ],
+     "eligible_states": 2
+    },
+    "wider_scale": {
+     "best_eligible_mass": 0.00979757,
+     "best_eligible_rank": 46,
+     "best_eligible_smiles": "CCn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O",
+     "cap": 16,
+     "closure_states": 457,
+     "conditioned": false,
+     "eligible_mass_share": 0.00471557,
+     "eligible_ranks": [
+      46,
+      238
+     ],
+     "eligible_states": 2
+    }
+   },
+   "role": "failed",
+   "smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O"
+  }
+ },
+ "horizon": 3,
+ "oracle_calls": 0,
+ "schema_version": "t4_region_law_counterfactual_v1",
+ "status": "DIAGNOSTIC_EVIDENCE_ONLY_ZERO_ORACLE_CALLS",
+ "support_floor": 0.05
+}

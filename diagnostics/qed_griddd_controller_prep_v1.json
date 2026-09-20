@@ -1,0 +1,444 @@
+{
+ "schema_version": "qed_griddd_controller_prep_v1",
+ "date": "2026-09-20",
+ "scope": "provenance verification, contract-authority audit, sealed fail-closed artifacts, and a paired local controller comparison on the Jin ICLR-2019 QED 800",
+ "authorization": {
+  "scored_launch_authorized": false,
+  "modal_launch_authorized": false,
+  "oracle_calls_authorized": 0,
+  "paid_oracle_calls_made": 0,
+  "modal_operations_made": [
+   "modal volume ls (read-only directory listing)",
+   "modal volume get (read-only download of banked records)"
+  ],
+  "modal_run_deploy_spawn_made": false,
+  "frozen_paths_modified": []
+ },
+ "provenance": {
+  "the_800_starts": {
+   "label": "VERIFIED",
+   "artifact": "data/jin/qed_test.txt",
+   "sha256": "704103777e8050eb59f4d15d9997ca6070ba05a6b878b8e18738bfb1e706a090",
+   "count": 800,
+   "upstream": "wengong-jin/iclr19-graph2graph @ e02c14ae857be0e122413845162aeac0251b09c6, data/qed/test.txt",
+   "evidence": [
+    "the local file's sha256 equals configs/benchmarks/griddd_qed_lead_manifest_v1.json -> jin_iclr19_exact.source_sha256 exactly",
+    "all 798 banked arm-A records carry a 'source' field equal to this file at the record's own index: 0 mismatches (MEASURED)",
+    "all 800 sources are 12-33 heavy atoms, so a 48-slot padded state always has free slots (MEASURED)"
+   ],
+   "not_the_griddd_list": "configs/benchmarks/cnof_leads.json is a different, 800-entry ZINC/Jin-derived QED lead file used elsewhere; the benchmark loader src/compose_v4/experiments/griddd_jin_benchmark.py:load_sources reads data/jin/qed_test.txt"
+  },
+  "qed_and_similarity_definitions": {
+   "label": "VERIFIED",
+   "qed": "rdkit.Chem.QED.qed",
+   "qed_target_band": "[0.90, 1.00]",
+   "similarity": "Tanimoto on Morgan fingerprints, radius 2, 2048 bits, chirality off, always against the ORIGINAL source",
+   "similarity_threshold": 0.4,
+   "success_event": "at least one returned candidate with QED >= 0.90 and Tanimoto >= 0.40",
+   "consumption_sites": [
+    "modal_apps/hphi_h40head_ab_app.py:78 REGION = (0.90, 0.40); used by in_region() inside run_source",
+    "modal_apps/hphi_h40head_ab_app.py:218 rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)",
+    "src/compose_v4/experiments/griddd_jin_benchmark.py:qed_task_success, 0.9 <= QED.qed(mc) <= 1.0",
+    "scripts/hphi_official800_curve.py REGION = (0.90, 0.40), re-derived from stored fields"
+   ],
+   "independent_recomputation": "QED and Tanimoto were recomputed with RDKit 2025.09.6 from the 6,384 returned SMILES of the banked arm-A run: max |dQED| = 1.11e-16, max |dSimilarity| = 0.0, 0 unparseable (MEASURED)"
+  },
+  "the_446_of_800_figure": {
+   "label": "VERIFIED (numerator and denominator), with a stale committed artifact corrected",
+   "claim_as_written": "paper_gem_neurips2026/sections/gem_experiments.tex:89 and sections/appendix.tex:574 -- 446 of 800 at K=8, 55.8%, Wilson [52.3, 59.2], against GrIDDD's reported 45.1% at K=20",
+   "only_committed_carrier_of_the_number": {
+    "path": "diagnostics/griddd_official800_k8.json",
+    "sha256": "8900dd0ee5a5aeb63cc253762b6ea8af374bed37b4df1721dffc542461107d7f",
+    "committed_in": "a737bd80 (2026-08-31)",
+    "contents": {
+     "scored": 797,
+     "solved": 446,
+     "rate": 0.5596,
+     "missing_shards": [
+      135,
+      408,
+      538
+     ]
+    }
+   },
+   "provenance_gap_found": "no script in this repository writes that file. The only aggregator present, scripts/hphi_official800_curve.py, writes a DIFFERENT file (docs/OFFICIAL800_QED_CURVE.json) into a DIFFERENT checkout (/Users/rmaganti/compose_v2_work), and its committed copy is a 199-source partial snapshot with complete=false.",
+   "gap_closed_by": "tools/score_qed_griddd_arm_a_v1.py (new), output diagnostics/qed_griddd_arm_a_rederivation_v1.json",
+   "measured_rederivation": {
+    "records_on_volume": 798,
+    "unscored_sources": [
+     135,
+     408
+    ],
+    "solved_at_k8": 446,
+    "rate_over_scored_798": 0.5588972431077694,
+    "rate_over_full_panel_800": 0.5575,
+    "cumulative_solved_at_k": [
+     254,
+     319,
+     370,
+     396,
+     420,
+     430,
+     439,
+     446
+    ],
+    "slots_per_source": "8 for all 798 records",
+    "stored_flag_disagreements": 0,
+    "panel_source_mismatches": 0
+   },
+   "discrepancies": [
+    "the committed artifact says scored=797 and lists THREE missing shards [135, 408, 538]; the volume now holds 798 records and only 135 and 408 are missing. Source 538 landed after the artifact was written and was never folded in. It is NOT solved, so the numerator 446 is unchanged -- only the denominator field is stale.",
+    "the committed artifact's rate 0.5596 uses denominator 797. The paper's 55.8% uses denominator 800 and is correct for 446/800 = 0.5575; its Wilson interval [52.3, 59.2] reproduces at n=800.",
+    "the paper's 'two sources did not return a completed shard' is CORRECT against the volume as it stands, and contradicts the committed artifact it presumably came from."
+   ],
+   "recommendation": "diagnostics/griddd_official800_k8.json should be re-derived from diagnostics/qed_griddd_arm_a_rederivation_v1.json; it was left untouched here because existing artifacts are out of scope for this task"
+  },
+  "the_griddd_comparator": {
+   "label": "UNVERIFIED at the source; VERIFIED only as a repo-internal transcription",
+   "value": "45.1% QED success at K=20, similarity >= 0.4",
+   "repo_carriers": [
+    "docs/griddd_qed_comparator.json -- states 'author-supplied; NOT programmatically extracted -- verify against the PDF before submission'",
+    "docs/GRIDDD_JIN_PROTOCOL.md published table",
+    "src/compose_v4/experiments/griddd_jin_benchmark.py PUBLISHED['GrIDDD']['qed'] = 0.451"
+   ],
+   "upstream": "Ninniri et al., GrIDDD, NeurIPS 2025, arXiv 2506.15725, Table 3 QED row",
+   "why_unverified": "no PDF or programmatic extraction is present in this tree; every in-repo copy descends from the same hand transcription, so their agreement is not independent corroboration",
+   "panel_comparability": {
+    "label": "NOT COMPARABLE AS A PANEL -- this is the most serious finding on the comparator",
+    "evidence": "configs/benchmarks/griddd_qed_lead_manifest_v1.json records that GrIDDD selects its own 800 from a pandas-shuffled ZINC-250k 80/10/10 split (random_state=42), and that the reconstruction of that selection has canonical_set_intersection = 1 against Jin's exact 800. GrIDDD's released exact list is marked 'exact_list_blocked' with five named blockers.",
+    "consequence": "COMPOSE's 446/800 is on Jin's panel; GrIDDD's 45.1% is on a panel sharing ONE molecule with it. Both panels draw from the same ZINC-250k QED-in-[0.7,0.8] population, so the comparison is population-matched, not panel-matched. The repo's own archived draft (paper_iclr2027/archive/superseded_2026-08-19/experiments_old_subsections.tex:97) already says 'not matched: a different source panel'."
+   }
+  },
+  "trajectory_count_comparability": {
+   "label": "VERIFIED as stated, but the budget axis is not matched",
+   "compose_k": 8,
+   "griddd_k": 20,
+   "direction": "COMPOSE returns 2.5x FEWER candidates, so on the returned-candidate axis the comparison is conservative in COMPOSE's favour",
+   "what_a_fair_comparison_requires": [
+    "same source panel (see above -- currently one molecule of overlap)",
+    "same K, or a success-vs-K curve for both. COMPOSE's curve at k=1..8 is [254, 319, 370, 396, 420, 430, 439, 446]; GrIDDD's curve at k<20 is not published, so 45.1% cannot be read at K=8",
+    "a stated property-evaluation ledger for both. MEASURED for COMPOSE: 6,755,513 proposed transitions and 3,761,470 unique states over 798 sources -- a mean of 4,714 distinct molecules QED-scored per source to return 8 candidates. GrIDDD's property-conditioned diffusion evaluates QED on no intermediates at inference.",
+    "the protocol's own mandatory caveat (docs/GRIDDD_JIN_PROTOCOL.md) already forbids claiming a matched computational or oracle budget"
+   ],
+   "residual_gap_in_the_paper": "the K=20 run the protocol preregistered has never been executed. paper_gem_neurips2026/sections/appendix.tex carries an explicit in-source marker '[G1] official 800-source cohort / TO CLOSE: run the official cohort once at 20 candidates per source'. A K=8..12 extension exists on the volume at 200/800 sources; the K=8..20 directory is empty."
+  },
+  "does_446_respect_the_per_sample_rule": {
+   "label": "VERIFIED -- yes, at the returned-candidate level",
+   "rule": "never compare our SELECTED top-k against a baseline's ALL-SAMPLE rate",
+   "finding": "solved@k is computed as any(c['success'] for c in candidates_sorted_by_k[:k]) where success is re-derived from the terminal QED and similarity of the molecule each trajectory RETURNED. No larger pool is filtered down: exactly 8 candidates exist per source and all 8 stay in the denominator. 67.4% of slots are extinct and return the unmodified source, and every one is counted as a failure (MEASURED: 4,301 of 6,384).",
+   "the_caveat_that_still_applies": "each returned molecule is the survivor of a 32-particle twisted SMC run whose weights use the goal indicator itself (h_phi returns exactly 1.0 in the region) and whose particles absorb on region entry. The 8 returned are therefore goal-conditioned outputs of a search over ~4,714 property-evaluated molecules, not 8 unconditioned draws. This is declared in the protocol, is legitimate twisted SMC, and does not violate the per-sample rule -- but it is why the comparison is a task-performance claim and not an efficiency claim."
+  }
+ },
+ "contract_authority_table": {
+  "method": "every field that would appear in a launch contract was traced to the line that reads it at runtime",
+  "arm_a_paper_era": [
+   {
+    "field": "QED threshold 0.90",
+    "operative": false,
+    "site": "modal_apps/hphi_h40head_ab_app.py:78 REGION module constant",
+    "verdict": "DECORATIVE in a contract -- no task dict can move it"
+   },
+   {
+    "field": "similarity threshold 0.40",
+    "operative": false,
+    "site": "same REGION module constant",
+    "verdict": "DECORATIVE in a contract"
+   },
+   {
+    "field": "similarity metric",
+    "operative": false,
+    "site": "hphi_h40head_ab_app.py:218 generator constructed inline",
+    "verdict": "DECORATIVE in a contract"
+   },
+   {
+    "field": "returned trajectories K",
+    "operative": true,
+    "site": "task dict k_start/k_end via official_tasks(); record name embeds the range",
+    "verdict": "operative"
+   },
+   {
+    "field": "budget ceiling",
+    "operative": true,
+    "site": "task.get('budget_max', 24)",
+    "verdict": "operative BUT has a silent default -- a caller that omits it inherits 24"
+   },
+   {
+    "field": "horizon",
+    "operative": true,
+    "site": "task.get('horizon', HORIZON=24)",
+    "verdict": "operative BUT silently defaults to 24 while official tasks pass 40"
+   },
+   {
+    "field": "seed",
+    "operative": true,
+    "site": "seed_for(arm, source, k) = uint64(sha256(PROTOCOL|task|source|replicate)[:8])",
+    "verdict": "operative, deterministic, never Python hash()"
+   },
+   {
+    "field": "particle count",
+    "operative": false,
+    "site": "N_PARTICLES = 32 module constant",
+    "verdict": "DECORATIVE in a contract"
+   },
+   {
+    "field": "canonical slots",
+    "operative": false,
+    "site": "CANONICAL_SLOTS = 48 module constant",
+    "verdict": "DECORATIVE in a contract"
+   },
+   {
+    "field": "time point",
+    "operative": false,
+    "site": "TIME_POINT = 0.5 module constant",
+    "verdict": "DECORATIVE in a contract"
+   },
+   {
+    "field": "container cap",
+    "operative": true,
+    "site": "scripts/hphi_official800_launch.py set_cap(), clamped to min(80, env)",
+    "verdict": "operative; affects wall clock only"
+   }
+  ],
+  "arm_b_current_controller": [
+   {
+    "field": "charged budget",
+    "operative": true,
+    "site": "ProgramQueryLedger.__init__, program_campaign.py:29 -- required keyword, type-checked, no default",
+    "verdict": "operative; this is the pattern that fixed the PMO module-constant budget defect"
+   },
+   {
+    "field": "seed",
+    "operative": true,
+    "site": "ProgramSearchConfig.seed -> np.random.default_rng, adaptive_program_optimizer.py:222",
+    "verdict": "operative"
+   },
+   {
+    "field": "rounds / queries_per_round",
+    "operative": true,
+    "site": "run_program_campaign validation, program_campaign.py:153",
+    "verdict": "operative"
+   },
+   {
+    "field": "wall_seconds",
+    "operative": true,
+    "site": "adaptive_program_optimizer.py:860",
+    "verdict": "operative"
+   },
+   {
+    "field": "attempts_per_batch",
+    "operative": true,
+    "site": "adaptive_program_optimizer.py:857",
+    "verdict": "operative"
+   },
+   {
+    "field": "candidates_per_batch",
+    "operative": true,
+    "site": "adaptive_program_optimizer.py:859",
+    "verdict": "operative"
+   },
+   {
+    "field": "parent_allocation",
+    "operative": true,
+    "site": "adaptive_program_optimizer.py:329-331",
+    "verdict": "operative"
+   },
+   {
+    "field": "max_primitives",
+    "operative": true,
+    "site": "program_campaign.py:277 and adaptive_program_optimizer.py:266",
+    "verdict": "operative"
+   },
+   {
+    "field": "QED / similarity thresholds",
+    "operative": true,
+    "site": "the injected evaluate() closure in tools/run_qed_griddd_controller_comparison_v1.py",
+    "verdict": "operative BECAUSE the scorer is injected -- this is the seam the paper-era arm lacks"
+   },
+   {
+    "field": "score_direction",
+    "operative": true,
+    "site": "adaptive_program_optimizer.py:326 AND parent_edit_search.py:23",
+    "verdict": "operative AND COUPLED -- parent_edit_search forces 'minimize' for kind='t4' and 'maximize' for kind='pmo'. Declaring 'maximize' with kind='t4' raises; silently inheriting the wrong pairing would invert the objective."
+   }
+  ],
+  "decorative_or_hazardous_fields_found": [
+   {
+    "item": "ProgramTask.endpoint_evaluator hardcodes qed_min=0.6 and sa_max=4.0",
+    "site": "src/compose_v4/control/program_task.py:76-77",
+    "why_it_matters": "routing the QED benchmark through kind='t4' would import a synthetic-accessibility floor the GrIDDD/Jin task does not have. A candidate with QED 0.95, similarity 0.5 and SA 4.3 solves the benchmark but would be marked oracle_eligible=False. A contract field 'qed_threshold: 0.9' pointed here would also be decorative, because the gate would still use 0.6.",
+    "handled_by": "arm B uses kind='pmo' and carries the similarity floor in the injected scorer; the deviation is recorded in the sealed contract rather than absorbed"
+   },
+   {
+    "item": "griddd_jin_benchmark.qed_task_success(threshold=0.4) is a DEFAULT argument and the 0.9 band is a hardcoded literal in the function body",
+    "site": "src/compose_v4/experiments/griddd_jin_benchmark.py",
+    "why_it_matters": "a caller that omits threshold silently gets 0.4, and nothing can move the QED band at all"
+   },
+   {
+    "item": "scripts/hphi_official800_launch.py and scripts/hphi_official800_curve.py hardcode ROOT = /Users/rmaganti/compose_v2_work",
+    "why_it_matters": "the launcher and the aggregator for the headline QED run read sources from, and write results into, a checkout that is not this repository. The committed curve artifact in this tree is therefore not the one the aggregator updates."
+   },
+   {
+    "item": "two different production slot counts coexist",
+    "detail": "PRODUCTION_MAX_ATOMS = 40 in editing_v2_evaluation_semantics, but whole_ring_plan.execute_program refuses anything that is not an exact supported 48-slot source, and the paper-era app uses CANONICAL_SLOTS = 48",
+    "why_it_matters": "padding to 40 for the program path fails closed with 'expected an exact supported 48-slot source' (MEASURED, hit during this work). It fails loudly, which is the good case, but the constant named PRODUCTION_MAX_ATOMS is not the production constant for this path."
+   }
+  ]
+ },
+ "padding_and_evaluation_semantics": {
+  "smiles_to_molecular_graph_hazard": "APPLIES and is handled on both arms",
+  "arm_a": "modal_apps/hphi_h40head_ab_app.py:161 and :226 call pad_molecular_graph(smiles_to_molecular_graph(smi), CANONICAL_SLOTS=48) -- padded (VERIFIED by code read)",
+  "arm_b": "tools/run_qed_griddd_controller_comparison_v1.py uses production_state_from_smiles(source, 48)",
+  "headroom": "all 800 sources are <= 33 heavy atoms, so every padded state has >= 15 free slots and the atom_insert family is present (MEASURED)",
+  "assert_production_state_semantics": {
+   "applies": false,
+   "reason": "it requires a MODEL (it calls realized_family_census(model, state, time)) and a compiler-recorded per-family census for the same source state. Arm B is model-free -- run_program_campaign imports no torch and loads no checkpoint -- and no Process-V2 corpus entry exists for the Jin sources, so there is no recorded census to compare against. The padding half of its contract is satisfied via production_state_from_smiles; the census half has no referent here."
+  }
+ },
+ "created_artifacts": {
+  "configs/qed_griddd_controller_comparison_v1.json": {
+   "role": "sealed fail-closed contract",
+   "payload_sha256": "951425eea1146f6667b7ab735e6c03ec9e7b8969c676f058c820afd0ebbb7dda",
+   "scored_launch_authorized": false,
+   "modal_launch_authorized": false,
+   "oracle_calls_authorized": 0
+  },
+  "diagnostics/qed_griddd_controller_comparison_v1/source_capsule_manifest.json": {
+   "role": "source capsule",
+   "file_count": 100,
+   "closure_derivation": "executed one real source and hashed every compose_v4 module reached, rather than reading imports"
+  },
+  "diagnostics/qed_griddd_controller_comparison_v1/authorization_receipt.json": {
+   "role": "authorization receipt, authorizes nothing"
+  },
+  "tools/prepare_qed_griddd_controller_comparison_v1.py": "seals and verifies the contract -> capsule -> receipt chain",
+  "tools/run_qed_griddd_controller_comparison_v1.py": "arm B runner with the injected free scorer",
+  "tools/score_qed_griddd_arm_a_v1.py": "re-derives arm A from its banked records",
+  "tools/analyze_qed_griddd_controller_comparison_v1.py": "paired comparison, both fairness rates",
+  "diagnostics/qed_griddd_arm_a_rederivation_v1.json": "arm A re-derivation output"
+ },
+ "fail_closed_proof": {
+  "positive": "prepare --verify-only prints VERIFIED fail-closed, contract=951425eea1146f66, capsule_files=100, receipt=5af9bb0889cd0e2d",
+  "negative_control_1": "setting oracle_calls_authorized=1000 without re-hashing -> 'contract envelope hash does not match its payload', exit 1",
+  "negative_control_2": "setting oracle_calls_authorized=1000 AND re-hashing the envelope consistently -> 'contract is not fail-closed: oracle_calls_authorized = 1000', exit 1",
+  "why_both": "the second control is the one that matters. A chain that only checks its own hash is self-consistent by construction; the flag check compares against literal expected values and fires independently.",
+  "capsule_drift": "verify re-hashes all 100 capsule files from disk on every run, so a frozen-module edit would refuse the chain"
+ },
+ "dry_run_and_injection_seam": {
+  "arm_a_seam": {
+   "exists": false,
+   "detail": "modal_apps/hphi_h40head_ab_app.py:run_source imports rdkit.Chem.QED inside the function and reads REGION from module scope. There is no callable parameter, no scorer argument and no configuration object. The paper-era QED benchmark CANNOT be dry-run against an injected free scorer without editing a frozen file.",
+   "risk": "a benchmark that cannot be dry-run can only be validated by spending its real run. That run costs 228.8 container-hours (MEASURED from the banked records' own 'seconds' fields), so a wiring error is discovered after the spend, not before. This is worth naming even though QED itself is free: the cost is compute, not oracle calls."
+  },
+  "arm_b_seam": {
+   "exists": true,
+   "detail": "ProgramQueryLedger(output, task, evaluate, budget=...) takes evaluate as Callable[[str], float]; run_program_campaign never constructs a scorer of its own. This is the same seam pmo_population_v1.execute_task uses.",
+   "gated_by": "pmo_population_v1.execute_task itself is NOT reusable here -- it raises 'task is outside the PMO-v1 three-task lock' for any name outside gsk3b / perindopril_mpo / celecoxib_rediscovery, and requires scored_launch_authorized. The generic seam one level down (run_program_campaign + ProgramQueryLedger) is what arm B uses, with no frozen file touched."
+  },
+  "dry_run_result": "PASS. One Jin source ran end to end through run_program_campaign with an injected free RDKit scorer: 33 scored endpoints in 32.5 s, best score 0.885, zero paid oracle calls. The closure probe inside the prepare tool repeats this at budget 2 on every seal."
+ },
+ "experiment_result_partial": {
+  "status": "RUNNING at the time of writing -- arm B is a resumable per-source run",
+  "arms": {
+   "A": "paper-era COMPOSE: region h_phi + twisted SMC, 32 particles, horizon 40, budget_max 24, K=8. BANKED, not re-run.",
+   "B": "current controller: structural program synthesis + FiberControl allocation, budget 48 scored endpoints, 5 rounds x 8, K=8 selected."
+  },
+  "paired_on": "source index; arm A is scored on the SAME indices arm B has completed, never on its global figure",
+  "prefix_bias_control": "MEASURED -- arm A scores 0.620 over indices 0..49 and 0.600 over 0..99 against a global 0.5589, converging to within 0.006 by index 150. A partial arm-B panel must therefore be compared only against arm A on the matched indices, which is what the analyzer does.",
+  "interpretation": {
+   "measured": "on 34 paired sources, arm B solves 2 where arm A solves 22, at 1/202nd the molecules inspected per source",
+   "disconfirming_for_the_new_controller": "yes, plainly -- the current controller is far behind at this budget, and its per-sample rate is 274x lower",
+   "what_the_result_does_NOT_establish": "that the current controller is worse. The arms are matched on RETURNED candidates and unmatched on work by 202x, so controller quality and budget are confounded. Arm B's mean best QED (0.851) is close to arm A's (0.863) -- it gets near the region and rarely crosses it, which is the signature of an under-budgeted search rather than a misdirected one.",
+   "what_would_decide_it": "run arm B at a budget that matches arm A's ~4,714 distinct molecules per source, or report both arms as success-vs-work curves. At the measured 12.6 s per source per 41 scored endpoints, a work-matched arm B is ~1.2 CPU-hours per source, i.e. ~960 CPU-hours for the panel -- the same order as arm A's 228.8 container-hours."
+  },
+  "how_to_complete": "python3 tools/run_qed_griddd_controller_comparison_v1.py --out ~/qed_griddd_armb_v1/run --budget 48 --rounds 5 --queries-per-round 8 --workers 6  (skips every source whose record already exists), then tools/analyze_qed_griddd_controller_comparison_v1.py",
+  "measured_cost_to_finish": "12.6 s/source wall at 6 workers on a 12-core machine already at load average 6-7; ~2.8 hours for the remaining sources; 0 oracle calls, 0 dollars",
+  "snapshot": {
+   "paired_sources": 56,
+   "index_range": [
+    0,
+    58
+   ],
+   "result_artifact": "diagnostics/qed_griddd_controller_comparison_result_v1.json",
+   "arm_a_returned_k8_rate": 0.6071,
+   "arm_a_per_sample_rate": 0.3214,
+   "arm_a_mean_best_qed": 0.8559,
+   "arm_a_mean_candidates_until_success": 2.35,
+   "arm_a_mean_within_source_diversity": 0.4939,
+   "arm_a_work_transitions_per_source": 8619,
+   "arm_b_returned_k8_rate": 0.0536,
+   "arm_b_per_sample_rate": 0.00175,
+   "arm_b_mean_best_qed": 0.8472,
+   "arm_b_mean_candidates_until_success": 13.3,
+   "arm_b_mean_similarity_margin_of_successes": 0.1963,
+   "arm_b_mean_within_source_diversity": 0.2391,
+   "arm_b_endpoint_uniqueness": 1.0,
+   "arm_b_scored_endpoints_per_source": 40.8,
+   "arm_b_mean_program_blocks": 1.7,
+   "arm_b_mean_primitive_depth": 4.9,
+   "arm_b_top_structural_blocks": [
+    "substituent_delete",
+    "construct_substituted_ring",
+    "functionalize",
+    "ring_path_remodel",
+    "carbonyl_insert"
+   ],
+   "work_ratio_a_over_b": 211.3
+  },
+  "arm_b_failure_decomposition_measured_at_54_sources": {
+   "scored_endpoints": 2202,
+   "admissible_similarity_ge_0.40": "1287 of 2202 (58.4%)",
+   "qed_ge_0.90_regardless_of_similarity": "15 of 2202 (0.68%)",
+   "both": 4,
+   "per_source_best_qed_among_admissible": {
+    "mean": 0.816,
+    "reaching_0.90": "3 of 54"
+   },
+   "per_source_best_qed_ignoring_similarity": {
+    "mean": 0.846,
+    "reaching_0.90": "9 of 54"
+   },
+   "reading": "the binding constraint is QED, not similarity: 58% of arm B's endpoints already satisfy the similarity floor, but only 0.68% reach the QED region at all. In 6 of the 9 sources where it can reach QED >= 0.90, it does so only by leaving the similarity ball.",
+   "actionable_defect_in_this_arm_B_wiring": "the injected scorer returns 0.0 for inadmissible endpoints, so 41.6% of the charged budget is spent on zero-scored molecules. FiberControl's own stated design puts feasibility in the SUPPORT, not in the reward; this arm was forced to put it in the reward because ProgramTask(kind='t4') -- the shape that carries a real support constraint -- also hardcodes sa_max=4.0, which is not part of this benchmark. A support-constrained arm B is the obvious next iteration and is expected to recover most of that 41.6%."
+  }
+ },
+ "blockers_to_a_launch": [
+  "NONE for arm B: it is local, free and already running. It needs no launch authorization.",
+  "Arm A cannot be re-run without a Modal launch, which is barred here. It does not need re-running: its 798 records are banked and now re-derivable by tool.",
+  "The K=20 run the protocol preregistered is still open (paper appendix marker [G1]). The K=8..12 extension is 200/800 on the volume; the K=8..20 directory is empty. Estimated cost from the banked records' own timings: 1,032 s per source per 8 trajectories, so 12 more trajectories over 800 sources is ~344 container-hours. Zero oracle calls -- QED is free; the cost is compute.",
+  "The GrIDDD 45.1% must be checked against the published PDF before any table ships. docs/griddd_qed_comparator.json says so itself and nothing in this tree has done it.",
+  "The panel non-overlap (intersection = 1 molecule) should be stated wherever the two numbers appear together."
+ ],
+ "estimated_oracle_cost": {
+  "paid_oracle_calls": 0,
+  "reason": "QED and Morgan-Tanimoto are local RDKit computations; this benchmark has no paid oracle. The real currency is CPU time.",
+  "arm_a_banked_cost": "228.8 container-hours already spent (MEASURED, sum of per-source 'seconds')",
+  "arm_b_cost_at_current_budget": "~2.8 CPU-hours for the full 800 at 6 workers",
+  "arm_b_cost_work_matched_to_arm_a": "~960 CPU-hours (INFERRED by linear scaling from the measured 41 endpoints in 12.6 s; the search cost per endpoint may not be linear in budget, so treat as an order of magnitude)"
+ },
+ "labels": {
+  "MEASURED": [
+   "798 banked arm-A records; unscored sources 135 and 408",
+   "solved@8 = 446, re-derived twice (stored fields and independent RDKit recomputation)",
+   "cumulative solved at k=1..8 = [254, 319, 370, 396, 420, 430, 439, 446]",
+   "QED/similarity recomputation agreement to 1.11e-16 / 0.0 over 6,384 returned molecules",
+   "4,301 of 6,384 slots extinct and returning the unmodified source, all counted as failures",
+   "6,755,513 proposed transitions and 3,761,470 unique states over 798 sources",
+   "mean 3.63 distinct successful non-source returns; 335 sources with >=2, 111 with exactly 1",
+   "arm A prefix bias: 0.620 at 0..49, 0.600 at 0..99, within 0.006 of global by 150",
+   "all 800 sources <= 33 heavy atoms",
+   "arm B dry run: 33 scored endpoints in 32.5 s, best score 0.885",
+   "arm B partial: 2/34 paired sources solved at budget 48",
+   "both fail-closed negative controls refuse the chain"
+  ],
+  "INFERRED": [
+   "work-matched arm B cost (~960 CPU-hours), by linear scaling",
+   "cost of the K=8..20 extension (~344 container-hours), by scaling the measured per-trajectory time",
+   "that arm B's deficit is budget-dominated rather than controller-dominated -- supported by its near-equal mean best QED but NOT established"
+  ],
+  "UNVERIFIED": [
+   "GrIDDD's 45.1% at the published source",
+   "whether GrIDDD's diversity metric aggregates as COMPOSE's does (docs/griddd_qed_comparator.json flags this itself)",
+   "whether arm B's ordering advantage or deficit persists past index 33"
+  ]
+ }
+}

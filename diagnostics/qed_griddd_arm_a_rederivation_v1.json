@@ -1,0 +1,43 @@
+{
+ "schema_version": "qed_griddd_arm_a_rederivation_v1",
+ "panel": "jin_iclr19_qed_test_800",
+ "k": 8,
+ "region": {
+  "qed_min": 0.9,
+  "tanimoto_min": 0.4
+ },
+ "similarity": "Morgan r=2, 2048 bits, chirality off, Tanimoto to the original source",
+ "scored_sources": 798,
+ "unscored_sources": [
+  135,
+  408
+ ],
+ "solved": 446,
+ "rate_over_scored": 0.5588972431077694,
+ "rate_over_full_panel": 0.5575,
+ "cumulative_solved_at_k": [
+  254,
+  319,
+  370,
+  396,
+  420,
+  430,
+  439,
+  446
+ ],
+ "slots_per_source_histogram": {
+  "8": 798
+ },
+ "verification": {
+  "panel_source_mismatches": [],
+  "unparseable_returned_smiles": 0,
+  "stored_flag_disagreements": 0,
+  "max_abs_qed_recompute_delta": 1.1102230246251565e-16,
+  "max_abs_similarity_recompute_delta": 0.0
+ },
+ "distinct_successful_non_source_returns": {
+  "mean": 3.625560538116592,
+  "sources_with_at_least_two": 335,
+  "sources_with_exactly_one": 111
+ }
+}

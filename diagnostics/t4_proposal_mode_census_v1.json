@@ -1,0 +1,37 @@
+{
+ "cells": {
+  "braf_1": {
+   "all_prune_share": 0.2,
+   "all_prune_share_by_depth": {
+    "1": 0.075,
+    "2": 0.115,
+    "3": 0.01
+   },
+   "draws": 200,
+   "first_module_share": {
+    "bond_reroute": 0.075,
+    "heteroatom_substitute": 0.11,
+    "ring_system_restate": 0.055,
+    "segment_replace": 0.12,
+    "segment_shrink": 0.12,
+    "substituent_delete": 0.36
+   },
+   "module_count_distribution": {
+    "1": 0.155,
+    "2": 0.61,
+    "3": 0.235
+   },
+   "seed": 2027091804,
+   "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl"
+  }
+ },
+ "horizon": 3,
+ "oracle_calls": 0,
+ "provenance": "Produced by `scripts/t4_proposal_mode_census.py --cells braf_1 --draws 200`. The run is deterministic given the seed, which is the audit's own shallow-lane derivation: controller_seed 2026091801 + 1_000_003 * 1 + 101 * 0 = 2027091804. Only the summary fields the reduction consumes are recorded here; re-running the script regenerates the full payload.",
+ "prune_families": [
+  "segment_shrink",
+  "substituent_delete"
+ ],
+ "schema_version": "t4_proposal_mode_census_v1",
+ "status": "DIAGNOSTIC_EVIDENCE_ONLY_ZERO_ORACLE_CALLS"
+}

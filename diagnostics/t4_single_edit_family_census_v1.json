@@ -1,0 +1,1923 @@
+{
+ "cells": {
+  "5ht1b_0": {
+   "families": {
+    "atom_restate_semantic": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.56834,
+       "qed_ok": false,
+       "sa": 4.2273,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.75325,
+       "smiles": "CC1=NC(c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)C4(CC[NH+](C)CC4)CO6)cc3)c(C)c2)=NC1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.55148,
+       "qed_ok": false,
+       "sa": 4.49002,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.725,
+       "smiles": "CC1=NC(c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)C4(CC[NH+](C)CC4)CO6)cc3)c(C)c2)=N[SH4]1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.55142,
+       "qed_ok": false,
+       "sa": 4.58663,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.71605,
+       "smiles": "Cc1cc(C2=NO[SH2](C)=N2)ccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 214,
+     "executed": 214,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "bond_reroute": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.43962,
+       "qed_ok": false,
+       "sa": 4.96952,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.63953,
+       "smiles": "Cc1cc(-c2ncon2)ccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2C)CO4)cc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.43962,
+       "qed_ok": false,
+       "sa": 4.96952,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.63953,
+       "smiles": "Cc1cc(-c2ncon2)ccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2C)CO4)cc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.43962,
+       "qed_ok": false,
+       "sa": 4.75938,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.675,
+       "smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)C4(CC[NH+](C)CC4C)CO6)cc3)cc2)no1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 56,
+     "executed": 35,
+     "execution_failures": {
+      "InvalidRewrite": 20,
+      "ValueError": 1
+     },
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_close": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.44771,
+       "qed_ok": false,
+       "sa": 4.69769,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.76623,
+       "smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)C4(CO6)C5C[NH+](C)CC54)cc3)c(C)c2)no1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.44628,
+       "qed_ok": false,
+       "sa": 5.92798,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.61628,
+       "smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4c5cc6c7cc5CC4C4C[NH+](C)CCC64CO7)cc3)c(C)c2)no1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.44628,
+       "qed_ok": false,
+       "sa": 5.92798,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.61628,
+       "smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4c5cc6c7cc5CC4C4C[NH+](C)CCC64CO7)cc3)c(C)c2)no1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 208,
+     "executed": 208,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_open": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.50799,
+       "qed_ok": false,
+       "sa": 4.54028,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.65116,
+       "smiles": "C=CC(=C(C)C=Cc1noc(C)n1)c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.50799,
+       "qed_ok": false,
+       "sa": 4.48062,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.63218,
+       "smiles": "C=C(C)C(=CC=Cc1noc(C)n1)c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.50799,
+       "qed_ok": false,
+       "sa": 4.49985,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.66265,
+       "smiles": "C=C(C(C)=CC(=C)c1noc(C)n1)c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 33,
+     "executed": 33,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "ring_system_restate": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.55405,
+       "qed_ok": false,
+       "sa": 4.10825,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.6988,
+       "smiles": "Cc1nc(-c2ccc(C3CCC(C(=O)N4CCc5cc6c(cc54)C4(CC[NH+](C)CC4)CO6)CC3)c(C)c2)no1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.55268,
+       "qed_ok": false,
+       "sa": 5.03821,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.625,
+       "smiles": "Cc1nc(C2CCC(c3ccc(C(=O)N4CCc5cc6c(cc54)C4(CC[NH+](C)CC4)CO6)cc3)C(C)C2)no1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.49001,
+       "qed_ok": false,
+       "sa": 5.02639,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.65882,
+       "smiles": "Cc1cc(C2NOC(C)N2)ccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 4,
+     "executed": 4,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    }
+   },
+   "heavy_atoms": 39,
+   "net_formal_charge": 1,
+   "protein": "5ht1b",
+   "role": "control",
+   "smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)[C@]4(CC[N@H+](C)CC4)CO6)cc3)c(C)c2)no1",
+   "total_eligible": 0,
+   "total_enumerated": 515
+  },
+  "5ht1b_1": {
+   "families": {
+    "atom_restate_semantic": {
+     "best_eligible": [
+      {
+       "eligible": true,
+       "heavy": 16,
+       "qed": 0.81923,
+       "qed_ok": true,
+       "sa": 3.79224,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.78788,
+       "smiles": "FC(F)(Br)c1cccc(N2CC[NH2+]CC2)c1"
+      },
+      {
+       "eligible": true,
+       "heavy": 16,
+       "qed": 0.81923,
+       "qed_ok": true,
+       "sa": 3.79224,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.78788,
+       "smiles": "FC(F)(Br)c1cccc(N2CC[NH2+]CC2)c1"
+      },
+      {
+       "eligible": true,
+       "heavy": 16,
+       "qed": 0.81923,
+       "qed_ok": true,
+       "sa": 3.79224,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.78788,
+       "smiles": "FC(F)(Br)c1cccc(N2CC[NH2+]CC2)c1"
+      },
+      {
+       "eligible": true,
+       "heavy": 16,
+       "qed": 0.80398,
+       "qed_ok": true,
+       "sa": 3.52071,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.76471,
+       "smiles": "CC(F)(F)c1cccc(N2CC[NH2+]CC2)c1"
+      }
+     ],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": true,
+       "heavy": 16,
+       "qed": 0.81923,
+       "qed_ok": true,
+       "sa": 3.79224,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.78788,
+       "smiles": "FC(F)(Br)c1cccc(N2CC[NH2+]CC2)c1"
+      },
+      {
+       "eligible": true,
+       "heavy": 16,
+       "qed": 0.81923,
+       "qed_ok": true,
+       "sa": 3.79224,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.78788,
+       "smiles": "FC(F)(Br)c1cccc(N2CC[NH2+]CC2)c1"
+      },
+      {
+       "eligible": true,
+       "heavy": 16,
+       "qed": 0.81923,
+       "qed_ok": true,
+       "sa": 3.79224,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.78788,
+       "smiles": "FC(F)(Br)c1cccc(N2CC[NH2+]CC2)c1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 33,
+     "enumerated_actions": 103,
+     "executed": 103,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.320388
+    },
+    "bond_reroute": {
+     "best_eligible": [
+      {
+       "eligible": true,
+       "heavy": 16,
+       "qed": 0.76659,
+       "qed_ok": true,
+       "sa": 3.24404,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.63636,
+       "smiles": "FC(F)(F)c1ccc(N2CC[NH2+]CC2)cc1"
+      }
+     ],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": true,
+       "heavy": 16,
+       "qed": 0.76659,
+       "qed_ok": true,
+       "sa": 3.24404,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.63636,
+       "smiles": "FC(F)(F)c1ccc(N2CC[NH2+]CC2)cc1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 1,
+     "enumerated_actions": 36,
+     "executed": 31,
+     "execution_failures": {
+      "InvalidRewrite": 4,
+      "ValueError": 1
+     },
+     "uniform_eligible_mass": 0.027778
+    },
+    "cycle_close": {
+     "best_eligible": [
+      {
+       "eligible": true,
+       "heavy": 16,
+       "qed": 0.7665,
+       "qed_ok": true,
+       "sa": 3.41348,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.61111,
+       "smiles": "FC(F)(F)c1cccc(N2CC3=C(C2)[NH2+]3)c1"
+      }
+     ],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": true,
+       "heavy": 16,
+       "qed": 0.7665,
+       "qed_ok": true,
+       "sa": 3.41348,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.61111,
+       "smiles": "FC(F)(F)c1cccc(N2CC3=C(C2)[NH2+]3)c1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 1,
+     "enumerated_actions": 28,
+     "executed": 28,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.035714
+    },
+    "cycle_open": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 10,
+     "executed": 10,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "ring_system_restate": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 1,
+     "executed": 1,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    }
+   },
+   "heavy_atoms": 16,
+   "net_formal_charge": 1,
+   "protein": "5ht1b",
+   "role": "control",
+   "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+   "total_eligible": 35,
+   "total_enumerated": 178
+  },
+  "5ht1b_2": {
+   "families": {
+    "atom_restate_semantic": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 31,
+       "qed": 0.7333,
+       "qed_ok": true,
+       "sa": 4.66211,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.69231,
+       "smiles": "C1=CC(n2cnnc2)=NC2C(CCCN3CC[NH+](CCc4ccccc4)CC3)=CN=C12"
+      },
+      {
+       "eligible": false,
+       "heavy": 31,
+       "qed": 0.72097,
+       "qed_ok": true,
+       "sa": 4.57743,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.73016,
+       "smiles": "C1=CC(n2cnnc2)=CC2C1=CC=C2CCCN1CC[NH+](CCc2ccccc2)CC1"
+      },
+      {
+       "eligible": false,
+       "heavy": 31,
+       "qed": 0.72072,
+       "qed_ok": true,
+       "sa": 4.58199,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.80952,
+       "smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)C2C=C1n1ccnc1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 222,
+     "executed": 222,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "bond_reroute": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 0,
+     "executed": 0,
+     "execution_failures": {},
+     "uniform_eligible_mass": null
+    },
+    "cycle_close": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 31,
+       "qed": 0.81497,
+       "qed_ok": true,
+       "sa": 5.28785,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.61111,
+       "smiles": "C1=CC2=NC=C(CCCN3CC[NH+]4CCc5ccccc5C4C3)C2C=C1n1cnnc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 31,
+       "qed": 0.81497,
+       "qed_ok": true,
+       "sa": 5.28785,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.61111,
+       "smiles": "C1=CC2=NC=C(CCCN3CC[NH+]4CCc5ccccc5C4C3)C2C=C1n1cnnc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 31,
+       "qed": 0.81497,
+       "qed_ok": true,
+       "sa": 5.28785,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.61111,
+       "smiles": "C1=CC2=NC=C(CCCN3CC[NH+]4CCc5ccccc5C4C3)C2C=C1n1cnnc1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 230,
+     "executed": 230,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_open": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 31,
+       "qed": 0.59466,
+       "qed_ok": false,
+       "sa": 5.24684,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.66667,
+       "smiles": "C=CC=CC=CCC[NH+]1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1"
+      },
+      {
+       "eligible": false,
+       "heavy": 31,
+       "qed": 0.59466,
+       "qed_ok": false,
+       "sa": 5.24684,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.66667,
+       "smiles": "C=CC=CC=CCC[NH+]1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1"
+      },
+      {
+       "eligible": false,
+       "heavy": 31,
+       "qed": 0.59466,
+       "qed_ok": false,
+       "sa": 5.3037,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.64789,
+       "smiles": "C=CC=CC(=C)CC[NH+]1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 23,
+     "executed": 23,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "ring_system_restate": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 31,
+       "qed": 0.702,
+       "qed_ok": true,
+       "sa": 4.8414,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.70769,
+       "smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCC4CCCCC4)CC3)C2C=C1n1cnnc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 31,
+       "qed": 0.58716,
+       "qed_ok": false,
+       "sa": 4.92321,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.7619,
+       "smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)C2C=C1N1CNNC1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 7,
+     "executed": 7,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    }
+   },
+   "heavy_atoms": 31,
+   "net_formal_charge": 1,
+   "protein": "5ht1b",
+   "role": "failed",
+   "smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1",
+   "total_eligible": 0,
+   "total_enumerated": 482
+  },
+  "braf_0": {
+   "families": {
+    "atom_restate_semantic": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.31528,
+       "qed_ok": false,
+       "sa": 3.34379,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.67059,
+       "smiles": "CCN(CC)CCNC(=O)c1cnn2c1N=[SH3]C=C2c1cccc(NC(=O)Nc2ccc(Cl)c(C(F)(F)F)c2)c1"
+      },
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.30619,
+       "qed_ok": false,
+       "sa": 3.363,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.65116,
+       "smiles": "CCN(CC)CCNC(=O)c1cnn2c1N=C[SH3]=C2c1cccc(NC(=O)Nc2ccc(Cl)c(C(F)(F)F)c2)c1"
+      },
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.30474,
+       "qed_ok": false,
+       "sa": 3.76217,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.65116,
+       "smiles": "CCN(CC)CCNC(=O)c1cnn2c1[PH2]=CC=C2c1cccc(NC(=O)Nc2ccc(Cl)c(C(F)(F)F)c2)c1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 269,
+     "executed": 269,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "bond_reroute": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.29355,
+       "qed_ok": false,
+       "sa": 2.85683,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.72619,
+       "smiles": "CCN(C)CCNC(=O)c1cnn2c(-c3cccc(N(C)C(=O)Nc4ccc(Cl)c(C(F)(F)F)c4)c3)ccnc12"
+      },
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.29355,
+       "qed_ok": false,
+       "sa": 2.8612,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.72619,
+       "smiles": "CCN(C)CCNC(=O)c1cnn2c(-c3cccc(NC(=O)N(C)c4ccc(Cl)c(C(F)(F)F)c4)c3)ccnc12"
+      },
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.29355,
+       "qed_ok": false,
+       "sa": 2.85683,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.72619,
+       "smiles": "CCN(C)CCNC(=O)c1cnn2c(-c3cccc(N(C)C(=O)Nc4ccc(Cl)c(C(F)(F)F)c4)c3)ccnc12"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 226,
+     "executed": 225,
+     "execution_failures": {
+      "ValueError": 1
+     },
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_close": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.33028,
+       "qed_ok": false,
+       "sa": 2.64428,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.68293,
+       "smiles": "CCN1CCN(C(=O)c2cnn3c(-c4cccc(NC(=O)Nc5ccc(Cl)c(C(F)(F)F)c5)c4)ccnc23)CC1"
+      },
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.33028,
+       "qed_ok": false,
+       "sa": 2.64428,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.68293,
+       "smiles": "CCN1CCN(C(=O)c2cnn3c(-c4cccc(NC(=O)Nc5ccc(Cl)c(C(F)(F)F)c5)c4)ccnc23)CC1"
+      },
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.31396,
+       "qed_ok": false,
+       "sa": 3.35958,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.65116,
+       "smiles": "CCN1CCN(C(=O)c2cnn3c(-c4cccc(NC(=O)Nc5ccc(Cl)c(C(F)(F)F)c5)c4)ccnc23)C1C"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 175,
+     "executed": 175,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_open": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.26769,
+       "qed_ok": false,
+       "sa": 3.41693,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.66292,
+       "smiles": "C=CC(Cl)=C(C=CNC(=O)Nc1cccc(-c2ccnc3c(C(=O)NCCN(CC)CC)cnn23)c1)C(F)(F)F"
+      },
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.26769,
+       "qed_ok": false,
+       "sa": 3.37834,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.66292,
+       "smiles": "C=C(C(Cl)=CC=CNC(=O)Nc1cccc(-c2ccnc3c(C(=O)NCCN(CC)CC)cnn23)c1)C(F)(F)F"
+      },
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.26769,
+       "qed_ok": false,
+       "sa": 3.33596,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.68605,
+       "smiles": "C=C(C=C(C(=C)Cl)C(F)(F)F)NC(=O)Nc1cccc(-c2ccnc3c(C(=O)NCCN(CC)CC)cnn23)c1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 18,
+     "executed": 18,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "ring_system_restate": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.31826,
+       "qed_ok": false,
+       "sa": 3.63176,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.65169,
+       "smiles": "CCN(CC)CCNC(=O)c1cnn2c(C3CCCC(NC(=O)Nc4ccc(Cl)c(C(F)(F)F)c4)C3)ccnc12"
+      },
+      {
+       "eligible": false,
+       "heavy": 40,
+       "qed": 0.31204,
+       "qed_ok": false,
+       "sa": 3.9036,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.67816,
+       "smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC(=O)NC4CCC(Cl)C(C(F)(F)F)C4)c3)ccnc12"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 3,
+     "executed": 3,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    }
+   },
+   "heavy_atoms": 40,
+   "net_formal_charge": 0,
+   "protein": "braf",
+   "role": "failed",
+   "smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34",
+   "total_eligible": 0,
+   "total_enumerated": 691
+  },
+  "braf_1": {
+   "families": {
+    "atom_restate_semantic": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.40636,
+       "qed_ok": false,
+       "sa": 3.5534,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.73171,
+       "smiles": "O=C(Nc1ccc(Cl)c(C(F)(F)F)c1)N[SH2]1=CC=C(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)C=C1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.40636,
+       "qed_ok": false,
+       "sa": 3.5338,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.71951,
+       "smiles": "O=C(NC1=CC=[SH2](Oc2ccnc(C(=O)NCCN3CCOCC3)c2)C=C1)Nc1ccc(Cl)c(C(F)(F)F)c1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.39914,
+       "qed_ok": false,
+       "sa": 3.95931,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.75,
+       "smiles": "O=C(Nc1ccc(Cl)c(C(F)(F)F)c1)N[PH]1=CC=C(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)C=C1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 243,
+     "executed": 243,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "bond_reroute": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.36824,
+       "qed_ok": false,
+       "sa": 2.76559,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.65432,
+       "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(NC(=O)N(Cl)c3cccc(C(F)(F)F)c3)cc2)ccn1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.36824,
+       "qed_ok": false,
+       "sa": 2.76409,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.63415,
+       "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(N(Cl)C(=O)Nc3cccc(C(F)(F)F)c3)cc2)ccn1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.36821,
+       "qed_ok": false,
+       "sa": 2.69764,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.67949,
+       "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(NC(=O)N(c3ccc(Cl)cc3)C(F)(F)F)cc2)ccn1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 95,
+     "executed": 94,
+     "execution_failures": {
+      "ValueError": 1
+     },
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_close": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.43861,
+       "qed_ok": false,
+       "sa": 3.23022,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.62963,
+       "smiles": "O=C(Nc1ccc(Oc2ccnc(C(=O)N3CCN4CCOCC43)c2)cc1)Nc1ccc(Cl)c(C(F)(F)F)c1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.43861,
+       "qed_ok": false,
+       "sa": 3.23022,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.62963,
+       "smiles": "O=C(Nc1ccc(Oc2ccnc(C(=O)N3CCN4CCOCC43)c2)cc1)Nc1ccc(Cl)c(C(F)(F)F)c1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.40682,
+       "qed_ok": false,
+       "sa": 3.61579,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.64286,
+       "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccc3cc2N(c2ccc(Cl)c(C(F)(F)F)c2)C(=O)N3)ccn1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 174,
+     "executed": 174,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_open": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.35714,
+       "qed_ok": false,
+       "sa": 3.17944,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.65854,
+       "smiles": "C=C(C=CC(Cl)=CC(F)(F)F)NC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.35714,
+       "qed_ok": false,
+       "sa": 3.23339,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.64286,
+       "smiles": "O=C(NC(C=CC(F)(F)F)=CC=CCl)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.35714,
+       "qed_ok": false,
+       "sa": 3.18566,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.64286,
+       "smiles": "C=C(C(Cl)=CC=CNC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1)C(F)(F)F"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 24,
+     "executed": 24,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "ring_system_restate": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.43717,
+       "qed_ok": false,
+       "sa": 2.69413,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.73418,
+       "smiles": "O=C(Nc1ccc(Cl)c(C(F)(F)F)c1)NC1CCC(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)CC1"
+      },
+      {
+       "eligible": false,
+       "heavy": 39,
+       "qed": 0.40728,
+       "qed_ok": false,
+       "sa": 3.70958,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.66667,
+       "smiles": "O=C(Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1)NC1CCC(Cl)C(C(F)(F)F)C1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 3,
+     "executed": 3,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    }
+   },
+   "heavy_atoms": 39,
+   "net_formal_charge": 0,
+   "protein": "braf",
+   "role": "failed",
+   "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+   "total_eligible": 0,
+   "total_enumerated": 539
+  },
+  "braf_2": {
+   "families": {
+    "atom_restate_semantic": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.35397,
+       "qed_ok": false,
+       "sa": 3.50213,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.69863,
+       "smiles": "O=C(Nc1ccc(Cl)c(C(F)(F)F)c1)N[SH2]1=CC=C(Oc2ccnc(C(=O)Nc3cccnc3)c2)C=C1"
+      },
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.35397,
+       "qed_ok": false,
+       "sa": 3.48142,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.68493,
+       "smiles": "O=C(NC1=CC=[SH2](Oc2ccnc(C(=O)Nc3cccnc3)c2)C=C1)Nc1ccc(Cl)c(C(F)(F)F)c1"
+      },
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.33635,
+       "qed_ok": false,
+       "sa": 2.67955,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.82258,
+       "smiles": "Bc1ccc(NC(=O)Nc2ccc(Oc3ccnc(C(=O)Nc4cccnc4)c3)cc2)cc1C(F)(F)F"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 180,
+     "executed": 180,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "bond_reroute": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.2709,
+       "qed_ok": false,
+       "sa": 2.66931,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.61972,
+       "smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccc(NC(=O)N(Cl)c3cccc(C(F)(F)F)c3)cc2)ccn1"
+      },
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.2709,
+       "qed_ok": false,
+       "sa": 2.66772,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.60563,
+       "smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccc(N(Cl)C(=O)Nc3cccc(C(F)(F)F)c3)cc2)ccn1"
+      },
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.27088,
+       "qed_ok": false,
+       "sa": 2.59748,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.63768,
+       "smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccc(NC(=O)N(c3ccc(Cl)cc3)C(F)(F)F)cc2)ccn1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 85,
+     "executed": 84,
+     "execution_failures": {
+      "ValueError": 1
+     },
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_close": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.39963,
+       "qed_ok": false,
+       "sa": 3.71777,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.60274,
+       "smiles": "O=C(Nc1ccc(Oc2ccnc(C(=O)N3C4=CN=CC3=C4)c2)cc1)Nc1ccc(Cl)c(C(F)(F)F)c1"
+      },
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.30068,
+       "qed_ok": false,
+       "sa": 2.67963,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.64,
+       "smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccc3[nH]c(=O)n(-c4ccc(Cl)c(C(F)(F)F)c4)c3c2)ccn1"
+      },
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.30068,
+       "qed_ok": false,
+       "sa": 2.67963,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.64,
+       "smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccc3[nH]c(=O)n(-c4ccc(Cl)c(C(F)(F)F)c4)c3c2)ccn1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 129,
+     "executed": 129,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_open": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.29289,
+       "qed_ok": false,
+       "sa": 3.10674,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.61644,
+       "smiles": "C=C(C=CC(Cl)=CC(F)(F)F)NC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.29289,
+       "qed_ok": false,
+       "sa": 3.16384,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.60811,
+       "smiles": "O=C(NC(C=CC(F)(F)F)=CC=CCl)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.29289,
+       "qed_ok": false,
+       "sa": 3.11331,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.6,
+       "smiles": "C=C(C(Cl)=CC=CNC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)C(F)(F)F"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 24,
+     "executed": 24,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "ring_system_restate": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.36501,
+       "qed_ok": false,
+       "sa": 2.59377,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.69014,
+       "smiles": "O=C(Nc1ccc(Cl)c(C(F)(F)F)c1)NC1CCC(Oc2ccnc(C(=O)Nc3cccnc3)c2)CC1"
+      },
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.33797,
+       "qed_ok": false,
+       "sa": 3.6196,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.61644,
+       "smiles": "O=C(Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1)NC1CCC(Cl)C(C(F)(F)F)C1"
+      },
+      {
+       "eligible": false,
+       "heavy": 37,
+       "qed": 0.32662,
+       "qed_ok": false,
+       "sa": 2.9534,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.62162,
+       "smiles": "O=C(Nc1ccc(Oc2ccnc(C(=O)NC3CCCNC3)c2)cc1)Nc1ccc(Cl)c(C(F)(F)F)c1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 4,
+     "executed": 4,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    }
+   },
+   "heavy_atoms": 37,
+   "net_formal_charge": 0,
+   "protein": "braf",
+   "role": "control",
+   "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+   "total_eligible": 0,
+   "total_enumerated": 422
+  },
+  "fa7_0": {
+   "families": {
+    "atom_restate_semantic": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 32,
+       "qed": 0.42705,
+       "qed_ok": false,
+       "sa": 2.57536,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.84211,
+       "smiles": "B=C(N)c1ccc2ccc(CN(CCC(C)C)C(=O)c3cccc4ccccc34)cc2c1"
+      },
+      {
+       "eligible": false,
+       "heavy": 32,
+       "qed": 0.40863,
+       "qed_ok": false,
+       "sa": 2.19682,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.87273,
+       "smiles": "CC(C)CCN(Cc1ccc2ccc(C(N)=O)cc2c1)C(=O)c1cccc2ccccc12"
+      },
+      {
+       "eligible": false,
+       "heavy": 32,
+       "qed": 0.39608,
+       "qed_ok": false,
+       "sa": 2.60317,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.84211,
+       "smiles": "CC(C)CCN(Cc1ccc2ccc(C(N)=[SH4])cc2c1)C(=O)c1cccc2ccccc12"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 152,
+     "executed": 152,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "bond_reroute": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 32,
+       "qed": 0.36126,
+       "qed_ok": false,
+       "sa": 3.01917,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.63636,
+       "smiles": "CC(CN)CCN(Cc1ccc2ccc(C=N)cc2c1)C(=O)c1cccc2ccccc12"
+      },
+      {
+       "eligible": false,
+       "heavy": 32,
+       "qed": 0.36126,
+       "qed_ok": false,
+       "sa": 3.01917,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.63636,
+       "smiles": "CC(CN)CCN(Cc1ccc2ccc(C=N)cc2c1)C(=O)c1cccc2ccccc12"
+      },
+      {
+       "eligible": false,
+       "heavy": 32,
+       "qed": 0.31613,
+       "qed_ok": false,
+       "sa": 2.38078,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.64062,
+       "smiles": "CCN(Cc1ccc2ccc(C(N)=NC(C)C)cc2c1)C(=O)c1cccc2ccccc12"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 126,
+     "executed": 126,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_close": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 32,
+       "qed": 0.41303,
+       "qed_ok": false,
+       "sa": 3.34729,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.62121,
+       "smiles": "CC(C)CCN(Cc1ccc2c3cc(cc2c1)C(N)=N3)C(=O)c1cccc2ccccc12"
+      },
+      {
+       "eligible": false,
+       "heavy": 32,
+       "qed": 0.41303,
+       "qed_ok": false,
+       "sa": 2.56682,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.66154,
+       "smiles": "CC(C)CCN(Cc1ccc2cc3c(cc2c1)C(N)=N3)C(=O)c1cccc2ccccc12"
+      },
+      {
+       "eligible": false,
+       "heavy": 32,
+       "qed": 0.41303,
+       "qed_ok": false,
+       "sa": 2.57792,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.63077,
+       "smiles": "CC(C)CCN(Cc1ccc2ccc3c(c2c1)N=C3N)C(=O)c1cccc2ccccc12"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 206,
+     "executed": 206,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_open": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 32,
+       "qed": 0.42383,
+       "qed_ok": false,
+       "sa": 3.12477,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.61194,
+       "smiles": "C=CC=c1ccccc1=CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+      },
+      {
+       "eligible": false,
+       "heavy": 32,
+       "qed": 0.42383,
+       "qed_ok": false,
+       "sa": 3.09668,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.60294,
+       "smiles": "C=CC(C(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1)=c1ccccc1=C"
+      },
+      {
+       "eligible": false,
+       "heavy": 32,
+       "qed": 0.42205,
+       "qed_ok": false,
+       "sa": 3.08522,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.63235,
+       "smiles": "C=c1cc(C(=N)N)ccc1=CC=CCN(CCC(C)C)C(=O)c1cccc2ccccc12"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 22,
+     "executed": 22,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "ring_system_restate": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 2,
+     "executed": 2,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    }
+   },
+   "heavy_atoms": 32,
+   "net_formal_charge": 0,
+   "protein": "fa7",
+   "role": "failed",
+   "smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+   "total_eligible": 0,
+   "total_enumerated": 508
+  },
+  "fa7_1": {
+   "families": {
+    "atom_restate_semantic": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.33314,
+       "qed_ok": false,
+       "sa": 3.59362,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.75758,
+       "smiles": "NC(N)=CCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.31001,
+       "qed_ok": false,
+       "sa": 3.89048,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.8,
+       "smiles": "NC(Cc1ccccc1)C(=O)N1CCCC1C(=O)NC(CCl)CCCN=S(N)N"
+      },
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.29826,
+       "qed_ok": false,
+       "sa": 4.06104,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.8,
+       "smiles": "NC(Cc1ccccc1)C(=O)N1CCCC1C(=O)NC(CCl)CCCN=[SH2](N)N"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 238,
+     "executed": 238,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "bond_reroute": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.29852,
+       "qed_ok": false,
+       "sa": 3.61653,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.61111,
+       "smiles": "CC(CCl)N(CCN=C(N)N)C(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.26651,
+       "qed_ok": false,
+       "sa": 3.65091,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.61644,
+       "smiles": "CCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1N=C(N)N"
+      },
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.26651,
+       "qed_ok": false,
+       "sa": 3.5807,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.64384,
+       "smiles": "CCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1cccc(N=C(N)N)c1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 190,
+     "executed": 189,
+     "execution_failures": {
+      "ValueError": 1
+     },
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_close": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.52888,
+       "qed_ok": false,
+       "sa": 3.84859,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.625,
+       "smiles": "NC1=NCC(CC(CCl)NC(=O)C2CCCN2C(=O)C(N)Cc2ccccc2)=N1"
+      },
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.52888,
+       "qed_ok": false,
+       "sa": 3.84859,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.625,
+       "smiles": "NC1=NCC(CC(CCl)NC(=O)C2CCCN2C(=O)C(N)Cc2ccccc2)=N1"
+      },
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.51188,
+       "qed_ok": false,
+       "sa": 3.66003,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.68116,
+       "smiles": "NC1=NC(CCC(CCl)NC(=O)C2CCCN2C(=O)C(N)Cc2ccccc2)=N1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 227,
+     "executed": 227,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_open": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.12033,
+       "qed_ok": false,
+       "sa": 4.13469,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.63889,
+       "smiles": "C=CC=CC=CCC(N)C(=O)N1CCCC1C(=O)NC(CCl)CCCN=C(N)N"
+      },
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.12033,
+       "qed_ok": false,
+       "sa": 4.13469,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.63889,
+       "smiles": "C=CC=CC=CCC(N)C(=O)N1CCCC1C(=O)NC(CCl)CCCN=C(N)N"
+      },
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.12033,
+       "qed_ok": false,
+       "sa": 4.15057,
+       "sa_ok": false,
+       "sim_ok": true,
+       "similarity": 0.63014,
+       "smiles": "C=CC=CC(=C)CC(N)C(=O)N1CCCC1C(=O)NC(CCl)CCCN=C(N)N"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 11,
+     "executed": 11,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "ring_system_restate": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.19758,
+       "qed_ok": false,
+       "sa": 3.48852,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.62319,
+       "smiles": "NC(N)=NCCCC(CCl)NC(=O)c1cccn1C(=O)C(N)Cc1ccccc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 29,
+       "qed": 0.17803,
+       "qed_ok": false,
+       "sa": 3.64114,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.69697,
+       "smiles": "NC(N)=NCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)CC1CCCCC1"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 2,
+     "executed": 2,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    }
+   },
+   "heavy_atoms": 29,
+   "net_formal_charge": 0,
+   "protein": "fa7",
+   "role": "control",
+   "smiles": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+   "total_eligible": 0,
+   "total_enumerated": 668
+  },
+  "fa7_2": {
+   "families": {
+    "atom_restate_semantic": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.29835,
+       "qed_ok": false,
+       "sa": 2.7519,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.84615,
+       "smiles": "C=C(N)c1ccc(CNC(=O)Cn2c(-c3cc(N)cc(C(=O)O)c3)ccc(NC(C)C)c2=O)cc1"
+      },
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.29359,
+       "qed_ok": false,
+       "sa": 2.57506,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.87302,
+       "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C(N)=O)cc2)c1=O"
+      },
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.24654,
+       "qed_ok": false,
+       "sa": 3.46716,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.79412,
+       "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(S(=N)N)cc2)c1=O"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 230,
+     "executed": 230,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "bond_reroute": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.20537,
+       "qed_ok": false,
+       "sa": 2.55407,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.69444,
+       "smiles": "CC(C)Nc1ccc(-c2cccc(NC(=O)O)c2)n(CC(=O)NCc2ccc(C(=N)N)cc2)c1=O"
+      },
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.20422,
+       "qed_ok": false,
+       "sa": 2.63286,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.70423,
+       "smiles": "CC(C)Nc1ccc(-c2cc(NC(=N)N)cc(C(=O)O)c2)n(CC(=O)NCc2ccccc2)c1=O"
+      },
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.20292,
+       "qed_ok": false,
+       "sa": 2.96246,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.62667,
+       "smiles": "CC(C)Nc1c(N)cc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc(C=N)cc2)c1=O"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 162,
+     "executed": 162,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_close": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.31245,
+       "qed_ok": false,
+       "sa": 3.7442,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.66216,
+       "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc3cc2N=C3N)c1=O"
+      },
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.31245,
+       "qed_ok": false,
+       "sa": 2.93783,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.72222,
+       "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc3c(c2)N=C3N)c1=O"
+      },
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.31245,
+       "qed_ok": false,
+       "sa": 2.93783,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.72222,
+       "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCc2ccc3c(c2)N=C3N)c1=O"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 197,
+     "executed": 197,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "cycle_open": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.1242,
+       "qed_ok": false,
+       "sa": 3.42204,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.64103,
+       "smiles": "C=CC(=CC=CCNC(=O)Cn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O)C(=N)N"
+      },
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.1242,
+       "qed_ok": false,
+       "sa": 3.42204,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.64103,
+       "smiles": "C=CC(=CC=CCNC(=O)Cn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O)C(=N)N"
+      },
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.1242,
+       "qed_ok": false,
+       "sa": 3.42441,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.66667,
+       "smiles": "C=C(C=CC(=C)C(=N)N)CNC(=O)Cn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 16,
+     "executed": 16,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    },
+    "ring_system_restate": {
+     "best_eligible": [],
+     "best_qed_among_similarity_passing": [
+      {
+       "eligible": false,
+       "heavy": 35,
+       "qed": 0.18056,
+       "qed_ok": false,
+       "sa": 2.91817,
+       "sa_ok": true,
+       "sim_ok": true,
+       "similarity": 0.67568,
+       "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CC(=O)NCC2CCC(C(=N)N)CC2)c1=O"
+      }
+     ],
+     "charge_changing_endpoints": 0,
+     "eligible": 0,
+     "enumerated_actions": 3,
+     "executed": 3,
+     "execution_failures": {},
+     "uniform_eligible_mass": 0.0
+    }
+   },
+   "heavy_atoms": 35,
+   "net_formal_charge": 0,
+   "protein": "fa7",
+   "role": "failed",
+   "smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+   "total_eligible": 0,
+   "total_enumerated": 608
+  }
+ },
+ "oracle_calls": 0,
+ "schema_version": "t4_single_edit_family_census_v1",
+ "status": "DIAGNOSTIC_EVIDENCE_ONLY_ZERO_ORACLE_CALLS"
+}
