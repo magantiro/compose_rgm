@@ -3,9 +3,9 @@
     "budget": {
       "automatic_retries": 0,
       "backfill": false,
-      "candidate_calls_per_task": 984,
-      "charged_calls_per_task": 1000,
-      "charged_calls_total": 3000,
+      "candidate_calls_per_task": 234,
+      "charged_calls_per_task": 250,
+      "charged_calls_total": 750,
       "cpu_per_worker": 1,
       "gpu": false,
       "initialization_calls_per_task": 16,
@@ -73,5 +73,5 @@
       "celecoxib_rediscovery"
     ]
   },
-  "payload_sha256": "a2530fcebd065407e2ef8709ba464dd7d3d1536a69106391787b54c2c6c652ce"
+  "payload_sha256": "047f6a0fd094ad548553fa1c28641284990a11e221263aa07948aec6eb18200a"
 }

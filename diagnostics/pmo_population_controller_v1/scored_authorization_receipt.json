@@ -1,0 +1,40 @@
+{
+  "schema_version": "pmo_population_scored_authorization_receipt_v1",
+  "status": "AUTHORIZED_PENDING_PREFLIGHT",
+  "authorization_basis": "User explicitly authorized the exact three-task PMO-v1 scored run under the sealed payload hash in the conversation.",
+  "contract_path": "configs/pmo_population_controller_v1_scored_contract.json",
+  "payload_sha256": "61c1fdf3995f0635b2f46a517e6e5ddd566f3ec9a26ce53ea3dec1c6e5a0b582",
+  "tasks": [
+    "gsk3b",
+    "perindopril_mpo",
+    "celecoxib_rediscovery"
+  ],
+  "charged_oracle_calls_total": 3000,
+  "charged_oracle_calls_per_task": 1000,
+  "initialization_calls_per_task": 16,
+  "candidate_calls_per_task": 984,
+  "automatic_retries": 0,
+  "replacements": false,
+  "backfill": false,
+  "no_prescreen": true,
+  "winner_injection": false,
+  "modal_source_upload": {
+    "required": true,
+    "authorization_basis": "Covered by the user's earlier explicit authorization to use Modal for this project; existing Modal token acceptance was verified before deployment.",
+    "workspace": "rahul-94866",
+    "token_verified": true,
+    "source_upload_scope": "Dedicated PMO-v1 worker image containing only the frozen PMO controller inputs, pinned oracle environment, and task-blind runtime source closure."
+  },
+  "code_revision": "b37900c2",
+  "controller_contract_sha256": "bf0ab7de1f4b99c93465b3c11259f05e7cf90da6cddbe6108d6351bd890b22db",
+  "support_gate_sha256": "510f6920e947e128557d48f52baa43392e7fb4bf9b0469aa864010ca85651ef0",
+  "support_scheduler_result_sha256": "de044abe3b6c7eb1f5cbf53fd8591f5c26561753dedf4b3cbcb5cb9691fa71fc",
+  "launch_worker_path": "modal_apps/pmo_population_v1_app.py",
+  "launch_worker_sha256": "a53dbe8345e5c37654b1f327e85ab2e54553d55874e6470737e4d4e3193218e3",
+  "preflight": {
+    "oracle_calls_before_launch": 0,
+    "modal_calls_before_launch": 0,
+    "result_namespace": "diagnostics/pmo_population_controller_v1/",
+    "task_boundary": "one durable Modal call per task; a started task is terminal and cannot be retried or backfilled"
+  }
+}

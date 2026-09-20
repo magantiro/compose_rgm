@@ -1,0 +1,32 @@
+{
+  "authorization_basis": "User explicitly authorized the corrected payload after the terminal pre-oracle worker image failure.",
+  "authorized_at_utc": "2026-09-20T19:32:26.985442+00:00",
+  "corrected_worker": {
+    "app": "compose-pmo-population-v1-corrected",
+    "path": "modal_apps/pmo_population_v1_app.py",
+    "torch": "2.4.0",
+    "torch_index": "https://download.pytorch.org/whl/cpu"
+  },
+  "modal_source_upload_authorized": true,
+  "new_explicit_authorization_required": false,
+  "oracle_calls_authorized": 750,
+  "payload_sha256": "047f6a0fd094ad548553fa1c28641284990a11e221263aa07948aec6eb18200a",
+  "reason_for_new_payload": "The 1000-call payload was authorized but its worker image omitted torch and every task died at zero charged calls.  The image is fixed and proven by a zero-oracle-call remote smoke.  This payload reduces the budget to 250 calls per task so the three diagnostic curves are read before a larger spend.",
+  "schema_version": "pmo_population_scored_authorization_receipt_v2",
+  "scored_launch_authorized": true,
+  "status": "AUTHORIZED",
+  "supersedes_payload_sha256": "a2530fcebd065407e2ef8709ba464dd7d3d1536a69106391787b54c2c6c652ce",
+  "terminal_failed_modal_calls": {
+    "celecoxib_rediscovery": "fc-01M2YM84NCGHWCYQ6M597VV7FE",
+    "gsk3b": "fc-01M2YM84HG9EJT81D6AVB6A9D0",
+    "perindopril_mpo": "fc-01M2YM84KFK1P5D0D94JZ07A5N"
+  },
+  "terminal_failure": {
+    "automatic_retries": 0,
+    "backfill": false,
+    "error": "No module named 'torch'",
+    "error_type": "ModuleNotFoundError",
+    "oracle_calls_observed": 0,
+    "replacements": false
+  }
+}

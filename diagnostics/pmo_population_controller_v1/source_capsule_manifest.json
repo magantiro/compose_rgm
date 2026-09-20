@@ -1,0 +1,32 @@
+{
+  "schema_version": "pmo_population_source_capsule_manifest_v1",
+  "contract_payload_sha256": "61c1fdf3995f0635b2f46a517e6e5ddd566f3ec9a26ce53ea3dec1c6e5a0b582",
+  "code_revision": "b37900c2",
+  "upload_mode": "Modal image add_local_dir/add_local_file",
+  "source_directories": [
+    "src"
+  ],
+  "source_files": {
+    "modal_apps/pmo_population_v1_app.py": "a53dbe8345e5c37654b1f327e85ab2e54553d55874e6470737e4d4e3193218e3",
+    "src/compose_v4/control/pmo_population_controller.py": "9108e0fcfe1b6478964c875a213bef438a89f9b44589bd6de313442bca7ccec9",
+    "src/compose_v4/control/program_campaign.py": "884f13cbbe49c06a94aafb59880daf38f313b6f4717af012c1fe8eb9074c469e",
+    "src/compose_v4/experiments/pmo_population_v1.py": "a46e105573557af2e9b4fdf9f08ba6399c88f912ebb4e16bcf73d8d6e5e26056",
+    "src/compose_v4/experiments/pmo_dynamic_v21.py": "3e7a7298990008e57fcb0bea0f5f261efd25188f680dc897bd25bbdf2e298ea1",
+    "src/compose_v4/experiments/pmo_ivg_oracle_parity.py": "16d06962af9e77f458667a6205b418c36f4997b4fdaa8c3f668865c9e9f0c49a",
+    "configs/pmo_population_controller_v1_scored_contract.json": "af2368c909a938da094f56f454ef3b3d24c7c2f8a943e2d2bdf0a5c592a1810a",
+    "configs/pmo_population_controller_v1.json": "a8a8271e7bf27dbaa51401b970a0210a2b9a9ef8ba398868c6ec95be2f41cc8f",
+    "configs/pmo_population_live_parent_gate_v2.json": "7292de1d9653729478552805ba490cc2f53a5a6b32e395698832eb2d7ccd8676",
+    "diagnostics/pmo_population_live_parent_gate_v1/scheduler_result.json": "de044abe3b6c7eb1f5cbf53fd8591f5c26561753dedf4b3cbcb5cb9691fa71fc",
+    "diagnostics/parent_edit_cycles/prepared/init_20260921.json": "a1f7840df1f75567565de633c4df3d013c3165df3e43cbf2ac87b156d5f206ff",
+    "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43"
+  },
+  "oracle_assets": "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets/",
+  "runtime_guarantees": {
+    "pinned_pytdc": "1.1.15",
+    "pinned_rdkit": "2023.09.6",
+    "cpu_per_worker": 1,
+    "modal_retries": 0,
+    "task_to_route_lookup": false,
+    "winner_injection": false
+  }
+}

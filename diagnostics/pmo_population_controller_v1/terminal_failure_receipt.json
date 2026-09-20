@@ -1,0 +1,30 @@
+{
+  "schema_version": "pmo_population_terminal_worker_failure_v1",
+  "run_id": "b5e2635f296eac4e9b84600ff1c5c3aca6b2c48bae4f7651bf1948fe3ff0d918",
+  "contract_payload_sha256": "61c1fdf3995f0635b2f46a517e6e5ddd566f3ec9a26ce53ea3dec1c6e5a0b582",
+  "calls": {
+    "gsk3b": {
+      "call_id": "fc-01M2YM84HG9EJT81D6AVB6A9D0",
+      "status": "terminal_failure",
+      "error_type": "ModuleNotFoundError",
+      "error": "No module named 'torch'"
+    },
+    "perindopril_mpo": {
+      "call_id": "fc-01M2YM84KFK1P5D0D94JZ07A5N",
+      "status": "terminal_failure",
+      "error_type": "ModuleNotFoundError",
+      "error": "No module named 'torch'"
+    },
+    "celecoxib_rediscovery": {
+      "call_id": "fc-01M2YM84NCGHWCYQ6M597VV7FE",
+      "status": "terminal_failure",
+      "error_type": "ModuleNotFoundError",
+      "error": "No module named 'torch'"
+    }
+  },
+  "charged_oracle_calls_observed": 0,
+  "automatic_retries": 0,
+  "replacements": false,
+  "backfill": false,
+  "interpretation": "Worker import failed before PMO task boundary or oracle construction. This attempt is preserved and invalidated; no retry was launched."
+}
