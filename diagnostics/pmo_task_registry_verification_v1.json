@@ -1,0 +1,305 @@
+{
+  "modal_launch_authorized": false,
+  "network_access": false,
+  "oracle_calls_authorized": 0,
+  "oracle_constructed": false,
+  "registry_provenance": {
+    "kind": "wheel",
+    "metadata_sha256": "f169cd7464eb5e8ba4339015c65aaf614d52356c5ff42872b89821c278cc692c",
+    "path": "/Users/rmaganti/Library/Caches/pip/wheels/24/6a/27/95aa98f441aa4ae1845d105118d281003baa66883096fa0c2f/pytdc-1.1.15-py3-none-any.whl",
+    "sha256": "c27c2cbe3c00632972e7119662703f7fe935d9ade288b19544e8168238b08546"
+  },
+  "schema_version": "pmo_task_registry_verification_v1",
+  "scored_launch_authorized": false,
+  "status": "VERIFICATION_ONLY_FAIL_CLOSED",
+  "suite": {
+    "n_tasks": 23,
+    "provenance": {
+      "agreement": "exact, 23/23",
+      "note": "PyTDC does not define the PMO suite; it ships the oracles. Suite membership is taken from two independent published transcriptions that agree exactly.",
+      "sources": [
+        {
+          "path": "docs/invirtuogen_pmo_targets.json",
+          "sha256": "87cf4adaecd0463af152b201bc1f1c45e17c329b5c029f1c1faffcd7c2cd9019",
+          "source": "arXiv:2509.26405 (InVirtuoGen), PMO table WITH ZINC250k prescreening"
+        },
+        {
+          "path": "docs/genmol_pmo_targets.json",
+          "sha256": "2dc20475db68fbfd66d277bb186faa2d79caf60634bd70f1feb4a035d10d4a45",
+          "source": "arXiv:2501.06158v3 Table (PMO AUC top-10, mean of 3 runs)"
+        }
+      ]
+    },
+    "tasks": [
+      "albuterol_similarity",
+      "amlodipine_mpo",
+      "celecoxib_rediscovery",
+      "deco_hop",
+      "drd2",
+      "fexofenadine_mpo",
+      "gsk3b",
+      "isomers_c7h8n2o2",
+      "isomers_c9h10n2o2pf2cl",
+      "jnk3",
+      "median1",
+      "median2",
+      "mestranol_similarity",
+      "osimertinib_mpo",
+      "perindopril_mpo",
+      "qed",
+      "ranolazine_mpo",
+      "scaffold_hop",
+      "sitagliptin_mpo",
+      "thiothixene_rediscovery",
+      "troglitazone_rediscovery",
+      "valsartan_smarts",
+      "zaleplon_mpo"
+    ]
+  },
+  "verification": {
+    "all_resolve": true,
+    "direction_source": "PMO/mol_opt convention (all 23 oracles are maximize on [0,1]); PyTDC ships NO machine-readable direction field. Independently enforced by compose_v4.control.program_task.pmo_top_ten_auc, which rejects any reward outside [0,1].",
+    "fuzzy_fallback_hazard": {
+      "behaviour": "a non-exact name resolves to the closest registry entry, silently",
+      "near_miss_entries_present": [
+        "sitagliptin_mpo_prev",
+        "zaleplon_mpo_prev"
+      ],
+      "threshold": 0.8
+    },
+    "registry_size": 88,
+    "tasks": {
+      "albuterol_similarity": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "amlodipine_mpo": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "celecoxib_rediscovery": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "deco_hop": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "drd2": {
+        "backing": "downloaded_predictor",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "fexofenadine_mpo": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "gsk3b": {
+        "backing": "downloaded_predictor",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "isomers_c7h8n2o2": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "isomers_c9h10n2o2pf2cl": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "jnk3": {
+        "backing": "downloaded_predictor",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "median1": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "median2": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "mestranol_similarity": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "osimertinib_mpo": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "perindopril_mpo": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "qed": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "ranolazine_mpo": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "scaffold_hop": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "sitagliptin_mpo": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "thiothixene_rediscovery": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "troglitazone_rediscovery": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "valsartan_smarts": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      },
+      "zaleplon_mpo": {
+        "backing": "analytic_guacamol_or_rdkit",
+        "direction": "maximize",
+        "range": [
+          0.0,
+          1.0
+        ],
+        "resolution": "exact",
+        "resolves": true
+      }
+    },
+    "unresolved": []
+  }
+}

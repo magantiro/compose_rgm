@@ -1,0 +1,139 @@
+{
+  "payload": {
+    "comparison_rule": "COMPOSE runs with prescreen=false. Only the no_prescreen column is a valid comparator. The prescreened column is retained solely to make substitution visible and must never be used as the target.",
+    "coverage": {
+      "n_absent": 16,
+      "n_tasks": 23,
+      "n_with_no_prescreen_value": 7,
+      "published_no_prescreen_sum_all_23": 16.676,
+      "sum_is_not_reconstructible": "The published no-prescreen column sums to 16.676 over all 23 tasks, but only 7 per-task values are transcribed. A suite-sum comparison is therefore NOT possible from this table."
+    },
+    "metric": "auc_top10, top_auc(finish=True), 10,000 oracle calls, mean of 3 runs",
+    "modal_launch_authorized": false,
+    "oracle_calls_authorized": 0,
+    "schema_version": "pmo_no_prescreen_baseline_v1",
+    "scored_launch_authorized": false,
+    "source": "arXiv:2509.26405 (InVirtuoGen), PMO table WITH ZINC250k prescreening",
+    "source_sha256": "87cf4adaecd0463af152b201bc1f1c45e17c329b5c029f1c1faffcd7c2cd9019",
+    "status": "PREPARED_FAIL_CLOSED_PENDING_EXPLICIT_PAYLOAD_AUTHORIZATION",
+    "tasks": {
+      "albuterol_similarity": {
+        "no_prescreen_auc_top10_10000": 0.95,
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.975,
+        "provenance": "arXiv:2509.26405 (InVirtuoGen), PMO table WITH ZINC250k prescreening Table 2 (no ZINC250k prescreen), transcribed in docs/invirtuogen_pmo_targets.json"
+      },
+      "amlodipine_mpo": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.836,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "celecoxib_rediscovery": {
+        "no_prescreen_auc_top10_10000": 0.798,
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.839,
+        "provenance": "arXiv:2509.26405 (InVirtuoGen), PMO table WITH ZINC250k prescreening Table 2 (no ZINC250k prescreen), transcribed in docs/invirtuogen_pmo_targets.json"
+      },
+      "deco_hop": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.968,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "drd2": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.995,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "fexofenadine_mpo": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.904,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "gsk3b": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.988,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "isomers_c7h8n2o2": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.988,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "isomers_c9h10n2o2pf2cl": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.898,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "jnk3": {
+        "no_prescreen_auc_top10_10000": 0.825,
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.898,
+        "provenance": "arXiv:2509.26405 (InVirtuoGen), PMO table WITH ZINC250k prescreening Table 2 (no ZINC250k prescreen), transcribed in docs/invirtuogen_pmo_targets.json"
+      },
+      "median1": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.386,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "median2": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.377,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "mestranol_similarity": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.991,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "osimertinib_mpo": {
+        "no_prescreen_auc_top10_10000": 0.87,
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.881,
+        "provenance": "arXiv:2509.26405 (InVirtuoGen), PMO table WITH ZINC250k prescreening Table 2 (no ZINC250k prescreen), transcribed in docs/invirtuogen_pmo_targets.json"
+      },
+      "perindopril_mpo": {
+        "no_prescreen_auc_top10_10000": 0.645,
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.753,
+        "provenance": "arXiv:2509.26405 (InVirtuoGen), PMO table WITH ZINC250k prescreening Table 2 (no ZINC250k prescreen), transcribed in docs/invirtuogen_pmo_targets.json"
+      },
+      "qed": {
+        "no_prescreen_auc_top10_10000": 0.942,
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.943,
+        "provenance": "arXiv:2509.26405 (InVirtuoGen), PMO table WITH ZINC250k prescreening Table 2 (no ZINC250k prescreen), transcribed in docs/invirtuogen_pmo_targets.json"
+      },
+      "ranolazine_mpo": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.854,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "scaffold_hop": {
+        "no_prescreen_auc_top10_10000": 0.589,
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.711,
+        "provenance": "arXiv:2509.26405 (InVirtuoGen), PMO table WITH ZINC250k prescreening Table 2 (no ZINC250k prescreen), transcribed in docs/invirtuogen_pmo_targets.json"
+      },
+      "sitagliptin_mpo": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.743,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "thiothixene_rediscovery": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.652,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "troglitazone_rediscovery": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.853,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "valsartan_smarts": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.935,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      },
+      "zaleplon_mpo": {
+        "no_prescreen_auc_top10_10000": "ABSENT",
+        "prescreened_auc_top10_10000_DO_NOT_COMPARE": 0.624,
+        "provenance": "ABSENT: not transcribed from the published no-prescreen table. Do NOT substitute the prescreened value -- it is a different oracle-budget regime (+250,000 calls)."
+      }
+    },
+    "url": "https://arxiv.org/html/2509.26405"
+  },
+  "payload_sha256": "b3a1a92df5aafda1e47931f5efa94c37b7255fe2c9597b3c11c478c79a02cdb2"
+}

@@ -1,0 +1,305 @@
+{
+  "payload": {
+    "artifact_payload_sha256": {
+      "configs/pmo_no_prescreen_baseline_v1.json": "b3a1a92df5aafda1e47931f5efa94c37b7255fe2c9597b3c11c478c79a02cdb2",
+      "configs/pmo_scale_up_manifest_10k_v1.json": "71e855737220c5b9f8b07a44638ca75e308b812cb7719c7bb70c84a2920ca50c",
+      "configs/pmo_scale_up_manifest_1k_v1.json": "749395bcf58fec40ca90e556991f97b64d8473181054d9b88be873a8bb85e580",
+      "configs/pmo_scale_up_manifest_250_v1.json": "d7c0cbff067628f4b28d89cb662e6413f69ace558831f6a160f1f2aaaa012c84"
+    },
+    "baseline": {
+      "coverage": {
+        "n_absent": 16,
+        "n_tasks": 23,
+        "n_with_no_prescreen_value": 7,
+        "published_no_prescreen_sum_all_23": 16.676,
+        "sum_is_not_reconstructible": "The published no-prescreen column sums to 16.676 over all 23 tasks, but only 7 per-task values are transcribed. A suite-sum comparison is therefore NOT possible from this table."
+      },
+      "path": "configs/pmo_no_prescreen_baseline_v1.json"
+    },
+    "blockers": [
+      {
+        "consequence": "The 3x250 pilot would charge up to 1000 calls/task (~3000 total, 4x the declared 750), and auc_top10_development_1000 would be normalized by 1000 rather than 250.",
+        "evidence": "MEASURED from the pinned runtime and campaign loop",
+        "finding": "The corrected contract declares charged_calls_per_task=250, but execute_task builds its ledger with budget=QUERY_BUDGET=1000 and never reads contract['budget']. run_program_campaign's only call-count authority is ledger.remaining; stagnation_rounds is None, so the stagnation break is disabled and the wall-clock break is the only other exit. 64 rounds x 16 queries + 16 init = 1040 > 1000, so the ledger binds at 1000.",
+        "fix_requires_pinned_file": "src/compose_v4/experiments/pmo_population_v1.py",
+        "id": "contract_budget_not_enforced",
+        "not_fixed_here": "editing it would break the pinned launch chain",
+        "severity": "BLOCKS_THE_IMMINENT_3x250_RELAUNCH"
+      },
+      {
+        "evidence": "MEASURED: execute_task raises on any task outside TASKS",
+        "finding": "TASKS is a 3-tuple and execute_task raises 'task is outside the PMO-v1 three-task lock'. TASK_ROLES would also KeyError for a new task.",
+        "fix_requires_pinned_file": "src/compose_v4/experiments/pmo_population_v1.py",
+        "id": "three_task_lock",
+        "severity": "BLOCKS_RUNG_2_AND_RUNG_3"
+      },
+      {
+        "evidence": "MEASURED: MAX_ROUNDS=64, QUERIES_PER_ROUND=16",
+        "finding": "10,000 calls needs 624 rounds; capacity is 64 rounds = 1040 calls. Both MAX_ROUNDS and QUERY_BUDGET must rise for an official-budget run.",
+        "fix_requires_pinned_file": "src/compose_v4/experiments/pmo_population_v1.py",
+        "id": "max_rounds_caps_the_10k_rung",
+        "severity": "BLOCKS_ALL_10k_RUNS"
+      },
+      {
+        "evidence": "MEASURED: CONTRACT is a module constant read by load_contract",
+        "finding": "load_contract always reads configs/pmo_population_controller_v1.json. The manifests written here are sealed PLANNING artifacts that specify the ladder and its arithmetic; they are not drop-in runtime contracts.",
+        "id": "contract_path_is_hardcoded",
+        "severity": "SCOPE_NOTE"
+      },
+      {
+        "consequence": "One third of the pilot's promotion criterion rests on an unsourced number. Promotion requires beating 2 of 3, so gsk3b can decide it.",
+        "evidence": "MEASURED: grep of docs/ finds no source for 0.952",
+        "finding": "ivg_targets_postrun_only pins gsk3b=0.952 in three pinned contracts. celecoxib=0.798 and perindopril=0.645 both match the published no-prescreen table exactly, but gsk3b is ABSENT from that table (its prescreened value is 0.988). 0.952 has no provenance in the repo.",
+        "fix_requires_pinned_file": "configs/pmo_population_controller_v1*.json",
+        "id": "gsk3b_ivg_target_unsourced",
+        "severity": "BASELINE_INTEGRITY"
+      },
+      {
+        "evidence": "MEASURED: 7 of 23 per-task no-prescreen values transcribed",
+        "finding": "The published no-prescreen column sums to 16.676 over 23 tasks, but only 7 per-task values exist in the repo. A 23-task suite-sum comparison is not possible until the remaining 16 are transcribed from the paper.",
+        "id": "no_prescreen_sum_not_reconstructible",
+        "severity": "CLAIM_SCOPE"
+      }
+    ],
+    "controller_task_blindness": {
+      "accepts_task_argument": false,
+      "call_site_passes_only_seed": true,
+      "config_field_count": 27,
+      "fields_varying_with_seed_only": [
+        "seed"
+      ],
+      "identical_across_tasks": "configuration() cannot vary by task: its only argument is `seed`, and execute_task calls it as configuration(contract['controller']['seed']) with no task argument.",
+      "method": "executed configuration() and searched the produced config for task names",
+      "parameters": [
+        "seed"
+      ],
+      "seed_in_scored_contract": null,
+      "signature": "(seed: 'int' = 20260920) -> 'ProgramSearchConfig'",
+      "task_blind": true,
+      "task_dependent_elsewhere_by_design": {
+        "ProgramTask(task_name, ...)": "oracle identity / ledger protocol binding",
+        "TASK_ROLES[task_name]": "reporting label only; KeyError outside the lock",
+        "_runtime_protocol(contract, task_name)": "per-task protocol hash"
+      },
+      "task_names_found_in_config": []
+    },
+    "generated_at_utc": "2026-09-20T21:30:37.738633+00:00",
+    "generator": "tools/build_pmo_scale_up_plan.py",
+    "ladder": {
+      "rung_1_pilot": {
+        "baseline_absent": [
+          "gsk3b"
+        ],
+        "n_tasks": 3,
+        "oracle_cost_by_budget": {
+          "1000": {
+            "charged_calls_total": 3000,
+            "with_3_seeds_for_publication": 9000
+          },
+          "10000": {
+            "charged_calls_total": 30000,
+            "with_3_seeds_for_publication": 90000
+          },
+          "250": {
+            "charged_calls_total": 750,
+            "with_3_seeds_for_publication": 2250
+          }
+        },
+        "tasks": [
+          "gsk3b",
+          "perindopril_mpo",
+          "celecoxib_rediscovery"
+        ]
+      },
+      "rung_2_five": {
+        "baseline_absent": [
+          "gsk3b",
+          "sitagliptin_mpo"
+        ],
+        "n_tasks": 5,
+        "oracle_cost_by_budget": {
+          "1000": {
+            "charged_calls_total": 5000,
+            "with_3_seeds_for_publication": 15000
+          },
+          "10000": {
+            "charged_calls_total": 50000,
+            "with_3_seeds_for_publication": 150000
+          },
+          "250": {
+            "charged_calls_total": 1250,
+            "with_3_seeds_for_publication": 3750
+          }
+        },
+        "tasks": [
+          "gsk3b",
+          "perindopril_mpo",
+          "celecoxib_rediscovery",
+          "jnk3",
+          "sitagliptin_mpo"
+        ]
+      },
+      "rung_3_full_suite": {
+        "baseline_absent": [
+          "amlodipine_mpo",
+          "deco_hop",
+          "drd2",
+          "fexofenadine_mpo",
+          "gsk3b",
+          "isomers_c7h8n2o2",
+          "isomers_c9h10n2o2pf2cl",
+          "median1",
+          "median2",
+          "mestranol_similarity",
+          "ranolazine_mpo",
+          "sitagliptin_mpo",
+          "thiothixene_rediscovery",
+          "troglitazone_rediscovery",
+          "valsartan_smarts",
+          "zaleplon_mpo"
+        ],
+        "n_tasks": 23,
+        "oracle_cost_by_budget": {
+          "1000": {
+            "charged_calls_total": 23000,
+            "with_3_seeds_for_publication": 69000
+          },
+          "10000": {
+            "charged_calls_total": 230000,
+            "with_3_seeds_for_publication": 690000
+          },
+          "250": {
+            "charged_calls_total": 5750,
+            "with_3_seeds_for_publication": 17250
+          }
+        },
+        "tasks": [
+          "albuterol_similarity",
+          "amlodipine_mpo",
+          "celecoxib_rediscovery",
+          "deco_hop",
+          "drd2",
+          "fexofenadine_mpo",
+          "gsk3b",
+          "isomers_c7h8n2o2",
+          "isomers_c9h10n2o2pf2cl",
+          "jnk3",
+          "median1",
+          "median2",
+          "mestranol_similarity",
+          "osimertinib_mpo",
+          "perindopril_mpo",
+          "qed",
+          "ranolazine_mpo",
+          "scaffold_hop",
+          "sitagliptin_mpo",
+          "thiothixene_rediscovery",
+          "troglitazone_rediscovery",
+          "valsartan_smarts",
+          "zaleplon_mpo"
+        ]
+      }
+    },
+    "launch_performed": false,
+    "manifests": {
+      "1000": {
+        "charged_calls_per_task": 1000,
+        "official_pmo_comparable": false,
+        "path": "configs/pmo_scale_up_manifest_1k_v1.json"
+      },
+      "10000": {
+        "charged_calls_per_task": 10000,
+        "official_pmo_comparable": true,
+        "path": "configs/pmo_scale_up_manifest_10k_v1.json"
+      },
+      "250": {
+        "charged_calls_per_task": 250,
+        "official_pmo_comparable": false,
+        "path": "configs/pmo_scale_up_manifest_250_v1.json"
+      }
+    },
+    "modal_actions": "none",
+    "modal_launch_authorized": false,
+    "oracle_calls_authorized": 0,
+    "oracle_calls_made": 0,
+    "runtime_capability_measured": {
+      "INIT_COUNT": 16,
+      "MAX_ROUNDS": 64,
+      "QUERIES_PER_ROUND": 16,
+      "QUERY_BUDGET": 1000,
+      "enforces_three_task_lock": true,
+      "max_charged_calls_per_task": 1000,
+      "measured_from": "src/compose_v4/experiments/pmo_population_v1.py",
+      "measured_sha256": "a553cf66264a88d3750ea26d3ddd29f3f04f7ddd1a122084bdfe5b659c9fb655",
+      "note": "execute_task builds its ledger with budget=QUERY_BUDGET and computes the AUC with budget=QUERY_BUDGET. It never reads contract['budget'], so the contract's charged_calls_per_task is a declaration the runtime does not enforce.",
+      "reads_contract_budget": false,
+      "round_capacity_calls": 1040,
+      "task_lock": [
+        "gsk3b",
+        "perindopril_mpo",
+        "celecoxib_rediscovery"
+      ]
+    },
+    "schema_version": "pmo_scale_up_plan_v1",
+    "scored_launch_authorized": false,
+    "staleness": {
+      "chain_consistency_at_generation": {
+        "chain_is_launchable_now": false,
+        "implementation_sha256_drift": [
+          "src/compose_v4/control/bootstrap_pool_continuity.py",
+          "src/compose_v4/control/pmo_population_controller.py"
+        ],
+        "launcher_PAYLOAD_constant_matches_contract": true,
+        "scored_contract_payload_sha256": "a3d343878e740a38ebb3509612faabfd7355914e63df8919f63279e80848dd1d"
+      },
+      "regenerate_before_use": true,
+      "why": "This plan pins the live launch chain by content hash. The chain was observed CHANGING during preparation (another session was editing it), so these pins can go stale. Re-run tools/build_pmo_scale_up_plan.py --apply immediately before acting on it; the builder is deterministic, so an unchanged tree reproduces byte-identical artifacts."
+    },
+    "status": "PREPARED_FAIL_CLOSED_PENDING_EXPLICIT_PAYLOAD_AUTHORIZATION",
+    "suite": {
+      "n_tasks": 23,
+      "provenance": {
+        "agreement": "exact, 23/23",
+        "note": "PyTDC does not define the PMO suite; it ships the oracles. Suite membership is taken from two independent published transcriptions that agree exactly.",
+        "sources": [
+          {
+            "path": "docs/invirtuogen_pmo_targets.json",
+            "sha256": "87cf4adaecd0463af152b201bc1f1c45e17c329b5c029f1c1faffcd7c2cd9019",
+            "source": "arXiv:2509.26405 (InVirtuoGen), PMO table WITH ZINC250k prescreening"
+          },
+          {
+            "path": "docs/genmol_pmo_targets.json",
+            "sha256": "2dc20475db68fbfd66d277bb186faa2d79caf60634bd70f1feb4a035d10d4a45",
+            "source": "arXiv:2501.06158v3 Table (PMO AUC top-10, mean of 3 runs)"
+          }
+        ]
+      },
+      "tasks": [
+        "albuterol_similarity",
+        "amlodipine_mpo",
+        "celecoxib_rediscovery",
+        "deco_hop",
+        "drd2",
+        "fexofenadine_mpo",
+        "gsk3b",
+        "isomers_c7h8n2o2",
+        "isomers_c9h10n2o2pf2cl",
+        "jnk3",
+        "median1",
+        "median2",
+        "mestranol_similarity",
+        "osimertinib_mpo",
+        "perindopril_mpo",
+        "qed",
+        "ranolazine_mpo",
+        "scaffold_hop",
+        "sitagliptin_mpo",
+        "thiothixene_rediscovery",
+        "troglitazone_rediscovery",
+        "valsartan_smarts",
+        "zaleplon_mpo"
+      ]
+    }
+  },
+  "payload_sha256": "b122504fbde7b697cdf2794ce77f8fce2916e5fcf1beaed192e09cce77c622fe"
+}

@@ -1,0 +1,381 @@
+{
+  "payload": {
+    "caveats": [
+      {
+        "evidence": "MEASURED",
+        "finding": "In the authors' archive the LaTeX \\label commands are swapped: pmo_comparison_table_with_std_no_prescreen.tex carries \\label{tab:prescreen} and pmo_comparison_table_with_std.tex carries \\label{tab:no_prescreen}. Keying off the label inverts the regime. The authority is the COLUMN HEADER ('InVirtuoGen (no prescreen)' vs 'InVirtuoGen') and the caption, which are unambiguous and agree with the results directory names and with the README.",
+        "id": "tex_labels_are_crossed",
+        "severity": "TRAP"
+      },
+      {
+        "evidence": "MEASURED code read; INFERRED numerical equivalence",
+        "finding": "The auc_top10 column in the published per-run CSVs is written by PBOptimizer.save_result_tot, which calls top_auc(..., finish=False, ...). It is called immediately after log_intermediate(finish=True) at the end of a run, and the run either exits because len(mol_buffer) >= max_oracle_calls or pads mol_buffer with zero-score entries up to max_oracle_calls on early stop. With a full buffer the finish term is inactive and finish=False equals finish=True, and zero-score padding does not change the running top-10 mean, so the padded trapezoids equal the flat finish=True extension. The equality is argued from the code, not observed by re-running; the buffer can also slightly overshoot 10,000, in which case top_auc divides by len(buffer). Treat the registry metric as top_auc(top_n=10, finish=True) at 10,000 calls, which is how the authors describe it.",
+        "id": "finish_flag"
+      },
+      {
+        "evidence": "MEASURED for GenMol; INFERRED for InVirtuoGen",
+        "finding": "The InVirtuoGen prescreen reads in_virtuo_reinforce/vocab/zinc250k.csv, sorts by a PRE-COMPUTED per-task oracle column, and injects the top rows with their scores already attached, bypassing self.oracle() and therefore mol_buffer. That path is MEASURED from the archive source. The exact number of prescreen oracle calls is NOT measurable from the archive because in_virtuo_reinforce/vocab is gitignored and absent. The ~249,455 figure is the measured ZINC250k size from the repo's own GenMol audit (docs/AMENDMENT_PMO_PRESCREEN_AUDIT.md) applied to the same dataset, and is therefore INFERRED for InVirtuoGen.",
+        "id": "prescreen_size"
+      },
+      {
+        "evidence": "MEASURED",
+        "finding": "The archive pins pytdc==1.1.15, rdkit==2023.9.6, scikit_learn==1.2.2. Completed COMPOSE PMO development waves used PyTDC 0.3.6 and RDKit 2024.03.5 (docs/PMO_IVG_ORACLE_PARITY.md). drd2, gsk3b and jnk3 are downloaded-predictor oracles whose shipped assets changed between those versions, so even a budget-matched, regime-matched comparison on those three tasks carries an oracle-version caveat. gsk3b is one of the three pinned pilot tasks.",
+        "id": "oracle_version_qualifier"
+      },
+      {
+        "evidence": "MEASURED",
+        "finding": "Gen. GFN / Mol GA / REINVENT / Graph GA no-prescreen columns are transcriptions by InVirtuoGen from other publications; no raw per-run data for them exists in the archive. They are recorded at tier SECOND_HAND and must not be promoted to the same evidential tier as the InVirtuoGen column.",
+        "id": "secondary_columns_are_second_hand"
+      },
+      {
+        "evidence": "MEASURED",
+        "finding": "Published Sum cells are computed from unrounded run means: no-prescreen 16.676 vs 16.674 as the sum of the rounded per-task cells; prescreened 18.993 vs 18.992. This is rounding, not an inconsistency. Sum a column from the unrounded means, or state which you used.",
+        "id": "rounding"
+      },
+      {
+        "evidence": "MEASURED",
+        "finding": "No network access was used. Every value is derived from an archive already present on this machine whose sha256 was already recorded in this repository.",
+        "id": "no_network"
+      }
+    ],
+    "existing_file_cross_check": {
+      "false_absent": [
+        {
+          "authoritative_no_prescreen": 0.733,
+          "claimed": "ABSENT",
+          "task": "amlodipine_mpo",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.748,
+          "claimed": "ABSENT",
+          "task": "deco_hop",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.985,
+          "claimed": "ABSENT",
+          "task": "drd2",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.845,
+          "claimed": "ABSENT",
+          "task": "fexofenadine_mpo",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.952,
+          "claimed": "ABSENT",
+          "task": "gsk3b",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.968,
+          "claimed": "ABSENT",
+          "task": "isomers_c7h8n2o2",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.874,
+          "claimed": "ABSENT",
+          "task": "isomers_c9h10n2o2pf2cl",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.342,
+          "claimed": "ABSENT",
+          "task": "median1",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.288,
+          "claimed": "ABSENT",
+          "task": "median2",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.797,
+          "claimed": "ABSENT",
+          "task": "mestranol_similarity",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.848,
+          "claimed": "ABSENT",
+          "task": "ranolazine_mpo",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.709,
+          "claimed": "ABSENT",
+          "task": "sitagliptin_mpo",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.625,
+          "claimed": "ABSENT",
+          "task": "thiothixene_rediscovery",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.595,
+          "claimed": "ABSENT",
+          "task": "troglitazone_rediscovery",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.21,
+          "claimed": "ABSENT",
+          "task": "valsartan_smarts",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        },
+        {
+          "authoritative_no_prescreen": 0.536,
+          "claimed": "ABSENT",
+          "task": "zaleplon_mpo",
+          "verdict": "FALSE NEGATIVE: the value is published"
+        }
+      ],
+      "method": "Each claimed cell re-derived independently from the authors' raw per-seed CSVs, not copied.",
+      "n_false_absent": 16,
+      "n_values_agree": 7,
+      "n_values_disagree": 0,
+      "path": "configs/pmo_no_prescreen_baseline_v1.json",
+      "sha256": "e22e13fa712f907ed442d5eb79c8dbd2da70078b9f2e3606211f2cf7190f9065",
+      "structural_defects": [
+        {
+          "evidence": "MEASURED",
+          "finding": "Claims n_with_no_prescreen_value=7, n_absent=16. The authoritative coverage is 23/23. 16 values were marked ABSENT that are published.",
+          "id": "coverage_understated"
+        },
+        {
+          "evidence": "MEASURED",
+          "finding": "Claims 'A suite-sum comparison is therefore NOT possible from this table.' It is possible: the 23 no-prescreen cells sum to 16.674 as rounded and 16.67576 unrounded, matching the published Sum 16.676.",
+          "id": "sum_not_reconstructible_falsified"
+        },
+        {
+          "evidence": "MEASURED",
+          "finding": "Top-level 'source' reads 'PMO table WITH ZINC250k prescreening' on a file whose purpose is the NO-prescreen column, and every per-task provenance string concatenates that with 'Table 2 (no ZINC250k prescreen)'. The two halves name opposite regimes in one sentence.",
+          "id": "source_string_names_the_wrong_table"
+        },
+        {
+          "evidence": "MEASURED",
+          "finding": "The provenance strings cite 'Table 2'. The archive's generated LaTeX carries no table number, and its two \\label commands are CROSSED (see caveats). Table numbering was not verifiable from the archive and is not asserted in the registry.",
+          "id": "table_number_unverified"
+        }
+      ],
+      "values_agree": [
+        {
+          "authoritative": 0.95,
+          "claimed": 0.95,
+          "task": "albuterol_similarity",
+          "verdict": "AGREES (independently reproduced from raw per-seed runs)"
+        },
+        {
+          "authoritative": 0.798,
+          "claimed": 0.798,
+          "task": "celecoxib_rediscovery",
+          "verdict": "AGREES (independently reproduced from raw per-seed runs)"
+        },
+        {
+          "authoritative": 0.825,
+          "claimed": 0.825,
+          "task": "jnk3",
+          "verdict": "AGREES (independently reproduced from raw per-seed runs)"
+        },
+        {
+          "authoritative": 0.87,
+          "claimed": 0.87,
+          "task": "osimertinib_mpo",
+          "verdict": "AGREES (independently reproduced from raw per-seed runs)"
+        },
+        {
+          "authoritative": 0.645,
+          "claimed": 0.645,
+          "task": "perindopril_mpo",
+          "verdict": "AGREES (independently reproduced from raw per-seed runs)"
+        },
+        {
+          "authoritative": 0.942,
+          "claimed": 0.942,
+          "task": "qed",
+          "verdict": "AGREES (independently reproduced from raw per-seed runs)"
+        },
+        {
+          "authoritative": 0.589,
+          "claimed": 0.589,
+          "task": "scaffold_hop",
+          "verdict": "AGREES (independently reproduced from raw per-seed runs)"
+        }
+      ],
+      "values_disagree": []
+    },
+    "gsk3b_0952_verdict": {
+      "consequence_for_the_pinned_contracts": "All three pinned ivg_targets_postrun_only triples (celecoxib 0.798, gsk3b 0.952, perindopril 0.645) are NO-PRESCREEN values and are regime-consistent with each other and with COMPOSE's prescreen=false. No contract edit is warranted on baseline-provenance grounds.",
+      "evidence_trail": [
+        {
+          "evidence": "MEASURED",
+          "finding": "0.952 entered the repo at commit b37900c2 'pmo: freeze population controller and live-parent support gate' in src/compose_v4/experiments/pmo_population_v1.py IVG_TARGETS and configs/pmo_population_controller_v1.json, with no inline citation.",
+          "method": "git log -S 0.952 --all",
+          "step": 1
+        },
+        {
+          "evidence": "MEASURED",
+          "finding": "Other 0.952 hits in the repo are unrelated (a running top10 value inside diagnostics/pmo_ivg_oracle_parity/result.json, etc.); none is a baseline citation.",
+          "step": 2
+        },
+        {
+          "evidence": "MEASURED",
+          "finding": "The authors' results archive InVirtuoGen_results (main.tar.gz sha256 09a9f3d2d9c676d0a71af7fc9f19724d6247daad15728e81e0c0e70377dc94c0) is present locally and its sha256 matches the value already recorded in diagnostics/pmo_ivg_oracle_parity/result.json, so the archive identity is independently pinned inside this repo.",
+          "location": "/Users/rmaganti/compose_rgm_git/tmp/ivg_repo/",
+          "step": 3
+        },
+        {
+          "evidence": "MEASURED",
+          "finding": "pmo_comparison_table_with_std_no_prescreen.tex, column 'InVirtuoGen (no prescreen)', row 'gsk3b' = 0.952 (+/- 0.016). All 23 rows present.",
+          "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756",
+          "step": 4
+        },
+        {
+          "evidence": "MEASURED",
+          "finding": "README.md renders the identical no-prescreen table; its gsk3b cell is 0.952 (+/-0.016). 23/23 cells concordant with the .tex.",
+          "step": 5
+        },
+        {
+          "evidence": "MEASURED",
+          "finding": "results/target_property/no_prescreen_3_runs/gsk3b/results_gsk3b.csv holds the three per-seed auc_top10 rows 0.962365 (seed 0), 0.929545 (seed 2), 0.9627427257 (seed 1); mean 0.9515509 rounds to 0.952 and population std 0.0155613 rounds to 0.016. The published cell is reproduced from its own raw data.",
+          "step": 6
+        },
+        {
+          "evidence": "MEASURED",
+          "finding": "The same reproduction succeeds for all 23 no-prescreen tasks (0 mismatches) and all 23 prescreened tasks (0 mismatches). Unrounded mean-of-means sums: no-prescreen 16.67576 (published Sum 16.676), prescreened 18.99250 (published Sum 18.993).",
+          "step": 7
+        },
+        {
+          "evidence": "MEASURED",
+          "finding": "gsk3b appears in BOTH regimes: 0.952 no-prescreen, 0.988 prescreened. The earlier finding correctly identified 0.988 as the prescreened value but wrongly concluded the no-prescreen cell did not exist.",
+          "step": 8
+        }
+      ],
+      "supersedes": {
+        "claim": "ivg_targets_postrun_only pins gsk3b=0.952 ... but gsk3b is ABSENT from that table (its prescreened value is 0.988). 0.952 has no provenance in the repo.",
+        "recorded_at": [
+          "tools/build_pmo_scale_up_plan.py finding id gsk3b_ivg_target_unsourced",
+          "diagnostics/pmo_scale_up_plan_v1.json",
+          "configs/pmo_no_prescreen_baseline_v1.json (gsk3b marked ABSENT)"
+        ],
+        "severity_of_the_false_finding": "It would have removed a CORRECT, correctly-regimed target from a 2-of-3 promotion criterion.",
+        "why_it_was_wrong": "The search was scoped to docs/ and to a PARTIAL transcription (docs/invirtuogen_pmo_targets.json carries only 7 of 23 no-prescreen cells). The authors' full no-prescreen table was already on this machine, unsearched, in the InVirtuoGen_results archive at tmp/ivg_repo/. Absence from a partial transcription is not absence from the source."
+      },
+      "verdict": "SOURCED. gsk3b = 0.952 is the published InVirtuoGen NO-PRESCREEN AUC-top10 at 10,000 oracle calls, mean of 3 runs, std 0.016."
+    },
+    "modal_launch_authorized": false,
+    "network_access": false,
+    "oracle_calls_authorized": 0,
+    "pinned_contract_cross_check": [
+      {
+        "all_same_regime": true,
+        "path": "configs/pmo_population_controller_v1.json",
+        "regime": [
+          "no_prescreen"
+        ],
+        "sha256": "636b34abc9500729f36c503c69089eac7409a9cc9905133804be429b751da40d",
+        "targets": [
+          {
+            "matches_regime": "no_prescreen",
+            "no_prescreen_published": 0.798,
+            "pinned_value": 0.798,
+            "prescreened_published": 0.839,
+            "task": "celecoxib_rediscovery"
+          },
+          {
+            "matches_regime": "no_prescreen",
+            "no_prescreen_published": 0.952,
+            "pinned_value": 0.952,
+            "prescreened_published": 0.988,
+            "task": "gsk3b"
+          },
+          {
+            "matches_regime": "no_prescreen",
+            "no_prescreen_published": 0.645,
+            "pinned_value": 0.645,
+            "prescreened_published": 0.753,
+            "task": "perindopril_mpo"
+          }
+        ]
+      },
+      {
+        "all_same_regime": true,
+        "path": "configs/pmo_population_controller_v1_scored_contract.json",
+        "regime": [
+          "no_prescreen"
+        ],
+        "sha256": "47520f040e8bab4b7aa35379cd9fab08bff04921a18d0e58ef86f280dfa26c5a",
+        "targets": [
+          {
+            "matches_regime": "no_prescreen",
+            "no_prescreen_published": 0.798,
+            "pinned_value": 0.798,
+            "prescreened_published": 0.839,
+            "task": "celecoxib_rediscovery"
+          },
+          {
+            "matches_regime": "no_prescreen",
+            "no_prescreen_published": 0.952,
+            "pinned_value": 0.952,
+            "prescreened_published": 0.988,
+            "task": "gsk3b"
+          },
+          {
+            "matches_regime": "no_prescreen",
+            "no_prescreen_published": 0.645,
+            "pinned_value": 0.645,
+            "prescreened_published": 0.753,
+            "task": "perindopril_mpo"
+          }
+        ]
+      },
+      {
+        "all_same_regime": true,
+        "path": "configs/pmo_population_controller_v1_scored_contract_corrected.json",
+        "regime": [
+          "no_prescreen"
+        ],
+        "sha256": "e12a2141b54cfc2372f096c90eef65cf7c0ce2594350e133ff6b3d17f8142941",
+        "targets": [
+          {
+            "matches_regime": "no_prescreen",
+            "no_prescreen_published": 0.798,
+            "pinned_value": 0.798,
+            "prescreened_published": 0.839,
+            "task": "celecoxib_rediscovery"
+          },
+          {
+            "matches_regime": "no_prescreen",
+            "no_prescreen_published": 0.952,
+            "pinned_value": 0.952,
+            "prescreened_published": 0.988,
+            "task": "gsk3b"
+          },
+          {
+            "matches_regime": "no_prescreen",
+            "no_prescreen_published": 0.645,
+            "pinned_value": 0.645,
+            "prescreened_published": 0.753,
+            "task": "perindopril_mpo"
+          }
+        ]
+      }
+    ],
+    "registry": {
+      "builder": "tools/build_pmo_baseline_registry_v1.py",
+      "path": "configs/pmo_baseline_registry_v1.json",
+      "payload_sha256": "6ca9590541377e03e3de1c5c25953c9541d1bb4b3fef89daa99edec6d04387ce"
+    },
+    "schema_version": "pmo_baseline_provenance_v1",
+    "scored_launch_authorized": false,
+    "status": "RESEARCH_RECORD_ONLY"
+  },
+  "payload_sha256": "878ec6978f2bdd96db33d3f6d0ae7f8293374805b8b3a8bb69d4e78dbeb764d9"
+}

@@ -1,0 +1,203 @@
+{
+  "payload": {
+    "aggregation": {
+      "log": "score_calls_log(scores) -> charged_queries / best_score / top10_score",
+      "module": "compose_v4.eval.pmo_budget_aggregation",
+      "projection": "frozen_tail_projection(...) -- always labelled, never comparable",
+      "reading": "top_ten_auc(scores, budget=N, authorized_budget=N)",
+      "suite": "aggregate_suite(...) -- refuses mixed budgets and projections"
+    },
+    "baseline_reference": {
+      "note": "written by this tool in the same run; ABSENT means no published value",
+      "path": "configs/pmo_no_prescreen_baseline_v1.json"
+    },
+    "charged_calls_per_task": 10000,
+    "comparability": "Official PMO budget: comparable to published tables ONLY if the full budget is charged and the run is a mean of 3 seeds.",
+    "controller": {
+      "proof": "see plan.controller_task_blindness (executed, not inspected)",
+      "task_blind": true
+    },
+    "metric_id": "auc_top10@10000",
+    "modal_launch_authorized": false,
+    "official_pmo_comparable": true,
+    "oracle": {
+      "calls_include_initialization": true,
+      "direction": "maximize",
+      "prescreen": false,
+      "range": [
+        0.0,
+        1.0
+      ]
+    },
+    "oracle_calls_authorized": 0,
+    "pinned_chain_read_only": {
+      "runtime": "src/compose_v4/experiments/pmo_population_v1.py",
+      "runtime_sha256": "a553cf66264a88d3750ea26d3ddd29f3f04f7ddd1a122084bdfe5b659c9fb655",
+      "scored_contract": "configs/pmo_population_controller_v1_scored_contract_corrected.json",
+      "scored_contract_payload_sha256": "a3d343878e740a38ebb3509612faabfd7355914e63df8919f63279e80848dd1d"
+    },
+    "rungs": {
+      "rung_1_pilot": {
+        "baseline_absent": [
+          "gsk3b"
+        ],
+        "baseline_covered": [
+          "celecoxib_rediscovery",
+          "perindopril_mpo"
+        ],
+        "budget": {
+          "arithmetic_check": true,
+          "candidate_calls_at_rounds_required": 9984,
+          "candidate_calls_per_task": 9984,
+          "charged_calls_per_task": 10000,
+          "charged_calls_total": 30000,
+          "final_round_is_partial": false,
+          "initialization_calls_per_task": 16,
+          "n_tasks": 3,
+          "queries_per_round": 16,
+          "rounds_required": 624
+        },
+        "runnable_without_touching_pinned_files": false,
+        "runtime_blockers": [
+          "runtime charges at most 1000 calls/task (QUERY_BUDGET=1000, MAX_ROUNDS=64); 10000 is unreachable",
+          "needs 624 rounds, MAX_ROUNDS=64"
+        ],
+        "tasks": [
+          "gsk3b",
+          "perindopril_mpo",
+          "celecoxib_rediscovery"
+        ]
+      },
+      "rung_2_five": {
+        "baseline_absent": [
+          "gsk3b",
+          "sitagliptin_mpo"
+        ],
+        "baseline_covered": [
+          "celecoxib_rediscovery",
+          "jnk3",
+          "perindopril_mpo"
+        ],
+        "budget": {
+          "arithmetic_check": true,
+          "candidate_calls_at_rounds_required": 9984,
+          "candidate_calls_per_task": 9984,
+          "charged_calls_per_task": 10000,
+          "charged_calls_total": 50000,
+          "final_round_is_partial": false,
+          "initialization_calls_per_task": 16,
+          "n_tasks": 5,
+          "queries_per_round": 16,
+          "rounds_required": 624
+        },
+        "runnable_without_touching_pinned_files": false,
+        "runtime_blockers": [
+          "runtime charges at most 1000 calls/task (QUERY_BUDGET=1000, MAX_ROUNDS=64); 10000 is unreachable",
+          "needs 624 rounds, MAX_ROUNDS=64",
+          "tasks outside the pinned three-task lock: ['jnk3', 'sitagliptin_mpo']"
+        ],
+        "tasks": [
+          "gsk3b",
+          "perindopril_mpo",
+          "celecoxib_rediscovery",
+          "jnk3",
+          "sitagliptin_mpo"
+        ]
+      },
+      "rung_3_full_suite": {
+        "baseline_absent": [
+          "amlodipine_mpo",
+          "deco_hop",
+          "drd2",
+          "fexofenadine_mpo",
+          "gsk3b",
+          "isomers_c7h8n2o2",
+          "isomers_c9h10n2o2pf2cl",
+          "median1",
+          "median2",
+          "mestranol_similarity",
+          "ranolazine_mpo",
+          "sitagliptin_mpo",
+          "thiothixene_rediscovery",
+          "troglitazone_rediscovery",
+          "valsartan_smarts",
+          "zaleplon_mpo"
+        ],
+        "baseline_covered": [
+          "albuterol_similarity",
+          "celecoxib_rediscovery",
+          "jnk3",
+          "osimertinib_mpo",
+          "perindopril_mpo",
+          "qed",
+          "scaffold_hop"
+        ],
+        "budget": {
+          "arithmetic_check": true,
+          "candidate_calls_at_rounds_required": 9984,
+          "candidate_calls_per_task": 9984,
+          "charged_calls_per_task": 10000,
+          "charged_calls_total": 230000,
+          "final_round_is_partial": false,
+          "initialization_calls_per_task": 16,
+          "n_tasks": 23,
+          "queries_per_round": 16,
+          "rounds_required": 624
+        },
+        "runnable_without_touching_pinned_files": false,
+        "runtime_blockers": [
+          "runtime charges at most 1000 calls/task (QUERY_BUDGET=1000, MAX_ROUNDS=64); 10000 is unreachable",
+          "needs 624 rounds, MAX_ROUNDS=64",
+          "tasks outside the pinned three-task lock: ['albuterol_similarity', 'amlodipine_mpo', 'deco_hop', 'drd2', 'fexofenadine_mpo', 'isomers_c7h8n2o2', 'isomers_c9h10n2o2pf2cl', 'jnk3', 'median1', 'median2', 'mestranol_similarity', 'osimertinib_mpo', 'qed', 'ranolazine_mpo', 'scaffold_hop', 'sitagliptin_mpo', 'thiothixene_rediscovery', 'troglitazone_rediscovery', 'valsartan_smarts', 'zaleplon_mpo']"
+        ],
+        "tasks": [
+          "albuterol_similarity",
+          "amlodipine_mpo",
+          "celecoxib_rediscovery",
+          "deco_hop",
+          "drd2",
+          "fexofenadine_mpo",
+          "gsk3b",
+          "isomers_c7h8n2o2",
+          "isomers_c9h10n2o2pf2cl",
+          "jnk3",
+          "median1",
+          "median2",
+          "mestranol_similarity",
+          "osimertinib_mpo",
+          "perindopril_mpo",
+          "qed",
+          "ranolazine_mpo",
+          "scaffold_hop",
+          "sitagliptin_mpo",
+          "thiothixene_rediscovery",
+          "troglitazone_rediscovery",
+          "valsartan_smarts",
+          "zaleplon_mpo"
+        ]
+      }
+    },
+    "runtime_capability_measured": {
+      "INIT_COUNT": 16,
+      "MAX_ROUNDS": 64,
+      "QUERIES_PER_ROUND": 16,
+      "QUERY_BUDGET": 1000,
+      "enforces_three_task_lock": true,
+      "max_charged_calls_per_task": 1000,
+      "measured_from": "src/compose_v4/experiments/pmo_population_v1.py",
+      "measured_sha256": "a553cf66264a88d3750ea26d3ddd29f3f04f7ddd1a122084bdfe5b659c9fb655",
+      "note": "execute_task builds its ledger with budget=QUERY_BUDGET and computes the AUC with budget=QUERY_BUDGET. It never reads contract['budget'], so the contract's charged_calls_per_task is a declaration the runtime does not enforce.",
+      "reads_contract_budget": false,
+      "round_capacity_calls": 1040,
+      "task_lock": [
+        "gsk3b",
+        "perindopril_mpo",
+        "celecoxib_rediscovery"
+      ]
+    },
+    "schema_version": "pmo_scale_up_manifest_v1",
+    "scored_launch_authorized": false,
+    "status": "PREPARED_FAIL_CLOSED_PENDING_EXPLICIT_PAYLOAD_AUTHORIZATION"
+  },
+  "payload_sha256": "71e855737220c5b9f8b07a44638ca75e308b812cb7719c7bb70c84a2920ca50c"
+}

@@ -1,0 +1,2108 @@
+{
+  "payload": {
+    "baseline_map_for_aggregate_suite": {
+      "map": {
+        "albuterol_similarity": 0.95,
+        "amlodipine_mpo": 0.733,
+        "celecoxib_rediscovery": 0.798,
+        "deco_hop": 0.748,
+        "drd2": 0.985,
+        "fexofenadine_mpo": 0.845,
+        "gsk3b": 0.952,
+        "isomers_c7h8n2o2": 0.968,
+        "isomers_c9h10n2o2pf2cl": 0.874,
+        "jnk3": 0.825,
+        "median1": 0.342,
+        "median2": 0.288,
+        "mestranol_similarity": 0.797,
+        "osimertinib_mpo": 0.87,
+        "perindopril_mpo": 0.645,
+        "qed": 0.942,
+        "ranolazine_mpo": 0.848,
+        "scaffold_hop": 0.589,
+        "sitagliptin_mpo": 0.709,
+        "thiothixene_rediscovery": 0.625,
+        "troglitazone_rediscovery": 0.595,
+        "valsartan_smarts": 0.21,
+        "zaleplon_mpo": 0.536
+      },
+      "metric_id": "auc_top10@10000",
+      "note": "Pass directly as aggregate_suite(readings, baseline=...). None means ABSENT; aggregate_suite reports those under baseline_absent.",
+      "regime": "no_prescreen"
+    },
+    "comparison_rule": "COMPOSE runs prescreen=false. Only regimes.no_prescreen is a valid comparator. regimes.prescreened is retained solely so that a substitution is visible, and must never be used as a target.",
+    "metric": {
+      "budget_oracle_calls": 10000,
+      "budget_warning": "A 250-call or 1,000-call COMPOSE reading is a DIFFERENT metric (auc_top10@250 / auc_top10@1000) and is not comparable to any value here.",
+      "consumable_by": "compose_v4.eval.pmo_budget_aggregation.aggregate_suite",
+      "definition": "top_auc(top_n=10, finish=True)",
+      "dispersion": "population standard deviation (ddof=0) over the 3 runs",
+      "log_frequency": 100,
+      "metric_id": "auc_top10@10000",
+      "runs_averaged": 3
+    },
+    "modal_launch_authorized": false,
+    "network_access": false,
+    "oracle_calls_authorized": 0,
+    "provenance": {
+      "archive_sha256": "09a9f3d2d9c676d0a71af7fc9f19724d6247daad15728e81e0c0e70377dc94c0",
+      "archive_sha256_independently_recorded_at": "diagnostics/pmo_ivg_oracle_parity/result.json -> contract.official_ivg_environment_evidence.archive_sha256",
+      "commit_recorded_in_repo": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+      "concordant_sources_per_value": 3,
+      "paper": "arXiv:2509.26405 (InVirtuoGen)",
+      "repository": "https://github.com/invirtuolabs/InVirtuoGen_results"
+    },
+    "purpose": "Authoritative, regime-separated PMO baseline values with per-value provenance. Research record only: authorizes nothing.",
+    "regimes": {
+      "no_prescreen": {
+        "description": "No ZINC250k prescreen. Reproduce command in the archive README runs with --max_oracle_calls 10000 and WITHOUT --use_prescreen.",
+        "prescreen": false,
+        "readme_column_agrees": {
+          "albuterol_similarity": true,
+          "amlodipine_mpo": true,
+          "celecoxib_rediscovery": true,
+          "deco_hop": true,
+          "drd2": true,
+          "fexofenadine_mpo": true,
+          "gsk3b": true,
+          "isomers_c7h8n2o2": true,
+          "isomers_c9h10n2o2pf2cl": true,
+          "jnk3": true,
+          "median1": true,
+          "median2": true,
+          "mestranol_similarity": true,
+          "osimertinib_mpo": true,
+          "perindopril_mpo": true,
+          "qed": true,
+          "ranolazine_mpo": true,
+          "scaffold_hop": true,
+          "sitagliptin_mpo": true,
+          "thiothixene_rediscovery": true,
+          "troglitazone_rediscovery": true,
+          "valsartan_smarts": true,
+          "zaleplon_mpo": true
+        },
+        "summary": {
+          "n_absent": 0,
+          "n_tasks": 23,
+          "n_with_value": 23,
+          "raw_vs_published_disagreements": [],
+          "sum_of_published_cells": 16.674,
+          "sum_of_unrounded_run_means": 16.67576
+        },
+        "tasks": {
+          "albuterol_similarity": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9523255591,
+              0.9270224028,
+              0.969369802
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.949572588,
+            "raw_std_population_unrounded": 0.0173975035,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/albuterol_similarity/results_albuterol_similarity.csv"
+                ]
+              }
+            ],
+            "std_population": 0.017,
+            "value": 0.95
+          },
+          "amlodipine_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.7911583945,
+              0.7192416515,
+              0.6895312507
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.7333104322,
+            "raw_std_population_unrounded": 0.042665107,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/amlodipine_mpo/results_amlodipine_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.043,
+            "value": 0.733
+          },
+          "celecoxib_rediscovery": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.8151488253,
+              0.7593100938,
+              0.8199550669
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.7981379954,
+            "raw_std_population_unrounded": 0.0275254966,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/celecoxib_rediscovery/results_celecoxib_rediscovery.csv"
+                ]
+              }
+            ],
+            "std_population": 0.028,
+            "value": 0.798
+          },
+          "deco_hop": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.6587225632,
+              0.9020933233,
+              0.682948013
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.7479212998,
+            "raw_std_population_unrounded": 0.109463777,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/deco_hop/results_deco_hop.csv"
+                ]
+              }
+            ],
+            "std_population": 0.109,
+            "value": 0.748
+          },
+          "drd2": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9836636445,
+              0.9876243869,
+              0.9852085891
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.9854988735,
+            "raw_std_population_unrounded": 0.0016299425,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/drd2/results_drd2.csv"
+                ]
+              }
+            ],
+            "std_population": 0.002,
+            "value": 0.985
+          },
+          "fexofenadine_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.8297122839,
+              0.8380413081,
+              0.866163163
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.8446389183,
+            "raw_std_population_unrounded": 0.0155951487,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/fexofenadine_mpo/results_fexofenadine_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.016,
+            "value": 0.845
+          },
+          "gsk3b": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.962365,
+              0.929545,
+              0.9627427257
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.9515509086,
+            "raw_std_population_unrounded": 0.0155612913,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/gsk3b/results_gsk3b.csv"
+                ]
+              }
+            ],
+            "std_population": 0.016,
+            "value": 0.952
+          },
+          "isomers_c7h8n2o2": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9748167025,
+              0.9662344564,
+              0.9640865925
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.9683792505,
+            "raw_std_population_unrounded": 0.0046356532,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/isomers_c7h8n2o2/results_isomers_c7h8n2o2.csv"
+                ]
+              }
+            ],
+            "std_population": 0.005,
+            "value": 0.968
+          },
+          "isomers_c9h10n2o2pf2cl": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.8639691178,
+              0.8648019365,
+              0.892443049
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.8737380344,
+            "raw_std_population_unrounded": 0.0132308119,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/isomers_c9h10n2o2pf2cl/results_isomers_c9h10n2o2pf2cl.csv"
+                ]
+              }
+            ],
+            "std_population": 0.013,
+            "value": 0.874
+          },
+          "jnk3": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.8483831617,
+              0.8128670633,
+              0.8150479952
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.8254327401,
+            "raw_std_population_unrounded": 0.016252805,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/jnk3/results_jnk3.csv"
+                ]
+              }
+            ],
+            "std_population": 0.016,
+            "value": 0.825
+          },
+          "median1": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.3314400737,
+              0.348057418,
+              0.3466090677
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.3420355198,
+            "raw_std_population_unrounded": 0.0075154081,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/median1/results_median1.csv"
+                ]
+              }
+            ],
+            "std_population": 0.008,
+            "value": 0.342
+          },
+          "median2": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.2909545029,
+              0.2965423122,
+              0.2770427325
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.2881798492,
+            "raw_std_population_unrounded": 0.0081988792,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/median2/results_median2.csv"
+                ]
+              }
+            ],
+            "std_population": 0.008,
+            "value": 0.288
+          },
+          "mestranol_similarity": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.841584375,
+              0.7616934192,
+              0.7884874605
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.7972550849,
+            "raw_std_population_unrounded": 0.0331993437,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/mestranol_similarity/results_mestranol_similarity.csv"
+                ]
+              }
+            ],
+            "std_population": 0.033,
+            "value": 0.797
+          },
+          "osimertinib_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.8731574337,
+              0.8635240861,
+              0.8739296339
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.8702037179,
+            "raw_std_population_unrounded": 0.0047337218,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/osimertinib_mpo/results_osimertinib_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.005,
+            "value": 0.87
+          },
+          "perindopril_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.6133075086,
+              0.6884539743,
+              0.6340918924
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.6452844584,
+            "raw_std_population_unrounded": 0.0316828343,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/perindopril_mpo/results_perindopril_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.032,
+            "value": 0.645
+          },
+          "qed": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9423032002,
+              0.9425498776,
+              0.9421315306
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.9423282028,
+            "raw_std_population_unrounded": 0.000171702,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/qed/results_qed.csv"
+                ]
+              }
+            ],
+            "std_population": 0.0,
+            "value": 0.942
+          },
+          "ranolazine_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.8520283986,
+              0.8342731347,
+              0.8580883723
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.8481299685,
+            "raw_std_population_unrounded": 0.0101057641,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/ranolazine_mpo/results_ranolazine_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.01,
+            "value": 0.848
+          },
+          "scaffold_hop": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.5798340916,
+              0.5694818915,
+              0.6172212097
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.5888457309,
+            "raw_std_population_unrounded": 0.0205047614,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/scaffold_hop/results_scaffold_hop.csv"
+                ]
+              }
+            ],
+            "std_population": 0.021,
+            "value": 0.589
+          },
+          "sitagliptin_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.7259312585,
+              0.7334622226,
+              0.6675975068
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.708996996,
+            "raw_std_population_unrounded": 0.0294348674,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/sitagliptin_mpo/results_sitagliptin_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.029,
+            "value": 0.709
+          },
+          "thiothixene_rediscovery": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.6295265418,
+              0.6398616947,
+              0.6057021803
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.6250301389,
+            "raw_std_population_unrounded": 0.0143034107,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/thiothixene_rediscovery/results_thiothixene_rediscovery.csv"
+                ]
+              }
+            ],
+            "std_population": 0.014,
+            "value": 0.625
+          },
+          "troglitazone_rediscovery": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.6526006071,
+              0.5239022596,
+              0.6075232159
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.5946753609,
+            "raw_std_population_unrounded": 0.0533205195,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/troglitazone_rediscovery/results_troglitazone_rediscovery.csv"
+                ]
+              }
+            ],
+            "std_population": 0.053,
+            "value": 0.595
+          },
+          "valsartan_smarts": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.0,
+              0.0,
+              0.6307293
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.2102431,
+            "raw_std_population_unrounded": 0.2973286434,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/valsartan_smarts/results_valsartan_smarts.csv"
+                ]
+              }
+            ],
+            "std_population": 0.297,
+            "value": 0.21
+          },
+          "zaleplon_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.5284515612,
+              0.5427779373,
+              0.5378818489
+            ],
+            "prescreen": false,
+            "raw_mean_unrounded": 0.5363704491,
+            "raw_std_population_unrounded": 0.0059455592,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen (no prescreen)",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std_no_prescreen.tex",
+                "sha256": "14980fd3f857e73eab0020ac151d098cf1c9efe00c768998d9d6dfd8d22ff756"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/no_prescreen_3_runs/zaleplon_mpo/results_zaleplon_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.006,
+            "value": 0.536
+          }
+        }
+      },
+      "prescreened": {
+        "description": "ZINC250k prescreened. Reproduce command in the archive README adds --use_prescreen; the initial population is read from a per-task oracle-scored ZINC250k csv and those scores never enter mol_buffer, so they are not charged against the 10,000-call budget.",
+        "do_not_compare": "NOT a comparator for a prescreen=false run.",
+        "prescreen": true,
+        "summary": {
+          "n_absent": 0,
+          "n_tasks": 23,
+          "n_with_value": 23,
+          "raw_vs_published_disagreements": [],
+          "sum_of_published_cells": 18.992,
+          "sum_of_unrounded_run_means": 18.992536
+        },
+        "tasks": {
+          "albuterol_similarity": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9931478965,
+              0.9758391016,
+              0.9546118753
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.9745329578,
+            "raw_std_population_unrounded": 0.0157593515,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              1.0,
+              2.0,
+              0.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/albuterol_similarity/results_albuterol_similarity.csv"
+                ]
+              }
+            ],
+            "std_population": 0.016,
+            "value": 0.975
+          },
+          "amlodipine_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.8356848798,
+              0.7974928657,
+              0.8741893783
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.8357890413,
+            "raw_std_population_unrounded": 0.0313113068,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              2.0,
+              1.0,
+              0.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/amlodipine_mpo/results_amlodipine_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.031,
+            "value": 0.836
+          },
+          "celecoxib_rediscovery": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.8378343067,
+              0.8556536558,
+              0.8243021112
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.8392633579,
+            "raw_std_population_unrounded": 0.0128390415,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              2.0,
+              1.0,
+              0.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/celecoxib_rediscovery/results_celecoxib_rediscovery.csv"
+                ]
+              }
+            ],
+            "std_population": 0.013,
+            "value": 0.839
+          },
+          "deco_hop": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9844123737,
+              0.9556917734,
+              0.9642680883
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.9681240784,
+            "raw_std_population_unrounded": 0.0120379875,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/deco_hop/results_deco_hop.csv"
+                ]
+              }
+            ],
+            "std_population": 0.012,
+            "value": 0.968
+          },
+          "drd2": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9947266896,
+              0.9946631979,
+              0.9943492229
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.9945797035,
+            "raw_std_population_unrounded": 0.0001650228,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              2.0,
+              1.0,
+              0.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/drd2/results_drd2.csv"
+                ]
+              }
+            ],
+            "std_population": 0.0,
+            "value": 0.995
+          },
+          "fexofenadine_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9047241932,
+              0.9045584073,
+              0.9039392372
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.9044072792,
+            "raw_std_population_unrounded": 0.0003378055,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              2.0,
+              1.0,
+              0.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/fexofenadine_mpo/results_fexofenadine_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.0,
+            "value": 0.904
+          },
+          "gsk3b": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.989605,
+              0.986775,
+              0.986885
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.987755,
+            "raw_std_population_unrounded": 0.0013089181,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/gsk3b/results_gsk3b.csv"
+                ]
+              }
+            ],
+            "std_population": 0.001,
+            "value": 0.988
+          },
+          "isomers_c7h8n2o2": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9902435453,
+              0.9871907911,
+              0.9862201673
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.9878848346,
+            "raw_std_population_unrounded": 0.001714286,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              2.0,
+              0.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/isomers_c7h8n2o2/results_isomers_c7h8n2o2.csv"
+                ]
+              }
+            ],
+            "std_population": 0.002,
+            "value": 0.988
+          },
+          "isomers_c9h10n2o2pf2cl": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.917499787,
+              0.8745906746,
+              0.90330404
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.8984648339,
+            "raw_std_population_unrounded": 0.0178486492,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/isomers_c9h10n2o2pf2cl/results_isomers_c9h10n2o2pf2cl.csv"
+                ]
+              }
+            ],
+            "std_population": 0.018,
+            "value": 0.898
+          },
+          "jnk3": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9368653135,
+              0.8598129187,
+              0.8968263174
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.8978348498,
+            "raw_std_population_unrounded": 0.0314645911,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              2.0,
+              1.0,
+              0.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/jnk3/results_jnk3.csv"
+                ]
+              }
+            ],
+            "std_population": 0.031,
+            "value": 0.898
+          },
+          "median1": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.3824845146,
+              0.3901960956,
+              0.3857635396
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.3861480499,
+            "raw_std_population_unrounded": 0.0031599585,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              1.0,
+              2.0,
+              0.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/median1/results_median1.csv"
+                ]
+              }
+            ],
+            "std_population": 0.003,
+            "value": 0.386
+          },
+          "median2": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.3687868444,
+              0.382914717,
+              0.380405015
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.3773688588,
+            "raw_std_population_unrounded": 0.0061542874,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/median2/results_median2.csv"
+                ]
+              }
+            ],
+            "std_population": 0.006,
+            "value": 0.377
+          },
+          "mestranol_similarity": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9933282197,
+              0.9905984906,
+              0.988421487
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.9907827324,
+            "raw_std_population_unrounded": 0.0020073972,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              1.0,
+              2.0,
+              0.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/mestranol_similarity/results_mestranol_similarity.csv"
+                ]
+              }
+            ],
+            "std_population": 0.002,
+            "value": 0.991
+          },
+          "osimertinib_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.8946956411,
+              0.8809059606,
+              0.8659569397
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.8805195138,
+            "raw_std_population_unrounded": 0.0117357075,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/osimertinib_mpo/results_osimertinib_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.012,
+            "value": 0.881
+          },
+          "perindopril_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.7459163529,
+              0.7340770498,
+              0.7798407395
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.7532780474,
+            "raw_std_population_unrounded": 0.0193945823,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/perindopril_mpo/results_perindopril_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.019,
+            "value": 0.753
+          },
+          "qed": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9434902607,
+              0.9433431226,
+              0.9435047094
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.9434460309,
+            "raw_std_population_unrounded": 7.30058e-05,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              1.0,
+              2.0,
+              0.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/qed/results_qed.csv"
+                ]
+              }
+            ],
+            "std_population": 0.0,
+            "value": 0.943
+          },
+          "ranolazine_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.8390205981,
+              0.8552003212,
+              0.8674491525
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.8538900239,
+            "raw_std_population_unrounded": 0.0116428329,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/ranolazine_mpo/results_ranolazine_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.012,
+            "value": 0.854
+          },
+          "scaffold_hop": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.8262334743,
+              0.6553500303,
+              0.6526101345
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.7113978797,
+            "raw_std_population_unrounded": 0.0812087315,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              2.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/scaffold_hop/results_scaffold_hop.csv"
+                ]
+              }
+            ],
+            "std_population": 0.081,
+            "value": 0.711
+          },
+          "sitagliptin_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.7673323535,
+              0.7144088013,
+              0.7481804259
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.7433071936,
+            "raw_std_population_unrounded": 0.0218790142,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              1.0,
+              2.0,
+              0.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/sitagliptin_mpo/results_sitagliptin_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.022,
+            "value": 0.743
+          },
+          "thiothixene_rediscovery": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.6864431312,
+              0.6386488146,
+              0.6314879535
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.6521932998,
+            "raw_std_population_unrounded": 0.0243940935,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              2.0,
+              0.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/thiothixene_rediscovery/results_thiothixene_rediscovery.csv"
+                ]
+              }
+            ],
+            "std_population": 0.024,
+            "value": 0.652
+          },
+          "troglitazone_rediscovery": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.8515974894,
+              0.8567688863,
+              0.8498154003
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.8527272587,
+            "raw_std_population_unrounded": 0.0029490141,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              0.0,
+              1.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/troglitazone_rediscovery/results_troglitazone_rediscovery.csv"
+                ]
+              }
+            ],
+            "std_population": 0.003,
+            "value": 0.853
+          },
+          "valsartan_smarts": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.9293964912,
+              0.9515619903,
+              0.9242014244
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.9350533019,
+            "raw_std_population_unrounded": 0.0118645065,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              2.0,
+              0.0,
+              1.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/valsartan_smarts/results_valsartan_smarts.csv"
+                ]
+              }
+            ],
+            "std_population": 0.012,
+            "value": 0.935
+          },
+          "zaleplon_mpo": {
+            "budget_oracle_calls": 10000,
+            "evidence": "MEASURED",
+            "log_frequency": 100,
+            "metric_definition": "top_auc(top_n=10, finish=True)",
+            "metric_id": "auc_top10@10000",
+            "n_runs": 3,
+            "per_run_auc_top10": [
+              0.6740710652,
+              0.5759252925,
+              0.6213680094
+            ],
+            "prescreen": true,
+            "raw_mean_unrounded": 0.6237881224,
+            "raw_std_population_unrounded": 0.0401043712,
+            "reproduces_published_cell_to_3dp": true,
+            "seeds": [
+              1.0,
+              0.0,
+              2.0
+            ],
+            "sources": [
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "column": "InVirtuoGen",
+                "kind": "published_table",
+                "path": "pmo_comparison_table_with_std.tex",
+                "sha256": "adda83b2632dc5401746fb2e731d2c723b0a19cebada9f4c8e39055084d03357"
+              },
+              {
+                "archive": "https://github.com/invirtuolabs/InVirtuoGen_results",
+                "kind": "raw_per_run_data",
+                "paths": [
+                  "results/target_property/prescreen_3_runs/zaleplon_mpo/results_zaleplon_mpo.csv"
+                ]
+              }
+            ],
+            "std_population": 0.04,
+            "value": 0.624
+          }
+        }
+      }
+    },
+    "schema_version": "pmo_baseline_registry_v1",
+    "scored_launch_authorized": false,
+    "secondary_no_prescreen_columns": {
+      "attribution": {
+        "gen_gfn": "Genetic GFN (Kim et al. 2024), quoted by InVirtuoGen",
+        "graph_ga": "Graph GA, via the PMO benchmark paper (Gao et al. 2022), quoted by InVirtuoGen",
+        "mol_ga": "Mol GA (Tripp et al. 2023), quoted by InVirtuoGen",
+        "reinvent": "REINVENT, via the PMO benchmark paper (Gao et al. 2022), quoted by InVirtuoGen"
+      },
+      "caution": "Transcribed by InVirtuoGen from other publications; the archive is evidence of the transcription, not of the measurement. No raw per-run data for these columns exists in the archive.",
+      "source": "README.md no-prescreen table",
+      "tasks": {
+        "albuterol_similarity": {
+          "gen_gfn": 0.949,
+          "graph_ga": 0.838,
+          "mol_ga": 0.896,
+          "reinvent": 0.882
+        },
+        "amlodipine_mpo": {
+          "gen_gfn": 0.761,
+          "graph_ga": 0.661,
+          "mol_ga": 0.688,
+          "reinvent": 0.635
+        },
+        "celecoxib_rediscovery": {
+          "gen_gfn": 0.802,
+          "graph_ga": 0.63,
+          "mol_ga": 0.567,
+          "reinvent": 0.713
+        },
+        "deco_hop": {
+          "gen_gfn": 0.733,
+          "graph_ga": 0.619,
+          "mol_ga": 0.649,
+          "reinvent": 0.666
+        },
+        "drd2": {
+          "gen_gfn": 0.974,
+          "graph_ga": 0.964,
+          "mol_ga": 0.936,
+          "reinvent": 0.945
+        },
+        "fexofenadine_mpo": {
+          "gen_gfn": 0.856,
+          "graph_ga": 0.76,
+          "mol_ga": 0.825,
+          "reinvent": 0.784
+        },
+        "gsk3b": {
+          "gen_gfn": 0.881,
+          "graph_ga": 0.788,
+          "mol_ga": 0.843,
+          "reinvent": 0.865
+        },
+        "isomers_c7h8n2o2": {
+          "gen_gfn": 0.969,
+          "graph_ga": 0.862,
+          "mol_ga": 0.878,
+          "reinvent": 0.852
+        },
+        "isomers_c9h10n2o2pf2cl": {
+          "gen_gfn": 0.897,
+          "graph_ga": 0.719,
+          "mol_ga": 0.865,
+          "reinvent": 0.642
+        },
+        "jnk3": {
+          "gen_gfn": 0.764,
+          "graph_ga": 0.553,
+          "mol_ga": 0.702,
+          "reinvent": 0.783
+        },
+        "median1": {
+          "gen_gfn": 0.379,
+          "graph_ga": 0.294,
+          "mol_ga": 0.257,
+          "reinvent": 0.356
+        },
+        "median2": {
+          "gen_gfn": 0.294,
+          "graph_ga": 0.273,
+          "mol_ga": 0.301,
+          "reinvent": 0.276
+        },
+        "mestranol_similarity": {
+          "gen_gfn": 0.708,
+          "graph_ga": 0.579,
+          "mol_ga": 0.591,
+          "reinvent": 0.618
+        },
+        "osimertinib_mpo": {
+          "gen_gfn": 0.86,
+          "graph_ga": 0.831,
+          "mol_ga": 0.844,
+          "reinvent": 0.837
+        },
+        "perindopril_mpo": {
+          "gen_gfn": 0.595,
+          "graph_ga": 0.538,
+          "mol_ga": 0.547,
+          "reinvent": 0.537
+        },
+        "qed": {
+          "gen_gfn": 0.942,
+          "graph_ga": 0.94,
+          "mol_ga": 0.941,
+          "reinvent": 0.941
+        },
+        "ranolazine_mpo": {
+          "gen_gfn": 0.819,
+          "graph_ga": 0.728,
+          "mol_ga": 0.804,
+          "reinvent": 0.76
+        },
+        "scaffold_hop": {
+          "gen_gfn": 0.615,
+          "graph_ga": 0.517,
+          "mol_ga": 0.527,
+          "reinvent": 0.56
+        },
+        "sitagliptin_mpo": {
+          "gen_gfn": 0.634,
+          "graph_ga": 0.433,
+          "mol_ga": 0.582,
+          "reinvent": 0.021
+        },
+        "thiothixene_rediscovery": {
+          "gen_gfn": 0.583,
+          "graph_ga": 0.479,
+          "mol_ga": 0.519,
+          "reinvent": 0.534
+        },
+        "troglitazone_rediscovery": {
+          "gen_gfn": 0.511,
+          "graph_ga": 0.39,
+          "mol_ga": 0.427,
+          "reinvent": 0.441
+        },
+        "valsartan_smarts": {
+          "gen_gfn": 0.135,
+          "graph_ga": 0.0,
+          "mol_ga": 0.0,
+          "reinvent": 0.178
+        },
+        "zaleplon_mpo": {
+          "gen_gfn": 0.552,
+          "graph_ga": 0.346,
+          "mol_ga": 0.519,
+          "reinvent": 0.358
+        }
+      },
+      "tier": "SECOND_HAND"
+    },
+    "status": "SEALED_RESEARCH_ONLY"
+  },
+  "payload_sha256": "6ca9590541377e03e3de1c5c25953c9541d1bb4b3fef89daa99edec6d04387ce"
+}
