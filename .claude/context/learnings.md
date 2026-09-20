@@ -1335,8 +1335,11 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   (works). Reporting per-gate pass rates alone hides this completely -- always report the pairwise
   intersection.
 - **5ht1b_2 fails on a DIFFERENT gate and must not be grouped with the other four.** 474 endpoints
-  pass similarity AND QED; the minimum SA among them is **4.332** against a 4.0 ceiling, and the
-  SOURCE is already outside at SA 4.687. Relaxing SA to 4.5 admits 6, to 5.0 admits 163, while
+  pass similarity AND QED; the minimum SA among them is **4.332** against a 4.0 ceiling, while the
+  SOURCE itself sits at SA 4.687. The SA ceiling constrains RETURNED molecules, not the source, so
+  this is a legitimate benchmark instance that happens to demand a substantial SA REPAIR (>=0.69)
+  while holding Tanimoto >= 0.6 -- it is a hard cell, NOT an out-of-spec one, and calling the source
+  out-of-spec would wrongly imply the instance is invalid. Relaxing SA to 4.5 admits 6, to 5.0 admits 163, while
   relaxing similarity or QED by 0.10 admits 0-1. One label, two mechanisms.
 - **"Zero eligible" is NOT "empty fiber" -- 4 of the 5 failures have a demonstrated eligible witness.**
   A program-free acyclic-bond truncation beam finds, inside the delta=0.6 ball, braf_0 at
