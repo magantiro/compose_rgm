@@ -1,0 +1,116 @@
+{
+ "schema_version": "t4_rescue_vehicle_survey_v1",
+ "generated": "2026-09-20T19:29:22",
+ "oracle_calls": 0,
+ "docking_calls": 0,
+ "question": "which existing runtime can execute the rescue set under a feasibility-conditioned expert at the reconciled per-cell budgets",
+ "rescue_set": [
+  "braf_0_d06",
+  "braf_1_d06",
+  "fa7_0_d06",
+  "fa7_2_d06",
+  "5ht1b_2_d06",
+  "fa7_2_d04"
+ ],
+ "reconciled_budgets": {
+  "braf_0_d06": 248,
+  "braf_1_d06": 249,
+  "fa7_0_d06": 249,
+  "fa7_2_d06": 248,
+  "5ht1b_2_d06": 248,
+  "fa7_2_d04": 249
+ },
+ "variants": {
+  "held_target_d06_250": {
+   "app": "modal_apps/t4_integrated_route_fiber_parp1_app.py (+ thin wrappers)",
+   "expert_vocabulary": [
+    "shallow",
+    "anchored_replacement",
+    "route_complete_region"
+   ],
+   "expert_selection": "module constant EXPERTS; proposal_worker raises on any other name",
+   "cells_available": "any, set by contract",
+   "charged_calls_per_cell": 250,
+   "carries_feasibility_headroom_v4": false,
+   "blocker": "cannot run any feasibility-conditioned expert; image does not ship scripts/"
+  },
+  "full": {
+   "app": "modal_apps/t4_shared_controller_completion_v1_app.py",
+   "expert_vocabulary": [
+    "anchored_replacement",
+    "route_complete_region",
+    "shallow"
+   ],
+   "expert_selection": "validate_scored_contract pins EXPECTED_CONTROLLER exactly",
+   "cells_available": [
+    "parp1_0_d04",
+    "parp1_1_d04",
+    "parp1_2_d04",
+    "braf_0_d04",
+    "braf_1_d04",
+    "braf_2_d04",
+    "braf_0_d06",
+    "braf_1_d06",
+    "braf_2_d06"
+   ],
+   "charged_calls_per_cell": 49,
+   "carries_feasibility_headroom_v4": false,
+   "blocker": "validator raises 'scored cell matrix drift' for any other cell set and 'scored budget or retry policy drift' for any budget != 49/441"
+  },
+  "repaired_exhaustion_v1": {
+   "app": "modal_apps/t4_shared_controller_repaired_exhaustion_v1_app.py",
+   "expert_vocabulary": [
+    "shallow",
+    "anchored_replacement",
+    "route_complete_region",
+    "protonation_aware_retained_subgraph"
+   ],
+   "expert_selection": "EXPERTS constant in the variant's contract module",
+   "cells_available": [
+    "braf_0_d06",
+    "5ht1b_2_d06"
+   ],
+   "charged_calls_per_cell": 49,
+   "carries_feasibility_headroom_v4": false,
+   "blocker": "fourth expert is protonation_aware_retained_subgraph, not generic_feasibility_headroom_v4; authorization receipt is ABSENT on disk so this campaign has never been authorized; 98-call total pinned"
+  },
+  "nodistill_feasibility_v4": {
+   "app": "modal_apps/t4_nodistill_feasibility_v4_app.py",
+   "expert_vocabulary": [
+    "shallow",
+    "anchored_replacement",
+    "route_complete_region",
+    "generic_feasibility_headroom_v4"
+   ],
+   "expert_selection": "variant contract module validator",
+   "cells_available": [
+    "jak2_0_d06",
+    "parp1_0_d04",
+    "5ht1b_1_d04"
+   ],
+   "charged_calls_per_cell": 49,
+   "carries_feasibility_headroom_v4": true,
+   "blocker": "cells are jak2_0_d06 / parp1_0_d04 / 5ht1b_1_d04 -- none of the rescue set, and 5ht1b_1_d04 belongs to the live delta=0.4 campaign"
+  }
+ },
+ "verified_true_about_the_shared_runtime": [
+  "src/compose_v4/control/generic_feasibility_headroom_composer_v4.py exists and its docstring states it takes no target, cell, teacher, route, template, objective or fitted input",
+  "t4_integrated_route_fiber.py defines FEASIBILITY_HEADROOM_V4_EXPERT and SUPPORTED_EXPERT_VOCABULARIES whitelists it",
+  "modal_apps/t4_shared_controller_completion_v1_app.py has no hardcoded EXPERTS tuple and dispatches generic_feasibility_headroom_v4 at line 465"
+ ],
+ "why_that_is_not_sufficient": [
+  "the DISPATCH is general but the CONTRACT is not: each campaign variant binds a validate_scored_contract that pins the cell matrix, the controller block and the call budget as module constants",
+  "those constants live in src/compose_v4/experiments/*_contract.py, which is forbidden to modify",
+  "a NEW variant additionally needs an entry in _VARIANT_APPS inside the completion app, whose sha256 is pinned by the source-capsule manifests of existing campaigns (local_scored_context raises 'local launcher differs from the exact source capsule')",
+  "no existing variant combines the rescue cells, the v4 feasibility expert and the reconciled 248/249 budgets"
+ ],
+ "authorization_requirement": {
+  "mechanism": "validate_scored_contract requires a payload-bound authorization envelope whose user_statement names the exact contract payload sha256, the per-cell cap and the total cap",
+  "example_existing_statement_field": "user_statement",
+  "consequence": "a rescue contract has a NEW payload hash and NEW caps, so it needs a NEW first-person user authorization naming that hash. This is a user action; it cannot be authored on the user's behalf, and an agent instruction is not a substitute for it."
+ },
+ "launch_decision": {
+  "launched": false,
+  "docking_calls_spent": 0
+ }
+}
