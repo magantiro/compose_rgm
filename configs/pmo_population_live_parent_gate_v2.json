@@ -1,55 +1,65 @@
 {
   "payload": {
-    "schema_version": "pmo_population_live_parent_gate_v2",
-    "scientific_question": "Does the task-blind PMO joint dependency-region composer retain route-scale support after a generic non-root descendant?",
-    "inputs": {
-      "initialization": "diagnostics/parent_edit_cycles/prepared/init_20260921.json",
-      "joint_checkpoint": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json",
-      "exhaustive_result": "diagnostics/pmo_population_live_parent_gate_v1/scheduler_result.json"
-    },
-    "input_sha256": {
-      "initialization": "a1f7840df1f75567565de633c4df3d013c3165df3e43cbf2ac87b156d5f206ff",
-      "joint_checkpoint": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43",
-      "exhaustive_result": "de044abe3b6c7eb1f5cbf53fd8591f5c26561753dedf4b3cbcb5cb9691fa71fc"
-    },
-    "plan_policy": {
-      "all_plan_latents": 95,
-      "plans_per_batch": 32,
-      "chunk_offset": "(batch_index * 32) mod 95",
-      "scale_order": "small, medium, large round-robin queues with fixed mass-weighted permutation",
-      "outcome_informed_selection": false,
-      "task_conditioning": false
-    },
-    "parent_policy": {
-      "initialization_count": 16,
-      "descendant_operator": "deterministic task-blind current-state family round-robin",
-      "selection_after_observation": false,
-      "minimum_supported_non_root_parents": 4,
-      "minimum_route_scale_primitives": 8
-    },
-    "support_observed": {
-      "parent_count": 16,
-      "descendant_exact_count": 14,
-      "supported_parent_count": 7,
-      "supported_parent_indices": [0, 2, 3, 4, 11, 13, 14],
-      "route_scale_exact_count": 37,
-      "unique_route_scale_endpoints": 30
-    },
+    "decision": "SUPPORT_PASS_FOR_SEPARATE_SCORED_CONTRACT",
     "implementation_sha256": {
-      "src/compose_v4/control/pmo_population_controller.py": "9108e0fcfe1b6478964c875a213bef438a89f9b44589bd6de313442bca7ccec9",
+      "modal_apps/pmo_population_v1_app.py": "289cebc51e34efbb860df514a2a5bcfd91284560d4e051c706fd66229242ea89",
+      "src/compose_v4/control/pmo_credit.py": "ec1eb66589f241dec65eaa73a540f32ac8b032d7562889f7adf1a3b299834112",
+      "src/compose_v4/control/pmo_population_controller.py": "c56a35124aaf40cad66de97d2694d7bd25ab44fac4dd2b1a8f09173fc632e4b8",
       "src/compose_v4/experiments/pmo_population_live_parent_gate.py": "518045a7941e5073ed75abfe0d0098d3d98c11f5267b2d217895a0fb40c095c5",
       "tools/pmo_population_live_parent_gate.py": "d945af12ab262d5d5667a15b623b212407d7f7a6960b439fdcf258ece944faea"
     },
-    "oracle_calls": 0,
+    "input_sha256": {
+      "exhaustive_result": "de044abe3b6c7eb1f5cbf53fd8591f5c26561753dedf4b3cbcb5cb9691fa71fc",
+      "initialization": "a1f7840df1f75567565de633c4df3d013c3165df3e43cbf2ac87b156d5f206ff",
+      "joint_checkpoint": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43"
+    },
+    "inputs": {
+      "exhaustive_result": "diagnostics/pmo_population_live_parent_gate_v1/scheduler_result.json",
+      "initialization": "diagnostics/parent_edit_cycles/prepared/init_20260921.json",
+      "joint_checkpoint": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json"
+    },
     "modal_launch_authorized": false,
-    "scored_launch_authorized": false,
-    "decision": "SUPPORT_PASS_FOR_SEPARATE_SCORED_CONTRACT",
+    "oracle_calls": 0,
+    "parent_policy": {
+      "descendant_operator": "deterministic task-blind current-state family round-robin",
+      "initialization_count": 16,
+      "minimum_route_scale_primitives": 8,
+      "minimum_supported_non_root_parents": 4,
+      "selection_after_observation": false
+    },
+    "plan_policy": {
+      "all_plan_latents": 95,
+      "chunk_offset": "(batch_index * 32) mod 95",
+      "outcome_informed_selection": false,
+      "plans_per_batch": 32,
+      "scale_order": "small, medium, large round-robin queues with fixed mass-weighted permutation",
+      "task_conditioning": false
+    },
     "prohibitions": [
       "no oracle or Modal call",
       "no score or task informed plan selection",
       "do not alter T4 v4",
       "do not claim held-out transfer"
-    ]
+    ],
+    "schema_version": "pmo_population_live_parent_gate_v2",
+    "scientific_question": "Does the task-blind PMO joint dependency-region composer retain route-scale support after a generic non-root descendant?",
+    "scored_launch_authorized": false,
+    "support_observed": {
+      "descendant_exact_count": 14,
+      "parent_count": 16,
+      "route_scale_exact_count": 37,
+      "supported_parent_count": 7,
+      "supported_parent_indices": [
+        0,
+        2,
+        3,
+        4,
+        11,
+        13,
+        14
+      ],
+      "unique_route_scale_endpoints": 30
+    }
   },
-  "payload_sha256": "510f6920e947e128557d48f52baa43392e7fb4bf9b0469aa864010ca85651ef0"
+  "payload_sha256": "90469c6968648c593aace4e8b99b75113299e9c7e5cf5ad02b359343980a8acf"
 }

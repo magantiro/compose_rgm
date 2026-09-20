@@ -14,6 +14,9 @@
     },
     "controller_contract": "configs/pmo_population_controller_v1.json",
     "controller_contract_sha256": "ff56851441242d600751bd8e0ec1c53803b3de18504bfe9c8a687887183a1c30",
+    "corrected_source_capsule_manifest": "diagnostics/pmo_population_controller_v1/source_capsule_manifest_v2.json",
+    "corrected_worker_app": "compose-pmo-population-v1-corrected",
+    "corrected_worker_path": "modal_apps/pmo_population_v1_app.py",
     "implementation_sha256": {
       "modal_apps/pmo_population_v1_app.py": "289cebc51e34efbb860df514a2a5bcfd91284560d4e051c706fd66229242ea89",
       "src/compose_v4/control/pmo_credit.py": "ec1eb66589f241dec65eaa73a540f32ac8b032d7562889f7adf1a3b299834112",
@@ -29,6 +32,7 @@
       "prescreen": false
     },
     "oracle_calls_authorized": 0,
+    "prior_launch_terminal_failure": "ModuleNotFoundError: torch before durable task/oracle work",
     "promotion": {
       "beat_at_least": 2,
       "ivg_targets_postrun_only": {
@@ -56,7 +60,8 @@
     "schema_version": "pmo_population_controller_v1_scored_contract",
     "scientific_question": "Does the shared COMPOSE program backbone plus PMO population control, FiberControl and recursive descendants achieve competitive no-prescreen PMO performance on three prospectively selected tasks?",
     "scored_launch_authorized": false,
-    "status": "FROZEN_FAIL_CLOSED_PENDING_EXPLICIT_PAYLOAD_AUTHORIZATION",
+    "status": "FROZEN_FAIL_CLOSED_PENDING_NEW_EXPLICIT_PAYLOAD_AUTHORIZATION",
+    "supersedes_payload_sha256": "61c1fdf3995f0635b2f46a517e6e5ddd566f3ec9a26ce53ea3dec1c6e5a0b582",
     "task_roles": {
       "celecoxib_rediscovery": "long-program reachability control",
       "gsk3b": "basin-discovery black-box",
@@ -68,5 +73,5 @@
       "celecoxib_rediscovery"
     ]
   },
-  "payload_sha256": "76e18e1924380a11590cd7bfba7a8b7e1a33170b063eb2deac933a8648f53f45"
+  "payload_sha256": "a2530fcebd065407e2ef8709ba464dd7d3d1536a69106391787b54c2c6c652ce"
 }
