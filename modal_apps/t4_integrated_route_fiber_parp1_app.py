@@ -26,6 +26,8 @@ VOLUME_NAME = os.environ.get(
 )
 OUTPUT = Path(os.environ.get("COMPOSE_HELD_OUTPUT", "/integrated_parp1"))
 MOOD = "https://raw.githubusercontent.com/SeulLee05/MOOD/main/scorer"
+RECEPTOR_NAME = os.environ.get("COMPOSE_HELD_RECEPTOR_NAME", "parp1")
+RECEPTOR_PATH = f"/opt/dock/receptors/{RECEPTOR_NAME}.pdbqt"
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -41,7 +43,7 @@ image = (
         "mkdir -p /opt/dock/receptors",
         f"curl --fail -sSL -o /opt/dock/qvina02 {MOOD}/qvina02",
         "chmod +x /opt/dock/qvina02",
-        f"curl --fail -sSL -o /opt/dock/receptors/parp1.pdbqt {MOOD}/receptors/parp1.pdbqt",
+        f"curl --fail -sSL -o {RECEPTOR_PATH} {MOOD}/receptors/{RECEPTOR_NAME}.pdbqt",
     )
     .add_local_dir(ROOT / "src", str(REMOTE / "src"), copy=True, ignore=["**/__pycache__/**"])
     .add_local_file(ROOT / CONTRACT, str(REMOTE / CONTRACT), copy=True)
@@ -226,7 +228,7 @@ def dock_worker(task: dict) -> dict:
     contract = _validate_task(task, role="dock")
     physical = {
         "qvina02": sha256_file(Path("/opt/dock/qvina02")),
-        "receptor": sha256_file(Path("/opt/dock/receptors/parp1.pdbqt")),
+        "receptor": sha256_file(Path(RECEPTOR_PATH)),
     }
     if physical != contract["evaluator_sha256"]:
         raise ValueError(f"docking evaluator identity mismatch: {physical}")
@@ -237,7 +239,7 @@ def dock_worker(task: dict) -> dict:
         contract["docking_seed"],
         box={
             "coordinates": contract["docking_box"],
-            "receptor": "/opt/dock/receptors/parp1.pdbqt",
+            "receptor": RECEPTOR_PATH,
         },
     )
     return {
