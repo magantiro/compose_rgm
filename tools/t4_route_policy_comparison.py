@@ -50,6 +50,7 @@ from compose_v4.experiments.t4_route_policy_comparison import (
     fit_marginal_policy,
     generate_marginal_candidates,
     predeclared_source_folds,
+    predeclared_target_folds,
     require_nonself_endpoint,
     teacher_candidate,
 )
@@ -382,6 +383,7 @@ def run(
     code_revision: str | None = None,
     working_tree_dirty: bool | None = None,
     progress_callback=None,
+    split_mode: str = "source",
 ):
     """Fit and evaluate three grouped policies without a task oracle."""
 
@@ -400,7 +402,12 @@ def run(
     traces, exclusions = _teacher_traces(library)
     if exclusions or len(traces) != 77:
         raise RuntimeError("the signed teacher census is incomplete")
-    all_folds = predeclared_source_folds(metadata)
+    if split_mode == "source":
+        all_folds = predeclared_source_folds(metadata)
+    elif split_mode == "target":
+        all_folds = predeclared_target_folds(metadata)
+    else:
+        raise ValueError(f"unsupported route-policy split mode: {split_mode!r}")
     requested_folds, folds = _select_folds(all_folds, fold_ids)
     selected_test_sources = _select_test_sources(folds, test_source_ids)
     by_source = {
@@ -715,7 +722,12 @@ def run(
         "evidence": "answer-known grouped T4 route-proposal development",
         "configuration": asdict(config),
         "predeclared_split": {
-            "rule": "three source-group folds; test source_idx equals fold",
+            "mode": split_mode,
+            "rule": (
+                "three source-group folds; test source_idx equals fold"
+                if split_mode == "source"
+                else "five target folds; all three source seeds for the held target"
+            ),
             "folds": list(all_folds),
             "evaluated_fold_ids": list(requested_folds),
             "evaluated_test_sources": sorted(
@@ -790,12 +802,13 @@ def main():
     parser.add_argument("--output", type=Path, default=OUTPUT)
     parser.add_argument("--attempts-per-source", type=int, default=128)
     parser.add_argument("--training-negative-attempts-per-source", type=int, default=32)
+    parser.add_argument("--split-mode", choices=("source", "target"), default="source")
     args = parser.parse_args()
     config = ComparisonConfig(
         attempts_per_source=args.attempts_per_source,
         training_negative_attempts_per_source=args.training_negative_attempts_per_source,
     )
-    result = run(args.output, config=config)
+    result = run(args.output, config=config, split_mode=args.split_mode)
     print(
         json.dumps(
             {

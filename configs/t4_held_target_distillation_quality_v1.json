@@ -1,0 +1,30 @@
+{
+  "schema_version": "t4_held_target_distillation_quality_contract_v1",
+  "status": "AUTHORIZED_ZERO_ORACLE_QUALITY_RUN",
+  "scientific_question": "Does a target-independent route-trained structural-action prior transfer to a target whose successful routes were excluded from fitting?",
+  "split": {
+    "kind": "leave_target_out",
+    "targets": ["braf", "fa7", "jak2", "parp1", "5ht1b"],
+    "all_three_source_seeds_held_out_together": true,
+    "vocabulary_and_preprocessing_fit_on_training_targets_only": true
+  },
+  "arms": [
+    "generic_marginal",
+    "held_target_route_actor",
+    "held_target_hybrid_ranker"
+  ],
+  "shared_backbone": {
+    "program_representation": "dependency_aware_complete_program",
+    "compiler": "exact_existing_compiler",
+    "endpoint_injection": false,
+    "oracle_calls": 0
+  },
+  "evaluation": {
+    "autonomous_generation": true,
+    "teacher_injected_panel": "diagnostic_only",
+    "coverage_and_precision_required": true,
+    "runtime_checkpoint_teacher_fields_forbidden": true
+  },
+  "authorization": "User authorized immediate held-target route-distillation development and subsequent scored evaluation after the zero-oracle quality gate.",
+  "promotion": "Only a sealed quality artifact with complete target folds may authorize a scored panel."
+}

@@ -179,6 +179,38 @@ def predeclared_source_folds(source_metadata: dict[str, dict]) -> tuple[dict, ..
     return tuple(folds)
 
 
+def predeclared_target_folds(source_metadata: dict[str, dict]) -> tuple[dict, ...]:
+    """Hold out every source from one target in each fixed target fold."""
+
+    targets = sorted({str(row["target"]) for row in source_metadata.values()})
+    if len(source_metadata) != 15 or len(targets) != 5:
+        raise ValueError("the predeclared T4 target split requires 15 sources and 5 targets")
+    folds = []
+    for fold, target in enumerate(targets):
+        test = sorted(
+            source
+            for source, row in source_metadata.items()
+            if str(row["target"]) == target
+        )
+        train = sorted(set(source_metadata) - set(test))
+        if len(test) != 3 or set(test) & set(train):
+            raise ValueError("each target fold must hold all three seeds for one target")
+        folds.append(
+            {
+                "fold": fold,
+                "held_out_target": target,
+                "train_sources": train,
+                "calibration_sources": [],
+                "test_sources": test,
+            }
+        )
+    if Counter(source for row in folds for source in row["test_sources"]) != Counter(
+        source_metadata.keys()
+    ):
+        raise ValueError("each source must be held out exactly once in target folds")
+    return tuple(folds)
+
+
 def _recognized_families(trace: dict) -> tuple[dict[str, float], int]:
     segments = recognize_trace(trace["states"], trace["actions"])
     totals = Counter()

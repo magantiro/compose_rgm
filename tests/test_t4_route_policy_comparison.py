@@ -13,6 +13,7 @@ from compose_v4.experiments.t4_route_policy_comparison import (
     complete_attempt_rows,
     fit_contrastive_ranker,
     predeclared_source_folds,
+    predeclared_target_folds,
     require_nonself_endpoint,
 )
 from compose_v4.rewrite.trace_shard import encode_state
@@ -36,6 +37,26 @@ def test_predeclared_folds_are_source_disjoint_and_balanced():
     )
     assert sorted(source for row in folds for source in row["test_sources"]) == sorted(
         metadata
+    )
+
+
+def test_predeclared_target_folds_hold_all_seeds_for_one_target():
+    metadata = {
+        f"source-{protein}-{seed}": {
+            "target": protein,
+            "source_idx": seed,
+        }
+        for protein in ("a", "b", "c", "d", "e")
+        for seed in range(3)
+    }
+    folds = predeclared_target_folds(metadata)
+    assert len(folds) == 5
+    assert all(len(row["test_sources"]) == 3 for row in folds)
+    assert all(not set(row["train_sources"]) & set(row["test_sources"]) for row in folds)
+    assert all(
+        {metadata[source]["target"] for source in row["test_sources"]}
+        == {row["held_out_target"]}
+        for row in folds
     )
 
 

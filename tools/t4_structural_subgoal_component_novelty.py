@@ -48,6 +48,7 @@ from compose_v4.control.structural_subgoal_policy import (
 from compose_v4.experiments.t4_matched_pilot import unseal
 from compose_v4.experiments.t4_route_policy_comparison import (
     predeclared_source_folds,
+    predeclared_target_folds,
 )
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import decode_state
@@ -685,7 +686,14 @@ def _aggregate(folds: list[dict]) -> dict:
     }
 
 
-def run(output: Path, *, pmo_corpus: Path, pmo_result: Path) -> dict:
+def run(
+    output: Path,
+    *,
+    pmo_corpus: Path,
+    pmo_result: Path,
+    split_mode: str = "source",
+    allow_dirty_development: bool = False,
+) -> dict:
     contract = _contract()
     for key, path in (
         ("optional_pmo_dependency_region_corpus", pmo_corpus),
@@ -697,7 +705,7 @@ def run(output: Path, *, pmo_corpus: Path, pmo_result: Path) -> dict:
     status = subprocess.check_output(
         ["git", "status", "--porcelain"], cwd=ROOT, text=True
     ).splitlines()
-    if status:
+    if status and not allow_dirty_development:
         raise ValueError(f"component-novelty audit requires clean source: {status[:5]}")
     revision = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
@@ -706,7 +714,12 @@ def run(output: Path, *, pmo_corpus: Path, pmo_result: Path) -> dict:
     t4_records, metadata = _t4_records()
     remaining_records, remaining_summary = _remaining_full146_records(metadata)
     pmo_records, pmo_summary = _pmo_records(pmo_corpus)
-    splits = predeclared_source_folds(metadata)
+    if split_mode == "source":
+        splits = predeclared_source_folds(metadata)
+    elif split_mode == "target":
+        splits = predeclared_target_folds(metadata)
+    else:
+        raise ValueError(f"unsupported component split mode: {split_mode!r}")
     folds = []
     for split in splits:
         train_sources, held_sources = set(split["train_sources"]), set(
@@ -724,6 +737,7 @@ def run(output: Path, *, pmo_corpus: Path, pmo_result: Path) -> dict:
                 "fold": split["fold"],
                 "train_sources": sorted(train_sources),
                 "held_sources": sorted(held_sources),
+                "held_target": split.get("held_out_target"),
                 "train_routes": len({row["route_id"] for row in train}),
                 "held_routes": len({row["route_id"] for row in held}),
                 "train_subgoals": len(train),
@@ -741,10 +755,14 @@ def run(output: Path, *, pmo_corpus: Path, pmo_result: Path) -> dict:
             "sha256": sha256(CONTRACT),
             "payload_sha256": identity(contract),
         },
-        "evidence": "computed_zero_oracle_grouped_source_component_support_audit",
+        "evidence": (
+            "computed_zero_oracle_grouped_source_component_support_audit"
+            if split_mode == "source"
+            else "computed_zero_oracle_leave_target_out_component_support_audit"
+        ),
         "implementation": {
             "revision": revision,
-            "working_tree_dirty": False,
+            "working_tree_dirty": bool(status),
             "python": platform.python_version(),
             "numpy": np.__version__,
             "networkx": nx.__version__,
@@ -781,6 +799,7 @@ def run(output: Path, *, pmo_corpus: Path, pmo_result: Path) -> dict:
             "source_groups": len({row["source_group"] for row in t4_records}),
             "subgoals": len(t4_records),
             "folds": len(folds),
+            "split_mode": split_mode,
             "each_source_held_once": sorted(
                 source for fold in folds for source in fold["held_sources"]
             )
@@ -820,9 +839,21 @@ def main() -> None:
     parser.add_argument("--pmo-corpus", type=Path, required=True)
     parser.add_argument("--pmo-result", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--split-mode", choices=("source", "target"), default="source")
+    parser.add_argument(
+        "--allow-dirty-development",
+        action="store_true",
+        help="record a provisional development artifact while preserving dirty-tree provenance",
+    )
     args = parser.parse_args()
     began = perf_counter()
-    result = run(args.output, pmo_corpus=args.pmo_corpus, pmo_result=args.pmo_result)
+    result = run(
+        args.output,
+        pmo_corpus=args.pmo_corpus,
+        pmo_result=args.pmo_result,
+        split_mode=args.split_mode,
+        allow_dirty_development=args.allow_dirty_development,
+    )
     print(
         json.dumps(
             {

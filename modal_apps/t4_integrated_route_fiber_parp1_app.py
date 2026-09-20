@@ -7,16 +7,24 @@ three cells and all proposal workers execute concurrently on single-CPU containe
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import modal
 
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE = Path("/compose")
-OUTPUT = Path("/integrated_parp1")
-CONTRACT = "configs/t4_integrated_route_fiber_parp1_v1.json"
-CHECKPOINT = "diagnostics/t4_integrated_route_fiber_parp1_v1/route_expert_checkpoint.json"
-VOLUME_NAME = "compose-t4-integrated-route-fiber-parp1-v1"
+CONTRACT = os.environ.get(
+    "COMPOSE_HELD_CONTRACT", "configs/t4_integrated_route_fiber_parp1_v1.json"
+)
+CHECKPOINT = os.environ.get(
+    "COMPOSE_HELD_CHECKPOINT",
+    "diagnostics/t4_integrated_route_fiber_parp1_v1/route_expert_checkpoint.json",
+)
+VOLUME_NAME = os.environ.get(
+    "COMPOSE_HELD_VOLUME", "compose-t4-integrated-route-fiber-parp1-v1"
+)
+OUTPUT = Path(os.environ.get("COMPOSE_HELD_OUTPUT", "/integrated_parp1"))
 MOOD = "https://raw.githubusercontent.com/SeulLee05/MOOD/main/scorer"
 
 image = (
@@ -51,13 +59,19 @@ image = (
     .env(
         {
             "PYTHONPATH": str(REMOTE / "src"),
+            "COMPOSE_HELD_CONTRACT": CONTRACT,
+            "COMPOSE_HELD_CHECKPOINT": CHECKPOINT,
+            "COMPOSE_HELD_VOLUME": VOLUME_NAME,
+            "COMPOSE_HELD_OUTPUT": str(OUTPUT),
             "OMP_NUM_THREADS": "1",
             "OPENBLAS_NUM_THREADS": "1",
         }
     )
 )
 volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
-app = modal.App("compose-t4-integrated-route-fiber-parp1-v1")
+app = modal.App(
+    os.environ.get("COMPOSE_HELD_APP", "compose-t4-integrated-route-fiber-parp1-v1")
+)
 common = {
     "image": image,
     "cpu": (1.0, 1.0),
