@@ -1,0 +1,198 @@
+{
+  "payload": {
+    "batch": 8,
+    "cells": [
+      {
+        "cell": "jak2_0",
+        "controller_seed": 2026091912,
+        "smiles": "OCCCCc2nc1ccccc1c4ncnc3[nH]cc2c34",
+        "source_global_index": 12
+      },
+      {
+        "cell": "jak2_1",
+        "controller_seed": 2026091913,
+        "smiles": "COC(=O)CC2Nc1ccccc1c3ccnc4[nH]cc2c34",
+        "source_global_index": 13
+      },
+      {
+        "cell": "jak2_2",
+        "controller_seed": 2026091914,
+        "smiles": "Oc5ccc(C2NC(=O)c1ccccc1c3ccnc4[nH]cc2c34)c(F)c5",
+        "source_global_index": 14
+      }
+    ],
+    "central_claim_under_test": "the same shared controller can use the broader delta=0.4 corridor to match or exceed reported IVG JAK2 utility",
+    "charged_calls_per_cell": 250,
+    "claim_boundary": "held-target jak2 panel at delta 0.6 with 250 charged calls per cell; no jak2 route enters the prior",
+    "delta": 0.4,
+    "docking_box": [
+      [
+        114.758,
+        65.496,
+        11.345
+      ],
+      [
+        19.033,
+        17.929,
+        20.283
+      ]
+    ],
+    "docking_seed": 20260919,
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "cb900f3f75dcf2ac3efe6538528ed1e87ec934a527b3b060c2b09dfe3a11d9b6"
+    },
+    "experimental_setting": "receipt-sharded continuation of the authorized three-seed JAK2 delta=0.4 campaign after v1 preemption; completed v1 calls count against the unchanged 49-call-per-cell ceiling and are never repeated",
+    "expert_floor_rounds": 2,
+    "exploration": 2,
+    "frozen_from": {
+      "allowed_adapter_changes": [
+        "leave-jak2-out route checkpoint",
+        "jak2 cells and docking evaluator",
+        "held-target output namespace",
+        "250-call payload-bound contract identity"
+      ],
+      "controller_contract": "configs/t4_shared_retained_fiber_jak2_v2.json"
+    },
+    "legacy_resume": {
+      "jak2_0": {
+        "checkpoint_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_0/checkpoint.json",
+        "checkpoint_payload_sha256": "b2f9cb01de1d325c32d2b18f106f76c0a1cfb85365c8a8425f94097066883608",
+        "checkpoint_sha256": "3cffdcfb65807ed268be5be0a1107ba2816534b961aeaab9d4ce92ad6071bc71",
+        "mode": "checkpoint",
+        "round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_0/round_002_lock.json",
+        "round_lock_payload_sha256": "007b191cd94b4242373b3e073dd1a59dd123e4b564a23c6c81cde1eafbe7ed86",
+        "round_lock_sha256": "3237d844149f15e8da036b3a2f1ad933dd0d7475a75b0bd0e85fa965b5eae811",
+        "run_id": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2",
+        "unresolved_round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_0/round_003_lock.json",
+        "unresolved_round_lock_payload_sha256": "cf0718e6d16cb589b13e80e72a49b5680080e7acb393730049830434ba5792da",
+        "unresolved_round_lock_sha256": "850d3f8af6638d14d949c71950bfffecb0e13327d214e4a7be6776ea55f14322"
+      },
+      "jak2_1": {
+        "checkpoint_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_1/checkpoint.json",
+        "checkpoint_payload_sha256": "3ef28e09a8a51a5dc103be1a230bd69d003ff2df739bc834a26659b02786fbb0",
+        "checkpoint_sha256": "284bc4c2da020a7f350c34655d14fa25fd480e0d2b80c60169fb31484429ebe0",
+        "mode": "checkpoint",
+        "round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_1/round_002_lock.json",
+        "round_lock_payload_sha256": "054906a6f4b7a3d7ff2729520abdaf60e7fe3f0abd3f0fa7b451944f5ce2e16d",
+        "round_lock_sha256": "10ea75b703b1a06b2cb57c85b4a924a31285020665526658eecc8a7791fe059e",
+        "run_id": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2",
+        "unresolved_round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_1/round_003_lock.json",
+        "unresolved_round_lock_payload_sha256": "cf34d74b947cf6eb7fdb2d1abf1846d031cb964dd19a0b177d604b8f8b7c13a2",
+        "unresolved_round_lock_sha256": "4a551848bed80c3767b0fb45f8188e89a17aa5ede6ec0cacd3616283f67344c7"
+      },
+      "jak2_2": {
+        "checkpoint_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_2/checkpoint.json",
+        "checkpoint_payload_sha256": "8e01f901496a09d46e7763ab0add4df791970ab526010ca8700dcc04376c82ee",
+        "checkpoint_sha256": "1fd2a316d1c73e937e888ae7262ba29748bfd5b651119dd0fc3f7872645c0b1d",
+        "mode": "checkpoint",
+        "round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_2/round_002_lock.json",
+        "round_lock_payload_sha256": "f4aba34b2f3e3b3dea7ffdb7c5f600c1d2c7314a09cbd9a6b489e54111925b12",
+        "round_lock_sha256": "868d7d2bd8d37e213f57dc94f315c1e71ad3a7b81ad0ea684631f5c1679e38fa",
+        "run_id": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2",
+        "unresolved_round_lock_path": "d9db07f00c2edae833cd30242e6b11cd9e233f8a6765794790b1e8bec424aee2/jak2_2/round_003_lock.json",
+        "unresolved_round_lock_payload_sha256": "dfac0cac4fc6e678a8a74e89d088c9cc4767512c24857bc0d9eae55754e55023",
+        "unresolved_round_lock_sha256": "8918bb97208e883aada83d3b0af177af24ac8b03dbc830e432ff09c422c6d56c"
+      }
+    },
+    "parent_explore": 0.3,
+    "parents": 4,
+    "phase_poll_seconds": 5,
+    "primary_baselines": "measured roots, frozen prior JAK2 delta=0.6 integrated run, and reported IVG delta=0.4 means; no comparator enters runtime",
+    "primary_model_output": "FiberControl selection over complete shallow, anchored, and leave-target-out route programs",
+    "prior_operational_waste": 24,
+    "proposal": {
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "route_complete_region": {
+        "beam_width": 48,
+        "expansion_width": 48,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "pool_size": 64,
+        "realization_limit": 96,
+        "scale_balanced": true,
+        "training_scope": "one shared task-independent expert fit on all 77 locked routes",
+        "training_split": "leave-jak2-out"
+      },
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      }
+    },
+    "proposal_wait_seconds": 2400,
+    "query_wait_seconds": 1200,
+    "reported_ivg_delta_0_4": {
+      "jak2_0": -10.2,
+      "jak2_1": -10.5,
+      "jak2_2": -10.2
+    },
+    "reported_ivg_source": {
+      "csv_census_artifact": "diagnostics/ivg_t4_census/census.json",
+      "csv_census_sha256": "2c06fdfe65fc31327d865381ccb8f4d2c40553c3925d9dc0a03386c22fda05bb",
+      "evidence": "published lead-optimization table, not a recomputation from released per-seed CSV rows",
+      "known_upstream_discrepancy": "the released CSV-derived run means differ from the published README table; headline comparison uses the published table and records the discrepancy rather than silently substituting the recomputation",
+      "sha256": "a5ae0d826fc458caa1bdfa0a4d8f23927da33cea39188c3e4375a55164de6b80",
+      "uncertainty": {
+        "jak2_0": 0.8,
+        "jak2_1": 0.3,
+        "jak2_2": 0.2
+      },
+      "upstream_revision": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/README.md"
+    },
+    "round_lock_policy": {
+      "automatic_retries": 0,
+      "continue_after_deadline_with_unresolved_calls_charged": true,
+      "never_resubmit_reserved_or_missing_query_receipt": true,
+      "no_backfill": true,
+      "per_expert_proposal_receipts": true,
+      "per_query_receipts": true,
+      "publish_before_docking": true,
+      "resume_complete_receipts_only": true
+    },
+    "route_scale_floor_rounds": 2,
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_held_target_distillation_quality_v1/jak2_checkpoint.json": "d9771225c7a9dc855330318ea4475246b7328107c9ad95da11c976098ca3fb25",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "modal_apps/t4_integrated_route_fiber_parp1_app.py": "15bcc08c842f76c3a6a660eb987ba3bed2956b44319b7946e8386554ed000aaa",
+      "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+      "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "092eb28b6a115a328be7f94ab115317b8f9c196b1f510aaed7a216911cee215e",
+      "src/compose_v4/control/structural_subgoal_policy.py": "d45a2f6b92a69f7462f6c1e2cd5523bc529cedb0a24e5a993aa714a2ade3d2b4",
+      "src/compose_v4/control/structural_subgoal_realizer.py": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_integrated_route_fiber.py": "0c8de5f5607c7b73d5da327f09ccd150ffdc37b741686e7095a12cf905740007",
+      "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "aeee1616ed67c5af77de7da8eae4519ddedda929618286d6d966868d543503ed"
+    },
+    "schema_version": "t4_held_target_distilled_jak2_d06_250_contract_v1",
+    "scientific_problem": "test transfer of a route-trained structural-action prior to jak2 with every jak2 route excluded from fitting",
+    "status": "SEALED_PENDING_EXACT_USER_AUTHORIZATION",
+    "support": "compose_valid",
+    "total_charged_call_ceiling": 750,
+    "value_penalty": 1.0,
+    "zero_oracle_route_support": {
+      "artifact": "diagnostics/t4_held_target_distillation_quality_v1/jak2_smoke.json",
+      "artifact_sha256": "5abd95d9d76023dda5a23b2534641e13c3c6dcacfb9aaea0ace588588b754170",
+      "interpretation": "support outcome is preserved and is not treated as oracle evidence",
+      "result": "leave-jak2-out route support artifact is frozen for the scored panel"
+    },
+    "zero_oracle_support": {
+      "artifacts": [
+        "diagnostics/t4_shared_retained_rewrite_v1/shards/jak2_0.json",
+        "diagnostics/t4_shared_retained_rewrite_v1/shards/jak2_1.json"
+      ],
+      "result": "both audited cells emitted exact small, medium and large programs with 41-42 eligible endpoints at delta 0.4",
+      "sha256": [
+        "0e0c9b70eb3ac590e09803545e6fdc7dfca9ef3f39ab821fad09e9bcc9cc4755",
+        "51185f360bd67421251a1d62d8056eb6530cde429fbccc08d039c52de187a2e4"
+      ]
+    }
+  },
+  "payload_sha256": "5cb41f3530c611f3eab8ddd456a7a85493a17d5bf7cba064b9e0bd84e03c686e"
+}

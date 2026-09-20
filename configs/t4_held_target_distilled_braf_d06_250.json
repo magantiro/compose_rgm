@@ -1,0 +1,141 @@
+{
+  "payload": {
+    "batch": 8,
+    "cells": [
+      {
+        "cell": "braf_0",
+        "controller_seed": 2026091800,
+        "smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34",
+        "source_global_index": 9
+      },
+      {
+        "cell": "braf_1",
+        "controller_seed": 2026091801,
+        "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+        "source_global_index": 10
+      },
+      {
+        "cell": "braf_2",
+        "controller_seed": 2026091802,
+        "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+        "source_global_index": 11
+      }
+    ],
+    "central_claim_under_test": "the same multi-expert FiberControl algorithm can autonomously allocate docking calls on BRAF without BRAF-specific controller changes",
+    "charged_calls_per_cell": 250,
+    "claim_boundary": "held-target braf panel at delta 0.6 with 250 charged calls per cell; no braf route enters the prior",
+    "declared_support": {
+      "endpoint_support": "compose_valid is a strict subset of the official T4 endpoint fiber",
+      "maximum_active_atoms": 40,
+      "objects": "complete connected molecular endpoints produced by three executable COMPOSE proposal experts",
+      "route_primitives": 32,
+      "route_regions": [
+        1,
+        4
+      ],
+      "shallow_and_anchored_horizon": 3,
+      "stereochemistry_claim": false
+    },
+    "delta": 0.6,
+    "docking_box": [
+      [
+        84.194,
+        6.949,
+        -7.081
+      ],
+      [
+        22.032,
+        19.211,
+        14.106
+      ]
+    ],
+    "docking_seed": 20260918,
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a"
+    },
+    "experimental_setting": "prospective three-cell BRAF delta=0.6 cross-target development transfer; fixed 49-call ceiling per cell; candidate exhaustion and abstention are valid outcomes",
+    "expert_floor_rounds": 2,
+    "exploration": 2,
+    "frozen_from": {
+      "allowed_adapter_changes": [
+        "leave-braf-out route checkpoint",
+        "braf cells and docking evaluator",
+        "held-target output namespace",
+        "250-call payload-bound contract identity"
+      ],
+      "controller_contract": "configs/t4_integrated_route_fiber_braf_v1.json",
+      "controller_contract_payload_sha256": "256563816a5d5b68706c7542bff1beae22f422e2c12109a55739dfe50680530c",
+      "controller_result": "diagnostics/t4_integrated_route_fiber_v1/final_result.json",
+      "forbidden_changes": "proposal families, proposal widths, FiberControl features or fitting, expert-floor schedule, parent selection, exploration, endpoint gates, call budget, retries, or per-cell tuning"
+    },
+    "parent_explore": 0.3,
+    "parents": 4,
+    "primary_baselines": "read-only measured roots and reported IVG delta=0.6 values; no comparator value enters runtime",
+    "primary_model_output": "FiberControl selection over complete shallow, anchored, and leave-target-out route programs",
+    "promotion_criteria": {
+      "negative": "two or more cells exhaust without an eligible non-root candidate, or all cells remain no better than their measured roots",
+      "per_round_reporting": true,
+      "transfer_signal": "at least two cells reach their reported IVG delta=0.6 mean or one cell beats it by at least 0.5 while a second improves on its measured root"
+    },
+    "proposal": {
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "route_complete_region": {
+        "beam_width": 32,
+        "expansion_width": 24,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "pool_size": 64,
+        "realization_limit": 32,
+        "training_split": "leave-braf-out"
+      },
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      }
+    },
+    "reported_ivg_delta_0_6": {
+      "braf_0": -9.7,
+      "braf_1": -10.4,
+      "braf_2": -10.3
+    },
+    "round_lock_policy": {
+      "automatic_retries": 0,
+      "no_backfill": true,
+      "no_candidate_replacement": true,
+      "persist_after_every_round": true,
+      "publish_complete_candidate_pool_before_docking": true
+    },
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_held_target_distillation_quality_v1/braf_checkpoint.json": "ab5ba04e3ec52a2f92cedcebec4e53ec7159d03d5a4871aa56199ee485c0709a",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "modal_apps/t4_integrated_route_fiber_parp1_app.py": "15bcc08c842f76c3a6a660eb987ba3bed2956b44319b7946e8386554ed000aaa",
+      "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+      "src/compose_v4/control/fiber_control.py": "8aa214ec25a12ea0b5806b64d22f92edba4617514886a2f2d3023322788e01db",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "092eb28b6a115a328be7f94ab115317b8f9c196b1f510aaed7a216911cee215e",
+      "src/compose_v4/control/structural_subgoal_policy.py": "d45a2f6b92a69f7462f6c1e2cd5523bc529cedb0a24e5a993aa714a2ade3d2b4",
+      "src/compose_v4/control/structural_subgoal_realizer.py": "c803e3c3118e262a8b6fc4df1cfb9f8fed2934d2dc6fb47431ee4e319b64ec5f",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+      "src/compose_v4/experiments/t4_integrated_route_fiber.py": "0c8de5f5607c7b73d5da327f09ccd150ffdc37b741686e7095a12cf905740007"
+    },
+    "schema_version": "t4_held_target_distilled_braf_d06_250_contract_v1",
+    "scientific_problem": "test transfer of a route-trained structural-action prior to braf with every braf route excluded from fitting",
+    "status": "SEALED_PENDING_EXACT_USER_AUTHORIZATION",
+    "support": "compose_valid",
+    "total_charged_call_ceiling": 750,
+    "value_penalty": 1.0,
+    "zero_oracle_route_support": {
+      "artifact": "diagnostics/t4_held_target_distillation_quality_v1/braf_smoke.json",
+      "artifact_sha256": "41dd997d40c069f0064889abaeed6fe117fd2854f5301fbb75fa62cda99240ec",
+      "interpretation": "support outcome is preserved and is not treated as oracle evidence",
+      "result": "leave-braf-out route support artifact is frozen for the scored panel"
+    }
+  },
+  "payload_sha256": "86d960f50c0070eb96d3b241f3294480e47d985058f9cdf1d031fc9266d3a0e9"
+}
