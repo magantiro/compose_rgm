@@ -1312,3 +1312,71 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   the code was single-copy on one disk even after the corpora were safe. Push
   the branch; replication is the only real protection, the gate just removes
   the failure mode already paid for.
+
+## 2026-09-20 (T4 held-target `candidate_exhaustion`: it is the JOINT gate, and the fiber is not empty)
+
+- **All 15 held-target cells reproduce their live terminal status offline, zero oracle calls**
+  (`scripts/t4_support_stage_audit.py`, `diagnostics/t4_support_stage_audit_v1.json`). Round one is
+  deterministic given the cell: one parent (the docked root), three experts, seed
+  `controller_seed + 1_000_003*round + 10_007*parent + 101*expert`. Re-running the pinned library
+  functions gives selected = 0 for the five `candidate_exhaustion` cells and 3/7/8/8/8/8/8/8/8/8 for
+  the ten that search. `parent_score` is unobtainable offline and provably cannot change the count:
+  `Fiber.check` never sees it and `ProgramValue` is unfitted at round one, so every pick is random.
+- **METHOD: instrument a gate by WRAPPING it, never by transcribing it.** `expand` returns only
+  endpoints that already passed `Fiber.check`, so the funnel interior is invisible from its return
+  value. The audit monkey-patches the module globals `t4_fiber_campaign` resolves at call time, in
+  its own process only; `Fiber.check`'s ORIGINAL method still decides, and the per-gate decomposition
+  is recomputed beside it and compared on every call. **0 disagreements over 118,000 gate calls** is
+  what licenses the decomposition; a transcription would have had nothing to check itself against.
+- **THE BINDING CONSTRAINT IS THE INTERSECTION, NOT ANY SINGLE GATE.** For braf_0/braf_1/fa7_0/fa7_2
+  each threshold individually admits hundreds to thousands of endpoints (braf_0: 1,638 pass
+  similarity, 3,534 pass SA) while `similarity AND QED` admits **zero**. The discriminating scalar is
+  `max similarity among QED>=0.6 endpoints`: braf_0 0.488, braf_1 0.566 (FAIL) vs braf_2 **0.650**
+  (works). Reporting per-gate pass rates alone hides this completely -- always report the pairwise
+  intersection.
+- **5ht1b_2 fails on a DIFFERENT gate and must not be grouped with the other four.** 474 endpoints
+  pass similarity AND QED; the minimum SA among them is **4.332** against a 4.0 ceiling, and the
+  SOURCE is already outside at SA 4.687. Relaxing SA to 4.5 admits 6, to 5.0 admits 163, while
+  relaxing similarity or QED by 0.10 admits 0-1. One label, two mechanisms.
+- **"Zero eligible" is NOT "empty fiber" -- 4 of the 5 failures have a demonstrated eligible witness.**
+  A program-free acyclic-bond truncation beam finds, inside the delta=0.6 ball, braf_0 at
+  sim 0.632/QED 0.635/SA 2.41 (-14 heavy atoms), braf_1 at 0.686/0.663/2.19, fa7_2 at
+  0.600/0.663/2.08, and a single-edit beam finds 5ht1b_2 at 0.758/0.626/3.77. Only fa7_0 has no
+  witness. Confirmed independently: braf_1 and braf_2 differ ONLY in the amide tail, and the exact cut
+  that produced braf_2's three eligible endpoints, applied to braf_1, gives sim 0.657 / QED 0.790 /
+  SA 2.17 -- BETTER margins than braf_2's actual winner. **So these are proposal-coverage failures at
+  480+512 draws, not support failures.**
+- **A single-edit beam is the wrong probe for a move class that deletes 13 atoms.** The first
+  geometry probe (depth-5 single-atom edits) returned NEGATIVE on braf_2, a cell that searches --
+  which is how the probe was caught being uninformative rather than being read as "empty fiber".
+  Probe the move class that actually wins: every eligible endpoint in every control here is a PRUNE.
+- **The held-target PRIOR is not the discriminator.** It enters only the `route_complete_region`
+  lane, which returns **0 eligible in 8 of the 9 braf/fa7/5ht1b cells, controls included** (5ht1b_1
+  gets 1), despite committing 7-64 complete programs each -- and it was MOST productive at the
+  proposal level on the failing 5ht1b_2 (64 committed). Every control survives on the model-free
+  `shallow` lane alone (3, 7, 27, 38 eligible). Attributing the failures to the prior does not
+  survive the sibling comparison.
+- **The failure is marginal, not categorical.** braf_2 survives round one on **3** eligible endpoints
+  out of 7,420 and fa7_1 on **7** of 8,583. FAIL vs CONTROL here is 0 versus 3, so any change that
+  moves the boundary slightly re-labels cells. fa7_0's best similarity-passing endpoint has
+  QED **0.5983** -- it misses eligibility by 0.0017 QED.
+- **DEFECT FOUND, live campaign: `configs/t4_held_target_distilled_jak2_d06_250.json` carries
+  `delta = 0.4`, not 0.6.** Its own `claim_boundary` says "held-target jak2 panel at delta 0.6". The
+  value was inherited from `frozen_from.controller_contract`
+  (`t4_shared_retained_fiber_jak2_v2.json`, delta 0.4, 49 calls) while `charged_calls_per_cell` WAS
+  updated to 250 -- a partial copy. All four sibling `jak2_d06_v1..v4` contracts carry 0.6, and the
+  other four proteins' 250-call contracts carry 0.6. Measured effect: jak2 yields 183-1,224 eligible
+  endpoints per cell against <=150 everywhere else, so no jak2 number from this run is a delta=0.6
+  result. **`delta` is executable (`Fiber(cell["smiles"], contract["delta"], ...)`); `claim_boundary`
+  is prose. Diff them.**
+- **Environment parity is checkable cheaply and was checked.** The audit ran on rdkit 2025.09.6 while
+  production pins 2024.3.5. On 8,183 real endpoints from a completed shard, similarity, QED, SA,
+  heavy count and the `med_chem_gate` verdict are **byte-identical** across the two. Build the pinned
+  env (`uv venv --python 3.11` + `rdkit==2024.3.5 numpy==1.26.4 scipy==1.13.1 networkx==3.3`, ~1 min,
+  no torch needed for this path) and diff on REAL generated endpoints, not just on the seeds.
+- **The proposal source is padded to 48 slots (`pad_molecular_graph(..., 48)`), so atom birth is
+  expressible, but no endpoint anywhere exceeded 40 heavy atoms and the `heavy > 40` gate fired
+  0 times in 118k calls.** The ceiling binds upstream in the executor, not at the fiber. Consequence:
+  a source AT 40 heavy atoms has a proposal distribution with literally **0% grow** (braf_0), versus
+  19.7% at 39 (braf_1) and 36.6% at 37 (braf_2). Headroom shapes the direction mix; it does not by
+  itself decide feasibility, since 5ht1b_0 at 39 heavy atoms searches fine.
