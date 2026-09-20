@@ -124,6 +124,91 @@ def _publish(path: Path, payload: dict) -> str:
     return envelope["payload_sha256"]
 
 
+def _resume_state(folder: Path, task: dict) -> dict | None:
+    """Restore a preempted cell from its last completed round, or None to start fresh.
+
+    The checkpoint is published only after a round finishes, while that round's lock is
+    published before any of its queries are docked. A lock above the last checkpointed
+    round is therefore an interrupted round whose charged-call count is unknowable: its
+    queries are debited in full and never re-docked, and the search resumes past it, so
+    budget is forfeited rather than an ambiguous scored retry being issued.
+    """
+    import json
+
+    from compose_v4.control.docking_value import identity
+
+    checkpoint_path = folder / "checkpoint.json"
+    locks = sorted(folder.glob("round_*_lock.json")) if folder.exists() else []
+    if not checkpoint_path.exists():
+        if locks:
+            raise RuntimeError(
+                "an unfinished query lock exists with no recoverable checkpoint; "
+                "automatic or ambiguous scored retry is forbidden"
+            )
+        return None
+
+    envelope = json.loads(checkpoint_path.read_text())
+    payload = envelope["payload"]
+    if identity(payload) != envelope["payload_sha256"]:
+        raise RuntimeError("refusing to resume a checkpoint whose payload hash does not verify")
+    if payload["contract_payload_sha256"] != task["contract_payload_sha256"]:
+        raise RuntimeError("refusing to resume a checkpoint sealed under a different contract")
+
+    completed = max((row["round"] for row in payload["rounds"]), default=0)
+    charged = payload["charged_calls"]
+    budget = payload["budget_remaining"]
+    history = list(payload["history"])
+
+    forfeited = 0
+    resume_after = completed
+    for lock_path in locks:
+        index = int(lock_path.name.split("_")[1])
+        if index <= completed:
+            continue
+        lock = json.loads(lock_path.read_text())["payload"]
+        forfeited += len(lock.get("queries") or [])
+        resume_after = max(resume_after, index)
+        history.append({"round": index, "improved": False, "forfeited": True})
+    charged += forfeited
+    budget -= forfeited
+
+    # A round lock records each query's parent and that parent's observed score, so a
+    # checkpoint that a restart overwrote can have its lost archive entries rebuilt from
+    # the locks alone. Where two locks disagree about one molecule the worse score is
+    # kept, so recovery can never flatter the archive.
+    archive = dict(payload["archive"])
+    recovered = 0
+    conflicts = []
+    for lock_path in locks:
+        lock = json.loads(lock_path.read_text())["payload"]
+        for query in lock.get("queries") or []:
+            parent, score = query.get("parent"), query.get("parent_score")
+            if not isinstance(parent, str) or not isinstance(score, (int, float)):
+                continue
+            score = float(score)
+            if parent not in archive:
+                archive[parent] = score
+                recovered += 1
+            elif abs(archive[parent] - score) > 1e-9:
+                conflicts.append({"smiles": parent, "kept": max(archive[parent], score)})
+                archive[parent] = max(archive[parent], score)
+
+    return {
+        "archive": archive,
+        "recovered_archive_entries": recovered,
+        "archive_score_conflicts": conflicts,
+        "budget_remaining": max(budget, 0),
+        "rounds_completed": resume_after,
+        "history": history,
+        "features": payload["features"],
+        "improvements": payload["improvements"],
+        "rounds": payload["rounds"],
+        "charged_calls": charged,
+        "rng_state": payload["rng_state"],
+        "forfeited_calls": forfeited,
+    }
+
+
 def _jsonable(value):
     import numpy as np
 
@@ -281,56 +366,83 @@ def run_cell(task: dict) -> dict:
     final_path = folder / "result.json"
     if final_path.exists():
         return json.loads(final_path.read_text())["payload"]
-    if folder.exists() and any(folder.glob("round_*_lock.json")):
-        raise RuntimeError(
-            "an unfinished query lock already exists; automatic or ambiguous scored retry is forbidden"
-        )
+    # ---- Resume ----
+    # The checkpoint written at the end of every round carries the whole search state,
+    # so a preempted cell continues instead of re-charging the oracle. A round lock is
+    # published BEFORE its queries are docked, so a lock above the last checkpointed
+    # round is an interrupted round whose charge count is unknowable: its queries are
+    # debited in full and never re-docked, spending budget rather than risking an
+    # ambiguous double charge.
+    resumed = _resume_state(folder, task)
 
     rng = np.random.default_rng(cell["controller_seed"])
     fiber = Fiber(cell["smiles"], contract["delta"], support=contract["support"])
-    state = SearchState(archive={}, budget=contract["charged_calls_per_cell"], rounds=0)
     value = ProgramValue(penalty=contract["value_penalty"])
-    features: list[list[float]] = []
-    improvements: list[float] = []
-    rounds: list[dict] = []
-    charged = 0
+    if resumed is not None:
+        state = SearchState(
+            archive=dict(resumed["archive"]),
+            budget=resumed["budget_remaining"],
+            rounds=resumed["rounds_completed"],
+            history=list(resumed["history"]),
+        )
+        features = [list(row) for row in resumed["features"]]
+        improvements = list(resumed["improvements"])
+        rounds = list(resumed["rounds"])
+        charged = resumed["charged_calls"]
+        rng.bit_generator.state = resumed["rng_state"]
+        value.fit(features, improvements)
+        previous = state.incumbent
+        print(
+            f"[{cell['cell']}] RESUME round={state.rounds} calls={charged} "
+            f"budget={state.budget} best={previous:.2f} "
+            f"forfeited_interrupted_calls={resumed['forfeited_calls']} "
+            f"recovered_archive={resumed['recovered_archive_entries']}",
+            flush=True,
+        )
+    else:
+        state = SearchState(archive={}, budget=contract["charged_calls_per_cell"], rounds=0)
+        features: list[list[float]] = []
+        improvements: list[float] = []
+        rounds: list[dict] = []
+        charged = 0
 
-    root_query = {
-        "schema_version": "t4_integrated_round_lock_v1",
-        "cell": cell["cell"],
-        "round": 0,
-        "kind": "root",
-        "queries": [
-            {"query_id": f"{task['run_id']}_{cell['cell']}_root", "smiles": cell["smiles"]}
-        ],
-    }
-    root_lock = _publish(folder / "round_000_lock.json", root_query)
-    root_answer = dock_worker.remote(
-        {
-            **task,
-            "query_id": root_query["queries"][0]["query_id"],
-            "smiles": cell["smiles"],
-        }
-    )
-    charged += 1
-    state.budget -= 1
-    if root_answer["score"] is None:
-        result = {
-            "schema_version": "t4_integrated_route_fiber_result_v1",
-            "status": "root_oracle_failure",
+        root_query = {
+            "schema_version": "t4_integrated_round_lock_v1",
             "cell": cell["cell"],
-            "charged_calls": charged,
-            "root_lock_sha256": root_lock,
-            "root_result": root_answer,
+            "round": 0,
+            "kind": "root",
+            "queries": [
+                {"query_id": f"{task['run_id']}_{cell['cell']}_root", "smiles": cell["smiles"]}
+            ],
         }
-        _publish(final_path, result)
-        return result
-    state.archive[cell["smiles"]] = float(root_answer["score"])
-    previous = state.incumbent
-    print(
-        f"[{cell['cell']}] root call=1 score={previous:.2f} budget={state.budget}",
-        flush=True,
-    )
+        root_lock = _publish(folder / "round_000_lock.json", root_query)
+        root_answer = dock_worker.remote(
+            {
+                **task,
+                "query_id": root_query["queries"][0]["query_id"],
+                "smiles": cell["smiles"],
+            }
+        )
+        charged += 1
+        state.budget -= 1
+        if root_answer["score"] is None:
+            result = {
+                "schema_version": "t4_integrated_route_fiber_result_v1",
+                "status": "root_oracle_failure",
+                "cell": cell["cell"],
+                "charged_calls": charged,
+                "root_lock_sha256": root_lock,
+                "root_result": root_answer,
+            }
+            _publish(final_path, result)
+            return result
+        state.archive[cell["smiles"]] = float(root_answer["score"])
+        previous = state.incumbent
+        print(
+            f"[{cell['cell']}] root call=1 score={previous:.2f} budget={state.budget}",
+            flush=True,
+        )
+
 
     while state.budget > 0:
         round_index = state.rounds + 1
@@ -645,11 +757,20 @@ def main(mode: str = "launch", run_id: str = "") -> None:
 
     from compose_v4.experiments.t4_matched_pilot import seal
 
-    if mode == "launch":
+    if mode in ("launch", "resume"):
         task = _local_task()
+        if mode == "resume":
+            # run_id is content-addressed over code_revision, so a fixed launcher can
+            # never recompute a prior run's id. Resuming therefore names it explicitly;
+            # the contract hash is still verified against every checkpoint before any
+            # state is restored.
+            if not run_id:
+                raise ValueError("mode=resume requires the prior run_id")
+            task["run_id"] = run_id
         call = drive.spawn(task)
         receipt = {
             "schema_version": "t4_integrated_route_fiber_launch_receipt_v1",
+            "mode": mode,
             "task": task,
             "function_call_id": call.object_id,
             "volume": VOLUME_NAME,
@@ -663,7 +784,7 @@ def main(mode: str = "launch", run_id: str = "") -> None:
         print(json.dumps(receipt, sort_keys=True))
         return
     if mode != "status" or not run_id:
-        raise ValueError("use mode=launch or mode=status with run_id")
+        raise ValueError("use mode=launch, mode=resume with run_id, or mode=status with run_id")
     task = _local_task()
     task["run_id"] = run_id
     print(json.dumps(remote_status.remote(task), indent=2))
