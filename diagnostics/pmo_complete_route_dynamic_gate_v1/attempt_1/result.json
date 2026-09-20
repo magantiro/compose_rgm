@@ -1,0 +1,526 @@
+{
+  "payload": {
+    "checkpoint_audit": {
+      "0": {
+        "complete_training_traces": 73,
+        "held_complete_routes": 33,
+        "held_lineages": 3,
+        "held_local_only_routes": 25,
+        "held_traces": 58,
+        "lineage_overlap": 0,
+        "training_lineages": 6
+      },
+      "1": {
+        "complete_training_traces": 81,
+        "held_complete_routes": 25,
+        "held_lineages": 4,
+        "held_local_only_routes": 30,
+        "held_traces": 55,
+        "lineage_overlap": 0,
+        "training_lineages": 6
+      },
+      "2": {
+        "complete_training_traces": 58,
+        "held_complete_routes": 48,
+        "held_lineages": 11,
+        "held_local_only_routes": 23,
+        "held_traces": 71,
+        "lineage_overlap": 0,
+        "training_lineages": 4
+      }
+    },
+    "checkpoint_payload_sha256": "12ae6f7f1ac77f3ec241ffc92224f74e773408e4a79539c534206b83a66c294a",
+    "code_revision": "963bd31aa2648fd0eac125931af2236afda8f2bd",
+    "decision": "PROMOTE_TO_SCORED_CONTRACT",
+    "finished_at": "2026-09-19T18:26:41.079213+00:00",
+    "historical_recursive_replay": {
+      "fiber_best_minus_blind_best": 0.024009172415079882,
+      "fiber_control": {
+        "best_reward": 0.5222329678670935,
+        "controller": "fiber_control",
+        "evidence_role": "retrospective_historical_replay_not_prospective",
+        "historical_candidate_edges": 92,
+        "maximum_calls": 32,
+        "maximum_selected_generation": 3,
+        "multi_generation_lineage_observed": true,
+        "new_oracle_calls": 0,
+        "root_parents": 35,
+        "rounds": [
+          {
+            "available": 64,
+            "incumbent_after": 0.49457488467042343,
+            "incumbent_before": 0.4910547339890429,
+            "round": 1,
+            "selected": 8
+          },
+          {
+            "available": 64,
+            "incumbent_after": 0.5051459331649651,
+            "incumbent_before": 0.49457488467042343,
+            "round": 2,
+            "selected": 8
+          },
+          {
+            "available": 60,
+            "incumbent_after": 0.5089133578079825,
+            "incumbent_before": 0.5051459331649651,
+            "round": 3,
+            "selected": 8
+          },
+          {
+            "available": 54,
+            "incumbent_after": 0.5222329678670935,
+            "incumbent_before": 0.5089133578079825,
+            "round": 4,
+            "selected": 8
+          }
+        ],
+        "scores_hidden_until_selection": true,
+        "selected_edges": 32,
+        "selected_improving_edges": 11
+      },
+      "matched_call_budget": 32,
+      "reward_blind": {
+        "best_reward": 0.4982237954520136,
+        "controller": "reward_blind",
+        "evidence_role": "retrospective_historical_replay_not_prospective",
+        "historical_candidate_edges": 92,
+        "maximum_calls": 32,
+        "maximum_selected_generation": 2,
+        "multi_generation_lineage_observed": true,
+        "new_oracle_calls": 0,
+        "root_parents": 35,
+        "rounds": [
+          {
+            "available": 64,
+            "incumbent_after": 0.49457488467042343,
+            "incumbent_before": 0.4910547339890429,
+            "round": 1,
+            "selected": 8
+          },
+          {
+            "available": 64,
+            "incumbent_after": 0.4982237954520136,
+            "incumbent_before": 0.49457488467042343,
+            "round": 2,
+            "selected": 8
+          },
+          {
+            "available": 58,
+            "incumbent_after": 0.4982237954520136,
+            "incumbent_before": 0.4982237954520136,
+            "round": 3,
+            "selected": 8
+          },
+          {
+            "available": 50,
+            "incumbent_after": 0.4982237954520136,
+            "incumbent_before": 0.4982237954520136,
+            "round": 4,
+            "selected": 8
+          }
+        ],
+        "scores_hidden_until_selection": true,
+        "selected_edges": 32,
+        "selected_improving_edges": 11
+      }
+    },
+    "implementation_sha256": {
+      "src/compose_v4/experiments/pmo_complete_route_dynamic_gate.py": "5a82d452250869970b202e5e4ad350e86e10c78072709ff31ef4b5398d1cd7f6",
+      "tests/test_pmo_complete_route_dynamic_gate.py": "e8d8a91ddb141db74a23d5473708cc706e68958f1abd733cdc6628eb299fe042",
+      "tools/pmo_complete_route_dynamic_gate.py": "ba80cf5903dc85c28f4196215823b39e3f7e2459b23c4e297dcc5db09cb9a7cb"
+    },
+    "inputs": {
+      "configs/pmo_route_fiber_scored_pilot_v1.json": "f7972a42042990ab12568a1cfcb2a00a1ca988db9f0a08725521607adfaa9be2",
+      "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz": "9b35529eae0975dcf977bc1fc51f3bd838e0184d51de3a7d2822edd0bc3d8b54",
+      "diagnostics/pmo_legal_action_policy/attempt_2/runtime_fold_checkpoints.json.gz": "e6336cfbcccef71b08434bde4e22a9f2b73cb3d1869f82caa844a87520c2a3a4",
+      "diagnostics/pmo_online_policy/result_sealed.json": "627f2e8a86107f54080902c53d8ac11fc307275c8d522541bfdc4e3d99287946",
+      "diagnostics/pmo_route_fiber_scored_pilot_v1/candidate_locks.json": "a10608e159b6d70ef5c30d1253a911fea9b43057b7b3f300b4ff02f2289dd0be",
+      "diagnostics/pmo_route_fiber_scored_pilot_v1/preflight.json": "5a15cfc096f7e58f9f7d10caaedebcf288f1e72b033a1269eefac58265c0f747"
+    },
+    "matched_actual_production_support": {
+      "celecoxib_rediscovery": {
+        "arms": {
+          "complete_route": {
+            "attempts": 34,
+            "complete": 34,
+            "exact_endpoint_support": 0,
+            "exact_execution_precision": 1.0,
+            "failure_counts": {},
+            "primitive_count_distribution": {
+              "12": 2,
+              "13": 1,
+              "14": 2,
+              "17": 1,
+              "19": 2,
+              "2": 1,
+              "20": 2,
+              "22": 1,
+              "23": 1,
+              "25": 3,
+              "26": 5,
+              "27": 2,
+              "28": 2,
+              "29": 3,
+              "31": 1,
+              "32": 3,
+              "5": 2
+            },
+            "transformation_equivalent_support": 0,
+            "unique_endpoints": 34,
+            "unique_yield": 1.0,
+            "validity": 1.0
+          },
+          "old_eight_primitive": {
+            "attempts": 34,
+            "complete": 34,
+            "exact_endpoint_support": 0,
+            "exact_execution_precision": 1.0,
+            "failure_counts": {},
+            "primitive_count_distribution": {
+              "1": 2,
+              "2": 3,
+              "3": 1,
+              "7": 2,
+              "8": 26
+            },
+            "transformation_equivalent_support": 0,
+            "unique_endpoints": 34,
+            "unique_yield": 1.0,
+            "validity": 1.0
+          },
+          "unchanged_v0": {
+            "attempts": 34,
+            "complete": 34,
+            "exact_endpoint_support": 0,
+            "exact_execution_precision": 1.0,
+            "failure_counts": {},
+            "primitive_count_distribution": {
+              "1": 7,
+              "10": 2,
+              "11": 1,
+              "12": 1,
+              "13": 2,
+              "14": 2,
+              "16": 1,
+              "17": 1,
+              "2": 6,
+              "3": 3,
+              "4": 1,
+              "5": 2,
+              "7": 2,
+              "8": 2,
+              "9": 1
+            },
+            "transformation_equivalent_support": 0,
+            "unique_endpoints": 34,
+            "unique_yield": 1.0,
+            "validity": 1.0
+          }
+        },
+        "candidate_budget_per_state_per_arm": 1,
+        "held_fold": 1,
+        "held_task_family": "rediscovery",
+        "unique_teacher_states": 34
+      },
+      "gsk3b": {
+        "arms": {
+          "complete_route": {
+            "attempts": 44,
+            "complete": 44,
+            "exact_endpoint_support": 0,
+            "exact_execution_precision": 1.0,
+            "failure_counts": {},
+            "primitive_count_distribution": {
+              "10": 1,
+              "13": 1,
+              "15": 2,
+              "16": 2,
+              "17": 1,
+              "2": 2,
+              "20": 1,
+              "24": 1,
+              "25": 2,
+              "26": 8,
+              "27": 2,
+              "28": 5,
+              "29": 4,
+              "30": 2,
+              "31": 6,
+              "32": 2,
+              "9": 2
+            },
+            "transformation_equivalent_support": 0,
+            "unique_endpoints": 44,
+            "unique_yield": 1.0,
+            "validity": 1.0
+          },
+          "old_eight_primitive": {
+            "attempts": 44,
+            "complete": 44,
+            "exact_endpoint_support": 1,
+            "exact_execution_precision": 1.0,
+            "failure_counts": {},
+            "primitive_count_distribution": {
+              "1": 5,
+              "2": 2,
+              "3": 3,
+              "4": 2,
+              "5": 1,
+              "7": 2,
+              "8": 29
+            },
+            "transformation_equivalent_support": 1,
+            "unique_endpoints": 44,
+            "unique_yield": 1.0,
+            "validity": 1.0
+          },
+          "unchanged_v0": {
+            "attempts": 44,
+            "complete": 44,
+            "exact_endpoint_support": 0,
+            "exact_execution_precision": 1.0,
+            "failure_counts": {},
+            "primitive_count_distribution": {
+              "1": 8,
+              "10": 1,
+              "11": 1,
+              "13": 2,
+              "17": 2,
+              "2": 13,
+              "3": 2,
+              "4": 4,
+              "5": 3,
+              "6": 1,
+              "7": 1,
+              "8": 1,
+              "9": 5
+            },
+            "transformation_equivalent_support": 0,
+            "unique_endpoints": 44,
+            "unique_yield": 1.0,
+            "validity": 1.0
+          }
+        },
+        "candidate_budget_per_state_per_arm": 1,
+        "held_fold": 0,
+        "held_task_family": "bioactivity",
+        "unique_teacher_states": 44
+      },
+      "perindopril_mpo": {
+        "arms": {
+          "complete_route": {
+            "attempts": 234,
+            "complete": 234,
+            "exact_endpoint_support": 0,
+            "exact_execution_precision": 1.0,
+            "failure_counts": {},
+            "primitive_count_distribution": {
+              "1": 3,
+              "10": 5,
+              "11": 10,
+              "12": 8,
+              "13": 6,
+              "14": 5,
+              "15": 7,
+              "16": 36,
+              "17": 7,
+              "18": 5,
+              "19": 4,
+              "20": 5,
+              "21": 2,
+              "22": 3,
+              "23": 5,
+              "24": 2,
+              "25": 8,
+              "26": 2,
+              "27": 1,
+              "28": 25,
+              "29": 14,
+              "3": 5,
+              "30": 14,
+              "31": 27,
+              "32": 8,
+              "4": 3,
+              "5": 3,
+              "6": 5,
+              "7": 2,
+              "8": 3,
+              "9": 1
+            },
+            "transformation_equivalent_support": 0,
+            "unique_endpoints": 234,
+            "unique_yield": 1.0,
+            "validity": 1.0
+          },
+          "old_eight_primitive": {
+            "attempts": 234,
+            "complete": 234,
+            "exact_endpoint_support": 0,
+            "exact_execution_precision": 1.0,
+            "failure_counts": {},
+            "primitive_count_distribution": {
+              "1": 19,
+              "2": 16,
+              "3": 11,
+              "4": 12,
+              "5": 8,
+              "6": 11,
+              "7": 10,
+              "8": 147
+            },
+            "transformation_equivalent_support": 0,
+            "unique_endpoints": 234,
+            "unique_yield": 1.0,
+            "validity": 1.0
+          },
+          "unchanged_v0": {
+            "attempts": 234,
+            "complete": 234,
+            "exact_endpoint_support": 0,
+            "exact_execution_precision": 1.0,
+            "failure_counts": {},
+            "primitive_count_distribution": {
+              "1": 73,
+              "10": 4,
+              "11": 5,
+              "12": 5,
+              "13": 4,
+              "14": 4,
+              "15": 2,
+              "16": 2,
+              "18": 1,
+              "2": 29,
+              "21": 1,
+              "23": 1,
+              "3": 26,
+              "4": 18,
+              "5": 13,
+              "6": 6,
+              "7": 15,
+              "8": 14,
+              "9": 11
+            },
+            "transformation_equivalent_support": 0,
+            "unique_endpoints": 234,
+            "unique_yield": 1.0,
+            "validity": 1.0
+          }
+        },
+        "candidate_budget_per_state_per_arm": 1,
+        "held_fold": 2,
+        "held_task_family": "mpo",
+        "unique_teacher_states": 234
+      }
+    },
+    "modal_launches": 0,
+    "new_oracle_calls": 0,
+    "old_negative_factorial_immutable": true,
+    "productive_continuation_rank": {
+      "celecoxib_rediscovery": {
+        "coverage": 0.9705882352941176,
+        "joint_rank": "unsupported; factor ranks reported without enumerating unrelated fibers",
+        "rule_median_rank": 2.0,
+        "rule_top1_recall": 0.38235294117647056,
+        "runtime_supported_productive_successors": 33,
+        "states": 34,
+        "teacher_injection": false,
+        "where_how_conditional_median_rank": 7.0,
+        "where_how_conditional_top1_recall": 0.12121212121212122,
+        "where_how_conditional_top32_recall": 0.7878787878787878,
+        "where_how_conditional_top8_recall": 0.5454545454545454
+      },
+      "gsk3b": {
+        "coverage": 0.9772727272727273,
+        "joint_rank": "unsupported; factor ranks reported without enumerating unrelated fibers",
+        "rule_median_rank": 1.0,
+        "rule_top1_recall": 0.5454545454545454,
+        "runtime_supported_productive_successors": 43,
+        "states": 44,
+        "teacher_injection": false,
+        "where_how_conditional_median_rank": 7.0,
+        "where_how_conditional_top1_recall": 0.32558139534883723,
+        "where_how_conditional_top32_recall": 0.9767441860465116,
+        "where_how_conditional_top8_recall": 0.5813953488372093
+      },
+      "perindopril_mpo": {
+        "coverage": 0.9957264957264957,
+        "joint_rank": "unsupported; factor ranks reported without enumerating unrelated fibers",
+        "rule_median_rank": 2.0,
+        "rule_top1_recall": 0.4358974358974359,
+        "runtime_supported_productive_successors": 233,
+        "states": 234,
+        "teacher_injection": false,
+        "where_how_conditional_median_rank": 5.0,
+        "where_how_conditional_top1_recall": 0.19313304721030042,
+        "where_how_conditional_top32_recall": 0.7725321888412017,
+        "where_how_conditional_top8_recall": 0.5622317596566524
+      }
+    },
+    "promotion_rule": {
+      "clean_autonomous_exact_or_equivalent_support": 0,
+      "historical_reward_enrichment_over_blind": true,
+      "historically_improving_multi_generation_archive": true,
+      "known_productive_complete_program_support": true,
+      "known_productive_runtime_routes": 38,
+      "structural_recall_alone_sufficient": false
+    },
+    "schema_version": "pmo_complete_route_dynamic_gate_v1",
+    "scope": {
+      "answer_known_support_is_not_autonomous_generalization": true,
+      "historical_replay_is_not_prospective": true,
+      "matched_candidate_budget_per_state_per_arm": 1,
+      "seed": 20260919,
+      "state_limit": null,
+      "tasks": [
+        "celecoxib_rediscovery",
+        "gsk3b",
+        "perindopril_mpo"
+      ],
+      "workers": 16
+    },
+    "scored_launch_authorized": false,
+    "software": {
+      "machine": "arm64",
+      "numpy": "2.5.3",
+      "python": "3.12.9",
+      "rdkit": "2026.03.6"
+    },
+    "teacher_forced_runtime_support": {
+      "celecoxib_rediscovery": {
+        "complete_route_abstention": false,
+        "complete_runtime_routes": 15,
+        "exact_replay_precision": 1.0,
+        "local_decision_only_routes": 0,
+        "primitive_length_max": 31,
+        "primitive_length_min": 29,
+        "representability": 1.0,
+        "routes": 15,
+        "same_runtime_replayed_routes": 15
+      },
+      "gsk3b": {
+        "complete_route_abstention": false,
+        "complete_runtime_routes": 23,
+        "exact_replay_precision": 1.0,
+        "local_decision_only_routes": 1,
+        "primitive_length_max": 33,
+        "primitive_length_min": 27,
+        "representability": 0.9583333333333334,
+        "routes": 24,
+        "same_runtime_replayed_routes": 23
+      },
+      "perindopril_mpo": {
+        "complete_route_abstention": true,
+        "complete_runtime_routes": 0,
+        "exact_replay_precision": null,
+        "local_decision_only_routes": 16,
+        "primitive_length_max": 67,
+        "primitive_length_min": 38,
+        "representability": 0.0,
+        "routes": 16,
+        "same_runtime_replayed_routes": 0
+      }
+    }
+  },
+  "payload_sha256": "23bc85702e6b4a09d37290e5a0521dda15a2f0e29c7648cae7852b6999e57927"
+}

@@ -1,0 +1,228 @@
+{
+  "payload": {
+    "decision": "NO_SCORED_LAUNCH_PRODUCTION_SUPPORT_INSUFFICIENT",
+    "diagnosis": "Program scale and exact execution are now in support on Celecoxib and GSK3B, but independent position/rule and WHERE/HOW decisions destroy whole-program probability. Perindopril additionally requires recursive composition because every witness exceeds the 32-primitive action horizon.",
+    "first_meaningful_scored_run_after_gate": {
+      "comparators": {
+        "celecoxib_rediscovery": 0.7981379953543186,
+        "gsk3b": 0.9515509085758085,
+        "perindopril_mpo": 0.645
+      },
+      "development_calls_per_task": 1000,
+      "initialization_calls_counted": true,
+      "kill": "stop before broader PMO if the joint lane emits teacher-scale candidates but FiberControl never continues an improving jump by 250 calls, or if 1000-call flat-tail AUC trails IVG by more than 0.05 on two tasks",
+      "primary_metric": "top-10 AUC with flat tail to the official 10000-call denominator",
+      "promotion": "beat IVG no-prescreen AUC on at least two of three tasks and finish within 0.02 on the third, with at least one winning lineage containing a route-scale jump and scored descendant refinement",
+      "recursive_descendants_required": true,
+      "tasks": [
+        "celecoxib_rediscovery",
+        "gsk3b",
+        "perindopril_mpo"
+      ]
+    },
+    "headline_lane": {
+      "answer_known_teacher_scores_are_comparators": false,
+      "metric": "top-10 AUC with finish=True",
+      "oracle_budget": 10000,
+      "prescreen": false
+    },
+    "historical_jump_refinement": {
+      "candidate_edges": 92,
+      "conclusion": "recursive reward adaptation is supported, but this ledger contains no route-scale jump and therefore does not validate jump-plus-refinement",
+      "maximum_primitive_count": 7,
+      "recursive_descendant_edges": 28,
+      "route_scale_jump_then_local_refinement_edges": 0,
+      "route_scale_jumps_at_least_9_primitives": 0
+    },
+    "inputs": {
+      "diagnostics/pmo_complete_route_dynamic_gate_v1/attempt_1/result.json": "4f5b8bd1378a5dcc980311d640951b74a00ace87b18b61df9c9ff3739c946b4e",
+      "diagnostics/pmo_complete_route_dynamic_gate_v1/attempt_1/runtime_fold_checkpoints.json": "43475dd3e43a12c1f45a8d564046134d3d9643135ba8ff5edf0a1314042e8934",
+      "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz": "9b35529eae0975dcf977bc1fc51f3bd838e0184d51de3a7d2822edd0bc3d8b54",
+      "diagnostics/pmo_ivg_oracle_parity/result.json": "e99d7b0a311693bd9f12509d62531444dc187f3b4e88a75ebd6a440479877675",
+      "diagnostics/pmo_legal_action_policy/attempt_2/runtime_fold_checkpoints.json.gz": "e6336cfbcccef71b08434bde4e22a9f2b73cb3d1869f82caa844a87520c2a3a4",
+      "diagnostics/pmo_online_policy/result_sealed.json": "627f2e8a86107f54080902c53d8ac11fc307275c8d522541bfdc4e3d99287946"
+    },
+    "new_oracle_calls": 0,
+    "one_next_architecture": {
+      "change": "replace independent per-position route draws with a source-conditioned joint dependency-region latent that preserves rule, component-control, created-handle and WHERE/HOW correlations across a complete <=32-step jump; keep unchanged v0 exploration, FiberControl and the recursive archive, then learn short refinement tails from scored descendants",
+      "deprioritized": [
+        "independent position-conditioned complete-route sampler",
+        "more tuning of one-step WHERE/HOW ranks",
+        "eight-primitive static factorial"
+      ],
+      "name": "joint_dependency_region_jump_plus_refinement_controller",
+      "reused": [
+        "sealed 184-route exact corpus and frozen folds",
+        "same dependency-region representation and exact compiler",
+        "unchanged Dynamic-v0 exploration",
+        "FiberControl and shared recursive archive"
+      ]
+    },
+    "schema_version": "pmo_complete_route_gap_analysis_v1",
+    "scored_launch_authorized": false,
+    "tasks": {
+      "celecoxib_rediscovery": {
+        "answer_known_ceiling_not_autonomous": {
+          "auc_top10_official_10k": 0.8808736842105261,
+          "best_score": 1.0,
+          "locked_calls": 16
+        },
+        "autonomous_production": {
+          "attempts": 34,
+          "complete": 34,
+          "exact_endpoint_support": 0,
+          "exact_execution_precision": 1.0,
+          "teacher_scale_programs": 7,
+          "teacher_scale_rate": 0.20588235294117646,
+          "transformation_equivalent_support": 0
+        },
+        "headline_comparator": {
+          "auc": 0.7981379953543186,
+          "finish": true,
+          "oracle_budget": 10000,
+          "role": "IVG_no_prescreen_autonomous_top10_AUC"
+        },
+        "productive_continuation_factor_ranks": {
+          "coverage": 0.9705882352941176,
+          "joint_rank": "unsupported; factor ranks reported without enumerating unrelated fibers",
+          "rule_median_rank": 2.0,
+          "rule_top1_recall": 0.38235294117647056,
+          "runtime_supported_productive_successors": 33,
+          "states": 34,
+          "teacher_injection": false,
+          "where_how_conditional_median_rank": 7.0,
+          "where_how_conditional_top1_recall": 0.12121212121212122,
+          "where_how_conditional_top32_recall": 0.7878787878787878,
+          "where_how_conditional_top8_recall": 0.5454545454545454
+        },
+        "teacher_route_probability_without_injection": {
+          "best_log10_probability": null,
+          "evaluated_complete_routes": 15,
+          "finite_support": 0,
+          "interpretation": "exact teacher trace probability under the clean factorized production law; alternative equal-utility programs are not counted",
+          "median_log10_probability": null,
+          "worst_log10_probability": null
+        },
+        "teacher_route_support": {
+          "local_only": 0,
+          "primitive_maximum": 31,
+          "primitive_minimum": 29,
+          "routes": 15,
+          "runtime_complete": 15
+        }
+      },
+      "gsk3b": {
+        "answer_known_ceiling_not_autonomous": {
+          "auc_top10_official_10k": 0.9984505500000002,
+          "best_score": 1.0,
+          "locked_calls": 11
+        },
+        "autonomous_production": {
+          "attempts": 44,
+          "complete": 44,
+          "exact_endpoint_support": 0,
+          "exact_execution_precision": 1.0,
+          "teacher_scale_programs": 21,
+          "teacher_scale_rate": 0.4772727272727273,
+          "transformation_equivalent_support": 0
+        },
+        "headline_comparator": {
+          "auc": 0.9515509085758085,
+          "finish": true,
+          "oracle_budget": 10000,
+          "role": "IVG_no_prescreen_autonomous_top10_AUC"
+        },
+        "productive_continuation_factor_ranks": {
+          "coverage": 0.9772727272727273,
+          "joint_rank": "unsupported; factor ranks reported without enumerating unrelated fibers",
+          "rule_median_rank": 1.0,
+          "rule_top1_recall": 0.5454545454545454,
+          "runtime_supported_productive_successors": 43,
+          "states": 44,
+          "teacher_injection": false,
+          "where_how_conditional_median_rank": 7.0,
+          "where_how_conditional_top1_recall": 0.32558139534883723,
+          "where_how_conditional_top32_recall": 0.9767441860465116,
+          "where_how_conditional_top8_recall": 0.5813953488372093
+        },
+        "teacher_route_probability_without_injection": {
+          "best_log10_probability": null,
+          "evaluated_complete_routes": 23,
+          "finite_support": 0,
+          "interpretation": "exact teacher trace probability under the clean factorized production law; alternative equal-utility programs are not counted",
+          "median_log10_probability": null,
+          "worst_log10_probability": null
+        },
+        "teacher_route_support": {
+          "local_only": 1,
+          "primitive_maximum": 33,
+          "primitive_minimum": 27,
+          "routes": 24,
+          "runtime_complete": 23
+        }
+      },
+      "perindopril_mpo": {
+        "answer_known_ceiling_not_autonomous": {
+          "auc_top10_official_10k": 0.8084043888960989,
+          "best_score": 0.8106434833777776,
+          "locked_calls": 15
+        },
+        "autonomous_production": {
+          "attempts": 234,
+          "complete": 234,
+          "exact_endpoint_support": 0,
+          "exact_execution_precision": 1.0,
+          "teacher_scale_programs": 0,
+          "teacher_scale_rate": 0.0,
+          "transformation_equivalent_support": 0
+        },
+        "headline_comparator": {
+          "auc": 0.645,
+          "finish": true,
+          "oracle_budget": 10000,
+          "role": "IVG_no_prescreen_autonomous_top10_AUC"
+        },
+        "productive_continuation_factor_ranks": {
+          "coverage": 0.9957264957264957,
+          "joint_rank": "unsupported; factor ranks reported without enumerating unrelated fibers",
+          "rule_median_rank": 2.0,
+          "rule_top1_recall": 0.4358974358974359,
+          "runtime_supported_productive_successors": 233,
+          "states": 234,
+          "teacher_injection": false,
+          "where_how_conditional_median_rank": 5.0,
+          "where_how_conditional_top1_recall": 0.19313304721030042,
+          "where_how_conditional_top32_recall": 0.7725321888412017,
+          "where_how_conditional_top8_recall": 0.5622317596566524
+        },
+        "teacher_route_probability_without_injection": {
+          "best_log10_probability": null,
+          "evaluated_complete_routes": 0,
+          "finite_support": 0,
+          "interpretation": "exact teacher trace probability under the clean factorized production law; alternative equal-utility programs are not counted",
+          "median_log10_probability": null,
+          "worst_log10_probability": null
+        },
+        "teacher_route_support": {
+          "local_only": 16,
+          "primitive_maximum": 67,
+          "primitive_minimum": 38,
+          "routes": 16,
+          "runtime_complete": 0
+        }
+      }
+    },
+    "zero_oracle_promotion_gate": {
+      "candidate_budget_per_source": 32,
+      "kill": "abandon this joint-latent formulation if a 32-candidate source panel still has zero exact/equivalent support on either runtime-supported task",
+      "requirements": [
+        "100% exact execution precision among emitted complete programs",
+        "at least 25% teacher-scale proposals on Celecoxib and GSK3B",
+        "nonzero exact or transformation-equivalent autonomous support on both Celecoxib and GSK3B",
+        "at least one autonomous <=32-step jump followed by an executable descendant refinement on Perindopril",
+        "no task/route/endpoint lookup in the runtime checkpoint"
+      ]
+    }
+  },
+  "payload_sha256": "923b8fd924f720a47e4152df4f05982f1012ca060b1ecb745b38f1084d4f9f8c"
+}
