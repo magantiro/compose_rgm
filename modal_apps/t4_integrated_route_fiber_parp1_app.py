@@ -124,7 +124,7 @@ def _publish(path: Path, payload: dict) -> str:
     return envelope["payload_sha256"]
 
 
-def _resume_state(folder: Path, task: dict) -> dict | None:
+def _resume_state(folder: Path, task: dict, contract: dict) -> dict | None:
     """Restore a preempted cell from its last completed round, or None to start fresh.
 
     The checkpoint is published only after a round finishes, while that round's lock is
@@ -151,7 +151,15 @@ def _resume_state(folder: Path, task: dict) -> dict | None:
     payload = envelope["payload"]
     if identity(payload) != envelope["payload_sha256"]:
         raise RuntimeError("refusing to resume a checkpoint whose payload hash does not verify")
-    if payload["contract_payload_sha256"] != task["contract_payload_sha256"]:
+    # A checkpoint may carry the current contract, or the single predecessor the current
+    # contract declares. The predecessor is admitted only because the re-seal tool proved
+    # offline that the app's own hash is the one field that moved; every scientific field
+    # is byte-identical. Any other ancestor is refused.
+    accepted = {task["contract_payload_sha256"]}
+    predecessor = (contract.get("resume_predecessor") or {}).get("contract_payload_sha256")
+    if predecessor:
+        accepted.add(predecessor)
+    if payload["contract_payload_sha256"] not in accepted:
         raise RuntimeError("refusing to resume a checkpoint sealed under a different contract")
 
     completed = max((row["round"] for row in payload["rounds"]), default=0)
@@ -373,7 +381,7 @@ def run_cell(task: dict) -> dict:
     # round is an interrupted round whose charge count is unknowable: its queries are
     # debited in full and never re-docked, spending budget rather than risking an
     # ambiguous double charge.
-    resumed = _resume_state(folder, task)
+    resumed = _resume_state(folder, task, contract)
 
     rng = np.random.default_rng(cell["controller_seed"])
     fiber = Fiber(cell["smiles"], contract["delta"], support=contract["support"])
