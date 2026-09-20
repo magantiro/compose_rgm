@@ -1,0 +1,44 @@
+{
+  "DO_NOT_REPORT_AS_A_TRAJECTORY": {
+    "what_it_may_NOT_be_used_for": [
+      "the corrected gsk3b best_score or AUC",
+      "any PMO performance summary, table or comparison",
+      "an estimate of what the corrected run will achieve"
+    ],
+    "what_it_may_be_used_for": [
+      "bounding the signal that was discarded",
+      "confirming the endpoints were chemically ordinary rather than degenerate"
+    ],
+    "why": "FiberControl never observed these values online. Every selection, every parent choice, every credit assignment in the voided run was made against a constant 0.0, so the corrected run's policy diverges from the first decision onward. Rescoring a trajectory the controller could not have followed produces a counterfactual, not a corrected result."
+  },
+  "base_rate_context": {
+    "note": "exact 0.0 is the modal outcome for a random drug-like molecule on this oracle, which is why an all-zero ledger was not self-evidently pathological and why the positive control, not the ledger distribution, is the decisive test",
+    "zinc_background_exact_zero_fraction": 0.34,
+    "zinc_background_mean": 0.028146666666666667
+  },
+  "caveat_on_the_reference_implementation": "The reference forest was frozen from gsk3b.pkl (sha 18d1cc9b..., 27,791,452 bytes); the pinned production asset is gsk3b_current.pkl (sha d3a20701..., 27,791,877 bytes). They agree exactly on the 29-molecule positive-control panel measured in the pinned image, but were not compared molecule by molecule across these 250. Treat the per-molecule values as close, not exact.",
+  "evidence": [
+    "diagnostics/pmo_gsk3b_oracle_diagnosis_v1.json"
+  ],
+  "interpretation": "The endpoints carried real but weak gsk3b signal: 196 of 250 nonzero, and a maximum of 0.18 against a frozen-panel known-actives mean of 0.867. So the defect hid a gradient the controller could have climbed, and hid it completely -- not a near-miss that a better metric would have caught.",
+  "measured": {
+    "initialization_molecules_nonzero": "11 of 16",
+    "initialization_nonzero_range": [
+      0.01,
+      0.08
+    ],
+    "max": 0.18,
+    "mean": 0.038906666666666666,
+    "n_endpoints": 250,
+    "nonzero": 196,
+    "nonzero_fraction": 0.784,
+    "recorded_by_the_run": "0.0 on all 250"
+  },
+  "method": "An INDEPENDENT numpy reimplementation of the same 2048-bit TDC random forest (compose_v4.benchmark.oracles.forest), parity-validated against the original sklearn 1.2.2 estimators at max_abs_delta 0.0 on the frozen 400-molecule panel, applied offline to the 250 canonical endpoints the voided ledger recorded.",
+  "purpose": "Quantify how much gsk3b signal the voided run's endpoints actually carried, so the cost of the defect is a number rather than an impression.",
+  "recorded_at_utc": "2026-09-20T23:05:50.105257+00:00",
+  "run_id": "79fec4984821e97de6decefd213e45a47b3d2b901a1a9c021ee0dfd3ed1561f4",
+  "schema_version": "pmo_gsk3b_retrospective_rescoring_v1",
+  "status": "DIAGNOSTIC_ARTIFACT_ONLY",
+  "task": "gsk3b"
+}

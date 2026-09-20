@@ -1,0 +1,73 @@
+{
+  "default_status_for_unlisted": "VALID",
+  "entries": [
+    {
+      "artifacts_preserved": true,
+      "contract_payload_sha256": "2e3f9195f27c92e957af78b8f6f61f742fe2545fd46af0d303fd2e2e1e718406",
+      "counterfactual": {
+        "cwd_held_at_assets_during_call": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "production_pattern_five_known_actives": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "evidence": [
+        "diagnostics/pmo_gsk3b_oracle_diagnosis_v1.json",
+        "diagnostics/pmo_oracle_asset_audit_v1.json"
+      ],
+      "exclude_from_performance_summaries": true,
+      "reason": "every one of the 250 charged calls returned PyTDC's default_property (0.0) because the gsk3b evaluator loads oracle/gsk3b_current.pkl lazily, by RELATIVE path, on the first call, and the worker had already restored the working directory after constructing the oracle; Oracle.__call__'s bare except turned the FileNotFoundError into a score",
+      "recorded_reading": {
+        "auc_budget": 250,
+        "auc_top10_at_budget": 0.0,
+        "best_score": 0.0,
+        "charged_oracle_calls": 250
+      },
+      "run_id": "79fec4984821e97de6decefd213e45a47b3d2b901a1a9c021ee0dfd3ed1561f4",
+      "status": "INVALID_ORACLE_RUNTIME_RELATIVE_PATH",
+      "superseded_by": "a fresh 250-call gsk3b run on the corrected worker",
+      "task": "gsk3b",
+      "the_zero_carries_no_information_about_gsk3b_chemistry": true,
+      "voided_at_utc": "2026-09-20T23:04:32.785509+00:00"
+    },
+    {
+      "contract_payload_sha256": "2e3f9195f27c92e957af78b8f6f61f742fe2545fd46af0d303fd2e2e1e718406",
+      "exclude_from_performance_summaries": false,
+      "reason": "the perindopril_mpo evaluator is pure RDKit arithmetic against a hardcoded reference SMILES; it opens no asset file and has no working-directory dependency. Measured unaffected.",
+      "recorded_reading": {
+        "auc_budget": 250,
+        "auc_top10_at_budget": 0.31650680077383925,
+        "best_score": 0.4864578310337349,
+        "charged_oracle_calls": 250
+      },
+      "run_id": "79fec4984821e97de6decefd213e45a47b3d2b901a1a9c021ee0dfd3ed1561f4",
+      "status": "VALID",
+      "task": "perindopril_mpo"
+    },
+    {
+      "contract_payload_sha256": "2e3f9195f27c92e957af78b8f6f61f742fe2545fd46af0d303fd2e2e1e718406",
+      "exclude_from_performance_summaries": false,
+      "reason": "the celecoxib_rediscovery evaluator (rediscovery_meta) is pure RDKit similarity to a hardcoded reference SMILES; it opens no asset file and has no working-directory dependency. Measured unaffected.",
+      "recorded_reading": {
+        "auc_budget": 250,
+        "auc_top10_at_budget": 0.13420348390812484,
+        "best_score": 0.1958041958041958,
+        "charged_oracle_calls": 250
+      },
+      "run_id": "79fec4984821e97de6decefd213e45a47b3d2b901a1a9c021ee0dfd3ed1561f4",
+      "status": "VALID",
+      "task": "celecoxib_rediscovery"
+    }
+  ],
+  "purpose": "Which recorded PMO task readings may be reported as performance. A completed run with a well-formed ledger is not automatically a valid measurement; this file records the exceptions, per TASK, and compose_v4.experiments.pmo_run_status is the loader every summary must use.",
+  "schema_version": "pmo_run_status_ledger_v1"
+}
