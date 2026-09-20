@@ -1,0 +1,159 @@
+{
+  "schema_version": "t4_nodistill_joint_stop_verification_v1",
+  "generated_at_utc": "2026-09-20T01:06:27Z",
+  "attempt": "attempt_1",
+  "decision": "PASS",
+  "authoritative_result": {
+    "path": "diagnostics/t4_nodistill_joint_stop_gate/attempt_1/result.json",
+    "sha256": "379a74f54af693b32f9c55f0c4829f86d7e570ce29b4241c167dff03b93c384a"
+  },
+  "execution": {
+    "command": "PYTHONPATH=src /Users/rmaganti/compose_rgm_git/.venv/bin/python tools/t4_nodistill_joint_stop_gate.py --workers 4",
+    "wall_seconds": 566.5599318750028,
+    "workers": 4,
+    "seed": 20260919,
+    "base_revision": "16cbb01a8ada44c67a1a8fc08570b949958c8f92",
+    "implementation_state": "new files were uncommitted at execution and are bound below by SHA-256",
+    "hardware": "local CPU; process-level deterministic shards",
+    "precision": "exact integer graph state and float64 RDKit properties",
+    "software": {
+      "platform": "macOS-26.5.2-arm64-arm-64bit",
+      "python": "3.12.9",
+      "rdkit": "2026.03.6"
+    }
+  },
+  "implementation_sha256": {
+    "configs/t4_nodistill_joint_stop_gate_v1.json": "0c38a4e1808166f9d62fcb362dce8a6b201185c41609d52c7a7f3f4c73ca8b61",
+    "docs/T4_NODISTILL_JOINT_STOP_GATE.md": "807e13374d3359ae4e0c6bc5588eaba7d9a1726d04cacb061d9cbabe6ce71355",
+    "src/compose_v4/control/nodistill_joint_stop.py": "565868e60eff009ac901fe194c2ed3282b01dbb1f6fee5f02aa6fd1c3018a2fc",
+    "src/compose_v4/experiments/t4_nodistill_joint_stop_gate.py": "186b2629b49e91e7bae7ded343c3011527403cd2397bd9823d9b28aae3f3991e",
+    "tests/test_t4_nodistill_joint_stop_gate.py": "99c0125b5035439f0cbab6dbee038c8a8260548814b0d09f1a5789f9384fe3d4",
+    "tools/t4_nodistill_joint_stop_gate.py": "976365a11836a7d957b7f4d56375cdc211ec64e75d9ca8c92758071aaecfffcd"
+  },
+  "inputs_sha256": {
+    "configs/t4_no_complete_routes_diagnostic_v1.json": "e17d1b1ce60bc3508514da780bd00a7eeab7e4963300b8f1efdc31c115c81194",
+    "diagnostics/t4_strategy_reset/20260916/route_comparison.json": "afc03d1c1e5249051ad8121b31a418edac6c9fb87c9345d66adbc1734c56e2f1"
+  },
+  "lock_manifest": {
+    "path": "diagnostics/t4_nodistill_joint_stop_gate/attempt_1/lock_manifest.json",
+    "sha256": "7059f6bf851e7a7c61d2f4eb3c0b59950e5df9e99592fd52881e4d54c821afad",
+    "all_locks_published_before_evaluation": true,
+    "all_full_lock_reruns_byte_deterministic": true
+  },
+  "locks_sha256": {
+    "contrast_lower_capacity__coverage_joint_stop.json": "771f951c994c9010c89cabd28a342c5f6121f212f64b94d87306a91a9d684a47",
+    "contrast_lower_capacity__independent_marginal.json": "0c90554b7e186de1ab5062ba9af8774c665a12b63b467f3a2049c5ce5529f921",
+    "primary_near_capacity__coverage_joint_stop.json": "ec164fe51ac9832402421d1fb2e4fced533b6e9f3c40ae7816a561dfa7cbf221",
+    "primary_near_capacity__independent_marginal.json": "f55e226bf9a4528ae3ad26c4429ef6de78a5da7c6e12f404e091bc9699fac026"
+  },
+  "support_audit": {
+    "declared": {
+      "max_primitives": 32,
+      "max_blocks": 8,
+      "max_active_atoms": 40,
+      "min_depth": 2,
+      "max_depth": 4
+    },
+    "observed_across_locks": {
+      "max_primitives": 16,
+      "max_blocks": 4,
+      "max_peak_active_atoms": 40,
+      "depths": [
+        2,
+        3,
+        4
+      ]
+    },
+    "new_oracle_calls": 0,
+    "docking_calls": 0,
+    "teacher_loaded_during_generation": false,
+    "runtime_generation_inputs": [
+      "source_graph",
+      "arm",
+      "frozen_settings"
+    ]
+  },
+  "primary_5ht1b_0_d04": {
+    "coverage_joint_stop": {
+      "emitted": 32,
+      "exact_replay": 32,
+      "exact_replay_precision": 1.0,
+      "valid_complete_stop_yield": 6,
+      "valid_unique_endpoints": 6,
+      "valid_joint_strata": 6,
+      "lock_joint_strata": 32,
+      "teacher_rows_supported_coarse": 6,
+      "teacher_rows_supported_semantic": 6,
+      "unique_teacher_coarse_signatures_supported": 2
+    },
+    "independent_marginal": {
+      "emitted": 32,
+      "exact_replay": 32,
+      "exact_replay_precision": 1.0,
+      "valid_complete_stop_yield": 0,
+      "valid_unique_endpoints": 0,
+      "valid_joint_strata": 0,
+      "lock_joint_strata": 2,
+      "teacher_rows_supported_coarse": 0,
+      "teacher_rows_supported_semantic": 0,
+      "unique_teacher_coarse_signatures_supported": 0
+    },
+    "unique_teacher_coarse_signatures_total": 2,
+    "valid_yield_delta": 6
+  },
+  "contrast_parp1_0_d04": {
+    "coverage_joint_stop": {
+      "emitted": 32,
+      "exact_replay": 32,
+      "exact_replay_precision": 1.0,
+      "valid_complete_stop_yield": 8,
+      "valid_unique_endpoints": 8,
+      "valid_joint_strata": 8,
+      "lock_joint_strata": 32,
+      "teacher_rows_supported_coarse": 0,
+      "teacher_rows_supported_semantic": 0,
+      "unique_teacher_coarse_signatures_supported": 0
+    },
+    "independent_marginal": {
+      "emitted": 32,
+      "exact_replay": 32,
+      "exact_replay_precision": 1.0,
+      "valid_complete_stop_yield": 1,
+      "valid_unique_endpoints": 1,
+      "valid_joint_strata": 1,
+      "lock_joint_strata": 2,
+      "teacher_rows_supported_coarse": 0,
+      "teacher_rows_supported_semantic": 0,
+      "unique_teacher_coarse_signatures_supported": 0
+    },
+    "unique_teacher_coarse_signatures_total": 1,
+    "valid_yield_delta": 7,
+    "preserved_negative": "neither arm covers the single historical coarse teacher signature"
+  },
+  "checks": [
+    {
+      "command": "/Users/rmaganti/compose_rgm_git/.venv/bin/python -m pytest -q tests/test_t4_nodistill_joint_stop_gate.py",
+      "result": "PASS: 4 passed in 8.24s"
+    },
+    {
+      "command": "/Users/rmaganti/compose_rgm_git/.venv/bin/python -m ruff check src/compose_v4/control/nodistill_joint_stop.py src/compose_v4/experiments/t4_nodistill_joint_stop_gate.py tools/t4_nodistill_joint_stop_gate.py tests/test_t4_nodistill_joint_stop_gate.py",
+      "result": "PASS: All checks passed"
+    },
+    {
+      "command": "UV_CACHE_DIR=.uv-cache uvx black --target-version py312 --check src/compose_v4/control/nodistill_joint_stop.py src/compose_v4/experiments/t4_nodistill_joint_stop_gate.py tools/t4_nodistill_joint_stop_gate.py tests/test_t4_nodistill_joint_stop_gate.py",
+      "result": "PASS: 4 files would be left unchanged"
+    },
+    {
+      "command": "/Users/rmaganti/compose_rgm_git/.venv/bin/python -m pytest -q tests/test_edit_program_graph.py tests/test_t4_dynamic_v1.py",
+      "result": "LIMITATION: 15 passed, 1 failed because the pre-existing t4_dynamic_v1 frozen contract expects dynamic_program_synthesis.py SHA-256 80fcc5f64a04306613fd84955dbed0b4c4ce5d512a3ed2c2ddd119515b899257 while the clean HEAD file is 4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e"
+    }
+  ],
+  "limitations": [
+    "This is development-source support evidence, not a scored objective result or production integration.",
+    "Teacher support is a post-lock coarse structural diagnostic, not endpoint recovery or exact route recovery.",
+    "The six primary teacher rows comprise two unique coarse signatures; row counts are not treated as six independent signatures.",
+    "Historical teacher rows do not carry a settled retained-interface label, so no retained-interface teacher support is inferred.",
+    "The contrast cell improves valid complete STOP yield but retains zero coarse and semantic teacher support for both arms.",
+    "No repository-wide test suite was run at this standalone support-gate boundary."
+  ]
+}

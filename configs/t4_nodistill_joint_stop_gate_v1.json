@@ -1,0 +1,86 @@
+{
+  "payload": {
+    "schema_version": "t4_nodistill_joint_stop_gate_v1",
+    "scientific_problem": "test whether route-free feasibility-aware joint constituent and STOP ranking preserves useful complete-program support that an independent constituent marginal collapses",
+    "primary_output": "deterministically locked exact depth-2..4 protected programs ranked without routes, teachers, task identity, objectives, docking scores, or learned weights",
+    "central_claim_under_test": "coverage-preserving joint ranking yields nonzero diverse selection-ready support on the frozen 5HT1B source and strictly improves valid complete STOP yield or post-lock coarse teacher support over a matched independent marginal without reducing exact precision",
+    "validation_setting": "zero-oracle offline support gate on one primary near-capacity 5HT1B delta-0.4 source and one contrasting lower-capacity PARP1 delta-0.4 source",
+    "support": {
+      "object": "complete exact executable molecular edit program",
+      "depths": [2, 4],
+      "max_primitives": 32,
+      "max_blocks": 8,
+      "max_active_atoms": 40,
+      "stereochemistry": "outside the exact graph claim",
+      "formal_charge_changes": "outside support"
+    },
+    "arms": [
+      "independent_marginal",
+      "coverage_joint_stop"
+    ],
+    "generation": {
+      "seed": 20260919,
+      "min_depth": 2,
+      "max_depth": 4,
+      "beam_width": 24,
+      "lock_width": 32,
+      "candidates_per_family": 6,
+      "expansions_per_parent": 24,
+      "max_primitives": 32,
+      "max_blocks": 8,
+      "max_active_atoms": 40
+    },
+    "cases": [
+      {
+        "case_id": "primary_near_capacity",
+        "source_cell": "5ht1b_0",
+        "teacher_cell": "5ht1b_0",
+        "source_state_sha256": "623a0921dbe2b65b6c71651a6ad1e74d82975360d0f9648fd646036017dc0ce8",
+        "delta": 0.4,
+        "role": "primary"
+      },
+      {
+        "case_id": "contrast_lower_capacity",
+        "source_cell": "parp1_0",
+        "teacher_cell": "parp1_0",
+        "source_state_sha256": "d33a59ceb9547bf955296f7cae3c0b196d75d0be1845e7e97365fbe1b0dc1700",
+        "delta": 0.4,
+        "role": "contrast"
+      }
+    ],
+    "information_regime": {
+      "runtime_graph_only": true,
+      "target_or_cell_name_at_runtime": false,
+      "objective_or_docking_score_at_runtime": false,
+      "route_template_or_teacher_identity_at_runtime": false,
+      "teacher_action_or_endpoint_at_runtime": false,
+      "absolute_route_address_at_runtime": false,
+      "learned_or_route_frequency_weights": false,
+      "candidate_lock_before_teacher_comparison": true,
+      "new_oracle_calls": 0,
+      "docking_calls": 0
+    },
+    "acceptance": {
+      "exact_replay_precision": 1.0,
+      "primary_nonzero_selection_ready_support": true,
+      "primary_diverse_selection_ready_support": true,
+      "proposed_strictly_better_valid_yield_or_teacher_support": true,
+      "proposed_exact_precision_not_lower": true,
+      "deterministic_locks": true,
+      "negative_result_is_authoritative": true
+    },
+    "inputs_sha256": {
+      "configs/t4_no_complete_routes_diagnostic_v1.json": "e17d1b1ce60bc3508514da780bd00a7eeab7e4963300b8f1efdc31c115c81194",
+      "diagnostics/t4_strategy_reset/20260916/route_comparison.json": "afc03d1c1e5249051ad8121b31a418edac6c9fb87c9345d66adbc1734c56e2f1"
+    },
+    "scope": {
+      "standalone_support_gate": true,
+      "production_integration": false,
+      "training": false,
+      "scored_experiment": false,
+      "modal": false,
+      "t4_artifact_mutation": false
+    }
+  },
+  "payload_sha256": "3c62e85c944f3e5b6e398b0c7f2f804505ddce2a70de8dbee4c89840cf018a6b"
+}
