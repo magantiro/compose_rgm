@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import argparse
 from pathlib import Path
 
 from compose_v4.control.docking_value import identity
@@ -11,7 +12,7 @@ from compose_v4.experiments.t4_matched_pilot import unseal
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "configs/t4_integrated_route_fiber_parp1_v1.json"
-OUTPUT = ROOT / "configs/t4_held_target_distilled_parp1_d06_v1.json"
+DEFAULT_OUTPUT = ROOT / "configs/t4_held_target_distilled_parp1_d06_v2.json"
 CHECKPOINT = "diagnostics/t4_held_target_distillation_quality_v1/parp1_checkpoint.json"
 SUPPORT = "diagnostics/t4_held_target_distillation_quality_v1/parp1_smoke.json"
 APP = "modal_apps/t4_integrated_route_fiber_parp1_app.py"
@@ -26,6 +27,9 @@ def sha256(path: Path) -> str:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    args = parser.parse_args()
     payload = dict(unseal(BASE))
     payload.update(
         {
@@ -49,11 +53,7 @@ def main() -> None:
                 "result": "leave-PARP1-out route expert produced exact programs and eligible endpoints on PARP1-0 and PARP1-1; PARP1-2 abstention is preserved",
                 "interpretation": "support gate is partial and the scored run must preserve exhaustion as a valid outcome",
             },
-            "runtime_inputs_sha256": {
-                **payload["runtime_inputs_sha256"],
-                CHECKPOINT: sha256(ROOT / CHECKPOINT),
-                APP: sha256(ROOT / APP),
-            },
+            "runtime_inputs_sha256": dict(payload["runtime_inputs_sha256"]),
         }
     )
     payload["runtime_inputs_sha256"].pop(
@@ -65,17 +65,23 @@ def main() -> None:
     )
     payload["runtime_inputs_sha256"][CHECKPOINT] = sha256(ROOT / CHECKPOINT)
     payload["runtime_inputs_sha256"][APP] = sha256(ROOT / APP)
+    for relative in tuple(payload["runtime_inputs_sha256"]):
+        path = ROOT / relative
+        if not path.exists():
+            raise FileNotFoundError(path)
+        payload["runtime_inputs_sha256"][relative] = sha256(path)
     payload["proposal"]["route_complete_region"]["training_split"] = "leave-PARP1-out"
     payload["proposal"]["route_complete_region"]["pool_size"] = 64
     payload["total_charged_call_ceiling"] = 147
     envelope = {"payload": payload, "payload_sha256": identity(payload)}
-    if OUTPUT.exists():
-        raise FileExistsError(OUTPUT)
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    temporary = OUTPUT.with_suffix(OUTPUT.suffix + ".tmp")
+    output = args.output.resolve()
+    if output.exists():
+        raise FileExistsError(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output.with_suffix(output.suffix + ".tmp")
     temporary.write_text(json.dumps(envelope, sort_keys=True, indent=2) + "\n")
-    temporary.replace(OUTPUT)
-    print(json.dumps({"path": str(OUTPUT), "payload_sha256": envelope["payload_sha256"]}, indent=2))
+    temporary.replace(output)
+    print(json.dumps({"path": str(output), "payload_sha256": envelope["payload_sha256"]}, indent=2))
 
 
 if __name__ == "__main__":
