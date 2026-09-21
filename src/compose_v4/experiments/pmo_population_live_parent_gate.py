@@ -18,8 +18,14 @@ import numpy as np
 from compose_v4.control.current_state_edits import current_state_program
 from compose_v4.control.docking_value import identity
 from compose_v4.control.edit_program_graph import compile_program_graph, execute_program_graph
-from compose_v4.control.pmo_joint_dependency_jump import bind_joint_plan
 from compose_v4.control.pmo_population_controller import PmoPopulationController
+from compose_v4.control.pmo_realization import (
+    PRODUCTION_MAX_REALIZATIONS,
+    PRODUCTION_NODE_BUDGET,
+    PRODUCTION_SECONDS_CAP,
+    PRODUCTION_SPECIFICATION,
+    realize_plan_binding,
+)
 from compose_v4.experiments.continuation_profile import publish_json, sha256_file
 from compose_v4.experiments.pmo_population_v1 import (
     CHECKPOINTS,
@@ -79,18 +85,45 @@ def _sample_descendant(source, index: int):
     }
 
 
+def _bind_plan(child, plan: dict) -> dict:
+    """Bind one plan exactly as the controller's jump lane binds it.
+
+    The parameters are imported from the binder module rather than restated here, so
+    a change to the deployed configuration cannot leave this gate certifying support
+    for a configuration production no longer runs.  ``seconds_cap`` is the full
+    production cap: the controller additionally narrows it by the jump lane's
+    remaining wall time, which this gate has no analogue for, and the smaller of the
+    two binds there.
+
+    The full result is returned, not just ``bindings``, because the realizer
+    distinguishes a plan PROVEN incompatible with this parent from one whose search
+    ran out of budget -- and a support floor that fails is only readable if the
+    receipt says which.
+    """
+
+    return realize_plan_binding(
+        child,
+        plan,
+        specification=PRODUCTION_SPECIFICATION,
+        node_budget=PRODUCTION_NODE_BUDGET,
+        seconds_cap=PRODUCTION_SECONDS_CAP,
+        max_realizations=PRODUCTION_MAX_REALIZATIONS,
+    )
+
+
 def _bind_parent_plans(payload: tuple[int, dict, list[list[dict]]]) -> tuple[int, dict, list[dict]]:
     """Independent deterministic parent shard for the exhaustive coverage audit."""
 
     index, descendant, plan_batches = payload
     child = decode_state(descendant["trace"]["states"][-1])
     attempts = successes = 0
-    lengths, rows = [], []
+    lengths, rows, outcomes = [], [], {}
     for batch_index, plans in enumerate(plan_batches):
         for plan in plans:
             attempts += 1
-            bound = bind_joint_plan(child, plan, beam_width=1)
-            exact = [row for row in bound if row.get("exact_replay")]
+            realized = _bind_plan(child, plan)
+            outcomes[realized["outcome"]] = outcomes.get(realized["outcome"], 0) + 1
+            exact = [row for row in realized["bindings"] if row.get("exact_replay")]
             successes += len(exact)
             lengths.extend(row["primitive_count"] for row in exact)
             rows.extend(
@@ -111,6 +144,7 @@ def _bind_parent_plans(payload: tuple[int, dict, list[list[dict]]]) -> tuple[int
             "exact_bindings": successes,
             "primitive_lengths": sorted(lengths),
             "route_scale_bindings": sum(length >= MIN_ROUTE_SCALE_PRIMITIVES for length in lengths),
+            "binder_outcomes": dict(sorted(outcomes.items())),
         },
         rows,
     )
@@ -198,13 +232,13 @@ def run_gate(
                 continue
             child = decode_state(parent["descendant"]["trace"]["states"][-1])
             attempts = successes = 0
-            lengths, rows = [], []
+            lengths, rows, outcomes = [], [], {}
             for plan in plans:
                 attempts += 1
+                realized = _bind_plan(child, plan)
+                outcomes[realized["outcome"]] = outcomes.get(realized["outcome"], 0) + 1
                 exact = [
-                    row
-                    for row in bind_joint_plan(child, plan, beam_width=8)
-                    if row.get("exact_replay")
+                    row for row in realized["bindings"] if row.get("exact_replay")
                 ]
                 successes += len(exact)
                 lengths.extend(row["primitive_count"] for row in exact)
@@ -225,6 +259,7 @@ def run_gate(
                 "route_scale_bindings": sum(
                     length >= MIN_ROUTE_SCALE_PRIMITIVES for length in lengths
                 ),
+                "binder_outcomes": dict(sorted(outcomes.items())),
             }
             plan_rows.extend(rows)
     supported = {
@@ -236,6 +271,15 @@ def run_gate(
         )
     }
     scheduler_batches = scheduled_plan_batches
+    # The realizer's four outcomes are carried up so a FAILING floor is readable:
+    # a plan proven incompatible with every parent and one whose search ran out of
+    # budget are different findings about whether support exists.
+    binder_outcomes: dict[str, int] = {}
+    for parent in parents:
+        for outcome, count in parent.get("joint_binding", {}).get(
+            "binder_outcomes", {}
+        ).items():
+            binder_outcomes[outcome] = binder_outcomes.get(outcome, 0) + count
     payload = {
         "schema_version": SCHEMA,
         "initialization_sha256": sha256_file(root / INITIALIZATION),
@@ -254,6 +298,17 @@ def run_gate(
                 band: sum(_band(int(row["primitive_count"])) == band for row in plans)
                 for band in ("small", "medium", "large")
             },
+        },
+        "binder": {
+            "function": (
+                f"{realize_plan_binding.__module__}."
+                f"{realize_plan_binding.__qualname__}"
+            ),
+            "specification": PRODUCTION_SPECIFICATION.name,
+            "node_budget": PRODUCTION_NODE_BUDGET,
+            "seconds_cap": PRODUCTION_SECONDS_CAP,
+            "max_realizations": PRODUCTION_MAX_REALIZATIONS,
+            "outcomes": dict(sorted(binder_outcomes.items())),
         },
         "parents": parents,
         "support": {
