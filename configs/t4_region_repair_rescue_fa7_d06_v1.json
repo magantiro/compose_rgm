@@ -1,15 +1,9 @@
 {
   "payload": {
     "authorization": {
-      "all_arms_ceiling": 1241,
-      "covers": "one sentence authorizes all three region-repair rescue arms together",
-      "launch_is_blocked_until_authorized": true,
-      "plan": "configs/t4_region_repair_rescue_plan_v1.json",
-      "plan_payload_sha256": "41a93a0774f1902b13bdacf420a9fc2dc40e3acfa0862e0566d90a9b627d870d",
-      "required": true,
-      "state": "NOT_AUTHORIZED",
-      "status_authorized_value": "AUTHORIZED_BY_OWNER_FOR_REGION_REPAIR_RESCUE",
-      "this_arm_ceiling": 496
+      "authorized_payload_sha256": "bbc6b3766f1687dd9376e00150acab66ac696def657a3d08034b8206aac1f38d",
+      "recorded_in": "diagnostics/t4_region_repair_rescue_authorization_v1.json",
+      "sentence": "I authorize the three region-repair rescue arms -- configs/t4_region_repair_rescue_braf_d06_v1.json at payload sha256 7ec9cc6a684cf41b78a405cb6e6e1d1ad4ecaf5c708328623687c4a9166c69f4, configs/t4_region_repair_rescue_fa7_d06_v1.json at bbc6b3766f1687dd9376e00150acab66ac696def657a3d08034b8206aac1f38d, and configs/t4_region_repair_rescue_fa7_d04_v1.json at c9b85fec7b156e50adb4fba32db1d60e30ea9ef6ba0b1a2fb76c9d1dac3accf3 -- to charge up to 1241 oracle calls in total, at the per-cell ceilings 248/248/248/248/249, as a versioned region-repair rescue built on wiring commit 2397522f over repair commit 7210f666, accepting that fa7_0's 248 calls are a bounded reseed rather than a mechanism-backed rescue, and that these results must be reported as a named rescue phase and never spliced into the unchanged-v1 panel table."
     },
     "batch": 8,
     "ceiling_derivation": {
@@ -203,7 +197,7 @@
         "the 5-mutation battery, all RED"
       ]
     },
-    "status": "PENDING_OWNER_AUTHORIZATION",
+    "status": "AUTHORIZED_BY_OWNER_FOR_REGION_REPAIR_RESCUE",
     "status_polling_caveat": "remote_status hardcodes ('parp1_0','parp1_1','parp1_2'), so mode=status reports not_started on this arm regardless of progress; round locks are the authority",
     "supersedes_plan_preconditions": {
       "one_contract_cannot_span_two_receptors": {
@@ -242,5 +236,5 @@
       "version": "region_repair_rescue_v1"
     }
   },
-  "payload_sha256": "bbc6b3766f1687dd9376e00150acab66ac696def657a3d08034b8206aac1f38d"
+  "payload_sha256": "91101214587acb98ef39ba5511a21df379f33ac3d5f8d6f2c7f035219159bc1e"
 }

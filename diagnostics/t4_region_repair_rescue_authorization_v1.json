@@ -1,0 +1,26 @@
+{
+  "authorization_form": "The owner AFFIRMED the fully-quoted, hash-bound sentence presented immediately above their reply rather than retyping it verbatim. The sentence, the three payload hashes it names, and the 1241-call ceiling were all displayed in full before the affirmation. Recorded this way so the audit trail states what actually happened.",
+  "authorization_sentence_presented_to_owner": "I authorize the three region-repair rescue arms -- configs/t4_region_repair_rescue_braf_d06_v1.json at payload sha256 7ec9cc6a684cf41b78a405cb6e6e1d1ad4ecaf5c708328623687c4a9166c69f4, configs/t4_region_repair_rescue_fa7_d06_v1.json at bbc6b3766f1687dd9376e00150acab66ac696def657a3d08034b8206aac1f38d, and configs/t4_region_repair_rescue_fa7_d04_v1.json at c9b85fec7b156e50adb4fba32db1d60e30ea9ef6ba0b1a2fb76c9d1dac3accf3 -- to charge up to 1241 oracle calls in total, at the per-cell ceilings 248/248/248/248/249, as a versioned region-repair rescue built on wiring commit 2397522f over repair commit 7210f666, accepting that fa7_0's 248 calls are a bounded reseed rather than a mechanism-backed rescue, and that these results must be reported as a named rescue phase and never spliced into the unchanged-v1 panel table.",
+  "authorized_at_utc": "2026-09-21T02:41:58.380791+00:00",
+  "authorized_payload_sha256_at_time_of_authorization": {
+    "braf_d06": "7ec9cc6a684cf41b78a405cb6e6e1d1ad4ecaf5c708328623687c4a9166c69f4",
+    "fa7_d04": "c9b85fec7b156e50adb4fba32db1d60e30ea9ef6ba0b1a2fb76c9d1dac3accf3",
+    "fa7_d06": "bbc6b3766f1687dd9376e00150acab66ac696def657a3d08034b8206aac1f38d"
+  },
+  "note_on_hash_movement": "Flipping status to AUTHORIZED re-seals each payload, so the live hashes after this receipt DIFFER from the ones authorized. The pre-flip values above are what the owner saw and approved; the post-flip values are recorded alongside.",
+  "owner_response_verbatim": "Yes I aurthoize",
+  "payload_sha256_after_authorization": {
+    "braf_d06": "eb6c0cfb8f461d8e3535320d0aa2631180853fa358ede4c42c4c3a0f7aa6e9fe",
+    "fa7_d04": "4d7dc75f4531ed7825bac5c40f5b56d6fe8393d2f7d7d67caca161680b54e39d",
+    "fa7_d06": "91101214587acb98ef39ba5511a21df379f33ac3d5f8d6f2c7f035219159bc1e"
+  },
+  "per_cell_ceilings": {
+    "braf_0_d06": 248,
+    "braf_1_d06": 248,
+    "fa7_0_d06": 248,
+    "fa7_2_d04": 249,
+    "fa7_2_d06": 248
+  },
+  "schema_version": "t4_region_repair_rescue_authorization_v1",
+  "total_charged_call_ceiling": 1241
+}
