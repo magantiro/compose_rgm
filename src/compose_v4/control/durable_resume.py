@@ -493,19 +493,49 @@ class CallLedger:
 
 SNAPSHOT_SCHEMA = "compose_durable_snapshot_v1"
 
-#: The scientific state a PMO run must carry across a preemption.  Every entry is
-#: something whose absence measurably changes the trajectory, so the store refuses
-#: a snapshot that omits one rather than restoring an empty stand-in.
+#: The scientific state a PMO run must carry across a preemption, named by the keys
+#: the production controller ACTUALLY emits (measured against
+#: ``PmoPopulationController.snapshot``, whose PMO state is nested under
+#: ``pmo_population`` while the base optimizer's sits at the top level).  Paths are
+#: dotted because a flat check would silently pass a snapshot whose entire nested
+#: PMO block was missing everything but its name.
 PMO_REQUIRED_COMPONENTS = frozenset(
     {
-        "archive",
-        "memory",
-        "allocator",
-        "credit",
         "rng",
-        "pending_candidates",
+        "entries",
+        "observations",
+        "pending",
+        "pmo_population.jump_rng",
+        "pmo_population.shallow_rng",
+        "pmo_population.structured_rng",
+        "pmo_population.population_state",
+        "pmo_population.credit",
+        "pmo_population.pool_continuity",
+        "pmo_population.online_memory",
     }
 )
+
+#: Present-but-null is a legitimate value for exactly two of the above: ``pending``
+#: is None whenever no batch is outstanding, and ``online_memory`` is None for an
+#: arm constructed without a memory.  Everything else being null is a lost
+#: component wearing a present key, which is the failure this store exists to stop.
+PMO_NULLABLE_COMPONENTS = frozenset({"pending", "pmo_population.online_memory"})
+
+#: The memory arm additionally requires the memory to be WARM, so a resumed arm B
+#: can never quietly continue as arm A.
+PMO_MEMORY_NON_NULL_COMPONENTS = frozenset(PMO_REQUIRED_COMPONENTS) - frozenset({"pending"})
+
+_MISSING = object()
+
+
+def resolve_component(components: dict, path: str):
+    """Walk a dotted component path, returning ``_MISSING`` when any hop is absent."""
+    node = components
+    for part in path.split("."):
+        if not isinstance(node, dict) or part not in node:
+            return _MISSING
+        node = node[part]
+    return node
 
 
 class DurableSnapshotStore:
@@ -518,6 +548,7 @@ class DurableSnapshotStore:
         run_id: str,
         revision_identity: dict,
         required_components: frozenset[str] = PMO_REQUIRED_COMPONENTS,
+        non_null_components: frozenset[str] | None = None,
     ) -> None:
         if not revision_identity:
             raise ValueError("a snapshot must carry the contract/revision identity it ran under")
@@ -527,6 +558,14 @@ class DurableSnapshotStore:
         self.run_id = run_id
         self.revision_identity = json.loads(json.dumps(revision_identity))
         self.required_components = frozenset(required_components)
+        # Default: every required component must also be non-null.  A caller relaxes
+        # this only for components whose None is a real value, never to paper over one.
+        self.non_null_components = frozenset(
+            self.required_components if non_null_components is None else non_null_components
+        )
+        unknown = sorted(self.non_null_components - self.required_components)
+        if unknown:
+            raise ValueError(f"non-null components must also be required: {unknown}")
         self.root.mkdir(parents=True, exist_ok=True)
 
     def _path(self, round_index: int) -> Path:
@@ -542,12 +581,18 @@ class DurableSnapshotStore:
         lease: WorkerLease | None = None,
     ) -> dict:
         """Publish a snapshot atomically, after proving this worker still holds the run."""
-        missing = sorted(self.required_components - set(components))
+        missing = sorted(
+            name
+            for name in self.required_components
+            if resolve_component(components, name) is _MISSING
+        )
         if missing:
             raise SnapshotIncomplete(
                 f"snapshot for round {round_index} omits required components: {missing}"
             )
-        empty = sorted(name for name in self.required_components if components[name] is None)
+        empty = sorted(
+            name for name in self.non_null_components if resolve_component(components, name) is None
+        )
         if empty:
             raise SnapshotIncomplete(
                 f"snapshot for round {round_index} carries null required components: {empty}"
@@ -564,6 +609,7 @@ class DurableSnapshotStore:
             "scored_call_ordinal": int(scored_call_ordinal),
             "revision_identity": self.revision_identity,
             "required_components": sorted(self.required_components),
+            "non_null_components": sorted(self.non_null_components),
             "epoch": None if lease is None else lease.epoch,
             "components": json.loads(json.dumps(components)),
         }
@@ -602,7 +648,12 @@ class DurableSnapshotStore:
                 "snapshot was produced under a different contract/revision identity; "
                 "resuming would splice two runtimes into one trajectory"
             )
-        missing = sorted(self.required_components - set(record.get("components", {})))
+        stored = record.get("components", {})
+        missing = sorted(
+            name
+            for name in self.required_components
+            if resolve_component(stored, name) is _MISSING
+        )
         if missing:
             raise SnapshotIncomplete(
                 f"stored snapshot is missing required components {missing}; refusing to "

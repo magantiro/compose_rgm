@@ -50,6 +50,10 @@ KILL_POINTS = (
 
 REVISION = {"contract": "fake_oracle_resumability_v1", "controller": "kill_worker_v1"}
 
+WORKER_COMPONENTS = frozenset(
+    {"archive", "memory", "allocator", "credit", "rng", "pending_candidates"}
+)
+
 
 def fake_oracle(molecule: str) -> float:
     """Deterministic, free, and a pure function of its argument."""
@@ -152,7 +156,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     ledger = CallLedger(root / "oracle", run_id=args.run_id, budget=args.budget)
     store = DurableSnapshotStore(
-        root / "snapshots", run_id=args.run_id, revision_identity=REVISION
+        root / "snapshots",
+        run_id=args.run_id,
+        revision_identity=REVISION,
+        # This worker carries a toy controller, so it declares its OWN components
+        # rather than inheriting the PMO profile's real key names.
+        required_components=WORKER_COMPONENTS,
+        non_null_components=WORKER_COMPONENTS - frozenset({"pending_candidates"}),
     )
 
     # Repair before reading state: a reservation whose worker died mid-call is

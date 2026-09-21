@@ -39,7 +39,7 @@ _MUTATIONS = [
     (
         "skip_the_memory_payload",
         _MODULE,
-        '        "memory",\n',
+        '        "pmo_population.online_memory",\n',
         "",
         "test_skipping_the_memory_payload_is_refused",
         "red",
@@ -82,7 +82,11 @@ _MUTATIONS = [
     (
         "fill_in_a_missing_component_at_load_instead_of_refusing",
         _MODULE,
-        '        missing = sorted(self.required_components - set(record.get("components", {})))',
+        ('        missing = sorted(\n'
+         '            name\n'
+         '            for name in self.required_components\n'
+         '            if resolve_component(stored, name) is _MISSING\n'
+         '        )'),
         "        missing = []",
         "test_a_stored_snapshot_missing_a_component_is_refused_at_load_not_filled_in",
         "red",

@@ -41,6 +41,8 @@ import pytest
 from compose_v4.control.durable_resume import (
     COMPLETE,
     FRESH,
+    PMO_NULLABLE_COMPONENTS,
+    PMO_REQUIRED_COMPONENTS,
     RESUME_IN_PLACE,
     BudgetExhausted,
     CallLedger,
@@ -185,10 +187,52 @@ def _components(**overrides) -> dict:
     return base
 
 
+_TOY_COMPONENTS = frozenset(
+    {"archive", "memory", "allocator", "credit", "rng", "pending_candidates"}
+)
+
+
 def _store(tmp_path: Path, **kwargs) -> DurableSnapshotStore:
     os.environ["COMPOSE_ALLOW_REAPABLE_PATH"] = "1"
+    kwargs.setdefault("required_components", _TOY_COMPONENTS)
     return DurableSnapshotStore(
         tmp_path / "snapshots", run_id="r1", revision_identity=_REVISION, **kwargs
+    )
+
+
+def _pmo_components(**overrides) -> dict:
+    """The shape `PmoPopulationController.snapshot` really emits: PMO state nested."""
+    base = {
+        "rng": {"bit_generator": "PCG64", "state": {"state": 7, "inc": 3}},
+        "entries": [],
+        "observations": {},
+        "pending": None,
+        "pmo_population": {
+            "jump_rng": {"state": 1},
+            "shallow_rng": {"state": 2},
+            "structured_rng": {"state": 3},
+            "population_state": {"best_score": 0.4},
+            "credit": {"cells": {}},
+            "pool_continuity": {"pool": []},
+            "online_memory": {"ordinal": 250},
+        },
+    }
+    for key, value in overrides.items():
+        if key.startswith("pmo_population."):
+            base["pmo_population"][key.split(".", 1)[1]] = value
+        else:
+            base[key] = value
+    return base
+
+
+def _pmo_store(tmp_path: Path) -> DurableSnapshotStore:
+    os.environ["COMPOSE_ALLOW_REAPABLE_PATH"] = "1"
+    return DurableSnapshotStore(
+        tmp_path / "snapshots",
+        run_id="r1",
+        revision_identity=_REVISION,
+        required_components=PMO_REQUIRED_COMPONENTS,
+        non_null_components=PMO_REQUIRED_COMPONENTS - PMO_NULLABLE_COMPONENTS,
     )
 
 
@@ -335,8 +379,8 @@ def test_the_ledger_refuses_a_changed_budget_across_resume(tmp_path):
 
 
 def test_dropping_the_rng_from_the_snapshot_is_refused(tmp_path):
-    store = _store(tmp_path)
-    components = _components()
+    store = _pmo_store(tmp_path)
+    components = _pmo_components()
     del components["rng"]
     with pytest.raises(SnapshotIncomplete):
         store.commit(
@@ -345,13 +389,72 @@ def test_dropping_the_rng_from_the_snapshot_is_refused(tmp_path):
 
 
 def test_skipping_the_memory_payload_is_refused(tmp_path):
-    store = _store(tmp_path)
-    components = _components()
-    del components["memory"]
+    """Arm B must never resume as arm A because a key quietly went missing."""
+    store = _pmo_store(tmp_path)
+    components = _pmo_components()
+    del components["pmo_population"]["online_memory"]
     with pytest.raises(SnapshotIncomplete):
         store.commit(
             round_index=0, charged_calls=0, scored_call_ordinal=0, components=components
         )
+
+
+def test_a_missing_nested_component_is_not_hidden_by_a_present_parent(tmp_path):
+    """A flat key check passes any snapshot whose nested block merely EXISTS."""
+    store = _pmo_store(tmp_path)
+    components = _pmo_components()
+    components["pmo_population"] = {"jump_rng": {"state": 1}}
+    with pytest.raises(SnapshotIncomplete) as failure:
+        store.commit(
+            round_index=0, charged_calls=0, scored_call_ordinal=0, components=components
+        )
+    assert "pmo_population.credit" in str(failure.value)
+
+
+def test_a_nullable_component_may_be_present_and_null(tmp_path):
+    """`pending` is None whenever no batch is outstanding; that is a real value."""
+    store = _pmo_store(tmp_path)
+    record = store.commit(
+        round_index=0,
+        charged_calls=4,
+        scored_call_ordinal=4,
+        components=_pmo_components(pending=None),
+    )
+    assert record["components"]["pending"] is None
+
+
+def test_a_non_nullable_component_may_not_be_null(tmp_path):
+    store = _pmo_store(tmp_path)
+    with pytest.raises(SnapshotIncomplete):
+        store.commit(
+            round_index=0,
+            charged_calls=0,
+            scored_call_ordinal=0,
+            components=_pmo_components(**{"pmo_population.credit": None}),
+        )
+
+
+def test_declaring_a_non_null_component_that_is_not_required_is_refused(tmp_path):
+    with pytest.raises(ValueError):
+        DurableSnapshotStore(
+            tmp_path / "snapshots",
+            run_id="r1",
+            revision_identity=_REVISION,
+            required_components=frozenset({"rng"}),
+            non_null_components=frozenset({"rng", "credit"}),
+        )
+
+
+def test_the_pmo_profile_names_nested_controller_keys(tmp_path):
+    """Measured against PmoPopulationController.snapshot, not invented."""
+    assert "pmo_population.credit" in PMO_REQUIRED_COMPONENTS
+    assert "pmo_population.online_memory" in PMO_REQUIRED_COMPONENTS
+    assert PMO_NULLABLE_COMPONENTS <= PMO_REQUIRED_COMPONENTS
+    store = _pmo_store(tmp_path)
+    store.commit(
+        round_index=0, charged_calls=4, scored_call_ordinal=4, components=_pmo_components()
+    )
+    assert store.load_latest()["components"]["pmo_population"]["online_memory"]["ordinal"] == 250
 
 
 def test_a_null_required_component_is_refused_as_firmly_as_a_missing_one(tmp_path):
