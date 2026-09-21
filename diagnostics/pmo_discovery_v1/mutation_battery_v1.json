@@ -1,8 +1,8 @@
 {
   "schema_version": "pmo_discovery_mutation_battery_v1",
   "suite": "tests/test_pmo_discovery.py",
-  "mutations": 22,
-  "killed": 22,
+  "mutations": 24,
+  "killed": 24,
   "positive_controls_green": true,
   "all_guards_load_bearing": true,
   "rows": [
@@ -242,14 +242,27 @@
       "status": "KILLED"
     },
     {
-      "mutation": "install_order_ignores_rings",
+      "mutation": "install_order_ignores_what_already_exists",
       "file": "pmo_transport_correspondence.py",
       "is_positive_control": false,
       "expected_red": [
-        "test_install_order_places_ring_atoms_before_acyclic_ones"
+        "test_install_order_grows_outward_from_what_already_exists"
       ],
       "observed_red": [
-        "test_install_order_places_ring_atoms_before_acyclic_ones"
+        "test_install_order_grows_outward_from_what_already_exists"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "staging_splits_a_ring_across_a_stage_boundary",
+      "file": "pmo_transport_staging.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_no_stage_exceeds_the_ceiling"
+      ],
+      "observed_red": [
+        "test_a_staged_transport_can_dip_below_its_own_starting_similarity",
+        "test_no_stage_exceeds_the_ceiling"
       ],
       "status": "KILLED"
     },
@@ -286,6 +299,19 @@
       ],
       "observed_red": [
         "test_a_connected_core_is_not_flagged_for_reattachment"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "trajectory_omits_the_source_so_a_dip_is_invisible",
+      "file": "pmo_transport_staging.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_a_staged_transport_can_dip_below_its_own_starting_similarity"
+      ],
+      "observed_red": [
+        "test_a_staged_transport_can_dip_below_its_own_starting_similarity",
+        "test_the_trajectory_starts_at_the_source"
       ],
       "status": "KILLED"
     },

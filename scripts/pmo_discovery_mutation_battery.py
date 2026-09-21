@@ -248,12 +248,27 @@ MUTATIONS = (
         suite=TRANSPORT_SUITE,
     ),
     Mutation(
-        name="install_order_ignores_rings",
+        # Reverts to the measured-wrong global ordering that ignores what already exists.
+        name="install_order_ignores_what_already_exists",
         path=TRANSPORT,
-        old="    return ring + chain",
-        new="    return chain + ring",
-        expect_red=("test_install_order_places_ring_atoms_before_acyclic_ones",),
+        old="        pick = adjacent[0] if adjacent else min(pending)",
+        new="        pick = min(pending)",
+        expect_red=("test_install_order_grows_outward_from_what_already_exists",),
         suite=TRANSPORT_SUITE,
+    ),
+    # NOTE: a mutation taking one ring atom at a time instead of the whole system was
+    # tried and SURVIVED, and that is a finding rather than a gap. Under anchored growth
+    # the next adjacent atom is a ring neighbour anyway, so the two orders coincide and
+    # the explicit grouping in `_growth_order` is redundant WITH IT. Ring integrity at a
+    # STAGE BOUNDARY is a different guard, enforced by `_atomic_groups` in
+    # `pmo_transport_staging` and exercised by the staging validation.
+    Mutation(
+        name="staging_splits_a_ring_across_a_stage_boundary",
+        path=ROOT / "src/compose_v4/control/pmo_transport_staging.py",
+        old="        if current and len(current) + len(unit) > max_primitives:",
+        new="        if current and len(current) + 0 > max_primitives:",
+        expect_red=("test_no_stage_exceeds_the_ceiling",),
+        suite="tests/test_pmo_transport_staging.py",
     ),
     Mutation(
         name="unparseable_input_returns_empty_instead_of_raising",
@@ -282,6 +297,14 @@ MUTATIONS = (
         new="        return True",
         expect_red=("test_a_connected_core_is_not_flagged_for_reattachment",),
         suite=TRANSPORT_SUITE,
+    ),
+    Mutation(
+        name="trajectory_omits_the_source_so_a_dip_is_invisible",
+        path=ROOT / "src/compose_v4/control/pmo_transport_staging.py",
+        old="    similarities = [source_similarity] if source_similarity is not None else []",
+        new="    similarities = []",
+        expect_red=("test_a_staged_transport_can_dip_below_its_own_starting_similarity",),
+        suite="tests/test_pmo_transport_staging.py",
     ),
     # ---- Positive control: bytes change, behaviour does not ----
     Mutation(

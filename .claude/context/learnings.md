@@ -2917,3 +2917,61 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   LARGER than the earlier raw-MCS reading of 21-40, because pruning and bond changes both
   raise it. Against a realization ceiling of median 16 / max 23 primitives this strengthens
   rather than weakens the staging conclusion.
+
+## 2026-09-21 (stage splitter: the staged path EXISTS; the SIGNAL does not guide you along it)
+
+- **VERDICT `STAGED_PATH_EXISTS_BUT_SIGNAL_IS_NOT_MONOTONE`.** 44 transports from COMPOSE's
+  init bank to declared PMO targets, split at the measured realization ceiling of 23
+  primitives, zero oracle calls and zero program execution (intermediates built with RDKit,
+  so a failure is a failure of the PLAN, not of the executor):
+      respects_ceiling 100%   intermediates valid 100%   connected 95.5%
+      reaches_target 86.4%    PATH EXISTS (scoped) 44/44   stages median 2, max 3
+      monotone 27/44          **DIPS BELOW SOURCE 17/44**
+  So the ceiling is NOT the blocker -- staging works. **The blocker is the selection
+  signal: 39% of staged transports pass through an intermediate scoring WORSE than where
+  the run started, and a controller selecting parents on score abandons exactly that
+  intermediate.** That is a sharper and more useful statement than "the ceiling blocks
+  long-range transport", which is what the predeclared falsifier would otherwise have said.
+- **An install order that is globally RING-FIRST silently disconnects the molecule.**
+  Installing a target ring system before the linker atoms joining it to the retained core
+  leaves a separate fragment: 17 of 44 staged transports had a disconnected intermediate
+  while their correspondence's core was perfectly connected -- the disconnection was
+  created by the ORDER, not the plan. Replaced with ANCHORED growth (take an atom adjacent
+  to what already exists, and a whole ring system at a time). **Attributed by execution,
+  not assumed: reverting the anchored pick alone drops connected 95.5% -> 63.6% and
+  complete paths 44/44 -> 30/44.**
+- **A guard is only tested where it binds -- twice in one session.** A mutation of the
+  anchored pick SURVIVED the battery while the aggregate showed it was worth 32 points of
+  connectivity, because the four fixture pairs do not exercise it. Fixed by adding two
+  measured ANCHOR_SENSITIVE pairs. Separately, a mutation installing one ring atom at a
+  time also survived and that one is a genuine FINDING: under anchored growth the next
+  adjacent atom is a ring neighbour anyway, so the explicit ring grouping in the install
+  order is redundant with it -- ring integrity at a STAGE BOUNDARY is a different guard,
+  living in the staging chunker.
+- **Copying a target's AROMATIC bonds into a partially built molecule does not work.**
+  A ring installed without its substituents is not aromatic on its own -- a bare pyrazole
+  whose N-substituent has not arrived cannot be kekulized -- so forcing the target's
+  aromatic flags produces a fragment RDKit rejects, and it presented as "stage 0 is not a
+  molecule". **Build from KEKULE bond orders and let sanitization re-perceive**, which is
+  also what COMPOSE's own executable states carry. The tell was that the delete-only
+  prefix sanitized fine and only a stage carrying installs did not.
+- **A monotonicity trajectory MUST start at the source.** Measuring over stage endpoints
+  alone cannot see an initial DIP, because the prune phase strips structure before the
+  install phase rebuilds it. Omitting the source made celecoxib read as monotone while its
+  first stage sat below its own starting point. Related: a monotonicity verdict over fewer
+  than two points is VACUOUS -- report it as unevaluated, or a single-point "monotone:
+  True" sits beside an invalid intermediate and reads as success.
+- **Scope a pass/fail criterion by GOAL KIND or it counts category errors as failures.**
+  `declared_smarts` tasks (deco_hop, scaffold_hop) supply a reference scaffold and a
+  substructure constraint, not a molecule to reproduce, so `reaches_target` is not their
+  objective; and a `requires_reattachment` correspondence declares up front that no
+  deletion order can keep it connected. Counting either as a staging defect double-counts
+  a declared limitation. Unscoped, the verdict read 17/44; scoped, 44/44.
+- **Stereochemistry must be excluded from a target comparison on this path.** COMPOSE's
+  MolecularGraph carries no stereo (`stereochemistry_claim: false`), so a rebuilt molecule
+  can never reproduce `[C@H]` and `mestranol_similarity` read as a staging failure.
+  Compare stereo-blind for the verdict and report the strict comparison as diagnosis.
+- **The reattachment primitive is `cycle_close`, NOT `bond_insert`** -- verified against
+  `action_codec_v4.supported_executor_rules()`, which is exactly `atom_delete, atom_insert,
+  atom_restate_semantic, bond_reorder, bond_reroute, cycle_close, cycle_open,
+  ring_system_restate`. T4 learned this the expensive way.

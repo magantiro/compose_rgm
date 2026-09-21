@@ -141,6 +141,13 @@ class Correspondence:
         is the move class the T4 5ht1b_2 witness needed and that a deletion-only search
         provably cannot express. Declaring it here means the planner can pick another
         alignment or stage the reattachment, instead of discovering it as an ordering bug.
+
+        THE REATTACHMENT PRIMITIVE IS ``cycle_close``, NOT ``bond_insert``. Verified
+        against the frozen Active8 codec surface
+        (``action_codec_v4.supported_executor_rules()``), which is exactly
+        ``atom_delete, atom_insert, atom_restate_semantic, bond_reorder, bond_reroute,
+        cycle_close, cycle_open, ring_system_restate`` -- ``bond_insert`` is NOT in it.
+        T4 learned that the expensive way; it is recorded here so Step 2 does not.
         """
         source = Chem.MolFromSmiles(self.source_smiles)
         core = set(self.retain_core)
@@ -253,16 +260,55 @@ def _connectivity_preserving_order(mol, atoms: tuple[int, ...]) -> tuple[int, ..
     return tuple(order)
 
 
-def _ring_first_order(mol, atoms: tuple[int, ...]) -> tuple[int, ...]:
-    """Install ring atoms before acyclic ones.
+def _growth_order(mol, atoms: tuple[int, ...], anchored: set[int]) -> tuple[int, ...]:
+    """Install atoms outward from what already exists, taking whole ring systems.
 
-    A substituent cannot attach to a ring that does not exist yet, and COMPOSE builds
-    rings by closure over existing atoms. Within each group the order is by index, so the
-    result is deterministic.
+    A globally ring-first order is WRONG and was measured to be: installing a target ring
+    system before the linker atoms that connect it to the retained core produces a
+    separate fragment, and 17 of 44 staged transports had a disconnected intermediate for
+    exactly that reason while their correspondence's core was perfectly connected. The
+    disconnection was created by the ORDER, not by the plan.
+
+    So growth is anchored: at each step take an atom adjacent to something already
+    present, and when that atom belongs to a ring system take the whole system at once --
+    a partial ring does not sanitize. Ties break on index, so the order is deterministic.
     """
-    ring = tuple(sorted(index for index in atoms if mol.GetAtomWithIdx(index).IsInRing()))
-    chain = tuple(sorted(index for index in atoms if not mol.GetAtomWithIdx(index).IsInRing()))
-    return ring + chain
+    rings = mol.GetRingInfo().AtomRings()
+    systems: list[set[int]] = []
+    for ring in rings:
+        merged = set(ring)
+        rest = []
+        for system in systems:
+            if system & merged:
+                merged |= system
+            else:
+                rest.append(system)
+        rest.append(merged)
+        systems = rest
+    owner = {atom: index for index, system in enumerate(systems) for atom in system}
+
+    pending = set(atoms)
+    present = set(anchored)
+    order: list[int] = []
+    while pending:
+        adjacent = [
+            index
+            for index in sorted(pending)
+            if any(n.GetIdx() in present for n in mol.GetAtomWithIdx(index).GetNeighbors())
+        ]
+        # Nothing touches what exists yet -- the remainder is a detached piece of the
+        # target. Take it in index order rather than stalling; the staging validator
+        # reports the resulting disconnection instead of this function hiding it.
+        pick = adjacent[0] if adjacent else min(pending)
+        system = owner.get(pick)
+        if system is None:
+            taken = [pick]
+        else:
+            taken = [index for index in sorted(systems[system]) if index in pending]
+        order.extend(taken)
+        present.update(taken)
+        pending.difference_update(taken)
+    return tuple(order)
 
 
 def prune_to_ring_complete(mol, core: set[int]) -> set[int]:
@@ -402,10 +448,10 @@ def correspondences(
                     ),
                     core_bond_changes=_core_bond_changes(source, target, dict(pairs)),
                     delete_order=_connectivity_preserving_order(source, delete),
-                    install_order=_ring_first_order(target, install),
+                    install_order=_growth_order(target, install, kept_target),
                     dependencies={
                         "delete_rule": "non_cut_vertex_first_keeps_survivors_connected",
-                        "install_rule": "ring_systems_before_acyclic_substituents",
+                        "install_rule": "anchored_growth_whole_ring_systems_at_once",
                     },
                 )
             )

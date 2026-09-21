@@ -40,6 +40,22 @@ def decisive(checks: dict) -> dict:
     return {key: value for key, value in checks.items() if key not in DIAGNOSTIC_KEYS}
 
 
+#: Pairs where ANCHORED growth is decisive. Measured by attribution: replacing the
+#: anchored pick with a plain index order drops connected staged intermediates from 95.5%
+#: to 63.6% and complete paths from 44/44 to 30/44 across the whole declared-target set,
+#: but changes NOTHING on the four pairs below -- so a mutation of it survived the battery
+#: until these were added. A guard is only tested where it binds.
+ANCHOR_SENSITIVE_PAIRS = (
+    (
+        "C=Cc1ccc(C(=O)NC(CC(=O)OC)C2CC2)cc1",
+        "COc1cc(N(C)CCN(C)C)c(NC(=O)C=C)cc1Nc2nccc(n2)c3cn(C)c4ccccc34",
+    ),
+    (
+        "CC1C(C(=O)[O-])CCN1C(=O)C(CCl)Oc1ccccc1",
+        "CC(C)(C(=O)O)c1ccc(cc1)C(O)CCCN2CCC(CC2)C(O)(c3ccccc3)c4ccccc4",
+    ),
+)
+
 REAL_PAIRS = (
     (INIT_LIKE, CELECOXIB),
     (PARACETAMOL, PARACETAMOL_OME),
@@ -190,11 +206,50 @@ def test_a_connected_core_is_not_flagged_for_reattachment():
     assert validate(correspondence)["deletion_keeps_source_connected"]
 
 
-def test_install_order_places_ring_atoms_before_acyclic_ones():
+def test_install_order_grows_outward_from_what_already_exists():
+    """Anchored growth, and a whole ring system at a time.
+
+    A globally ring-first order was measured to be WRONG: installing a target ring system
+    before the linker atoms connecting it to the retained core leaves a separate fragment,
+    and 17 of 44 staged transports had a disconnected intermediate for that reason while
+    their correspondence's core was perfectly connected. The disconnection was created by
+    the ORDER, not the plan.
+    """
+    for source, target in REAL_PAIRS + ANCHOR_SENSITIVE_PAIRS:
+        found = correspondences(source, target)
+        if not found:
+            continue
+        correspondence = found[0]
+        molecule = Chem.MolFromSmiles(correspondence.target_smiles)
+        present = {pair[1] for pair in correspondence.core_map}
+        detached = 0
+        for index in correspondence.install_order:
+            neighbours = {n.GetIdx() for n in molecule.GetAtomWithIdx(index).GetNeighbors()}
+            if not (neighbours & present):
+                detached += 1
+            present.add(index)
+        # ZERO, measured on every real pair. A tolerance of "at most one" let a mutation
+        # that ignores what already exists survive the battery, because a lucky index
+        # order is often still adjacent. The assertion is the exact property.
+        assert detached == 0, (
+            f"{detached} installed atoms were not adjacent to existing structure"
+        )
+
+
+def test_a_whole_ring_system_is_installed_before_leaving_it():
+    """A partial ring does not sanitize, so a ring system may not be interleaved."""
     correspondence = correspondences(INIT_LIKE, CELECOXIB)[0]
-    target = Chem.MolFromSmiles(correspondence.target_smiles)
-    in_ring = [target.GetAtomWithIdx(i).IsInRing() for i in correspondence.install_order]
-    assert in_ring == sorted(in_ring, reverse=True), "an acyclic atom precedes a ring atom"
+    molecule = Chem.MolFromSmiles(correspondence.target_smiles)
+    rings = [set(r) for r in molecule.GetRingInfo().AtomRings()]
+    order = list(correspondence.install_order)
+    for ring in rings:
+        positions = [order.index(a) for a in ring if a in order]
+        if len(positions) <= 1:
+            continue
+        span = max(positions) - min(positions) + 1
+        assert span == len(positions), (
+            "a ring system was interleaved with atoms from outside it"
+        )
 
 
 def test_unparseable_input_raises_rather_than_returning_no_core():
