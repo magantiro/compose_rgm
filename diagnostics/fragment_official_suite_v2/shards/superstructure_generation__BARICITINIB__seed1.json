@@ -1,0 +1,129 @@
+{
+  "schema": "compose_fragment_official_suite_v1",
+  "protocol": {
+    "source": "in_virtuo_gen/evaluation/downstream.py @ b50bb3ae",
+    "samples_per_prompt": 100,
+    "seeds": 3,
+    "task_row": "unweighted mean over the task's drugs",
+    "scaffold_morphing": "upstream copies the linker result"
+  },
+  "kernel": {
+    "rdkit": "2026.03.6",
+    "numpy": "2.5.3",
+    "torch": "2.14.0",
+    "python": "3.12.9",
+    "platform": "macOS-26.5.2-arm64-arm-64bit"
+  },
+  "checkpoint": {
+    "path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "completed_steps": 16000,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "atom_vocabulary": "ORGANIC"
+  },
+  "sampler": {
+    "config": {
+      "mark_attempts_per_event": 24,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "config_sha256": "805b2d10fa863c278dfd760fb3b9f5fd29eb94f91ef1653b1bf5ebe44aaab9ae"
+  },
+  "metric_provenance": {
+    "validity_uniqueness_quality_diversity": "official in_virtuo_gen.train_utils.metrics.evaluate_smiles @ b50bb3ae, already_smiles=True",
+    "distance": "NOT in the released evaluator: evaluate_smiles returns no distance key. Estimator is the official in_virtuo_gen.utils.mol.calculate_average_tanimoto(prompt=...); reference = the dummy-stripped prompt fragment(s)",
+    "fragment_preservation": "independent audit, atom-level non-overlapping substructure match, run over COMMITTED endpoints as well as emitted samples"
+  },
+  "results": {
+    "superstructure_generation": {
+      "task": "superstructure_generation",
+      "prompts_declared": 1,
+      "prompts_scored": 1,
+      "samples_per_prompt": 100,
+      "seeds": 3,
+      "per_seed": [
+        {
+          "validity": 100.0,
+          "uniqueness": 99.0,
+          "quality": 45.0,
+          "diversity": 0.715787878787879,
+          "distance": 0.6055156813294067,
+          "distance_to_original_drug": 0.7239611529873692
+        }
+      ],
+      "summary": {
+        "validity": {
+          "mean": 100.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 99.0,
+          "std": 0.0
+        },
+        "quality": {
+          "mean": 45.0,
+          "std": 0.0
+        },
+        "diversity": {
+          "mean": 0.715787878787879,
+          "std": 0.0
+        },
+        "distance": {
+          "mean": 0.6055156813294067,
+          "std": 0.0
+        },
+        "distance_to_original_drug": {
+          "mean": 0.7239611529873692,
+          "std": 0.0
+        }
+      },
+      "build_failures": [],
+      "per_drug": {
+        "BARICITINIB": [
+          {
+            "seed": 1,
+            "rng_seed": 3540716737,
+            "official": {
+              "validity": 100.0,
+              "uniqueness": 99.0,
+              "diversity": 0.715787878787879,
+              "quality": 45.0,
+              "distance": 0.6055156813294067,
+              "distance_to_original_drug": 0.7239611529873692
+            },
+            "attempts": 100,
+            "validity_denominator": 100,
+            "emitted_nonempty": 100,
+            "distance_reference_prompt": "c1nc(-c2cnn(C3CNC3)c2)c2cc[nH]c2n1",
+            "unique_valid_count": 99,
+            "committed_endpoints": 100,
+            "committed_chemically_valid": 100,
+            "committed_fragment_preserving": 100,
+            "emitted_fragment_preserving": 100,
+            "constraint_failures": 0,
+            "lock_rejections": 408,
+            "budget_exhausted": 0,
+            "executor_refusals": 0,
+            "mean_events": 12.13,
+            "families": {
+              "atom_insert": 868,
+              "atom_delete": 229,
+              "atom_restate": 20,
+              "bond_reroute": 50,
+              "bond_reorder": 45,
+              "bond_insert": 1
+            },
+            "seconds": 248.29,
+            "example_completions": [
+              "Nc1nc(-c2cnn(C3CNC3=O)c2)c2cc[nH]c2n1",
+              "CC1NCC1n1cc(-c2ncnc3[nH]ccc23)cn1",
+              "C=CCc1cc2c(-c3cnn(C4(C)CNC4)c3)nc(C=N)nc2[nH]1",
+              "CC(C)(C=O)COc1cc2c(-c3cn(C4(C)C(=O)NC4=O)nc3F)nc(N)nc2n1O",
+              "Cc1nc(-c2cnn(C3CN(C(F)OC=N)C3)c2)c2cc(C)n(C)c2n1"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

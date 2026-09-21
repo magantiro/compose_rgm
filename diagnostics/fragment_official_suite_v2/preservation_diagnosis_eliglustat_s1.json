@@ -1,0 +1,37 @@
+{
+  "schema": "compose_fragment_preservation_diagnosis_v1",
+  "task": "superstructure_generation",
+  "drug": "ELIGLUSTAT",
+  "seed": 1,
+  "rng_seed": 4024116812,
+  "prompt_core": "c1cc2c(cc1CCCN1CCCC1)OCCO2",
+  "attempts": 100,
+  "committed_endpoints": 100,
+  "non_preserving": 1,
+  "region_lock_locked_slots": 18,
+  "constraint_failures": 1,
+  "offenders": [
+    {
+      "smiles": "CCC(C)NC(=O)c1[nH]nc(C(=O)N2CCCC2)c1-c1ccc2c(c1)OCCO2",
+      "heavy_atoms": 29,
+      "matches_aromatic_query": false,
+      "matches_kekulized_query": true,
+      "aromatic_rings": 2
+    }
+  ],
+  "mechanism": {
+    "verdict": "region lock held at the GRAPH level; RDKit aromaticity PERCEPTION changed",
+    "localized_event": {
+      "trajectory": 51,
+      "event_index": 7,
+      "rule": "bond_insert",
+      "action": "BondInsert(a=6, b=21, order=2)",
+      "before": "O=CCNN=C(Cc1ccc2c(c1)OCCO2)C(=O)N1CCCC1",
+      "after": "O=Cc1[nH]nc(C(=O)N2CCCC2)c1-c1ccc2c(c1)OCCO2",
+      "real_atoms": "24 -> 24",
+      "locked_slot_atom_types_unchanged": true
+    },
+    "explanation": "The rewrite is a cycle_close that builds a new five-membered ring through core atoms, and RDKit then perceives that ring as aromatic. Executable states are Kekule, so the bond ORDERS among locked slots are unchanged and RegionLock.permits correctly returns True. Aromaticity is not a stored bond class here, it is perception over the WHOLE molecule, so core atoms flip from aliphatic to aromatic. An aliphatic query atom does not match an aromatic target atom, so the core stops matching as a substructure although its induced subgraph is byte-identical.",
+    "consequence_for_claims": "Preservation of the core's induced labelled subgraph (elements, formal charges, pairwise bond orders) IS by construction. Preservation as an RDKit SUBSTRUCTURE MATCH is NOT: it is enforced by the endpoint check, and a miss is emitted as the failure placeholder, so it LOWERS reported validity rather than being hidden."
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "schema": "compose_fragment_official_suite_v1",
+  "protocol": {
+    "source": "in_virtuo_gen/evaluation/downstream.py @ b50bb3ae",
+    "samples_per_prompt": 100,
+    "seeds": 3,
+    "task_row": "unweighted mean over the task's drugs",
+    "scaffold_morphing": "upstream copies the linker result"
+  },
+  "kernel": {
+    "rdkit": "2026.03.6",
+    "numpy": "2.5.3",
+    "torch": "2.14.0",
+    "python": "3.12.9",
+    "platform": "macOS-26.5.2-arm64-arm-64bit"
+  },
+  "checkpoint": {
+    "path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "completed_steps": 16000,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "atom_vocabulary": "ORGANIC"
+  },
+  "sampler": {
+    "config": {
+      "mark_attempts_per_event": 24,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "config_sha256": "805b2d10fa863c278dfd760fb3b9f5fd29eb94f91ef1653b1bf5ebe44aaab9ae"
+  },
+  "metric_provenance": {
+    "validity_uniqueness_quality_diversity": "official in_virtuo_gen.train_utils.metrics.evaluate_smiles @ b50bb3ae, already_smiles=True",
+    "distance": "NOT in the released evaluator: evaluate_smiles returns no distance key. Estimator is the official in_virtuo_gen.utils.mol.calculate_average_tanimoto(prompt=...); reference = the dummy-stripped prompt fragment(s)",
+    "fragment_preservation": "independent audit, atom-level non-overlapping substructure match, run over COMMITTED endpoints as well as emitted samples"
+  },
+  "results": {
+    "superstructure_generation": {
+      "task": "superstructure_generation",
+      "prompts_declared": 1,
+      "prompts_scored": 1,
+      "samples_per_prompt": 100,
+      "seeds": 3,
+      "per_seed": [
+        {
+          "validity": 99.0,
+          "uniqueness": 98.98989898989899,
+          "quality": 39.0,
+          "diversity": 0.641469387755102,
+          "distance": 0.522191580545389,
+          "distance_to_original_drug": 0.7073346857176093
+        }
+      ],
+      "summary": {
+        "validity": {
+          "mean": 99.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 98.98989898989899,
+          "std": 0.0
+        },
+        "quality": {
+          "mean": 39.0,
+          "std": 0.0
+        },
+        "diversity": {
+          "mean": 0.641469387755102,
+          "std": 0.0
+        },
+        "distance": {
+          "mean": 0.522191580545389,
+          "std": 0.0
+        },
+        "distance_to_original_drug": {
+          "mean": 0.7073346857176093,
+          "std": 0.0
+        }
+      },
+      "build_failures": [],
+      "per_drug": {
+        "FUTIBATINIB": [
+          {
+            "seed": 0,
+            "rng_seed": 1239798670,
+            "official": {
+              "validity": 99.0,
+              "uniqueness": 98.98989898989899,
+              "diversity": 0.641469387755102,
+              "quality": 39.0,
+              "distance": 0.522191580545389,
+              "distance_to_original_drug": 0.7073346857176093
+            },
+            "attempts": 100,
+            "validity_denominator": 100,
+            "emitted_nonempty": 99,
+            "distance_reference_prompt": "C(#Cc1nn([C@H]2CCNC2)c2ncncc12)c1ccccc1",
+            "unique_valid_count": 98,
+            "committed_endpoints": 99,
+            "committed_chemically_valid": 99,
+            "committed_fragment_preserving": 99,
+            "emitted_fragment_preserving": 99,
+            "constraint_failures": 0,
+            "lock_rejections": 990,
+            "budget_exhausted": 1,
+            "executor_refusals": 0,
+            "mean_events": 10.24,
+            "families": {
+              "atom_insert": 697,
+              "atom_delete": 195,
+              "bond_reroute": 79,
+              "atom_restate": 41,
+              "bond_reorder": 10,
+              "bond_insert": 2
+            },
+            "seconds": 171.1,
+            "example_completions": [
+              "CC(C)=NN1CCC(n2nc(C#Cc3ccccc3)c3cncnc32)C1O",
+              "Cc1cccc(C#Cc2nn(C3CCN(CCO)C3=O)c3ncncc23)c1",
+              "CC1(C)NCCC1n1nc(C#Cc2ccccc2)c2cncnc21",
+              "CCCN1CCC(n2nc(C#Cc3ccccc3O)c3c(N)nc(N)nc32)C1",
+              "CC(C)CCN1CCC(n2nc(C#Cc3ccccc3)c3cncnc32)C1"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
