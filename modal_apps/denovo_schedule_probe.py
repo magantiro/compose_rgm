@@ -259,23 +259,43 @@ def select_targets(sample_size: int, seed: int) -> dict:
 
     _assert_pinned("step1000")
     started = time.time()
-    split = load_cnof_corpus_split(
-        TRAIN_SMILES,
-        train_size=TRAIN_SIZE,
-        validation_size=VALIDATION_SIZE,
-        test_size=TEST_SIZE,
-        max_atoms=MAX_ATOMS,
-        seed=CORPUS_SEED,
-        scan_all=True,
-        workers=8,
+    # The split is a pure function of the corpus bytes and the recipe's split
+    # parameters, so it is cached on the volume under a key naming BOTH.  A cache
+    # that keyed on the corpus alone could serve a split built under different
+    # sizes or seed, which is the derived-artifact-cache failure this repo has
+    # already paid for once.
+    cache_key = (
+        f"{TRAIN_SMILES_SHA256}_{TRAIN_SIZE}_{VALIDATION_SIZE}_{TEST_SIZE}"
+        f"_{MAX_ATOMS}_{CORPUS_SEED}"
     )
-    train = tuple(split.train)
+    cache_path = VOL / "schedule_probe" / f"train_split_{cache_key}.json"
+    reused = False
+    if cache_path.exists():
+        train = tuple(json.loads(cache_path.read_text())["train"])
+        reused = True
+    else:
+        split = load_cnof_corpus_split(
+            TRAIN_SMILES,
+            train_size=TRAIN_SIZE,
+            validation_size=VALIDATION_SIZE,
+            test_size=TEST_SIZE,
+            max_atoms=MAX_ATOMS,
+            seed=CORPUS_SEED,
+            scan_all=True,
+            workers=8,
+        )
+        train = tuple(split.train)
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(json.dumps({"cache_key": cache_key, "train": list(train)}))
+        volume.commit()
     rng = np.random.default_rng(seed)
     if sample_size > len(train):
         raise ValueError(f"requested {sample_size} targets from {len(train)}")
     chosen = rng.choice(len(train), size=sample_size, replace=False)
     return {
         "train_size": len(train),
+        "split_cache_reused": reused,
+        "split_cache_key": cache_key,
         "sample_size": sample_size,
         "seed": seed,
         "targets": [train[int(index)] for index in sorted(chosen)],
