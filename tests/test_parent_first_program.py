@@ -16,8 +16,13 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from rdkit import Chem
 
-from compose_v4.chem.molecular_graph import is_element, smiles_to_molecular_graph
+from compose_v4.chem.molecular_graph import (
+    is_element,
+    molecular_graph_to_smiles,
+    smiles_to_molecular_graph,
+)
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.control.bridge_region_law import (
     BridgeRegionLaw,
@@ -26,12 +31,23 @@ from compose_v4.control.bridge_region_law import (
     excise_region,
 )
 from compose_v4.control.parent_first_program import (
+    ABSTAIN_NO_EXCISION_DEMAND,
+    ABSTAIN_NO_INSERTION_CAPACITY,
     ABSTAIN_NO_REGION_IN_BAND,
+    ABSTAIN_NO_STRUCTURAL_DEMAND,
+    ABSTAIN_RING_CLOSURE_REFUSED,
     ABSTENTION_REASONS,
+    BRANCH_REGION_EXCISION,
+    BRANCH_ZERO_EXCISION,
+    BRANCHES,
     PLAN_SCHEMA_VERSION,
+    AttachmentSiteLaw,
     ProgramIntent,
     SizeBandRegionLaw,
+    _construction_schedule,
     _deletion_schedule,
+    attachment_headroom_margin,
+    attachment_sites,
     construct_parent_first_program,
     excision_accounting,
     intent_of_plan,
@@ -40,6 +56,7 @@ from compose_v4.control.parent_first_program import (
 )
 from compose_v4.experiments.whole_ring_plan import execute_program
 from compose_v4.rewrite.kernel import canonical_state_key
+from compose_v4.rewrite.trace_shard import decode_state
 
 # Production PMO parents carry n_atoms == 48 (measured, unanimous over all 226 parents
 # of the completed 3x250 run).  A TIGHT graph has no free slot and therefore no
@@ -317,3 +334,240 @@ def test_a_tight_graph_has_no_insertion_capacity_and_the_constructor_says_so():
     grow = _intent(2, insert=8)
     assert not construct_parent_first_program(tight, grow, np.random.default_rng(1))["realized"]
     assert tight_result["realized"] or padded_result["realized"]
+
+
+# ---- the zero-excision branch ----
+
+
+def _zero_intent(insert: int = 4, close: int = 0, elements=("C", "N", "O")) -> ProgramIntent:
+    return ProgramIntent(
+        excise_atoms=0,
+        insert_atoms=insert,
+        elements=elements,
+        source_plan_id="fixture-zero",
+        primitive_count=insert + close,
+        close_bonds=close,
+    )
+
+
+def test_a_zero_excision_intent_is_constructed_not_abstained():
+    """The gap this branch closes: excise == 0 used to be an abstention."""
+
+    source = _parent()
+    result = construct_parent_first_program(source, _zero_intent(4), np.random.default_rng(9))
+    assert result["reason"] != ABSTAIN_NO_EXCISION_DEMAND
+    assert result["realized"], result
+    assert result["branch"] == BRANCH_ZERO_EXCISION
+    assert result["region_size"] == 0
+
+
+def test_both_branches_are_tagged_so_their_endpoints_stay_separable():
+    source = _parent()
+    zero = construct_parent_first_program(source, _zero_intent(3), np.random.default_rng(4))
+    excise = construct_parent_first_program(source, _intent(3, insert=1), np.random.default_rng(4))
+    assert zero["branch"] == BRANCH_ZERO_EXCISION
+    assert excise["branch"] == BRANCH_REGION_EXCISION
+    assert {BRANCH_ZERO_EXCISION, BRANCH_REGION_EXCISION} <= set(BRANCHES)
+
+
+def test_zero_excision_retains_every_parent_atom_by_construction():
+    """Not a degeneracy -- a fact about the move class, which is why it is tagged."""
+
+    source = _parent()
+    result = construct_parent_first_program(source, _zero_intent(4), np.random.default_rng(9))
+    assert result["realized"]
+    assert result["deleted_parent_slots"] == []
+    assert result["true_retained_fraction"] == 1.0
+    assert result["retained_fraction"] == 1.0
+    assert not result["retention_measures_disagree"]
+
+
+def test_zero_excision_places_every_demanded_atom_and_no_more():
+    source = _parent()
+    for insert in (1, 2, 5, 8):
+        result = construct_parent_first_program(
+            source, _zero_intent(insert), np.random.default_rng(13)
+        )
+        assert result["realized"], insert
+        assert result["delta_heavy_atoms"] == insert, (
+            "a construction that placed a different number of atoms than the intent "
+            "demanded is a different transformation"
+        )
+        assert result["primitive_count"] == insert
+
+
+def test_zero_excision_closes_every_demanded_ring_and_the_endpoint_gains_rings():
+    source = _parent(LEADS[0])
+    result = construct_parent_first_program(
+        source, _zero_intent(6, close=2), np.random.default_rng(21)
+    )
+    assert result["realized"], result
+    assert result["rings_closed"] == 2
+    # Counted independently of the reported field, which must not echo the intent.
+    assert sum(1 for r in result["actions"] if str(r["executor_rule"]) == "cycle_close") == 2
+    assert result["primitive_count"] == 6 + 2
+    before = Chem.MolFromSmiles(molecular_graph_to_smiles(source))
+    after = Chem.MolFromSmiles(molecular_graph_to_smiles(decode_state(result["endpoint_state"])))
+    assert after is not None
+    assert after.GetRingInfo().NumRings() == before.GetRingInfo().NumRings() + 2, (
+        "the demanded closures must produce rings, not merely execute"
+    )
+
+
+def test_a_ring_closure_must_touch_the_construction():
+    """Closing an unrelated ring elsewhere would satisfy the count, not the intent."""
+
+    source = _parent(LEADS[0])
+    result = construct_parent_first_program(
+        source, _zero_intent(6, close=1), np.random.default_rng(21)
+    )
+    assert result["realized"]
+    created = {
+        int(record["payload"]["slot"])
+        for record in result["actions"]
+        if str(record["executor_rule"]) == "atom_insert"
+    }
+    closures = [r for r in result["actions"] if str(r["executor_rule"]) == "cycle_close"]
+    assert closures
+    for record in closures:
+        endpoints = {int(record["payload"]["a"]), int(record["payload"]["b"])}
+        assert endpoints & created, (
+            "a closure that touches no constructed atom realizes a different edit"
+        )
+
+
+def test_zero_excision_abstains_rather_than_building_fewer_atoms():
+    """The no-shrinking invariant, in the construction branch's own terms."""
+
+    source = _parent()
+    heavy = int(is_element(source.atom_types).sum())
+    # Demand more atoms than the 40-heavy ceiling can hold.
+    result = construct_parent_first_program(
+        source, _zero_intent(41 - heavy + 5), np.random.default_rng(2)
+    )
+    assert not result["realized"]
+    assert result["reason"] == ABSTAIN_NO_INSERTION_CAPACITY
+    assert "actions" not in result
+
+
+def test_a_single_inserted_atom_can_still_close_a_three_ring():
+    """Pinned because it refuted my own assumption, which a weaker test encoded.
+
+    I expected one inserted atom to be unable to close anything -- it is bonded only
+    to its anchor, and ``cycle_close`` refuses a pair that is already bonded.  It can:
+    the new atom closes onto a NEIGHBOUR of the anchor, giving a three-ring.  The
+    branch is therefore more capable here than assumed, and the guard that follows
+    uses a genuinely closure-free parent instead.
+    """
+
+    source = _parent()
+    result = construct_parent_first_program(
+        source, _zero_intent(1, close=1), np.random.default_rng(6)
+    )
+    assert result["realized"]
+    assert result["rings_closed"] == 1
+    after = Chem.MolFromSmiles(molecular_graph_to_smiles(decode_state(result["endpoint_state"])))
+    before = Chem.MolFromSmiles(molecular_graph_to_smiles(source))
+    assert after.GetRingInfo().NumRings() == before.GetRingInfo().NumRings() + 1
+
+
+def test_zero_excision_abstains_when_no_ring_closure_is_admitted():
+    """A two-atom state has no non-bonded pair, so no closure exists at all."""
+
+    source = _parent("C")
+    result = construct_parent_first_program(
+        source, _zero_intent(1, close=1), np.random.default_rng(6)
+    )
+    assert not result["realized"]
+    assert result["reason"] == ABSTAIN_RING_CLOSURE_REFUSED
+    assert "actions" not in result
+
+
+def test_an_intent_demanding_nothing_structural_abstains_with_its_own_reason():
+    source = _parent()
+    result = construct_parent_first_program(
+        source, _zero_intent(0), np.random.default_rng(1)
+    )
+    assert not result["realized"]
+    assert result["reason"] == ABSTAIN_NO_STRUCTURAL_DEMAND
+
+
+# ---- the attachment-site law ----
+
+
+def test_every_attachment_site_carries_free_valence_and_ring_atoms_are_included():
+    source = _parent(LEADS[1])
+    sites = attachment_sites(source)
+    assert sites
+    for site in sites:
+        assert site.free_valence >= 1
+        assert int(source.implicit_h_counts[site.slot]) == site.free_valence
+    assert any(site.in_ring for site in sites), (
+        "excluding ring atoms would bar the commonest decoration there is"
+    )
+    # Deterministic enumeration; the draw is where randomness enters.
+    assert attachment_sites(source) == sites
+
+
+def test_the_attachment_law_preserves_support_and_reduces_to_a_permutation():
+    source = _parent()
+    sites = attachment_sites(source)
+    uniform = AttachmentSiteLaw()
+    assert sorted(s.slot for s in uniform.order(source, np.random.default_rng(0))) == sorted(
+        s.slot for s in sites
+    )
+    conditioned = AttachmentSiteLaw(
+        margin=attachment_headroom_margin(insert_atoms=2, close_bonds=1)
+    )
+    weights = conditioned.weights(source, sites)
+    assert len(weights) == len(sites)
+    assert float(weights.min()) > 0.0, "the law must never delete a site from the support"
+    # Same support, different order: conditioning re-ranks, it does not filter.
+    assert sorted(s.slot for s in conditioned.order(source, np.random.default_rng(0))) == sorted(
+        s.slot for s in sites
+    )
+
+
+def test_the_attachment_law_refuses_an_impossible_valence_floor():
+    with pytest.raises(ValueError):
+        AttachmentSiteLaw(minimum_free_valence=0)
+    with pytest.raises(ValueError):
+        AttachmentSiteLaw(temperature=0.0)
+
+
+def test_a_partial_ring_closure_schedule_is_refused_not_accepted():
+    """Driving the schedule directly: it must raise, never return short.
+
+    The guard that reads ``rings_closed`` cannot catch this on its own -- that field
+    used to be copied from the intent, and a mutation accepting a partial schedule
+    survived the whole file until it was counted from the actions instead.
+    """
+
+    from compose_v4.control.parent_first_program import _ring_closure_schedule
+
+    source = _parent("C")
+    _grow, grown, created = _construction_schedule(
+        source, 0, np.random.default_rng(0), length=1, elements=("C",)
+    )
+    with pytest.raises((RegionRealizationError, ValueError)):
+        _ring_closure_schedule(grown, created, np.random.default_rng(0), count=1)
+
+
+def test_the_attachment_law_keeps_negative_margin_sites_in_the_support():
+    """The support floor, exercised where it actually binds.
+
+    A margin is negative exactly when the build cannot fit.  Weighting must still
+    return a strictly positive number there, because the law RE-RANKS and never
+    filters -- a filter would delete sites the executor might still accept.  Without
+    a negative-margin case the floor is untested, and a filtering mutation survived.
+    """
+
+    source = _parent()
+    sites = attachment_sites(source)
+    heavy = int(is_element(source.atom_types).sum())
+    impossible = attachment_headroom_margin(insert_atoms=200 - heavy, close_bonds=0)
+    assert impossible(source, sites[0]) < 0.0, "fixture must produce a negative margin"
+    law = AttachmentSiteLaw(margin=impossible)
+    weights = law.weights(source, sites)
+    assert float(weights.min()) >= law.floor > 0.0
+    assert len(law.order(source, np.random.default_rng(0))) == len(sites)

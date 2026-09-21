@@ -56,6 +56,7 @@ or ``decode_state`` of a real production state.  ``assert_production_state_seman
 
 from __future__ import annotations
 
+import math
 from collections import Counter
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, replace
@@ -71,9 +72,12 @@ from compose_v4.chem.molecular_graph import (
     is_element,
 )
 from compose_v4.control.bridge_region_law import (
+    MARGIN_TEMPERATURE,
+    SUPPORT_FLOOR,
     BridgeRegion,
     BridgeRegionLaw,
     RegionRealizationError,
+    _adjacency,
     bridge_separated_regions,
 )
 from compose_v4.control.dependency_region_program import (
@@ -85,10 +89,21 @@ from compose_v4.control.pmo_action_roles import action_role_supervision
 from compose_v4.experiments.whole_ring_plan import execute_program, fresh_slot
 from compose_v4.rewrite.action_codec_v4 import encode_action
 from compose_v4.rewrite.kernel import canonical_state_key
-from compose_v4.rewrite.operators import AtomDelete, AtomInsert, CycleOpenEdge
+from compose_v4.rewrite.operators import (
+    AtomDelete,
+    AtomInsert,
+    CycleOpenEdge,
+    enumerate_cycle_close_edges,
+)
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 SCHEMA = "pmo_parent_first_program_v1"
+
+# The two structural moves the constructor can make.  Tagged on every result so the
+# endpoint populations they produce stay separable in any downstream reduction.
+BRANCH_REGION_EXCISION = "region_excision"
+BRANCH_ZERO_EXCISION = "zero_excision_construction"
+BRANCHES = (BRANCH_REGION_EXCISION, BRANCH_ZERO_EXCISION)
 
 # The plan schema v1 latents carry, reproduced so a constructed program is comparable
 # to a mined one by identity rather than by resemblance.
@@ -107,6 +122,10 @@ DEFAULT_CONSTRUCTION_ELEMENTS = ("C", "N", "O")
 
 ABSTAIN_NO_REGION_IN_BAND = "no_legal_region_in_demanded_size_band"
 ABSTAIN_NO_EXCISION_DEMAND = "intent_demands_no_excision"
+ABSTAIN_NO_STRUCTURAL_DEMAND = "intent_demands_neither_excision_nor_construction"
+ABSTAIN_NO_ATTACHMENT_SITE = "parent_carries_no_attachment_site"
+ABSTAIN_NO_SITE_ADMITS_THE_BUILD = "no_attachment_site_admits_the_demanded_build"
+ABSTAIN_RING_CLOSURE_REFUSED = "demanded_ring_closures_are_not_all_admitted"
 ABSTAIN_NO_DELETION_SCHEDULE = "no_region_in_band_admits_a_deletion_schedule"
 ABSTAIN_NO_INSERTION_CAPACITY = "contracted_state_has_no_insertion_capacity"
 ABSTAIN_NO_ANCHOR = "contracted_state_has_no_hydrogen_bearing_anchor"
@@ -117,6 +136,10 @@ ABSTAIN_ENDPOINT_UNSUPPORTED = "endpoint_representation_unsupported"
 ABSTENTION_REASONS = (
     ABSTAIN_NO_REGION_IN_BAND,
     ABSTAIN_NO_EXCISION_DEMAND,
+    ABSTAIN_NO_STRUCTURAL_DEMAND,
+    ABSTAIN_NO_ATTACHMENT_SITE,
+    ABSTAIN_NO_SITE_ADMITS_THE_BUILD,
+    ABSTAIN_RING_CLOSURE_REFUSED,
     ABSTAIN_NO_DELETION_SCHEDULE,
     ABSTAIN_NO_INSERTION_CAPACITY,
     ABSTAIN_NO_ANCHOR,
@@ -144,10 +167,19 @@ class ProgramIntent:
     elements: tuple[str, ...]
     source_plan_id: str
     primitive_count: int
+    close_bonds: int = 0
 
     @property
     def demands_excision(self) -> bool:
         return self.excise_atoms > 0
+
+    @property
+    def demands_construction(self) -> bool:
+        return self.insert_atoms > 0
+
+    @property
+    def demands_ring_closure(self) -> bool:
+        return self.close_bonds > 0
 
 
 def intent_of_plan(plan: dict[str, Any]) -> ProgramIntent:
@@ -161,9 +193,12 @@ def intent_of_plan(plan: dict[str, Any]) -> ProgramIntent:
     """
 
     excise = 0
+    closures = 0
     elements: list[str] = []
     for role in plan["roles"]:
         rule = str(role["executor_rule"])
+        if rule == "cycle_close":
+            closures += 1
         if rule == "atom_delete":
             descriptor = role["operands"][0]["descriptor"]
             if descriptor.get("origin") == "preexisting":
@@ -183,6 +218,7 @@ def intent_of_plan(plan: dict[str, Any]) -> ProgramIntent:
         elements=vocabulary,
         source_plan_id=str(plan["plan_id"]),
         primitive_count=int(plan["primitive_count"]),
+        close_bonds=closures,
     )
 
 
@@ -248,6 +284,167 @@ def construction_headroom_margin(
     return margin
 
 
+# ---- attachment-site selection (the zero-excision analogue of the region draw) ----
+
+
+@dataclass(frozen=True)
+class AttachmentSite:
+    """One hydrogen-bearing slot of a state, with the context the law weights on.
+
+    The zero-excision counterpart of :class:`BridgeRegion`.  A region names atoms to
+    REMOVE; a site names the single atom a construction will be built FROM, which is
+    why the two cannot share one dataclass even though they share the draw mechanism.
+    """
+
+    slot: int
+    free_valence: int
+    degree: int
+    in_ring: bool
+
+
+def attachment_sites(
+    graph: MolecularGraph, *, minimum_free_valence: int = 1
+) -> tuple[AttachmentSite, ...]:
+    """Every slot a construction may attach to, in a deterministic order.
+
+    A site must carry at least one implicit hydrogen, because that is exactly what
+    ``AtomInsert`` consumes when it bonds a new atom to an existing one.  Ring atoms
+    are INCLUDED: attaching a substituent to a ring is ordinary chemistry, and
+    excluding them would silently bar the commonest decoration there is.
+
+    Ordered by slot so two runs enumerate identically; the draw, not the enumeration,
+    is where randomness enters -- the same contract ``bridge_separated_regions`` keeps.
+    """
+
+    adjacency = _adjacency(graph)
+    cycle_members = _cycle_atoms(graph, adjacency)
+    sites = []
+    for slot in sorted(adjacency):
+        free = int(graph.implicit_h_counts[slot])
+        if free < minimum_free_valence:
+            continue
+        sites.append(
+            AttachmentSite(
+                slot=slot,
+                free_valence=free,
+                degree=len(adjacency[slot]),
+                in_ring=slot in cycle_members,
+            )
+        )
+    return tuple(sites)
+
+
+def _cycle_atoms(graph: MolecularGraph, adjacency: dict[int, set[int]]) -> set[int]:
+    """Atoms lying on at least one cycle of the real-atom graph.
+
+    Computed from the adjacency directly rather than through RDKit: this is a graph
+    question, it runs inside the draw, and routing it through a SMILES round-trip
+    would make the law's cost depend on the chemistry kernel.
+    """
+
+    import networkx as nx
+
+    nx_graph = nx.Graph()
+    nx_graph.add_nodes_from(adjacency)
+    for node, neighbors in adjacency.items():
+        for other in neighbors:
+            if node < other:
+                nx_graph.add_edge(node, other)
+    bridges = set(map(frozenset, nx.bridges(nx_graph))) if nx_graph.number_of_edges() else set()
+    on_cycle: set[int] = set()
+    for node, neighbors in adjacency.items():
+        for other in neighbors:
+            if frozenset((node, other)) not in bridges:
+                on_cycle.add(node)
+                on_cycle.add(other)
+    return on_cycle
+
+
+def attachment_headroom_margin(
+    *, insert_atoms: int, close_bonds: int
+) -> Callable[[MolecularGraph, AttachmentSite], float]:
+    """The site-level analogue of ``construction_headroom_margin``.
+
+    The region law weights the CHILD, because ``excise_region`` gives that child in
+    closed form for a few microseconds.  A construction has no closed form -- its child
+    requires the whole build -- so the zero-excision law weights the SITE instead.
+    Saying that plainly matters: these are analogous mechanisms, not the same one, and
+    a site margin is a weaker signal than a child margin.
+
+    Prefers sites that leave slack after the attachment, and sites with spare valence
+    when the intent must later close rings, since a closure consumes free valence at
+    both of its endpoints.
+    """
+
+    def margin(graph: MolecularGraph, site: AttachmentSite) -> float:
+        heavy = int(is_element(graph.atom_types).sum())
+        free_slots = int(graph.n_atoms) - heavy
+        room = min(REPRESENTABLE_HEAVY_ATOMS - heavy, free_slots) - int(insert_atoms)
+        if room < 0:
+            return -1.0
+        # A closure needs free valence at both ends; one end is the growing chain, so
+        # a site with spare valence is worth more when closures are demanded.
+        valence_slack = site.free_valence - (1 if close_bonds else 0)
+        return (
+            float(room) / float(REPRESENTABLE_HEAVY_ATOMS)
+            + 0.25 * float(min(valence_slack, 2))
+        )
+
+    return margin
+
+
+@dataclass(frozen=True)
+class AttachmentSiteLaw:
+    """A probability law over a state's attachment sites.
+
+    Deliberately mirrors :class:`BridgeRegionLaw`: strictly positive weights with the
+    same support ``floor``, the same Boltzmann ``temperature``, and the same
+    Efraimidis-Spirakis draw order, so the head of ``order`` is one draw from the law
+    and the tail is the law conditioned on that draw having been refused by the
+    executor.  Uniform weights reduce to a plain permutation.
+    """
+
+    margin: Callable[[MolecularGraph, AttachmentSite], float] | None = None
+    floor: float = SUPPORT_FLOOR
+    temperature: float = MARGIN_TEMPERATURE
+    minimum_free_valence: int = 1
+
+    def __post_init__(self) -> None:
+        if not 0.0 < self.floor <= 1.0:
+            raise ValueError("support floor must lie in (0, 1]")
+        if self.temperature <= 0.0:
+            raise ValueError("margin temperature must be positive")
+        if self.minimum_free_valence < 1:
+            raise ValueError("an attachment site needs at least one free valence")
+
+    @property
+    def conditioned(self) -> bool:
+        return self.margin is not None
+
+    def sites(self, graph: MolecularGraph) -> tuple[AttachmentSite, ...]:
+        return attachment_sites(graph, minimum_free_valence=self.minimum_free_valence)
+
+    def weights(
+        self, graph: MolecularGraph, sites: Sequence[AttachmentSite]
+    ) -> np.ndarray:
+        if self.margin is None:
+            return np.ones(len(sites), dtype=float)
+        out = np.empty(len(sites), dtype=float)
+        for position, site in enumerate(sites):
+            out[position] = max(
+                self.floor, math.exp(float(self.margin(graph, site)) / self.temperature)
+            )
+        return out
+
+    def order(self, graph: MolecularGraph, rng) -> list[AttachmentSite]:
+        sites = self.sites(graph)
+        if not sites:
+            return []
+        weights = self.weights(graph, sites)
+        keys = -np.log(np.clip(rng.random(len(sites)), 1e-300, 1.0)) / weights
+        return [sites[int(at)] for at in np.argsort(keys, kind="stable")]
+
+
 # ---- exact excision + construction on the drawn region ----
 
 
@@ -304,11 +501,17 @@ def _construction_schedule(
     *,
     length: int,
     elements: Sequence[str],
-) -> tuple[list, MolecularGraph]:
-    """Executor-verified chain construction of ``length`` atoms from ``anchor``."""
+) -> tuple[list, MolecularGraph, list[int]]:
+    """Executor-verified chain construction of ``length`` atoms from ``anchor``.
+
+    Returns the created slots alongside the actions, because a ring closure has to
+    name them and re-deriving them from the endpoint would not distinguish a slot this
+    construction filled from one the parent already occupied.
+    """
 
     current = contracted
     actions: list = []
+    created: list[int] = []
     at = int(anchor)
     for _ in range(length):
         symbol = elements[int(rng.integers(len(elements)))]
@@ -321,7 +524,57 @@ def _construction_schedule(
         record = encode_action("atom_insert", action)
         current, _ = execute_program(current, [record])
         actions.append(record)
+        created.append(int(action.slot))
         at = action.slot
+    return actions, current, created
+
+
+def _ring_closure_schedule(
+    current: MolecularGraph,
+    created: Sequence[int],
+    rng,
+    *,
+    count: int,
+) -> tuple[list, MolecularGraph]:
+    """Close exactly ``count`` rings involving the atoms just constructed.
+
+    Candidates come from ``enumerate_cycle_close_edges`` -- the PRODUCTION closure
+    fiber -- rather than from a hand-rolled pair search, so a closure this function
+    proposes is one the executor already admits and the ring chemistry is the
+    kernel's, not this module's.
+
+    Restricted to closures touching a newly created atom: closing an unrelated ring
+    elsewhere in the parent would satisfy the count while realizing a different
+    transformation, which is the shrink-until-it-binds failure wearing a ring.
+
+    Raises rather than returning a partial schedule.  A construction that closed one
+    of two demanded rings is not a smaller version of the request; it is a different
+    request.
+    """
+
+    fresh = {int(slot) for slot in created}
+    actions: list = []
+    for _ in range(int(count)):
+        candidates = [
+            edge
+            for edge in enumerate_cycle_close_edges(current)
+            if int(edge.a) in fresh or int(edge.b) in fresh
+        ]
+        if not candidates:
+            raise RegionRealizationError("no admitted closure touches the construction")
+        closed = False
+        for raw in rng.permutation(len(candidates)):
+            record = encode_action("cycle_close", candidates[int(raw)])
+            try:
+                following, _ = execute_program(current, [record])
+            except ValueError:
+                continue
+            current = following
+            actions.append(record)
+            closed = True
+            break
+        if not closed:
+            raise RegionRealizationError("every admitted closure was refused on replay")
     return actions, current
 
 
@@ -454,6 +707,151 @@ def plan_of_execution(
 # ---- the constructor ----
 
 
+def construct_zero_excision_program(
+    source: MolecularGraph,
+    intent: ProgramIntent,
+    rng,
+    *,
+    law: AttachmentSiteLaw | None = None,
+) -> dict[str, Any]:
+    """A construction at a drawn attachment site, with no excision.
+
+    The zero-excision half of the parent-first mechanism.  Where the region branch
+    draws a fragment to REMOVE, this draws a site to BUILD FROM, then performs the
+    construction and any ring closures the intent demands.  The parent is otherwise
+    untouched, so every parent atom is retained BY CONSTRUCTION -- which is a fact
+    about the move class, not a degeneracy, and is exactly why the two branches are
+    tagged and reported apart.
+
+    The no-shrinking invariant is preserved in its own terms: the build must place
+    EVERY demanded atom and close EVERY demanded ring, or the site is refused and the
+    next one tried.  A construction that placed twelve of thirteen atoms, or closed
+    one of two rings, is a different transformation and is never reported as this one.
+    """
+
+    if not intent.demands_construction:
+        return {
+            "realized": False,
+            "branch": BRANCH_ZERO_EXCISION,
+            "reason": ABSTAIN_NO_STRUCTURAL_DEMAND,
+        }
+    if law is None:
+        law = AttachmentSiteLaw(
+            margin=attachment_headroom_margin(
+                insert_atoms=intent.insert_atoms, close_bonds=intent.close_bonds
+            )
+        )
+    ordered = law.order(source, rng)
+    if not ordered:
+        return {
+            "realized": False,
+            "branch": BRANCH_ZERO_EXCISION,
+            "reason": ABSTAIN_NO_ATTACHMENT_SITE,
+        }
+
+    heavy = int(is_element(source.atom_types).sum())
+    free_slots = int(source.n_atoms) - heavy
+    room = min(REPRESENTABLE_HEAVY_ATOMS - heavy, free_slots)
+    if intent.insert_atoms > room:
+        return {
+            "realized": False,
+            "branch": BRANCH_ZERO_EXCISION,
+            "reason": ABSTAIN_NO_INSERTION_CAPACITY,
+            "demanded_atoms": intent.insert_atoms,
+            "available_room": room,
+        }
+
+    failures: Counter = Counter()
+    for site in ordered:
+        try:
+            grow_actions, grown, created = _construction_schedule(
+                source,
+                site.slot,
+                rng,
+                length=intent.insert_atoms,
+                elements=intent.elements,
+            )
+        except (RegionRealizationError, ValueError) as error:
+            failures[str(error)] += 1
+            continue
+        actions = list(grow_actions)
+        endpoint = grown
+        if intent.demands_ring_closure:
+            try:
+                close_actions, endpoint = _ring_closure_schedule(
+                    grown, created, rng, count=intent.close_bonds
+                )
+            except (RegionRealizationError, ValueError):
+                failures[ABSTAIN_RING_CLOSURE_REFUSED] += 1
+                continue
+            if len(close_actions) != intent.close_bonds:
+                # Defence in depth: the schedule raises rather than returning short,
+                # but a caller must never silently accept a partial realization.
+                failures[ABSTAIN_RING_CLOSURE_REFUSED] += 1
+                continue
+            actions.extend(close_actions)
+        if canonical_state_key(endpoint) == canonical_state_key(source):
+            failures[ABSTAIN_ENDPOINT_EQUALS_SOURCE] += 1
+            continue
+        plan = plan_of_execution(source, actions)
+        if not (plan["exact_replay"] and plan["complete_representation_supported"]):
+            failures[ABSTAIN_ENDPOINT_UNSUPPORTED] += 1
+            continue
+        accounting = excision_accounting(source, endpoint, actions)
+        return {
+            "realized": True,
+            "branch": BRANCH_ZERO_EXCISION,
+            "reason": None,
+            "plan": plan,
+            "plan_id": plan["plan_id"],
+            "actions": actions,
+            "states": list(execute_program(source, actions)[1]["states"]),
+            "endpoint_state": encode_state(endpoint),
+            "endpoint_key": canonical_state_key(endpoint),
+            "primitive_count": len(actions),
+            "region_size": 0,
+            "region_anchor": int(site.slot),
+            "attachment_site": {
+                "slot": int(site.slot),
+                "free_valence": int(site.free_valence),
+                "degree": int(site.degree),
+                "in_ring": bool(site.in_ring),
+            },
+            # Counted from the ACTIONS, never copied from the intent: a field echoing
+            # the demand cannot witness that the demand was met, and a mutation
+            # accepting a partial closure schedule survived until this was fixed.
+            "rings_closed": sum(
+                1 for record in actions if str(record["executor_rule"]) == "cycle_close"
+            ),
+            "demanded_band": [0, 0],
+            "intent": {
+                "excise_atoms": intent.excise_atoms,
+                "insert_atoms": intent.insert_atoms,
+                "close_bonds": intent.close_bonds,
+                "elements": list(intent.elements),
+                "source_plan_id": intent.source_plan_id,
+                "primitive_count": intent.primitive_count,
+            },
+            "delta_heavy_atoms": int(endpoint.n_real_atoms) - int(source.n_real_atoms),
+            "retained_fraction": accounting.controller_retained_fraction,
+            "true_retained_fraction": accounting.true_retained_fraction,
+            "deleted_parent_slots": list(accounting.deleted_parent_slots),
+            "refilled_slots": list(accounting.refilled_slots),
+            "retention_measures_disagree": accounting.measures_disagree,
+            "sites_tried": int(sum(failures.values())) + 1,
+        }
+    reason = failures.most_common(1)[0][0] if failures else ABSTAIN_NO_SITE_ADMITS_THE_BUILD
+    if reason not in ABSTENTION_REASONS:
+        reason = ABSTAIN_NO_SITE_ADMITS_THE_BUILD
+    return {
+        "realized": False,
+        "branch": BRANCH_ZERO_EXCISION,
+        "reason": reason,
+        "sites_tried": len(ordered),
+        "failures": dict(failures.most_common()),
+    }
+
+
 def construct_parent_first_program(
     source: MolecularGraph,
     intent: ProgramIntent,
@@ -461,21 +859,31 @@ def construct_parent_first_program(
     *,
     law: BridgeRegionLaw | None = None,
     size_tolerance: int = 0,
+    attachment_law: AttachmentSiteLaw | None = None,
 ) -> dict[str, Any]:
     """One parent-first structural program, or an attributed abstention.
 
-    The intent's excision demand fixes a size BAND; the law draws a region inside it;
-    the executor performs the excision and the construction.  The program is NEVER
-    reduced to fit: if no region in the band admits a deletion schedule, or the
-    contracted state cannot carry the construction, the result is an abstention with
-    a reason, not a smaller transformation.
+    DISPATCHES on what the intent demands, so the two structural moves are one
+    interface over the same state and executor rather than two controllers:
+
+    * excision demanded -- the intent's size fixes a BAND, the region law draws inside
+      it, and the executor performs the excision and the construction;
+    * no excision -- :func:`construct_zero_excision_program` draws an ATTACHMENT SITE
+      and builds there, which is how additions and ring attachment are first-class
+      moves instead of abstentions.
+
+    The program is NEVER reduced to fit, on either branch: if no region in the band
+    admits a deletion schedule, or no site admits the demanded build, the result is an
+    attributed abstention rather than a smaller transformation.
 
     ``size_tolerance`` widens the band symmetrically; it is a declared parameter of the
     arm, reported alongside the result, never adjusted per parent.
     """
 
     if not intent.demands_excision:
-        return {"realized": False, "reason": ABSTAIN_NO_EXCISION_DEMAND}
+        return construct_zero_excision_program(
+            source, intent, rng, law=attachment_law
+        )
     low = max(1, intent.excise_atoms - int(size_tolerance))
     high = intent.excise_atoms + int(size_tolerance)
     if law is None:
@@ -502,6 +910,7 @@ def construct_parent_first_program(
     if not ordered:
         return {
             "realized": False,
+            "branch": BRANCH_REGION_EXCISION,
             "reason": ABSTAIN_NO_REGION_IN_BAND,
             "demanded_band": [low, high],
         }
@@ -523,7 +932,7 @@ def construct_parent_first_program(
             failures[ABSTAIN_NO_ANCHOR] += 1
             continue
         try:
-            grow_actions, endpoint = _construction_schedule(
+            grow_actions, endpoint, _created = _construction_schedule(
                 contracted, anchor, rng, length=intent.insert_atoms, elements=intent.elements
             )
         except (RegionRealizationError, ValueError) as error:
@@ -540,6 +949,7 @@ def construct_parent_first_program(
         accounting = excision_accounting(source, endpoint, actions)
         return {
             "realized": True,
+            "branch": BRANCH_REGION_EXCISION,
             "reason": None,
             "plan": plan,
             "plan_id": plan["plan_id"],
@@ -554,6 +964,7 @@ def construct_parent_first_program(
             "intent": {
                 "excise_atoms": intent.excise_atoms,
                 "insert_atoms": intent.insert_atoms,
+                "close_bonds": intent.close_bonds,
                 "elements": list(intent.elements),
                 "source_plan_id": intent.source_plan_id,
                 "primitive_count": intent.primitive_count,
@@ -576,6 +987,7 @@ def construct_parent_first_program(
         reason = ABSTAIN_NO_DELETION_SCHEDULE
     return {
         "realized": False,
+        "branch": BRANCH_REGION_EXCISION,
         "reason": reason,
         "demanded_band": [low, high],
         "regions_tried": len(ordered),
