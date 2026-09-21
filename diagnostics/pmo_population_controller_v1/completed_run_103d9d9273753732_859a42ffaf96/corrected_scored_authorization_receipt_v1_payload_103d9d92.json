@@ -1,9 +1,6 @@
 {
   "authorization_basis": "User explicitly authorized the corrected payload after the terminal pre-oracle worker image failure.",
-  "authorization_record": "diagnostics/pmo_v2_scored_authorization_v1.json",
-  "authorized_at_utc": "2026-09-21T04:01:08.924072+00:00",
-  "charged_calls_per_task": 250,
-  "charged_calls_total": 750,
+  "authorized_at_utc": "2026-09-20T23:07:52.491829+00:00",
   "corrected_worker": {
     "app": "compose-pmo-population-v1-corrected",
     "path": "modal_apps/pmo_population_v1_app.py",
@@ -11,26 +8,14 @@
     "torch_index": "https://download.pytorch.org/whl/cpu"
   },
   "modal_source_upload_authorized": true,
-  "modal_source_upload_note": "Implied by the owner's explicit launch authorization: the run executes on Modal, so launching it necessarily uploads the pinned source. Recorded explicitly rather than inherited silently from the v1 receipt.",
   "new_explicit_authorization_required": false,
   "oracle_calls_authorized": 750,
-  "payload_sha256": "38afd1c4f5bbe5f863423a2a51051b979cf8cf7986017720bbb0872463bf8220",
+  "payload_sha256": "103d9d9273753732fb7fc03207834c88e317c4d1d9bab11b3f3b2f265fc50075",
   "reason_for_new_payload": "The previous 3x250 payload 2e3f9195... ran to completion, but its gsk3b task is VOID: the worker restored the working directory after CONSTRUCTING the TDC oracle, while PyTDC loads oracle/gsk3b_current.pkl lazily on the first CALL by relative path, so all 250 charged calls returned the swallowed default_property 0.0 (diagnostics/pmo_gsk3b_oracle_diagnosis_v1.json, diagnostics/pmo_run_status_ledger.json).  This payload binds a worker that resolves asset-backed oracles for the oracle's full lifetime via AssetPinnedOracle, and that refuses to charge a single call until a pinned positive control CALLS the oracle and reproduces the frozen reference panel.  perindopril_mpo (0.486) and celecoxib_rediscovery (0.196) from the previous payload are unaffected and remain valid; only gsk3b is re-run.",
-  "runtime_version": "PMO-v2 (jump-lane exact realizer)",
   "schema_version": "pmo_population_scored_authorization_receipt_v2",
   "scored_launch_authorized": true,
   "status": "AUTHORIZED",
-  "supersedes": {
-    "archived_to": "diagnostics/pmo_population_controller_v1/completed_run_103d9d9273753732_859a42ffaf96/corrected_scored_authorization_receipt_v1_payload_103d9d92.json",
-    "note": "The v1 authorization covered contract 103d9d92, a DIFFERENT runtime (beam binder). It is archived, not edited -- re-pointing an authorization pin would manufacture consent.",
-    "payload_sha256": "103d9d9273753732fb7fc03207834c88e317c4d1d9bab11b3f3b2f265fc50075"
-  },
   "supersedes_payload_sha256": "103d9d9273753732fb7fc03207834c88e317c4d1d9bab11b3f3b2f265fc50075",
-  "tasks": [
-    "gsk3b",
-    "perindopril_mpo",
-    "celecoxib_rediscovery"
-  ],
   "terminal_failed_modal_calls": {
     "celecoxib_rediscovery": "fc-01M2YM84NCGHWCYQ6M597VV7FE",
     "gsk3b": "fc-01M2YM84HG9EJT81D6AVB6A9D0",
