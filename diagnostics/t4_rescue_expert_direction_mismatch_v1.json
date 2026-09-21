@@ -1,0 +1,86 @@
+{
+ "schema_version": "t4_rescue_expert_direction_mismatch_v1",
+ "generated": "2026-09-20T20:09:50",
+ "oracle_calls": 0,
+ "docking_calls": 0,
+ "finding": "EVERY clean eligible witness for ALL FIVE exhausted cells is a net EXCISION of 7 to 15 heavy atoms. Not one is a growth. The proposed rescue expert generic_feasibility_headroom_v4 is growth-only.",
+ "witness_direction_by_cell": {
+  "braf_0": {
+   "clean_witnesses": 12,
+   "heavy_delta_min": -15,
+   "heavy_delta_max": -13,
+   "all_witnesses_are_excisions": true,
+   "witness_net_charges": [
+    0
+   ]
+  },
+  "braf_1": {
+   "clean_witnesses": 12,
+   "heavy_delta_min": -15,
+   "heavy_delta_max": -12,
+   "all_witnesses_are_excisions": true,
+   "witness_net_charges": [
+    0
+   ]
+  },
+  "fa7_0": {
+   "clean_witnesses": 5,
+   "heavy_delta_min": -9,
+   "heavy_delta_max": -8,
+   "all_witnesses_are_excisions": true,
+   "witness_net_charges": [
+    0
+   ]
+  },
+  "fa7_2": {
+   "clean_witnesses": 12,
+   "heavy_delta_min": -13,
+   "heavy_delta_max": -9,
+   "all_witnesses_are_excisions": true,
+   "witness_net_charges": [
+    0
+   ]
+  },
+  "5ht1b_2": {
+   "clean_witnesses": 4,
+   "heavy_delta_min": -8,
+   "heavy_delta_max": -7,
+   "all_witnesses_are_excisions": true,
+   "witness_net_charges": [
+    0
+   ],
+   "source_net_charge": 1
+  }
+ },
+ "v4_expert_direction": {
+  "macro_modes": [
+   "direct_ring_growth",
+   "grow_then_close",
+   "grow_then_ring",
+   "replace_then_ring",
+   "double_ring_growth",
+   "grow_then_double_ring"
+  ],
+  "all_modes_are_growth": true,
+  "observed_delta_heavy_atom_range_on_braf_0": [
+   -7,
+   0
+  ],
+  "observed_source": "diagnostics/t4_nodistill_feasibility_headroom_gate_v4/attempt_1/result.json, cells[braf_0_d06].preteacher_support",
+  "plans_allocated_on_rescue_sources": {
+   "braf_0_d06": 0,
+   "braf_1_d06": 8,
+   "fa7_0_d06": 24,
+   "fa7_2_d06": 16,
+   "5ht1b_2_d06": 12,
+   "fa7_2_d04": 16
+  }
+ },
+ "correction_to_a_relayed_claim": {
+  "claim": "5ht1b_2 needs a net formal-charge change and is not reachable by any budget",
+  "verdict": "TOO STRONG, and the mechanism is different",
+  "measured": "all four clean witnesses carry net charge 0 against a +1 source, so the net-charge change is REAL -- but it is achieved by EXCISING the [NH+]-bearing piperazine (-7 to -8 heavy atoms), not by any operation that changes an atom's formal charge. The cell is reachable; it is reachable by PRUNING, which is the same direction the other four need."
+ },
+ "consequence": "the direction mismatch is 5 of 5, not 3 of 5. braf_0 is not a special case to exclude -- it is where a growth-only vocabulary reads as zero plans instead of thin allocation. Building the gate module and contract around this expert would produce a campaign that reproduces exhaustion.",
+ "not_measured": "candidate YIELD of the v4 expert on the five sources. Plan allocation is measured; the proposal step was contaminated by a 12-core machine at load 196 and is deliberately not quoted."
+}
