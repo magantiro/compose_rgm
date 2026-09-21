@@ -2530,3 +2530,35 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   have implied a tuning lever that does nothing.
 - **`sequential` is byte-identical after the refactor**, fingerprinted over 113 real molecules
   against the branch base: 0 differing traces, same 13 pre-existing compile failures.
+- **ACCEPTANCE: the schedule repair FAILS the <0.15 gate on the mean and passes on the median, and
+  it does NOT beat the scheduler that already ships.** Matched three-arm run, pinned kernel,
+  molecules drawn uniformly at random from the recipe's own train partition, 160 molecules / 373
+  ring decision points, zero oracle calls:
+      arm                     mean              median   legal templates
+      sequential              0.3102 +- 0.0089  0.2849   343
+      exact_early_ring        0.1958 +- 0.0067  0.1383   738
+      ring_dependency_block   0.2005 +- 0.0068  0.1403   710
+  Paired per ring event: repair minus sequential **-0.1097 +- 0.0091** (290 improved / 65 worsened),
+  repair minus shipped scheduler **+0.0047 +- 0.0021 with 325 of 373 events UNCHANGED**. Endpoint
+  exactness holds **160 of 160 in every arm**, by array identity AND canonical key.
+- **So the deliverable is PLUMBING, not an algorithm.** The support gain worth having is already
+  available from `exact_early_ring`, which shipped 2026-07-20 and was never wired into the training
+  recipe. The dependency block reproduces it at 1.087x compile cost instead of 14,897 verified
+  adjacent swaps per 800 traces, and places rings INSIDE the graft phase, but it adds no support
+  quality on top. Do not present it as a further gain.
+- **The residual is a ring-system ORDINAL effect and no schedule can fix it.** Block arm by ordinal
+  within a molecule: **0.1403 / 0.1977 / 0.3026 / 0.2982 / 0.5320** on n = 156 / 125 / 67 / 23 / 2.
+  The FIRST ring system passes the gate; each commitment constricts the legal support the next is
+  decided against, which is unavoidable in a sequential trace carrying more than one ring system
+  (mean 2.5 systems per molecule). Closing it needs a support-level change or a scoped claim.
+- **The pooled size histogram and the per-event mean disagree, and the gate is the per-event mean.**
+  Pooled 3+4-ring share moves only 17.44% -> 13.80% while the per-event mean moves 0.310 -> 0.201,
+  because pooling weights each event by its support SIZE and the per-event mean does not -- and the
+  events that matter are exactly the ones whose support has collapsed to a handful of templates.
+  Report both and say which one the gate is stated over.
+- **Modal `.map()` ordered output can deliver ZERO rows from a run that did most of its work.** An
+  n=2000 fan-out processed 536 molecules across 62 containers and handed the driver nothing, because
+  shard 0 had stalled on one expensive molecule and ordered output queues every finished shard
+  behind it. Pass `order_outputs=False` whenever results are reduced as a set. Separately: killing
+  the LOCAL driver does not stop the app -- it held 99 containers afterwards and starved the next
+  launch until `modal app stop`.
