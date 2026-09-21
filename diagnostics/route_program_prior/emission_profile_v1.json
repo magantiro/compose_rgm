@@ -1,0 +1,98 @@
+{
+ "compiled_per_family": {
+  "append_ring": 128,
+  "bond_reroute": 114,
+  "carbonyl_insert": 128,
+  "cycle_close": 128,
+  "cycle_open": 128,
+  "functionalize": 125,
+  "fuse_ring": 120,
+  "heteroatom_substitute": 128,
+  "ring_system_restate": 104,
+  "segment_grow": 126,
+  "segment_replace": 128,
+  "segment_shrink": 122,
+  "substituent_delete": 128
+ },
+ "costs": {
+  "docking_calls": 0,
+  "modal_launches": 0,
+  "oracle_calls": 0
+ },
+ "emission_profile": {
+  "append_ring": {
+   "atom_insert": 707,
+   "cycle_close": 128
+  },
+  "bond_reroute": {
+   "bond_reroute": 114
+  },
+  "carbonyl_insert": {
+   "atom_insert": 128
+  },
+  "cycle_close": {
+   "cycle_close": 128
+  },
+  "cycle_open": {
+   "cycle_open": 128
+  },
+  "functionalize": {
+   "atom_insert": 125
+  },
+  "fuse_ring": {
+   "atom_insert": 420,
+   "cycle_close": 120
+  },
+  "heteroatom_substitute": {
+   "atom_restate_semantic": 128
+  },
+  "ring_system_restate": {
+   "ring_system_restate": 104
+  },
+  "segment_grow": {
+   "atom_insert": 533
+  },
+  "segment_replace": {
+   "atom_delete": 376,
+   "atom_insert": 578,
+   "cycle_open": 31
+  },
+  "segment_shrink": {
+   "atom_delete": 384
+  },
+  "substituent_delete": {
+   "atom_delete": 376,
+   "cycle_open": 31
+  }
+ },
+ "implementation": {
+  "code_revision": "cb509f895316d997a9a16e9514c91c15f6182ea8",
+  "compiles_attempted": 1664,
+  "numpy": "1.26.4",
+  "python": "3.11.13",
+  "rdkit": "2024.03.5",
+  "wall_seconds": 271.5
+ },
+ "proposal_slots": 48,
+ "refusals": {
+  "bond_reroute:InvalidRewrite": 10,
+  "bond_reroute:ValueError": 4,
+  "functionalize:InvalidRewrite": 3,
+  "fuse_ring:ValueError": 8,
+  "ring_system_restate:InvalidRewrite": 16,
+  "ring_system_restate:ValueError": 8,
+  "segment_grow:InvalidRewrite": 2,
+  "segment_shrink:ValueError": 6
+ },
+ "schema_version": "route_prior_emission_profile_v1",
+ "substrate": {
+  "carries_teacher_labels": false,
+  "path": "data/jin/hphi_train_1024.txt",
+  "replicates_per_family": 4,
+  "seed": 20260921,
+  "selection": "sha256-lexicographic prefix; deterministic, no RNG",
+  "sha256": "236269717633b96c97ec0fddf4a0120f6028881ddd663f7c697042c74b45825a",
+  "sources_used": 32
+ },
+ "unpaddable_sources": 0
+}

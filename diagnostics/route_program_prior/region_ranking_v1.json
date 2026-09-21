@@ -1,0 +1,393 @@
+{
+ "control": "analytic uniform over the same region support; no sampling error on either side",
+ "costs": {
+  "docking_calls": 0,
+  "modal_launches": 0,
+  "oracle_calls": 0
+ },
+ "headline": {
+  "exact_poisson_binomial_p_values": {
+   "recall_at_1": 0.3920107647924167,
+   "recall_at_10": 0.5164775439655322,
+   "recall_at_3": 0.4831778005357991,
+   "recall_at_5": 0.054254907872594155
+  },
+  "learned": {
+   "mean_reciprocal_rank": 0.47068376068376067,
+   "recall_at_1": 0.26666666666666666,
+   "recall_at_10": 0.9333333333333333,
+   "recall_at_3": 0.5333333333333333,
+   "recall_at_5": 0.8666666666666667
+  },
+  "learned_hits": {
+   "recall_at_1": 4,
+   "recall_at_10": 14,
+   "recall_at_3": 8,
+   "recall_at_5": 13
+  },
+  "median_support_regions": 16.0,
+  "median_teacher_targets": 3.0,
+  "sources_scored": 15,
+  "sources_skipped": 0,
+  "uniform": {
+   "mean_reciprocal_rank": 0.41011484069710574,
+   "recall_at_1": 0.21122242036715722,
+   "recall_at_10": 0.8970731237614376,
+   "recall_at_3": 0.49646780532817403,
+   "recall_at_5": 0.6648758855748453
+  },
+  "uniform_expected_hits": {
+   "recall_at_1": 3.168336305507358,
+   "recall_at_10": 13.456096856421564,
+   "recall_at_3": 7.4470170799226105,
+   "recall_at_5": 9.97313828362268
+  }
+ },
+ "implementation": {
+  "code_revision": "1c8e1fc83e03052ab1c91fd6676a070300c873fd",
+  "numpy": "1.26.4",
+  "python": "3.11.13",
+  "rdkit": "2024.03.5",
+  "wall_seconds": 9.07
+ },
+ "inputs": {
+  "fit": {
+   "path": "diagnostics/route_program_prior/fit_v1.json",
+   "sha256": "7f15f9c1abdd73220038fa9938327e4303f74c5acb800c57bcc1cb10074c9afc"
+  }
+ },
+ "per_source": [
+  {
+   "best_teacher_rank_learned": 6,
+   "fold": "fold_1",
+   "heavy_atoms": 35,
+   "learned": {
+    "recall_at_1": 0.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.0,
+    "recall_at_5": 0.0
+   },
+   "learned_reciprocal_rank": 0.16666666666666666,
+   "source_id": "1e0fa0c80c789ded50ec2b390f2efae90723747771ef2c9e719d4a35c0962f77",
+   "support_regions": 38,
+   "teacher_target_regions": 6,
+   "uniform": {
+    "recall_at_1": 0.1578947368421053,
+    "recall_at_10": 0.8635336715832072,
+    "recall_at_3": 0.4120436225699383,
+    "recall_at_5": 0.5988062365771344
+   },
+   "uniform_reciprocal_rank": 0.3535579418112759
+  },
+  {
+   "best_teacher_rank_learned": 3,
+   "fold": "fold_1",
+   "heavy_atoms": 27,
+   "learned": {
+    "recall_at_1": 0.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 1.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 0.3333333333333333,
+   "source_id": "2a57c85017e878e8005e0bf4bf7ed02dc37126e244f845a4ab4829602265a223",
+   "support_regions": 8,
+   "teacher_target_regions": 3,
+   "uniform": {
+    "recall_at_1": 0.375,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.8214285714285714,
+    "recall_at_5": 0.9821428571428571
+   },
+   "uniform_reciprocal_rank": 0.6089285714285714
+  },
+  {
+   "best_teacher_rank_learned": 2,
+   "fold": "fold_0",
+   "heavy_atoms": 29,
+   "learned": {
+    "recall_at_1": 0.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 1.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 0.5,
+   "source_id": "33e9f949da62e787304e6646c1650c6c34a30c0dd4a5bc8cb01fc12605de86a8",
+   "support_regions": 38,
+   "teacher_target_regions": 3,
+   "uniform": {
+    "recall_at_1": 0.07894736842105265,
+    "recall_at_10": 0.6116642958748222,
+    "recall_at_3": 0.224158368895211,
+    "recall_at_5": 0.3532479848269322
+   },
+   "uniform_reciprocal_rank": 0.22732516777461245
+  },
+  {
+   "best_teacher_rank_learned": 1,
+   "fold": "fold_2",
+   "heavy_atoms": 17,
+   "learned": {
+    "recall_at_1": 1.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 1.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 1.0,
+   "source_id": "37010cb2c62a218034cd075c7068dab15ccb7d927a9463d6076af376513a22eb",
+   "support_regions": 8,
+   "teacher_target_regions": 4,
+   "uniform": {
+    "recall_at_1": 0.5,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.9285714285714286,
+    "recall_at_5": 1.0
+   },
+   "uniform_reciprocal_rank": 0.7076190476190476
+  },
+  {
+   "best_teacher_rank_learned": 1,
+   "fold": "fold_1",
+   "heavy_atoms": 37,
+   "learned": {
+    "recall_at_1": 1.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 1.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 1.0,
+   "source_id": "419a816724ce235e8d55d73a067b5b564d6ed99a2d1648fb6b85e730f2c48a1f",
+   "support_regions": 32,
+   "teacher_target_regions": 5,
+   "uniform": {
+    "recall_at_1": 0.15625,
+    "recall_at_10": 0.8692296996662958,
+    "recall_at_3": 0.4102822580645161,
+    "recall_at_5": 0.5991081360241538
+   },
+   "uniform_reciprocal_rank": 0.35270747537556907
+  },
+  {
+   "best_teacher_rank_learned": 1,
+   "fold": "fold_2",
+   "heavy_atoms": 39,
+   "learned": {
+    "recall_at_1": 1.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 1.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 1.0,
+   "source_id": "5bae1397a2e096c2e7b83f59d30b2bd0d8a2bf94b2243b851f907068c16060a5",
+   "support_regions": 36,
+   "teacher_target_regions": 5,
+   "uniform": {
+    "recall_at_1": 0.13888888888888884,
+    "recall_at_10": 0.8255135387488328,
+    "recall_at_3": 0.3704481792717087,
+    "recall_at_5": 0.549298128342246
+   },
+   "uniform_reciprocal_rank": 0.32675404116582907
+  },
+  {
+   "best_teacher_rank_learned": 2,
+   "fold": "fold_1",
+   "heavy_atoms": 22,
+   "learned": {
+    "recall_at_1": 0.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 1.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 0.5,
+   "source_id": "61cc289f734dbc290fe5c2f6304b11706fb5cfc14d0830178ae94f45cfd2ac8f",
+   "support_regions": 10,
+   "teacher_target_regions": 3,
+   "uniform": {
+    "recall_at_1": 0.30000000000000004,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.7083333333333333,
+    "recall_at_5": 0.9166666666666666
+   },
+   "uniform_reciprocal_rank": 0.5358630952380953
+  },
+  {
+   "best_teacher_rank_learned": 13,
+   "fold": "fold_0",
+   "heavy_atoms": 32,
+   "learned": {
+    "recall_at_1": 0.0,
+    "recall_at_10": 0.0,
+    "recall_at_3": 0.0,
+    "recall_at_5": 0.0
+   },
+   "learned_reciprocal_rank": 0.07692307692307693,
+   "source_id": "6753c8c03b1a10d4f6fe52e24b6c7a0ad81ff9bd991efa132f36e5a611c74d7f",
+   "support_regions": 26,
+   "teacher_target_regions": 5,
+   "uniform": {
+    "recall_at_1": 0.1923076923076923,
+    "recall_at_10": 0.933596837944664,
+    "recall_at_3": 0.4884615384615385,
+    "recall_at_5": 0.6906506536941319
+   },
+   "uniform_reciprocal_rank": 0.40251963247311634
+  },
+  {
+   "best_teacher_rank_learned": 3,
+   "fold": "fold_1",
+   "heavy_atoms": 19,
+   "learned": {
+    "recall_at_1": 0.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 1.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 0.3333333333333333,
+   "source_id": "8a720e86b0661a40d8afb9ad522c83e84754973e21cfe1569294e1304d725ae3",
+   "support_regions": 10,
+   "teacher_target_regions": 1,
+   "uniform": {
+    "recall_at_1": 0.09999999999999998,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.30000000000000004,
+    "recall_at_5": 0.5
+   },
+   "uniform_reciprocal_rank": 0.29289682539682543
+  },
+  {
+   "best_teacher_rank_learned": 5,
+   "fold": "fold_0",
+   "heavy_atoms": 39,
+   "learned": {
+    "recall_at_1": 0.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 0.2,
+   "source_id": "8f0e2acbda6d280a5f5a0fa81b25ce254a132eb38de3abbbcdd7a2bc9c205d6c",
+   "support_regions": 16,
+   "teacher_target_regions": 3,
+   "uniform": {
+    "recall_at_1": 0.1875,
+    "recall_at_10": 0.9642857142857143,
+    "recall_at_3": 0.4892857142857143,
+    "recall_at_5": 0.7053571428571428
+   },
+   "uniform_reciprocal_rank": 0.4030133556919271
+  },
+  {
+   "best_teacher_rank_learned": 4,
+   "fold": "fold_2",
+   "heavy_atoms": 31,
+   "learned": {
+    "recall_at_1": 0.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 0.25,
+   "source_id": "b50d18da9c86db0e6c04722ea34ea3734b6087e0dc3c063cf2df8ce232f07254",
+   "support_regions": 16,
+   "teacher_target_regions": 1,
+   "uniform": {
+    "recall_at_1": 0.0625,
+    "recall_at_10": 0.625,
+    "recall_at_3": 0.1875,
+    "recall_at_5": 0.3125
+   },
+   "uniform_reciprocal_rank": 0.2112955620768121
+  },
+  {
+   "best_teacher_rank_learned": 4,
+   "fold": "fold_1",
+   "heavy_atoms": 22,
+   "learned": {
+    "recall_at_1": 0.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 0.25,
+   "source_id": "c0937210e6535fac6a0666cf4ed8ba32e89915d12d46c15fda1b3937d39055b6",
+   "support_regions": 10,
+   "teacher_target_regions": 2,
+   "uniform": {
+    "recall_at_1": 0.19999999999999996,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.5333333333333333,
+    "recall_at_5": 0.7777777777777778
+   },
+   "uniform_reciprocal_rank": 0.4286596119929454
+  },
+  {
+   "best_teacher_rank_learned": 5,
+   "fold": "fold_0",
+   "heavy_atoms": 40,
+   "learned": {
+    "recall_at_1": 0.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 0.2,
+   "source_id": "c155a43b22fdc23a20389bcc4ee8e38f72086d95d8a93b7c8d3a58cf5f8d9a87",
+   "support_regions": 42,
+   "teacher_target_regions": 5,
+   "uniform": {
+    "recall_at_1": 0.11904761904761907,
+    "recall_at_10": 0.7632730983180277,
+    "recall_at_3": 0.323170731707317,
+    "recall_at_5": 0.48758269971363677
+   },
+   "uniform_reciprocal_rank": 0.29518545701513216
+  },
+  {
+   "best_teacher_rank_learned": 4,
+   "fold": "fold_0",
+   "heavy_atoms": 16,
+   "learned": {
+    "recall_at_1": 0.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 0.25,
+   "source_id": "d026a7b66c507154ebd51f849d311cc9914879f5797eee1bc0e90a4e570b488a",
+   "support_regions": 6,
+   "teacher_target_regions": 3,
+   "uniform": {
+    "recall_at_1": 0.5,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.95,
+    "recall_at_5": 1.0
+   },
+   "uniform_reciprocal_rank": 0.7125
+  },
+  {
+   "best_teacher_rank_learned": 1,
+   "fold": "fold_1",
+   "heavy_atoms": 16,
+   "learned": {
+    "recall_at_1": 1.0,
+    "recall_at_10": 1.0,
+    "recall_at_3": 1.0,
+    "recall_at_5": 1.0
+   },
+   "learned_reciprocal_rank": 1.0,
+   "source_id": "f1cdadbf9d0becf82ae7702c8e07aea80661b062ae42d8e59b4a057c6615ce54",
+   "support_regions": 10,
+   "teacher_target_regions": 1,
+   "uniform": {
+    "recall_at_1": 0.09999999999999998,
+    "recall_at_10": 1.0,
+    "recall_at_3": 0.30000000000000004,
+    "recall_at_5": 0.5
+   },
+   "uniform_reciprocal_rank": 0.29289682539682543
+  }
+ ],
+ "regime": "leave-source-out; every source ranked under a prior fitted without any route from that source molecule",
+ "schema_version": "route_prior_region_ranking_v1"
+}

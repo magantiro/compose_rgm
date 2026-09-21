@@ -81,6 +81,27 @@ def uniform_reciprocal_rank(total: int, targets: int) -> float:
     )
 
 
+def poisson_binomial_tail(probabilities, observed: int) -> float:
+    """Exact P(X >= observed) where each trial has its OWN success probability.
+
+    Every source offers a different number of regions and a different number of
+    teacher targets, so its uniform-control recall differs; pooling them into
+    one binomial rate would be wrong. The distribution of the count is a
+    Poisson binomial, whose pmf is computed here by exact convolution -- cheap
+    at fifteen trials and free of any normal approximation, which fifteen
+    bounded trials would not justify.
+    """
+
+    pmf = [1.0]
+    for probability in probabilities:
+        nxt = [0.0] * (len(pmf) + 1)
+        for successes, mass in enumerate(pmf):
+            nxt[successes] += mass * (1.0 - probability)
+            nxt[successes + 1] += mass * probability
+        pmf = nxt
+    return float(sum(pmf[observed:]))
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fit", required=True)
@@ -189,6 +210,25 @@ def main(argv=None) -> int:
             "mean_reciprocal_rank": float(
                 np.mean([r["uniform_reciprocal_rank"] for r in scored])
             ),
+        },
+        "exact_poisson_binomial_p_values": {
+            f"recall_at_{k}": poisson_binomial_tail(
+                [r["uniform"][f"recall_at_{k}"] for r in scored],
+                int(sum(r["learned"][f"recall_at_{k}"] for r in scored)),
+            )
+            for k in RECALL_AT
+        },
+        "learned_hits": {
+            f"recall_at_{k}": int(
+                sum(r["learned"][f"recall_at_{k}"] for r in scored)
+            )
+            for k in RECALL_AT
+        },
+        "uniform_expected_hits": {
+            f"recall_at_{k}": float(
+                sum(r["uniform"][f"recall_at_{k}"] for r in scored)
+            )
+            for k in RECALL_AT
         },
     }
 

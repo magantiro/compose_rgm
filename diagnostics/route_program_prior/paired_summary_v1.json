@@ -1,0 +1,635 @@
+{
+ "note": "arms are matched per parent, per draw seed and per declared module count, so the paired difference is the informative statistic",
+ "paired_contrasts": {
+  "generic": {
+   "declared_prior_families_vs_uniform": {
+    "complete_program_yield": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.029513888888888885,
+      "low": -0.008680555555555566,
+      "resampled": "parents"
+     },
+     "control_mean": 0.9618055555555555,
+     "mean_paired_difference": 0.009548611111111105,
+     "median_paired_difference": 0.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 7,
+      "p_value": 0.629058837890625,
+      "positive": 10,
+      "ties": 7
+     },
+     "treatment_mean": 0.9713541666666666
+    },
+    "distinct_endpoints": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.6666666666666666,
+      "low": -1.875,
+      "resampled": "parents"
+     },
+     "control_mean": 44.291666666666664,
+     "mean_paired_difference": -0.5833333333333334,
+     "median_paired_difference": 0.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 9,
+      "p_value": 1.0,
+      "positive": 10,
+      "ties": 5
+     },
+     "treatment_mean": 43.708333333333336
+    },
+    "legal_execution_rate": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.02690972222222224,
+      "low": -0.004340277777777767,
+      "resampled": "parents"
+     },
+     "control_mean": 0.9765625,
+     "mean_paired_difference": 0.011284722222222238,
+     "median_paired_difference": 0.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 2,
+      "p_value": 0.0654296875,
+      "positive": 9,
+      "ties": 13
+     },
+     "treatment_mean": 0.9878472222222223
+    },
+    "teacher_region_recall": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.0,
+      "low": 0.0,
+      "resampled": "parents"
+     },
+     "control_mean": 0.0,
+     "mean_paired_difference": 0.0,
+     "median_paired_difference": 0.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 0,
+      "p_value": 1.0,
+      "positive": 0,
+      "ties": 24
+     },
+     "treatment_mean": 0.0
+    }
+   },
+   "declared_prior_region_vs_uniform": {
+    "complete_program_yield": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": -0.015625,
+      "low": -0.03645833333333334,
+      "resampled": "parents"
+     },
+     "control_mean": 0.9618055555555555,
+     "mean_paired_difference": -0.026041666666666668,
+     "median_paired_difference": -0.02083333333333337,
+     "parents": 24,
+     "sign_test": {
+      "negative": 15,
+      "p_value": 6.103515625e-05,
+      "positive": 0,
+      "ties": 9
+     },
+     "treatment_mean": 0.9357638888888888
+    },
+    "distinct_endpoints": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": -0.375,
+      "low": -1.5,
+      "resampled": "parents"
+     },
+     "control_mean": 44.291666666666664,
+     "mean_paired_difference": -0.9583333333333334,
+     "median_paired_difference": -1.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 13,
+      "p_value": 0.00738525390625,
+      "positive": 2,
+      "ties": 9
+     },
+     "treatment_mean": 43.333333333333336
+    },
+    "legal_execution_rate": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.0,
+      "low": -0.006944444444444434,
+      "resampled": "parents"
+     },
+     "control_mean": 0.9765625,
+     "mean_paired_difference": -0.002604166666666662,
+     "median_paired_difference": 0.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 2,
+      "p_value": 0.5,
+      "positive": 0,
+      "ties": 22
+     },
+     "treatment_mean": 0.9739583333333334
+    },
+    "teacher_region_recall": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.0,
+      "low": 0.0,
+      "resampled": "parents"
+     },
+     "control_mean": 0.0,
+     "mean_paired_difference": 0.0,
+     "median_paired_difference": 0.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 0,
+      "p_value": 1.0,
+      "positive": 0,
+      "ties": 24
+     },
+     "treatment_mean": 0.0
+    }
+   },
+   "declared_prior_vs_declared_uniform": {
+    "complete_program_yield": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": -0.006076388888888881,
+      "low": -0.057291666666666664,
+      "resampled": "parents"
+     },
+     "control_mean": 0.9618055555555555,
+     "mean_paired_difference": -0.03298611111111111,
+     "median_paired_difference": -0.04166666666666663,
+     "parents": 24,
+     "sign_test": {
+      "negative": 17,
+      "p_value": 0.01690053939819336,
+      "positive": 5,
+      "ties": 2
+     },
+     "treatment_mean": 0.9288194444444443
+    },
+    "distinct_endpoints": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": -0.875,
+      "low": -4.125,
+      "resampled": "parents"
+     },
+     "control_mean": 44.291666666666664,
+     "mean_paired_difference": -2.5,
+     "median_paired_difference": -2.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 18,
+      "p_value": 0.004343509674072266,
+      "positive": 4,
+      "ties": 2
+     },
+     "treatment_mean": 41.791666666666664
+    },
+    "legal_execution_rate": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.02517361111111112,
+      "low": -0.007812499999999986,
+      "resampled": "parents"
+     },
+     "control_mean": 0.9765625,
+     "mean_paired_difference": 0.008680555555555566,
+     "median_paired_difference": 0.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 4,
+      "p_value": 0.3876953125,
+      "positive": 8,
+      "ties": 12
+     },
+     "treatment_mean": 0.9852430555555557
+    },
+    "teacher_region_recall": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.0,
+      "low": 0.0,
+      "resampled": "parents"
+     },
+     "control_mean": 0.0,
+     "mean_paired_difference": 0.0,
+     "median_paired_difference": 0.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 0,
+      "p_value": 1.0,
+      "positive": 0,
+      "ties": 24
+     },
+     "treatment_mean": 0.0
+    }
+   },
+   "production_route_law_vs_v1": {
+    "complete_program_yield": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.0,
+      "low": -0.006076388888888899,
+      "resampled": "parents"
+     },
+     "control_mean": 1.0,
+     "mean_paired_difference": -0.0026041666666666713,
+     "median_paired_difference": 0.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 3,
+      "p_value": 0.25,
+      "positive": 0,
+      "ties": 21
+     },
+     "treatment_mean": 0.9973958333333334
+    },
+    "distinct_endpoints": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.4166666666666667,
+      "low": -0.625,
+      "resampled": "parents"
+     },
+     "control_mean": 46.541666666666664,
+     "mean_paired_difference": -0.041666666666666664,
+     "median_paired_difference": 0.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 4,
+      "p_value": 0.548828125,
+      "positive": 7,
+      "ties": 13
+     },
+     "treatment_mean": 46.5
+    },
+    "legal_execution_rate": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.0,
+      "low": 0.0,
+      "resampled": "parents"
+     },
+     "control_mean": 1.0,
+     "mean_paired_difference": 0.0,
+     "median_paired_difference": 0.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 0,
+      "p_value": 1.0,
+      "positive": 0,
+      "ties": 24
+     },
+     "treatment_mean": 1.0
+    },
+    "teacher_region_recall": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.0,
+      "low": 0.0,
+      "resampled": "parents"
+     },
+     "control_mean": 0.0,
+     "mean_paired_difference": 0.0,
+     "median_paired_difference": 0.0,
+     "parents": 24,
+     "sign_test": {
+      "negative": 0,
+      "p_value": 1.0,
+      "positive": 0,
+      "ties": 24
+     },
+     "treatment_mean": 0.0
+    }
+   }
+  },
+  "t4_heldout": {
+   "declared_prior_families_vs_uniform": {
+    "complete_program_yield": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.015277777777777776,
+      "low": -0.059722222222222204,
+      "resampled": "parents"
+     },
+     "control_mean": 0.8499999999999999,
+     "mean_paired_difference": -0.019444444444444434,
+     "median_paired_difference": 0.0,
+     "parents": 15,
+     "sign_test": {
+      "negative": 5,
+      "p_value": 1.0,
+      "positive": 6,
+      "ties": 4
+     },
+     "treatment_mean": 0.8305555555555555
+    },
+    "distinct_endpoints": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.6,
+      "low": -3.6666666666666665,
+      "resampled": "parents"
+     },
+     "control_mean": 39.06666666666667,
+     "mean_paired_difference": -1.4,
+     "median_paired_difference": -1.0,
+     "parents": 15,
+     "sign_test": {
+      "negative": 8,
+      "p_value": 0.79052734375,
+      "positive": 6,
+      "ties": 1
+     },
+     "treatment_mean": 37.666666666666664
+    },
+    "legal_execution_rate": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.0,
+      "low": -0.0722222222222222,
+      "resampled": "parents"
+     },
+     "control_mean": 0.9319444444444446,
+     "mean_paired_difference": -0.02916666666666667,
+     "median_paired_difference": 0.0,
+     "parents": 15,
+     "sign_test": {
+      "negative": 4,
+      "p_value": 0.375,
+      "positive": 1,
+      "ties": 10
+     },
+     "treatment_mean": 0.9027777777777778
+    },
+    "teacher_region_recall": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.07725482426969339,
+      "low": -0.06770910003667385,
+      "resampled": "parents"
+     },
+     "control_mean": 0.19139703733288035,
+     "mean_paired_difference": 0.0017079065579263262,
+     "median_paired_difference": -0.041666666666666664,
+     "parents": 15,
+     "sign_test": {
+      "negative": 10,
+      "p_value": 0.3017578125,
+      "positive": 5,
+      "ties": 0
+     },
+     "treatment_mean": 0.19310494389080674
+    }
+   },
+   "declared_prior_region_vs_uniform": {
+    "complete_program_yield": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": -0.040277777777777767,
+      "low": -0.0861111111111111,
+      "resampled": "parents"
+     },
+     "control_mean": 0.8499999999999999,
+     "mean_paired_difference": -0.06388888888888887,
+     "median_paired_difference": -0.0625,
+     "parents": 15,
+     "sign_test": {
+      "negative": 12,
+      "p_value": 0.00341796875,
+      "positive": 1,
+      "ties": 2
+     },
+     "treatment_mean": 0.7861111111111111
+    },
+    "distinct_endpoints": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": -1.7333333333333334,
+      "low": -3.933333333333333,
+      "resampled": "parents"
+     },
+     "control_mean": 39.06666666666667,
+     "mean_paired_difference": -2.8,
+     "median_paired_difference": -2.0,
+     "parents": 15,
+     "sign_test": {
+      "negative": 13,
+      "p_value": 0.0018310546875,
+      "positive": 1,
+      "ties": 1
+     },
+     "treatment_mean": 36.266666666666666
+    },
+    "legal_execution_rate": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": -0.006944444444444449,
+      "low": -0.04305555555555556,
+      "resampled": "parents"
+     },
+     "control_mean": 0.9319444444444446,
+     "mean_paired_difference": -0.023611111111111117,
+     "median_paired_difference": 0.0,
+     "parents": 15,
+     "sign_test": {
+      "negative": 6,
+      "p_value": 0.03125,
+      "positive": 0,
+      "ties": 9
+     },
+     "treatment_mean": 0.9083333333333333
+    },
+    "teacher_region_recall": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.03314470819448192,
+      "low": -0.03437191749552992,
+      "resampled": "parents"
+     },
+     "control_mean": 0.19139703733288035,
+     "mean_paired_difference": -0.0023975387061587724,
+     "median_paired_difference": -0.020222446916076844,
+     "parents": 15,
+     "sign_test": {
+      "negative": 8,
+      "p_value": 1.0,
+      "positive": 7,
+      "ties": 0
+     },
+     "treatment_mean": 0.18899949862672163
+    }
+   },
+   "declared_prior_vs_declared_uniform": {
+    "complete_program_yield": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": -0.04166666666666665,
+      "low": -0.16388888888888886,
+      "resampled": "parents"
+     },
+     "control_mean": 0.8499999999999999,
+     "mean_paired_difference": -0.10138888888888888,
+     "median_paired_difference": -0.0625,
+     "parents": 15,
+     "sign_test": {
+      "negative": 8,
+      "p_value": 0.2265625,
+      "positive": 3,
+      "ties": 4
+     },
+     "treatment_mean": 0.7486111111111111
+    },
+    "distinct_endpoints": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": -1.8666666666666667,
+      "low": -8.466666666666667,
+      "resampled": "parents"
+     },
+     "control_mean": 39.06666666666667,
+     "mean_paired_difference": -5.066666666666666,
+     "median_paired_difference": -2.0,
+     "parents": 15,
+     "sign_test": {
+      "negative": 11,
+      "p_value": 0.057373046875,
+      "positive": 3,
+      "ties": 1
+     },
+     "treatment_mean": 34.0
+    },
+    "legal_execution_rate": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": -0.022222222222222233,
+      "low": -0.1263888888888889,
+      "resampled": "parents"
+     },
+     "control_mean": 0.9319444444444446,
+     "mean_paired_difference": -0.06944444444444445,
+     "median_paired_difference": 0.0,
+     "parents": 15,
+     "sign_test": {
+      "negative": 7,
+      "p_value": 0.0703125,
+      "positive": 1,
+      "ties": 7
+     },
+     "treatment_mean": 0.8625
+    },
+    "teacher_region_recall": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.14356187675029491,
+      "low": -0.05550320475617178,
+      "resampled": "parents"
+     },
+     "control_mean": 0.19139703733288035,
+     "mean_paired_difference": 0.03717680273661923,
+     "median_paired_difference": -0.008021390374331527,
+     "parents": 15,
+     "sign_test": {
+      "negative": 8,
+      "p_value": 0.79052734375,
+      "positive": 6,
+      "ties": 1
+     },
+     "treatment_mean": 0.2285738400694996
+    }
+   },
+   "production_route_law_vs_v1": {
+    "complete_program_yield": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.0,
+      "low": -0.0125,
+      "resampled": "parents"
+     },
+     "control_mean": 1.0,
+     "mean_paired_difference": -0.005555555555555558,
+     "median_paired_difference": 0.0,
+     "parents": 15,
+     "sign_test": {
+      "negative": 3,
+      "p_value": 0.25,
+      "positive": 0,
+      "ties": 12
+     },
+     "treatment_mean": 0.9944444444444444
+    },
+    "distinct_endpoints": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.8666666666666667,
+      "low": -0.8,
+      "resampled": "parents"
+     },
+     "control_mean": 45.53333333333333,
+     "mean_paired_difference": 0.0,
+     "median_paired_difference": 0.0,
+     "parents": 15,
+     "sign_test": {
+      "negative": 6,
+      "p_value": 1.0,
+      "positive": 5,
+      "ties": 4
+     },
+     "treatment_mean": 45.53333333333333
+    },
+    "legal_execution_rate": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.0,
+      "low": 0.0,
+      "resampled": "parents"
+     },
+     "control_mean": 1.0,
+     "mean_paired_difference": 0.0,
+     "median_paired_difference": 0.0,
+     "parents": 15,
+     "sign_test": {
+      "negative": 0,
+      "p_value": 1.0,
+      "positive": 0,
+      "ties": 15
+     },
+     "treatment_mean": 1.0
+    },
+    "teacher_region_recall": {
+     "bootstrap_95": {
+      "draws": 20000,
+      "high": 0.029143539932161577,
+      "low": -0.03683703361085414,
+      "resampled": "parents"
+     },
+     "control_mean": 0.2236111111111111,
+     "mean_paired_difference": -0.005342275670675302,
+     "median_paired_difference": -0.02083333333333333,
+     "parents": 15,
+     "sign_test": {
+      "negative": 9,
+      "p_value": 0.4239501953125,
+      "positive": 5,
+      "ties": 1
+     },
+     "treatment_mean": 0.2182688354404358
+    }
+   }
+  }
+ },
+ "schema_version": "route_prior_paired_summary_v1",
+ "source_comparison": "diagnostics/route_program_prior/heldout_comparison_v1.json"
+}

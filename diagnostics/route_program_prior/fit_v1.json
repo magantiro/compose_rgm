@@ -1,0 +1,1223 @@
+{
+ "census": {
+  "distinct_sources": 15,
+  "module_count_histogram": {
+   "1": 86,
+   "2": 70,
+   "3": 4
+  },
+  "primitive_transitions": 3070,
+  "program_shapes": 160,
+  "region_choices": 213,
+  "routes": 160,
+  "statuses": {
+   "search_unresolved": 3,
+   "unreachable_charge_change": 10,
+   "unsupported_representation": 3,
+   "witness_found": 160
+  }
+ },
+ "costs": {
+  "docking_calls": 0,
+  "modal_launches": 0,
+  "oracle_calls": 0
+ },
+ "exclusion_certificate": {
+  "admitted_corpus": "diagnostics/ivg_winner_paths/pairs/*.json.gz",
+  "admitted_evidence": "T4 lead-optimization witness routes (IVG endpoints)",
+  "docking_scores_read": 0,
+  "forbidden_corpora_not_read": [
+   "diagnostics/pmo_route_distillation",
+   "diagnostics/pmo_teacher_route_gap_v1.json",
+   "diagnostics/pmo_winner_program_curriculum",
+   "diagnostics/pmo_public_winner_recovery"
+  ],
+  "note": "A PMO winner route carries oracle information even with its score deleted, because selecting that molecule as a winner is itself an oracle output.",
+  "pmo_oracle_values_read": 0,
+  "pmo_task_identities_read": 0
+ },
+ "folds": {
+  "fold_0": [
+   "33e9f949da62e787304e6646c1650c6c34a30c0dd4a5bc8cb01fc12605de86a8",
+   "6753c8c03b1a10d4f6fe52e24b6c7a0ad81ff9bd991efa132f36e5a611c74d7f",
+   "8f0e2acbda6d280a5f5a0fa81b25ce254a132eb38de3abbbcdd7a2bc9c205d6c",
+   "c155a43b22fdc23a20389bcc4ee8e38f72086d95d8a93b7c8d3a58cf5f8d9a87",
+   "d026a7b66c507154ebd51f849d311cc9914879f5797eee1bc0e90a4e570b488a"
+  ],
+  "fold_1": [
+   "1e0fa0c80c789ded50ec2b390f2efae90723747771ef2c9e719d4a35c0962f77",
+   "2a57c85017e878e8005e0bf4bf7ed02dc37126e244f845a4ab4829602265a223",
+   "419a816724ce235e8d55d73a067b5b564d6ed99a2d1648fb6b85e730f2c48a1f",
+   "61cc289f734dbc290fe5c2f6304b11706fb5cfc14d0830178ae94f45cfd2ac8f",
+   "8a720e86b0661a40d8afb9ad522c83e84754973e21cfe1569294e1304d725ae3",
+   "c0937210e6535fac6a0666cf4ed8ba32e89915d12d46c15fda1b3937d39055b6",
+   "f1cdadbf9d0becf82ae7702c8e07aea80661b062ae42d8e59b4a057c6615ce54"
+  ],
+  "fold_2": [
+   "37010cb2c62a218034cd075c7068dab15ccb7d927a9463d6076af376513a22eb",
+   "5bae1397a2e096c2e7b83f59d30b2bd0d8a2bf94b2243b851f907068c16060a5",
+   "b50d18da9c86db0e6c04722ea34ea3734b6087e0dc3c063cf2df8ce232f07254"
+  ]
+ },
+ "implementation": {
+  "code_revision": "cb509f895316d997a9a16e9514c91c15f6182ea8",
+  "numpy": "1.26.4",
+  "python": "3.11.13",
+  "rdkit": "2024.03.5",
+  "wall_seconds": 18.18
+ },
+ "inputs": {
+  "emission_profile": {
+   "path": "diagnostics/route_program_prior/emission_profile_v1.json",
+   "sha256": "bb9eb30539c1262c1f9984a4c313377b10d3c4cc9020533acbef082d0cd85f92"
+  },
+  "teacher_route_count": 160,
+  "teacher_route_manifest_sha256": "d1d8b4b27c369e239b54d40912b7ff41de7218f392f551ade67e0961c2b54dd3",
+  "teacher_routes": [
+   {
+    "path": "diagnostics/ivg_winner_paths/pairs/007c8dab09cbe22ab9f0cd90aaead80a04022b57f3308aafc370a1dbbd7d2584.json.gz",
+    "sha256": "92b1ca8b2d6534ff2f22b3b4d7155c78d26439f7bd2950469aead39de378ecea"
+   },
+   {
+    "path": "diagnostics/ivg_winner_paths/pairs/00be1944e4cd07b68203b9858a7a28d62678ef6378f830ed7f3bde504921731f.json.gz",
+    "sha256": "a1b900cd9e041d2f3cd8ad34cd00ee9fad45e7773f6f939fe333573278fc880a"
+   },
+   {
+    "path": "diagnostics/ivg_winner_paths/pairs/010879e20a7f71dcad196a864495b71d86560e6d9a10892b2ec4b9b1ca4f1f66.json.gz",
+    "sha256": "d6be8586905a60fe81557aef3b19a76963107817a87d17f79539d3745594774d"
+   },
+   {
+    "path": "diagnostics/ivg_winner_paths/pairs/0357d6c51a44b181fe2adcc0fc5fb5e4bfef8a77ec4ec14bfa26390d1ae94051.json.gz",
+    "sha256": "e128fc9f47b536b0877c57b8e583b2b6ffcb252e3d119ff3044ebff08ef3be87"
+   },
+   {
+    "path": "diagnostics/ivg_winner_paths/pairs/03726e8db2c3c5a37359fe4f0e624940bbebf46e363806006b86979d39788dcb.json.gz",
+    "sha256": "8cea339e32c17a91e2ba00f5b5170a7a85276e8d3f09ebb58ee3b7ed49990aee"
+   }
+  ]
+ },
+ "priors": {
+  "fold_0": {
+   "emission_profile": {
+    "append_ring": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.8467065868263473,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.1532934131736527,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "bond_reroute": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 1.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "carbonyl_insert": {
+     "atom_delete": 0.0,
+     "atom_insert": 1.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "cycle_close": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 1.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "cycle_open": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 1.0,
+     "ring_system_restate": 0.0
+    },
+    "functionalize": {
+     "atom_delete": 0.0,
+     "atom_insert": 1.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "fuse_ring": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.7777777777777778,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.2222222222222222,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "heteroatom_substitute": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 1.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "ring_system_restate": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 1.0
+    },
+    "segment_grow": {
+     "atom_delete": 0.0,
+     "atom_insert": 1.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "segment_replace": {
+     "atom_delete": 0.3817258883248731,
+     "atom_insert": 0.5868020304568528,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.03147208121827411,
+     "ring_system_restate": 0.0
+    },
+    "segment_shrink": {
+     "atom_delete": 1.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "substituent_delete": {
+     "atom_delete": 0.9238329238329238,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.07616707616707617,
+     "ring_system_restate": 0.0
+    }
+   },
+   "floor": 0.05,
+   "module_count": {
+    "*": [
+     0.521551724137931,
+     0.41810344827586204,
+     0.03879310344827586,
+     0.004310344827586207,
+     0.004310344827586207,
+     0.004310344827586207,
+     0.004310344827586207,
+     0.004310344827586207
+    ],
+    "large/open": [
+     0.425,
+     0.425,
+     0.025,
+     0.025,
+     0.025,
+     0.025,
+     0.025,
+     0.025
+    ],
+    "large/tight": [
+     0.4107142857142857,
+     0.4107142857142857,
+     0.08928571428571429,
+     0.017857142857142856,
+     0.017857142857142856,
+     0.017857142857142856,
+     0.017857142857142856,
+     0.017857142857142856
+    ],
+    "medium/open": [
+     0.2647058823529412,
+     0.5588235294117647,
+     0.029411764705882353,
+     0.029411764705882353,
+     0.029411764705882353,
+     0.029411764705882353,
+     0.029411764705882353,
+     0.029411764705882353
+    ],
+    "small/open": [
+     0.5952380952380952,
+     0.3253968253968254,
+     0.03968253968253968,
+     0.007936507936507936,
+     0.007936507936507936,
+     0.007936507936507936,
+     0.007936507936507936,
+     0.007936507936507936
+    ]
+   },
+   "region_coefficients": [
+    -1.2564796551693684,
+    0.49119165234381723,
+    -0.3563387041217092,
+    -0.6704324579587243,
+    -0.4053174003932829,
+    0.6801202238127861,
+    -0.8194857555359201,
+    -0.6801202238127856
+   ],
+   "region_feature_names": [
+    "relative_size",
+    "log_size",
+    "fragment_has_ring",
+    "anchor_in_ring",
+    "cut_bond_is_single",
+    "fragment_has_heteroatom",
+    "fragment_is_single_atom",
+    "fragment_all_carbon"
+   ],
+   "rule_table": {
+    "*": {
+     "atom_delete": 0.37011764705882355,
+     "atom_insert": 0.45529411764705885,
+     "atom_restate_semantic": 0.006352941176470588,
+     "bond_reorder": 0.032705882352941175,
+     "bond_reroute": 0.00023529411764705883,
+     "cycle_close": 0.09670588235294118,
+     "cycle_open": 0.024705882352941175,
+     "ring_system_restate": 0.01388235294117647
+    },
+    "large/open": {
+     "atom_delete": 0.6996124031007752,
+     "atom_insert": 0.23449612403100775,
+     "atom_restate_semantic": 0.001937984496124031,
+     "bond_reorder": 0.025193798449612403,
+     "bond_reroute": 0.001937984496124031,
+     "cycle_close": 0.025193798449612403,
+     "cycle_open": 0.001937984496124031,
+     "ring_system_restate": 0.009689922480620155
+    },
+    "large/tight": {
+     "atom_delete": 0.6213662790697675,
+     "atom_insert": 0.27834302325581395,
+     "atom_restate_semantic": 0.0007267441860465116,
+     "bond_reorder": 0.04142441860465116,
+     "bond_reroute": 0.0007267441860465116,
+     "cycle_close": 0.04869186046511628,
+     "cycle_open": 0.006540697674418605,
+     "ring_system_restate": 0.002180232558139535
+    },
+    "medium/open": {
+     "atom_delete": 0.404,
+     "atom_insert": 0.228,
+     "atom_restate_semantic": 0.004,
+     "bond_reorder": 0.02,
+     "bond_reroute": 0.004,
+     "cycle_close": 0.196,
+     "cycle_open": 0.084,
+     "ring_system_restate": 0.06
+    },
+    "small/open": {
+     "atom_delete": 0.12148217636022514,
+     "atom_insert": 0.6458724202626641,
+     "atom_restate_semantic": 0.012664165103189493,
+     "bond_reorder": 0.03142589118198874,
+     "bond_reroute": 0.00046904315196998124,
+     "cycle_close": 0.13367729831144465,
+     "cycle_open": 0.036116322701688554,
+     "ring_system_restate": 0.018292682926829267
+    }
+   },
+   "schema_version": "route_program_prior_v1",
+   "telemetry": {
+    "primitive_observations": 2121,
+    "program_shapes": 112,
+    "region_choices": 151,
+    "region_logit": {
+     "events": 151,
+     "gradient_norm": 6.998935775911276e-06,
+     "log_likelihood": -396.02598427038276
+    },
+    "training_source_count": 10
+   },
+   "training_identity": "leave_source_out_fold_0",
+   "training_sources": [
+    "1e0fa0c80c789ded50ec2b390f2efae90723747771ef2c9e719d4a35c0962f77",
+    "2a57c85017e878e8005e0bf4bf7ed02dc37126e244f845a4ab4829602265a223",
+    "37010cb2c62a218034cd075c7068dab15ccb7d927a9463d6076af376513a22eb",
+    "419a816724ce235e8d55d73a067b5b564d6ed99a2d1648fb6b85e730f2c48a1f",
+    "5bae1397a2e096c2e7b83f59d30b2bd0d8a2bf94b2243b851f907068c16060a5",
+    "61cc289f734dbc290fe5c2f6304b11706fb5cfc14d0830178ae94f45cfd2ac8f",
+    "8a720e86b0661a40d8afb9ad522c83e84754973e21cfe1569294e1304d725ae3",
+    "b50d18da9c86db0e6c04722ea34ea3734b6087e0dc3c063cf2df8ce232f07254",
+    "c0937210e6535fac6a0666cf4ed8ba32e89915d12d46c15fda1b3937d39055b6",
+    "f1cdadbf9d0becf82ae7702c8e07aea80661b062ae42d8e59b4a057c6615ce54"
+   ]
+  },
+  "fold_1": {
+   "emission_profile": {
+    "append_ring": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.8467065868263473,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.1532934131736527,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "bond_reroute": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 1.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "carbonyl_insert": {
+     "atom_delete": 0.0,
+     "atom_insert": 1.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "cycle_close": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 1.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "cycle_open": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 1.0,
+     "ring_system_restate": 0.0
+    },
+    "functionalize": {
+     "atom_delete": 0.0,
+     "atom_insert": 1.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "fuse_ring": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.7777777777777778,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.2222222222222222,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "heteroatom_substitute": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 1.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "ring_system_restate": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 1.0
+    },
+    "segment_grow": {
+     "atom_delete": 0.0,
+     "atom_insert": 1.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "segment_replace": {
+     "atom_delete": 0.3817258883248731,
+     "atom_insert": 0.5868020304568528,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.03147208121827411,
+     "ring_system_restate": 0.0
+    },
+    "segment_shrink": {
+     "atom_delete": 1.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "substituent_delete": {
+     "atom_delete": 0.9238329238329238,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.07616707616707617,
+     "ring_system_restate": 0.0
+    }
+   },
+   "floor": 0.05,
+   "module_count": {
+    "*": [
+     0.4807692307692308,
+     0.4551282051282051,
+     0.03205128205128205,
+     0.00641025641025641,
+     0.00641025641025641,
+     0.00641025641025641,
+     0.00641025641025641,
+     0.00641025641025641
+    ],
+    "large/tight": [
+     0.47297297297297297,
+     0.44594594594594594,
+     0.013513513513513514,
+     0.013513513513513514,
+     0.013513513513513514,
+     0.013513513513513514,
+     0.013513513513513514,
+     0.013513513513513514
+    ],
+    "medium/open": [
+     0.3541666666666667,
+     0.5208333333333334,
+     0.020833333333333332,
+     0.020833333333333332,
+     0.020833333333333332,
+     0.020833333333333332,
+     0.020833333333333332,
+     0.020833333333333332
+    ],
+    "small/open": [
+     0.5,
+     0.3,
+     0.1,
+     0.02,
+     0.02,
+     0.02,
+     0.02,
+     0.02
+    ]
+   },
+   "region_coefficients": [
+    -1.7766328944921872,
+    0.7207269215311446,
+    -0.23303842714024,
+    0.22012091774700304,
+    -0.6439868599818586,
+    -0.41142879300590607,
+    -0.8136674813073637,
+    0.4114287930059065
+   ],
+   "region_feature_names": [
+    "relative_size",
+    "log_size",
+    "fragment_has_ring",
+    "anchor_in_ring",
+    "cut_bond_is_single",
+    "fragment_has_heteroatom",
+    "fragment_is_single_atom",
+    "fragment_all_carbon"
+   ],
+   "rule_table": {
+    "*": {
+     "atom_delete": 0.44639438417358007,
+     "atom_insert": 0.3813018506700702,
+     "atom_restate_semantic": 0.006700701978302489,
+     "bond_reorder": 0.06285896617740906,
+     "bond_reroute": 0.0003190810465858328,
+     "cycle_close": 0.07562220804084237,
+     "cycle_open": 0.021378430121250798,
+     "ring_system_restate": 0.005424377791959157
+    },
+    "large/tight": {
+     "atom_delete": 0.6137532133676092,
+     "atom_insert": 0.2217223650385604,
+     "atom_restate_semantic": 0.0006426735218508997,
+     "bond_reorder": 0.09575835475578406,
+     "bond_reroute": 0.0006426735218508997,
+     "cycle_close": 0.05077120822622108,
+     "cycle_open": 0.013496143958868894,
+     "ring_system_restate": 0.003213367609254499
+    },
+    "medium/open": {
+     "atom_delete": 0.5025839793281653,
+     "atom_insert": 0.38113695090439276,
+     "atom_restate_semantic": 0.00904392764857881,
+     "bond_reorder": 0.02454780361757106,
+     "bond_reroute": 0.0012919896640826874,
+     "cycle_close": 0.06847545219638243,
+     "cycle_open": 0.011627906976744186,
+     "ring_system_restate": 0.0012919896640826874
+    },
+    "small/open": {
+     "atom_delete": 0.06951219512195123,
+     "atom_insert": 0.6792682926829269,
+     "atom_restate_semantic": 0.018292682926829267,
+     "bond_reorder": 0.03780487804878049,
+     "bond_reroute": 0.0012195121951219512,
+     "cycle_close": 0.13048780487804879,
+     "cycle_open": 0.0475609756097561,
+     "ring_system_restate": 0.015853658536585366
+    }
+   },
+   "schema_version": "route_program_prior_v1",
+   "telemetry": {
+    "primitive_observations": 1563,
+    "program_shapes": 74,
+    "region_choices": 95,
+    "region_logit": {
+     "events": 95,
+     "gradient_norm": 3.6485222064371204e-06,
+     "log_likelihood": -272.48782681163607
+    },
+    "training_source_count": 8
+   },
+   "training_identity": "leave_source_out_fold_1",
+   "training_sources": [
+    "33e9f949da62e787304e6646c1650c6c34a30c0dd4a5bc8cb01fc12605de86a8",
+    "37010cb2c62a218034cd075c7068dab15ccb7d927a9463d6076af376513a22eb",
+    "5bae1397a2e096c2e7b83f59d30b2bd0d8a2bf94b2243b851f907068c16060a5",
+    "6753c8c03b1a10d4f6fe52e24b6c7a0ad81ff9bd991efa132f36e5a611c74d7f",
+    "8f0e2acbda6d280a5f5a0fa81b25ce254a132eb38de3abbbcdd7a2bc9c205d6c",
+    "b50d18da9c86db0e6c04722ea34ea3734b6087e0dc3c063cf2df8ce232f07254",
+    "c155a43b22fdc23a20389bcc4ee8e38f72086d95d8a93b7c8d3a58cf5f8d9a87",
+    "d026a7b66c507154ebd51f849d311cc9914879f5797eee1bc0e90a4e570b488a"
+   ]
+  },
+  "fold_2": {
+   "emission_profile": {
+    "append_ring": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.8467065868263473,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.1532934131736527,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "bond_reroute": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 1.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "carbonyl_insert": {
+     "atom_delete": 0.0,
+     "atom_insert": 1.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "cycle_close": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 1.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "cycle_open": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 1.0,
+     "ring_system_restate": 0.0
+    },
+    "functionalize": {
+     "atom_delete": 0.0,
+     "atom_insert": 1.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "fuse_ring": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.7777777777777778,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.2222222222222222,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "heteroatom_substitute": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 1.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "ring_system_restate": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 1.0
+    },
+    "segment_grow": {
+     "atom_delete": 0.0,
+     "atom_insert": 1.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "segment_replace": {
+     "atom_delete": 0.3817258883248731,
+     "atom_insert": 0.5868020304568528,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.03147208121827411,
+     "ring_system_restate": 0.0
+    },
+    "segment_shrink": {
+     "atom_delete": 1.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "substituent_delete": {
+     "atom_delete": 0.9238329238329238,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.07616707616707617,
+     "ring_system_restate": 0.0
+    }
+   },
+   "floor": 0.05,
+   "module_count": {
+    "*": [
+     0.5471014492753623,
+     0.4166666666666667,
+     0.018115942028985508,
+     0.0036231884057971015,
+     0.0036231884057971015,
+     0.0036231884057971015,
+     0.0036231884057971015,
+     0.0036231884057971015
+    ],
+    "large/open": [
+     0.425,
+     0.425,
+     0.025,
+     0.025,
+     0.025,
+     0.025,
+     0.025,
+     0.025
+    ],
+    "large/tight": [
+     0.4142857142857143,
+     0.44285714285714284,
+     0.07142857142857142,
+     0.014285714285714285,
+     0.014285714285714285,
+     0.014285714285714285,
+     0.014285714285714285,
+     0.014285714285714285
+    ],
+    "medium/open": [
+     0.25757575757575757,
+     0.6515151515151515,
+     0.015151515151515152,
+     0.015151515151515152,
+     0.015151515151515152,
+     0.015151515151515152,
+     0.015151515151515152,
+     0.015151515151515152
+    ],
+    "small/open": [
+     0.7338709677419355,
+     0.21774193548387097,
+     0.008064516129032258,
+     0.008064516129032258,
+     0.008064516129032258,
+     0.008064516129032258,
+     0.008064516129032258,
+     0.008064516129032258
+    ]
+   },
+   "region_coefficients": [
+    -1.945420789826844,
+    0.6356122594939313,
+    -0.1747055208660907,
+    -0.14232223359994067,
+    -0.47527647930687583,
+    -0.19969506336999782,
+    -1.3400464572845474,
+    0.19969506336999807
+   ],
+   "region_feature_names": [
+    "relative_size",
+    "log_size",
+    "fragment_has_ring",
+    "anchor_in_ring",
+    "cut_bond_is_single",
+    "fragment_has_heteroatom",
+    "fragment_is_single_atom",
+    "fragment_all_carbon"
+   ],
+   "rule_table": {
+    "*": {
+     "atom_delete": 0.37378048780487805,
+     "atom_insert": 0.43272357723577237,
+     "atom_restate_semantic": 0.003861788617886179,
+     "bond_reorder": 0.05914634146341463,
+     "bond_reroute": 0.0002032520325203252,
+     "cycle_close": 0.09573170731707317,
+     "cycle_open": 0.022560975609756097,
+     "ring_system_restate": 0.011991869918699187
+    },
+    "large/open": {
+     "atom_delete": 0.6996124031007752,
+     "atom_insert": 0.23449612403100775,
+     "atom_restate_semantic": 0.001937984496124031,
+     "bond_reorder": 0.025193798449612403,
+     "bond_reroute": 0.001937984496124031,
+     "cycle_close": 0.025193798449612403,
+     "cycle_open": 0.001937984496124031,
+     "ring_system_restate": 0.009689922480620155
+    },
+    "large/tight": {
+     "atom_delete": 0.577536231884058,
+     "atom_insert": 0.18478260869565216,
+     "atom_restate_semantic": 0.0007246376811594203,
+     "bond_reorder": 0.14855072463768115,
+     "bond_reroute": 0.0007246376811594203,
+     "cycle_close": 0.06159420289855073,
+     "cycle_open": 0.021014492753623187,
+     "ring_system_restate": 0.005072463768115942
+    },
+    "medium/open": {
+     "atom_delete": 0.47478070175438597,
+     "atom_insert": 0.3673245614035088,
+     "atom_restate_semantic": 0.007675438596491228,
+     "bond_reorder": 0.01644736842105263,
+     "bond_reroute": 0.0010964912280701754,
+     "cycle_close": 0.09320175438596491,
+     "cycle_open": 0.023026315789473683,
+     "ring_system_restate": 0.01644736842105263
+    },
+    "small/open": {
+     "atom_delete": 0.11750936329588015,
+     "atom_insert": 0.6652621722846442,
+     "atom_restate_semantic": 0.006086142322097378,
+     "bond_reorder": 0.02855805243445693,
+     "bond_reroute": 0.00046816479400749064,
+     "cycle_close": 0.13623595505617977,
+     "cycle_open": 0.02949438202247191,
+     "ring_system_restate": 0.01638576779026217
+    }
+   },
+   "schema_version": "route_program_prior_v1",
+   "telemetry": {
+    "primitive_observations": 2456,
+    "program_shapes": 134,
+    "region_choices": 180,
+    "region_logit": {
+     "events": 180,
+     "gradient_norm": 6.362958518130097e-06,
+     "log_likelihood": -483.4698685775503
+    },
+    "training_source_count": 12
+   },
+   "training_identity": "leave_source_out_fold_2",
+   "training_sources": [
+    "1e0fa0c80c789ded50ec2b390f2efae90723747771ef2c9e719d4a35c0962f77",
+    "2a57c85017e878e8005e0bf4bf7ed02dc37126e244f845a4ab4829602265a223",
+    "33e9f949da62e787304e6646c1650c6c34a30c0dd4a5bc8cb01fc12605de86a8",
+    "419a816724ce235e8d55d73a067b5b564d6ed99a2d1648fb6b85e730f2c48a1f",
+    "61cc289f734dbc290fe5c2f6304b11706fb5cfc14d0830178ae94f45cfd2ac8f",
+    "6753c8c03b1a10d4f6fe52e24b6c7a0ad81ff9bd991efa132f36e5a611c74d7f",
+    "8a720e86b0661a40d8afb9ad522c83e84754973e21cfe1569294e1304d725ae3",
+    "8f0e2acbda6d280a5f5a0fa81b25ce254a132eb38de3abbbcdd7a2bc9c205d6c",
+    "c0937210e6535fac6a0666cf4ed8ba32e89915d12d46c15fda1b3937d39055b6",
+    "c155a43b22fdc23a20389bcc4ee8e38f72086d95d8a93b7c8d3a58cf5f8d9a87",
+    "d026a7b66c507154ebd51f849d311cc9914879f5797eee1bc0e90a4e570b488a",
+    "f1cdadbf9d0becf82ae7702c8e07aea80661b062ae42d8e59b4a057c6615ce54"
+   ]
+  },
+  "train_on_all": {
+   "emission_profile": {
+    "append_ring": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.8467065868263473,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.1532934131736527,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "bond_reroute": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 1.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "carbonyl_insert": {
+     "atom_delete": 0.0,
+     "atom_insert": 1.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "cycle_close": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 1.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "cycle_open": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 1.0,
+     "ring_system_restate": 0.0
+    },
+    "functionalize": {
+     "atom_delete": 0.0,
+     "atom_insert": 1.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "fuse_ring": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.7777777777777778,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.2222222222222222,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "heteroatom_substitute": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 1.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "ring_system_restate": {
+     "atom_delete": 0.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 1.0
+    },
+    "segment_grow": {
+     "atom_delete": 0.0,
+     "atom_insert": 1.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "segment_replace": {
+     "atom_delete": 0.3817258883248731,
+     "atom_insert": 0.5868020304568528,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.03147208121827411,
+     "ring_system_restate": 0.0
+    },
+    "segment_shrink": {
+     "atom_delete": 1.0,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.0,
+     "ring_system_restate": 0.0
+    },
+    "substituent_delete": {
+     "atom_delete": 0.9238329238329238,
+     "atom_insert": 0.0,
+     "atom_restate_semantic": 0.0,
+     "bond_reorder": 0.0,
+     "bond_reroute": 0.0,
+     "cycle_close": 0.0,
+     "cycle_open": 0.07616707616707617,
+     "ring_system_restate": 0.0
+    }
+   },
+   "floor": 0.05,
+   "module_count": {
+    "*": [
+     0.5274390243902439,
+     0.4298780487804878,
+     0.027439024390243903,
+     0.003048780487804878,
+     0.003048780487804878,
+     0.003048780487804878,
+     0.003048780487804878,
+     0.003048780487804878
+    ],
+    "large/open": [
+     0.425,
+     0.425,
+     0.025,
+     0.025,
+     0.025,
+     0.025,
+     0.025,
+     0.025
+    ],
+    "large/tight": [
+     0.4479166666666667,
+     0.4479166666666667,
+     0.052083333333333336,
+     0.010416666666666666,
+     0.010416666666666666,
+     0.010416666666666666,
+     0.010416666666666666,
+     0.010416666666666666
+    ],
+    "medium/open": [
+     0.3,
+     0.6142857142857143,
+     0.014285714285714285,
+     0.014285714285714285,
+     0.014285714285714285,
+     0.014285714285714285,
+     0.014285714285714285,
+     0.014285714285714285
+    ],
+    "small/open": [
+     0.6506849315068494,
+     0.2808219178082192,
+     0.03424657534246575,
+     0.00684931506849315,
+     0.00684931506849315,
+     0.00684931506849315,
+     0.00684931506849315,
+     0.00684931506849315
+    ]
+   },
+   "region_coefficients": [
+    -2.2118050468557353,
+    0.8117764875531377,
+    -0.2470490931143431,
+    -0.2755206562892868,
+    -0.5415352431672854,
+    -0.15565304540740407,
+    -1.0321637362040965,
+    0.1556530454074045
+   ],
+   "region_feature_names": [
+    "relative_size",
+    "log_size",
+    "fragment_has_ring",
+    "anchor_in_ring",
+    "cut_bond_is_single",
+    "fragment_has_heteroatom",
+    "fragment_is_single_atom",
+    "fragment_all_carbon"
+   ],
+   "rule_table": {
+    "*": {
+     "atom_delete": 0.3911841249186727,
+     "atom_insert": 0.42761873780091086,
+     "atom_restate_semantic": 0.005367599219258295,
+     "bond_reorder": 0.05091086532205595,
+     "bond_reroute": 0.00016265452179570593,
+     "cycle_close": 0.09092387768379961,
+     "cycle_open": 0.022934287573194535,
+     "ring_system_restate": 0.010897852960312296
+    },
+    "large/open": {
+     "atom_delete": 0.6996124031007752,
+     "atom_insert": 0.23449612403100775,
+     "atom_restate_semantic": 0.001937984496124031,
+     "bond_reorder": 0.025193798449612403,
+     "bond_reroute": 0.001937984496124031,
+     "cycle_close": 0.025193798449612403,
+     "cycle_open": 0.001937984496124031,
+     "ring_system_restate": 0.009689922480620155
+    },
+    "large/tight": {
+     "atom_delete": 0.6054832713754646,
+     "atom_insert": 0.22815985130111524,
+     "atom_restate_semantic": 0.00046468401486988845,
+     "bond_reorder": 0.09526022304832714,
+     "bond_reroute": 0.00046468401486988845,
+     "cycle_close": 0.05343866171003717,
+     "cycle_open": 0.013475836431226766,
+     "ring_system_restate": 0.0032527881040892194
+    },
+    "medium/open": {
+     "atom_delete": 0.4782157676348548,
+     "atom_insert": 0.3558091286307054,
+     "atom_restate_semantic": 0.007261410788381743,
+     "bond_reorder": 0.01970954356846473,
+     "bond_reroute": 0.001037344398340249,
+     "cycle_close": 0.09647302904564316,
+     "cycle_open": 0.025933609958506226,
+     "ring_system_restate": 0.015560165975103735
+    },
+    "small/open": {
+     "atom_delete": 0.11141732283464567,
+     "atom_insert": 0.6602362204724409,
+     "atom_restate_semantic": 0.01062992125984252,
+     "bond_reorder": 0.03110236220472441,
+     "bond_reroute": 0.0003937007874015748,
+     "cycle_close": 0.134251968503937,
+     "cycle_open": 0.03503937007874016,
+     "ring_system_restate": 0.016929133858267716
+    }
+   },
+   "schema_version": "route_program_prior_v1",
+   "telemetry": {
+    "primitive_observations": 3070,
+    "program_shapes": 160,
+    "region_choices": 213,
+    "region_logit": {
+     "events": 213,
+     "gradient_norm": 7.904242579553949e-06,
+     "log_likelihood": -579.1162317821456
+    },
+    "training_source_count": 15
+   },
+   "training_identity": "train_on_all",
+   "training_sources": [
+    "1e0fa0c80c789ded50ec2b390f2efae90723747771ef2c9e719d4a35c0962f77",
+    "2a57c85017e878e8005e0bf4bf7ed02dc37126e244f845a4ab4829602265a223",
+    "33e9f949da62e787304e6646c1650c6c34a30c0dd4a5bc8cb01fc12605de86a8",
+    "37010cb2c62a218034cd075c7068dab15ccb7d927a9463d6076af376513a22eb",
+    "419a816724ce235e8d55d73a067b5b564d6ed99a2d1648fb6b85e730f2c48a1f",
+    "5bae1397a2e096c2e7b83f59d30b2bd0d8a2bf94b2243b851f907068c16060a5",
+    "61cc289f734dbc290fe5c2f6304b11706fb5cfc14d0830178ae94f45cfd2ac8f",
+    "6753c8c03b1a10d4f6fe52e24b6c7a0ad81ff9bd991efa132f36e5a611c74d7f",
+    "8a720e86b0661a40d8afb9ad522c83e84754973e21cfe1569294e1304d725ae3",
+    "8f0e2acbda6d280a5f5a0fa81b25ce254a132eb38de3abbbcdd7a2bc9c205d6c",
+    "b50d18da9c86db0e6c04722ea34ea3734b6087e0dc3c063cf2df8ce232f07254",
+    "c0937210e6535fac6a0666cf4ed8ba32e89915d12d46c15fda1b3937d39055b6",
+    "c155a43b22fdc23a20389bcc4ee8e38f72086d95d8a93b7c8d3a58cf5f8d9a87",
+    "d026a7b66c507154ebd51f849d311cc9914879f5797eee1bc0e90a4e570b488a",
+    "f1cdadbf9d0becf82ae7702c8e07aea80661b062ae42d8e59b4a057c6615ce54"
+   ]
+  }
+ },
+ "schema_version": "route_program_prior_fit_v1"
+}
