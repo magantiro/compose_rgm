@@ -1,0 +1,4232 @@
+{
+  "contract": {
+    "modal_launches": 0,
+    "new_oracle_calls": 0,
+    "note": "pmo_joint_dependency_jump, pmo_action_roles and pmo_population_controller are imported read-only.  All chemistry -- successor enumeration, role supervision, program extraction, executor replay -- is the pinned implementation in every arm.  An arm differs only in the ACCEPTANCE PREDICATE and the search.",
+    "pinned_modules_modified": [],
+    "production_wiring_changed": false
+  },
+  "elapsed_seconds": 2161.3881150420057,
+  "new_oracle_calls": 0,
+  "outcomes": [
+    "completed_realization",
+    "proven_incompatible",
+    "invalid_plan",
+    "search_budget_exhausted"
+  ],
+  "pairs": [
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.05313933399156667,
+          "successors_enumerated": 15
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 15,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 60,
+          "pruned_by_propagation": 34,
+          "realizations": [],
+          "seconds": 27.047159167006612,
+          "successors_enumerated": 2304
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0010579579975456,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "production_init:6",
+      "plan_id": "a1562a612ac45d1b6d971bd5cee649ce3668efc972801d640588beb6c8fc107a",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 2,
+          "realizations": [],
+          "seconds": 0.0437686659861356,
+          "successors_enumerated": 13
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 3,
+          "nodes_expanded": 19,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 9,
+          "realizations": [],
+          "seconds": 0.7775623750058003,
+          "successors_enumerated": 215
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0010285000025760382,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "production_init:5",
+      "plan_id": "a9da4d0d3e9ed626b5550282345c33a3f31660ccbc1c4dd74c7ca3fe364bd500",
+      "plan_primitive_count": 30,
+      "plan_scale": "teacher_scale",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 4,
+          "nodes_expanded": 36,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 7,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 7.261561332998099,
+          "successors_enumerated": 654
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 7,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 8,
+          "pruned_by_propagation": 23,
+          "realizations": [],
+          "seconds": 194.2328704999818,
+          "successors_enumerated": 8978
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 7,
+          "realizations": [],
+          "seconds": 5.36557670799084,
+          "successors_enumerated": 157
+        }
+      },
+      "parent_id": "production_init:6",
+      "plan_id": "e9ba86ade0cd8e6d35f307ae0a8836a780db4263e97884e92e63c3404e7e4d76",
+      "plan_primitive_count": 27,
+      "plan_scale": "teacher_scale",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0307662500126753,
+          "successors_enumerated": 15
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 3,
+          "nodes_expanded": 45,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 11,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 1.8641623750154395,
+          "successors_enumerated": 479
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0009989170066546649,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "production_init:8",
+      "plan_id": "29a11498523de32f26c464f92fa4e5651f0f77283e0ea97cfdcc7580f2b55f9e",
+      "plan_primitive_count": 29,
+      "plan_scale": "teacher_scale",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 2,
+          "realizations": [],
+          "seconds": 0.032353000016883016,
+          "successors_enumerated": 8
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 10,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 77,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 1.0991771669941954,
+          "successors_enumerated": 292
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0009857080003712326,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "production_init:13",
+      "plan_id": "7604d38ec803399fd63774a3ea5c645009ed46feb3049b856cd85096393fdcdb",
+      "plan_primitive_count": 29,
+      "plan_scale": "teacher_scale",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.03530112499720417,
+          "successors_enumerated": 12
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 8,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 87,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 1.065374833997339,
+          "successors_enumerated": 345
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0007962500094436109,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "production_init:15",
+      "plan_id": "8e5f1f94fcde53e106dc8a2aa44fcf9d95c2eba76b77d525672bec0ea00fd969",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.03073616698384285,
+          "successors_enumerated": 15
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 13,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 45,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 2.3257096669985913,
+          "successors_enumerated": 874
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0010248330072499812,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "production_init:8",
+      "plan_id": "de1a718ced53fe930f36bc2d7dd4b195f28f7fbc8ef4ece4319e8edef13d501f",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 7.808298687450588e-05,
+          "successors_enumerated": 0
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 7.587499567307532e-05,
+          "successors_enumerated": 0
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0003472499956842512,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "production_init:7",
+      "plan_id": "74b29ba8fd5ad1f46e59f72629c280fef626e13e7c73d14e141a2f0af12b4252",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.00040695900679565966,
+          "successors_enumerated": 0
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 8,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 24,
+          "pruned_by_propagation": 19,
+          "realizations": [],
+          "seconds": 55.303052625007695,
+          "successors_enumerated": 4531
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.00068374999682419,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "production_init:1",
+      "plan_id": "990b73e8b3f76625ffe5704abbc14977748f7366eb6f5258a2ef84e0aa2218a6",
+      "plan_primitive_count": 27,
+      "plan_scale": "teacher_scale",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.014950707991374657,
+          "successors_enumerated": 11
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 8,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 87,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 1.124502582999412,
+          "successors_enumerated": 281
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0007424590003211051,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "production_init:1",
+      "plan_id": "0dc608b3ad637869e559220e864592c2be64237fc5006128095fb8639dcfaeef",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 4,
+          "nodes_expanded": 26,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 5,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 1.6729007920075674,
+          "successors_enumerated": 291
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 9,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 3,
+          "pruned_by_propagation": 33,
+          "realizations": [],
+          "seconds": 202.90070870899945,
+          "successors_enumerated": 10366
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 2,
+          "realizations": [],
+          "seconds": 0.5505746249982622,
+          "successors_enumerated": 16
+        }
+      },
+      "parent_id": "production_init:6",
+      "plan_id": "bc6c97910bd7542fd885b1ed5c463c80f3602eac1524defba9b7ae3c21a1a60d",
+      "plan_primitive_count": 28,
+      "plan_scale": "teacher_scale",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 4,
+          "nodes_expanded": 16,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 3,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 1.2220665829954669,
+          "successors_enumerated": 171
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 9,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 3,
+          "pruned_by_propagation": 33,
+          "realizations": [],
+          "seconds": 187.77621862501837,
+          "successors_enumerated": 9860
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.48723841601167805,
+          "successors_enumerated": 13
+        }
+      },
+      "parent_id": "production_init:8",
+      "plan_id": "1c0b3fe804d209da6e1a9347d4c8b34fcf17f4a47493059cfc3646e806412c9f",
+      "plan_primitive_count": 28,
+      "plan_scale": "teacher_scale",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 16,
+          "nodes_expanded": 17,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 2,
+              "created_dependency_edges": 14,
+              "declared_component_count": 2,
+              "declared_created_dependency_count": 14,
+              "delta_heavy_atoms": 12,
+              "endpoint_key": "CC1C(C23CCC(CC2=O)C3(C)C)C(Cl)N(C(=O)C2(C)CCCO2)CC1(C)C(=O)[O-]",
+              "plan_primitive_count": 16,
+              "primitive_count": 16,
+              "retained_fraction": 1.0
+            }
+          ],
+          "seconds": 30.007002583995927,
+          "successors_enumerated": 5369
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 14,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 151.6801808749733,
+          "successors_enumerated": 18940
+        },
+        "v1_exact": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [
+            "declared_component_count_not_realized"
+          ],
+          "full_depth_but_completion_rejected": true,
+          "full_depth_prefixes": 6,
+          "max_depth_reached": 16,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 1,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 44.63937137500034,
+          "successors_enumerated": 18900
+        }
+      },
+      "parent_id": "production_init:9",
+      "plan_id": "65a4738b22ce6d0b9dda813a918ebf18a62694ea79c90fda4e9800a120376860",
+      "plan_primitive_count": 16,
+      "plan_scale": "short",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 3,
+          "realizations": [],
+          "seconds": 0.036688540974864736,
+          "successors_enumerated": 12
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [
+            "declared_component_count_not_realized"
+          ],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 27,
+          "max_depth_reached": 11,
+          "nodes_expanded": 17,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 2,
+              "created_dependency_edges": 5,
+              "declared_component_count": 2,
+              "declared_created_dependency_count": 5,
+              "delta_heavy_atoms": 1,
+              "endpoint_key": "COCCC(O)C(=O)N1CC(C)(C(=O)[O-])CCC12C=N2",
+              "plan_primitive_count": 11,
+              "primitive_count": 11,
+              "retained_fraction": 1.0
+            }
+          ],
+          "seconds": 20.27916120798909,
+          "successors_enumerated": 2519
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 3,
+          "realizations": [],
+          "seconds": 0.033253250003326684,
+          "successors_enumerated": 12
+        }
+      },
+      "parent_id": "production_init:0",
+      "plan_id": "d7aef6419d5cfd12c4ed1f42c10440684226106c0a4610564c5aa1213415755c",
+      "plan_primitive_count": 11,
+      "plan_scale": "short",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.00045908300671726465,
+          "successors_enumerated": 0
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 6,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 12,
+          "pruned_by_propagation": 40,
+          "realizations": [],
+          "seconds": 81.44887562497752,
+          "successors_enumerated": 5797
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0008391250157728791,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "production_init:0",
+      "plan_id": "11a6e5c5e6be329cbd90ec5100d4b2d543d88019e99aa36ef238dd29b7c051d1",
+      "plan_primitive_count": 26,
+      "plan_scale": "short",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 12,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 6,
+          "pruned_by_propagation": 23,
+          "realizations": [],
+          "seconds": 53.46490304201143,
+          "successors_enumerated": 6803
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [
+            "declared_component_count_not_realized"
+          ],
+          "full_depth_but_completion_rejected": true,
+          "full_depth_prefixes": 30,
+          "max_depth_reached": 16,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 211.86765691600158,
+          "successors_enumerated": 8691
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 2,
+          "nodes_expanded": 2,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 8,
+          "realizations": [],
+          "seconds": 0.11954187499941327,
+          "successors_enumerated": 30
+        }
+      },
+      "parent_id": "production_init:8",
+      "plan_id": "6fddb1a528e24c5c5ecb776c22849ea8aa90a3120ebfeef5d46ebc52dfdc3bec",
+      "plan_primitive_count": 16,
+      "plan_scale": "short",
+      "stratum": "production_init"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 2,
+          "nodes_expanded": 2,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.010159750003367662,
+          "successors_enumerated": 10
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 2,
+          "nodes_expanded": 6,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 5,
+          "realizations": [],
+          "seconds": 0.05274116600048728,
+          "successors_enumerated": 23
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0005702089983969927,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "teacher_root:2",
+      "plan_id": "8380bdd91a6d6f8287ae8917301b12626e06c16d7b85c8c1bc14fe273211b7a2",
+      "plan_primitive_count": 28,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 8.58750136103481e-05,
+          "successors_enumerated": 0
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 8.120801066979766e-05,
+          "successors_enumerated": 0
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.00036937498953193426,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "teacher_root:6",
+      "plan_id": "d0c244ce92e24d7367593404a257f70017d66c470a19fddb5bdebfeecf43c22b",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 6.78329961374402e-05,
+          "successors_enumerated": 0
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 6.44999963697046e-05,
+          "successors_enumerated": 0
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0002945000014733523,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "teacher_root:3",
+      "plan_id": "0dc608b3ad637869e559220e864592c2be64237fc5006128095fb8639dcfaeef",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 6.491699605248868e-05,
+          "successors_enumerated": 0
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 6.395799573510885e-05,
+          "successors_enumerated": 0
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.00029349999385885894,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "teacher_root:2",
+      "plan_id": "f1abecfa0c60609f7ae3083f498609bfeeb71a28e4df7cc1aaa65d3560f63215",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.007506458001444116,
+          "successors_enumerated": 7
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 2,
+          "nodes_expanded": 7,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 6,
+          "realizations": [],
+          "seconds": 0.060428208991652355,
+          "successors_enumerated": 31
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0005728329997509718,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "teacher_root:3",
+      "plan_id": "df8d76666ee1271cd652a93267f118d50dc94de7cefd69df76f1a5090045190f",
+      "plan_primitive_count": 29,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.01333595800679177,
+          "successors_enumerated": 7
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 2,
+          "nodes_expanded": 7,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 6,
+          "realizations": [],
+          "seconds": 0.0895714579964988,
+          "successors_enumerated": 31
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0006378749967552722,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "teacher_root:3",
+      "plan_id": "d3b91c732cacb8dd5b3076606d87a9e2e3807b466d256bc63643c32e4c9ba278",
+      "plan_primitive_count": 32,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 8,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 1,
+          "pruned_by_propagation": 39,
+          "realizations": [],
+          "seconds": 387.41736183399917,
+          "successors_enumerated": 16464
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 8,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 1,
+          "pruned_by_propagation": 184,
+          "realizations": [],
+          "seconds": 356.11415629199473,
+          "successors_enumerated": 16311
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.5772009580105077,
+          "successors_enumerated": 18
+        }
+      },
+      "parent_id": "teacher_root:1",
+      "plan_id": "c32cd2ca38e83a1a6a52c74c0f085dbcacedd59453b3737ad5c1749658576422",
+      "plan_primitive_count": 27,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0002343340020161122,
+          "successors_enumerated": 0
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 3,
+          "nodes_expanded": 17,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 3,
+          "pruned_by_propagation": 10,
+          "realizations": [],
+          "seconds": 0.1859747919952497,
+          "successors_enumerated": 54
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0005901250115130097,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "teacher_root:2",
+      "plan_id": "8d1477ded25522ae1f0e01b27966152d9474c1b156eebf5545ca7f281185b960",
+      "plan_primitive_count": 28,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 4,
+          "realizations": [],
+          "seconds": 0.05713729199487716,
+          "successors_enumerated": 9
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 2,
+          "nodes_expanded": 7,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 6,
+          "realizations": [],
+          "seconds": 0.21343941701343283,
+          "successors_enumerated": 59
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0009398749971296638,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "teacher_root:4",
+      "plan_id": "1e71ee5afee356374bced35bc54957fa844e630f7da344a1b1bec601b4a68c5a",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 4,
+          "realizations": [],
+          "seconds": 0.022999250009888783,
+          "successors_enumerated": 9
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 2,
+          "nodes_expanded": 7,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 6,
+          "realizations": [],
+          "seconds": 0.2999491249793209,
+          "successors_enumerated": 59
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0008590000215917826,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "teacher_root:4",
+      "plan_id": "a9da4d0d3e9ed626b5550282345c33a3f31660ccbc1c4dd74c7ca3fe364bd500",
+      "plan_primitive_count": 30,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 25,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 2,
+          "pruned_by_propagation": 6,
+          "realizations": [],
+          "seconds": 97.65050537500065,
+          "successors_enumerated": 5326
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [
+            "declared_component_count_not_realized"
+          ],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 56,
+          "max_depth_reached": 28,
+          "nodes_expanded": 33,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 1,
+              "created_dependency_edges": 0,
+              "declared_component_count": 1,
+              "declared_created_dependency_count": 0,
+              "delta_heavy_atoms": -4,
+              "endpoint_key": "CCCC(C(C)N)C(C)C#CC(OC)C1=C2C(C3=C4C(O)=C43)=C21",
+              "plan_primitive_count": 28,
+              "primitive_count": 28,
+              "retained_fraction": 0.8518518518518519
+            }
+          ],
+          "seconds": 60.49887695899815,
+          "successors_enumerated": 3780
+        },
+        "v1_exact": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 18,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 304,
+          "realizations": [],
+          "seconds": 37.69709204198443,
+          "successors_enumerated": 2286
+        }
+      },
+      "parent_id": "teacher_root:0",
+      "plan_id": "ea0dfdd2d3f7c1a72f96f788c9e8c54d5cdf52dc78aabac947e96cb263cb1dde",
+      "plan_primitive_count": 28,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 9,
+          "realizations": [],
+          "seconds": 4.240334750007605,
+          "successors_enumerated": 74
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 2,
+          "nodes_expanded": 11,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 141,
+          "realizations": [],
+          "seconds": 4.777367333008442,
+          "successors_enumerated": 254
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 8,
+          "realizations": [],
+          "seconds": 5.132039375021122,
+          "successors_enumerated": 74
+        }
+      },
+      "parent_id": "teacher_root:5",
+      "plan_id": "e9ba86ade0cd8e6d35f307ae0a8836a780db4263e97884e92e63c3404e7e4d76",
+      "plan_primitive_count": 27,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.000498042005347088,
+          "successors_enumerated": 0
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [
+            "declared_component_count_not_realized"
+          ],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 3,
+          "max_depth_reached": 6,
+          "nodes_expanded": 7,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 2,
+              "created_dependency_edges": 2,
+              "declared_component_count": 2,
+              "declared_created_dependency_count": 2,
+              "delta_heavy_atoms": 1,
+              "endpoint_key": "COC(=CC1N=CO1)C(=O)Nc1ccc(NC(=O)c2ccco2)cc1",
+              "plan_primitive_count": 6,
+              "primitive_count": 6,
+              "retained_fraction": 1.0
+            }
+          ],
+          "seconds": 12.479595874989172,
+          "successors_enumerated": 730
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.00069570800405927,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "teacher_root:6",
+      "plan_id": "7898a507c2de51eb6d943c857b0e49a421221ff04a0916c485a8b6149bcd3f81",
+      "plan_primitive_count": 6,
+      "plan_scale": "short",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 4,
+          "nodes_expanded": 49,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 12,
+          "realizations": [],
+          "seconds": 48.411134374997346,
+          "successors_enumerated": 15198
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 4,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 44.566279416001635,
+          "successors_enumerated": 13777
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 2,
+          "nodes_expanded": 4,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 6,
+          "realizations": [],
+          "seconds": 0.31767195899738,
+          "successors_enumerated": 70
+        }
+      },
+      "parent_id": "teacher_root:1",
+      "plan_id": "c85199cca05aabc322b641f05ad418547f197590f79ae2740b7243cbc9fd7643",
+      "plan_primitive_count": 16,
+      "plan_scale": "short",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [
+            "declared_component_count_not_realized"
+          ],
+          "full_depth_but_completion_rejected": true,
+          "full_depth_prefixes": 2,
+          "max_depth_reached": 23,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 155.19035758299287,
+          "successors_enumerated": 15533
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 23,
+          "nodes_expanded": 24,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 2,
+              "created_dependency_edges": 22,
+              "declared_component_count": 2,
+              "declared_created_dependency_count": 22,
+              "delta_heavy_atoms": 3,
+              "endpoint_key": "Cc1cccc(CNS(=O)(=O)c2cc(C(=O)N3CCCCCC3)cs2)c1OC(C)C",
+              "plan_primitive_count": 23,
+              "primitive_count": 23,
+              "retained_fraction": 1.0
+            }
+          ],
+          "seconds": 52.68296824998106,
+          "successors_enumerated": 4664
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 1,
+          "nodes_expanded": 1,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 2,
+          "realizations": [],
+          "seconds": 0.7166388329933397,
+          "successors_enumerated": 232
+        }
+      },
+      "parent_id": "teacher_root:0",
+      "plan_id": "ef254e9b546f5c8b8a5311c597e37b79f49f6df0c6219e75ca9a7846febcf814",
+      "plan_primitive_count": 23,
+      "plan_scale": "short",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 7.912502042017877e-05,
+          "successors_enumerated": 0
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 7.087498670443892e-05,
+          "successors_enumerated": 0
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 0,
+          "nodes_expanded": 0,
+          "outcome": "proven_incompatible",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 0.0003358749963808805,
+          "successors_enumerated": 0
+        }
+      },
+      "parent_id": "teacher_root:5",
+      "plan_id": "b37da60fcca006ea415ba9fa431206117686395fde991ea8a51765d57feee51f",
+      "plan_primitive_count": 25,
+      "plan_scale": "short",
+      "stratum": "teacher_root"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 11,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 10,
+          "pruned_by_propagation": 127,
+          "realizations": [],
+          "seconds": 152.40744979100418,
+          "successors_enumerated": 10415
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 21,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 20.147664165997412,
+          "successors_enumerated": 2059
+        },
+        "v1_exact": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 19,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 33.035172583011445,
+          "successors_enumerated": 2508
+        }
+      },
+      "parent_id": "teacher_witness_route:77",
+      "plan_id": "e09fc0c54a7e31ab718fa171c5a365e6e5d764cafaf7ca05013ed08728256295",
+      "plan_primitive_count": 30,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [
+            "declared_component_count_not_realized"
+          ],
+          "full_depth_but_completion_rejected": true,
+          "full_depth_prefixes": 9,
+          "max_depth_reached": 31,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 60.137886083015474,
+          "successors_enumerated": 4768
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 21,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 5.087409125000704,
+          "successors_enumerated": 2792
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 31,
+          "nodes_expanded": 51,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 2,
+              "created_dependency_edges": 11,
+              "declared_component_count": 2,
+              "declared_created_dependency_count": 11,
+              "delta_heavy_atoms": -1,
+              "endpoint_key": "CC1=C=Cc2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)c(N)c2C=C1",
+              "plan_primitive_count": 31,
+              "primitive_count": 31,
+              "retained_fraction": 0.9629629629629629
+            }
+          ],
+          "seconds": 9.815921957982937,
+          "successors_enumerated": 4656
+        }
+      },
+      "parent_id": "teacher_witness_route:64",
+      "plan_id": "10b322d07481c7f2b6155295489e6b0b0a0a9646dfa8658e43d92e51774f0925",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 31,
+          "nodes_expanded": 41,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 1,
+              "created_dependency_edges": 11,
+              "declared_component_count": 1,
+              "declared_created_dependency_count": 11,
+              "delta_heavy_atoms": -1,
+              "endpoint_key": "C=S(N)(=O)C1=C(C2=CC(C(F)(F)F)=NN(C3=C=C(C=CC)C=C3)C2)C=C1",
+              "plan_primitive_count": 31,
+              "primitive_count": 31,
+              "retained_fraction": 0.9629629629629629
+            }
+          ],
+          "seconds": 18.565609584009508,
+          "successors_enumerated": 2937
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 21,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 4.617182250018232,
+          "successors_enumerated": 2792
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 31,
+          "nodes_expanded": 51,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 1,
+              "created_dependency_edges": 11,
+              "declared_component_count": 1,
+              "declared_created_dependency_count": 11,
+              "delta_heavy_atoms": -1,
+              "endpoint_key": "C=S(N)(=O)c1ccc2c(c1)C=CC(CC)=C=Cc1cc(C(F)(F)F)nn1-2",
+              "plan_primitive_count": 31,
+              "primitive_count": 31,
+              "retained_fraction": 0.9629629629629629
+            }
+          ],
+          "seconds": 9.97948479198385,
+          "successors_enumerated": 4706
+        }
+      },
+      "parent_id": "teacher_witness_route:53",
+      "plan_id": "8327e0007d92ef6317c58e6b116c710d5401629519b4e56e1c026b8cc1121b30",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 11,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 1,
+          "pruned_by_propagation": 5,
+          "realizations": [],
+          "seconds": 135.4704223339795,
+          "successors_enumerated": 7351
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 27,
+          "nodes_expanded": 28,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 2,
+              "created_dependency_edges": 0,
+              "declared_component_count": 2,
+              "declared_created_dependency_count": 0,
+              "delta_heavy_atoms": -4,
+              "endpoint_key": "C=C1C(=C=C=CCC(F)=NCN(C)CCN=CC)N2N=C=C=C12",
+              "plan_primitive_count": 27,
+              "primitive_count": 27,
+              "retained_fraction": 0.8518518518518519
+            }
+          ],
+          "seconds": 39.69228587500402,
+          "successors_enumerated": 2436
+        },
+        "v1_exact": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 21,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 83.55056908301776,
+          "successors_enumerated": 4654
+        }
+      },
+      "parent_id": "teacher_witness_route:110",
+      "plan_id": "7e933239f8ae60a8dd4d52161cd56e20132a3eaeb6c9a83d06644963b2ee6f17",
+      "plan_primitive_count": 27,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 11,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 10,
+          "pruned_by_propagation": 127,
+          "realizations": [],
+          "seconds": 149.240784041991,
+          "successors_enumerated": 10415
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 21,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 18.228556042013224,
+          "successors_enumerated": 2059
+        },
+        "v1_exact": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 19,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 29.808244082989404,
+          "successors_enumerated": 2508
+        }
+      },
+      "parent_id": "teacher_witness_route:6",
+      "plan_id": "df8d76666ee1271cd652a93267f118d50dc94de7cefd69df76f1a5090045190f",
+      "plan_primitive_count": 29,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 11,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 10,
+          "pruned_by_propagation": 127,
+          "realizations": [],
+          "seconds": 157.39313599999878,
+          "successors_enumerated": 10415
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 21,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 22.22970212501241,
+          "successors_enumerated": 2059
+        },
+        "v1_exact": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 19,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 25.387336708023213,
+          "successors_enumerated": 2508
+        }
+      },
+      "parent_id": "teacher_witness_route:105",
+      "plan_id": "d3b91c732cacb8dd5b3076606d87a9e2e3807b466d256bc63643c32e4c9ba278",
+      "plan_primitive_count": 32,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 23,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 29.16940391602111,
+          "successors_enumerated": 3634
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 23,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 1,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 32.60749162500724,
+          "successors_enumerated": 3334
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 31,
+          "nodes_expanded": 55,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 1,
+              "created_dependency_edges": 0,
+              "declared_component_count": 1,
+              "declared_created_dependency_count": 0,
+              "delta_heavy_atoms": -10,
+              "endpoint_key": "CC1=CC(C(O)=CCO)=CC(C)(N)NCC1O",
+              "plan_primitive_count": 31,
+              "primitive_count": 31,
+              "retained_fraction": 0.6296296296296297
+            }
+          ],
+          "seconds": 16.89867375002359,
+          "successors_enumerated": 2389
+        }
+      },
+      "parent_id": "teacher_witness_route:161",
+      "plan_id": "0dc608b3ad637869e559220e864592c2be64237fc5006128095fb8639dcfaeef",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 23,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 32.20348891700269,
+          "successors_enumerated": 3634
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 23,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 1,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 34.62168295899755,
+          "successors_enumerated": 3334
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 31,
+          "nodes_expanded": 55,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 1,
+              "created_dependency_edges": 1,
+              "declared_component_count": 1,
+              "declared_created_dependency_count": 1,
+              "delta_heavy_atoms": -10,
+              "endpoint_key": "CC1=CC(C=CCO)=C(C)C(C)(C)NCC1O",
+              "plan_primitive_count": 31,
+              "primitive_count": 31,
+              "retained_fraction": 0.6296296296296297
+            }
+          ],
+          "seconds": 17.262171292008134,
+          "successors_enumerated": 2375
+        }
+      },
+      "parent_id": "teacher_witness_route:114",
+      "plan_id": "8e5f1f94fcde53e106dc8a2aa44fcf9d95c2eba76b77d525672bec0ea00fd969",
+      "plan_primitive_count": 31,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 11,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 10,
+          "pruned_by_propagation": 127,
+          "realizations": [],
+          "seconds": 164.69283283301047,
+          "successors_enumerated": 10415
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 21,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 25.150672167015728,
+          "successors_enumerated": 2059
+        },
+        "v1_exact": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 19,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 33.73053441601223,
+          "successors_enumerated": 2508
+        }
+      },
+      "parent_id": "teacher_witness_route:118",
+      "plan_id": "74da902039d84aee30a55385ec19ee5a965182aa22513e2cb555136b45b8fb2a",
+      "plan_primitive_count": 29,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 23,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 34.00971629098058,
+          "successors_enumerated": 3634
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 23,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 1,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 31.74011833302211,
+          "successors_enumerated": 3334
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 29,
+          "nodes_expanded": 53,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 1,
+              "created_dependency_edges": 0,
+              "declared_component_count": 1,
+              "declared_created_dependency_count": 0,
+              "delta_heavy_atoms": -10,
+              "endpoint_key": "CC1=CC(C(O)=CCO)=CC(C)(C)NCC1O",
+              "plan_primitive_count": 29,
+              "primitive_count": 29,
+              "retained_fraction": 0.6296296296296297
+            }
+          ],
+          "seconds": 21.507161999994423,
+          "successors_enumerated": 2136
+        }
+      },
+      "parent_id": "teacher_witness_route:100",
+      "plan_id": "7604d38ec803399fd63774a3ea5c645009ed46feb3049b856cd85096393fdcdb",
+      "plan_primitive_count": 29,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 11,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 10,
+          "pruned_by_propagation": 127,
+          "realizations": [],
+          "seconds": 166.17598670799634,
+          "successors_enumerated": 10415
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 21,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 22.256005458999425,
+          "successors_enumerated": 2059
+        },
+        "v1_exact": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 19,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 31.517285333015025,
+          "successors_enumerated": 2508
+        }
+      },
+      "parent_id": "teacher_witness_route:160",
+      "plan_id": "d65cb0b39449e017986a8a9a2f35292b534402d724448013dabf456acae99ab4",
+      "plan_primitive_count": 29,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 25,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 2,
+          "pruned_by_propagation": 6,
+          "realizations": [],
+          "seconds": 81.95239720799145,
+          "successors_enumerated": 5326
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [
+            "declared_component_count_not_realized"
+          ],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 10,
+          "max_depth_reached": 28,
+          "nodes_expanded": 30,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 1,
+              "created_dependency_edges": 1,
+              "declared_component_count": 1,
+              "declared_created_dependency_count": 1,
+              "delta_heavy_atoms": -4,
+              "endpoint_key": "CC#CC(CCC)C(C)CCC(OC)C1=C2C(C3=C4C(N)=C43)=C21",
+              "plan_primitive_count": 28,
+              "primitive_count": 28,
+              "retained_fraction": 0.8518518518518519
+            }
+          ],
+          "seconds": 48.9542996250093,
+          "successors_enumerated": 2793
+        },
+        "v1_exact": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 18,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 304,
+          "realizations": [],
+          "seconds": 27.06893329200102,
+          "successors_enumerated": 2286
+        }
+      },
+      "parent_id": "teacher_witness_route:87",
+      "plan_id": "6506168f21cf3aed579163a8fa120fcc358140c106bba33527a34b48537001c1",
+      "plan_primitive_count": 28,
+      "plan_scale": "teacher_scale",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 11,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 1,
+          "pruned_by_propagation": 5,
+          "realizations": [],
+          "seconds": 159.05848912498914,
+          "successors_enumerated": 7351
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 26,
+          "nodes_expanded": 27,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 2,
+              "created_dependency_edges": 0,
+              "declared_component_count": 2,
+              "declared_created_dependency_count": 0,
+              "delta_heavy_atoms": -3,
+              "endpoint_key": "CC=NCCN(C)CN=c1c2c1C2=C=C=C1C(=CF)C2=C=C=NN21",
+              "plan_primitive_count": 26,
+              "primitive_count": 26,
+              "retained_fraction": 0.8888888888888888
+            }
+          ],
+          "seconds": 45.50037724999129,
+          "successors_enumerated": 2374
+        },
+        "v1_exact": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 21,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 89.95420929099782,
+          "successors_enumerated": 4654
+        }
+      },
+      "parent_id": "teacher_witness_route:113",
+      "plan_id": "143daed17b7f5ff99287210cc39354e73b140ac1f17c8edfb6d3836cfeebfa5d",
+      "plan_primitive_count": 26,
+      "plan_scale": "short",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 11,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 1,
+          "pruned_by_propagation": 5,
+          "realizations": [],
+          "seconds": 155.57003474998055,
+          "successors_enumerated": 7351
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 26,
+          "nodes_expanded": 27,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 2,
+              "created_dependency_edges": 0,
+              "declared_component_count": 2,
+              "declared_created_dependency_count": 0,
+              "delta_heavy_atoms": -3,
+              "endpoint_key": "CC=NCCN(C)CN=c1c2c1C2=C=C=C1C(=CF)C2=C=C=NN21",
+              "plan_primitive_count": 26,
+              "primitive_count": 26,
+              "retained_fraction": 0.8888888888888888
+            }
+          ],
+          "seconds": 44.31749629200203,
+          "successors_enumerated": 2374
+        },
+        "v1_exact": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 21,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 93.65981708298204,
+          "successors_enumerated": 4654
+        }
+      },
+      "parent_id": "teacher_witness_route:157",
+      "plan_id": "5d2eef2b4756d5eff9e42ee642b4004e35cad48dc7e43cecd45f331c96ed40a4",
+      "plan_primitive_count": 26,
+      "plan_scale": "short",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 16,
+          "nodes_expanded": 17,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 2,
+              "created_dependency_edges": 14,
+              "declared_component_count": 2,
+              "declared_created_dependency_count": 14,
+              "delta_heavy_atoms": 12,
+              "endpoint_key": "CC1C(O)CC(O)C(C23CCC(CC2=O)C3(C)C)C1C",
+              "plan_primitive_count": 16,
+              "primitive_count": 16,
+              "retained_fraction": 1.0
+            }
+          ],
+          "seconds": 14.75678958298522,
+          "successors_enumerated": 4292
+        },
+        "R2_plus_capacity": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 14,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [],
+          "seconds": 54.33174341698759,
+          "successors_enumerated": 14942
+        },
+        "v1_exact": {
+          "budget_reason": null,
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 1,
+          "max_depth_reached": 16,
+          "nodes_expanded": 17,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 2,
+              "created_dependency_edges": 14,
+              "declared_component_count": 2,
+              "declared_created_dependency_count": 14,
+              "delta_heavy_atoms": 12,
+              "endpoint_key": "CC1C(O)CC(O)C(C23CCC(CC2=O)C3(C)C)C1C",
+              "plan_primitive_count": 16,
+              "primitive_count": 16,
+              "retained_fraction": 1.0
+            }
+          ],
+          "seconds": 6.601307957986137,
+          "successors_enumerated": 3990
+        }
+      },
+      "parent_id": "teacher_witness_route:147",
+      "plan_id": "95e49bc7a7307987bed987e202a0d0f4bd88e832c7496b3cb154080ac9857d9d",
+      "plan_primitive_count": 16,
+      "plan_scale": "short",
+      "stratum": "teacher_witness"
+    },
+    {
+      "arms": {
+        "R1_drop_environment_and_lag": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 11,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 1,
+          "pruned_by_propagation": 5,
+          "realizations": [],
+          "seconds": 126.56420941697434,
+          "successors_enumerated": 7039
+        },
+        "R2_plus_capacity": {
+          "budget_reason": null,
+          "completion_rejections": [
+            "declared_component_count_not_realized"
+          ],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 3,
+          "max_depth_reached": 25,
+          "nodes_expanded": 25,
+          "outcome": "completed_realization",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 0,
+          "realizations": [
+            {
+              "component_count": 2,
+              "created_dependency_edges": 0,
+              "declared_component_count": 2,
+              "declared_created_dependency_count": 0,
+              "delta_heavy_atoms": -4,
+              "endpoint_key": "C=CN=CCN(C)CN=c1c2c1C2=C=C=C1C=C1c1ccn[nH]1",
+              "plan_primitive_count": 25,
+              "primitive_count": 25,
+              "retained_fraction": 0.8518518518518519
+            }
+          ],
+          "seconds": 39.22225912500289,
+          "successors_enumerated": 2179
+        },
+        "v1_exact": {
+          "budget_reason": "node_budget",
+          "completion_rejections": [],
+          "full_depth_but_completion_rejected": false,
+          "full_depth_prefixes": 0,
+          "max_depth_reached": 21,
+          "nodes_expanded": 64,
+          "outcome": "search_budget_exhausted",
+          "pruned_by_memo": 0,
+          "pruned_by_propagation": 1,
+          "realizations": [],
+          "seconds": 98.35024237501784,
+          "successors_enumerated": 4953
+        }
+      },
+      "parent_id": "teacher_witness_route:178",
+      "plan_id": "7712aac8665e2498c428298910fe72137f01afab8854c3f57dccce12a731e244",
+      "plan_primitive_count": 25,
+      "plan_scale": "short",
+      "stratum": "teacher_witness"
+    }
+  ],
+  "provenance": {
+    "branch": "pmo-realization-repair-20260920",
+    "environment": {
+      "networkx": "3.6.1",
+      "numpy": "2.4.2",
+      "python": "3.14.2",
+      "rdkit": "2025.09.6"
+    },
+    "environment_note": "NOT the pinned production image (python 3.11, rdkit 2024.3.5).  Every arm runs in the SAME interpreter on the SAME pairs, so the matched comparison between specifications is internally valid; absolute rates are conditional on this chemistry kernel and should not be quoted as production numbers.  This is the interpreter the located-defect report (pmo_binder_repair_v1) also used, so the two are comparable.",
+    "git_head": "0b662b0ee6d784814ab4df2f8ba0fe3db94abd78",
+    "node_budget": 64,
+    "realization_seconds": 1846.0427016250032,
+    "reproduce": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src:scripts python3 scripts/pmo_realization_repair_report_v1.py --sample 12 --workers 3 --node-budget 64 --seconds-cap 900.0",
+    "sample_per_stratum": 12,
+    "seconds_cap": 900.0,
+    "seed": 20260920,
+    "short_sample_per_stratum": 4,
+    "workers": 3
+  },
+  "question": "Does a weaker role descriptor actually raise COMPLETE-PROGRAM yield at teacher scale and inside the teacher retained band?",
+  "schema_version": "pmo_realization_repair_v1",
+  "specifications": {
+    "R1_drop_environment_and_lag": {
+      "kept": [
+        "atom_type",
+        "formal_charge",
+        "origin",
+        "created_ordinal",
+        "implicit_hydrogens",
+        "degree",
+        "bond_class_histogram"
+      ],
+      "relaxed": [
+        "creation_lag",
+        "neighbor_element_histogram"
+      ]
+    },
+    "R2_plus_capacity": {
+      "kept": [
+        "atom_type",
+        "formal_charge",
+        "origin",
+        "created_ordinal"
+      ],
+      "relaxed": [
+        "bond_class_histogram",
+        "creation_lag",
+        "degree",
+        "implicit_hydrogens",
+        "neighbor_element_histogram"
+      ]
+    },
+    "added_back": {
+      "declared_component_count": "the realized dependency-region program must have the component count the plan declares",
+      "declared_created_dependency_count": "and the declared number of created-handle dependency edges",
+      "forward_propagation": "element/charge budget for remaining preexisting deletions, created-handle reachability, free-slot capacity, one-step operand availability",
+      "rationale": "relaxing the per-atom fingerprint removes an ACCIDENTAL proxy for constraints the v1 latent never expressed (it stores per-operand descriptors only, so pairwise operand topology such as the ring size a cycle_close produces is not recoverable from it).  The declared program structure is enforced so a relaxation cannot manufacture a 'successful' binding."
+    },
+    "never_relaxed": {
+      "executor_rule": "the operation performed",
+      "model_family": "the operator family",
+      "operand_atom_type": "attaching to a carbon is not the same operation as attaching to an oxygen",
+      "operand_created_ordinal": "the dataflow edge that makes the plan a program rather than N unrelated edits",
+      "operand_formal_charge": "charge is preserved, never optimized",
+      "operand_origin": "preexisting vs route_created",
+      "parameters": "the full edit semantics (inserted element/charge/H, attachment bond classes, restate target class, closure bond class, ring restate bond classes)"
+    },
+    "v1_exact": {
+      "note": "whole-role hash equality, the pinned predicate",
+      "relaxed": []
+    }
+  },
+  "stage_0_structural_retained_bound": {
+    "definition": "retained fraction implied by the plan's own preexisting-origin deletions and the parent's heavy-atom count, with no slot reuse.",
+    "implied_in_band_fraction": 0.5866320571057755,
+    "implied_in_teacher_retained_band": 904,
+    "implied_pairs": 1541,
+    "implied_retained_fraction_teacher_scale_x_parent": {
+      "max": 0.875,
+      "mean": 0.553145600093523,
+      "median": 0.6,
+      "min": 0.0,
+      "n": 1541,
+      "p90": 0.7692307692307693
+    },
+    "plans": 95,
+    "purely_additive_plans": {
+      "count": 8,
+      "created_dependency_counts": [
+        13,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        22
+      ],
+      "note": "a complete realization of one of these has retained_fraction 1.000 BY CONSTRUCTION -- it removes nothing from the parent",
+      "primitive_counts": [
+        14,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        23
+      ]
+    },
+    "teacher_scale_plans": {
+      "count": 67,
+      "created_dependency_count": {
+        "max": 13.0,
+        "mean": 3.208955223880597,
+        "median": 1.0,
+        "min": 0.0,
+        "n": 67,
+        "p90": 11.0
+      },
+      "preexisting_deletes": {
+        "max": 13.0,
+        "mean": 8.776119402985074,
+        "median": 7.0,
+        "min": 5.0,
+        "n": 67,
+        "p90": 13.0
+      },
+      "purely_additive": 0
+    }
+  },
+  "stage_1_plan_validity": {
+    "definition": "defects of the LATENT, independent of any parent: a created operand referencing an ordinal no earlier role emits, a declared primitive or component count above the runtime maximum, or a declared created-dependency count disagreeing with the roles themselves.",
+    "invalid": 0,
+    "invalid_rows": [],
+    "plans": 95
+  },
+  "stage_2_static_depth0": {
+    "by_stratum": {
+      "production_init": {
+        "feasible_fraction": {
+          "R1_drop_environment_and_lag": 0.9013157894736842,
+          "R2_plus_capacity": 1.0,
+          "v1_exact": 0.32171052631578945
+        },
+        "pairs": 1520
+      },
+      "teacher_root": {
+        "feasible_fraction": {
+          "R1_drop_environment_and_lag": 0.7142857142857143,
+          "R2_plus_capacity": 1.0,
+          "v1_exact": 0.3518796992481203
+        },
+        "pairs": 665
+      }
+    },
+    "definition": "role 0 has an operand descriptor no active atom of the parent carries, under the comparison each specification makes.  A zero here is a proof of proven_incompatible at depth 0, independent of search.",
+    "feasible_fraction": {
+      "R1_drop_environment_and_lag": 0.8443935926773455,
+      "R2_plus_capacity": 1.0,
+      "v1_exact": 0.3308924485125858
+    },
+    "seconds": 5.762384250003379,
+    "total_pairs": 2185
+  },
+  "stage_3_yield": {
+    "by_plan_scale": {
+      "short": {
+        "R1_drop_environment_and_lag": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 5,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.16666666666666666,
+          "decided_fraction": 0.5833333333333334,
+          "full_depth_but_completion_rejected": 1,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 33.0,
+          "median_successors_enumerated": 6086.0,
+          "outcomes": {
+            "completed_realization": 2,
+            "invalid_plan": 0,
+            "proven_incompatible": 5,
+            "search_budget_exhausted": 5
+          },
+          "pairs": 12,
+          "realized_delta_heavy_atoms": {
+            "max": 12.0,
+            "mean": 12.0,
+            "median": 12.0,
+            "min": 12.0,
+            "n": 2,
+            "p90": 12.0
+          },
+          "realized_primitive_count": {
+            "max": 16.0,
+            "mean": 16.0,
+            "median": 16.0,
+            "min": 16.0,
+            "n": 2,
+            "p90": 16.0
+          },
+          "realized_programs": 2,
+          "realized_retained_fraction": {
+            "max": 1.0,
+            "mean": 1.0,
+            "median": 1.0,
+            "min": 1.0,
+            "n": 2,
+            "p90": 1.0
+          }
+        },
+        "R2_plus_capacity": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 5,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.5,
+          "decided_fraction": 0.5833333333333334,
+          "full_depth_but_completion_rejected": 1,
+          "in_teacher_retained_band": 3,
+          "median_nodes_expanded": 27.0,
+          "median_successors_enumerated": 3591.5,
+          "outcomes": {
+            "completed_realization": 6,
+            "invalid_plan": 0,
+            "proven_incompatible": 1,
+            "search_budget_exhausted": 5
+          },
+          "pairs": 12,
+          "realized_delta_heavy_atoms": {
+            "max": 3.0,
+            "mean": -0.8333333333333334,
+            "median": -1.0,
+            "min": -4.0,
+            "n": 6,
+            "p90": 2.0
+          },
+          "realized_primitive_count": {
+            "max": 26.0,
+            "mean": 19.5,
+            "median": 24.0,
+            "min": 6.0,
+            "n": 6,
+            "p90": 26.0
+          },
+          "realized_programs": 6,
+          "realized_retained_fraction": {
+            "max": 1.0,
+            "mean": 0.9382716049382717,
+            "median": 0.9444444444444444,
+            "min": 0.8518518518518519,
+            "n": 6,
+            "p90": 1.0
+          }
+        },
+        "v1_exact": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 4,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.08333333333333333,
+          "decided_fraction": 0.6666666666666666,
+          "full_depth_but_completion_rejected": 1,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 3.0,
+          "median_successors_enumerated": 151.0,
+          "outcomes": {
+            "completed_realization": 1,
+            "invalid_plan": 0,
+            "proven_incompatible": 7,
+            "search_budget_exhausted": 4
+          },
+          "pairs": 12,
+          "realized_delta_heavy_atoms": {
+            "max": 12.0,
+            "mean": 12.0,
+            "median": 12.0,
+            "min": 12.0,
+            "n": 1,
+            "p90": 12.0
+          },
+          "realized_primitive_count": {
+            "max": 16.0,
+            "mean": 16.0,
+            "median": 16.0,
+            "min": 16.0,
+            "n": 1,
+            "p90": 16.0
+          },
+          "realized_programs": 1,
+          "realized_retained_fraction": {
+            "max": 1.0,
+            "mean": 1.0,
+            "median": 1.0,
+            "min": 1.0,
+            "n": 1,
+            "p90": 1.0
+          }
+        }
+      },
+      "teacher_scale": {
+        "R1_drop_environment_and_lag": {
+          "at_teacher_scale": 1,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 13,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.027777777777777776,
+          "decided_fraction": 0.6388888888888888,
+          "full_depth_but_completion_rejected": 1,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 1.5,
+          "median_successors_enumerated": 44.5,
+          "outcomes": {
+            "completed_realization": 1,
+            "invalid_plan": 0,
+            "proven_incompatible": 22,
+            "search_budget_exhausted": 13
+          },
+          "pairs": 36,
+          "realized_delta_heavy_atoms": {
+            "max": -1.0,
+            "mean": -1.0,
+            "median": -1.0,
+            "min": -1.0,
+            "n": 1,
+            "p90": -1.0
+          },
+          "realized_primitive_count": {
+            "max": 31.0,
+            "mean": 31.0,
+            "median": 31.0,
+            "min": 31.0,
+            "n": 1,
+            "p90": 31.0
+          },
+          "realized_programs": 1,
+          "realized_retained_fraction": {
+            "max": 0.9629629629629629,
+            "mean": 0.9629629629629629,
+            "median": 0.9629629629629629,
+            "min": 0.9629629629629629,
+            "n": 1,
+            "p90": 0.9629629629629629
+          }
+        },
+        "R2_plus_capacity": {
+          "at_teacher_scale": 3,
+          "at_teacher_scale_and_in_band": 3,
+          "budget_reason_counts": {
+            "node_budget": 20,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.08333333333333333,
+          "decided_fraction": 0.4444444444444444,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 3,
+          "median_nodes_expanded": 64.0,
+          "median_successors_enumerated": 2059.0,
+          "outcomes": {
+            "completed_realization": 3,
+            "invalid_plan": 0,
+            "proven_incompatible": 13,
+            "search_budget_exhausted": 20
+          },
+          "pairs": 36,
+          "realized_delta_heavy_atoms": {
+            "max": -4.0,
+            "mean": -4.0,
+            "median": -4.0,
+            "min": -4.0,
+            "n": 3,
+            "p90": -4.0
+          },
+          "realized_primitive_count": {
+            "max": 28.0,
+            "mean": 27.666666666666668,
+            "median": 28.0,
+            "min": 27.0,
+            "n": 3,
+            "p90": 28.0
+          },
+          "realized_programs": 3,
+          "realized_retained_fraction": {
+            "max": 0.8518518518518519,
+            "mean": 0.8518518518518517,
+            "median": 0.8518518518518519,
+            "min": 0.8518518518518519,
+            "n": 3,
+            "p90": 0.8518518518518519
+          }
+        },
+        "v1_exact": {
+          "at_teacher_scale": 5,
+          "at_teacher_scale_and_in_band": 3,
+          "budget_reason_counts": {
+            "node_budget": 8,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.1388888888888889,
+          "decided_fraction": 0.7777777777777778,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 3,
+          "median_nodes_expanded": 0.5,
+          "median_successors_enumerated": 6.5,
+          "outcomes": {
+            "completed_realization": 5,
+            "invalid_plan": 0,
+            "proven_incompatible": 23,
+            "search_budget_exhausted": 8
+          },
+          "pairs": 36,
+          "realized_delta_heavy_atoms": {
+            "max": -1.0,
+            "mean": -6.4,
+            "median": -10.0,
+            "min": -10.0,
+            "n": 5,
+            "p90": -1.0
+          },
+          "realized_primitive_count": {
+            "max": 31.0,
+            "mean": 30.6,
+            "median": 31.0,
+            "min": 29.0,
+            "n": 5,
+            "p90": 31.0
+          },
+          "realized_programs": 5,
+          "realized_retained_fraction": {
+            "max": 0.9629629629629629,
+            "mean": 0.762962962962963,
+            "median": 0.6296296296296297,
+            "min": 0.6296296296296297,
+            "n": 5,
+            "p90": 0.9629629629629629
+          }
+        }
+      }
+    },
+    "by_stratum": {
+      "production_init": {
+        "R1_drop_environment_and_lag": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 1,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.0625,
+          "decided_fraction": 0.9375,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 1.0,
+          "median_successors_enumerated": 14.0,
+          "outcomes": {
+            "completed_realization": 1,
+            "invalid_plan": 0,
+            "proven_incompatible": 14,
+            "search_budget_exhausted": 1
+          },
+          "pairs": 16,
+          "realized_delta_heavy_atoms": {
+            "max": 12.0,
+            "mean": 12.0,
+            "median": 12.0,
+            "min": 12.0,
+            "n": 1,
+            "p90": 12.0
+          },
+          "realized_primitive_count": {
+            "max": 16.0,
+            "mean": 16.0,
+            "median": 16.0,
+            "min": 16.0,
+            "n": 1,
+            "p90": 16.0
+          },
+          "realized_programs": 1,
+          "realized_retained_fraction": {
+            "max": 1.0,
+            "mean": 1.0,
+            "median": 1.0,
+            "min": 1.0,
+            "n": 1,
+            "p90": 1.0
+          }
+        },
+        "R2_plus_capacity": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 12,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.0625,
+          "decided_fraction": 0.25,
+          "full_depth_but_completion_rejected": 1,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 64.0,
+          "median_successors_enumerated": 2411.5,
+          "outcomes": {
+            "completed_realization": 1,
+            "invalid_plan": 0,
+            "proven_incompatible": 3,
+            "search_budget_exhausted": 12
+          },
+          "pairs": 16,
+          "realized_delta_heavy_atoms": {
+            "max": 1.0,
+            "mean": 1.0,
+            "median": 1.0,
+            "min": 1.0,
+            "n": 1,
+            "p90": 1.0
+          },
+          "realized_primitive_count": {
+            "max": 11.0,
+            "mean": 11.0,
+            "median": 11.0,
+            "min": 11.0,
+            "n": 1,
+            "p90": 11.0
+          },
+          "realized_programs": 1,
+          "realized_retained_fraction": {
+            "max": 1.0,
+            "mean": 1.0,
+            "median": 1.0,
+            "min": 1.0,
+            "n": 1,
+            "p90": 1.0
+          }
+        },
+        "v1_exact": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 1,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.0,
+          "decided_fraction": 0.9375,
+          "full_depth_but_completion_rejected": 1,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 0.0,
+          "median_successors_enumerated": 0.0,
+          "outcomes": {
+            "completed_realization": 0,
+            "invalid_plan": 0,
+            "proven_incompatible": 15,
+            "search_budget_exhausted": 1
+          },
+          "pairs": 16,
+          "realized_delta_heavy_atoms": {
+            "n": 0
+          },
+          "realized_primitive_count": {
+            "n": 0
+          },
+          "realized_programs": 0,
+          "realized_retained_fraction": {
+            "n": 0
+          }
+        }
+      },
+      "teacher_root": {
+        "R1_drop_environment_and_lag": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 3,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.0,
+          "decided_fraction": 0.8125,
+          "full_depth_but_completion_rejected": 1,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 1.0,
+          "median_successors_enumerated": 8.0,
+          "outcomes": {
+            "completed_realization": 0,
+            "invalid_plan": 0,
+            "proven_incompatible": 13,
+            "search_budget_exhausted": 3
+          },
+          "pairs": 16,
+          "realized_delta_heavy_atoms": {
+            "n": 0
+          },
+          "realized_primitive_count": {
+            "n": 0
+          },
+          "realized_programs": 0,
+          "realized_retained_fraction": {
+            "n": 0
+          }
+        },
+        "R2_plus_capacity": {
+          "at_teacher_scale": 1,
+          "at_teacher_scale_and_in_band": 1,
+          "budget_reason_counts": {
+            "node_budget": 2,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.1875,
+          "decided_fraction": 0.875,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 1,
+          "median_nodes_expanded": 7.0,
+          "median_successors_enumerated": 56.5,
+          "outcomes": {
+            "completed_realization": 3,
+            "invalid_plan": 0,
+            "proven_incompatible": 11,
+            "search_budget_exhausted": 2
+          },
+          "pairs": 16,
+          "realized_delta_heavy_atoms": {
+            "max": 3.0,
+            "mean": 0.0,
+            "median": 1.0,
+            "min": -4.0,
+            "n": 3,
+            "p90": 2.6
+          },
+          "realized_primitive_count": {
+            "max": 28.0,
+            "mean": 19.0,
+            "median": 23.0,
+            "min": 6.0,
+            "n": 3,
+            "p90": 27.0
+          },
+          "realized_programs": 3,
+          "realized_retained_fraction": {
+            "max": 1.0,
+            "mean": 0.9506172839506174,
+            "median": 1.0,
+            "min": 0.8518518518518519,
+            "n": 3,
+            "p90": 1.0
+          }
+        },
+        "v1_exact": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 1,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.0,
+          "decided_fraction": 0.9375,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 0.0,
+          "median_successors_enumerated": 0.0,
+          "outcomes": {
+            "completed_realization": 0,
+            "invalid_plan": 0,
+            "proven_incompatible": 15,
+            "search_budget_exhausted": 1
+          },
+          "pairs": 16,
+          "realized_delta_heavy_atoms": {
+            "n": 0
+          },
+          "realized_primitive_count": {
+            "n": 0
+          },
+          "realized_programs": 0,
+          "realized_retained_fraction": {
+            "n": 0
+          }
+        }
+      },
+      "teacher_witness": {
+        "R1_drop_environment_and_lag": {
+          "at_teacher_scale": 1,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 14,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.125,
+          "decided_fraction": 0.125,
+          "full_depth_but_completion_rejected": 1,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 64.0,
+          "median_successors_enumerated": 7195.0,
+          "outcomes": {
+            "completed_realization": 2,
+            "invalid_plan": 0,
+            "proven_incompatible": 0,
+            "search_budget_exhausted": 14
+          },
+          "pairs": 16,
+          "realized_delta_heavy_atoms": {
+            "max": 12.0,
+            "mean": 5.5,
+            "median": 5.5,
+            "min": -1.0,
+            "n": 2,
+            "p90": 10.700000000000001
+          },
+          "realized_primitive_count": {
+            "max": 31.0,
+            "mean": 23.5,
+            "median": 23.5,
+            "min": 16.0,
+            "n": 2,
+            "p90": 29.5
+          },
+          "realized_programs": 2,
+          "realized_retained_fraction": {
+            "max": 1.0,
+            "mean": 0.9814814814814814,
+            "median": 0.9814814814814814,
+            "min": 0.9629629629629629,
+            "n": 2,
+            "p90": 0.9962962962962962
+          }
+        },
+        "R2_plus_capacity": {
+          "at_teacher_scale": 2,
+          "at_teacher_scale_and_in_band": 2,
+          "budget_reason_counts": {
+            "node_budget": 11,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.3125,
+          "decided_fraction": 0.3125,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 5,
+          "median_nodes_expanded": 64.0,
+          "median_successors_enumerated": 2405.0,
+          "outcomes": {
+            "completed_realization": 5,
+            "invalid_plan": 0,
+            "proven_incompatible": 0,
+            "search_budget_exhausted": 11
+          },
+          "pairs": 16,
+          "realized_delta_heavy_atoms": {
+            "max": -3.0,
+            "mean": -3.6,
+            "median": -4.0,
+            "min": -4.0,
+            "n": 5,
+            "p90": -3.0
+          },
+          "realized_primitive_count": {
+            "max": 28.0,
+            "mean": 26.4,
+            "median": 26.0,
+            "min": 25.0,
+            "n": 5,
+            "p90": 27.6
+          },
+          "realized_programs": 5,
+          "realized_retained_fraction": {
+            "max": 0.8888888888888888,
+            "mean": 0.8666666666666666,
+            "median": 0.8518518518518519,
+            "min": 0.8518518518518519,
+            "n": 5,
+            "p90": 0.8888888888888888
+          }
+        },
+        "v1_exact": {
+          "at_teacher_scale": 5,
+          "at_teacher_scale_and_in_band": 3,
+          "budget_reason_counts": {
+            "node_budget": 10,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.375,
+          "decided_fraction": 0.375,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 3,
+          "median_nodes_expanded": 64.0,
+          "median_successors_enumerated": 2508.0,
+          "outcomes": {
+            "completed_realization": 6,
+            "invalid_plan": 0,
+            "proven_incompatible": 0,
+            "search_budget_exhausted": 10
+          },
+          "pairs": 16,
+          "realized_delta_heavy_atoms": {
+            "max": 12.0,
+            "mean": -3.3333333333333335,
+            "median": -5.5,
+            "min": -10.0,
+            "n": 6,
+            "p90": 5.5
+          },
+          "realized_primitive_count": {
+            "max": 31.0,
+            "mean": 28.166666666666668,
+            "median": 31.0,
+            "min": 16.0,
+            "n": 6,
+            "p90": 31.0
+          },
+          "realized_programs": 6,
+          "realized_retained_fraction": {
+            "max": 1.0,
+            "mean": 0.8024691358024691,
+            "median": 0.7962962962962963,
+            "min": 0.6296296296296297,
+            "n": 6,
+            "p90": 0.9814814814814814
+          }
+        }
+      }
+    },
+    "overall": {
+      "R1_drop_environment_and_lag": {
+        "at_teacher_scale": 1,
+        "at_teacher_scale_and_in_band": 0,
+        "budget_reason_counts": {
+          "node_budget": 18,
+          "seconds_cap": 0
+        },
+        "complete_realization_yield": 0.0625,
+        "decided_fraction": 0.625,
+        "full_depth_but_completion_rejected": 2,
+        "in_teacher_retained_band": 0,
+        "median_nodes_expanded": 16.5,
+        "median_successors_enumerated": 231.0,
+        "outcomes": {
+          "completed_realization": 3,
+          "invalid_plan": 0,
+          "proven_incompatible": 27,
+          "search_budget_exhausted": 18
+        },
+        "pairs": 48,
+        "realized_delta_heavy_atoms": {
+          "max": 12.0,
+          "mean": 7.666666666666667,
+          "median": 12.0,
+          "min": -1.0,
+          "n": 3,
+          "p90": 12.0
+        },
+        "realized_primitive_count": {
+          "max": 31.0,
+          "mean": 21.0,
+          "median": 16.0,
+          "min": 16.0,
+          "n": 3,
+          "p90": 28.0
+        },
+        "realized_programs": 3,
+        "realized_retained_fraction": {
+          "max": 1.0,
+          "mean": 0.9876543209876543,
+          "median": 1.0,
+          "min": 0.9629629629629629,
+          "n": 3,
+          "p90": 1.0
+        }
+      },
+      "R2_plus_capacity": {
+        "at_teacher_scale": 3,
+        "at_teacher_scale_and_in_band": 3,
+        "budget_reason_counts": {
+          "node_budget": 25,
+          "seconds_cap": 0
+        },
+        "complete_realization_yield": 0.1875,
+        "decided_fraction": 0.4791666666666667,
+        "full_depth_but_completion_rejected": 1,
+        "in_teacher_retained_band": 6,
+        "median_nodes_expanded": 64.0,
+        "median_successors_enumerated": 2119.0,
+        "outcomes": {
+          "completed_realization": 9,
+          "invalid_plan": 0,
+          "proven_incompatible": 14,
+          "search_budget_exhausted": 25
+        },
+        "pairs": 48,
+        "realized_delta_heavy_atoms": {
+          "max": 3.0,
+          "mean": -1.8888888888888888,
+          "median": -3.0,
+          "min": -4.0,
+          "n": 9,
+          "p90": 1.4000000000000004
+        },
+        "realized_primitive_count": {
+          "max": 28.0,
+          "mean": 22.22222222222222,
+          "median": 26.0,
+          "min": 6.0,
+          "n": 9,
+          "p90": 28.0
+        },
+        "realized_programs": 9,
+        "realized_retained_fraction": {
+          "max": 1.0,
+          "mean": 0.9094650205761317,
+          "median": 0.8888888888888888,
+          "min": 0.8518518518518519,
+          "n": 9,
+          "p90": 1.0
+        }
+      },
+      "v1_exact": {
+        "at_teacher_scale": 5,
+        "at_teacher_scale_and_in_band": 3,
+        "budget_reason_counts": {
+          "node_budget": 12,
+          "seconds_cap": 0
+        },
+        "complete_realization_yield": 0.125,
+        "decided_fraction": 0.75,
+        "full_depth_but_completion_rejected": 1,
+        "in_teacher_retained_band": 3,
+        "median_nodes_expanded": 1.0,
+        "median_successors_enumerated": 17.0,
+        "outcomes": {
+          "completed_realization": 6,
+          "invalid_plan": 0,
+          "proven_incompatible": 30,
+          "search_budget_exhausted": 12
+        },
+        "pairs": 48,
+        "realized_delta_heavy_atoms": {
+          "max": 12.0,
+          "mean": -3.3333333333333335,
+          "median": -5.5,
+          "min": -10.0,
+          "n": 6,
+          "p90": 5.5
+        },
+        "realized_primitive_count": {
+          "max": 31.0,
+          "mean": 28.166666666666668,
+          "median": 31.0,
+          "min": 16.0,
+          "n": 6,
+          "p90": 31.0
+        },
+        "realized_programs": 6,
+        "realized_retained_fraction": {
+          "max": 1.0,
+          "mean": 0.8024691358024691,
+          "median": 0.7962962962962963,
+          "min": 0.6296296296296297,
+          "n": 6,
+          "p90": 0.9814814814814814
+        }
+      }
+    },
+    "teacher_scale_by_stratum": {
+      "production_init": {
+        "R1_drop_environment_and_lag": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 0,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.0,
+          "decided_fraction": 1.0,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 1.0,
+          "median_successors_enumerated": 14.0,
+          "outcomes": {
+            "completed_realization": 0,
+            "invalid_plan": 0,
+            "proven_incompatible": 12,
+            "search_budget_exhausted": 0
+          },
+          "pairs": 12,
+          "realized_delta_heavy_atoms": {
+            "n": 0
+          },
+          "realized_primitive_count": {
+            "n": 0
+          },
+          "realized_programs": 0,
+          "realized_retained_fraction": {
+            "n": 0
+          }
+        },
+        "R2_plus_capacity": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 9,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.0,
+          "decided_fraction": 0.25,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 64.0,
+          "median_successors_enumerated": 676.5,
+          "outcomes": {
+            "completed_realization": 0,
+            "invalid_plan": 0,
+            "proven_incompatible": 3,
+            "search_budget_exhausted": 9
+          },
+          "pairs": 12,
+          "realized_delta_heavy_atoms": {
+            "n": 0
+          },
+          "realized_primitive_count": {
+            "n": 0
+          },
+          "realized_programs": 0,
+          "realized_retained_fraction": {
+            "n": 0
+          }
+        },
+        "v1_exact": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 0,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.0,
+          "decided_fraction": 1.0,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 0.0,
+          "median_successors_enumerated": 0.0,
+          "outcomes": {
+            "completed_realization": 0,
+            "invalid_plan": 0,
+            "proven_incompatible": 12,
+            "search_budget_exhausted": 0
+          },
+          "pairs": 12,
+          "realized_delta_heavy_atoms": {
+            "n": 0
+          },
+          "realized_primitive_count": {
+            "n": 0
+          },
+          "realized_programs": 0,
+          "realized_retained_fraction": {
+            "n": 0
+          }
+        }
+      },
+      "teacher_root": {
+        "R1_drop_environment_and_lag": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 2,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.0,
+          "decided_fraction": 0.8333333333333334,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 1.0,
+          "median_successors_enumerated": 8.0,
+          "outcomes": {
+            "completed_realization": 0,
+            "invalid_plan": 0,
+            "proven_incompatible": 10,
+            "search_budget_exhausted": 2
+          },
+          "pairs": 12,
+          "realized_delta_heavy_atoms": {
+            "n": 0
+          },
+          "realized_primitive_count": {
+            "n": 0
+          },
+          "realized_programs": 0,
+          "realized_retained_fraction": {
+            "n": 0
+          }
+        },
+        "R2_plus_capacity": {
+          "at_teacher_scale": 1,
+          "at_teacher_scale_and_in_band": 1,
+          "budget_reason_counts": {
+            "node_budget": 1,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.08333333333333333,
+          "decided_fraction": 0.9166666666666666,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 1,
+          "median_nodes_expanded": 7.0,
+          "median_successors_enumerated": 42.5,
+          "outcomes": {
+            "completed_realization": 1,
+            "invalid_plan": 0,
+            "proven_incompatible": 10,
+            "search_budget_exhausted": 1
+          },
+          "pairs": 12,
+          "realized_delta_heavy_atoms": {
+            "max": -4.0,
+            "mean": -4.0,
+            "median": -4.0,
+            "min": -4.0,
+            "n": 1,
+            "p90": -4.0
+          },
+          "realized_primitive_count": {
+            "max": 28.0,
+            "mean": 28.0,
+            "median": 28.0,
+            "min": 28.0,
+            "n": 1,
+            "p90": 28.0
+          },
+          "realized_programs": 1,
+          "realized_retained_fraction": {
+            "max": 0.8518518518518519,
+            "mean": 0.8518518518518519,
+            "median": 0.8518518518518519,
+            "min": 0.8518518518518519,
+            "n": 1,
+            "p90": 0.8518518518518519
+          }
+        },
+        "v1_exact": {
+          "at_teacher_scale": 0,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 1,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.0,
+          "decided_fraction": 0.9166666666666666,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 0.0,
+          "median_successors_enumerated": 0.0,
+          "outcomes": {
+            "completed_realization": 0,
+            "invalid_plan": 0,
+            "proven_incompatible": 11,
+            "search_budget_exhausted": 1
+          },
+          "pairs": 12,
+          "realized_delta_heavy_atoms": {
+            "n": 0
+          },
+          "realized_primitive_count": {
+            "n": 0
+          },
+          "realized_programs": 0,
+          "realized_retained_fraction": {
+            "n": 0
+          }
+        }
+      },
+      "teacher_witness": {
+        "R1_drop_environment_and_lag": {
+          "at_teacher_scale": 1,
+          "at_teacher_scale_and_in_band": 0,
+          "budget_reason_counts": {
+            "node_budget": 11,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.08333333333333333,
+          "decided_fraction": 0.08333333333333333,
+          "full_depth_but_completion_rejected": 1,
+          "in_teacher_retained_band": 0,
+          "median_nodes_expanded": 64.0,
+          "median_successors_enumerated": 6338.5,
+          "outcomes": {
+            "completed_realization": 1,
+            "invalid_plan": 0,
+            "proven_incompatible": 0,
+            "search_budget_exhausted": 11
+          },
+          "pairs": 12,
+          "realized_delta_heavy_atoms": {
+            "max": -1.0,
+            "mean": -1.0,
+            "median": -1.0,
+            "min": -1.0,
+            "n": 1,
+            "p90": -1.0
+          },
+          "realized_primitive_count": {
+            "max": 31.0,
+            "mean": 31.0,
+            "median": 31.0,
+            "min": 31.0,
+            "n": 1,
+            "p90": 31.0
+          },
+          "realized_programs": 1,
+          "realized_retained_fraction": {
+            "max": 0.9629629629629629,
+            "mean": 0.9629629629629629,
+            "median": 0.9629629629629629,
+            "min": 0.9629629629629629,
+            "n": 1,
+            "p90": 0.9629629629629629
+          }
+        },
+        "R2_plus_capacity": {
+          "at_teacher_scale": 2,
+          "at_teacher_scale_and_in_band": 2,
+          "budget_reason_counts": {
+            "node_budget": 10,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.16666666666666666,
+          "decided_fraction": 0.16666666666666666,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 2,
+          "median_nodes_expanded": 64.0,
+          "median_successors_enumerated": 2614.0,
+          "outcomes": {
+            "completed_realization": 2,
+            "invalid_plan": 0,
+            "proven_incompatible": 0,
+            "search_budget_exhausted": 10
+          },
+          "pairs": 12,
+          "realized_delta_heavy_atoms": {
+            "max": -4.0,
+            "mean": -4.0,
+            "median": -4.0,
+            "min": -4.0,
+            "n": 2,
+            "p90": -4.0
+          },
+          "realized_primitive_count": {
+            "max": 28.0,
+            "mean": 27.5,
+            "median": 27.5,
+            "min": 27.0,
+            "n": 2,
+            "p90": 27.9
+          },
+          "realized_programs": 2,
+          "realized_retained_fraction": {
+            "max": 0.8518518518518519,
+            "mean": 0.8518518518518519,
+            "median": 0.8518518518518519,
+            "min": 0.8518518518518519,
+            "n": 2,
+            "p90": 0.8518518518518519
+          }
+        },
+        "v1_exact": {
+          "at_teacher_scale": 5,
+          "at_teacher_scale_and_in_band": 3,
+          "budget_reason_counts": {
+            "node_budget": 7,
+            "seconds_cap": 0
+          },
+          "complete_realization_yield": 0.4166666666666667,
+          "decided_fraction": 0.4166666666666667,
+          "full_depth_but_completion_rejected": 0,
+          "in_teacher_retained_band": 3,
+          "median_nodes_expanded": 64.0,
+          "median_successors_enumerated": 2508.0,
+          "outcomes": {
+            "completed_realization": 5,
+            "invalid_plan": 0,
+            "proven_incompatible": 0,
+            "search_budget_exhausted": 7
+          },
+          "pairs": 12,
+          "realized_delta_heavy_atoms": {
+            "max": -1.0,
+            "mean": -6.4,
+            "median": -10.0,
+            "min": -10.0,
+            "n": 5,
+            "p90": -1.0
+          },
+          "realized_primitive_count": {
+            "max": 31.0,
+            "mean": 30.6,
+            "median": 31.0,
+            "min": 29.0,
+            "n": 5,
+            "p90": 31.0
+          },
+          "realized_programs": 5,
+          "realized_retained_fraction": {
+            "max": 0.9629629629629629,
+            "mean": 0.762962962962963,
+            "median": 0.6296296296296297,
+            "min": 0.6296296296296297,
+            "n": 5,
+            "p90": 0.9629629629629629
+          }
+        }
+      }
+    },
+    "teacher_scale_plans_only": {
+      "R1_drop_environment_and_lag": {
+        "at_teacher_scale": 1,
+        "at_teacher_scale_and_in_band": 0,
+        "budget_reason_counts": {
+          "node_budget": 13,
+          "seconds_cap": 0
+        },
+        "complete_realization_yield": 0.027777777777777776,
+        "decided_fraction": 0.6388888888888888,
+        "full_depth_but_completion_rejected": 1,
+        "in_teacher_retained_band": 0,
+        "median_nodes_expanded": 1.5,
+        "median_successors_enumerated": 44.5,
+        "outcomes": {
+          "completed_realization": 1,
+          "invalid_plan": 0,
+          "proven_incompatible": 22,
+          "search_budget_exhausted": 13
+        },
+        "pairs": 36,
+        "realized_delta_heavy_atoms": {
+          "max": -1.0,
+          "mean": -1.0,
+          "median": -1.0,
+          "min": -1.0,
+          "n": 1,
+          "p90": -1.0
+        },
+        "realized_primitive_count": {
+          "max": 31.0,
+          "mean": 31.0,
+          "median": 31.0,
+          "min": 31.0,
+          "n": 1,
+          "p90": 31.0
+        },
+        "realized_programs": 1,
+        "realized_retained_fraction": {
+          "max": 0.9629629629629629,
+          "mean": 0.9629629629629629,
+          "median": 0.9629629629629629,
+          "min": 0.9629629629629629,
+          "n": 1,
+          "p90": 0.9629629629629629
+        }
+      },
+      "R2_plus_capacity": {
+        "at_teacher_scale": 3,
+        "at_teacher_scale_and_in_band": 3,
+        "budget_reason_counts": {
+          "node_budget": 20,
+          "seconds_cap": 0
+        },
+        "complete_realization_yield": 0.08333333333333333,
+        "decided_fraction": 0.4444444444444444,
+        "full_depth_but_completion_rejected": 0,
+        "in_teacher_retained_band": 3,
+        "median_nodes_expanded": 64.0,
+        "median_successors_enumerated": 2059.0,
+        "outcomes": {
+          "completed_realization": 3,
+          "invalid_plan": 0,
+          "proven_incompatible": 13,
+          "search_budget_exhausted": 20
+        },
+        "pairs": 36,
+        "realized_delta_heavy_atoms": {
+          "max": -4.0,
+          "mean": -4.0,
+          "median": -4.0,
+          "min": -4.0,
+          "n": 3,
+          "p90": -4.0
+        },
+        "realized_primitive_count": {
+          "max": 28.0,
+          "mean": 27.666666666666668,
+          "median": 28.0,
+          "min": 27.0,
+          "n": 3,
+          "p90": 28.0
+        },
+        "realized_programs": 3,
+        "realized_retained_fraction": {
+          "max": 0.8518518518518519,
+          "mean": 0.8518518518518517,
+          "median": 0.8518518518518519,
+          "min": 0.8518518518518519,
+          "n": 3,
+          "p90": 0.8518518518518519
+        }
+      },
+      "v1_exact": {
+        "at_teacher_scale": 5,
+        "at_teacher_scale_and_in_band": 3,
+        "budget_reason_counts": {
+          "node_budget": 8,
+          "seconds_cap": 0
+        },
+        "complete_realization_yield": 0.1388888888888889,
+        "decided_fraction": 0.7777777777777778,
+        "full_depth_but_completion_rejected": 0,
+        "in_teacher_retained_band": 3,
+        "median_nodes_expanded": 0.5,
+        "median_successors_enumerated": 6.5,
+        "outcomes": {
+          "completed_realization": 5,
+          "invalid_plan": 0,
+          "proven_incompatible": 23,
+          "search_budget_exhausted": 8
+        },
+        "pairs": 36,
+        "realized_delta_heavy_atoms": {
+          "max": -1.0,
+          "mean": -6.4,
+          "median": -10.0,
+          "min": -10.0,
+          "n": 5,
+          "p90": -1.0
+        },
+        "realized_primitive_count": {
+          "max": 31.0,
+          "mean": 30.6,
+          "median": 31.0,
+          "min": 29.0,
+          "n": 5,
+          "p90": 31.0
+        },
+        "realized_programs": 5,
+        "realized_retained_fraction": {
+          "max": 0.9629629629629629,
+          "mean": 0.762962962962963,
+          "median": 0.6296296296296297,
+          "min": 0.6296296296296297,
+          "n": 5,
+          "p90": 0.9629629629629629
+        }
+      }
+    }
+  },
+  "stage_4_equivalence": {
+    "pinned_binder_equivalence": {
+      "checks": 48,
+      "identical": 48,
+      "non_empty_binding_counts": [
+        4,
+        4,
+        4,
+        1
+      ],
+      "non_empty_checks": 4,
+      "non_empty_identical": 4,
+      "note": "live bind_joint_plan vs bind_instrumented(ranking='hash') at the production beam width",
+      "vacuous": false
+    },
+    "predicate_equivalence": {
+      "agree": 5005,
+      "comparisons": 5005,
+      "disagree": 0,
+      "discriminating": true,
+      "note": "role_match under SPEC_V1_EXACT vs the pinned rule identity(observed) == identity(desired) (pmo_joint_dependency_jump.py:344)",
+      "reference_false_cases": 4937,
+      "reference_true_cases": 68,
+      "relaxation_is_a_strict_widening": true,
+      "relaxed_R1_true_cases": 108
+    }
+  },
+  "teacher_profile": {
+    "primitive_count_median_range": [
+      29,
+      40
+    ],
+    "retained_fraction_range": [
+      0.52,
+      0.96
+    ],
+    "source": "diagnostics/pmo_binder_repair_v1.json (teacher profile carried forward)",
+    "teacher_scale_threshold": 27
+  },
+  "verdict": {
+    "best_relaxed_at_teacher_scale": 3,
+    "best_relaxed_in_teacher_retained_band": 3,
+    "best_relaxed_yield": 0.08333333333333333,
+    "budget_reason_by_arm": {
+      "R1_drop_environment_and_lag": {
+        "node_budget": 13,
+        "seconds_cap": 0
+      },
+      "R2_plus_capacity": {
+        "node_budget": 20,
+        "seconds_cap": 0
+      },
+      "v1_exact": {
+        "node_budget": 8,
+        "seconds_cap": 0
+      }
+    },
+    "caveat": "an arm whose decided_fraction is low is budget-limited: its proven_incompatible count is a lower bound and its yield is not an estimate.",
+    "control_at_teacher_scale": 5,
+    "control_in_teacher_retained_band": 3,
+    "control_yield": 0.1388888888888889,
+    "decided_fraction_by_arm": {
+      "R1_drop_environment_and_lag": 0.6388888888888888,
+      "R2_plus_capacity": 0.4444444444444444,
+      "v1_exact": 0.7777777777777778
+    },
+    "depth0_feasible_fraction": {
+      "R1_drop_environment_and_lag": 0.8443935926773455,
+      "R2_plus_capacity": 1.0,
+      "v1_exact": 0.3308924485125858
+    },
+    "headline": "NOT REPAIRED: the weaker descriptor raised depth-0 feasibility (and so the binding-rate ceiling) but produced NO additional complete program at teacher scale.  This is the failure mode the task named in advance -- a raised match rate that does not move realized scale is not a fix.",
+    "relaxation_raised_complete_realization_yield": false,
+    "relaxation_raised_depth0_feasibility": true,
+    "relaxation_raised_in_band_yield": false,
+    "relaxation_raised_teacher_scale_yield": false,
+    "scope": "teacher_scale_plans_only -- the cut the question is about"
+  }
+}

@@ -1996,3 +1996,59 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   into that name; `git fetch origin <branch>` then `git merge FETCH_HEAD` works. The only
   conflict was `learnings.md`, which is append-only -- resolve by keeping BOTH blocks in
   order, never by choosing a side.
+## 2026-09-20 (PMO-v2: promoting the realizer, and budgeting a COMPLETE search)
+
+- **Choose a search budget from the SUCCESS cost distribution, never from the mean.** The
+  realizer replaced the jump lane's width-4 beam. A 12 s per-attempt cap looked comfortable on
+  aggregates (mean 4.94 s/attempt, median 0.30, 9.1 attempts per 45 s lane) and **silently lost
+  3 of the 6 measured realizations**, because every realization the matched comparison found
+  needed **51-55 expanded nodes of a 64 budget** -- so the first one arrives at ~80% of the way
+  through, and capping near the mean truncates exactly the productive tail. 20 s keeps 6 of 6 at
+  6.88 s/attempt. The cut is safe only because the two distributions SEPARATE: every success
+  finishes within 16.92 s while the unproductive searches run 18-64 s. **The expensive searches
+  are the ones that produce nothing** -- the opposite of the intuition that would have set the
+  cap by average cost.
+- **Measure the production configuration, not the component.** The matched-comparison numbers
+  were time-to-FIRST realization under 3 concurrent workers; the production adapter collects
+  SEVERAL (the controller ranks bindings by retained fraction against a random target, so one row
+  makes that target inert). Re-measuring at the real setting -- node_budget 64, collect_all,
+  max_realizations 4, single process -- was what produced the cap decision, and it reproduced the
+  headline exactly through the adapter: 5 teacher-scale pairs, median 31 primitives, median
+  retained 0.630, 3 in the 0.52-0.96 band. Single process ran **1.3-2.1x faster** than the
+  3-worker measurement, restating the standing rule that parallelism is free during
+  implementation and not during measurement.
+- **A wall cap checked between expansions is SOFT.** `over_budget()` runs between node
+  expansions, so the executor replay and program extraction of an in-flight node complete past
+  it: measured max 20.77 s against a 20.0 s cap (~4%). Budget the lane with that headroom rather
+  than assuming the cap is hard.
+- **Record the throughput trade in the contract instead of discovering it later.** The lane now
+  makes ~6.5 attempts per 45 s batch instead of up to 32. That is the intended trade -- fewer,
+  deeper attempts -- but a later run judged against the beam's attempt count would read it as a
+  regression. Raising `wall_seconds` is the available lever and was deliberately NOT taken: it
+  affects all three lanes.
+- **A preflight can stop gating its own runtime the moment you swap the thing it measures.**
+  `pmo_population_live_parent_gate.py` says "scoring is prohibited until the resulting receipt
+  passes the non-root support floor" and binds with `bind_joint_plan` -- the BEAM. After the
+  controller moved to `realize_plan_binding`, that gate measures a binder production no longer
+  uses, so its sealed decision does not gate the new runtime. Found by grepping for remaining
+  callers of the replaced function, not by any test. **After replacing a production function,
+  grep its other callers and ask which of them are GATES.** Deliberately not rewired in the same
+  pass: the gate could legitimately fail under the realizer's per-attempt cost, and that is a
+  measurement the owner should sanction, not a side effect of an integration commit.
+- **A moved contract identity SHOULD break the launcher, and re-pinning it would forge an
+  authorization.** Re-sealing moved `pmo_population_controller_v1_scored_contract_corrected.json`,
+  whose old hash is pinned in `tools/launch_pmo_population_v1_corrected.py` plus four receipts and
+  a source capsule. The launcher now refuses with "corrected contract payload hash changed" --
+  correct, because PMO-v2 is a different runtime from the one that authorization covered. The
+  receipts are records of the SUPERSEDED identity and must stay addressing it. Distinguish this
+  from the 2026-08-02 re-pin sweep: there the pins were maintenance on a non-authorizing binding
+  contract; here the pin is an AUTHORIZATION and re-pointing it would manufacture consent.
+- **Mutation is the only proof an adapter test is load-bearing.** Six production mutations --
+  dropping the source state from `states`, pointing `endpoint_state` at the source, collapsing the
+  returned rows to one, ignoring `max_realizations`, returning search order instead of the
+  content-addressed order, and drifting the production predicate onto a relaxation -- each had to
+  make a NAMED test fail. All six were killed. The strongest of these guards does not recompute
+  anything from the adapter: it drives the real consumer (`_joint_program`), which replays the
+  actions and asserts `trace["states"] == bound["states"]`, and it cross-checks
+  `retained_fraction` computed by `finalize` from the executed graph against the controller's own
+  recomputation from `decode_state(endpoint_state)` -- two independent paths to one number.

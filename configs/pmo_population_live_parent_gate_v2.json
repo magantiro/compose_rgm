@@ -5,7 +5,8 @@
       "modal_apps/pmo_population_v1_app.py": "36f49f0ecf791e6ba823a1d3f19a2b34b69cc8e269d149f3c69d1ea1b61ad88a",
       "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",
       "src/compose_v4/control/pmo_credit.py": "ec1eb66589f241dec65eaa73a540f32ac8b032d7562889f7adf1a3b299834112",
-      "src/compose_v4/control/pmo_population_controller.py": "f136d26fe248dab575dfef2d4eddc6741e3dbb8a934755d5cfad057a52a5466a",
+      "src/compose_v4/control/pmo_population_controller.py": "9c86474b8e3f3487a43366d1f3acdd6716f086e9d13f1df1fb2d099ed7c7b55d",
+      "src/compose_v4/control/pmo_realization.py": "153d2f49b08186abff6088c1f6c462fe2d96b83ede26587b90a8504c0671b308",
       "src/compose_v4/experiments/pmo_oracle_assets.py": "5ec0b7c9b9185cd2b8edd14c2529f37e825311a2b39d6ce71c68423ab9f4d558",
       "src/compose_v4/experiments/pmo_population_live_parent_gate.py": "518045a7941e5073ed75abfe0d0098d3d98c11f5267b2d217895a0fb40c095c5",
       "tools/pmo_population_live_parent_gate.py": "d945af12ab262d5d5667a15b623b212407d7f7a6960b439fdcf258ece944faea"
@@ -63,5 +64,5 @@
       "unique_route_scale_endpoints": 30
     }
   },
-  "payload_sha256": "a315357cf26e7ba421d869046b4ac00a14ec2760f559100fdc3d90926aeabd3b"
+  "payload_sha256": "0bd8160baf5595f812f76d3e9b3966fe09aaf3c556ade90cf2b18a9812c08b7b"
 }
