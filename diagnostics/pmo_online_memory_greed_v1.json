@@ -1,0 +1,29 @@
+{
+  "schema": "pmo_online_memory_greed_v1",
+  "tasks": {
+    "celecoxib_rediscovery": {
+      "median_effective_fraction_of_support": 0.6296890283048252,
+      "median_effective_support_size": 5.356545908773758,
+      "median_max_over_min_weight": 97.82378211216754,
+      "median_regions": 16.0,
+      "median_top_region_probability": 0.20186483148304546,
+      "parents": 39
+    },
+    "gsk3b": {
+      "median_effective_fraction_of_support": 0.5481506027119869,
+      "median_effective_support_size": 7.2927889677409805,
+      "median_max_over_min_weight": 87.54319482988582,
+      "median_regions": 18.0,
+      "median_top_region_probability": 0.2578732846310301,
+      "parents": 40
+    },
+    "perindopril_mpo": {
+      "median_effective_fraction_of_support": 0.6102442679551717,
+      "median_effective_support_size": 8.176384350201287,
+      "median_max_over_min_weight": 70.88638609047219,
+      "median_regions": 16.0,
+      "median_top_region_probability": 0.24620135940864882,
+      "parents": 39
+    }
+  }
+}
