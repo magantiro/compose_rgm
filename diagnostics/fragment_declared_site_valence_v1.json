@@ -1,0 +1,118 @@
+{
+  "schema": "compose_fragment_declared_site_valence_v1",
+  "question": "why do 8 of 10 drugs have no free valence at the far-core anchor -- task property, harness artifact, or wrong atom?",
+  "answer": "(c) -- NEITHER (a) nor (b). The precondition was an artifact of the ROUTE the transaction took, not of the task and not of the seeding.",
+  "three_columns_measured": {
+    "note": "siteH_in_core is the hydrogen capping the declared dummy; siteH_after_seed is the same site once the bridge bonds to it",
+    "BARICITINIB": {
+      "core": [
+        1,
+        1
+      ],
+      "after_seed": [
+        0,
+        0
+      ]
+    },
+    "CYCLOTHIAZIDE": {
+      "core": [
+        2,
+        2
+      ],
+      "after_seed": [
+        1,
+        1
+      ]
+    },
+    "ELIGLUSTAT": {
+      "core": [
+        1,
+        1
+      ],
+      "after_seed": [
+        0,
+        0
+      ]
+    },
+    "ERLOTINIB": {
+      "core": [
+        1,
+        1
+      ],
+      "after_seed": [
+        0,
+        0
+      ]
+    },
+    "FUTIBATINIB": {
+      "core": [
+        2,
+        1
+      ],
+      "after_seed": [
+        1,
+        0
+      ]
+    },
+    "LESINURAD": {
+      "core": [
+        1,
+        2
+      ],
+      "after_seed": [
+        0,
+        1
+      ]
+    },
+    "LIOTHYRONINE": {
+      "core": [
+        3,
+        1
+      ],
+      "after_seed": [
+        2,
+        0
+      ]
+    },
+    "LOVASTATIN": {
+      "core": [
+        2,
+        2
+      ],
+      "after_seed": [
+        1,
+        1
+      ]
+    },
+    "MARIBAVIR": {
+      "core": [
+        1,
+        2
+      ],
+      "after_seed": [
+        0,
+        1
+      ]
+    },
+    "SPIRAPRIL": {
+      "core": [
+        1,
+        1
+      ],
+      "after_seed": [
+        0,
+        0
+      ]
+    }
+  },
+  "why_not_a": "The declared sites are NOT saturated in the drug. Every one carries at least one hydrogen in the retained core, so the benchmark means what it says: something attaches there into free valence. The attachment model is not mismatched panel-wide.",
+  "why_not_b": "The seeding is CORRECT. siteH_after_seed is exactly siteH_in_core minus one on every drug and every site, which is the linker bond consuming precisely the valence the declared site offers. That is the intended chemistry, not a defect.",
+  "why_c": "The close-then-open route ring-closes the new atom to the far anchor BEFORE removing the old bond, so the anchor must transiently carry TWO external bonds. A declared site offering one free valence -- the normal case -- cannot. The transaction therefore only ran where the site happened to carry spare valence beyond what the task requires, which is 4 of 10.",
+  "the_fix_verified": "bond_reroute exchanges a bridge atomically: its docstring is exactly this operation, removing (a,b) and inserting (u,v) in one committed rewrite with no disconnected state ever visible. Insert then reroute needs no transient extra valence and is TWO events rather than three.",
+  "measured": {
+    "close_then_open": "4 of 10 drugs",
+    "insert_then_reroute": "10 of 10 drugs, all valid, cores separated, region lock permitting"
+  },
+  "consequence": "The precondition should be DELETED rather than scoped. v3 would carry no free-valence gate at all.",
+  "status": "v2 is FALSIFIED as predeclared and remains OFF by default. v3 is NOT built and no arm has been scored."
+}
