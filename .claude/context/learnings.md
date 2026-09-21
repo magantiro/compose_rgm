@@ -1996,3 +1996,61 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   into that name; `git fetch origin <branch>` then `git merge FETCH_HEAD` works. The only
   conflict was `learnings.md`, which is append-only -- resolve by keeping BOTH blocks in
   order, never by choosing a side.
+
+## 2026-09-21 (de-novo generation benchmark: the checkpoint question is closed)
+
+- **Lineage B step-1,000 is the ONLY de-novo checkpoint that still exists anywhere on Modal, and
+  the one checkpoint that was ever numerically better is both rejected on record AND gone from
+  disk.** A full recursive enumeration of `compose-v4-artifacts` (79 top-level dirs, 81,274
+  entries, 4,421 `.pt` files) returns **ZERO** hits for every training-run signature:
+  `checkpoint.best_so_far`, `checkpoint.recovery`, `manifest.training`, `tree_source_prior`,
+  `metrics.json`, `compiled_paths`, `rollouts.pt`. There is no `_shared/` dir either, though
+  `modal_apps/train_tracelet_gm.py:48` points `TRAINING_SUPPORT_CACHE_DIR` at it, and none of the
+  three known run labels resolve. Reason: the volume was created **2026-08-09**, AFTER the July
+  generator runs; the volume that held them is gone. `compose-v4-artifacts` holds campaign outputs
+  (`t4_*`, `pmo_*`), the editing corpus, and value nets -- **not** the generator lineage. Of the 18
+  non-corpus `.pt` files on it, every general model is EDITING: the two `R_THETA_CHECKPOINT.pt` and
+  their `inference_packages/` re-export carry `frozen_process_sha256 = 0c938177...`, the Process-V2
+  identity. The ONLY surviving de-novo artifact is the copy staged on `compose-denovo-eval-v1`
+  at `lineageB/checkpoint.best_so_far.pt` (38,387,536 B, sha `c9d9275...`).
+  **Corollary: a stronger unconditional generator cannot be promoted, only trained.**
+- **The step-2,500 checkpoint is NOT an available upgrade, and the reason is scientific, not
+  logistical.** It is numerically better on the same run (small rings 51% -> 40%, matched-CNOF FCD
+  23.044 -> 19.180) but `docs/GENERATOR_LINEAGE_MAP.md` §0.2 records it as deliberately NOT
+  promoted: it sits on the same 3,000-step cosine schedule whose LR had already decayed to 4.22e-5,
+  so a new scientific conclusion must not be drawn from it; the fresh-optimizer continuation
+  early-stopped (val 11.69 -> 12.08) and the legacy-transfer rescue lost to the incumbent. Its only
+  recorded homes were `/private/tmp/...` -- reaped. So the documented **51% small-ring rate at step
+  1,000** is the rate any de-novo number today is produced under: predict the QED/SA quality metric
+  accordingly and label it a PREVIEW result rather than reporting it as COMPOSE's de-novo ceiling.
+- **`modal run file.py::func` refuses to dispatch when the file defines MORE THAN ONE
+  `@app.local_entrypoint()`** -- it prints "Specify a Modal Function or local entrypoint to run"
+  and lists them, exiting non-zero WITHOUT running anything. This is what the earlier
+  "`::probe` deferred to the local entrypoint" note was describing. Adding a second entrypoint to
+  a working app therefore breaks every previously-working bare invocation of it. Always name the
+  entrypoint explicitly (`::main`, `::probe_entry`). Note the failure is fast and exits 0 from a
+  backgrounding wrapper's perspective if you only check the wrapper -- read the LOG, not the exit
+  code (cf. the 2026-07-29 `nohup` note).
+- **Unconditional de-novo sampling DOES run today, verified end-to-end on the pinned kernel.**
+  `sample_tracelet_ancestral` + `payload["tree_source_prior"]`
+  (`DegreeBoundedCarbonTreePrior`, `source_prior: "carbon_tree"`) samples from structured NOISE --
+  a random degree-capped all-carbon alkane tree (t=0 examples:
+  `CCCCC(CC(C)CC)C(CCCC)(CCCC(C)C)CC(CC)C(C)CC`) carrying no heteroatom, bond-order, ring or
+  scaffold information and not a corpus molecule. 4/4 probe trajectories produced valid, connected,
+  heteroaromatic drug-like molecules in 22-29 events. The image reproduces the checkpoint
+  manifest's own training runtime exactly (python 3.11.12, torch 2.4.0+cu121, numpy 1.26.4,
+  scipy 1.13.1, networkx 3.3, rdkit 2024.03.5), and the de-novo rollout path never calls
+  `build_production_ringcore_catalog` -- the typed ring catalog is deserialized FROM the checkpoint
+  payload, which is strictly stronger than the frozen-fingerprint check because it is byte-identical
+  to the catalog used in training.
+- **The published `quality` metric was never implemented in this repo.**
+  `src/compose_v4/eval/molecular_quality.py` has V/U/N, descriptor Wassersteins, FCD and
+  `internal_diversity`, but NOT the GenMol/InVirtuoGen conjunction (valid AND unique AND QED >= 0.6
+  AND SA <= 4). Added as `src/compose_v4/eval/denovo_benchmark.py` with 16 tests. Two denominator
+  traps, both now reported explicitly rather than chosen silently: `quality` over ATTEMPTS vs
+  `quality_given_valid_unique` over the valid-unique set (they differ by the uniqueness factor),
+  and off-diagonal pairwise diversity vs MOSES `IntDiv1` which includes the i==j diagonal.
+  **The QED >= 0.6 bar is far more selective than it sounds: measured, aspirin (QED 0.550) and
+  caffeine (0.538) both FAIL it**; ibuprofen 0.822, celecoxib 0.754, diazepam 0.792 pass. A test
+  fixture that assumes a famous drug passes will fail, and that is the fixture being wrong, not the
+  metric.
