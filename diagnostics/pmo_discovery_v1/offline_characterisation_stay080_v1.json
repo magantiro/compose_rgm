@@ -1,0 +1,447 @@
+{
+  "schema_version": "pmo_discovery_offline_characterisation_v1",
+  "oracle_calls": 0,
+  "scorer": "synthetic free landscape defined in this script",
+  "budget": 250,
+  "per_round": 14,
+  "stay_in_basin_probability": 0.8,
+  "seeds": [
+    11,
+    23,
+    37
+  ],
+  "landscapes": {
+    "plateaued": {
+      "rows": [
+        {
+          "arm": "B_memory_only",
+          "seed": 11,
+          "charged_calls": 250,
+          "rounds": 35,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 128,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.673688,
+          "u10": 0.648638,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_full",
+          "seed": 11,
+          "charged_calls": 250,
+          "rounds": 41,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 128,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.670171,
+          "u10": 0.650515,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_floor_only",
+          "seed": 11,
+          "charged_calls": 241,
+          "rounds": 38,
+          "distinct_basins_scored": 7,
+          "distinct_molecules_scored": 241,
+          "distinct_source_molecules_used": 121,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.166,
+          "best_score": 0.650954,
+          "u10": 0.63833,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_frontier_only",
+          "seed": 11,
+          "charged_calls": 250,
+          "rounds": 35,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 122,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.669211,
+          "u10": 0.652923,
+          "basins_available": 12
+        },
+        {
+          "arm": "B_memory_only",
+          "seed": 23,
+          "charged_calls": 231,
+          "rounds": 41,
+          "distinct_basins_scored": 7,
+          "distinct_molecules_scored": 231,
+          "distinct_source_molecules_used": 120,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.1732,
+          "best_score": 0.635784,
+          "u10": 0.62063,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_full",
+          "seed": 23,
+          "charged_calls": 250,
+          "rounds": 30,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 130,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.654674,
+          "u10": 0.647421,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_floor_only",
+          "seed": 23,
+          "charged_calls": 250,
+          "rounds": 31,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 129,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.657409,
+          "u10": 0.638937,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_frontier_only",
+          "seed": 23,
+          "charged_calls": 250,
+          "rounds": 41,
+          "distinct_basins_scored": 7,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 120,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.654674,
+          "u10": 0.643366,
+          "basins_available": 12
+        },
+        {
+          "arm": "B_memory_only",
+          "seed": 37,
+          "charged_calls": 250,
+          "rounds": 44,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 127,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.646078,
+          "u10": 0.638072,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_full",
+          "seed": 37,
+          "charged_calls": 250,
+          "rounds": 41,
+          "distinct_basins_scored": 9,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 130,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.686033,
+          "u10": 0.652881,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_floor_only",
+          "seed": 37,
+          "charged_calls": 250,
+          "rounds": 41,
+          "distinct_basins_scored": 9,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 130,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.686033,
+          "u10": 0.652881,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_frontier_only",
+          "seed": 37,
+          "charged_calls": 250,
+          "rounds": 39,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 130,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.663317,
+          "u10": 0.637927,
+          "basins_available": 12
+        }
+      ],
+      "mean": {
+        "distinct_basins_scored": {
+          "B_memory_only": 7.6667,
+          "C_full": 8.3333,
+          "C_floor_only": 8.0,
+          "C_frontier_only": 7.6667
+        },
+        "distinct_molecules_scored": {
+          "B_memory_only": 243.6667,
+          "C_full": 250.0,
+          "C_floor_only": 247.0,
+          "C_frontier_only": 250.0
+        },
+        "distinct_source_molecules_used": {
+          "B_memory_only": 125.0,
+          "C_full": 129.3333,
+          "C_floor_only": 126.6667,
+          "C_frontier_only": 124.0
+        },
+        "distinct_program_families_used": {
+          "B_memory_only": 5.0,
+          "C_full": 5.0,
+          "C_floor_only": 5.0,
+          "C_frontier_only": 5.0
+        },
+        "dominant_basin_call_share": {
+          "B_memory_only": 0.1644,
+          "C_full": 0.16,
+          "C_floor_only": 0.162,
+          "C_frontier_only": 0.16
+        },
+        "best_score": {
+          "B_memory_only": 0.6519,
+          "C_full": 0.6703,
+          "C_floor_only": 0.6648,
+          "C_frontier_only": 0.6624
+        },
+        "u10": {
+          "B_memory_only": 0.6358,
+          "C_full": 0.6503,
+          "C_floor_only": 0.6434,
+          "C_frontier_only": 0.6447
+        }
+      }
+    },
+    "adversarial": {
+      "rows": [
+        {
+          "arm": "B_memory_only",
+          "seed": 11,
+          "charged_calls": 250,
+          "rounds": 48,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 129,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.974965,
+          "u10": 0.969273,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_full",
+          "seed": 11,
+          "charged_calls": 250,
+          "rounds": 35,
+          "distinct_basins_scored": 7,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 126,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.974965,
+          "u10": 0.969273,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_floor_only",
+          "seed": 11,
+          "charged_calls": 250,
+          "rounds": 30,
+          "distinct_basins_scored": 9,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 127,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.974965,
+          "u10": 0.969273,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_frontier_only",
+          "seed": 11,
+          "charged_calls": 250,
+          "rounds": 42,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 120,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.974965,
+          "u10": 0.969273,
+          "basins_available": 12
+        },
+        {
+          "arm": "B_memory_only",
+          "seed": 23,
+          "charged_calls": 250,
+          "rounds": 38,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 128,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.974965,
+          "u10": 0.969273,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_full",
+          "seed": 23,
+          "charged_calls": 200,
+          "rounds": 21,
+          "distinct_basins_scored": 7,
+          "distinct_molecules_scored": 200,
+          "distinct_source_molecules_used": 98,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.2,
+          "best_score": 0.974965,
+          "u10": 0.969273,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_floor_only",
+          "seed": 23,
+          "charged_calls": 250,
+          "rounds": 35,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 118,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.974965,
+          "u10": 0.969273,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_frontier_only",
+          "seed": 23,
+          "charged_calls": 250,
+          "rounds": 32,
+          "distinct_basins_scored": 9,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 122,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.974965,
+          "u10": 0.969273,
+          "basins_available": 12
+        },
+        {
+          "arm": "B_memory_only",
+          "seed": 37,
+          "charged_calls": 206,
+          "rounds": 30,
+          "distinct_basins_scored": 6,
+          "distinct_molecules_scored": 206,
+          "distinct_source_molecules_used": 109,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.1942,
+          "best_score": 0.974965,
+          "u10": 0.969273,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_full",
+          "seed": 37,
+          "charged_calls": 250,
+          "rounds": 33,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 126,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.974965,
+          "u10": 0.969273,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_floor_only",
+          "seed": 37,
+          "charged_calls": 250,
+          "rounds": 37,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 250,
+          "distinct_source_molecules_used": 134,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.16,
+          "best_score": 0.974965,
+          "u10": 0.969273,
+          "basins_available": 12
+        },
+        {
+          "arm": "C_frontier_only",
+          "seed": 37,
+          "charged_calls": 249,
+          "rounds": 42,
+          "distinct_basins_scored": 8,
+          "distinct_molecules_scored": 249,
+          "distinct_source_molecules_used": 130,
+          "distinct_program_families_used": 5,
+          "dominant_basin_call_share": 0.1606,
+          "best_score": 0.974965,
+          "u10": 0.969273,
+          "basins_available": 12
+        }
+      ],
+      "mean": {
+        "distinct_basins_scored": {
+          "B_memory_only": 7.3333,
+          "C_full": 7.3333,
+          "C_floor_only": 8.3333,
+          "C_frontier_only": 8.3333
+        },
+        "distinct_molecules_scored": {
+          "B_memory_only": 235.3333,
+          "C_full": 233.3333,
+          "C_floor_only": 250.0,
+          "C_frontier_only": 249.6667
+        },
+        "distinct_source_molecules_used": {
+          "B_memory_only": 122.0,
+          "C_full": 116.6667,
+          "C_floor_only": 126.3333,
+          "C_frontier_only": 124.0
+        },
+        "distinct_program_families_used": {
+          "B_memory_only": 5.0,
+          "C_full": 5.0,
+          "C_floor_only": 5.0,
+          "C_frontier_only": 5.0
+        },
+        "dominant_basin_call_share": {
+          "B_memory_only": 0.1714,
+          "C_full": 0.1733,
+          "C_floor_only": 0.16,
+          "C_frontier_only": 0.1602
+        },
+        "best_score": {
+          "B_memory_only": 0.975,
+          "C_full": 0.975,
+          "C_floor_only": 0.975,
+          "C_frontier_only": 0.975
+        },
+        "u10": {
+          "B_memory_only": 0.9693,
+          "C_full": 0.9693,
+          "C_floor_only": 0.9693,
+          "C_frontier_only": 0.9693
+        }
+      }
+    }
+  }
+}

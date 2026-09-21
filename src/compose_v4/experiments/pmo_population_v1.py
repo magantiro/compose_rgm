@@ -191,6 +191,7 @@ def execute_task(
     charged_calls_per_task: int,
     progress=None,
     enable_online_memory: bool = False,
+    enable_discovery: bool = False,
 ) -> dict:
     """Run one PMO-v1 task after a separately authorized scored launch.
 
@@ -238,6 +239,11 @@ def execute_task(
             # run_program_campaign folds it into `optimizer_kwargs_sha256` and the two
             # arms cannot share a run identity even if every other input matches.
             "enable_online_memory": bool(enable_online_memory),
+            # Arm C = arm B + the discovery allocator. It rides here for the same
+            # reason the memory flag does: `run_program_campaign` folds
+            # optimizer_kwargs into `optimizer_kwargs_sha256`, so B and C cannot
+            # share a run identity even when every other input matches.
+            "enable_discovery": bool(enable_discovery),
         },
         initial_batch_fn=initial_dynamic_program_batch_v21,
     )
