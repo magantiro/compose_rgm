@@ -20,7 +20,11 @@ from compose_v4.chem.molecular_graph import (
 )
 from compose_v4.chem.state import is_connected_or_null, is_valid_state
 from compose_v4.rewrite.commuting_schedule import schedule_priority_events_earliest
-from compose_v4.rewrite.kernel import RewriteSystem, de_novo_rewrite_system
+from compose_v4.rewrite.kernel import (
+    InvalidRewrite,
+    RewriteSystem,
+    de_novo_rewrite_system,
+)
 from compose_v4.rewrite.operators import (
     AtomDelete,
     AtomInsert,
@@ -76,14 +80,24 @@ def compile_carbon_tree_to_target(
         raise ValueError("flexible-size transport requires Graft support")
     if align_source and not use_bond_reroute:
         raise ValueError("source alignment is only defined for Graft transport")
-    if event_schedule not in {"sequential", "exact_early_ring"}:
+    if event_schedule not in {
+        "sequential",
+        "exact_early_ring",
+        "ring_dependency_block",
+    }:
         raise ValueError(f"unknown tree event schedule: {event_schedule}")
+    ring_dependency_block = event_schedule == "ring_dependency_block"
+    if ring_dependency_block and not (flexible_size or use_bond_reroute):
+        raise ValueError(
+            "the ring dependency-block schedule is defined for Graft transport"
+        )
     if flexible_size:
         trace = _compile_flexible_graft_tree_transport(
             source,
             target,
             runtime=runtime,
             ring_catalog=ring_catalog,
+            ring_dependency_block=ring_dependency_block,
         )
     elif use_bond_reroute:
         trace = _compile_graft_tree_transport(
@@ -91,6 +105,7 @@ def compile_carbon_tree_to_target(
             target,
             runtime=runtime,
             ring_catalog=ring_catalog,
+            ring_dependency_block=ring_dependency_block,
         )
     else:
         target_trace = compile_null_to_target_tracelets(
@@ -116,6 +131,7 @@ def _compile_flexible_graft_tree_transport(
     *,
     runtime: RewriteSystem,
     ring_catalog: TypedRingCatalog | None,
+    ring_dependency_block: bool = False,
 ) -> RewriteTrace:
     """Resize an independent tree, then couple it in the molecular quotient.
 
@@ -189,6 +205,7 @@ def _compile_flexible_graft_tree_transport(
         target,
         runtime=runtime,
         ring_catalog=ring_catalog,
+        ring_dependency_block=ring_dependency_block,
     )
     resized_real = tuple(int(v) for v in np.flatnonzero(is_element(state.atom_types)))
     suffix_real = tuple(
@@ -267,8 +284,19 @@ def _compile_graft_tree_transport(
     *,
     runtime: RewriteSystem,
     ring_catalog: TypedRingCatalog | None,
+    ring_dependency_block: bool = False,
 ) -> RewriteTrace:
-    """Compile an equal-size, atom-retaining tree-to-molecule path."""
+    """Compile an equal-size, atom-retaining tree-to-molecule path.
+
+    With ``ring_dependency_block`` the route is emitted as a dependency block
+    per ring system -- establish the tree edges that system needs, commit the
+    whole ring transaction, then continue unrelated growth and decoration --
+    instead of deferring every ring commitment behind the entire graft and
+    decoration phases.  The endpoint is unchanged: every candidate position is
+    accepted only when the executor performs it, and a system that cannot
+    commit early falls back to its original place, so the trace still replays
+    to the array-exact corpus target.
+    """
 
     original_source = source
     steps: list[RewriteStep] = []
@@ -288,11 +316,11 @@ def _compile_graft_tree_transport(
         steps.append(RewriteStep(rule_name, action))
 
     target_tree_edges = {_edge(a, b) for a, b in target_tree.edges()}
-    for action in graft_actions:
-        commit("bond_reroute", action)
-    # The target spanning-tree scaffold is obtained by removing only chords,
-    # so each deletion preserves connectivity.  Its restored hydrogen counts
-    # make it a valid molecule in its own right.
+
+    # Everything below is derived from the TARGET alone and is therefore
+    # independent of where in the route a ring transaction is committed.  It is
+    # hoisted above the graft loop so the dependency-block emission can build a
+    # ring payload at any prefix without recomputing target-side facts.
     scaffold = target
     closure_edges = []
     for a, b in sorted(target_graph.edges()):
@@ -307,12 +335,142 @@ def _compile_graft_tree_transport(
         for system_id, members in enumerate(ring_systems)
         for atom in members
     }
+    perceived_target = resonance_invariant_bond_classes(target)
 
-    # All atoms are still carbon here, so raising retained tree bond orders is
-    # valence-safe before installing lower-valence heteroatom identities.
-    # Internal cyclic-system bonds are deliberately deferred into the atomic
-    # RingSystemGrow event so the model never sees an independently decorated
-    # chain that is later reinterpreted by a closure mark.
+    def ring_grow_action(system_id: int) -> RingSystemGrow:
+        """Build one ring transaction against the CURRENT state.
+
+        ``scaffold_bonds`` and the internal bond reorders are read from the
+        state the transaction will execute on, so the same ring system yields a
+        different -- and individually correct -- payload at each candidate
+        commit point.  The atom payloads, closure insertions and aromatic edges
+        are target-derived and identical everywhere.
+        """
+
+        system_atoms = ring_systems[system_id]
+        member_set = set(system_atoms)
+        return RingSystemGrow(
+            system_atoms=system_atoms,
+            interface_atoms=(),
+            scaffold_bonds=tuple(
+                RingBond(int(a), int(b), int(state.bonds[a, b]))
+                for offset, a in enumerate(system_atoms)
+                for b in system_atoms[offset + 1 :]
+                if int(state.bonds[a, b]) != 0
+            ),
+            bond_reorders=tuple(
+                BondOrderChange(int(a), int(b), int(scaffold.bonds[a, b]))
+                for a, b in sorted(target_tree.edges())
+                if a in member_set
+                and b in member_set
+                and int(state.bonds[a, b]) != int(scaffold.bonds[a, b])
+            ),
+            atom_payloads=tuple(
+                AtomPayload(
+                    slot=int(v),
+                    atom_type=int(scaffold.atom_types[v]),
+                    formal_charge=int(scaffold.formal_charges[v]),
+                    implicit_h_count=int(scaffold.implicit_h_counts[v]),
+                )
+                for v in system_atoms
+            ),
+            atom_insertions=(),
+            bond_insertions=tuple(
+                RingBond(int(a), int(b), int(order))
+                for a, b, order in closure_edges
+                if ring_system_by_atom[a] == system_id
+            ),
+            source_aromatic_edges=(),
+            aromatic_edges=tuple(
+                (int(a), int(b))
+                for offset, a in enumerate(system_atoms)
+                for b in system_atoms[offset + 1 :]
+                if int(perceived_target[a, b]) == BOND_AROMATIC
+            ),
+            topology_class=_ring_system_topology_class(
+                target_graph.subgraph(system_atoms)
+            ),
+        )
+
+    def ring_system_tree_edges(system_id: int) -> tuple[frozenset[int], ...]:
+        """The target-tree edges internal to one ring system."""
+
+        member_set = set(ring_systems[system_id])
+        return tuple(
+            _edge(int(a), int(b))
+            for a, b in target_tree.edges()
+            if a in member_set and b in member_set
+        )
+
+    def try_commit_ring(system_id: int) -> bool:
+        """Commit one ring transaction here when the executor performs it.
+
+        Feasibility is decided BY EXECUTION.  A dependency test on the tree
+        edges alone would be a heuristic read of the precondition; the rewrite
+        system is the authority on whether this state admits the transaction.
+        """
+
+        nonlocal state
+        try:
+            successor = runtime.apply(
+                state, "ring_system_grow", ring_grow_action(system_id)
+            )
+        except (InvalidRewrite, ValueError, KeyError, IndexError):
+            return False
+        action = ring_grow_action(system_id)
+        state = successor
+        steps.append(RewriteStep("ring_system_grow", action))
+        return True
+
+    pending_systems = list(range(len(ring_systems)))
+    dependency_block_commits = 0
+
+    if ring_dependency_block:
+        # Commit each ring system at the earliest graft prefix the executor
+        # accepts it at, so the ring decision is supervised on the large,
+        # undecorated carbon skeleton rather than on a constricted late state.
+        required_edges = {
+            system_id: ring_system_tree_edges(system_id)
+            for system_id in pending_systems
+        }
+        present = {
+            _edge(int(a), int(b))
+            for a, b in _topology_graph(
+                state, tuple(int(v) for v in np.flatnonzero(is_element(state.atom_types)))
+            ).edges()
+        }
+        # The edge test is a cheap PRE-FILTER, not a correctness guard: the
+        # executor is the sole authority on feasibility, and removing this
+        # clause was measured to leave every compiled trace byte-identical on
+        # a 7-molecule fingerprint panel.  It is kept because it avoids an
+        # executor call per pending system per graft, not because the schedule
+        # depends on it.
+        for action in graft_actions:
+            for system_id in tuple(pending_systems):
+                if all(
+                    edge in present for edge in required_edges[system_id]
+                ) and try_commit_ring(system_id):
+                    pending_systems.remove(system_id)
+                    dependency_block_commits += 1
+            commit("bond_reroute", action)
+            present.discard(_edge(int(action.a), int(action.b)))
+            present.add(_edge(int(action.u), int(action.v)))
+        for system_id in tuple(pending_systems):
+            if all(
+                edge in present for edge in required_edges[system_id]
+            ) and try_commit_ring(system_id):
+                pending_systems.remove(system_id)
+                dependency_block_commits += 1
+    else:
+        for action in graft_actions:
+            commit("bond_reroute", action)
+
+    # All atoms outside a committed ring system are still carbon here, so
+    # raising retained tree bond orders is valence-safe before installing
+    # lower-valence heteroatom identities.  Internal cyclic-system bonds are
+    # deliberately carried by the atomic RingSystemGrow event so the model
+    # never sees an independently decorated chain that a closure mark later
+    # reinterprets.
     for a, b in sorted(target_tree.edges()):
         same_ring_system = (
             a in ring_system_by_atom
@@ -331,12 +489,12 @@ def _compile_graft_tree_transport(
             int(scaffold.formal_charges[v]),
             int(scaffold.implicit_h_counts[v]),
         )
-        present = (
+        present_atom = (
             int(state.atom_types[v]),
             int(state.formal_charges[v]),
             int(state.implicit_h_counts[v]),
         )
-        if present != desired:
+        if present_atom != desired:
             commit(
                 "atom_restate",
                 AtomRestate(
@@ -347,58 +505,11 @@ def _compile_graft_tree_transport(
                 ),
             )
 
-    perceived_target = resonance_invariant_bond_classes(target)
-    for system_id, system_atoms in enumerate(ring_systems):
-        member_set = set(system_atoms)
-        internal_reorders = tuple(
-            BondOrderChange(int(a), int(b), int(scaffold.bonds[a, b]))
-            for a, b in sorted(target_tree.edges())
-            if a in member_set
-            and b in member_set
-            and int(state.bonds[a, b]) != int(scaffold.bonds[a, b])
-        )
-        atom_payloads = tuple(
-            AtomPayload(
-                slot=int(v),
-                atom_type=int(scaffold.atom_types[v]),
-                formal_charge=int(scaffold.formal_charges[v]),
-                implicit_h_count=int(scaffold.implicit_h_counts[v]),
-            )
-            for v in system_atoms
-        )
-        insertions = tuple(
-            RingBond(int(a), int(b), int(order))
-            for a, b, order in closure_edges
-            if ring_system_by_atom[a] == system_id
-        )
-        aromatic_edges = tuple(
-            (int(a), int(b))
-            for offset, a in enumerate(system_atoms)
-            for b in system_atoms[offset + 1 :]
-            if int(perceived_target[a, b]) == BOND_AROMATIC
-        )
-        commit(
-            "ring_system_grow",
-            RingSystemGrow(
-                system_atoms=system_atoms,
-                interface_atoms=(),
-                scaffold_bonds=tuple(
-                    RingBond(int(a), int(b), int(state.bonds[a, b]))
-                    for offset, a in enumerate(system_atoms)
-                    for b in system_atoms[offset + 1 :]
-                    if int(state.bonds[a, b]) != 0
-                ),
-                bond_reorders=internal_reorders,
-                atom_payloads=atom_payloads,
-                atom_insertions=(),
-                bond_insertions=insertions,
-                source_aromatic_edges=(),
-                aromatic_edges=aromatic_edges,
-                topology_class=_ring_system_topology_class(
-                    target_graph.subgraph(system_atoms)
-                ),
-            ),
-        )
+    # Any system the dependency block could not place early keeps its original
+    # position at the end of the route, so no molecule is lost to the schedule.
+    for system_id in pending_systems:
+        commit("ring_system_grow", ring_grow_action(system_id))
+
     if not _same_state(state, target):
         raise TraceCompilationError("tree transport did not reconstruct target")
 
@@ -425,6 +536,11 @@ def _compile_graft_tree_transport(
             "bond_reorder_steps": counts["bond_reorder"],
             "ring_system_restate_steps": counts["ring_system_restate"],
             "ring_commitment_status": "atomic_full_ring_systems",
+            "ring_emission_schedule": (
+                "ring_dependency_block_v1" if ring_dependency_block else "sequential"
+            ),
+            "ring_dependency_block_commits": dependency_block_commits,
+            "ring_dependency_block_deferred": len(pending_systems),
         },
     )
     if ring_catalog is not None and not ring_catalog.supports_trace(trace):
