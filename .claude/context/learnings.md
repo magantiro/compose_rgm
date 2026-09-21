@@ -2446,3 +2446,70 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   with new `total=200` shards for the same seed while every count still looked reasonable. This sat
   in the PUBLISHED-benchmark path. Guarded in both the app and the analysis script; the guard fired
   on real data with a precise diagnosis. Key a shard by its full identity, never by a seed prefix.
+
+## 2026-09-21 (offline route prior: recognition beat generation again, one level down)
+
+- **A teacher-route structural prior LOSES to a uniform control on complete-program yield,
+  on held-out sources, in both populations.** Leave-source-out over the 15 T4 source
+  molecules and out-of-domain over 24 held-out ZINC parents, 11,232 draws, zero oracle:
+  declared-program yield **0.749 vs 0.850** (T4; paired -0.101, bootstrap 95%
+  [-0.164,-0.042], sign test p=0.23) and **0.929 vs 0.962** (generic; -0.033, p=0.017).
+  It also produces significantly FEWER distinct endpoints (generic -2.50, p=0.004).
+  Attribution is consistent across both populations: the **region law** costs the yield
+  (T4 -0.064 p=0.0034, generic -0.026 p=0.0001) and the **family projection is neutral**
+  (p=1.00 / p=0.63). Exact teacher-endpoint recovery was **0 of 11,232** in every arm.
+- **The 91.6%-recognition / near-zero-generation result reappears at the REGION coordinate.**
+  The same law that lowers complete-program yield ranks the teacher's region slightly ABOVE
+  chance (recall@5 0.867 vs an analytic-uniform 0.665). But the exact Poisson-binomial test
+  -- each source has its own support size and target count, so the control is a Poisson
+  binomial, not one binomial rate -- gives p=0.054 on that single best cell of four, and
+  0.39/0.48/0.52 on the rest. **Not established at n=15 sources.** Teacher-like regions are
+  LARGER, and larger excisions are refused more often by the executor; that is the whole
+  mechanism of the yield loss.
+- **The one component that survives is a SCALE shift, and it is measured against the
+  engineered law rather than against nothing.** On the shipped `synthesize_dynamic_program`
+  the learned law moves mean excision 1.44 -> 3.86 atoms and max 8.33 -> 21.00, **unanimous
+  +15/-0 across parents**, at a yield cost of 0.6 points (p=0.25). `free_gate_margin_v1`
+  moves it to 3.27 / 15.00 (+13/-2). So the learned structural law RECOVERS and slightly
+  exceeds the task-gated law's shift **without consuming the similarity reference and delta
+  that law requires** -- which is why it is expressible for PMO, where neither exists, and
+  the gated law is not. That is a T4 region-repair finding about ONE coordinate; it is not
+  evidence for a PMO program prior, and the same law asked to carry a whole declared program
+  is significantly worse than uniform.
+- **DATA HYGIENE, and it disqualifies an existing artifact.**
+  `t4_compositional_structural_subgoal_generator` has
+  `training_trace_counts = {"pmo_dependency_region": 85, "t4_complete": 50}` in fold 0 and
+  85 of 191/193 in folds 1-2 -- **44-63% of its training routes are PMO routes**, from a
+  corpus whose own result file records "All PMO supervision is answer-known, panel-informed
+  or winner-informed development evidence". Whatever its merits as a T4 result it is NOT
+  admissible as a no-prescreen PMO prior. A winner route carries oracle information even with
+  its score deleted, because selecting that molecule as a winner IS an oracle output.
+- **Teacher routes do NOT decompose into production modules, so a family head is the wrong
+  shape.** 160 routes carry 238 dependency components at a median of 12 primitives each, and
+  only 65 of 238 match the emission signature of a single generic module family
+  (`atom_delete+atom_insert+cycle_close` alone is 76). Fitting p(family|G) on that labelling
+  throws away three quarters of the corpus. Fix: learn p(primitive rule | G) -- well powered
+  at 3,070 transitions -- and PROJECT it through a MEASURED family emission matrix
+  (compile all thirteen families on generic ZINC molecules and record what they emit).
+- **Teacher releases are bridge-coherent, which is what makes the region seam supervisable at
+  all.** Of 214 releasing components, 72 release a bridge-separated fragment EXACTLY and 141
+  release a strict subset of one: **213 of 214 are contained in a single bridge region**.
+  Supervise with the minimal CONTAINING region (213 events, not 72) -- the law chooses WHERE,
+  and how much of it to remove is the module's own parameter.
+- **A floor guard that asserts only `min(weight) > 0` CANNOT FAIL, and mine survived its first
+  mutation.** The un-floored law satisfies `> 0` too. The property that matters is that the
+  floor BINDS, so the test must construct a tilt sharp enough to drive some weight below it
+  and assert `min == floor` exactly. Seven mutations run, seven killed only after that repair.
+  Same class as the 2026-08-02 mask and the 2026-08-03 file-inventory tautologies.
+- **Pin an artifact's molecules, not its counters -- caught this time BEFORE the run.** The
+  first comparison launch stored endpoint counts only; it was killed 2 minutes in and
+  relaunched storing the SMILES, which is what made teacher-endpoint recall computable at all.
+  The fragment evaluation paid for this lesson retrospectively and could not recover.
+- **`etime` in this harness is real wall time and tool calls consume very little of it.** A
+  45-minute job needs an explicit blocking wait loop; polling between ordinary tool calls
+  advances the clock by seconds, not minutes, and reading "elapsed 01:50" as "nearly done"
+  would invert the schedule. Measured costs here: emission profile 272 s, held-out comparison
+  **4,344 s** (11,232 draws x 6 arms), gated-law reference 1,475 s.
+- **The pinned env has no `modal`**, so `tests/test_t4_no_complete_routes.py` fails there on an
+  import and passes 8/8 in the main `.venv`. Attribute such a failure by running it in the
+  other environment, not by inspecting it.
