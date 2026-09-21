@@ -1,0 +1,65 @@
+{
+  "arms": {
+    "A_baseline": {
+      "charged_calls_observed": 522,
+      "checkpoints": [
+        {
+          "auc_top10_at_budget": 0.14711235958044097,
+          "best_score": 0.23853211009174313,
+          "charged_calls": 250,
+          "frontier_improvements": 9,
+          "memory_derived_frontier_improvements": 0,
+          "memory_derived_scored_calls": 0,
+          "memory_improvement_fraction": 0.0,
+          "memory_proposal_fraction": 0.0,
+          "top10_mean": 0.2177022390835937,
+          "unique_scored_molecules": 250
+        },
+        {
+          "auc_top10_at_budget": 0.19654984519979615,
+          "best_score": 0.2857142857142857,
+          "charged_calls": 500,
+          "frontier_improvements": 15,
+          "memory_derived_frontier_improvements": 0,
+          "memory_derived_scored_calls": 0,
+          "memory_improvement_fraction": 0.0,
+          "memory_proposal_fraction": 0.0,
+          "top10_mean": 0.27128248443175995,
+          "unique_scored_molecules": 500
+        }
+      ],
+      "latest_committed_round": "round_0035",
+      "online_memory_reconstruction": null,
+      "run_id": "8d02a667384b248fed0a5fbb432a93714cc2a3a127ffdc05a4153f37ac3f89a0"
+    },
+    "B_memory": {
+      "charged_calls_observed": 490,
+      "checkpoints": [
+        {
+          "auc_top10_at_budget": 0.19158258958359187,
+          "best_score": 0.34408602150537637,
+          "charged_calls": 250,
+          "frontier_improvements": 12,
+          "memory_derived_frontier_improvements": 3,
+          "memory_derived_scored_calls": 82,
+          "memory_improvement_fraction": 0.25,
+          "memory_proposal_fraction": 0.328,
+          "top10_mean": 0.31021252686363193,
+          "unique_scored_molecules": 250
+        }
+      ],
+      "latest_committed_round": "round_0031",
+      "online_memory_reconstruction": {
+        "attribution_failures": 0,
+        "byte_equality_with_live_memory_claimed": false,
+        "entries": 234,
+        "replayed": 234,
+        "skipped_unscored": 0,
+        "source": "archived_counted_observations"
+      },
+      "run_id": "37bb856e15309543795e14cdccf44d1b672e957cb9af1e902af08d630f3e241b"
+    }
+  },
+  "schema_version": "pmo_ab_1k_checkpoints_v1",
+  "task": "celecoxib_rediscovery"
+}
