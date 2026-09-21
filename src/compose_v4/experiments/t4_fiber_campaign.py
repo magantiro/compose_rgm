@@ -137,6 +137,10 @@ class Fiber:
             raise ValueError(f"unknown fiber support {support!r}; expected one of {_SUPPORTS}")
         self.delta = delta
         self.support = support
+        #: The declared similarity reference, retained as written. The region-draw
+        #: law is built against THIS string, never the current parent, so a law
+        #: cannot drift its own target as the campaign walks away from the root.
+        self.seed_smiles = seed_smiles
         self.generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
         self.seed = self.generator.GetFingerprint(Chem.MolFromSmiles(seed_smiles))
 
@@ -239,6 +243,7 @@ def expand(
     multi_region: bool = True,
     horizon: int = 3,
     proposal_lane: str = "shallow",
+    region_law=None,
 ) -> list[dict]:
     """Free complete programs from one parent; only queryable endpoints are returned.
 
@@ -246,12 +251,27 @@ def expand(
     before the controller replans against a measured outcome. It is a parameter rather
     than a constant so that one-step control is the same code path as depth-three
     control, and the comparison between them is not a comparison of two programs.
+
+    `region_law` is the bridge region-draw law selected by the contract field
+    `proposal.shallow.region_law`, resolved by
+    `compose_v4.control.region_law_contract`. `None` is the historical behaviour and
+    is byte-identical: `synthesize_dynamic_program` then draws under v1's uniform
+    bounded law, consuming the same RNG stream as before. It is accepted only on the
+    `shallow` lane because that is the only lane that reaches a synthesizer able to
+    thread it; requesting it on another lane raises rather than being ignored.
     """
     if horizon < 1:
         raise ValueError("horizon must be at least one module")
     if proposal_lane not in ("shallow", "structured", "anchored_replacement"):
         raise ValueError(
             "proposal_lane must be 'shallow', 'structured' or 'anchored_replacement'"
+        )
+    if region_law is not None and proposal_lane != "shallow":
+        # Fail closed rather than drop it. A law accepted here and never consulted
+        # is precisely the "declared but not consumed" defect the contract check
+        # exists to prevent, and it would be invisible in the run artifact.
+        raise ValueError(
+            f"region_law is only consumable on the 'shallow' lane, not {proposal_lane!r}"
         )
     try:
         source = pad_molecular_graph(smiles_to_molecular_graph(parent), 48)
@@ -262,7 +282,7 @@ def expand(
         try:
             if proposal_lane == "shallow":
                 _, _, _, trace, metadata = synthesize_dynamic_program(
-                    source, rng, max_modules=horizon
+                    source, rng, max_modules=horizon, region_law=region_law
                 )
             elif proposal_lane == "structured":
                 _, _, _, trace, metadata = synthesize_progressive_program(source, rng)
