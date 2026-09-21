@@ -1,0 +1,129 @@
+{
+  "schema": "compose_fragment_official_suite_v1",
+  "protocol": {
+    "source": "in_virtuo_gen/evaluation/downstream.py @ b50bb3ae",
+    "samples_per_prompt": 100,
+    "seeds": 3,
+    "task_row": "unweighted mean over the task's drugs",
+    "scaffold_morphing": "upstream copies the linker result"
+  },
+  "kernel": {
+    "rdkit": "2026.03.6",
+    "numpy": "2.5.3",
+    "torch": "2.14.0",
+    "python": "3.12.9",
+    "platform": "macOS-26.5.2-arm64-arm-64bit"
+  },
+  "checkpoint": {
+    "path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "completed_steps": 16000,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "atom_vocabulary": "ORGANIC"
+  },
+  "sampler": {
+    "config": {
+      "mark_attempts_per_event": 24,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "config_sha256": "805b2d10fa863c278dfd760fb3b9f5fd29eb94f91ef1653b1bf5ebe44aaab9ae"
+  },
+  "metric_provenance": {
+    "validity_uniqueness_quality_diversity": "official in_virtuo_gen.train_utils.metrics.evaluate_smiles @ b50bb3ae, already_smiles=True",
+    "distance": "NOT in the released evaluator: evaluate_smiles returns no distance key. Estimator is the official in_virtuo_gen.utils.mol.calculate_average_tanimoto(prompt=...); reference = the dummy-stripped prompt fragment(s)",
+    "fragment_preservation": "independent audit, atom-level non-overlapping substructure match, run over COMMITTED endpoints as well as emitted samples"
+  },
+  "results": {
+    "motif_extension": {
+      "task": "motif_extension",
+      "prompts_declared": 1,
+      "prompts_scored": 1,
+      "samples_per_prompt": 100,
+      "seeds": 3,
+      "per_seed": [
+        {
+          "validity": 9.0,
+          "uniqueness": 100.0,
+          "quality": 1.0,
+          "diversity": 0.7432222222222221,
+          "distance": 0.7855332406950686,
+          "distance_to_original_drug": 0.7887199573078252
+        }
+      ],
+      "summary": {
+        "validity": {
+          "mean": 9.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 100.0,
+          "std": 0.0
+        },
+        "quality": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "diversity": {
+          "mean": 0.7432222222222221,
+          "std": 0.0
+        },
+        "distance": {
+          "mean": 0.7855332406950686,
+          "std": 0.0
+        },
+        "distance_to_original_drug": {
+          "mean": 0.7887199573078252,
+          "std": 0.0
+        }
+      },
+      "build_failures": [],
+      "per_drug": {
+        "BARICITINIB": [
+          {
+            "seed": 2,
+            "rng_seed": 1945712599,
+            "official": {
+              "validity": 9.0,
+              "uniqueness": 100.0,
+              "diversity": 0.7432222222222221,
+              "quality": 1.0,
+              "distance": 0.7855332406950686,
+              "distance_to_original_drug": 0.7887199573078252
+            },
+            "attempts": 100,
+            "validity_denominator": 100,
+            "emitted_nonempty": 9,
+            "distance_reference_prompt": "CCS(=O)(=O)N1CC(CC#N)C1",
+            "unique_valid_count": 9,
+            "committed_endpoints": 75,
+            "committed_chemically_valid": 75,
+            "committed_fragment_preserving": 75,
+            "emitted_fragment_preserving": 9,
+            "constraint_failures": 66,
+            "lock_rejections": 2394,
+            "budget_exhausted": 30,
+            "executor_refusals": 0,
+            "mean_events": 13.26,
+            "families": {
+              "atom_insert": 986,
+              "atom_delete": 286,
+              "bond_reorder": 9,
+              "atom_restate": 24,
+              "bond_reroute": 10,
+              "bond_insert": 11
+            },
+            "seconds": 127.8,
+            "example_completions": [
+              "CC(N)(CNC(=O)C(=O)O)C(=O)NCCS(=O)(=O)N1CC(C=O)(CC#N)C1=O",
+              "COC(=O)CS(=O)(=O)N1CC(CC#N)(ON=C(N)SCCCN)C1",
+              "CC(C)(C)N(CC#N)N=C(C#N)C1(O)CN(S(=O)(=O)CCCCCO)C1",
+              "CO[SH4]CC1N(S(=O)(=O)C(=O)CCCN(C)C)CC1(C)CC#N",
+              "CCN(C=O)C(CC(=O)O)C(=O)OCC1(CC#N)CN(S(=O)(=O)CC)C1=O"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

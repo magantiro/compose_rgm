@@ -112,7 +112,7 @@ def summarise(table: dict, expected_drugs: int, expected_seeds: int) -> dict:
                 "mean": statistics.fmean(values),
                 "std": statistics.pstdev(values) if len(values) > 1 else 0.0,
             }
-        totals = defaultdict(int)
+        totals: dict[str, int] = defaultdict(int)
         for by_drug in by_seed.values():
             for row in by_drug.values():
                 for field in (
@@ -126,8 +126,35 @@ def summarise(table: dict, expected_drugs: int, expected_seeds: int) -> dict:
                     "budget_exhausted",
                 ):
                     totals[field] += row.get(field, 0)
+        attempts = totals["attempts"] or 1
+        committed = totals["committed_endpoints"] or 1
+        decomposition = {
+            # What COMPOSE emits, and therefore what the official metric scores.
+            # An attempt that produced nothing admissible is an INVALID attempt.
+            "strict_benchmark_validity_pct": summary["validity"]["mean"],
+            # The official definition applied to every committed endpoint:
+            # parseable, connected, salt-free. This is the number a generator
+            # that did NOT self-censor on the prompt would report, and it is the
+            # like-for-like comparison against a baseline whose evaluator never
+            # checks the fragment at all.
+            "chemical_validity_of_committed_pct": 100.0
+            * totals["committed_chemically_valid"]
+            / attempts,
+            "committed_per_attempt_pct": 100.0 * totals["committed_endpoints"] / attempts,
+            # Of the states COMPOSE committed, how many still contain the prompt
+            # fragment(s) as a non-overlapping atom-level substructure.
+            "fragment_containment_of_committed_pct": 100.0
+            * totals["committed_fragment_preserving"]
+            / committed,
+            # Committed, fragment-containing, but the DECLARED attachment site
+            # was not extended. Only tasks whose prompt carries a dummy can fail
+            # this way; superstructure prompts carry none.
+            "endpoint_constraint_failures": totals["constraint_failures"],
+            "trajectories_hitting_rejection_budget": totals["budget_exhausted"],
+        }
         out[task] = {
             "complete": complete,
+            "constraint_decomposition": decomposition,
             "seeds_present": sorted(by_seed),
             "drugs_per_seed": {s: len(by_seed[s]) for s in sorted(by_seed)},
             "per_seed": per_seed_rows,
