@@ -1731,3 +1731,17 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   endpoints are 14 distinct, of which ~4 are conventionally drug-like; the rest are exocyclic
   quinoids and strained azirines that pass the thresholds, `med_chem_gate` AND `LEGACY_SCREENED`
   (15/15 survive). Eligibility is a floor, not a score.
+
+- **"48" and "40" are DIFFERENT QUANTITIES in the T4 path and two agents stated them as competing
+  rules.** `pad_molecular_graph(smiles_to_molecular_graph(parent), 48)`
+  (`t4_fiber_campaign.py:257`) sets the SLOT CAPACITY of the proposal source array;
+  `REPRESENTABLE_HEAVY_ATOMS = 40` (:62), enforced at :148 by `if heavy > REPRESENTABLE_HEAVY_ATOMS`,
+  is the HEAVY-ATOM CEILING that `Fiber` applies to ENDPOINTS. Both hold at once: pad the source to
+  48 slots, and the fiber refuses any endpoint above 40 heavy atoms. "Pad to 40, not 48" and "the
+  executor requires 48" are each locally true and read as a contradiction, which is how a load-
+  bearing detail gets propagated wrong. Say which quantity you mean every time.
+- **A T4 endpoint can parse in RDKit and still be unbuildable in COMPOSE.** `[CH]c1ccc(...)` is a
+  real radical: RDKit accepts it, the COMPOSE executor cannot construct it. RDKit-parseability is
+  not a COMPOSE-validity check, so a probe that filters on `MolFromSmiles is not None` will admit
+  endpoints the production path refuses -- and `t4_fiber_campaign` documents that the intervention
+  layer still emits radicals, which is what `_rebalance` exists to prevent.
