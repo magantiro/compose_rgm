@@ -306,7 +306,16 @@ def select_targets(sample_size: int, seed: int) -> dict:
 # ---- Stage 3: the three arms ----
 
 
-@app.function(image=image, volumes={str(VOL): volume}, timeout=5400, cpu=2, memory=16384)
+# Preemption is an expected event, not a code failure. Shards are small and
+# idempotent, so a retry redoes at most one short stride rather than a long run.
+@app.function(
+    image=image,
+    volumes={str(VOL): volume},
+    timeout=5400,
+    cpu=2,
+    memory=16384,
+    retries=modal.Retries(max_retries=5),
+)
 def probe_shard(payload_in: dict) -> dict:
     """Compile one stride of targets and measure all three arms on each.
 
