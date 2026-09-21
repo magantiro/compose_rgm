@@ -173,3 +173,49 @@ def test_contract_declares_the_binder_the_controller_calls() -> None:
         "the contract's declared call site moved; the derivation in this test reads "
         "the whole controller module and would no longer be pinned to the jump lane"
     )
+
+
+def test_gate_decision_config_matches_the_receipt_it_cites() -> None:
+    """The sealed decision's numbers must come from the receipt it points at.
+
+    ``reseal_pmo_population_contracts.py`` re-hashes every key already present in
+    ``implementation_sha256`` but treats ``support_observed`` as ordinary semantics and
+    only guards it against CHANGE.  So a re-seal after a binder swap re-pins the gate
+    SOURCE while leaving support numbers measured under the previous binder -- a config
+    that validates and binds a stale measurement.  This closes that by requiring the
+    numbers, the cited receipt, and the binder to agree with each other and with the
+    controller.
+    """
+
+    import hashlib
+    import json
+
+    config = json.loads(
+        (_REPO_ROOT / "configs" / "pmo_population_live_parent_gate_v2.json").read_text()
+    )["payload"]
+    cited = config["inputs"]["exhaustive_result"]
+    receipt_path = _REPO_ROOT / cited
+    assert receipt_path.exists(), f"the decision cites a receipt that is not on disk: {cited}"
+    digest = hashlib.sha256(receipt_path.read_bytes()).hexdigest()
+    assert digest == config["input_sha256"]["exhaustive_result"], (
+        f"{cited} does not hash to the value the decision pins"
+    )
+
+    receipt = json.loads(receipt_path.read_text())["payload"]
+    for key, value in config["support_observed"].items():
+        assert receipt["support"][key] == value, (
+            f"decision reports {key}={value} but its cited receipt says "
+            f"{receipt['support'][key]}; the decision was not re-measured"
+        )
+
+    controller = _sole_controller_binder()
+    assert receipt["binder"]["function"] == controller["target"], (
+        "the cited receipt was produced by a binder the controller no longer calls"
+    )
+    assert config["binder_observed"]["function"] == controller["target"], (
+        "the decision records a binder the controller no longer calls"
+    )
+    floor = config["parent_policy"]["minimum_supported_non_root_parents"]
+    assert config["support_observed"]["supported_parent_count"] >= floor, (
+        "the decision records a PASS below its own support floor"
+    )
