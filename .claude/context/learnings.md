@@ -2532,15 +2532,17 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   against the branch base: 0 differing traces, same 13 pre-existing compile failures.
 - **ACCEPTANCE: the schedule repair FAILS the <0.15 gate on the mean and passes on the median, and
   it does NOT beat the scheduler that already ships.** Matched three-arm run, pinned kernel,
-  molecules drawn uniformly at random from the recipe's own train partition, 160 molecules / 373
+  molecules drawn uniformly at random from the recipe's own train partition, 250 molecules / 590
   ring decision points, zero oracle calls:
       arm                     mean              median   legal templates
-      sequential              0.3102 +- 0.0089  0.2849   343
-      exact_early_ring        0.1958 +- 0.0067  0.1383   738
-      ring_dependency_block   0.2005 +- 0.0068  0.1403   710
-  Paired per ring event: repair minus sequential **-0.1097 +- 0.0091** (290 improved / 65 worsened),
-  repair minus shipped scheduler **+0.0047 +- 0.0021 with 325 of 373 events UNCHANGED**. Endpoint
-  exactness holds **160 of 160 in every arm**, by array identity AND canonical key.
+      sequential              0.3089 +- 0.0069  0.2716   349
+      exact_early_ring        0.1921 +- 0.0051  0.1381   743
+      ring_dependency_block   0.1957 +- 0.0051  0.1394   720
+  Paired per ring event: repair minus sequential **-0.1132 +- 0.0071** (462 improved / 96 worsened),
+  repair minus shipped scheduler **+0.0037 +- 0.0017 with 515 of 590 events UNCHANGED** -- which is
+  marginally and DETECTABLY WORSE, about two standard errors; state the sign rather than rounding it
+  to "equivalent". Endpoint exactness holds **250 of 250 in every arm**, by array identity AND
+  canonical key.
 - **So the deliverable is PLUMBING, not an algorithm.** The support gain worth having is already
   available from `exact_early_ring`, which shipped 2026-07-20 and was never wired into the training
   recipe. The dependency block reproduces it at 1.087x compile cost instead of 14,897 verified
