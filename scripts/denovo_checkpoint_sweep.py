@@ -56,9 +56,17 @@ SCHEMA_VERSION = 1
 def load_shard_records(shard_dir: Path) -> tuple[list[dict], list[str]]:
     """Every record from every shard in ``shard_dir``, with the shard file names.
 
-    Shards are keyed by trajectory index range and are idempotent, so a duplicate
-    index is a real defect (two shards claiming the same trajectory) rather than
-    something to silently deduplicate.  It raises.
+    Two guards, both of which have a demonstrated failure mode:
+
+    * A duplicate trajectory index means two shards claim the same trajectory.
+      Shards are idempotent and index-keyed, so that is a real defect rather than
+      something to silently deduplicate.  It raises.
+    * All shards must share ONE sampling design ``(seed, total, horizon)``.
+      Per-trajectory seeds are derived from ``(seed, total)``, so a shard sampled
+      at a different ``total`` belongs to a different trajectory family entirely.
+      Such a shard can sit in the same directory under a plausible name (an
+      earlier run at a different N), and merging it would silently pool two
+      different experiments.  It raises and names the conflicting designs.
     """
 
     paths = sorted(shard_dir.glob("*.json"))
@@ -66,8 +74,12 @@ def load_shard_records(shard_dir: Path) -> tuple[list[dict], list[str]]:
         raise ValueError(f"no shard json found under {shard_dir}")
     records: list[dict] = []
     seen: dict[int, str] = {}
+    designs: dict[tuple, list[str]] = {}
     for path in paths:
         payload = json.loads(path.read_text())
+        if isinstance(payload, dict):
+            design = (payload.get("seed"), payload.get("total"), payload.get("horizon"))
+            designs.setdefault(design, []).append(path.name)
         shard_records = payload.get("records", payload if isinstance(payload, list) else [])
         for record in shard_records:
             index = record.get("index")
@@ -78,6 +90,12 @@ def load_shard_records(shard_dir: Path) -> tuple[list[dict], list[str]]:
                     )
                 seen[index] = path.name
             records.append(record)
+    if len(designs) > 1:
+        detail = "; ".join(
+            f"(seed={seed}, total={total}, horizon={horizon}): {sorted(names)}"
+            for (seed, total, horizon), names in sorted(designs.items(), key=lambda item: str(item[0]))
+        )
+        raise ValueError(f"shards span more than one sampling design in {shard_dir}: {detail}")
     return records, [path.name for path in paths]
 
 

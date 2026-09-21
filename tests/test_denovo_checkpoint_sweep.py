@@ -99,3 +99,34 @@ def test_records_without_an_index_are_kept_and_do_not_collide(tmp_path: Path) ->
     _write_shard(tmp_path, "a.json", [{"smiles": "CCO"}, {"smiles": "CCN"}])
     records, _names = load_shard_records(tmp_path)
     assert len(records) == 2
+
+
+def test_shards_from_a_different_sampling_design_raise(tmp_path: Path) -> None:
+    """A shard at a different ``total`` is a different trajectory family."""
+
+    (tmp_path / "a.json").write_text(
+        json.dumps({"seed": 20260920, "total": 200, "horizon": 16.0, "records": [_record(0, "CCO")]})
+    )
+    (tmp_path / "b.json").write_text(
+        json.dumps(
+            {"seed": 20260920, "total": 1000, "horizon": 16.0, "records": [_record(400, "CCN")]}
+        )
+    )
+    with pytest.raises(ValueError, match="more than one sampling design"):
+        load_shard_records(tmp_path)
+
+
+def test_a_single_consistent_design_is_accepted(tmp_path: Path) -> None:
+    for name, index in (("a.json", 0), ("b.json", 1)):
+        (tmp_path / name).write_text(
+            json.dumps(
+                {
+                    "seed": 20260920,
+                    "total": 200,
+                    "horizon": 16.0,
+                    "records": [_record(index, "CCO")],
+                }
+            )
+        )
+    records, names = load_shard_records(tmp_path)
+    assert len(records) == 2 and names == ["a.json", "b.json"]
