@@ -22,18 +22,22 @@
       "platform": "macOS-26.5.2-arm64-arm-64bit"
     }
   },
-  "shards": 33,
+  "shards": 41,
+  "denominator_audit": {
+    "rows_checked": 41,
+    "samples_per_prompt": 100
+  },
   "aggregation": "per seed: unweighted mean over the task's drugs; reported as mean +/- population std over seeds; scaffold_morphing copies linker_design",
   "tasks": {
     "motif_extension": {
       "complete": false,
       "constraint_decomposition": {
-        "strict_benchmark_validity_pct": 7.666666666666667,
-        "chemical_validity_of_committed_pct": 74.33333333333333,
-        "committed_per_attempt_pct": 74.33333333333333,
-        "fragment_containment_of_committed_pct": 100.0,
-        "endpoint_constraint_failures": 200,
-        "trajectories_hitting_rejection_budget": 91
+        "strict_benchmark_validity_pct": 48.69444444444445,
+        "chemical_validity_of_committed_pct": 89.72727272727273,
+        "committed_per_attempt_pct": 89.72727272727273,
+        "fragment_containment_of_committed_pct": 99.79736575481256,
+        "endpoint_constraint_failures": 453,
+        "trajectories_hitting_rejection_budget": 136
       },
       "seeds_present": [
         0,
@@ -41,71 +45,71 @@
         2
       ],
       "drugs_per_seed": {
-        "0": 1,
-        "1": 1,
-        "2": 1
+        "0": 4,
+        "1": 4,
+        "2": 3
       },
       "per_seed": {
         "0": {
-          "validity": 8.0,
+          "validity": 49.0,
           "uniqueness": 100.0,
-          "quality": 0.0,
-          "diversity": 0.7278749999999999,
-          "distance": 0.7810973710366999,
-          "distance_to_original_drug": 0.7942308498773534
+          "quality": 13.5,
+          "diversity": 0.7561984183046683,
+          "distance": 0.7844050997663866,
+          "distance_to_original_drug": 0.8132899326530126
         },
         "1": {
-          "validity": 6.0,
+          "validity": 46.75,
           "uniqueness": 100.0,
-          "quality": 1.0,
-          "diversity": 0.7046666666666667,
-          "distance": 0.7495743815867656,
-          "distance_to_original_drug": 0.7603075114186225
+          "quality": 15.0,
+          "diversity": 0.7447856210822361,
+          "distance": 0.7732185203875557,
+          "distance_to_original_drug": 0.8006796936162129
         },
         "2": {
-          "validity": 9.0,
+          "validity": 50.333333333333336,
           "uniqueness": 100.0,
-          "quality": 1.0,
-          "diversity": 0.7432222222222221,
-          "distance": 0.7855332406950686,
-          "distance_to_original_drug": 0.7887199573078252
+          "quality": 16.666666666666668,
+          "diversity": 0.7331178912783751,
+          "distance": 0.7661353899029667,
+          "distance_to_original_drug": 0.7713671872822546
         }
       },
       "summary": {
         "validity": {
-          "mean": 7.666666666666667,
-          "std": 1.247219128924647
+          "mean": 48.69444444444445,
+          "std": 1.4787590726895747
         },
         "uniqueness": {
           "mean": 100.0,
           "std": 0.0
         },
         "quality": {
-          "mean": 0.6666666666666666,
-          "std": 0.4714045207910317
+          "mean": 15.055555555555557,
+          "std": 1.29338296964698
         },
         "diversity": {
-          "mean": 0.7252546296296295,
-          "std": 0.015848921555483765
+          "mean": 0.7447006435550931,
+          "std": 0.009422777291858688
         },
         "distance": {
-          "mean": 0.772068331106178,
-          "std": 0.016008384441554672
+          "mean": 0.7745863366856364,
+          "std": 0.0075210267779675325
         },
         "distance_to_original_drug": {
-          "mean": 0.7810861062012671,
-          "std": 0.014863938129675378
+          "mean": 0.7951122711838267,
+          "std": 0.017561820127022353
         }
       },
       "totals": {
-        "attempts": 300,
-        "committed_endpoints": 223,
-        "committed_chemically_valid": 223,
-        "committed_fragment_preserving": 223,
-        "emitted_nonempty": 23,
-        "emitted_fragment_preserving": 23,
-        "constraint_failures": 200,
-        "budget_exhausted": 91
+        "attempts": 1100,
+        "committed_endpoints": 987,
+        "committed_chemically_valid": 987,
+        "committed_fragment_preserving": 985,
+        "emitted_nonempty": 534,
+        "emitted_fragment_preserving": 534,
+        "constraint_failures": 453,
+        "budget_exhausted": 136
       }
     },
     "superstructure_generation": {

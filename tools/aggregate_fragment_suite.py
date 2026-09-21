@@ -74,6 +74,48 @@ def assert_one_frozen_configuration(shards: list[dict]) -> dict:
     }
 
 
+def assert_denominators(shards: list[dict], expected_samples: int) -> dict:
+    """Prove, over every row, that validity was scored out of the ATTEMPTS.
+
+    Two identities are checked on every (task, drug, seed) row:
+
+    ``attempts == validity_denominator == expected_samples``
+        A row that requested 100 and scored 40 survivors would break this.
+
+    ``official validity == 100 * emitted_nonempty / attempts``
+        Every non-empty emission is asserted parseable, connected and
+        canonical before scoring, so the official valid COUNT must equal the
+        number of attempts that produced something.  If the two ever diverge,
+        either an attempt was dropped from the denominator or an unparseable
+        string was scored as valid -- both are the cherry-pick this check
+        exists to exclude.
+    """
+    checked = 0
+    for shard in shards:
+        for task, result in shard["results"].items():
+            for drug, rows in result["per_drug"].items():
+                for row in rows:
+                    where = f"{task}/{drug}/seed{row['seed']}"
+                    if not (
+                        row["attempts"]
+                        == row["validity_denominator"]
+                        == expected_samples
+                    ):
+                        raise SystemExit(
+                            f"{where}: denominator is not the attempt count "
+                            f"({row['attempts']}, {row['validity_denominator']}, "
+                            f"expected {expected_samples})"
+                        )
+                    implied = 100.0 * row["emitted_nonempty"] / row["attempts"]
+                    if abs(implied - row["official"]["validity"]) > 1e-9:
+                        raise SystemExit(
+                            f"{where}: official validity {row['official']['validity']} "
+                            f"does not equal 100*emitted/attempts {implied}"
+                        )
+                    checked += 1
+    return {"rows_checked": checked, "samples_per_prompt": expected_samples}
+
+
 def collect(shards: list[dict]) -> dict:
     # task -> seed -> drug -> row
     table: dict[str, dict[int, dict[str, dict]]] = defaultdict(lambda: defaultdict(dict))
@@ -182,10 +224,12 @@ def main() -> None:
     )
     parser.add_argument("--expected-drugs", type=int, default=10)
     parser.add_argument("--expected-seeds", type=int, default=3)
+    parser.add_argument("--samples", type=int, default=100)
     args = parser.parse_args()
 
     shards = load_shards(args.shards)
     identity = assert_one_frozen_configuration(shards)
+    denominators = assert_denominators(shards, args.samples)
     table = collect(shards)
     summary = summarise(table, args.expected_drugs, args.expected_seeds)
 
@@ -193,6 +237,7 @@ def main() -> None:
         "schema": "compose_fragment_official_suite_table_v1",
         "identity": identity,
         "shards": len(shards),
+        "denominator_audit": denominators,
         "aggregation": (
             "per seed: unweighted mean over the task's drugs; reported as mean +/- "
             "population std over seeds; scaffold_morphing copies linker_design"
