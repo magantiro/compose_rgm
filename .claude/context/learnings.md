@@ -2718,3 +2718,64 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   **A score-following component cannot be evaluated on chemistry against a hackable
   oracle** -- read gsk3b on score only, or fix the oracle first. Averaging the three
   tasks produces a number that reads as a regression in work that improved 2 of 3.
+
+## 2026-09-21 (PMO discovery: the exploration floor protects the wrong UNIT, and allocation is not where discovery is lost)
+
+- **`PopulationCredit`'s exploration floor is uniform over CELLS, and a cell is not a basin,
+  so whichever side of the run opens more cells captures the floor itself.** Cells are
+  `(basin, parent, family, scale)`. MEASURED on one basin holding 30 cells against three
+  structurally distinct basins holding one each, eps=0.2: the dominant basin takes **0.9174**
+  of the budget and the three rivals split **0.0826** (0.0275 each). Stratifying the
+  exploration mass over BASINS first takes the rivals to **0.2144**, and to **0.2226** under an
+  adversarial exploit of +1e6 over 500 trials where each rival keeps 0.0742 against a 0.0500
+  guarantee. The guarantee does not depend on the credit values at all, because the floor term
+  is ADDED after the credit term is normalized rather than multiplied into it.
+  **The defect is DIRECTIONLESS, which is why it is worth fixing at the unit rather than by
+  tuning eps:** `test_pmo_credit_adversarial.py::test_cell_proliferation_cannot_outbid_measured_credit`
+  already records the SAME root cause pointing the other way, with 30 never-productive cells
+  taking budget from one cell holding 40 trials at +4.0. Uniform-over-cells rewards whoever
+  proliferates; it does not reward exploration.
+- **`OnlineProposalMemory.allocation_priority` -- the frontier/delta-U10 quantity -- had ZERO
+  production call sites on arm B despite carrying its own passing test.** Its docstring even
+  names the gap it was built to close ("It supplies the frontier term that allocator currently
+  has no way to see"). Fourth instance of the inert-repair pattern in this repo. **The tell is
+  static and costs one grep: search for the symbol at CALL sites, not at definition sites.**
+- **Do NOT rank WITHIN a credit cell by frontier gain.** `frontier_gain` is monotone
+  non-decreasing in the endpoint value, so within a cell it is an order-preserving transform of
+  the predicted value -- except that it is identically ZERO below the frontier, which ties every
+  sub-frontier candidate and hands the order to the candidate id. It changes allocation ACROSS
+  cells, where values differ, and only destroys information within one.
+- **THE RESULT, and it redirects the work: basin coverage is bounded above by the CANDIDATE
+  POOL's own basin diversity, and the pool is thin.** MEASURED on the live allocation path at
+  a 0.95 stay-in-basin proposal law: the pool holds a mean of **1.44 basins per round**, **19 of
+  27 rounds offered zero discovery-eligible cells**, and only **17 of 108 reserved discovery
+  slots were fillable (15.7%)**. An allocator cannot fund a basin the proposal law never
+  proposes. Four matched arms over two landscapes at budget 250 give distinct-basin counts whose
+  SIGN FLIPS with the proposal law (stay=0.95: B 5.17 vs C_full 4.83; stay=0.80: B 7.67 vs
+  C_full 8.33) with every per-seed split near a coin flip. **Allocation is not where PMO
+  discovery is lost** -- same shape as the measured topology-provenance finding, where the gap
+  was pair SELECTION rather than the compiler or the compute.
+- **The hard exploration floor is FREE, which is the one clean positive.** On an adversarial
+  landscape where one early exploit scores 0.95 against rivals at 0.10 -- so exploiting is
+  CORRECT -- `best_score` and `u10` are identical to four decimals across all four arms in both
+  sweeps. A floor that only survives when it is free is not a floor; this one was tested where
+  it costs something and did not cost anything.
+- **TWO INSTRUMENT FAILURES, both caught before a number was read, neither a result.**
+  (1) An all-to-all basin graph saturated coverage at **6/6 basins for both arms** -- a metric
+  that cannot vary is not a measurement. Fixed by a CHAIN adjacency so distant basins require
+  sustained investment. (2) With a molecule universe of 84 against a budget of 250, and
+  `archive_seen` exclusion, both arms scored every reachable molecule and finished with the
+  IDENTICAL set -- allocation ORDER cannot change the final set when the budget exhausts the
+  universe. **An allocator only matters where the budget forces a choice**, so the universe must
+  exceed the budget (raised to 560). `distinct_program_families_used` stayed saturated at 5.0 for
+  every arm in every run and is evidence of nothing; it is reported as such rather than quietly
+  dropped.
+- **Decompose your own mechanism before reporting its net effect.** Running only the full arm
+  reported C_full WORSE than B and would have attributed that to "discovery does not work". The
+  four-arm decomposition (floor only / frontier only / both) shows both components individually
+  at or above B while the combination sits below it on one landscape -- an interaction there is
+  no power to explain at n=3-6 seeds, which is itself the finding to report.
+- **A minimal pinned venv is not a test environment.** `~/compose_region_pinned_env` lacks
+  `pyyaml`, so `pytest tests/ -k pmo` died with **59 collection errors** that look exactly like
+  a branch-health catastrophe and are `ModuleNotFoundError: No module named 'yaml'`. Run the
+  named test FILES, or read the error before attributing it to the branch.
