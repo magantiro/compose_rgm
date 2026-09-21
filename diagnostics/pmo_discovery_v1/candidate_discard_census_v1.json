@@ -1,0 +1,197 @@
+{
+  "schema_version": "pmo_candidate_discard_census_v1",
+  "oracle_calls": 0,
+  "settings": {
+    "attempts_per_batch": 128,
+    "candidates_per_batch": 16,
+    "wall_seconds": 45.0,
+    "channel_candidate_limit": 16
+  },
+  "rounds_measured": 6,
+  "rounds_where_allocation_was_capacity_limited": 6,
+  "total_discarded_by_allocation": 97,
+  "total_discarded_by_lock": 0,
+  "verdict": "ALLOCATION_IS_CAPACITY_LIMITED_SELECTION_BITES",
+  "results": [
+    {
+      "source": "CC(=O)Nc1ccc(O)cc1",
+      "seed": 11,
+      "rounds": [
+        {
+          "round": 0,
+          "attempt_statuses": {
+            "execution_rejected": 12,
+            "eligible": 34,
+            "duplicate": 5,
+            "cross_channel_duplicate": 1
+          },
+          "pool_by_channel": {
+            "shallow_program_channel": 16,
+            "structured_program_channel": 15,
+            "joint_dependency_region_jump": 2
+          },
+          "channel_at_candidate_limit": {
+            "shallow_program_channel": true,
+            "structured_program_channel": false,
+            "joint_dependency_region_jump": false
+          },
+          "merged_pool": 33,
+          "candidates_per_batch": 16,
+          "selected": 16,
+          "discarded_by_allocation": 17,
+          "allocation_is_capacity_limited": true,
+          "proposed_to_lock": 16,
+          "locked": 16,
+          "discarded_by_lock": 0,
+          "allocation_mode": "fiber_control_with_family_and_niche_floor",
+          "credit_cells_available": null
+        },
+        {
+          "round": 1,
+          "attempt_statuses": {
+            "eligible": 32,
+            "duplicate": 3,
+            "execution_rejected": 34
+          },
+          "pool_by_channel": {
+            "shallow_program_channel": 16,
+            "structured_program_channel": 16,
+            "joint_dependency_region_jump": 0
+          },
+          "channel_at_candidate_limit": {
+            "shallow_program_channel": true,
+            "structured_program_channel": true,
+            "joint_dependency_region_jump": false
+          },
+          "merged_pool": 32,
+          "candidates_per_batch": 16,
+          "selected": 16,
+          "discarded_by_allocation": 16,
+          "allocation_is_capacity_limited": true,
+          "proposed_to_lock": 16,
+          "locked": 16,
+          "discarded_by_lock": 0,
+          "allocation_mode": "fiber_control_with_family_and_niche_floor",
+          "credit_cells_available": 28
+        },
+        {
+          "round": 2,
+          "attempt_statuses": {
+            "eligible": 32,
+            "execution_rejected": 38,
+            "duplicate": 4
+          },
+          "pool_by_channel": {
+            "shallow_program_channel": 16,
+            "structured_program_channel": 16,
+            "joint_dependency_region_jump": 0
+          },
+          "channel_at_candidate_limit": {
+            "shallow_program_channel": true,
+            "structured_program_channel": true,
+            "joint_dependency_region_jump": false
+          },
+          "merged_pool": 32,
+          "candidates_per_batch": 16,
+          "selected": 16,
+          "discarded_by_allocation": 16,
+          "allocation_is_capacity_limited": true,
+          "proposed_to_lock": 16,
+          "locked": 16,
+          "discarded_by_lock": 0,
+          "allocation_mode": "fiber_control_with_family_and_niche_floor",
+          "credit_cells_available": 28
+        }
+      ]
+    },
+    {
+      "source": "O=C(NC1CCNCC1)c1ccccc1",
+      "seed": 11,
+      "rounds": [
+        {
+          "round": 0,
+          "attempt_statuses": {
+            "execution_rejected": 38,
+            "eligible": 32,
+            "duplicate": 1
+          },
+          "pool_by_channel": {
+            "shallow_program_channel": 16,
+            "structured_program_channel": 16,
+            "joint_dependency_region_jump": 0
+          },
+          "channel_at_candidate_limit": {
+            "shallow_program_channel": true,
+            "structured_program_channel": true,
+            "joint_dependency_region_jump": false
+          },
+          "merged_pool": 32,
+          "candidates_per_batch": 16,
+          "selected": 16,
+          "discarded_by_allocation": 16,
+          "allocation_is_capacity_limited": true,
+          "proposed_to_lock": 16,
+          "locked": 16,
+          "discarded_by_lock": 0,
+          "allocation_mode": "fiber_control_with_family_and_niche_floor",
+          "credit_cells_available": null
+        },
+        {
+          "round": 1,
+          "attempt_statuses": {
+            "eligible": 32,
+            "execution_rejected": 36
+          },
+          "pool_by_channel": {
+            "shallow_program_channel": 16,
+            "structured_program_channel": 16,
+            "joint_dependency_region_jump": 0
+          },
+          "channel_at_candidate_limit": {
+            "shallow_program_channel": true,
+            "structured_program_channel": true,
+            "joint_dependency_region_jump": false
+          },
+          "merged_pool": 32,
+          "candidates_per_batch": 16,
+          "selected": 16,
+          "discarded_by_allocation": 16,
+          "allocation_is_capacity_limited": true,
+          "proposed_to_lock": 16,
+          "locked": 16,
+          "discarded_by_lock": 0,
+          "allocation_mode": "fiber_control_with_family_and_niche_floor",
+          "credit_cells_available": 27
+        },
+        {
+          "round": 2,
+          "attempt_statuses": {
+            "eligible": 32,
+            "duplicate": 3,
+            "execution_rejected": 37
+          },
+          "pool_by_channel": {
+            "shallow_program_channel": 16,
+            "structured_program_channel": 16,
+            "joint_dependency_region_jump": 0
+          },
+          "channel_at_candidate_limit": {
+            "shallow_program_channel": true,
+            "structured_program_channel": true,
+            "joint_dependency_region_jump": false
+          },
+          "merged_pool": 32,
+          "candidates_per_batch": 16,
+          "selected": 16,
+          "discarded_by_allocation": 16,
+          "allocation_is_capacity_limited": true,
+          "proposed_to_lock": 16,
+          "locked": 16,
+          "discarded_by_lock": 0,
+          "allocation_mode": "fiber_control_with_family_and_niche_floor",
+          "credit_cells_available": 26
+        }
+      ]
+    }
+  ]
+}
