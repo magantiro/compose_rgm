@@ -2874,3 +2874,90 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   tests. Also: `du` cannot read `~/Desktop`/`~/Documents`/`~/Downloads` without Full Disk Access, so
   a home-directory survey can silently miss the majority of the volume -- 362 GB visible against 899
   GB used here.
+
+## 2026-09-21 (fragments: a budget knob and a placement mechanism are ORTHOGONAL, and the prediction test proves it)
+
+- **A COORDINATOR PREDICTION WAS FALSIFIED IN THE USEFUL DIRECTION.** I predicted the attachment
+  mechanism's attributable delta would SHRINK once the baseline also ran at the tuned budget, on the
+  reasoning that the 24-attempt deltas were budget-confounded. MEASURED at both arms 96:
+  motif **41.80 -> 50.70**, decoration **80.67 -> 89.93**. The 24-attempt numbers were UNDERSTATING
+  the mechanism. The agent reported this as a negative against the stated prediction rather than
+  presenting the larger number as a win, which is the only reason it is credible.
+- **WHY: the budget fixes CHEMISTRY, only the mechanism fixes PLACEMENT.** On the baseline arm the
+  extra budget moves committed-per-attempt 93.47 -> 99.57 and exhaustions 7.5 -> 0.6 while task
+  success moves **3.50 -> 3.57**. It converts exhausted trajectories into committed, chemically
+  valid, fragment-CONTAINING molecules and steers none of them to the declared sites. So on the
+  baseline a larger budget buys chemical validity that the task then rejects.
+- **THE EXPLANATION WAS TESTED, NOT ASSERTED -- and this is the strongest evidence in the fragment
+  workstream.** If chance placement is what lifts the baseline at all, the lift must COLLAPSE as the
+  number of declared interfaces rises, because satisfying k sites by luck gets rapidly harder.
+  Measured over all 20 drug-task pairs: 1 interface -> mean baseline gain **+6.67** (10 drugs);
+  2/3/4/5/6 interfaces -> **+0.00 / +0.34 / +0.00 / +0.00 / +0.00**. **19 of 20 multi-interface
+  pairs gained exactly nothing.** That is why motif's baseline moved +6.67 (one site) and
+  decoration's moved +0.07 (two to six). Deriving a prediction from a mechanism and measuring it
+  converts an attribution into a tested claim.
+- **The negative control survives the configuration change**: superstructure declares no interface
+  and its delta is EXACTLY 0.00 at 24 AND at 96 -- so it is not an artifact of the old setting.
+- **Choose a budget knob at the point the budget stops BINDING, not at the largest value tried.**
+  96 was chosen because exhaustions fall to 8.6 / 1.0 / 0.8 per hundred attempts, so the remaining
+  loss is chemistry and a larger value has almost nothing left to recover. Verified it does not
+  narrow the distribution -- motif uniqueness 78.22 -> 89.86 and quality 14.47 -> 21.03, i.e. harder
+  trajectories FINISH rather than easy ones being favoured. Without that check the value would have
+  been a number that happened to look good.
+- **A knob that helps where the deficit was and nowhere else is a mechanism; one that lifts
+  everything is a fit.** SPIRAPRIL decoration 49.67 -> 75.67 with exhaustions halved; LESINURAD,
+  already 100% with zero exhaustions, unchanged at 100%.
+- **Enforce a scientific scope rule STRUCTURALLY.** The knob is global by construction, a test
+  asserts the parser offers no `--mark-attempts-for-task` / `--per-drug-*` option, and the value is
+  hashed into the sampler identity so the aggregator cannot silently combine two settings. A
+  convention someone has to remember fails eventually.
+- **NEVER quote a tuned arm against an untuned baseline.** The agent caught this itself: a 96-attempt
+  attachment arm against a 24-attempt baseline would have credited the budget's gain to the
+  mechanism -- the same conflation corrected twice already in this workstream.
+
+## 2026-09-21 (two proposal channels, one shared defect: the law ranks a molecule the harness never scores)
+
+- **`expand` on the T4 path does NOT gate the molecule a proposal law ranks.** It abstracts the
+  synthesized program via `extract_structural_goal`, expands `_variants`, re-binds each subgoal with
+  `attachment_bindings(...).assignments[0]`, and gates whatever `instantiate_goal` builds. MEASURED
+  over 150 draws: the program's own endpoint appeared in the gated set **zero times**,
+  `recovered_fraction = 0.0000`. So a completion law measured at p = 0.00859 on MODULE endpoints
+  cannot transfer end to end -- it is conditioning the right object for the WRONG consumer.
+- **The PMO path is the opposite and it was verified by EXECUTION, not by reading:
+  `recovered_fraction = 1.0000`.** 144 candidates, three independent hops -- endpoint recomputed
+  from each candidate's own executed trace through the production decoder, program size profile
+  against that trace, and the charged archive entry after a real
+  `propose_batch -> lock_query_subset -> observe_batch` -- 0/0/0 mismatches. Structurally,
+  `_generate_channel_pool` executes the program and takes `endpoint = trace["endpoint"]`, and
+  `program_campaign` charges `ledger.query(candidate["endpoint"])`. No goal abstraction anywhere.
+- **LESSON: before conditioning ANY proposal law, verify by execution that the molecule the law
+  ranks is the molecule the harness scores.** Pin it as an invariant with a mutation that makes a
+  candidate record carry a molecule its program did not produce. Two independent investigations hit
+  this today from opposite directions, which is what makes it a shared assumption rather than a
+  local bug.
+- **A related convergence worth stating: the PMO ALLOCATOR cannot fund basins the proposal law never
+  proposes** -- candidate pool holds 1.44 basins/round, 19 of 27 rounds offered zero
+  discovery-eligible cells, 15.7% of reserved discovery slots fillable. Both findings point the same
+  way: the leverage is in WHAT GETS GENERATED, not in how it is ranked or allocated.
+
+## 2026-09-21 (route corpora: the only general pair compiler destroys the molecule first)
+
+- **`compile_source_to_target` is `delete_to_null_then_construct_v1` and its own docstring says it
+  "is intentionally not an edit-minimal alignment".** MEASURED: `retained_fraction = 0.000 on 4 of
+  4` generic pairs, all routed through the formal NULL state -- **including a pair differing by ONE
+  METHYL, which costs 25 steps on an 11-atom molecule** (12 deletions to nothing, then 13
+  constructions). The route shape is INDEPENDENT of how close the pair is.
+- **CONSEQUENCE: every semantic route feature is degenerate on its output** -- retained region,
+  released region, replacement topology and interface all read "retain nothing, release everything".
+  Fitting route prototypes on it would learn the compiler's deletion order, which is the
+  `real_endpoint_multistep_path` artifact already on the record. A scaffold-preserving bridge
+  compiler is the prerequisite for answer-known proxy tasks at scale, and it does not exist yet.
+- **PROVENANCE, checked rather than trusted: `diagnostics/ivg_winner_paths/` is derived from a
+  COMPETITOR's published winners.** `origin: github.com/invirtuolabs/InVirtuoGen_results`;
+  `by_target` is 5ht1b/braf/fa7/jak2/parp1 and `by_cell` is `docking_*_thr4/thr6`, i.e. **T4
+  docking cells, not PMO tasks**; its own `evidence` field says "target-informed locally replayed
+  upper-bound witnesses, not blind recovery"; and the LICENSE notice is **non-commercial**. So it
+  leaks no PMO answers, but it is competitor-derived, target-informed, small (160 routes / 82
+  targets), NC-licensed, and **flatly inadmissible for T4, where those ARE the benchmark's answers**.
+  A prior fitted on this exact corpus already failed on yield. Check a corpus's audit file before
+  treating its name as a description.
