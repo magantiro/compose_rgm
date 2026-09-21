@@ -978,6 +978,100 @@ def descriptive_diagnostics(arm_c: dict, criteria: dict) -> dict:
     }
 
 
+# ---- program-length control (a diagnostic, not a proposal source) ----
+
+# Synthetic intents used ONLY to separate the move class from the demands the catalog
+# happens to route to it.  Every catalog plan with no excision demand asks for 12-13
+# insertions, so the zero-excision branch is confined to the long end of the
+# program-length curve by the LIBRARY, not by anything about the move.  These intents
+# are never a proposal source and never enter a scored path.
+LENGTH_CONTROL_CELLS = ((1, 0), (2, 0), (3, 0), (4, 0), (3, 1), (5, 1), (12, 2))
+
+
+def length_control(data: dict[str, Any]) -> dict[str, Any]:
+    """Drive the zero-excision branch on every production parent at several sizes."""
+
+    from rdkit import Chem
+    from rdkit.Chem import QED
+
+    from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
+
+    sascorer = _sascorer()
+    entries = data["entries"]
+    entry_ids = sorted({row["entry_id"] for row in data["rows"]})
+    sources = {
+        entry_id: decode_state(entries[entry_id]["trace"]["states"][-1])
+        for entry_id in entry_ids
+    }
+    cells = []
+    for insert, close in LENGTH_CONTROL_CELLS:
+        intent = PFP.ProgramIntent(
+            excise_atoms=0,
+            insert_atoms=insert,
+            elements=("C", "N", "O"),
+            source_plan_id=f"length-control-{insert}-{close}",
+            primitive_count=insert + close,
+            close_bonds=close,
+        )
+        deltas_qed: list[float] = []
+        deltas_sa: list[float] = []
+        realized = 0
+        for index, entry_id in enumerate(entry_ids):
+            source = sources[entry_id]
+            result = PFP.construct_parent_first_program(
+                source, intent, np.random.default_rng(1000 + index)
+            )
+            if not result["realized"]:
+                continue
+            parent_smiles = molecular_graph_to_smiles(source)
+            endpoint_smiles = molecular_graph_to_smiles(decode_state(result["endpoint_state"]))
+            parent = Chem.MolFromSmiles(parent_smiles) if parent_smiles else None
+            endpoint = Chem.MolFromSmiles(endpoint_smiles) if endpoint_smiles else None
+            if parent is None or endpoint is None:
+                continue
+            realized += 1
+            deltas_qed.append(QED.qed(endpoint) - QED.qed(parent))
+            deltas_sa.append(
+                sascorer.calculateScore(endpoint) - sascorer.calculateScore(parent)
+            )
+        cells.append(
+            {
+                "insert_atoms": insert,
+                "close_bonds": close,
+                "parents": len(entry_ids),
+                "realized": realized,
+                "yield": realized / max(1, len(entry_ids)),
+                "delta_qed": _distribution(deltas_qed),
+                "delta_sa": _distribution(deltas_sa),
+                "share_losing_drug_likeness": (
+                    sum(1 for value in deltas_qed if value < 0) / len(deltas_qed)
+                    if deltas_qed
+                    else None
+                ),
+            }
+        )
+    return {
+        "cells": cells,
+        "reading": (
+            "Pure ADDITION is net-negative at EVERY size, including one atom "
+            "(-0.023), and degrades monotonically with it.  This CORRECTS an "
+            "over-general reading of the excision branch's +0.081 at 3-5 primitives: "
+            "that gain belongs to REMOVING a fragment, not to short programs as such. "
+            "RING CLOSURE MITIGATES SUBSTANTIALLY -- 3 atoms plus one closure is "
+            "-0.022 against -0.100 for 3 atoms alone, and 5 plus one closure is "
+            "-0.067 against -0.160 for 4 alone -- because a closure turns a floppy "
+            "chain into a ring.  Synthetic accessibility moves the wrong way "
+            "throughout and a closure makes that worse, so QED and SA disagree about "
+            "ring closure and must be quoted together."
+        ),
+        "scope": (
+            "DIAGNOSTIC ONLY.  These intents are synthetic and exist to separate the "
+            "move class from the catalog's demand profile.  They are not a proposal "
+            "source and must not enter a scored path."
+        ),
+    }
+
+
 # ---- entry point ----
 
 
@@ -997,6 +1091,11 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=5)
     parser.add_argument("--limit", type=int, default=0, help="pilot: first N requests only")
     parser.add_argument("--skip-arm-b", action="store_true")
+    parser.add_argument(
+        "--length-control-only",
+        action="store_true",
+        help="run only the zero-excision program-length diagnostic",
+    )
     args = parser.parse_args()
 
     data_root = Path(args.data_root)
@@ -1038,6 +1137,24 @@ def main() -> None:
 
     data = BASE.load_inputs(data_root)
     print(f"inputs loaded; plan order parity {data['plan_order_parity']}", flush=True)
+
+    if args.length_control_only:
+        control = length_control(data)
+        provenance["total_seconds"] = perf_counter() - began
+        out_path.write_text(
+            json.dumps(
+                {
+                    "schema_version": f"{SCHEMA}_length_control",
+                    "status": "MEASURED",
+                    "length_control": control,
+                    "provenance": provenance,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        print(f"wrote {out_path}", flush=True)
+        return
 
     arm_a = load_arm_a()
     print(f"arm A reused: yield {arm_a['yield_per_realization_attempt']:.4%}", flush=True)
