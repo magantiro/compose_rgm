@@ -107,12 +107,56 @@ Two reasons, and both are second mechanisms the atom count alone misses:
 So the host explains the direction and most of the magnitude; shape and
 fragmentation account for the rest. Nothing here points back at the catalog.
 
+## Rollout half — the same mechanism produces the established 44.3%
+
+The committed reference audit stores both the support statistic and the ROLLOUT
+state it was measured on, so this is directly attributable rather than
+analogous. `scripts/denovo_rollout_host_attribution.py` reproduces the audit's
+own stored mean (0.4431) before reporting anything, so a misread of the
+artifact cannot be mistaken for a finding.
+
+| row | legal | small | mass | real atoms | host | largest tree | components | lost to cycles |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 808 | 120 | 0.1485 | 36 | 36 | 18 | 3 | 0 |
+| 6 | 1098 | 127 | 0.1157 | 31 | 27 | 22 | 2 | 0 |
+| 10 | 802 | 114 | 0.1421 | 21 | 18 | 18 | 1 | 0 |
+| 1 | 653 | 102 | 0.1562 | 36 | 26 | 17 | 6 | 10 |
+| 7 | 561 | 88 | 0.1569 | 31 | 21 | 15 | 3 | 6 |
+| 4 | 469 | 90 | 0.1919 | 21 | 18 | 15 | 2 | 0 |
+| 5 | 113 | 54 | 0.4779 | 21 | 13 | 9 | 3 | 5 |
+| 8 | 12 | 5 | 0.4167 | 31 | 12 | 5 | 4 | 15 |
+| 11 | 45 | 23 | 0.5111 | 21 | 8 | 7 | 2 | 10 |
+| **2** | **2** | **2** | **1.0000** | 36 | 16 | **3** | 10 | **20** |
+| **3** | **2** | **2** | **1.0000** | 36 | 13 | **3** | 9 | **23** |
+| **9** | **5** | **5** | **1.0000** | 31 | 7 | **5** | 3 | **20** |
+
+`r(mass, largest_host_tree) = -0.890`, `r(log legal, largest_host_tree) =
+**+0.962**`. Mean largest host tree 11.4.
+
+**The headline the 0.4431 mean hides: on 3 of 12 audited rollout states EVERY
+legal template is a small ring.** Those states have 2-5 legal templates and a
+host reduced to a 3-5 atom fragment by 20-23 atoms already locked into
+committed rings. The model has no non-small option to choose. That is not
+miscalibration -- it cannot be fixed by any amount of training, reward shaping,
+or better sampling, because the alternative does not exist in the support.
+
+The distribution is bimodal, not centrally enriched: states with an intact host
+score 0.116-0.192 (they would pass a 0.15-ish gate), states whose host has been
+eaten score 0.417-1.000. Quoting the 0.4431 mean alone describes neither
+population.
+
+This closes the loop on the generated-molecule defect. ~50% of generated
+molecules carry a 3- or 4-ring because at their later ring decisions the
+support contained nothing else.
+
 ## What this rules in and out
 
 - **Ruled out: a catalog gap.** The large templates exist (2,965 of 3,092 fit on
   an 18-atom host). Adding templates changes nothing while the host is small.
-- **Ruled out: a reward or policy fix.** The model already sits *below* uniform
-  on small rings. It cannot select a template that is not in the support.
+- **Ruled out: a reward or policy fix — now conclusively.** The model already
+  sits *below* uniform on small rings, and on 3 of 12 audited rollout states
+  the support contains *no* non-small template at all. A policy cannot select
+  an option that does not exist.
 - **Ruled out: a better schedule.** Scheduling moves *when* a ring is committed;
   it cannot stop a committed ring from consuming its atoms. This is why the
   acceptance run's ordinal wall was unavoidable.
