@@ -2279,3 +2279,36 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   is ~20 core-hours; the predeclared 6-point Pareto sweep would be ~265 core-hours. Not justifiable
   on a preview checkpoint, and the 40-container 3x1,000 run was stopped after producing 1 of 60
   shards in 80 minutes.
+
+## 2026-09-21 (preemption killed a 60-shard fan-out; the lever is WORK-UNIT SIZE, not retry count)
+
+- **SHARPENS the 2026-07-29 retry lesson into its general form.** That entry said a retry budget
+  without a working resume path just burns the same steps repeatedly. The de-novo run shows the
+  corollary that actually decides launches: **retries only make forward progress when each retry
+  resumes from COMMITTED state. Absent a resume path, the lever is not `max_retries`, it is the
+  SIZE OF THE WORK UNIT.**
+- **The measured failure.** A 3x1,000 de-novo run fanned 60 shards of 50 trajectories each. At a
+  measured 72.65 s/trajectory a shard is ~61 minutes with NO intra-shard checkpointing, so every
+  preemption discarded up to an hour and the retry restarted from zero. 27 preemptions
+  ("Container terminated due to preemption. Your Function will be restarted with the same input");
+  `max_retries=3` could not carry a 61-minute unit on preemptible capacity. When one shard exhausted
+  its retries the local `.map()` raised `RemoteError`, **which killed the whole fan-out including
+  the 59 healthy shards**. Exactly 1 of 60 committed.
+- **A one-flag fix, no code:** `--shards-per-seed 100` gives 10-trajectory shards of ~12 minutes --
+  short enough to land between preemptions. 3,000 trajectories becomes 300 shards, ~90 min wall on
+  40 containers. Shards are horizon-scoped and idempotent, so a relaunch reuses the committed shard
+  and redoes nothing.
+- **ONE `.map()` SHARD EXHAUSTING RETRIES CAN DESTROY EVERY HEALTHY SIBLING.** If partial results
+  matter, do not let a fan-out's failure mode be a single raising map -- commit per shard (this one
+  did, which is why the surviving shard was scorable) and catch per-shard failure rather than
+  letting it propagate.
+- **"NO OUTPUT YET" CANNOT DISCRIMINATE "still starting" FROM "being preempted to death" --
+  both predict silence, and I misdiagnosed it as slow container ramp-up.** Two commands settle it:
+  `grep -c preemption` on the log, and `modal app list` for the task count. A monitor armed only for
+  the SUCCESS event (here `SEED_COMPLETE`) is structurally blind to this failure -- watch for the
+  failure signature too, or the watch tells you nothing for an hour.
+- **ALSO: verify an app is actually alive before claiming you freed its capacity.** I ran
+  `modal app stop` on a listing that showed `tasks=40` and reported "40 containers freed"; the app
+  had already died of preemption and those entries were stale or terminating. A task count in a
+  listing is not proof of live capacity -- check the function-call state, as the same listing
+  misled a phantom-run diagnosis earlier the same day.
