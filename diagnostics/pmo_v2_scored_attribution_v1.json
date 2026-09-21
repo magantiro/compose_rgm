@@ -41,8 +41,8 @@
   "archive_channel_census": {
     "dynamic_v21_pooled_channels": 2448,
     "entries_scanned": 2448,
-    "jump_lane": 0,
-    "note": "Every archived entry across all three tasks came from the pooled channels; zero from the jump lane.",
+    "jump_lane": 2,
+    "note": "2 of 2,448 archived entries came from the jump lane (gsk3b fc33df003b91, celecoxib a177033588c6); every other entry came from the pooled channels. CORRECTED from 0 -- the first pass sampled 7 of 15 rounds.",
     "rounds": 7,
     "tasks": 3
   },
@@ -119,7 +119,7 @@
   },
   "contract_payload_sha256": "ba9515615b341019f09f66f3224e590b4ca596dee6bb7c97c759dbe418f1ff4b",
   "generated_at_utc": "2026-09-21T05:22:27.666805+00:00",
-  "headline": "All three tasks improved on best score at matched 250-call budget, and NONE of it is attributable to the realization repair under test. The repaired binder lives in the jump lane; the jump lane produced 2 successful executions across 1,005 proposals.",
+  "headline": "All three tasks improved on best score at matched 250-call budget, and NONE of it is attributable to the realization repair under test. The repaired binder lives in the jump lane; the jump lane produced 3 executions and 2 archive entries across 1,091 proposals.",
   "next_test_zero_oracle": "Determine why 95%+ of jump bindings are rejected in production while the same realizer completed 5 of 24 teacher-scale witness pairs offline. Candidates: the production parent population differs from the witness stratum; the 20s per-attempt cap truncates the productive tail in-lane; or plan latents at >=29 primitives (45 of 95) never bind on production parents at all.",
   "run_id": "35fc7bcd4bf5c964294698014c1ed40da483ad013f6b92c6201b01dee2d3d306",
   "schema_version": "pmo_v2_scored_attribution_v1",
