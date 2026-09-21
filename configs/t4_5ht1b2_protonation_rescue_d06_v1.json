@@ -153,10 +153,10 @@
       "changed_runtime_inputs": {
         "modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py": {
           "from": "b314fe20ec08c0f1d7fb44e0cccd568a048a6ad4220ad9467e9e30e6ac4da174",
-          "to": "89797a4450f547155d07962540fbeef10e93152ba0eabe55140c61d5e3f3f71f"
+          "to": "4a48a1e07efaf4daddecfca60bdd2e544e421df825f52e8f819833beea52d359"
         }
       },
-      "reason": "the wrapper pinned here validated against the superseded v1 contract module and required an authorized status inside the scientific payload; both are repaired. Only the wrapper pin moved and only the v2 validator pin was added -- no delta, ceiling, cell, proposal, allocation or endpoint-gate field changed, which reconstruct_superseded_payload proves by rebuilding the superseded payload.",
+      "reason": "the wrapper pinned here validated against the superseded v1 contract module and required an authorized status inside the scientific payload; both are repaired. Only the wrapper pin moved and only the v2 validator pin was added -- no delta, ceiling, cell, proposal, allocation or endpoint-gate field changed, which reconstruct_superseded_payload proves by rebuilding the superseded payload. SECOND REVISION: the wrapper computed CONTRACT_PATH as ROOT/CONTRACT, but this module is imported inside the container too, where __file__ is /root/<app>.py so ROOT resolves to '/' and the path became the non-existent '/configs/...'. Both arms died at module import with FileNotFoundError before charging any oracle call. The contract is mounted at REMOTE/CONTRACT, so CONTRACT_PATH now resolves to whichever exists. A local launch_dry_run cannot catch this because the local entrypoint resolves ROOT correctly. No scientific field changed.",
       "supersedes_payload_sha256": "d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb"
     },
     "mechanism": {
@@ -244,7 +244,7 @@
     "runtime_inputs_sha256": {
       "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
       "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
-      "modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py": "89797a4450f547155d07962540fbeef10e93152ba0eabe55140c61d5e3f3f71f",
+      "modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py": "4a48a1e07efaf4daddecfca60bdd2e544e421df825f52e8f819833beea52d359",
       "src/compose_v4/control/protonation_aware_proposal.py": "97842262c5c7a0aa0f330045f82d107bbd441b63a01b1c4e82f8f1f7134ca413",
       "src/compose_v4/control/protonation_restate_program.py": "be8502c1488520a72253ce1978a0e55000b17674101643abb4677dcb31cc5626",
       "src/compose_v4/control/route_distilled_goal_expert.py": "092eb28b6a115a328be7f94ab115317b8f9c196b1f510aaed7a216911cee215e",
@@ -349,5 +349,5 @@
       "version": "protonation_rescue_v1"
     }
   },
-  "payload_sha256": "f4c00e06a124c61f56e742f5cac6e53820a4bb83f4360292af25c18b9d8ad520"
+  "payload_sha256": "d95fb5a190b3569bd0f2532b91e7603ea32c076ef0e73f481e1b889df3635c02"
 }

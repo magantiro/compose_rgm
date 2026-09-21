@@ -30,7 +30,13 @@ VOLUME_NAME = "compose-t4-5ht1b2-protonation-rescue-d04"
 MOOD = "https://raw.githubusercontent.com/SeulLee05/MOOD/main/scorer"
 
 
-CONTRACT_PATH = ROOT / CONTRACT
+# This module is imported in BOTH environments: locally by `modal run`, where ROOT is the
+# repository, and inside the container, where __file__ is /root/<app>.py so ROOT resolves to
+# "/" and ROOT / CONTRACT would be the non-existent "/configs/...". The contract is mounted at
+# REMOTE / CONTRACT, so resolve to whichever exists. The import-time guard below runs remotely
+# too, which is why this cannot be deferred to the entrypoint -- and why a local launch_dry_run
+# cannot catch it.
+CONTRACT_PATH = (ROOT / CONTRACT) if (ROOT / CONTRACT).exists() else (REMOTE / CONTRACT)
 ARM = "d04"
 PREPARED_STATUS = "PREPARED_AWAITING_OWNER_AUTHORIZATION"
 REQUIRED_EXPERT = "protonation_aware_retained_subgraph"

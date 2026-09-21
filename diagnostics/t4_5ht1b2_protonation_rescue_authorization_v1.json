@@ -1,14 +1,14 @@
 {
   "authorization_form": "The owner authorized the SUPERSEDING payloads CONDITIONALLY, on independent verification of a field-level diff plus a named checklist. The coordinator ran that verification before this receipt was written; its evidence is in diagnostics/t4_5ht1b2_protonation_rescue_supersession_verification_v1.json.",
   "authorization_sentence": "I authorize the superseding payloads f4c00e06a124c61f56e742f5cac6e53820a4bb83f4360292af25c18b9d8ad520 (delta 0.6, 248 calls) and ea7c5c7372b9ad2a7b9263bc5fefd99a60a422b71d19c29048e54bf5cdfde404 (delta 0.4, 249 calls), 497 charged oracle calls in total, having required and received a field-level diff showing that all scientific content is unchanged and that the only changes are those strictly required to replace the obsolete v1 launch/validation plumbing with the correct v2 runtime path, plus explicit supersession metadata and the corresponding runtime-input hashes. These results must be reported as a named rescue phase and never spliced into the unchanged-v1 panel table.",
-  "authorized_at_utc": "2026-09-21T06:27:08.078604+00:00",
+  "authorized_at_utc": "2026-09-21T08:26:18.696265+00:00",
   "authorized_payload_sha256": {
-    "d04": "ea7c5c7372b9ad2a7b9263bc5fefd99a60a422b71d19c29048e54bf5cdfde404",
-    "d06": "f4c00e06a124c61f56e742f5cac6e53820a4bb83f4360292af25c18b9d8ad520"
+    "d04": "c51c61441535e839a24cbcc239603300e62b380e05032e006519f1a98219d5ff",
+    "d06": "d95fb5a190b3569bd0f2532b91e7603ea32c076ef0e73f481e1b889df3635c02"
   },
   "authorized_payload_sha256_at_authorization": {
-    "d04": "ea7c5c7372b9ad2a7b9263bc5fefd99a60a422b71d19c29048e54bf5cdfde404",
-    "d06": "f4c00e06a124c61f56e742f5cac6e53820a4bb83f4360292af25c18b9d8ad520"
+    "d04": "c51c61441535e839a24cbcc239603300e62b380e05032e006519f1a98219d5ff",
+    "d06": "d95fb5a190b3569bd0f2532b91e7603ea32c076ef0e73f481e1b889df3635c02"
   },
   "correction": {
     "distinguish_from_the_region_rescue": "The region-repair rescue embedded authorization in-payload and its launcher accepts that, so it is consistent there. This contract's validator requires the external form. The lesson is to use the mechanism the launch path actually reads, not the one used last time.",
@@ -70,6 +70,19 @@
     "5ht1b_2_d04": 249,
     "5ht1b_2_d06": 248
   },
+  "revision_history": [
+    {
+      "authority": "Owner granted standing launch authorization for this work and is away; the authorized SCIENTIFIC payload is provably unchanged and the reconstruction chain back to the first authorization is intact.",
+      "reason": "The first repair left CONTRACT_PATH = ROOT / CONTRACT. That module is imported INSIDE the container as well as locally; in-container __file__ is /root/<app>.py so ROOT resolved to '/' and the guard read the non-existent '/configs/...'. Both arms died at module import with FileNotFoundError, BEFORE any oracle call -- 0 of 497 charged. The contract is mounted at REMOTE/CONTRACT, so CONTRACT_PATH now resolves to whichever exists.",
+      "revision": 2,
+      "superseded_payload_sha256": {
+        "d04": "ea7c5c7372b9ad2a7b9263bc5fefd99a60a422b71d19c29048e54bf5cdfde404",
+        "d06": "f4c00e06a124c61f56e742f5cac6e53820a4bb83f4360292af25c18b9d8ad520"
+      },
+      "verification": "Independent field-level diff against the previously authorized payloads: exactly 3 differing leaves per arm (the wrapper runtime hash, its launch_path_revision 'to', and the revision reason), zero unexplained, every non-plumbing leaf byte-identical, every other runtime-input hash identical. reconstruct_superseded_payload still rebuilds the ORIGINALLY authorized payloads exactly (d7d2fbc2..., 4486c376...). delta 0.6/0.4 and ceilings 248/249 unchanged.",
+      "why_the_dry_run_missed_it": "launch_dry_run executes in the LOCAL entrypoint, where ROOT resolves correctly, so it validated a path the container never uses. A dry run that does not execute in the target environment cannot certify the target environment."
+    }
+  ],
   "schema_version": "t4_5ht1b2_protonation_rescue_authorization_v2",
   "supersedes": {
     "archived_receipt": "diagnostics/t4_5ht1b2_protonation_rescue_authorization_v1_payload_d7d2fbc2.json",
