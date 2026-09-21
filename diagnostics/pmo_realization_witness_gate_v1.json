@@ -1,0 +1,1687 @@
+{
+  "census_rows": [
+    {
+      "gaps": [],
+      "plan_id": "3b50710c647a4c8aece0f3ce84555ab4109911f5d7596c80d8be8213a2e3deba",
+      "primitive_count": 29,
+      "route_index": 0,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "ef254e9b546f5c8b8a5311c597e37b79f49f6df0c6219e75ca9a7846febcf814",
+      "primitive_count": 23,
+      "route_index": 3,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "df8d76666ee1271cd652a93267f118d50dc94de7cefd69df76f1a5090045190f",
+      "primitive_count": 29,
+      "route_index": 6,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "9d58866dad1cc003f6eafd6525c81b00a76311374341f1f554d8f198bbe7b535",
+      "primitive_count": 31,
+      "route_index": 7,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "74b29ba8fd5ad1f46e59f72629c280fef626e13e7c73d14e141a2f0af12b4252",
+      "primitive_count": 31,
+      "route_index": 12,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "a16bbed7336321b612efc654d4dcedcc2c4ca54ead03f33723a2f74e69a3b86b",
+      "primitive_count": 27,
+      "route_index": 13,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "1fc935dd76942bd8f3dc05af4fb494498454b8a7581cdad2515928542cbced63",
+      "primitive_count": 12,
+      "route_index": 14,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "a1562a612ac45d1b6d971bd5cee649ce3668efc972801d640588beb6c8fc107a",
+      "primitive_count": 31,
+      "route_index": 16,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "484809b6c5025288a6e930ec1efded0e813eea8838ab52ae29b31377d65983c3",
+      "primitive_count": 31,
+      "route_index": 17,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "01b3c0bb5edd40f5be2fef66b82b0610c6c080e9babd7aafa7459bd71d00e2ac",
+      "primitive_count": 16,
+      "route_index": 18,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "68f0e510e5d2088ae7b3aa4cefe2c26a2a7e71243e7c9bb9f3d3f2e023bf22c4",
+      "primitive_count": 28,
+      "route_index": 20,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "b05e3e39264c11434f38b51cbf431c0f6a1d89dab47a8375371999038bacb8b3",
+      "primitive_count": 31,
+      "route_index": 22,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "7898a507c2de51eb6d943c857b0e49a421221ff04a0916c485a8b6149bcd3f81",
+      "primitive_count": 6,
+      "route_index": 25,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "5288b349bbdad574dbc715ff7258684e2f733ac9c6b127d64960c453479be9da",
+      "primitive_count": 16,
+      "route_index": 28,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "6fddb1a528e24c5c5ecb776c22849ea8aa90a3120ebfeef5d46ebc52dfdc3bec",
+      "primitive_count": 16,
+      "route_index": 32,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "b6250b90052c9032ac8fe0985e5bd4aec498c19f4001d6f0cf95de79178b1eee",
+      "primitive_count": 28,
+      "route_index": 36,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "8eb4633a2a249eaa43e490b164f0f0f972bccb790134e4254f47ed355d7e92ff",
+      "primitive_count": 16,
+      "route_index": 38,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "c85199cca05aabc322b641f05ad418547f197590f79ae2740b7243cbc9fd7643",
+      "primitive_count": 16,
+      "route_index": 40,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "a47886b363ad7a0d655bf858943eee2414a6f7dc2729924260124247a10c0151",
+      "primitive_count": 14,
+      "route_index": 44,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "88a3c36843980f4fc984aa82d3dc0bbe0a01c36d7e29db6086c3aff393802a41",
+      "primitive_count": 32,
+      "route_index": 46,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "287446d68e60317f53d122321d55faae914cccbd4a1a940afe4584d4f957bb8a",
+      "primitive_count": 31,
+      "route_index": 48,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "1e71ee5afee356374bced35bc54957fa844e630f7da344a1b1bec601b4a68c5a",
+      "primitive_count": 31,
+      "route_index": 49,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "0bbb39c8bfa1199acfd45221dd955f955af185c6a11132ce26fa3300e44e651f",
+      "primitive_count": 31,
+      "route_index": 51,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "8327e0007d92ef6317c58e6b116c710d5401629519b4e56e1c026b8cc1121b30",
+      "primitive_count": 31,
+      "route_index": 53,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "99985a3995b517fd1bb2dc6a5bf1dd59d8629266d365ceef3985f8cf238482de",
+      "primitive_count": 28,
+      "route_index": 56,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "4e62852e94dda7058d2ac257bd170e1f4445de0c248403425365a7f1f55d096e",
+      "primitive_count": 28,
+      "route_index": 58,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "2910e71fe1848b15971c43e2c706fbde4d88261a690136853062b77d78bdc164",
+      "primitive_count": 26,
+      "route_index": 59,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "35e9a10631aa8d126dcd4816f22f3a5a62caa485709519d1389ffd765306674c",
+      "primitive_count": 27,
+      "route_index": 61,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "00673320643973b94e934b0c4f9c3c59d6c9acad8168c546ae67e6ee63a05a00",
+      "primitive_count": 27,
+      "route_index": 63,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "10b322d07481c7f2b6155295489e6b0b0a0a9646dfa8658e43d92e51774f0925",
+      "primitive_count": 31,
+      "route_index": 64,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "3cacd578a699b0bf85bf1b12007dabdf6fb670cd3a13dc989c0822880d9b41df",
+      "primitive_count": 31,
+      "route_index": 66,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "cc8efa6ab40b90c8e1e21e8fb07f16d34afaf8a99f8f80a27eecffb90ba3df99",
+      "primitive_count": 28,
+      "route_index": 67,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "d7aef6419d5cfd12c4ed1f42c10440684226106c0a4610564c5aa1213415755c",
+      "primitive_count": 11,
+      "route_index": 70,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "578c1c1c1eaa098c16a31ca14e54f874ea0233c636e9c2a1a3930b926be5c108",
+      "primitive_count": 15,
+      "route_index": 71,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "b8c667a0bc05137ddf41fb259131adb77565273320e664f63aca8554a85255ce",
+      "primitive_count": 14,
+      "route_index": 72,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "e09fc0c54a7e31ab718fa171c5a365e6e5d764cafaf7ca05013ed08728256295",
+      "primitive_count": 30,
+      "route_index": 77,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "b37da60fcca006ea415ba9fa431206117686395fde991ea8a51765d57feee51f",
+      "primitive_count": 25,
+      "route_index": 78,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "7ab271dab8d0dcdc755031f783a8ccd7d9798372383a1711ce6094244fffb517",
+      "primitive_count": 29,
+      "route_index": 79,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "97d54ec083a91c409007aa1c7430ed624d34885d0129bf754067fadbcde6dc48",
+      "primitive_count": 29,
+      "route_index": 80,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "b1d96fff5ba4959ea1600c91e976a71a4610fe5fcb9243f235475f3e3fdd8e9a",
+      "primitive_count": 30,
+      "route_index": 82,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "1c0b3fe804d209da6e1a9347d4c8b34fcf17f4a47493059cfc3646e806412c9f",
+      "primitive_count": 28,
+      "route_index": 83,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "6506168f21cf3aed579163a8fa120fcc358140c106bba33527a34b48537001c1",
+      "primitive_count": 28,
+      "route_index": 87,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "ae330ef634c74de94f598418b5ebbae750cdb30e279b8d37b9652bb484f82b8a",
+      "primitive_count": 28,
+      "route_index": 89,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 14,
+          "executor_rule": "atom_delete",
+          "step": 29
+        }
+      ],
+      "plan_id": "f338e798dd2f9f4989e653e5b18dd3cd8ffaf290ecf7cc8da1135c5500449880",
+      "primitive_count": 31,
+      "route_index": 92,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "97cde040078811b45191eb4af31ce07d82044c1f0c5fa105839c53b3110ba527",
+      "primitive_count": 31,
+      "route_index": 93,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 14,
+          "executor_rule": "atom_delete",
+          "step": 29
+        }
+      ],
+      "plan_id": "d0c244ce92e24d7367593404a257f70017d66c470a19fddb5bdebfeecf43c22b",
+      "primitive_count": 31,
+      "route_index": 95,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "8fad7f5002104bfea3d3ea7cd58c55ef11b06c6d2703e2d46b4e4bc234a1b70a",
+      "primitive_count": 13,
+      "route_index": 96,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "8a9e63ba4776eae5a144f878beef547777036dc35cd03092c2043a106364a21e",
+      "primitive_count": 25,
+      "route_index": 99,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "7604d38ec803399fd63774a3ea5c645009ed46feb3049b856cd85096393fdcdb",
+      "primitive_count": 29,
+      "route_index": 100,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "150c20fc8701fcbeabc00a6a010df24f47cc245c337d4be8a05a9063332bf031",
+      "primitive_count": 28,
+      "route_index": 101,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 14,
+          "executor_rule": "atom_delete",
+          "step": 29
+        }
+      ],
+      "plan_id": "421a14fea5ed6adac8766bca2f4926b15785c46930ca8ccea1d8cc0e92f7a1b9",
+      "primitive_count": 31,
+      "route_index": 103,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "3058e28dc5e2c3b200b8d5e6ce32fe245fc46a0a4d4abc5b63ee048b056fb59f",
+      "primitive_count": 26,
+      "route_index": 104,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "d3b91c732cacb8dd5b3076606d87a9e2e3807b466d256bc63643c32e4c9ba278",
+      "primitive_count": 32,
+      "route_index": 105,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "f1abecfa0c60609f7ae3083f498609bfeeb71a28e4df7cc1aaa65d3560f63215",
+      "primitive_count": 31,
+      "route_index": 106,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "da6ee76c60721dc45171a10185546637f4c717708da587d26bae477496c6cbad",
+      "primitive_count": 31,
+      "route_index": 107,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "7e933239f8ae60a8dd4d52161cd56e20132a3eaeb6c9a83d06644963b2ee6f17",
+      "primitive_count": 27,
+      "route_index": 110,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "143daed17b7f5ff99287210cc39354e73b140ac1f17c8edfb6d3836cfeebfa5d",
+      "primitive_count": 26,
+      "route_index": 113,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "8e5f1f94fcde53e106dc8a2aa44fcf9d95c2eba76b77d525672bec0ea00fd969",
+      "primitive_count": 31,
+      "route_index": 114,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "79a9ec81b0a6e3c6776ddc45159aed11a901df653789c1d544232ce3ff10b723",
+      "primitive_count": 31,
+      "route_index": 116,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "72db80d6b6663368ef72555219908dca24f20885421a18f628b467c8efddcfd0",
+      "primitive_count": 31,
+      "route_index": 117,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "74da902039d84aee30a55385ec19ee5a965182aa22513e2cb555136b45b8fb2a",
+      "primitive_count": 29,
+      "route_index": 118,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "d7be5c457f407acc95f85b83efb9ef3991b9b46c36970a6eb23923c7f48e1318",
+      "primitive_count": 31,
+      "route_index": 119,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "448ed900a9c1ad634a107b4a0b51f823c6177a2bb541f4b9bfa03ffe32cf02aa",
+      "primitive_count": 32,
+      "route_index": 120,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "de1a718ced53fe930f36bc2d7dd4b195f28f7fbc8ef4ece4319e8edef13d501f",
+      "primitive_count": 31,
+      "route_index": 121,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "cd92d67803a89f0279713971db23e70350275f9b971db67e4acab41b995384ef",
+      "primitive_count": 29,
+      "route_index": 123,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "c32cd2ca38e83a1a6a52c74c0f085dbcacedd59453b3737ad5c1749658576422",
+      "primitive_count": 27,
+      "route_index": 127,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "eeffb49369d0a4d05a06d07e9a8857826612204ad6d10205199c4c5024c7a8a1",
+      "primitive_count": 12,
+      "route_index": 128,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "990b73e8b3f76625ffe5704abbc14977748f7366eb6f5258a2ef84e0aa2218a6",
+      "primitive_count": 27,
+      "route_index": 134,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "c3e6148b8fd4f2fe99d40a0c8d184bdcdbfe0772195046411d620de140710e23",
+      "primitive_count": 28,
+      "route_index": 139,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "d198ddae54dc8f2108eba08de84c034f83809d09849733e21ce5c9a91499663f",
+      "primitive_count": 31,
+      "route_index": 140,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "0c99eb7078aa588c694965fb4314e9ac99fa9b61b4a9c170d3ab9abc46c22cc3",
+      "primitive_count": 26,
+      "route_index": 141,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "11a6e5c5e6be329cbd90ec5100d4b2d543d88019e99aa36ef238dd29b7c051d1",
+      "primitive_count": 26,
+      "route_index": 143,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "afe8bef79512efbe3a3324d97ca80bb2a371349a9d4c0a0b46f73374b180a70d",
+      "primitive_count": 16,
+      "route_index": 144,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "e9ba86ade0cd8e6d35f307ae0a8836a780db4263e97884e92e63c3404e7e4d76",
+      "primitive_count": 27,
+      "route_index": 146,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "95e49bc7a7307987bed987e202a0d0f4bd88e832c7496b3cb154080ac9857d9d",
+      "primitive_count": 16,
+      "route_index": 147,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "65a4738b22ce6d0b9dda813a918ebf18a62694ea79c90fda4e9800a120376860",
+      "primitive_count": 16,
+      "route_index": 149,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "8d1477ded25522ae1f0e01b27966152d9474c1b156eebf5545ca7f281185b960",
+      "primitive_count": 28,
+      "route_index": 150,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "0047a562244c0978ea6085cb942b7754e1a3ac3f57c374bfd5a7ecdf95ec9756",
+      "primitive_count": 31,
+      "route_index": 151,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "8380bdd91a6d6f8287ae8917301b12626e06c16d7b85c8c1bc14fe273211b7a2",
+      "primitive_count": 28,
+      "route_index": 153,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "7bd8b03b634beaab2955a7eaa6f8b3775b1c2c433f302fb3e990ec9e8820f1cf",
+      "primitive_count": 28,
+      "route_index": 155,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "2b70e9e8b22e082a8e78d906625069ca60c3f43f5b04fc5580acdb06059b4ea7",
+      "primitive_count": 31,
+      "route_index": 156,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "5d2eef2b4756d5eff9e42ee642b4004e35cad48dc7e43cecd45f331c96ed40a4",
+      "primitive_count": 26,
+      "route_index": 157,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "d65cb0b39449e017986a8a9a2f35292b534402d724448013dabf456acae99ab4",
+      "primitive_count": 29,
+      "route_index": 160,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "0dc608b3ad637869e559220e864592c2be64237fc5006128095fb8639dcfaeef",
+      "primitive_count": 31,
+      "route_index": 161,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "bc6c97910bd7542fd885b1ed5c463c80f3602eac1524defba9b7ae3c21a1a60d",
+      "primitive_count": 28,
+      "route_index": 163,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "4f0d48372f2123a89020d94a7811749486239dace4e7ed6e8f65b97ca9d6df54",
+      "primitive_count": 31,
+      "route_index": 164,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "6099ebc41a807a1ba59d1385d76b3ed9265652582e7cf846f4ff9a858972900b",
+      "primitive_count": 30,
+      "route_index": 172,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "7d15217d5f7ac77684398e26d961ab341ba7f138a61cb8cf06bec5e95be57146",
+      "primitive_count": 26,
+      "route_index": 174,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 129,
+          "executor_rule": "atom_insert",
+          "step": 29
+        }
+      ],
+      "plan_id": "01ca5fac0940bdb682115abedd511af49157639103e1833567de3d1906e9e3d4",
+      "primitive_count": 30,
+      "route_index": 175,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "a90e586e711c62b8499141987e9b1ae49ae850e158ecef10590c10f9dab00b0f",
+      "primitive_count": 31,
+      "route_index": 177,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "7712aac8665e2498c428298910fe72137f01afab8854c3f57dccce12a731e244",
+      "primitive_count": 25,
+      "route_index": 178,
+      "teacher_scale": false
+    },
+    {
+      "gaps": [],
+      "plan_id": "a9da4d0d3e9ed626b5550282345c33a3f31660ccbc1c4dd74c7ca3fe364bd500",
+      "primitive_count": 30,
+      "route_index": 179,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "ea0dfdd2d3f7c1a72f96f788c9e8c54d5cdf52dc78aabac947e96cb263cb1dde",
+      "primitive_count": 28,
+      "route_index": 180,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [],
+      "plan_id": "29a11498523de32f26c464f92fa4e5651f0f77283e0ea97cfdcc7580f2b55f9e",
+      "primitive_count": 29,
+      "route_index": 181,
+      "teacher_scale": true
+    },
+    {
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "91a3fa7290de287f7acfdefe7d0b7b8b114541f3aa0d78765c2377e59a193b7c",
+      "primitive_count": 17,
+      "route_index": 183,
+      "teacher_scale": false
+    }
+  ],
+  "elapsed_seconds": 1133.192028792022,
+  "gate_rows": [
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 11,
+        "nodes_expanded": 58,
+        "outcome": "search_budget_exhausted",
+        "realizations": [],
+        "seconds": 120.17816545799724,
+        "successors_enumerated": 9365,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "3b50710c647a4c8aece0f3ce84555ab4109911f5d7596c80d8be8213a2e3deba",
+      "primitive_count": 29,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 29,
+        "nodes_expanded": 95,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 1,
+            "primitive_count": 29,
+            "retained_fraction": 0.8148148148148148
+          }
+        ],
+        "seconds": 44.52281024999684,
+        "successors_enumerated": 3785,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 23,
+        "nodes_expanded": 24,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 2,
+            "created_dependency_edges": 22,
+            "primitive_count": 23,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 10.655662334000226,
+        "successors_enumerated": 4039,
+        "unsound": false
+      },
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "ef254e9b546f5c8b8a5311c597e37b79f49f6df0c6219e75ca9a7846febcf814",
+      "primitive_count": 23,
+      "reenumerable": false,
+      "teacher_scale": false,
+      "v1_exact": {
+        "max_depth_reached": 23,
+        "nodes_expanded": 24,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 2,
+            "created_dependency_edges": 22,
+            "primitive_count": 23,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 4.786027291993378,
+        "successors_enumerated": 3737,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 11,
+        "nodes_expanded": 59,
+        "outcome": "search_budget_exhausted",
+        "realizations": [],
+        "seconds": 121.69023129198467,
+        "successors_enumerated": 9520,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "df8d76666ee1271cd652a93267f118d50dc94de7cefd69df76f1a5090045190f",
+      "primitive_count": 29,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 29,
+        "nodes_expanded": 95,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 1,
+            "primitive_count": 29,
+            "retained_fraction": 0.8148148148148148
+          }
+        ],
+        "seconds": 43.94880683298106,
+        "successors_enumerated": 3830,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 143,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 0,
+            "primitive_count": 31,
+            "retained_fraction": 0.6296296296296297
+          }
+        ],
+        "seconds": 54.76550708399736,
+        "successors_enumerated": 8012,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "9d58866dad1cc003f6eafd6525c81b00a76311374341f1f554d8f198bbe7b535",
+      "primitive_count": 31,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 55,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 0,
+            "primitive_count": 31,
+            "retained_fraction": 0.6296296296296297
+          }
+        ],
+        "seconds": 19.201636499987217,
+        "successors_enumerated": 2389,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 30,
+        "nodes_expanded": 125,
+        "outcome": "search_budget_exhausted",
+        "realizations": [],
+        "seconds": 120.24327666600584,
+        "successors_enumerated": 8139,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "74b29ba8fd5ad1f46e59f72629c280fef626e13e7c73d14e141a2f0af12b4252",
+      "primitive_count": 31,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 51,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 11,
+            "primitive_count": 31,
+            "retained_fraction": 0.9629629629629629
+          }
+        ],
+        "seconds": 9.564317042008042,
+        "successors_enumerated": 4670,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 11,
+        "nodes_expanded": 62,
+        "outcome": "search_budget_exhausted",
+        "realizations": [],
+        "seconds": 120.09314591699513,
+        "successors_enumerated": 10045,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "a16bbed7336321b612efc654d4dcedcc2c4ca54ead03f33723a2f74e69a3b86b",
+      "primitive_count": 27,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 27,
+        "nodes_expanded": 93,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 1,
+            "primitive_count": 27,
+            "retained_fraction": 0.8148148148148148
+          }
+        ],
+        "seconds": 36.903396749985404,
+        "successors_enumerated": 3660,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 12,
+        "nodes_expanded": 40,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 5,
+            "primitive_count": 12,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 5.388548125018133,
+        "successors_enumerated": 3485,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "1fc935dd76942bd8f3dc05af4fb494498454b8a7581cdad2515928542cbced63",
+      "primitive_count": 12,
+      "reenumerable": true,
+      "teacher_scale": false,
+      "v1_exact": {
+        "max_depth_reached": 12,
+        "nodes_expanded": 25,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 5,
+            "primitive_count": 12,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 1.9538121249934193,
+        "successors_enumerated": 1758,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 143,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 0,
+            "primitive_count": 31,
+            "retained_fraction": 0.6296296296296297
+          }
+        ],
+        "seconds": 51.56910737499129,
+        "successors_enumerated": 7998,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "a1562a612ac45d1b6d971bd5cee649ce3668efc972801d640588beb6c8fc107a",
+      "primitive_count": 31,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 55,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 0,
+            "primitive_count": 31,
+            "retained_fraction": 0.6296296296296297
+          }
+        ],
+        "seconds": 16.302194541000063,
+        "successors_enumerated": 2370,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 143,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 0,
+            "primitive_count": 31,
+            "retained_fraction": 0.6296296296296297
+          }
+        ],
+        "seconds": 50.523187832994154,
+        "successors_enumerated": 7998,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "484809b6c5025288a6e930ec1efded0e813eea8838ab52ae29b31377d65983c3",
+      "primitive_count": 31,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 55,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 0,
+            "primitive_count": 31,
+            "retained_fraction": 0.6296296296296297
+          }
+        ],
+        "seconds": 15.029681291984161,
+        "successors_enumerated": 2370,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 16,
+        "nodes_expanded": 17,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 2,
+            "created_dependency_edges": 14,
+            "primitive_count": 16,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 9.370551707979757,
+        "successors_enumerated": 4292,
+        "unsound": false
+      },
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "01b3c0bb5edd40f5be2fef66b82b0610c6c080e9babd7aafa7459bd71d00e2ac",
+      "primitive_count": 16,
+      "reenumerable": false,
+      "teacher_scale": false,
+      "v1_exact": {
+        "max_depth_reached": 16,
+        "nodes_expanded": 17,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 2,
+            "created_dependency_edges": 14,
+            "primitive_count": 16,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 4.106721375021152,
+        "successors_enumerated": 3990,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 11,
+        "nodes_expanded": 64,
+        "outcome": "search_budget_exhausted",
+        "realizations": [],
+        "seconds": 121.6693864580011,
+        "successors_enumerated": 10415,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "68f0e510e5d2088ae7b3aa4cefe2c26a2a7e71243e7c9bb9f3d3f2e023bf22c4",
+      "primitive_count": 28,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 28,
+        "nodes_expanded": 94,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 1,
+            "primitive_count": 28,
+            "retained_fraction": 0.8518518518518519
+          }
+        ],
+        "seconds": 35.217323791992385,
+        "successors_enumerated": 3792,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 143,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 0,
+            "primitive_count": 31,
+            "retained_fraction": 0.6296296296296297
+          }
+        ],
+        "seconds": 49.027278124995064,
+        "successors_enumerated": 7998,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "b05e3e39264c11434f38b51cbf431c0f6a1d89dab47a8375371999038bacb8b3",
+      "primitive_count": 31,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 55,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 0,
+            "primitive_count": 31,
+            "retained_fraction": 0.6296296296296297
+          }
+        ],
+        "seconds": 14.9261149999802,
+        "successors_enumerated": 2372,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 6,
+        "nodes_expanded": 21,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 2,
+            "created_dependency_edges": 2,
+            "primitive_count": 6,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 2.4270551249792334,
+        "successors_enumerated": 2268,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "7898a507c2de51eb6d943c857b0e49a421221ff04a0916c485a8b6149bcd3f81",
+      "primitive_count": 6,
+      "reenumerable": true,
+      "teacher_scale": false,
+      "v1_exact": {
+        "max_depth_reached": 6,
+        "nodes_expanded": 9,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 2,
+            "created_dependency_edges": 2,
+            "primitive_count": 6,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 0.6927722079853993,
+        "successors_enumerated": 759,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 16,
+        "nodes_expanded": 17,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 2,
+            "created_dependency_edges": 14,
+            "primitive_count": 16,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 8.913485708995722,
+        "successors_enumerated": 4292,
+        "unsound": false
+      },
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "5288b349bbdad574dbc715ff7258684e2f733ac9c6b127d64960c453479be9da",
+      "primitive_count": 16,
+      "reenumerable": false,
+      "teacher_scale": false,
+      "v1_exact": {
+        "max_depth_reached": 16,
+        "nodes_expanded": 17,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 2,
+            "created_dependency_edges": 14,
+            "primitive_count": 16,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 4.008834125008434,
+        "successors_enumerated": 3990,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 16,
+        "nodes_expanded": 54,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 7,
+            "primitive_count": 16,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 5.2234076659951825,
+        "successors_enumerated": 3739,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "6fddb1a528e24c5c5ecb776c22849ea8aa90a3120ebfeef5d46ebc52dfdc3bec",
+      "primitive_count": 16,
+      "reenumerable": true,
+      "teacher_scale": false,
+      "v1_exact": {
+        "max_depth_reached": 16,
+        "nodes_expanded": 29,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 7,
+            "primitive_count": 16,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 1.9958604169951286,
+        "successors_enumerated": 1967,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 25,
+        "nodes_expanded": 208,
+        "outcome": "search_budget_exhausted",
+        "realizations": [],
+        "seconds": 120.65223212499404,
+        "successors_enumerated": 9934,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "b6250b90052c9032ac8fe0985e5bd4aec498c19f4001d6f0cf95de79178b1eee",
+      "primitive_count": 28,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 25,
+        "nodes_expanded": 2889,
+        "outcome": "search_budget_exhausted",
+        "realizations": [],
+        "seconds": 120.00306112499675,
+        "successors_enumerated": 44473,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 16,
+        "nodes_expanded": 17,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 2,
+            "created_dependency_edges": 14,
+            "primitive_count": 16,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 9.196829166990938,
+        "successors_enumerated": 4292,
+        "unsound": false
+      },
+      "gaps": [
+        {
+          "enumerated": 213,
+          "executor_rule": "atom_insert",
+          "step": 3
+        }
+      ],
+      "plan_id": "8eb4633a2a249eaa43e490b164f0f0f972bccb790134e4254f47ed355d7e92ff",
+      "primitive_count": 16,
+      "reenumerable": false,
+      "teacher_scale": false,
+      "v1_exact": {
+        "max_depth_reached": 16,
+        "nodes_expanded": 17,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 2,
+            "created_dependency_edges": 14,
+            "primitive_count": 16,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 4.347672333009541,
+        "successors_enumerated": 3990,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 16,
+        "nodes_expanded": 31,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 8,
+            "primitive_count": 16,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 3.0216845830145758,
+        "successors_enumerated": 2747,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "c85199cca05aabc322b641f05ad418547f197590f79ae2740b7243cbc9fd7643",
+      "primitive_count": 16,
+      "reenumerable": true,
+      "teacher_scale": false,
+      "v1_exact": {
+        "max_depth_reached": 16,
+        "nodes_expanded": 19,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 8,
+            "primitive_count": 16,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 1.2152630829950795,
+        "successors_enumerated": 1238,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 14,
+        "nodes_expanded": 91,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 6,
+            "primitive_count": 14,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 10.080100708000828,
+        "successors_enumerated": 7638,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "a47886b363ad7a0d655bf858943eee2414a6f7dc2729924260124247a10c0151",
+      "primitive_count": 14,
+      "reenumerable": true,
+      "teacher_scale": false,
+      "v1_exact": {
+        "max_depth_reached": 14,
+        "nodes_expanded": 39,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 6,
+            "primitive_count": 14,
+            "retained_fraction": 1.0
+          }
+        ],
+        "seconds": 2.9786048340029083,
+        "successors_enumerated": 2988,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 11,
+        "nodes_expanded": 64,
+        "outcome": "search_budget_exhausted",
+        "realizations": [],
+        "seconds": 121.77848945901496,
+        "successors_enumerated": 10415,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "88a3c36843980f4fc984aa82d3dc0bbe0a01c36d7e29db6086c3aff393802a41",
+      "primitive_count": 32,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 32,
+        "nodes_expanded": 98,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 3,
+            "primitive_count": 32,
+            "retained_fraction": 0.9259259259259259
+          }
+        ],
+        "seconds": 35.70610720801051,
+        "successors_enumerated": 4228,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 41,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 11,
+            "primitive_count": 31,
+            "retained_fraction": 0.9629629629629629
+          }
+        ],
+        "seconds": 13.318505500006722,
+        "successors_enumerated": 2937,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "287446d68e60317f53d122321d55faae914cccbd4a1a940afe4584d4f957bb8a",
+      "primitive_count": 31,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 51,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 11,
+            "primitive_count": 31,
+            "retained_fraction": 0.9629629629629629
+          }
+        ],
+        "seconds": 8.12175625000964,
+        "successors_enumerated": 4706,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 11,
+        "nodes_expanded": 64,
+        "outcome": "search_budget_exhausted",
+        "realizations": [],
+        "seconds": 120.72087741701398,
+        "successors_enumerated": 10415,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "1e71ee5afee356374bced35bc54957fa844e630f7da344a1b1bec601b4a68c5a",
+      "primitive_count": 31,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 97,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 2,
+            "primitive_count": 31,
+            "retained_fraction": 0.8148148148148148
+          }
+        ],
+        "seconds": 34.60328983300133,
+        "successors_enumerated": 3938,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 143,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 0,
+            "primitive_count": 31,
+            "retained_fraction": 0.6296296296296297
+          }
+        ],
+        "seconds": 47.75116254098248,
+        "successors_enumerated": 7998,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "0bbb39c8bfa1199acfd45221dd955f955af185c6a11132ce26fa3300e44e651f",
+      "primitive_count": 31,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 55,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 0,
+            "primitive_count": 31,
+            "retained_fraction": 0.6296296296296297
+          }
+        ],
+        "seconds": 14.366560833004769,
+        "successors_enumerated": 2372,
+        "unsound": false
+      }
+    },
+    {
+      "R1_drop_environment_and_lag": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 41,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 11,
+            "primitive_count": 31,
+            "retained_fraction": 0.9629629629629629
+          }
+        ],
+        "seconds": 13.187549833004596,
+        "successors_enumerated": 2937,
+        "unsound": false
+      },
+      "gaps": [],
+      "plan_id": "8327e0007d92ef6317c58e6b116c710d5401629519b4e56e1c026b8cc1121b30",
+      "primitive_count": 31,
+      "reenumerable": true,
+      "teacher_scale": true,
+      "v1_exact": {
+        "max_depth_reached": 31,
+        "nodes_expanded": 51,
+        "outcome": "completed_realization",
+        "realizations": [
+          {
+            "component_count": 1,
+            "created_dependency_edges": 11,
+            "primitive_count": 31,
+            "retained_fraction": 0.9629629629629629
+          }
+        ],
+        "seconds": 7.997878082998795,
+        "successors_enumerated": 4706,
+        "unsound": false
+      }
+    }
+  ],
+  "new_oracle_calls": 0,
+  "reenumerability_census": {
+    "consequence": "a plan with a gap is unrealizable on its OWN generating source, so proven_incompatible there is CORRECT.  The teacher-witness stratum is therefore not a guaranteed positive control.",
+    "definition": "teacher steps whose own action enumerate_role_successors does not offer at the state they were taken from",
+    "gap_steps": 14,
+    "gap_steps_by_rule": {
+      "atom_delete": 3,
+      "atom_insert": 11
+    },
+    "plans": 95,
+    "plans_with_a_gap": 14,
+    "plans_with_a_gap_fraction": 0.14736842105263157,
+    "teacher_scale_plans": 67,
+    "teacher_scale_plans_with_a_gap": 4,
+    "teacher_steps_total": 2506
+  },
+  "reproduce": "KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src:scripts python3 scripts/pmo_realization_witness_gate_v1.py --workers 3 --gate-sample 24",
+  "schema_version": "pmo_realization_witness_gate_v1",
+  "soundness_gate": {
+    "definition": "on a fully re-enumerable route a realization exists, so proven_incompatible is an unsound prune",
+    "outcomes": {
+      "R1_drop_environment_and_lag": {
+        "completed_realization": 16,
+        "search_budget_exhausted": 8
+      },
+      "v1_exact": {
+        "completed_realization": 23,
+        "search_budget_exhausted": 1
+      }
+    },
+    "pairs": 24,
+    "unsound": 0,
+    "unsound_rows": []
+  }
+}
