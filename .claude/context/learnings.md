@@ -2485,3 +2485,48 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   gradient steps cannot repair a support that is ~15x enriched in small rings relative to the
   catalog. Two independent lines -- a longitudinal checkpoint comparison and a static support census
   -- agree that the defect is upstream of the learned rates. **Do not spend further training on it.**
+
+## 2026-09-21 (de novo ring schedule: the support defect is real, localized, and the repair plateaus)
+
+- **The n=800 three-arm probe's OWN predeclared rule returns FIX_COMPILER_ORDERING**, and reducing it
+  settles two things the earlier n=24 probe could not. Arm A (sequential, what Lineage B trained on)
+  **0.2919 +- 0.0038**, arm B (shipped `exact_early_ring`) **0.1894 +- 0.0027**, arm C (same, phase
+  barriers removed) **identical to arm B to sixteen digits** -- which proves the barrier is never
+  reached and relaxing it is a provable no-op.
+- **CORRECTS the standing slot-scarcity framing at TRAINING time, with the right metric.** Free slots
+  are IDENTICAL across all three arms (11.883) while the support mass moves 0.29 -> 0.19, so slots
+  cannot be the mechanism. What the mass actually tracks is support SIZE:
+  `r(mass, log legal_template_count) = -0.87` (A) and **-0.92** (B), against
+  `r(mass, free_slots) = +0.13` with the WRONG SIGN -- smaller molecules have MORE small-ring mass,
+  not less. Anyone proposing "commit the ring when only its minimum atoms exist" is proposing to move
+  along the +0.13 axis in the damaging direction.
+- **The collapse is ONE STEP, and it is decoration.** Full support curve along a real 32-step trace
+  (pinned kernel): indices 0-28 sit at legal 300-1600 and mass 0.10-0.16; the LAST `atom_restate`
+  before the ring cuts legal **1034 -> 295** and lifts mass **0.1199 -> 0.2237**; the first ring grow
+  then leaves only **28** legal templates at mass 0.3571 for the second ring system. So decoration
+  constricts the support, and each ring commitment constricts it further for the next.
+- **Post-hoc adjacent-transposition scheduling is EXHAUSTED where it stops.** Blocker census over
+  2,017 ring events: after bubbling as far left as it can, **82.2% are blocked by a `bond_reroute`**
+  and **95.3% have no exact commutation available at all**. The shipped scheduler cannot cross the
+  graft phase, so it can only ever park a ring event immediately after the last graft.
+- **The repair is an EMISSION-ORDER change, `event_schedule="ring_dependency_block"`.** Each ring
+  system is committed at the earliest graft prefix the executor accepts it at, which also places it
+  ahead of all decoration. Feasibility is decided BY EXECUTION; the tree-edge test beside it is a
+  cheap pre-filter, MEASURED to leave every compiled trace byte-identical when removed.
+- **A per-item fallback cannot protect a corpus; you need a TRACE-level one.** Committing a ring
+  early can invalidate a LATER graft that touches one of its atoms -- 3 of 150 real training
+  molecules compiled under `sequential` and raised under the block. The per-system fallback cannot
+  see this because the commitment it would have to undo already succeeded. Without abandoning the
+  whole reordering as a unit the schedule silently shrinks the corpus by ~2%, and that loss is
+  INVISIBLE in any per-arm mean computed over whatever survived.
+- **Reach is bounded and must be reported with the win:** 30% of real molecules defer at least one
+  ring system to the legacy end-of-route position, and ~2% fall back entirely. Both are flagged per
+  trace (`ring_dependency_block_deferred`, `ring_dependency_block_fell_back_to_sequential`).
+- **Compile cost 1.087x**, measured in executor applications per compiled trace (50.2 -> 54.6, n=150)
+  -- a load-independent counter, because this machine is shared with three other agents.
+- **A knob measured INERT was removed rather than shipped.** A graft-gap spreader between consecutive
+  ring commits produced byte-identical output at gap 0, 3, 6 and 20 across 116 molecules, because
+  ring dependencies complete too late in the graft phase for the gap to ever bind. Shipping it would
+  have implied a tuning lever that does nothing.
+- **`sequential` is byte-identical after the refactor**, fingerprinted over 113 real molecules
+  against the branch base: 0 differing traces, same 13 pre-existing compile failures.
