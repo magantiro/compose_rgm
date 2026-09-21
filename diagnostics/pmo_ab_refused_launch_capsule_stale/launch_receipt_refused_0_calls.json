@@ -1,0 +1,48 @@
+{
+  "app": "compose-pmo-population-v1-corrected",
+  "arms": {
+    "A_baseline": "fe6c5d45483eeb992ad42ba7b7b1280c3897837af155a5925068b79d7d2f26da",
+    "B_memory": "f0dc7b902dc2e3bf8043d360479963cb1afa9036f1c91dfa08a9bb3eed0a2b0b"
+  },
+  "automatic_retries": 0,
+  "calls": {
+    "A_baseline/celecoxib_rediscovery": {
+      "call_id": "fc-01M31JSDCQE4Q3YWWWGKS8KCK8",
+      "run_id": "0e34671be5e8989c1d5fd2f4bc257a79af408c6e518246df92bc5dc537e2d732"
+    },
+    "A_baseline/gsk3b": {
+      "call_id": "fc-01M31JSD8WFHM6PGQ0WTGJX8F5",
+      "run_id": "1de893f313f1847f40fb5a6934d53c44b55659cb26deb14dd2dc2f01ac8caa8e"
+    },
+    "A_baseline/perindopril_mpo": {
+      "call_id": "fc-01M31JSDAJAQS7MJN93MSF4KWD",
+      "run_id": "baf8d1be6c39e9a377fc3d773d32a60959a17dc52a2de339410d039b3a15167e"
+    },
+    "B_memory/celecoxib_rediscovery": {
+      "call_id": "fc-01M31JSDMR8EDYCZBRM81GCQKH",
+      "run_id": "bb0a0c4e9a401124ab79467603e02f15767722f9cd3b7cc3a69f84f4215351db"
+    },
+    "B_memory/gsk3b": {
+      "call_id": "fc-01M31JSDGN2SGWJ6S42GDXK0EV",
+      "run_id": "8c7cb144d17059e7ace89097d45db4e032613045da355699769a3b6571dcd074"
+    },
+    "B_memory/perindopril_mpo": {
+      "call_id": "fc-01M31JSDJKHCJ1E57KRT4PE1VD",
+      "run_id": "eede57906421165f56a9383a07fc06c5c2dbe3e60ab80a27c5b77c68491d3083"
+    }
+  },
+  "charged_calls_per_task": 250,
+  "charged_calls_total": 1500,
+  "created_at_utc": "2026-09-21T08:54:41.879907+00:00",
+  "matched": "payloads differ in exactly one top-level key: arm",
+  "oracle_calls_charged": 0,
+  "outcome": "REFUSED_BY_INPUT_IDENTITY_CHECK",
+  "reason": "verify_runtime_environment refused: the source capsule manifest still pinned the pre-A/B worker hash (36f49f0e -> c0f0591e). The fail-closed chain stopped the run before any scoring. Archived rather than deleted: it is the record of a refused launch that cost nothing.",
+  "schema_version": "pmo_ab_launch_receipt_v1",
+  "status": "SPAWNED_ALL",
+  "tasks": [
+    "gsk3b",
+    "perindopril_mpo",
+    "celecoxib_rediscovery"
+  ]
+}

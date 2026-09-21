@@ -9,6 +9,7 @@
     "torch": "2.4.0",
     "torch_index": "https://download.pytorch.org/whl/cpu"
   },
+  "revision_note": "Re-hashed for the matched A/B: the worker was made arm-aware, the controller gained the memory call site, execute_task gained the arm flag, and the allocator repair moved adaptive_program_optimizer/edit_learning_data. pmo_online_memory.py and the two allocator modules are added because they are on the scoring path and were previously outside the capsule.",
   "schema_version": "pmo_population_source_capsule_manifest_v2",
   "source_files": {
     "configs/pmo_population_controller_v1_scored_contract_corrected.json": "903840efb6abdf6a7a688bde423171faf02c19b95588bcbad2c9507dce7be0d7",
@@ -16,13 +17,16 @@
     "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43",
     "diagnostics/pmo_population_controller_v1/corrected_scored_authorization_receipt.json": "823cc881e8ee297151b9931fe32bd708b9181b2f52d4d2645b3cb8d8b3237d14",
     "diagnostics/pmo_population_live_parent_gate_v1/scheduler_result.json": "de044abe3b6c7eb1f5cbf53fd8591f5c26561753dedf4b3cbcb5cb9691fa71fc",
-    "modal_apps/pmo_population_v1_app.py": "36f49f0ecf791e6ba823a1d3f19a2b34b69cc8e269d149f3c69d1ea1b61ad88a",
+    "modal_apps/pmo_population_v1_app.py": "c0f0591ea1cca0676449721517c306937e55a05d8845cb77508f758aeb12845c",
+    "src/compose_v4/control/adaptive_program_optimizer.py": "1f1937ca6035f2797235878925a515aff543089d044a8c06cd6197aea6a64a23",
     "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",
-    "src/compose_v4/control/pmo_credit.py": "ec1eb66589f241dec65eaa73a540f32ac8b032d7562889f7adf1a3b299834112",
-    "src/compose_v4/control/pmo_population_controller.py": "9c86474b8e3f3487a43366d1f3acdd6716f086e9d13f1df1fb2d099ed7c7b55d",
+    "src/compose_v4/control/edit_learning_data.py": "b0e71fdbd54c39727765edfe36253c0588b9882ecf8a52f6b65b7c590d711f71",
+    "src/compose_v4/control/pmo_credit.py": "9c8e32adec82df973d7175215a424df29367af96c8870981a0909fcd2a77a164",
+    "src/compose_v4/control/pmo_online_memory.py": "391c4477fc6c05c83c73cdf180fa397127d7ab185c29064357f5ad0ce3715427",
+    "src/compose_v4/control/pmo_population_controller.py": "e0e5bdd99b6e9ffc4303b0e97eaead09fc377665c6d1c8674f281a0d53f09f32",
     "src/compose_v4/control/program_campaign.py": "884f13cbbe49c06a94aafb59880daf38f313b6f4717af012c1fe8eb9074c469e",
     "src/compose_v4/experiments/pmo_oracle_assets.py": "5ec0b7c9b9185cd2b8edd14c2529f37e825311a2b39d6ce71c68423ab9f4d558",
-    "src/compose_v4/experiments/pmo_population_v1.py": "a553cf66264a88d3750ea26d3ddd29f3f04f7ddd1a122084bdfe5b659c9fb655"
+    "src/compose_v4/experiments/pmo_population_v1.py": "eafc755e5eec80373ff0d134c03f7c9782085fc54e73383489a61a8aa24332bf"
   },
   "status": "PREPARED_NO_LAUNCH",
   "task_to_route_lookup": false,
