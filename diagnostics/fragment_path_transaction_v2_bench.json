@@ -1,0 +1,74 @@
+{
+  "schema": "compose_fragment_path_transaction_v2_bench_v1",
+  "what": "composite path-insertion transaction: insert on a path atom, ring-close to the far core, open the original bond, executed atomically",
+  "payload_source": "the prior -- the inserted atom is taken from an atom_insert the MODEL proposes at the chosen site, and the transaction is abandoned rather than invented if the model offers none",
+  "precondition": "free valence at the far-core anchor, computed from the state; no drug name, no task label",
+  "measured_10_attempts_per_drug_10_drugs": {
+    "arm_off": {
+      "committed": 38,
+      "length_histogram": {
+        "1": 38
+      },
+      "above_seed": 0,
+      "above_seed_pct": 0.0
+    },
+    "arm_on": {
+      "committed": 31,
+      "length_histogram": {
+        "1": 28,
+        "2": 3
+      },
+      "above_seed": 3,
+      "above_seed_pct": 9.7,
+      "transactions": 3
+    }
+  },
+  "per_drug_on": {
+    "BARICITINIB": [
+      1,
+      0
+    ],
+    "CYCLOTHIAZIDE": [
+      1,
+      1
+    ],
+    "ELIGLUSTAT": [
+      8,
+      0
+    ],
+    "ERLOTINIB": [
+      6,
+      0
+    ],
+    "FUTIBATINIB": [
+      6,
+      0
+    ],
+    "LESINURAD": [
+      2,
+      2
+    ],
+    "LIOTHYRONINE": [
+      3,
+      0
+    ],
+    "LOVASTATIN": [
+      0,
+      0
+    ],
+    "MARIBAVIR": [
+      0,
+      0
+    ],
+    "SPIRAPRIL": [
+      4,
+      0
+    ]
+  },
+  "predeclared_vacuity_falsifier": ">90% of committed endpoints at the seeded length means the DESIGN is wrong",
+  "falsifier_reading_panel_wide": "FIRES: 28 of 31 committed endpoints are at the seeded length = 90.3%",
+  "falsifier_reading_where_applicable": "PASSES: on the two drugs whose declared site has free valence the transaction fires on every committed endpoint, 3 of 3 above seed",
+  "honest_note": "The two readings differ because the precondition makes the program DECLAREDLY vacuous on 8 of 10 drugs, the same way the attachment controller is vacuous on superstructure. But the falsifier was predeclared panel-wide, and re-scoping a falsifier AFTER seeing the result is exactly the move that destroys its value. Both readings are reported and the choice is not mine to make silently.",
+  "yield_caveat": "Even where it applies, yield is low: 3 committed endpoints from 20 attempts on the two applicable drugs.",
+  "status": "path_program remains OFF by default; no linker number is reported and no arm has been scored"
+}

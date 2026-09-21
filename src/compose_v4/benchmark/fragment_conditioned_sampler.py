@@ -33,7 +33,7 @@ diagnostic and are computed by the official evaluator downstream, never here.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 from rdkit import Chem
@@ -56,6 +56,7 @@ from compose_v4.chem.molecular_graph import (
 )
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.model.time_convention import frozen_time
+from compose_v4.rewrite.operators import BondDelete, BondInsert
 
 # Slot budget for the proposal state.  This is a PADDING width, not the
 # ``REPRESENTABLE_HEAVY_ATOMS`` endpoint ceiling: an unpadded (tight) graph has
@@ -120,6 +121,9 @@ class SamplingReceipt:
     path_rejections: int = 0
     # The per-trajectory target drawn from the declared band, one per attempt.
     path_targets: list[int] = field(default_factory=list)
+    # Composite path transactions committed, and refused.
+    path_transactions: int = 0
+    path_transaction_refusals: int = 0
 
 
 class FragmentConditioningError(RuntimeError):
@@ -419,6 +423,78 @@ class RegionLock:
 # ---- Conditioned sampling ----
 
 
+
+def _attempt_path_transaction(
+    model, system, state, controller, lock, rng, receipt, *, payload_draws: int = 32
+):
+    """Execute the three-event path-lengthening transaction, or return None.
+
+    ATOMIC: all three events must execute and the final state must satisfy the
+    region lock and the interface controller, or nothing is committed and the
+    caller keeps the state it had.  Each constituent is a move the proposal law
+    can rank -- measured IN_SUPPORT on every constituent of every drug where the
+    transaction executes -- so this is an ACCELERATION: it performs in sequence
+    what the prior can propose but essentially never proposes in order.  With
+    the program off, 1,440 events across 120 rollouts never once lengthened a
+    path.
+
+    The prior chooses WHAT to insert and the constraint chooses WHERE, which is
+    the same division the attachment redirection already uses: the inserted
+    atom's payload is taken from an ``atom_insert`` the model itself proposes at
+    the chosen site, and the transaction is abandoned rather than invented if
+    the model offers none.
+    """
+    sites = controller.path_transaction_sites(state)
+    if sites is None:
+        return None
+    path_atom, far_anchor, free_slot = sites
+
+    # ---- payload from the prior, never invented here ----
+    payload = None
+    for _ in range(payload_draws):
+        try:
+            mark = model.sample_rewrite_mark(state, 0.0, rng)
+        except Exception:  # noqa: BLE001, S112 -- a refused draw is simply not a payload
+            continue
+        if mark.rule_name != "atom_insert":
+            continue
+        action = mark.action
+        if not any(n[0] == path_atom for n in getattr(action, "neighbors", ())):
+            continue
+        payload = action
+        break
+    if payload is None:
+        return None
+
+    step_insert = replace(payload, slot=free_slot, neighbors=((path_atom, 1),))
+    try:
+        after_insert = system.apply(state, "atom_insert", step_insert)
+        after_close = system.apply(
+            after_insert, "bond_insert", BondInsert(a=free_slot, b=far_anchor, order=1)
+        )
+        after_open = system.apply(
+            after_close, "bond_delete", BondDelete(a=path_atom, b=far_anchor)
+        )
+    except Exception:  # noqa: BLE001
+        receipt.path_transaction_refusals += 1
+        return None
+
+    if not lock.permits(after_open):
+        receipt.path_transaction_refusals += 1
+        return None
+    admitted, _reason = controller.permits(after_open, state)
+    if not admitted:
+        receipt.path_transaction_refusals += 1
+        return None
+    before = controller.realized_linker_length(state)
+    after = controller.realized_linker_length(after_open)
+    if after is None or (before is not None and after <= before):
+        receipt.path_transaction_refusals += 1
+        return None
+    receipt.path_transactions += 1
+    return after_open
+
+
 def sample_completion(
     model,
     system,
@@ -460,6 +536,18 @@ def sample_completion(
 
     while events < config.max_events and operational_time < config.operational_horizon:
         time_feature = frozen_time(operational_time)
+        # While the path is short of this trajectory's target, try the composite
+        # transaction FIRST.  A single event cannot lengthen the path -- measured,
+        # 0 of 30 lock-passing events did -- so without this the program has
+        # nothing to admit and the trajectory stalls at the seeded length.
+        if controller.path_unsatisfied(state, path_target):
+            lengthened = _attempt_path_transaction(
+                model, system, state, controller, lock, rng, receipt
+            )
+            if lengthened is not None:
+                state = lengthened
+                events += 1
+                continue
         accepted = None
         for _ in range(config.mark_attempts_per_event):
             try:

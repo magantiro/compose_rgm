@@ -326,6 +326,43 @@ class AttachmentController:
         realized = self.realized_linker_length(state)
         return realized is not None and realized < target
 
+    def path_transaction_sites(self, state: MolecularGraph) -> tuple[int, int, int] | None:
+        """Sites a path-lengthening transaction needs: (path_atom, far_anchor, free_slot).
+
+        Lengthening the core-to-core path is a THREE-EVENT transaction -- insert
+        an atom on a path atom, ring-close it to the far core, then open the
+        original bond -- because both bonds of the path are BRIDGES, so deleting
+        one first disconnects the molecule and the executor refuses that state.
+        This returns the structural sites the transaction needs, or ``None``
+        when the state cannot support one.
+
+        The PRECONDITION is free valence at the far-core anchor: a saturated
+        anchor cannot accept the ring-closing bond, which is measured to be
+        exactly why the transaction fails on the drugs whose declared sites
+        carry no free valence.  It is computed from the STATE -- no drug name,
+        no task label, no list of instances.
+        """
+        groups = self._spec.lock_groups
+        if len(groups) < 2:
+            return None
+        real = is_element(state.atom_types)
+        core_slots = frozenset().union(*groups)
+        far = groups[1]
+        free_slot = next((i for i in range(state.n_atoms) if not bool(real[i])), None)
+        if free_slot is None:
+            return None
+        for slot in range(state.n_atoms):
+            if slot in core_slots or not bool(real[slot]):
+                continue
+            row = state.bonds[slot]
+            for anchor in sorted(far):
+                if int(row[anchor]) <= 0:
+                    continue
+                if int(state.implicit_h_counts[anchor]) < 1:
+                    continue
+                return slot, anchor, free_slot
+        return None
+
     def path_permits(
         self, successor: MolecularGraph, predecessor: MolecularGraph, target: int
     ) -> tuple[bool, str]:
@@ -339,6 +376,13 @@ class AttachmentController:
         if not self.path_active:
             return True, ""
         if not self.path_unsatisfied(predecessor, target):
+            return True, ""
+        # A predicate that cannot be satisfied must not block.  Where the
+        # far-core anchor is saturated there is no transaction to perform, so
+        # gating here would strangle the trajectory exactly as the v1 per-event
+        # predicate did -- committing nothing instead of committing a seed-length
+        # linker.  Release and let the prior elaborate.
+        if self.path_transaction_sites(predecessor) is None:
             return True, ""
         before = self.realized_linker_length(predecessor)
         after = self.realized_linker_length(successor)

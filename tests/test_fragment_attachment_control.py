@@ -1085,3 +1085,91 @@ def test_path_target_is_drawn_from_the_declared_band():
     assert draws <= {2, 3, 4, 5}
     # It must VARY -- a target pinned per instance is per-instance tuning.
     assert len(draws) > 1
+
+
+# ---- The composite path transaction ----
+
+
+def test_transaction_sites_are_none_for_a_single_core_prompt():
+    """There is no second core to route a path to, so there is no transaction.
+
+    Checked on a GROWN state, not only the start state: a single-core prompt
+    starts with no atoms outside its core at all, so the start state cannot
+    exercise the guard -- any implementation returns None there for the wrong
+    reason.
+    """
+    config = AttachmentControlConfig(enabled=True, path_program=True)
+    prompt = _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
+    context = build_prompt_context(prompt, control=config)
+    controller = AttachmentController(context.attachment, context.locked_slots, config)
+    assert controller.path_transaction_sites(context.start_state) is None
+
+    # Grow a pendant off a declared interface, so a non-core atom now exists
+    # adjacent to the core -- exactly the shape the two-core branch looks for.
+    anchor = context.attachment.interfaces[0]
+    grown = _attach_new_atom(context.start_state, anchor)
+    assert any(
+        int(grown.bonds[anchor][j]) > 0
+        and j not in frozenset().union(*context.attachment.lock_groups)
+        for j in range(grown.n_atoms)
+    ), "the fixture must actually place a non-core atom beside the core"
+    assert controller.path_transaction_sites(grown) is None
+
+
+def test_transaction_requires_free_valence_at_the_far_anchor():
+    """The precondition, and it must be computed from the STATE.
+
+    A saturated anchor cannot accept the ring-closing bond. Saturating the
+    anchor must therefore withdraw the sites, and no drug name may decide it.
+    """
+    config = AttachmentControlConfig(enabled=True, path_program=True)
+    fired = saturated = 0
+    for prompt in _linker_prompts():
+        context = build_prompt_context(
+            prompt, control=config, linker_bridge_atoms=1
+        )
+        controller = AttachmentController(
+            context.attachment, context.locked_slots, config
+        )
+        sites = controller.path_transaction_sites(context.start_state)
+        if sites is None:
+            saturated += 1
+            continue
+        fired += 1
+        _path_atom, anchor, _free = sites
+        assert int(context.start_state.implicit_h_counts[anchor]) >= 1
+        # Saturate that anchor and the sites must withdraw.
+        blocked = copy.deepcopy(context.start_state)
+        blocked.implicit_h_counts[anchor] = 0
+        assert controller.path_transaction_sites(blocked) is None
+    assert fired, "the transaction must be available on at least one released prompt"
+    assert saturated, "and unavailable where the declared site carries no free valence"
+
+
+def test_an_unsatisfiable_path_predicate_does_not_block():
+    """A predicate with no way to make progress must release.
+
+    Where the far anchor is saturated there is no transaction to perform;
+    gating there would strangle the trajectory exactly as the v1 per-event
+    predicate did, committing nothing instead of a seed-length linker.
+    """
+    config = AttachmentControlConfig(enabled=True, path_program=True)
+    chosen = None
+    for prompt in _linker_prompts():
+        context = build_prompt_context(prompt, control=config, linker_bridge_atoms=1)
+        controller = AttachmentController(
+            context.attachment, context.locked_slots, config
+        )
+        sites = controller.path_transaction_sites(context.start_state)
+        if sites is not None:
+            chosen = (context, controller, sites)
+            break
+    assert chosen is not None, "no released prompt can host the transaction"
+    context, controller, sites = chosen
+    state = context.start_state
+    _path_atom, anchor, _free = sites
+    blocked = copy.deepcopy(state)
+    blocked.implicit_h_counts[anchor] = 0
+    assert controller.path_unsatisfied(blocked, 4)
+    ok, reason = controller.path_permits(blocked, blocked, 4)
+    assert ok, f"an unsatisfiable predicate must release, got {reason!r}"
