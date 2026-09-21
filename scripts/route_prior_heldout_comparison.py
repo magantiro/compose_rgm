@@ -199,7 +199,17 @@ def _pool(results: list[dict]) -> dict:
                 np.median([v for t in tallies for v in t.primitive_counts] or [0.0])
             ),
             "wall_seconds": round(sum(t.wall_seconds for t in tallies), 2),
-            "compile_attempts": int(sum(t.compile_attempts for t in tallies)),
+            "work": {
+                "module_compiles_attempted": int(
+                    sum(t.module_compiles_attempted for t in tallies)
+                ),
+                "primitive_rewrites_executed": int(
+                    sum(t.primitive_rewrites_executed for t in tallies)
+                ),
+                "region_law_consultations": int(
+                    sum(t.region_law_consultations for t in tallies)
+                ),
+            },
             "parents_with_zero_complete": int(sum(1 for t in tallies if not t.complete)),
         }
     return pooled

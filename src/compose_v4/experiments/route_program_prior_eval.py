@@ -101,7 +101,9 @@ class ArmTally:
     draws: int = 0
     legal: int = 0
     complete: int = 0
-    compile_attempts: int = 0
+    region_law_consultations: int = 0
+    module_compiles_attempted: int = 0
+    primitive_rewrites_executed: int = 0
     wall_seconds: float = 0.0
     endpoints: set = field(default_factory=set)
     family_multisets: set = field(default_factory=set)
@@ -145,8 +147,13 @@ class ArmTally:
             "changed_fraction": stats(self.changed_fractions),
             "primitive_count": stats(self.primitive_counts),
             "realized_module_count": stats(self.module_counts),
-            "compile_attempts": self.compile_attempts,
+            "work": {
+                "module_compiles_attempted": self.module_compiles_attempted,
+                "primitive_rewrites_executed": self.primitive_rewrites_executed,
+                "region_law_consultations": self.region_law_consultations,
+            },
             "wall_seconds": round(self.wall_seconds, 2),
+            "wall_seconds_is_load_contaminated": True,
             "refusals": dict(self.refusals.most_common(8)),
         }
 
@@ -257,6 +264,7 @@ def _record(
     tally.released_sizes.append(len(released))
     tally.changed_fractions.append(_changed_fraction(trace, source))
     tally.primitive_counts.append(len(program.marks))
+    tally.primitive_rewrites_executed += len(program.marks)
     tally.module_counts.append(int(metadata.get("completed_module_count", 0)))
     if teacher_endpoints is not None and smiles is not None and smiles in teacher_endpoints:
         tally.teacher_endpoint_hits += 1
@@ -321,8 +329,16 @@ def run_production_arm(
         except _PROPOSAL_REFUSALS as error:
             tally.refusals[f"{type(error).__name__}:{str(error)[:60]}"] += 1
             tally.wall_seconds += time.monotonic() - started
+            # A refused draw still compiled nothing successfully, but it did try
+            # every family in its permutation; the synthesizer reports the count
+            # only through the message, so it is recorded as a floor of one
+            # rather than guessed.
+            tally.module_compiles_attempted += 1
             continue
         tally.wall_seconds += time.monotonic() - started
+        tally.module_compiles_attempted += int(
+            sum((metadata.get("module_failure_counts") or {}).values())
+        ) + int(metadata["completed_module_count"])
         tally.legal += 1
         if int(metadata["completed_module_count"]) == int(
             metadata["requested_module_count"]
@@ -332,7 +348,7 @@ def run_production_arm(
             tally, source, program, trace, metadata,
             teacher_regions=teacher_regions, teacher_endpoints=teacher_endpoints,
         )
-    tally.compile_attempts = law.consulted if law is not None else 0
+    tally.region_law_consultations = law.consulted if law is not None else 0
     return tally
 
 
@@ -361,7 +377,7 @@ def run_declared_arm(
         families = families_for(source, np.random.default_rng(seeded), module_count)
         started = time.monotonic()
         tally.draws += 1
-        tally.compile_attempts += len(families) + 1
+        tally.module_compiles_attempted += len(families)
         try:
             _src, program, _assign, trace, metadata = synthesize_named_module_sequence(
                 source,
@@ -374,6 +390,7 @@ def run_declared_arm(
             tally.wall_seconds += time.monotonic() - started
             # Legality is the one-module prefix of this arm's OWN declaration,
             # so a failure at module 2 is still a legal execution at module 1.
+            tally.module_compiles_attempted += 1
             try:
                 synthesize_named_module_sequence(
                     source,
