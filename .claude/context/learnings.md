@@ -2230,3 +2230,41 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   far-core anchor has free valence: a structural property of the state, needing no instance
   identity, that explains both failures as the known start-state defect rather than as two new
   limitations.
+
+## 2026-09-21 (fragments: a predicate that cannot progress must release, and a precondition that was really a route)
+
+- **A PREDICATE WITH NO WAY TO MAKE PROGRESS MUST RELEASE, or it strangles the trajectory.** The
+  v2 path program gated on path progress even in states where its transaction could not fire; that
+  dropped committed endpoints from 38 to **3** before it was caught, and it would have read as the
+  MECHANISM destroying yield rather than as a staging bug. This is v1's failure mode reappearing
+  one layer up: v1 refused every event because no single event could lengthen the path, v2 refused
+  every event wherever the composite was inapplicable. Any staging predicate needs an explicit
+  release when the thing it is staging toward is unreachable from the current state.
+- **A GUARD IS ONLY TESTED WHERE IT BINDS -- fixture edition.** The mutation
+  `sites_offered_for_a_single_core_prompt` SURVIVED because the test checked only a START state,
+  and a single-core prompt has no atoms outside its core there, so EVERY implementation returns
+  None -- for the wrong reason. Re-tested on a grown state carrying a pendant beside the core, the
+  mutation dies. Same shape as the support-floor guard that passed because no candidate ever
+  reached a negative margin; the fixture, not the assertion, was the weak part.
+- **A PRECONDITION CAN BE AN ARTIFACT OF THE ROUTE RATHER THAN A PROPERTY OF THE SUBSTRATE.** The
+  composite path transaction needed free valence at the far-core anchor and so ran on only 4 of 10
+  drugs, which looked like a declared scope. It was not. Measured per drug across three stages:
+  declared sites carry 1-3 hydrogens in the retained core, and exactly one fewer after the bridge
+  seeds -- the linker bond consuming precisely the valence the site offers, which is the intended
+  chemistry. The real cause was that close-then-open ring-closes to the anchor BEFORE removing the
+  old bond, so the anchor must transiently carry TWO external bonds; a site offering one free
+  valence cannot. **`bond_reroute` exchanges a bridge atomically** -- removes one bond and inserts
+  another in a single committed rewrite, with no disconnected state ever visible -- so
+  insert-then-reroute needs no transient valence and is two events rather than three. Measured:
+  close-then-open reaches a length-2 linker on **4 of 10** drugs, insert-then-reroute on **10 of
+  10**, every endpoint valid with cores separated and the region lock permitting. Before scoping a
+  mechanism to the instances where it happens to work, check whether a different ROUTE to the same
+  transformation removes the restriction entirely.
+- **Hold a predeclared falsifier even when the test was badly designed.** The v2 vacuity threshold
+  was declared panel-wide BEFORE the precondition existed, and the precondition then changed the
+  applicable denominator; accepting a subset reading afterwards would let a post-hoc scope
+  restriction rescue a pre-declared test. Both things are true at once: the falsifier FIRES (90.3%
+  against a 90% threshold), AND it was a poor falsifier, because a threshold was set with no power
+  analysis on n=31 where one endpoint moves the number three points. Re-running larger to see
+  whether it lands the other side is measuring until the answer changes. The criticism belongs to
+  the test; the verdict still stands.
