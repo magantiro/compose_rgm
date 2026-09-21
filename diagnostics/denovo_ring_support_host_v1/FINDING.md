@@ -63,6 +63,50 @@ It also explains the correlation that looked backwards in the acceptance run:
 small-ring mass. Smaller molecule → smaller host → the surviving templates are
 the small rings.
 
+## State half — MEASURED on real compiled traces
+
+90 ring decisions over 34 real training molecules, `ring_dependency_block`
+schedule (which commits rings *before* decoration, so the host loss here is
+almost purely from prior rings):
+
+| ordinal | n | small mass | legal | host atoms | largest tree | components | lost to cycles | lost to heteroatoms |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 34 | 0.1292 | 1040.8 | 26.9 | 26.5 | 1.21 | 0.0 | 0.4 |
+| 1 | 30 | 0.1827 | 657.7 | 20.1 | 17.6 | 1.83 | 6.6 | 0.4 |
+| 2 | 20 | 0.2976 | 295.6 | 14.2 | 11.1 | 2.35 | 12.6 | 1.2 |
+| 3 | 6 | 0.2726 | 272.5 | 13.3 | 10.8 | 2.00 | 17.2 | 0.0 |
+
+`r(small mass, largest_host_tree) = -0.673`,
+`r(log legal, largest_host_tree) = +0.772`. Host loss is carried almost entirely
+by **committed cycles** (0.0 → 17.2) and not by heteroatoms (0.4 → 1.2) under
+this schedule, which is exactly what it should be: this arm commits rings
+first.
+
+### The catalog table is a LOWER BOUND, not the whole story
+
+Observed small-ring mass runs consistently **1.4x to 2x above** what
+"templates that fit on a host of this size" predicts:
+
+| ordinal | largest host tree | catalog table predicts | observed |
+| --- | --- | --- | --- |
+| 0 | 26.5 | ~9.2% | 12.9% |
+| 1 | 17.6 | ~9.4% | 18.3% |
+| 2 | 11.1 | ~15.3% | 29.8% |
+| 3 | 10.8 | ~15.3% | 27.3% |
+
+Two reasons, and both are second mechanisms the atom count alone misses:
+
+1. **Shape.** Fitting needs the right branching pattern, not just enough atoms.
+   "Host requirement <= k" is necessary, not sufficient.
+2. **Fragmentation.** Host components rise **1.21 → 1.83 → 2.35** with ordinal.
+   A committed ring does not only remove atoms, it can SPLIT the remaining
+   forest, and a template needs one contiguous piece. A census tracking atoms
+   alone would miss this entirely, which is why `largest_host_tree` and
+   `host_components` are reported and separately tested.
+
+So the host explains the direction and most of the magnitude; shape and
+fragmentation account for the rest. Nothing here points back at the catalog.
+
 ## What this rules in and out
 
 - **Ruled out: a catalog gap.** The large templates exist (2,965 of 3,092 fit on
