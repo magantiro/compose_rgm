@@ -92,6 +92,39 @@ EXPECTED_SHA256 = {
     "reference": "1f8e92f70018dfb94965977f87b7844dea791e4727ea8f7d251946925d1aa99f",
 }
 
+# ---- Checkpoint sweep registry ----
+#
+# The model states of the Lineage B de-novo trajectory that survive as artifacts,
+# each pinned by sha256 so a sweep point can never silently sample the wrong
+# weights.  Both were trained from the SAME recipe and seed (20260717); the
+# step-2500 state comes from the continuation run whose validation history is
+# byte-identical to Lineage B's through step 1000, so these are two points on one
+# trajectory rather than two independent models.
+#
+# ``step1000`` deliberately keeps the historical UNNESTED shard directory so every
+# shard sampled before this registry existed stays valid and reusable.
+DEFAULT_MODEL = "step1000"
+MODELS: dict[str, dict[str, str]] = {
+    "step1000": {
+        "relative_path": "lineageB/checkpoint.best_so_far.pt",
+        "sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c",
+        "completed_steps": "1000",
+    },
+    "step2500": {
+        "relative_path": "lineageB_step2500/checkpoint.best_so_far.pt",
+        "sha256": "bb53e00237bd4be60436e149c7f92cd75b30ce555ae96d9264164e303150abb1",
+        "completed_steps": "2500",
+    },
+}
+
+
+def model_checkpoint(model: str) -> Path:
+    """The pinned checkpoint path for one sweep point."""
+
+    if model not in MODELS:
+        raise ValueError(f"unknown model {model!r}; known: {sorted(MODELS)}")
+    return VOL / MODELS[model]["relative_path"]
+
 # Sampling geometry, taken from the production rollout evaluator's defaults
 # (scripts/evaluate_tracelet_rollouts.py) so this is the same process the repo
 # already evaluates, not a re-tuned one.
@@ -114,21 +147,31 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _assert_pinned_inputs() -> dict[str, str]:
-    """Fail closed if any input is not the artifact the model was trained with."""
+def _assert_pinned_inputs(model: str = DEFAULT_MODEL) -> dict[str, str]:
+    """Fail closed if any input is not the artifact the model was trained with.
 
+    The corpus pins are shared across sweep points; the checkpoint pin is the one
+    for ``model``, so sampling the wrong weights aborts rather than producing a
+    plausible row attributed to the wrong training step.
+    """
+
+    expected = {
+        "checkpoint": MODELS[model]["sha256"],
+        "train": EXPECTED_SHA256["train"],
+        "reference": EXPECTED_SHA256["reference"],
+    }
     observed = {
-        "checkpoint": _sha256(CHECKPOINT),
+        "checkpoint": _sha256(model_checkpoint(model)),
         "train": _sha256(TRAIN_SMILES),
         "reference": _sha256(REFERENCE_SMILES),
     }
     mismatched = {
-        key: (observed[key], EXPECTED_SHA256[key])
-        for key in EXPECTED_SHA256
-        if observed[key] != EXPECTED_SHA256[key]
+        key: (observed[key], expected[key])
+        for key in expected
+        if observed[key] != expected[key]
     }
     if mismatched:
-        raise RuntimeError(f"pinned input sha256 mismatch: {mismatched}")
+        raise RuntimeError(f"pinned input sha256 mismatch for model {model!r}: {mismatched}")
     return observed
 
 
@@ -161,13 +204,21 @@ def horizon_tag(horizon: float) -> str:
     return "h" + f"{float(horizon):.1f}".replace(".", "p")
 
 
-def shard_path(seed: int, start: int, stop: int, horizon: float) -> Path:
-    return (
-        VOL
-        / "shards"
-        / horizon_tag(horizon)
-        / f"seed{seed}_{start:06d}_{stop:06d}.json"
-    )
+def shard_path(
+    seed: int, start: int, stop: int, horizon: float, model: str = DEFAULT_MODEL
+) -> Path:
+    """Shard location, keyed by horizon AND model.
+
+    The model is part of the PATH for the same reason the horizon is: two sweep
+    points must never silently reuse each other's shards.  The default model keeps
+    the historical unnested layout so shards sampled before the sweep registry
+    existed remain addressable.
+    """
+
+    base = VOL / "shards" / horizon_tag(horizon)
+    if model != DEFAULT_MODEL:
+        base = base / model
+    return base / f"seed{seed}_{start:06d}_{stop:06d}.json"
 
 
 def _read_smiles(path: Path, limit: int | None = None) -> tuple[str, ...]:
@@ -325,7 +376,8 @@ def sample_shard(task: dict) -> dict:
     # part of the shard PATH so a sweep point can never silently reuse a shard
     # sampled at a different horizon.
     horizon = float(task.get("horizon", OPERATIONAL_HORIZON))
-    out_path = shard_path(seed, start, stop, horizon)
+    model_label = str(task.get("model", DEFAULT_MODEL))
+    out_path = shard_path(seed, start, stop, horizon, model_label)
     if out_path.exists():
         volume.reload()
         return {
@@ -333,10 +385,11 @@ def sample_shard(task: dict) -> dict:
             "reused": True,
             "seed": seed,
             "horizon": horizon,
+            "model": model_label,
         }
 
-    _assert_pinned_inputs()
-    model, payload = load_factorized_rollout_checkpoint(str(CHECKPOINT))
+    _assert_pinned_inputs(model_label)
+    model, payload = load_factorized_rollout_checkpoint(str(model_checkpoint(model_label)))
     prior = payload["tree_source_prior"]
     model.eval()
 
@@ -393,6 +446,11 @@ def sample_shard(task: dict) -> dict:
         "start": start,
         "stop": stop,
         "horizon": horizon,
+        # Which sweep point produced these molecules, and the exact weights, so a
+        # shard is self-describing rather than identified only by its directory.
+        "model": model_label,
+        "model_checkpoint_sha256": MODELS[model_label]["sha256"],
+        "model_completed_steps": MODELS[model_label]["completed_steps"],
         "elapsed_seconds": time.time() - began,
         "versions": _runtime_versions(),
         "records": records,
@@ -919,6 +977,64 @@ def main(
         with_novelty,
     )
     _write_summary(run_label, reports)
+
+
+@app.local_entrypoint()
+def sample_model(
+    model: str = DEFAULT_MODEL,
+    samples_per_seed: int = 200,
+    seeds: int = 1,
+    shards_per_seed: int = 20,
+    base_seed: int = 20260920,
+    horizon: float = OPERATIONAL_HORIZON,
+) -> None:
+    """Sample ONE checkpoint of the training-step sweep, matched to the others.
+
+    Sampling only -- no scoring.  The sweep's diagnostic row (published metrics
+    plus the ring/size decomposition) is built from the persisted shards by
+    ``scripts/denovo_checkpoint_sweep.py``, so the per-molecule data stays
+    available for questions posed after the run.
+
+    Every sweep point must use the SAME base_seed, samples_per_seed and horizon;
+    only ``model`` changes.  Shards are idempotent and keyed by model, so a
+    relaunch after preemption reuses what landed and redoes nothing.
+    """
+
+    if model not in MODELS:
+        raise ValueError(f"unknown model {model!r}; known: {sorted(MODELS)}")
+    seed_values = [base_seed + offset for offset in range(seeds)]
+    tasks = _shard_tasks(seed_values, samples_per_seed, shards_per_seed, float(horizon))
+    for task in tasks:
+        task["model"] = model
+
+    print(
+        json.dumps(
+            {
+                "phase": "launch",
+                "model": model,
+                "completed_steps": MODELS[model]["completed_steps"],
+                "checkpoint_sha256": MODELS[model]["sha256"],
+                "shards": len(tasks),
+                "samples_per_seed": samples_per_seed,
+                "seeds": seed_values,
+                "horizon": float(horizon),
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+
+    completed = 0
+    for result in sample_shard.map(tasks, order_outputs=False):
+        completed += 1
+        print(
+            json.dumps(
+                {"phase": "shard_complete", "done": completed, "of": len(tasks), **result},
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+    print(json.dumps({"phase": "model_complete", "model": model, "shards": completed}), flush=True)
 
 
 @app.local_entrypoint()
