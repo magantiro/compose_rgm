@@ -1,0 +1,33 @@
+{
+  "arms": {
+    "A_baseline": {
+      "contract": "configs/pmo_ab_a_baseline_contract_v1.json",
+      "enable_online_memory": false,
+      "payload_sha256": "6fcf71ce0407b77d394103bdb1ca39e47b0df1da48cffaf17be32e15132ae7dc"
+    },
+    "B_memory": {
+      "contract": "configs/pmo_ab_b_memory_contract_v1.json",
+      "enable_online_memory": true,
+      "payload_sha256": "1fce6ace747d703beee2912d74e867d2c6c4b9dfe24fb9cb41190c12fc3a7d91"
+    }
+  },
+  "authority": "Owner granted standing launch authorization for this overnight PMO work and is away ('you have authorization for modal and everything... you don't have to ask'). The active goal names this experiment explicitly: 'A = strong current productive controller. B = same initialization, executor, chemistry, budget, and controller + online task-adaptive structural proposal memory. Start with GSK3B, Celecoxib, Perindopril.'",
+  "authorized_at_utc": "2026-09-21T08:48:47.593200+00:00",
+  "automatic_retries": 0,
+  "charged_calls_per_task": 250,
+  "charged_calls_total": 1500,
+  "matched_comparison_proof": "The two payloads differ in EXACTLY ONE top-level key ('arm'). budget, tasks and implementation_sha256 are byte-identical, verified by diff before sealing.",
+  "offline_gates_passed_before_this_authorization": {
+    "allocator_repair": "parents <10 heavy 68.5/38.4/62.6% -> 10.2/7.6/7.2%; mean parent score 0.091/0.097/0.138 -> 0.186/0.237/0.410; singleton score-swing now moves (+0.04 -> +0.35); escape drains; 8/8 mutations killed; predeclaration written before measurement",
+    "online_memory": "all five predeclared criteria: proposal distribution changes and does so DIFFERENTLY per task from identical code with no task branch; 75-79 distinct endpoints of 80 and 0 near-duplicate pairs; 24 parents across all three tasks; no collapse to shallow edits; cost measured in load-independent counters; 10/10 mutations killed"
+  },
+  "predeclared_caveat_gsk3b": "gsk3b's score is NOT interpretable as search quality. Its fingerprint-RandomForest oracle rewards off-manifold chemistry (r(score,QED) = -0.433, r(score,SA) = +0.684) and the repaired allocator correctly directs mass at the hacked molecules (mass-weighted QED 0.328 -> 0.124). Promotion evidence must come from perindopril_mpo and celecoxib_rediscovery. Recorded BEFORE the run so a favourable gsk3b number cannot be read as success after the fact.",
+  "schema_version": "pmo_ab_scored_authorization_v1",
+  "status": "AUTHORIZED",
+  "tasks": [
+    "gsk3b",
+    "perindopril_mpo",
+    "celecoxib_rediscovery"
+  ],
+  "what_is_NOT_included": "The learned chemical prior. Its offline gate had not returned when this was sealed, and unvalidated code in a scored run produces an uninterpretable result."
+}
