@@ -1,0 +1,122 @@
+{
+  "VERDICT": "REVISE_NOT_PROMOTE",
+  "archive_channel_census": {
+    "dynamic_v21_pooled_channels": 2448,
+    "entries_scanned": 2448,
+    "jump_lane": 0,
+    "note": "Every archived entry across all three tasks came from the pooled channels; zero from the jump lane.",
+    "rounds": 7,
+    "tasks": 3
+  },
+  "budget": {
+    "all_positive_controls_passed": true,
+    "charged_calls_per_task": 250,
+    "tasks": 3,
+    "total": 750
+  },
+  "channel_counters_final_round": {
+    "celecoxib_rediscovery": {
+      "jump": {
+        "charged": 1,
+        "exact_executions": 1,
+        "execution_rejections": 345,
+        "improvement_sum": 0.0,
+        "proposals": 346
+      },
+      "shallow": {
+        "charged": 97,
+        "exact_executions": 240,
+        "improvement_sum": 0.602,
+        "proposals": 322
+      },
+      "structured": {
+        "charged": 94,
+        "exact_executions": 218,
+        "improvement_sum": 0.739,
+        "proposals": 309
+      }
+    },
+    "gsk3b": {
+      "jump": {
+        "charged": 1,
+        "exact_executions": 1,
+        "execution_rejections": 318,
+        "improvement_sum": 0.04,
+        "proposals": 319
+      },
+      "shallow": {
+        "charged": 101,
+        "exact_executions": 211,
+        "improvement_sum": 1.055,
+        "proposals": 281
+      },
+      "structured": {
+        "charged": 90,
+        "exact_executions": 205,
+        "improvement_sum": 1.027,
+        "proposals": 276
+      }
+    },
+    "perindopril_mpo": {
+      "jump": {
+        "charged": 0,
+        "exact_executions": 0,
+        "execution_rejections": 340,
+        "improvement_sum": 0.0,
+        "proposals": 340
+      },
+      "shallow": {
+        "charged": 102,
+        "exact_executions": 214,
+        "improvement_sum": 0.532,
+        "proposals": 286
+      },
+      "structured": {
+        "charged": 90,
+        "exact_executions": 209,
+        "improvement_sum": 0.478,
+        "proposals": 282
+      }
+    }
+  },
+  "contract_payload_sha256": "ba9515615b341019f09f66f3224e590b4ca596dee6bb7c97c759dbe418f1ff4b",
+  "generated_at_utc": "2026-09-21T05:22:27.666805+00:00",
+  "headline": "All three tasks improved on best score at matched 250-call budget, and NONE of it is attributable to the realization repair under test. The repaired binder lives in the jump lane; the jump lane produced 2 successful executions across 1,005 proposals.",
+  "next_test_zero_oracle": "Determine why 95%+ of jump bindings are rejected in production while the same realizer completed 5 of 24 teacher-scale witness pairs offline. Candidates: the production parent population differs from the witness stratum; the 20s per-attempt cap truncates the productive tail in-lane; or plan latents at >=29 primitives (45 of 95) never bind on production parents at all.",
+  "run_id": "35fc7bcd4bf5c964294698014c1ed40da483ad013f6b92c6201b01dee2d3d306",
+  "schema_version": "pmo_v2_scored_attribution_v1",
+  "scores": {
+    "celecoxib_rediscovery": {
+      "delta_auc": 0.007,
+      "delta_best": 0.02433,
+      "v1_auc": 0.1342,
+      "v1_best": 0.196,
+      "v2_auc": 0.1412,
+      "v2_best": 0.22033
+    },
+    "gsk3b": {
+      "delta_auc": 0.02517,
+      "delta_best": 0.08,
+      "v1_auc": 0.12,
+      "v1_best": 0.21,
+      "v2_auc": 0.14517,
+      "v2_best": 0.29
+    },
+    "perindopril_mpo": {
+      "delta_auc": -0.02402,
+      "delta_best": 0.012,
+      "v1_auc": 0.31651,
+      "v1_best": 0.486,
+      "v2_auc": 0.29249,
+      "v2_best": 0.498
+    }
+  },
+  "the_opportunity_cost": "The jump lane made MORE proposals than shallow (319 vs 281 on gsk3b) while returning 1 execution against 211. It consumes roughly a third of the proposal allocation and returns ~2% of the improvement mass. The integration agent flagged the realizer's throughput cost (~6.5 attempts per lane instead of up to 32) as a RISK; it is now measured as a cost to the channels that do work.",
+  "what_is_NOT_claimed": [
+    "that the realization repair improves PMO scores",
+    "that v2 should be promoted to 1,000 calls",
+    "that the gsk3b +0.08 is anything other than run-to-run variance in the pooled channels"
+  ],
+  "why_this_was_caught": "The contract predeclared that realized program scale and retained fraction are read BEFORE bind rate, with the falsifier 'programs at retained ~1.000 with median ~16 primitives mean the repair did not help REGARDLESS of bind rate'. Without that read order, 'PMO-v2 improves all three tasks, gsk3b +38%' would have been reported as the realizer working.",
+  "worse_than_the_beam_it_replaced": "v1's autopsy measured the jump lane at 5 eligible of 232 proposals (2.2%). v2's realizer runs at ~0.3%. So in PRODUCTION the exact realizer is no better, and plausibly worse, than the width-4 beam it replaced -- despite being measurably BETTER offline (5 teacher-scale completions vs the beam's 0, median 31 primitives at retained 0.630). Explaining that offline/production gap is the prerequisite for any redesign."
+}
