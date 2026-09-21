@@ -1116,14 +1116,18 @@ def test_transaction_sites_are_none_for_a_single_core_prompt():
     assert controller.path_transaction_sites(grown) is None
 
 
-def test_transaction_requires_free_valence_at_the_far_anchor():
-    """The precondition, and it must be computed from the STATE.
+def test_a_saturated_anchor_no_longer_blocks_the_transaction():
+    """v3 deletes v2's free-valence precondition, and this pins why.
 
-    A saturated anchor cannot accept the ring-closing bond. Saturating the
-    anchor must therefore withdraw the sites, and no drug name may decide it.
+    v2 ring-closed to the far anchor BEFORE removing the old bond, so the
+    anchor had to carry two external bonds at once and a declared site offering
+    one free valence could not host it -- 4 of 10 drugs. bond_reroute exchanges
+    the bridge atomically, so the anchor never holds more than one bond and a
+    saturated anchor is no longer an obstacle. This test asserts the OPPOSITE
+    of the v2 test it replaces, because the mechanism deliberately changed.
     """
     config = AttachmentControlConfig(enabled=True, path_program=True)
-    fired = saturated = 0
+    available = 0
     for prompt in _linker_prompts():
         context = build_prompt_context(
             prompt, control=config, linker_bridge_atoms=1
@@ -1132,44 +1136,39 @@ def test_transaction_requires_free_valence_at_the_far_anchor():
             context.attachment, context.locked_slots, config
         )
         sites = controller.path_transaction_sites(context.start_state)
-        if sites is None:
-            saturated += 1
-            continue
-        fired += 1
+        assert sites is not None, (
+            f"{prompt.drug_name}: v3 must offer the transaction on every linker "
+            "prompt, with no free-valence gate"
+        )
+        available += 1
         _path_atom, anchor, _free = sites
-        assert int(context.start_state.implicit_h_counts[anchor]) >= 1
-        # Saturate that anchor and the sites must withdraw.
+        # Saturating the anchor must NOT withdraw the sites under v3.
         blocked = copy.deepcopy(context.start_state)
         blocked.implicit_h_counts[anchor] = 0
-        assert controller.path_transaction_sites(blocked) is None
-    assert fired, "the transaction must be available on at least one released prompt"
-    assert saturated, "and unavailable where the declared site carries no free valence"
+        assert controller.path_transaction_sites(blocked) is not None, (
+            f"{prompt.drug_name}: an atomic bridge exchange needs no free "
+            "valence at the anchor"
+        )
+    assert available == 10, "all ten released linker prompts must host it"
 
 
 def test_an_unsatisfiable_path_predicate_does_not_block():
     """A predicate with no way to make progress must release.
 
-    Where the far anchor is saturated there is no transaction to perform;
-    gating there would strangle the trajectory exactly as the v1 per-event
-    predicate did, committing nothing instead of a seed-length linker.
+    Under v3 the transaction is available on every released prompt, so the
+    release is exercised with a state that genuinely offers no sites: one whose
+    padding is fully consumed, leaving nowhere to insert the new atom.
     """
     config = AttachmentControlConfig(enabled=True, path_program=True)
-    chosen = None
-    for prompt in _linker_prompts():
-        context = build_prompt_context(prompt, control=config, linker_bridge_atoms=1)
-        controller = AttachmentController(
-            context.attachment, context.locked_slots, config
-        )
-        sites = controller.path_transaction_sites(context.start_state)
-        if sites is not None:
-            chosen = (context, controller, sites)
-            break
-    assert chosen is not None, "no released prompt can host the transaction"
-    context, controller, sites = chosen
-    state = context.start_state
-    _path_atom, anchor, _free = sites
-    blocked = copy.deepcopy(state)
-    blocked.implicit_h_counts[anchor] = 0
-    assert controller.path_unsatisfied(blocked, 4)
-    ok, reason = controller.path_permits(blocked, blocked, 4)
+    prompt = _linker_prompts()[0]
+    context = build_prompt_context(prompt, control=config, linker_bridge_atoms=1)
+    controller = AttachmentController(context.attachment, context.locked_slots, config)
+    full = copy.deepcopy(context.start_state)
+    # Occupy every padding slot: no free slot means no transaction is possible.
+    for i in range(full.n_atoms):
+        if full.atom_types[i] == NULL_IDX:
+            full.atom_types[i] = 6
+    assert controller.path_transaction_sites(full) is None
+    assert controller.path_unsatisfied(full, 4)
+    ok, reason = controller.path_permits(full, full, 4)
     assert ok, f"an unsatisfiable predicate must release, got {reason!r}"

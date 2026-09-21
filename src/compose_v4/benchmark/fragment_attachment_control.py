@@ -336,11 +336,14 @@ class AttachmentController:
         This returns the structural sites the transaction needs, or ``None``
         when the state cannot support one.
 
-        The PRECONDITION is free valence at the far-core anchor: a saturated
-        anchor cannot accept the ring-closing bond, which is measured to be
-        exactly why the transaction fails on the drugs whose declared sites
-        carry no free valence.  It is computed from the STATE -- no drug name,
-        no task label, no list of instances.
+        There is NO free-valence precondition.  An earlier version ring-closed
+        to the far anchor before removing the old bond, which forced that anchor
+        to carry two external bonds at once; a declared site offering one free
+        valence -- the normal case -- cannot, so the transaction ran on only 4
+        of 10 drugs and the restriction looked like a declared scope.  It was an
+        artifact of the ROUTE.  ``bond_reroute`` exchanges a bridge atomically,
+        so the anchor never holds more than one bond and no valence is needed
+        beyond what the declared site already offers.
         """
         groups = self._spec.lock_groups
         if len(groups) < 2:
@@ -357,8 +360,6 @@ class AttachmentController:
             row = state.bonds[slot]
             for anchor in sorted(far):
                 if int(row[anchor]) <= 0:
-                    continue
-                if int(state.implicit_h_counts[anchor]) < 1:
                     continue
                 return slot, anchor, free_slot
         return None

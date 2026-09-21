@@ -56,7 +56,7 @@ from compose_v4.chem.molecular_graph import (
 )
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.model.time_convention import frozen_time
-from compose_v4.rewrite.operators import BondDelete, BondInsert
+from compose_v4.rewrite.operators import BondReroute
 
 # Slot budget for the proposal state.  This is a PADDING width, not the
 # ``REPRESENTABLE_HEAVY_ATOMS`` endpoint ceiling: an unpadded (tight) graph has
@@ -469,11 +469,15 @@ def _attempt_path_transaction(
     step_insert = replace(payload, slot=free_slot, neighbors=((path_atom, 1),))
     try:
         after_insert = system.apply(state, "atom_insert", step_insert)
-        after_close = system.apply(
-            after_insert, "bond_insert", BondInsert(a=free_slot, b=far_anchor, order=1)
-        )
+        # ONE atomic bridge exchange: the path atom's bond to the far core is
+        # removed and the new atom's bond to it inserted in a single committed
+        # rewrite, so no disconnected state is ever visible and the anchor never
+        # carries more than one bond. Ring-closing first and opening afterwards
+        # would need transient extra valence the declared site does not have.
         after_open = system.apply(
-            after_close, "bond_delete", BondDelete(a=path_atom, b=far_anchor)
+            after_insert,
+            "bond_reroute",
+            BondReroute(a=path_atom, b=far_anchor, u=free_slot, v=far_anchor),
         )
     except Exception:  # noqa: BLE001
         receipt.path_transaction_refusals += 1
