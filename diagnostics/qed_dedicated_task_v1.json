@@ -13,11 +13,16 @@
  "frozen_path_check": {
   "method": "git diff against merge-base with main, plus untracked files",
   "positive_control": {
-   "total_changed_or_new_paths_seen": 3,
+   "total_changed_or_new_paths_seen": 15,
    "sample": [
+    ".claude/context/learnings.md",
+    "configs/qed_dedicated_task_v1.json",
+    "diagnostics/qed_dedicated_task_comparison_v1.json",
+    "diagnostics/qed_dedicated_task_fix_verification_v1.json",
+    "diagnostics/qed_dedicated_task_v1.json",
     "diagnostics/qed_legacy_armb_label_v1.json",
-    "tools/build_qed_dedicated_task_report_v1.py",
-    "tools/label_legacy_qed_armb_v1.py"
+    "src/compose_v4/tasks/__init__.py",
+    "src/compose_v4/tasks/qed_edit_task.py"
    ],
    "why": "a frozen-path check that saw NOTHING would also report CLEAN. This confirms the check observes real changes before concluding none of them are frozen."
   },
@@ -32,6 +37,7 @@
   "new_configs_added": [
    "configs/qed_dedicated_task_v1.json"
   ],
+  "base_commit": "17f96b6f16405c4ec2b3f103f5c50b865c606d9c",
   "verdict": "CLEAN"
  },
  "what_was_built": {

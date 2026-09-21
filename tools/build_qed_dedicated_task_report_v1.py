@@ -19,14 +19,26 @@ FROZEN_PREFIXES = (
 )
 
 
-def frozen_path_check(repo: Path, new_configs: set[str]) -> dict:
+def frozen_path_check(repo: Path, new_configs: set[str], explicit_base: str = "") -> dict:
     """Which frozen paths this branch touched, measured from git."""
-    base = subprocess.run(
-        ["git", "merge-base", "HEAD", "main"],
-        cwd=repo, capture_output=True, text=True, check=False,
-    ).stdout.strip()
+    base = ""
+    for ref in (explicit_base, "main", "origin/main"):
+        if not ref:
+            continue
+        found = subprocess.run(
+            ["git", "merge-base", "HEAD", ref],
+            cwd=repo, capture_output=True, text=True, check=False,
+        )
+        if found.returncode == 0 and found.stdout.strip():
+            base = found.stdout.strip()
+            break
+    if not base:
+        raise SystemExit(
+            "frozen-path check needs a real base commit; pass --base. Falling back to HEAD "
+            "would compare the working tree against itself and report CLEAN vacuously."
+        )
     changed = subprocess.run(
-        ["git", "diff", "--name-status", base or "HEAD"],
+        ["git", "diff", "--name-status", base],
         cwd=repo, capture_output=True, text=True, check=False,
     ).stdout.splitlines()
     untracked = subprocess.run(
@@ -72,7 +84,10 @@ def frozen_path_check(repo: Path, new_configs: set[str]) -> dict:
         "frozen_files_added": added_frozen,
         "existing_configs_modified": existing_configs_touched,
         "new_configs_added": sorted(new_configs),
-        "verdict": "CLEAN"
+        "base_commit": base,
+        "verdict": "INCONCLUSIVE -- the check saw no changes at all"
+        if not all_paths
+        else "CLEAN"
         if not modified_frozen and not added_frozen and not existing_configs_touched
         else "FROZEN PATHS TOUCHED -- investigate",
     }
@@ -84,6 +99,7 @@ def main() -> None:
     parser.add_argument("--comparison", required=True)
     parser.add_argument("--legacy", required=True)
     parser.add_argument("--repo", default=".")
+    parser.add_argument("--base", default="", help="commit the diff is taken against")
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
 
@@ -109,7 +125,7 @@ def main() -> None:
                       "has no paid oracle. The currency is CPU time.",
         },
         "frozen_path_check": frozen_path_check(
-            Path(args.repo), {"configs/qed_dedicated_task_v1.json"}
+            Path(args.repo), {"configs/qed_dedicated_task_v1.json"}, args.base
         ),
         "what_was_built": {
             "task": "src/compose_v4/tasks/qed_edit_task.py -- QedEditTask, a duck-typed peer of "
