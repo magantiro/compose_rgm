@@ -48,7 +48,7 @@ def _read_optional(volume, path):
         return _read(volume, path)
     except FileNotFoundError:
         return None
-    except Exception as error:  # noqa: BLE001 - narrowed by message, then re-raised
+    except Exception as error:  # narrowed by message below, then re-raised
         if "not found" in str(error).lower() or "no such file" in str(error).lower():
             return None
         raise
