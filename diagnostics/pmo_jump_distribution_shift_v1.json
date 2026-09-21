@@ -1,0 +1,2614 @@
+{
+ "admissibility_by_parent_heavy_atoms": {
+  "production_archive": {
+   "01-09": {
+    "median_depth": 3.5,
+    "pairs": 8740,
+    "parents": 92,
+    "root_admissible": 672,
+    "root_admissible_fraction": 0.07688787185354691
+   },
+   "10-14": {
+    "median_depth": 6,
+    "pairs": 1995,
+    "parents": 21,
+    "root_admissible": 346,
+    "root_admissible_fraction": 0.17343358395989975
+   },
+   "15-19": {
+    "median_depth": 3.0,
+    "pairs": 2280,
+    "parents": 24,
+    "root_admissible": 519,
+    "root_admissible_fraction": 0.22763157894736843
+   },
+   "20-24": {
+    "median_depth": 7,
+    "pairs": 2945,
+    "parents": 31,
+    "root_admissible": 969,
+    "root_admissible_fraction": 0.32903225806451614
+   },
+   "25-29": {
+    "median_depth": 5,
+    "pairs": 2375,
+    "parents": 25,
+    "root_admissible": 849,
+    "root_admissible_fraction": 0.35747368421052633
+   },
+   "30+": {
+    "median_depth": 7,
+    "pairs": 3135,
+    "parents": 33,
+    "root_admissible": 1287,
+    "root_admissible_fraction": 0.4105263157894737
+   }
+  },
+  "production_init": {
+   "15-19": {
+    "median_depth": 0.0,
+    "pairs": 570,
+    "parents": 6,
+    "root_admissible": 124,
+    "root_admissible_fraction": 0.21754385964912282
+   },
+   "20-24": {
+    "median_depth": 0,
+    "pairs": 665,
+    "parents": 7,
+    "root_admissible": 243,
+    "root_admissible_fraction": 0.36541353383458647
+   },
+   "25-29": {
+    "median_depth": 0,
+    "pairs": 285,
+    "parents": 3,
+    "root_admissible": 116,
+    "root_admissible_fraction": 0.4070175438596491
+   }
+  },
+  "teacher_root": {
+   "01-09": {
+    "median_depth": 0,
+    "pairs": 95,
+    "parents": 1,
+    "root_admissible": 18,
+    "root_admissible_fraction": 0.18947368421052632
+   },
+   "10-14": {
+    "median_depth": 0,
+    "pairs": 95,
+    "parents": 1,
+    "root_admissible": 22,
+    "root_admissible_fraction": 0.23157894736842105
+   },
+   "20-24": {
+    "median_depth": 0,
+    "pairs": 285,
+    "parents": 3,
+    "root_admissible": 60,
+    "root_admissible_fraction": 0.21052631578947367
+   },
+   "25-29": {
+    "median_depth": 0,
+    "pairs": 95,
+    "parents": 1,
+    "root_admissible": 86,
+    "root_admissible_fraction": 0.9052631578947369
+   },
+   "30+": {
+    "median_depth": 0,
+    "pairs": 95,
+    "parents": 1,
+    "root_admissible": 39,
+    "root_admissible_fraction": 0.4105263157894737
+   }
+  }
+ },
+ "by_plan_scale": {
+  "production_archive": {
+   "large16-26": {
+    "operand": 2552,
+    "operand_fraction": 0.5646017699115045,
+    "pairs": 4520,
+    "root": 2358,
+    "root_fraction": 0.5216814159292036
+   },
+   "medium8-15": {
+    "operand": 938,
+    "operand_fraction": 0.5929203539823009,
+    "pairs": 1582,
+    "root": 856,
+    "root_fraction": 0.5410872313527181
+   },
+   "small<=7": {
+    "operand": 132,
+    "operand_fraction": 0.584070796460177,
+    "pairs": 226,
+    "root": 132,
+    "root_fraction": 0.584070796460177
+   },
+   "teacher_scale>=27": {
+    "operand": 1453,
+    "operand_fraction": 0.09595826178840312,
+    "pairs": 15142,
+    "root": 1296,
+    "root_fraction": 0.0855897503632281
+   }
+  },
+  "production_init": {
+   "large16-26": {
+    "operand": 243,
+    "operand_fraction": 0.759375,
+    "pairs": 320,
+    "root": 238,
+    "root_fraction": 0.74375
+   },
+   "medium8-15": {
+    "operand": 110,
+    "operand_fraction": 0.9821428571428571,
+    "pairs": 112,
+    "root": 109,
+    "root_fraction": 0.9732142857142857
+   },
+   "small<=7": {
+    "operand": 16,
+    "operand_fraction": 1.0,
+    "pairs": 16,
+    "root": 16,
+    "root_fraction": 1.0
+   },
+   "teacher_scale>=27": {
+    "operand": 120,
+    "operand_fraction": 0.11194029850746269,
+    "pairs": 1072,
+    "root": 120,
+    "root_fraction": 0.11194029850746269
+   }
+  },
+  "teacher_root": {
+   "large16-26": {
+    "operand": 87,
+    "operand_fraction": 0.6214285714285714,
+    "pairs": 140,
+    "root": 79,
+    "root_fraction": 0.5642857142857143
+   },
+   "medium8-15": {
+    "operand": 28,
+    "operand_fraction": 0.5714285714285714,
+    "pairs": 49,
+    "root": 27,
+    "root_fraction": 0.5510204081632653
+   },
+   "small<=7": {
+    "operand": 4,
+    "operand_fraction": 0.5714285714285714,
+    "pairs": 7,
+    "root": 4,
+    "root_fraction": 0.5714285714285714
+   },
+   "teacher_scale>=27": {
+    "operand": 115,
+    "operand_fraction": 0.24520255863539445,
+    "pairs": 469,
+    "root": 115,
+    "root_fraction": 0.24520255863539445
+   }
+  }
+ },
+ "elapsed_seconds": 21.357730542018544,
+ "new_oracle_calls": 0,
+ "parent_axes": {
+  "production_archive": {
+   "depth_from_root": {
+    "max": 27.0,
+    "mean": 5.787610619469026,
+    "median": 4.0,
+    "min": 1.0,
+    "n": 226,
+    "p90": 12.0
+   },
+   "free_slots": {
+    "max": 47,
+    "mean": 31.91592920353982,
+    "median": 34.0,
+    "min": 9,
+    "n": 226,
+    "p90": 45
+   },
+   "heavy_atoms": {
+    "max": 39,
+    "mean": 16.08407079646018,
+    "median": 14.0,
+    "min": 1,
+    "n": 226,
+    "p90": 32
+   },
+   "n_slots": {
+    "max": 48.0,
+    "mean": 48.0,
+    "median": 48.0,
+    "min": 48.0,
+    "n": 226,
+    "p90": 48.0
+   },
+   "parents": 226
+  },
+  "production_init": {
+   "depth_from_root": {
+    "max": 0.0,
+    "mean": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 16,
+    "p90": 0.0
+   },
+   "free_slots": {
+    "max": 33,
+    "mean": 27.25,
+    "median": 28.0,
+    "min": 21,
+    "n": 16,
+    "p90": 31
+   },
+   "heavy_atoms": {
+    "max": 27,
+    "mean": 20.75,
+    "median": 20.0,
+    "min": 15,
+    "n": 16,
+    "p90": 26
+   },
+   "n_slots": {
+    "max": 48.0,
+    "mean": 48.0,
+    "median": 48.0,
+    "min": 48.0,
+    "n": 16,
+    "p90": 48.0
+   },
+   "parents": 16
+  },
+  "teacher_root": {
+   "depth_from_root": {
+    "max": 0.0,
+    "mean": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 7,
+    "p90": 0.0
+   },
+   "free_slots": {
+    "max": 40,
+    "mean": 26.0,
+    "median": 24,
+    "min": 8,
+    "n": 7,
+    "p90": 40
+   },
+   "heavy_atoms": {
+    "max": 40,
+    "mean": 22.0,
+    "median": 24,
+    "min": 8,
+    "n": 7,
+    "p90": 40
+   },
+   "n_slots": {
+    "max": 48.0,
+    "mean": 48.0,
+    "median": 48.0,
+    "min": 48.0,
+    "n": 7,
+    "p90": 48.0
+   },
+   "parents": 7
+  }
+ },
+ "per_parent": {
+  "production_archive": [
+   {
+    "depth": 9,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:014594ce8c7c",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 1,
+    "free_slots": 33,
+    "heavy_atoms": 15,
+    "n_slots": 48,
+    "parent_id": "production_archive:0196fe37c3ab",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 1,
+    "free_slots": 38,
+    "heavy_atoms": 10,
+    "n_slots": 48,
+    "parent_id": "production_archive:01c772488a23",
+    "root_admissible_fraction": 0.23157894736842105,
+    "root_admissible_plans": 22
+   },
+   {
+    "depth": 1,
+    "free_slots": 44,
+    "heavy_atoms": 4,
+    "n_slots": 48,
+    "parent_id": "production_archive:023531588bf0",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 7,
+    "free_slots": 44,
+    "heavy_atoms": 4,
+    "n_slots": 48,
+    "parent_id": "production_archive:02ccb1887250",
+    "root_admissible_fraction": 0.17894736842105263,
+    "root_admissible_plans": 17
+   },
+   {
+    "depth": 1,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:036f9d793458",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 8,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:0397d0ff9ead",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 18,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:039f052f4345",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 2,
+    "free_slots": 45,
+    "heavy_atoms": 3,
+    "n_slots": 48,
+    "parent_id": "production_archive:04fb73637702",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 2,
+    "free_slots": 33,
+    "heavy_atoms": 15,
+    "n_slots": 48,
+    "parent_id": "production_archive:0545dae8d845",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 4,
+    "free_slots": 47,
+    "heavy_atoms": 1,
+    "n_slots": 48,
+    "parent_id": "production_archive:0614ab5a1221",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 10,
+    "free_slots": 45,
+    "heavy_atoms": 3,
+    "n_slots": 48,
+    "parent_id": "production_archive:06eaeb80b9f9",
+    "root_admissible_fraction": 0.021052631578947368,
+    "root_admissible_plans": 2
+   },
+   {
+    "depth": 9,
+    "free_slots": 42,
+    "heavy_atoms": 6,
+    "n_slots": 48,
+    "parent_id": "production_archive:07a0902d5a85",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 10,
+    "free_slots": 29,
+    "heavy_atoms": 19,
+    "n_slots": 48,
+    "parent_id": "production_archive:07aa7c1bc45f",
+    "root_admissible_fraction": 0.21052631578947367,
+    "root_admissible_plans": 20
+   },
+   {
+    "depth": 7,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:08ec1534909b",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 2,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:09c97d2ea185",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 3,
+    "free_slots": 46,
+    "heavy_atoms": 2,
+    "n_slots": 48,
+    "parent_id": "production_archive:0a42859cef15",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 9,
+    "free_slots": 26,
+    "heavy_atoms": 22,
+    "n_slots": 48,
+    "parent_id": "production_archive:0b5e6dda6791",
+    "root_admissible_fraction": 0.5473684210526316,
+    "root_admissible_plans": 52
+   },
+   {
+    "depth": 7,
+    "free_slots": 35,
+    "heavy_atoms": 13,
+    "n_slots": 48,
+    "parent_id": "production_archive:0ba54b67967d",
+    "root_admissible_fraction": 0.1368421052631579,
+    "root_admissible_plans": 13
+   },
+   {
+    "depth": 7,
+    "free_slots": 27,
+    "heavy_atoms": 21,
+    "n_slots": 48,
+    "parent_id": "production_archive:0c31211c0b0b",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 12,
+    "free_slots": 15,
+    "heavy_atoms": 33,
+    "n_slots": 48,
+    "parent_id": "production_archive:0d104e12fa46",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 3,
+    "free_slots": 32,
+    "heavy_atoms": 16,
+    "n_slots": 48,
+    "parent_id": "production_archive:0e0f60ca6ca1",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 6,
+    "free_slots": 35,
+    "heavy_atoms": 13,
+    "n_slots": 48,
+    "parent_id": "production_archive:0fdbf66a2fe1",
+    "root_admissible_fraction": 0.1368421052631579,
+    "root_admissible_plans": 13
+   },
+   {
+    "depth": 4,
+    "free_slots": 45,
+    "heavy_atoms": 3,
+    "n_slots": 48,
+    "parent_id": "production_archive:12bab6986dcd",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 20,
+    "heavy_atoms": 28,
+    "n_slots": 48,
+    "parent_id": "production_archive:12f6d094dfe4",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 1,
+    "free_slots": 44,
+    "heavy_atoms": 4,
+    "n_slots": 48,
+    "parent_id": "production_archive:13548ead6d25",
+    "root_admissible_fraction": 0.021052631578947368,
+    "root_admissible_plans": 2
+   },
+   {
+    "depth": 2,
+    "free_slots": 44,
+    "heavy_atoms": 4,
+    "n_slots": 48,
+    "parent_id": "production_archive:17bc96991f0e",
+    "root_admissible_fraction": 0.07368421052631578,
+    "root_admissible_plans": 7
+   },
+   {
+    "depth": 4,
+    "free_slots": 32,
+    "heavy_atoms": 16,
+    "n_slots": 48,
+    "parent_id": "production_archive:1914bd83df63",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 9,
+    "free_slots": 46,
+    "heavy_atoms": 2,
+    "n_slots": 48,
+    "parent_id": "production_archive:191942945241",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 15,
+    "heavy_atoms": 33,
+    "n_slots": 48,
+    "parent_id": "production_archive:1a7ee176fd00",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 1,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:1aec97a1b15f",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 9,
+    "free_slots": 16,
+    "heavy_atoms": 32,
+    "n_slots": 48,
+    "parent_id": "production_archive:1b0d40d60833",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 10,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:1d651667b600",
+    "root_admissible_fraction": 0.18947368421052632,
+    "root_admissible_plans": 18
+   },
+   {
+    "depth": 8,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:1e094c20fb68",
+    "root_admissible_fraction": 0.18947368421052632,
+    "root_admissible_plans": 18
+   },
+   {
+    "depth": 16,
+    "free_slots": 20,
+    "heavy_atoms": 28,
+    "n_slots": 48,
+    "parent_id": "production_archive:1e1031fc0052",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 12,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:22a8ee5f4118",
+    "root_admissible_fraction": 0.07368421052631578,
+    "root_admissible_plans": 7
+   },
+   {
+    "depth": 7,
+    "free_slots": 36,
+    "heavy_atoms": 12,
+    "n_slots": 48,
+    "parent_id": "production_archive:22bd24775611",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 2,
+    "free_slots": 22,
+    "heavy_atoms": 26,
+    "n_slots": 48,
+    "parent_id": "production_archive:25d25e3b3e02",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 9,
+    "free_slots": 45,
+    "heavy_atoms": 3,
+    "n_slots": 48,
+    "parent_id": "production_archive:2760cd6ebfe5",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 46,
+    "heavy_atoms": 2,
+    "n_slots": 48,
+    "parent_id": "production_archive:28bb34221c76",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 2,
+    "free_slots": 19,
+    "heavy_atoms": 29,
+    "n_slots": 48,
+    "parent_id": "production_archive:2a2d72f4459d",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 3,
+    "free_slots": 46,
+    "heavy_atoms": 2,
+    "n_slots": 48,
+    "parent_id": "production_archive:2a40c03e5743",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 3,
+    "free_slots": 31,
+    "heavy_atoms": 17,
+    "n_slots": 48,
+    "parent_id": "production_archive:2bef55992348",
+    "root_admissible_fraction": 0.10526315789473684,
+    "root_admissible_plans": 10
+   },
+   {
+    "depth": 4,
+    "free_slots": 24,
+    "heavy_atoms": 24,
+    "n_slots": 48,
+    "parent_id": "production_archive:2d09058abed1",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 13,
+    "free_slots": 19,
+    "heavy_atoms": 29,
+    "n_slots": 48,
+    "parent_id": "production_archive:2dd73c275d82",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 2,
+    "free_slots": 47,
+    "heavy_atoms": 1,
+    "n_slots": 48,
+    "parent_id": "production_archive:31f5bfa812ee",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:3318f7dd38c2",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 10,
+    "free_slots": 26,
+    "heavy_atoms": 22,
+    "n_slots": 48,
+    "parent_id": "production_archive:340e97f437af",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 2,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:3440117f4ab9",
+    "root_admissible_fraction": 0.07368421052631578,
+    "root_admissible_plans": 7
+   },
+   {
+    "depth": 12,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:35435b52d24a",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 10,
+    "free_slots": 37,
+    "heavy_atoms": 11,
+    "n_slots": 48,
+    "parent_id": "production_archive:35a3ee535d70",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 2,
+    "free_slots": 22,
+    "heavy_atoms": 26,
+    "n_slots": 48,
+    "parent_id": "production_archive:37e8a20f5d3d",
+    "root_admissible_fraction": 0.21052631578947367,
+    "root_admissible_plans": 20
+   },
+   {
+    "depth": 7,
+    "free_slots": 17,
+    "heavy_atoms": 31,
+    "n_slots": 48,
+    "parent_id": "production_archive:380703f0db45",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 8,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:38f5d8b0bbae",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 8,
+    "free_slots": 24,
+    "heavy_atoms": 24,
+    "n_slots": 48,
+    "parent_id": "production_archive:3c7211595c4c",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 1,
+    "free_slots": 36,
+    "heavy_atoms": 12,
+    "n_slots": 48,
+    "parent_id": "production_archive:3c98c0427c26",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 2,
+    "free_slots": 15,
+    "heavy_atoms": 33,
+    "n_slots": 48,
+    "parent_id": "production_archive:3cff3f3a65df",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 1,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:3f39ea83b35e",
+    "root_admissible_fraction": 0.07368421052631578,
+    "root_admissible_plans": 7
+   },
+   {
+    "depth": 6,
+    "free_slots": 15,
+    "heavy_atoms": 33,
+    "n_slots": 48,
+    "parent_id": "production_archive:3f47fbc15161",
+    "root_admissible_fraction": 0.24210526315789474,
+    "root_admissible_plans": 23
+   },
+   {
+    "depth": 1,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:3fccebee58e0",
+    "root_admissible_fraction": 0.29473684210526313,
+    "root_admissible_plans": 28
+   },
+   {
+    "depth": 1,
+    "free_slots": 16,
+    "heavy_atoms": 32,
+    "n_slots": 48,
+    "parent_id": "production_archive:3fd050627ea6",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 2,
+    "free_slots": 45,
+    "heavy_atoms": 3,
+    "n_slots": 48,
+    "parent_id": "production_archive:41a680cbc44b",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 12,
+    "free_slots": 32,
+    "heavy_atoms": 16,
+    "n_slots": 48,
+    "parent_id": "production_archive:42fa64d66311",
+    "root_admissible_fraction": 0.1368421052631579,
+    "root_admissible_plans": 13
+   },
+   {
+    "depth": 1,
+    "free_slots": 22,
+    "heavy_atoms": 26,
+    "n_slots": 48,
+    "parent_id": "production_archive:435f8456e6be",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 9,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:43d5998a5948",
+    "root_admissible_fraction": 0.1368421052631579,
+    "root_admissible_plans": 13
+   },
+   {
+    "depth": 1,
+    "free_slots": 36,
+    "heavy_atoms": 12,
+    "n_slots": 48,
+    "parent_id": "production_archive:44c94f0703f1",
+    "root_admissible_fraction": 0.23157894736842105,
+    "root_admissible_plans": 22
+   },
+   {
+    "depth": 1,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:4865604d5919",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 2,
+    "free_slots": 16,
+    "heavy_atoms": 32,
+    "n_slots": 48,
+    "parent_id": "production_archive:4b5901cd6c17",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 1,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:4c4e8f216c73",
+    "root_admissible_fraction": 0.5473684210526316,
+    "root_admissible_plans": 52
+   },
+   {
+    "depth": 1,
+    "free_slots": 16,
+    "heavy_atoms": 32,
+    "n_slots": 48,
+    "parent_id": "production_archive:4ddd30896aa8",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 2,
+    "free_slots": 47,
+    "heavy_atoms": 1,
+    "n_slots": 48,
+    "parent_id": "production_archive:4dec5a82bc30",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:51017914a8f6",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 10,
+    "free_slots": 26,
+    "heavy_atoms": 22,
+    "n_slots": 48,
+    "parent_id": "production_archive:52caace6db18",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 10,
+    "free_slots": 47,
+    "heavy_atoms": 1,
+    "n_slots": 48,
+    "parent_id": "production_archive:53502b3f7cad",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 33,
+    "heavy_atoms": 15,
+    "n_slots": 48,
+    "parent_id": "production_archive:54b86daa811e",
+    "root_admissible_fraction": 0.23157894736842105,
+    "root_admissible_plans": 22
+   },
+   {
+    "depth": 17,
+    "free_slots": 42,
+    "heavy_atoms": 6,
+    "n_slots": 48,
+    "parent_id": "production_archive:572696c9602e",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 11,
+    "free_slots": 11,
+    "heavy_atoms": 37,
+    "n_slots": 48,
+    "parent_id": "production_archive:594b10e0c0ab",
+    "root_admissible_fraction": 0.4105263157894737,
+    "root_admissible_plans": 39
+   },
+   {
+    "depth": 1,
+    "free_slots": 45,
+    "heavy_atoms": 3,
+    "n_slots": 48,
+    "parent_id": "production_archive:598bdb29b17d",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 8,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:599605bb73d7",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 21,
+    "free_slots": 32,
+    "heavy_atoms": 16,
+    "n_slots": 48,
+    "parent_id": "production_archive:5b89457e4f4b",
+    "root_admissible_fraction": 0.10526315789473684,
+    "root_admissible_plans": 10
+   },
+   {
+    "depth": 1,
+    "free_slots": 16,
+    "heavy_atoms": 32,
+    "n_slots": 48,
+    "parent_id": "production_archive:5bb343b5c1e7",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 5,
+    "free_slots": 29,
+    "heavy_atoms": 19,
+    "n_slots": 48,
+    "parent_id": "production_archive:5ccdfd24283c",
+    "root_admissible_fraction": 0.10526315789473684,
+    "root_admissible_plans": 10
+   },
+   {
+    "depth": 1,
+    "free_slots": 11,
+    "heavy_atoms": 37,
+    "n_slots": 48,
+    "parent_id": "production_archive:5f63401162bf",
+    "root_admissible_fraction": 0.4105263157894737,
+    "root_admissible_plans": 39
+   },
+   {
+    "depth": 18,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:5f95b7f2893e",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 8,
+    "free_slots": 10,
+    "heavy_atoms": 38,
+    "n_slots": 48,
+    "parent_id": "production_archive:5faac069da2b",
+    "root_admissible_fraction": 0.4105263157894737,
+    "root_admissible_plans": 39
+   },
+   {
+    "depth": 8,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:61d133159171",
+    "root_admissible_fraction": 0.1368421052631579,
+    "root_admissible_plans": 13
+   },
+   {
+    "depth": 3,
+    "free_slots": 46,
+    "heavy_atoms": 2,
+    "n_slots": 48,
+    "parent_id": "production_archive:62b7e74db30d",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:62c6a3061c1a",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 9,
+    "free_slots": 16,
+    "heavy_atoms": 32,
+    "n_slots": 48,
+    "parent_id": "production_archive:62ff64898371",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 1,
+    "free_slots": 38,
+    "heavy_atoms": 10,
+    "n_slots": 48,
+    "parent_id": "production_archive:63b392b5bf8a",
+    "root_admissible_fraction": 0.08421052631578947,
+    "root_admissible_plans": 8
+   },
+   {
+    "depth": 4,
+    "free_slots": 38,
+    "heavy_atoms": 10,
+    "n_slots": 48,
+    "parent_id": "production_archive:666950089d24",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 2,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:670f06afc49a",
+    "root_admissible_fraction": 0.1368421052631579,
+    "root_admissible_plans": 13
+   },
+   {
+    "depth": 2,
+    "free_slots": 26,
+    "heavy_atoms": 22,
+    "n_slots": 48,
+    "parent_id": "production_archive:676ee542810c",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 2,
+    "free_slots": 19,
+    "heavy_atoms": 29,
+    "n_slots": 48,
+    "parent_id": "production_archive:681d05f12daa",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 9,
+    "free_slots": 21,
+    "heavy_atoms": 27,
+    "n_slots": 48,
+    "parent_id": "production_archive:68b4c8417515",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 4,
+    "free_slots": 20,
+    "heavy_atoms": 28,
+    "n_slots": 48,
+    "parent_id": "production_archive:69ed9bce6a4c",
+    "root_admissible_fraction": 0.24210526315789474,
+    "root_admissible_plans": 23
+   },
+   {
+    "depth": 5,
+    "free_slots": 10,
+    "heavy_atoms": 38,
+    "n_slots": 48,
+    "parent_id": "production_archive:6c919aebe654",
+    "root_admissible_fraction": 0.4105263157894737,
+    "root_admissible_plans": 39
+   },
+   {
+    "depth": 8,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:6d774d5a07a5",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 7,
+    "free_slots": 36,
+    "heavy_atoms": 12,
+    "n_slots": 48,
+    "parent_id": "production_archive:6dcae099718b",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 4,
+    "free_slots": 43,
+    "heavy_atoms": 5,
+    "n_slots": 48,
+    "parent_id": "production_archive:6e496fd1a6c2",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 11,
+    "heavy_atoms": 37,
+    "n_slots": 48,
+    "parent_id": "production_archive:6fa6266420df",
+    "root_admissible_fraction": 0.4105263157894737,
+    "root_admissible_plans": 39
+   },
+   {
+    "depth": 1,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:7059f5c80587",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 46,
+    "heavy_atoms": 2,
+    "n_slots": 48,
+    "parent_id": "production_archive:713e5610d94c",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 2,
+    "free_slots": 32,
+    "heavy_atoms": 16,
+    "n_slots": 48,
+    "parent_id": "production_archive:71f808e4285a",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 12,
+    "free_slots": 20,
+    "heavy_atoms": 28,
+    "n_slots": 48,
+    "parent_id": "production_archive:7249b3870fd0",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 1,
+    "free_slots": 24,
+    "heavy_atoms": 24,
+    "n_slots": 48,
+    "parent_id": "production_archive:7459ebfdf4f4",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 14,
+    "free_slots": 16,
+    "heavy_atoms": 32,
+    "n_slots": 48,
+    "parent_id": "production_archive:750036b546b8",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 7,
+    "free_slots": 10,
+    "heavy_atoms": 38,
+    "n_slots": 48,
+    "parent_id": "production_archive:76af5ce01874",
+    "root_admissible_fraction": 0.25263157894736843,
+    "root_admissible_plans": 24
+   },
+   {
+    "depth": 9,
+    "free_slots": 29,
+    "heavy_atoms": 19,
+    "n_slots": 48,
+    "parent_id": "production_archive:77c1eb6f330f",
+    "root_admissible_fraction": 0.5473684210526316,
+    "root_admissible_plans": 52
+   },
+   {
+    "depth": 1,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:77d7bcfa0412",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 6,
+    "free_slots": 43,
+    "heavy_atoms": 5,
+    "n_slots": 48,
+    "parent_id": "production_archive:7b02d1fc1332",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 1,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:7c25b852dbaa",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 4,
+    "free_slots": 25,
+    "heavy_atoms": 23,
+    "n_slots": 48,
+    "parent_id": "production_archive:7c87c32d4353",
+    "root_admissible_fraction": 0.29473684210526313,
+    "root_admissible_plans": 28
+   },
+   {
+    "depth": 1,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:7f992975d906",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 8,
+    "free_slots": 15,
+    "heavy_atoms": 33,
+    "n_slots": 48,
+    "parent_id": "production_archive:8167f5f79cf8",
+    "root_admissible_fraction": 0.24210526315789474,
+    "root_admissible_plans": 23
+   },
+   {
+    "depth": 2,
+    "free_slots": 16,
+    "heavy_atoms": 32,
+    "n_slots": 48,
+    "parent_id": "production_archive:81a0adf63b44",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 2,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:81cca8a1f639",
+    "root_admissible_fraction": 0.4842105263157895,
+    "root_admissible_plans": 46
+   },
+   {
+    "depth": 1,
+    "free_slots": 43,
+    "heavy_atoms": 5,
+    "n_slots": 48,
+    "parent_id": "production_archive:851dfa36e951",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 6,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:87d35bf298ec",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 12,
+    "free_slots": 18,
+    "heavy_atoms": 30,
+    "n_slots": 48,
+    "parent_id": "production_archive:87ef07bc1656",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 7,
+    "free_slots": 20,
+    "heavy_atoms": 28,
+    "n_slots": 48,
+    "parent_id": "production_archive:8905de9d6426",
+    "root_admissible_fraction": 0.4,
+    "root_admissible_plans": 38
+   },
+   {
+    "depth": 12,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:8945856e4b1c",
+    "root_admissible_fraction": 0.23157894736842105,
+    "root_admissible_plans": 22
+   },
+   {
+    "depth": 3,
+    "free_slots": 35,
+    "heavy_atoms": 13,
+    "n_slots": 48,
+    "parent_id": "production_archive:89f3a508bc52",
+    "root_admissible_fraction": 0.1368421052631579,
+    "root_admissible_plans": 13
+   },
+   {
+    "depth": 6,
+    "free_slots": 23,
+    "heavy_atoms": 25,
+    "n_slots": 48,
+    "parent_id": "production_archive:8b8b25e594f7",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 8,
+    "free_slots": 45,
+    "heavy_atoms": 3,
+    "n_slots": 48,
+    "parent_id": "production_archive:8cbf51084f6f",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 13,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:91268030f924",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 8,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:937954fc6da4",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 8,
+    "free_slots": 35,
+    "heavy_atoms": 13,
+    "n_slots": 48,
+    "parent_id": "production_archive:93e1a5b33832",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 1,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:94502844e489",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 46,
+    "heavy_atoms": 2,
+    "n_slots": 48,
+    "parent_id": "production_archive:97ef86dc9a4a",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 17,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:982ccbe62b2d",
+    "root_admissible_fraction": 0.1368421052631579,
+    "root_admissible_plans": 13
+   },
+   {
+    "depth": 1,
+    "free_slots": 44,
+    "heavy_atoms": 4,
+    "n_slots": 48,
+    "parent_id": "production_archive:9864eed96fd9",
+    "root_admissible_fraction": 0.17894736842105263,
+    "root_admissible_plans": 17
+   },
+   {
+    "depth": 7,
+    "free_slots": 10,
+    "heavy_atoms": 38,
+    "n_slots": 48,
+    "parent_id": "production_archive:9a25fd51bc1b",
+    "root_admissible_fraction": 0.4105263157894737,
+    "root_admissible_plans": 39
+   },
+   {
+    "depth": 1,
+    "free_slots": 18,
+    "heavy_atoms": 30,
+    "n_slots": 48,
+    "parent_id": "production_archive:9e979b7169f7",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 11,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:9ef75073769d",
+    "root_admissible_fraction": 0.07368421052631578,
+    "root_admissible_plans": 7
+   },
+   {
+    "depth": 12,
+    "free_slots": 21,
+    "heavy_atoms": 27,
+    "n_slots": 48,
+    "parent_id": "production_archive:a0fc1de04254",
+    "root_admissible_fraction": 0.5894736842105263,
+    "root_admissible_plans": 56
+   },
+   {
+    "depth": 2,
+    "free_slots": 33,
+    "heavy_atoms": 15,
+    "n_slots": 48,
+    "parent_id": "production_archive:a2126c3f105d",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 1,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:a33b10546fd4",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 1,
+    "free_slots": 47,
+    "heavy_atoms": 1,
+    "n_slots": 48,
+    "parent_id": "production_archive:a49a5175fff7",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:a5504c420133",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 12,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:a67ec2529c2f",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:a7892a4bacb9",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 12,
+    "free_slots": 24,
+    "heavy_atoms": 24,
+    "n_slots": 48,
+    "parent_id": "production_archive:a805522f4e2c",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 13,
+    "free_slots": 23,
+    "heavy_atoms": 25,
+    "n_slots": 48,
+    "parent_id": "production_archive:a911625c1853",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 1,
+    "free_slots": 42,
+    "heavy_atoms": 6,
+    "n_slots": 48,
+    "parent_id": "production_archive:a9163b97b814",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 4,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:a9e3a9f849dd",
+    "root_admissible_fraction": 0.29473684210526313,
+    "root_admissible_plans": 28
+   },
+   {
+    "depth": 8,
+    "free_slots": 17,
+    "heavy_atoms": 31,
+    "n_slots": 48,
+    "parent_id": "production_archive:ab679310c40d",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 27,
+    "free_slots": 33,
+    "heavy_atoms": 15,
+    "n_slots": 48,
+    "parent_id": "production_archive:ac9ce6e0725f",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 10,
+    "free_slots": 26,
+    "heavy_atoms": 22,
+    "n_slots": 48,
+    "parent_id": "production_archive:af11d765acd2",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 2,
+    "free_slots": 42,
+    "heavy_atoms": 6,
+    "n_slots": 48,
+    "parent_id": "production_archive:b00cb2a82b5d",
+    "root_admissible_fraction": 0.07368421052631578,
+    "root_admissible_plans": 7
+   },
+   {
+    "depth": 1,
+    "free_slots": 31,
+    "heavy_atoms": 17,
+    "n_slots": 48,
+    "parent_id": "production_archive:b04a52ca7d42",
+    "root_admissible_fraction": 0.29473684210526313,
+    "root_admissible_plans": 28
+   },
+   {
+    "depth": 1,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:b0d16ae98498",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 4,
+    "free_slots": 33,
+    "heavy_atoms": 15,
+    "n_slots": 48,
+    "parent_id": "production_archive:b40f74aa6a4a",
+    "root_admissible_fraction": 0.10526315789473684,
+    "root_admissible_plans": 10
+   },
+   {
+    "depth": 2,
+    "free_slots": 16,
+    "heavy_atoms": 32,
+    "n_slots": 48,
+    "parent_id": "production_archive:b589c9579004",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 8,
+    "free_slots": 29,
+    "heavy_atoms": 19,
+    "n_slots": 48,
+    "parent_id": "production_archive:b7a9e99a111c",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 10,
+    "free_slots": 9,
+    "heavy_atoms": 39,
+    "n_slots": 48,
+    "parent_id": "production_archive:b8fb0cc76ec1",
+    "root_admissible_fraction": 0.4105263157894737,
+    "root_admissible_plans": 39
+   },
+   {
+    "depth": 12,
+    "free_slots": 18,
+    "heavy_atoms": 30,
+    "n_slots": 48,
+    "parent_id": "production_archive:bc2b113435ca",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 13,
+    "free_slots": 38,
+    "heavy_atoms": 10,
+    "n_slots": 48,
+    "parent_id": "production_archive:bdd3bc6d971e",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 5,
+    "free_slots": 42,
+    "heavy_atoms": 6,
+    "n_slots": 48,
+    "parent_id": "production_archive:bde7f5974c13",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 1,
+    "free_slots": 17,
+    "heavy_atoms": 31,
+    "n_slots": 48,
+    "parent_id": "production_archive:c05f99c7e014",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 7,
+    "free_slots": 20,
+    "heavy_atoms": 28,
+    "n_slots": 48,
+    "parent_id": "production_archive:c1fe1e62840b",
+    "root_admissible_fraction": 0.24210526315789474,
+    "root_admissible_plans": 23
+   },
+   {
+    "depth": 12,
+    "free_slots": 29,
+    "heavy_atoms": 19,
+    "n_slots": 48,
+    "parent_id": "production_archive:c369136a2a2e",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 1,
+    "free_slots": 33,
+    "heavy_atoms": 15,
+    "n_slots": 48,
+    "parent_id": "production_archive:c3aa49aed8f4",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 1,
+    "free_slots": 36,
+    "heavy_atoms": 12,
+    "n_slots": 48,
+    "parent_id": "production_archive:c3fd16a66185",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 10,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:c558518f919b",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 2,
+    "free_slots": 26,
+    "heavy_atoms": 22,
+    "n_slots": 48,
+    "parent_id": "production_archive:c5708147e9fa",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 1,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:c5938d282fc9",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:c6adf0b0ad35",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 8,
+    "free_slots": 35,
+    "heavy_atoms": 13,
+    "n_slots": 48,
+    "parent_id": "production_archive:c6b5c6ec56ed",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 7,
+    "free_slots": 46,
+    "heavy_atoms": 2,
+    "n_slots": 48,
+    "parent_id": "production_archive:c89688e11aa2",
+    "root_admissible_fraction": 0.021052631578947368,
+    "root_admissible_plans": 2
+   },
+   {
+    "depth": 12,
+    "free_slots": 24,
+    "heavy_atoms": 24,
+    "n_slots": 48,
+    "parent_id": "production_archive:c94ef8789b1b",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 7,
+    "free_slots": 47,
+    "heavy_atoms": 1,
+    "n_slots": 48,
+    "parent_id": "production_archive:c9e579ed3042",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 2,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:cf18b2f164b9",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 11,
+    "free_slots": 36,
+    "heavy_atoms": 12,
+    "n_slots": 48,
+    "parent_id": "production_archive:d17c32c22eef",
+    "root_admissible_fraction": 0.23157894736842105,
+    "root_admissible_plans": 22
+   },
+   {
+    "depth": 8,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:d3762b4f20e2",
+    "root_admissible_fraction": 0.18947368421052632,
+    "root_admissible_plans": 18
+   },
+   {
+    "depth": 7,
+    "free_slots": 36,
+    "heavy_atoms": 12,
+    "n_slots": 48,
+    "parent_id": "production_archive:d5601d245d88",
+    "root_admissible_fraction": 0.2,
+    "root_admissible_plans": 19
+   },
+   {
+    "depth": 7,
+    "free_slots": 25,
+    "heavy_atoms": 23,
+    "n_slots": 48,
+    "parent_id": "production_archive:d5984f43e9db",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 12,
+    "free_slots": 21,
+    "heavy_atoms": 27,
+    "n_slots": 48,
+    "parent_id": "production_archive:d59db08fc9c5",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 1,
+    "free_slots": 47,
+    "heavy_atoms": 1,
+    "n_slots": 48,
+    "parent_id": "production_archive:d737e03113f6",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 3,
+    "free_slots": 44,
+    "heavy_atoms": 4,
+    "n_slots": 48,
+    "parent_id": "production_archive:d9f0e9d96687",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 22,
+    "heavy_atoms": 26,
+    "n_slots": 48,
+    "parent_id": "production_archive:de5dbd4af26f",
+    "root_admissible_fraction": 0.3894736842105263,
+    "root_admissible_plans": 37
+   },
+   {
+    "depth": 11,
+    "free_slots": 37,
+    "heavy_atoms": 11,
+    "n_slots": 48,
+    "parent_id": "production_archive:de85e490e79b",
+    "root_admissible_fraction": 0.18947368421052632,
+    "root_admissible_plans": 18
+   },
+   {
+    "depth": 1,
+    "free_slots": 45,
+    "heavy_atoms": 3,
+    "n_slots": 48,
+    "parent_id": "production_archive:de86e445a44c",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 32,
+    "heavy_atoms": 16,
+    "n_slots": 48,
+    "parent_id": "production_archive:dedeb68d0b27",
+    "root_admissible_fraction": 0.3894736842105263,
+    "root_admissible_plans": 37
+   },
+   {
+    "depth": 1,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:dff3f882315a",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 5,
+    "free_slots": 20,
+    "heavy_atoms": 28,
+    "n_slots": 48,
+    "parent_id": "production_archive:e0a968026f60",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 2,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:e0b1e197d8fb",
+    "root_admissible_fraction": 0.07368421052631578,
+    "root_admissible_plans": 7
+   },
+   {
+    "depth": 9,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:e10ce359de84",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 9,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:e16085c7d2fb",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 5,
+    "free_slots": 19,
+    "heavy_atoms": 29,
+    "n_slots": 48,
+    "parent_id": "production_archive:e3f9fcc41efb",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 3,
+    "free_slots": 38,
+    "heavy_atoms": 10,
+    "n_slots": 48,
+    "parent_id": "production_archive:e41d6a9b5a0c",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 15,
+    "free_slots": 47,
+    "heavy_atoms": 1,
+    "n_slots": 48,
+    "parent_id": "production_archive:e4d628d7e5e9",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 13,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:e74f5f644d9a",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 2,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:e7ef043beff7",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 4,
+    "free_slots": 44,
+    "heavy_atoms": 4,
+    "n_slots": 48,
+    "parent_id": "production_archive:e892d08e03fe",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 10,
+    "free_slots": 16,
+    "heavy_atoms": 32,
+    "n_slots": 48,
+    "parent_id": "production_archive:e8fb07c280e9",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 2,
+    "free_slots": 33,
+    "heavy_atoms": 15,
+    "n_slots": 48,
+    "parent_id": "production_archive:e90d74d814ff",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 4,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:e92ebe18a9f5",
+    "root_admissible_fraction": 0.1368421052631579,
+    "root_admissible_plans": 13
+   },
+   {
+    "depth": 16,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:e95e7e3af8f6",
+    "root_admissible_fraction": 0.1368421052631579,
+    "root_admissible_plans": 13
+   },
+   {
+    "depth": 14,
+    "free_slots": 13,
+    "heavy_atoms": 35,
+    "n_slots": 48,
+    "parent_id": "production_archive:e98c1e1af2cb",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 9,
+    "free_slots": 20,
+    "heavy_atoms": 28,
+    "n_slots": 48,
+    "parent_id": "production_archive:eb4472e1fe3b",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 8,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:ebbde7fdab20",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 7,
+    "free_slots": 27,
+    "heavy_atoms": 21,
+    "n_slots": 48,
+    "parent_id": "production_archive:ec2a2577bd72",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 4,
+    "free_slots": 42,
+    "heavy_atoms": 6,
+    "n_slots": 48,
+    "parent_id": "production_archive:ecb4535da563",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 1,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "production_archive:ecb5a6abb25f",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 5,
+    "free_slots": 36,
+    "heavy_atoms": 12,
+    "n_slots": 48,
+    "parent_id": "production_archive:ecffbff79a55",
+    "root_admissible_fraction": 0.23157894736842105,
+    "root_admissible_plans": 22
+   },
+   {
+    "depth": 1,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:ee4d516c0500",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 7,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:eed8e3aec37f",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:efb420a02eff",
+    "root_admissible_fraction": 0.1368421052631579,
+    "root_admissible_plans": 13
+   },
+   {
+    "depth": 4,
+    "free_slots": 39,
+    "heavy_atoms": 9,
+    "n_slots": 48,
+    "parent_id": "production_archive:f0f57d89a0f0",
+    "root_admissible_fraction": 0.0,
+    "root_admissible_plans": 0
+   },
+   {
+    "depth": 1,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:f27f9b296c81",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 1,
+    "free_slots": 11,
+    "heavy_atoms": 37,
+    "n_slots": 48,
+    "parent_id": "production_archive:f3d59d2f033c",
+    "root_admissible_fraction": 0.4105263157894737,
+    "root_admissible_plans": 39
+   },
+   {
+    "depth": 1,
+    "free_slots": 46,
+    "heavy_atoms": 2,
+    "n_slots": 48,
+    "parent_id": "production_archive:f44ab63895a4",
+    "root_admissible_fraction": 0.021052631578947368,
+    "root_admissible_plans": 2
+   },
+   {
+    "depth": 24,
+    "free_slots": 41,
+    "heavy_atoms": 7,
+    "n_slots": 48,
+    "parent_id": "production_archive:f654dc0446f3",
+    "root_admissible_fraction": 0.09473684210526316,
+    "root_admissible_plans": 9
+   },
+   {
+    "depth": 12,
+    "free_slots": 20,
+    "heavy_atoms": 28,
+    "n_slots": 48,
+    "parent_id": "production_archive:f6e75da33cdc",
+    "root_admissible_fraction": 0.24210526315789474,
+    "root_admissible_plans": 23
+   },
+   {
+    "depth": 1,
+    "free_slots": 21,
+    "heavy_atoms": 27,
+    "n_slots": 48,
+    "parent_id": "production_archive:f7e1fa457d84",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 2,
+    "free_slots": 29,
+    "heavy_atoms": 19,
+    "n_slots": 48,
+    "parent_id": "production_archive:f824f94b2426",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 2,
+    "free_slots": 37,
+    "heavy_atoms": 11,
+    "n_slots": 48,
+    "parent_id": "production_archive:f923d23e4e4a",
+    "root_admissible_fraction": 0.23157894736842105,
+    "root_admissible_plans": 22
+   },
+   {
+    "depth": 1,
+    "free_slots": 22,
+    "heavy_atoms": 26,
+    "n_slots": 48,
+    "parent_id": "production_archive:fad9644d9704",
+    "root_admissible_fraction": 0.3894736842105263,
+    "root_admissible_plans": 37
+   },
+   {
+    "depth": 7,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_archive:faebd322a7f6",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 5,
+    "free_slots": 19,
+    "heavy_atoms": 29,
+    "n_slots": 48,
+    "parent_id": "production_archive:fb3f2792f96a",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 2,
+    "free_slots": 15,
+    "heavy_atoms": 33,
+    "n_slots": 48,
+    "parent_id": "production_archive:fbcee82b6255",
+    "root_admissible_fraction": 0.24210526315789474,
+    "root_admissible_plans": 23
+   },
+   {
+    "depth": 14,
+    "free_slots": 16,
+    "heavy_atoms": 32,
+    "n_slots": 48,
+    "parent_id": "production_archive:fc33df003b91",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 12,
+    "free_slots": 26,
+    "heavy_atoms": 22,
+    "n_slots": 48,
+    "parent_id": "production_archive:fc7a57d9b880",
+    "root_admissible_fraction": 0.24210526315789474,
+    "root_admissible_plans": 23
+   },
+   {
+    "depth": 2,
+    "free_slots": 29,
+    "heavy_atoms": 19,
+    "n_slots": 48,
+    "parent_id": "production_archive:fc7b95f90d30",
+    "root_admissible_fraction": 0.16842105263157894,
+    "root_admissible_plans": 16
+   },
+   {
+    "depth": 17,
+    "free_slots": 33,
+    "heavy_atoms": 15,
+    "n_slots": 48,
+    "parent_id": "production_archive:fdfb6df1df9e",
+    "root_admissible_fraction": 0.2,
+    "root_admissible_plans": 19
+   }
+  ],
+  "production_init": [
+   {
+    "depth": 0,
+    "free_slots": 29,
+    "heavy_atoms": 19,
+    "n_slots": 48,
+    "parent_id": "production_init:0",
+    "root_admissible_fraction": 0.2,
+    "root_admissible_plans": 19
+   },
+   {
+    "depth": 0,
+    "free_slots": 31,
+    "heavy_atoms": 17,
+    "n_slots": 48,
+    "parent_id": "production_init:1",
+    "root_admissible_fraction": 0.2,
+    "root_admissible_plans": 19
+   },
+   {
+    "depth": 0,
+    "free_slots": 27,
+    "heavy_atoms": 21,
+    "n_slots": 48,
+    "parent_id": "production_init:2",
+    "root_admissible_fraction": 0.18947368421052632,
+    "root_admissible_plans": 18
+   },
+   {
+    "depth": 0,
+    "free_slots": 29,
+    "heavy_atoms": 19,
+    "n_slots": 48,
+    "parent_id": "production_init:3",
+    "root_admissible_fraction": 0.2,
+    "root_admissible_plans": 19
+   },
+   {
+    "depth": 0,
+    "free_slots": 27,
+    "heavy_atoms": 21,
+    "n_slots": 48,
+    "parent_id": "production_init:4",
+    "root_admissible_fraction": 0.3263157894736842,
+    "root_admissible_plans": 31
+   },
+   {
+    "depth": 0,
+    "free_slots": 24,
+    "heavy_atoms": 24,
+    "n_slots": 48,
+    "parent_id": "production_init:5",
+    "root_admissible_fraction": 0.23157894736842105,
+    "root_admissible_plans": 22
+   },
+   {
+    "depth": 0,
+    "free_slots": 21,
+    "heavy_atoms": 27,
+    "n_slots": 48,
+    "parent_id": "production_init:6",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 0,
+    "free_slots": 33,
+    "heavy_atoms": 15,
+    "n_slots": 48,
+    "parent_id": "production_init:7",
+    "root_admissible_fraction": 0.30526315789473685,
+    "root_admissible_plans": 29
+   },
+   {
+    "depth": 0,
+    "free_slots": 22,
+    "heavy_atoms": 26,
+    "n_slots": 48,
+    "parent_id": "production_init:8",
+    "root_admissible_fraction": 0.3894736842105263,
+    "root_admissible_plans": 37
+   },
+   {
+    "depth": 0,
+    "free_slots": 30,
+    "heavy_atoms": 18,
+    "n_slots": 48,
+    "parent_id": "production_init:9",
+    "root_admissible_fraction": 0.2,
+    "root_admissible_plans": 19
+   },
+   {
+    "depth": 0,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_init:10",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 0,
+    "free_slots": 22,
+    "heavy_atoms": 26,
+    "n_slots": 48,
+    "parent_id": "production_init:11",
+    "root_admissible_fraction": 0.3368421052631579,
+    "root_admissible_plans": 32
+   },
+   {
+    "depth": 0,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_init:12",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 0,
+    "free_slots": 27,
+    "heavy_atoms": 21,
+    "n_slots": 48,
+    "parent_id": "production_init:13",
+    "root_admissible_fraction": 0.3263157894736842,
+    "root_admissible_plans": 31
+   },
+   {
+    "depth": 0,
+    "free_slots": 28,
+    "heavy_atoms": 20,
+    "n_slots": 48,
+    "parent_id": "production_init:14",
+    "root_admissible_fraction": 0.49473684210526314,
+    "root_admissible_plans": 47
+   },
+   {
+    "depth": 0,
+    "free_slots": 30,
+    "heavy_atoms": 18,
+    "n_slots": 48,
+    "parent_id": "production_init:15",
+    "root_admissible_fraction": 0.2,
+    "root_admissible_plans": 19
+   }
+  ],
+  "teacher_root": [
+   {
+    "depth": 0,
+    "free_slots": 21,
+    "heavy_atoms": 27,
+    "n_slots": 48,
+    "parent_id": "teacher_root:0",
+    "root_admissible_fraction": 0.9052631578947369,
+    "root_admissible_plans": 86
+   },
+   {
+    "depth": 0,
+    "free_slots": 8,
+    "heavy_atoms": 40,
+    "n_slots": 48,
+    "parent_id": "teacher_root:1",
+    "root_admissible_fraction": 0.4105263157894737,
+    "root_admissible_plans": 39
+   },
+   {
+    "depth": 0,
+    "free_slots": 40,
+    "heavy_atoms": 8,
+    "n_slots": 48,
+    "parent_id": "teacher_root:2",
+    "root_admissible_fraction": 0.18947368421052632,
+    "root_admissible_plans": 18
+   },
+   {
+    "depth": 0,
+    "free_slots": 38,
+    "heavy_atoms": 10,
+    "n_slots": 48,
+    "parent_id": "teacher_root:3",
+    "root_admissible_fraction": 0.23157894736842105,
+    "root_admissible_plans": 22
+   },
+   {
+    "depth": 0,
+    "free_slots": 27,
+    "heavy_atoms": 21,
+    "n_slots": 48,
+    "parent_id": "teacher_root:4",
+    "root_admissible_fraction": 0.2,
+    "root_admissible_plans": 19
+   },
+   {
+    "depth": 0,
+    "free_slots": 24,
+    "heavy_atoms": 24,
+    "n_slots": 48,
+    "parent_id": "teacher_root:5",
+    "root_admissible_fraction": 0.1368421052631579,
+    "root_admissible_plans": 13
+   },
+   {
+    "depth": 0,
+    "free_slots": 24,
+    "heavy_atoms": 24,
+    "n_slots": 48,
+    "parent_id": "teacher_root:6",
+    "root_admissible_fraction": 0.29473684210526313,
+    "root_admissible_plans": 28
+   }
+  ]
+ },
+ "plans": 95,
+ "schema_version": "pmo_jump_distribution_shift_v1",
+ "specification": "v1_exact",
+ "strata": {
+  "production_archive": {
+   "operand_feasible": 5075,
+   "operand_feasible_fraction": 0.23637633907778297,
+   "pairs": 21470,
+   "root_admissible": 4642,
+   "root_admissible_fraction": 0.21620866325104798,
+   "root_refusal_histogram": {
+    "ADMISSIBLE": 4642,
+    "insufficient_preexisting_atoms_for_remaining_deletions": 4841,
+    "insufficient_preexisting_atoms_of_a_required_identity": 1967,
+    "insufficient_slot_capacity": 72,
+    "no_atom_carries_a_required_operand_descriptor": 9948
+   }
+  },
+  "production_init": {
+   "operand_feasible": 489,
+   "operand_feasible_fraction": 0.32171052631578945,
+   "pairs": 1520,
+   "root_admissible": 483,
+   "root_admissible_fraction": 0.31776315789473686,
+   "root_refusal_histogram": {
+    "ADMISSIBLE": 483,
+    "insufficient_preexisting_atoms_of_a_required_identity": 153,
+    "no_atom_carries_a_required_operand_descriptor": 884
+   }
+  },
+  "teacher_root": {
+   "operand_feasible": 234,
+   "operand_feasible_fraction": 0.3518796992481203,
+   "pairs": 665,
+   "root_admissible": 225,
+   "root_admissible_fraction": 0.3383458646616541,
+   "root_refusal_histogram": {
+    "ADMISSIBLE": 225,
+    "insufficient_preexisting_atoms_for_remaining_deletions": 60,
+    "insufficient_preexisting_atoms_of_a_required_identity": 64,
+    "insufficient_slot_capacity": 8,
+    "no_atom_carries_a_required_operand_descriptor": 308
+   }
+  },
+  "teacher_witness_matched": {
+   "note": "each plan bound onto the teacher route that generated it",
+   "operand_feasible": 106,
+   "operand_feasible_fraction": 1.0,
+   "pairs": 106,
+   "root_admissible": 106,
+   "root_admissible_fraction": 1.0,
+   "root_refusal_histogram": {
+    "ADMISSIBLE": 106
+   }
+  }
+ }
+}
