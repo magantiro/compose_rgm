@@ -1,0 +1,108 @@
+{
+ "added_examples": [
+  {
+   "first_refusal": "unparseable_or_over_heavy_ceiling",
+   "qed": -1,
+   "sa": -1,
+   "similarity": -1,
+   "smiles": "C=O.CC(C)Cc1cccc2cccc([C]=O)c12.[CH2]c1ccc2ccc(C(=N)N)cc2c1"
+  },
+  {
+   "first_refusal": "similarity",
+   "qed": 0.342558,
+   "sa": 3.1742,
+   "similarity": 0.177778,
+   "smiles": "N=Nc1ccc2ccc(CNCc3cccc4cccc(C5CCCOC5)c34)cc2c1"
+  },
+  {
+   "first_refusal": "qed",
+   "qed": 0.192444,
+   "sa": 3.3849,
+   "similarity": 0.7,
+   "smiles": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)c1cccc2ccc(C3CCNN3)cc12"
+  },
+  {
+   "first_refusal": "unparseable_or_over_heavy_ceiling",
+   "qed": -1,
+   "sa": -1,
+   "similarity": -1,
+   "smiles": "N=C(N)c1cc2cc(CN(CS)C(=O)c3cccc4ccccc34)ccc2cc1-c1ccccc1.[CH3].[CH3]"
+  },
+  {
+   "first_refusal": "similarity",
+   "qed": 0.136887,
+   "sa": 2.6309,
+   "similarity": 0.557143,
+   "smiles": "CC(C)OCN(Cc1ccc2cc(-c3ccccc3)c(C(=N)N)cc2c1)C(=O)c1cccc2ccccc12"
+  },
+  {
+   "first_refusal": "similarity",
+   "qed": 0.138971,
+   "sa": 3.4464,
+   "similarity": 0.419753,
+   "smiles": "CC(C)SCN(Cc1cc[c]c(C=C(Cc2ccccc2)C(=N)N)c1)C(=O)c1cccc2ccccc12"
+  },
+  {
+   "first_refusal": "similarity",
+   "qed": 0.12247,
+   "sa": 2.7715,
+   "similarity": 0.448718,
+   "smiles": "COCCNNCc1cccc2cccc(C(=O)N(C)Cc3ccc4ccc(C(=N)N)cc4c3)c12"
+  },
+  {
+   "first_refusal": "similarity",
+   "qed": 0.236175,
+   "sa": 4.4036,
+   "similarity": 0.333333,
+   "smiles": "CC(C)CCN(Cc1cc2cc(C(=N)N)ccc2c2ccoc12)C(=O)C1=CC=C[C]C1=CC=CC1CCCN1"
+  },
+  {
+   "first_refusal": "similarity",
+   "qed": 0.370622,
+   "sa": 4.5345,
+   "similarity": 0.178947,
+   "smiles": "[CH]c1ccc(C)cc1C(=CC(C)C)C(=O)N(C)CC1CCC2CCC(C(=N)N)CC2C1"
+  },
+  {
+   "first_refusal": "similarity",
+   "qed": 0.306033,
+   "sa": 3.3769,
+   "similarity": 0.443038,
+   "smiles": "Cc1cccc2cccc(C(=O)N(CCC(C)C)C3c4cnc5ccc(C(=N)N)cc5c43)c12"
+  }
+ ],
+ "added_first_refusal": {
+  "qed": 35,
+  "similarity": 264,
+  "unparseable_or_over_heavy_ceiling": 94
+ },
+ "added_that_are_eligible": 0,
+ "broad": {
+  "distinct_endpoints_offered": 3961,
+  "eligible": 0,
+  "gate_calls": 8341,
+  "gate_disagreements": 0,
+  "max_binding_combinations": 8,
+  "max_bindings_per_subgoal": 4
+ },
+ "cell": "fa7_0",
+ "contract": "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+ "delta": 0.6,
+ "docking_calls": 0,
+ "draws": 240,
+ "endpoints_added_by_wider_binding": 393,
+ "endpoints_lost_by_wider_binding": 0,
+ "narrow": {
+  "distinct_endpoints_offered": 3568,
+  "eligible": 0,
+  "gate_calls": 5083,
+  "gate_disagreements": 0,
+  "max_binding_combinations": 4,
+  "max_bindings_per_subgoal": 1
+ },
+ "oracle_calls": 0,
+ "reading": "The wider binding choice built genuinely different molecules and the gate refused every one. Placement is a real axis that the current law exploits badly, and the binding gate that refuses them is named in added_first_refusal.",
+ "schema_version": "t4_fa7_0_placement_discriminator_v1",
+ "support": "compose_valid",
+ "verdict": "DISTINCT_BUT_INELIGIBLE"
+}
