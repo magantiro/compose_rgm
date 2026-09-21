@@ -18,6 +18,13 @@ Two signatures, deliberately kept apart because they need different thresholds:
                     published lock with an unfinished round is the NORMAL look of work in
                     progress.  Only the absence of change across snapshots distinguishes them.
 
+A cell is judged across ALL of its runs, not per run.  A campaign that was relaunched leaves
+the abandoned attempt's root lock behind forever, and that lock is TERMINAL, not stalled -- the
+work lives under a different run_id on the same volume.  The first version of this watchdog did
+not group that way and reported 3 false positives out of 4 on its first tick (braf_1, fa7_0 and
+5ht1b_0 at delta 0.6, each of which has a productive run elsewhere).  A watchdog that cries wolf
+three times out of four trains you to ignore it, which is worse than not having one.
+
 Read-only.  It never relaunches, stops or writes to any volume -- recovery is a separate,
 budget-aware decision, because a published lock counts as a charged call even when no result
 artifact exists, and a naive relaunch would double-charge it.
@@ -94,9 +101,19 @@ def classify(now: dict, prev: dict | None) -> list[dict]:
         delta = datetime.fromisoformat(now["taken_at_utc"]) - datetime.fromisoformat(prev_at)
         minutes = delta.total_seconds() / 60.0
 
+    # A cell that has a productive run under ANY run_id is not stalled: a leftover root lock
+    # from an abandoned attempt is terminal.  Group by (arm, cell) before judging.
+    productive: set[tuple[str, str]] = {
+        (c["arm"], c["cell"])
+        for c in now["cells"].values()
+        if c["has_result"] or c["has_checkpoint"]
+    }
+
     for key, cur in now["cells"].items():
         if cur["has_result"]:
             continue  # terminal: the cell finished or aborted with a recorded reason
+        if (cur["arm"], cur["cell"]) in productive and not cur["has_checkpoint"]:
+            continue  # a sibling run of this same cell is doing the work
         before = prev_cells.get(key)
         unchanged = before is not None and {
             k: before.get(k) for k in ("newest_lock", "lock_count", "has_checkpoint")
