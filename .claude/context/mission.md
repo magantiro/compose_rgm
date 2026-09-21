@@ -146,20 +146,58 @@ configuration and the rescue phase, or run the matched confirmation.
 
 ## PMO
 
-Fix oracle asset resolution for the oracle's full lifetime (absolute paths or a stable
-worker dir, not a constructor-only chdir). Before any scored rerun, a reference panel that
-**actually calls** the production oracle in a fresh process against pinned values including
-a nontrivial intermediate -- not merely "an active is positive". Cover every asset-backed
-evaluator; keep reference molecules out of initialization, archives and selection.
+**RESET 2026-09-21.** The objective is no longer to recover teacher-shaped structural jumps.
+It is to **improve the top-ten score curve with a general feedback-driven controller**. The old
+mechanism diagnostics -- a ~31-primitive median, retained fraction well below 1, teacher-geometry
+recovery -- are **NOT admission requirements** for useful PMO search and must never gate whether a
+promising optimizer continues. Measured: support-conditioned pairing lifted exact realization
+10.8x (0.275% -> 2.96%) and every success was still purely additive, which proves the transplant
+MECHANISM transfers poorly, not that PMO needs deletion-heavy jumps.
 
-Priority: **realization/attachment first** (alpha is the leading hypothesis, not a proven
-universal cause), then trajectory autopsy, then hierarchical credit where evidence supports
-it. Program length is separate from binding; a 32-primitive cap is not a theorem about
-reachability.
+**One controller plus a task adapter, shared with T4.** The loop is the same in both:
+`choose parent -> choose legal region -> choose structural program -> execute exactly -> feed back`.
+Only the adapter differs -- T4 supplies a lead plus similarity/QED/SA constraints and docking and
+optimizes best-eligible; PMO supplies a task-independent initial population and a scalar oracle and
+optimizes the top-10 frontier. Never grow a separate pile of PMO-specific hacks, and never import
+T4's SA/QED eligibility into PMO, where the task does not supply it.
 
-No-prescreen only. Ladder 250 -> 1k -> broader panel -> 10k matched with multiple seeds.
-**Never scale a 250-call AUC and compare it to a 10k result.** Reproduce the official AUC
-implementation for official comparisons.
+**Proposals are PARENT-FIRST:** `G -> R subset G -> (H, alpha, D) | G, R -> G'`. Choose the region
+on the actual parent, then construct a compatible refinement, replacement or recombination. Never
+draw a historical plan and ask the current molecule to resemble that plan's original source. Hard
+constraints stay hard (valence, connectivity, real attachment obligations, declared program
+semantics); source-side *descriptors* may be preferences -- separate those deliberately rather than
+loosening every matcher until something binds. Retire expensive source-specific transplanted plans
+from default allocation; do NOT replace them with production beam search.
+
+**Information boundary.** Task-independent chemical prior + current-run COUNTED feedback. Online
+adaptation from scored observations is legitimate no-prescreen optimization. Oracle internals,
+target SMILES, hidden component scores and uncounted same-task history are NOT. If QED is the
+objective, computing it on uncounted candidates for selection IS objective evaluation.
+
+**Learn structural CONTENT, not just allocation.** Two memories: donor regions from high-scoring
+molecules (associations, not causal labels), and edit outcomes `(G, Z, G', f(G), f(G'))`. Update
+what gets PROPOSED, not merely which channel receives budget. Reuse the existing archive,
+ProgramValue, credit and operator infrastructure -- verify current behaviour first so components
+are not duplicated, and remember a validated repair behind an opt-in keyword is INERT until a
+caller passes it.
+
+**Allocation targets frontier utility.** `U10 = mean of the top ten scored`; prioritize by
+predicted endpoint value and `delta U10`, using parent-relative change as learning evidence rather
+than the sole objective. Keep explicit exploration and some structurally distinct non-elite
+parents. Track proposal COST separately from oracle utility: an easy generator must not monopolize
+a run by completing reliably, and an expensive one must not hold a fixed share by sounding
+powerful.
+
+No-prescreen only. **1,000 calls is the development horizon, 250 an intermediate diagnostic.**
+Hold initialization FIXED across matched arms. Development set: gsk3b, celecoxib_rediscovery,
+perindopril_mpo, then C7 isomers, Median1, Valsartan SMARTS -- freeze the recipe before the
+remaining tasks, report all 23 with development status clear. **Never scale a 250-call AUC and
+compare it to a 10k result.** Reproduce the official AUC implementation for official comparisons.
+
+Oracle assets: resolve for the oracle's full LIFETIME (not a constructor-only chdir), and before
+any scored rerun run a reference panel that **actually calls** the production oracle in a fresh
+process against pinned values including a nontrivial intermediate -- not merely "an active is
+positive". Keep reference molecules out of initialization, archives and selection.
 
 ## QED and fragments
 
