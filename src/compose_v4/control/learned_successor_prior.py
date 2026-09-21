@@ -68,6 +68,8 @@ Invariants maintained
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Any
@@ -198,14 +200,32 @@ class LearnedSuccessorPrior:
 
     # -- the marked law, cached per source state --
 
+    @staticmethod
+    def _state_identity(source: MolecularGraph) -> str:
+        """A content address for one state, with no objective dependency.
+
+        This is byte-for-byte the computation `control.docking_value.identity`
+        performs, inlined so a chemistry prior never has to import a module that
+        also carries docking and scoring machinery.  Keep the two in step; the
+        test suite asserts this module imports nothing objective-bearing.
+        """
+        from compose_v4.rewrite.trace_shard import encode_state
+
+        return hashlib.sha256(
+            json.dumps(
+                encode_state(source),
+                sort_keys=True,
+                separators=(",", ":"),
+                allow_nan=False,
+            ).encode()
+        ).hexdigest()
+
     def _marked_law(self, source: MolecularGraph):
-        from compose_v4.control.docking_value import identity
         from compose_v4.experiments.production_successor_kernel import (
             enumerate_factorized_marked_law,
         )
-        from compose_v4.rewrite.trace_shard import encode_state
 
-        key = identity(encode_state(source))
+        key = self._state_identity(source)
         cached = self._law_cache.get(key)
         if cached is not None:
             self._law_cache.move_to_end(key)
@@ -419,3 +439,61 @@ class LearnedSuccessorPrior:
             "path_length": len(steps),
             "step_log_likelihoods": tuple(per_step_logs),
         }
+
+
+# ---- Consumption probe ------------------------------------------------------
+
+
+class PriorNotConsumed(BaseException):
+    """The production draw never consulted the prior it was handed.
+
+    Deliberately a ``BaseException`` and NOT a ``ValueError`` / ``RuntimeError``
+    / ``KeyError`` / ``IndexError`` / ``TypeError``: the proposal path catches
+    all five per family and per draw, so any of them would be swallowed by the
+    very code the probe is trying to observe, and the probe would report a pass
+    it never earned.
+    """
+
+
+class _ProbeSignal(BaseException):
+    """Raised from inside a probe prior's ``order`` to prove it was reached."""
+
+
+class _ConsumptionProbePrior:
+    """A stand-in prior that raises the moment the draw site consults it."""
+
+    def order(self, source, rng, *, family, actions):
+        raise _ProbeSignal
+
+    def weights(self, source, *, family, actions):
+        raise _ProbeSignal
+
+    def probability_of(self, source, *, family, actions, action):
+        raise _ProbeSignal
+
+
+def assert_prior_is_consumed(draw, *, attempts: int = 16) -> int:
+    """Prove a caller's own draw closure reaches the prior it was given.
+
+    ``draw`` takes ``(prior, seed)`` and must perform the caller's REAL
+    production draw with that prior.  Returns the 1-based attempt on which the
+    prior was reached.  Seeds are fixed rather than random so the check is
+    reproducible: for a given code state it always passes or always fails, which
+    makes a failure a wiring defect instead of an unlucky draw.
+
+    Bounded attempts are required because the family is chosen before the
+    candidate list, and only some families route through the prior.
+    """
+
+    probe = _ConsumptionProbePrior()
+    for attempt in range(1, int(attempts) + 1):
+        try:
+            draw(probe, attempt)
+        except _ProbeSignal:
+            return attempt
+        except Exception:  # noqa: BLE001,S112 - an ordinary failure just means retry
+            continue
+    raise PriorNotConsumed(
+        f"the production draw did not consult the prior in {attempts} attempts; "
+        "the keyword is almost certainly dropped at one of the call sites"
+    )
