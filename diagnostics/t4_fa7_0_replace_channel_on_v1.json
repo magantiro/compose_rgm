@@ -1,0 +1,23 @@
+{
+ "cell": "fa7_0",
+ "contract": "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+ "deleted_atoms_histogram": {},
+ "delta": 0.6,
+ "docking_calls": 0,
+ "draws": 600,
+ "eligible_count": 0,
+ "eligible_endpoints": [],
+ "eligible_per_executed_module": 0.0,
+ "family": "segment_replace",
+ "inserted_atoms_histogram": {},
+ "module_executed": 0,
+ "module_refused": 600,
+ "oracle_calls": 0,
+ "region_law": "free_gate_margin_v1",
+ "schema_version": "t4_fa7_0_replace_channel_probe_v1",
+ "seconds": 223.4,
+ "seed": 2026091903,
+ "source_heavy_atoms": 32,
+ "support": "compose_valid",
+ "top_element_strings": {}
+}

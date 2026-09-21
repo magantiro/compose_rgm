@@ -1,0 +1,540 @@
+{
+ "cell": "5ht1b_0",
+ "contract": "configs/t4_held_target_distilled_5ht1b_d06_250.json",
+ "delta": 0.6,
+ "delta_eligible_per_draw": 0.03125000000000001,
+ "docking_calls": 0,
+ "off": {
+  "completion_law": null,
+  "completion_law_candidates": null,
+  "completion_law_consumption_attempts": null,
+  "draws": 480,
+  "eligible": 20,
+  "eligible_per_draw": 0.041666666666666664,
+  "endpoints": [
+   {
+    "heavy": 26,
+    "heavy_delta": -13,
+    "pharmacophore_preserved": true,
+    "qed": 0.852285,
+    "sa": 3.8333,
+    "similarity": 0.638889,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccccc1)CC3"
+   },
+   {
+    "heavy": 32,
+    "heavy_delta": -7,
+    "pharmacophore_preserved": true,
+    "qed": 0.685588,
+    "sa": 3.7954,
+    "similarity": 0.675676,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccncc2)cc1)CC3"
+   },
+   {
+    "heavy": 32,
+    "heavy_delta": -7,
+    "pharmacophore_preserved": true,
+    "qed": 0.685588,
+    "sa": 3.7804,
+    "similarity": 0.632911,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccn2)cc1)CC3"
+   },
+   {
+    "heavy": 32,
+    "heavy_delta": -7,
+    "pharmacophore_preserved": true,
+    "qed": 0.682043,
+    "sa": 3.6533,
+    "similarity": 0.671233,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccc2)cc1)CC3"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.665855,
+    "sa": 3.8841,
+    "similarity": 0.723684,
+    "smiles": "Cc1cnccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.65908,
+    "sa": 3.7179,
+    "similarity": 0.649351,
+    "smiles": "Cc1cccc(-c2ccc(C(=O)N3CCc4cc5c(cc43)C3(CC[NH+](C)CC3)CO5)cc2)c1"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.65908,
+    "sa": 3.715,
+    "similarity": 0.739726,
+    "smiles": "Cc1ccccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.642313,
+    "sa": 3.7795,
+    "similarity": 0.671053,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccc2O)cc1)CC3"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.640976,
+    "sa": 3.9402,
+    "similarity": 0.65,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccncc2N)cc1)CC3"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.640405,
+    "sa": 3.9629,
+    "similarity": 0.658228,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccncc2O)cc1)CC3"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.637757,
+    "sa": 3.965,
+    "similarity": 0.641975,
+    "smiles": "CNc1cnccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.636535,
+    "sa": 3.7988,
+    "similarity": 0.653846,
+    "smiles": "CNc1ccccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 35,
+    "heavy_delta": -4,
+    "pharmacophore_preserved": true,
+    "qed": 0.620914,
+    "sa": 3.8485,
+    "similarity": 0.609756,
+    "smiles": "CCc1cc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)ccc1-c1ccccc1C"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.619296,
+    "sa": 3.8128,
+    "similarity": 0.625,
+    "smiles": "Cc1ccccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C=O)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.618503,
+    "sa": 3.9769,
+    "similarity": 0.614458,
+    "smiles": "Cc1cnccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C=O)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.615462,
+    "sa": 3.9953,
+    "similarity": 0.614458,
+    "smiles": "Cc1cnccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](N=O)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.611685,
+    "sa": 3.8313,
+    "similarity": 0.625,
+    "smiles": "Cc1ccccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](N=O)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 36,
+    "heavy_delta": -3,
+    "pharmacophore_preserved": true,
+    "qed": 0.611258,
+    "sa": 3.8271,
+    "similarity": 0.708861,
+    "smiles": "COCc1ccc(-c2ccc(C(=O)N3CCc4cc5c(cc43)C3(CC[NH+](C)CC3)CO5)cc2)c(C)c1"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.602413,
+    "sa": 3.7904,
+    "similarity": 0.662338,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccc2N)cc1)CC3"
+   },
+   {
+    "heavy": 36,
+    "heavy_delta": -3,
+    "pharmacophore_preserved": true,
+    "qed": 0.600007,
+    "sa": 3.8549,
+    "similarity": 0.708861,
+    "smiles": "Cc1cc(CCN)ccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+   }
+  ],
+  "pharmacophore_groups_required": [
+   "carboxamide"
+  ],
+  "pharmacophore_preserved": 20,
+  "region_law": null,
+  "seconds": 618.5,
+  "seed": 2026091906
+ },
+ "on": {
+  "completion_law": "free_gate_margin_v1",
+  "completion_law_candidates": 16,
+  "completion_law_consumption_attempts": 2,
+  "draws": 480,
+  "eligible": 35,
+  "eligible_per_draw": 0.07291666666666667,
+  "endpoints": [
+   {
+    "heavy": 26,
+    "heavy_delta": -13,
+    "pharmacophore_preserved": true,
+    "qed": 0.852285,
+    "sa": 3.8333,
+    "similarity": 0.638889,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccccc1)CC3"
+   },
+   {
+    "heavy": 32,
+    "heavy_delta": -7,
+    "pharmacophore_preserved": true,
+    "qed": 0.685588,
+    "sa": 3.7954,
+    "similarity": 0.675676,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccncc2)cc1)CC3"
+   },
+   {
+    "heavy": 32,
+    "heavy_delta": -7,
+    "pharmacophore_preserved": true,
+    "qed": 0.685588,
+    "sa": 3.7804,
+    "similarity": 0.632911,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccn2)cc1)CC3"
+   },
+   {
+    "heavy": 32,
+    "heavy_delta": -7,
+    "pharmacophore_preserved": true,
+    "qed": 0.682043,
+    "sa": 3.6533,
+    "similarity": 0.671233,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccc2)cc1)CC3"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.665855,
+    "sa": 3.8841,
+    "similarity": 0.723684,
+    "smiles": "Cc1cnccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.665855,
+    "sa": 3.8245,
+    "similarity": 0.666667,
+    "smiles": "Cc1cccc(-c2ccc(C(=O)N3CCc4cc5c(cc43)C3(CC[NH+](C)CC3)CO5)cc2)n1"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.665855,
+    "sa": 3.8596,
+    "similarity": 0.653846,
+    "smiles": "Cc1cc(-c2ccc(C(=O)N3CCc4cc5c(cc43)C3(CC[NH+](C)CC3)CO5)cc2)ccn1"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.665855,
+    "sa": 3.8888,
+    "similarity": 0.625,
+    "smiles": "Cc1ccccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)nc1"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.65908,
+    "sa": 3.7179,
+    "similarity": 0.649351,
+    "smiles": "Cc1cccc(-c2ccc(C(=O)N3CCc4cc5c(cc43)C3(CC[NH+](C)CC3)CO5)cc2)c1"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.65908,
+    "sa": 3.715,
+    "similarity": 0.739726,
+    "smiles": "Cc1ccccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.642313,
+    "sa": 3.7795,
+    "similarity": 0.671053,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccc2O)cc1)CC3"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.642313,
+    "sa": 3.7441,
+    "similarity": 0.671233,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccc(O)cc2)cc1)CC3"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.640976,
+    "sa": 3.9402,
+    "similarity": 0.65,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccncc2N)cc1)CC3"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.640405,
+    "sa": 3.9629,
+    "similarity": 0.658228,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccncc2O)cc1)CC3"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.640405,
+    "sa": 3.9087,
+    "similarity": 0.625,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccc(O)cn2)cc1)CC3"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.639855,
+    "sa": 3.7983,
+    "similarity": 0.6375,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccc2CN)cc1)CC3"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.638601,
+    "sa": 3.7835,
+    "similarity": 0.653846,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccc2CO)cc1)CC3"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.636065,
+    "sa": 3.9709,
+    "similarity": 0.626506,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccncc2CN)cc1)CC3"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.635276,
+    "sa": 3.9466,
+    "similarity": 0.641975,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccncc2CO)cc1)CC3"
+   },
+   {
+    "heavy": 35,
+    "heavy_delta": -4,
+    "pharmacophore_preserved": true,
+    "qed": 0.6345,
+    "sa": 3.7563,
+    "similarity": 0.736842,
+    "smiles": "COc1ccc(-c2ccc(C(=O)N3CCc4cc5c(cc43)C3(CC[NH+](C)CC3)CO5)cc2)c(C)c1"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.633673,
+    "sa": 3.7617,
+    "similarity": 0.777778,
+    "smiles": "Cc1ccc(-c2ccc(C(=O)N3CCc4cc5c(cc43)C3(CC[NH+](C)CC3)CO5)cc2)c(C)c1"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.621951,
+    "sa": 3.8364,
+    "similarity": 0.767123,
+    "smiles": "Cc1cc(O)ccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 35,
+    "heavy_delta": -4,
+    "pharmacophore_preserved": true,
+    "qed": 0.620914,
+    "sa": 3.7953,
+    "similarity": 0.736842,
+    "smiles": "CCc1ccc(-c2ccc(C(=O)N3CCc4cc5c(cc43)C3(CC[NH+](C)CC3)CO5)cc2)c(C)c1"
+   },
+   {
+    "heavy": 35,
+    "heavy_delta": -4,
+    "pharmacophore_preserved": true,
+    "qed": 0.62045,
+    "sa": 3.8441,
+    "similarity": 0.727273,
+    "smiles": "Cc1cc(CN)ccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.619439,
+    "sa": 3.844,
+    "similarity": 0.653846,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccc2C=O)cc1)CC3"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.619296,
+    "sa": 3.8128,
+    "similarity": 0.625,
+    "smiles": "Cc1ccccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C=O)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 35,
+    "heavy_delta": -4,
+    "pharmacophore_preserved": true,
+    "qed": 0.619085,
+    "sa": 3.833,
+    "similarity": 0.746667,
+    "smiles": "Cc1cc(CO)ccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.618503,
+    "sa": 3.9769,
+    "similarity": 0.614458,
+    "smiles": "Cc1cnccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](C=O)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.615462,
+    "sa": 3.9953,
+    "similarity": 0.614458,
+    "smiles": "Cc1cnccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](N=O)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 35,
+    "heavy_delta": -4,
+    "pharmacophore_preserved": true,
+    "qed": 0.614024,
+    "sa": 3.8533,
+    "similarity": 0.736842,
+    "smiles": "CNc1ccc(-c2ccc(C(=O)N3CCc4cc5c(cc43)C3(CC[NH+](C)CC3)CO5)cc2)c(C)c1"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.611685,
+    "sa": 3.8313,
+    "similarity": 0.625,
+    "smiles": "Cc1ccccc1-c1ccc(C(=O)N2CCc3cc4c(cc32)C2(CC[NH+](N=O)CC2)CO4)cc1"
+   },
+   {
+    "heavy": 34,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": true,
+    "qed": 0.610985,
+    "sa": 3.9585,
+    "similarity": 0.64557,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccc2N=O)cc1)CC3"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.602413,
+    "sa": 3.7904,
+    "similarity": 0.662338,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccccc2N)cc1)CC3"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.602413,
+    "sa": 3.7907,
+    "similarity": 0.620253,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2cccc(N)c2)cc1)CC3"
+   },
+   {
+    "heavy": 33,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": true,
+    "qed": 0.602413,
+    "sa": 3.7603,
+    "similarity": 0.662162,
+    "smiles": "C[NH+]1CCC2(CC1)COc1cc3c(cc12)N(C(=O)c1ccc(-c2ccc(N)cc2)cc1)CC3"
+   }
+  ],
+  "pharmacophore_groups_required": [
+   "carboxamide"
+  ],
+  "pharmacophore_preserved": 35,
+  "region_law": null,
+  "seconds": 657.1,
+  "seed": 2026091906
+ },
+ "oracle_calls": 0,
+ "schema_version": "t4_fa7_0_completion_gate_v1",
+ "source_smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)[C@]4(CC[N@H+](C)CC4)CO6)cc3)c(C)c2)no1",
+ "support": "compose_valid"
+}

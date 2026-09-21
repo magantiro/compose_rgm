@@ -1,0 +1,50 @@
+{
+ "cell": "fa7_0",
+ "contract": "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+ "deleted_atoms_histogram": {
+  "1": 1082,
+  "3": 443,
+  "4": 239,
+  "5": 236
+ },
+ "delta": 0.6,
+ "docking_calls": 0,
+ "draws": 2000,
+ "eligible_count": 0,
+ "eligible_endpoints": [],
+ "eligible_per_executed_module": 0.0,
+ "family": "segment_replace",
+ "inserted_atoms_histogram": {
+  "1": 254,
+  "2": 249,
+  "3": 246,
+  "4": 237,
+  "5": 239,
+  "6": 276,
+  "7": 239,
+  "8": 260
+ },
+ "module_executed": 2000,
+ "module_refused": 0,
+ "oracle_calls": 0,
+ "region_law": null,
+ "schema_version": "t4_fa7_0_replace_channel_probe_v1",
+ "seconds": 171.7,
+ "seed": 2026091903,
+ "source_heavy_atoms": 32,
+ "support": "compose_valid",
+ "top_element_strings": {
+  "C": 78,
+  "CC": 26,
+  "CN": 33,
+  "CO": 25,
+  "N": 99,
+  "NC": 27,
+  "NN": 29,
+  "NO": 27,
+  "O": 77,
+  "OC": 22,
+  "ON": 28,
+  "OO": 32
+ }
+}

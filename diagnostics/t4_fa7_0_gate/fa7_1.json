@@ -1,0 +1,227 @@
+{
+ "cell": "fa7_1",
+ "contract": "configs/t4_held_target_distilled_fa7_d06_250.json",
+ "delta": 0.6,
+ "delta_eligible_per_draw": 0.0125,
+ "docking_calls": 0,
+ "off": {
+  "completion_law": null,
+  "completion_law_candidates": null,
+  "completion_law_consumption_attempts": null,
+  "draws": 480,
+  "eligible": 7,
+  "eligible_per_draw": 0.014583333333333334,
+  "endpoints": [
+   {
+    "heavy": 23,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": false,
+    "qed": 0.768025,
+    "sa": 3.0445,
+    "similarity": 0.65625,
+    "smiles": "CC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   },
+   {
+    "heavy": 22,
+    "heavy_delta": -7,
+    "pharmacophore_preserved": false,
+    "qed": 0.763846,
+    "sa": 2.7368,
+    "similarity": 0.6,
+    "smiles": "NC(Cc1ccccc1)C(=O)N1CCCC1C(=O)NCCCl"
+   },
+   {
+    "heavy": 24,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": false,
+    "qed": 0.733784,
+    "sa": 3.1163,
+    "similarity": 0.714286,
+    "smiles": "CCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   },
+   {
+    "heavy": 25,
+    "heavy_delta": -4,
+    "pharmacophore_preserved": false,
+    "qed": 0.692323,
+    "sa": 3.1356,
+    "similarity": 0.746032,
+    "smiles": "CCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   },
+   {
+    "heavy": 26,
+    "heavy_delta": -3,
+    "pharmacophore_preserved": false,
+    "qed": 0.646955,
+    "sa": 3.1496,
+    "similarity": 0.777778,
+    "smiles": "CCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   },
+   {
+    "heavy": 24,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": false,
+    "qed": 0.612766,
+    "sa": 3.1537,
+    "similarity": 0.725806,
+    "smiles": "NC(Cc1ccccc1)C(=O)N1CCCC1C(=O)NC(CO)CCl"
+   },
+   {
+    "heavy": 24,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": false,
+    "qed": 0.611232,
+    "sa": 3.1931,
+    "similarity": 0.737705,
+    "smiles": "NCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   }
+  ],
+  "pharmacophore_groups_required": [
+   "amidine",
+   "carboxamide"
+  ],
+  "pharmacophore_preserved": 0,
+  "region_law": null,
+  "seconds": 324.3,
+  "seed": 2026091904
+ },
+ "on": {
+  "completion_law": "free_gate_margin_v1",
+  "completion_law_candidates": 16,
+  "completion_law_consumption_attempts": 1,
+  "draws": 480,
+  "eligible": 13,
+  "eligible_per_draw": 0.027083333333333334,
+  "endpoints": [
+   {
+    "heavy": 24,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": false,
+    "qed": 0.800518,
+    "sa": 2.7576,
+    "similarity": 0.650794,
+    "smiles": "CCC(CC)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   },
+   {
+    "heavy": 23,
+    "heavy_delta": -6,
+    "pharmacophore_preserved": false,
+    "qed": 0.768025,
+    "sa": 3.0445,
+    "similarity": 0.65625,
+    "smiles": "CC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   },
+   {
+    "heavy": 22,
+    "heavy_delta": -7,
+    "pharmacophore_preserved": false,
+    "qed": 0.763846,
+    "sa": 2.7368,
+    "similarity": 0.6,
+    "smiles": "NC(Cc1ccccc1)C(=O)N1CCCC1C(=O)NCCCl"
+   },
+   {
+    "heavy": 24,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": false,
+    "qed": 0.733784,
+    "sa": 3.1163,
+    "similarity": 0.714286,
+    "smiles": "CCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   },
+   {
+    "heavy": 26,
+    "heavy_delta": -3,
+    "pharmacophore_preserved": false,
+    "qed": 0.714085,
+    "sa": 3.2546,
+    "similarity": 0.636364,
+    "smiles": "NC(Cc1ccccc1)C(=O)N1CCCC1C(=O)NC(CCl)C1CCC1"
+   },
+   {
+    "heavy": 25,
+    "heavy_delta": -4,
+    "pharmacophore_preserved": false,
+    "qed": 0.692323,
+    "sa": 3.1356,
+    "similarity": 0.746032,
+    "smiles": "CCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   },
+   {
+    "heavy": 24,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": false,
+    "qed": 0.674348,
+    "sa": 2.9788,
+    "similarity": 0.621212,
+    "smiles": "CCC(CO)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   },
+   {
+    "heavy": 24,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": false,
+    "qed": 0.672533,
+    "sa": 3.0436,
+    "similarity": 0.621212,
+    "smiles": "CCC(CN)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   },
+   {
+    "heavy": 27,
+    "heavy_delta": -2,
+    "pharmacophore_preserved": false,
+    "qed": 0.668186,
+    "sa": 3.2413,
+    "similarity": 0.692308,
+    "smiles": "NC(Cc1ccccc1)C(=O)N1CCCC1C(=O)NC(CCl)CC1CCC1"
+   },
+   {
+    "heavy": 26,
+    "heavy_delta": -3,
+    "pharmacophore_preserved": false,
+    "qed": 0.646955,
+    "sa": 3.1496,
+    "similarity": 0.777778,
+    "smiles": "CCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   },
+   {
+    "heavy": 26,
+    "heavy_delta": -3,
+    "pharmacophore_preserved": false,
+    "qed": 0.631438,
+    "sa": 3.2303,
+    "similarity": 0.661765,
+    "smiles": "CCOCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   },
+   {
+    "heavy": 24,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": false,
+    "qed": 0.612766,
+    "sa": 3.1537,
+    "similarity": 0.725806,
+    "smiles": "NC(Cc1ccccc1)C(=O)N1CCCC1C(=O)NC(CO)CCl"
+   },
+   {
+    "heavy": 24,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": false,
+    "qed": 0.611232,
+    "sa": 3.1931,
+    "similarity": 0.737705,
+    "smiles": "NCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+   }
+  ],
+  "pharmacophore_groups_required": [
+   "amidine",
+   "carboxamide"
+  ],
+  "pharmacophore_preserved": 0,
+  "region_law": null,
+  "seconds": 378.5,
+  "seed": 2026091904
+ },
+ "oracle_calls": 0,
+ "schema_version": "t4_fa7_0_completion_gate_v1",
+ "source_smiles": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+ "support": "compose_valid"
+}
