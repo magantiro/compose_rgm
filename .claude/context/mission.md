@@ -15,6 +15,43 @@ objective performance -> keep, revise, or discard. "Infrastructure works" and "s
 improved" are not success while optimization is weak. One bad early score is not a reason
 to redesign a working algorithm.
 
+## Measurable progress overrides activity
+
+The primary outputs are exactly two:
+
+1. a complete, correctly reconciled T4 table at delta=0.6 and delta=0.4;
+2. increasingly competitive **scored** PMO results.
+
+Agents spawned, diagnostics written, tests passed, commits made and hypotheses developed
+are **not** progress toward those outputs. Do not report them as if they were.
+
+**T4 -- patience with healthy computation, impatience with blocked cells.** Keep every healthy
+cell running and use authorized Modal capacity aggressively to cut wall clock; never interrupt a
+good run merely because it is incomplete. Track per cell: charged calls / budget, best score, IVG
+gap, and state = healthy / exhausted / rescue / complete. Finish the pruning-capable rescue gate
+and move straight into scored rescue runs when it passes. Add no new T4 mechanism work unless an
+existing rescue fails or a live cell reveals a new blocker. **Seed-only rows are not generated
+COMPOSE successes.** The target is all 15 cells resolved at both thresholds, not further polishing
+of cells already winning.
+
+**PMO -- impatience with further unscored analysis.** Shift from diagnosis to scored iteration.
+Corrected GSK3B v1 must reach a real scored 250-call run, and it must NOT block v2. The
+attachment/realization repair must reach a matched scored 250-call v2 experiment on
+Perindopril/Celecoxib, plus GSK3B once its oracle is ready. Do not run another broad diagnostic
+cycle before scoring the strongest currently justified controller revision. After each scored
+version decide: promote to 1k, revise on trajectory evidence, or reject. Hierarchical credit, new
+priors and additional machinery enter only when measured trajectories justify them.
+
+**Scoreboard.** Maintain a compact progress scoreboard updated from authoritative artifacts --
+round locks for T4, ledgers for PMO. T4: completed cells, active calls, rescue status,
+searched-cell W/T/L. PMO: controller version, task, calls, best score, AUC/top-k, and delta versus
+the previous matched version.
+
+Orient parallelism toward shortening the path to these outputs. Once an experiment is validated
+enough to answer its question, **run it**. Avoid low-value housekeeping, repeated audits and
+infrastructure that does not unblock a scored experiment. Be principled, but bias toward execution
+whenever a bounded experiment can resolve the uncertainty.
+
 ## Architecture to preserve
 
     state + constraints -> structural/dependency-region program policy
