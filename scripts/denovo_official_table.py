@@ -47,7 +47,7 @@ def _pct(value: float) -> str:
     return f"{100.0 * float(value):.1f}"
 
 
-def render(by_horizon: dict[float, list[dict]]) -> str:
+def render(by_horizon: dict[float, list[dict]], corpus: dict | None = None) -> str:
     lines: list[str] = []
     lines.append("=" * 78)
     lines.append("COMPOSE unconditional de-novo generation")
@@ -59,18 +59,24 @@ def render(by_horizon: dict[float, list[dict]]) -> str:
         lines.append(f"-- operational_horizon = {horizon} ({len(entries)} seed(s)) --")
         lines.append(
             f"{'seed':>10} {'valid%':>8} {'uniq%':>8} {'qual%':>8} "
-            f"{'qual|VU%':>9} {'divers':>8} {'heavy':>7} {'events':>7}"
+            f"{'divers':>8} {'QEDpass%':>9} {'SApass%':>8} "
+            f"{'mQED':>6} {'mSA':>6} {'heavy':>6} {'3/4ring%':>9}"
         )
         for entry in entries:
+            census = entry.get("strained_ring_census") or {}
+            strained = census.get("fraction_with_strained_ring")
             lines.append(
                 f"{int(entry['seed']):>10} "
                 f"{_pct(entry['validity']):>8} "
                 f"{_pct(entry['uniqueness']):>8} "
                 f"{_pct(entry['quality']):>8} "
-                f"{_pct(entry['quality_given_valid_unique']):>9} "
                 f"{float(entry['diversity']):>8.3f} "
-                f"{float(entry['mean_heavy_atoms']):>7.1f} "
-                f"{float(entry['mean_events']):>7.1f}"
+                f"{_pct(entry['fraction_unique_passing_qed']):>9} "
+                f"{_pct(entry['fraction_unique_passing_sa']):>8} "
+                f"{float(entry['mean_qed']):>6.3f} "
+                f"{float(entry['mean_sa']):>6.2f} "
+                f"{float(entry['mean_heavy_atoms']):>6.1f} "
+                f"{('-' if strained is None else _pct(strained)):>9}"
             )
         summary = aggregate_seed_metrics(entries)
         std = summary.get("quality_std")
@@ -80,9 +86,34 @@ def render(by_horizon: dict[float, list[dict]]) -> str:
             f"{_pct(summary['validity_mean']):>8} "
             f"{_pct(summary['uniqueness_mean']):>8} "
             f"{_pct(summary['quality_mean']):>8} "
-            f"{_pct(summary['quality_given_valid_unique_mean']):>9} "
             f"{float(summary['diversity_mean']):>8.3f}"
-            f"{spread}"
+            f"   (quality {spread.strip() or 'n/a'})"
+        )
+
+    if corpus:
+        lines.append("")
+        lines.append("-- CORPUS CEILING: GuacaMol scored on this same metric (measured here) --")
+        lines.append(
+            f"{'source':>18} {'valid%':>8} {'uniq%':>8} {'qual%':>8} "
+            f"{'divers':>8} {'QEDpass%':>9} {'SApass%':>8} {'mQED':>6} {'mSA':>6}"
+        )
+        for name, row in corpus.items():
+            lines.append(
+                f"{name:>18} "
+                f"{_pct(row['validity']):>8} "
+                f"{_pct(row['uniqueness']):>8} "
+                f"{_pct(row['quality']):>8} "
+                f"{float(row['diversity']):>8.3f} "
+                f"{_pct(row['fraction_unique_passing_qed']):>9} "
+                f"{_pct(row['fraction_unique_passing_sa']):>8} "
+                f"{float(row['mean_qed']):>6.3f} "
+                f"{float(row['mean_sa']):>6.2f}"
+            )
+        lines.append(
+            "    (a corpus-faithful generator scores ~42% quality, not ~90%:"
+        )
+        lines.append(
+            "     the published systems are trained on far more QED-favorable data)"
         )
 
     lines.append("")
@@ -118,17 +149,21 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("report_dir", type=Path)
     parser.add_argument("--json", type=Path, default=None)
+    parser.add_argument("--corpus", type=Path, default=None,
+                        help="corpus_reference_v1.json, for the corpus ceiling block")
     args = parser.parse_args()
 
     by_horizon = load_reports(args.report_dir)
     if not by_horizon:
         raise SystemExit(f"no seed*.json reports under {args.report_dir}")
 
-    print(render(by_horizon))
+    corpus = json.loads(args.corpus.read_text()) if args.corpus else None
+    print(render(by_horizon, corpus))
 
     if args.json is not None:
         payload = {
             "published_reference": PUBLISHED,
+            "corpus_reference": corpus,
             "horizons": {
                 str(horizon): {
                     "per_seed": entries,
