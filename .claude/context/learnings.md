@@ -2724,3 +2724,77 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   search reconstructed a reported endpoint -- so the corpus rule mix is partly a property of that
   compiler. Yield is unaffected, but **no claim that the prior learned chemistry rather than
   route-compiler habit is supported**, and 15 source molecules carry every leave-source-out number.
+
+## 2026-09-21 (resuming a scored run: four ways a resume is not a resume)
+
+- **A flag accepted by `__init__` but NOT by `restore()` makes the fresh path work and the
+  RESUME path raise, and nothing notices until you resume.** `run_program_campaign` passes
+  `optimizer_kwargs` to BOTH the constructor and the `restore` classmethod, so
+  `PmoPopulationController.restore()` died with `TypeError: unexpected keyword argument
+  'enable_online_memory'` on the first 1k extension -- after the ledger had already been
+  widened, before a single call was charged. The 250-call runs never exercised it because
+  each lived in one container. Worse than the crash: had `restore` silently accepted and
+  dropped it, a resumed arm B would have rebuilt as arm A. The guard test asserts both
+  signatures carry the same arm parameters, so a future flag cannot repeat it.
+- **An extension that archives-then-unlinks is NOT IDEMPOTENT, so its own failed attempt
+  reads as a forbidden retry.** The extension path archives `result.json` to
+  `result_at_<N>_calls.json` and removes it BEFORE the run starts. The attempt that died on
+  the TypeError therefore left a folder with no result at all, and the guard -- keyed on
+  `result.json` -- refused to resume the very state it had created. Fix: the ARCHIVE is
+  strictly stronger evidence than `result.json`, because it proves the prior run completed
+  AND that this extension has run before. Gate resuming from it on the prior attempt having
+  TERMINATED (`started.json` AND `failure.json`); `started` without `failure` means a
+  container may still be live and must be refused, not resolved. Cross-check the archive's
+  name against the charged-call count inside it -- two records of one number.
+- **In-process state that was never serialised cannot be "restored" -- but it can often be
+  RECONSTRUCTED, and the distinction must be stated.** Arm B's online memory accumulated
+  across 250 calls inside one container; persistence landed afterwards, so its snapshot
+  carried no `online_memory` key (verified by reading the real snapshot, not inferred). A
+  plain resume would have restarted it COLD, quietly turning a 1000-call memory experiment
+  into a 250-call one followed by a reset, with nothing in the artifact to show it. It was
+  recoverable because EVERY quantity the memory holds is a sum or a bounded max over counted
+  observations, all durable in the archive -- only the audit ordinal on donor rows depends on
+  arrival order. Replaying them through the SAME production observation path reconstructed it
+  (234/234 entries, 0 attribution failures, ordinal 234 -> 250 by the first resumed round).
+  **Byte-equality with the live object is unavailable and must not be claimed.**
+  GOTCHA: `observations` is keyed by RECEIPT id and `entries` by its own key -- key overlap
+  is ZERO -- so the join is on ENDPOINT. A join on the key reconstructs nothing, which is why
+  the reconstruction REFUSES rather than resuming empty when it replays 0 of N.
+- **A revision boundary is MEASURABLE, not a matter of argument.** Restore one real
+  production snapshot under each revision and compare every leaf of the re-emitted state:
+  **2 differing leaves of 218,869** for arm A, both new bookkeeping keys carrying `None`.
+  Entries, observations, population state, credit, pool continuity and all three RNG streams
+  identical. That is what licenses saying "proposal semantics unchanged"; a diff of the source
+  would not have, because it cannot show what the code actually reads.
+- **A REDEPLOY REBAKES THE CONTRACTS AN IN-FLIGHT RUN IS BOUND TO.**
+  `add_local_file(..., copy=True)` fixes the contract at IMAGE BUILD time, and the worker
+  refuses any payload its baked contract does not match. So a second fix that moves the
+  contract hashes cannot be deployed while a scored run is live without risking that run on
+  its next preemption retry. Park the second fix; record which payload each running arm is
+  actually bound to rather than re-pinning the repo to match a running job.
+- **`modal volume ls <vol> <subpath>` SILENTLY RETURNS THE PARENT LISTING** for a valid
+  subdirectory, and `<subpath>/` returns "No such file or directory" for a directory that
+  exists. Both readings are wrong and neither errors usefully. Use the Python API
+  (`modal.Volume.from_name(...).listdir(path)`), which is exact. Companion to the 2026-09-20
+  `modal volume get` collapse gotcha. Also: `Volume.reload()` raises
+  `reload() can only be called from within a running function` -- it is not available locally.
+
+## 2026-09-21 (a blank T4 cell had a molecule; the driver was waiting for a human)
+
+- **"No molecule" in the combined table can mean "the rescue arm holding the molecule is not
+  merged yet", not "nothing was found".** `5ht1b_s8_d0.6` read as blank while its live
+  protonation-rescue arm already held **best -10.8 at 88 charged calls** against GenMol's
+  -10.50 -- a WIN sitting unmerged. Read each rescue arm's OWN status before calling a cell
+  blank; the panel table and the rescue volumes are different artifacts.
+- **`state: "terminal"` in `driver_state.json` is not a failure and not a stall -- it is the
+  fail-closed driver WAITING FOR A HUMAN**, and it burns nothing while it waits. The d06 arm
+  sat terminal at 88 of its own authorized 248 calls, i.e. 160 calls of an ALREADY-GRANTED
+  authorization unspent, and the stall watchdog reported the sibling d04 cell instead. Check
+  `driver_state.json` per arm; a watchdog keyed on lock mtime does not see this state.
+- **Confirm "the prior call is terminal" by GETTING the call, never by inferring it from a
+  zero task count.** `modal.FunctionCall.from_id(cid).get(timeout=0)` raised
+  `continuation remained reserved; fail closed without running a phase` -- that RAISE is the
+  evidence `--confirm-prior-call-terminal` asserts. A listing showing `tasks=0` is not
+  evidence; the same listing misled a phantom-run diagnosis the day before.
+- The advance is `modal run --detach <app> --mode advance --run-id <id>
+  --confirm-prior-call-terminal`, and `--detach` is mandatory because `main()` uses `.spawn()`.
