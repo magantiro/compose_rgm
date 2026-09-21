@@ -76,11 +76,17 @@ def run(contract: Path, *, cell_name: str, family: str, draws: int, law_on: bool
     started = time.time()
     for _ in range(draws):
         try:
-            state, _, detail = compile_generic_module(source, rng, family, region_law=law)[:3]
+            state, meta = compile_generic_module(source, rng, family, region_law=law)
         except (ValueError, RuntimeError, KeyError, IndexError, TypeError):
             refused += 1
             continue
         executed += 1
+        # `compile_generic_module` returns (state, meta); the module's own draw is
+        # recorded under meta["parameters"]. Unpacking this wrongly is silent under
+        # the broad except above, so the shape is asserted rather than assumed.
+        if not isinstance(meta, dict) or "parameters" not in meta:
+            raise ValueError(f"unexpected module meta shape: {type(meta)}")
+        detail = meta["parameters"]
         if isinstance(detail, dict):
             if "inserted_atoms" in detail:
                 inserted_hist[int(detail["inserted_atoms"])] += 1
