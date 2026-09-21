@@ -1,0 +1,20 @@
+{
+  "already_authorized": "The 250-call A/B authorization covers this arm's full 250; resuming spends only what it already authorized.",
+  "arm": "A_baseline",
+  "blocked_on": "resume_in_place is committed but NOT deployed. Deploying now would rebake the contracts the in-flight celecoxib 1k arms are bound to.",
+  "consequence_if_not_resumed": "B/perindopril completed 250/250 (top10 0.4509, AUC 0.3075); A stopped at 48. The perindopril row is UNMATCHED and cannot be compared until A finishes.",
+  "diagnosis": "The container died (preemption) and Modal re-invoked run_task with the same input; the started-guard correctly refused the second attempt, so the arm stopped at round 2. It is not slow -- it is dead.",
+  "ledger_state": {
+    "ambiguous_half_charged_queries": 0,
+    "budget": 250,
+    "charged_queries": 48,
+    "remaining": 202
+  },
+  "recorded_at_utc": "2026-09-21T16:27:07.629852+00:00",
+  "run_id": "21136cba1aa552680cb1c7e24834534856fc564a078c8aa5d07f928950343a50",
+  "schema_version": "pmo_ab_parked_recovery_v1",
+  "status": "PARKED_PENDING_CELECOXIB_1K",
+  "task": "perindopril_mpo",
+  "terminal_call_id": "fc-01M31KJ4DSZSS82JAPVBBZG7V5",
+  "terminal_error": "RuntimeError: task already started or completed; retries/backfill forbidden"
+}

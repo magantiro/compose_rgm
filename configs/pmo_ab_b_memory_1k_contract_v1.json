@@ -20,7 +20,7 @@
       "queries_per_round": 16
     },
     "controller_contract": "configs/pmo_population_controller_v1.json",
-    "controller_contract_sha256": "12af12d80845b0dd456e44bbf8a3ecb9445551dbc308ef9773ff612b0a97cfc7",
+    "controller_contract_sha256": "ef27a829f39d54f37766299e4ba20048fb2909331631a40b9a0e39d3894e6381",
     "corrected_source_capsule_manifest": "diagnostics/pmo_population_controller_v1/source_capsule_manifest_v2.json",
     "corrected_worker_app": "compose-pmo-population-v1-corrected",
     "corrected_worker_path": "modal_apps/pmo_population_v1_app.py",
@@ -38,7 +38,7 @@
       }
     },
     "implementation_sha256": {
-      "modal_apps/pmo_population_v1_app.py": "f97e1e235804ddf5834ec76d7e24b951beee3968c13d8590ba93ea4a65e0242b",
+      "modal_apps/pmo_population_v1_app.py": "45cc1aecd334ce14bfcdac5fadc2749b2bbde65d1fcfc013a66a0fa66bc45c3b",
       "src/compose_v4/control/adaptive_program_optimizer.py": "1f1937ca6035f2797235878925a515aff543089d044a8c06cd6197aea6a64a23",
       "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",
       "src/compose_v4/control/edit_learning_data.py": "b0e71fdbd54c39727765edfe36253c0588b9882ecf8a52f6b65b7c590d711f71",
@@ -100,5 +100,5 @@
       "celecoxib_rediscovery"
     ]
   },
-  "payload_sha256": "5cd54226b8e471387e86b007675c7bc8fcad754972b682aa4a92246d4f4534cd"
+  "payload_sha256": "2ef68974a80b69bf6a0ae8a5022d132ea9ad7df42c16264428f0f8f42b79b9f9"
 }

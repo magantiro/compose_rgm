@@ -232,6 +232,48 @@ def run_task(spec: dict) -> dict:
             (folder / f"failure_attempt_{index}.json").write_text(failure_path.read_text())
             failure_path.unlink()
         volume.commit()
+    elif spec.get("resume_in_place"):
+        # A RESUME is neither a retry nor an extension. A retry re-runs a task from
+        # scratch and could double-charge; an extension raises an authorized budget.
+        # This continues a run whose container DIED mid-flight, at its own unchanged
+        # budget, so it spends only what that budget already authorized and never
+        # re-spends a charged call -- the ledger restores its own rows and refuses an
+        # ambiguous half-charged query outright.
+        if result_path.exists():
+            raise RuntimeError(
+                "task is COMPLETE; raising its budget is `extend_to_budget`, not a resume"
+            )
+        if not started.exists():
+            raise RuntimeError("resume_in_place requires a run that started; this one did not")
+        # The folder guard exists to stop two containers racing on one ledger, so the
+        # dead call has to be NAMED. The launcher proves it is terminal before
+        # spawning; recording the id here makes that claim part of the artifact
+        # rather than something only the operator remembers.
+        terminal_call = spec.get("resume_after_terminal_call_id")
+        if not terminal_call:
+            raise RuntimeError(
+                "resume_in_place must name the terminal call it resumes after, so a "
+                "second container can never be started against a live one"
+            )
+        failure_path = folder / "failure.json"
+        index = len(list(folder.glob("resume_*.json")))
+        (folder / f"resume_{index}.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "pmo_population_task_resume_v1",
+                    "resumed_after_terminal_call_id": terminal_call,
+                    "prior_failure": (
+                        json.loads(failure_path.read_text()) if failure_path.exists() else None
+                    ),
+                    "prior_started": json.loads(started.read_text()),
+                },
+                sort_keys=True,
+            )
+        )
+        started.unlink()
+        if failure_path.exists():
+            failure_path.unlink()
+        volume.commit()
     elif result_path.exists() or started.exists():
         raise RuntimeError("task already started or completed; retries/backfill forbidden")
 

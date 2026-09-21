@@ -1,0 +1,54 @@
+{
+  "arm_a_state_identity": {
+    "differing": {
+      "/pmo_population/online_memory": "absent in X, None in Y",
+      "/pmo_population/online_memory_reconstruction": "absent in X, None in Y"
+    },
+    "interpretation": "Both are new bookkeeping keys carrying None for the arm with no memory. Entries, observations, population_state, credit, pool_continuity and all three RNG streams are identical, and arm A's proposal path reads neither key, so its next batch cannot differ.",
+    "leaves_compared": 218869,
+    "leaves_differing": 2,
+    "method": "restore one real production snapshot under each revision and compare every leaf of the re-emitted snapshot; zero oracle calls",
+    "snapshots": [
+      "A/perindopril round_0001",
+      "A/celecoxib round_0014"
+    ]
+  },
+  "arm_b_memory": {
+    "byte_equality_with_live_memory_claimed": false,
+    "measured_in_container": {
+      "attribution_failures": 0,
+      "entries": 234,
+      "memory_at_first_resumed_round": {
+        "donor_rows": 5016,
+        "edit_rows": 248,
+        "frontier": 250,
+        "ordinal": 250
+      },
+      "replayed": 234,
+      "skipped_unscored": 0
+    },
+    "problem": "The 250-call run lived in one container, so arm B's memory was never serialised. A plain resume would restart it COLD -- a 1000-call memory experiment silently becoming a 250-call one followed by a reset.",
+    "resolution": "restore() replays the archived counted observations through the same observation path the live run used",
+    "why_not": "The live memory was never serialised, so byte-equality is unavailable. Only the audit ordinal stamped on donor rows depends on arrival order; every learned quantity is a sum or bounded max over the observations, so the replay reproduces the learned state."
+  },
+  "calls_regenerated_or_rescored": 0,
+  "prior_results_preserved_at": "result_at_250_calls.json on each run folder",
+  "proposal_semantics_changed": false,
+  "question": "Calls 251-1000 run under a different code revision than calls 1-250. Does that revision change what either arm proposes?",
+  "recorded_at_utc": "2026-09-21T16:26:05.473257+00:00",
+  "revision_x": {
+    "commit": "fc1c95eb4b459b145d924407ff5ccf40c6d9c6ee",
+    "covers": "charged calls 1-250, both arms, all three tasks"
+  },
+  "revision_y": {
+    "covers": "charged calls 251-1000 (celecoxib), and 49-250 for the resumed A/perindopril"
+  },
+  "schema_version": "pmo_ab_revision_boundary_v1",
+  "what_changed": [
+    "restore() accepts the arm flag and forwards it to the constructor (the resume path was simply broken before: it raised TypeError)",
+    "the extension guard resumes from its own archive instead of reading its half-finished state as a forbidden retry",
+    "the query ledger records a budget INCREASE in budget_history instead of refusing any budget change",
+    "the online memory gained payload()/restore_payload(), and restore() reconstructs it from archived observations when the snapshot predates persistence",
+    "an explicit resume_in_place path for a run whose container died mid-flight"
+  ]
+}

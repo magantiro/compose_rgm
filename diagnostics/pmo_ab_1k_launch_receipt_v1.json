@@ -1,10 +1,19 @@
 {
   "A_baseline_1k": {
-    "call_id": "fc-01M32AFRS0YQVJS5H27DD86TYZ",
+    "call_id": "fc-01M32C2153GB2M8MBW2HVDAWM2",
+    "payload_sha256": "97a8a8106fa33fcc0bb95800fdd3ce68243f58106600f582106bc4627d1caba6",
     "run_id": "8d02a667384b248fed0a5fbb432a93714cc2a3a127ffdc05a4153f37ac3f89a0"
   },
   "B_memory_1k": {
-    "call_id": "fc-01M32AFRVXRQ8J0W9DN44QY81X",
+    "call_id": "fc-01M32C217E8P0H9FCKRSNSYDDJ",
+    "payload_sha256": "5cd54226b8e471387e86b007675c7bc8fcad754972b682aa4a92246d4f4534cd",
     "run_id": "37bb856e15309543795e14cdccf44d1b672e957cb9af1e902af08d630f3e241b"
-  }
+  },
+  "deployed_payloads_in_flight": {
+    "A_baseline_1k": "97a8a8106fa33fcc",
+    "B_memory_1k": "5cd54226b8e47138",
+    "note": "These are the payload hashes the RUNNING containers are bound to, baked into the image deployed at spawn time. The repo's 1k contracts have since moved (resume_in_place was added for the parked perindopril recovery), so the files on disk no longer hash to these. Recorded rather than re-pinned: re-pinning to match a running job would be a fiction in the other direction.",
+    "redeploy_blocked_until": "celecoxib 1k completes -- a redeploy could strand these arms on a preemption retry, and that would cost the primary result"
+  },
+  "spawned_at_utc": "2026-09-21T16:16:19.220884+00:00"
 }
