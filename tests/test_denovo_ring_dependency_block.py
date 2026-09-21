@@ -278,6 +278,69 @@ def test_a_deferred_ring_system_still_reaches_the_exact_target(smiles: str) -> N
     assert _rule_names(block)[-1] == "ring_system_grow"
 
 
+# Real training molecules on which committing a ring system early invalidates a
+# LATER graft that touches one of its atoms.  Found by compiling a 150-molecule
+# random draw of the train partition under both schedules; without the
+# trace-level fallback these three compiled under ``sequential`` and raised
+# under the block, which would have silently shrunk the corpus by ~2%.
+_FALLBACK_MOLECULES = (
+    ("c1ccc(-c2ccc3[nH]c(-c4ccc5nc(-c6ccccc6)[nH]c5c4)nc3c2)cc1", 20_283_871),
+    ("CC1(C)CC(=O)C(=NNc2cccnc2)C(=O)C1", 20_287_352),
+    ("Cc1cc(C2CC(CO)CN2C)on1", 20_291_145),
+)
+
+
+def _production_pair(smiles: str, seed: int):
+    """Reproduce the trainer's own 40-slot source draw for one molecule."""
+
+    target = pad_molecular_graph(smiles_to_molecular_graph(smiles), 40)
+    source = DegreeBoundedCarbonTreePrior(
+        sizes=(target.n_real_atoms,),
+    ).sample(np.random.default_rng(seed), n_slots=40)
+    return source, target
+
+
+@pytest.mark.parametrize(("smiles", "seed"), _FALLBACK_MOLECULES)
+def test_a_molecule_the_block_cannot_reorder_is_kept_not_dropped(
+    smiles: str, seed: int
+) -> None:
+    """The schedule may decline to reorder; it may never cost a molecule.
+
+    A schedule that compiles fewer molecules produces a different corpus, not a
+    repair, and the difference would be invisible in any per-arm support mean
+    computed over whatever survived.
+    """
+
+    source, target = _production_pair(smiles, seed)
+    sequential = compile_carbon_tree_to_target(
+        source, target, event_schedule="sequential", ring_catalog=None,
+        align_source=False, **_GRAFT
+    )
+    block = compile_carbon_tree_to_target(
+        source, target, event_schedule="ring_dependency_block", ring_catalog=None,
+        align_source=False, **_GRAFT
+    )
+
+    assert block.metadata["ring_dependency_block_fell_back_to_sequential"] is True
+    # Falling back means falling back: the emitted route is the legacy one.
+    assert _rule_names(block) == _rule_names(sequential)
+    endpoint = execute_trace(block.source, block.steps)
+    assert np.array_equal(endpoint.atom_types, target.atom_types)
+    assert np.array_equal(endpoint.bonds, target.bonds)
+    assert canonical_state_key(endpoint) == canonical_state_key(target)
+
+
+def test_a_reorderable_molecule_does_not_report_a_fallback() -> None:
+    """The fallback flag must discriminate, not be pinned to one value."""
+
+    source, target = _pair("O=C(Cc1ccccc1O)Nc1ccccc1", seed=907)
+    block = compile_carbon_tree_to_target(
+        source, target, event_schedule="ring_dependency_block", **_GRAFT
+    )
+    assert block.metadata["ring_dependency_block_fell_back_to_sequential"] is False
+    assert block.metadata["ring_dependency_block_commits"] >= 1
+
+
 def test_unknown_event_schedule_is_refused() -> None:
     source, target = _pair("c1ccncc1O", seed=11)
     with pytest.raises(ValueError, match="unknown tree event schedule"):

@@ -91,22 +91,49 @@ def compile_carbon_tree_to_target(
         raise ValueError(
             "the ring dependency-block schedule is defined for Graft transport"
         )
-    if flexible_size:
-        trace = _compile_flexible_graft_tree_transport(
+    def _graft_trace(block: bool) -> RewriteTrace:
+        if flexible_size:
+            return _compile_flexible_graft_tree_transport(
+                source,
+                target,
+                runtime=runtime,
+                ring_catalog=ring_catalog,
+                ring_dependency_block=block,
+            )
+        return _compile_graft_tree_transport(
             source,
             target,
             runtime=runtime,
             ring_catalog=ring_catalog,
-            ring_dependency_block=ring_dependency_block,
+            ring_dependency_block=block,
         )
-    elif use_bond_reroute:
-        trace = _compile_graft_tree_transport(
-            source,
-            target,
-            runtime=runtime,
-            ring_catalog=ring_catalog,
-            ring_dependency_block=ring_dependency_block,
-        )
+
+    if flexible_size or use_bond_reroute:
+        if not ring_dependency_block:
+            trace = _graft_trace(False)
+        else:
+            # Committing a ring system early can invalidate a LATER Graft that
+            # touches one of its atoms -- measured on 3 of 150 real training
+            # molecules.  The per-system fallback cannot see that, because the
+            # commitment it would have to undo already succeeded.  So the whole
+            # reordering is attempted and abandoned as a unit: a molecule that
+            # cannot be compiled this way is compiled the old way, never lost.
+            # Without this the schedule would silently shrink the corpus, which
+            # is a different corpus rather than a repair.
+            try:
+                trace = _graft_trace(True)
+            except (InvalidRewrite, TraceCompilationError):
+                trace = _graft_trace(False)
+                trace = RewriteTrace(
+                    source=trace.source,
+                    target=trace.target,
+                    steps=trace.steps,
+                    metadata={
+                        **trace.metadata,
+                        "ring_emission_schedule": "ring_dependency_block_v1",
+                        "ring_dependency_block_fell_back_to_sequential": True,
+                    },
+                )
     else:
         target_trace = compile_null_to_target_tracelets(
             target,
@@ -539,6 +566,7 @@ def _compile_graft_tree_transport(
             "ring_emission_schedule": (
                 "ring_dependency_block_v1" if ring_dependency_block else "sequential"
             ),
+            "ring_dependency_block_fell_back_to_sequential": False,
             "ring_dependency_block_commits": dependency_block_commits,
             "ring_dependency_block_deferred": len(pending_systems),
         },

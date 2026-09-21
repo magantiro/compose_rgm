@@ -47,6 +47,7 @@ import os
 import time
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures.process import BrokenProcessPool
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -274,33 +275,57 @@ def main() -> None:
     sidecar = args.output.with_suffix(".rows.jsonl")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     rows: list[dict] = []
-    with ProcessPoolExecutor(
-        max_workers=args.workers,
-        initializer=_init_worker,
-        initargs=(str(args.checkpoint),),
-    ) as pool, sidecar.open("w") as handle:
-        for done, row in enumerate(pool.map(_measure, jobs, chunksize=1), start=1):
-            rows.append(row)
-            handle.write(json.dumps(row, sort_keys=True) + "\n")
-            handle.flush()
-            if done % 10 == 0:
-                print(
-                    json.dumps(
-                        {
-                            "phase": "progress",
-                            "done": done,
-                            "total": len(jobs),
-                            "elapsed_seconds": round(time.time() - started, 1),
-                            **{
-                                arm: round(value, 4)
-                                for arm, value in _interim(rows).items()
-                            },
-                        }
-                    ),
-                    flush=True,
-                )
-            if done % 50 == 0:
-                _write_interim(args, rows, pinned, len(train), started)
+    pool = None
+    if args.workers > 1:
+        pool = ProcessPoolExecutor(
+            max_workers=args.workers,
+            initializer=_init_worker,
+            initargs=(str(args.checkpoint),),
+        )
+        stream = pool.map(_measure, jobs, chunksize=1)
+    else:
+        # Serial is the robust mode on this machine: a shared, heavily loaded
+        # laptop has already killed a worker mid-run, and every number here is
+        # a deterministic structural count, so serialising costs wall clock and
+        # nothing else.
+        _init_worker(str(args.checkpoint))
+        stream = map(_measure, jobs)
+
+    interrupted = None
+    try:
+        with sidecar.open("w") as handle:
+            for done, row in enumerate(stream, start=1):
+                rows.append(row)
+                handle.write(json.dumps(row, sort_keys=True) + "\n")
+                handle.flush()
+                if done % 10 == 0:
+                    print(
+                        json.dumps(
+                            {
+                                "phase": "progress",
+                                "done": done,
+                                "total": len(jobs),
+                                "elapsed_seconds": round(time.time() - started, 1),
+                                **{
+                                    arm: round(value, 4)
+                                    for arm, value in _interim(rows).items()
+                                },
+                            }
+                        ),
+                        flush=True,
+                    )
+                if done % 25 == 0:
+                    _write_interim(args, rows, pinned, len(train), started)
+    except (BrokenProcessPool, KeyboardInterrupt, OSError) as error:
+        # A machine failure must not discard completed measurements.  It is
+        # recorded in the artifact so a partial run can never be mistaken for
+        # a complete one.
+        interrupted = f"{type(error).__name__}: {error}"
+        print(json.dumps({"phase": "interrupted", "error": interrupted,
+                          "completed": len(rows)}), flush=True)
+    finally:
+        if pool is not None:
+            pool.shutdown(wait=False, cancel_futures=True)
 
     artifact = {
         "measurement": "denovo_ring_schedule_acceptance_v1",
@@ -321,7 +346,9 @@ def main() -> None:
             "seed": args.seed,
             "sample_size": args.sample_size,
         },
-        "status": "COMPLETE",
+        "status": "COMPLETE" if interrupted is None else "PARTIAL",
+        "interrupted": interrupted,
+        "molecules_completed": len(rows),
         "rows_sidecar": str(sidecar.name),
         "rows": rows,
         "wall_seconds": time.time() - started,
