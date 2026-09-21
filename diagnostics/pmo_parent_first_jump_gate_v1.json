@@ -1,0 +1,721 @@
+{
+  "arm_a_v1_exact": {
+    "arm": "A_v1_exact_descriptor",
+    "descriptor": "v1_exact",
+    "distinct_success_parents": 16,
+    "distinct_success_tasks": 3,
+    "funnel": {
+      "admitted_endpoint": 22,
+      "certificate_compatible": 743,
+      "distinct_archive_eligible_endpoint": 18,
+      "exact_realization": 22,
+      "parent_plan_requests": 1091,
+      "realization_attempted": 743,
+      "support_abstentions": 348,
+      "valid_endpoint": 22
+    },
+    "geometry": {
+      "created_dependency_edges": {
+        "median": 13.0,
+        "values": [
+          8,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          13,
+          14,
+          14,
+          14,
+          15,
+          22,
+          22,
+          22,
+          22
+        ]
+      },
+      "heavy_atom_delta": {
+        "median": 12.0,
+        "values": [
+          1,
+          3,
+          3,
+          3,
+          3,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12,
+          12
+        ]
+      },
+      "intended_primitive_count": {
+        "median": 14.0,
+        "values": [
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          15,
+          16,
+          16,
+          16,
+          17,
+          23,
+          23,
+          23,
+          23
+        ]
+      },
+      "intended_retained_fraction": {
+        "median": 1.0,
+        "values": [
+          0.8846,
+          0.963,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "realized_primitive_count": {
+        "median": 14.0,
+        "values": [
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14,
+          15,
+          16,
+          16,
+          16,
+          17,
+          23,
+          23,
+          23,
+          23
+        ]
+      },
+      "realized_retained_fraction": {
+        "count_below_0_999": 0,
+        "median": 1.0,
+        "values": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "outcomes": {
+      "completed_realization": 22,
+      "proven_incompatible": 663,
+      "search_budget_exhausted": 58
+    },
+    "pairing": "support_conditioned_v1",
+    "reused_not_recomputed": true,
+    "selected_pairs_refused_by_certificate": 0,
+    "source": "diagnostics/pmo_conditioned_jump_gate_v1.json",
+    "source_code_revision": "7a83dfab3ad12629202827216f5a7d75fc58cc92",
+    "work": {
+      "expanded_nodes_per_exact_realization": 150.1818181818182,
+      "expanded_nodes_total": 3304,
+      "median_success_expanded_nodes": 27.0,
+      "median_success_seconds": 20.40823785449902,
+      "realization_seconds_total": 3062.604244444723,
+      "seconds_per_exact_realization": 139.2092838383965,
+      "successors_enumerated_total": 729321
+    },
+    "yield_per_realization_attempt": 0.029609690444145357,
+    "yield_per_request": 0.02016498625114574
+  },
+  "arm_b_relaxed_R1": {
+    "abstained_requests": 303,
+    "abstention_refusal_reasons": {
+      "insufficient_preexisting_atoms_for_remaining_deletions": 105,
+      "insufficient_preexisting_atoms_of_a_required_identity": 9,
+      "no_atom_carries_a_required_operand_descriptor": 28671
+    },
+    "additive_attempts": 175,
+    "additive_successes": 1,
+    "additive_yield": 0.005714285714285714,
+    "arm": "B_relaxed_R1_descriptor",
+    "certificate_refusal_stages": {},
+    "controller_retained_fraction": {
+      "histogram": {
+        "1.0": 13
+      },
+      "max": 1.0,
+      "mean": 1.0,
+      "median": 1.0,
+      "min": 1.0,
+      "n": 13,
+      "p10": 1.0,
+      "p25": 1.0,
+      "p75": 1.0,
+      "p90": 1.0
+    },
+    "delta_heavy_atoms": {
+      "histogram": {
+        "1.0": 12,
+        "12.0": 1
+      },
+      "max": 12.0,
+      "mean": 1.8461538461538463,
+      "median": 1.0,
+      "min": 1.0,
+      "n": 13,
+      "p10": 1.0,
+      "p25": 1.0,
+      "p75": 1.0,
+      "p90": 1.0
+    },
+    "descriptor": "R1_drop_environment_and_lag",
+    "distinct_endpoints": 28,
+    "distinct_parents": 10,
+    "distinct_tasks": [
+      "celecoxib_rediscovery",
+      "gsk3b",
+      "perindopril_mpo"
+    ],
+    "excision_demanding_attempts": 613,
+    "excision_demanding_successes": 12,
+    "excision_demanding_yield": 0.01957585644371941,
+    "fraction_of_successes_deleting_a_parent_atom": 0.9230769230769231,
+    "outcomes": {
+      "abstained_no_supported_plan": 303,
+      "completed_realization": 13,
+      "proven_incompatible": 705,
+      "search_budget_exhausted": 70
+    },
+    "pairing": "support_conditioned_v1",
+    "primitive_count": {
+      "histogram": {
+        "6.0": 3,
+        "11.0": 6,
+        "13.0": 2,
+        "14.0": 1,
+        "15.0": 1
+      },
+      "max": 15.0,
+      "mean": 10.692307692307692,
+      "median": 11.0,
+      "min": 6.0,
+      "n": 13,
+      "p10": 6.0,
+      "p25": 11.0,
+      "p75": 13.0,
+      "p90": 13.8
+    },
+    "realization_attempts": 788,
+    "realizations_deleting_a_parent_atom": 12,
+    "requests": 1091,
+    "status": "DIAGNOSTIC_ONLY_NOT_A_CANDIDATE_FIX",
+    "successes": 13,
+    "true_retained_fraction": {
+      "histogram": {
+        "0.85": 2,
+        "0.86": 2,
+        "0.88": 2,
+        "0.91": 1,
+        "0.92": 3,
+        "0.93": 2,
+        "1.0": 1
+      },
+      "max": 1.0,
+      "mean": 0.8996608994453822,
+      "median": 0.90625,
+      "min": 0.85,
+      "n": 13,
+      "p10": 0.8527272727272727,
+      "p25": 0.8636363636363636,
+      "p75": 0.9166666666666666,
+      "p90": 0.9310344827586207
+    },
+    "wall_seconds": 485.6180591250013,
+    "work": {
+      "nodes_expanded": 4994,
+      "seconds_load_contaminated": 2533.965149321739,
+      "successes_per_1000_expanded_nodes": 2.6031237484981977,
+      "successes_per_second_load_contaminated": 0.005130299445309926,
+      "successors_enumerated": 731186
+    },
+    "yield_per_realization_attempt": 0.01649746192893401,
+    "yield_per_request": 0.011915673693858845
+  },
+  "arm_c_parent_first": {
+    "abstained_requests": 848,
+    "abstention_reasons": {
+      "contracted_state_has_no_insertion_capacity": 5,
+      "intent_demands_no_excision": 92,
+      "no_legal_region_in_demanded_size_band": 698,
+      "no_region_in_band_admits_a_deletion_schedule": 53
+    },
+    "arm": "C_parent_first_construction",
+    "controller_retained_fraction": {
+      "histogram": {
+        "0.08": 3,
+        "0.12": 3,
+        "0.14": 2,
+        "0.17": 1,
+        "0.25": 5,
+        "0.27": 1,
+        "0.3": 4,
+        "0.33": 2,
+        "0.38": 5,
+        "0.4": 1,
+        "0.42": 1,
+        "0.43": 4,
+        "0.44": 6,
+        "0.47": 1,
+        "0.5": 6,
+        "0.53": 1,
+        "0.55": 1,
+        "0.56": 5,
+        "0.57": 1,
+        "0.58": 3,
+        "0.6": 1,
+        "0.62": 8,
+        "0.63": 2,
+        "0.67": 8,
+        "0.68": 3,
+        "0.69": 1,
+        "0.71": 3,
+        "0.73": 1,
+        "0.74": 6,
+        "0.75": 8,
+        "0.77": 8,
+        "0.78": 4,
+        "0.79": 5,
+        "0.8": 4,
+        "0.81": 5,
+        "0.82": 5,
+        "0.83": 4,
+        "0.84": 5,
+        "0.85": 6,
+        "0.86": 8,
+        "0.87": 4,
+        "0.88": 10,
+        "0.89": 7,
+        "0.91": 10,
+        "0.92": 2,
+        "0.94": 2,
+        "1.0": 57
+      },
+      "max": 1.0,
+      "mean": 0.7478333454910808,
+      "median": 0.8125,
+      "min": 0.07692307692307693,
+      "n": 243,
+      "p10": 0.37692307692307697,
+      "p25": 0.6201923076923077,
+      "p75": 0.914004914004914,
+      "p90": 1.0
+    },
+    "delta_heavy_atoms": {
+      "histogram": {
+        "-10.0": 19,
+        "-9.0": 6,
+        "-5.0": 37,
+        "-4.0": 60,
+        "-3.0": 41,
+        "-2.0": 15,
+        "-1.0": 1,
+        "1.0": 5,
+        "2.0": 26,
+        "3.0": 3,
+        "4.0": 17,
+        "5.0": 7,
+        "12.0": 6
+      },
+      "max": 12.0,
+      "mean": -2.3950617283950617,
+      "median": -4.0,
+      "min": -10.0,
+      "n": 243,
+      "p10": -8.199999999999989,
+      "p25": -5.0,
+      "p75": 1.0,
+      "p90": 4.0
+    },
+    "descriptor": "none_roles_read_off_the_realized_execution",
+    "distinct_endpoints": 221,
+    "distinct_parents": 115,
+    "distinct_realized_programs": 230,
+    "distinct_tasks": [
+      "celecoxib_rediscovery",
+      "gsk3b",
+      "perindopril_mpo"
+    ],
+    "endpoint_chemistry": {
+      "note": "Parseability is PMO's endpoint eligibility rule and is a FLOOR, not a quality score.  The construction is a chain drawn from the intent's element vocabulary, so it produces valid but frequently implausible chemistry (peroxide and N-O linkages among them).  The mechanism guarantees validity and structural coherence, NOT medicinal-chemistry plausibility.",
+      "rdkit_parseable": 243,
+      "rdkit_parseable_share": 1.0,
+      "ring_bearing": 159,
+      "ring_bearing_share": 0.654320987654321
+    },
+    "excision_demanding_attempts": 999,
+    "excision_demanding_successes": 243,
+    "excision_demanding_yield": 0.24324324324324326,
+    "fraction_of_successes_deleting_a_parent_atom": 1.0,
+    "pairing": "parent_first_region_draw",
+    "primitive_count": {
+      "histogram": {
+        "4.0": 5,
+        "5.0": 23,
+        "6.0": 10,
+        "7.0": 17,
+        "8.0": 49,
+        "9.0": 31,
+        "10.0": 34,
+        "11.0": 14,
+        "12.0": 15,
+        "13.0": 7,
+        "14.0": 12,
+        "15.0": 15,
+        "16.0": 3,
+        "17.0": 1,
+        "19.0": 3,
+        "20.0": 1,
+        "22.0": 2,
+        "23.0": 1
+      },
+      "max": 23.0,
+      "mean": 9.679012345679013,
+      "median": 9.0,
+      "min": 4.0,
+      "n": 243,
+      "p10": 5.0,
+      "p25": 8.0,
+      "p75": 11.0,
+      "p90": 15.0
+    },
+    "realization_attempts": 1091,
+    "realization_by_parent_size": {
+      "bands": {
+        "1-9": {
+          "attempts": 587,
+          "rate": 0.11925042589437819,
+          "realized": 70
+        },
+        "10-19": {
+          "attempts": 159,
+          "rate": 0.3710691823899371,
+          "realized": 59
+        },
+        "20-29": {
+          "attempts": 218,
+          "rate": 0.3119266055045872,
+          "realized": 68
+        },
+        "30-39": {
+          "attempts": 127,
+          "rate": 0.36220472440944884,
+          "realized": 46
+        }
+      },
+      "note": "Realization RISES with parent size (tiny parents simply carry no bridge-separated region), so the mechanism is not an artifact of the small early PMO population.  Parent heavy atoms across this run: min 1, median 14, max 39."
+    },
+    "realizations_deleting_a_parent_atom": 243,
+    "region_law": "SizeBandRegionLaw(margin=construction_headroom_margin)",
+    "region_size": {
+      "histogram": {
+        "1.0": 6,
+        "2.0": 10,
+        "3.0": 32,
+        "4.0": 29,
+        "5.0": 37,
+        "6.0": 51,
+        "7.0": 49,
+        "8.0": 4,
+        "11.0": 8,
+        "12.0": 17
+      },
+      "max": 12.0,
+      "mean": 5.744855967078189,
+      "median": 6.0,
+      "min": 1.0,
+      "n": 243,
+      "p10": 3.0,
+      "p25": 4.0,
+      "p75": 7.0,
+      "p90": 10.400000000000034
+    },
+    "requests": 1091,
+    "share_at_true_retained_at_or_below_0_90": 0.9465020576131687,
+    "size_tolerance": 0,
+    "successes": 243,
+    "successes_at_true_retained_at_or_below_0_90": 230,
+    "successes_where_retention_measures_disagree": 210,
+    "true_retained_fraction": {
+      "histogram": {
+        "0.08": 5,
+        "0.11": 2,
+        "0.12": 10,
+        "0.14": 8,
+        "0.17": 1,
+        "0.2": 2,
+        "0.22": 9,
+        "0.25": 6,
+        "0.27": 1,
+        "0.3": 5,
+        "0.33": 7,
+        "0.37": 1,
+        "0.38": 4,
+        "0.4": 2,
+        "0.42": 3,
+        "0.43": 1,
+        "0.44": 4,
+        "0.45": 2,
+        "0.46": 4,
+        "0.5": 5,
+        "0.54": 2,
+        "0.56": 6,
+        "0.57": 1,
+        "0.58": 3,
+        "0.59": 1,
+        "0.61": 3,
+        "0.62": 5,
+        "0.63": 4,
+        "0.65": 4,
+        "0.67": 7,
+        "0.68": 7,
+        "0.7": 3,
+        "0.71": 5,
+        "0.72": 1,
+        "0.73": 1,
+        "0.74": 1,
+        "0.75": 9,
+        "0.76": 1,
+        "0.77": 10,
+        "0.78": 4,
+        "0.79": 6,
+        "0.8": 3,
+        "0.81": 9,
+        "0.82": 9,
+        "0.83": 4,
+        "0.84": 15,
+        "0.85": 7,
+        "0.86": 5,
+        "0.87": 1,
+        "0.88": 7,
+        "0.89": 2,
+        "0.9": 3,
+        "0.91": 2,
+        "0.92": 4,
+        "0.93": 3,
+        "0.94": 1,
+        "0.95": 2
+      },
+      "max": 0.9459459459459459,
+      "mean": 0.6014723510608445,
+      "median": 0.6842105263157895,
+      "min": 0.07692307692307693,
+      "n": 243,
+      "p10": 0.14761904761904768,
+      "p25": 0.39230769230769236,
+      "p75": 0.8214285714285714,
+      "p90": 0.8663063063063063
+    },
+    "wall_seconds": 6.271603500004858,
+    "work": {
+      "executor_calls": 6019,
+      "regions_tried": 333,
+      "seconds_load_contaminated": 21.623195135674905,
+      "successes_per_1000_executor_calls": 40.372154842997176,
+      "successes_per_second_load_contaminated": 11.237932159206567,
+      "work_unit_note": "executor calls are NOT expanded nodes.  Arms A and B search a plan's binding tree and are costed in nodes; arm C performs no search and is costed in executor calls and regions tried.  The two are reported side by side and are never summed or divided into one another."
+    },
+    "yield_per_realization_attempt": 0.2227314390467461,
+    "yield_per_request": 0.2227314390467461
+  },
+  "capability_statement": {
+    "can_construct": [
+      "bridge-separated region excision of ANY size the parent carries, realized here at sizes 1.0 to 12.0 (median 6.0) -- the v1 MAX_SEGMENT_LENGTH = 8 cap does not apply, because the region is drawn on the parent",
+      "a compatible chain construction re-attached at the retained anchor, so the action is a REPLACEMENT rather than a deletion",
+      "small coherent actions as well as large ones: the realized region size distribution starts at 1 atom, so 'change a couple of atoms and one attachment' is inside the support, not a special case",
+      "programs whose roles are read off the realized execution, in the v1 representation, and are therefore comparable to mined latents"
+    ],
+    "cannot_currently_construct": [
+      {
+        "detail": "construct_parent_first_program REQUIRES an excision demand and abstains otherwise.  The owner's reset explicitly wants additions and ring-system attachment to be first-class, so this is a real gap, not a scoping choice.  It is one branch: draw an attachment site instead of a region when excise_atoms == 0.",
+        "evidence_count": 92,
+        "gap": "pure construction with NO excision"
+      },
+      {
+        "detail": "only ONE-bridge pendant regions are drawable, so a cut that removes an internal segment and reconnects its flanks is outside the support.  Same limitation the T4 5ht1b_2 analysis named.",
+        "evidence_count": null,
+        "gap": "interior (two-bridge) excision joining the two flanks"
+      },
+      {
+        "detail": "the construction is a CHAIN of single-bonded atoms.  A whole ring system is not built, though the excision side handles ring regions by opening them first.",
+        "evidence_count": null,
+        "gap": "ring-system construction"
+      },
+      {
+        "detail": "the dominant abstention.  This is the no-shrinking invariant working as designed: the alternative is to bind a smaller transformation and report it as the requested one.",
+        "evidence_count": 698,
+        "gap": "regions the parent simply does not carry at the demanded size"
+      }
+    ],
+    "work_unit_caveat": "regions_tried counts region ATTEMPTS and is 0 for a request whose parent carries no region in the demanded band, so it is not a count of requests. executor_calls is the complete cost measure."
+  },
+  "descriptive_diagnostics": {
+    "C1_excision_yield_vs_retired_threshold": {
+      "comparator_arm_a": 0.0037,
+      "measured": 0.24324324324324326,
+      "met": true,
+      "multiple_of_arm_a": 65.74141709276844,
+      "threshold": 0.037000000000000005
+    },
+    "C2_retained_fraction_vs_retired_threshold": {
+      "median_true_retained": 0.6842105263157895,
+      "met": true,
+      "required_share": 0.25,
+      "share_at_or_below_0_90": 0.9465020576131687
+    },
+    "C3_breadth_across_parents_and_tasks": {
+      "distinct_parents": 115,
+      "met": true,
+      "required_parents": 20,
+      "tasks": [
+        "celecoxib_rediscovery",
+        "gsk3b",
+        "perindopril_mpo"
+      ]
+    },
+    "FRAMING": "DESCRIPTIVE ONLY.  The thresholds below are RETIRED and decide nothing.  Excision depth and retained fraction are diagnostics of how the v1 mechanism transferred, not requirements a useful structural action must satisfy.",
+    "additive_only": {
+      "note": "Under the retired framing this was the falsifier.  It is now an OBSERVATION about what the mechanism builds.  A purely additive result would not by itself have condemned the lane.",
+      "observed": false,
+      "statement": "arm C realizations delete parent atoms; the construction is not purely additive"
+    },
+    "all_retired_thresholds_cleared": true
+  },
+  "predeclared_criteria": {
+    "C1_excision_yield_materially_exceeds_arm_a": {
+      "comparator": 0.0037,
+      "criterion": "arm C's excision-demanding realization yield must MATERIALLY exceed arm A's 0.37%.  Operationalized as at least 10x, i.e. >= 3.70%.",
+      "threshold": 0.037000000000000005
+    },
+    "C2_retained_fractions_materially_below_one": {
+      "criterion": "a HEALTHY POPULATION of genuine replacements, not a tail.  Operationalized as: median TRUE retained fraction < 1.000 AND at least 25% of realizations at true retained <= 0.90.  The TRUE measure is used because the controller's slot rule counts a deleted-then-refilled slot as retained.",
+      "median_true_retained_must_be_below": 1.0,
+      "minimum_share_at_or_below_0_90": 0.25
+    },
+    "C3_breadth_across_parents_and_tasks": {
+      "criterion": "many parents and all three tasks, not one exceptional case.  Operationalized as >= 20 distinct parents and 3 of 3 tasks.",
+      "minimum_distinct_parents": 20,
+      "required_tasks": 3
+    },
+    "FALSIFIER_additive_degeneracy": {
+      "criterion": "If arm C also produces only retained-1.000 additive edits, the structural-jump hypothesis has been properly tested and FAILED.  That is a complete and decisive answer, and is to be reported plainly rather than hedged."
+    },
+    "STATUS": "RETIRED_BY_OWNER_MID_EXPERIMENT_KEPT_FOR_THE_RECORD",
+    "caveat_retained_fraction_is_slot_based": "pmo_population_controller._retained_fraction counts a parent SLOT that was deleted and later refilled by an insertion as retained.  Every arm-C row therefore carries BOTH that measure and a true retention derived from the atom_delete actions, plus the refilled slots the two disagree about.",
+    "retirement_reason": "We have not proved that PMO needs deletion-heavy, 31-primitive jumps.  We have proved that our attempted mechanism for producing them transfers poorly.  These criteria are mechanism diagnostics, not admission requirements for useful PMO search, and they do not gate the lane."
+  },
+  "provenance": {
+    "arm_c_seed": 20260921,
+    "code_revision": "48995201f0f2855d40fb097a9aec06261d7b6696",
+    "contract_payload_sha256": "ba9515615b341019f09f66f3224e590b4ca596dee6bb7c97c759dbe418f1ff4b",
+    "numpy": "1.26.4",
+    "oracle_calls": 0,
+    "python": "3.11.13",
+    "rdkit": "2024.03.5",
+    "replayed_run_id": "35fc7bcd4bf5c964294698014c1ed40da483ad013f6b92c6201b01dee2d3d306",
+    "run_seed": 20260920,
+    "schema_version": "pmo_parent_first_jump_gate_v1",
+    "tasks": [
+      "gsk3b",
+      "perindopril_mpo",
+      "celecoxib_rediscovery"
+    ],
+    "total_seconds": 508.000959707977,
+    "workers": 5
+  },
+  "schema_version": "pmo_parent_first_jump_gate_v1",
+  "state_semantics": {
+    "free_slots_median": 34.0,
+    "free_slots_min": 9,
+    "note": "PMO parents carry 48 SLOTS, matching the T4 proposal path, NOT the 40-slot editing corpus.  48 is the slot CAPACITY of the state array; 40 is the separate heavy-atom CEILING the executor enforces on endpoints.  Every parent has free slots, so atom_insert is expressible everywhere.  assert_production_state_semantics / production_state_from_smiles are the 40-slot editing-corpus preflight and are the WRONG check for this path.",
+    "parents": 226,
+    "parents_without_insertion_capacity": 0,
+    "slot_capacity_histogram": {
+      "48": 226
+    }
+  },
+  "status": "MEASURED"
+}
