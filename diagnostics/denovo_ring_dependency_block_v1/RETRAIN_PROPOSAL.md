@@ -68,18 +68,20 @@ stratified by them rather than reported as uniform.
 
 The dependency block is **statistically indistinguishable from the shipped
 `exact_early_ring` scheduler** on the acceptance statistic. Matched three-arm
-run, same molecules and same source draw (MEASURED, n=40 molecules / 94 ring
-events at the time of writing; see the artifact for the final sample):
+run, same molecules and same source draw (MEASURED, n=250 molecules / 590 ring
+events, pinned kernel, zero oracle calls):
 
 | arm | mean | median |
 | --- | --- | --- |
-| `sequential` (what Lineage B trained on) | 0.3072 +- 0.0161 | 0.3020 |
-| `exact_early_ring` (shipped, never wired into training) | 0.2022 +- 0.0141 | 0.1360 |
-| `ring_dependency_block` (this change) | 0.2083 +- 0.0144 | 0.1370 |
+| `sequential` (what Lineage B trained on) | 0.3089 +- 0.0069 | 0.2716 |
+| `exact_early_ring` (shipped, never wired into training) | 0.1921 +- 0.0051 | 0.1381 |
+| `ring_dependency_block` (this change) | 0.1957 +- 0.0051 | 0.1394 |
 
-Paired, per ring event: repair minus shipped scheduler **+0.0061 +- 0.0033**,
-with **81 of 94 events UNCHANGED**. Repair minus sequential is
-**-0.0989 +- 0.0158**, 71 improved against 19 worsened.
+Paired, per ring event: repair minus shipped scheduler **+0.0037 +- 0.0017**,
+with **515 of 590 events UNCHANGED**. That is marginally and detectably WORSE
+than the shipped scheduler, not better -- about 2 standard errors, negligible
+in size but stated with its sign rather than rounded to "equivalent". Repair
+minus sequential is **-0.1132 +- 0.0071**, 462 improved against 96 worsened.
 
 So the support gain is real and large against the corpus that was trained on,
 and it is ALREADY AVAILABLE from a scheduler that shipped in July and was never
@@ -95,13 +97,13 @@ the shipped scheduler.
 
 Per ring-system ordinal within a molecule (MEASURED, block arm vs sequential):
 
-| ordinal | sequential | dependency block |
+| ordinal | n | dependency block |
 | --- | --- | --- |
-| 0 | 0.2394 | **0.1358** |
-| 1 | 0.3361 | 0.2008 |
-| 2 | 0.3767 | 0.3372 |
-| 3 | 0.3665 | 0.3163 |
-| 4 | 0.5476 | 0.5422 |
+| 0 | 244 | **0.1388** |
+| 1 | 194 | 0.1905 |
+| 2 | 109 | 0.2755 |
+| 3 | 37 | 0.3260 |
+| 4 | 6 | 0.4274 |
 
 The FIRST ring system of a molecule passes the <0.15 gate. Every later one
 fails, and the repair's benefit decays to nothing by the fifth. The mechanism
@@ -114,8 +116,11 @@ A schedule cannot fix this. Closing it needs either a support-level change
 
 ## Preconditions before spending GPU
 
-1. The acceptance number in this directory, at its stated sample size, with
-   N-of-N endpoint exactness.
+1. **The acceptance gate FAILED.** 0.1957 +- 0.0051 against a threshold of
+   0.15, on the mean the gate is stated over. It passes on the median (0.1394)
+   and the FIRST ring system of a molecule passes on the mean (0.1388).
+   Endpoint exactness held 250 of 250 in every arm. Do not spend GPU on the
+   strength of the median alone.
 2. The five plumbing hops wired AND mutation-tested at the call sites.
 3. A decision on the residual: the repair is strongest on the FIRST ring system
    of a molecule and degrades for later ones, because each commitment
