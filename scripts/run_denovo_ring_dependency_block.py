@@ -87,7 +87,16 @@ def main() -> None:
         versions = None
         catalog = {}
         with sidecar.open("w") as handle:
-            for result in acceptance_shard.map(payloads, return_exceptions=True):
+            # Unordered: results are reduced as a set, never by position, and
+            # ordered output blocks every finished shard behind the slowest
+            # one -- which on a preemptible fan-out can mean reading nothing
+            # at all from a run that did most of its work.
+            for result in acceptance_shard.map(
+                payloads,
+                return_exceptions=True,
+                wrap_returned_exceptions=False,
+                order_outputs=False,
+            ):
                 if not isinstance(result, dict):
                     failures.append(repr(result)[:300])
                     print(f"[shard-failed] {repr(result)[:160]}", flush=True)
