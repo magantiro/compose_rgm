@@ -63,7 +63,7 @@ SMALL_RING_MAX = 4
 CHECKPOINT_SHA256 = "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c"
 TRAIN_SMILES_SHA256 = "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791"
 
-ARMS = ("sequential", "ring_dependency_block")
+ARMS = ("sequential", "exact_early_ring", "ring_dependency_block")
 
 
 def _sha256(path: Path) -> str:

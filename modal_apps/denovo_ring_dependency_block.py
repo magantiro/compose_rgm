@@ -10,14 +10,19 @@ recipe's own train partition:
 
     P_support(3- or 4-ring | at a ring decision point)
 
-under both schedules, with the FULL per-minimum-ring-size histogram beside it,
+under three schedules, with the FULL per-minimum-ring-size histogram beside it,
 and it checks endpoint exactness per trace by canonical key AND by array
 identity.  Nothing is trained, no checkpoint is written, no oracle exists on
 this path.  The ring catalog and the carbon-tree source prior are deserialized
 from the checkpoint payload rather than rebuilt, which is strictly stronger
 than a fingerprint check.
 
-Arms are matched by construction: both schedules see the same target and the
+The shipped ``exact_early_ring`` scheduler is carried as a third arm on the
+SAME molecules.  Without it the question "is the new compiler better than what
+already ships" cannot be answered, and the two have never been compared on one
+sample -- their published numbers come from different draws.
+
+Arms are matched by construction: every schedule sees the same target and the
 same source draw, so an arm difference cannot come from a different draw.
 """
 
@@ -74,7 +79,7 @@ TEST_SIZE = 2_000
 CORPUS_SEED = 20260717
 SMALL_RING_MAX = 4
 
-ARMS = ("sequential", "ring_dependency_block")
+ARMS = ("sequential", "exact_early_ring", "ring_dependency_block")
 
 
 def _sha256(path: Path) -> str:
@@ -187,7 +192,7 @@ def select_targets(sample_size: int, seed: int) -> dict:
     retries=modal.Retries(max_retries=3),
 )
 def acceptance_shard(payload: dict) -> dict:
-    """Compile one stride of molecules under both schedules and measure support."""
+    """Compile one stride of molecules under every schedule and measure support."""
 
     import numpy as np
     import torch

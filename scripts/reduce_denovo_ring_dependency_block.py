@@ -28,8 +28,10 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from statistics import median
 
-ARMS = ("sequential", "ring_dependency_block")
-BASELINE_ARM, REPAIR_ARM = ARMS
+ARMS = ("sequential", "exact_early_ring", "ring_dependency_block")
+BASELINE_ARM = "sequential"
+SHIPPED_ARM = "exact_early_ring"
+REPAIR_ARM = "ring_dependency_block"
 GATE = 0.15
 
 
@@ -116,22 +118,27 @@ def reduce_artifact(rows: list[dict]) -> dict:
             ),
         }
 
-    # Paired: same molecule, same source draw, same ring-system ordinal.
-    deltas = []
-    for row in in_scope:
-        base = _events(row, BASELINE_ARM)
-        repair = _events(row, REPAIR_ARM)
-        for left, right in zip(base, repair):
-            deltas.append(
-                right["small_mass_uniform_support"] - left["small_mass_uniform_support"]
-            )
-    report["paired_delta_repair_minus_baseline"] = _stats(deltas)
-    report["paired_delta_repair_minus_baseline"]["improved"] = sum(
-        1 for d in deltas if d < 0
-    )
-    report["paired_delta_repair_minus_baseline"]["worsened"] = sum(
-        1 for d in deltas if d > 0
-    )
+    # Paired: same molecule, same source draw, same ring-system ordinal.  The
+    # repair is compared against BOTH the legacy schedule and the shipped
+    # scheduler, because "better than the corpus we trained on" and "better
+    # than what already ships" are different claims.
+    for label, left_arm, right_arm in (
+        ("repair_minus_sequential", BASELINE_ARM, REPAIR_ARM),
+        ("repair_minus_shipped_scheduler", SHIPPED_ARM, REPAIR_ARM),
+        ("shipped_scheduler_minus_sequential", BASELINE_ARM, SHIPPED_ARM),
+    ):
+        deltas = []
+        for row in in_scope:
+            for left, right in zip(_events(row, left_arm), _events(row, right_arm)):
+                deltas.append(
+                    right["small_mass_uniform_support"]
+                    - left["small_mass_uniform_support"]
+                )
+        entry = _stats(deltas)
+        entry["improved"] = sum(1 for d in deltas if d < 0)
+        entry["worsened"] = sum(1 for d in deltas if d > 0)
+        entry["unchanged"] = sum(1 for d in deltas if d == 0)
+        report.setdefault("paired_deltas", {})[label] = entry
 
     # Per ring-system ordinal within a molecule.
     ordinals: dict[str, dict[int, list[float]]] = {
@@ -175,6 +182,9 @@ def reduce_artifact(rows: list[dict]) -> dict:
     report["verdict"] = {
         "endpoint_exactness_holds": exact_ok,
         "baseline_mean": baseline["mean"],
+        "shipped_scheduler_mean": report["arms"][SHIPPED_ARM][
+            "small_ring_support_mass"
+        ]["mean"],
         "repair_mean": repair["mean"],
         "gate_passed_on_mean": bool(
             exact_ok and repair["mean"] is not None and repair["mean"] < GATE
