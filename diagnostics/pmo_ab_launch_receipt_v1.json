@@ -35,6 +35,19 @@
   "charged_calls_total": 1500,
   "created_at_utc": "2026-09-21T09:08:11.942248+00:00",
   "matched": "payloads differ in exactly one top-level key: arm",
+  "resumes": [
+    {
+      "arm": "A_baseline",
+      "at_utc": "2026-09-21T18:58:42.041318+00:00",
+      "call_id": "fc-01M32NBBP9CEQ2VRBN8834NCSM",
+      "charged_at_resume": 48,
+      "payload_sha256": "bb8b7530cd77618ef68cf985da09e67bd7bdbe5bcd0617f627042391d3b8f590",
+      "resumed_after_terminal_call_id": "fc-01M31KJ4DSZSS82JAPVBBZG7V5",
+      "revision_boundary": "calls 1-48 under the launch revision; calls 49-250 under the current one. Arm-A state identity across that boundary measured at 2 differing leaves of 218,869, both new bookkeeping keys holding None. ASYMMETRIC vs B/perindopril, which ran all 250 under the launch revision -- recorded, not hidden.",
+      "run_id": "21136cba1aa552680cb1c7e24834534856fc564a078c8aa5d07f928950343a50",
+      "task": "perindopril_mpo"
+    }
+  ],
   "schema_version": "pmo_ab_launch_receipt_v1",
   "status": "SPAWNED_ALL",
   "tasks": [

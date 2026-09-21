@@ -1,0 +1,51 @@
+{
+  "budget": 250,
+  "caveat_perindopril": "REVISION-ASYMMETRIC. A ran calls 1-48 under the launch revision and 49-250 under the current one after a preemption strand; B ran all 250 under the launch revision. Arm-A state identity across that boundary was measured at 2 differing leaves of 218,865+ (both new bookkeeping keys holding None), so it is unlikely to explain a 0.023 AUC gap -- but a clean single-revision rerun of A at 250 would settle it and has not been run.",
+  "consequence": "Do not scale this controller to 23x10k. Its benefit is task-dependent and, on the task where it wins, its BEST saturates at call 500 while only top-10 fills in -- exploitation inside a found basin with discovery stalled. The next controller work targets the proposal law (global route prototypes), not allocation or more budget.",
+  "headline": "Online structural memory is TASK-DEPENDENT, not a universal win: 1 clean win, 1 hollow win, 1 loss across three matched 250-call tasks.",
+  "recorded_at_utc": "2026-09-21T19:57:22.927404+00:00",
+  "schema_version": "pmo_ab_250_three_task_v1",
+  "seeds": 1,
+  "supersedes_framing": "An earlier coordinator summary said the memory effect 'is real and persists with budget'. That is supported for celecoxib and was generalised further than three tasks allow. Corrected here.",
+  "tasks": {
+    "celecoxib_rediscovery": {
+      "A": {
+        "auc": 0.1471,
+        "best": 0.2385
+      },
+      "B": {
+        "auc": 0.1916,
+        "best": 0.3441
+      },
+      "note": "clean win; B also holds at 1000 calls (AUC 0.2489 -> 0.3138) but its BEST froze at call 500",
+      "role": "rediscovery/similarity",
+      "winner": "B"
+    },
+    "gsk3b": {
+      "A": {
+        "auc": 0.199,
+        "best": 0.41
+      },
+      "B": {
+        "auc": 0.2722,
+        "best": 0.53
+      },
+      "note": "HOLLOW: the official score is legitimate and stays in the table, but B's top-10 are chemically worse (QED 0.367 vs 0.423, SA 6.31 vs 6.12) and memory strengthens r(score,SA) 0.456 -> 0.668. B exploits the predictor harder.",
+      "role": "fingerprint predictor",
+      "winner": "B"
+    },
+    "perindopril_mpo": {
+      "A": {
+        "auc": 0.3309,
+        "best": 0.4963
+      },
+      "B": {
+        "auc": 0.3075,
+        "best": 0.481
+      },
+      "note": "A BEATS B by +0.0234 AUC and +0.0153 best. Memory is a net negative on this landscape.",
+      "role": "multi-property objective",
+      "winner": "A"
+    }
+  }
+}
