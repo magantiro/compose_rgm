@@ -60,6 +60,34 @@ PROPOSAL_SLOTS = 48
 FAILED = {"braf_0", "braf_1", "fa7_0", "fa7_2"}
 
 
+#: A "micro" endpoint differs from the source by at most this many heavy atoms.
+#: The plus-or-minus-one-atom rescues reported for fa7_0 sit at 1.
+MICRO_EDIT_ATOMS = 2
+
+#: Anything at or beyond this net loss is the large bridge-separated excision
+#: class -- the shape v1's eight-atom cap cannot draw in one module.
+LARGE_EXCISION_ATOMS = 7
+
+
+def _shape_census(excisions: list[int]) -> dict:
+    """Eligible endpoints bucketed by net heavy-atom change from the source."""
+
+    return {
+        "micro_within_two_atoms": sum(
+            1 for value in excisions if abs(value) <= MICRO_EDIT_ATOMS
+        ),
+        "growth": sum(1 for value in excisions if value <= -(MICRO_EDIT_ATOMS + 1)),
+        "small_excision": sum(
+            1
+            for value in excisions
+            if MICRO_EDIT_ATOMS < value < LARGE_EXCISION_ATOMS
+        ),
+        "large_excision": sum(
+            1 for value in excisions if value >= LARGE_EXCISION_ATOMS
+        ),
+    }
+
+
 def _cell_rows(payload: dict, wanted: tuple[str, ...] | None) -> list[dict]:
     rows = payload["cells"]
     if wanted:
@@ -103,6 +131,15 @@ def _arm(cell: dict, payload: dict, *, region_law, draws: int, seed: int) -> dic
         "eligible": len(records),
         "max_excision": max(excisions, default=0),
         "excisions_over_v1_cap": sum(1 for value in excisions if value > 8),
+        # WHICH WITNESS SHAPE was reached. Two disjoint pools are known for these
+        # cells: large bridge-separated excisions, and plus-or-minus-one-atom
+        # edits of an existing endpoint. The region law re-ranks only the
+        # substituent_delete / segment_replace draw, so the micro shape is
+        # produced by families it does not touch and is equally available to both
+        # arms. Reporting the histogram is what distinguishes "the repair reaches
+        # both pools" from "the repair reaches the large pool only" -- a scoping
+        # fact about the mechanism, not a failure either way.
+        "shape_census": _shape_census(excisions),
         "best_similarity": max((row["similarity"] for row in records), default=None),
         "best_qed": max((row["qed"] for row in records), default=None),
         "example": min(
@@ -110,6 +147,18 @@ def _arm(cell: dict, payload: dict, *, region_law, draws: int, seed: int) -> dic
             key=lambda row: -row["similarity"],
             default=None,
         ),
+        "micro_example": next(
+            (
+                row
+                for row, cut in sorted(
+                    zip(records, excisions), key=lambda pair: abs(pair[1])
+                )
+                if abs(cut) <= MICRO_EDIT_ATOMS
+            ),
+            None,
+        ),
+        # Wall clock only, and this run shares the machine with other jobs, so it
+        # is NOT a load-independent cost metric. Read the counts, not the seconds.
         "seconds": round(time.time() - started, 2),
     }
 
@@ -168,9 +217,9 @@ def run(contract_path: Path, *, cells, draws, seed_offset, out: Path) -> dict:
         row = rows[-1]
         print(
             f"{row['cell']:>8} {row['status']:>12}  "
-            f"OFF eligible={off['eligible']:<5} maxcut={off['max_excision']:<3} "
+            f"OFF eligible={off['eligible']:<5} shapes={off['shape_census']}  "
             f"|  ON eligible={on['eligible']:<5} maxcut={on['max_excision']:<3} "
-            f"over_cap={on['excisions_over_v1_cap']}",
+            f"shapes={on['shape_census']}",
             flush=True,
         )
     report = {

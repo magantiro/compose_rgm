@@ -45,6 +45,7 @@ from compose_v4.control.region_law_contract import (
     assert_no_unconsumable_region_law_request,
     assert_region_law_is_consumed,
     build_region_law,
+    region_law_for_proposal_lane,
     region_law_request,
     resolve_region_law,
 )
@@ -328,3 +329,95 @@ def test_the_campaign_off_path_is_unchanged_by_the_new_keyword():
         _BRAF_0, 0.0, fiber, np.random.default_rng(5), draws=3, region_law=None
     )
     assert [row["smiles"] for row in bare] == [row["smiles"] for row in explicit]
+
+
+# ---- 5. the single policy entry point every proposal worker calls ---------
+
+
+def _worker_draw(law, attempt):
+    """The draw closure a proposal worker supplies: `expand` on the real lane."""
+
+    fiber = Fiber(_BRAF_0, _DELTA, support="compose_valid")
+    return expand(
+        _BRAF_0,
+        0.0,
+        fiber,
+        np.random.default_rng(1_000_003 * (attempt + 1)),
+        draws=1,
+        multi_region=False,
+        horizon=3,
+        proposal_lane=CONTRACT_LANE,
+        region_law=law,
+    )
+
+
+def test_off_yields_no_law_and_an_empty_telemetry_record():
+    """A run with the field absent must leave the ARTIFACT unchanged too.
+
+    Returning an empty mapping, rather than a recorded ``None``, is what makes
+    an OFF run indistinguishable from one made before the field existed.
+    """
+
+    law, telemetry = region_law_for_proposal_lane(
+        _contract(),
+        lane=CONTRACT_LANE,
+        delta=_DELTA,
+        reference_smiles=_BRAF_0,
+        draw=_worker_draw,
+    )
+    assert law is None
+    assert telemetry == {}
+
+
+def test_on_yields_the_law_and_records_that_consumption_was_proven():
+    law, telemetry = region_law_for_proposal_lane(
+        _contract(FREE_GATE_MARGIN_V1),
+        lane=CONTRACT_LANE,
+        delta=_DELTA,
+        reference_smiles=_BRAF_0,
+        draw=_worker_draw,
+    )
+    assert isinstance(law, BridgeRegionLaw)
+    assert telemetry[CONTRACT_FIELD] == FREE_GATE_MARGIN_V1
+    assert telemetry["region_law_consumption_attempts"] >= 1
+
+
+def test_a_lane_that_cannot_thread_a_law_receives_none_even_when_shallow_declares_one():
+    """The anchored worker must not silently install the shallow lane's law."""
+
+    law, telemetry = region_law_for_proposal_lane(
+        _contract(FREE_GATE_MARGIN_V1),
+        lane="anchored_replacement",
+        delta=_DELTA,
+        reference_smiles=_BRAF_0,
+        draw=_worker_draw,
+    )
+    assert law is None
+    assert telemetry == {}
+
+
+@pytest.mark.parametrize("lane", [CONTRACT_LANE, "anchored_replacement", "route_complete_region"])
+def test_a_misplaced_field_is_refused_on_every_worker_including_the_ones_that_ignore_it(lane):
+    payload = _contract(FREE_GATE_MARGIN_V1, lane="anchored_replacement")
+    with pytest.raises(RegionLawContractError):
+        region_law_for_proposal_lane(
+            payload,
+            lane=lane,
+            delta=_DELTA,
+            reference_smiles=_BRAF_0,
+            draw=_worker_draw,
+        )
+
+
+def test_the_entry_point_refuses_to_hand_back_a_law_the_draw_never_consults():
+    """A worker must not report a region-law run it did not perform."""
+
+    with pytest.raises(RegionLawNotConsumed):
+        region_law_for_proposal_lane(
+            _contract(FREE_GATE_MARGIN_V1),
+            lane=CONTRACT_LANE,
+            delta=_DELTA,
+            reference_smiles=_BRAF_0,
+            draw=lambda law, attempt: [],
+            attempts=3,
+        )

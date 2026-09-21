@@ -245,11 +245,7 @@ def proposal_worker(task: dict) -> dict:
     from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
     from compose_v4.chem.state import pad_molecular_graph
     from compose_v4.control.docking_value import identity
-    from compose_v4.control.region_law_contract import (
-        assert_no_unconsumable_region_law_request,
-        assert_region_law_is_consumed,
-        resolve_region_law,
-    )
+    from compose_v4.control.region_law_contract import region_law_for_proposal_lane
     from compose_v4.control.route_distilled_goal_expert import (
         RouteDistilledGoalExpert,
         propose_route_expert_candidates,
@@ -261,44 +257,40 @@ def proposal_worker(task: dict) -> dict:
     started = time.time()
     fiber = Fiber(task["original_seed"], contract["delta"], support=contract["support"])
     telemetry = {}
-    # Refuse a region-law request parked on a lane that cannot consume one, on EVERY
-    # expert. A field read by nobody is the defect this surface exists to prevent, so
-    # it must fail on the worker that would have ignored it, not only on the one that
-    # would have honoured it.
-    assert_no_unconsumable_region_law_request(contract)
-    if expert in {"shallow", "anchored_replacement"}:
-        region_law = None
-        if expert == "shallow":
-            region_law = resolve_region_law(
-                contract,
-                delta=contract["delta"],
-                reference_smiles=task["original_seed"],
-            )
-        if region_law is not None:
-            # RUNTIME-RESOLVED CONSUMPTION CHECK. The contract asked for a region
-            # law; prove the proposal path this worker is about to run actually
-            # consults one before any of it is charged. The probe runs `expand`
-            # itself -- the same function, the same lane, the same horizon -- so
-            # what is verified is the path, not a transcription of it. It raises
-            # from the draw site, so a healthy wiring costs one partial synthesis.
-            def _probe_draw(law, attempt, *, _horizon=contract["proposal"][expert]["horizon"]):
-                return expand(
-                    task["parent"],
-                    task["parent_score"],
-                    fiber,
-                    np.random.default_rng(
-                        task["proposal_seed"] + 1_000_003 * (attempt + 1)
-                    ),
-                    draws=1,
-                    multi_region=False,
-                    horizon=_horizon,
-                    proposal_lane="shallow",
-                    region_law=law,
-                )
 
-            telemetry["region_law_consumption_attempts"] = (
-                assert_region_law_is_consumed(_probe_draw)
-            )
+    def _probe_draw(law, attempt):
+        """One production proposal draw, used only to prove the law is consumed.
+
+        It calls `expand` itself -- same function, same lane, same horizon -- so
+        what the check verifies is the path this worker is about to run, not a
+        transcription of it. Its RNG is a separate stream, so probing cannot
+        perturb the scored draw below.
+        """
+
+        return expand(
+            task["parent"],
+            task["parent_score"],
+            fiber,
+            np.random.default_rng(task["proposal_seed"] + 1_000_003 * (attempt + 1)),
+            draws=1,
+            multi_region=False,
+            horizon=contract["proposal"]["shallow"]["horizon"],
+            proposal_lane="shallow",
+            region_law=law,
+        )
+
+    # Resolve the contract's region-draw law and PROVE the runtime consumes it
+    # before anything is charged. Called on every expert, because a field parked
+    # on a lane that cannot honour it must fail on the worker that would
+    # otherwise have ignored it. Absent field -> (None, {}) -> byte-identical.
+    region_law, region_law_telemetry = region_law_for_proposal_lane(
+        contract,
+        lane=expert,
+        delta=contract["delta"],
+        reference_smiles=task["original_seed"],
+        draw=_probe_draw,
+    )
+    if expert in {"shallow", "anchored_replacement"}:
         records = expand(
             task["parent"],
             task["parent_score"],
@@ -310,10 +302,8 @@ def proposal_worker(task: dict) -> dict:
             proposal_lane=expert,
             region_law=region_law,
         )
-        telemetry["raw_draws"] = contract["proposal"][expert]["draws"]
-        telemetry["region_law"] = (
-            None if region_law is None else contract["proposal"]["shallow"]["region_law"]
-        )
+        telemetry = {"raw_draws": contract["proposal"][expert]["draws"]}
+        telemetry.update(region_law_telemetry)
     elif expert == "route_complete_region":
         envelope = json.loads((REMOTE / CHECKPOINT).read_text())
         if identity(envelope["payload"]) != envelope["payload_sha256"]:

@@ -228,6 +228,46 @@ def resolve_region_law(
 # ---- Proving the runtime consumes it -------------------------------------
 
 
+def region_law_for_proposal_lane(
+    payload: dict,
+    *,
+    lane: str,
+    delta: float,
+    reference_smiles: str,
+    draw: Callable[[Any, int], Any],
+    attempts: int = CONSUMPTION_PROBE_ATTEMPTS,
+) -> tuple[BridgeRegionLaw | None, dict]:
+    """The whole contract policy for one proposal worker, in one call.
+
+    Returns ``(law, telemetry)``.  A worker installs ``law`` on its lane and
+    merges ``telemetry`` into what it records.  Every proposal worker calls
+    this, whatever its lane, because the placement refusal has to happen on the
+    worker that would otherwise have ignored the field.
+
+    OFF -- an absent field -- returns ``(None, {})``, so a run made before this
+    field existed and a run made with it absent produce the same proposals AND
+    the same artifact.
+
+    ON returns the law only after :func:`assert_region_law_is_consumed` has
+    watched ``draw`` reach the draw site, so no worker can report a region-law
+    run it did not actually perform.
+    """
+
+    assert_no_unconsumable_region_law_request(payload)
+    if lane != CONTRACT_LANE:
+        return None, {}
+    law = resolve_region_law(
+        payload, delta=delta, reference_smiles=reference_smiles
+    )
+    if law is None:
+        return None, {}
+    consumed = assert_region_law_is_consumed(draw, attempts=attempts)
+    return law, {
+        CONTRACT_FIELD: region_law_request(payload),
+        "region_law_consumption_attempts": consumed,
+    }
+
+
 def assert_region_law_is_consumed(
     draw: Callable[[Any, int], Any], *, attempts: int = CONSUMPTION_PROBE_ATTEMPTS
 ) -> int:

@@ -1753,3 +1753,63 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   `floor = 0.05`, so every region the executor could reach keeps positive probability and the
   uncapped support is a strict superset of v1's. A filter here would have deleted exactly the
   charge-changing cuts that one cell's only witnesses need.
+
+## 2026-09-20 (the region repair was inert: a keyword nothing passed)
+
+- **A validated repair with an opt-in keyword is INERT until some caller passes it, and
+  "the module has tests" hides that completely.** `bridge_region_law` was measured,
+  tested (20 passing) and merged; `synthesize_dynamic_program` accepted `region_law=`;
+  `dynamic_program_synthesis.py` hashed to the post-repair `a1370685`. Every one of
+  those facts is true and none of them made the repair reachable. **MEASURED: no
+  production caller passed it**, so a rescue launched on that commit would have run
+  `law=None` -- v1 verbatim -- and spent up to 1,241 oracle calls reproducing the same
+  `candidate_exhaustion`. The tell is available statically and costs one grep: search
+  for the keyword at CALL sites, not at definition sites.
+- **The field is `proposal.shallow.region_law`, and ABSENT is the only byte-identical
+  OFF.** `_delete_pendant_fragment` consumes `rng.permutation` when unlawed and
+  `rng.random` (Efraimidis-Spirakis) under ANY law object, so `UNIFORM_BOUNDED_V1`
+  reproduces v1's SUPPORT but not v1's DRAWS. An "off" implemented as a uniform law
+  would have moved every existing run while reading as a no-op. No uniform law is
+  registered in `region_law_contract` for exactly that reason -- a name that looks like
+  "off" but is not is worse than no name.
+- **A consumption check must RUN the path, not read the signature.** `inspect.signature`
+  would have passed both of today's earlier defects (a receipt reading `SPAWNED_ALL`
+  while nothing ran; a contract declaring `charged_calls_per_task: 250` beside a module
+  constant of 1000), because in both the field existed and was dropped one hop later.
+  `assert_region_law_is_consumed(draw)` takes the CALLER's own draw closure, installs a
+  probe that raises from `order`, and requires the production path to reach it. The
+  probe exception is deliberately not a `ValueError`/`RuntimeError`/`KeyError`/
+  `IndexError`/`TypeError`: `synthesize_dynamic_program` catches `ValueError` per family
+  and `expand` catches all five per draw, so any of those would be swallowed by the very
+  path being observed. MEASURED cost on braf_0: consumed on attempt 1 in 0.03 s.
+- **Bound the probe with FIXED seeds, not random ones.** `_weighted_module_order` is a
+  permutation over thirteen families and only two route through the law, so a single
+  draw can legitimately miss it. Sixteen deterministic seeds make the check reproducible:
+  for a given code state it always passes or always fails, so a failure is a wiring
+  defect rather than an unlucky draw.
+- **MUTATION-PROVEN, four ways.** Dropping the keyword at `expand`, at
+  `synthesize_dynamic_program`, at both delete modules, and a resolver that ignores the
+  field each turn `tests/test_region_law_contract_wiring.py` red. NOTE the near-miss:
+  dropping the law from `substituent_delete` ALONE leaves the consultation test GREEN,
+  because `segment_replace` still threads it -- caught only by the separate behavioural
+  test asserting the production module can excise past the eight-atom cap. One test per
+  hop is not enough when two hops share a sink.
+- **OFF vs ON on the campaign's own path, braf_0, 24 shallow draws, ZERO oracle calls:
+  OFF 0 eligible (reproducing the live `candidate_exhaustion`), ON 4 eligible**, best at
+  similarity 0.640 / QED 0.711 / SA 2.32 from a 15-heavy-atom excision. All four ON
+  endpoints exceed v1's cap, which is the axis that made them undrawable in one module.
+- **The rescue re-pin is exactly three files per arm, and TWO MORE MUST BE ADDED.**
+  `modal_apps/t4_integrated_route_fiber_parp1_app.py`, `dynamic_program_synthesis.py`
+  and `t4_fiber_campaign.py` move; `bridge_region_law.py` and `region_law_contract.py`
+  are in NO existing `runtime_inputs_sha256`, so a rescue contract that does not add
+  them leaves the module implementing the repair unpinned and free to drift.
+- **Attribute a red test before blaming your own change.** Of three hash-pin failures at
+  HEAD, two come from MERGING the repair and one (`t4_integrated_route_fiber_parp1_v1`)
+  was ALREADY stale on four files at the branch base `4cfd398d` -- a superseded v1
+  contract, unrelated to either change. Measured by re-running at the merge commit and
+  by hashing the base revision's own blobs, not inferred from the diff.
+- **`git worktree add` + `git merge FETCH_HEAD`:** `git merge origin/<branch>` fails with
+  "not something we can merge" in a fresh worktree whose remote refs were not fetched
+  into that name; `git fetch origin <branch>` then `git merge FETCH_HEAD` works. The only
+  conflict was `learnings.md`, which is append-only -- resolve by keeping BOTH blocks in
+  order, never by choosing a side.
