@@ -3,12 +3,12 @@
     "A_baseline": {
       "contract": "configs/pmo_ab_a_baseline_contract_v1.json",
       "enable_online_memory": false,
-      "payload_sha256": "c2f615c865ee73d43eb93f41d31b46d8aa54cfb37cdb5e228e30d23e177ba043"
+      "payload_sha256": "fe6c5d45483eeb992ad42ba7b7b1280c3897837af155a5925068b79d7d2f26da"
     },
     "B_memory": {
       "contract": "configs/pmo_ab_b_memory_contract_v1.json",
       "enable_online_memory": true,
-      "payload_sha256": "a48ac78339de5e61e9662f85845f57673edc2e33430a65f90e0d5c03c6d91d75"
+      "payload_sha256": "f0dc7b902dc2e3bf8043d360479963cb1afa9036f1c91dfa08a9bb3eed0a2b0b"
     }
   },
   "authority": "Owner granted standing launch authorization for this overnight PMO work and is away ('you have authorization for modal and everything... you don't have to ask'). The active goal names this experiment explicitly: 'A = strong current productive controller. B = same initialization, executor, chemistry, budget, and controller + online task-adaptive structural proposal memory. Start with GSK3B, Celecoxib, Perindopril.'",
@@ -16,9 +16,10 @@
   "automatic_retries": 0,
   "charged_calls_per_task": 250,
   "charged_calls_total": 1500,
+  "chemistry_contrast": "The repair improves chemistry where the oracle is sound and degrades it where the oracle is hackable: celecoxib QED 0.422->0.499 SA 3.93->3.54; perindopril QED 0.404->0.437 SA 5.03->4.41; gsk3b QED 0.342->0.164 SA 5.27->6.81.",
   "matched_comparison_proof": "The two payloads differ in EXACTLY ONE top-level key ('arm'). budget, tasks and implementation_sha256 are byte-identical, verified by diff before sealing.",
   "offline_gates_passed_before_this_authorization": {
-    "allocator_repair": "parents <10 heavy 68.5/38.4/62.6% -> 10.2/7.6/7.2%; mean parent score 0.091/0.097/0.138 -> 0.186/0.237/0.410; singleton score-swing now moves (+0.04 -> +0.35); escape drains; 8/8 mutations killed; predeclaration written before measurement",
+    "allocator_repair": "FINAL (after a coordinator-requested greed/stall check that changed the fix): the binding constraint was CENTRE SELECTION, not the weighting -- exploration_niches picked every centre after the first by distance alone, so 4-6 of 8 admitted endpoints were one-atom fragments. evidence_niches: admitted sub-10 fragments 6/8->2/8, 4/8->0/8, 6/8->0/8; effective parents 25.2/19.9/12.0 (legacy 23.5/22.7/23.2); sub-10 parent mass 0.687/0.382/0.626 -> 0.156/0.061/0.052; drawn parent mean score 0.080/0.087/0.158 -> 0.158/0.220/0.398. STALL CHECK initially FAILED -- 64 dead children moved top-parent mass 0.05% -- fixed by expressing the tilt in measured-reward units: now -16.7/-26.1/-32.6%, monotone. 10/10 mutations killed, incl. one that first SURVIVED because its test called the function directly instead of through production.",
     "online_memory": "all five predeclared criteria: proposal distribution changes and does so DIFFERENTLY per task from identical code with no task branch; 75-79 distinct endpoints of 80 and 0 near-duplicate pairs; 24 parents across all three tasks; no collapse to shallow edits; cost measured in load-independent counters; 10/10 mutations killed"
   },
   "predeclared_caveat_gsk3b": "gsk3b's score is NOT interpretable as search quality. Its fingerprint-RandomForest oracle rewards off-manifold chemistry (r(score,QED) = -0.433, r(score,SA) = +0.684) and the repaired allocator correctly directs mass at the hacked molecules (mass-weighted QED 0.328 -> 0.124). Promotion evidence must come from perindopril_mpo and celecoxib_rediscovery. Recorded BEFORE the run so a favourable gsk3b number cannot be read as success after the fact.",

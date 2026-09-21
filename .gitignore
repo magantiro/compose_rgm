@@ -114,3 +114,4 @@ artifacts/tdc_originals/
 # Capsules committed before this rule stay tracked; .gitignore does not affect them.
 diagnostics/**/source_capsule/
 diagnostics/**/source_capsule_v[0-9]/
+diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets/
