@@ -54,6 +54,7 @@ import os
 import subprocess
 import sys
 import time
+import uuid
 from pathlib import Path
 
 import modal
@@ -61,7 +62,13 @@ import modal
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose_v4")
 APP_NAME = "compose-zero-oracle-chemistry-fanout"
-VOLUME_NAME = "compose-zero-oracle-fanout"
+#: Volume V2.  This is load-bearing, not cosmetic: on a V1 volume Modal serialises
+#: writers, and a 108-unit map that requested 135 containers was MEASURED running at an
+#: effective concurrency of 3.46 -- the repository's own mining app records the same
+#: ceiling ("at most 5 containers concurrently on Volume v1").  Every unit writes its row
+#: as it completes, so the fan-out width is exactly the volume's concurrent-writer limit.
+VOLUME_NAME = os.environ.get("ZOC_VOLUME", "compose-zero-oracle-fanout-v2")
+VOLUME_VERSION = int(os.environ.get("ZOC_VOLUME_VERSION", "2"))
 ARTIFACT_MOUNT = Path("/artifacts")
 SCHEMA_VERSION = "zero_oracle_chemistry_fanout_v1"
 
@@ -83,11 +90,23 @@ UNIT_TIMEOUT_SECONDS = int(os.environ.get("ZOC_UNIT_TIMEOUT", str(60 * 60)))
 #: one.  Deliberately OFF by default: a resumed unit returns in milliseconds, which would
 #: silently turn any repeat launch -- including a throughput measurement -- into a cache
 #: read reported as compute.
+#:
+#: Read on the LAUNCHER and passed to the unit as an argument.  An environment variable
+#: cannot carry it: this module is imported twice, once locally to build the app and once
+#: inside the container, and the container's environment holds only what the image's
+#: ``.env()`` set.  A decorator argument such as ``max_containers`` is baked into the
+#: function spec at deploy time and so does travel; a value READ AT RUNTIME does not.
 RESUME = os.environ.get("ZOC_RESUME", "0") == "1"
 
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from modal_apps import zero_oracle_chemistry_workloads as workloads
+
+#: One value per PROCESS, so counting distinct values counts containers.
+#: ``os.uname().nodename`` is the literal string "modal" in every Modal container, so a
+#: container census built on it reports 1 however wide the fan-out actually was -- a
+#: metric that cannot vary is not a measurement.
+CONTAINER_UUID = uuid.uuid4().hex
 
 _IGNORE = ("**/__pycache__/**", "**/*.pyc")
 
@@ -166,7 +185,9 @@ def _runtime_image() -> modal.Image:
 
 image = _runtime_image()
 app = modal.App(APP_NAME)
-volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
+volume = modal.Volume.from_name(
+    VOLUME_NAME, create_if_missing=True, version=VOLUME_VERSION
+)
 
 
 def manifest_path_for(path: Path) -> Path:
@@ -232,7 +253,9 @@ def run_namespace(workload_name: str, parameters: dict, commit: str) -> str:
     block_network=BLOCK_NETWORK,
     retries=modal.Retries(max_retries=3),
 )
-def run_unit(item: dict, run_id: str = "", commit: str = "") -> dict:
+def run_unit(
+    item: dict, run_id: str = "", commit: str = "", resume: bool = False
+) -> dict:
     """Execute exactly one work unit and persist it BEFORE returning."""
 
     started = time.time()
@@ -242,7 +265,7 @@ def run_unit(item: dict, run_id: str = "", commit: str = "") -> dict:
         flush=True,
     )
     destination = ARTIFACT_MOUNT / run_id / "units" / f"{item['unit_id']}.json"
-    if RESUME and destination.exists():
+    if resume and destination.exists():
         try:
             existing = json.loads(destination.read_text())
         except (OSError, ValueError):
@@ -255,6 +278,7 @@ def run_unit(item: dict, run_id: str = "", commit: str = "") -> dict:
     row = workloads.execute_item(item)
     row["run_id"] = run_id
     row["source_commit"] = commit
+    row["container_uuid"] = CONTAINER_UUID
     row["item"] = item
 
     row["resumed"] = False
@@ -306,7 +330,9 @@ def reduce_run(run_id: str, workload_name: str, plan: list[dict], meta: dict) ->
         "unit_seconds_max": round(
             max((float(row.get("wall_seconds") or 0.0) for row in rows), default=0.0), 2
         ),
-        "distinct_containers": len({row.get("hostname") for row in rows}),
+        "distinct_containers": len(
+            {row.get("container_uuid") for row in rows if row.get("container_uuid")}
+        ),
         "resumed_units": sum(1 for row in rows if row.get("resumed")),
         "oracle_calls": 0,
         "docking_calls": 0,
@@ -330,6 +356,41 @@ def reduce_run(run_id: str, workload_name: str, plan: list[dict], meta: dict) ->
         f"[reduce] wrote {merged_path} and {manifest_path_for(merged_path)}", flush=True
     )
     return {"merged": merged, "manifest": manifest}
+
+
+@app.function(
+    image=image,
+    cpu=(1.0, 1.0),
+    memory=4096,
+    timeout=20 * 60,
+    max_containers=MAX_CONTAINERS,
+    min_containers=MIN_CONTAINERS,
+    buffer_containers=BUFFER_CONTAINERS,
+    block_network=BLOCK_NETWORK,
+)
+def scaling_probe(index: int, seconds: float = 20.0) -> dict:
+    """Occupy a container for ``seconds`` and report which container ran it.
+
+    The saturation question is about the SCHEDULER, not the chemistry, so it is answered
+    with a workload that has no chemistry in it: distinct ``container_uuid`` values over
+    a map of known duration give the realised container count directly, and the wall
+    clock gives the realised speedup.
+    """
+
+    started = time.time()
+    finish = started + seconds
+    # A busy wait, not sleep: a sleeping container can be descheduled, and the question
+    # is how many containers the scheduler will genuinely run at once.
+    total = 0
+    while time.time() < finish:
+        total += sum(i * i for i in range(1000))
+    return {
+        "index": index,
+        "container_uuid": CONTAINER_UUID,
+        "started": started,
+        "ended": time.time(),
+        "checksum": total % 1000,
+    }
 
 
 @app.function(
@@ -378,7 +439,12 @@ def environment_report() -> dict:
         "networkx": networkx.__version__,
         "omp_num_threads": os.environ.get("OMP_NUM_THREADS"),
         "cpu_count": os.cpu_count(),
-        "block_network": BLOCK_NETWORK,
+        "block_network_requested": BLOCK_NETWORK,
+        # PROBED, not restated: ``BLOCK_NETWORK`` is a launcher-side value and this
+        # module is imported again inside the container with a different environment, so
+        # reporting the flag would prove nothing about the container.  A refused egress
+        # is what makes "no oracle host is reachable" evidence.
+        "egress_probe": _egress_probe(),
     }
     try:
         import torch
@@ -391,6 +457,23 @@ def environment_report() -> dict:
 
 
 # ---- Launcher -----------------------------------------------------------------------
+
+
+def _egress_probe(host: str = "pypi.org", port: int = 443, timeout: float = 5.0) -> dict:
+    """Try one outbound TCP connection.  ``reachable: False`` is the desired result."""
+
+    import socket
+
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return {"host": host, "port": port, "reachable": True, "error": None}
+    except Exception as error:  # noqa: BLE001 - any failure is the evidence we want
+        return {
+            "host": host,
+            "port": port,
+            "reachable": False,
+            "error": f"{type(error).__name__}: {error}",
+        }
 
 
 def _parse_list(value: str) -> tuple[str, ...]:
@@ -412,11 +495,43 @@ def main(
     stream_dir: str = "",
     plan_only: bool = False,
     environment_only: bool = False,
+    scaling_probe_tasks: int = 0,
+    scaling_probe_seconds: float = 20.0,
 ) -> None:
     """Plan locally, fan out, stream rows back, reduce, write the artifact."""
 
     if environment_only:
         print(json.dumps(environment_report.remote(), indent=1, sort_keys=True))
+        return
+
+    if scaling_probe_tasks:
+        started = time.time()
+        rows = list(
+            scaling_probe.map(
+                range(scaling_probe_tasks),
+                kwargs={"seconds": scaling_probe_seconds},
+                order_outputs=False,
+            )
+        )
+        wall = time.time() - started
+        busy = sum(row["ended"] - row["started"] for row in rows)
+        print(
+            json.dumps(
+                {
+                    "tasks": len(rows),
+                    "seconds_per_task": scaling_probe_seconds,
+                    "max_containers": MAX_CONTAINERS,
+                    "min_containers": MIN_CONTAINERS,
+                    "buffer_containers": BUFFER_CONTAINERS,
+                    "distinct_containers": len({row["container_uuid"] for row in rows}),
+                    "busy_seconds": round(busy, 1),
+                    "wall_seconds": round(wall, 1),
+                    "effective_concurrency": round(busy / max(wall, 1e-9), 2),
+                },
+                indent=1,
+                sort_keys=True,
+            )
+        )
         return
 
     commit = source_commit()
@@ -457,7 +572,9 @@ def main(
     # ``order_outputs=False`` yields each row the instant it lands, which is what makes
     # the local mirror an as-they-complete write rather than a buffered one.
     for row in run_unit.map(
-        items, kwargs={"run_id": run_id, "commit": commit}, order_outputs=False
+        items,
+        kwargs={"run_id": run_id, "commit": commit, "resume": RESUME},
+        order_outputs=False,
     ):
         completed += 1
         unit_seconds += float(row.get("wall_seconds") or 0.0)
