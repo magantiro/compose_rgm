@@ -64,6 +64,54 @@ to the sequential route entirely. Both are recorded per trace in metadata
 `ring_dependency_block_fell_back_to_sequential`) so the retrained corpus can be
 stratified by them rather than reported as uniform.
 
+## The finding that changes the recommendation
+
+The dependency block is **statistically indistinguishable from the shipped
+`exact_early_ring` scheduler** on the acceptance statistic. Matched three-arm
+run, same molecules and same source draw (MEASURED, n=40 molecules / 94 ring
+events at the time of writing; see the artifact for the final sample):
+
+| arm | mean | median |
+| --- | --- | --- |
+| `sequential` (what Lineage B trained on) | 0.3072 +- 0.0161 | 0.3020 |
+| `exact_early_ring` (shipped, never wired into training) | 0.2022 +- 0.0141 | 0.1360 |
+| `ring_dependency_block` (this change) | 0.2083 +- 0.0144 | 0.1370 |
+
+Paired, per ring event: repair minus shipped scheduler **+0.0061 +- 0.0033**,
+with **81 of 94 events UNCHANGED**. Repair minus sequential is
+**-0.0989 +- 0.0158**, 71 improved against 19 worsened.
+
+So the support gain is real and large against the corpus that was trained on,
+and it is ALREADY AVAILABLE from a scheduler that shipped in July and was never
+wired into the training recipe. The dependency block reproduces it at lower
+compile cost and by construction rather than by 14,897 executor-verified
+adjacent swaps per 800 traces, but it does not add support quality on top.
+
+**Consequence: whichever schedule is chosen, the plumbing is the deliverable,
+not the algorithm.** Do not present the dependency block as a further gain over
+the shipped scheduler.
+
+## Where the residual lives, exactly
+
+Per ring-system ordinal within a molecule (MEASURED, block arm vs sequential):
+
+| ordinal | sequential | dependency block |
+| --- | --- | --- |
+| 0 | 0.2394 | **0.1358** |
+| 1 | 0.3361 | 0.2008 |
+| 2 | 0.3767 | 0.3372 |
+| 3 | 0.3665 | 0.3163 |
+| 4 | 0.5476 | 0.5422 |
+
+The FIRST ring system of a molecule passes the <0.15 gate. Every later one
+fails, and the repair's benefit decays to nothing by the fifth. The mechanism
+is direct: committing a ring system constricts the legal ring-template support
+the next one is decided against, and no reordering can avoid that in a
+sequential trace with more than one ring system.
+
+A schedule cannot fix this. Closing it needs either a support-level change
+(what the catalog offers at a post-ring state) or an acceptance of the scope.
+
 ## Preconditions before spending GPU
 
 1. The acceptance number in this directory, at its stated sample size, with
