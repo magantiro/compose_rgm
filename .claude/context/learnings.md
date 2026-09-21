@@ -1460,3 +1460,61 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   exposed to the same construct-then-restore-cwd pattern. Not measured. This bites the 5-task rung
   (jnk3) and the 23-task rung. `perindopril_mpo` and `celecoxib_rediscovery` are pure-RDKit
   evaluators with no asset file and no cwd dependency -- measured unaffected.
+
+## 2026-09-20 (dedicated QED-editing task; routing a benchmark through a `kind` label)
+
+- **`ProgramTask.kind` is a DISPATCH token with three separate frozen consumers, and routing a
+  benchmark through it imports that label's unrelated gates.** For the constrained-QED
+  (GrIDDD/Jin) benchmark, `kind="t4"` pulls in `qed_min=0.6` AND `sa_max=4.0`
+  (`program_task.py:76-77`) AND `med_chem_gate.is_valid` via
+  `t4_endpoint_selection.acceptable_endpoint`. MEASURED: that gate marks **143 of the 800 panel
+  sources ineligible when evaluated against themselves** (similarity exactly 1.0, so it is not a
+  similarity refusal); 140 of them have SA > 4.0. The benchmark has no SA term, so the T4 route
+  refuses the benchmark's own starting molecules -- and a contract field `qed_target: 0.90`
+  pointed at that path would still be overridden by the 0.6 literal in the function body.
+- **Resolve a forced direction by CALLING the frozen guard, never by restating its expression.**
+  `parent_edit_search.py:23` forces `"minimize" if task.kind == "t4" else "maximize"`. QED is a
+  maximization objective, so the T4 pairing ranks the archive by LOWEST QED
+  (`ProgramTask.utility(0.95) = -0.95 < -0.50`). `resolve_score_direction` probes
+  `prepare_query_batch` with `count=0` -- refused AFTER the direction guard, so reaching that
+  refusal proves the direction passed. A restatement would agree with itself if the frozen rule
+  moved. The other two consumers: `program_campaign.py:160` refuses `all_scored_pool`
+  initialization unless `kind == "pmo"`, and `:359` adds the PMO AUC summary.
+- **`PRODUCTION_MAX_ATOMS = 40` is the ACTIVE heavy-atom ceiling, not the padding width.**
+  `whole_ring_plan.execute_program` requires `graph.n_atoms == 48` AND
+  `1 <= graph.n_real_atoms <= 40` -- two numbers meaning two things. MEASURED: a tight graph
+  (25 slots, **0 free**) and a 40-padded graph are both refused with "expected an exact supported
+  48-slot source"; 48 is accepted with 23 free slots. Zero free slots is also the mechanism
+  behind the `atom_insert` gotcha -- a birth operation needs a slot to be born into.
+- **Put feasibility in the SUPPORT, not the reward, and the wasted budget disappears rather than
+  shrinking.** `ProgramOptimizer.propose_batch` applies `task.endpoint_evaluator()` and executes
+  `if outcome != "eligible": continue`, so an endpoint the evaluator refuses never becomes a
+  candidate and never spends a charged query. The earlier wiring carried the similarity indicator
+  in the reward (`score = QED * 1[sim >= 0.4]`); MEASURED over 687 legacy sources, **12,064 of
+  28,023 charged endpoints (43.05%) scored 0.0**. With the floor moved into `oracle_eligible`,
+  zero-scored charged endpoints are **0 per source** and ~77% of proposals are admitted.
+- **Keep OUTPUT feasibility separate from ADMISSION.** The QED target is the success event on
+  returned endpoints; it must NOT gate admission, or the search has nothing to climb. Encoded as
+  `is_success` (output) versus `endpoint_evaluator` (support).
+- **Contract governance is only real if the dataclass has NO defaults for the operative values.**
+  `QedEditTask` omits defaults for `qed_target`/`similarity_floor`, so an incomplete contract is a
+  `TypeError`, and both values enter `task_id` via `identity(asdict(self))`. Proof must be a
+  negative control: the SAME call path flips its admission decision and moves `task_id` when only
+  the contract file changed. **A probe for that control has to be a generated analogue of its own
+  source** -- two unrelated panel molecules are never similar enough to sit between a 0.40 and a
+  0.60 floor, so an unrelated-molecule probe silently returns nothing and the control looks
+  vacuously fine.
+- **Shuffle job order whenever a long run may be truncated and the panel has known prefix bias.**
+  Arm A scores 0.620 over indices 0-49 against a global 0.559, so an index-ordered partial run
+  reports a biased number. A systematic sample run in a seeded-shuffled order keeps any partial
+  completion unbiased.
+- **Two snapshot-shape traps in the campaign record.** `trace["primitive_edits"]` is an integer
+  COUNT, not a list -- reading it as a list yields `primitive_depth: null` for every entry and the
+  error is silent. Program blocks are keyed **`label`**, not `name`. Both were caught only because
+  an aggregate came back `null`; the repair reads the saved campaign snapshots, which are the
+  authority, rather than re-running the search.
+- **Units, for any COMPOSE-versus-baseline efficiency claim.** Arm A reports 6,755,513 proposed
+  TRANSITIONS and 3,761,470 UNIQUE STATES over the same 798 sources -- a 1.80x gap between two
+  quantities that are both called "work". Equal K=8 does not equalise effort. State the unit, and
+  note the residual asymmetry that arm A property-evaluates trajectory intermediates while the
+  program arm property-evaluates endpoints only.
