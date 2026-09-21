@@ -3355,3 +3355,59 @@ independently of whether fa7_0 ever closes.**
   same class as "a metric that cannot vary is not a measurement". **(2) Pre-blessing one branch as
   "publishable" creates pressure to reach it.** State what each outcome would mean, never which one
   would be a good result.
+
+## 2026-09-21 (CORRECTION: "publicly available" is not "supplied by the task" -- traced at source)
+
+- **CORRECTS the entry above, "a benchmark-declared target is a task INPUT".** That entry is TOO
+  BROAD and its PMO half is withdrawn. The celecoxib target SMILES IS a literal in TDC's public
+  oracle source -- that fact was verified and stands. **The inference drawn from it was wrong:
+  publicly available is NOT the same as supplied-to-the-optimizer-by-the-evaluated-task.**
+- **TRACED AT SOURCE in the comparator.** IVG's `in_virtuo_reinforce/genetic_ppo.py` does contain a
+  dictionary of reference SMILES assigned to `config.target` -- but every use of
+  `self.config.target` in the optimization loop passes it to `visualize_top_smiles`, which puts the
+  reference at the front of a molecular drawing grid and saves a plot. The data flow is
+  **reference SMILES -> configuration -> visualization -> saved plot**. It never reaches the
+  proposal model, the reward, the prompter or the training procedure. **It is a DISPLAY reference,
+  not a navigational input.** Finding a SMILES in a repository does not settle the question;
+  tracing where the string GOES does.
+- **The PMO paper is explicit:** "neither the analytic form of oracles nor the derivatives of the
+  properties are accessible" -- feedback is scalar oracle evaluations under a query budget.
+- **CORRECTED RULE: use a target when the EVALUATED TASK actually supplies it.**
+  - **T4 supplies the lead molecule** -- GenMol's lead runner reads the supplied start, builds its
+    fingerprint and initializes from its fragments. A genuine task input, like delta.
+  - **PMO black-box search supplies scalar feedback only.** A source-to-target compiler does not
+    change this: hand it the answer and you have evaluated REFERENCE-CONDITIONED CONSTRUCTION, not
+    black-box discovery. That is still good science -- it just needs its own label.
+- **Where the comparators' task-specific proposal information actually comes from:**
+  - GenMol's released PMO setup: `scripts/exps/pmo/get_vocab.py` reads ZINC250k, evaluates the PMO
+    objectives, decomposes molecules into fragments, scores fragments by the mean of the molecules
+    containing them, and writes the **top 10,000 fragments PER OBJECTIVE**. That is an
+    oracle-informed **prescreened vocabulary** -- precisely what IVG's `--use_prescreen` toggles.
+  - IVG no-prescreen: generated initialization plus counted evaluations that drive prompting,
+    mutation, adaptive length selection, replay and generator updates. Its `GeneticPrompter` does
+    use molecular STRUCTURE aggressively -- but from its own scored search population, not from the
+    reference dictionary.
+  - NAMING TRAP: `model.sample(oracle=n_oracle)` does NOT hand the generator the property oracle;
+    `n_oracle` is a list of selected sequence lengths. Property evaluation happens at
+    `self.oracle(smiles)`.
+- **PERMITTED vs NOT, for the no-prescreen comparison.** Freely usable: structures the optimizer
+  GENERATES, task-independent molecular data, graph relationships among candidates, and scores
+  acquired within the run's budget. Not silently supplied: the hidden reference graph, a target
+  fingerprint extracted from the evaluator, same-task winning molecules selected using prior oracle
+  results, or a checkpoint trained to reconstruct benchmark answers. **A zero-read certificate at
+  runtime does not erase information already baked into weights or a library.**
+- **THREE SEPARATELY LABELLED MODES, because they answer different questions:**
+      goal-given transport DIAGNOSTIC     reference visible     can the compiler CONSTRUCT it?
+      teacher-region warm-start DIAGNOSTIC init state informed,  can the local optimizer EXPLOIT it?
+                                           no suffix or goal
+      no-prescreen PMO SEARCH             nothing hidden shown  can the system DISCOVER it?
+- **The 11-task teacher dossier is a CHALLENGE SET, not a training distribution.** 137 programs /
+  4,548 primitive actions, but **8 of the 11 task sections share the SAME starting molecule**
+  (`COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1`) and lineage diversity is very limited. Fitting a
+  prior on 11 PMO winning structures and then reporting those same tasks as task-independent would
+  convey answer information regardless of any runtime certificate. **Generality of the algorithm and
+  fairness of its information are separate questions.**
+- **SCALE of the remaining gap, as bookkeeping not forecast:** IVG's no-prescreen celecoxib AUC at
+  10,000 calls is 0.798; our arm B reached AUC 0.3138 at 1,000. Matching 0.798 over 10k after those
+  first 1,000 requires an average top-ten level of ~0.852 across the remaining 9,000 calls. A single
+  perfect target molecule is not the objective; a strong top-ten CURVE is.
