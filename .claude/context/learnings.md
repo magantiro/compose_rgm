@@ -2382,3 +2382,59 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **Build a witness, do not search for one.** A prior search over the six largest production
   parents found nothing; constructing one took minutes, and rebuilding it from the LIVE
   enumerator each run means a chemistry-kernel change re-derives it rather than invalidating it.
+
+## 2026-09-21 (zero-excision construction: ring closure is the mitigation, and a mutation that did not apply)
+
+- **A mutation that silently FAILS TO APPLY reads exactly like a surviving mutation, and I
+  recorded a phantom hole because of it.** My mutation string used single quotes against a
+  double-quoted source, so `str.replace` was a no-op, the suite passed, and I wrote it up as
+  "the guard is weak". Same class as "a comparison whose expectation is recomputed from the code
+  under test cannot fail" — the test of the test was missing. **Every mutation runner must
+  `diff` the file and refuse to report a result when the mutation did not change it.** With that
+  check added, 7 of 7 mutations on the new branch were killed.
+- **One of the two apparent survivors was real, and it was a TAUTOLOGY of the familiar shape:**
+  the constructor reported `rings_closed` by copying `intent.close_bonds` — the DEMAND — rather
+  than counting `cycle_close` actions in the realized program. A field that echoes the request
+  cannot witness that the request was met. Count from the actions. The second real weakness was
+  a support-floor test that never exercised a NEGATIVE margin, so a law mutated from re-ranking
+  into filtering passed; a floor is only tested where it binds.
+- **Zero-excision construction is broadly reachable and chemically costly.** Drawing an
+  ATTACHMENT SITE instead of a region (an `AttachmentSiteLaw` mirroring `BridgeRegionLaw`'s
+  floor, temperature and Efraimidis-Spirakis order) realizes 51 of the 92 previously-abstained
+  requests — 55.4%, more than twice the excision branch's 24.3%, because it needs no region of a
+  given size. But its endpoints are worse: mean dQED **-0.125** against the excision branch's
+  **-0.065**, and mean dSA **+1.97** to a median endpoint SA of **6.23**, which is effectively
+  unmakeable. Against the completed run's baseline (-0.0837 mean dQED, 66.1% of edits losing
+  drug-likeness) the excision branch is slightly BETTER and the construction branch clearly
+  worse in magnitude.
+- **CORRECTION I made to my own reading within the same session.** The excision branch's
+  program-length curve (3-5 primitives **+0.081**, 6-9 -0.028, 10-14 -0.135, 15+ -0.159)
+  reproduces the ~7x damage scaling, and I first summarised it as "short parent-first programs
+  improve drug-likeness". A control driving the ZERO-EXCISION branch at sizes 1-12 refutes that:
+  pure addition is net-negative at EVERY size including a single atom (-0.023) and degrades
+  monotonically. So the +0.081 belongs to REMOVING a fragment, not to short programs as such.
+  Two branches, two different curves; do not let one stand in for the other.
+- **RING CLOSURE IS THE MITIGATION, and QED and SA disagree about it.** 3 atoms + 1 closure is
+  **-0.022** against **-0.100** for 3 atoms alone; 5 + 1 closure is -0.067 against -0.160 for 4
+  alone. A closure turns a floppy chain into a ring and QED rewards it — roughly a 4x reduction
+  in damage. Synthetic accessibility moves the OPPOSITE way (+0.88 and +1.07 for those cells
+  against +0.25 and +0.34 without), because rings raise SA. Quote both or the conclusion
+  inverts with the metric you picked.
+- **The binding limitation is element PLACEMENT, not vocabulary.** The chain is drawn uniformly
+  from the intent's element set, so a 12-atom build from `('C','O')` produces polyperoxides —
+  `C1COOCOOCCC2OOOO1` — which are valid, executable, RDKit-parseable, and not molecules. The
+  teacher used those same elements in specific positions. A chemistry prior over placement is
+  what closes this; widening or narrowing the vocabulary will not.
+- **Intent-catalog confounding: check what the library DEMANDS of a branch before judging the
+  branch.** All 8 catalog plans with no excision demand ask for 12-13 insertions plus 2
+  `cycle_close`, so the zero-excision branch is pinned to the worst end of the length curve by
+  the LIBRARY rather than by anything about the move class. The synthetic-intent control is what
+  separated them, and it is a diagnostic only — never a proposal source.
+- **A single inserted atom CAN close a three-ring**, onto a NEIGHBOUR of its anchor. I assumed it
+  could not (it is bonded only to the anchor, and `cycle_close` refuses an already-bonded pair)
+  and encoded that assumption in a test, which failed. Pinned as a positive test rather than
+  quietly fixed, because the branch is more capable here than assumed.
+- **`enumerate_cycle_close_edges` is the production closure fiber and is EXPENSIVE** (it runs the
+  semantic cycle-close admission mask). Use it anyway — a hand-rolled pair search would be this
+  module's ring chemistry instead of the kernel's — but budget for it: the 92 zero-excision
+  requests cost about as much wall time as the 999 excision ones.
