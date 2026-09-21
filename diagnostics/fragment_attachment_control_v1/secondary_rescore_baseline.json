@@ -22,7 +22,7 @@
         },
         "diversity": {
           "mean": 0.7686698617719768,
-          "std": 0.05447994509788323
+          "std": 0.05447994509788326
         }
       },
       "over_emitted_rows": 30,
@@ -41,12 +41,54 @@
         },
         "diversity": {
           "mean": 0.7746694998780332,
-          "std": 0.049266540280448384
+          "std": 0.04926654028044843
         }
       },
       "over_committed_rows": 30,
       "committed_endpoints": 2562,
       "unique_committed_endpoints": 2502
+    },
+    "scaffold_decoration": {
+      "over_emitted": {
+        "validity": {
+          "mean": 3.5,
+          "std": 5.572252686302013
+        },
+        "uniqueness": {
+          "mean": 50.0,
+          "std": 50.0
+        },
+        "quality": {
+          "mean": 1.8,
+          "std": 3.3605555096342825
+        },
+        "diversity": {
+          "mean": 0.24177943409531644,
+          "std": 0.3437391871489767
+        }
+      },
+      "over_emitted_rows": 30,
+      "over_committed": {
+        "validity": {
+          "mean": 100.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 97.93066911600582,
+          "std": 4.877072535391694
+        },
+        "quality": {
+          "mean": 38.96448158561561,
+          "std": 22.921790939097328
+        },
+        "diversity": {
+          "mean": 0.7256738819253074,
+          "std": 0.04381650241785896
+        }
+      },
+      "over_committed_rows": 30,
+      "committed_endpoints": 2804,
+      "unique_committed_endpoints": 2768
     }
   }
 }

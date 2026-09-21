@@ -1,23 +1,64 @@
 {
   "schema": "compose_fragment_attachment_secondary_reading_v1",
-  "task": "motif_extension",
-  "kernel": {"rdkit": "2026.03.6", "numpy": "2.5.3", "torch": "2.14.0", "python": "3.12.9"},
+  "task": [
+    "motif_extension",
+    "scaffold_decoration"
+  ],
+  "kernel": {
+    "rdkit": "2026.03.6",
+    "numpy": "2.5.3",
+    "torch": "2.14.0",
+    "python": "3.12.9"
+  },
   "why_this_file_exists": "The persisted committed endpoints make uniqueness/quality/diversity recoverable over BOTH denominators for the first time. The baseline's published secondary numbers were scored over its emitted set, which excluded 51% of what it committed, so they described the survivors. Reading the two arms side by side without that correction would credit the controller with a uniqueness regression it did not cause and hide the one it did.",
   "over_committed_endpoints": {
     "note": "the generator's own output, before the task filter; validity is 100% by construction in both arms",
-    "before": {"uniqueness": 97.01, "quality": 15.87, "diversity": 0.77},
-    "after": {"uniqueness": 76.58, "quality": 17.96, "diversity": 0.60}
+    "before": {
+      "uniqueness": 97.01,
+      "quality": 15.87,
+      "diversity": 0.77
+    },
+    "after": {
+      "uniqueness": 76.58,
+      "quality": 17.96,
+      "diversity": 0.6
+    }
   },
   "over_emitted_samples": {
     "note": "the published protocol's denominator; a censored or failed attempt counts as an invalid sample",
-    "before": {"validity_is_task_success": 41.43, "uniqueness": 99.81, "quality": 7.87, "diversity": 0.77},
-    "after": {"validity_is_task_success": 83.23, "uniqueness": 78.22, "quality": 14.47, "diversity": 0.60}
+    "before": {
+      "validity_is_task_success": 41.43,
+      "uniqueness": 99.81,
+      "quality": 7.87,
+      "diversity": 0.77
+    },
+    "after": {
+      "validity_is_task_success": 83.23,
+      "uniqueness": 78.22,
+      "quality": 14.47,
+      "diversity": 0.6
+    }
   },
   "pinned_comparators_motif": {
     "provenance": "references/reference_metrics.csv @ b50bb3ae, as already pinned in diagnostics/fragment_official_suite_v2/comparison_table.json",
-    "GenMol": {"validity": 82.90, "uniqueness": 77.50, "quality": 30.10, "diversity": 0.62},
-    "SAFE-GPT": {"validity": 96.10, "uniqueness": 66.80, "quality": 18.60, "diversity": 0.56},
-    "InVirtuoGen": {"validity": 64.90, "uniqueness": 96.72, "quality": 35.20, "diversity": 0.62}
+    "GenMol": {
+      "validity": 82.9,
+      "uniqueness": 77.5,
+      "quality": 30.1,
+      "diversity": 0.62
+    },
+    "SAFE-GPT": {
+      "validity": 96.1,
+      "uniqueness": 66.8,
+      "quality": 18.6,
+      "diversity": 0.56
+    },
+    "InVirtuoGen": {
+      "validity": 64.9,
+      "uniqueness": 96.72,
+      "quality": 35.2,
+      "diversity": 0.62
+    }
   },
   "readings": [
     "MEASURED COST, real and not a denominator artifact: over COMMITTED endpoints uniqueness falls 97.01 -> 76.58 and diversity 0.77 -> 0.60. Both arms use the same denominator here, so this is the controller concentrating growth onto one declared site instead of spreading it over the whole core.",
@@ -25,5 +66,47 @@
     "The baseline's headline uniqueness of 99.81 was an artifact of scoring 8 surviving molecules per 100 attempts. At 83 survivors the same estimator reads 78.22. Do not report that fall as a regression; the comparable pair is the over-committed one.",
     "Both post-control secondary numbers land inside the comparator range rather than outside it (uniqueness 78.22 against GenMol 77.50; diversity 0.60 against GenMol 0.62 and SAFE-GPT 0.56). The baseline's 0.77 diversity came from growing anywhere on the core, including the 59% of endpoints that failed the task.",
     "Quality 14.47 against GenMol 30.10 remains a real gap and attachment control does not close it. It is NOT the placement mechanism: quality is QED>=0.6 AND SA<=4, and this checkpoint's SA is depressed by the small-ring rate documented for the Lineage B preview. Out of scope here, named so it is not mistaken for a controller cost."
-  ]
+  ],
+  "scaffold_decoration": {
+    "over_committed_endpoints": {
+      "note": "same denominator both arms; this is the valid comparison",
+      "before": {
+        "uniqueness": 97.93,
+        "quality": 38.96,
+        "diversity": 0.73
+      },
+      "after": {
+        "uniqueness": 95.89,
+        "quality": 29.72,
+        "diversity": 0.59
+      }
+    },
+    "over_emitted_samples": {
+      "note": "published protocol denominator",
+      "before": {
+        "validity_is_task_success": 3.5,
+        "uniqueness": 50.0,
+        "quality": 1.8,
+        "diversity": 0.24
+      },
+      "after": {
+        "validity_is_task_success": 84.17,
+        "uniqueness": 98.55,
+        "quality": 25.1,
+        "diversity": 0.58
+      }
+    },
+    "genmol_pinned": {
+      "validity": 96.6,
+      "uniqueness": 82.7,
+      "quality": 31.8,
+      "diversity": 0.591,
+      "distance": 0.651
+    },
+    "readings": [
+      "The before arm's emitted secondary numbers were scored over 105 of 2,804 committed endpoints (96.3% censored) and are INVALID as generator statistics. Their apparent improvement under the controller (uniqueness 50.0 -> 98.5, quality 1.8 -> 25.1) is mostly the denominator recovering, not the generator improving.",
+      "On the SAME denominator (over committed) the controller COSTS quality 38.96 -> 29.72 and diversity 0.73 -> 0.59, with uniqueness roughly flat 97.93 -> 95.89. The unconstrained generator makes more drug-like molecules; they just do not satisfy the declared attachment sites.",
+      "So the honest statement is a trade, not a free win: conditional task success 3.50 -> 84.17 of attempts, paid for with a real reduction in the chemical quality and structural spread of what is produced."
+    ]
+  }
 }

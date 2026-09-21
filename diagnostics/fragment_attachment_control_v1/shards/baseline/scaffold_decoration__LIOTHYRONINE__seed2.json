@@ -1,0 +1,410 @@
+{
+  "schema": "compose_fragment_official_suite_v1",
+  "protocol": {
+    "source": "in_virtuo_gen/evaluation/downstream.py @ b50bb3ae",
+    "samples_per_prompt": 100,
+    "seeds": 3,
+    "task_row": "unweighted mean over the task's drugs",
+    "scaffold_morphing": "upstream copies the linker result"
+  },
+  "kernel": {
+    "rdkit": "2026.03.6",
+    "numpy": "2.5.3",
+    "torch": "2.14.0",
+    "python": "3.12.9",
+    "platform": "macOS-26.5.2-arm64-arm-64bit"
+  },
+  "checkpoint": {
+    "path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "completed_steps": 16000,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "atom_vocabulary": "ORGANIC"
+  },
+  "sampler": {
+    "config": {
+      "mark_attempts_per_event": 24,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "config_sha256": "805b2d10fa863c278dfd760fb3b9f5fd29eb94f91ef1653b1bf5ebe44aaab9ae"
+  },
+  "attachment_control": {
+    "config": {
+      "attachment_first": true,
+      "enabled": false,
+      "realize_redirected_order": true,
+      "redirect_attachment": true,
+      "release_linker_join": true,
+      "require_separated_cores": true,
+      "restrict_interfaces": true
+    },
+    "config_sha256": "698d57036e25eba4e23d910e3e5adffe70c6582b440aeb4dd8b3389b0e2f6691",
+    "arm": "frozen_sampler_baseline"
+  },
+  "metric_provenance": {
+    "validity_uniqueness_quality_diversity": "official in_virtuo_gen.train_utils.metrics.evaluate_smiles @ b50bb3ae, already_smiles=True",
+    "distance": "NOT in the released evaluator: evaluate_smiles returns no distance key. Estimator is the official in_virtuo_gen.utils.mol.calculate_average_tanimoto(prompt=...); reference = the dummy-stripped prompt fragment(s)",
+    "fragment_preservation": "independent audit, atom-level non-overlapping substructure match, run over COMMITTED endpoints as well as emitted samples"
+  },
+  "results": {
+    "scaffold_decoration": {
+      "task": "scaffold_decoration",
+      "prompts_declared": 1,
+      "prompts_scored": 1,
+      "samples_per_prompt": 100,
+      "seeds": 3,
+      "per_seed": [
+        {
+          "validity": 0.0,
+          "uniqueness": 0.0,
+          "quality": 0.0,
+          "diversity": 0.0,
+          "distance": NaN,
+          "distance_to_original_drug": NaN
+        }
+      ],
+      "summary": {
+        "validity": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "quality": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "diversity": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "distance": {
+          "mean": NaN,
+          "std": NaN
+        },
+        "distance_to_original_drug": {
+          "mean": NaN,
+          "std": NaN
+        }
+      },
+      "build_failures": [],
+      "per_drug": {
+        "LIOTHYRONINE": [
+          {
+            "seed": 2,
+            "rng_seed": 135870705,
+            "official": {
+              "validity": 0.0,
+              "uniqueness": 0.0,
+              "diversity": 0.0,
+              "quality": 0.0,
+              "distance": NaN,
+              "distance_to_original_drug": NaN
+            },
+            "attempts": 100,
+            "validity_denominator": 100,
+            "emitted_nonempty": 0,
+            "distance_reference_prompt": "c1ccc(Oc2ccccc2)cc1",
+            "unique_valid_count": 0,
+            "committed_endpoints": 100,
+            "committed_chemically_valid": 100,
+            "committed_fragment_preserving": 100,
+            "emitted_fragment_preserving": 0,
+            "constraint_failures": 100,
+            "lock_rejections": 54,
+            "budget_exhausted": 0,
+            "executor_refusals": 0,
+            "mean_events": 19.57,
+            "families": {
+              "atom_insert": 1601,
+              "atom_delete": 329,
+              "bond_reorder": 7,
+              "atom_restate": 7,
+              "bond_reroute": 7,
+              "bond_insert": 6
+            },
+            "seconds": 350.99,
+            "committed_endpoint_smiles": [
+              "CC(N=O)C(=O)Nc1ccc(Oc2ccc(F)cc2)cc1",
+              "CCSCCN(CC)C(=O)Oc1cccc(Oc2cccc(Br)c2)c1",
+              "COc1c(F)cccc1Oc1cc(Cl)ccc1C(=O)NC(CCO)C(=O)Cl",
+              "CN(C)CCOC(O)CNC(=O)c1ccccc1Oc1cccc(N(C)C)c1",
+              "CCC(=O)Nc1ccc(Oc2ccccc2F)cc1",
+              "CN(CCCCCC(=O)OC(=O)O)c1ccc(Oc2ccccc2F)cc1",
+              "O=C(Br)Oc1ccc(Oc2ccccc2OCCCC(=O)OCCO)cc1F",
+              "COc1cccc(Oc2ccc(OCCOC(=O)NC(C)=O)cc2)c1",
+              "C=C(CCCNC(=O)CCN(CC)c1ccc(Oc2ccccc2)cc1)C(=O)O",
+              "CC(C#N)=Cc1ccccc1Oc1cccc(S(=O)(O)(O)CC(=O)O)c1",
+              "CCCCC(=O)Nc1cc(Oc2ccc(OC)cc2)ccc1N",
+              "CC(C)N(C)C(=O)Nc1cc(Oc2ccc(O)cc2)ccc1O",
+              "CC(C)(C)N(c1ccc(Oc2ccccc2Br)cc1)C(CO)C(=O)O",
+              "CCCCOC(C)(C)COc1cccc(Oc2ccc(OC)cc2)c1",
+              "COP(=O)(CCCc1ccc(Oc2ccc(CCN(C)C)cc2)cc1)OC(=O)O",
+              "CC(C)CCCCNC(=O)COc1ccc(Oc2ccccc2)cc1",
+              "CC(C)(N)COC(=O)C#Cc1ccc(C(=N)OCO)c(Oc2ccc(Cl)cc2)c1",
+              "NCCOCCOC(=O)CCCOc1cccc(Oc2cccc(Br)c2)c1",
+              "CC(C)(C)C(=O)NCc1ccc(Oc2ccc(O)cc2O)cc1",
+              "C=C(Br)c1cc(SC)ccc1Oc1ccccc1OCC(O)O",
+              "CCC(CC)(NC(=O)c1ccc(Oc2ccccc2)cc1)C(=O)CC(C)(C)C",
+              "CCC(C)(C)C(=O)Nc1cccc(Oc2ccccc2)c1",
+              "CCN(C)CCSCc1ccc(O)c(Oc2ccc(OC(N)=O)cc2Cl)c1",
+              "B=C(C)CC(=O)NC(=O)c1cccc(Oc2ccccc2)c1",
+              "COc1ccc(Oc2ccc(C(=O)NCC(C)O)cc2O)cc1",
+              "NC(=O)c1ccc(Oc2ccc(ONC(=O)CBr)cc2O)cc1",
+              "CCN(C(=O)O)c1ccc(Oc2ccc(O)c(I)c2CO)cc1",
+              "CCCC(C)(COC)NC(=O)c1ccc(Oc2ccccc2)cc1",
+              "CC(=O)Nc1cc(Cl)ccc1Oc1cccc(C)c1",
+              "CCC(C)(C)CNC(=O)CNC(=O)C=Cc1ccc2cc1OC(=O)Nc1cccc(c1)O2",
+              "N=C(CCC(=O)Nc1ccc(Oc2ccc(Cl)cc2)cc1)N(N)C(N)=O",
+              "CCCCOC(=O)CSCc1ccc(O)c(Cl)c1Oc1ccccc1OC",
+              "O=C(O)CCOC(=O)Nc1cccc(Oc2ccc(C(F)(F)F)cc2)c1",
+              "CCN(CC)CCCCCCCC(=O)Nc1ccccc1Oc1ccc(OC)cc1",
+              "CNc1ccc(C=CCCC(=O)OC)cc1Oc1ccc(Cl)cc1C",
+              "CC(=O)OC(=O)C(F)(F)Sc1ccc(Oc2ccccc2)cc1",
+              "C#Cc1cc(Oc2ccc(Cl)cc2)ccc1C(=C)CCCN(C)CC",
+              "COC(=O)CCOC(=O)CCC(=O)Nc1ccccc1Oc1ccccc1",
+              "COC(=S)N(C)c1ccccc1Oc1cccc(C(F)(F)F)c1",
+              "CCCN(NC)C(O)C(=O)Oc1ccccc1Oc1ccc(C(=O)NCC=O)cc1",
+              "CCCN=NCc1cccc(Oc2ccccc2)c1",
+              "CC(C)(C)COC(=O)Oc1ccc(Oc2ccc(Cl)cc2)cc1",
+              "CCOC(CCC(=O)NO)C(=O)Nc1ccc(Oc2cccc(F)c2)cc1",
+              "CCN(C)C(=O)Nc1cc(O)ccc1Oc1ccc(Cl)cc1OC",
+              "CSCC(=O)N(C=O)CCC(C)=NOc1cccc(Oc2ccccc2)c1",
+              "C#CCN(CC)CC(N=O)=Nc1ccc(Oc2ccc(Cl)cc2)cc1",
+              "CC(C)=C1C(=O)Oc2cc(Oc3ccc(O)cc3)ccc21",
+              "CCC(C)(C(=O)N(C)C)c1cc(Oc2ccc(F)cc2)c(Cl)cc1C",
+              "C#CCN(CC)C(=O)c1ccc(Oc2ccc(OC(F)(F)F)cc2)cc1",
+              "CC(=O)BC(COc1cccc(Oc2ccccc2)c1)CC(C)C",
+              "CCC(C)(O)c1ccc(Oc2ccc(CC(=O)OCCO)cc2)cc1",
+              "CC(C)C(=O)NC(=S)NC(CCCl)C(=O)Nc1ccc(Oc2ccccc2)cc1",
+              "CCCCCOC(=O)CCOc1ccc(Oc2cccc(C)c2)c(F)c1",
+              "COc1ccc(Oc2ccc(N(C)C)cc2)c(NC(CCN(O)O)C(=O)O)c1",
+              "CNCCOOCC(CN(C)C)Oc1ccc(Oc2ccc(OC(=O)O)cc2)cc1",
+              "CCN(C)C(=O)CC(=O)NCc1ccc(Oc2ccccc2)cc1",
+              "CCOC(=O)C(=O)NC(=O)c1cc(Cl)ccc1Oc1ccc(OC)cc1",
+              "Cc1cccc(Oc2cc(C(=O)OC(C)(C)CS)ccc2CCCCO)c1F",
+              "CN(C=O)CCCC(=O)Nc1ccc(Oc2ccccc2)cc1O",
+              "[O-][I+]Oc1ccccc1Oc1ccc(C(F)F)cc1",
+              "CC(=O)N(CC(=O)O)c1ccc(Oc2ccc(OCC(C)N)cc2)cc1",
+              "CC(=O)N1CCN(CC#COc2ccccc2Oc2ccc(Br)cc2)CC1",
+              "CCOOc1cc(C(F)(F)F)ccc1Oc1cc(Cl)c(Cl)c(OCl)c1",
+              "CCCCN(CC)CCc1ccc(Oc2ccc(OC)cc2)cc1",
+              "CCOCCOc1ccc(CCC(=O)O)c(Oc2cccc(OCC(=O)Cl)c2OC)c1",
+              "CC1=C(ON)CN(c2ccc(Oc3cccc(C(F)(F)F)c3O)cc2)C1=O",
+              "CCOC(=O)c1cc(C)c(Oc2cccc(C(=O)O)c2)c(C(=O)N(CC)NC(N)=O)c1",
+              "NNC(=O)CCCOc1ccc(CCOC(N)=O)cc1Oc1ccccc1",
+              "CCOc1ccc(Oc2ccc(C(=O)N(C)CCCl)cc2)cc1",
+              "C=CCOc1ccc(Oc2ccc(OCC)cc2S[PH4])cc1",
+              "CC(C)N(CCOc1ccc(Oc2ccccc2)cc1)C(C)(C)C",
+              "C=CCOC(O)Cc1cccc(Oc2cccc(OCC=NNC)c2)c1O",
+              "CC(CC(C=Cc1ccccc1Oc1ccccc1)OC(N)=O)N=O",
+              "COc1ccccc1Oc1ccc(C(=O)NN=NNC(=O)NC(C)C(O)CCC=O)cc1",
+              "Oc1cc(Oc2ccc(OC(F)(F)Cl)cc2)c(CF)cc1F",
+              "CCC(=O)NN(CO)CCNCCOc1ccc(Oc2ccc(Cl)cc2)cc1",
+              "CNCCCC(=O)NCc1ccc(Oc2cccc(Br)c2)cc1",
+              "CCN(C(N)=O)C(=O)SCC(=O)OCc1cc(C(=O)OC)ccc1Oc1ccccc1",
+              "CCCN(CCNC(=O)NC)CCc1ccc(Oc2ccccc2)cc1",
+              "CN(C)CC(=O)OCCOc1ccc(Oc2ccccc2Br)cc1",
+              "COCCOC(=O)CCCCOc1ccc(Oc2ccccc2)c(C)c1",
+              "O=C(O)C(C(=O)O)c1ccc(Oc2ccc(F)c(O)c2)cc1",
+              "CC(=O)C(COCO)CC(=O)Nc1ccc(Oc2cccc(OC3CCC3)c2)cc1",
+              "CCN(C)C(=O)C(CO)NC(=O)c1ccc(Oc2cccc(O)c2C)cc1",
+              "COc1cccc(Oc2ccccc2NC(CCNC(N)=O)C(N)=O)c1",
+              "CCC(C)C(=O)C(COc1ccccc1Oc1ccc(OC)cc1Cl)N=N",
+              "CCN(CCCN(C)C)CCOC(=O)c1cccc(Oc2cccc(Br)c2)c1",
+              "CNC(=O)C(C)(C)NCC(O)COc1cc(Oc2ccc(Cl)c(Cl)c2)c(Cl)c(C(F)(F)F)c1",
+              "COc1ccc(OCCC(=O)O)c(Oc2ccc(OCCC(=O)CN)cc2O)c1",
+              "CC(=O)C(C)([IH2])C(=O)Nc1ccc(Oc2ccccc2C)cc1",
+              "CCC(C)COC(=O)NC(N)=NCCCNc1ccccc1Oc1ccccc1",
+              "CCCCOC(=O)Nc1cccc(Oc2cc(O)ccc2C(=O)O)c1",
+              "COc1ccccc1Oc1ccc(NC=O)cc1CSC(=O)CC(N)C#N",
+              "CCOC(=O)c1cc(Oc2ccc(CCOC(C)(C)CC)cc2)cc(O)c1F",
+              "CCN(C(=O)O)C(=S)COC(=O)c1ccc(Oc2ccc(Cl)cc2)cc1",
+              "CCCOc1ccc(Oc2cccc(OCC(C)(C)C)c2)cc1",
+              "CCCN=C(CCCCOc1ccc(Oc2ccc(C)cc2)cc1)NCCCCN(C)CC",
+              "COCCN(CCOc1ccc(Oc2cccc(Cl)c2C)cc1)C(=O)O",
+              "CC(C)COc1ccc(Oc2ccc(C=CC(=O)NO)cc2)cc1",
+              "C=COC1CCC(Oc2ccc(Oc3ccc(OC)cc3)cc2)C1"
+            ],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "interface_rejections": 0,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 0,
+            "declared_interfaces": [
+              0,
+              2,
+              8,
+              9,
+              11
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                0,
+                2,
+                8,
+                9,
+                11
+              ],
+              "requirements": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  1
+                ],
+                [
+                  8,
+                  1
+                ],
+                [
+                  9,
+                  1
+                ],
+                [
+                  11,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                13
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                0,
+                2,
+                8,
+                9,
+                11
+              ],
+              "required": {
+                "0": 1,
+                "2": 1,
+                "8": 1,
+                "9": 1,
+                "11": 1
+              },
+              "covered": {
+                "0": 0,
+                "2": 0,
+                "8": 0,
+                "9": 0,
+                "11": 0
+              },
+              "satisfied": false
+            }
+          }
+        ]
+      }
+    }
+  }
+}
