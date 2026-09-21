@@ -267,17 +267,40 @@ def main() -> None:
     print(f"[sample] {len(jobs)} of {len(train)} train molecules, seed {args.seed}",
           flush=True)
 
+    # This machine is shared, so a long run is never all-or-nothing: rows are
+    # appended to a JSONL sidecar as they land and the summary is rewritten
+    # periodically.  A run killed at any point is still readable, and a
+    # relaunch can be scored against whatever completed.
+    sidecar = args.output.with_suffix(".rows.jsonl")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
     rows: list[dict] = []
     with ProcessPoolExecutor(
         max_workers=args.workers,
         initializer=_init_worker,
         initargs=(str(args.checkpoint),),
-    ) as pool:
+    ) as pool, sidecar.open("w") as handle:
         for done, row in enumerate(pool.map(_measure, jobs, chunksize=1), start=1):
             rows.append(row)
+            handle.write(json.dumps(row, sort_keys=True) + "\n")
+            handle.flush()
             if done % 10 == 0:
-                print(f"[progress] {done}/{len(jobs)} elapsed={time.time()-started:.0f}s",
-                      flush=True)
+                print(
+                    json.dumps(
+                        {
+                            "phase": "progress",
+                            "done": done,
+                            "total": len(jobs),
+                            "elapsed_seconds": round(time.time() - started, 1),
+                            **{
+                                arm: round(value, 4)
+                                for arm, value in _interim(rows).items()
+                            },
+                        }
+                    ),
+                    flush=True,
+                )
+            if done % 50 == 0:
+                _write_interim(args, rows, pinned, len(train), started)
 
     artifact = {
         "measurement": "denovo_ring_schedule_acceptance_v1",
@@ -298,6 +321,8 @@ def main() -> None:
             "seed": args.seed,
             "sample_size": args.sample_size,
         },
+        "status": "COMPLETE",
+        "rows_sidecar": str(sidecar.name),
         "rows": rows,
         "wall_seconds": time.time() - started,
         "workers": args.workers,
@@ -307,6 +332,46 @@ def main() -> None:
     args.output.write_text(json.dumps(artifact, indent=1, sort_keys=True) + "\n")
     print(json.dumps(artifact["summary"], indent=1, sort_keys=True), flush=True)
     print(f"[written] {args.output}", flush=True)
+
+
+def _interim(rows: list[dict]) -> dict[str, float]:
+    """Running mean small-ring support per arm, for the progress line."""
+
+    out: dict[str, float] = {}
+    for arm in ARMS:
+        masses = [
+            event["small_mass_uniform_support"]
+            for row in rows
+            for event in row.get("arms", {}).get(arm, {}).get("ring_events", [])
+        ]
+        if masses:
+            out[arm] = sum(masses) / len(masses)
+    return out
+
+
+def _write_interim(args, rows, pinned, train_size, started) -> None:
+    """Rewrite the summary artifact from whatever has completed so far."""
+
+    payload = {
+        "measurement": "denovo_ring_schedule_acceptance_v1",
+        "status": "PARTIAL",
+        "trains_nothing": True,
+        "oracle_calls": 0,
+        "arms": list(ARMS),
+        "pinned_inputs_sha256": pinned,
+        "corpus_split": {"train_size": train_size, "max_atoms": MAX_ATOMS,
+                         "corpus_seed": CORPUS_SEED},
+        "sampling": {
+            "rule": "uniform at random without replacement from the train partition",
+            "seed": args.seed,
+            "sample_size_requested": args.sample_size,
+            "sample_size_completed": len(rows),
+        },
+        "wall_seconds": time.time() - started,
+        "workers": args.workers,
+        "summary": summarize(rows),
+    }
+    args.output.write_text(json.dumps(payload, indent=1, sort_keys=True) + "\n")
 
 
 def summarize(rows: list[dict]) -> dict:
