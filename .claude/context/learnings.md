@@ -2371,3 +2371,78 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   trajectory -- and it buys a free correctness gate, because the reconstruction passes through
   step 1,000 and must match the stored checkpoint. Also note `training_steps: 3000`: the original
   de-novo run targeted 3,000 steps, not the 16,000 of the editing runs.
+
+## 2026-09-21 (CORRECTION: the Lineage B training artifacts were never lost -- two volumes share one name)
+
+- **CORRECTS the 2026-09-21 entry "A STRONGER DE-NOVO GENERATOR CANNOT BE PROMOTED, ONLY TRAINED"
+  and its claim that a full scan found ZERO de-novo training artifacts.** That scan read the WRONG
+  VOLUME. There are TWO distinct Modal volumes both named `compose-v4-artifacts`:
+      profile `rahul`         created 2026-07-17 03:16 EDT   <- holds the July Lineage B run
+      profile `rahul-94866`   created 2026-08-09 00:13 EDT   <- the one that was scanned, empty of them
+  **Both print `rahul-94866` in the workspace column of `modal volume list`**, so the listing itself
+  cannot distinguish them; only the profile the CLI is invoked under and the creation date can.
+  The July volume holds the original run, its **recovery checkpoint with optimizer + RNG state**, and
+  a **step-2500 checkpoint that is the genuine continuation of the Lineage B trajectory**.
+  COST OF THE ERROR: I instructed a from-scratch retrain at seed 20260717 to "reproduce the
+  trajectory", on the stated premise that no resumable state existed. The premise was false, the
+  agent checked rather than complied, and resuming beats reconstruction because a from-scratch rerun
+  can only APPROXIMATE a trajectory that a recovery checkpoint reproduces exactly.
+  **LESSON: a volume NAME is not a volume identity. Pin the profile and the creation date before
+  concluding an artifact is absent** -- "I scanned the volume and it was empty" is not a finding when
+  two volumes share the name.
+- **A checkpoint's `provenance_sha256` IS the producing run's `run_identity_sha256`**
+  (`train_tracelet_gm.py:1117`), so a checkpoint can be matched to its run by HASH rather than by
+  recipe similarity. Scanning every candidate `manifest.training.json` matched `a1907ed1...` to
+  exactly one run, `compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`. Use this instead of inferring
+  lineage from matching hyperparameters.
+- **A MATCHING STORED VALIDATION HISTORY PROVES NOTHING ABOUT REPRODUCIBILITY.** An identical
+  step-1..1000 curve across two run identities looks like code-change invariance and is not: the
+  history is a list carried INSIDE the recovery checkpoint and restored on resume, so it is shared
+  ancestry, not independent reproduction. The tell is `resume_checkpoint` in the recipe arguments.
+  (Claim made and withdrawn by the agent mid-task; worth keeping because the artifact is genuinely
+  persuasive at a glance.)
+- **CONTINUED TRAINING DOES NOT FIX THE SMALL-RING DEFECT, AND THE OUTCOME METRIC HIDES IT.**
+  Matched n=70/arm, identical trajectory seeds, pinned kernel, ring catalog byte-identical between
+  checkpoints (`50337de077f374db`) so ring-size SUPPORT is fixed and any shift is policy:
+      quality                        0.1714 -> 0.3000   (+0.129)   <- looks like success
+      mean heavy atoms               28.70  -> 26.87
+      rings / molecule               3.743  -> 3.300
+      molecules with a 3/4-ring      0.4429 -> 0.5143   (WORSE)
+      per-RING strained fraction     0.1679 -> 0.1948   (WORSE)    <- the mechanism metric
+      ring sizes   6-rings 152 -> 111,  3-rings 26 -> 38
+  Quality rose because molecules got SMALLER, not because ring chemistry improved. **Endpoint
+  prevalence and the per-ring closure policy diverge, and only the per-ring metric catches it** --
+  exactly the failure mode that motivated adding it. Nothing reaches 95% at n=70, so these are
+  DIRECTIONS not verdicts; but there is no hint of the intended improvement in either measure.
+- **SIZE-PARTIALLED REGRESSION SETTLES THE 2026-09-21 CONFOUND: the SA half is genuine strain, the
+  QED half is size.** Replicated at both checkpoints:
+      SA  ~ strain +0.791+-0.217 (s1000), +0.496+-0.218 (s2500)   heavy +0.024/+0.058
+      QED ~ strain +0.033+-0.039, -0.037+-0.037 (NO effect)       heavy -0.024+-0.003 (|z|~8)
+  So "strained molecules have worse QED" was entirely molecule size; the SA effect survives control.
+  Validated by a NEGATIVE CONTROL: on synthetic data where strain has zero effect and size carries
+  everything, the fitted strain coefficient collapses to <1e-6 while the raw contrast still reads
+  +0.7. An instrument that cannot return "it was size" cannot be trusted when it returns "it was
+  strain".
+- **THE RING DEFECT IS UPSTREAM OF THE LEARNED RATES, so no reward term can fix it.** Exact support
+  audit, 265 ring events over 100 rollouts: unconditional catalog small-ring mass **0.030**; uniform
+  over the LEGAL SUPPORT where ring events actually fire **0.443**; the model's prior given that
+  support **0.284**; produced **0.280**. The model is ALREADY pushing away from small rings relative
+  to its own support, which is ~15x enriched in them versus the catalog. An SA or small-ring penalty
+  would push an already-anti-small-ring policy against a support that leaves it no alternative --
+  which is why the correction belongs in the training DISTRIBUTION, not the objective.
+- **`event_schedule="exact_early_ring"` IS A BUILT, TESTED, INERT REPAIR -- the region-law lesson
+  again.** `rewrite/commuting_schedule.py` moves whole ring transactions to the earliest state at
+  which they are executable (detected BY EXECUTION, `atom_insert`/`atom_delete` as phase barriers,
+  swaps accepted only when both orders are array-exact), so ring decisions get supervised at states
+  with free slots where large-ring templates are still legal. Added 2026-07-20 -- ONE DAY after the
+  step-1000 checkpoint -- 6/6 tests passing, and the string appears nowhere outside
+  `tree_transport.py`. Lineage B trained on `"sequential"`. Plumbing gap is five additive hops:
+  recipe argument -> gate CLI flag -> `build_tree_transport_path_records(..., event_schedule=)` ->
+  its two `compile_carbon_tree_to_target` call sites -> Modal `build_tracelet_recipe_argv`.
+  **Mutation-test at the CALL sites: two hops share one sink, so a single consultation test stays
+  green** (the exact near-miss the region-law wiring hit).
+- **Shard globbing pooled two different trajectory-seed families into one headline number.**
+  `score_available`/`score_seed` glob `seed{seed}_*.json`, which merged a legacy `total=1000` shard
+  with new `total=200` shards for the same seed while every count still looked reasonable. This sat
+  in the PUBLISHED-benchmark path. Guarded in both the app and the analysis script; the guard fired
+  on real data with a precise diagnosis. Key a shard by its full identity, never by a seed prefix.
