@@ -1,0 +1,52 @@
+{
+  "schema": "compose_fragment_secondary_rescore_v1",
+  "denominators": {
+    "over_emitted": "attempts; a censored or failed attempt counts as an invalid sample. This is the published protocol's denominator.",
+    "over_committed": "endpoints the generator actually committed. Validity is 100% by construction, so the other three describe the generator rather than the subset that survived the task filter."
+  },
+  "metric_source": "official in_virtuo_gen.train_utils.metrics.evaluate_smiles @ b50bb3ae, already_smiles=True; only the list handed to it differs",
+  "tasks": {
+    "motif_extension": {
+      "over_emitted": {
+        "validity": {
+          "mean": 83.23333333333333,
+          "std": 16.317032682309474
+        },
+        "uniqueness": {
+          "mean": 78.21745313994941,
+          "std": 26.09958812159399
+        },
+        "quality": {
+          "mean": 14.466666666666667,
+          "std": 15.51071314357345
+        },
+        "diversity": {
+          "mean": 0.6001935862799203,
+          "std": 0.11075859387066525
+        }
+      },
+      "over_emitted_rows": 30,
+      "over_committed": {
+        "validity": {
+          "mean": 100.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 76.57597565077847,
+          "std": 25.220114667485014
+        },
+        "quality": {
+          "mean": 17.962184618928156,
+          "std": 17.564127799879792
+        },
+        "diversity": {
+          "mean": 0.6020192111891702,
+          "std": 0.1097772610998823
+        }
+      },
+      "over_committed_rows": 30,
+      "committed_endpoints": 2577,
+      "unique_committed_endpoints": 2016
+    }
+  }
+}
