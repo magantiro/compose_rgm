@@ -229,6 +229,55 @@ def test_dependency_block_interleaves_a_ring_with_the_graft_phase() -> None:
     )
 
 
+# A ring system whose tree edges are only completed by the final Graft cannot
+# be placed early.  Measured on 116 real training molecules, 30% defer at least
+# one system, so this is a common path and not a corner case.
+_DEFERRING_MOLECULES = (
+    "O=C1C=C(c2cccc(O)c2)CCC1",
+    "COc1ccc(C(=O)N2CCCC2=O)cn1",
+    "CN(C)CCN1C(=O)c2ccccc2C1=O",
+)
+
+
+@pytest.mark.parametrize("smiles", _DEFERRING_MOLECULES)
+def test_a_deferred_ring_system_still_reaches_the_exact_target(smiles: str) -> None:
+    """The fallback path is exercised, not merely believed in.
+
+    A system the block cannot place early keeps its original position at the
+    end of the route.  That is a real limitation of the repair -- such a system
+    is still decided against a constricted support -- but it must never cost a
+    molecule or move an endpoint.
+    """
+
+    source, target = _pair(smiles, seed=907)
+    block = compile_carbon_tree_to_target(
+        source, target, event_schedule="ring_dependency_block", **_GRAFT
+    )
+    assert block.metadata["ring_dependency_block_deferred"] >= 1, (
+        "fixture must exercise the deferred path"
+    )
+
+    endpoint = execute_trace(block.source, block.steps)
+    assert np.array_equal(endpoint.atom_types, target.atom_types)
+    assert np.array_equal(endpoint.bonds, target.bonds)
+    assert np.array_equal(endpoint.implicit_h_counts, target.implicit_h_counts)
+    assert canonical_state_key(endpoint) == canonical_state_key(target)
+
+    sequential = compile_carbon_tree_to_target(
+        source, target, event_schedule="sequential", **_GRAFT
+    )
+    # Every system is emitted exactly once, deferred or not.
+    assert len(_ring_indices(block)) == len(_ring_indices(sequential))
+    assert (
+        block.metadata["ring_dependency_block_commits"]
+        + block.metadata["ring_dependency_block_deferred"]
+        == len(_ring_indices(block))
+    )
+    # The deferred system is last, which is exactly the position the repair
+    # does NOT improve. Asserted so the limitation cannot be quietly lost.
+    assert _rule_names(block)[-1] == "ring_system_grow"
+
+
 def test_unknown_event_schedule_is_refused() -> None:
     source, target = _pair("c1ccncc1O", seed=11)
     with pytest.raises(ValueError, match="unknown tree event schedule"):
