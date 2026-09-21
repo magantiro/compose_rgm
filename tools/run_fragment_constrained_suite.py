@@ -36,6 +36,10 @@ from pathlib import Path
 import numpy as np
 from rdkit import Chem
 
+from compose_v4.benchmark.fragment_attachment_control import (
+    AttachmentControlConfig,
+    interface_coverage_report,
+)
 from compose_v4.benchmark.fragment_conditioned_sampler import (
     FragmentConditioningError,
     SamplerConfig,
@@ -69,6 +73,23 @@ def prompt_rng_seed(drug_name: str, task_value: str, seed: int) -> int:
     """
     key = f"{drug_name}|{task_value}|{seed}".encode()
     return int.from_bytes(hashlib.blake2b(key, digest_size=8).digest(), "big") % (2**32)
+
+
+def frozen_attachment_identity(control: AttachmentControlConfig) -> dict:
+    """The attachment controller's configuration and its hash, frozen before the sweep.
+
+    ONE controller configuration is used for every drug and every task.  The
+    hash is over the canonical JSON of the dataclass, so any per-drug or
+    per-task adjustment would move it and be visible in every shard; the
+    aggregator refuses to combine shards whose hashes disagree.
+    """
+    payload = {k: v for k, v in sorted(asdict(control).items())}
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return {
+        "config": payload,
+        "config_sha256": hashlib.sha256(canonical.encode()).hexdigest(),
+        "arm": "attachment_control" if control.enabled else "frozen_sampler_baseline",
+    }
 
 
 def frozen_sampler_identity(config: SamplerConfig) -> dict:
@@ -196,6 +217,7 @@ def run_task(
     seeds: int,
     samples: int,
     config: SamplerConfig,
+    control: AttachmentControlConfig,
     verbose: bool = True,
     seed_list: list[int] | None = None,
     drugs: list[str] | None = None,
@@ -212,7 +234,7 @@ def run_task(
         drug_metrics: list[dict[str, float]] = []
         for prompt in task_prompts:
             try:
-                context = build_prompt_context(prompt, config=config)
+                context = build_prompt_context(prompt, config=config, control=control)
             except FragmentConditioningError as exc:
                 build_failures.append(
                     {"drug": prompt.drug_name, "seed": seed, "error": str(exc)}
@@ -226,7 +248,13 @@ def run_task(
             started = time.time()
             for _ in range(samples):
                 out = sample_completion(
-                    model, system, context, rng, config=config, receipt=receipt
+                    model,
+                    system,
+                    context,
+                    rng,
+                    config=config,
+                    receipt=receipt,
+                    control=control,
                 )
                 emitted.append(out if out else FAILED_SAMPLE_PLACEHOLDER)
             elapsed = time.time() - started
@@ -269,7 +297,37 @@ def run_task(
                     "mean_events": float(np.mean(receipt.events)) if receipt.events else 0.0,
                     "families": dict(receipt.families),
                     "seconds": round(elapsed, 2),
-                    "example_completions": [s for s in emitted if s][:5],
+                    # THE MOLECULES, not a sample of them.  Secondary metrics
+                    # (uniqueness / quality / diversity / distance) were
+                    # previously uncorrectable because only counters and five
+                    # example SMILES survived, while the task filter censored
+                    # 51% of motif and 96% of decoration endpoints.  Both lists
+                    # are retained so any of those metrics can be re-scored
+                    # over EITHER denominator without re-running the sampler.
+                    "committed_endpoint_smiles": list(committed),
+                    "emitted_samples": list(emitted),
+                    "interface_rejections": receipt.interface_rejections,
+                    "staging_rejections": receipt.staging_rejections,
+                    "redirections": receipt.redirections,
+                    "separation_failures": receipt.separation_failures,
+                    "committed_interfaces_covered": receipt.interface_covered,
+                    "declared_interfaces": list(
+                        context.attachment.interfaces if context.attachment else ()
+                    ),
+                    "attachment_spec": (
+                        context.attachment.identity_payload()
+                        if context.attachment
+                        else None
+                    ),
+                    "start_state_interface_coverage": (
+                        interface_coverage_report(
+                            context.start_state,
+                            context.attachment,
+                            context.locked_slots,
+                        )
+                        if context.attachment
+                        else None
+                    ),
                 }
             )
             if verbose:
@@ -346,6 +404,14 @@ def main() -> None:
     parser.add_argument("--samples", type=int, default=OFFICIAL_SAMPLES_PER_PROMPT)
     parser.add_argument("--max-events", type=int, default=32)
     parser.add_argument("--operational-horizon", type=float, default=16.0)
+    parser.add_argument(
+        "--attachment-control",
+        action="store_true",
+        help=(
+            "steer growth to the prompt's DECLARED attachment interfaces. "
+            "Default off, so the frozen-sampler baseline rows reproduce."
+        ),
+    )
     args = parser.parse_args()
 
     from evaluate_tracelet_rollouts import load_factorized_rollout_checkpoint
@@ -358,6 +424,9 @@ def main() -> None:
     config = SamplerConfig(
         max_events=args.max_events, operational_horizon=args.operational_horizon
     )
+    # ONE controller configuration for every drug and every task.  Nothing here
+    # reads a drug name, a task label or any other instance identity.
+    control = AttachmentControlConfig(enabled=bool(args.attachment_control))
 
     selected = (
         [FragmentTask(t) for t in args.task]
@@ -376,6 +445,7 @@ def main() -> None:
             seeds=args.seeds,
             samples=args.samples,
             config=config,
+            control=control,
             seed_list=args.seed_list,
             drugs=args.drug,
         )
@@ -397,6 +467,7 @@ def main() -> None:
             "atom_vocabulary": "ORGANIC" if len(model.atom_vocabulary.classes) == 15 else "CNOF",
         },
         "sampler": frozen_sampler_identity(config),
+        "attachment_control": frozen_attachment_identity(control),
         "metric_provenance": {
             "validity_uniqueness_quality_diversity": (
                 "official in_virtuo_gen.train_utils.metrics.evaluate_smiles "

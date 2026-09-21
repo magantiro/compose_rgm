@@ -1,0 +1,575 @@
+"""Attachment-aware fragment control: declared interfaces, staging, redirection.
+
+These tests fix the three properties the controller has to have for its numbers
+to mean anything:
+
+* the declared interfaces it steers toward are the ones the BENCHMARK declared,
+  recovered through the canonical slot reordering the region lock also uses;
+* switching it off leaves the sampler's decision sequence untouched, so the
+  frozen-sampler rows stay reproducible; and
+* switching it on actually deletes the undeclared-interface events from the
+  fiber, rather than filtering them at the endpoint.
+
+The negative controls matter as much as the positives here: a prompt that
+declares no interface (``superstructure_generation``) must come out of the
+controller bit-identical, and a mutation that removes the restriction must make
+a test fail.
+"""
+
+from __future__ import annotations
+
+import copy
+
+import numpy as np
+import pytest
+from rdkit import Chem
+
+from compose_v4.benchmark.fragment_attachment_control import (
+    AttachmentControlConfig,
+    AttachmentController,
+    external_neighbour_count,
+)
+from compose_v4.benchmark.fragment_conditioned_sampler import (
+    RegionLock,
+    SamplerConfig,
+    _declared_sites,
+    build_prompt_context,
+    retained_core,
+)
+from compose_v4.benchmark.fragment_constrained import (
+    FragmentTask,
+    _fragment_spec,
+    load_genmol_prompts,
+)
+from compose_v4.chem.molecular_graph import NULL_IDX
+
+MANIFEST = "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv"
+
+_ON = AttachmentControlConfig(enabled=True)
+_OFF = AttachmentControlConfig(enabled=False)
+
+
+def _prompts():
+    return load_genmol_prompts(MANIFEST)
+
+
+def _prompt(task: FragmentTask, drug: str):
+    return next(p for p in _prompts() if p.task is task and p.drug_name == drug)
+
+
+def _first_null_slot(state) -> int:
+    nulls = np.flatnonzero(state.atom_types == NULL_IDX)
+    assert nulls.size, "the padded proposal state must expose a free slot"
+    return int(nulls[0])
+
+
+def _attach_new_atom(state, anchor: int, *, order: int = 1):
+    """A successor that bonds a fresh carbon to ``anchor``; array-level, no executor."""
+    successor = copy.deepcopy(state)
+    slot = _first_null_slot(state)
+    successor.atom_types[slot] = state.atom_types[anchor]
+    successor.formal_charges[slot] = 0
+    successor.implicit_h_counts[slot] = 3
+    successor.bonds[slot][anchor] = order
+    successor.bonds[anchor][slot] = order
+    return successor
+
+
+# ---- The interfaces are the benchmark's own ----
+
+
+def test_two_core_construction_routes_agree_on_every_released_fragment():
+    """``retained_core`` and ``_fragment_spec`` must index the same core.
+
+    The controller reads attachment COUNTS from ``_fragment_spec`` and maps
+    them through the slot order ``retained_core`` produced.  The two build the
+    dummy-stripped core by different routes -- capping the dummy with hydrogen
+    and then removing it, versus deleting the dummy outright -- so their
+    agreement is a real assumption and is asserted here rather than trusted.
+    """
+    checked = 0
+    for prompt in _prompts():
+        for fragment in prompt.fragments:
+            core, sites = retained_core(fragment)
+            spec = _fragment_spec(fragment)
+            assert core.GetNumAtoms() == spec.core.GetNumAtoms(), fragment
+            assert [a.GetSymbol() for a in core.GetAtoms()] == [
+                a.GetSymbol() for a in spec.core.GetAtoms()
+            ], fragment
+            assert sites == tuple(
+                sorted(site for site, _count in spec.attachment_requirements)
+            ), fragment
+            checked += 1
+    assert checked == 70
+
+
+def test_declared_interfaces_land_on_locked_slots_carrying_free_valence():
+    """Every declared interface is a locked slot, and can still take a bond."""
+    config = SamplerConfig()
+    for prompt in _prompts():
+        if prompt.task is FragmentTask.SCAFFOLD_MORPHING:
+            continue  # same prompt strings as linker_design
+        context = build_prompt_context(prompt, config=config, control=_ON)
+        spec = context.attachment
+        assert spec is not None
+        locked = set(context.locked_slots)
+        assert set(spec.interfaces) <= locked, prompt.drug_name
+        assert len(spec.requirements) == len(spec.interfaces)
+        for slot in spec.interfaces:
+            assert spec.requirement_of(slot) >= 1
+        if len(spec.lock_groups) == 1:
+            # The dummy was replaced by a hydrogen, so a single-core prompt's
+            # site retains a free valence and the interface can be covered.
+            for slot in spec.interfaces:
+                assert int(context.start_state.implicit_h_counts[slot]) >= 1, (
+                    prompt.drug_name,
+                    prompt.task.value,
+                    slot,
+                )
+
+
+def test_the_constructed_linker_join_consumes_the_declared_valences():
+    """MEASURED, and the reason linker design stays withheld.
+
+    ``build_prompt_context`` has to hand the executor a CONNECTED state, so it
+    joins the two retained cores with a direct bond -- and that bond is spent
+    out of the very valence each fragment declared open.  Twelve of the twenty
+    declared linker interfaces are left with no free valence at all, and for
+    four of the ten drugs BOTH sites are saturated, so no atom can be attached
+    at a declared site without first removing the join.  Removing it in
+    isolation disconnects the state, which the executor refuses.  Attachment
+    control therefore cannot open this task on its own: the START STATE, not
+    the proposal distribution, is what forecloses it.
+    """
+    saturated = 0
+    total = 0
+    both_saturated = []
+    for prompt in _prompts():
+        if prompt.task is not FragmentTask.LINKER_DESIGN:
+            continue
+        context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+        free = [
+            int(context.start_state.implicit_h_counts[slot])
+            for slot in context.attachment.interfaces
+        ]
+        assert len(free) == 2
+        total += len(free)
+        saturated += sum(1 for h in free if h == 0)
+        if all(h == 0 for h in free):
+            both_saturated.append(prompt.drug_name)
+    assert total == 20
+    assert saturated == 12
+    assert sorted(both_saturated) == [
+        "BARICITINIB",
+        "ELIGLUSTAT",
+        "ERLOTINIB",
+        "SPIRAPRIL",
+    ]
+
+
+def test_declared_interface_count_matches_the_prompt_dummy_count():
+    for prompt in _prompts():
+        if prompt.task is FragmentTask.SCAFFOLD_MORPHING:
+            continue
+        context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+        dummies = sum(
+            1
+            for fragment in prompt.fragments
+            for atom in Chem.MolFromSmiles(fragment).GetAtoms()
+            if atom.GetAtomicNum() == 0
+        )
+        declared = sum(
+            count
+            for fragment in prompt.fragments
+            for _site, count in _declared_sites(fragment)
+        )
+        assert declared == dummies, prompt.drug_name
+        assert (
+            sum(count for _slot, count in context.attachment.requirements) == dummies
+        )
+
+
+def test_superstructure_declares_no_interface_and_deactivates_the_controller():
+    """The vacuous case is a negative control, not a special case for one task."""
+    for prompt in _prompts():
+        if prompt.task is not FragmentTask.SUPERSTRUCTURE_GENERATION:
+            continue
+        context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+        assert context.attachment.interfaces == ()
+        controller = AttachmentController(
+            context.attachment, context.locked_slots, _ON
+        )
+        assert controller.active is False
+        state = context.start_state
+        # With no declared interface, every locked atom stays open: growth
+        # anywhere on the core is admitted exactly as before.
+        for anchor in context.locked_slots[:5]:
+            admitted, reason = controller.permits(
+                _attach_new_atom(state, anchor), state
+            )
+            assert admitted and reason == ""
+
+
+# ---- Pathwise admission ----
+
+
+def test_interface_restriction_refuses_growth_off_an_undeclared_atom():
+    prompt = _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    controller = AttachmentController(context.attachment, context.locked_slots, _ON)
+    assert controller.active
+    state = context.start_state
+    interface = context.attachment.interfaces[0]
+    undeclared = [s for s in context.locked_slots if s != interface]
+    assert undeclared
+
+    admitted, _ = controller.permits(_attach_new_atom(state, interface), state)
+    assert admitted, "growth at the declared site must be admitted"
+
+    for anchor in undeclared:
+        admitted, reason = controller.permits(_attach_new_atom(state, anchor), state)
+        assert not admitted and reason == "undeclared_interface", anchor
+
+
+def test_the_same_undeclared_growth_is_admitted_with_the_controller_off():
+    """The restriction is the controller's, not an accident of the state."""
+    prompt = _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_OFF)
+    controller = AttachmentController(context.attachment, context.locked_slots, _OFF)
+    state = context.start_state
+    undeclared = [s for s in context.locked_slots if s not in context.attachment.interfaces]
+    for anchor in undeclared:
+        admitted, reason = controller.permits(_attach_new_atom(state, anchor), state)
+        assert admitted and reason == ""
+
+
+def test_staging_refuses_an_event_that_makes_no_coverage_progress():
+    """A decoration prompt with several open sites must cover them first."""
+    prompt = _prompt(FragmentTask.SCAFFOLD_DECORATION, "ERLOTINIB")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    controller = AttachmentController(context.attachment, context.locked_slots, _ON)
+    state = context.start_state
+    interfaces = context.attachment.interfaces
+    assert len(interfaces) >= 2
+
+    assert set(controller.unsatisfied(state)) == set(interfaces)
+    covered_once = _attach_new_atom(state, interfaces[0])
+    admitted, _ = controller.permits(covered_once, state)
+    assert admitted
+    assert set(controller.unsatisfied(covered_once)) == set(interfaces[1:])
+
+    # Elaborating the decoration we just placed leaves the other sites open,
+    # so while staging is engaged it is refused.
+    grown = _attach_new_atom(covered_once, _first_null_slot(state))
+    admitted, reason = controller.permits(grown, covered_once)
+    assert not admitted and reason == "no_coverage_progress"
+
+
+def test_staging_releases_once_every_interface_is_covered():
+    prompt = _prompt(FragmentTask.SCAFFOLD_DECORATION, "ERLOTINIB")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    controller = AttachmentController(context.attachment, context.locked_slots, _ON)
+    state = context.start_state
+    for slot in context.attachment.interfaces:
+        state = _attach_new_atom(state, slot)
+    assert controller.unsatisfied(state) == ()
+    assert controller.all_interfaces_covered(state)
+
+    decorated = _attach_new_atom(state, _first_null_slot(context.start_state))
+    admitted, reason = controller.permits(decorated, state)
+    assert admitted and reason == ""
+
+
+def test_coverage_ignores_neighbours_inside_the_retained_region():
+    """A locked neighbour is not an EXTERNAL neighbour; the linker join is the case."""
+    prompt = _prompt(FragmentTask.LINKER_DESIGN, "ELIGLUSTAT")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    state = context.start_state
+    for slot in context.attachment.interfaces:
+        assert external_neighbour_count(state, slot, context.locked_slots) == 0
+    controller = AttachmentController(context.attachment, context.locked_slots, _ON)
+    assert set(controller.unsatisfied(state)) == set(context.attachment.interfaces)
+
+
+# ---- Attachment redirection ----
+
+
+def test_redirection_moves_the_anchor_and_keeps_the_prior_payload():
+    from compose_v4.rewrite.operators import AtomInsert
+
+    prompt = _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    controller = AttachmentController(context.attachment, context.locked_slots, _ON)
+    state = context.start_state
+    interface = context.attachment.interfaces[0]
+    undeclared = next(s for s in context.locked_slots if s != interface)
+
+    free = int(state.implicit_h_counts[interface])
+    assert free == 1, "this fixture site declares exactly one open valence"
+
+    # An order the declared site can take is carried across untouched.
+    proposed = AtomInsert(_first_null_slot(state), 2, 0, 3, ((undeclared, 1),))
+    redirected = controller.redirect("atom_insert", proposed, state)
+    assert redirected is not proposed
+    assert redirected.neighbors == ((interface, 1),)
+    # Payload is the PRIOR's: element, charge, derived hydrogens, bond order.
+    assert redirected.slot == proposed.slot
+    assert redirected.atom_type == proposed.atom_type
+    assert redirected.formal_charge == proposed.formal_charge
+    assert redirected.implicit_h_count == proposed.implicit_h_count
+
+
+def test_redirection_realizes_an_order_the_declared_site_cannot_take():
+    """Constrained realization: the element survives, the order is lowered."""
+    from compose_v4.rewrite.operators import AtomInsert
+
+    prompt = _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    controller = AttachmentController(context.attachment, context.locked_slots, _ON)
+    state = context.start_state
+    interface = context.attachment.interfaces[0]
+    undeclared = next(s for s in context.locked_slots if s != interface)
+    free = int(state.implicit_h_counts[interface])
+    assert free == 1
+
+    proposed = AtomInsert(_first_null_slot(state), 2, 0, 2, ((undeclared, 2),))
+    redirected = controller.redirect("atom_insert", proposed, state)
+    assert redirected.neighbors == ((interface, free),)
+    assert redirected.atom_type == proposed.atom_type
+    # The hydrogen count is re-derived for the reduced order, so the element's
+    # total valence is unchanged: 2 bonds + 2 H becomes 1 bond + 3 H.
+    assert redirected.implicit_h_count == proposed.implicit_h_count + 2 - free
+    assert (
+        redirected.implicit_h_count + redirected.neighbors[0][1]
+        == proposed.implicit_h_count + proposed.neighbors[0][1]
+    )
+
+
+def test_redirection_refuses_to_manufacture_a_bond_at_a_saturated_site():
+    """A linker interface has no valence left; the action must pass through."""
+    from compose_v4.rewrite.operators import AtomInsert
+
+    prompt = _prompt(FragmentTask.LINKER_DESIGN, "ELIGLUSTAT")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    controller = AttachmentController(context.attachment, context.locked_slots, _ON)
+    state = context.start_state
+    assert all(
+        int(state.implicit_h_counts[slot]) == 0
+        for slot in context.attachment.interfaces
+    )
+    undeclared = next(
+        s for s in context.locked_slots if s not in context.attachment.interfaces
+    )
+    proposed = AtomInsert(_first_null_slot(state), 2, 0, 3, ((undeclared, 1),))
+    assert controller.redirect("atom_insert", proposed, state) is proposed
+
+
+def test_redirection_leaves_an_already_admissible_anchor_alone():
+    from compose_v4.rewrite.operators import AtomInsert
+
+    prompt = _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    controller = AttachmentController(context.attachment, context.locked_slots, _ON)
+    state = context.start_state
+    interface = context.attachment.interfaces[0]
+    proposed = AtomInsert(_first_null_slot(state), 2, 0, 3, ((interface, 1),))
+    assert controller.redirect("atom_insert", proposed, state) is proposed
+
+
+def test_redirection_is_the_identity_when_the_controller_is_off():
+    from compose_v4.rewrite.operators import AtomInsert
+
+    prompt = _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_OFF)
+    controller = AttachmentController(context.attachment, context.locked_slots, _OFF)
+    state = context.start_state
+    undeclared = next(
+        s for s in context.locked_slots if s not in context.attachment.interfaces
+    )
+    proposed = AtomInsert(_first_null_slot(state), 2, 0, 3, ((undeclared, 1),))
+    assert controller.redirect("atom_insert", proposed, state) is proposed
+
+
+def test_redirection_never_touches_a_family_without_an_anchor():
+    from compose_v4.rewrite.operators import AtomDelete, BondReorder
+
+    prompt = _prompt(FragmentTask.SCAFFOLD_DECORATION, "ERLOTINIB")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    controller = AttachmentController(context.attachment, context.locked_slots, _ON)
+    state = context.start_state
+    for rule, action in (
+        ("atom_delete", AtomDelete(3)),
+        ("bond_reorder", BondReorder(1, 2, 2)),
+    ):
+        assert controller.redirect(rule, action, state) is action
+
+
+def test_redirection_spreads_across_unsatisfied_interfaces():
+    """The target is the LEAST covered site, so several open sites get filled."""
+    from compose_v4.rewrite.operators import AtomInsert
+
+    prompt = _prompt(FragmentTask.SCAFFOLD_DECORATION, "MARIBAVIR")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    controller = AttachmentController(context.attachment, context.locked_slots, _ON)
+    interfaces = context.attachment.interfaces
+    assert len(interfaces) >= 5
+
+    state = context.start_state
+    undeclared = next(s for s in context.locked_slots if s not in interfaces)
+    hit = []
+    for _ in range(len(interfaces)):
+        proposed = AtomInsert(_first_null_slot(state), 2, 0, 3, ((undeclared, 1),))
+        target = controller.redirect("atom_insert", proposed, state).neighbors[0][0]
+        hit.append(target)
+        state = _attach_new_atom(state, target)
+    assert sorted(hit) == sorted(interfaces)
+    assert controller.unsatisfied(state) == ()
+
+
+# ---- The linker join ----
+
+
+def test_region_lock_pins_the_linker_join_when_the_controller_is_off():
+    prompt = _prompt(FragmentTask.LINKER_DESIGN, "ELIGLUSTAT")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_OFF)
+    assert context.attachment.released_pairs == frozenset()
+    lock = RegionLock(
+        context.start_state,
+        context.locked_slots,
+        released_pairs=context.attachment.released_pairs,
+    )
+    left, right = context.attachment.lock_groups
+    joined = [
+        (i, j)
+        for i in left
+        for j in right
+        if int(context.start_state.bonds[i][j]) > 0
+    ]
+    assert len(joined) == 1, "the constructed start state joins the cores exactly once"
+    i, j = joined[0]
+    broken = copy.deepcopy(context.start_state)
+    broken.bonds[i][j] = 0
+    broken.bonds[j][i] = 0
+    assert lock.permits(broken) is False
+
+
+def test_region_lock_releases_only_the_join_pair_when_the_controller_is_on():
+    prompt = _prompt(FragmentTask.LINKER_DESIGN, "ELIGLUSTAT")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    released = context.attachment.released_pairs
+    assert len(released) == 1
+    (pair,) = released
+    i, j = sorted(pair)
+    lock = RegionLock(
+        context.start_state, context.locked_slots, released_pairs=released
+    )
+
+    opened = copy.deepcopy(context.start_state)
+    opened.bonds[i][j] = 0
+    opened.bonds[j][i] = 0
+    assert lock.permits(opened) is True, "the constructed join must be openable"
+
+    # Every OTHER locked pair is still pinned, and both endpoints keep their
+    # element and charge: releasing the join is not releasing the cores.
+    others = [
+        (a, b)
+        for index, a in enumerate(context.locked_slots)
+        for b in context.locked_slots[index + 1 :]
+        if int(context.start_state.bonds[a][b]) > 0 and {a, b} != {i, j}
+    ]
+    assert others
+    for a, b in others:
+        mutated = copy.deepcopy(context.start_state)
+        mutated.bonds[a][b] = 0
+        mutated.bonds[b][a] = 0
+        assert lock.permits(mutated) is False, (a, b)
+    retyped = copy.deepcopy(context.start_state)
+    retyped.atom_types[i] = int(retyped.atom_types[i]) + 1
+    assert lock.permits(retyped) is False
+
+
+def test_zero_atom_linker_is_refused_by_the_separation_check():
+    prompt = _prompt(FragmentTask.LINKER_DESIGN, "ELIGLUSTAT")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    controller = AttachmentController(context.attachment, context.locked_slots, _ON)
+    # The start state IS the defect the invalidation report measured: the two
+    # cores directly bonded, with zero linker atoms between them.
+    assert controller.cores_are_separated(context.start_state) is False
+
+    separated = copy.deepcopy(context.start_state)
+    (pair,) = context.attachment.released_pairs
+    i, j = sorted(pair)
+    separated.bonds[i][j] = 0
+    separated.bonds[j][i] = 0
+    assert controller.cores_are_separated(separated) is True
+
+
+def test_separation_check_is_vacuous_for_a_single_core_prompt():
+    prompt = _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+    controller = AttachmentController(context.attachment, context.locked_slots, _ON)
+    assert len(context.attachment.lock_groups) == 1
+    assert controller.cores_are_separated(context.start_state) is True
+
+
+# ---- Identity of the off path ----
+
+
+def test_switching_the_controller_off_restores_every_decision():
+    """OFF must be a no-op on admission, redirection and the lock alike."""
+    for task in (
+        FragmentTask.MOTIF_EXTENSION,
+        FragmentTask.SCAFFOLD_DECORATION,
+        FragmentTask.SUPERSTRUCTURE_GENERATION,
+        FragmentTask.LINKER_DESIGN,
+    ):
+        for drug in ("BARICITINIB", "MARIBAVIR"):
+            prompt = _prompt(task, drug)
+            off = build_prompt_context(prompt, config=SamplerConfig(), control=_OFF)
+            controller = AttachmentController(off.attachment, off.locked_slots, _OFF)
+            assert controller.active is False
+            assert off.attachment.released_pairs == frozenset()
+            lock = RegionLock(
+                off.start_state,
+                off.locked_slots,
+                released_pairs=off.attachment.released_pairs,
+            )
+            legacy = RegionLock(off.start_state, off.locked_slots)
+            assert lock._bonds == legacy._bonds
+            state = off.start_state
+            for anchor in off.locked_slots:
+                admitted, reason = controller.permits(
+                    _attach_new_atom(state, anchor), state
+                )
+                assert admitted and reason == ""
+
+
+def test_the_start_state_never_satisfies_a_declared_interface():
+    """Coverage must start at zero, or the staging phase would be skipped."""
+    for prompt in _prompts():
+        if prompt.task is FragmentTask.SCAFFOLD_MORPHING:
+            continue
+        context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+        controller = AttachmentController(
+            context.attachment, context.locked_slots, _ON
+        )
+        assert set(controller.unsatisfied(context.start_state)) == set(
+            context.attachment.interfaces
+        ), (prompt.drug_name, prompt.task.value)
+
+
+@pytest.mark.parametrize(
+    "task",
+    [
+        FragmentTask.MOTIF_EXTENSION,
+        FragmentTask.SCAFFOLD_DECORATION,
+        FragmentTask.SUPERSTRUCTURE_GENERATION,
+    ],
+)
+def test_every_drug_builds_a_context_under_the_controller(task):
+    for prompt in _prompts():
+        if prompt.task is not task:
+            continue
+        context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
+        assert context.attachment is not None
+        assert len(context.attachment.lock_groups) == 1

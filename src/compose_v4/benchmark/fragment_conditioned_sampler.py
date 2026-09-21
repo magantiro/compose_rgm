@@ -38,9 +38,15 @@ from dataclasses import dataclass, field
 import numpy as np
 from rdkit import Chem
 
+from compose_v4.benchmark.fragment_attachment_control import (
+    AttachmentControlConfig,
+    AttachmentController,
+    AttachmentSpec,
+)
 from compose_v4.benchmark.fragment_constrained import (
     FragmentPrompt,
     FragmentTask,
+    _fragment_spec,
     check_fragment_constraint,
 )
 from compose_v4.chem.molecular_graph import (
@@ -76,6 +82,10 @@ class PromptContext:
     start_state: MolecularGraph
     locked_slots: tuple[int, ...]
     start_smiles: str
+    # The benchmark's OWN declared attachment interfaces, in canonical slot
+    # coordinates.  Always derived, so it is visible in the artifact even when
+    # the controller that consumes it is switched off.
+    attachment: AttachmentSpec | None = None
 
 
 @dataclass
@@ -92,6 +102,13 @@ class SamplingReceipt:
     # construction, so this list is the evidence for the chemical-validity claim
     # and must be kept separate from benchmark (strict) validity.
     committed_endpoints: list[str] = field(default_factory=list)
+    # Attachment-control accounting.  All zero when the controller is off or
+    # when the prompt declares no interface.
+    interface_rejections: int = 0
+    staging_rejections: int = 0
+    redirections: int = 0
+    separation_failures: int = 0
+    interface_covered: int = 0
 
 
 class FragmentConditioningError(RuntimeError):
@@ -151,8 +168,23 @@ def retained_core(fragment_smiles: str) -> tuple[Chem.Mol, tuple[int, ...]]:
     return core, sites
 
 
+def _declared_sites(fragment: str) -> tuple[tuple[int, int], ...]:
+    """(core atom index, required external heavy neighbours) for one fragment.
+
+    Indices are positions in the DUMMY-STRIPPED core.  ``retained_core`` and
+    ``_fragment_spec`` build that core by different routes -- capping the dummy
+    with hydrogen and removing it, respectively -- so the agreement of their
+    atom orders is asserted in ``tests/test_fragment_attachment_control.py``
+    across every released fragment rather than assumed here.
+    """
+    return tuple(_fragment_spec(fragment).attachment_requirements)
+
+
 def build_prompt_context(
-    prompt: FragmentPrompt, *, config: SamplerConfig | None = None
+    prompt: FragmentPrompt,
+    *,
+    config: SamplerConfig | None = None,
+    control: AttachmentControlConfig | None = None,
 ) -> PromptContext:
     """Build the fixed start state and the locked slot set for one prompt.
 
@@ -191,6 +223,17 @@ def build_prompt_context(
             atom.SetNoImplicit(True)
             atom.SetNumExplicitHs(total_h - 1)
         combined.AddBond(join[0], join[1], Chem.BondType.SINGLE)
+        declared = [
+            (site, count) for site, count in _declared_sites(prompt.fragments[0])
+        ] + [
+            (site + offset, count)
+            for site, count in _declared_sites(prompt.fragments[1])
+        ]
+        group_bounds = (
+            tuple(range(left.GetNumAtoms())),
+            tuple(range(left.GetNumAtoms(), left.GetNumAtoms() + right.GetNumAtoms())),
+        )
+        join_pair = join
         start = combined.GetMol()
         try:
             Chem.SanitizeMol(start)
@@ -203,6 +246,9 @@ def build_prompt_context(
         core, _sites = retained_core(prompt.fragments[0])
         start = core
         locked = tuple(range(core.GetNumAtoms()))
+        declared = list(_declared_sites(prompt.fragments[0]))
+        group_bounds = (tuple(range(core.GetNumAtoms())),)
+        join_pair = None
 
     start_smiles = Chem.MolToSmiles(start)
     # Re-parse from canonical SMILES so slot i corresponds to RDKit atom i of the
@@ -226,11 +272,34 @@ def build_prompt_context(
             f"start state needs {len(graph.atom_types)} slots, budget is {config.n_slots}"
         )
     padded = pad_molecular_graph(graph, config.n_slots)
+
+    # ``order[i]`` is the canonical slot of start-molecule atom ``i``; the
+    # declared interfaces are addressed in the same coordinates as the lock.
+    interfaces = tuple(sorted(order[site] for site, _count in declared))
+    requirements = tuple(
+        sorted((order[site], int(count)) for site, count in declared)
+    )
+    lock_groups = tuple(
+        frozenset(order[i] for i in bounds) for bounds in group_bounds
+    )
+    release = control is not None and control.enabled and control.release_linker_join
+    released_pairs = (
+        frozenset({frozenset({order[join_pair[0]], order[join_pair[1]]})})
+        if join_pair is not None and release
+        else frozenset()
+    )
+    attachment = AttachmentSpec(
+        interfaces=interfaces,
+        requirements=requirements,
+        lock_groups=lock_groups,
+        released_pairs=released_pairs,
+    )
     return PromptContext(
         prompt=prompt,
         start_state=padded,
         locked_slots=locked_canonical,
         start_smiles=start_smiles,
+        attachment=attachment,
     )
 
 
@@ -240,19 +309,38 @@ def build_prompt_context(
 class RegionLock:
     """Admits exactly the successors that leave the retained core untouched."""
 
-    def __init__(self, state: MolecularGraph, locked_slots: Sequence[int]) -> None:
+    def __init__(
+        self,
+        state: MolecularGraph,
+        locked_slots: Sequence[int],
+        *,
+        released_pairs: frozenset[frozenset[int]] = frozenset(),
+    ) -> None:
         self._slots = tuple(locked_slots)
         self._types = {i: int(state.atom_types[i]) for i in self._slots}
         self._charges = {i: int(state.formal_charges[i]) for i in self._slots}
+        # A RELEASED pair is one this adapter constructed rather than one the
+        # prompt declared: the linker join bond exists only because the
+        # executor refuses a disconnected state, so pinning its order would
+        # make a genuine linker unreachable.  Element and charge stay locked on
+        # both of its endpoints; only the bond between them is free.
+        self._released = frozenset(
+            frozenset(int(x) for x in pair) for pair in released_pairs
+        )
         self._bonds = {
             (i, j): int(state.bonds[i][j])
             for index, i in enumerate(self._slots)
             for j in self._slots[index + 1 :]
+            if frozenset({i, j}) not in self._released
         }
 
     @property
     def locked_slots(self) -> tuple[int, ...]:
         return self._slots
+
+    @property
+    def released_pairs(self) -> frozenset[frozenset[int]]:
+        return self._released
 
     def permits(self, successor: MolecularGraph) -> bool:
         for slot, expected in self._types.items():
@@ -278,6 +366,7 @@ def sample_completion(
     *,
     config: SamplerConfig | None = None,
     receipt: SamplingReceipt | None = None,
+    control: AttachmentControlConfig | None = None,
 ) -> str | None:
     """Sample ONE completion of ``context``'s prompt from the learned process.
 
@@ -289,7 +378,14 @@ def sample_completion(
     """
     config = config or SamplerConfig()
     receipt = receipt if receipt is not None else SamplingReceipt()
-    lock = RegionLock(context.start_state, context.locked_slots)
+    control = control or AttachmentControlConfig()
+    spec = context.attachment or AttachmentSpec((), (), (frozenset(context.locked_slots),))
+    controller = AttachmentController(spec, context.locked_slots, control)
+    lock = RegionLock(
+        context.start_state,
+        context.locked_slots,
+        released_pairs=spec.released_pairs,
+    )
 
     state = context.start_state
     operational_time = 0.0
@@ -304,13 +400,27 @@ def sample_completion(
             except Exception:  # noqa: BLE001
                 receipt.executor_refusals += 1
                 continue
+            # Attachment (``alpha``) is the controller's degree of freedom: the
+            # prior keeps the payload, the declared constraint picks the site.
+            # ``redirect`` is the identity whenever the controller is inactive,
+            # so the off path executes exactly the mark the prior sampled.
+            action = controller.redirect(mark.rule_name, mark.action, state)
+            if action is not mark.action:
+                receipt.redirections += 1
             try:
-                successor = system.apply(state, mark.rule_name, mark.action)
+                successor = system.apply(state, mark.rule_name, action)
             except Exception:  # noqa: BLE001
                 receipt.executor_refusals += 1
                 continue
             if not lock.permits(successor):
                 receipt.lock_rejections += 1
+                continue
+            admitted, reason = controller.permits(successor, state)
+            if not admitted:
+                if reason == "undeclared_interface":
+                    receipt.interface_rejections += 1
+                else:
+                    receipt.staging_rejections += 1
                 continue
             accepted = (mark, successor)
             break
@@ -338,9 +448,22 @@ def sample_completion(
     if not smiles:
         return None
     receipt.committed_endpoints.append(smiles)
+    if controller.active and controller.all_interfaces_covered(state):
+        receipt.interface_covered += 1
     result = check_fragment_constraint(context.prompt, smiles)
     if not result.satisfied or result.canonical_smiles is None:
         receipt.constraint_failures += 1
+        return None
+    # A linker prompt is CONSTRUCTED with its two cores directly bonded, and
+    # the benchmark's endpoint test cannot see that: each core satisfies the
+    # other's attachment requirement, so a zero-atom "linker" passes it.  This
+    # is the one place the adapter is STRICTER than the published check.
+    if (
+        control.enabled
+        and control.require_separated_cores
+        and not controller.cores_are_separated(state)
+    ):
+        receipt.separation_failures += 1
         return None
     receipt.completed += 1
     return result.canonical_smiles
@@ -348,6 +471,7 @@ def sample_completion(
 
 __all__ = [
     "DEFAULT_PROPOSAL_SLOTS",
+    "AttachmentControlConfig",
     "FragmentConditioningError",
     "PromptContext",
     "RegionLock",
