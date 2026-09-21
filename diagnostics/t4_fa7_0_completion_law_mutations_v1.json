@@ -1,0 +1,81 @@
+{
+ "controls_ok": 1,
+ "harness_problems": 0,
+ "killed": 6,
+ "mutations": [
+  {
+   "applied": true,
+   "expectation": "red",
+   "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+   "mutation": "hop1_dynamic_drops_the_keyword",
+   "tail": "",
+   "test": "test_dynamic_synthesizer_consults_the_completion_law",
+   "test_passed": false,
+   "verdict": "KILLED"
+  },
+  {
+   "applied": true,
+   "expectation": "red",
+   "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+   "mutation": "hop2_named_sequence_drops_the_keyword",
+   "tail": "",
+   "test": "test_named_sequence_consults_the_completion_law",
+   "test_passed": false,
+   "verdict": "KILLED"
+  },
+  {
+   "applied": true,
+   "expectation": "red",
+   "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+   "mutation": "sink_ignores_the_law_entirely",
+   "tail": "",
+   "test": "test_dynamic_synthesizer_consults_the_completion_law",
+   "test_passed": false,
+   "verdict": "KILLED"
+  },
+  {
+   "applied": true,
+   "expectation": "red",
+   "file": "src/compose_v4/control/replace_completion_law.py",
+   "mutation": "law_becomes_a_filter_not_a_reranking",
+   "tail": "",
+   "test": "test_support_floor_actually_binds_not_merely_exists",
+   "test_passed": false,
+   "verdict": "KILLED"
+  },
+  {
+   "applied": true,
+   "expectation": "red",
+   "file": "src/compose_v4/control/replace_completion_law.py",
+   "mutation": "unrealizable_candidate_dropped_instead_of_floored",
+   "tail": "",
+   "test": "test_a_raising_margin_is_floored_not_dropped",
+   "test_passed": false,
+   "verdict": "KILLED"
+  },
+  {
+   "applied": true,
+   "expectation": "red",
+   "file": "src/compose_v4/control/replace_completion_law.py",
+   "mutation": "tilt_points_the_wrong_way",
+   "tail": "",
+   "test": "test_a_better_margin_is_preferred_far_more_often_than_not",
+   "test_passed": false,
+   "verdict": "KILLED"
+  },
+  {
+   "applied": true,
+   "expectation": "green",
+   "file": "src/compose_v4/control/replace_completion_law.py",
+   "mutation": "CONTROL_cosmetic_comment_only",
+   "tail": "",
+   "test": "test_dynamic_synthesizer_consults_the_completion_law",
+   "test_passed": true,
+   "verdict": "CONTROL_OK"
+  }
+ ],
+ "oracle_calls": 0,
+ "schema_version": "t4_fa7_0_completion_law_mutations_v1",
+ "survived": 0,
+ "verdict": "PASS"
+}

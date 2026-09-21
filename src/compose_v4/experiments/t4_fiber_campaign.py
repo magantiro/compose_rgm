@@ -244,6 +244,7 @@ def expand(
     horizon: int = 3,
     proposal_lane: str = "shallow",
     region_law=None,
+    completion_law=None,
 ) -> list[dict]:
     """Free complete programs from one parent; only queryable endpoints are returned.
 
@@ -259,6 +260,12 @@ def expand(
     bounded law, consuming the same RNG stream as before. It is accepted only on the
     `shallow` lane because that is the only lane that reaches a synthesizer able to
     thread it; requesting it on another lane raises rather than being ignored.
+   
+    `completion_law` is the replacement-construction law selected by the contract
+    field `proposal.shallow.completion_law`, resolved by
+    `compose_v4.control.completion_law_contract`. It follows exactly the same
+    rules: `None` is byte-identical historical behaviour, and it is accepted only
+    on the `shallow` lane.
     """
     if horizon < 1:
         raise ValueError("horizon must be at least one module")
@@ -273,6 +280,13 @@ def expand(
         raise ValueError(
             f"region_law is only consumable on the 'shallow' lane, not {proposal_lane!r}"
         )
+    if completion_law is not None and proposal_lane != "shallow":
+        # Same fail-closed rule, same reason: only the shallow lane reaches a
+        # synthesizer that threads a completion law to the construction site.
+        raise ValueError(
+            "completion_law is only consumable on the 'shallow' lane, not "
+            f"{proposal_lane!r}"
+        )
     try:
         source = pad_molecular_graph(smiles_to_molecular_graph(parent), 48)
     except (ValueError, KeyError):
@@ -282,7 +296,11 @@ def expand(
         try:
             if proposal_lane == "shallow":
                 _, _, _, trace, metadata = synthesize_dynamic_program(
-                    source, rng, max_modules=horizon, region_law=region_law
+                    source,
+                    rng,
+                    max_modules=horizon,
+                    region_law=region_law,
+                    completion_law=completion_law,
                 )
             elif proposal_lane == "structured":
                 _, _, _, trace, metadata = synthesize_progressive_program(source, rng)
