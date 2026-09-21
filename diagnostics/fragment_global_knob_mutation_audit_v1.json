@@ -1,0 +1,41 @@
+{
+  "schema": "compose_fragment_global_knob_mutation_audit_v1",
+  "positive_control_unmutated_tree_green": true,
+  "mutations": [
+    {
+      "mutation": "knob_parsed_but_not_wired",
+      "expected_test": "test_mark_attempts_flag_reaches_the_sampler_configuration",
+      "all_failing_tests": [
+        "test_mark_attempts_flag_reaches_the_sampler_configuration",
+        "test_the_knob_moves_the_recorded_sampler_identity"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "default_silently_moved",
+      "expected_test": "test_mark_attempts_default_is_the_frozen_value",
+      "all_failing_tests": [
+        "test_mark_attempts_default_is_the_frozen_value"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "knob_dropped_from_hashed_identity",
+      "expected_test": "test_the_knob_moves_the_recorded_sampler_identity",
+      "all_failing_tests": [
+        "test_the_knob_moves_the_recorded_sampler_identity"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "per_task_knob_added",
+      "expected_test": "test_no_per_task_or_per_drug_sampler_knob_is_expressible",
+      "all_failing_tests": [
+        "test_no_per_task_or_per_drug_sampler_knob_is_expressible"
+      ],
+      "verdict": "KILLED"
+    }
+  ],
+  "killed": 4,
+  "total": 4
+}

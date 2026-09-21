@@ -389,7 +389,13 @@ def _chemically_valid(smiles_list) -> int:
     return total
 
 
-def main() -> None:
+def build_parser() -> argparse.ArgumentParser:
+    """The suite's argument parser, factored out so the wiring is testable.
+
+    A knob that is parsed but never reaches SamplerConfig is inert, and inert
+    knobs are invisible to every check that reads the recorded configuration --
+    the value is written into the artifact either way.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
@@ -405,6 +411,18 @@ def main() -> None:
     parser.add_argument("--max-events", type=int, default=32)
     parser.add_argument("--operational-horizon", type=float, default=16.0)
     parser.add_argument(
+        "--mark-attempts-per-event",
+        type=int,
+        default=24,
+        help=(
+            "bounded rejection budget per event. GLOBAL: one value covers every "
+            "drug and every task. Exhausting it stops the trajectory, which "
+            "shows up as a lost attempt rather than an invalid molecule, so "
+            "raising it trades wall clock for sampler efficiency and cannot "
+            "change what is chemically admissible."
+        ),
+    )
+    parser.add_argument(
         "--attachment-control",
         action="store_true",
         help=(
@@ -412,7 +430,25 @@ def main() -> None:
             "Default off, so the frozen-sampler baseline rows reproduce."
         ),
     )
-    args = parser.parse_args()
+    return parser
+
+
+def sampler_config_from_args(args: argparse.Namespace) -> SamplerConfig:
+    """ONE sampler configuration for every drug and every task.
+
+    These are GLOBAL knobs. A per-task or per-drug value would be benchmark
+    engineering rather than a general capability, so neither this function nor
+    the parser offers any way to express one.
+    """
+    return SamplerConfig(
+        max_events=args.max_events,
+        operational_horizon=args.operational_horizon,
+        mark_attempts_per_event=args.mark_attempts_per_event,
+    )
+
+
+def main() -> None:
+    args = build_parser().parse_args()
 
     from evaluate_tracelet_rollouts import load_factorized_rollout_checkpoint
 
@@ -421,9 +457,7 @@ def main() -> None:
     model, meta = load_factorized_rollout_checkpoint(args.checkpoint)
     system = de_novo_rewrite_system()
     prompts = load_genmol_prompts(MANIFEST)
-    config = SamplerConfig(
-        max_events=args.max_events, operational_horizon=args.operational_horizon
-    )
+    config = sampler_config_from_args(args)
     # ONE controller configuration for every drug and every task.  Nothing here
     # reads a drug name, a task label or any other instance identity.
     control = AttachmentControlConfig(enabled=bool(args.attachment_control))

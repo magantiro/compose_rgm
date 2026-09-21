@@ -282,3 +282,83 @@ def test_corrected_table_reports_task_success_separately():
         # material share of the committed endpoints.
         if block["censoring_pct_of_committed"] > 5.0:
             assert not block["secondary_metrics_valid"], task
+
+
+# ---- Global sampler knobs ----
+#
+# A knob that is parsed but never reaches SamplerConfig is INERT, and an inert
+# knob is invisible to every check that reads the recorded configuration,
+# because the requested value is written into the artifact either way. These
+# drive the suite's real parser rather than reconstructing one.
+
+
+def _suite_module():
+    import sys
+    from pathlib import Path
+
+    tools = str(Path(__file__).resolve().parents[1] / "tools")
+    if tools not in sys.path:
+        sys.path.insert(0, tools)
+    import run_fragment_constrained_suite as suite
+
+    return suite
+
+
+def _parsed(*extra: str):
+    suite = _suite_module()
+    argv = ["--checkpoint", "ckpt.pt", "--output", "out.json", *extra]
+    return suite, suite.build_parser().parse_args(argv)
+
+
+def test_mark_attempts_flag_reaches_the_sampler_configuration():
+    suite, args = _parsed("--mark-attempts-per-event", "96")
+    assert suite.sampler_config_from_args(args).mark_attempts_per_event == 96
+
+
+def test_mark_attempts_default_is_the_frozen_value():
+    """The default must stay 24 or every landed row silently changes meaning."""
+    suite, args = _parsed()
+    assert suite.sampler_config_from_args(args).mark_attempts_per_event == 24
+
+
+def test_the_knob_moves_the_recorded_sampler_identity():
+    """Two settings must not be combinable by accident.
+
+    The aggregator refuses shards whose sampler hashes disagree, which only
+    protects the panel if the knob is actually part of the hashed payload.
+    """
+    suite, low = _parsed("--mark-attempts-per-event", "24")
+    _, high = _parsed("--mark-attempts-per-event", "96")
+    left = suite.frozen_sampler_identity(suite.sampler_config_from_args(low))
+    right = suite.frozen_sampler_identity(suite.sampler_config_from_args(high))
+    assert left["config_sha256"] != right["config_sha256"]
+    assert left["config"]["mark_attempts_per_event"] == 24
+    assert right["config"]["mark_attempts_per_event"] == 96
+
+
+def test_no_per_task_or_per_drug_sampler_knob_is_expressible():
+    """The line between a general capability and benchmark engineering.
+
+    A global knob is legitimate; a per-instance one is not. The parser must
+    offer no option that scopes a sampler knob to a drug or a task.
+    """
+    suite = _suite_module()
+    options = {
+        option
+        for action in suite.build_parser()._actions
+        for option in action.option_strings
+    }
+    for forbidden in (
+        "--mark-attempts-for-drug",
+        "--mark-attempts-for-task",
+        "--per-drug-mark-attempts",
+        "--per-task-mark-attempts",
+        "--max-events-for-task",
+    ):
+        assert forbidden not in options
+    # --drug and --task SELECT which instances to run; they must not carry a value.
+    for action in suite.build_parser()._actions:
+        if "--drug" in action.option_strings or "--task" in action.option_strings:
+            assert action.type is not int, (
+                f"{action.option_strings} looks like it carries a numeric knob"
+            )
