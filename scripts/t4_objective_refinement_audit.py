@@ -16,7 +16,9 @@ PANEL SELECTION
 By the endpoint's own constraint-violation scalar ``v`` from
 ``t4_endpoint_selection.calculate_properties`` -- the same "select by existing
 violation, never by a successor result or winner" rule ``t4_repair_neighbors``
-uses.  No target, cell or seed identity enters the selection.
+uses.  No target, cell or seed identity enters the selection, and crucially
+neither does WHICH bound the endpoint fails: on braf_1 four of five rescues are
+similarity failures repaired jointly with QED, which a QED-only panel misses.
 
 SLOT SEMANTICS
 --------------
@@ -51,9 +53,11 @@ from compose_v4.experiments.t4_fiber_campaign import QED_MIN, SA_MAX, Fiber
 from compose_v4.experiments.t4_objective_refinement import (
     PRODUCTION_MAX_ATOMS,
     SCHEMA_VERSION,
+    VIOLATION_RANKED_PANEL,
     free_objective_near_miss,
     properties_for_fiber,
     refine_endpoint,
+    select_refinement_panel,
 )
 
 RDLogger.DisableLog("rdApp.*")
@@ -142,14 +146,12 @@ def audit_cell(shard_path: Path, delta: float, panel: int) -> dict:
     fiber = Fiber(seed, delta)
     rows = _distinct_scored(shard, fiber)
 
-    violating = sorted(
-        (r for r in rows if r["v"] > 0), key=lambda r: (r["v"], r["smiles"])
-    )
+    panel_rows = select_refinement_panel(rows, panel)
     similarity_pass = [r for r in rows if r["sim"] >= delta]
     best = max(similarity_pass, key=lambda r: r["qed"]) if similarity_pass else None
 
     refined, oracle_calls = [], 0
-    for row in violating[:panel]:
+    for row in panel_rows:
         report = refine_endpoint(seed, delta, row["smiles"])
         oracle_calls += report["oracle_calls"]
         best_row = (
@@ -230,7 +232,7 @@ def main() -> None:
             {
                 "schema": SCHEMA,
                 "refinement_schema_version": SCHEMA_VERSION,
-                "panel_selection": "least constraint violation v; no target identity",
+                "panel_selection": VIOLATION_RANKED_PANEL,
                 "oracle_calls": sum(c["oracle_calls"] for c in cells),
                 "cells": cells,
             },
