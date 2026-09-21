@@ -44,6 +44,7 @@
   },
   "max_abs_delta": 1.1102230246251565e-16,
   "distance_reference_identical": true,
-  "verdict": "DIFFERS",
-  "coverage": "one row (superstructure/BARICITINIB/seed 0), 100 emissions, zero failure placeholders"
+  "verdict": "IDENTICAL_TO_FLOATING_POINT_ROUNDING",
+  "coverage": "one row (superstructure/BARICITINIB/seed 0), 100 emissions, zero failure placeholders",
+  "verdict_note": "max absolute delta 1.11022e-16 is one double-precision ULP on diversity (0.72238 vs 0.7223800000000001), i.e. summation-order rounding, not a chemistry difference. Every other metric is bit-identical, including distance at full precision."
 }
