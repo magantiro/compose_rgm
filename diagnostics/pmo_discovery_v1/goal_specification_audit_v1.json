@@ -1,0 +1,379 @@
+{
+  "schema_version": "pmo_goal_specification_audit_v1",
+  "oracle_calls": 0,
+  "tdc_version": "1.1.15 (pinned)",
+  "oracle_source": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916/.uv-cache/sdists-v7/pypi/pytdc/1.1.15/1BbE1CByMlrf4ye7noADs/src/tdc/chem_utils/oracle/oracle.py",
+  "tasks": 23,
+  "by_kind": {
+    "black_box_scalar_only": [
+      "drd2",
+      "gsk3b",
+      "jnk3",
+      "qed"
+    ],
+    "declared_molecular_formula": [
+      "isomers_c7h8n2o2",
+      "isomers_c9h10n2o2pf2cl",
+      "zaleplon_mpo"
+    ],
+    "declared_reference_structure_in_composite": [
+      "amlodipine_mpo",
+      "fexofenadine_mpo",
+      "osimertinib_mpo",
+      "perindopril_mpo",
+      "ranolazine_mpo",
+      "sitagliptin_mpo"
+    ],
+    "declared_smarts": [
+      "deco_hop",
+      "scaffold_hop",
+      "valsartan_smarts"
+    ],
+    "declared_target_pair": [
+      "median1",
+      "median2"
+    ],
+    "declared_target_structure": [
+      "albuterol_similarity",
+      "celecoxib_rediscovery",
+      "mestranol_similarity",
+      "thiothixene_rediscovery",
+      "troglitazone_rediscovery"
+    ]
+  },
+  "rows": [
+    {
+      "task": "albuterol_similarity",
+      "constructor": "similarity_meta",
+      "declared": [
+        {
+          "name": "target_smiles",
+          "value": "CC(C)(C)NCC(O)c1ccc(O)c(CO)c1",
+          "kind": "smiles"
+        },
+        {
+          "name": "fp",
+          "value": "FCFP4",
+          "kind": "formula"
+        }
+      ],
+      "goal_kind": "declared_target_structure"
+    },
+    {
+      "task": "amlodipine_mpo",
+      "constructor": "FunctionDef",
+      "declared": [
+        {
+          "name": "amlodipine_smiles",
+          "value": "Clc1ccccc1C2C(=C(/N/C(=C2/C(=O)OCC)COCCN)C)\\C(=O)OC",
+          "kind": "smiles"
+        }
+      ],
+      "goal_kind": "declared_reference_structure_in_composite"
+    },
+    {
+      "task": "celecoxib_rediscovery",
+      "constructor": "rediscovery_meta",
+      "declared": [
+        {
+          "name": "target_smiles",
+          "value": "CC1=CC=C(C=C1)C1=CC(=NN1C1=CC=C(C=C1)S(N)(=O)=O)C(F)(F)F",
+          "kind": "smiles"
+        },
+        {
+          "name": "fp",
+          "value": "ECFP4",
+          "kind": "formula"
+        }
+      ],
+      "goal_kind": "declared_target_structure"
+    },
+    {
+      "task": "deco_hop",
+      "constructor": "FunctionDef",
+      "declared": [
+        {
+          "name": "pharmacophor_smiles",
+          "value": "CCCOc1cc2ncnc(Nc3ccc4ncsc4c3)c2cc1S(=O)(=O)C(C)(C)C",
+          "kind": "smiles"
+        },
+        {
+          "name": "target_smarts",
+          "value": "CS([#6])(=O)=O",
+          "kind": "smarts"
+        },
+        {
+          "name": "target_smarts",
+          "value": "[#7]-c1ccc2ncsc2c1",
+          "kind": "smarts"
+        },
+        {
+          "name": "target_smarts",
+          "value": "[#7]-c1n[c;h1]nc2[c;h1]c(-[#8])[c;h0][c;h1]c12",
+          "kind": "smarts"
+        }
+      ],
+      "goal_kind": "declared_smarts"
+    },
+    {
+      "task": "drd2",
+      "constructor": "FunctionDef",
+      "declared": [],
+      "goal_kind": "black_box_scalar_only"
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "constructor": "FunctionDef",
+      "declared": [
+        {
+          "name": "fexofenadine_smiles",
+          "value": "CC(C)(C(=O)O)c1ccc(cc1)C(O)CCCN2CCC(CC2)C(O)(c3ccccc3)c4ccccc4",
+          "kind": "smiles"
+        }
+      ],
+      "goal_kind": "declared_reference_structure_in_composite"
+    },
+    {
+      "task": "gsk3b",
+      "constructor": "FunctionDef",
+      "declared": [],
+      "goal_kind": "black_box_scalar_only"
+    },
+    {
+      "task": "isomers_c7h8n2o2",
+      "constructor": "isomer_meta",
+      "declared": [
+        {
+          "name": "target_smiles",
+          "value": "C7H8N2O2",
+          "kind": "formula"
+        }
+      ],
+      "goal_kind": "declared_molecular_formula"
+    },
+    {
+      "task": "isomers_c9h10n2o2pf2cl",
+      "constructor": "isomer_meta",
+      "declared": [
+        {
+          "name": "target_smiles",
+          "value": "C9H10N2O2PF2Cl",
+          "kind": "formula"
+        }
+      ],
+      "goal_kind": "declared_molecular_formula"
+    },
+    {
+      "task": "jnk3",
+      "constructor": "ClassDef",
+      "declared": [],
+      "goal_kind": "black_box_scalar_only"
+    },
+    {
+      "task": "median1",
+      "constructor": "median_meta",
+      "declared": [
+        {
+          "name": "target_smiles_1",
+          "value": "CC1(C)C2CCC1(C)C(=O)C2",
+          "kind": "smiles"
+        },
+        {
+          "name": "target_smiles_2",
+          "value": "CC(C)C1CCC(C)CC1O",
+          "kind": "smiles"
+        },
+        {
+          "name": "fp1",
+          "value": "ECFP4",
+          "kind": "formula"
+        }
+      ],
+      "goal_kind": "declared_target_pair"
+    },
+    {
+      "task": "median2",
+      "constructor": "median_meta",
+      "declared": [
+        {
+          "name": "target_smiles_1",
+          "value": "O=C1N(CC(N2C1CC3=C(C2C4=CC5=C(OCO5)C=C4)NC6=C3C=CC=C6)=O)C",
+          "kind": "smiles"
+        },
+        {
+          "name": "target_smiles_2",
+          "value": "CCCC1=NN(C2=C1N=C(NC2=O)C3=C(C=CC(=C3)S(=O)(=O)N4CCN(CC4)C)OCC)C",
+          "kind": "smiles"
+        },
+        {
+          "name": "fp1",
+          "value": "ECFP6",
+          "kind": "formula"
+        }
+      ],
+      "goal_kind": "declared_target_pair"
+    },
+    {
+      "task": "mestranol_similarity",
+      "constructor": "similarity_meta",
+      "declared": [
+        {
+          "name": "target_smiles",
+          "value": "COc1ccc2[C@H]3CC[C@@]4(C)[C@@H](CC[C@@]4(O)C#C)[C@@H]3CCc2c1",
+          "kind": "smiles"
+        },
+        {
+          "name": "fp",
+          "value": "AP",
+          "kind": "formula"
+        }
+      ],
+      "goal_kind": "declared_target_structure"
+    },
+    {
+      "task": "osimertinib_mpo",
+      "constructor": "FunctionDef",
+      "declared": [
+        {
+          "name": "osimertinib_smiles",
+          "value": "COc1cc(N(C)CCN(C)C)c(NC(=O)C=C)cc1Nc2nccc(n2)c3cn(C)c4ccccc34",
+          "kind": "smiles"
+        }
+      ],
+      "goal_kind": "declared_reference_structure_in_composite"
+    },
+    {
+      "task": "perindopril_mpo",
+      "constructor": "FunctionDef",
+      "declared": [
+        {
+          "name": "perindopril_smiles",
+          "value": "O=C(OCC)C(NC(C(=O)N1C(C(=O)O)CC2CCCCC12)C)CCC",
+          "kind": "smiles"
+        }
+      ],
+      "goal_kind": "declared_reference_structure_in_composite"
+    },
+    {
+      "task": "qed",
+      "constructor": "FunctionDef",
+      "declared": [],
+      "goal_kind": "black_box_scalar_only"
+    },
+    {
+      "task": "ranolazine_mpo",
+      "constructor": "FunctionDef",
+      "declared": [
+        {
+          "name": "ranolazine_smiles",
+          "value": "COc1ccccc1OCC(O)CN2CCN(CC(=O)Nc3c(C)cccc3C)CC2",
+          "kind": "smiles"
+        }
+      ],
+      "goal_kind": "declared_reference_structure_in_composite"
+    },
+    {
+      "task": "scaffold_hop",
+      "constructor": "FunctionDef",
+      "declared": [
+        {
+          "name": "pharmacophor_smiles",
+          "value": "CCCOc1cc2ncnc(Nc3ccc4ncsc4c3)c2cc1S(=O)(=O)C(C)(C)C",
+          "kind": "smiles"
+        },
+        {
+          "name": "target_smarts",
+          "value": "[#6]-[#6]-[#6]-[#8]-[#6]~[#6]~[#6]~[#6]~[#6]-[#7]-c1ccc2ncsc2c1",
+          "kind": "smarts"
+        },
+        {
+          "name": "target_smarts",
+          "value": "[#7]-c1n[c;h1]nc2[c;h1]c(-[#8])[c;h0][c;h1]c12",
+          "kind": "smarts"
+        }
+      ],
+      "goal_kind": "declared_smarts"
+    },
+    {
+      "task": "sitagliptin_mpo",
+      "constructor": "FunctionDef",
+      "declared": [
+        {
+          "name": "sitagliptin_smiles",
+          "value": "Fc1cc(c(F)cc1F)CC(N)CC(=O)N3Cc2nnc(n2CC3)C(F)(F)F",
+          "kind": "smiles"
+        }
+      ],
+      "goal_kind": "declared_reference_structure_in_composite"
+    },
+    {
+      "task": "thiothixene_rediscovery",
+      "constructor": "rediscovery_meta",
+      "declared": [
+        {
+          "name": "target_smiles",
+          "value": "CN(C)S(=O)(=O)c1ccc2Sc3ccccc3C(=CCCN4CCN(C)CC4)c2c1",
+          "kind": "smiles"
+        },
+        {
+          "name": "fp",
+          "value": "ECFP4",
+          "kind": "formula"
+        }
+      ],
+      "goal_kind": "declared_target_structure"
+    },
+    {
+      "task": "troglitazone_rediscovery",
+      "constructor": "rediscovery_meta",
+      "declared": [
+        {
+          "name": "target_smiles",
+          "value": "Cc1c(C)c2OC(C)(COc3ccc(CC4SC(=O)NC4=O)cc3)CCc2c(C)c1O",
+          "kind": "smiles"
+        },
+        {
+          "name": "fp",
+          "value": "ECFP4",
+          "kind": "formula"
+        }
+      ],
+      "goal_kind": "declared_target_structure"
+    },
+    {
+      "task": "valsartan_smarts",
+      "constructor": "FunctionDef",
+      "declared": [
+        {
+          "name": "valsartan_smarts",
+          "value": "CN(C=O)Cc1ccc(c2ccccc2)cc1",
+          "kind": "smarts"
+        },
+        {
+          "name": "sitagliptin_smiles",
+          "value": "NC(CC(=O)N1CCn2c(nnc2C(F)(F)F)C1)Cc1cc(F)c(F)cc1F",
+          "kind": "smiles"
+        }
+      ],
+      "goal_kind": "declared_smarts"
+    },
+    {
+      "task": "zaleplon_mpo",
+      "constructor": "FunctionDef",
+      "declared": [
+        {
+          "name": "zaleplon_smiles",
+          "value": "O=C(C)N(CC)C1=CC=CC(C2=CC=NC3=C(C=NN23)C#N)=C1",
+          "kind": "smiles"
+        },
+        {
+          "name": "target_smiles",
+          "value": "C19H17N3O2",
+          "kind": "formula"
+        }
+      ],
+      "goal_kind": "declared_molecular_formula"
+    }
+  ],
+  "note": "Parsed with ast; TDC is never imported and no oracle is constructed, so no predictor pickle is downloaded and no task name can resolve through TDC's fuzzy matcher to a different oracle."
+}
