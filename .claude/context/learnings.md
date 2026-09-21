@@ -2779,3 +2779,45 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   `pyyaml`, so `pytest tests/ -k pmo` died with **59 collection errors** that look exactly like
   a branch-health catastrophe and are `ModuleNotFoundError: No module named 'yaml'`. Run the
   named test FILES, or read the error before attributing it to the branch.
+
+## 2026-09-21 (PMO route channel: the integration gate PASSES, and the proxy-task corpus source does not)
+
+- **The PMO proposal IS the molecule that gets scored: `recovered_fraction` 1.0000, against
+  T4's 0.0000.** `t4_fiber_campaign.expand` abstracts its synthesized program through
+  `extract_structural_goal`, expands `_variants`, re-binds via
+  `attachment_bindings(...).assignments[0]` and gates whatever `instantiate_goal` builds, so a
+  proposal law wired there conditions an object nobody scores. **PMO has no such indirection**:
+  `_generate_channel_pool` executes the synthesized program and takes `endpoint =
+  trace["endpoint"]`, `_candidate` carries that same trace, and `program_campaign` charges
+  `ledger.query(candidate["endpoint"])`. MEASURED by execution over **144 candidates** (3 generic
+  sources x 2 seeds), three hops each -- endpoint recomputed from the candidate's own executed
+  trace through the production decoder, program size profile against the executed trace, and the
+  charged archive after a real propose -> lock -> `observe_batch`: **0 / 0 / 0 mismatches**.
+  Pinned as two tests plus a battery mutation that makes the candidate record carry a molecule
+  its program did not produce -- the T4 defect class reproduced on the PMO path -- which turns
+  both tests red. **Verify this hop before wiring any proposal law; it is one cheap gate and it
+  is the difference between a channel that steers and a channel that is ignored.**
+- **`compile_source_to_target` CANNOT source semantic routes: it demolishes the molecule to the
+  formal NULL state first.** It is the only compiler accepting an arbitrary pair, and it is
+  `delete_to_null_then_construct_v1` -- its own docstring says it "is intentionally not an
+  edit-minimal alignment". MEASURED **retained_fraction 0.000 on 4 of 4** generic drug-like
+  pairs, all four through null, **including a pair differing by ONE METHYL** which costs 25 steps
+  on an 11-atom molecule (12 deletions to nothing, then 13 constructions). The route shape is
+  INDEPENDENT of how close the pair is, so retained region, released region, replacement
+  topology and interface are all degenerate on its output: retain nothing, release everything.
+  This is the `real_endpoint_multistep_path` failure already on the record -- a demolish-then-
+  rebuild decomposition whose family share moves monotonically `atom_delete` early to
+  `atom_insert` late, "a compiler artifact, not chemistry". Fitting route prototypes on it would
+  learn the compiler's deletion order. **A proxy-task design that compiles G0 -> T for generic
+  pairs needs a scaffold-preserving bridge that does not exist today.**
+- **The admitted witness corpus has exactly the shape the route design wants, and it is small.**
+  MEASURED over the 160 `witness_found` routes of `diagnostics/ivg_winner_paths/pairs/`:
+  retained_fraction **median 0.8125** (min 0.350, max 1.000), **ZERO routes through null**, steps
+  median 17 (5-47), and **138 of 160 CHANGE RING RANK** -- genuine long-range topology moves over
+  82 distinct targets. Families: atom_insert 1314, atom_delete 1202, cycle_close 279,
+  bond_reorder 156, cycle_open 70, ring_system_restate 33, atom_restate_semantic 16. Caveats that
+  belong beside any number fitted on it: these are COMPILED WITNESSES (a search reconstructed a
+  reported endpoint, so the rule mix is partly the search's property), they are benchmark-derived
+  rather than generic, and a teacher-route prior fitted on this very corpus already FAILED to
+  improve complete-program yield -- with the REGION LAW causing the loss and the family
+  projection neutral.
