@@ -1,0 +1,66 @@
+{
+  "CONSEQUENCES": [
+    "The gsk3b 0.290 best / 0.145 AUC is NOT a defensible scientific result and must not be reported as one.",
+    "A donor-region memory seeded by score rank would AMPLIFY the pathology on predictor-backed oracles.",
+    "This is upstream of the jump mechanism: move SIZE was never the binding constraint on gsk3b; the search was in a garbage region of chemical space.",
+    "r(score, heavy_atoms) is +0.67 to +0.81 on ALL three tasks, so there is a universal size gradient a scale-learning memory could trivially latch onto.",
+    "The architectural fix is a proposal distribution grounded in real chemistry (task-independent structural prior), NOT a QED/SA filter -- a filter is a patch, and where QED is the objective it would be uncounted objective evaluation."
+  ],
+  "FINDING": "On gsk3b the search REWARD-HACKS a fingerprint-based RandomForest: score correlates NEGATIVELY with QED (-0.433) and POSITIVELY with SA (+0.684). Its top-scoring molecule carries bare phosphorus, hypervalent [IH] and a peroxide-hydrazine chain at QED 0.03 / SA 7.81. The two similarity/descriptor oracles are NOT fooled -- their correlations run the healthy way and their top molecules are chemically reasonable. So this is oracle-class-specific, not a universal COMPOSE defect.",
+  "WHY_IT_HAPPENS": "COMPOSE's executor is validity-closed in the VALENCE sense -- every committed state is a complete valid connected molecule -- which is NOT the same as chemically sensible. The proposal distribution carries no prior over real chemistry, so it explores valence-legal but drug-implausible space, and a fingerprint predictor gives that space partial credit. GenMol and InVirtuoGen generate from learned distributions over real molecules (SAFE/fragment tokens) and structurally cannot easily emit [IH]OOCNNCO, so they do not meet this failure mode.",
+  "kernel": "rdkit 2024.03.5 pinned",
+  "method": "final-round snapshot observations of the completed PMO-v2 3x250 run; every scored endpoint re-scored offline for QED/SA/heavy atoms. No oracle was called.",
+  "oracle_calls_spent_by_this_analysis": 0,
+  "run_id": "35fc7bcd4bf5c964294698014c1ed40da483ad013f6b92c6201b01dee2d3d306",
+  "schema_version": "pmo_offmanifold_reward_hacking_v1",
+  "tasks": {
+    "celecoxib_rediscovery": {
+      "all_median_qed": 0.4486,
+      "all_median_sa": 4.1564,
+      "best": 0.2203,
+      "corr_score_heavy": 0.7294,
+      "corr_score_qed": 0.2276,
+      "corr_score_sa": -0.1536,
+      "frac_sa_le_4": 0.4103,
+      "n_scored": 234,
+      "top10_mean": 0.1969,
+      "top10_median_qed": 0.5227,
+      "top10_median_sa": 4.0035,
+      "top_scorer_qed": 0.5809,
+      "top_scorer_sa": 3.9114,
+      "top_scorer_smiles": "CC1=CC=C(C(CNc2ccc(Br)cc2Cl)C(N)(F)c2cccnc2)C1"
+    },
+    "gsk3b": {
+      "all_median_qed": 0.4064,
+      "all_median_sa": 4.8347,
+      "best": 0.29,
+      "corr_score_heavy": 0.8067,
+      "corr_score_qed": -0.4326,
+      "corr_score_sa": 0.6838,
+      "frac_sa_le_4": 0.2521,
+      "n_scored": 234,
+      "top10_mean": 0.2462,
+      "top10_median_qed": 0.1134,
+      "top10_median_sa": 7.1549,
+      "top_scorer_qed": 0.029,
+      "top_scorer_sa": 7.8115,
+      "top_scorer_smiles": "CC1C(C)C2CC3CC(=O)C2(C(C#N)C1NC1=C(P)C=C(Br)C(C(N)[IH]OOCNNCO)N1)C3(C)C"
+    },
+    "perindopril_mpo": {
+      "all_median_qed": 0.4439,
+      "all_median_sa": 4.4552,
+      "best": 0.498,
+      "corr_score_heavy": 0.6739,
+      "corr_score_qed": 0.0696,
+      "corr_score_sa": -0.0266,
+      "frac_sa_le_4": 0.2863,
+      "n_scored": 234,
+      "top10_mean": 0.4515,
+      "top10_median_qed": 0.4839,
+      "top10_median_sa": 4.163,
+      "top_scorer_qed": 0.3849,
+      "top_scorer_sa": 4.2723,
+      "top_scorer_smiles": "CCCC(OC1CCCCC1C(C)C)C(=O)Nc1ccc2[nH]c(=NCOO)sc2c1"
+    }
+  }
+}
