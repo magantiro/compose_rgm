@@ -3055,3 +3055,57 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   express. Three fixtures were needed: one MIXED (both kinds admissible), one RESIDUAL (the
   chosen ordering genuinely dips), one SYNTHETIC (two dipping candidates of different
   depth). Check that the fixture can express the property before trusting the assertion.
+
+## 2026-09-21 (RETRACTION: a benchmark DECLARING a target is not the task SUPPLYING it)
+
+- **RETRACTED: "19 of 23 PMO tasks declare structural content, and a declared target is a
+  task INPUT in the sense delta is in T4."** The first clause stands and is reusable; the
+  second is withdrawn. The celecoxib literal is real -- pinned PyTDC 1.1.15,
+  `celecoxib_rediscovery = rediscovery_meta(target_smiles="CC1=CC=C(C=C1)...")`, line 921
+  -- and finding it settles nothing about whether the EVALUATED TASK hands it to the
+  search.
+- **What settled it was tracing where the string GOES.** In InVirtuoGen's
+  `genetic_ppo.py` a dictionary of reference SMILES is assigned to `config.target`, and
+  every use in the optimization loop passes it to `visualize_top_smiles`, which puts the
+  reference at the front of a drawing grid and saves a plot. Reference SMILES ->
+  configuration -> visualization -> saved file. **It never reaches the proposal model, the
+  reward, the prompter or the training procedure.** A display reference, not a
+  navigational input. The PMO paper is explicit that neither oracle analytic forms nor
+  property derivatives are accessible: scalar evaluations under a query budget.
+- **THE OPERATIVE RULE: use a target when the EVALUATED TASK supplies it, not when the
+  repository contains it.** T4 supplies a lead molecule and the runner initializes from
+  its fragments -- a genuine input. PMO black-box search supplies scalar feedback only.
+  Also worth knowing: GenMol's released PMO setup builds an ORACLE-SCORED fragment
+  vocabulary per objective from ZINC250k, which is exactly the prescreen IVG's
+  no-prescreen flag turns off.
+- **HOW THE ERROR PROPAGATED, because the shape recurs.** An audit classified what the
+  benchmark DECLARES -- correct, tested, three misclassification patterns each pinned.
+  That classification was then labelled "a task INPUT in the sense delta is in T4", which
+  is a claim about DATA FLOW, and the label was converted into a directive without anyone
+  tracing the flow. Verifying a literal exists, and verifying its line number, both felt
+  like verification and neither touched the actual question. **A classification of what a
+  benchmark declares is not a claim about what it supplies. Trace the consumer.**
+- **STALE CONTEXT IS WORSE THAN NONE, and a module docstring is context.**
+  `scripts/pmo_goal_specification_audit.py` asserted the retracted inference in its own
+  header, where the next agent to read it would have taken it as established. Corrected in
+  place, with the retraction stated rather than the sentence quietly deleted -- the audit
+  now says explicitly that its output feeds the goal-given DIAGNOSTIC mode and does not
+  license a declared target in a scored no-prescreen run.
+- **THREE MODES, TO BE LABELLED SEPARATELY IN ANY RESULT** (owner's structure; three
+  questions with three different remedies -- can we CONSTRUCT it, can we EXPLOIT it, can
+  we DISCOVER it):
+    1. goal-given transport DIAGNOSTIC -- reference visible, deliberately answer-informed;
+    2. teacher-region warm-start DIAGNOSTIC -- answer-informed initial state, no teacher
+       suffix and no future goal supplied;
+    3. no-prescreen PMO SEARCH -- no hidden reference structures, no same-task
+       winner-derived priors.
+  For the scored controller, goals come from current-run donor chemistry RECOMBINED (new
+  combinations, not "pick an elite as the destination"), a learned task-independent
+  completion prior on a permitted generic corpus, and broad discovery proposals not
+  concentrated on elites. A bandit can choose among available alternatives; it cannot make
+  chemically useful alternatives appear if the construction law samples arbitrary
+  structures.
+- **SCALE, for calibration:** IVG's no-prescreen celecoxib AUC at 10,000 calls is 0.798;
+  arm B reached 0.3138 at 1,000. Matching 0.798 would need an average top-ten level near
+  0.852 across the remaining 9,000 calls. Not a forecast and not an impossibility claim --
+  it means the objective is a strong top-ten CURVE, not a single perfect molecule.

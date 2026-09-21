@@ -1,26 +1,35 @@
 """What does each PMO task's PUBLIC definition declare? Zero oracle calls.
 
-WHY THIS EXISTS
----------------
-The transport controller turns a DECLARED GOAL into executable COMPOSE programs. Which
-goals exist is therefore a fact about the benchmark, and it has to be read from the
-benchmark source rather than assumed or hand-written -- a hand-written target list is
-exactly the per-task content the architecture forbids.
+WHAT THIS ESTABLISHES, AND WHAT IT DOES NOT
+-------------------------------------------
+This audit reports what each task's public definition CONTAINS. It is a classification of
+the benchmark source, read from that source rather than hand-written, because a
+hand-written target list is exactly the per-task content the architecture forbids. The
+classification is correct and reusable.
 
-INFORMATION BOUNDARY, and it moved on evidence. A target structure written as a literal
-in the PUBLIC task definition is a task INPUT, in the same sense that delta and the start
-molecule are inputs in T4. VERIFIED in the pinned PyTDC 1.1.15 this repository already
-pins:
+**IT IS NOT A CLAIM THAT ANY OF IT IS SUPPLIED TO THE OPTIMIZER.** An earlier version of
+this docstring asserted that a target structure written as a literal in the public task
+definition "is a task INPUT, in the same sense that delta and the start molecule are
+inputs in T4". THAT INFERENCE IS RETRACTED. The literal is real -- in the pinned PyTDC
+1.1.15, `celecoxib_rediscovery = rediscovery_meta(target_smiles="CC1=CC=C(C=C1)...")` at
+line 921 -- but finding a string in a repository does not establish that the evaluated
+task hands it to the search.
 
-    celecoxib_rediscovery = rediscovery_meta(
-        target_smiles="CC1=CC=C(C=C1)C1=CC(=NN1C1=CC=C(C=C1)S(N)(=O)=O)C(F)(F)F", ...)
+It was settled by tracing where the string GOES, which neither finding it nor verifying
+its line number could do. In InVirtuoGen's `genetic_ppo.py` a dictionary of reference
+SMILES is assigned to `config.target`, and every use of it in the optimization loop passes
+it to `visualize_top_smiles`, which places the reference at the front of a drawing grid
+and saves a plot. Reference SMILES -> configuration -> visualization -> saved file. It
+never reaches the proposal model, the reward, the prompter or the training procedure. It
+is a display reference, not a navigational input. The PMO paper is explicit that neither
+the analytic form of the oracles nor property derivatives are accessible: feedback is
+scalar evaluations under a query budget.
 
-(An earlier note placed this at line 748; in the pinned version it is line 921. The claim
-holds, the line number did not -- which is why this reads the pinned source itself.)
-
-"No prescreen" is about not pre-scoring the ~250k ZINC set to build task-specific
-vocabularies, NOT about ignoring declared task structure. What must stay general is the
-CONTROLLER that turns an arbitrary declared goal into programs.
+THE OPERATIVE RULE: use a target when the EVALUATED TASK supplies it. T4 supplies a lead
+molecule and the runner initializes from its fragments -- a genuine task input. PMO
+black-box search supplies scalar feedback only. So this audit's output feeds the
+goal-given DIAGNOSTIC mode, where a reference is deliberately visible and labelled as
+such; it does NOT license using a declared target in a scored no-prescreen run.
 
 This audit does NOT execute TDC. It parses the module with `ast`, so no predictor pickle
 is downloaded and no oracle is constructed -- which also means a near-miss task name
