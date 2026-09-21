@@ -55,6 +55,7 @@ import numpy as np
 
 from compose_v4.chem.molecular_graph import MolecularGraph, is_element, is_occupied
 from compose_v4.eval.ring_calibration import (
+    ring_template_cycle_sizes,
     undesirable_small_ring_mask,
     uniform_category_mass,
 )
@@ -370,6 +371,36 @@ def small_ring_category_mask(templates: Sequence[object], *, maximum_size: int =
     """Return the production 3/4-ring template mask for one catalog."""
 
     return undesirable_small_ring_mask(templates, maximum_size=maximum_size)
+
+
+def ring_size_support_histogram(
+    support: Sequence[bool],
+    templates: Sequence[object],
+) -> dict[str, int]:
+    """Count legal templates by their SMALLEST ring, not only by 3/4 membership.
+
+    The small-ring fraction is one scalar over a distribution, and two supports
+    with the same fraction can differ completely in what else they offer.  A
+    schedule that merely deletes small templates and a schedule that restores
+    large ones both raise the same scalar; only the histogram separates them, so
+    it is reported beside the fraction rather than derived from it.
+
+    Keys are the minimum cycle size as a string, plus ``"acyclic"`` for a
+    template whose target pattern carries no cycle at all.  Sizes are read
+    through the production ``ring_template_cycle_sizes`` helper, so the
+    histogram and the 3/4 mask cannot disagree about what a template contains.
+    """
+
+    if len(support) != len(templates):
+        raise ValueError("support and template sequences must align")
+    histogram: dict[str, int] = {}
+    for legal, template in zip(support, templates):
+        if not bool(legal):
+            continue
+        sizes = ring_template_cycle_sizes(template)
+        key = str(min(sizes)) if sizes else "acyclic"
+        histogram[key] = histogram.get(key, 0) + 1
+    return histogram
 
 
 # ---- Aggregation ----
