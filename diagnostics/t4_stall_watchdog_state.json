@@ -5,16 +5,16 @@
       "cell": "5ht1b_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 8,
-      "newest_lock": "round_007_lock.json"
+      "lock_count": 11,
+      "newest_lock": "round_010_lock.json"
     },
     "5ht1b_d04/8cb564a63b09/5ht1b_1": {
       "arm": "5ht1b_d04",
       "cell": "5ht1b_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 5,
-      "newest_lock": "round_004_lock.json"
+      "lock_count": 7,
+      "newest_lock": "round_006_lock.json"
     },
     "5ht1b_d04/8cb564a63b09/5ht1b_2": {
       "arm": "5ht1b_d04",
@@ -29,16 +29,16 @@
       "cell": "5ht1b_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 15,
-      "newest_lock": "round_014_lock.json"
+      "lock_count": 18,
+      "newest_lock": "round_017_lock.json"
     },
     "5ht1b_d06/5f08e547828d/5ht1b_1": {
       "arm": "5ht1b_d06",
       "cell": "5ht1b_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 29,
-      "newest_lock": "round_028_lock.json"
+      "lock_count": 34,
+      "newest_lock": "round_033_lock.json"
     },
     "5ht1b_d06/5f08e547828d/5ht1b_2": {
       "arm": "5ht1b_d06",
@@ -77,24 +77,24 @@
       "cell": "braf_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 11,
-      "newest_lock": "round_010_lock.json"
+      "lock_count": 12,
+      "newest_lock": "round_011_lock.json"
     },
     "braf_d04/ce0ef61b78fa/braf_1": {
       "arm": "braf_d04",
       "cell": "braf_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 9,
-      "newest_lock": "round_008_lock.json"
+      "lock_count": 13,
+      "newest_lock": "round_012_lock.json"
     },
     "braf_d04/ce0ef61b78fa/braf_2": {
       "arm": "braf_d04",
       "cell": "braf_2",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 10,
-      "newest_lock": "round_009_lock.json"
+      "lock_count": 11,
+      "newest_lock": "round_010_lock.json"
     },
     "braf_d06/6bb679e5cd0e/braf_0": {
       "arm": "braf_d06",
@@ -144,21 +144,37 @@
       "lock_count": 25,
       "newest_lock": "round_024_lock.json"
     },
+    "braf_d06_region_repair/028ca867173f/braf_0": {
+      "arm": "braf_d06_region_repair",
+      "cell": "braf_0",
+      "has_checkpoint": true,
+      "has_result": false,
+      "lock_count": 4,
+      "newest_lock": "round_003_lock.json"
+    },
+    "braf_d06_region_repair/028ca867173f/braf_1": {
+      "arm": "braf_d06_region_repair",
+      "cell": "braf_1",
+      "has_checkpoint": true,
+      "has_result": false,
+      "lock_count": 4,
+      "newest_lock": "round_003_lock.json"
+    },
     "fa7_d04/b710c7c68a35/fa7_0": {
       "arm": "fa7_d04",
       "cell": "fa7_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 9,
-      "newest_lock": "round_008_lock.json"
+      "lock_count": 12,
+      "newest_lock": "round_011_lock.json"
     },
     "fa7_d04/b710c7c68a35/fa7_1": {
       "arm": "fa7_d04",
       "cell": "fa7_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 11,
-      "newest_lock": "round_010_lock.json"
+      "lock_count": 14,
+      "newest_lock": "round_013_lock.json"
     },
     "fa7_d04/b710c7c68a35/fa7_2": {
       "arm": "fa7_d04",
@@ -171,10 +187,10 @@
     "fa7_d04_region_repair/8130bad41341/fa7_2": {
       "arm": "fa7_d04_region_repair",
       "cell": "fa7_2",
-      "has_checkpoint": false,
+      "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 1,
-      "newest_lock": "round_000_lock.json"
+      "lock_count": 3,
+      "newest_lock": "round_002_lock.json"
     },
     "fa7_d06/71d3b6d96ecd/fa7_0": {
       "arm": "fa7_d06",
@@ -213,8 +229,8 @@
       "cell": "fa7_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 26,
-      "newest_lock": "round_025_lock.json"
+      "lock_count": 29,
+      "newest_lock": "round_028_lock.json"
     },
     "fa7_d06/d907ab0b7a82/fa7_2": {
       "arm": "fa7_d06",
@@ -223,6 +239,22 @@
       "has_result": true,
       "lock_count": 1,
       "newest_lock": "round_000_lock.json"
+    },
+    "fa7_d06_region_repair/b9161be0d130/fa7_0": {
+      "arm": "fa7_d06_region_repair",
+      "cell": "fa7_0",
+      "has_checkpoint": false,
+      "has_result": true,
+      "lock_count": 1,
+      "newest_lock": "round_000_lock.json"
+    },
+    "fa7_d06_region_repair/b9161be0d130/fa7_2": {
+      "arm": "fa7_d06_region_repair",
+      "cell": "fa7_2",
+      "has_checkpoint": true,
+      "has_result": false,
+      "lock_count": 3,
+      "newest_lock": "round_002_lock.json"
     },
     "jak2_named_d06/3d89d15013d5/jak2_0": {
       "arm": "jak2_named_d06",
@@ -253,8 +285,8 @@
       "cell": "jak2_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 22,
-      "newest_lock": "round_021_lock.json"
+      "lock_count": 26,
+      "newest_lock": "round_025_lock.json"
     },
     "jak2_named_d06/74e0021606af/jak2_1": {
       "arm": "jak2_named_d06",
@@ -277,72 +309,72 @@
       "cell": "jak2_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 10,
-      "newest_lock": "round_009_lock.json"
+      "lock_count": 13,
+      "newest_lock": "round_012_lock.json"
     },
     "jak2_true_d06/161b94ce44a1/jak2_1": {
       "arm": "jak2_true_d06",
       "cell": "jak2_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 9,
-      "newest_lock": "round_008_lock.json"
+      "lock_count": 13,
+      "newest_lock": "round_012_lock.json"
     },
     "jak2_true_d06/161b94ce44a1/jak2_2": {
       "arm": "jak2_true_d06",
       "cell": "jak2_2",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 11,
-      "newest_lock": "round_010_lock.json"
+      "lock_count": 15,
+      "newest_lock": "round_014_lock.json"
     },
     "parp1_d04/180ae8a46186/parp1_0": {
       "arm": "parp1_d04",
       "cell": "parp1_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 10,
-      "newest_lock": "round_009_lock.json"
+      "lock_count": 11,
+      "newest_lock": "round_010_lock.json"
     },
     "parp1_d04/180ae8a46186/parp1_1": {
       "arm": "parp1_d04",
       "cell": "parp1_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 11,
-      "newest_lock": "round_010_lock.json"
+      "lock_count": 12,
+      "newest_lock": "round_011_lock.json"
     },
     "parp1_d04/180ae8a46186/parp1_2": {
       "arm": "parp1_d04",
       "cell": "parp1_2",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 10,
-      "newest_lock": "round_009_lock.json"
+      "lock_count": 14,
+      "newest_lock": "round_013_lock.json"
     },
     "parp1_d06/99d2a7c155c0/parp1_0": {
       "arm": "parp1_d06",
       "cell": "parp1_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 24,
-      "newest_lock": "round_023_lock.json"
+      "lock_count": 25,
+      "newest_lock": "round_024_lock.json"
     },
     "parp1_d06/99d2a7c155c0/parp1_1": {
       "arm": "parp1_d06",
       "cell": "parp1_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 31,
-      "newest_lock": "round_030_lock.json"
+      "lock_count": 33,
+      "newest_lock": "round_032_lock.json"
     },
     "parp1_d06/99d2a7c155c0/parp1_2": {
       "arm": "parp1_d06",
       "cell": "parp1_2",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 21,
-      "newest_lock": "round_020_lock.json"
+      "lock_count": 24,
+      "newest_lock": "round_023_lock.json"
     },
     "parp1_d06/fa246d80862d/parp1_0": {
       "arm": "parp1_d06",
@@ -369,5 +401,5 @@
       "newest_lock": "round_001_lock.json"
     }
   },
-  "taken_at_utc": "2026-09-21T02:51:18.664479+00:00"
+  "taken_at_utc": "2026-09-21T04:59:10.772145+00:00"
 }

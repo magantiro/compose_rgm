@@ -1,0 +1,304 @@
+{
+  "rows": [
+    {
+      "best": -13.0,
+      "calls": 113,
+      "cell": "5ht1b_0",
+      "delta": 0.6,
+      "gap": -0.5999999999999996,
+      "ivg": -12.4,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -12.2,
+      "calls": 199,
+      "cell": "5ht1b_1",
+      "delta": 0.6,
+      "gap": -0.1999999999999993,
+      "ivg": -12.0,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -9.8,
+      "calls": 1,
+      "cell": "5ht1b_2",
+      "delta": 0.6,
+      "gap": 0.7999999999999989,
+      "ivg": -10.6,
+      "rescue_calls": 0,
+      "state": "rescue-PENDING-AUTH"
+    },
+    {
+      "best": -9.6,
+      "calls": 1,
+      "cell": "braf_0",
+      "delta": 0.6,
+      "gap": 0.09999999999999964,
+      "ivg": -9.7,
+      "rescue_calls": 25,
+      "state": "rescue-searching"
+    },
+    {
+      "best": -10.3,
+      "calls": 1,
+      "cell": "braf_1",
+      "delta": 0.6,
+      "gap": 0.09999999999999964,
+      "ivg": -10.4,
+      "rescue_calls": 17,
+      "state": "rescue-searching"
+    },
+    {
+      "best": -11.5,
+      "calls": 104,
+      "cell": "braf_2",
+      "delta": 0.6,
+      "gap": -1.1999999999999993,
+      "ivg": -10.3,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -7.5,
+      "calls": 1,
+      "cell": "fa7_0",
+      "delta": 0.6,
+      "gap": 0.20000000000000018,
+      "ivg": -7.7,
+      "rescue_calls": 1,
+      "state": "rescue-exhausted(reseed)"
+    },
+    {
+      "best": -7.8,
+      "calls": 184,
+      "cell": "fa7_1",
+      "delta": 0.6,
+      "gap": -0.2999999999999998,
+      "ivg": -7.5,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -8.5,
+      "calls": 1,
+      "cell": "fa7_2",
+      "delta": 0.6,
+      "gap": -1.0999999999999996,
+      "ivg": -7.4,
+      "rescue_calls": 12,
+      "state": "rescue-searching"
+    },
+    {
+      "best": -10.6,
+      "calls": 73,
+      "cell": "jak2_0",
+      "delta": 0.6,
+      "gap": -0.9000000000000004,
+      "ivg": -9.7,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -10.8,
+      "calls": 65,
+      "cell": "jak2_1",
+      "delta": 0.6,
+      "gap": -0.40000000000000036,
+      "ivg": -10.4,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -10.5,
+      "calls": 81,
+      "cell": "jak2_2",
+      "delta": 0.6,
+      "gap": -0.1999999999999993,
+      "ivg": -10.3,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -12.6,
+      "calls": 183,
+      "cell": "parp1_0",
+      "delta": 0.6,
+      "gap": -0.29999999999999893,
+      "ivg": -12.3,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -12.2,
+      "calls": 236,
+      "cell": "parp1_1",
+      "delta": 0.6,
+      "gap": -0.5,
+      "ivg": -11.7,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -11.2,
+      "calls": 161,
+      "cell": "parp1_2",
+      "delta": 0.6,
+      "gap": -0.5,
+      "ivg": -10.7,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -11.9,
+      "calls": 50,
+      "cell": "5ht1b_0",
+      "delta": 0.4,
+      "gap": 1.4000000000000004,
+      "ivg": -13.3,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -10.7,
+      "calls": 33,
+      "cell": "5ht1b_1",
+      "delta": 0.4,
+      "gap": 1.3000000000000007,
+      "ivg": -12.0,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": null,
+      "calls": null,
+      "cell": "5ht1b_2",
+      "delta": 0.4,
+      "gap": null,
+      "ivg": -10.9,
+      "rescue_calls": 0,
+      "state": "rescue-PENDING-AUTH"
+    },
+    {
+      "best": -12.2,
+      "calls": 77,
+      "cell": "braf_0",
+      "delta": 0.4,
+      "gap": -2.0999999999999996,
+      "ivg": -10.1,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -10.4,
+      "calls": 65,
+      "cell": "braf_1",
+      "delta": 0.4,
+      "gap": 0.40000000000000036,
+      "ivg": -10.8,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -10.9,
+      "calls": 73,
+      "cell": "braf_2",
+      "delta": 0.4,
+      "gap": -0.3000000000000007,
+      "ivg": -10.6,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -8.7,
+      "calls": 57,
+      "cell": "fa7_0",
+      "delta": 0.4,
+      "gap": -0.29999999999999893,
+      "ivg": -8.4,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -7.6,
+      "calls": 73,
+      "cell": "fa7_1",
+      "delta": 0.4,
+      "gap": 1.3000000000000007,
+      "ivg": -8.9,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -8.4,
+      "calls": 1,
+      "cell": "fa7_2",
+      "delta": 0.4,
+      "gap": -0.40000000000000036,
+      "ivg": -8.0,
+      "rescue_calls": 17,
+      "state": "rescue-searching"
+    },
+    {
+      "best": -10.4,
+      "calls": 169,
+      "cell": "jak2_0",
+      "delta": 0.4,
+      "gap": -0.20000000000000107,
+      "ivg": -10.2,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -11.3,
+      "calls": 153,
+      "cell": "jak2_1",
+      "delta": 0.4,
+      "gap": -0.8000000000000007,
+      "ivg": -10.5,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -10.7,
+      "calls": 137,
+      "cell": "jak2_2",
+      "delta": 0.4,
+      "gap": -0.5,
+      "ivg": -10.2,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -11.9,
+      "calls": 73,
+      "cell": "parp1_0",
+      "delta": 0.4,
+      "gap": 2.1999999999999993,
+      "ivg": -14.1,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -12.3,
+      "calls": 81,
+      "cell": "parp1_1",
+      "delta": 0.4,
+      "gap": 1.0999999999999996,
+      "ivg": -13.4,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    },
+    {
+      "best": -14.1,
+      "calls": 73,
+      "cell": "parp1_2",
+      "delta": 0.4,
+      "gap": -5.1,
+      "ivg": -9.0,
+      "rescue_calls": null,
+      "state": "healthy-searching"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "charged_oracle_calls": 0,
+  "failure": "input identity mismatch on pmo_population_live_parent_gate.py; the base contract pinned its pre-edit hash.",
+  "outcome": "FAILED_BEFORE_ANY_CHARGED_CALL",
+  "resolution": "Chain re-sealed (base 7287c6f5->19aa07e1, scored 38afd1c4->ba951561) with owner approval; app redeployed."
+}
