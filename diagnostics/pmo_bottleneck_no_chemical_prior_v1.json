@@ -5,6 +5,21 @@
     "Oracle asset defects: gsk3b/drd2 lazy-load fixed via AssetPinnedOracle, positive control runs before started.json.",
     "Budget accounting: execute_task now takes charged_calls_per_task from the contract; the 1000-constant defect is gone."
   ],
+  "CORRECTION_AFTER_THE_CAPABILITY_INVENTORY": {
+    "and_it_is_score_independent": "MUTATION TEST: swinging four one-atom fragments from score 0.01 to 0.99 changes their parent mass by EXACTLY 0.0000, while a control (aspirin best) moves 0.0083 -> 0.1083, 13x. A structurally-alone molecule receives full niche mass however badly it scores, because |group| == 1. Score only breaks ties WITHIN a niche.",
+    "both_fixes_are_real_and_the_allocator_is_cheaper": "The missing chemical prior stands as a genuine defect -- the PMO path instantiates a rate model 0 times and calls torch.load 0 times in a full real proposal round. But the allocator defect is upstream, mutation-verified, and score-independent, so it is not a tuning question and it is the cheaper repair.",
+    "deletion_is_refuted_with_the_sign_reversed": "Realized edits GROW molecules: atom_insert:atom_delete = 2.42:1 in executed programs, mean delta +1.16 heavy atoms, 45.5% grow vs 17.5% shrink. Reproduced reward-independently on a synthetic-reward run (+1.65 mean, 52.4% grow vs 14.7% shrink).",
+    "revised_causal_chain": [
+      "1. The niche allocator gives ~80% of parent mass to <=8 molecules, independent of archive size.",
+      "2. Niche centres are frequently structurally-alone degenerate fragments, and score cannot dislodge them.",
+      "3. Those fragments are worked on repeatedly; sub-10 archive members are 87-96% children of sub-10 parents.",
+      "4. Descendants are small and off-manifold, so QED collapses 0.763 -> ~0.41 -- the effect I measured.",
+      "5. The absent proposal prior means nothing pulls the draw back toward real chemistry.",
+      "6. On gsk3b a fingerprint predictor then PAYS for the resulting weirdness."
+    ],
+    "the_upstream_cause_is_the_PARENT_ALLOCATOR": "The archive is median 16 heavy atoms; the parents actually DRAWN are median 9, 51.2% under 10. `parent_allocation='niche_score'` -> `exploration_niches(max_niches=4, per_niche=2)` gives at most 8 molecules ~80% of parent mass regardless of archive size. Replayed on the real final archives, 3 of 4 niche centres are 1-3 heavy-atom fragments ([SH4], CCl, NN(N)F, P, NF, O=C=[SH4]); the drug-like niche holds 189-203 of 234 endpoints and contributes exactly 2 parents while the three fragment niches contribute 6.",
+    "what_i_got_wrong": "I implied the QED collapse is caused SOLELY by the missing proposal prior, and I assumed deletion-dominance was shrinking the population. Both need correcting."
+  },
   "PREDICTION_TO_TEST": "If the proposal draw is weighted by the learned editing model, median QED of scored molecules should stay near the initialization's 0.763 rather than collapsing to ~0.41, and gsk3b's r(score,QED) should stop being negative. That is a zero-oracle prediction measurable on replayed parents before any scored run.",
   "THE_FIX": "Put a learned prior over real chemistry into the PMO proposal draw. COMPOSE ALREADY HAS trained editing models (B-edit / RingCore, Q_theta(y|x,t) fitted on real molecular edits) that score legal successors; they are simply not wired into the PMO path, which uses rng instead. This is the same 'validated capability sitting inert behind an unused call site' pattern as the region law and exact_early_ring. It is NOT a QED/SA filter: a filter is a patch, it would be uncounted objective evaluation where QED is the objective, and it cannot create good proposals -- only reject bad ones after they are generated.",
   "VERDICT": "LOCATED: the PMO proposal distribution has no prior over real chemistry. It draws randomly over the legal fiber, so it walks off the drug-like manifold on every task.",

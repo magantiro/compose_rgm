@@ -2446,3 +2446,79 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   with new `total=200` shards for the same seed while every count still looked reasonable. This sat
   in the PUBLISHED-benchmark path. Guarded in both the app and the analysis script; the guard fired
   on real data with a precise diagnosis. Key a shard by its full identity, never by a seed prefix.
+
+## 2026-09-21 (PMO located: the parent allocator spends the budget on garbage, and there is no chemical prior)
+
+- **MEASURED, zero oracle calls: the PMO search starts from excellent chemistry and walks off-manifold on
+  EVERY task.** The init bank (`docs/PMO_INIT_BANK.json`, 100 SMILES, objective-blind, fixed before any
+  task) is median **QED 0.763 / SA 3.575 / 21 heavy atoms, 85% at or above QED 0.6**. After 250 calls the
+  scored molecules sit at median QED 0.41-0.45 with only **20-26%** above 0.6. So the weak-start hypothesis
+  is FALSIFIED and the degradation is universal, not oracle-specific.
+- **On a fingerprint-predictor oracle that drift becomes REWARD HACKING.** gsk3b: r(score, QED) **-0.433**,
+  r(score, SA) **+0.684**; best molecule 0.290 at **QED 0.03 / SA 7.81**, carrying bare phosphorus,
+  hypervalent `[IH]` and a peroxide-hydrazine chain `OOCNNCO`; top-10 median QED 0.113, SA 7.155. The
+  similarity/descriptor oracles are NOT fooled (correlations run the healthy way, top molecules reasonable),
+  so hacking is the CONSEQUENCE of going off-manifold, not the cause. **That 0.290 is not a reportable
+  number.** `r(score, heavy_atoms)` is +0.67 to +0.81 on all three tasks -- a universal size gradient any
+  scale-learning component could trivially latch onto instead of learning chemistry.
+- **THE PMO PATH CONTAINS NO LEARNED MODEL.** A full real proposal round (16 candidates, 61 attempts)
+  instantiates `WholeGraphRateModel` / `FactorizedRateModel` / `FactorizedTraceletRateModel` **0 times** and
+  calls `torch.load` **0 times**; grepping the whole runtime for `rate_model` / `load_factorized` / `*.pt`
+  returns nothing. Proposals are `shallow_rng` / `structured_rng` / `arbitration_rng` draws over the legal
+  fiber plus heuristic tilts; the only checkpoint loaded is the dead jump library's plan latents. `torch` is
+  in the import closure -- **imports are not calls.** The legal fiber is vastly larger than the drug-like
+  manifold, so sampling it near-uniformly MUST drift: validity-closure is a VALENCE guarantee and says
+  nothing about plausibility. GenMol/IVG sample from learned distributions over real molecules and never
+  meet this. Part of what reads as an algorithmic gap is a missing generative prior.
+- **THE UPSTREAM CAUSE IS THE PARENT ALLOCATOR, AND IT IS SCORE-INDEPENDENT.** Archive median **16** heavy
+  atoms; parents actually DRAWN median **9**, 51.2% under 10. `parent_allocation='niche_score'` ->
+  `exploration_niches(endpoints, utilities, max_niches=4, per_niche=2)` at the production call site with bare
+  defaults gives at most **4x2 = 8 molecules ~80% of parent mass regardless of archive size**; everything
+  else gets only the `0.2/N` floor. Replayed on the REAL final archives, **3 of 4 niche centres are 1-3
+  heavy-atom fragments** (`[SH4]`, `CCl`, `NN(N)F`, `P`, `NF`, `O=C=[SH4]`): the drug-like niche holds
+  189-203 of 234 endpoints and contributes **2** parents, the three fragment niches contribute **6**, scoring
+  0.000-0.12 against incumbents at 0.22-0.50.
+  **THE MUTATION TEST THAT NAILS IT:** swinging four one-atom fragments from score 0.01 to 0.99 changes their
+  parent mass by **EXACTLY 0.0000**, while a control (making aspirin best) moves its mass 0.0083 -> 0.1083,
+  **13x**. A structurally-alone molecule receives full niche mass however badly it scores, because
+  `|group| == 1`; score only breaks ties WITHIN a niche. A fragment that enters once becomes a permanent
+  niche centre drawing ~10% of every round.
+- **DELETION IS REFUTED AS THE CAUSE, WITH THE SIGN REVERSED.** Realized edits GROW molecules:
+  `atom_insert:atom_delete = 2.42:1`, mean delta **+1.16** heavy atoms, 45.5% grow vs 17.5% shrink;
+  reproduced reward-independently on a synthetic-reward run whose reward PEAKS at 26 heavy atoms and
+  penalises small molecules -- **the collapse happened anyway** (44 archive entries under 5 heavy atoms).
+  Sub-10 archive members are 87-96% children of sub-10 parents: a ratchet sustained by ALLOCATION, seeded by
+  only 3-8 large-deletion events per task. The archive median falling 20 -> 15.5 is DOWNSTREAM of allocation.
+- **The benchmark objective never reaches a decision.** `top_k` / `auc` / frontier appear nowhere in
+  `pmo_population_controller.py`, `fiber_control.py` or `pmo_credit.py` except two prose comments;
+  `archive_top_k` is called only inside the round SUMMARY. The controller maximises predicted ENDPOINT SCORE.
+  Marginal contribution to the top-10 mean does not exist as a quantity anywhere in the runtime.
+- **The exploration constants are calibrated for docking and swamp PMO's signal by 10-30x.** Measured mean
+  positive improvement per child is **u = 0.0077** (6 channel x task cells, 0.0052-0.0114). The parent tilt
+  `1 + upside + 0.25/sqrt(trials+1)` needs **n > 1042 trials on ONE parent** for upside to beat the constant
+  (max possible 250), so it is a pure novelty bonus. `PopulationCredit`: `value(untried) = 0.2500` strictly
+  outranks `value(1 trial, +0.05 delivered) = 0.2268`; a 1-trial cell needs **>= 0.0732** merely to tie, 10x
+  the measured mean. Result: **180 active cells / 91 basins from 202 scored children ~ 1.1 trials per cell**,
+  every top-earning cell at `trials: 1`. Proliferation beats credit.
+- **Plateau escape LATCHES PERMANENTLY into the dead lane.** `rounds_without_improvement >= 3 ->
+  escape_rounds_remaining = 2`, decremented 1 per allocation, so on a plateau it is RE-SET faster than it
+  drains: measured **escape True for 8 consecutive rounds, never releasing**, holding jump at 3/16 and
+  cutting shallow to 1/16. The jump lane is measured dead both with the real oracle (3 executions / 1,091
+  proposals) and reward-independently (147 attempts -> 4 eligible, 2.7%, vs shallow 72.7% / structured 65.3%).
+- **Parent MODES are labels, not behaviour.** `propose_batch` builds `schedules = {channel: [self._parent()...]}`
+  and `_parent()` takes no channel argument, so `global_explore` / `jump_from_elite` / `refine_elite` all draw
+  from ONE distribution; every occurrence of `mode` in the controller is a WRITE into provenance. `jump_from_elite`
+  does not restrict to elites. Do not describe these as different policies.
+- **Capacity, measured, and STRONGER than the standing trap:** PMO states are **48 slots** (all 16 init states,
+  `n_real` 15-27, 0 tight) with the 40-heavy ceiling enforced at CONSTRUCTION, not on endpoints; states come
+  from `decode_state`, never a SMILES re-parse, so the tight-graph hazard cannot arise here. At 40 slots the
+  path **hard-refuses** ("expected an exact supported 48-slot source", 0/13 families execute) rather than
+  silently dropping `atom_insert`. For PMO, 48 is a requirement.
+- **Smaller measured facts worth keeping:** stereochemistry costs exactly ZERO (`useChirality=False` at both
+  occurrences in the oracle source; Tanimoto(reference, stereo-stripped) = 1.000000 on the one stereo-bearing
+  reference). `bond_reorder` is the one Active8 executor rule PMO can never emit (absent from
+  `GENERIC_MODULES`). Heavy elements S/P/Cl/Br/I/B are reachable ONLY by `atom_restate_semantic`, never by
+  insertion -- every growth module is hardcoded CNO(F). 8 of 16 init states are permanently anionic and
+  `CalcMolFormula` (what `Isomer_scoring` parses) then carries a trailing `-` and one fewer H; AUC cost
+  UNDETERMINED. The archive is append-only with no prune/evict path, and PMO endpoint eligibility is
+  RDKit-parseability only -- correct for no-prescreen, but there is no floor of any kind.
