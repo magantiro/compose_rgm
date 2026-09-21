@@ -34,7 +34,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CREDIT = ROOT / "src/compose_v4/control/pmo_discovery.py"
 CONTROLLER = ROOT / "src/compose_v4/control/pmo_population_controller.py"
+V21 = ROOT / "src/compose_v4/control/dynamic_program_synthesis_v21.py"
 SUITE = "tests/test_pmo_discovery.py"
+IDENTITY_SUITE = "tests/test_pmo_proposal_scoring_identity.py"
 
 
 @dataclass(frozen=True)
@@ -46,6 +48,9 @@ class Mutation:
     #: Tests expected to go red. Empty means this is a positive control that must stay
     #: green -- the harness check, not a guard check.
     expect_red: tuple[str, ...]
+    #: The suite to run. The proposal/scoring identity guards drive the real proposal
+    #: path and cost ~70 s a run, so only they pay that.
+    suite: str = SUITE
 
     @property
     def is_control(self) -> bool:
@@ -158,6 +163,25 @@ MUTATIONS = (
         new="            self.credit = PopulationCredit()",
         expect_red=("test_the_controller_actually_constructs_the_discovery_allocator",),
     ),
+    # ---- The T4 indirection, reproduced on the PMO path ----
+    # `t4_fiber_campaign.expand` gates a molecule re-instantiated from an abstracted
+    # goal rather than the one its program produced (measured recovered_fraction
+    # 0.0000). PMO measures 1.0000. This mutation makes the candidate record carry a
+    # molecule the program did not produce, which is exactly that defect class, and
+    # requires the identity guards to catch it.
+    Mutation(
+        name="candidate_records_a_molecule_the_program_did_not_produce",
+        path=V21,
+        old="""        "assignment": list(binding),
+        "endpoint": trace["endpoint"],""",
+        new="""        "assignment": list(binding),
+        "endpoint": "CCO",""",
+        expect_red=(
+            "test_every_proposal_endpoint_is_its_own_executed_program_endpoint",
+            "test_the_scored_archive_records_the_produced_molecule",
+        ),
+        suite=IDENTITY_SUITE,
+    ),
     # ---- Positive control: bytes change, behaviour does not ----
     Mutation(
         name="POSITIVE_CONTROL_cosmetic_comment",
@@ -171,12 +195,13 @@ MUTATIONS = (
 _FAILED = re.compile(r"^(?:FAILED|ERROR) [^:]+::([\w\[\]\-.]+)", re.MULTILINE)
 
 
-def run_suite() -> tuple[int, set[str]]:
+def run_suite(suite: str = SUITE) -> tuple[int, set[str]]:
     proc = subprocess.run(
-        [sys.executable, "-m", "pytest", SUITE, "-q", "--no-header", "-p", "no:randomly"],
+        [sys.executable, "-m", "pytest", suite, "-q", "--no-header", "-p", "no:randomly"],
         cwd=ROOT,
         capture_output=True,
         text=True,
+        check=False,
     )
     out = proc.stdout + proc.stderr
     # Strip a parametrize suffix so a mutation may name the test function alone.
@@ -212,7 +237,7 @@ def main() -> int:
                 return 2
             mutation.path.write_text(mutated)
             try:
-                code, failed = run_suite()
+                code, failed = run_suite(mutation.suite)
             finally:
                 mutation.path.write_text(source)
 

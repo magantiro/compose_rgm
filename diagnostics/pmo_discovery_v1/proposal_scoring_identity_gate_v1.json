@@ -1,0 +1,76 @@
+{
+  "schema_version": "pmo_proposal_scoring_identity_gate_v1",
+  "oracle_calls": 0,
+  "candidates_checked": 144,
+  "scored_candidates": 144,
+  "total_mismatches": 0,
+  "verdict": "PASS_PROPOSAL_IS_SCORED",
+  "rows": [
+    {
+      "source_smiles": "CC(=O)Nc1ccc(O)cc1",
+      "seed": 11,
+      "candidates_checked": 24,
+      "scored_candidates": 24,
+      "endpoint_mismatches": [],
+      "endpoint_mismatch_count": 0,
+      "program_size_mismatch_count": 0,
+      "scored_mismatch_count": 0,
+      "recovered_fraction": 1.0
+    },
+    {
+      "source_smiles": "CC(=O)Nc1ccc(O)cc1",
+      "seed": 23,
+      "candidates_checked": 24,
+      "scored_candidates": 24,
+      "endpoint_mismatches": [],
+      "endpoint_mismatch_count": 0,
+      "program_size_mismatch_count": 0,
+      "scored_mismatch_count": 0,
+      "recovered_fraction": 1.0
+    },
+    {
+      "source_smiles": "O=C(NC1CCNCC1)c1ccccc1",
+      "seed": 11,
+      "candidates_checked": 24,
+      "scored_candidates": 24,
+      "endpoint_mismatches": [],
+      "endpoint_mismatch_count": 0,
+      "program_size_mismatch_count": 0,
+      "scored_mismatch_count": 0,
+      "recovered_fraction": 1.0
+    },
+    {
+      "source_smiles": "O=C(NC1CCNCC1)c1ccccc1",
+      "seed": 23,
+      "candidates_checked": 24,
+      "scored_candidates": 24,
+      "endpoint_mismatches": [],
+      "endpoint_mismatch_count": 0,
+      "program_size_mismatch_count": 0,
+      "scored_mismatch_count": 0,
+      "recovered_fraction": 1.0
+    },
+    {
+      "source_smiles": "COc1ccc(CCN)cc1",
+      "seed": 11,
+      "candidates_checked": 24,
+      "scored_candidates": 24,
+      "endpoint_mismatches": [],
+      "endpoint_mismatch_count": 0,
+      "program_size_mismatch_count": 0,
+      "scored_mismatch_count": 0,
+      "recovered_fraction": 1.0
+    },
+    {
+      "source_smiles": "COc1ccc(CCN)cc1",
+      "seed": 23,
+      "candidates_checked": 24,
+      "scored_candidates": 24,
+      "endpoint_mismatches": [],
+      "endpoint_mismatch_count": 0,
+      "program_size_mismatch_count": 0,
+      "scored_mismatch_count": 0,
+      "recovered_fraction": 1.0
+    }
+  ]
+}

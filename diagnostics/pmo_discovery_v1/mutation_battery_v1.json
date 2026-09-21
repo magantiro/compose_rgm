@@ -1,8 +1,8 @@
 {
   "schema_version": "pmo_discovery_mutation_battery_v1",
   "suite": "tests/test_pmo_discovery.py",
-  "mutations": 12,
-  "killed": 12,
+  "mutations": 13,
+  "killed": 13,
   "positive_controls_green": true,
   "all_guards_load_bearing": true,
   "rows": [
@@ -156,6 +156,20 @@
         "test_observe_batch_writes_frontier_credit_on_the_production_path",
         "test_the_controller_actually_constructs_the_discovery_allocator",
         "test_the_discovery_reservation_is_consumed_and_reaches_a_thin_basin"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "candidate_records_a_molecule_the_program_did_not_produce",
+      "file": "dynamic_program_synthesis_v21.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_every_proposal_endpoint_is_its_own_executed_program_endpoint",
+        "test_the_scored_archive_records_the_produced_molecule"
+      ],
+      "observed_red": [
+        "test_every_proposal_endpoint_is_its_own_executed_program_endpoint",
+        "test_the_scored_archive_records_the_produced_molecule"
       ],
       "status": "KILLED"
     },
