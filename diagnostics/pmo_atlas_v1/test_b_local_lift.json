@@ -1,0 +1,228 @@
+{
+ "payload": {
+  "budget_per_run": 64,
+  "controller": {
+   "arm": "B_memory",
+   "class": "PmoPopulationController",
+   "destination_or_teacher_suffix_supplied_after_initialization": false,
+   "enable_online_memory": true,
+   "jump_checkpoint": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json",
+   "jump_checkpoint_sha256": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43"
+  },
+  "diagnostic_oracle_calls": 256,
+  "elapsed_seconds": 1820.03,
+  "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
+  "information_regime_statement": "Answer-known, panel-informed and winner-informed PMO development evidence. Destinations are published task answers or transcribed competitor winners. This is a challenge set and a diagnostic instrument, never a training distribution, prior, library or initialization for a scored no-prescreen run.",
+  "partial": true,
+  "probe_positions": [
+   {
+    "fraction": 0.25,
+    "label": "early"
+   },
+   {
+    "fraction": 0.85,
+    "label": "near_anchor"
+   },
+   {
+    "fraction": 1.0,
+    "label": "anchor"
+   }
+  ],
+  "queries_per_round": 16,
+  "question": "Started in a teacher region with a fixed small budget, does the frozen local controller fill a strong top ten, or only preserve one good seed?",
+  "reference_panel": {
+   "artifact": "diagnostics/pmo_atlas_v1/reference_panel.json",
+   "controls": {
+    "albuterol_similarity": {
+     "charged_to_diagnostic_budget": false,
+     "checks": 3,
+     "max_abs_delta": 0.0,
+     "note": "Reference-panel calls bypass the counted ledger deliberately: they are an instrument check, and they are reported separately from the diagnostic budget.",
+     "observations": [
+      {
+       "delta": 0.0,
+       "expected": 0.2459546925566343,
+       "label": "shared_source",
+       "observed": 0.2459546925566343
+      },
+      {
+       "delta": 0.0,
+       "expected": 1.0,
+       "label": "recorded_destination",
+       "observed": 1.0
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.21333333333333332,
+       "label": "route_midpoint",
+       "observed": 0.21333333333333332
+      }
+     ],
+     "task": "albuterol_similarity",
+     "tolerance": 1e-09
+    },
+    "celecoxib_rediscovery": {
+     "charged_to_diagnostic_budget": false,
+     "checks": 3,
+     "max_abs_delta": 0.0,
+     "note": "Reference-panel calls bypass the counted ledger deliberately: they are an instrument check, and they are reported separately from the diagnostic budget.",
+     "observations": [
+      {
+       "delta": 0.0,
+       "expected": 0.15625,
+       "label": "shared_source",
+       "observed": 0.15625
+      },
+      {
+       "delta": 0.0,
+       "expected": 1.0,
+       "label": "recorded_destination",
+       "observed": 1.0
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.08771929824561403,
+       "label": "route_midpoint",
+       "observed": 0.08771929824561403
+      }
+     ],
+     "task": "celecoxib_rediscovery",
+     "tolerance": 1e-09
+    }
+   },
+   "file_sha256": "cd3e5d28c3afb90e9e9fd1181e037e929e32d0b52f9840a2e068b9ab0299f47a"
+  },
+  "runs": [
+   {
+    "best_new": 0.2891566265060241,
+    "best_overall": 0.2891566265060241,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.2414,
+    "checkpoint_label": "early",
+    "checkpoint_step_index": 7,
+    "distinct_new_above_seed": 37,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.07459723953284403,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 64,
+     "lookups": 64,
+     "seconds": 0.072,
+     "task": "albuterol_similarity"
+    },
+    "remaining_teacher_steps": 22,
+    "seconds": 255.63,
+    "seed_heavy_atoms": 20,
+    "seed_score": 0.21455938697318006,
+    "seed_smiles": "CCNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+    "task": "albuterol_similarity",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.27960586461892895
+   },
+   {
+    "best_new": 0.5063291139240507,
+    "best_overall": 0.5063291139240507,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.8621,
+    "checkpoint_label": "near_anchor",
+    "checkpoint_step_index": 25,
+    "distinct_new_above_seed": 5,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.09456440804169775,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 128,
+     "lookups": 128,
+     "seconds": 0.123,
+     "task": "albuterol_similarity"
+    },
+    "remaining_teacher_steps": 4,
+    "seconds": 176.94,
+    "seed_heavy_atoms": 17,
+    "seed_score": 0.4117647058823529,
+    "seed_smiles": "C=C(CCC(O)CCO)C(O)CNC(C)(C)C",
+    "task": "albuterol_similarity",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.42369051827354126
+   },
+   {
+    "best_new": 1.0,
+    "best_overall": 1.0,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 1.0,
+    "checkpoint_label": "anchor",
+    "checkpoint_step_index": 29,
+    "distinct_new_above_seed": 0,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.0,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 192,
+     "lookups": 192,
+     "seconds": 0.186,
+     "task": "albuterol_similarity"
+    },
+    "remaining_teacher_steps": 0,
+    "seconds": 249.83,
+    "seed_heavy_atoms": 17,
+    "seed_score": 1.0,
+    "seed_smiles": "CC(C)(C)NCC(O)c1ccc(O)c(CO)c1",
+    "task": "albuterol_similarity",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.9858543865259568
+   },
+   {
+    "best_new": 0.1935483870967742,
+    "best_overall": 0.1935483870967742,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.2414,
+    "checkpoint_label": "early",
+    "checkpoint_step_index": 7,
+    "distinct_new_above_seed": 34,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.08920056100981767,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 64,
+     "lookups": 64,
+     "seconds": 0.039,
+     "task": "celecoxib_rediscovery"
+    },
+    "remaining_teacher_steps": 22,
+    "seconds": 1131.75,
+    "seed_heavy_atoms": 20,
+    "seed_score": 0.10434782608695652,
+    "seed_smiles": "CCNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+    "task": "celecoxib_rediscovery",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.16564300895641818
+   }
+  ],
+  "schema_version": "pmo_atlas_test_b_local_lift_v1",
+  "seed": 20260921,
+  "software": {
+   "numpy": "1.26.4",
+   "pytdc": "1.1.15",
+   "python": "3.11.13",
+   "rdkit": "2023.09.6"
+  },
+  "tasks_probed": [
+   "albuterol_similarity",
+   "celecoxib_rediscovery",
+   "gsk3b",
+   "isomers_c7h8n2o2",
+   "jnk3",
+   "median1",
+   "mestranol_similarity",
+   "perindopril_mpo",
+   "qed",
+   "thiothixene_rediscovery",
+   "troglitazone_rediscovery"
+  ]
+ },
+ "payload_sha256": "4cd32c4a5e60536414ac1a6fc1f74b3dc7b138cc251741bb7c087dafd13c5189"
+}

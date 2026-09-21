@@ -256,6 +256,27 @@ def main(argv: list[str] | None = None) -> int:
     lines += _profile_section(_load(repo_root, PANEL))
     lines += _test_b_section(_load(repo_root, TEST_B))
 
+    lines += [
+        "## Test C -- can blind search enter those regions?",
+        "",
+        ("NOT RUN, and it is BLOCKED ON TEST B by construction. The operational definition "
+        "of a productive region is objective-verified, not structural: a region is "
+        "productive when the frozen local controller repeatedly produces high-value "
+        "distinct candidates from starting points in it. Those labels are Test B's output, "
+        "so a Test C run before Test B completes would have to substitute a fingerprint "
+        "threshold for the definition, which is the substitution the protocol forbids."),
+        "",
+        ("One EXISTING compatible observation is reported descriptively, not as a Test C "
+        "result. The committed 1,000-call A/B result for `celecoxib_rediscovery` "
+        "(`diagnostics/pmo_ab_1k_result_v1.json`) records arm B's best score reaching "
+        "0.3838 by call 500 and standing unchanged at calls 750 and 1,000, while its "
+        "top-ten mean keeps rising from 0.3556 to 0.3714. That is exploitation inside a "
+        "found basin with discovery stalled. Set against Test A, where the destination for "
+        "that same task is celecoxib itself at score 1.0 and the compiler reaches it from "
+        "the shared source when told, the gap is not a construction gap."),
+        "",
+    ]
+
     battery = _load(repo_root, BATTERY)
     lines += [
         "## Guards",
