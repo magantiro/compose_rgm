@@ -1996,3 +1996,66 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   into that name; `git fetch origin <branch>` then `git merge FETCH_HEAD` works. The only
   conflict was `learnings.md`, which is append-only -- resolve by keeping BOTH blocks in
   order, never by choosing a side.
+
+## 2026-09-21 (fragment-constrained benchmark: the protocol is where the claims live)
+
+- **`abs(hash((drug, task, seed)))` is not a seed.** Python salts `str` hashing with
+  `PYTHONHASHSEED`, so the fragment harness drew a DIFFERENT stream in every process and no
+  reported row could be reproduced -- not by a reviewer, not by the author, not by re-running
+  the identical command. Measured: three runs gave 704705714 / 159431064 / 4134730822 for the
+  same key. Replaced with BLAKE2b; the same command now reproduces byte-identically across
+  processes. Any "seed N" in an artifact predating that fix names nothing.
+- **The failure placeholder survives on TRUTHINESS, not on a None check.** COMPOSE emits `""`
+  for an attempt that produced nothing so the official metric counts it invalid. But
+  `Chem.MolFromSmiles("")` returns a ZERO-ATOM Mol, not None (the 2026-07-29 gotcha again), and
+  the official `already_smiles=True` branch does `canonical = Chem.MolToSmiles(MolFromSmiles(s))`
+  then `if canonical:`. It works only because the canonical string of an empty Mol is `""`, which
+  is falsy. One upstream edit to that line silently turns every FAILED attempt into a VALID one
+  and inflates validity by exactly the failure rate. Pinned with a test.
+- **The released InVirtuoGen evaluator does NOT compute `distance`.** `evaluate_smiles` returns
+  validity/uniqueness/diversity/quality/sa/qed and no distance key; `downstream.py` never calls
+  the distance path; `write_latex_tables` explicitly DROPS `distance`. The baselines' distance
+  column is TRANSCRIBED in `references/reference_metrics.csv`. So distance is reproducible only
+  as an estimator, not as "the official metric" -- use upstream's own
+  `calculate_average_tanimoto(smiles, prompt=...)` (mean `1 - Tanimoto(ECFP4-2048)`) and SAY which
+  reference molecule was passed, because it moves the number a lot: the same 5 BARICITINIB
+  samples score 0.649 against the prompt core and 0.756 against the original drug.
+- **The official SUPERSTRUCTURE prompt is not a fixed fragment.** `downstream.py` reads the core
+  from `references/fragments.csv`, calls `list_individual_attach_points(core, depth=2)`, and picks
+  one variant per sample with `random.choice` from the UNSEEDED global `random` module -- so
+  upstream's 100 samples per drug come from 100 randomly chosen attachment-point variants, and
+  upstream cannot reproduce its own draw either. Sampling 100 completions of ONE bare core is a
+  different (and for uniqueness/diversity, harder) conditioning distribution. Verified separately
+  that the INPUT MOLECULES are ours exactly: `references/fragments.csv` @ b50bb3ae is identical to
+  `data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv` in all 50 cells, textually
+  and after canonicalization, differing only by a trailing newline.
+- **The pathwise region lock preserves the GRAPH, not the SUBSTRUCTURE MATCH, and the difference
+  is aromaticity perception.** `RegionLock` checks element, formal charge and every pairwise bond
+  order on the locked slots, so the core's induced labelled subgraph is byte-identical in every
+  committed state -- that part IS by construction. But executable states are Kekule and
+  "aromatic" is RDKit perception over the WHOLE molecule, so a `cycle_close` that builds a new
+  ring THROUGH core atoms flips them from aliphatic to aromatic with every locked bond order
+  unchanged. An aliphatic query atom does not match an aromatic target atom, so the core stops
+  matching. Localized to one event: `BondInsert(a=6, b=21, order=2)` turning
+  `O=CCNN=C(Cc1ccc2c(c1)OCCO2)C(=O)N1CCCC1` into
+  `O=Cc1[nH]nc(C(=O)N2CCCC2)c1-c1ccc2c(c1)OCCO2`, 24 atoms in and out, locked slot types
+  identical. **So: claim graph-level region preservation by construction; claim substructure
+  preservation as ENFORCED BY THE ENDPOINT CHECK, which emits the failure placeholder and
+  therefore LOWERS validity rather than hiding the miss.**
+- **For the three attachment-point tasks the binding constraint is SITE STEERING, not
+  containment.** Motif extension on BARICITINIB: 71 of 100 attempts committed a molecule,
+  **71/71 contained the motif**, and 63 of those failed only because the ONE declared attachment
+  site was not extended -- validity 8%. The region lock forbids touching the core but does
+  nothing to direct growth to the declared site, while a prompted decoder attaches there by
+  construction of its prompt format. Do not read a low validity on these tasks as a chemistry or
+  containment failure; report the decomposition (committed / contained / site-extended) or the
+  number is uninterpretable.
+- **`quality`'s denominator is `num_calc = min(1000, len(samples))`, i.e. the ATTEMPT count at
+  N=100**, and the numerator counts UNIQUE valid molecules with QED >= 0.6 and SA <= 4.0. So
+  quality is directly comparable across methods at N=100, but it is bounded above by uniqueness,
+  and at any N > 1000 the denominator would stop being the attempt count.
+- **One drug is not a task row.** The BARICITINIB superstructure pilot (validity 100.00,
+  uniqueness 99.67, quality 48.33, diversity 0.715 over 3 seeds) reproduces, but the 10-drug task
+  row is 93.53 / 97.58 / 37.67 / 0.726. The per-drug spread is large -- CYCLOTHIAZIDE scores
+  quality 0.00 on all three seeds because its core is simply not drug-like -- so a single
+  instance over-states uniqueness and quality and hides the validity deficit entirely.
