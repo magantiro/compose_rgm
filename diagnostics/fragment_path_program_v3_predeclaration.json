@@ -1,0 +1,44 @@
+{
+  "schema": "compose_fragment_path_program_v3_predeclaration_v1",
+  "status": "PREDECLARED BEFORE ANY v3 SAMPLING. Committed prior to the first sample and not to be edited afterward.",
+  "mechanism_under_test": {
+    "name": "v3 two-interface path program, insert-then-reroute",
+    "what_it_does": "while the realized core-to-core path is shorter than this trajectory's target, insert an atom on a path atom and REROUTE the path atom's bond to the far core onto the new atom, in one atomic bridge exchange",
+    "precondition": "NONE. v2's free-valence gate is deleted rather than scoped: it was an artifact of ring-closing before opening, which forced the far anchor to transiently carry two external bonds. bond_reroute exchanges a bridge atomically and needs no transient valence.",
+    "payload_source": "the prior -- the inserted atom comes from an atom_insert the MODEL proposes at the chosen site; the transaction is abandoned rather than invented if the model offers none",
+    "target": "drawn per trajectory from the global band [2, 5], one band for every instance"
+  },
+
+  "falsifier": {
+    "metric": "share of COMMITTED two-core endpoints whose realized core-to-core path length EXCEEDS the seeded length of 1",
+    "threshold_percent": 50.0,
+    "where_the_threshold_comes_from": "It is not a round number chosen for comfort. A linker row reports a realized-length distribution, and that row is only ABOUT designed linkers rather than inherited seeds if the majority of the endpoints in it were designed. Fifty percent is therefore the point at which the reported distribution stops being majority-artifact. Every trajectory draws a target of at least 2, so a working program is trying to exceed the seed on every single trajectory; requiring it to succeed on more than half is already a lenient reading of 'working'.",
+    "decision_rule": "PASS if the LOWER BOUND of the 95% Wilson confidence interval exceeds 50.0%. FAIL otherwise.",
+    "why_a_confidence_bound_rather_than_a_point_estimate": "v2 failed at 90.3% against a 90% threshold on n=31, where a single endpoint moved the number by three points. A point estimate against a bare threshold is decided by noise at that scale. Requiring the interval to clear the threshold means the verdict cannot be produced by sampling variation."
+  },
+
+  "sample_size": {
+    "n_minimum": 150,
+    "unit": "COMMITTED two-core endpoints -- endpoints for which realized_linker_length is defined. NOT attempts.",
+    "power_calculation": "Worst-case binomial half-width at p=0.5 is 1.96*sqrt(0.25/n). Targeting a half-width of 0.08 gives n >= 151, rounded to 150. At n=150 one endpoint moves the rate by 0.67 points, against the 3 points it moved at v2's n=31.",
+    "why_0.08": "The margin that would be called decisive here is roughly ten points either side of the threshold. A half-width comfortably below that keeps the interval from straddling the threshold for any result that is not genuinely borderline.",
+    "attempts_required": "The v2 OFF arm committed 38 of 100 attempts. At that rate 150 committed endpoints needs about 395 attempts, so 40 attempts per drug across the 10 released linker drugs is the planned budget. If the commit rate falls, attempts are increased until n >= 150 committed; the THRESHOLD is never adjusted to fit the sample."
+  },
+
+  "denominator": {
+    "definition": "all committed two-core endpoints produced by the v3 arm across ALL 10 released linker drugs, pooled",
+    "immutable": true,
+    "note": "This denominator may not be changed afterward for any reason, including the discovery of a structural property that makes the program inapplicable to some drugs. v2's falsifier was declared panel-wide and then had its applicable denominator changed underneath it by a precondition added later; accepting a subset reading at that point would have let a post-hoc scope restriction rescue a pre-declared test. If v3 turns out to be inapplicable somewhere, that is part of the result, not an exclusion from it."
+  },
+
+  "consequences": {
+    "pass_licenses": "a matched arm at the chosen global budget of 96, baseline and v3, from which a linker row may be reported WITH the realized-length distribution beside it",
+    "fail_means": "v3 is recorded falsified, the linker gets no row, and the mechanism is not rescoped to make it pass"
+  },
+
+  "additional_requirements_binding_on_the_result": {
+    "reachable_is_not_yield": "The hand-constructed sequence reaches a length-2 linker on 10 of 10 drugs. That bounds what is REACHABLE and does not predict yield: v2 executed by hand on 4 of 10 and committed in practice on 2 of 10. Both numbers are reported, never the hand figure alone, and the sampler figure is expected to be lower.",
+    "composite_scoring_probe": "Each constituent of the v3 transaction must be shown rankable by the proposal law before any row is reported, at a budget chosen from a measured per-draw RATE rather than a guessed ladder. bond_reroute may be common or rare at these states and that is not yet known.",
+    "genericity": "the existing guards continue to apply -- no drug name in the module, no FragmentTask or prompt.task or drug_name read, one frozen parameter set across the panel"
+  }
+}
