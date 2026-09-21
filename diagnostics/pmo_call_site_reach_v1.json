@@ -1,0 +1,46 @@
+{
+  "archived_entries": 5742,
+  "call_site_reach_pct": 8.76,
+  "effective_reach_pct": 5.76,
+  "entries_through_the_prior_call_site": 503,
+  "families_at_the_call_site": {
+    "atom_restate_semantic": 179,
+    "bond_reroute": 51,
+    "cycle_close": 152,
+    "cycle_open": 66,
+    "ring_system_restate": 55
+  },
+  "families_where_the_prior_has_measured_signal": [
+    "atom_restate_semantic",
+    "cycle_close"
+  ],
+  "method": "Count archived entries whose provenance.metadata carries the `current_state_edit` detail dict that current_state_program emits.",
+  "oracle_calls_spent": 0,
+  "other_proposal_lanes_seen": {
+    "dynamic_generic_composition": 1352,
+    "dynamic_v1_structured_program": 1251,
+    "mutations": 940,
+    "proposal_kind": 4562
+  },
+  "pct_of_call_site_draws_with_signal": 65.81,
+  "per_task": {
+    "celecoxib_rediscovery": {
+      "current_state_edits": 210,
+      "entries": 1914,
+      "pct": 10.97
+    },
+    "gsk3b": {
+      "current_state_edits": 176,
+      "entries": 1914,
+      "pct": 9.2
+    },
+    "perindopril_mpo": {
+      "current_state_edits": 117,
+      "entries": 1914,
+      "pct": 6.11
+    }
+  },
+  "reading": "Wiring this one site is necessary and not sufficient. The prior can influence roughly `effective_reach_pct` of all proposals; the larger generic-composition and structured lanes draw their successors elsewhere and would each need their own call site.",
+  "run_id": "35fc7bcd4bf5c964294698014c1ed40da483ad013f6b92c6201b01dee2d3d306",
+  "schema_version": "pmo_call_site_reach_v1"
+}
