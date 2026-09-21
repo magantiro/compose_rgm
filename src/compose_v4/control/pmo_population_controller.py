@@ -50,7 +50,13 @@ from compose_v4.control.pmo_credit import (
 )
 from compose_v4.control.pmo_joint_dependency_jump import (
     CHECKPOINT_SCHEMA,
-    bind_joint_plan,
+)
+from compose_v4.control.pmo_realization import (
+    PRODUCTION_MAX_REALIZATIONS,
+    PRODUCTION_NODE_BUDGET,
+    PRODUCTION_SECONDS_CAP,
+    PRODUCTION_SPECIFICATION,
+    realize_plan_binding,
 )
 from compose_v4.rewrite.trace_shard import decode_state
 
@@ -272,9 +278,30 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             source = decode_state(entry["trace"]["states"][-1])
             retention_target = float(self.jump_rng.random())
             try:
-                bound = bind_joint_plan(source, plan, beam_width=4)
+                # The jump lane's own wall budget binds this attempt as well, so one
+                # hopeless plan cannot consume the lane the way an unbounded complete
+                # search would.  The smaller of the two caps applies.
+                realized = realize_plan_binding(
+                    source,
+                    plan,
+                    specification=PRODUCTION_SPECIFICATION,
+                    node_budget=PRODUCTION_NODE_BUDGET,
+                    seconds_cap=min(
+                        PRODUCTION_SECONDS_CAP,
+                        max(self.config.wall_seconds - (perf_counter() - began), 0.0),
+                    ),
+                    max_realizations=PRODUCTION_MAX_REALIZATIONS,
+                )
+                bound = realized["bindings"]
                 if not bound:
-                    raise ValueError("joint plan has no legal binding on this parent")
+                    # The outcome rides along: a plan PROVEN incompatible with this
+                    # parent and one whose search ran out of budget are different
+                    # findings, and one string for both is what made the previous
+                    # binder failure unreadable.
+                    raise ValueError(
+                        "joint plan has no legal binding on this parent "
+                        f"({realized['outcome']})"
+                    )
                 ranked = []
                 for row in bound:
                     endpoint_state = decode_state(row["endpoint_state"])
