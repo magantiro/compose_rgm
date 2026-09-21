@@ -2615,3 +2615,15 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   (`tracelet_conditional.py` 192, 454). The two sinks share one parameter, so a consultation test
   exercising only one stays green -- the exact near-miss the region-law wiring hit. Mutation-test at
   the CALL sites, not the definition.
+- **THE ROLLOUT 44.3% IS THE SAME MECHANISM, AND IT IS BIMODAL, NOT ENRICHED.** The committed
+  reference audit stores both the statistic and the rollout state it was measured on, so this is
+  directly attributable (`scripts/denovo_rollout_host_attribution.py`, which reproduces the audit's
+  own stored mean before reporting anything). Over its 12 states:
+  `r(small mass, largest_host_tree) = **-0.890**`, `r(log legal, largest_host_tree) = **+0.962**`,
+  mean largest host tree 11.4. States with an intact host score **0.116-0.192**; states whose host
+  has been eaten score **0.417-1.000**. Quoting the 0.4431 mean alone describes NEITHER population.
+- **On 3 of 12 audited rollout states EVERY legal template is a small ring** -- 2 to 5 legal
+  templates on a host cut to a 3-5 atom fragment by 20-23 atoms already locked into committed rings.
+  **The model has no non-small option to choose.** No amount of training, reward shaping or better
+  sampling can fix a state whose support contains no alternative. This closes the loop on why ~50%
+  of generated molecules carry a 3/4-ring: at their later ring decisions there was nothing else.
