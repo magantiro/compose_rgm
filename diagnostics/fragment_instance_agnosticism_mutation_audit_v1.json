@@ -1,0 +1,32 @@
+{
+  "schema": "compose_fragment_instance_agnosticism_mutation_audit_v1",
+  "positive_control_unmutated_tree_green": true,
+  "mutations": [
+    {
+      "mutation": "per_drug_rule",
+      "expected_test": "test_the_controller_names_no_benchmark_instance",
+      "all_failing_tests": [
+        "test_the_controller_names_no_benchmark_instance"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "task_label_branch",
+      "expected_test": "test_the_controller_does_not_branch_on_the_task_label",
+      "all_failing_tests": [
+        "test_the_controller_does_not_branch_on_the_task_label"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "per_instance_parameter_set",
+      "expected_test": "test_one_frozen_parameter_set_covers_every_prompt",
+      "all_failing_tests": [
+        "test_one_frozen_parameter_set_covers_every_prompt"
+      ],
+      "verdict": "KILLED"
+    }
+  ],
+  "killed": 3,
+  "total": 3
+}

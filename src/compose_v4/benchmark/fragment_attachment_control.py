@@ -174,6 +174,11 @@ class AttachmentController:
         return self._spec
 
     @property
+    def config(self) -> AttachmentControlConfig:
+        """The frozen parameter set.  One object serves every drug and task."""
+        return self._config
+
+    @property
     def active(self) -> bool:
         """False when the prompt declares no interface: the controller is a no-op."""
         return self._config.enabled and self._spec.declares_interfaces

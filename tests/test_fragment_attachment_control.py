@@ -19,6 +19,9 @@ a test fail.
 from __future__ import annotations
 
 import copy
+import dataclasses
+import json
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -584,7 +587,6 @@ def test_every_drug_builds_a_context_under_the_controller(task):
 # arm that SHOULD be rejected and requires the rejection.
 
 import sys
-from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT / "tools") not in sys.path:
@@ -942,3 +944,80 @@ def test_realized_length_does_not_walk_padding_slots():
     spec = _synthetic_spec([{0}, {2}])
     controller = AttachmentController(spec, (0, 2), _ON)
     assert controller.realized_linker_length(state) is None
+
+
+# ---- One controller, every instance ----
+#
+# Consuming the benchmark's DECLARED constraint -- motif, attachment sites,
+# locked atoms -- is what a fragment-conditioned generator is supposed to do.
+# Tuning on the drug or the task label is not, and it would invalidate the
+# section rather than improve it.  These guards enforce the distinction on the
+# source itself, because it is the kind of claim a reader has to take on trust
+# otherwise.
+
+
+def test_the_controller_names_no_benchmark_instance():
+    """No drug name from the released manifest may appear in the controller.
+
+    The drug list is read from the manifest rather than written out here, so a
+    newly released drug is covered the day it lands.
+    """
+    import compose_v4.benchmark.fragment_attachment_control as module
+
+    source = Path(module.__file__).read_text()
+    lowered = source.lower()
+    offenders = sorted(
+        {
+            prompt.drug_name
+            for prompt in _prompts()
+            if prompt.drug_name.lower() in lowered
+        }
+    )
+    assert not offenders, (
+        f"the attachment controller names benchmark instances {offenders}; a "
+        "mechanism must activate from the declared constraint and structural "
+        "state, never from an instance identity"
+    )
+
+
+def test_the_controller_does_not_branch_on_the_task_label():
+    """A task-shaped branch is per-task tuning wearing a general name.
+
+    'No declared interface' is a property of the SPECIFICATION and is already
+    how superstructure deactivates the controller; reading FragmentTask would
+    be a different and illegitimate thing.
+    """
+    import compose_v4.benchmark.fragment_attachment_control as module
+
+    source = Path(module.__file__).read_text()
+    code = "\n".join(
+        line for line in source.splitlines() if not line.strip().startswith("#")
+    )
+    _, _, body = code.partition('"""')
+    _, _, body = body.partition('"""')  # drop the module docstring
+    for forbidden in ("FragmentTask", "prompt.task", "drug_name"):
+        assert forbidden not in body, (
+            f"the controller reads {forbidden!r}; routing on the task label or "
+            "the drug is benchmark engineering, not a general capability"
+        )
+
+
+def test_one_frozen_parameter_set_covers_every_prompt():
+    """The same config object must serve every released prompt."""
+    config = AttachmentControlConfig(enabled=True)
+    seen = set()
+    for prompt in _prompts():
+        bridge = 1 if len(prompt.fragments) == 2 else 0
+        context = build_prompt_context(
+            prompt, control=config, linker_bridge_atoms=bridge
+        )
+        controller = AttachmentController(
+            context.attachment, context.locked_slots, config
+        )
+        # The tunable parameter set must not vary with the instance; only the
+        # DECLARED spec may differ from prompt to prompt.
+        seen.add(json.dumps(dataclasses.asdict(controller.config), sort_keys=True))
+    assert len(seen) == 1, (
+        f"the controller held {len(seen)} distinct parameter sets across the "
+        "panel; it must hold exactly one"
+    )
