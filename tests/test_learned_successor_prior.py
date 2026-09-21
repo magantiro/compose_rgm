@@ -468,3 +468,22 @@ def test_guidance_strength_actually_changes_the_weights() -> None:
         if compared >= 3:
             break
     assert compared >= 3, "fixture produced too few non-flat laws to compare"
+
+
+def test_inlined_state_identity_matches_the_production_helper() -> None:
+    """The prior inlines `docking_value.identity` to avoid importing it.
+
+    The docstring promises the two stay in step; this is the guard that makes
+    that promise checkable. The prior must not import the objective-bearing
+    module, but the TEST may, which is what lets the comparison be external.
+    """
+    from compose_v4.control.docking_value import identity
+    from compose_v4.rewrite.trace_shard import encode_state
+
+    checked = 0
+    for _row, source in _parents():
+        assert LearnedSuccessorPrior._state_identity(source) == identity(
+            encode_state(source)
+        )
+        checked += 1
+    assert checked >= 5
