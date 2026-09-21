@@ -2522,3 +2522,45 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   `CalcMolFormula` (what `Isomer_scoring` parses) then carries a trailing `-` and one fewer H; AUC cost
   UNDETERMINED. The archive is append-only with no prune/evict path, and PMO endpoint eligibility is
   RDKit-parseability only -- correct for no-prescreen, but there is no floor of any kind.
+
+## 2026-09-21 (de novo: `exact_early_ring` is INERT on the mechanism, and the slot-scarcity story is a rollout-time explanation)
+
+- **DO NOT RETRAIN ON `exact_early_ring`, and do not bother relaxing its barrier.** Zero-training probe,
+  n=24 traces / 40 ring events, production compiler and scheduler, pinned kernel:
+      metric                        A sequential   B shipped   C barrier relaxed
+      ring position (frac of trace)     0.939        0.652          0.652
+      accepted / attempted swaps          --       236 / 276      236 / 276
+      MEAN FREE SLOTS                   21.925       21.925        21.925
+  Ring events DO move materially (0.939 -> 0.652). **Free slots do not change at all -- per-event
+  identical A==B 40/40 and A==C 40/40**, same distribution `{16:2,19:3,20:12,21:2,22:2,23:8,24:3,25:6,
+  27:1,29:1}`. Arm C reproduced arm B on 24/24 traces with **identical attempted swaps (276 = 276)**,
+  which proves **arm B never reached a barrier at all** -- so removing the barrier is provably a no-op,
+  eliminated by direct mechanism rather than by the conjunction.
+- **CORRECTS the standing diagnosis: "ring growth is supervised LATE on crowded states near the 40-atom
+  cap" is a ROLLOUT-time story and does not hold at TRAINING time.** In training traces the ring decision
+  already sits at **~22 free slots of 40** (min 16). Slot scarcity is NOT the binding variable there. In
+  the flexible-graft compiler every `atom_insert` precedes the topology phase, so free slots at the ring
+  decision already equal `40 - final heavy count` before any ring event fires, and `ring_system_grow`
+  cyclizes existing atoms consuming **no** slots -- reordering within the topology phase cannot move the
+  number. What actually refuses the swaps is the exactness test on **`bond_reroute` 38/40 and
+  `bond_reorder` 2/40**: the topology events that build the very bonds the ring system attaches to. So
+  the support degeneracy comes from bond topology, not crowding.
+- **CONSEQUENCE: the fix is the compiler's EMISSION ORDER, not a post-hoc reordering.** The ring
+  transaction must be emitted at a different point in the dependency order -- interleaved with the
+  `bond_reroute` topology phase rather than appended after it. Bubble-sorting a poor trace cannot repair
+  a trace whose ring decision was never placed well.
+- **The reference 0.443 support mass is a mean over TWELVE states, not the 265 ring events**, and it is
+  extremely heterogeneous: four of the twelve have supports of only 2, 2, 5 and 12 templates, three of
+  which are 100% small (mass 1.0). It is driven by a handful of near-degenerate states, not a uniform 44%
+  tilt. Quote it with that caveat.
+- **METHOD: a probe reducer must refuse to emit a verdict from zero data.** The reducer initially emitted
+  `FIX_COMPILER_ORDERING` -- the "don't retrain" branch -- from **zero compiled traces**, because a
+  separate bug (passing the catalog INTO `compile_carbon_tree_to_target`, which refuses unsupported
+  traces) had killed 12 of 12 real molecules. The trainer compiles with `ring_catalog=None` and filters
+  afterwards with `structured_ring_trace_supported`. Both fixed; the reducer now returns
+  `INCONCLUSIVE_NO_DATA`. A verdict branch reachable with an empty input set is a landmine, and it was
+  pointing at the right answer for the wrong reason.
+- **Instrument check before arms, not after.** Rather than hoping arm A landed near 0.443, the probe
+  recomputed the committed reference audit's own 12 states through the production support path and got
+  **12/12 agreement to 16 digits**. The ring catalog is byte-identical between step-1000 and step-2500
+  (`template_repr_sha256 25bb9f52...`), so the instrument transfers between arms.
