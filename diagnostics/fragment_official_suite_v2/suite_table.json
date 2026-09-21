@@ -22,23 +22,24 @@
       "platform": "macOS-26.5.2-arm64-arm-64bit"
     }
   },
-  "shards": 63,
+  "shards": 90,
   "denominator_audit": {
-    "rows_checked": 63,
+    "rows_checked": 90,
     "samples_per_prompt": 100
   },
   "aggregation": "per seed: unweighted mean over the task's drugs; reported as mean +/- population std over seeds; scaffold_morphing copies linker_design",
   "tasks": {
     "motif_extension": {
-      "complete": false,
+      "complete": true,
+      "withheld_reason": null,
       "constraint_decomposition": {
-        "strict_benchmark_validity_pct": 43.333333333333336,
+        "strict_benchmark_validity_pct": 41.43333333333333,
         "chemically_valid_share_of_committed_pct": 100.0,
-        "chemical_validity_of_committed_pct": 89.29629629629629,
-        "committed_per_attempt_pct": 89.29629629629629,
-        "fragment_containment_of_committed_pct": 99.54375777685608,
-        "endpoint_constraint_failures": 1241,
-        "trajectories_hitting_rejection_budget": 362
+        "chemical_validity_of_committed_pct": 85.4,
+        "committed_per_attempt_pct": 85.4,
+        "fragment_containment_of_committed_pct": 99.29742388758783,
+        "endpoint_constraint_failures": 1319,
+        "trajectories_hitting_rejection_budget": 538
       },
       "seeds_present": [
         0,
@@ -46,83 +47,106 @@
         2
       ],
       "drugs_per_seed": {
-        "0": 9,
-        "1": 9,
-        "2": 9
+        "0": 10,
+        "1": 10,
+        "2": 10
       },
+      "undefined_cells": {
+        "validity": 0,
+        "uniqueness": 0,
+        "quality": 0,
+        "diversity": 0,
+        "distance": 0,
+        "distance_to_original_drug": 0
+      },
+      "drug_seed_cells_with_no_valid_emission": 0,
+      "secondary_metrics_interpretable": true,
       "per_seed": {
         "0": {
-          "validity": 43.666666666666664,
-          "uniqueness": 100.0,
-          "quality": 8.0,
-          "diversity": 0.7814621033970325,
-          "distance": 0.7899101352312347,
-          "distance_to_original_drug": 0.8133234972838116
+          "validity": 41.9,
+          "uniqueness": 99.61538461538461,
+          "quality": 7.7,
+          "diversity": 0.7712838930573291,
+          "distance": 0.7880443958108001,
+          "distance_to_original_drug": 0.8057957049758879
         },
         "1": {
-          "validity": 42.44444444444444,
+          "validity": 40.3,
           "uniqueness": 100.0,
-          "quality": 8.11111111111111,
-          "diversity": 0.7742270443292323,
-          "distance": 0.7806186114488401,
-          "distance_to_original_drug": 0.8022064570767422
+          "quality": 7.8,
+          "diversity": 0.7642233875153567,
+          "distance": 0.7793700579103542,
+          "distance_to_original_drug": 0.7949519130102012
         },
         "2": {
-          "validity": 43.888888888888886,
-          "uniqueness": 99.80158730158729,
-          "quality": 8.222222222222221,
-          "diversity": 0.7771222189454854,
-          "distance": 0.7884106760204793,
-          "distance_to_original_drug": 0.8098147311893108
+          "validity": 42.1,
+          "uniqueness": 99.82142857142857,
+          "quality": 8.1,
+          "diversity": 0.7705023047432445,
+          "distance": 0.7863981624964385,
+          "distance_to_original_drug": 0.8025697903082385
         }
       },
       "summary": {
         "validity": {
-          "mean": 43.333333333333336,
-          "std": 0.6350528962771197
+          "mean": 41.43333333333333,
+          "std": 0.8055363982396396,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "uniqueness": {
-          "mean": 99.93386243386243,
-          "std": 0.09353264301409912
+          "mean": 99.81227106227107,
+          "std": 0.15715203573013378,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "quality": {
-          "mean": 8.11111111111111,
-          "std": 0.09072184232530257
+          "mean": 7.866666666666667,
+          "std": 0.1699673171197593,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "diversity": {
-          "mean": 0.7776037888905835,
-          "std": 0.0029732644391482943
+          "mean": 0.7686698617719768,
+          "std": 0.0031602816392707176,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "distance": {
-          "mean": 0.7863131409001847,
-          "std": 0.004072905902452831
+          "mean": 0.7846042054058643,
+          "std": 0.003761626069923682,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "distance_to_original_drug": {
-          "mean": 0.8084482285166216,
-          "std": 0.00464023296162664
+          "mean": 0.8011058027647758,
+          "std": 0.004546383228775257,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         }
       },
       "totals": {
-        "attempts": 2700,
-        "committed_endpoints": 2411,
-        "committed_chemically_valid": 2411,
-        "committed_fragment_preserving": 2400,
-        "emitted_nonempty": 1170,
-        "emitted_fragment_preserving": 1170,
-        "constraint_failures": 1241,
-        "budget_exhausted": 362
+        "attempts": 3000,
+        "committed_endpoints": 2562,
+        "committed_chemically_valid": 2562,
+        "committed_fragment_preserving": 2544,
+        "emitted_nonempty": 1243,
+        "emitted_fragment_preserving": 1243,
+        "constraint_failures": 1319,
+        "budget_exhausted": 538
       }
     },
     "scaffold_decoration": {
-      "complete": false,
+      "complete": true,
+      "withheld_reason": null,
       "constraint_decomposition": {
-        "strict_benchmark_validity_pct": 7.833333333333333,
+        "strict_benchmark_validity_pct": 3.5,
         "chemically_valid_share_of_committed_pct": 100.0,
-        "chemical_validity_of_committed_pct": 98.5,
-        "committed_per_attempt_pct": 98.5,
-        "fragment_containment_of_committed_pct": 99.83079526226734,
-        "endpoint_constraint_failures": 544,
-        "trajectories_hitting_rejection_budget": 11
+        "chemical_validity_of_committed_pct": 93.46666666666667,
+        "committed_per_attempt_pct": 93.46666666666667,
+        "fragment_containment_of_committed_pct": 99.89300998573466,
+        "endpoint_constraint_failures": 2699,
+        "trajectories_hitting_rejection_budget": 226
       },
       "seeds_present": [
         0,
@@ -130,75 +154,98 @@
         2
       ],
       "drugs_per_seed": {
-        "0": 2,
-        "1": 2,
-        "2": 2
+        "0": 10,
+        "1": 10,
+        "2": 10
       },
+      "undefined_cells": {
+        "validity": 0,
+        "uniqueness": 0,
+        "quality": 0,
+        "diversity": 0,
+        "distance": 15,
+        "distance_to_original_drug": 15
+      },
+      "drug_seed_cells_with_no_valid_emission": 15,
+      "secondary_metrics_interpretable": false,
       "per_seed": {
         "0": {
-          "validity": 8.0,
-          "uniqueness": 100.0,
-          "quality": 5.5,
-          "diversity": 0.3523333333333333,
-          "distance": 0.6968287493511682,
-          "distance_to_original_drug": 0.6414541979829562
+          "validity": 3.2,
+          "uniqueness": 50.0,
+          "quality": 1.8,
+          "diversity": 0.14583809523809524,
+          "distance": 0.7691707396554834,
+          "distance_to_original_drug": 0.7277077824403833
         },
         "1": {
-          "validity": 9.5,
-          "uniqueness": 100.0,
-          "quality": 5.5,
-          "diversity": 0.7708235294117647,
-          "distance": 0.7238271196628092,
-          "distance_to_original_drug": 0.7042483126015886
+          "validity": 4.0,
+          "uniqueness": 50.0,
+          "quality": 1.9,
+          "diversity": 0.2924847058823529,
+          "distance": 0.7413601237820598,
+          "distance_to_original_drug": 0.6991670303248064
         },
         "2": {
-          "validity": 6.0,
-          "uniqueness": 100.0,
-          "quality": 2.0,
-          "diversity": 0.3650454545454545,
-          "distance": 0.6907125185724696,
-          "distance_to_original_drug": 0.6387770304870694
+          "validity": 3.3,
+          "uniqueness": 50.0,
+          "quality": 1.7,
+          "diversity": 0.2870155011655012,
+          "distance": 0.724598064368367,
+          "distance_to_original_drug": 0.6732256132215308
         }
       },
       "summary": {
         "validity": {
-          "mean": 7.833333333333333,
-          "std": 1.4337208778404378
+          "mean": 3.5,
+          "std": 0.3559026084010437,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "uniqueness": {
-          "mean": 100.0,
-          "std": 0.0
+          "mean": 50.0,
+          "std": 0.0,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "quality": {
-          "mean": 4.333333333333333,
-          "std": 1.6499158227686108
+          "mean": 1.8,
+          "std": 0.08164965809277258,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "diversity": {
-          "mean": 0.49606743909685086,
-          "std": 0.19435119651510724
+          "mean": 0.24177943409531644,
+          "std": 0.06787750450306698,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "distance": {
-          "mean": 0.7037894625288157,
-          "std": 0.01438709716607642
+          "mean": 0.7450429759353034,
+          "std": 0.01838211804172137,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 15
         },
         "distance_to_original_drug": {
-          "mean": 0.6614931803572047,
-          "std": 0.03025219337917306
+          "mean": 0.7000334753289068,
+          "std": 0.022250688916776864,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 15
         }
       },
       "totals": {
-        "attempts": 600,
-        "committed_endpoints": 591,
-        "committed_chemically_valid": 591,
-        "committed_fragment_preserving": 590,
-        "emitted_nonempty": 47,
-        "emitted_fragment_preserving": 47,
-        "constraint_failures": 544,
-        "budget_exhausted": 11
+        "attempts": 3000,
+        "committed_endpoints": 2804,
+        "committed_chemically_valid": 2804,
+        "committed_fragment_preserving": 2801,
+        "emitted_nonempty": 105,
+        "emitted_fragment_preserving": 105,
+        "constraint_failures": 2699,
+        "budget_exhausted": 226
       }
     },
     "superstructure_generation": {
       "complete": true,
+      "withheld_reason": null,
       "constraint_decomposition": {
         "strict_benchmark_validity_pct": 93.53333333333335,
         "chemically_valid_share_of_committed_pct": 100.0,
@@ -218,6 +265,16 @@
         "1": 10,
         "2": 10
       },
+      "undefined_cells": {
+        "validity": 0,
+        "uniqueness": 0,
+        "quality": 0,
+        "diversity": 0,
+        "distance": 0,
+        "distance_to_original_drug": 0
+      },
+      "drug_seed_cells_with_no_valid_emission": 0,
+      "secondary_metrics_interpretable": true,
       "per_seed": {
         "0": {
           "validity": 93.6,
@@ -247,27 +304,39 @@
       "summary": {
         "validity": {
           "mean": 93.53333333333335,
-          "std": 0.16996731711976099
+          "std": 0.16996731711976099,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "uniqueness": {
           "mean": 97.57853006749058,
-          "std": 0.5759419352163396
+          "std": 0.5759419352163396,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "quality": {
           "mean": 37.666666666666664,
-          "std": 0.9030811456096054
+          "std": 0.9030811456096054,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "diversity": {
           "mean": 0.7261047121188805,
-          "std": 0.00225810783508816
+          "std": 0.00225810783508816,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "distance": {
           "mean": 0.6420692939712243,
-          "std": 0.001551418490263697
+          "std": 0.001551418490263697,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "distance_to_original_drug": {
           "mean": 0.7542517974088999,
-          "std": 0.001970818391763326
+          "std": 0.001970818391763326,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         }
       },
       "totals": {

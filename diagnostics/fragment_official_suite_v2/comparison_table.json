@@ -32,36 +32,48 @@
     {
       "task": "motif_extension",
       "category": "motif",
-      "complete": false,
+      "complete": true,
+      "withheld_reason": null,
       "copied_from": null,
       "constraint_decomposition": {
-        "strict_benchmark_validity_pct": 43.333333333333336,
-        "chemical_validity_of_committed_pct": 89.29629629629629,
-        "committed_per_attempt_pct": 89.29629629629629,
-        "fragment_containment_of_committed_pct": 99.54375777685608,
-        "endpoint_constraint_failures": 1241,
-        "trajectories_hitting_rejection_budget": 362
+        "strict_benchmark_validity_pct": 41.43333333333333,
+        "chemically_valid_share_of_committed_pct": 100.0,
+        "chemical_validity_of_committed_pct": 85.4,
+        "committed_per_attempt_pct": 85.4,
+        "fragment_containment_of_committed_pct": 99.29742388758783,
+        "endpoint_constraint_failures": 1319,
+        "trajectories_hitting_rejection_budget": 538
       },
       "COMPOSE": {
         "validity": {
-          "mean": 43.333333333333336,
-          "std": 0.6350528962771197
+          "mean": 41.43333333333333,
+          "std": 0.8055363982396396,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "uniqueness": {
-          "mean": 99.93386243386243,
-          "std": 0.09353264301409912
+          "mean": 99.81227106227107,
+          "std": 0.15715203573013378,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "quality": {
-          "mean": 8.11111111111111,
-          "std": 0.09072184232530257
+          "mean": 7.866666666666667,
+          "std": 0.1699673171197593,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "diversity": {
-          "mean": 0.7776037888905835,
-          "std": 0.0029732644391482943
+          "mean": 0.7686698617719768,
+          "std": 0.0031602816392707176,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "distance": {
-          "mean": 0.7863131409001847,
-          "std": 0.004072905902452831
+          "mean": 0.7846042054058643,
+          "std": 0.003761626069923682,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         }
       },
       "InVirtuoGen": {
@@ -135,9 +147,11 @@
       "task": "superstructure_generation",
       "category": "superstructure",
       "complete": true,
+      "withheld_reason": null,
       "copied_from": null,
       "constraint_decomposition": {
         "strict_benchmark_validity_pct": 93.53333333333335,
+        "chemically_valid_share_of_committed_pct": 100.0,
         "chemical_validity_of_committed_pct": 93.63333333333334,
         "committed_per_attempt_pct": 93.63333333333334,
         "fragment_containment_of_committed_pct": 99.8932004271983,
@@ -147,23 +161,33 @@
       "COMPOSE": {
         "validity": {
           "mean": 93.53333333333335,
-          "std": 0.16996731711976099
+          "std": 0.16996731711976099,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "uniqueness": {
           "mean": 97.57853006749058,
-          "std": 0.5759419352163396
+          "std": 0.5759419352163396,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "quality": {
           "mean": 37.666666666666664,
-          "std": 0.9030811456096054
+          "std": 0.9030811456096054,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "diversity": {
           "mean": 0.7261047121188805,
-          "std": 0.00225810783508816
+          "std": 0.00225810783508816,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "distance": {
           "mean": 0.6420692939712243,
-          "std": 0.001551418490263697
+          "std": 0.001551418490263697,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         }
       },
       "InVirtuoGen": {
@@ -236,36 +260,48 @@
     {
       "task": "scaffold_decoration",
       "category": "decoration",
-      "complete": false,
+      "complete": true,
+      "withheld_reason": null,
       "copied_from": null,
       "constraint_decomposition": {
-        "strict_benchmark_validity_pct": 7.833333333333333,
-        "chemical_validity_of_committed_pct": 98.5,
-        "committed_per_attempt_pct": 98.5,
-        "fragment_containment_of_committed_pct": 99.83079526226734,
-        "endpoint_constraint_failures": 544,
-        "trajectories_hitting_rejection_budget": 11
+        "strict_benchmark_validity_pct": 3.5,
+        "chemically_valid_share_of_committed_pct": 100.0,
+        "chemical_validity_of_committed_pct": 93.46666666666667,
+        "committed_per_attempt_pct": 93.46666666666667,
+        "fragment_containment_of_committed_pct": 99.89300998573466,
+        "endpoint_constraint_failures": 2699,
+        "trajectories_hitting_rejection_budget": 226
       },
       "COMPOSE": {
         "validity": {
-          "mean": 7.833333333333333,
-          "std": 1.4337208778404378
+          "mean": 3.5,
+          "std": 0.3559026084010437,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "uniqueness": {
-          "mean": 100.0,
-          "std": 0.0
+          "mean": 50.0,
+          "std": 0.0,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "quality": {
-          "mean": 4.333333333333333,
-          "std": 1.6499158227686108
+          "mean": 1.8,
+          "std": 0.08164965809277258,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "diversity": {
-          "mean": 0.49606743909685086,
-          "std": 0.19435119651510724
+          "mean": 0.24177943409531644,
+          "std": 0.06787750450306698,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 0
         },
         "distance": {
-          "mean": 0.7037894625288157,
-          "std": 0.01438709716607642
+          "mean": 0.7450429759353034,
+          "std": 0.01838211804172137,
+          "seeds_contributing": 3,
+          "drug_seed_cells_undefined": 15
         }
       },
       "InVirtuoGen": {

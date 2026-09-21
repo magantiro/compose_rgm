@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import statistics
 from collections import defaultdict
 from pathlib import Path
@@ -146,23 +147,36 @@ def collect(shards: list[dict]) -> dict:
 def summarise(table: dict, expected_drugs: int, expected_seeds: int) -> dict:
     out: dict[str, dict] = {}
     for task, by_seed in table.items():
+        # A drug/seed that emitted NOTHING has no molecules to measure distance
+        # over, so its distance is NaN. That is a real absence, not a zero:
+        # averaging it in as 0.0 would drag the task distance toward the prompt
+        # exactly where the sampler failed hardest. Drop it from the mean and
+        # COUNT the drops, so a row resting on fewer drugs is visible.
         per_seed_rows = {}
+        undefined: dict[str, int] = defaultdict(int)
         for seed, by_drug in sorted(by_seed.items()):
-            per_seed_rows[seed] = {
-                key: statistics.fmean(
-                    [by_drug[d]["official"][key] for d in sorted(by_drug)]
-                )
-                for key in METRIC_KEYS
-            }
+            row = {}
+            for key in METRIC_KEYS:
+                values = [by_drug[d]["official"][key] for d in sorted(by_drug)]
+                finite = [v for v in values if not math.isnan(v)]
+                undefined[key] += len(values) - len(finite)
+                row[key] = statistics.fmean(finite) if finite else float("nan")
+            per_seed_rows[seed] = row
         complete = all(len(by_seed[s]) == expected_drugs for s in by_seed) and (
             len(by_seed) == expected_seeds
         )
         summary = {}
         for key in METRIC_KEYS:
-            values = [per_seed_rows[s][key] for s in sorted(per_seed_rows)]
+            values = [
+                per_seed_rows[s][key]
+                for s in sorted(per_seed_rows)
+                if not math.isnan(per_seed_rows[s][key])
+            ]
             summary[key] = {
-                "mean": statistics.fmean(values),
+                "mean": statistics.fmean(values) if values else float("nan"),
                 "std": statistics.pstdev(values) if len(values) > 1 else 0.0,
+                "seeds_contributing": len(values),
+                "drug_seed_cells_undefined": undefined[key],
             }
         totals: dict[str, int] = defaultdict(int)
         for by_drug in by_seed.values():
@@ -221,6 +235,15 @@ def summarise(table: dict, expected_drugs: int, expected_seeds: int) -> dict:
             "constraint_decomposition": decomposition,
             "seeds_present": sorted(by_seed),
             "drugs_per_seed": {s: len(by_seed[s]) for s in sorted(by_seed)},
+            "undefined_cells": dict(undefined),
+            # A (drug, seed) cell that emitted nothing valid still contributes
+            # to uniqueness (0, since valid_count is 0) and to diversity (0),
+            # so once a task has many empty cells its uniqueness and diversity
+            # describe the empty cells rather than the chemistry. The distance
+            # undefined count IS the empty-cell count, because distance is the
+            # one metric that refuses to be defined over nothing.
+            "drug_seed_cells_with_no_valid_emission": undefined["distance"],
+            "secondary_metrics_interpretable": undefined["distance"] == 0,
             "per_seed": per_seed_rows,
             "summary": summary,
             "totals": dict(totals),
