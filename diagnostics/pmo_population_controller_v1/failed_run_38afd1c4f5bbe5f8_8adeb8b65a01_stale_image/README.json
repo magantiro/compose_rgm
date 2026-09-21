@@ -1,0 +1,10 @@
+{
+  "accounting_note": "ZERO oracle calls charged -- the guard fired before scoring, which is the fail-closed chain working as designed. Nothing is debited from the 750-call authorization.",
+  "charged_oracle_calls": 0,
+  "contract_payload_sha256": "38afd1c4f5bbe5f863423a2a51051b979cf8cf7986017720bbb0872463bf8220",
+  "failure": "All three tasks raised ValueError('scored payload authorization identity changed') inside their containers. The worker compares the spec's contract_payload_sha256 against the contract baked into its IMAGE; the deployed app's image still carried the v1-era contract 103d9d92 because add_local_file(..., copy=True) bakes it at BUILD time and the launcher spawns against a DEPLOYED function.",
+  "outcome": "FAILED_BEFORE_ANY_CHARGED_CALL",
+  "resolution": "Redeployed compose-pmo-population-v1-corrected so its image carries the authorized contract, then relaunched.",
+  "run_id": "8adeb8b65a01e7b7aefab26473137670006d316f08fddf305c4f89d1ca3d21fe",
+  "schema_version": "pmo_failed_run_archive_v1"
+}
