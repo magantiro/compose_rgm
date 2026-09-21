@@ -1778,3 +1778,43 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   Correctly left unguessed: the field name carries neither the `_file_sha256` (physical bytes) nor
   the `_semantic_sha256` (self-hash) convention, and writing the wrong role into a pin is its own
   failure mode, per the 2026-08-02 entry on exactly that corruption.
+
+## 2026-09-20 (rdkit parity holds on real endpoints and BREAKS on states the search invents)
+
+- **Two environment-parity checks in this session appeared to contradict each other; both are
+  right, and the distinction is decision-critical.** The support-stage audit compared rdkit
+  2025.09.6 against the pinned 2024.3.5 on **8,183 real endpoints from a completed shard** and got
+  byte-identical similarity, QED, SA, heavy count and `med_chem_gate` verdict. The Modal fan-out
+  agent compared 2026.03.6 against 2024.3.5 on the **T4-v2 feasibility grid** and found the two
+  kernels write DIFFERENT canonical SMILES for the same molecule (same InChI) on a Kekule-
+  degenerate hypervalent-sulfur ring **the search itself constructs**, diverging 105 of 600
+  evaluations. RESOLUTION: parity on drug-like molecules that already exist says nothing about
+  parity on the exotic intermediates a search builds. Validate the kernel on the states the
+  PROCEDURE generates, not on the corpus it starts from.
+- **Under the pinned kernel one T4-v2 cell cannot be computed AT ALL.** `parp1_2` dies in every arm
+  inside `Chem.MolToSmiles` with `RuntimeError: Invariant Violation / could not find atom1 /
+  Canon.cpp:222` (RDKIT 2024.03.5), raised from `t4_v2_feasibility_proposal::_canonical` via
+  `replace_moves`. On rdkit 2026.03.6 the same run completes and reports `parp1_2` as an ORDINARY
+  RESULT. So the newer kernel silently tolerates a state production refuses -- the dangerous
+  direction, because it manufactures a plausible row rather than an error.
+- **Canonical SMILES is a CACHE KEY here, which turns a cosmetic difference into a permanent
+  divergence.** The search keys its endpoint cache on the canonical string, so two kernels that
+  merely SPELL a molecule differently explore different trees from that point on. A "same molecule,
+  different string" difference is not cosmetic in any procedure that dedupes on the string.
+- **CONSEQUENCE, and it is a live claim-validity question, not a throughput one:** any T4-v2 row
+  produced by a LOCAL run was computed under a kernel that diverges from production. The campaign
+  docking results are unaffected -- those run in the pinned Modal image and are reconstructed from
+  round locks -- but locally-produced gates, feasibility grids and proposal-rank tables are exposed
+  and must be re-run pinned before they support a launch or a published number. Rebuilding the
+  pinned env costs about a minute: `uv venv --python 3.11` plus rdkit==2024.3.5, numpy==1.26.4,
+  scipy==1.13.1, networkx==3.3, and torch==2.4.0 (needed only because `t4_fiber_campaign` imports
+  it transitively -- but omitting it forces you to TRANSCRIBE the gate instead of importing it, and
+  a transcribed gate cannot fail usefully).
+- **A metric that cannot vary is not a measurement.** A container census built on
+  `os.uname().nodename` reported the literal string "modal" in every container. Check that a
+  diagnostic's value is capable of differing before drawing an inference from its uniformity.
+- **The T4 Modal workspace is container-starved and a sibling workspace is not.** A chemistry-free,
+  volume-free scaling probe (40 tasks x 20 busy-seconds, same code, minutes apart) measured
+  `nitya` at 3 containers / 507.7 s against `rahul-94866` at 40 containers / 34.2 s -- **14.8x**.
+  The running campaigns hold `nitya`. Run zero-oracle side work on the other workspace, and re-run
+  the probe (about two cents) rather than assuming capacity.
