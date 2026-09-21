@@ -2312,3 +2312,70 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   had already died of preemption and those entries were stale or terminating. A task count in a
   listing is not proof of live capacity -- check the function-call state, as the same listing
   misled a phantom-run diagnosis earlier the same day.
+
+## 2026-09-21 (the July de-novo artifacts were never lost -- they are on a DIFFERENT PROFILE'S volume)
+
+- **CORRECTS the 2026-09-21 entry "A STRONGER DE-NOVO GENERATOR CANNOT BE PROMOTED, ONLY TRAINED".**
+  That entry recorded a full recursive scan of `compose-v4-artifacts` finding ZERO de-novo training
+  artifacts, and correctly noted the volume was created **2026-08-09, AFTER the July runs**. It then
+  drew the wrong conclusion. There are FOUR Modal profiles here (`nitya`, `rahul` -> workspace
+  kosha-labs, `rarospec2`, `rahul-94866`) and **each has its own `compose-v4-artifacts`**. The
+  `rahul` profile's copy was created **2026-07-17** -- the Lineage B window -- and holds 191 run
+  directories including every `tree_fcd_transfer` / `stage3` de-novo run. **A volume name is not a
+  volume identity; check `modal volume list` on EVERY profile before concluding an artifact is gone.**
+  The same reasoning error would have justified a multi-day retrain that reproduced work already
+  sitting on disk.
+- **`checkpoint.best_so_far.pt` and `checkpoint.recovery.pt` are DIFFERENT ARTIFACTS with different
+  contracts, and reading resume-capability off the wrong one inverts the conclusion.**
+  `best_so_far` is `checkpoint_kind = 'interim_best_evaluation_model'`: weights plus
+  `selected_validation`, and **no optimizer, scheduler or RNG state** -- so it genuinely cannot be
+  resumed. `checkpoint.recovery.pt` (written by `recovery_every: 500`) is
+  `checkpoint_kind = 'exact_training_recovery'` and carries `current_state_dict`,
+  **`optimizer_state_dict`, `torch_rng_state`, `cuda_rng_states`**, `best_state_dict`,
+  `best_metrics`, `history` and `completed_steps`. Sizes differ 3x (38 MB vs 113 MB) because AdamW
+  keeps two moments per parameter -- **the size ratio is the cheap tell.** "The run cannot be
+  resumed" was measured on `best_so_far` and was false of the run.
+- **A checkpoint's `provenance_sha256` IS the producing run's `run_identity_sha256`, so the exact run
+  is FINDABLE by scanning volume manifests.** `modal_apps/train_tracelet_gm.py:1117` sets
+  `recipe["arguments"]["provenance_sha256"] = run_identity_sha256`, and each run writes
+  `manifest.training.json` carrying that value. Downloading every candidate run's
+  `manifest.training.json` and matching the hash identified Lineage B as
+  **`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`** by EXACT HASH rather than by inference from a
+  recipe match. Do this before reconstructing anything: the identification is minutes of work and it
+  is proof, not a guess. Note `run_identity` also folds in `run_label` and the data manifest, so the
+  value cannot be recomputed from source alone -- the manifest is the only route.
+- **The from-scratch reproduction gate was ALREADY RUN, in July, and it PASSED -- by two runs with
+  DIFFERENT code identities.** `compose-v4-stage3-flexible-graft-3k-fullcache-c39520c-v2`
+  (`run_identity af57588e...`, a later source revision) shares Lineage B's recipe and seed 20260717,
+  and its stored validation `history` is **byte-identical to Lineage B's at every evaluation through
+  step 1000**: 56.655693 / 19.152582 / 18.760945 / 15.715200 / **14.545557**, the last matching the
+  step-1000 checkpoint's `early_stopping_reference_loss` exactly. It then continued to step 2500.
+  So the de-novo training path is empirically invariant across those revisions, and the trajectory
+  extension the retrain was meant to produce **already exists on disk**. A stored `history` list is a
+  reproduction reference; look for one before spending GPU to regenerate it.
+- **Only `best_so_far` and `recovery` survive per run, so intermediate steps are NOT recoverable.**
+  `best_so_far` is overwritten whenever evaluation improves and `recovery` every 500 steps, so the
+  surviving Lineage B trajectory is exactly TWO measurable states: step 1000 and step 2500. The
+  sibling runs (`-cert-cdac478-v1/v2`, `-fullcache-c39520c-v1`) kept manifests only. Plan a
+  checkpoint sweep around the states that EXIST rather than around a desired grid.
+- **The current code still samples the July checkpoint identically, measured two ways.** The archived
+  July step-1000 ring histogram (`results/diagnostics/step1000_ring_topology_comparison.json`,
+  n=100) is `{3:54, 4:23, 5:107, 6:202, 7:4, 9:1}` -> **19.69% of RINGS strained**; an independent
+  n=50 sample drawn under current code three months later gives 32/160 = **20.0%** (two-proportion
+  z = 0.08, p = 0.93). Ring-size composition is reproduced. This is evidence about SAMPLING, not
+  about training.
+- **Report the per-RING strained fraction beside the per-MOLECULE prevalence.** Prevalence (share of
+  molecules carrying any 3/4-ring) moves when molecules get bigger or smaller even if the closure
+  policy is unchanged; the per-ring fraction `P(size | a ring exists)` is invariant to both molecule
+  size and ring count, so it is the size-independent read of the learned closure policy. Measured
+  `ring_removing_events == 0` over 50 trajectories (the de-novo model has zero
+  `ring_system_delete` validation examples and fires none at sampling), which is what licenses the
+  ENDPOINT ring census to stand in for ring CREATION -- check that, do not assume it.
+- **The n=50 strained-vs-clean gap is PARTLY confounded with molecule size, and the two axes behave
+  differently.** OLS with size partialled out (`scripts/denovo_checkpoint_sweep.py`,
+  `compose_v4.eval.denovo_ring_decomposition`): **SA** raw strained difference +0.946 falls to a
+  strain coefficient of **+0.614 (SE 0.280)** with heavy atoms at +0.083 (SE 0.021) -- a genuine
+  strain effect survives, about 65% of the raw gap. **QED** raw difference -0.120 falls to
+  **-0.054 (SE 0.039)**, i.e. NOT distinguishable from zero, while heavy atoms carry -0.0165
+  (SE 0.0029). So the QED half of the association is essentially all size. Quoting the raw
+  conditional split alone would have attributed both to ring strain.
