@@ -375,3 +375,128 @@ def test_priority_default_covers_both_ring_transactions() -> None:
         trace,
         priority_rule_names=DEFAULT_PRIORITY_RULES,
     )
+
+
+@pytest.mark.parametrize("smiles", _SMILES)
+def test_blocker_census_reports_the_real_obstacle_not_the_barrier_setting(
+    smiles: str,
+) -> None:
+    """The census must describe the trace, not echo the barrier configuration.
+
+    The scheduler BREAKS without counting an attempt when it meets a barrier, so
+    a barrier hit and an exactness refusal are indistinguishable from its own
+    counters -- yet they imply opposite recommendations.  This asserts the census
+    reports the actual predecessor and an independently computed commutation
+    verdict, and that the verdict does not change when the barrier set does.
+    """
+
+    system = de_novo_rewrite_system()
+    trace = _compiled_trace(smiles)
+    scheduled = probe.apply_schedule_arm(
+        trace,
+        arm="B_exact_early_ring_default_barriers",
+        phase_barrier_rule_names=DEFAULT_PHASE_BARRIERS,
+        system=system,
+    )
+    assert scheduled.trace is not None
+
+    with_barriers = probe.ring_event_blockers(
+        scheduled.trace, barrier_rule_names=DEFAULT_PHASE_BARRIERS, system=system
+    )
+    without_barriers = probe.ring_event_blockers(
+        scheduled.trace, barrier_rule_names=frozenset(), system=system
+    )
+    assert with_barriers, "a scheduled trace must carry a ring event"
+
+    for row, bare in zip(with_barriers, without_barriers):
+        # The predecessor and the commutation verdict are properties of the
+        # TRACE, so they must be identical under any barrier configuration.
+        assert row["predecessor_rule_name"] == bare["predecessor_rule_name"]
+        assert row["exact_commutation_available"] == bare["exact_commutation_available"]
+        # Only the barrier LABEL may move with the configuration.
+        assert bare["predecessor_is_barrier"] is False
+        if row["predecessor_rule_name"] is not None:
+            assert row["predecessor_is_barrier"] == (
+                row["predecessor_rule_name"] in DEFAULT_PHASE_BARRIERS
+            )
+            # A scheduled arm stops only where it cannot proceed: either the
+            # predecessor is a barrier it refuses to cross, or the exactness test
+            # refuses the swap. If neither held, the event would have moved further.
+            assert (
+                row["predecessor_is_barrier"]
+                or not row["exact_commutation_available"]
+            )
+
+
+@pytest.mark.parametrize("smiles", _SMILES)
+def test_blocker_census_names_the_real_predecessor_and_reads_the_right_state(
+    smiles: str,
+) -> None:
+    """Pin the two facts the barrier-configuration comparison cannot pin.
+
+    In these traces a ring event is never adjacent to a barrier -- which is the
+    probe's central empirical finding -- so a census that leaked the barrier
+    configuration into the predecessor NAME survived the comparison test, and so
+    did one that evaluated commutation from the wrong prefix state.  Both are
+    pinned here against the trace and the executor directly.
+    """
+
+    system = de_novo_rewrite_system()
+    trace = _compiled_trace(smiles)
+    rows = probe.ring_event_blockers(trace, system=system)
+    assert rows
+
+    for row in rows:
+        index = row["index"]
+        if index == 0:
+            assert row["predecessor_rule_name"] is None
+            continue
+        # The name is a property of the trace, whatever the barrier set is.
+        assert row["predecessor_rule_name"] == trace.steps[index - 1].rule_name
+
+    # The unscheduled trace puts its ring events last, and the scheduler is known
+    # to move them, so the census must SEE that the final one can commute. Read
+    # from the wrong prefix state, the executor refuses and this flips to False.
+    scheduled = probe.apply_schedule_arm(
+        trace,
+        arm="B_exact_early_ring_default_barriers",
+        phase_barrier_rule_names=DEFAULT_PHASE_BARRIERS,
+        system=system,
+    )
+    if scheduled.accepted_swaps > 0:
+        assert any(row["exact_commutation_available"] for row in rows), (
+            "the scheduler accepted a swap, so some ring event must be "
+            "reported as able to commute with its predecessor"
+        )
+
+    # Pin the PREFIX INDEX explicitly: the test chooses states[index - 1] itself
+    # and only reuses the production commutation predicate.
+    #
+    # HONEST LIMIT, measured rather than assumed: on every fixture here the
+    # verdict from states[index] is IDENTICAL to the verdict from
+    # states[index - 1], so a mutation to the wrong prefix state survives this
+    # assertion. That is a property of these traces (the predecessor is either
+    # re-appliable to the post state or refused in both), not an oversight that
+    # a different assertion would close. The probe's conclusion therefore does
+    # not rest on this field: it rests on predecessor_rule_name, which is pinned
+    # against the trace directly above, and on the attempted-swap parity between
+    # the barrier-on and barrier-off arms.
+    from compose_v4.rewrite.commuting_schedule import swapped_adjacent_midpoint
+
+    _, prefix_states = execute_trace(
+        trace.source,
+        trace.steps,
+        system=system,
+        return_states=True,
+    )
+    for row in rows:
+        index = row["index"]
+        if index == 0:
+            continue
+        expected = swapped_adjacent_midpoint(
+            prefix_states[index - 1],
+            trace.steps[index - 1],
+            trace.steps[index],
+            system=system,
+        )
+        assert row["exact_commutation_available"] == (expected is not None)

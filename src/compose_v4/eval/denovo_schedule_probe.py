@@ -63,6 +63,7 @@ from compose_v4.rewrite.commuting_schedule import (
     DEFAULT_PRIORITY_RULES,
     schedule_priority_events_earliest,
     states_are_array_exact,
+    swapped_adjacent_midpoint,
 )
 from compose_v4.rewrite.kernel import RewriteSystem, de_novo_rewrite_system
 from compose_v4.rewrite.trace import RewriteTrace, execute_trace
@@ -270,6 +271,70 @@ ARM_BARRIERS: dict[str, frozenset[str]] = {
 ARM_A = "A_sequential"
 
 
+# ---- What actually stops a ring event moving ----
+
+
+def ring_event_blockers(
+    trace: RewriteTrace,
+    *,
+    priority_rule_names: Iterable[str] = DEFAULT_PRIORITY_RULES,
+    barrier_rule_names: Iterable[str] = DEFAULT_PHASE_BARRIERS,
+    system: RewriteSystem | None = None,
+) -> tuple[dict[str, object], ...]:
+    """Report, per ring event in a SCHEDULED trace, what sits in its way.
+
+    This is the measurement that separates "the shipped barrier is the blocker"
+    from "the barrier is never even reached".  Those two lead to opposite
+    recommendations, and the scheduler's own counters cannot tell them apart: it
+    BREAKS without counting an attempt when it meets a barrier, so a barrier hit
+    and an exactness refusal both simply end the walk.
+
+    For each ring event that has not reached the start of the trace, this records
+    the predecessor's rule name, whether that predecessor is a configured
+    barrier, and -- independently of any barrier setting -- whether the
+    production exactness test would in fact permit the swap.
+    """
+
+    runtime = system or de_novo_rewrite_system()
+    barriers = frozenset(barrier_rule_names)
+    _, states = execute_trace(
+        trace.source,
+        trace.steps,
+        system=runtime,
+        return_states=True,
+    )
+    rows: list[dict[str, object]] = []
+    for index in ring_event_indices(trace, priority_rule_names=priority_rule_names):
+        if index == 0:
+            rows.append(
+                {
+                    "index": index,
+                    "predecessor_rule_name": None,
+                    "predecessor_is_barrier": False,
+                    "exact_commutation_available": False,
+                    "reached_trace_start": True,
+                }
+            )
+            continue
+        predecessor = trace.steps[index - 1]
+        midpoint = swapped_adjacent_midpoint(
+            states[index - 1],
+            predecessor,
+            trace.steps[index],
+            system=runtime,
+        )
+        rows.append(
+            {
+                "index": index,
+                "predecessor_rule_name": predecessor.rule_name,
+                "predecessor_is_barrier": predecessor.rule_name in barriers,
+                "exact_commutation_available": midpoint is not None,
+                "reached_trace_start": False,
+            }
+        )
+    return tuple(rows)
+
+
 # ---- Support measurement ----
 
 
@@ -401,6 +466,7 @@ __all__ = [
     "free_slots",
     "observe_ring_events",
     "occupied_free_slots",
+    "ring_event_blockers",
     "ring_event_indices",
     "small_ring_category_mask",
     "small_ring_support_mass",

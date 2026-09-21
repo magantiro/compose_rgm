@@ -326,6 +326,7 @@ def probe_shard(payload_in: dict) -> dict:
         RING_GROW_RULE,
         apply_schedule_arm,
         observe_ring_events,
+        ring_event_blockers,
         ring_event_indices,
         small_ring_category_mask,
         small_ring_support_mass,
@@ -366,6 +367,7 @@ def probe_shard(payload_in: dict) -> dict:
     compiled = 0
     compile_failures = 0
     trainer_supported_traces = 0
+    blockers: list[dict] = []
     support_evaluations = 0
     support_cache: dict[str, tuple[float, int, int]] = {}
 
@@ -439,6 +441,19 @@ def probe_shard(payload_in: dict) -> dict:
 
         for arm, trace in arm_traces.items():
             arm_counters[arm]["traces"] += 1
+            # What actually stops each ring event moving further left. The
+            # scheduler breaks WITHOUT counting an attempt when it meets a
+            # barrier, so its own counters cannot distinguish "hit the shipped
+            # barrier" from "the exactness test refused" -- and those imply
+            # opposite recommendations.
+            for blocker in ring_event_blockers(
+                trace,
+                barrier_rule_names=ARM_BARRIERS[
+                    "B_exact_early_ring_default_barriers"
+                ],
+                system=system,
+            ):
+                blockers.append({"arm": arm, "offset": offset, **blocker})
             for observation in observe_ring_events(trace, system=system):
                 mass = legal = legal_small = None
                 if observation.rule_name == RING_GROW_RULE:
@@ -485,6 +500,7 @@ def probe_shard(payload_in: dict) -> dict:
         "arm_counters": arm_counters,
         "drop_reasons": {arm: sorted(set(reasons))[:5] for arm, reasons in drop_reasons.items()},
         "events": events,
+        "blockers": blockers,
         "support_evaluations": support_evaluations,
         "support_cache_size": len(support_cache),
         "elapsed_seconds": time.time() - started,
