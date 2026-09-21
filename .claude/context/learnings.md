@@ -3274,3 +3274,53 @@ independently of whether fa7_0 ever closes.**
   SCOPE: for the six composite MPOs the declared reference is ONE TERM of a multi-objective score,
   so transporting to it is a heuristic and those must be validated on TASK SCORE, never on
   similarity-to-reference.
+
+## 2026-09-21 (THE PMO PLATEAU EXPLAINED: the transport path exists and the score signal walks you off it)
+
+- **VERDICT `STAGED_PATH_EXISTS_BUT_SIGNAL_IS_NOT_MONOTONE`.** 44 transports from the init bank to
+  declared targets, split at the measured 23-primitive ceiling, intermediates built with RDKit from
+  the correspondence so a failure is a failure of the PLAN, not the executor:
+      respects_ceiling            100%
+      all_intermediates_valid     100%
+      all_intermediates_connected 95.5%
+      reaches_target              86.4%
+      PATH EXISTS (scoped)        44/44   median 2 stages, max 3
+      monotone                    27/44
+      **DIPS BELOW SOURCE         17/44 (39%)**
+- **THE CEILING IS NOT THE BLOCKER -- staging clears it.** The predeclared falsifier ("if staging
+  cannot preserve monotonic approach, the ceiling is the publishable blocker") did NOT fire as
+  written, and the sharper true statement is better: **39% of transports pass through an
+  intermediate scoring WORSE than where the run started, so a score-greedy controller abandons
+  exactly the intermediate the path requires.** The signal does not guide you along the path that
+  exists. That points at SELECTION, not realization.
+- **THIS IS THE MECHANISM BEHIND THE MEASURED CELECOXIB PLATEAU.** On the matched 1000-call A/B, arm
+  B's BEST froze at call 500 (0.3838) and never improved through 1000 while top-10 kept filling
+  (0.3556 -> 0.3714). That was recorded as "exploitation strong, discovery weak" with no mechanism.
+  The dip IS the mechanism: B was not out of budget or out of basin, it was structurally unable to
+  accept a worse intermediate.
+- **It also retroactively justifies the basin exploration floor**, which had been measured FREE (best
+  and U10 identical to four decimals on an adversarial landscape where exploiting is correct). Budget
+  protected from score-based selection turns out to be exactly what a transport channel needs -- a
+  much stronger argument than "it costs nothing".
+- **Three plan defects, each found BEFORE the verdict was read, each having inflated the failure
+  rate:** (a) a globally RING-FIRST install order disconnects the molecule, because installing a
+  target ring before the linker joining it to the core leaves a fragment -- attributed BY EXECUTION,
+  since reverting the anchored pick alone drops connected 95.5% -> 63.6% and complete paths 44/44 ->
+  30/44; (b) copying the TARGET's aromatic bonds into a partly built molecule fails, because a ring
+  installed without its substituents is not aromatic on its own -- build from KEKULE orders and let
+  sanitization re-perceive, as COMPOSE's own states do; (c) the monotonicity trajectory OMITTED THE
+  SOURCE, so an initial dip was invisible and celecoxib read as monotone while its first stage sat
+  below its own start. Also: a monotonicity verdict over one point is vacuous and must report
+  UNEVALUATED rather than True.
+- **Scoping that hides the unscoped number is spin; scoping that shows both is analysis.** Unscoped
+  the verdict reads 17/44, scoped 44/44, and the difference is two declared category errors --
+  `declared_smarts` supplies a reference SCAFFOLD rather than a molecule to reproduce, and a
+  `requires_reattachment` correspondence DECLARES that no deletion order keeps it connected. Report
+  both numbers and name the exclusions.
+- **"A guard is only tested where it binds" bit twice in one battery, and the two cases are
+  different.** A mutation of the anchored pick SURVIVED while the aggregate showed it was worth 32
+  points of connectivity -- a fixture GAP, fixed with measured anchor-sensitive pairs. A mutation
+  installing one ring atom at a time also survived -- that one is a FINDING, not a gap: under
+  anchored growth the next adjacent atom is a ring neighbour anyway, so the explicit ring grouping is
+  redundant with it, and ring integrity at a STAGE BOUNDARY is a separate guard in the chunker.
+  Record the distinction rather than deleting the surviving mutation.
