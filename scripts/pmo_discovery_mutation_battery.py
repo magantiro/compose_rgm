@@ -322,6 +322,40 @@ MUTATIONS = (
         expect_red=("test_dip_depth_and_width_are_reported_not_just_a_boolean",),
         suite="tests/test_pmo_transport_staging.py",
     ),
+    Mutation(
+        name="selector_scores_inadmissible_orderings",
+        path=ROOT / "src/compose_v4/control/pmo_transport_staging.py",
+        old="    admissible = [c for c in candidates if c.admissible]",
+        new="    admissible = list(candidates)",
+        expect_red=("test_admissibility_is_a_hard_filter_not_a_term_in_the_score",),
+        suite="tests/test_pmo_transport_staging.py",
+    ),
+    # THE SHAPE KEY'S TERMS ARE REDUNDANT ON REAL DATA, and two mutations established it
+    # rather than a gap: a dip-free ordering has depth 0.0 AND width 0, so either term
+    # alone prefers it, and no measured pair offers two DIPPING admissible candidates of
+    # different depth. A separate "does it dip" boolean was therefore REMOVED as
+    # decoration. What remains decidable is the tie-break ORDER between depth and width,
+    # which this mutation targets against constructed candidates.
+    Mutation(
+        name="shape_key_ranks_width_before_depth",
+        path=ROOT / "src/compose_v4/control/pmo_transport_staging.py",
+        old="""        candidate.dip_depth_relative or 0.0,
+        candidate.dip_width_stages or 0,""",
+        new="""        candidate.dip_width_stages or 0,
+        candidate.dip_depth_relative or 0.0,""",
+        expect_red=(
+            "test_among_dipping_orderings_the_SHALLOWER_is_preferred_over_the_narrower",
+        ),
+        suite="tests/test_pmo_transport_staging.py",
+    ),
+    Mutation(
+        name="protected_rounds_is_an_open_allowance",
+        path=ROOT / "src/compose_v4/control/pmo_transport_staging.py",
+        old="            else int(chosen.dip_width_stages or 1)",
+        new="            else 99",
+        expect_red=("test_protected_rounds_is_the_trough_width_not_an_open_allowance",),
+        suite="tests/test_pmo_transport_staging.py",
+    ),
     # ---- Positive control: bytes change, behaviour does not ----
     Mutation(
         name="POSITIVE_CONTROL_cosmetic_comment",

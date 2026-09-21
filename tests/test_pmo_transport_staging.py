@@ -13,7 +13,11 @@ from rdkit import Chem
 from compose_v4.control.pmo_transport_correspondence import correspondences
 from compose_v4.control.pmo_transport_staging import (
     DEFAULT_MAX_PRIMITIVES,
+    OrderingCandidate,
+    _shape_key,
     build_intermediate,
+    candidate_orderings,
+    select_ordering,
     split,
     validate_staging,
 )
@@ -185,3 +189,131 @@ def test_split_refuses_a_ceiling_below_one():
     correspondence = correspondences(PARACETAMOL, PARACETAMOL_OME)[0]
     with pytest.raises(ValueError, match="at least one primitive"):
         split(correspondence, max_primitives=0)
+
+
+# ---- Ordering selection --------------------------------------------------
+
+
+#: A RESIDUAL transport: no admissible ordering is dip-free, so the selector's chosen
+#: candidate genuinely dips. Taken from the measured residual (5 of 35) rather than
+#: assumed -- two selector mutations survived the battery because every fixture in hand
+#: had a dip-free ordering available, so the dipping branches never executed. Third time
+#: this session that a guard was only testable where it binds.
+#: A pair offering BOTH a dipping and a dip-free ADMISSIBLE ordering, so the selector's
+#: preference can actually be wrong. The earlier dipping fixture could not test it: all
+#: of its candidates are inadmissible (they never reach the target), so there was no
+#: preference to express.
+MIXED_SOURCE = "CC1CCC(C)(C(=O)[O-])CN1C(=O)C1(C)CCCO1"
+MIXED_TARGET = "CC1(C)C2CCC1(C)C(=O)C2"
+
+RESIDUAL_SOURCE = "CC(Oc1cccc(Cl)c1)C(=O)N1CCC(C(=O)[O-])C1C"
+RESIDUAL_TARGET = "COc1ccc2[C@H]3CC[C@@]4(C)[C@@H](CC[C@@]4(O)C#C)[C@@H]3CCc2c1"
+
+
+def _alignments(source, target):
+    return correspondences(source, target, top_k=8)
+
+
+def test_admissibility_is_a_hard_filter_not_a_term_in_the_score():
+    """An ordering that loses the endpoint is NOT a better-shaped candidate.
+
+    This is the concrete reason the selector exists rather than a switch to interleaved:
+    interleaving removes the dip on 9 of 10 dipping transports but preserves the endpoint
+    on only 6 of 10, so scoring shape without the filter selects orderings that never
+    arrive. Measured through the policy, 5 of those 9 survive admissibility.
+    """
+    selection = select_ordering(_alignments(DIPPING_SOURCE, DIPPING_TARGET))
+    for candidate in selection.candidates:
+        if not candidate.admissible:
+            assert candidate.refusals, "an inadmissible candidate must say why"
+    if selection.chosen is not None:
+        assert selection.chosen.admissible
+        assert selection.chosen in [c for c in selection.candidates if c.admissible]
+
+
+def test_a_dip_free_ordering_is_preferred_over_a_dipping_one():
+    """Driven on a pair that has BOTH kinds available, so the preference can be wrong.
+
+    A conditional assertion over a fixture where every admissible ordering is already
+    dip-free cannot fail, and a mutation deleting the dip term from the sort key survived
+    exactly that way.
+    """
+    selection = select_ordering(_alignments(MIXED_SOURCE, MIXED_TARGET))
+    assert selection.chosen is not None
+    admissible = [c for c in selection.candidates if c.admissible]
+    kinds = {c.dips for c in admissible}
+    assert kinds == {True, False}, (
+        f"fixture no longer offers both a dipping and a dip-free ordering: {kinds}"
+    )
+    assert selection.chosen.dips is False
+    assert selection.has_dip_free_ordering
+
+
+def test_protected_rounds_is_zero_when_a_dip_free_ordering_exists():
+    """The floor is only charged where it is needed. MEASURED residual: 5 of 35
+    transports have no dip-free ordering, each needing exactly ONE protected round."""
+    dip_free = select_ordering(_alignments(INIT_LIKE, CELECOXIB))
+    assert dip_free.has_dip_free_ordering
+    assert dip_free.protected_rounds_required == 0
+    residual = select_ordering(_alignments(RESIDUAL_SOURCE, RESIDUAL_TARGET))
+    assert not residual.has_dip_free_ordering
+    assert residual.protected_rounds_required >= 1
+
+
+def test_protected_rounds_is_the_trough_width_not_an_open_allowance():
+    """Driven on a RESIDUAL transport, where the chosen ordering genuinely dips.
+
+    Protecting a SINGLE crossing is a stronger guarantee than protecting an arbitrary
+    number of rounds; the measured width across the residual is one stage.
+    """
+    selection = select_ordering(_alignments(RESIDUAL_SOURCE, RESIDUAL_TARGET))
+    assert selection.chosen is not None
+    assert not selection.has_dip_free_ordering, "fixture is no longer residual"
+    assert selection.chosen.dips is True
+    assert selection.protected_rounds_required == selection.chosen.dip_width_stages
+    assert selection.protected_rounds_required == 1
+
+
+def _candidate(depth, width, *, stages=2, alignment=0, interleave=False):
+    return OrderingCandidate(
+        alignment=alignment, interleave=interleave, stages=stages, admissible=True,
+        refusals=(), dips=depth > 0, dip_depth_relative=depth,
+        dip_width_stages=width, final_smiles="C",
+    )
+
+
+def test_among_dipping_orderings_the_SHALLOWER_is_preferred_over_the_narrower():
+    """Depth leads width, and this is the only test that can tell them apart.
+
+    On real data the two are redundant: a dip-free ordering has depth 0.0 AND width 0, so
+    either term alone prefers it, and mutations of each survived the battery because no
+    measured pair offers two DIPPING admissible candidates of different depth. The
+    preference order is a real decision -- the measured distribution is deep-but-narrow,
+    so depth is what makes a trough unfollowable while width only sizes the protection --
+    and it is pinned here on constructed candidates rather than left untested.
+    """
+    shallow_but_wide = _candidate(0.15, 3, alignment=1)
+    deep_but_narrow = _candidate(0.80, 1, alignment=0)
+    assert min([deep_but_narrow, shallow_but_wide], key=_shape_key) is shallow_but_wide
+    # Width breaks a tie only once depth is equal.
+    narrow = _candidate(0.40, 1, alignment=1)
+    wide = _candidate(0.40, 2, alignment=0)
+    assert min([wide, narrow], key=_shape_key) is narrow
+
+
+def test_both_ordering_families_are_built_for_every_alignment():
+    """Neither prune-first nor interleaved is a safe default, so both are built and
+    checked rather than one being chosen by rule."""
+    alignments = _alignments(INIT_LIKE, CELECOXIB)
+    candidates = candidate_orderings(alignments)
+    assert len(candidates) == 2 * len(alignments)
+    assert {c.interleave for c in candidates} == {False, True}
+
+
+def test_no_admissible_ordering_selects_nothing_rather_than_the_least_bad():
+    """A transport with no realizable arriving ordering must report that, not return a
+    candidate that does not arrive."""
+    selection = select_ordering([])
+    assert selection.chosen is None
+    assert selection.protected_rounds_required == 0
+    assert selection.payload()["chosen"] is None

@@ -3013,3 +3013,45 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   accepting a molecule scoring ~66% worse for one round. It also re-justifies the
   basin-stratified exploration floor on stronger grounds than "it is free": protected
   budget is exactly what a channel needs to cross a one-stage trough.
+
+## 2026-09-21 (ordering selector: the floor is cheap insurance, and three mutations were findings not gaps)
+
+- **MEASURED ORDERING POLICY, 35 declared-target transports, zero oracle calls:**
+      no admissible ordering at all   0
+      prune-first default would dip   10
+      POLICY finds a dip-free ordering 5/10
+      RESIDUAL (no dip-free ordering)  **5/35 = 14.3%**, protected rounds median 1, max 1
+      policy selects interleaved on    6/35
+  Verdict `FLOOR_IS_CHEAP_INSURANCE`. **The transport channel needs budget protected from
+  score-based selection on 14% of transports, for exactly ONE round each** -- a bounded,
+  specific requirement rather than an open architectural worry.
+- **The admissibility filter is why the count is 5/10 and not 9/10.** Interleaving removes
+  the dip on 9 of 10 dipping transports but preserves the endpoint on only 6 of 10, so
+  four of those nine land somewhere other than the target. Admissibility -- every
+  intermediate valid and connected, and the final molecule IS the target -- is a HARD
+  filter, never a term in the score: an ordering with a better trajectory that does not
+  arrive is not a candidate. Scoring shape without the filter selects orderings that never
+  get there.
+- **THREE SURVIVING MUTATIONS IN ONE SESSION, AND THEY MEAN DIFFERENT THINGS.** Telling
+  them apart is the skill, not killing them all:
+  (a) **Fixture GAP** -- the anchored-pick mutation survived while the aggregate showed it
+      worth 32 points of connectivity, because the four fixture pairs did not exercise it.
+      Fixed by adding measured anchor-sensitive pairs.
+  (b) **REDUNDANCY** -- a separate "does it dip" boolean in the shape key could not be
+      killed, because a dip-free ordering has `dip_depth_relative == 0.0` AND
+      `dip_width_stages == 0` by construction, so either remaining term already prefers it.
+      The term was REMOVED as decoration rather than kept with a test written around it.
+      Same class as the one-ring-atom-at-a-time survivor earlier: under anchored growth the
+      next adjacent atom is a ring neighbour anyway.
+  (c) **UNTESTABLE ON REAL DATA** -- depth-versus-width ordering is not decidable from the
+      measured set, because no pair offers two DIPPING admissible candidates of different
+      depth. Pinned instead on CONSTRUCTED candidates through `_shape_key` directly. A
+      property that real fixtures cannot discriminate still needs a test; it just needs a
+      synthetic one, and saying so is better than leaving the key unguarded.
+- **A conditional assertion over a fixture that cannot fail it is the recurring shape.**
+  `if any(c.dips is False ...)` passed trivially where every admissible ordering was
+  already dip-free. The dipping fixture could not replace it either -- all of ITS
+  candidates are inadmissible (they never reach the target), so there was no preference to
+  express. Three fixtures were needed: one MIXED (both kinds admissible), one RESIDUAL (the
+  chosen ordering genuinely dips), one SYNTHETIC (two dipping candidates of different
+  depth). Check that the fixture can express the property before trusting the assertion.

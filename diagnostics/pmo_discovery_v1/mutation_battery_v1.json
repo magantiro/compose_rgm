@@ -1,8 +1,8 @@
 {
   "schema_version": "pmo_discovery_mutation_battery_v1",
   "suite": "tests/test_pmo_discovery.py",
-  "mutations": 26,
-  "killed": 26,
+  "mutations": 29,
+  "killed": 29,
   "positive_controls_green": true,
   "all_guards_load_bearing": true,
   "rows": [
@@ -261,10 +261,13 @@
         "test_no_stage_exceeds_the_ceiling"
       ],
       "observed_red": [
+        "test_a_dip_free_ordering_is_preferred_over_a_dipping_one",
         "test_a_staged_transport_can_dip_below_its_own_starting_similarity",
         "test_dip_depth_and_width_are_reported_not_just_a_boolean",
         "test_interleaving_removes_the_dip_on_a_dipping_transport",
-        "test_no_stage_exceeds_the_ceiling"
+        "test_no_stage_exceeds_the_ceiling",
+        "test_protected_rounds_is_the_trough_width_not_an_open_allowance",
+        "test_protected_rounds_is_zero_when_a_dip_free_ordering_exists"
       ],
       "status": "KILLED"
     },
@@ -312,9 +315,12 @@
         "test_a_staged_transport_can_dip_below_its_own_starting_similarity"
       ],
       "observed_red": [
+        "test_a_dip_free_ordering_is_preferred_over_a_dipping_one",
         "test_a_staged_transport_can_dip_below_its_own_starting_similarity",
         "test_dip_depth_and_width_are_reported_not_just_a_boolean",
         "test_interleaving_removes_the_dip_on_a_dipping_transport",
+        "test_protected_rounds_is_the_trough_width_not_an_open_allowance",
+        "test_protected_rounds_is_zero_when_a_dip_free_ordering_exists",
         "test_the_trajectory_starts_at_the_source"
       ],
       "status": "KILLED"
@@ -327,6 +333,7 @@
         "test_interleaving_removes_the_dip_on_a_dipping_transport"
       ],
       "observed_red": [
+        "test_a_dip_free_ordering_is_preferred_over_a_dipping_one",
         "test_interleaving_removes_the_dip_on_a_dipping_transport"
       ],
       "status": "KILLED"
@@ -340,6 +347,44 @@
       ],
       "observed_red": [
         "test_dip_depth_and_width_are_reported_not_just_a_boolean"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "selector_scores_inadmissible_orderings",
+      "file": "pmo_transport_staging.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_admissibility_is_a_hard_filter_not_a_term_in_the_score"
+      ],
+      "observed_red": [
+        "test_admissibility_is_a_hard_filter_not_a_term_in_the_score",
+        "test_protected_rounds_is_the_trough_width_not_an_open_allowance",
+        "test_protected_rounds_is_zero_when_a_dip_free_ordering_exists"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "shape_key_ranks_width_before_depth",
+      "file": "pmo_transport_staging.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_among_dipping_orderings_the_SHALLOWER_is_preferred_over_the_narrower"
+      ],
+      "observed_red": [
+        "test_among_dipping_orderings_the_SHALLOWER_is_preferred_over_the_narrower"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "protected_rounds_is_an_open_allowance",
+      "file": "pmo_transport_staging.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_protected_rounds_is_the_trough_width_not_an_open_allowance"
+      ],
+      "observed_red": [
+        "test_protected_rounds_is_the_trough_width_not_an_open_allowance"
       ],
       "status": "KILLED"
     },

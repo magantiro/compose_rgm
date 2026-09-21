@@ -416,3 +416,162 @@ def validate_staging(
         "reaches_target_with_stereochemistry": final is not None and final == canonical_target,
         "final_smiles": final,
     }
+
+
+# ---- Ordering selection --------------------------------------------------
+
+
+@dataclass(frozen=True)
+class OrderingCandidate:
+    """One candidate way to stage a transport, with its admissibility and its shape."""
+
+    alignment: int
+    interleave: bool
+    stages: int
+    #: Admissible means the staged path is REALIZABLE AND ARRIVES: every intermediate
+    #: valid and connected, and the final molecule is the target. An ordering with a
+    #: beautiful trajectory that lands somewhere else is not a candidate at all.
+    admissible: bool
+    refusals: tuple[str, ...]
+    dips: bool | None
+    dip_depth_relative: float | None
+    dip_width_stages: int | None
+    final_smiles: str | None
+
+    def payload(self) -> dict:
+        return {
+            "alignment": self.alignment,
+            "interleave": self.interleave,
+            "stages": self.stages,
+            "admissible": self.admissible,
+            "refusals": list(self.refusals),
+            "dips": self.dips,
+            "dip_depth_relative": self.dip_depth_relative,
+            "dip_width_stages": self.dip_width_stages,
+        }
+
+
+@dataclass(frozen=True)
+class Selection:
+    """The chosen ordering, and what it costs if no dip-free ordering exists."""
+
+    chosen: OrderingCandidate | None
+    candidates: tuple[OrderingCandidate, ...]
+    #: True when SOME admissible ordering never drops below the starting similarity.
+    has_dip_free_ordering: bool
+    #: Rounds of budget that must be protected from score-based selection for the chosen
+    #: ordering to be followable. ZERO when a dip-free ordering was found.
+    protected_rounds_required: int
+
+    def payload(self) -> dict:
+        return {
+            "chosen": None if self.chosen is None else self.chosen.payload(),
+            "has_dip_free_ordering": self.has_dip_free_ordering,
+            "protected_rounds_required": self.protected_rounds_required,
+            "candidates": [c.payload() for c in self.candidates],
+        }
+
+
+def candidate_orderings(
+    alignments, *, max_primitives: int = DEFAULT_MAX_PRIMITIVES
+) -> list[OrderingCandidate]:
+    """Every ordering of every alignment, each SCORED rather than ranked on a proxy.
+
+    Two ordering families are enumerated per alignment -- prune-first and interleaved --
+    because they were measured to differ on exactly the axis that matters: interleaving
+    removes the dip on 9 of 10 dipping transports but preserves the endpoint on only 6 of
+    10. Neither is a safe default, which is why both are built and checked rather than one
+    being chosen by rule.
+
+    Alignment variants are passed IN rather than generated here: `correspondences`
+    derives its top-K from the matches of a single MCS, so more than one alignment exists
+    only for symmetric molecules. Treating alignment as a general lever would overstate
+    what is available.
+    """
+    found: list[OrderingCandidate] = []
+    for index, correspondence in enumerate(alignments):
+        for interleave in (False, True):
+            stages = split(
+                correspondence, max_primitives=max_primitives, interleave=interleave
+            )
+            checks = validate_staging(
+                correspondence, stages, max_primitives=max_primitives
+            )
+            refusals = []
+            if not checks["all_intermediates_valid"]:
+                refusals.append("an intermediate does not sanitize")
+            if not (
+                checks["all_intermediates_connected"]
+                or correspondence.requires_reattachment
+            ):
+                refusals.append("an intermediate is disconnected")
+            if not checks["reaches_target"]:
+                refusals.append("the final molecule is not the target")
+            if not checks["respects_ceiling"]:
+                refusals.append("a stage exceeds the primitive ceiling")
+            found.append(
+                OrderingCandidate(
+                    alignment=index,
+                    interleave=interleave,
+                    stages=checks["stages"],
+                    admissible=not refusals,
+                    refusals=tuple(refusals),
+                    dips=checks["dips_below_source"],
+                    dip_depth_relative=checks["dip_depth_relative"],
+                    dip_width_stages=checks["dip_width_stages"],
+                    final_smiles=checks["final_smiles"],
+                )
+            )
+    return found
+
+
+def _shape_key(candidate: OrderingCandidate):
+    """Preference over ADMISSIBLE candidates: dip-free first, then shallow, then narrow.
+
+    Depth leads width because the measured distribution is deep-but-narrow -- median 65.9%
+    relative depth with 0 of 10 shallower than 10%, against a median width of one stage.
+    Depth is what makes a trough unfollowable; width is what sizes the protection.
+    """
+    # NOTE the absence of a separate "does it dip" term. It was there, and a mutation
+    # deleting it SURVIVED the battery -- correctly, because it is REDUNDANT: a dip-free
+    # ordering has `dip_depth_relative == 0.0` by construction, so depth already orders
+    # dip-free ahead of dipping. Keeping a term no mutation can break would be decoration
+    # that reads as a guard.
+    return (
+        candidate.dip_depth_relative or 0.0,
+        candidate.dip_width_stages or 0,
+        candidate.stages,
+        candidate.alignment,
+        candidate.interleave,
+    )
+
+
+def select_ordering(
+    alignments, *, max_primitives: int = DEFAULT_MAX_PRIMITIVES
+) -> Selection:
+    """Choose a staging order by trajectory shape, subject to admissibility.
+
+    Admissibility is a HARD filter, never a term in the score: an ordering that loses the
+    endpoint is not a better-shaped candidate, it is not a candidate. Only the survivors
+    are compared on shape.
+
+    `protected_rounds_required` is the WIDTH of the chosen ordering's trough, not a
+    budget-fraction and not an unbounded allowance. The measured width is one stage, so
+    what a transport channel needs is protection for a SINGLE crossing -- a materially
+    stronger guarantee to make than protecting an arbitrary number of rounds, and a
+    cheaper one to honour.
+    """
+    candidates = candidate_orderings(alignments, max_primitives=max_primitives)
+    admissible = [c for c in candidates if c.admissible]
+    chosen = min(admissible, key=_shape_key) if admissible else None
+    dip_free = any(c for c in admissible if c.dips is False)
+    return Selection(
+        chosen=chosen,
+        candidates=tuple(candidates),
+        has_dip_free_ordering=dip_free,
+        protected_rounds_required=(
+            0
+            if chosen is None or not chosen.dips
+            else int(chosen.dip_width_stages or 1)
+        ),
+    )
