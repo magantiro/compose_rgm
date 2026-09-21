@@ -35,6 +35,12 @@
       },
       "status": "FROZEN_PRE_SCORE"
     },
+    "authorization": {
+      "authorized_payload_sha256": "d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb",
+      "gate": "diagnostics/t4_5ht1b2_protonation_rescue_feasibility_pinned_v1.json",
+      "gate_kernel": "rdkit 2024.03.5 / python 3.11.13 (production pin)",
+      "sentence": "I authorize the two 5ht1b_2 protonation rescue arms -- configs/t4_5ht1b2_protonation_rescue_d06_v1.json at payload sha256 d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb and configs/t4_5ht1b2_protonation_rescue_d04_v1.json at 4486c376e1c378670d4aa9d6c07c3343366035cf67b6821547e2edefdc890a5c -- to charge up to 497 oracle calls in total, at the per-cell ceilings 248 (delta 0.6) and 249 (delta 0.4), as a versioned protonation-aware rescue distinct from the region-repair rescue, and I accept that these results must be reported as a named rescue phase and never spliced into the unchanged-v1 panel table."
+    },
     "automatic_retries": 0,
     "batch": 8,
     "ceiling_derivation": {
@@ -279,7 +285,7 @@
       "region_law_must_be_absent": "proposal.shallow carries no region_law field. assert_no_unconsumable_region_law_request raises on every proposal worker if region_law is declared anywhere it cannot be consumed, so a stray declaration fails closed rather than silently blending the two mechanisms.",
       "why_5ht1b_2_was_excluded_from_those_arms": "its witnesses need a two-boundary interior excision plus one reattachment bond, a region shape the bridge-separated law does not draw; the production charge policy refuses 9 of 16 pendant regions on this source; and bond_insert is outside the frozen Active8 codec surface"
     },
-    "status": "PREPARED_AWAITING_OWNER_AUTHORIZATION",
+    "status": "AUTHORIZED_BY_OWNER_FOR_PROTONATION_RESCUE",
     "support": "compose_valid",
     "supporting_evidence": {
       "launch_feasibility_gate": {
@@ -335,5 +341,5 @@
       "version": "protonation_rescue_v1"
     }
   },
-  "payload_sha256": "d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb"
+  "payload_sha256": "d74a6f5d864349f474baf7e6aedd32fe003a486b12b32501fb10eef19b438e7e"
 }
