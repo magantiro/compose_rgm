@@ -45,11 +45,22 @@ from compose_v4.benchmark.fragment_conditioned_sampler import (
     build_prompt_context,
 )
 from compose_v4.benchmark.fragment_constrained import FragmentTask, load_genmol_prompts
-from compose_v4.chem.molecular_graph import is_element, molecular_graph_to_smiles
+from compose_v4.chem.molecular_graph import (
+    ELEMENTS,
+    is_element,
+    molecular_graph_to_smiles,
+)
 from compose_v4.rewrite.operators import AtomInsert, BondDelete, BondInsert
 
 MANIFEST = Path("data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv")
-CARBON = 6
+# ELEMENTS is ['null', 'B', 'C', 'N', ...], so an atom_type is a VOCABULARY INDEX
+# and not an atomic number. Index 6 is phosphorus; carbon is 2. Taking 6 for
+# carbon silently builds a phosphorus linker, which the prior rightly never
+# proposes -- and that reads as a vocabulary boundary rather than as a bug.
+CARBON = ELEMENTS.index("C")
+# A carbon joined by one single bond carries three hydrogens. Passing a count
+# the valence does not support makes the insert unexecutable.
+METHYL_HYDROGENS = 3
 
 
 def _graph(state):
@@ -165,7 +176,7 @@ def main() -> None:
         slot = _free_slot(state)
         step1 = AtomInsert(
             slot=slot, atom_type=CARBON, formal_charge=0,
-            implicit_h_count=2, neighbors=((seed, 1),),
+            implicit_h_count=METHYL_HYDROGENS, neighbors=((seed, 1),),
         )
         s1, key1 = _successor_key(system, state, "atom_insert", step1)
         record["steps"].append({
