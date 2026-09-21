@@ -115,7 +115,7 @@ def main() -> None:
             "task": "src/compose_v4/tasks/qed_edit_task.py -- QedEditTask, a duck-typed peer of "
                     "ProgramTask with the benchmark's own semantics",
             "contract": "configs/qed_dedicated_task_v1.json (NEW file)",
-            "tests": "tests/test_qed_edit_task.py -- 17 passing; three production mutations "
+            "tests": "tests/test_qed_edit_task.py -- 21 passing; three production mutations "
                      "were injected and all three were caught",
             "runner": "tools/run_qed_dedicated_task_v1.py",
             "analyzer": "tools/analyze_qed_dedicated_task_v1.py",
@@ -186,6 +186,8 @@ def main() -> None:
                 "any_inspected_success_rate",
                 "any_inspected_note",
                 "lane_allocation",
+                "difficulty_structure",
+                "anytime_curves",
             )
             if key in metrics
         },
@@ -227,10 +229,22 @@ def main() -> None:
                 "corrected wiring: 0 zero-scored charged endpoints per source",
                 (f"pilot: {metrics['solved_at_k']} of {metrics['sources']} sources solved at "
                 f"K=8, Wilson CI {metrics['solved_at_k_ci95_wilson']}"),
+                (f"a benchmark-SOLVING molecule refused by the T4 gate: {fixes['fix_1_benchmark_solving_witness']['witness_count']} witnesses among "
+                f"{fixes['fix_1_benchmark_solving_witness']['candidates_examined']} examined candidates, split "
+                f"{fixes['fix_1_benchmark_solving_witness']['refused_by_breakdown']}"),
+                (f"pilot failure structure: solve rate by source-QED tertile "
+                f"{ {k: v['rate'] for k, v in metrics['difficulty_structure']['by_source_qed_tertile'].items()} }, "
+                f"by heavy-atom tertile "
+                f"{ {k: v['rate'] for k, v in metrics['difficulty_structure']['by_heavy_atom_tertile'].items()} }; "
+                f"unsolved sources land a median "
+                f"{metrics['difficulty_structure']['gap_to_target_among_unsolved']['median']} short of the target"),
+                (f"independent recomputation of all "
+                f"{comparison['independent_recomputation']['charged_endpoints_compared']} charged endpoints: "
+                f"candidate rows agree to 0.0, 0 flag disagreements, 0 panel mismatches"),
                 (f"pilot work: {work['distinct_molecules_property_evaluated']:.0f} distinct "
                 f"molecules property-evaluated per source, "
                 f"{work['charged_scored_endpoints']:.0f} charged"),
-                "17 tests pass; 3 injected production mutations were all caught",
+                "21 tests pass; 3 injected production mutations were all caught",
             ],
             "INFERRED": [
                 ("arm A's per-trajectory inspection cost (its total unique states divided "

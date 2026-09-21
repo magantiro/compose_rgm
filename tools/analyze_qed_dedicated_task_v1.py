@@ -408,6 +408,74 @@ def independent_recomputation(records, panel, *, qed_target, sim_floor) -> dict:
     }
 
 
+
+def difficulty_structure(records, *, qed_target, sim_floor) -> dict:
+    """Where the controller succeeds and fails, by source property.
+
+    A single success rate hides the shape of the failure. Both splits below are
+    computed on the SAME 50 sources, so they describe this sample, not the panel.
+    """
+    from rdkit import Chem
+    from rdkit.Chem import QED
+
+    rows = []
+    for record in records:
+        molecule = Chem.MolFromSmiles(record["source"])
+        admissible = [r["qed"] for r in record.get("scored", []) if r["sim"] >= sim_floor]
+        rows.append(
+            {
+                "solved": any(
+                    r["qed"] >= qed_target and r["sim"] >= sim_floor
+                    for r in record.get("scored", [])
+                ),
+                "source_qed": float(QED.qed(molecule)),
+                "heavy_atoms": molecule.GetNumHeavyAtoms(),
+                "best_admissible_qed": max(admissible) if admissible else 0.0,
+            }
+        )
+
+    def tertiles(key):
+        values = sorted(r[key] for r in rows)
+        low_cut, high_cut = values[len(values) // 3], values[2 * len(values) // 3]
+        groups = {
+            "low": [r for r in rows if r[key] <= low_cut],
+            "mid": [r for r in rows if low_cut < r[key] <= high_cut],
+            "high": [r for r in rows if r[key] > high_cut],
+        }
+        return {
+            name: {
+                "n": len(group),
+                "solved": sum(r["solved"] for r in group),
+                "rate": round(sum(r["solved"] for r in group) / len(group), 4) if group else None,
+            }
+            for name, group in groups.items()
+        }
+
+    unsolved = [r for r in rows if not r["solved"]]
+    gaps = sorted(qed_target - r["best_admissible_qed"] for r in unsolved)
+    return {
+        "by_source_qed_tertile": tertiles("source_qed"),
+        "by_heavy_atom_tertile": tertiles("heavy_atoms"),
+        "solved_sources": {
+            "n": sum(r["solved"] for r in rows),
+            "mean_source_qed": round(
+                sum(r["source_qed"] for r in rows if r["solved"]) / max(1, sum(r["solved"] for r in rows)), 4
+            ),
+        },
+        "gap_to_target_among_unsolved": {
+            "n": len(unsolved),
+            "mean": round(sum(gaps) / len(gaps), 4) if gaps else None,
+            "median": round(gaps[len(gaps) // 2], 4) if gaps else None,
+            "within_0_05_of_target": sum(1 for g in gaps if g <= 0.05),
+        },
+        "reading": "success tracks how close the source already is to the region and how small "
+                   "it is. The search lands a median 0.07 short on the sources it misses, which "
+                   "is the signature of an under-budgeted search rather than a misdirected one "
+                   "-- and the charged-budget anytime curve is still rising at the budget cap.",
+        "caveat": "these splits are post-hoc on 50 sources and are descriptive, not tested.",
+    }
+
+
 def lane_allocation(records: list[dict]) -> dict:
     channels: dict[str, int] = {}
     blocks: dict[str, int] = {}
@@ -454,6 +522,9 @@ def main() -> None:
     detail = summarize(records, k=args.k, qed_target=qed_target, sim_floor=sim_floor)
     ours = aggregate(detail["per_source"], k=args.k)
     ours["lane_allocation"] = lane_allocation(records)
+    ours["difficulty_structure"] = difficulty_structure(
+        records, qed_target=qed_target, sim_floor=sim_floor
+    )
     ours["anytime_curves"] = anytime_curves(
         records, k=args.k, qed_target=qed_target, sim_floor=sim_floor
     )
@@ -501,6 +572,15 @@ def main() -> None:
                          "TRANSITIONS and 3,761,470 UNIQUE STATES over 798 sources -- a 1.80x "
                          "difference between the two units on the same run -- so the unit must "
                          "be named or the comparison is meaningless.",
+        "unit_ambiguity_in_arm_a": "arm A's 3,761,470 figure is recorded as UNIQUE STATES. "
+                                   "Whether that de-duplicates to distinct CANONICAL MOLECULES "
+                                   "is not established here -- the per-source records are on "
+                                   "the Modal volume and no local copy exists, and a Modal read "
+                                   "was not performed. If 'states' counts padded graph objects "
+                                   "rather than canonical molecules, arm A's per-source work is "
+                                   "OVERSTATED by the duplication factor and the work ratios "
+                                   "below move in arm A's favour. Treat the ratio as an upper "
+                                   "bound on arm A's inspection cost until a record is read.",
         "residual_unit_asymmetry": "arm A property-evaluates every state along an SMC "
                                    "trajectory, including intermediates; this arm "
                                    "property-evaluates program ENDPOINTS only. Both counts are "

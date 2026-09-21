@@ -1,0 +1,312 @@
+{
+ "schema_version": "qed_dedicated_task_fix_verification_v1",
+ "panel": {
+  "path": "data/jin/qed_test.txt",
+  "sha256": "704103777e8050eb59f4d15d9997ca6070ba05a6b878b8e18738bfb1e706a090",
+  "count": 800
+ },
+ "contract": {
+  "path": "configs/qed_dedicated_task_v1.json",
+  "sha256": "618b9c58aa7eceebac37d3f833475fd4de3527b29e7c9b3d3a747401ab5a8382"
+ },
+ "fix_1_sa_floor": {
+  "claim": "routing this benchmark through ProgramTask(kind='t4') imports an SA ceiling (and a 0.6 QED floor and a med-chem screen) that the GrIDDD/Jin task lacks",
+  "method": "evaluate each panel source AGAINST ITSELF under both tasks; similarity is then exactly 1.0, so any refusal is not a similarity refusal",
+  "panel_sources": 800,
+  "sources_with_sa_above_4_0": 140,
+  "sources_the_t4_gate_refuses": 143,
+  "sources_the_dedicated_task_refuses": 0,
+  "reading": "the T4 gate marks the benchmark's own starting molecules ineligible",
+  "examples": [
+   {
+    "index": 1,
+    "smiles": "C[C@@H](C(=O)C1=c2ccccc2=[NH+]C1)[NH+]1CCC[C@@H]1[C@@H]1CC=CS1",
+    "qed": 0.7113,
+    "sa": 5.969,
+    "sim_to_itself": 1.0,
+    "t4_violation_v": 0.4922,
+    "t4_oracle_eligible": false,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "index": 5,
+    "smiles": "c1ccc(-c2cc(N3C[C@H]4[C@@H]5CC[C@@H](O5)[C@H]4C3)c3ccccc3[nH+]2)cc1",
+    "qed": 0.7046,
+    "sa": 5.049,
+    "sim_to_itself": 1.0,
+    "t4_violation_v": 0.2622,
+    "t4_oracle_eligible": false,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "index": 17,
+    "smiles": "Oc1ccc(C[NH2+]C[C@H]2CCCC[C@H]2CCl)cc1",
+    "qed": 0.7914,
+    "sa": 4.021,
+    "sim_to_itself": 1.0,
+    "t4_violation_v": 0.0051,
+    "t4_oracle_eligible": false,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "index": 19,
+    "smiles": "CC(C)[C@H](C)[NH+]1Cc2cccc(NCc3cc(=O)n4ccsc4[nH+]3)c2C1",
+    "qed": 0.7187,
+    "sa": 5.155,
+    "sim_to_itself": 1.0,
+    "t4_violation_v": 0.2887,
+    "t4_oracle_eligible": false,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "index": 33,
+    "smiles": "CC[NH+]1CCC2(CC1)OC[C@H](C(=O)[O-])N2C(=O)c1ccc(F)cc1",
+    "qed": 0.7534,
+    "sa": 4.775,
+    "sim_to_itself": 1.0,
+    "t4_violation_v": 0.1938,
+    "t4_oracle_eligible": false,
+    "dedicated_oracle_eligible": true
+   }
+  ]
+ },
+ "fix_1_benchmark_solving_witness": {
+  "claim": "a molecule that SOLVES the benchmark (QED >= target, sim >= floor) is refused as an ineligible endpoint by the T4 gate",
+  "candidates_examined": 2500,
+  "witness_count": 26,
+  "refused_by_breakdown": {
+   "med_chem_gate.is_valid": 5,
+   "violation_term:sa_max=4.0": 21
+  },
+  "two_independent_inherited_gates": "acceptable_endpoint = feasible_endpoint (the qed_min/sa_max/delta violation) AND med_chem_gate.is_valid. A benchmark solution can be refused by either one.",
+  "witnesses": [
+   {
+    "refused_by": "violation_term:sa_max=4.0",
+    "source_index": 0,
+    "source": "CC(=O)NCCNC(=O)c1cnn(-c2ccc(C)c(Cl)c2)c1C1CC1",
+    "candidate": "CC(=O)NCC1=Cc2ccc(cc2Cl)-n2ncc(c2C2CC2)CN1",
+    "qed": 0.9012,
+    "sim": 0.5072,
+    "sa": 4.651,
+    "solves_benchmark": true,
+    "t4_oracle_eligible": false,
+    "t4_violation_v": 0.1628,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "refused_by": "violation_term:sa_max=4.0",
+    "source_index": 80,
+    "source": "CC(C)C[NH2+]C[C@H]1CCCO[C@H]1[C@H]1CC=CCC1",
+    "candidate": "CC(C)C[NH2+]CC1CCCOC1c1ccc2ccoc2c1",
+    "qed": 0.9178,
+    "sim": 0.4483,
+    "sa": 4.206,
+    "solves_benchmark": true,
+    "t4_oracle_eligible": false,
+    "t4_violation_v": 0.0515,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "refused_by": "violation_term:sa_max=4.0",
+    "source_index": 80,
+    "source": "CC(C)C[NH2+]C[C@H]1CCCO[C@H]1[C@H]1CC=CCC1",
+    "candidate": "CC(C)C[NH2+]CC1CCCOC1C1CC=Cc2cnccc21",
+    "qed": 0.9077,
+    "sim": 0.5,
+    "sa": 4.738,
+    "solves_benchmark": true,
+    "t4_oracle_eligible": false,
+    "t4_violation_v": 0.1844,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "refused_by": "violation_term:sa_max=4.0",
+    "source_index": 160,
+    "source": "Cc1cnn(CCCCC[NH+]2CCN(c3ccc(O)cc3)CC2)c1",
+    "candidate": "Cc1cnn(CCCC2C[NH+]3CCN(CC3)c3ccc(cc3)O2)c1",
+    "qed": 0.9145,
+    "sim": 0.5333,
+    "sa": 5.638,
+    "solves_benchmark": true,
+    "t4_oracle_eligible": false,
+    "t4_violation_v": 0.4095,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "refused_by": "violation_term:sa_max=4.0",
+    "source_index": 176,
+    "source": "C[C@H](CCc1ccccc1F)[NH2+]CCc1nc2cc(F)ccc2n1C",
+    "candidate": "CC1C=C(c2cc3c(cc2F)nc(CC[NH2+]C(C)C)n3C)C1",
+    "qed": 0.9051,
+    "sim": 0.4179,
+    "sa": 4.068,
+    "solves_benchmark": true,
+    "t4_oracle_eligible": false,
+    "t4_violation_v": 0.0169,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "refused_by": "med_chem_gate.is_valid",
+    "source_index": 224,
+    "source": "COc1ccc(NC(=O)c2n[nH]c3cccc(Cl)c23)cc1OC",
+    "candidate": "COc1ccc(NC(=O)C2=N[SH4]c3cccc(Cl)c32)cc1O",
+    "qed": 0.9026,
+    "sim": 0.4375,
+    "sa": 3.162,
+    "solves_benchmark": true,
+    "t4_oracle_eligible": false,
+    "t4_violation_v": 0.0,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "refused_by": "violation_term:sa_max=4.0",
+    "source_index": 256,
+    "source": "[NH3+][C@@H]1CCC[C@@H](n2cc(C(F)(F)F)cn2)C1",
+    "candidate": "CCCC(F)(F)c1cnn(C2CCC(=O)C([NH3+])C2)c1",
+    "qed": 0.9061,
+    "sim": 0.4528,
+    "sa": 4.433,
+    "solves_benchmark": true,
+    "t4_oracle_eligible": false,
+    "t4_violation_v": 0.1082,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "refused_by": "violation_term:sa_max=4.0",
+    "source_index": 256,
+    "source": "[NH3+][C@@H]1CCC[C@@H](n2cc(C(F)(F)F)cn2)C1",
+    "candidate": "[NH3+]C1C(=O)CCC(n2cc(C(F)(F)F)cn2)C1C1CCCCC1",
+    "qed": 0.9059,
+    "sim": 0.4423,
+    "sa": 4.26,
+    "solves_benchmark": true,
+    "t4_oracle_eligible": false,
+    "t4_violation_v": 0.065,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "refused_by": "violation_term:sa_max=4.0",
+    "source_index": 256,
+    "source": "[NH3+][C@@H]1CCC[C@@H](n2cc(C(F)(F)F)cn2)C1",
+    "candidate": "CSC(F)(F)c1cnn(C2CCC(=O)C([NH3+])C2)c1",
+    "qed": 0.902,
+    "sim": 0.4706,
+    "sa": 4.779,
+    "solves_benchmark": true,
+    "t4_oracle_eligible": false,
+    "t4_violation_v": 0.1949,
+    "dedicated_oracle_eligible": true
+   },
+   {
+    "refused_by": "med_chem_gate.is_valid",
+    "source_index": 304,
+    "source": "Clc1ccccc1Cn1ccnc1",
+    "candidate": "CC1CCC(c2ccccc2Cn2ccnc2)CONC1",
+    "qed": 0.9421,
+    "sim": 0.4151,
+    "sa": 3.61,
+    "solves_benchmark": true,
+    "t4_oracle_eligible": false,
+    "t4_violation_v": 0.0,
+    "dedicated_oracle_eligible": true
+   }
+  ],
+  "status": "WITNESS FOUND"
+ },
+ "fix_2_score_direction": {
+  "claim": "parent_edit_search.py:23 forces the direction from task.kind; a mismatched pairing inverts the objective",
+  "method": "resolve by CALLING prepare_query_batch and observing which direction it refuses, rather than restating its expression",
+  "dedicated_task_resolved_direction": "maximize",
+  "t4_task_resolved_direction": "minimize",
+  "wrong_direction_is_refused": true,
+  "refusal_message": "search parent direction disagrees with task utility",
+  "inversion_demonstrated_on_utility": {
+   "t4_utility_of_qed_0_95": -0.95,
+   "t4_utility_of_qed_0_50": -0.5,
+   "t4_ranks_higher_qed_worse": true,
+   "dedicated_utility_of_qed_0_95": 0.95,
+   "dedicated_utility_of_qed_0_50": 0.5,
+   "dedicated_ranks_higher_qed_better": true
+  }
+ },
+ "fix_3_slot_semantics": {
+  "claim": "PRODUCTION_MAX_ATOMS = 40 is the ACTIVE heavy-atom ceiling, not the padding width; whole_ring_plan.execute_program requires n_atoms == 48 AND 1 <= n_real_atoms <= 40",
+  "constants": {
+   "editing_v2_evaluation_semantics.PRODUCTION_MAX_ATOMS": 40,
+   "qed_edit_task.ALLOCATED_GRAPH_SLOTS": 48,
+   "qed_edit_task.MAX_ACTIVE_HEAVY_ATOMS": 40
+  },
+  "runtime_outcomes": {
+   "tight_from_smiles": {
+    "n_atoms_allocated_slots": 25,
+    "n_real_atoms_active": 25,
+    "free_slots": 0,
+    "execute_program": "refused: expected an exact supported 48-slot source"
+   },
+   "padded_to_PRODUCTION_MAX_ATOMS_40": {
+    "n_atoms_allocated_slots": 40,
+    "n_real_atoms_active": 25,
+    "free_slots": 15,
+    "execute_program": "refused: expected an exact supported 48-slot source"
+   },
+   "padded_to_ALLOCATED_GRAPH_SLOTS_48": {
+    "n_atoms_allocated_slots": 48,
+    "n_real_atoms_active": 25,
+    "free_slots": 23,
+    "execute_program": "accepted"
+   }
+  },
+  "birth_operations_need_a_free_slot": {
+   "tight_free_slots": 0,
+   "padded_48_free_slots": 23,
+   "note": "a tight graph has zero free slots, so the whole atom_insert family is absent from its legal support; any support claim on a tight state is an artifact"
+  },
+  "panel_active_heavy_atoms": {
+   "max": 33,
+   "min": 12,
+   "all_within_active_ceiling": true
+  }
+ },
+ "contract_governance": {
+  "claim": "qed_target and similarity_floor are contract-governed and runtime-resolved, not module constants",
+  "dataclass_has_no_defaults_for_them": true,
+  "missing_field_error": "QedEditTask.__init__() missing 5 required positional arguments: 'qed_target', 'similarity_floor', 'fingerprint_radius', 'fingerprint_bits', and 'archive_top_k'",
+  "baseline": {
+   "qed_target": 0.9,
+   "similarity_floor": 0.4,
+   "task_id": "60d759dfb30e1929e02f780985a2c22ab69237adb39e70ff8f12ac66b9267e62"
+  },
+  "perturbed_negative_control": {
+   "qed_target": 0.95,
+   "similarity_floor": 0.6,
+   "task_id": "51b85494cbe43731a93eacaba97243ce3d22e9c4cfd8916f9e9e8b1d62a7f66c"
+  },
+  "task_id_moved": true,
+  "admission_decision_moved_at_runtime": {
+   "probe": "CCCc1c(C(=O)NC)cnn1-c1ccc(C)c(Cl)c1",
+   "sim": 0.55,
+   "admitted_under_floor_0_40": true,
+   "admitted_under_floor_0_60": false
+  },
+  "why_this_is_runtime_resolved": "the SAME call path returns a different admission decision and a different task identity when only the contract file changed; nothing in the module carries the operative value"
+ },
+ "feasibility_in_support_not_reward": {
+  "claim": "the similarity floor constrains the SUPPORT (oracle_eligible), not the reward",
+  "propose_batch_drops_ineligible_before_candidacy": true,
+  "seam": "adaptive_program_optimizer.ProgramOptimizer.propose_batch applies task.endpoint_evaluator() and skips anything not 'eligible'",
+  "infeasible_probe": {
+   "smiles": "C[C@@H](C(=O)C1=c2ccccc2=[NH+]C1)[NH+]1CCC[C@@H]1[C@@H]1CC=CS1",
+   "sim": 0.1099,
+   "oracle_eligible": false,
+   "reward_is_true_qed_not_zero": 0.7113,
+   "note": "the reward is never consulted for this molecule because the support refuses it first; the earlier wiring instead admitted it and scored 0.0"
+  },
+  "evaluator_sees_program_ENDPOINTS_only": {
+   "evidence": "propose_batch computes endpoint = trace[\"endpoint\"] and then calls eligibility({\"smiles\": endpoint}); no intermediate primitive state is ever passed to the task evaluator",
+   "endpoint_binding_present": true,
+   "evaluator_called_on_endpoint_only": true,
+   "consequence": "output feasibility cannot leak into intermediate program validity; a program whose last block supplies the QED gain is never refused mid-way"
+  },
+  "qed_target_is_not_an_admission_gate": true
+ }
+}

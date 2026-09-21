@@ -1,0 +1,23 @@
+{
+ "schema_version": "qed_legacy_armb_label_v1",
+ "LABEL": "SUPERSEDED -- produced under the MISCONFIGURED interface",
+ "do_not_reuse_as": "the corrected dedicated-task result",
+ "what_was_wrong": [
+  "the similarity floor lived in the REWARD (score = QED * indicator), so endpoints below the floor were admitted as candidates and consumed charged queries while scoring 0.0",
+  "the task was ProgramTask(kind='pmo'), a dispatch label, not a dedicated QED-editing task with contract-governed thresholds"
+ ],
+ "records": 800,
+ "source_index_range": [
+  0,
+  799
+ ],
+ "charged_scored_endpoints": 32641,
+ "zero_scored_charged_endpoints": 14058,
+ "zero_scored_fraction_of_budget": 0.4307,
+ "charged_endpoints_below_similarity_floor": 14058,
+ "wasted_fraction_of_budget": 0.4307,
+ "proposed_evaluations_total": 32641,
+ "solved_at_k_under_corrected_metric": 68,
+ "rate": 0.085,
+ "note": "the rate is reported only so the corrected run can be compared against its own predecessor; it is NOT a controller result and must not be quoted as one"
+}

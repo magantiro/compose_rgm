@@ -1,0 +1,1898 @@
+{
+ "schema_version": "qed_dedicated_task_comparison_v1",
+ "label": "qed_dedicated_task_pilot50",
+ "region": {
+  "qed_target": 0.9,
+  "similarity_floor": 0.4
+ },
+ "fairness_rule": "never compare our SELECTED top-k against a baseline's ALL-SAMPLE rate. Both arms are scored per-sample over their own returned candidates; the inspected-set ceiling is reported separately and marked NOT COMPARABLE.",
+ "comparison_1_same_returned_k": {
+  "question": "benchmark compatibility: at the same number of RETURNED candidates, how often is the benchmark solved?",
+  "matched_axis": "returned candidates = 8 on both arms",
+  "unmatched_axis": "INSPECTED WORK is not matched and differs by roughly 14.4x in arm A's favour (distinct molecules property-evaluated per source)",
+  "unit_of_success": "a source counts as solved if any RETURNED molecule has QED >= 0.9 and Tanimoto >= 0.4 to the ORIGINAL source (Morgan r=2, 2048 bits)",
+  "arm_a_banked": {
+   "solved": 446,
+   "scored_sources": 798,
+   "rate_over_scored": 0.5589,
+   "rate_over_full_panel": 0.5575,
+   "ci95_wilson": [
+    0.5242,
+    0.593
+   ],
+   "status": "MEASURED, independently re-derived"
+  },
+  "dedicated_task": {
+   "sources": 50,
+   "solved": 12,
+   "rate": 0.24,
+   "ci95_wilson": [
+    0.143,
+    0.3741
+   ],
+   "sampling": "systematic sample of the 800-source panel (every 16th index), an unbiased estimator of the panel rate; arm A's comparator is its GLOBAL measured rate because its per-source records are on the Modal volume and no local copy exists",
+   "status": "MEASURED"
+  }
+ },
+ "comparison_2_same_inspected_work": {
+  "question": "the algorithmic question: at comparable INSPECTED WORK, how often is the benchmark solved?",
+  "unit": "distinct molecules property-evaluated per source",
+  "why_this_unit": "primitive transitions, endpoint evaluations, distinct molecules and CPU seconds are different quantities. Arm A reports 6,755,513 proposed TRANSITIONS and 3,761,470 UNIQUE STATES over 798 sources -- a 1.80x difference between the two units on the same run -- so the unit must be named or the comparison is meaningless.",
+  "unit_ambiguity_in_arm_a": "arm A's 3,761,470 figure is recorded as UNIQUE STATES. Whether that de-duplicates to distinct CANONICAL MOLECULES is not established here -- the per-source records are on the Modal volume and no local copy exists, and a Modal read was not performed. If 'states' counts padded graph objects rather than canonical molecules, arm A's per-source work is OVERSTATED by the duplication factor and the work ratios below move in arm A's favour. Treat the ratio as an upper bound on arm A's inspection cost until a record is read.",
+  "residual_unit_asymmetry": "arm A property-evaluates every state along an SMC trajectory, including intermediates; this arm property-evaluates program ENDPOINTS only. Both counts are molecules whose QED and similarity were computed, so the unit is comparable, but arm A's total includes trajectory intermediates that have no analogue here.",
+  "arm_a_points": [
+   {
+    "returned_k": 1,
+    "solved": 254,
+    "rate": 0.3183,
+    "distinct_molecules_per_source_estimated": 589.2,
+    "estimate_status": "INFERRED -- arm A's total unique states divided evenly across its 8 trajectories; the per-trajectory split is not separately reported"
+   },
+   {
+    "returned_k": 2,
+    "solved": 319,
+    "rate": 0.3997,
+    "distinct_molecules_per_source_estimated": 1178.4,
+    "estimate_status": "INFERRED -- arm A's total unique states divided evenly across its 8 trajectories; the per-trajectory split is not separately reported"
+   },
+   {
+    "returned_k": 3,
+    "solved": 370,
+    "rate": 0.4637,
+    "distinct_molecules_per_source_estimated": 1767.6,
+    "estimate_status": "INFERRED -- arm A's total unique states divided evenly across its 8 trajectories; the per-trajectory split is not separately reported"
+   },
+   {
+    "returned_k": 4,
+    "solved": 396,
+    "rate": 0.4962,
+    "distinct_molecules_per_source_estimated": 2356.8,
+    "estimate_status": "INFERRED -- arm A's total unique states divided evenly across its 8 trajectories; the per-trajectory split is not separately reported"
+   },
+   {
+    "returned_k": 5,
+    "solved": 420,
+    "rate": 0.5263,
+    "distinct_molecules_per_source_estimated": 2946.0,
+    "estimate_status": "INFERRED -- arm A's total unique states divided evenly across its 8 trajectories; the per-trajectory split is not separately reported"
+   },
+   {
+    "returned_k": 6,
+    "solved": 430,
+    "rate": 0.5388,
+    "distinct_molecules_per_source_estimated": 3535.2,
+    "estimate_status": "INFERRED -- arm A's total unique states divided evenly across its 8 trajectories; the per-trajectory split is not separately reported"
+   },
+   {
+    "returned_k": 7,
+    "solved": 439,
+    "rate": 0.5501,
+    "distinct_molecules_per_source_estimated": 4124.4,
+    "estimate_status": "INFERRED -- arm A's total unique states divided evenly across its 8 trajectories; the per-trajectory split is not separately reported"
+   },
+   {
+    "returned_k": 8,
+    "solved": 446,
+    "rate": 0.5589,
+    "distinct_molecules_per_source_estimated": 4713.6,
+    "estimate_status": "INFERRED -- arm A's total unique states divided evenly across its 8 trajectories; the per-trajectory split is not separately reported"
+   }
+  ],
+  "dedicated_task_anytime_curve": {
+   "by_charged_budget": {
+    "unit": "charged (returned-eligible) endpoints per source",
+    "success": "any of the top-8 by score among the first C charged endpoints satisfies QED >= 0.9 and similarity >= 0.4",
+    "comparable_to_arm_a": true,
+    "caveat": "POST-HOC TRUNCATION of a single budget-48 run, not a set of independent budget-C runs. Parent selection depends on the observations already made, so a genuine budget-C run would explore differently; read this as an anytime profile of THIS run, not as a budget ablation.",
+    "points": [
+     {
+      "charged_endpoints": 1,
+      "solved": 0,
+      "rate": 0.0
+     },
+     {
+      "charged_endpoints": 2,
+      "solved": 1,
+      "rate": 0.02
+     },
+     {
+      "charged_endpoints": 4,
+      "solved": 2,
+      "rate": 0.04
+     },
+     {
+      "charged_endpoints": 8,
+      "solved": 5,
+      "rate": 0.1
+     },
+     {
+      "charged_endpoints": 12,
+      "solved": 5,
+      "rate": 0.1
+     },
+     {
+      "charged_endpoints": 16,
+      "solved": 6,
+      "rate": 0.12
+     },
+     {
+      "charged_endpoints": 24,
+      "solved": 9,
+      "rate": 0.18
+     },
+     {
+      "charged_endpoints": 32,
+      "solved": 9,
+      "rate": 0.18
+     },
+     {
+      "charged_endpoints": 40,
+      "solved": 11,
+      "rate": 0.22
+     },
+     {
+      "charged_endpoints": 48,
+      "solved": 12,
+      "rate": 0.24
+     }
+    ]
+   },
+   "by_inspected_molecules": {
+    "unit": "distinct molecules property-evaluated per source",
+    "success": "a benchmark-solving molecule appeared ANYWHERE in the inspected prefix",
+    "comparable_to_arm_a": false,
+    "why_not": "this is an all-sample quantity; comparing it against a baseline's returned-candidate rate is exactly the unfairness the per-sample rule forbids. It bounds what the search reached, not what it returned.",
+    "points": [
+     {
+      "molecules_property_evaluated": 25,
+      "sources_with_a_solution_in_the_set": 10,
+      "rate": 0.2
+     },
+     {
+      "molecules_property_evaluated": 50,
+      "sources_with_a_solution_in_the_set": 13,
+      "rate": 0.26
+     },
+     {
+      "molecules_property_evaluated": 100,
+      "sources_with_a_solution_in_the_set": 16,
+      "rate": 0.32
+     },
+     {
+      "molecules_property_evaluated": 150,
+      "sources_with_a_solution_in_the_set": 17,
+      "rate": 0.34
+     },
+     {
+      "molecules_property_evaluated": 200,
+      "sources_with_a_solution_in_the_set": 22,
+      "rate": 0.44
+     },
+     {
+      "molecules_property_evaluated": 300,
+      "sources_with_a_solution_in_the_set": 23,
+      "rate": 0.46
+     },
+     {
+      "molecules_property_evaluated": 400,
+      "sources_with_a_solution_in_the_set": 24,
+      "rate": 0.48
+     },
+     {
+      "molecules_property_evaluated": 500,
+      "sources_with_a_solution_in_the_set": 24,
+      "rate": 0.48
+     }
+    ]
+   }
+  },
+  "dedicated_task_point": {
+   "returned_k": 8,
+   "rate": 0.24,
+   "distinct_molecules_per_source": 326.4,
+   "status": "MEASURED"
+  },
+  "bracketing": {
+   "note": "NO CELL MATCHES ON BOTH AXES. These two comparisons bracket the truth.",
+   "cheaper_arm_a_point": {
+    "arm_a": {
+     "returned_k": 1,
+     "rate": 0.3183,
+     "distinct_molecules_per_source": 589.2
+    },
+    "ours": {
+     "returned_k": 8,
+     "rate": 0.24,
+     "distinct_molecules_per_source": 326.4
+    },
+    "reading": "we use 0.55x the work and return 8x the candidates"
+   },
+   "equal_k_arm_a_point": {
+    "arm_a": {
+     "returned_k": 8,
+     "rate": 0.5589,
+     "distinct_molecules_per_source": 4713.6
+    },
+    "ours": {
+     "returned_k": 8,
+     "rate": 0.24,
+     "distinct_molecules_per_source": 326.4
+    },
+    "reading": "same returned count; we use 0.069x the work"
+   }
+  }
+ },
+ "dedicated_task_metrics": {
+  "sources": 50,
+  "returned_k": 8,
+  "solved_at_k": 12,
+  "solved_at_k_rate": 0.24,
+  "solved_at_k_ci95_wilson": [
+   0.143,
+   0.3741
+  ],
+  "per_sample_rate": 0.06,
+  "per_sample_denominator": 400,
+  "returned_slots_actually_filled": 400,
+  "per_sample_note": "successful RETURNED slots divided by k*sources; unfilled slots count as failures, matching arm A's treatment of extinct trajectories. The selected top-k is never compared against a baseline all-sample rate.",
+  "any_charged_success_rate": 0.24,
+  "any_inspected_success_rate": 0.48,
+  "any_inspected_note": "CEILING, NOT COMPARABLE to arm A's 446/800: it asks whether a solution appeared anywhere in the inspected set, which is an all-sample quantity, not a returned-candidate quantity",
+  "mean_candidates_until_success": 18.25,
+  "mean_first_inspected_success_position": 85.08333333333333,
+  "mean_best_qed_admissible": 0.8469531563365116,
+  "mean_best_qed_any": 0.8469531563365116,
+  "mean_similarity_margin_of_successes": 0.1276420323821267,
+  "mean_returned_uniqueness": 1.0,
+  "mean_returned_diversity": 0.5411797154968496,
+  "mean_n_blocks": 1.6781267345050879,
+  "mean_primitive_depth": 5.004085954363244,
+  "mean_parent_to_child_improvement": -0.019099736388562088,
+  "work_units_per_source": {
+   "proposal_attempts": 497.5,
+   "executed_endpoint_evaluations": 426.5,
+   "distinct_molecules_property_evaluated": 326.4,
+   "admitted_endpoint_evaluations": 321.58,
+   "charged_scored_endpoints": 47.66,
+   "zero_scored_charged": 0.0,
+   "cpu_seconds": 155.03261993510066,
+   "primitive_transitions_estimated": 2134.242659535924,
+   "primitive_transitions_status": "INFERRED -- executed endpoints times mean primitive depth of retained programs; per-attempt depth is not recorded"
+  },
+  "lane_allocation": {
+   "channels": {
+    "mutation": 1307,
+    "dynamic_v21_pooled_channels": 748,
+    "recombination": 287
+   },
+   "structural_blocks": {
+    "substituent_delete": 464,
+    "construct_substituted_ring": 445,
+    "functionalize": 391,
+    "carbonyl_insert": 258,
+    "ring_path_remodel": 226,
+    "segment_grow": 204,
+    "append_ring": 196,
+    "heteroatom_substitute": 174,
+    "segment_replace": 173,
+    "fuse_ring": 163,
+    "current:atom_restate_semantic": 115,
+    "bond_reroute": 112,
+    "0:1:dependency_branch:1": 107,
+    "0:0:dependency_branch:0": 82,
+    "current:bond_reroute": 73,
+    "1:dependency_branch:1": 66,
+    "cycle_open": 65,
+    "ring_system_restate": 58,
+    "1:1:dependency_branch:1": 55,
+    "cycle_close": 53,
+    "1:0:dependency_branch:0": 53,
+    "segment_shrink": 53,
+    "0:dependency_branch:0": 43,
+    "current:ring_system_restate": 42,
+    "current:cycle_open": 41
+   }
+  },
+  "difficulty_structure": {
+   "by_source_qed_tertile": {
+    "low": {
+     "n": 17,
+     "solved": 2,
+     "rate": 0.1176
+    },
+    "mid": {
+     "n": 17,
+     "solved": 3,
+     "rate": 0.1765
+    },
+    "high": {
+     "n": 16,
+     "solved": 7,
+     "rate": 0.4375
+    }
+   },
+   "by_heavy_atom_tertile": {
+    "low": {
+     "n": 18,
+     "solved": 4,
+     "rate": 0.2222
+    },
+    "mid": {
+     "n": 18,
+     "solved": 7,
+     "rate": 0.3889
+    },
+    "high": {
+     "n": 14,
+     "solved": 1,
+     "rate": 0.0714
+    }
+   },
+   "solved_sources": {
+    "n": 12,
+    "mean_source_qed": 0.7698
+   },
+   "gap_to_target_among_unsolved": {
+    "n": 38,
+    "mean": 0.0769,
+    "median": 0.074,
+    "within_0_05_of_target": 13
+   },
+   "reading": "success tracks how close the source already is to the region and how small it is. The search lands a median 0.07 short on the sources it misses, which is the signature of an under-budgeted search rather than a misdirected one -- and the charged-budget anytime curve is still rising at the budget cap.",
+   "caveat": "these splits are post-hoc on 50 sources and are descriptive, not tested."
+  },
+  "anytime_curves": {
+   "by_charged_budget": {
+    "unit": "charged (returned-eligible) endpoints per source",
+    "success": "any of the top-8 by score among the first C charged endpoints satisfies QED >= 0.9 and similarity >= 0.4",
+    "comparable_to_arm_a": true,
+    "caveat": "POST-HOC TRUNCATION of a single budget-48 run, not a set of independent budget-C runs. Parent selection depends on the observations already made, so a genuine budget-C run would explore differently; read this as an anytime profile of THIS run, not as a budget ablation.",
+    "points": [
+     {
+      "charged_endpoints": 1,
+      "solved": 0,
+      "rate": 0.0
+     },
+     {
+      "charged_endpoints": 2,
+      "solved": 1,
+      "rate": 0.02
+     },
+     {
+      "charged_endpoints": 4,
+      "solved": 2,
+      "rate": 0.04
+     },
+     {
+      "charged_endpoints": 8,
+      "solved": 5,
+      "rate": 0.1
+     },
+     {
+      "charged_endpoints": 12,
+      "solved": 5,
+      "rate": 0.1
+     },
+     {
+      "charged_endpoints": 16,
+      "solved": 6,
+      "rate": 0.12
+     },
+     {
+      "charged_endpoints": 24,
+      "solved": 9,
+      "rate": 0.18
+     },
+     {
+      "charged_endpoints": 32,
+      "solved": 9,
+      "rate": 0.18
+     },
+     {
+      "charged_endpoints": 40,
+      "solved": 11,
+      "rate": 0.22
+     },
+     {
+      "charged_endpoints": 48,
+      "solved": 12,
+      "rate": 0.24
+     }
+    ]
+   },
+   "by_inspected_molecules": {
+    "unit": "distinct molecules property-evaluated per source",
+    "success": "a benchmark-solving molecule appeared ANYWHERE in the inspected prefix",
+    "comparable_to_arm_a": false,
+    "why_not": "this is an all-sample quantity; comparing it against a baseline's returned-candidate rate is exactly the unfairness the per-sample rule forbids. It bounds what the search reached, not what it returned.",
+    "points": [
+     {
+      "molecules_property_evaluated": 25,
+      "sources_with_a_solution_in_the_set": 10,
+      "rate": 0.2
+     },
+     {
+      "molecules_property_evaluated": 50,
+      "sources_with_a_solution_in_the_set": 13,
+      "rate": 0.26
+     },
+     {
+      "molecules_property_evaluated": 100,
+      "sources_with_a_solution_in_the_set": 16,
+      "rate": 0.32
+     },
+     {
+      "molecules_property_evaluated": 150,
+      "sources_with_a_solution_in_the_set": 17,
+      "rate": 0.34
+     },
+     {
+      "molecules_property_evaluated": 200,
+      "sources_with_a_solution_in_the_set": 22,
+      "rate": 0.44
+     },
+     {
+      "molecules_property_evaluated": 300,
+      "sources_with_a_solution_in_the_set": 23,
+      "rate": 0.46
+     },
+     {
+      "molecules_property_evaluated": 400,
+      "sources_with_a_solution_in_the_set": 24,
+      "rate": 0.48
+     },
+     {
+      "molecules_property_evaluated": 500,
+      "sources_with_a_solution_in_the_set": 24,
+      "rate": 0.48
+     }
+    ]
+   }
+  }
+ },
+ "griddd_comparator": {
+  "value": 0.451,
+  "K": 20,
+  "status": "UNVERIFIED at the published source",
+  "why": "no PDF or programmatic extraction is present in this tree; every in-repo copy descends from one hand transcription, so their agreement is not independent corroboration",
+  "panel_comparability": "NOT PANEL-MATCHED. GrIDDD selects its own 800 by shuffling ZINC-250k with pandas random_state=42, taking the final 10% test split, and keeping the first 800 processed rows with QED in 0.70-0.80. The reconstruction has canonical_set_intersection = 1 against Jin's exact 800. Both draw from the same ZINC-250k QED-in-[0.7,0.8] population, so the comparison is POPULATION-matched, not PANEL-matched."
+ },
+ "claim_discipline": "Do not state an unqualified 'COMPOSE beats GrIDDD'. The 446/800 result stands and is independently re-derived, but GrIDDD's 45.1% is UNVERIFIED at source and is measured on a panel sharing ONE molecule with Jin's 800.",
+ "rows_recomputed_before_scoring": 2383,
+ "independent_recomputation": {
+  "method": "recompute QED and Morgan-Tanimoto from the stored SMILES against the panel source read independently from data/jin/qed_test.txt",
+  "charged_endpoints_compared": 2383,
+  "deltas_by_role": {
+   "initialization": 1.0,
+   "candidate": 0.0
+  },
+  "panel_source_mismatches": [],
+  "unparseable_returned_smiles": 0,
+  "stored_flag_disagreements": 0,
+  "max_abs_qed_recompute_delta": 0.7975927918760845,
+  "max_abs_similarity_recompute_delta": 1.0,
+  "expected_initialization_delta": "records written before the runner fix stored qed/sim as 0.0 for the INITIALIZATION row, because that endpoint is charged through the ledger without ever passing through the endpoint evaluator. deltas_by_role isolates it: candidate rows must agree to 0.0. Metrics are computed from the recomputation, so the artifact does not propagate."
+ },
+ "per_source": [
+  {
+   "index": 0,
+   "returned": 8,
+   "solved_at_k": true,
+   "successful_returned_slots": 5,
+   "any_charged_success": true,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 3,
+   "candidates_until_success": 6,
+   "best_qed_admissible": 0.9437747769250201,
+   "best_qed_any": 0.9437747769250201,
+   "similarity_margin_of_successes": 0.19733832359807774,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5607063568489822,
+   "mean_n_blocks": 1.5319148936170213,
+   "mean_primitive_depth": 3.4680851063829787,
+   "mean_parent_to_child_improvement": -0.03787012615611931,
+   "work": {
+    "proposal_attempts": 599,
+    "executed_endpoint_evaluations": 480,
+    "distinct_endpoints_evaluated": 331,
+    "admitted_endpoint_evaluations": 351,
+    "admitted_fraction": 0.73125,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 197.22933612499037
+   }
+  },
+  {
+   "index": 16,
+   "returned": 8,
+   "solved_at_k": true,
+   "successful_returned_slots": 1,
+   "any_charged_success": true,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 266,
+   "candidates_until_success": 37,
+   "best_qed_admissible": 0.9079077952636031,
+   "best_qed_any": 0.9079077952636031,
+   "similarity_margin_of_successes": 0.33999999999999997,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.41432932362160896,
+   "mean_n_blocks": 1.6808510638297873,
+   "mean_primitive_depth": 3.6808510638297873,
+   "mean_parent_to_child_improvement": 0.004810595058320851,
+   "work": {
+    "proposal_attempts": 577,
+    "executed_endpoint_evaluations": 492,
+    "distinct_endpoints_evaluated": 326,
+    "admitted_endpoint_evaluations": 380,
+    "admitted_fraction": 0.7723577235772358,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 173.2177212079987
+   }
+  },
+  {
+   "index": 32,
+   "returned": 8,
+   "solved_at_k": true,
+   "successful_returned_slots": 2,
+   "any_charged_success": true,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 32,
+   "candidates_until_success": 6,
+   "best_qed_admissible": 0.9025232426279195,
+   "best_qed_any": 0.9025232426279195,
+   "similarity_margin_of_successes": 0.11808091657715716,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.6343664584789117,
+   "mean_n_blocks": 1.872340425531915,
+   "mean_primitive_depth": 4.74468085106383,
+   "mean_parent_to_child_improvement": -0.059484090476021795,
+   "work": {
+    "proposal_attempts": 539,
+    "executed_endpoint_evaluations": 485,
+    "distinct_endpoints_evaluated": 374,
+    "admitted_endpoint_evaluations": 304,
+    "admitted_fraction": 0.6268041237113402,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 225.28067566698883
+   }
+  },
+  {
+   "index": 48,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8884766287208224,
+   "best_qed_any": 0.8884766287208224,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5765321784082186,
+   "mean_n_blocks": 1.553191489361702,
+   "mean_primitive_depth": 5.25531914893617,
+   "mean_parent_to_child_improvement": -0.027688715890082618,
+   "work": {
+    "proposal_attempts": 499,
+    "executed_endpoint_evaluations": 413,
+    "distinct_endpoints_evaluated": 316,
+    "admitted_endpoint_evaluations": 335,
+    "admitted_fraction": 0.8111380145278451,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 119.2871021249739
+   }
+  },
+  {
+   "index": 64,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8809631194284089,
+   "best_qed_any": 0.8809631194284089,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.4689975209863263,
+   "mean_n_blocks": 1.7659574468085106,
+   "mean_primitive_depth": 3.8297872340425534,
+   "mean_parent_to_child_improvement": -0.013253200702970256,
+   "work": {
+    "proposal_attempts": 438,
+    "executed_endpoint_evaluations": 381,
+    "distinct_endpoints_evaluated": 298,
+    "admitted_endpoint_evaluations": 324,
+    "admitted_fraction": 0.8503937007874016,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 107.16322374998708
+   }
+  },
+  {
+   "index": 80,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 20,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7896082084415503,
+   "best_qed_any": 0.7896082084415503,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5578200864814883,
+   "mean_n_blocks": 1.5,
+   "mean_primitive_depth": 4.225,
+   "mean_parent_to_child_improvement": -0.04041486568180862,
+   "work": {
+    "proposal_attempts": 483,
+    "executed_endpoint_evaluations": 427,
+    "distinct_endpoints_evaluated": 309,
+    "admitted_endpoint_evaluations": 310,
+    "admitted_fraction": 0.7259953161592506,
+    "charged_scored_endpoints": 41,
+    "zero_scored_charged": 0,
+    "seconds": 61.31578312499914
+   }
+  },
+  {
+   "index": 96,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 193,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.799504629920384,
+   "best_qed_any": 0.799504629920384,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5296754942994168,
+   "mean_n_blocks": 1.6382978723404256,
+   "mean_primitive_depth": 5.680851063829787,
+   "mean_parent_to_child_improvement": -0.029094050782446014,
+   "work": {
+    "proposal_attempts": 400,
+    "executed_endpoint_evaluations": 333,
+    "distinct_endpoints_evaluated": 274,
+    "admitted_endpoint_evaluations": 287,
+    "admitted_fraction": 0.8618618618618619,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 148.00297708401922
+   }
+  },
+  {
+   "index": 112,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.775904358450448,
+   "best_qed_any": 0.775904358450448,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5935074531197919,
+   "mean_n_blocks": 1.4893617021276595,
+   "mean_primitive_depth": 4.9787234042553195,
+   "mean_parent_to_child_improvement": 0.021409143635794724,
+   "work": {
+    "proposal_attempts": 447,
+    "executed_endpoint_evaluations": 372,
+    "distinct_endpoints_evaluated": 305,
+    "admitted_endpoint_evaluations": 298,
+    "admitted_fraction": 0.8010752688172043,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 105.41632208300871
+   }
+  },
+  {
+   "index": 128,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7678319828388696,
+   "best_qed_any": 0.7678319828388696,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5132438128344581,
+   "mean_n_blocks": 2.1914893617021276,
+   "mean_primitive_depth": 6.76595744680851,
+   "mean_parent_to_child_improvement": 0.018004811005052343,
+   "work": {
+    "proposal_attempts": 396,
+    "executed_endpoint_evaluations": 344,
+    "distinct_endpoints_evaluated": 292,
+    "admitted_endpoint_evaluations": 293,
+    "admitted_fraction": 0.8517441860465116,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 163.2436733750219
+   }
+  },
+  {
+   "index": 144,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7874648955074208,
+   "best_qed_any": 0.7874648955074208,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.48497944087878647,
+   "mean_n_blocks": 1.9148936170212767,
+   "mean_primitive_depth": 2.723404255319149,
+   "mean_parent_to_child_improvement": -0.005929348103538039,
+   "work": {
+    "proposal_attempts": 570,
+    "executed_endpoint_evaluations": 481,
+    "distinct_endpoints_evaluated": 326,
+    "admitted_endpoint_evaluations": 369,
+    "admitted_fraction": 0.7671517671517671,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 158.44491891699727
+   }
+  },
+  {
+   "index": 160,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 36,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8194551085157504,
+   "best_qed_any": 0.8194551085157504,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.41790955231868226,
+   "mean_n_blocks": 1.4893617021276595,
+   "mean_primitive_depth": 5.0638297872340425,
+   "mean_parent_to_child_improvement": 0.01916486127454041,
+   "work": {
+    "proposal_attempts": 417,
+    "executed_endpoint_evaluations": 355,
+    "distinct_endpoints_evaluated": 304,
+    "admitted_endpoint_evaluations": 290,
+    "admitted_fraction": 0.8169014084507042,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 124.98945066699525
+   }
+  },
+  {
+   "index": 176,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 74,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8594133061597459,
+   "best_qed_any": 0.8594133061597459,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.43195493860763173,
+   "mean_n_blocks": 2.0425531914893615,
+   "mean_primitive_depth": 7.808510638297872,
+   "mean_parent_to_child_improvement": -0.025734185094231705,
+   "work": {
+    "proposal_attempts": 529,
+    "executed_endpoint_evaluations": 422,
+    "distinct_endpoints_evaluated": 334,
+    "admitted_endpoint_evaluations": 326,
+    "admitted_fraction": 0.7725118483412322,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 215.3896523329895
+   }
+  },
+  {
+   "index": 192,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7076258624046956,
+   "best_qed_any": 0.7076258624046956,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5559778253704178,
+   "mean_n_blocks": 1.7872340425531914,
+   "mean_primitive_depth": 6.446808510638298,
+   "mean_parent_to_child_improvement": -0.009366401416318528,
+   "work": {
+    "proposal_attempts": 476,
+    "executed_endpoint_evaluations": 414,
+    "distinct_endpoints_evaluated": 321,
+    "admitted_endpoint_evaluations": 321,
+    "admitted_fraction": 0.7753623188405797,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 113.72773887499352
+   }
+  },
+  {
+   "index": 208,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 19,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8902370928208347,
+   "best_qed_any": 0.8902370928208347,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5760417065280858,
+   "mean_n_blocks": 1.3958333333333333,
+   "mean_primitive_depth": 2.2291666666666665,
+   "mean_parent_to_child_improvement": -0.01641954599745176,
+   "work": {
+    "proposal_attempts": 612,
+    "executed_endpoint_evaluations": 469,
+    "distinct_endpoints_evaluated": 337,
+    "admitted_endpoint_evaluations": 350,
+    "admitted_fraction": 0.746268656716418,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 107.38535275001777
+   }
+  },
+  {
+   "index": 224,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 51,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8259869399850438,
+   "best_qed_any": 0.8259869399850438,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5697704288813176,
+   "mean_n_blocks": 1.446808510638298,
+   "mean_primitive_depth": 4.25531914893617,
+   "mean_parent_to_child_improvement": -0.008096069965135198,
+   "work": {
+    "proposal_attempts": 474,
+    "executed_endpoint_evaluations": 411,
+    "distinct_endpoints_evaluated": 301,
+    "admitted_endpoint_evaluations": 333,
+    "admitted_fraction": 0.8102189781021898,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 178.51319625001634
+   }
+  },
+  {
+   "index": 240,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 25,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8979297695756958,
+   "best_qed_any": 0.8979297695756958,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5916699419990534,
+   "mean_n_blocks": 1.574468085106383,
+   "mean_primitive_depth": 4.191489361702128,
+   "mean_parent_to_child_improvement": 0.021467624077893818,
+   "work": {
+    "proposal_attempts": 486,
+    "executed_endpoint_evaluations": 408,
+    "distinct_endpoints_evaluated": 348,
+    "admitted_endpoint_evaluations": 307,
+    "admitted_fraction": 0.7524509803921569,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 117.75833779200912
+   }
+  },
+  {
+   "index": 256,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 16,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8924076687692133,
+   "best_qed_any": 0.8924076687692133,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.6113833850759935,
+   "mean_n_blocks": 1.5,
+   "mean_primitive_depth": 3.1,
+   "mean_parent_to_child_improvement": -0.005063433245254425,
+   "work": {
+    "proposal_attempts": 597,
+    "executed_endpoint_evaluations": 512,
+    "distinct_endpoints_evaluated": 338,
+    "admitted_endpoint_evaluations": 352,
+    "admitted_fraction": 0.6875,
+    "charged_scored_endpoints": 40,
+    "zero_scored_charged": 0,
+    "seconds": 95.84571333299391
+   }
+  },
+  {
+   "index": 272,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.79425225299195,
+   "best_qed_any": 0.79425225299195,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.524993052834423,
+   "mean_n_blocks": 1.5106382978723405,
+   "mean_primitive_depth": 5.595744680851064,
+   "mean_parent_to_child_improvement": -0.0026673819938121826,
+   "work": {
+    "proposal_attempts": 404,
+    "executed_endpoint_evaluations": 359,
+    "distinct_endpoints_evaluated": 303,
+    "admitted_endpoint_evaluations": 304,
+    "admitted_fraction": 0.8467966573816156,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 106.93906220898498
+   }
+  },
+  {
+   "index": 288,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7688760519552399,
+   "best_qed_any": 0.7688760519552399,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5334753311495387,
+   "mean_n_blocks": 1.7234042553191489,
+   "mean_primitive_depth": 6.276595744680851,
+   "mean_parent_to_child_improvement": -0.050571970750301586,
+   "work": {
+    "proposal_attempts": 494,
+    "executed_endpoint_evaluations": 424,
+    "distinct_endpoints_evaluated": 346,
+    "admitted_endpoint_evaluations": 314,
+    "admitted_fraction": 0.7405660377358491,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 97.60482804200728
+   }
+  },
+  {
+   "index": 304,
+   "returned": 8,
+   "solved_at_k": true,
+   "successful_returned_slots": 1,
+   "any_charged_success": true,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 164,
+   "candidates_until_success": 15,
+   "best_qed_admissible": 0.9188024180045613,
+   "best_qed_any": 0.9188024180045613,
+   "similarity_margin_of_successes": 0.08936170212765954,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5184958115799209,
+   "mean_n_blocks": 1.4042553191489362,
+   "mean_primitive_depth": 5.404255319148936,
+   "mean_parent_to_child_improvement": -0.011334985050191296,
+   "work": {
+    "proposal_attempts": 854,
+    "executed_endpoint_evaluations": 725,
+    "distinct_endpoints_evaluated": 458,
+    "admitted_endpoint_evaluations": 451,
+    "admitted_fraction": 0.6220689655172413,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 150.0588430419739
+   }
+  },
+  {
+   "index": 320,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 17,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8592438521538561,
+   "best_qed_any": 0.8592438521538561,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.622687901349515,
+   "mean_n_blocks": 1.5957446808510638,
+   "mean_primitive_depth": 4.851063829787234,
+   "mean_parent_to_child_improvement": -0.01597067985096958,
+   "work": {
+    "proposal_attempts": 476,
+    "executed_endpoint_evaluations": 425,
+    "distinct_endpoints_evaluated": 336,
+    "admitted_endpoint_evaluations": 313,
+    "admitted_fraction": 0.7364705882352941,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 141.70443766698008
+   }
+  },
+  {
+   "index": 336,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 154,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8318973567308537,
+   "best_qed_any": 0.8318973567308537,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.44831826048328083,
+   "mean_n_blocks": 1.574468085106383,
+   "mean_primitive_depth": 3.6595744680851063,
+   "mean_parent_to_child_improvement": -0.011390767289317745,
+   "work": {
+    "proposal_attempts": 431,
+    "executed_endpoint_evaluations": 386,
+    "distinct_endpoints_evaluated": 282,
+    "admitted_endpoint_evaluations": 325,
+    "admitted_fraction": 0.8419689119170984,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 292.12030466698343
+   }
+  },
+  {
+   "index": 352,
+   "returned": 8,
+   "solved_at_k": true,
+   "successful_returned_slots": 1,
+   "any_charged_success": true,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 74,
+   "candidates_until_success": 21,
+   "best_qed_admissible": 0.9076326503200272,
+   "best_qed_any": 0.9076326503200272,
+   "similarity_margin_of_successes": 0.1098039215686274,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.47434157988087255,
+   "mean_n_blocks": 1.872340425531915,
+   "mean_primitive_depth": 9.76595744680851,
+   "mean_parent_to_child_improvement": 0.006353495789492821,
+   "work": {
+    "proposal_attempts": 578,
+    "executed_endpoint_evaluations": 492,
+    "distinct_endpoints_evaluated": 388,
+    "admitted_endpoint_evaluations": 317,
+    "admitted_fraction": 0.6443089430894309,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 142.41518525002175
+   }
+  },
+  {
+   "index": 368,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8369690493310993,
+   "best_qed_any": 0.8369690493310993,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5635536816035349,
+   "mean_n_blocks": 1.6170212765957446,
+   "mean_primitive_depth": 4.1063829787234045,
+   "mean_parent_to_child_improvement": -0.04166204999758707,
+   "work": {
+    "proposal_attempts": 510,
+    "executed_endpoint_evaluations": 472,
+    "distinct_endpoints_evaluated": 359,
+    "admitted_endpoint_evaluations": 333,
+    "admitted_fraction": 0.7055084745762712,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 137.73569612498977
+   }
+  },
+  {
+   "index": 384,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7091629965991272,
+   "best_qed_any": 0.7091629965991272,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5323513762834852,
+   "mean_n_blocks": 1.7446808510638299,
+   "mean_primitive_depth": 3.276595744680851,
+   "mean_parent_to_child_improvement": -0.0415154773033435,
+   "work": {
+    "proposal_attempts": 533,
+    "executed_endpoint_evaluations": 444,
+    "distinct_endpoints_evaluated": 299,
+    "admitted_endpoint_evaluations": 371,
+    "admitted_fraction": 0.8355855855855856,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 174.2801261249988
+   }
+  },
+  {
+   "index": 400,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7715363497268963,
+   "best_qed_any": 0.7715363497268963,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5552625476453252,
+   "mean_n_blocks": 1.6382978723404256,
+   "mean_primitive_depth": 3.3404255319148937,
+   "mean_parent_to_child_improvement": 0.00929491168935531,
+   "work": {
+    "proposal_attempts": 589,
+    "executed_endpoint_evaluations": 516,
+    "distinct_endpoints_evaluated": 406,
+    "admitted_endpoint_evaluations": 349,
+    "admitted_fraction": 0.6763565891472868,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 76.4789173330064
+   }
+  },
+  {
+   "index": 416,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 145,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8980002997958815,
+   "best_qed_any": 0.8980002997958815,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5938667374431773,
+   "mean_n_blocks": 1.6382978723404256,
+   "mean_primitive_depth": 5.787234042553192,
+   "mean_parent_to_child_improvement": -0.025922960041906477,
+   "work": {
+    "proposal_attempts": 705,
+    "executed_endpoint_evaluations": 632,
+    "distinct_endpoints_evaluated": 418,
+    "admitted_endpoint_evaluations": 390,
+    "admitted_fraction": 0.6170886075949367,
+    "charged_scored_endpoints": 47,
+    "zero_scored_charged": 0,
+    "seconds": 149.7214248330274
+   }
+  },
+  {
+   "index": 432,
+   "returned": 8,
+   "solved_at_k": true,
+   "successful_returned_slots": 4,
+   "any_charged_success": true,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 24,
+   "candidates_until_success": 6,
+   "best_qed_admissible": 0.9286064317741869,
+   "best_qed_any": 0.9286064317741869,
+   "similarity_margin_of_successes": 0.11881756443857026,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5831139647335428,
+   "mean_n_blocks": 1.8125,
+   "mean_primitive_depth": 6.5,
+   "mean_parent_to_child_improvement": -0.08845015698393095,
+   "work": {
+    "proposal_attempts": 449,
+    "executed_endpoint_evaluations": 380,
+    "distinct_endpoints_evaluated": 301,
+    "admitted_endpoint_evaluations": 291,
+    "admitted_fraction": 0.7657894736842106,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 223.9740950000123
+   }
+  },
+  {
+   "index": 448,
+   "returned": 8,
+   "solved_at_k": true,
+   "successful_returned_slots": 1,
+   "any_charged_success": true,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 176,
+   "candidates_until_success": 18,
+   "best_qed_admissible": 0.9153000530119659,
+   "best_qed_any": 0.9153000530119659,
+   "similarity_margin_of_successes": 0.11785714285714288,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5573512803788173,
+   "mean_n_blocks": 1.851063829787234,
+   "mean_primitive_depth": 6.617021276595745,
+   "mean_parent_to_child_improvement": 0.009986049525805214,
+   "work": {
+    "proposal_attempts": 620,
+    "executed_endpoint_evaluations": 468,
+    "distinct_endpoints_evaluated": 345,
+    "admitted_endpoint_evaluations": 326,
+    "admitted_fraction": 0.6965811965811965,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 190.1822602910106
+   }
+  },
+  {
+   "index": 464,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.832156395562844,
+   "best_qed_any": 0.832156395562844,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.421907057548262,
+   "mean_n_blocks": 1.6808510638297873,
+   "mean_primitive_depth": 5.425531914893617,
+   "mean_parent_to_child_improvement": -0.03292796634849247,
+   "work": {
+    "proposal_attempts": 405,
+    "executed_endpoint_evaluations": 376,
+    "distinct_endpoints_evaluated": 315,
+    "admitted_endpoint_evaluations": 309,
+    "admitted_fraction": 0.8218085106382979,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 148.00276962501812
+   }
+  },
+  {
+   "index": 480,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8976469259604746,
+   "best_qed_any": 0.8976469259604746,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5793221430359374,
+   "mean_n_blocks": 1.702127659574468,
+   "mean_primitive_depth": 3.8085106382978724,
+   "mean_parent_to_child_improvement": -0.009253078451581645,
+   "work": {
+    "proposal_attempts": 470,
+    "executed_endpoint_evaluations": 403,
+    "distinct_endpoints_evaluated": 328,
+    "admitted_endpoint_evaluations": 314,
+    "admitted_fraction": 0.7791563275434243,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 107.65966795900022
+   }
+  },
+  {
+   "index": 496,
+   "returned": 8,
+   "solved_at_k": true,
+   "successful_returned_slots": 4,
+   "any_charged_success": true,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 2,
+   "candidates_until_success": 2,
+   "best_qed_admissible": 0.9393719189764587,
+   "best_qed_any": 0.9393719189764587,
+   "similarity_margin_of_successes": 0.06340568578277765,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.48600715990798055,
+   "mean_n_blocks": 1.7083333333333333,
+   "mean_primitive_depth": 3.1875,
+   "mean_parent_to_child_improvement": -0.04503925643762872,
+   "work": {
+    "proposal_attempts": 596,
+    "executed_endpoint_evaluations": 518,
+    "distinct_endpoints_evaluated": 347,
+    "admitted_endpoint_evaluations": 390,
+    "admitted_fraction": 0.752895752895753,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 175.75557241699426
+   }
+  },
+  {
+   "index": 512,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8943962150921351,
+   "best_qed_any": 0.8943962150921351,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5119031572953269,
+   "mean_n_blocks": 1.7234042553191489,
+   "mean_primitive_depth": 6.042553191489362,
+   "mean_parent_to_child_improvement": -0.03830997697996126,
+   "work": {
+    "proposal_attempts": 289,
+    "executed_endpoint_evaluations": 275,
+    "distinct_endpoints_evaluated": 249,
+    "admitted_endpoint_evaluations": 221,
+    "admitted_fraction": 0.8036363636363636,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 293.42232320900075
+   }
+  },
+  {
+   "index": 528,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8268323771372889,
+   "best_qed_any": 0.8268323771372889,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5657808889945647,
+   "mean_n_blocks": 1.3617021276595744,
+   "mean_primitive_depth": 5.468085106382978,
+   "mean_parent_to_child_improvement": -0.05818208613155765,
+   "work": {
+    "proposal_attempts": 442,
+    "executed_endpoint_evaluations": 406,
+    "distinct_endpoints_evaluated": 340,
+    "admitted_endpoint_evaluations": 293,
+    "admitted_fraction": 0.7216748768472906,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 176.59728670900222
+   }
+  },
+  {
+   "index": 544,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7906448480887233,
+   "best_qed_any": 0.7906448480887233,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5746889780939499,
+   "mean_n_blocks": 1.7083333333333333,
+   "mean_primitive_depth": 3.7916666666666665,
+   "mean_parent_to_child_improvement": -0.011531778061630908,
+   "work": {
+    "proposal_attempts": 363,
+    "executed_endpoint_evaluations": 327,
+    "distinct_endpoints_evaluated": 277,
+    "admitted_endpoint_evaluations": 272,
+    "admitted_fraction": 0.8318042813455657,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 221.1573243329767
+   }
+  },
+  {
+   "index": 560,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7959479399886835,
+   "best_qed_any": 0.7959479399886835,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.4935703021265871,
+   "mean_n_blocks": 1.5106382978723405,
+   "mean_primitive_depth": 5.51063829787234,
+   "mean_parent_to_child_improvement": -0.03882514791891133,
+   "work": {
+    "proposal_attempts": 373,
+    "executed_endpoint_evaluations": 340,
+    "distinct_endpoints_evaluated": 280,
+    "admitted_endpoint_evaluations": 282,
+    "admitted_fraction": 0.8294117647058824,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 154.19108929199865
+   }
+  },
+  {
+   "index": 576,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8561235190825315,
+   "best_qed_any": 0.8561235190825315,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5727263523105369,
+   "mean_n_blocks": 1.4680851063829787,
+   "mean_primitive_depth": 5.617021276595745,
+   "mean_parent_to_child_improvement": -0.013095127430763838,
+   "work": {
+    "proposal_attempts": 533,
+    "executed_endpoint_evaluations": 442,
+    "distinct_endpoints_evaluated": 300,
+    "admitted_endpoint_evaluations": 357,
+    "admitted_fraction": 0.8076923076923077,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 157.49628520800616
+   }
+  },
+  {
+   "index": 592,
+   "returned": 8,
+   "solved_at_k": true,
+   "successful_returned_slots": 1,
+   "any_charged_success": true,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 2,
+   "candidates_until_success": 4,
+   "best_qed_admissible": 0.934175103307351,
+   "best_qed_any": 0.934175103307351,
+   "similarity_margin_of_successes": 0.03478260869565214,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5175142095339046,
+   "mean_n_blocks": 1.574468085106383,
+   "mean_primitive_depth": 4.702127659574468,
+   "mean_parent_to_child_improvement": -0.050448319176854314,
+   "work": {
+    "proposal_attempts": 532,
+    "executed_endpoint_evaluations": 402,
+    "distinct_endpoints_evaluated": 319,
+    "admitted_endpoint_evaluations": 324,
+    "admitted_fraction": 0.8059701492537313,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 125.37849304100382
+   }
+  },
+  {
+   "index": 608,
+   "returned": 8,
+   "solved_at_k": true,
+   "successful_returned_slots": 1,
+   "any_charged_success": true,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 325,
+   "candidates_until_success": 43,
+   "best_qed_admissible": 0.9190505037002551,
+   "best_qed_any": 0.9190505037002551,
+   "similarity_margin_of_successes": 0.0927536231884058,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5617516627257275,
+   "mean_n_blocks": 1.8478260869565217,
+   "mean_primitive_depth": 5.8478260869565215,
+   "mean_parent_to_child_improvement": -0.05795867897619078,
+   "work": {
+    "proposal_attempts": 417,
+    "executed_endpoint_evaluations": 340,
+    "distinct_endpoints_evaluated": 287,
+    "admitted_endpoint_evaluations": 269,
+    "admitted_fraction": 0.7911764705882353,
+    "charged_scored_endpoints": 47,
+    "zero_scored_charged": 0,
+    "seconds": 258.56357820902485
+   }
+  },
+  {
+   "index": 624,
+   "returned": 8,
+   "solved_at_k": true,
+   "successful_returned_slots": 1,
+   "any_charged_success": true,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 20,
+   "candidates_until_success": 21,
+   "best_qed_admissible": 0.914414332348288,
+   "best_qed_any": 0.914414332348288,
+   "similarity_margin_of_successes": 0.22499999999999998,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5364802718323928,
+   "mean_n_blocks": 1.446808510638298,
+   "mean_primitive_depth": 4.404255319148936,
+   "mean_parent_to_child_improvement": -0.005786004987581785,
+   "work": {
+    "proposal_attempts": 695,
+    "executed_endpoint_evaluations": 578,
+    "distinct_endpoints_evaluated": 413,
+    "admitted_endpoint_evaluations": 369,
+    "admitted_fraction": 0.6384083044982699,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 189.5388324999949
+   }
+  },
+  {
+   "index": 640,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8385529140650376,
+   "best_qed_any": 0.8385529140650376,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.4465515910707653,
+   "mean_n_blocks": 1.9148936170212767,
+   "mean_primitive_depth": 5.48936170212766,
+   "mean_parent_to_child_improvement": -0.0106681311785632,
+   "work": {
+    "proposal_attempts": 367,
+    "executed_endpoint_evaluations": 331,
+    "distinct_endpoints_evaluated": 286,
+    "admitted_endpoint_evaluations": 270,
+    "admitted_fraction": 0.8157099697885196,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 165.31700366700534
+   }
+  },
+  {
+   "index": 656,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7554737670531726,
+   "best_qed_any": 0.7554737670531726,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5630844602108123,
+   "mean_n_blocks": 1.8936170212765957,
+   "mean_primitive_depth": 6.191489361702128,
+   "mean_parent_to_child_improvement": 0.028814117226395285,
+   "work": {
+    "proposal_attempts": 646,
+    "executed_endpoint_evaluations": 536,
+    "distinct_endpoints_evaluated": 395,
+    "admitted_endpoint_evaluations": 371,
+    "admitted_fraction": 0.6921641791044776,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 109.43592895800248
+   }
+  },
+  {
+   "index": 672,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8530173034333294,
+   "best_qed_any": 0.8530173034333294,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.587894797676956,
+   "mean_n_blocks": 2.0833333333333335,
+   "mean_primitive_depth": 6.166666666666667,
+   "mean_parent_to_child_improvement": -0.014406807096500976,
+   "work": {
+    "proposal_attempts": 410,
+    "executed_endpoint_evaluations": 361,
+    "distinct_endpoints_evaluated": 309,
+    "admitted_endpoint_evaluations": 271,
+    "admitted_fraction": 0.7506925207756233,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 131.1633040419838
+   }
+  },
+  {
+   "index": 688,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7892771646885305,
+   "best_qed_any": 0.7892771646885305,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.4067121458800732,
+   "mean_n_blocks": 1.7234042553191489,
+   "mean_primitive_depth": 5.0638297872340425,
+   "mean_parent_to_child_improvement": -0.0035760419137459386,
+   "work": {
+    "proposal_attempts": 362,
+    "executed_endpoint_evaluations": 338,
+    "distinct_endpoints_evaluated": 285,
+    "admitted_endpoint_evaluations": 276,
+    "admitted_fraction": 0.8165680473372781,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 182.41076020800392
+   }
+  },
+  {
+   "index": 704,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8534132672642911,
+   "best_qed_any": 0.8534132672642911,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.6201005321650149,
+   "mean_n_blocks": 1.6595744680851063,
+   "mean_primitive_depth": 5.76595744680851,
+   "mean_parent_to_child_improvement": -0.05215760458026395,
+   "work": {
+    "proposal_attempts": 645,
+    "executed_endpoint_evaluations": 582,
+    "distinct_endpoints_evaluated": 389,
+    "admitted_endpoint_evaluations": 407,
+    "admitted_fraction": 0.6993127147766323,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 76.96047154199914
+   }
+  },
+  {
+   "index": 720,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8157658901910124,
+   "best_qed_any": 0.8157658901910124,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.618244583085593,
+   "mean_n_blocks": 2.0416666666666665,
+   "mean_primitive_depth": 5.9375,
+   "mean_parent_to_child_improvement": -0.026055041527184006,
+   "work": {
+    "proposal_attempts": 424,
+    "executed_endpoint_evaluations": 352,
+    "distinct_endpoints_evaluated": 302,
+    "admitted_endpoint_evaluations": 288,
+    "admitted_fraction": 0.8181818181818182,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 185.37367529197945
+   }
+  },
+  {
+   "index": 736,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7989909306082134,
+   "best_qed_any": 0.7989909306082134,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5858985289426005,
+   "mean_n_blocks": 1.702127659574468,
+   "mean_primitive_depth": 4.808510638297872,
+   "mean_parent_to_child_improvement": 0.001978153686550565,
+   "work": {
+    "proposal_attempts": 395,
+    "executed_endpoint_evaluations": 337,
+    "distinct_endpoints_evaluated": 282,
+    "admitted_endpoint_evaluations": 291,
+    "admitted_fraction": 0.8635014836795252,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 135.1779839170049
+   }
+  },
+  {
+   "index": 752,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 165,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.8418629136459512,
+   "best_qed_any": 0.8418629136459512,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.6547859125540544,
+   "mean_n_blocks": 1.5106382978723405,
+   "mean_primitive_depth": 4.25531914893617,
+   "mean_parent_to_child_improvement": -0.020159847282240764,
+   "work": {
+    "proposal_attempts": 390,
+    "executed_endpoint_evaluations": 357,
+    "distinct_endpoints_evaluated": 299,
+    "admitted_endpoint_evaluations": 281,
+    "admitted_fraction": 0.7871148459383753,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 166.61812220900902
+   }
+  },
+  {
+   "index": 768,
+   "returned": 8,
+   "solved_at_k": true,
+   "successful_returned_slots": 2,
+   "any_charged_success": true,
+   "any_inspected_success": true,
+   "first_inspected_success_position": 39,
+   "candidates_until_success": 40,
+   "best_qed_admissible": 0.9373345612619594,
+   "best_qed_any": 0.9373345612619594,
+   "similarity_margin_of_successes": 0.02450289975144984,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.5438580075806232,
+   "mean_n_blocks": 1.7872340425531914,
+   "mean_primitive_depth": 5.382978723404255,
+   "mean_parent_to_child_improvement": -0.011224758556599643,
+   "work": {
+    "proposal_attempts": 360,
+    "executed_endpoint_evaluations": 336,
+    "distinct_endpoints_evaluated": 282,
+    "admitted_endpoint_evaluations": 276,
+    "admitted_fraction": 0.8214285714285714,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 224.9742142080213
+   }
+  },
+  {
+   "index": 784,
+   "returned": 8,
+   "solved_at_k": false,
+   "successful_returned_slots": 0,
+   "any_charged_success": false,
+   "any_inspected_success": false,
+   "first_inspected_success_position": null,
+   "candidates_until_success": null,
+   "best_qed_admissible": 0.7859138766179774,
+   "best_qed_any": 0.7859138766179774,
+   "similarity_margin_of_successes": null,
+   "returned_uniqueness": 1.0,
+   "returned_diversity": 0.6135256021662145,
+   "mean_n_blocks": 1.5,
+   "mean_primitive_depth": 3.7083333333333335,
+   "mean_parent_to_child_improvement": -0.028764466588313838,
+   "work": {
+    "proposal_attempts": 579,
+    "executed_endpoint_evaluations": 466,
+    "distinct_endpoints_evaluated": 361,
+    "admitted_endpoint_evaluations": 334,
+    "admitted_fraction": 0.7167381974248928,
+    "charged_scored_endpoints": 48,
+    "zero_scored_charged": 0,
+    "seconds": 71.00995416700607
+   }
+  }
+ ]
+}
