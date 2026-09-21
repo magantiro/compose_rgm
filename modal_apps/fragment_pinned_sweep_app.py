@@ -104,7 +104,9 @@ app = modal.App("compose-fragment-pinned-sweep")
     # minutes, so a retry redoes little and makes forward progress.
     retries=modal.Retries(max_retries=3),
 )
-def run_shard(arm: str, task: str, drug: str, seed: int) -> dict:
+def run_shard(
+    arm: str, task: str, drug: str, seed: int, mark_attempts: int = 24
+) -> dict:
     """Run one shard through the real CLI and return its parsed payload."""
     if arm not in {"baseline", "attachment"}:
         raise ValueError(f"unknown arm: {arm!r}")
@@ -118,6 +120,9 @@ def run_shard(arm: str, task: str, drug: str, seed: int) -> dict:
         "--drug", drug,
         "--seed-list", str(seed),
         "--samples", str(SAMPLES),
+        # GLOBAL: one value for the whole panel. The sweep varies it BETWEEN
+        # runs, never between drugs or tasks within one.
+        "--mark-attempts-per-event", str(mark_attempts),
     ]
     if arm == "attachment":
         argv.append("--attachment-control")
@@ -134,14 +139,14 @@ def run_shard(arm: str, task: str, drug: str, seed: int) -> dict:
     return payload
 
 
-def _requested(spec: str) -> list[tuple[str, str, str, int]]:
+def _requested(spec: str, mark_attempts: int) -> list[tuple[str, str, str, int, int]]:
     """Expand 'arm:task,arm:task' into shard tuples, preserving the given order.
 
     Order is the caller's, deliberately: it decides which row completes first
     when a run is interrupted, and the publication-critical gap should close
     before an already-verified one.
     """
-    work: list[tuple[str, str, str, int]] = []
+    work: list[tuple[str, str, str, int, int]] = []
     for group in spec.split(","):
         group = group.strip()
         if not group:
@@ -151,7 +156,7 @@ def _requested(spec: str) -> list[tuple[str, str, str, int]]:
             raise ValueError(f"expected 'arm:task', got {group!r}")
         for drug in DRUGS:
             for seed in SEEDS:
-                work.append((arm.strip(), task.strip(), drug, seed))
+                work.append((arm.strip(), task.strip(), drug, seed, mark_attempts))
     return work
 
 
@@ -160,12 +165,13 @@ def main(
     shards: str = "attachment:scaffold_decoration,baseline:scaffold_decoration,"
                   "attachment:superstructure_generation",
     output_root: str = "diagnostics/fragment_attachment_pinned_v1/shards",
+    mark_attempts: int = 24,
 ) -> None:
     root = Path(output_root)
     if not root.is_absolute():
         root = ROOT / root
 
-    work = _requested(shards)
+    work = _requested(shards, mark_attempts)
     # Skip what already exists, so a resumed run redoes nothing.
     pending = [
         item for item in work
@@ -180,7 +186,7 @@ def main(
     for item, result in zip(
         pending, run_shard.starmap(pending, return_exceptions=True)
     ):
-        arm, task, drug, seed = item
+        arm, task, drug, seed, _attempts = item
         label = f"{arm}/{task}/{drug}/seed{seed}"
         if isinstance(result, Exception):
             failed += 1
