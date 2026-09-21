@@ -38,8 +38,28 @@ class ProgramQueryLedger:
             "schema_version": "program_query_ledger_v1",
         }
         path = self.output / "manifest.json"
-        if path.exists() and json.loads(path.read_text()) != manifest:
-            raise ValueError("query ledger task or budget changed during resume")
+        if path.exists():
+            stored = json.loads(path.read_text())
+            # The TASK and the schema may never move on a resume: a run that changes
+            # what it is optimising is a different experiment wearing the same ledger.
+            fixed = lambda m: {
+                k: v for k, v in m.items() if k not in ("budget", "budget_history")
+            }
+            if fixed(stored) != fixed(manifest):
+                raise ValueError("query ledger task changed during resume")
+            previous = int(stored["budget"])
+            if budget < previous:
+                # A DECREASE is refused: it would make an already-spent run read as
+                # under budget and could mask an overspend. Only growth is safe,
+                # because a charged call can never be un-charged.
+                raise ValueError(
+                    "query ledger budget may not decrease during resume: "
+                    f"{previous} -> {budget}"
+                )
+            history = list(stored.get("budget_history", [previous]))
+            if budget > previous:
+                history.append(budget)
+            manifest["budget_history"] = history
         publish_json(path, manifest)
         for started in sorted(self.output.glob("query_*/started.json")):
             finished = started.with_name("result.json")
