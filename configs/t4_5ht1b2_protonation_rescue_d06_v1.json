@@ -1,0 +1,339 @@
+{
+  "payload": {
+    "allocation_policy": {
+      "empty_optional_protonation_pool": {
+        "behavior": "release the optional expert slot to ordinary exploration",
+        "exploration_slots": 1
+      },
+      "expected_all_pools_nonempty": {
+        "expert_floor_counts": {
+          "anchored_replacement": 1,
+          "protonation_aware_retained_subgraph": 1,
+          "shallow": 1
+        },
+        "exploration_slots": 0,
+        "route_scale_floor_counts": {
+          "large": 3,
+          "medium": 1,
+          "small": 1
+        }
+      },
+      "implementation": "src/compose_v4/control/t4_cold_start_allocation.py",
+      "implementation_revision": "617eef03",
+      "later_rounds": {
+        "cold_start_floors_active": false,
+        "ordinary_exploration_slots": 2
+      },
+      "schema_version": "t4_cold_start_allocation_v1",
+      "selection_basis": "score-free cross-cell cold-start replay: preserve small1, medium1 and large3 route observations, shallow1, anchored1 and one remaining expert slot; assign that slot to protonation when available and otherwise ordinary exploration",
+      "selection_evidence": {
+        "claim_boundary": "score-free deterministic replay only; no new docking or utility claim",
+        "path": "diagnostics/t4_cold_start_allocation_v1/attempt_1/result.json",
+        "payload_sha256": "0d8ce0d79e806d42d7e3635e848a3da543a4fadb402253e20c35aab3be6a28b2",
+        "sha256": "5e600471c4591012f3db29b3b36915eaa4dee9adba1e31b15c6c226041200187",
+        "status": "selected_zero_oracle_policy"
+      },
+      "status": "FROZEN_PRE_SCORE"
+    },
+    "automatic_retries": 0,
+    "batch": 8,
+    "ceiling_derivation": {
+      "attempts": [
+        {
+          "contract_payload_sha256": "4eb6019e0b3600efb48be1b43b0a628bbee155ed7243caa2826653d9af0e1bef",
+          "contract_revision": "superseded; not the contract currently in the tree",
+          "docked": true,
+          "lock": "round_000_lock.json",
+          "lock_payload_sha256": "14851c9c4896d36750bae7253625a225e6237d6ba1711c0c56e8cf199d123f31",
+          "lock_queries": 1,
+          "root_score": -9.7,
+          "run_id": "9332ca69134dbcf8b0358af9c7438d52fa24de1797683355a018060b6e6c5609",
+          "status": "candidate_exhaustion"
+        },
+        {
+          "contract_payload_sha256": "6959ae96cc0387f8116c6fa4fe9b531eb726959d33a17df6d8fbc51f1bb0e306",
+          "contract_revision": "matches configs/t4_held_target_distilled_5ht1b_d06_250.json in the current tree",
+          "docked": true,
+          "lock": "round_000_lock.json",
+          "lock_payload_sha256": "3415903427ba1ac00b6b8ea93d76ab88220435065081e029bed990082f62bc06",
+          "lock_queries": 1,
+          "root_score": -9.8,
+          "run_id": "5f08e547828dd27af91caa2266b3d7f7ec0053021e2695c9802585745f310b1b",
+          "status": "candidate_exhaustion"
+        }
+      ],
+      "basis": "two independent prior attempts, each of which published a root lock carrying exactly one query and then docked it",
+      "corrects": "a single-attempt reading of this cell would have set the ceiling to 249; there are TWO prior d06 attempts and both charged",
+      "precedent": "braf_0 and braf_1 were each debited 2 for the same shape -- two prior attempts, one docked root call each -- and set to 248",
+      "prior_charged_calls": 2,
+      "reconciled_from": "round locks, not results",
+      "rule": "250 authorized per cell minus every call the round-lock policy has consumed on this cell, docked or forfeited"
+    },
+    "cells": [
+      {
+        "cell": "5ht1b_2",
+        "controller_seed": 2026091908,
+        "smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1",
+        "source_global_index": 8
+      }
+    ],
+    "central_claim_under_test": "adding one generic explicit protonation-aware proposal expert to the otherwise unchanged shared controller exposes useful strict-eligible endpoints and permits recursive reward-guided improvement",
+    "charged_calls_per_cell": 248,
+    "claim_boundary": "prospective single-cell protonation-aware rescue on 5HT1B seed 2 at delta=0.6, one docking seed, 248 charged calls. A positive outcome tests the additive protonation support repair and nothing else; it is not a replicated full-T4 result and must never be spliced into the unchanged-v1 panel table without being named as a protonation rescue phase.",
+    "cold_start_floor_rounds": 1,
+    "continuation_policy": {
+      "active_statuses": [
+        "proposals_running",
+        "queries_running",
+        "running"
+      ],
+      "ambiguous_reservation": "wait; never respawn without explicit authoritative prior-call terminal confirmation",
+      "helper": "src/compose_v4/experiments/t4_campaign_driver.py",
+      "reservation_order": "publish reserved, spawn one continuation, publish running with call ID"
+    },
+    "delta": 0.6,
+    "docking_box": [
+      [
+        -26.602,
+        5.277,
+        17.898
+      ],
+      [
+        22.5,
+        22.5,
+        22.5
+      ]
+    ],
+    "docking_seed": 20260919,
+    "editing_support": "Editing-V3 atom_protonation_restate",
+    "endpoint_gate": {
+      "application_time": "completed endpoint only",
+      "qed": ">= 0.6",
+      "sa": "<= 4.0",
+      "similarity": ">= 0.6 against the original root using Morgan radius 2, 2048-bit Tanimoto",
+      "structural_support": "compose_valid"
+    },
+    "evaluator_sha256": {
+      "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+      "receptor": "6ab5ac2d63be05c4d7992f96175258c2b253ccc41539833af4fb12465ee3a59f"
+    },
+    "experimental_setting": "one prospective 248-charged-call 5HT1B seed-2 delta=0.6 rescue under one docking seed, with a fresh archive, a fresh volume and no reuse of prior outcomes",
+    "exploration": 2,
+    "forbidden_runtime_inputs": [
+      "cell-to-winner lookup",
+      "known endpoint or teacher candidate injection",
+      "target-specific chemistry constant",
+      "reported IVG comparator in proposal or selection",
+      "prior scored 5HT1B-2 outcomes",
+      "per-cell hyperparameter branch"
+    ],
+    "frozen_from": {
+      "allowed_adapter_changes": [
+        "cell list restricted to 5ht1b_2",
+        "per-cell budget reduced by the measured prior charged calls",
+        "the protonation-aware expert added to the proposal block and the cold-start floor",
+        "separate rescue app, volume and output namespace"
+      ],
+      "controller_contract": "configs/t4_held_target_distilled_5ht1b_d06_250.json",
+      "forbidden_changes": "delta, endpoint gates, docking box, docking seed, evaluator, controller seed, retries or replacements"
+    },
+    "isolation": {
+      "app": "compose-t4-5ht1b2-protonation-rescue-d06",
+      "guarantee": "app, volume and output namespace all differ from every panel arm and from every region-repair rescue arm",
+      "output_prefix": "/protonation_rescue_5ht1b2_d06",
+      "two_apps_are_required": "the base app copies the contract file INTO the image and bakes COMPOSE-equivalent constants at image build time, so the contract path, volume and output prefix are image-build inputs. delta is a contract-level field, therefore two thresholds are two contracts, two images and two apps. The receptor being identical does not permit sharing. The committed precedent is the existing t4_shared_retained_fiber_5ht1b_{d06,d04}_v1 app pair, which are two full apps differing in six constants.",
+      "volume": "compose-t4-5ht1b2-protonation-rescue-d06",
+      "wrapper": "modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py"
+    },
+    "launch_authority": "NOT LAUNCHED. PENDING owner authorization.",
+    "mechanism": {
+      "admitted_site_rule": "a real nitrogen carrying exactly three single bonds to real atoms, whose (formal_charge, implicit_h) is (+1,1) or (0,0); the action swaps it to the other. This is tertiary-amine protonation at physiological pH and it is reversible by the rule's own symmetry, so invertibility holds by construction.",
+      "expert": "protonation_aware_retained_subgraph",
+      "generality": "the precondition is a state/constraint deficit, not a cell name: any molecule carrying an admissible tertiary-amine site activates this proposal mode. It is not expressible as 'if source == 5ht1b_2'. That 5ht1b_2 may be the only cell in the 15-cell panel that triggers it is expected and is stated here rather than hidden.",
+      "governing_support_contract": {
+        "path": "configs/t4_atom_protonation_restate_support_v1.json",
+        "payload_sha256": "2d606bcb1977ae7c0984ac6490d5e69210ffeeae45863aba86f1d966478442a1",
+        "status": "AUTHORIZED_ZERO_ORACLE_SUPPORT_EXPANSION"
+      },
+      "implementation": [
+        "src/compose_v4/rewrite/operators.py::enumerate_atom_protonation_restates",
+        "src/compose_v4/rewrite/operators.py::is_valid_atom_protonation_restate",
+        "src/compose_v4/control/protonation_aware_proposal.py::propose_protonation_aware_candidates",
+        "src/compose_v4/experiments/t4_shared_controller_scored_runtime.py::protonation_aware_records"
+      ],
+      "name": "protonation-aware retained-subgraph proposal expert",
+      "reads_target_identity": false
+    },
+    "parent_explore": 0.3,
+    "parents": 4,
+    "phase_poll_seconds": 5,
+    "primary_model_output": "FiberControl-selected complete endpoints from one shared additive mixture of shallow, anchored, route-complete and protonation-aware retained-subgraph programs",
+    "prior_operational_waste": 0,
+    "promotion_readout": "best eligible docking score versus the reported IVG mean after all locked calls, plus score-versus-call trajectory and winning lineage",
+    "proposal": {
+      "anchored_replacement": {
+        "draws": 512,
+        "horizon": 3
+      },
+      "protonation_aware_retained_subgraph": {
+        "maximum_active_atoms": 40,
+        "maximum_primitives": 32,
+        "persistent_slots": 48,
+        "retained_maximum_fragment_atoms": 16,
+        "retained_maximum_prefixes": 4096,
+        "retained_maximum_stages": 2,
+        "route_beam_width": 48,
+        "route_candidate_timeout_seconds": 10.0,
+        "route_expansion_width": 48,
+        "route_max_bindings_per_template": 4,
+        "route_maximum_expansions": 4000,
+        "route_pool_size": 192,
+        "route_realization_limit": 96,
+        "shallow_draws": 256,
+        "task_or_target_input_used": false,
+        "teacher_or_endpoint_input_used": false
+      },
+      "route_complete_region": {
+        "beam_width": 48,
+        "expansion_width": 48,
+        "max_bindings_per_template": 4,
+        "maximum_expansions": 4000,
+        "pool_size": 192,
+        "realization_limit": 96,
+        "scale_balanced": true,
+        "training_scope": "one shared task-independent expert fit on all 77 locked routes"
+      },
+      "shallow": {
+        "draws": 480,
+        "horizon": 3
+      }
+    },
+    "proposal_wait_seconds": 2400,
+    "query_wait_seconds": 1200,
+    "reported_ivg": {
+      "delta_0_6": {
+        "5ht1b_2": -10.6
+      },
+      "evidence": "published lead-optimization table, read-only; never a runtime input or selection threshold",
+      "uncertainty": 0.1
+    },
+    "required_separate_launch_authorization": "Explicitly authorize this exact payload SHA-256 and its 248-call ceiling before invoking Modal launch. Preparation alone confers zero scored-call authority.",
+    "round_lock_policy": {
+      "automatic_retries": 0,
+      "continue_after_deadline_with_unresolved_calls_charged": true,
+      "never_resubmit_reserved_or_missing_query_receipt": true,
+      "no_backfill": true,
+      "per_expert_proposal_receipts": true,
+      "per_query_receipts": true,
+      "publish_before_docking": true,
+      "resume_complete_receipts_only": true
+    },
+    "runtime_inputs_sha256": {
+      "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
+      "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
+      "modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py": "b314fe20ec08c0f1d7fb44e0cccd568a048a6ad4220ad9467e9e30e6ac4da174",
+      "src/compose_v4/control/protonation_aware_proposal.py": "97842262c5c7a0aa0f330045f82d107bbd441b63a01b1c4e82f8f1f7134ca413",
+      "src/compose_v4/control/protonation_restate_program.py": "be8502c1488520a72253ce1978a0e55000b17674101643abb4677dcb31cc5626",
+      "src/compose_v4/control/route_distilled_goal_expert.py": "092eb28b6a115a328be7f94ab115317b8f9c196b1f510aaed7a216911cee215e",
+      "src/compose_v4/control/t4_cold_start_allocation.py": "840aa0604477832b9ada86ed0659cefd54375e7ec2266835af66cb109c7dc6d5",
+      "src/compose_v4/experiments/t4_campaign_driver.py": "f7270b73f50cd1b8afdcca6cbe636d857ae3547dc09429e02e4b7642447616ee",
+      "src/compose_v4/experiments/t4_docking_adapter.py": "4d501837c1e61e36b34582be4d60b4f73818a2cbdd61906e0d0f5af20a917d2e",
+      "src/compose_v4/experiments/t4_fiber_campaign.py": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864",
+      "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "aeee1616ed67c5af77de7da8eae4519ddedda929618286d6d966868d543503ed",
+      "src/compose_v4/experiments/t4_protonation_integrated_route_fiber.py": "8ec1218efb282c039aa326ab71a6a31a605fa695458a925dcf364ece6d404910",
+      "src/compose_v4/experiments/t4_protonation_rescue_contract.py": "6d141576e245ef0fbafd2341699e5aee30586b06a47f042fbb9ae492a30a4cca",
+      "src/compose_v4/experiments/t4_shared_controller_scored_runtime.py": "d6aa710b9423ae8bc703d7b5b81206c9f076bfd2a502e8701de850e5974557bd",
+      "src/compose_v4/gates/med_chem_gate.py": "4503e1e72d7c8022b3b5cf24f36bfd2e63dea5a4eb261cb018ce06d508928946",
+      "src/compose_v4/rewrite/action_codec_v5.py": "dd2b85dbf49e9ae2c3c6bcf77708ab2a49e7e9ab6035a24c6ddccdbea0bd32b1",
+      "src/compose_v4/rewrite/kernel.py": "afdda7d41ee3f437aa1a72e90341dc81f0f776c6e1cb6799f1ad9ff75d5c3e99",
+      "src/compose_v4/rewrite/operators.py": "a1542f2cd7bdae392ef7618636ab8ca9ec49215cda9b8927113e4daf2c9b5c0f"
+    },
+    "runtime_pin_changes": {
+      "added": {
+        "src/compose_v4/control/protonation_restate_program.py": "be8502c1488520a72253ce1978a0e55000b17674101643abb4677dcb31cc5626",
+        "src/compose_v4/control/route_distilled_goal_expert.py": "092eb28b6a115a328be7f94ab115317b8f9c196b1f510aaed7a216911cee215e",
+        "src/compose_v4/experiments/t4_shared_controller_scored_runtime.py": "d6aa710b9423ae8bc703d7b5b81206c9f076bfd2a502e8701de850e5974557bd",
+        "src/compose_v4/gates/med_chem_gate.py": "4503e1e72d7c8022b3b5cf24f36bfd2e63dea5a4eb261cb018ce06d508928946"
+      },
+      "added_rationale": "everything that decides whether a number is produced must be pinned. t4_shared_controller_scored_runtime.py holds protonation_aware_records, which is the function that calls Fiber.check; med_chem_gate.py holds structurally_valid, which decides endpoint eligibility; protonation_restate_program.py and route_distilled_goal_expert.py are on the proposal path. None of them appeared in any existing pin block, so without these entries they would be free to drift.",
+      "app_pin_is_the_safety_guard": "_validate_task re-hashes every runtime_inputs_sha256 entry including the app path, so a contract pinning the protonation-wired app cannot run against an unwired one",
+      "moved": {
+        "src/compose_v4/experiments/t4_fiber_campaign.py": {
+          "cause": "the region-law wiring merge moved this file; the value now matches what the region-repair arms pin",
+          "from": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+          "to": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864"
+        }
+      },
+      "verified_against": "recomputed from the merged tree at the branch HEAD, not copied from another contract or a message"
+    },
+    "schema_version": "t4_5ht1b2_protonation_rescue_contract_v2",
+    "scientific_problem": "test whether the smallest general Editing-V3 support repair converts the previously exhausted strict 5HT1B seed-2 cell into an autonomously searchable reward-bearing trajectory",
+    "separation_from_region_repair_rescue": {
+      "ASSERTION": "THIS ARM USES THE PROTONATION-AWARE PROPOSAL, NOT THE REGION-REPAIR LAW. The two mechanisms must never be mixed in one arm or the mechanism becomes unattributable.",
+      "concurrent_arms": [
+        "configs/t4_region_repair_rescue_braf_d06_v1.json",
+        "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+        "configs/t4_region_repair_rescue_fa7_d04_v1.json"
+      ],
+      "region_law_declared": false,
+      "region_law_must_be_absent": "proposal.shallow carries no region_law field. assert_no_unconsumable_region_law_request raises on every proposal worker if region_law is declared anywhere it cannot be consumed, so a stray declaration fails closed rather than silently blending the two mechanisms.",
+      "why_5ht1b_2_was_excluded_from_those_arms": "its witnesses need a two-boundary interior excision plus one reattachment bond, a region shape the bridge-separated law does not draw; the production charge policy refuses 9 of 16 pendant regions on this source; and bond_insert is outside the frozen Active8 codec surface"
+    },
+    "status": "PREPARED_AWAITING_OWNER_AUTHORIZATION",
+    "support": "compose_valid",
+    "supporting_evidence": {
+      "launch_feasibility_gate": {
+        "note": "the gate measures this contract's settings; only this supporting_evidence block was added afterwards, so the contract revision it names is this contract minus this block",
+        "output": "diagnostics/t4_5ht1b2_protonation_rescue_feasibility_gate_v1/attempt_1/result.json",
+        "status": "REQUIRED BEFORE AUTHORIZATION; result recorded separately",
+        "tool": "tools/t4_5ht1b2_protonation_rescue_feasibility_gate.py",
+        "what_it_adds_over_the_relayed_gate": [
+          "it calls the production Fiber.check unmodified, through t4_shared_controller_scored_runtime.protonation_aware_records, rather than restating the thresholds",
+          "it runs at BOTH delta 0.6 and delta 0.4, because delta is contract-level and the two arms are two contracts",
+          "it publishes per-endpoint similarity/QED/SA margins so threshold-hugging endpoints are visible",
+          "it reports elements, net formal charge, radical count and fragment count per endpoint",
+          "it perturbs one contract setting and requires the result to change, so a proposal block that nothing reads fails the gate"
+        ]
+      },
+      "zero_oracle_proposal_gate": {
+        "claim_boundary": "autonomous proposal support and free endpoint feasibility only; no docking utility was measured",
+        "delta_measured": 0.6,
+        "measured_on_root": "this arm's cell, source_global_index 8",
+        "path": "diagnostics/t4_protonation_aware_proposal_gate_v1/attempt_1/result.json",
+        "payload_sha256": "69c718b442509324bf28f1acc46b6b7bf49ced0554f70cc06d3a979339c59b11",
+        "predeclared_contrast_roots": [
+          "registry index 0 (parp1): a NEUTRAL tertiary amine exercising the REVERSE (0,0)->(+1,1) transition, which is the generality evidence that the rule is not charge-source-specific",
+          "registry index 13 (jak2): a root whose narrow protonation fiber is EMPTY, which must abstain explicitly rather than fall back to Editing-V2"
+        ],
+        "reported": {
+          "docking_calls": 0,
+          "exact_execution": "1766/1766 across all frozen roots; 1078/1078 on this root",
+          "modal_launches": 0,
+          "oracle_calls": 0,
+          "primary_fully_eligible_unique_endpoints": 14,
+          "primary_fully_eligible_unique_murcko_scaffolds": 8
+        },
+        "sha256": "bec9bc6e697a0178f9725df9a83a53de5d32bd9b985cfd9522790cd41cabd6db",
+        "status": "RELAYED, NOT RE-MEASURED HERE",
+        "two_caveats_this_contract_records_rather_than_inherits": {
+          "endpoint_gate_was_transcribed_not_called": "that gate evaluates eligibility at its line 129 as 'sim >= delta, qed >= 0.6, sa <= 4.0', which is a TRANSCRIPTION of the thresholds rather than a call to the production Fiber.check. A transcription omits structurally_valid -- the med-chem gate that removes radicals, hypervalent sulfur and iodine and cumulenes -- and the heavy-atom and multi-fragment refusals. Its 14 is therefore an UPPER BOUND on what the campaign's own gate would admit, not the campaign number.",
+          "software_environment_drift": "that gate ran on rdkit 2026.03.6 / numpy 2.5.3 / python 3.12.9. The production image pins rdkit 2024.3.5 / numpy 1.26.4 / python 3.11. The endpoint-gate path was previously measured byte-identical between rdkit 2025.09.6 and 2024.3.5 on 8,183 real endpoints, but 2026.03.6 is a further step and is NOT covered by that measurement."
+        }
+      }
+    },
+    "total_charged_call_ceiling": 248,
+    "value_penalty": 1.0,
+    "versioned_rescue_requirement": {
+      "must_report": [
+        "the rescue configuration name and its payload sha256",
+        "that the mechanism is the protonation-aware proposal expert, NOT the region-repair region-draw law",
+        "the per-cell ceiling and the prior charged calls it was reduced by",
+        "that the proposal law differs from the v1 arm it would be compared against",
+        "that this is one cell at one docking seed, not a replicated panel result"
+      ],
+      "rule": "never splice silently into an unchanged-v1 table",
+      "version": "protonation_rescue_v1"
+    }
+  },
+  "payload_sha256": "d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb"
+}

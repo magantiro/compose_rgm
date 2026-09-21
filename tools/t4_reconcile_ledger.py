@@ -120,6 +120,26 @@ ARMS: dict[str, tuple[str, str, str]] = {
         "fa7",
         "configs/t4_region_repair_rescue_fa7_d04_v1.json",
     ),
+    # Protonation-aware rescue arms for 5ht1b_2, the last unresolved panel cell, which is
+    # unresolved at BOTH thresholds.  These are a DIFFERENT mechanism from the three
+    # region-repair arms above -- the protonation-aware proposal expert, not the
+    # bridge-separated region-draw law -- and they are registered separately so that a
+    # result is attributable to one mechanism or the other, never to their union.
+    # Ceilings are 248 (d06) and 249 (d04), not 250: the d06 cell has TWO prior attempts
+    # that each docked one root call, and the d04 cell has one published root lock that
+    # reserved a call and never docked it.  Read the budget from the contract, never from
+    # the arm name.  Registered before launch so the cells are visible from the moment
+    # their contracts exist; an arm whose volume does not exist yet reports as unlaunched.
+    "5ht1b_d06_protonation": (
+        "compose-t4-5ht1b2-protonation-rescue-d06",
+        "5ht1b",
+        "configs/t4_5ht1b2_protonation_rescue_d06_v1.json",
+    ),
+    "5ht1b_d04_protonation": (
+        "compose-t4-5ht1b2-protonation-rescue-d04",
+        "5ht1b",
+        "configs/t4_5ht1b2_protonation_rescue_d04_v1.json",
+    ),
 }
 
 TOLERANCE = 1e-9
