@@ -423,6 +423,95 @@ def sample_shard(task: dict) -> dict:
 
 
 @app.function(image=image, volumes={str(VOL): volume}, timeout=3600, cpu=4, memory=8192)
+def score_available(seed: int, horizon: float = OPERATIONAL_HORIZON) -> dict:
+    """Score whatever shards have landed for one seed, WITHOUT requiring the
+    full run.
+
+    ``score_seed`` deliberately refuses a partial seed, because the headline
+    row must be the complete 1,000.  This variant exists so an in-flight run
+    can be reported honestly at its true N: it returns ``attempted`` and
+    ``complete`` so a partial number can never be mistaken for the full one.
+    """
+
+    from rdkit import Chem, RDLogger
+
+    from compose_v4.eval.denovo_benchmark import (
+        denovo_benchmark_metrics,
+        strained_ring_census,
+    )
+
+    RDLogger.DisableLog("rdApp.*")
+    volume.reload()
+    _assert_pinned_inputs()
+
+    shard_dir = VOL / "shards" / horizon_tag(horizon)
+    paths = sorted(shard_dir.glob(f"seed{seed}_*.json"))
+    records: list[dict] = []
+    total_expected = None
+    for path in paths:
+        payload = json.loads(path.read_text())
+        total_expected = int(payload.get("total", 0)) or total_expected
+        records.extend(payload["records"])
+    records.sort(key=lambda item: item["index"])
+
+    generated = [item["smiles"] or "" for item in records]
+    metrics = denovo_benchmark_metrics(generated)
+
+    import numpy as np
+
+    distinct = sorted(
+        {
+            Chem.MolToSmiles(Chem.MolFromSmiles(t))
+            for t in generated
+            if t and Chem.MolFromSmiles(t) is not None
+        }
+    )
+    metrics["strained_ring_census"] = strained_ring_census(distinct)
+    metrics["seed"] = seed
+    metrics["horizon"] = horizon
+    metrics["shards_present"] = len(paths)
+    metrics["target_total"] = total_expected
+    metrics["complete"] = bool(total_expected and len(records) == total_expected)
+    metrics["mean_events"] = (
+        float(np.mean([item["events"] for item in records])) if records else 0.0
+    )
+    metrics["connected_fraction"] = (
+        float(np.mean([bool(i.get("connected")) for i in records])) if records else 0.0
+    )
+    metrics["valid_state_fraction"] = (
+        float(np.mean([bool(i.get("valid_state")) for i in records])) if records else 0.0
+    )
+    metrics["mean_heavy_atoms"] = (
+        float(
+            np.mean(
+                [
+                    Chem.MolFromSmiles(t).GetNumAtoms()
+                    for t in generated
+                    if t and Chem.MolFromSmiles(t) is not None
+                ]
+            )
+        )
+        if generated
+        else 0.0
+    )
+    metrics["versions"] = _runtime_versions()
+
+    out = VOL / "partial_reports" / horizon_tag(horizon) / f"seed{seed}.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(metrics, indent=2, default=str))
+    volume.commit()
+    return metrics
+
+
+@app.local_entrypoint()
+def score_available_entry(
+    seed: int = 20260920, horizon: float = OPERATIONAL_HORIZON
+) -> None:
+    print(json.dumps(score_available.remote(seed, horizon), indent=2, default=str))
+
+
+
+@app.function(image=image, volumes={str(VOL): volume}, timeout=3600, cpu=4, memory=8192)
 def score_seed(
     seed: int,
     samples_per_seed: int,
