@@ -35,33 +35,33 @@
       "complete": false,
       "copied_from": null,
       "constraint_decomposition": {
-        "strict_benchmark_validity_pct": 7.666666666666667,
-        "chemical_validity_of_committed_pct": 74.33333333333333,
-        "committed_per_attempt_pct": 74.33333333333333,
-        "fragment_containment_of_committed_pct": 100.0,
-        "endpoint_constraint_failures": 200,
-        "trajectories_hitting_rejection_budget": 91
+        "strict_benchmark_validity_pct": 43.333333333333336,
+        "chemical_validity_of_committed_pct": 89.29629629629629,
+        "committed_per_attempt_pct": 89.29629629629629,
+        "fragment_containment_of_committed_pct": 99.54375777685608,
+        "endpoint_constraint_failures": 1241,
+        "trajectories_hitting_rejection_budget": 362
       },
       "COMPOSE": {
         "validity": {
-          "mean": 7.666666666666667,
-          "std": 1.247219128924647
+          "mean": 43.333333333333336,
+          "std": 0.6350528962771197
         },
         "uniqueness": {
-          "mean": 100.0,
-          "std": 0.0
+          "mean": 99.93386243386243,
+          "std": 0.09353264301409912
         },
         "quality": {
-          "mean": 0.6666666666666666,
-          "std": 0.4714045207910317
+          "mean": 8.11111111111111,
+          "std": 0.09072184232530257
         },
         "diversity": {
-          "mean": 0.7252546296296295,
-          "std": 0.015848921555483765
+          "mean": 0.7776037888905835,
+          "std": 0.0029732644391482943
         },
         "distance": {
-          "mean": 0.772068331106178,
-          "std": 0.016008384441554672
+          "mean": 0.7863131409001847,
+          "std": 0.004072905902452831
         }
       },
       "InVirtuoGen": {
@@ -230,6 +230,108 @@
         "distance": {
           "mean": 0.776,
           "std": 0.036
+        }
+      }
+    },
+    {
+      "task": "scaffold_decoration",
+      "category": "decoration",
+      "complete": false,
+      "copied_from": null,
+      "constraint_decomposition": {
+        "strict_benchmark_validity_pct": 7.833333333333333,
+        "chemical_validity_of_committed_pct": 98.5,
+        "committed_per_attempt_pct": 98.5,
+        "fragment_containment_of_committed_pct": 99.83079526226734,
+        "endpoint_constraint_failures": 544,
+        "trajectories_hitting_rejection_budget": 11
+      },
+      "COMPOSE": {
+        "validity": {
+          "mean": 7.833333333333333,
+          "std": 1.4337208778404378
+        },
+        "uniqueness": {
+          "mean": 100.0,
+          "std": 0.0
+        },
+        "quality": {
+          "mean": 4.333333333333333,
+          "std": 1.6499158227686108
+        },
+        "diversity": {
+          "mean": 0.49606743909685086,
+          "std": 0.19435119651510724
+        },
+        "distance": {
+          "mean": 0.7037894625288157,
+          "std": 0.01438709716607642
+        }
+      },
+      "InVirtuoGen": {
+        "validity": {
+          "mean": 90.47,
+          "std": 0.5312459150169732
+        },
+        "uniqueness": {
+          "mean": 87.26,
+          "std": 1.3452861244657535
+        },
+        "quality": {
+          "mean": 39.4,
+          "std": 0.6976149845485433
+        },
+        "diversity": {
+          "mean": 0.55,
+          "std": 0.0011982701834689269
+        },
+        "distance": {
+          "mean": null,
+          "std": null
+        }
+      },
+      "GenMol": {
+        "validity": {
+          "mean": 96.6,
+          "std": 0.8
+        },
+        "uniqueness": {
+          "mean": 82.7,
+          "std": 1.8
+        },
+        "quality": {
+          "mean": 31.8,
+          "std": 0.5
+        },
+        "diversity": {
+          "mean": 0.591,
+          "std": 0.001
+        },
+        "distance": {
+          "mean": 0.651,
+          "std": 0.001
+        }
+      },
+      "SAFE-GPT": {
+        "validity": {
+          "mean": 97.7,
+          "std": 0.3
+        },
+        "uniqueness": {
+          "mean": 74.7,
+          "std": 2.5
+        },
+        "quality": {
+          "mean": 10.0,
+          "std": 1.4
+        },
+        "diversity": {
+          "mean": 0.575,
+          "std": 0.008
+        },
+        "distance": {
+          "mean": 0.625,
+          "std": 0.009
         }
       }
     }

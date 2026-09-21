@@ -179,6 +179,17 @@ def summarise(table: dict, expected_drugs: int, expected_seeds: int) -> dict:
             # that did NOT self-censor on the prompt would report, and it is the
             # like-for-like comparison against a baseline whose evaluator never
             # checks the fragment at all.
+            # THE BY-CONSTRUCTION CLAIM, stated as its own ratio: of the states
+            # COMPOSE actually committed, how many are valid connected
+            # molecules. Committed states are complete, supported and connected
+            # by construction and the legal-event fiber is validity-closed, so
+            # this is expected to be exactly 100% and is worth reporting
+            # separately from any benchmark validity, which also folds in
+            # "the trajectory produced nothing" and "the prompt was not
+            # satisfied".
+            "chemically_valid_share_of_committed_pct": 100.0
+            * totals["committed_chemically_valid"]
+            / committed,
             "chemical_validity_of_committed_pct": 100.0
             * totals["committed_chemically_valid"]
             / attempts,
