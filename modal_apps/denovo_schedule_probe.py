@@ -226,7 +226,7 @@ def catalog_identity(model_label: str) -> dict:
     from compose_v4.eval.denovo_schedule_probe import small_ring_category_mask
 
     _assert_pinned(model_label)
-    model, _payload = _load_model(model_label)
+    model, payload = _load_model(model_label)
     category = small_ring_category_mask(
         model.ring_system_templates, maximum_size=SMALL_RING_MAX
     )
