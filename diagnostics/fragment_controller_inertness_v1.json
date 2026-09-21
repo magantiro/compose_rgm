@@ -1,0 +1,18 @@
+{
+  "schema": "compose_fragment_controller_inertness_v1",
+  "question": "does switching the attachment controller on change anything on a task that declares no attachment interface?",
+  "task": "superstructure_generation",
+  "paired_rows": 30,
+  "declared_interface_counts_seen": [
+    0
+  ],
+  "rows_whose_molecules_differ": [],
+  "controller_counters_in_attachment_arm": {
+    "redirections": 0,
+    "interface_rejections": 0,
+    "staging_rejections": 0,
+    "separation_failures": 0
+  },
+  "verdict": "INERT",
+  "note": "Molecule-level equality is the claim; the controller counters are independent evidence, since a controller that redirected or rejected anything was not inert whatever the molecules say. Metrics are deliberately NOT compared: official diversity is hash-order dependent at ~1 ULP across processes."
+}
