@@ -2975,3 +2975,41 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   `action_codec_v4.supported_executor_rules()`, which is exactly `atom_delete, atom_insert,
   atom_restate_semantic, bond_reorder, bond_reroute, cycle_close, cycle_open,
   ring_system_restate`. T4 learned this the expensive way.
+
+## 2026-09-21 (the transport dip is an ORDERING artifact, and the alignment test was nearly vacuous)
+
+- **THE DIP HAS A MECHANISM AND IT IS THE ORDER.** Prune-then-install strips structure the
+  target does not want BEFORE adding structure it does, so the midpoint is smaller than
+  both ends and scores below the source. Installing before deleting keeps the molecule out
+  of that trough. MEASURED over 35 declared-target pairs: prune-first dips on 10, and
+  **interleaving removes the dip on 9 of 10** -- e.g. 0.2235 -> 0.1014 -> 0.6515 becomes
+  0.2235 -> 0.2826 -> 0.6515 with the same endpoints. **BUT interleaving preserves the
+  endpoint on only 6 of 10**, so it is a per-transport choice under a validity constraint,
+  never a blanket default.
+- **DIP SHAPE: DEEP BUT NARROW.** Relative depth median **65.9%** (min 13.0%, max 100.0%),
+  with **0 of 10 shallower than 10%** and 8 of 10 deeper than 25% -- but width is **median
+  1 stage, max 1**. So the objective does not merely wobble, it collapses; it just does so
+  for a single stage. That distribution is what separates "a selection tolerance can absorb
+  this" from "the channel needs protected budget", and it says the former is implausible
+  while the latter need only cover one stage.
+- **THE ALTERNATIVE-ALIGNMENT TEST WAS NEARLY VACUOUS AND I ALMOST SHIPPED IT AS A
+  DECISIVE NEGATIVE.** The first run returned
+  `NO_ALIGNMENT_IS_MONOTONE_THE_OBJECTIVE_CANNOT_GUIDE_TRANSPORT`, 0 of 10 rescued. Then:
+  **26 of 35 pairs admit exactly ONE alignment, and 7 of the 10 dipping pairs had no
+  alternative at all**, so "not rescued" was definitionally true for them. `correspondences`
+  derives its top-K from `GetSubstructMatches` of a single MCS, so alignment diversity
+  exists only for SYMMETRIC molecules -- it is not a general lever. Among the 3 dipping
+  pairs that did have an alternative, **3 of 3 were rescued**, which points the same way as
+  interleaving but at n=3 is indicative, not decisive. **Check that the alternative being
+  tested EXISTS before reporting that it failed** -- a "0 of 10" over a set where 7 had
+  nothing to choose from is the same class as a metric that cannot vary.
+- **Both levers agree that trajectory shape is SELECTABLE**, which unblocks the compiler
+  with one requirement: stage ordering must be chosen per transport on trajectory shape
+  subject to validity and endpoint preservation, not fixed to prune-first.
+- **Why this matters beyond the planner:** it supplies the mechanism for the headline PMO
+  result. On the matched 1,000-call celecoxib A/B, arm B's best froze at 0.3838 at call 500
+  and never improved while its top ten kept filling in. A transport path existed; the
+  selection signal walked the controller off it, because accepting the next stage meant
+  accepting a molecule scoring ~66% worse for one round. It also re-justifies the
+  basin-stratified exploration floor on stronger grounds than "it is free": protected
+  budget is exactly what a channel needs to cross a one-stage trough.

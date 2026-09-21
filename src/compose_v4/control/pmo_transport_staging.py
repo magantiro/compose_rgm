@@ -41,7 +41,7 @@ the empirical question, not an assumption.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from itertools import pairwise
+from itertools import pairwise, zip_longest
 
 from rdkit import Chem, DataStructs
 from rdkit.Chem import rdFingerprintGenerator
@@ -86,6 +86,35 @@ class Stage:
             "similarity_to_target": self.similarity_to_target,
             "size": self.size,
         }
+
+
+def _dip_shape(source_similarity: float | None, similarities: list[float]) -> dict:
+    """How far below the starting point the path goes, and for how many stages.
+
+    `width` is the LONGEST CONSECUTIVE run of stage endpoints below the source, not the
+    total count: a controller has to tolerate a contiguous stretch of worse intermediates,
+    and two isolated dips are a different problem from one sustained trough.
+    """
+    if source_similarity is None or len(similarities) < 2:
+        return {
+            "dip_depth_absolute": None,
+            "dip_depth_relative": None,
+            "dip_width_stages": None,
+        }
+    after = similarities[1:]
+    below = [value < source_similarity - 1e-9 for value in after]
+    longest = current = 0
+    for flag in below:
+        current = current + 1 if flag else 0
+        longest = max(longest, current)
+    depth = max(0.0, source_similarity - min(after))
+    return {
+        "dip_depth_absolute": round(depth, 6),
+        "dip_depth_relative": (
+            round(depth / source_similarity, 6) if source_similarity > 0 else None
+        ),
+        "dip_width_stages": longest,
+    }
 
 
 def _without_stereo(mol):
@@ -228,7 +257,10 @@ def _atomic_groups(mol, ordered: tuple[int, ...]) -> list[list[int]]:
 
 
 def split(
-    correspondence: Correspondence, *, max_primitives: int = DEFAULT_MAX_PRIMITIVES
+    correspondence: Correspondence,
+    *,
+    max_primitives: int = DEFAULT_MAX_PRIMITIVES,
+    interleave: bool = False,
 ) -> list[Stage]:
     """Cut the transport into stages of at most `max_primitives` operations.
 
@@ -236,6 +268,14 @@ def split(
     partial ring does not sanitize. A single ring system larger than `max_primitives`
     would therefore force an oversized stage; `validate_staging` reports
     `respects_ceiling` so that case is visible rather than silently accepted.
+
+    ``interleave`` alternates deletion and installation units instead of running every
+    deletion first. It exists because the DIP has a mechanism: prune-then-install strips
+    structure the target does not want before adding structure it does, so the midpoint
+    is smaller than both ends and scores below the source. Interleaving is the direct
+    test of whether that dip is an artifact of the ORDER rather than a property of the
+    transport -- alternative ALIGNMENTS could not answer it, because 26 of 35 real pairs
+    admit only one alignment and the choice only exists for symmetric molecules.
     """
     if max_primitives < 1:
         raise ValueError("a stage must hold at least one primitive")
@@ -255,6 +295,20 @@ def split(
     for group in _atomic_groups(target, correspondence.install_order):
         units.append([("install", index) for index in group])
     units = [unit for unit in units if unit]
+
+    if interleave:
+        deletes = [u for u in units if u and u[0][0] == "delete"]
+        installs = [u for u in units if u and u[0][0] == "install"]
+        bonds = [u for u in units if u and u[0][0] == "bond"]
+        woven: list[list[tuple[str, object]]] = []
+        # Install FIRST at each step: adding target structure before removing source
+        # structure keeps the molecule from passing through its smallest point.
+        for install, delete in zip_longest(installs, deletes, fillvalue=None):
+            if install:
+                woven.append(install)
+            if delete:
+                woven.append(delete)
+        units = woven + bonds
 
     chunks: list[list[tuple[str, object]]] = []
     current: list[tuple[str, object]] = []
@@ -352,6 +406,11 @@ def validate_staging(
             )
         ),
         "minimum_similarity_on_path": min(similarities) if similarities else None,
+        # DEPTH and WIDTH, not merely whether a dip occurs. A transport dipping 2% for one
+        # stage is navigable by almost any tolerance; one dipping 40% for two stages needs
+        # genuinely protected budget. That distribution is the difference between a
+        # tunable parameter and an architectural requirement.
+        **_dip_shape(source_similarity, similarities),
         "similarity_trajectory": similarities,
         "reaches_target": flat_final is not None and flat_final == flat_target,
         "reaches_target_with_stereochemistry": final is not None and final == canonical_target,

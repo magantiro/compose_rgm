@@ -113,6 +113,58 @@ def test_the_dip_detector_does_not_fire_on_a_monotone_transport():
     assert checks["similarity_monotone_nondecreasing"] is True
 
 
+def test_interleaving_removes_the_dip_on_a_dipping_transport():
+    """The dip has a MECHANISM and it is the ORDER, not the transport.
+
+    Prune-then-install strips structure the target does not want before adding structure
+    it does, so the midpoint is smaller than both ends and scores below the source.
+    Installing before deleting keeps the molecule out of that trough. MEASURED across the
+    declared-target set: 9 of 10 dipping transports become monotone under interleaving.
+    """
+    correspondence = correspondences(DIPPING_SOURCE, DIPPING_TARGET)[0]
+    prune_first = validate_staging(
+        correspondence,
+        split(correspondence, max_primitives=DEFAULT_MAX_PRIMITIVES),
+        max_primitives=DEFAULT_MAX_PRIMITIVES,
+    )
+    woven = validate_staging(
+        correspondence,
+        split(correspondence, max_primitives=DEFAULT_MAX_PRIMITIVES, interleave=True),
+        max_primitives=DEFAULT_MAX_PRIMITIVES,
+    )
+    assert prune_first["dips_below_source"] is True
+    assert woven["dips_below_source"] is False
+    assert woven["dip_depth_relative"] == 0.0
+    # The endpoint must not change: a reordering that reaches somewhere else is not a
+    # rescue. MEASURED: interleaving preserves it on 6 of 10, so it is a per-transport
+    # choice under a validity constraint, never a blanket default.
+    assert woven["final_smiles"] == prune_first["final_smiles"]
+
+
+def test_dip_depth_and_width_are_reported_not_just_a_boolean():
+    """A 2% dip for one stage is navigable; a 40% dip for two stages needs protected
+    budget. MEASURED distribution: median depth 65.9% but median width ONE stage."""
+    correspondence = correspondences(DIPPING_SOURCE, DIPPING_TARGET)[0]
+    checks = validate_staging(
+        correspondence,
+        split(correspondence, max_primitives=DEFAULT_MAX_PRIMITIVES),
+        max_primitives=DEFAULT_MAX_PRIMITIVES,
+    )
+    assert checks["dip_depth_relative"] > 0.1
+    assert checks["dip_width_stages"] >= 1
+    assert checks["dip_depth_absolute"] > 0.0
+
+
+def test_dip_shape_is_unevaluated_when_there_is_nothing_to_compare():
+    correspondence = correspondences(PARACETAMOL, PARACETAMOL_OME)[0]
+    checks = validate_staging(
+        correspondence, split(correspondence), max_primitives=DEFAULT_MAX_PRIMITIVES
+    )
+    if checks["similarity_points"] < 2:
+        assert checks["dip_depth_relative"] is None
+        assert checks["dip_width_stages"] is None
+
+
 def test_stereochemistry_is_excluded_from_the_target_comparison():
     """COMPOSE's MolecularGraph carries no stereo, so a rebuilt molecule can never
     reproduce [C@H]. Both comparisons are reported; the stereo-blind one is the verdict."""

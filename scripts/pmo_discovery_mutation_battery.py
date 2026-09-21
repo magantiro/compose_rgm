@@ -306,6 +306,22 @@ MUTATIONS = (
         expect_red=("test_a_staged_transport_can_dip_below_its_own_starting_similarity",),
         suite="tests/test_pmo_transport_staging.py",
     ),
+    Mutation(
+        name="interleaving_is_ignored_and_always_prunes_first",
+        path=ROOT / "src/compose_v4/control/pmo_transport_staging.py",
+        old="    if interleave:",
+        new="    if False:",
+        expect_red=("test_interleaving_removes_the_dip_on_a_dipping_transport",),
+        suite="tests/test_pmo_transport_staging.py",
+    ),
+    Mutation(
+        name="dip_depth_is_collapsed_to_a_boolean",
+        path=ROOT / "src/compose_v4/control/pmo_transport_staging.py",
+        old="    depth = max(0.0, source_similarity - min(after))",
+        new="    depth = 0.0",
+        expect_red=("test_dip_depth_and_width_are_reported_not_just_a_boolean",),
+        suite="tests/test_pmo_transport_staging.py",
+    ),
     # ---- Positive control: bytes change, behaviour does not ----
     Mutation(
         name="POSITIVE_CONTROL_cosmetic_comment",
