@@ -171,6 +171,7 @@ class LearnedSuccessorPrior:
     cache_entries: int = 64
     verify_successors: bool = True
     _law_cache: OrderedDict = field(default_factory=OrderedDict, repr=False)
+    _weight_cache: OrderedDict = field(default_factory=OrderedDict, repr=False)
     _stats: dict = field(default_factory=dict, repr=False)
 
     def __post_init__(self) -> None:
@@ -260,6 +261,21 @@ class LearnedSuccessorPrior:
         if not candidates:
             raise LearnedSuccessorPriorError("cannot weight an empty candidate list")
 
+        # `order` and `probability_of` ask for the same weights back to back, and
+        # on the verified-successor family that means re-running real executor
+        # calls.  Memoize on the exact inputs.
+        cache_key = (
+            self._state_identity(source),
+            family,
+            len(candidates),
+            float(self.floor),
+            float(self.temperature),
+        )
+        cached = self._weight_cache.get(cache_key)
+        if cached is not None:
+            self._weight_cache.move_to_end(cache_key)
+            return cached.copy()
+
         rule = FAMILY_TO_EXECUTOR_RULE[family]
         law = self._marked_law(source)
         table: dict = {}
@@ -291,10 +307,15 @@ class LearnedSuccessorPrior:
 
         peak = float(probabilities.max())
         if peak <= 0.0:
-            return np.full(len(candidates), 1.0 / len(candidates), dtype=float)
-        relative = np.power(probabilities / peak, 1.0 / float(self.temperature))
-        weighted = np.maximum(float(self.floor), relative)
-        return weighted / float(weighted.sum())
+            result = np.full(len(candidates), 1.0 / len(candidates), dtype=float)
+        else:
+            relative = np.power(probabilities / peak, 1.0 / float(self.temperature))
+            weighted = np.maximum(float(self.floor), relative)
+            result = weighted / float(weighted.sum())
+        self._weight_cache[cache_key] = result
+        while len(self._weight_cache) > int(self.cache_entries):
+            self._weight_cache.popitem(last=False)
+        return result.copy()
 
     def _same_successor(self, source, family: str, action, mark) -> bool:
         """Do the candidate and its joined mark reach the same molecule?"""
