@@ -1,0 +1,69 @@
+{
+  "arms": {
+    "A_baseline": {
+      "auc_top10_at_budget": 0.24887376757580607,
+      "best_score": 0.3364485981308411,
+      "charged_oracle_calls": 1000,
+      "checkpoints": {
+        "1000": {
+          "best": 0.3364485981308411,
+          "top10": 0.3287432287302894
+        },
+        "250": {
+          "best": 0.23853211009174313,
+          "top10": 0.2177022390835937
+        },
+        "500": {
+          "best": 0.2857142857142857,
+          "top10": 0.27128248443175995
+        },
+        "750": {
+          "best": 0.30612244897959184,
+          "top10": 0.29297647206336447
+        }
+      },
+      "run_id": "8d02a667384b248fed0a5fbb432a93714cc2a3a127ffdc05a4153f37ac3f89a0"
+    },
+    "B_memory": {
+      "auc_top10_at_budget": 0.3138190421651204,
+      "best_score": 0.3838383838383838,
+      "charged_oracle_calls": 1000,
+      "checkpoints": {
+        "1000": {
+          "best": 0.3838383838383838,
+          "top10": 0.3713838383838385
+        },
+        "250": {
+          "best": 0.34408602150537637,
+          "top10": 0.31021252686363193
+        },
+        "500": {
+          "best": 0.3838383838383838,
+          "top10": 0.35559032500586146
+        },
+        "750": {
+          "best": 0.3838383838383838,
+          "top10": 0.36714657273837037
+        }
+      },
+      "run_id": "37bb856e15309543795e14cdccf44d1b672e957cb9af1e902af08d630f3e241b"
+    }
+  },
+  "budget": 1000,
+  "caveats": [
+    "ONE task and ONE seed. This justifies scaling the algorithm; it is not a benchmark claim.",
+    "celecoxib_rediscovery is the CLEAN oracle -- a similarity objective whose score/QED and score/SA correlations run the healthy way. The reward-hacking task measured this session was gsk3b (r(score,QED) -0.433, r(score,SA) +0.684). A heterogeneous panel MUST include a fingerprint-predictor oracle to learn whether memory suppresses or amplifies off-manifold drift.",
+    "Arm B was preempted at round 33 and resumed from 538 charged with no call re-spent; its 250-call memory was reconstructed by replaying archived observations, and byte-equality with the never-serialised live object is unavailable and not claimed."
+  ],
+  "comparison": "matched A/B; payloads differ in exactly three leaves (/arm/name, /arm/enable_online_memory, /extension/extends_payload_sha256); identical initialization, identical implementation pins",
+  "delta_B_minus_A": {
+    "auc": 0.06494527458931434,
+    "auc_relative_pct": 26.095668989915644,
+    "best": 0.04738978570754271
+  },
+  "recorded_at_utc": "2026-09-21T18:36:52.673638+00:00",
+  "revision_boundary": "calls 1-250 under revision fc1c95eb; calls 251-1000 under the resume revision. Arm-A state identity across the boundary measured at 2 differing leaves of 218,869, both new bookkeeping keys holding None.",
+  "schema_version": "pmo_ab_1k_result_v1",
+  "seeds": 1,
+  "task": "celecoxib_rediscovery"
+}

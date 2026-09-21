@@ -15,5 +15,17 @@
     "note": "These are the payload hashes the RUNNING containers are bound to, baked into the image deployed at spawn time. The repo's 1k contracts have since moved (resume_in_place was added for the parked perindopril recovery), so the files on disk no longer hash to these. Recorded rather than re-pinned: re-pinning to match a running job would be a fiction in the other direction.",
     "redeploy_blocked_until": "celecoxib 1k completes -- a redeploy could strand these arms on a preemption retry, and that would cost the primary result"
   },
+  "resumes": [
+    {
+      "arm": "B_memory_1k",
+      "at_utc": "2026-09-21T17:27:22.956398+00:00",
+      "call_id": "fc-01M32G451F3J1BJHYPA37Y353N",
+      "charged_at_resume": 538,
+      "note": "Preemption mid-round-33; Modal's retry was refused by the extension guard, which cannot tell a live container from a preempted one. Resumed on the SAME deployed payload arm A ran under, so calls 251-1000 stay on identical code in both arms.",
+      "payload_sha256": "5cd54226b8e471387e86b007675c7bc8fcad754972b682aa4a92246d4f4534cd",
+      "resumed_after_terminal_call_id": "fc-01M32C217E8P0H9FCKRSNSYDDJ",
+      "run_id": "37bb856e15309543795e14cdccf44d1b672e957cb9af1e902af08d630f3e241b"
+    }
+  ],
   "spawned_at_utc": "2026-09-21T16:16:19.220884+00:00"
 }
