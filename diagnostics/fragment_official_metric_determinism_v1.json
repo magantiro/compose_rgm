@@ -1,0 +1,56 @@
+{
+  "schema": "compose_fragment_official_metric_determinism_v1",
+  "question": "does the official evaluator return bitwise identical metrics for identical input across processes?",
+  "shard": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__BARICITINIB__seed0.json",
+  "samples_scored": 100,
+  "hash_seeds": [
+    "0",
+    "1",
+    "2",
+    "12345",
+    "999"
+  ],
+  "per_hash_seed": {
+    "0": {
+      "validity": 100.0,
+      "uniqueness": 100.0,
+      "diversity": 0.7223799999999998,
+      "quality": 50.0
+    },
+    "1": {
+      "validity": 100.0,
+      "uniqueness": 100.0,
+      "diversity": 0.7223800000000002,
+      "quality": 50.0
+    },
+    "2": {
+      "validity": 100.0,
+      "uniqueness": 100.0,
+      "diversity": 0.72238,
+      "quality": 50.0
+    },
+    "12345": {
+      "validity": 100.0,
+      "uniqueness": 100.0,
+      "diversity": 0.72238,
+      "quality": 50.0
+    },
+    "999": {
+      "validity": 100.0,
+      "uniqueness": 100.0,
+      "diversity": 0.72238,
+      "quality": 50.0
+    }
+  },
+  "spread_by_metric": {
+    "diversity": 4.440892098500626e-16,
+    "quality": 0.0,
+    "uniqueness": 0.0,
+    "validity": 0.0
+  },
+  "metrics_not_bitwise_reproducible": [
+    "diversity"
+  ],
+  "verdict": "HASH_ORDER_DEPENDENT",
+  "consequence": "A metric listed in metrics_not_bitwise_reproducible cannot be compared by byte equality across processes. Compare it within a tolerance and report the observed spread; demanding exact equality manufactures divergence that is not chemistry."
+}
