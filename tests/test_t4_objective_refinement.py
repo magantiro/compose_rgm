@@ -265,3 +265,28 @@ def test_a_similarity_failure_can_be_repaired_jointly_with_qed():
     assert best["similarity"] >= BRAF_1_DELTA
     assert best["qed"] >= QED_MIN
     assert best["similarity_delta"] > 0
+
+
+# ---- Padding pays off on a real rescue --------------------------------------
+
+#: braf_0's seed and an endpoint whose proposal lane DELETED the seed's amide
+#: carbonyl. Its only rescue is an `atom_insert` putting the oxygen back, so
+#: this rescue exists solely because the source graph carries a free slot.
+BRAF_0_SEED = (
+    "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34"
+)
+BRAF_0_DEOXY = "CCN(CC)CCNCc1cnn2c(-c3cccc(NC)c3)ccnc12"
+BRAF_0_DELTA = 0.6
+
+
+def test_the_only_braf_0_rescue_requires_atom_birth():
+    """An unpadded source would make this rescue invisible, not merely rarer."""
+
+    report = refine_endpoint(BRAF_0_SEED, BRAF_0_DELTA, BRAF_0_DEOXY)
+
+    assert report["eligible_count"] >= 1
+    assert {row["rule"] for row in report["eligible"]} == {"atom_insert"}
+
+    best = max(report["eligible"], key=lambda row: row["qed"])
+    assert best["heavy"] > Chem.MolFromSmiles(BRAF_0_DEOXY).GetNumHeavyAtoms()
+    assert best["similarity_delta"] > 0.15
