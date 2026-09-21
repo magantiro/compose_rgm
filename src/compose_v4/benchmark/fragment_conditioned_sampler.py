@@ -109,6 +109,12 @@ class SamplingReceipt:
     redirections: int = 0
     separation_failures: int = 0
     interface_covered: int = 0
+    # Realized linker length per COMMITTED endpoint of a two-core prompt, in the
+    # same order as ``committed_endpoints``.  A seeded bridge means separation is
+    # satisfied from the start, so this distribution -- not the separation count
+    # -- is what distinguishes a designed linker from an inherited seed.  Empty
+    # for single-core prompts, where the quantity is undefined.
+    linker_lengths: list[int] = field(default_factory=list)
 
 
 class FragmentConditioningError(RuntimeError):
@@ -498,6 +504,9 @@ def sample_completion(
     if not smiles:
         return None
     receipt.committed_endpoints.append(smiles)
+    realized_length = controller.realized_linker_length(state)
+    if realized_length is not None:
+        receipt.linker_lengths.append(realized_length)
     if controller.active and controller.all_interfaces_covered(state):
         receipt.interface_covered += 1
     result = check_fragment_constraint(context.prompt, smiles)

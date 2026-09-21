@@ -137,6 +137,18 @@ def main() -> None:
                 "structural": verdict,
                 "attempts": args.samples,
                 "committed_endpoints": len(receipt.committed_endpoints),
+                # Every committed molecule, so a question asked later about this
+                # run can be answered from the artifact rather than re-run.
+                "committed_endpoint_smiles": list(receipt.committed_endpoints),
+                "emitted_samples": list(emitted),
+                "linker_lengths": list(receipt.linker_lengths),
+                "linker_length_histogram": {
+                    str(n): receipt.linker_lengths.count(n)
+                    for n in sorted(set(receipt.linker_lengths))
+                },
+                "linker_length_above_seed": sum(
+                    1 for n in receipt.linker_lengths if n > args.bridge_atoms
+                ),
                 "task_success": sum(1 for x in emitted if x),
                 "separation_failures": receipt.separation_failures,
                 "constraint_failures": receipt.constraint_failures,
