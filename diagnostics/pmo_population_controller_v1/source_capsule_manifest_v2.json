@@ -1,5 +1,5 @@
 {
-  "contract_payload_sha256": "38afd1c4f5bbe5f863423a2a51051b979cf8cf7986017720bbb0872463bf8220",
+  "contract_payload_sha256": "ba9515615b341019f09f66f3224e590b4ca596dee6bb7c97c759dbe418f1ff4b",
   "oracle_assets": "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets/",
   "pinned_runtime": {
     "cpu_per_worker": 1,
@@ -11,10 +11,10 @@
   },
   "schema_version": "pmo_population_source_capsule_manifest_v2",
   "source_files": {
-    "configs/pmo_population_controller_v1_scored_contract_corrected.json": "6ea114923c5b6c0bb838574ca2a27353d4373dad5b2a8209d7691df756d55cb0",
+    "configs/pmo_population_controller_v1_scored_contract_corrected.json": "903840efb6abdf6a7a688bde423171faf02c19b95588bcbad2c9507dce7be0d7",
     "diagnostics/parent_edit_cycles/prepared/init_20260921.json": "a1f7840df1f75567565de633c4df3d013c3165df3e43cbf2ac87b156d5f206ff",
     "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43",
-    "diagnostics/pmo_population_controller_v1/corrected_scored_authorization_receipt.json": "73c734368a30e6728c6b502142bd021f6599780d406c0d1013a41a34ae294e25",
+    "diagnostics/pmo_population_controller_v1/corrected_scored_authorization_receipt.json": "823cc881e8ee297151b9931fe32bd708b9181b2f52d4d2645b3cb8d8b3237d14",
     "diagnostics/pmo_population_live_parent_gate_v1/scheduler_result.json": "de044abe3b6c7eb1f5cbf53fd8591f5c26561753dedf4b3cbcb5cb9691fa71fc",
     "modal_apps/pmo_population_v1_app.py": "36f49f0ecf791e6ba823a1d3f19a2b34b69cc8e269d149f3c69d1ea1b61ad88a",
     "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",

@@ -15,6 +15,25 @@
   },
   "owner_response_verbatim": "\"And separately, yes, I would give the PMO-v2 authorization now using the exact sentence Claude supplied. That experiment is ready and we badly need the number.\" -- together with the directive \"PMO: launch the ready matched PMO-v2 250-call run on GSK3B, Perindopril MPO and Celecoxib rediscovery as soon as its existing executable authorization requirements are satisfied. This is now the highest-priority new scored experiment.\"",
   "predeclared_read": "Realized program scale and retained fraction are read BEFORE bind rate. A doubled binding yield at unchanged program scale is NOT reportable as success. Falsifier: programs at retained_fraction ~1.000 with median ~16 primitives mean the repair did not help regardless of bind rate; measured success shape is median 31 primitives at retained 0.630, band 0.52-0.96.",
+  "reseal_supersession": {
+    "charged_calls_before_reseal": 0,
+    "method": "Applied as four individual visible file edits rather than a script, after an automated rewrite was correctly refused as self-modification. The original authorization record above is left UNEDITED as the historical record of what was first approved.",
+    "owner_approved_the_reseal": true,
+    "owner_response_verbatim": "yes to both",
+    "resealed_at_utc": "2026-09-21T04:53:10.519832+00:00",
+    "root_cause": "The base contract pinned src/compose_v4/experiments/pmo_population_live_parent_gate.py at 518045a7, its PRE-EDIT hash. That file was re-pointed from the beam binder to the realizer AFTER the integration resealed, so on disk it is 2b44294b. Exactly one pin mismatched; the runtime identity guard caught it inside the container before any oracle call was charged.",
+    "what_moved": {
+      "base_contract": {
+        "from": "7287c6f58199ef8a56819a5a8ff323d871010030b25c0145e272f47cebd28220",
+        "to": "19aa07e1fdf7f4d5fd9db7b45e8d1580cc4e5b539ef91aecdbd9f9d0ab0276ce"
+      },
+      "scored_contract": {
+        "from": "38afd1c4f5bbe5f863423a2a51051b979cf8cf7986017720bbb0872463bf8220",
+        "to": "ba9515615b341019f09f66f3224e590b4ca596dee6bb7c97c759dbe418f1ff4b"
+      }
+    },
+    "why_this_is_not_a_scope_change": "The authorization sentence the owner approved already describes this runtime -- it authorizes the run 'on the basis that the re-pointed live-parent support gate PASSES under the realizer the controller actually binds through'. The re-pointed gate file is precisely what is now correctly pinned. Nothing about tasks, budgets, comparators or the predeclared read changed; only the pin that had not caught up."
+  },
   "schema_version": "pmo_v2_scored_authorization_v1",
   "tasks": [
     "gsk3b",

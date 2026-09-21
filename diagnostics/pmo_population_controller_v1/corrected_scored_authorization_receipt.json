@@ -14,7 +14,7 @@
   "modal_source_upload_note": "Implied by the owner's explicit launch authorization: the run executes on Modal, so launching it necessarily uploads the pinned source. Recorded explicitly rather than inherited silently from the v1 receipt.",
   "new_explicit_authorization_required": false,
   "oracle_calls_authorized": 750,
-  "payload_sha256": "38afd1c4f5bbe5f863423a2a51051b979cf8cf7986017720bbb0872463bf8220",
+  "payload_sha256": "ba9515615b341019f09f66f3224e590b4ca596dee6bb7c97c759dbe418f1ff4b",
   "reason_for_new_payload": "The previous 3x250 payload 2e3f9195... ran to completion, but its gsk3b task is VOID: the worker restored the working directory after CONSTRUCTING the TDC oracle, while PyTDC loads oracle/gsk3b_current.pkl lazily on the first CALL by relative path, so all 250 charged calls returned the swallowed default_property 0.0 (diagnostics/pmo_gsk3b_oracle_diagnosis_v1.json, diagnostics/pmo_run_status_ledger.json).  This payload binds a worker that resolves asset-backed oracles for the oracle's full lifetime via AssetPinnedOracle, and that refuses to charge a single call until a pinned positive control CALLS the oracle and reproduces the frozen reference panel.  perindopril_mpo (0.486) and celecoxib_rediscovery (0.196) from the previous payload are unaffected and remain valid; only gsk3b is re-run.",
   "runtime_version": "PMO-v2 (jump-lane exact realizer)",
   "schema_version": "pmo_population_scored_authorization_receipt_v2",

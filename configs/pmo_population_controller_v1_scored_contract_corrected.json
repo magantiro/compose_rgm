@@ -13,7 +13,7 @@
       "queries_per_round": 16
     },
     "controller_contract": "configs/pmo_population_controller_v1.json",
-    "controller_contract_sha256": "7287c6f58199ef8a56819a5a8ff323d871010030b25c0145e272f47cebd28220",
+    "controller_contract_sha256": "19aa07e1fdf7f4d5fd9db7b45e8d1580cc4e5b539ef91aecdbd9f9d0ab0276ce",
     "corrected_source_capsule_manifest": "diagnostics/pmo_population_controller_v1/source_capsule_manifest_v2.json",
     "corrected_worker_app": "compose-pmo-population-v1-corrected",
     "corrected_worker_path": "modal_apps/pmo_population_v1_app.py",
@@ -76,5 +76,5 @@
       "celecoxib_rediscovery"
     ]
   },
-  "payload_sha256": "38afd1c4f5bbe5f863423a2a51051b979cf8cf7986017720bbb0872463bf8220"
+  "payload_sha256": "ba9515615b341019f09f66f3224e590b4ca596dee6bb7c97c759dbe418f1ff4b"
 }

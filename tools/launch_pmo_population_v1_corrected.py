@@ -20,7 +20,7 @@ AUTH = ROOT / "diagnostics/pmo_population_controller_v1/corrected_scored_authori
 MANIFEST = ROOT / "diagnostics/pmo_population_controller_v1/source_capsule_manifest_v2.json"
 PREFLIGHT = ROOT / "diagnostics/pmo_population_controller_v1/corrected_preflight_receipt.json"
 LAUNCH = ROOT / "diagnostics/pmo_population_controller_v1/corrected_scored_launch_receipt.json"
-PAYLOAD = "38afd1c4f5bbe5f863423a2a51051b979cf8cf7986017720bbb0872463bf8220"
+PAYLOAD = "ba9515615b341019f09f66f3224e590b4ca596dee6bb7c97c759dbe418f1ff4b"
 APP = "compose-pmo-population-v1-corrected"
 # The contract's locked task set.  It is what the payload authorizes, and it never
 # widens: a launch may spend LESS than its authorization but may never spend more.
