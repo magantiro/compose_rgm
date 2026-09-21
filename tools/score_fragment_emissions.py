@@ -47,6 +47,11 @@ def _stub_torch_if_absent() -> bool:
 
     torch_mod = _Forbidden("torch")
     dist_mod = _Forbidden("torch.distributed")
+    # ``import torch.distributed as dist`` binds the submodule as an ATTRIBUTE of
+    # the parent, so the attribute has to exist or __getattr__ fires on the
+    # import itself rather than on a real use.  Anything BEYOND the import --
+    # an actual dist.* call -- still raises, which is the point.
+    torch_mod.distributed = dist_mod
     sys.modules["torch"] = torch_mod
     sys.modules["torch.distributed"] = dist_mod
     return True
