@@ -331,6 +331,7 @@ def probe_shard(payload_in: dict) -> dict:
         small_ring_support_mass,
     )
     from compose_v4.rewrite.kernel import de_novo_rewrite_system
+    from compose_v4.rewrite.ring_system_fiber import structured_ring_trace_supported
     from compose_v4.rewrite.tracelet_compiler import TraceCompilationError
     from compose_v4.rewrite.tree_transport import compile_carbon_tree_to_target
 
@@ -364,6 +365,7 @@ def probe_shard(payload_in: dict) -> dict:
     drop_reasons: dict[str, list[str]] = {name: [] for name in ARM_BARRIERS}
     compiled = 0
     compile_failures = 0
+    trainer_supported_traces = 0
     support_evaluations = 0
     support_cache: dict[str, tuple[float, int, int]] = {}
 
@@ -380,6 +382,14 @@ def probe_shard(payload_in: dict) -> dict:
         # makes the whole shard reproducible independently of stride order.
         source = prior.sample(np.random.default_rng(seed + offset), n_slots=MAX_ATOMS)
         try:
+            # The trainer compiles its raw tree-transport records with
+            # ring_catalog=None and only afterwards KEEPS the records the catalog
+            # supports (train_tracelet_cnof_gate.py calls
+            # build_tree_transport_path_records with ring_catalog=None, then
+            # filters by structured_ring_trace_supported).  Passing the catalog
+            # INTO the compiler is a different and far stricter predicate: it
+            # refused 12 of 12 real training molecules in the smoke.  Reproduce
+            # the trainer's order, then record its keep filter separately.
             base = compile_carbon_tree_to_target(
                 source,
                 target,
@@ -387,7 +397,7 @@ def probe_shard(payload_in: dict) -> dict:
                 align_source=False,
                 flexible_size=True,
                 typed_ring_payloads=True,
-                ring_catalog=catalog,
+                ring_catalog=None,
                 system=system,
             )
         except (TraceCompilationError, ValueError, RuntimeError) as error:
@@ -399,6 +409,9 @@ def probe_shard(payload_in: dict) -> dict:
             )
             continue
         compiled += 1
+        trainer_supported = bool(structured_ring_trace_supported(base, catalog))
+        if trainer_supported:
+            trainer_supported_traces += 1
 
         arm_traces = {ARM_A: base}
         for arm, barriers in ARM_BARRIERS.items():
@@ -441,6 +454,7 @@ def probe_shard(payload_in: dict) -> dict:
                     {
                         "arm": arm,
                         "offset": offset,
+                        "trainer_supported": trainer_supported,
                         "rule_name": observation.rule_name,
                         "index": observation.index,
                         "trace_length": observation.trace_length,
@@ -467,6 +481,7 @@ def probe_shard(payload_in: dict) -> dict:
         "targets_requested": len(targets),
         "compiled": compiled,
         "compile_failures": compile_failures,
+        "trainer_supported_traces": trainer_supported_traces,
         "arm_counters": arm_counters,
         "drop_reasons": {arm: sorted(set(reasons))[:5] for arm, reasons in drop_reasons.items()},
         "events": events,

@@ -53,10 +53,14 @@ def main() -> None:
     parser.add_argument("--artifact", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--reference-uniform-support", type=float, default=0.44307839688899203)
+    parser.add_argument("--trainer-supported-only", action="store_true",
+                        help="restrict to traces the trainer's catalog filter keeps")
     args = parser.parse_args()
 
     payload = json.loads(args.artifact.read_text())
     events = payload["events"]
+    if args.trainer_supported_only:
+        events = [event for event in events if event.get("trainer_supported")]
     by_arm = defaultdict(list)
     for event in events:
         by_arm[event["arm"]].append(event)
@@ -161,7 +165,15 @@ def main() -> None:
         }
 
     verdicts = {arm: arm_verdict(arm) for arm in (ARM_B, ARM_C)}
-    if verdicts[ARM_B]["achieves_repair"]:
+    # A run with no ring events has not tested anything.  Emitting
+    # FIX_COMPILER_ORDERING from an empty arm would dress a failed measurement up
+    # as a clean negative, which is the single most expensive mistake this probe
+    # could make -- it is the branch that tells the owner NOT to retrain.  The
+    # smoke did exactly this from 0 compiled traces before this guard existed.
+    grow_a = arms[ARM_A]["ring_grow_events"]
+    if grow_a == 0 or payload["cost_counters"]["traces_compiled"] == 0:
+        decision = "INCONCLUSIVE_NO_DATA"
+    elif verdicts[ARM_B]["achieves_repair"]:
         decision = "RETRAIN"
     elif verdicts[ARM_C]["achieves_repair"]:
         decision = "RELAX_BARRIER"
@@ -185,6 +197,11 @@ def main() -> None:
         "trains_nothing": True,
         "oracle_calls": 0,
         "realized_n_targets_compiled": payload["cost_counters"]["traces_compiled"],
+        "trainer_supported_traces": sum(
+            shard.get("trainer_supported_traces", 0)
+            for shard in payload.get("shard_results", [])
+        ),
+        "restricted_to_trainer_supported": bool(args.trainer_supported_only),
         "compile_failures": payload["cost_counters"]["compile_failures"],
         "instrument_check": instrument_verdict,
         "instrument_reference_population_note": (
