@@ -3486,3 +3486,31 @@ independently of whether fa7_0 ever closes.**
 - **A goal-conditioned scoring-identity gate must land WITH the realizer, not after it.** It needs
   the proposals to exist, but if it reads 0.0000 the way T4's `expand` did, every downstream
   improvement in goal selection is unobservable and the realizer would be measuring nothing.
+
+## 2026-09-21 (SHARPENED: estimate the per-draw RATE first -- it tells you which rung is decisive)
+
+- **IMPROVES the rule "before naming a boundary, check the candidate against what the prior proposes
+  at that site."** The sharper form, contributed by the fragment agent and adopted: **estimate the
+  PER-DRAW RATE first, and it tells you which budget would settle the question** -- instead of
+  doubling a ladder blindly until something happens.
+- **MEASURED instance.** A constituent read NO_HIT at 16,384 draws, which looked like a possible
+  vocabulary boundary. Rather than spending 131,072 draws asking whether the prior proposes THAT
+  construction, one call asked what the prior proposes AT THAT STATE: **`bond_insert` is 8 of 6,000
+  draws (0.13%)**, and the specific atom pair is a fraction of that. **Expected hits in 16,384 draws
+  is therefore of order ONE -- a zero there discriminates nothing and carries no information.** The
+  rate estimate identified 65,536 as the decisive rung, and the move HIT at 65,536.
+- **CONSEQUENCE: UNRESOLVED was not hedging, it was the correct reading of a measurement with no
+  power.** A negative from an underpowered probe is not weak evidence of absence; it is no evidence
+  at all, and the rate estimate is what distinguishes the two. Compute the expected count before
+  reporting a zero.
+- **Verdict that followed: all three constituents IN_SUPPORT, so the composite bundles moves the
+  prior can already rank but does not make in sequence -- an ACCELERATION, not a capability
+  extension.** The macro/extension question is decided per constituent, at the budget the rate
+  estimate says is decisive.
+- **Aim a falsifier at your own mechanism, not at the substrate.** The added "precondition honesty"
+  criterion: if the free-valence gate fires on drugs that DO have free valence, **the gate is wrong
+  rather than the chemistry**. That is the hard direction to point a falsifier and the one that
+  catches self-serving preconditions.
+- **`pgrep | head -1` made a 119%-CPU process read as a 0.0% deadlock.** Same family as a container
+  census whose value could not vary: an instrument that cannot report the true state will
+  confidently report a false one.
