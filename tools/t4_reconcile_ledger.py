@@ -482,7 +482,26 @@ def main() -> int:
         delta = contract.get("delta")
         budget = contract.get("charged_calls_per_cell")
         print(f"\n=== {label}  vol={volume}  target={target}  delta={delta}", flush=True)
-        root = volume_ls(volume)
+        # An arm may be registered before it is launched, so that the stall watchdog and
+        # this ledger know it exists from the moment its contract does.  Its volume then
+        # does not exist yet and volume_ls raises.  Report that arm as unlaunched instead
+        # of failing the whole reconciliation -- an arm nobody can see is how a dead cell
+        # sits unnoticed, which is the failure this registration exists to prevent.
+        try:
+            root = volume_ls(volume)
+        except RuntimeError as exc:
+            print(f"  volume not readable, reporting arm as unlaunched: {exc}", flush=True)
+            report["arms"][label] = {
+                "volume": volume,
+                "target": target,
+                "delta": delta,
+                "budget_per_cell": budget,
+                "contract": contract_path,
+                "runs": [],
+                "cell_rows": 0,
+                "volume_unreadable": str(exc),
+            }
+            continue
         runs = sorted(row["Filename"] for row in root if row.get("Type") == "dir")
         arm_rows = []
         for run in runs:
