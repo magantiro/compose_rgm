@@ -1,0 +1,299 @@
+{
+  "budget": "COMPOSE 250 calls/cell vs InVirtuoGen 1000",
+  "deltas": {
+    "0.4": {
+      "compose_sum": -169.2,
+      "coverage": 15,
+      "delta": -8.799999999999983,
+      "ivg_sum": -160.4,
+      "matched_n": 15,
+      "mean_gap": -0.5866666666666656,
+      "rows": [
+        {
+          "calls": 73,
+          "compose": -11.9,
+          "gap": 2.1999999999999993,
+          "ivg": -14.1,
+          "seed_index": 0,
+          "source": "panel",
+          "target": "parp1"
+        },
+        {
+          "calls": 81,
+          "compose": -12.3,
+          "gap": 1.0999999999999996,
+          "ivg": -13.4,
+          "seed_index": 1,
+          "source": "panel",
+          "target": "parp1"
+        },
+        {
+          "calls": 129,
+          "compose": -14.1,
+          "gap": -5.1,
+          "ivg": -9.0,
+          "seed_index": 2,
+          "source": "panel",
+          "target": "parp1"
+        },
+        {
+          "calls": 89,
+          "compose": -9.3,
+          "gap": -0.9000000000000004,
+          "ivg": -8.4,
+          "seed_index": 3,
+          "source": "panel",
+          "target": "fa7"
+        },
+        {
+          "calls": 217,
+          "compose": -9.4,
+          "gap": -0.5,
+          "ivg": -8.9,
+          "seed_index": 4,
+          "source": "panel",
+          "target": "fa7"
+        },
+        {
+          "calls": 105,
+          "compose": -9.6,
+          "gap": -1.5999999999999996,
+          "ivg": -8.0,
+          "seed_index": 5,
+          "source": "RESCUE",
+          "target": "fa7"
+        },
+        {
+          "calls": 130,
+          "compose": -12.4,
+          "gap": 0.9000000000000004,
+          "ivg": -13.3,
+          "seed_index": 6,
+          "source": "panel",
+          "target": "5ht1b"
+        },
+        {
+          "calls": 161,
+          "compose": -11.9,
+          "gap": 0.09999999999999964,
+          "ivg": -12.0,
+          "seed_index": 7,
+          "source": "panel",
+          "target": "5ht1b"
+        },
+        {
+          "calls": 249,
+          "compose": -12.3,
+          "gap": -1.4000000000000004,
+          "ivg": -10.9,
+          "seed_index": 8,
+          "source": "RESCUE",
+          "target": "5ht1b"
+        },
+        {
+          "calls": 77,
+          "compose": -12.2,
+          "gap": -2.0999999999999996,
+          "ivg": -10.1,
+          "seed_index": 9,
+          "source": "panel",
+          "target": "braf"
+        },
+        {
+          "calls": 113,
+          "compose": -10.5,
+          "gap": 0.3000000000000007,
+          "ivg": -10.8,
+          "seed_index": 10,
+          "source": "panel",
+          "target": "braf"
+        },
+        {
+          "calls": 73,
+          "compose": -10.9,
+          "gap": -0.3000000000000007,
+          "ivg": -10.6,
+          "seed_index": 11,
+          "source": "panel",
+          "target": "braf"
+        },
+        {
+          "calls": 225,
+          "compose": -10.4,
+          "gap": -0.20000000000000107,
+          "ivg": -10.2,
+          "seed_index": 12,
+          "source": "panel",
+          "target": "jak2"
+        },
+        {
+          "calls": 145,
+          "compose": -11.3,
+          "gap": -0.8000000000000007,
+          "ivg": -10.5,
+          "seed_index": 13,
+          "source": "panel",
+          "target": "jak2"
+        },
+        {
+          "calls": 129,
+          "compose": -10.7,
+          "gap": -0.5,
+          "ivg": -10.2,
+          "seed_index": 14,
+          "source": "panel",
+          "target": "jak2"
+        }
+      ],
+      "wins": 10
+    },
+    "0.6": {
+      "compose_sum": -153.0,
+      "coverage": 14,
+      "delta": -7.599999999999994,
+      "ivg_sum": -145.4,
+      "matched_n": 14,
+      "mean_gap": -0.5428571428571425,
+      "rows": [
+        {
+          "calls": 246,
+          "compose": -13.6,
+          "gap": -1.299999999999999,
+          "ivg": -12.3,
+          "seed_index": 0,
+          "source": "panel",
+          "target": "parp1"
+        },
+        {
+          "calls": 244,
+          "compose": -12.7,
+          "gap": -1.0,
+          "ivg": -11.7,
+          "seed_index": 1,
+          "source": "panel",
+          "target": "parp1"
+        },
+        {
+          "calls": 249,
+          "compose": -11.3,
+          "gap": -0.6000000000000014,
+          "ivg": -10.7,
+          "seed_index": 2,
+          "source": "panel",
+          "target": "parp1"
+        },
+        {
+          "calls": 0,
+          "compose": null,
+          "gap": null,
+          "ivg": -7.7,
+          "seed_index": 3,
+          "source": "panel",
+          "target": "fa7"
+        },
+        {
+          "calls": 249,
+          "compose": -7.8,
+          "gap": -0.2999999999999998,
+          "ivg": -7.5,
+          "seed_index": 4,
+          "source": "panel",
+          "target": "fa7"
+        },
+        {
+          "calls": 40,
+          "compose": -8.5,
+          "gap": -1.0999999999999996,
+          "ivg": -7.4,
+          "seed_index": 5,
+          "source": "RESCUE",
+          "target": "fa7"
+        },
+        {
+          "calls": 217,
+          "compose": -13.3,
+          "gap": -0.9000000000000004,
+          "ivg": -12.4,
+          "seed_index": 6,
+          "source": "panel",
+          "target": "5ht1b"
+        },
+        {
+          "calls": 222,
+          "compose": -11.3,
+          "gap": 0.6999999999999993,
+          "ivg": -12.0,
+          "seed_index": 7,
+          "source": "panel",
+          "target": "5ht1b"
+        },
+        {
+          "calls": 126,
+          "compose": -10.8,
+          "gap": -0.20000000000000107,
+          "ivg": -10.6,
+          "seed_index": 8,
+          "source": "RESCUE",
+          "target": "5ht1b"
+        },
+        {
+          "calls": 33,
+          "compose": -9.0,
+          "gap": 0.6999999999999993,
+          "ivg": -9.7,
+          "seed_index": 9,
+          "source": "RESCUE",
+          "target": "braf"
+        },
+        {
+          "calls": 89,
+          "compose": -11.0,
+          "gap": -0.5999999999999996,
+          "ivg": -10.4,
+          "seed_index": 10,
+          "source": "RESCUE",
+          "target": "braf"
+        },
+        {
+          "calls": 104,
+          "compose": -11.5,
+          "gap": -1.1999999999999993,
+          "ivg": -10.3,
+          "seed_index": 11,
+          "source": "panel",
+          "target": "braf"
+        },
+        {
+          "calls": 97,
+          "compose": -10.6,
+          "gap": -0.9000000000000004,
+          "ivg": -9.7,
+          "seed_index": 12,
+          "source": "panel",
+          "target": "jak2"
+        },
+        {
+          "calls": 89,
+          "compose": -10.8,
+          "gap": -0.40000000000000036,
+          "ivg": -10.4,
+          "seed_index": 13,
+          "source": "panel",
+          "target": "jak2"
+        },
+        {
+          "calls": 113,
+          "compose": -10.8,
+          "gap": -0.5,
+          "ivg": -10.3,
+          "seed_index": 14,
+          "source": "panel",
+          "target": "jak2"
+        }
+      ],
+      "wins": 12
+    }
+  },
+  "schema_version": "t4_final_ivg_table_v1",
+  "status": "ALL RESCUES TERMINATED"
+}
