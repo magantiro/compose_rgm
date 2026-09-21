@@ -1,0 +1,101 @@
+{
+  "CAVEATS": [
+    "One task, one seed. Celecoxib's +0.0445 AUC needs a second seed before it is more than strongly suggestive.",
+    "gsk3b's larger +0.073 does NOT count, exactly as predeclared.",
+    "perindopril's pair is incomplete -- the A arm was still running.",
+    "The memory reaches only the SHALLOW lane (synthesize_structured_program has no region_law parameter). Shallow is 32.5% of proposals but 51.1% of what reaches the oracle, so this is a result about half the oracle-reaching stream.",
+    "Both arms still lack a chemical prior, so both are proposing off-manifold; this measures feedback-conditioned region choice ON TOP of that, not the ceiling.",
+    "The memory state is not persisted into snapshot(), so a preempted resume would silently restart it cold. No resume occurred in this run; fix before any 1k continuation."
+  ],
+  "MECHANISM_EVIDENCE_BEHAVIOURAL": {
+    "also_confirms": "arm A is a true no-op, which the whole matched comparison rests on.",
+    "gsk3b_shared_endpoints": {
+      "round_0": "16 of 16, BYTE-IDENTICAL",
+      "round_2": "36 of 48",
+      "round_8": "52 of 144"
+    },
+    "method": "Arm B's memory is COLD at round 0 and returns no region law, which is the identical code path to arm A; it warms as counted scores arrive. So the arms must be identical early and diverge later. This is behavioural evidence -- it cannot be satisfied by a flag that was set but never consulted."
+  },
+  "NEXT_EXPERIMENT": "1,000 calls on the SAME celecoxib trajectories with a second seed -- continue unchanged rather than adding mechanism, per the goal's own rule. Not another component.",
+  "PROMOTION": "Both goal criteria are met on the clean task: the mechanism is ACTIVE and search IMPROVED, and it improved chemistry rather than gaming it.",
+  "RESULTS": {
+    "celecoxib_rediscovery": {
+      "A": {
+        "auc_at_250": 0.1471,
+        "best": 0.2385
+      },
+      "A_top_molecule": "O=CN=CSc1cccc(N2C(=O)COc3ccc2cc3)c1  (QED 0.38, SA 3.92)",
+      "B": {
+        "auc_at_250": 0.1916,
+        "best": 0.3441
+      },
+      "B_top_molecule": "Cc1ccc(C(C)(F)C(N)(F)c2ccc(Cl)cc2)cc1  (QED 0.82, SA 3.09)",
+      "chemistry_A": {
+        "median_qed": 0.448,
+        "median_sa": 4.802,
+        "pct_qed_ge_0_6": 32.1,
+        "pct_sa_le_4": 28.2,
+        "top10_median_qed": 0.36,
+        "top10_median_sa": 5.005
+      },
+      "chemistry_B": {
+        "median_qed": 0.619,
+        "median_sa": 3.973,
+        "pct_qed_ge_0_6": 52.6,
+        "pct_sa_le_4": 50.9,
+        "top10_median_qed": 0.834,
+        "top10_median_sa": 3.17
+      },
+      "counts_for_promotion": true,
+      "delta_auc": 0.0445,
+      "delta_best": 0.1056,
+      "relative_auc_gain": "+30%"
+    },
+    "gsk3b": {
+      "A": {
+        "auc_at_250": 0.199,
+        "best": 0.41
+      },
+      "B": {
+        "auc_at_250": 0.2722,
+        "best": 0.53
+      },
+      "chemistry_A_top10": {
+        "median_qed": 0.427,
+        "median_sa": 6.253
+      },
+      "chemistry_B_top10": {
+        "median_qed": 0.348,
+        "median_sa": 6.067
+      },
+      "counts_for_promotion": false,
+      "why_excluded": "Predeclared in the authorization receipt BEFORE the run. This oracle rewards off-manifold chemistry (r(score,QED) = -0.433, r(score,SA) = +0.684), so a score gain here measures better exploitation of a corrupt signal."
+    },
+    "perindopril_mpo": {
+      "B": {
+        "auc_at_250": 0.3075,
+        "best": 0.481
+      },
+      "counts_for_promotion": true,
+      "status": "A ARM INCOMPLETE -- pair not yet closed"
+    }
+  },
+  "THE_FALSIFICATION_TEST": {
+    "prediction": "If the memory works by following COUNTED FEEDBACK, it should improve chemistry where the oracle is sound and degrade it where the oracle is hackable -- from the same code, with no task branch.",
+    "result": "CONFIRMED. top-10 median QED A->B: celecoxib 0.360 -> 0.834 (UP), gsk3b 0.427 -> 0.348 (DOWN). Same controller, opposite chemistry outcomes, determined entirely by whether the oracle being learned from is sound.",
+    "why_it_matters": "This is stronger than the score table alone: it is a prediction made from an independent off-manifold measurement and then confirmed, rather than a post-hoc reading."
+  },
+  "arms": {
+    "A_baseline": "bb8b7530cd77618e...",
+    "B_memory": "637c7cd75b891415..."
+  },
+  "budget": {
+    "arms": 2,
+    "automatic_retries": 0,
+    "charged_calls_per_task": 250,
+    "tasks": 3,
+    "total_authorized": 1500
+  },
+  "experiment": "Matched A/B. A = allocator-repaired baseline; B = A + online task-adaptive structural proposal memory. Payloads differ in EXACTLY one top-level key (arm.enable_online_memory); budget, tasks and all implementation pins byte-identical, enforced by the launcher.",
+  "schema_version": "pmo_matched_ab_result_v1"
+}
