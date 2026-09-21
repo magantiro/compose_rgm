@@ -1,0 +1,225 @@
+{
+  "schema": "compose_fragment_matched_budget_attribution_v1",
+  "question": "with both arms at the chosen global budget, how much of the before/after delta does the MECHANISM cause?",
+  "predeclared_expectation": "the delta would SHRINK, because the 24-attempt deltas were thought to be budget-confounded",
+  "outcome": "FALSIFIED -- the delta GREW on both tasks that declare an interface",
+  "mechanism_delta_at_24": {
+    "motif_extension": {
+      "task_success": 41.8,
+      "chemical_validity_over_attempts": 0.5
+    },
+    "superstructure_generation": {
+      "task_success": 0.0,
+      "chemical_validity_over_attempts": 0.0
+    },
+    "scaffold_decoration": {
+      "task_success": 80.67,
+      "chemical_validity_over_attempts": 0.3
+    }
+  },
+  "mechanism_delta_at_96": {
+    "motif_extension": {
+      "task_success": 50.7,
+      "chemical_validity_over_attempts": -0.2
+    },
+    "superstructure_generation": {
+      "task_success": 0.0,
+      "chemical_validity_over_attempts": 0.0
+    },
+    "scaffold_decoration": {
+      "task_success": 89.93,
+      "chemical_validity_over_attempts": -0.03
+    }
+  },
+  "why": "Budget and placement are nearly ORTHOGONAL. Extra budget converts exhausted trajectories into committed, chemically valid, fragment-containing molecules -- baseline decoration committed/attempt 93.47 -> 99.57 with exhaustions 7.5 -> 0.6 -- but nothing steers those molecules to the declared sites, so baseline task success moves 3.50 -> 3.57. The budget fixes chemistry; only the mechanism fixes placement.",
+  "prediction_tested": "If chance placement is what lifts the baseline, the lift must fall as the number of DECLARED INTERFACES rises, since satisfying k sites by chance gets rapidly harder.",
+  "baseline_gain_by_declared_interface_count": {
+    "1": {
+      "drugs": 10,
+      "mean_gain": 6.67
+    },
+    "2": {
+      "drugs": 4,
+      "mean_gain": 0.0
+    },
+    "3": {
+      "drugs": 2,
+      "mean_gain": 0.34
+    },
+    "4": {
+      "drugs": 2,
+      "mean_gain": 0.0
+    },
+    "5": {
+      "drugs": 1,
+      "mean_gain": 0.0
+    },
+    "6": {
+      "drugs": 1,
+      "mean_gain": 0.0
+    }
+  },
+  "per_drug": [
+    {
+      "task": "motif_extension",
+      "drug": "BARICITINIB",
+      "declared_interfaces": 1,
+      "baseline_task_success_24": 7.67,
+      "baseline_task_success_96": 11.0,
+      "gain": 3.33
+    },
+    {
+      "task": "motif_extension",
+      "drug": "CYCLOTHIAZIDE",
+      "declared_interfaces": 1,
+      "baseline_task_success_24": 63.33,
+      "baseline_task_success_96": 66.67,
+      "gain": 3.33
+    },
+    {
+      "task": "motif_extension",
+      "drug": "ELIGLUSTAT",
+      "declared_interfaces": 1,
+      "baseline_task_success_24": 76.67,
+      "baseline_task_success_96": 76.67,
+      "gain": 0.0
+    },
+    {
+      "task": "motif_extension",
+      "drug": "ERLOTINIB",
+      "declared_interfaces": 1,
+      "baseline_task_success_24": 49.0,
+      "baseline_task_success_96": 56.33,
+      "gain": 7.33
+    },
+    {
+      "task": "motif_extension",
+      "drug": "FUTIBATINIB",
+      "declared_interfaces": 1,
+      "baseline_task_success_24": 29.33,
+      "baseline_task_success_96": 40.33,
+      "gain": 11.0
+    },
+    {
+      "task": "motif_extension",
+      "drug": "LESINURAD",
+      "declared_interfaces": 1,
+      "baseline_task_success_24": 24.33,
+      "baseline_task_success_96": 53.0,
+      "gain": 28.67
+    },
+    {
+      "task": "motif_extension",
+      "drug": "LIOTHYRONINE",
+      "declared_interfaces": 1,
+      "baseline_task_success_24": 82.0,
+      "baseline_task_success_96": 89.33,
+      "gain": 7.33
+    },
+    {
+      "task": "motif_extension",
+      "drug": "LOVASTATIN",
+      "declared_interfaces": 1,
+      "baseline_task_success_24": 3.67,
+      "baseline_task_success_96": 6.67,
+      "gain": 3.0
+    },
+    {
+      "task": "motif_extension",
+      "drug": "MARIBAVIR",
+      "declared_interfaces": 1,
+      "baseline_task_success_24": 33.67,
+      "baseline_task_success_96": 34.0,
+      "gain": 0.33
+    },
+    {
+      "task": "motif_extension",
+      "drug": "SPIRAPRIL",
+      "declared_interfaces": 1,
+      "baseline_task_success_24": 44.67,
+      "baseline_task_success_96": 47.0,
+      "gain": 2.33
+    },
+    {
+      "task": "scaffold_decoration",
+      "drug": "BARICITINIB",
+      "declared_interfaces": 2,
+      "baseline_task_success_24": 4.0,
+      "baseline_task_success_96": 4.0,
+      "gain": 0.0
+    },
+    {
+      "task": "scaffold_decoration",
+      "drug": "CYCLOTHIAZIDE",
+      "declared_interfaces": 2,
+      "baseline_task_success_24": 1.33,
+      "baseline_task_success_96": 1.33,
+      "gain": 0.0
+    },
+    {
+      "task": "scaffold_decoration",
+      "drug": "ELIGLUSTAT",
+      "declared_interfaces": 2,
+      "baseline_task_success_24": 14.33,
+      "baseline_task_success_96": 14.33,
+      "gain": 0.0
+    },
+    {
+      "task": "scaffold_decoration",
+      "drug": "ERLOTINIB",
+      "declared_interfaces": 3,
+      "baseline_task_success_24": 1.0,
+      "baseline_task_success_96": 1.0,
+      "gain": 0.0
+    },
+    {
+      "task": "scaffold_decoration",
+      "drug": "FUTIBATINIB",
+      "declared_interfaces": 4,
+      "baseline_task_success_24": 0.0,
+      "baseline_task_success_96": 0.0,
+      "gain": 0.0
+    },
+    {
+      "task": "scaffold_decoration",
+      "drug": "LESINURAD",
+      "declared_interfaces": 2,
+      "baseline_task_success_24": 14.0,
+      "baseline_task_success_96": 14.0,
+      "gain": 0.0
+    },
+    {
+      "task": "scaffold_decoration",
+      "drug": "LIOTHYRONINE",
+      "declared_interfaces": 5,
+      "baseline_task_success_24": 0.33,
+      "baseline_task_success_96": 0.33,
+      "gain": 0.0
+    },
+    {
+      "task": "scaffold_decoration",
+      "drug": "LOVASTATIN",
+      "declared_interfaces": 4,
+      "baseline_task_success_24": 0.0,
+      "baseline_task_success_96": 0.0,
+      "gain": 0.0
+    },
+    {
+      "task": "scaffold_decoration",
+      "drug": "MARIBAVIR",
+      "declared_interfaces": 6,
+      "baseline_task_success_24": 0.0,
+      "baseline_task_success_96": 0.0,
+      "gain": 0.0
+    },
+    {
+      "task": "scaffold_decoration",
+      "drug": "SPIRAPRIL",
+      "declared_interfaces": 3,
+      "baseline_task_success_24": 0.0,
+      "baseline_task_success_96": 0.67,
+      "gain": 0.67
+    }
+  ],
+  "note": "superstructure declares no interface and its delta is exactly 0.00 at BOTH budgets -- the negative control holds at the new setting."
+}

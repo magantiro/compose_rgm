@@ -1,0 +1,136 @@
+{
+  "schema": "compose_fragment_secondary_rescore_v1",
+  "denominators": {
+    "over_emitted": "attempts; a censored or failed attempt counts as an invalid sample. This is the published protocol's denominator.",
+    "over_committed": "endpoints the generator actually committed. Validity is 100% by construction, so the other three describe the generator rather than the subset that survived the task filter."
+  },
+  "metric_source": "official in_virtuo_gen.train_utils.metrics.evaluate_smiles @ b50bb3ae, already_smiles=True; only the list handed to it differs",
+  "tasks": {
+    "motif_extension": {
+      "over_emitted": {
+        "validity": {
+          "mean": 48.1,
+          "std": 25.30790390372146
+        },
+        "uniqueness": {
+          "mean": 99.94791666666667,
+          "std": 0.28047733370492206
+        },
+        "quality": {
+          "mean": 8.933333333333334,
+          "std": 11.53814928352415
+        },
+        "diversity": {
+          "mean": 0.7649629535566704,
+          "std": 0.05182678128153395
+        }
+      },
+      "over_emitted_rows": 30,
+      "over_committed": {
+        "validity": {
+          "mean": 100.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 99.83299663299663,
+          "std": 0.45400441675139547
+        },
+        "quality": {
+          "mean": 16.15767016671272,
+          "std": 14.246024444839426
+        },
+        "diversity": {
+          "mean": 0.7770036439242257,
+          "std": 0.045500655453329646
+        }
+      },
+      "over_committed_rows": 30,
+      "committed_endpoints": 2982,
+      "unique_committed_endpoints": 2977
+    },
+    "scaffold_decoration": {
+      "over_emitted": {
+        "validity": {
+          "mean": 3.566666666666667,
+          "std": 5.541860898851777
+        },
+        "uniqueness": {
+          "mean": 53.333333333333336,
+          "std": 49.88876515698588
+        },
+        "quality": {
+          "mean": 1.8,
+          "std": 3.3605555096342825
+        },
+        "diversity": {
+          "mean": 0.2661461007619831,
+          "std": 0.351556837390224
+        }
+      },
+      "over_emitted_rows": 30,
+      "over_committed": {
+        "validity": {
+          "mean": 100.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 99.3862262038074,
+          "std": 1.0292147822733166
+        },
+        "quality": {
+          "mean": 39.629897692559666,
+          "std": 22.739703171600226
+        },
+        "diversity": {
+          "mean": 0.72686857554247,
+          "std": 0.042919508268446795
+        }
+      },
+      "over_committed_rows": 30,
+      "committed_endpoints": 2987,
+      "unique_committed_endpoints": 2969
+    },
+    "superstructure_generation": {
+      "over_emitted": {
+        "validity": {
+          "mean": 98.86666666666666,
+          "std": 3.2530327730015607
+        },
+        "uniqueness": {
+          "mean": 99.69588014981272,
+          "std": 0.5319085247768072
+        },
+        "quality": {
+          "mean": 39.2,
+          "std": 22.6
+        },
+        "diversity": {
+          "mean": 0.7281088953325852,
+          "std": 0.04130855326364846
+        }
+      },
+      "over_emitted_rows": 30,
+      "over_committed": {
+        "validity": {
+          "mean": 100.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 99.69588014981272,
+          "std": 0.5319085247768072
+        },
+        "quality": {
+          "mean": 39.617316753561774,
+          "std": 22.53568420735566
+        },
+        "diversity": {
+          "mean": 0.7283711216452091,
+          "std": 0.04104673400071355
+        }
+      },
+      "over_committed_rows": 30,
+      "committed_endpoints": 2973,
+      "unique_committed_endpoints": 2964
+    }
+  }
+}
