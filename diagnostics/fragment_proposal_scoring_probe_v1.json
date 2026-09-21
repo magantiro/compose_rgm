@@ -1,0 +1,24 @@
+{
+  "schema": "compose_fragment_proposal_scoring_probe_v2",
+  "question": "does the fragment path execute transitions its proposal law never ranked, as the T4 path does?",
+  "verdict": "PROPOSAL_IS_IN_SUPPORT -- the controller RE-RANKS inside the proposal law, it does not invent transitions outside it",
+  "why_the_first_reading_was_wrong": "A single recovered_fraction of 0.376 at 128 draws reads like the T4 exposure. It is a sampling-power artifact: not sampled is not impossible. The discriminating test is whether the fraction RISES with the draw budget.",
+  "power_curve_BARICITINIB_20_redirects": {
+    "64": 0.5,
+    "256": 0.7,
+    "1024": 0.85
+  },
+  "contrast_with_t4": "The T4 path measured recovered_fraction exactly 0.0000 -- a hard zero that no number of draws can lift, because the gated molecule is outside the proposal support entirely. This curve rises monotonically and is already at 0.85, which is the signature of low-probability-but-present, not absent.",
+  "interpretation": "Redirected transitions ARE in the prior support and are simply unlikely under it, which is exactly why the controller exists: an unguided prior rarely places growth at a declared site. The mechanism promotes low-probability in-support transitions rather than executing unrankable ones.",
+  "consequence_for_the_path_program": "A two-interface path program may be scored on this path. It must still be built from transitions the executor and the proposal law both admit -- re-ranking, never widening -- and any new primitive needs this same probe re-run against it.",
+  "limits": [
+    "recovered_fraction is a LOWER BOUND at every draw budget; the 0.85 at 1024 draws does not establish that the remaining 3 of 20 are absent, only that they are rarer.",
+    "Measured on scaffold_decoration, the task that redirects most. Other tasks redirect less and are less exposed, not more.",
+    "One drug carries the power curve; the three-drug aggregate at 128 draws was 0.376."
+  ],
+  "first_reading_at_128_draws": {
+    "redirects_observed": 93,
+    "executable_redirects": 93,
+    "recovered": 35
+  }
+}
