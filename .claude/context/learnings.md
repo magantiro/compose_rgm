@@ -1616,3 +1616,43 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   defect being measured.
 - **`compose-t4-held-target-distilled-jak2-d06-250` is the delta=0.4 arm** despite its name -- its
   frozen contract declares `delta: 0.4`. Always read delta from the contract, never the volume name.
+
+## 2026-09-20 (T4 failure decomposition: three mechanisms, one of them a vocabulary boundary)
+
+- **The five T4 no-distill failures are THREE different problems, and only one is
+  exhaustion.** Decomposed against each cell's own witness, so these are per-cell
+  diagnoses and not an aggregate story:
+  - `braf_0`, `braf_1`, `fa7_2` -- **exhaustion, repairable.** The witness is already
+    inside the v1 proposal support at mass ranks 309/319, 46/157 and 145/247.
+    `MAX_SEGMENT_LENGTH = 8` splits one chemically coherent 11-14 atom excision into 2-3
+    independent UNIFORM UNCONDITIONED region draws, and mass decays ~10x per extra module.
+    Minimal supported change: ONE draw over bridge-separated substituents of any size,
+    weighted by the free gate margin of the child. Measured: braf_1 rank 46->1,
+    braf_0 309->1, fa7_2 145->2, no control regressing. Raising the size cap ALONE
+    degrades a working control (fa7_1 rank 2->6, mass -38%) and conditioning ALONE leaves
+    braf_0 at 109/319, so it is the joint change or nothing.
+  - `5ht1b_2` -- **outside the vocabulary, NOT repairable by budget.** Its witness needs a
+    net formal-charge change, and across all 482 enumerated single-edit actions in all
+    five families ZERO change net charge. Verified structurally at three load-bearing
+    points, not inferred from the census: `factorized_fiber.py:397` RAISES on any charged
+    state ("factorized fiber supports only neutral atom states"); every atom the
+    enumerator creates is hardcoded `formal_charge=0` (:154,:171,:198); and
+    `source_corruption.py:209` rejects any candidate whose successor changes net charge,
+    universally, so a neutral molecule cannot silently gain charge either. This is the
+    same charge-PRESERVING scope decision locked on 2026-07-26/27 -- the dense edit heads
+    encode only neutral `(element,valence)` classes -- now surfacing as a T4 ceiling.
+    SCOPE THE CLAIM, do not spend the ladder on it: the axis is absent by construction.
+    CAREFUL: this says the axis THAT WITNESS needs is unavailable, not that no neutral
+    candidate could ever pass; 5ht1b_2 is also SA-bound.
+  - `fa7_0` -- **not a proposal failure at all.** Best QED margin over 1,537
+    similarity-passing endpoints is -0.0017. The cell is QED-bound, so a better search
+    finds nothing; only a different objective trade would.
+- **A matched pair that looks like a mechanism can be Poisson noise.** `braf_1` and
+  `braf_2` are identical on every categorical axis measured (binding gate, depth, min cut
+  size, attachment degeneracy, single-edit eligibility) and differ 1.31x in expected yield
+  (1.92 vs 2.51 per 480 draws). Observed 0 vs 3 has P(0) = 0.147 -- unremarkable. Do not
+  build a mechanism on a 0-vs-3 contrast without the yield model.
+- **Growth-only rescue experts cannot rescue a size-capped cell.** `braf_0_d06` allocates
+  ZERO plans under the v4 composer because at 40 heavy atoms it has no growth headroom and
+  every v4 mode is growth. That is consistent with its witness requiring an 11-14 atom
+  EXCISION. Check headroom against the expert's modes before costing a rescue arm.
