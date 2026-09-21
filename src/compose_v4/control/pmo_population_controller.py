@@ -63,6 +63,17 @@ from compose_v4.rewrite.trace_shard import decode_state
 SCHEMA = "pmo_population_controller_v1"
 JUMP_CHANNEL = "joint_dependency_region_jump"
 CHANNELS = (SHALLOW_CHANNEL, STRUCTURED_CHANNEL, JUMP_CHANNEL)
+
+# Plateau excursion. `PLATEAU_ROUNDS` non-improving rounds arm a bounded
+# `ESCAPE_ROUNDS` excursion, and arming restarts the counter so the excursion drains
+# before it can be armed again. A search setting, not a calibrated schedule.
+PLATEAU_ROUNDS = 3
+ESCAPE_ROUNDS = 2
+
+# Novelty bonus for an untried parent, expressed in MULTIPLES of the run's own measured
+# mean upside per child rather than in absolute oracle units. Dimensionless on purpose:
+# one value covers every oracle because the scale it multiplies is counted, not assumed.
+NOVELTY_PRIOR_TRIALS = 1.0
 MODE_BY_CHANNEL = {
     SHALLOW_CHANNEL: "refine_elite",
     STRUCTURED_CHANNEL: "global_explore",
@@ -98,6 +109,27 @@ def initial_population_state() -> dict[str, Any]:
         "parent_outcomes": {},
         "credit_key_failures": 0,
     }
+
+
+def advance_plateau_state(state: dict[str, Any], *, improved: bool) -> dict[str, Any]:
+    """Advance the plateau counter and arm a bounded escape excursion. Mutates `state`.
+
+    Arming RESTARTS the non-improvement counter. The previous form re-set the escape
+    budget on every non-improving round while the allocator drained only one unit per
+    round, so on any plateau longer than the threshold the budget was replenished faster
+    than it was spent and the escape never released. Restarting the counter makes the
+    excursion bounded by construction: after arming it takes `PLATEAU_ROUNDS` further
+    non-improving rounds to re-arm, which is strictly longer than the `ESCAPE_ROUNDS` it
+    takes to drain.
+    """
+    if improved:
+        state["rounds_without_improvement"] = 0
+        return state
+    state["rounds_without_improvement"] = int(state["rounds_without_improvement"]) + 1
+    if state["rounds_without_improvement"] >= PLATEAU_ROUNDS:
+        state["escape_rounds_remaining"] = ESCAPE_ROUNDS
+        state["rounds_without_improvement"] = 0
+    return state
 
 
 def _retained_fraction(source, endpoint) -> float:
@@ -198,10 +230,31 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         self._pool_continuity = BootstrapPoolContinuity()
         self.credit = PopulationCredit()
 
+    def observed_upside_scale(self) -> float:
+        """Mean positive parent improvement per child, counted from this run.
+
+        This is the reward SCALE the exploration bonus is denominated in. It is derived
+        from observations the controller already holds -- never from a per-task
+        constant -- so one mechanism covers every oracle. Before any child has been
+        scored it returns 0.0, which leaves every parent's novelty bonus identical and
+        therefore leaves the allocation exactly where it already was.
+        """
+        children = 0
+        positive = 0.0
+        for stats in self.population_state["parent_outcomes"].values():
+            children += int(stats.get("children", 0))
+            positive += float(stats.get("positive_improvement_sum", 0.0))
+        return positive / children if children else 0.0
+
     def selection(self):
         """Preserve structural niches, then tilt toward parents with measured upside."""
 
         keys, probability = ProgramOptimizer.selection(self)
+        # The novelty bonus is expressed in MEASURED improvement units. A fixed 0.25
+        # was sized for a docking score; against PMO's observed mean upside it needed
+        # ~1000 trials on one parent before earned upside could overtake it, which made
+        # the tilt a pure novelty term that no evidence could outvote.
+        scale = self.observed_upside_scale()
         factors = []
         for key in keys:
             stats = self.population_state["parent_outcomes"].get(key, {})
@@ -209,7 +262,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             positive = float(stats.get("positive_improvement_sum", 0.0))
             upside = positive / max(1, trials)
             uncertainty = 1.0 / math.sqrt(trials + 1)
-            factors.append(1.0 + upside + 0.25 * uncertainty)
+            factors.append(1.0 + upside + NOVELTY_PRIOR_TRIALS * scale * uncertainty)
         weighted = probability * np.asarray(factors, dtype=float)
         return keys, weighted / weighted.sum()
 
@@ -466,12 +519,16 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         }
         escape = self.population_state["escape_rounds_remaining"] > 0
         early = self.batches < 4
+        # The jump lane holds NO fixed floor. It is not deleted: its candidates stay in
+        # `remaining`, where `PopulationCredit.allocate` guarantees every live cell at
+        # least `eps / n` of the budget, so the lane recovers on measured evidence
+        # rather than on a reserved quota it was not earning.
         quota = (
-            {SHALLOW_CHANNEL: 1, STRUCTURED_CHANNEL: 4, JUMP_CHANNEL: 3}
+            {SHALLOW_CHANNEL: 1, STRUCTURED_CHANNEL: 5, JUMP_CHANNEL: 0}
             if escape
-            else {SHALLOW_CHANNEL: 2, STRUCTURED_CHANNEL: 2, JUMP_CHANNEL: 2}
+            else {SHALLOW_CHANNEL: 2, STRUCTURED_CHANNEL: 2, JUMP_CHANNEL: 0}
             if early
-            else {channel: 1 for channel in CHANNELS}
+            else {SHALLOW_CHANNEL: 1, STRUCTURED_CHANNEL: 1, JUMP_CHANNEL: 0}
         )
         chosen: list[dict[str, Any]] = []
         allocation_roles: dict[str, str] = {}
@@ -802,13 +859,10 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
                     )
         ProgramOptimizer.observe_batch(self, batch_id, outcomes)
         current = max(scored, default=prior_best if prior_best is not None else -math.inf)
-        if prior_best is None or current > prior_best:
+        improved = prior_best is None or current > prior_best
+        if improved:
             self.population_state["best_score"] = current
-            self.population_state["rounds_without_improvement"] = 0
-        else:
-            self.population_state["rounds_without_improvement"] += 1
-            if self.population_state["rounds_without_improvement"] >= 3:
-                self.population_state["escape_rounds_remaining"] = 2
+        advance_plateau_state(self.population_state, improved=improved)
 
     def snapshot(self, *, include_history=True):
         snapshot = ProgramOptimizer.snapshot(self, include_history=include_history)
@@ -863,6 +917,7 @@ __all__ = [
     "MODE_BY_CHANNEL",
     "SCHEMA",
     "PmoPopulationController",
+    "advance_plateau_state",
     "initial_population_state",
     "population_features",
 ]

@@ -1,0 +1,402 @@
+{
+ "schema_version": "pmo_allocator_repair_replay_v1",
+ "oracle_calls_charged": 0,
+ "predeclaration": [
+  {
+   "id": "P1_parent_heavy_atoms",
+   "claim": "Parents actually drawn should track the archive's own heavy-atom distribution rather than sitting ~7 atoms below it.",
+   "before_expectation": "median drawn ~9 against archive median ~16",
+   "pass_condition": "AFTER median drawn is within 2 heavy atoms of the archive median, and the sub-10 drawn share falls substantially from its BEFORE value",
+   "fail_is_informative": true
+  },
+  {
+   "id": "P2_singleton_score_sensitivity",
+   "claim": "A badly-scoring singleton should lose mass when its score drops.",
+   "before_expectation": "swinging a one-atom fragment from 0.01 to 0.99 changes its parent mass by exactly 0.0000",
+   "pass_condition": "AFTER, the same swing moves the singleton's mass by a strictly positive amount, and the direction is monotone (higher score -> more mass)",
+   "control": "a drug-like archive member swung over the same range must also move (it moved 0.0083 -> 0.1083 BEFORE); if the control stops moving the fix is broken, not working"
+  },
+  {
+   "id": "P3_escape_drains",
+   "claim": "Plateau escape must drain rather than latch.",
+   "before_expectation": "escape True for 8 consecutive rounds, never releasing",
+   "pass_condition": "AFTER, no escape episode on the same measured best-score sequence exceeds its declared duration, and escape is False for at least one round inside the BEFORE 8-round latch window"
+  },
+  {
+   "id": "P4_jump_floor_removed",
+   "claim": "The measured-dead jump lane must not hold a fixed floor quota, but must keep a recoverable exploration floor.",
+   "pass_condition": "AFTER, the jump lane's guaranteed floor quota is 0 while its achievable share is strictly positive when its measured yield is competitive"
+  },
+  {
+   "id": "P5_trials_per_cell",
+   "claim": "Exploration weight sized for docking fragments credit into ~1-trial cells.",
+   "before_expectation": "~1.1 trials per cell; untried value 0.2500 outranks a 1-trial cell that delivered +0.05",
+   "pass_condition": "AFTER, an untried cell no longer strictly outranks a 1-trial cell that delivered an improvement at the MEASURED reward scale (mean positive improvement u ~ 0.0077)"
+  },
+  {
+   "id": "P6_mass_concentration",
+   "claim": "Fewer than 10 molecules should not hold ~80% of parent mass by virtue of structural isolation.",
+   "before_expectation": "~8 endpoints hold ~80%",
+   "pass_condition": "reported either way; a rise in the count is only meaningful alongside P1 and P2"
+  }
+ ],
+ "per_task": [
+  {
+   "task": "celecoxib_rediscovery",
+   "archive_median_heavy": 14.0,
+   "drawn_median_heavy_before": 8.0,
+   "drawn_median_heavy_after": 26.0,
+   "drawn_under10_before": 0.6852,
+   "drawn_under10_after": 0.1023,
+   "drawn_mean_parent_score_before": 0.0905,
+   "drawn_mean_parent_score_after": 0.1855,
+   "endpoints_holding_80pct_before": 8,
+   "endpoints_holding_80pct_after": 6,
+   "top1_mass_before": 0.1559,
+   "top1_mass_after": 0.5806,
+   "top8_mass_before": 0.8066,
+   "top8_mass_after": 0.806,
+   "exploration_floor_before": 0.000851,
+   "exploration_floor_after": 0.000853,
+   "mass_weighted_qed_before": 0.4353,
+   "mass_weighted_qed_after": 0.5503,
+   "mass_weighted_sa_before": 3.887,
+   "mass_weighted_sa_after": 3.978,
+   "escape_pattern_before": ".........EEEE",
+   "escape_pattern_after": "..........EE.",
+   "escape_max_consecutive_before": 4,
+   "escape_max_consecutive_after": 2,
+   "escape_latched_at_budget_end": true,
+   "credit_cells": 191,
+   "trials_per_cell": 1.058,
+   "observed_reward_scale": 0.0069,
+   "budget_share_on_earning_cells_before": 0.326,
+   "budget_share_on_earning_cells_after": 0.637,
+   "jump_slots_reserved": 25,
+   "jump_rounds_with_any_candidate": 1,
+   "jump_candidates_ever_selected": 1
+  },
+  {
+   "task": "gsk3b",
+   "archive_median_heavy": 16.0,
+   "drawn_median_heavy_before": 10.0,
+   "drawn_median_heavy_after": 37.0,
+   "drawn_under10_before": 0.3837,
+   "drawn_under10_after": 0.0757,
+   "drawn_mean_parent_score_before": 0.0967,
+   "drawn_mean_parent_score_after": 0.2365,
+   "endpoints_holding_80pct_before": 8,
+   "endpoints_holding_80pct_after": 6,
+   "top1_mass_before": 0.1471,
+   "top1_mass_after": 0.6803,
+   "top8_mass_before": 0.8064,
+   "top8_mass_after": 0.806,
+   "exploration_floor_before": 0.000849,
+   "exploration_floor_after": 0.000851,
+   "mass_weighted_qed_before": 0.3277,
+   "mass_weighted_qed_after": 0.1244,
+   "mass_weighted_sa_before": 5.273,
+   "mass_weighted_sa_after": 7.058,
+   "escape_pattern_before": ".............",
+   "escape_pattern_after": ".............",
+   "escape_max_consecutive_before": 0,
+   "escape_max_consecutive_after": 0,
+   "escape_latched_at_budget_end": false,
+   "credit_cells": 196,
+   "trials_per_cell": 1.031,
+   "observed_reward_scale": 0.01095,
+   "budget_share_on_earning_cells_before": 0.389,
+   "budget_share_on_earning_cells_after": 0.663,
+   "jump_slots_reserved": 17,
+   "jump_rounds_with_any_candidate": 1,
+   "jump_candidates_ever_selected": 1
+  },
+  {
+   "task": "perindopril_mpo",
+   "archive_median_heavy": 18.5,
+   "drawn_median_heavy_before": 9.0,
+   "drawn_median_heavy_after": 30.0,
+   "drawn_under10_before": 0.6264,
+   "drawn_under10_after": 0.0716,
+   "drawn_mean_parent_score_before": 0.1375,
+   "drawn_mean_parent_score_after": 0.4101,
+   "endpoints_holding_80pct_before": 8,
+   "endpoints_holding_80pct_after": 5,
+   "top1_mass_before": 0.1557,
+   "top1_mass_after": 0.6299,
+   "top8_mass_before": 0.8064,
+   "top8_mass_after": 0.8067,
+   "exploration_floor_before": 0.00085,
+   "exploration_floor_after": 0.000849,
+   "mass_weighted_qed_before": 0.3953,
+   "mass_weighted_qed_after": 0.4088,
+   "mass_weighted_sa_before": 5.012,
+   "mass_weighted_sa_after": 4.346,
+   "escape_pattern_before": ".............",
+   "escape_pattern_after": ".............",
+   "escape_max_consecutive_before": 0,
+   "escape_max_consecutive_after": 0,
+   "escape_latched_at_budget_end": false,
+   "credit_cells": 191,
+   "trials_per_cell": 1.058,
+   "observed_reward_scale": 0.0068,
+   "budget_share_on_earning_cells_before": 0.377,
+   "budget_share_on_earning_cells_after": 0.665,
+   "jump_slots_reserved": 17,
+   "jump_rounds_with_any_candidate": 1,
+   "jump_candidates_ever_selected": 1
+  }
+ ],
+ "singleton_score_swing": {
+  "celecoxib_rediscovery": [
+   {
+    "role": "fragment",
+    "endpoint": "CCC=O",
+    "heavy": 4,
+    "before_delta": 0.04054327048817887,
+    "after_delta": 0.35208068267516895,
+    "before_low": 0.0008522440623911957,
+    "before_high": 0.04139551455057007,
+    "after_low": 0.0008558426327811012,
+    "after_high": 0.35293652530795006
+   },
+   {
+    "role": "fragment",
+    "endpoint": "CCCF",
+    "heavy": 4,
+    "before_delta": 0.028531231729985312,
+    "after_delta": 0.2503073971905317,
+    "before_low": 0.0008559628745323872,
+    "before_high": 0.029387194604517698,
+    "after_low": 0.0008592225677006996,
+    "after_high": 0.2511666197582324
+   },
+   {
+    "role": "fragment",
+    "endpoint": "O=C=O",
+    "heavy": 3,
+    "before_delta": 0.0145538643951117,
+    "after_delta": 0.25373660489674144,
+    "before_low": 0.0008593176628816998,
+    "before_high": 0.0154131820579934,
+    "after_low": 0.0008620054407099507,
+    "after_high": 0.2545986103374514
+   },
+   {
+    "role": "CONTROL",
+    "endpoint": "CC1=CC=C(C(CNc2ccc(Br)cc2Cl)C(N)(F)c2cccnc2)C1",
+    "heavy": 26,
+    "before_delta": 0.11540891595668533,
+    "after_delta": 0.5797335473180042,
+    "before_low": 0.0008511163028589913,
+    "before_high": 0.11626003225954432,
+    "after_low": 0.000853032047630244,
+    "after_high": 0.5805865793656344
+   }
+  ],
+  "gsk3b": [
+   {
+    "role": "fragment",
+    "endpoint": "C",
+    "heavy": 1,
+    "before_delta": -0.00893294982931049,
+    "after_delta": 0.35170316007253694,
+    "before_low": 0.07442305196366808,
+    "before_high": 0.06549010213435759,
+    "after_low": 0.0029673986736714984,
+    "after_high": 0.35467055874620845
+   },
+   {
+    "role": "fragment",
+    "endpoint": "CCCNF",
+    "heavy": 5,
+    "before_delta": 0.00336535943289841,
+    "after_delta": 0.2891189828435748,
+    "before_low": 0.07324764049185244,
+    "before_high": 0.07661299992475085,
+    "after_low": 0.002920544543971804,
+    "after_high": 0.29203952738754657
+   },
+   {
+    "role": "CONTROL",
+    "endpoint": "CC1C(C)C2CC3CC(=O)C2(C(C#N)C1NC1=C(P)C=C(Br)C(C(N)[IH]OOCNNCO)N1)C3(C)C",
+    "heavy": 37,
+    "before_delta": 0.14499968514350312,
+    "after_delta": 0.6794254537785338,
+    "before_low": 0.0008503934644338469,
+    "before_high": 0.14585007860793697,
+    "after_low": 0.000852741466614681,
+    "after_high": 0.6802781952451484
+   }
+  ],
+  "perindopril_mpo": [
+   {
+    "role": "fragment",
+    "endpoint": "Br",
+    "heavy": 1,
+    "before_delta": -3.873282393006966e-05,
+    "after_delta": 0.2609876739600446,
+    "before_low": 0.05274375861244482,
+    "before_high": 0.05270502578851475,
+    "after_low": 0.002721766900990325,
+    "after_high": 0.2637094408610349
+   },
+   {
+    "role": "fragment",
+    "endpoint": "C",
+    "heavy": 1,
+    "before_delta": -0.017751147974021386,
+    "after_delta": 0.469056792546396,
+    "before_low": 0.1556579884582083,
+    "before_high": 0.13790684048418692,
+    "after_low": 0.00640190388573916,
+    "after_high": 0.4754586964321351
+   },
+   {
+    "role": "CONTROL",
+    "endpoint": "CCCC(OC1CCCCC1C(C)C)C(=O)Nc1ccc2[nH]c(=NCOO)sc2c1",
+    "heavy": 30,
+    "before_delta": 0.1548032094973824,
+    "after_delta": 0.6290675784205578,
+    "before_low": 0.0008547789608258943,
+    "before_high": 0.1556579884582083,
+    "after_low": 0.0008510109378758503,
+    "after_high": 0.6299185893584337
+   }
+  ]
+ },
+ "mutation_battery": {
+  "M1_evidence_weight_reverted_to_uniform_per_niche": {
+   "applied": true,
+   "failed_tests": [
+    "test_evidence_allocation_mass_is_monotone_in_score",
+    "test_evidence_allocation_prefers_the_better_of_two_admitted_endpoints"
+   ],
+   "summary": "2 failed, 20 passed in 1.33s",
+   "killed": true
+  },
+  "M2_evidence_weight_ignores_niche_mask": {
+   "applied": true,
+   "failed_tests": [
+    "test_niching_still_caps_how_many_endpoints_draw_exploitation_mass"
+   ],
+   "summary": "1 failed, 21 passed in 1.32s",
+   "killed": true
+  },
+  "M3_escape_arming_no_longer_restarts_counter": {
+   "applied": true,
+   "failed_tests": [
+    "test_escape_drains_on_an_unbroken_plateau"
+   ],
+   "summary": "1 failed, 21 passed in 1.37s",
+   "killed": true
+  },
+  "M4_jump_floor_quota_restored": {
+   "applied": true,
+   "failed_tests": [
+    "test_jump_lane_holds_no_reserved_floor_in_any_quota_regime[early-0-False]",
+    "test_jump_lane_holds_no_reserved_floor_in_any_quota_regime[normal-9-False]",
+    "test_jump_lane_holds_no_reserved_floor_in_any_quota_regime[escape-9-True]",
+    "test_jump_lane_is_still_reachable_without_a_reserved_floor"
+   ],
+   "summary": "4 failed, 18 passed in 1.33s",
+   "killed": true
+  },
+  "M5_credit_bonus_back_to_absolute_constant": {
+   "applied": true,
+   "failed_tests": [
+    "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.007]",
+    "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.05]"
+   ],
+   "summary": "2 failed, 20 passed in 1.35s",
+   "killed": true
+  },
+  "M6_parent_tilt_back_to_absolute_constant": {
+   "applied": true,
+   "failed_tests": [
+    "test_parent_tilt_lets_measured_upside_outvote_novelty"
+   ],
+   "summary": "1 failed, 21 passed in 1.34s",
+   "killed": true
+  },
+  "M7_credit_schema_not_bumped": {
+   "applied": true,
+   "failed_tests": [
+    "test_credit_snapshot_schema_refuses_the_reweighted_v1_payload"
+   ],
+   "summary": "1 failed, 21 passed in 1.33s",
+   "killed": true
+  },
+  "M8_observed_scale_hardcoded": {
+   "applied": true,
+   "failed_tests": [
+    "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.007]",
+    "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.05]",
+    "test_observed_scale_is_counted_not_configured"
+   ],
+   "summary": "3 failed, 19 passed in 1.30s",
+   "killed": true
+  }
+ },
+ "hierarchical_credit_prequential": {
+  "celecoxib_rediscovery": {
+   "v1_flat": -0.007102958813198431,
+   "hierarchical": -0.0019196377699062794,
+   "uniform": -0.007129916024934148
+  },
+  "gsk3b": {
+   "v1_flat": -0.0072290295486883,
+   "hierarchical": -0.005889072146389059,
+   "uniform": -0.00715997023809524
+  },
+  "perindopril_mpo": {
+   "v1_flat": -0.035697143187002324,
+   "hierarchical": -0.02696481199779875,
+   "uniform": -0.03564722067756075
+  }
+ },
+ "verdicts": [
+  {
+   "id": "P1_parent_heavy_atoms",
+   "verdict": "PARTIAL -- literal criterion FAILED, stated intent MET",
+   "measured": "drawn median heavy 8->26, 10->37, 9->30 against archive medians 14, 16, 18.5",
+   "detail": "The predeclared condition ('within 2 heavy atoms of the archive median') FAILS: parents now sit 12-21 atoms ABOVE the archive median instead of 6-9 below it. The criterion was a poor proxy and I am not redefining it after the fact. What it was standing in for did move: the sub-10-heavy share of drawn parents collapses 0.685->0.102, 0.384->0.076, 0.626->0.072, and the mean measured score of the parent actually drawn rises 2.0x, 2.4x and 3.0x. The archive median is pulled down by the same garbage fragments the allocator was over-drawing, so 'track the archive' was never the right target."
+  },
+  {
+   "id": "P2_singleton_score_sensitivity",
+   "verdict": "PASS",
+   "measured": "perindopril 'Br': BEFORE -0.0000 (the brief's figure reproduced exactly), AFTER +0.2610. gsk3b 'C': BEFORE -0.0089 (mass FELL as score rose), AFTER +0.3517.",
+   "control": "the best-scoring archive member moves +0.1154/+0.1450/+0.1548 BEFORE and +0.5797/+0.6794/+0.6291 AFTER -- still the largest mover in every task, so the fix did not break the control."
+  },
+  {
+   "id": "P3_escape_drains",
+   "verdict": "PASS",
+   "measured": "celecoxib: BEFORE '.........EEEE' (4 consecutive, still armed when the budget ran out, so it would never have released); AFTER '..........EE.' (releases after 2). gsk3b and perindopril never armed escape in either arm.",
+   "correction_to_the_brief": "the brief cites 8 consecutive rounds latched on batches 5-12. In THIS run (35fc7bcd) the measured latch is 4 consecutive rounds on 1 of 3 tasks. The mechanism is confirmed -- once armed it never released -- but the 8-round magnitude comes from a different run and should not be quoted against this one."
+  },
+  {
+   "id": "P4_jump_floor_removed",
+   "verdict": "PASS structurally, CLEAN NEGATIVE on measured impact",
+   "measured": "quota_by_channel[jump] == 0 in all three regimes, driven through the production _allocate and proven by mutation. The credit exploration floor still guarantees a jump cell at least eps/n, and a jump-only pool is still selectable.",
+   "negative": "removing the floor recovers ~0 oracle budget in this run. The jump lane offered a candidate in only 1 of 13 rounds per task and exactly 1 was ever selected per task, so the reserved floor was almost never fillable. The jump lane's real cost is PROPOSAL attempts, which is not the allocator's lever -- that belongs to the proposal path."
+  },
+  {
+   "id": "P5_trials_per_cell",
+   "verdict": "PASS on the stated ordering, PARTIAL on the underlying failure",
+   "measured": "at the run's own measured scale (0.0069/0.0110/0.0068) an untried cell scores 0.00690 and a 1-trial cell that delivered one mean improvement scores 0.01178 -- evidence now wins. BEFORE: untried 0.25000 vs delivered 0.18368 -- evidence lost. Budget share landing on cells that actually won rises 0.326->0.637, 0.389->0.663, 0.377->0.665.",
+   "not_fixed": "trials-per-cell (1.03-1.06) is a property of the completed run and cannot be moved by a replay; only a scored run can measure it. More importantly the COLLECTIVE proliferation failure survives: enough untried cells still outvote one proven cell, because each keeps a positive share and their number grows. Scaling the bonus fixes the per-cell ordering, not the count. That is what hierarchical backoff addresses."
+  },
+  {
+   "id": "P6_mass_concentration",
+   "verdict": "MEASURED, and it is a risk to flag rather than a win",
+   "measured": "endpoints holding 80% of parent mass 8->6, 8->6, 8->5. top-8 mass is UNCHANGED at ~0.806 in both arms because the same 8 endpoints are niche-admitted; what changes is the split among them -- top-1 mass rises 0.156->0.581, 0.147->0.680, 0.156->0.630.",
+   "risk": "the leader now holds 58-68% of all parent mass. The uniform exploration floor is preserved exactly (0.00085 in both arms), so nothing is starved below it, but this is close to one lineage absorbing the run, which is the failure the floor exists to prevent. On gsk3b it is worse than that: mass-weighted QED falls 0.328->0.124 and SA rises 5.27->7.06, because gsk3b's top scorer is a large high-SA structure -- consistent with the separately recorded finding that the gsk3b search reward-hacks its fingerprint oracle. Allocating on measured score necessarily amplifies a hacked oracle. celecoxib and perindopril move the other way (QED 0.435->0.550 and 0.395->0.409)."
+  }
+ ],
+ "what_was_not_fixed": [
+  "Collective cell proliferation in PopulationCredit (see P5). The per-cell ordering is fixed; the count is not.",
+  "The jump lane's proposal-side cost (97.3% execution-rejected). Owned by the proposal path, not the allocator.",
+  "niche_score itself is left byte-identical because live T4 arms use it. It carries the SAME defect and a T4 campaign on parent_allocation='niche_score' is allocating the same way; switching it is a coordinator decision between campaigns, not something to change under a running campaign.",
+  "Hierarchical credit is NOT wired -- see the prequential result and its stated limitation."
+ ]
+}

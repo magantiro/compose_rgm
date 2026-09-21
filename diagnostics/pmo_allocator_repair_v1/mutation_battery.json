@@ -1,0 +1,73 @@
+{
+ "M1_evidence_weight_reverted_to_uniform_per_niche": {
+  "applied": true,
+  "failed_tests": [
+   "test_evidence_allocation_mass_is_monotone_in_score",
+   "test_evidence_allocation_prefers_the_better_of_two_admitted_endpoints"
+  ],
+  "summary": "2 failed, 20 passed in 1.33s",
+  "killed": true
+ },
+ "M2_evidence_weight_ignores_niche_mask": {
+  "applied": true,
+  "failed_tests": [
+   "test_niching_still_caps_how_many_endpoints_draw_exploitation_mass"
+  ],
+  "summary": "1 failed, 21 passed in 1.32s",
+  "killed": true
+ },
+ "M3_escape_arming_no_longer_restarts_counter": {
+  "applied": true,
+  "failed_tests": [
+   "test_escape_drains_on_an_unbroken_plateau"
+  ],
+  "summary": "1 failed, 21 passed in 1.37s",
+  "killed": true
+ },
+ "M4_jump_floor_quota_restored": {
+  "applied": true,
+  "failed_tests": [
+   "test_jump_lane_holds_no_reserved_floor_in_any_quota_regime[early-0-False]",
+   "test_jump_lane_holds_no_reserved_floor_in_any_quota_regime[normal-9-False]",
+   "test_jump_lane_holds_no_reserved_floor_in_any_quota_regime[escape-9-True]",
+   "test_jump_lane_is_still_reachable_without_a_reserved_floor"
+  ],
+  "summary": "4 failed, 18 passed in 1.33s",
+  "killed": true
+ },
+ "M5_credit_bonus_back_to_absolute_constant": {
+  "applied": true,
+  "failed_tests": [
+   "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.007]",
+   "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.05]"
+  ],
+  "summary": "2 failed, 20 passed in 1.35s",
+  "killed": true
+ },
+ "M6_parent_tilt_back_to_absolute_constant": {
+  "applied": true,
+  "failed_tests": [
+   "test_parent_tilt_lets_measured_upside_outvote_novelty"
+  ],
+  "summary": "1 failed, 21 passed in 1.34s",
+  "killed": true
+ },
+ "M7_credit_schema_not_bumped": {
+  "applied": true,
+  "failed_tests": [
+   "test_credit_snapshot_schema_refuses_the_reweighted_v1_payload"
+  ],
+  "summary": "1 failed, 21 passed in 1.33s",
+  "killed": true
+ },
+ "M8_observed_scale_hardcoded": {
+  "applied": true,
+  "failed_tests": [
+   "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.007]",
+   "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.05]",
+   "test_observed_scale_is_counted_not_configured"
+  ],
+  "summary": "3 failed, 19 passed in 1.30s",
+  "killed": true
+ }
+}

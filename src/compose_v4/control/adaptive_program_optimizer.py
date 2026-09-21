@@ -159,8 +159,15 @@ class ProgramSearchConfig:
             or type(self.decompose_programs) is not bool
         ):
             raise ValueError("invalid current-state/decomposition configuration")
-        if self.parent_allocation not in ("score_rank", "score_blind", "niche_score"):
-            raise ValueError("parent allocation must be score_rank, score_blind or niche_score")
+        if self.parent_allocation not in (
+            "score_rank",
+            "score_blind",
+            "niche_score",
+            "niche_evidence",
+        ):
+            raise ValueError(
+                "parent allocation must be score_rank, score_blind, niche_score or niche_evidence"
+            )
         if any(
             type(v) is not int or v < 1
             for v in (
@@ -328,15 +335,35 @@ class ProgramOptimizer:
         quality = (
             np.ones(len(endpoints)) if self.config.parent_allocation == "score_blind" else 1 / ranks
         )
-        if self.config.parent_allocation == "niche_score":
+        if self.config.parent_allocation in ("niche_score", "niche_evidence"):
             key = (tuple(endpoints), tuple(costs))
             if self._niche_cache is None or self._niche_cache[0] != key:
                 self._niche_cache = (key, exploration_niches(endpoints, -costs))
             niches = self._niche_cache[1]
             selected = [set(group) for group in niches["selected"]]
-            quality = np.asarray(
-                [sum(1 / len(group) for group in selected if s in group) for s in endpoints]
-            )
+            if self.config.parent_allocation == "niche_score":
+                # Legacy: mass per NICHE is uniform, so a structurally isolated
+                # endpoint draws a full niche's exploitation mass however badly it
+                # scores, and score only breaks ties inside a niche.
+                quality = np.asarray(
+                    [sum(1 / len(group) for group in selected if s in group) for s in endpoints]
+                )
+            else:
+                # Evidence weighting. Niching decides WHICH endpoints may draw
+                # exploitation mass -- it caps how many members of one structural
+                # basin compete, which is what niching is for -- and the measured
+                # score decides HOW MUCH each of them draws. An endpoint that is
+                # alone in its basin is admitted, never endowed: its mass is the
+                # same rank reciprocal `score_rank` would have given it.
+                eligible = set().union(*selected) if selected else set()
+                quality = np.asarray(
+                    [
+                        (1 / rank) if endpoint in eligible else 0.0
+                        for endpoint, rank in zip(endpoints, ranks, strict=True)
+                    ]
+                )
+                if not quality.sum():
+                    raise ValueError("niche evidence allocation admitted no scored endpoint")
         # Exhaustion tempers exploitation, not the explicit exploration floor.
         quality /= np.asarray(
             [1 + np.mean([self.duplicate_counts.get(k, 0) for k in groups[s]]) for s in endpoints]

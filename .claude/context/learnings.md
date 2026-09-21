@@ -2564,3 +2564,100 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   recomputed the committed reference audit's own 12 states through the production support path and got
   **12/12 agreement to 16 digits**. The ring catalog is byte-identical between step-1000 and step-2500
   (`template_repr_sha256 25bb9f52...`), so the instrument transfers between arms.
+## 2026-09-21 (PMO allocation: a niche is not evidence, and three constants sized for docking)
+
+- **`exploration_niches` gives every niche the SAME exploitation mass, so structural
+  isolation buys budget that score cannot take away.** `adaptive_program_optimizer.py`
+  weighted a niche-selected endpoint by `1 / len(selected_group)`, which sums to one
+  unit PER NICHE however good or bad that niche is. Measured on the completed 3x250 run
+  (35fc7bcd): the drug-like niche holds 189-203 of 234 endpoints and contributes 2
+  parents; three fragment niches centred on `[SH4]`, `CCl`, `NN(N)F`, `P`, `NF` and
+  `O=C=[SH4]` contribute 6, scoring 0.000-0.12 against incumbents at 0.22-0.50. So ~75%
+  of exploitation mass went to garbage, and drawn parents ran 6-9 heavy atoms BELOW the
+  archive median.
+- **THE TELL IS A SWING, NOT A SHARE. A member of a niche with <= `per_niche` members is
+  selected regardless of score**, so its mass is score-independent by construction.
+  Measured: swinging perindopril's `Br` from 0.01 to 0.99 moved its parent mass by
+  **exactly -0.0000**, and gsk3b's `C` moved **-0.0089 -- mass FELL as score ROSE**,
+  because at 0.99 the fragment becomes `exploration_niches`' first (max-utility) centre
+  and the whole partition reorganises. Score-ANTI-correlated, not merely score-blind.
+- **FIX: niching decides WHO may draw exploitation mass, score decides HOW MUCH.** New
+  `parent_allocation="niche_evidence"` keeps the niche partition as an eligibility CAP
+  (at most `max_niches * per_niche` endpoints above the floor -- that is what niching is
+  for) and weights the admitted set by the archive rank reciprocal, i.e. exactly what
+  `score_rank` already trusted. No new free parameter, which matters: every smoothing
+  variant I considered (linear-normalised utility, softmax at temperature = archive std)
+  required choosing a constant by looking at the replay. `niche_score` is left
+  BYTE-IDENTICAL because live T4 arms run on it, and a test pins its score-insensitivity
+  so a later in-place "fix" of it cannot pass silently.
+- **AFTER, zero oracle calls, both arms through the production `selection`:** sub-10-heavy
+  share of drawn parents 0.685->0.102 / 0.384->0.076 / 0.626->0.072; mean measured score
+  of the parent actually drawn up 2.0x / 2.4x / 3.0x; `Br` swing -0.0000 -> +0.2610.
+  **COST, and it is real:** the leader now holds 58-68% of all parent mass (top-8 mass is
+  unchanged at ~0.806 -- the same 8 are admitted; only the split among them moves). On
+  gsk3b that AMPLIFIES a known reward hack: mass-weighted QED 0.328->0.124, SA 5.27->7.06,
+  because its top scorer is a large high-SA structure. Allocating on measured score
+  necessarily amplifies a hacked oracle; celecoxib and perindopril move the other way.
+- **A plateau escape that re-sets its budget every round drains slower than it arms.**
+  `rounds_without_improvement >= 3 -> escape_rounds_remaining = 2`, decremented once per
+  allocation, so any plateau longer than the threshold latched it on forever. Arming now
+  RESTARTS the counter, which bounds the excursion by construction (re-arming takes 3
+  rounds, draining takes 2). **CORRECTION to the brief: in this run the latch is 4
+  consecutive rounds on 1 of 3 tasks, not 8** -- still armed when the budget ran out, so
+  the mechanism is confirmed, but the 8-round figure belongs to a different run.
+- **Removing the dead jump lane's floor quota recovers ~0 oracle budget -- clean negative.**
+  The lane offered a candidate in only **1 of 13 rounds per task** and exactly 1 was ever
+  selected per task, so the reserved floor was almost never fillable: a quota CAPS how
+  many of a channel's rows enter as floor, it does not reserve empty slots. The lane's
+  real cost is PROPOSAL attempts (97.3% execution-rejected), which is not the allocator's
+  lever. Do not cost a quota change as budget recovery without checking availability.
+- **An exploration constant is a claim about the reward scale, and three of them were
+  sized for docking.** Measured mean positive improvement per trial on real PMO is
+  **0.0069-0.0110**. Against that, `PopulationCredit.value`'s `0.25 / sqrt(n+1)` made an
+  untried cell (0.2500) strictly outrank a 1-trial cell that delivered +0.05 (0.2268),
+  and the parent tilt's `0.25 * uncertainty` needed ~1000 children on one parent before
+  earned upside could overtake it. Both now multiply a scale COUNTED from the run's own
+  observations (`observed_scale()` / `observed_upside_scale()`), so one dimensionless
+  value covers every oracle. Untried 0.00690 vs delivered 0.01178; budget share landing
+  on cells that actually won rises 0.326->0.637 / 0.389->0.663 / 0.377->0.665.
+- **`prior_weight` CHANGED UNITS, so the credit schema is bumped to `pmo_credit_v2` and a
+  v1 snapshot now fails closed.** A restored v1 payload carries 0.25 in absolute units
+  and would be silently misread as 0.25 multiples of the scale -- a 36x error that
+  resumes clean. Changing a persisted field's MEANING is a schema change even when its
+  name, type and range are untouched.
+- **Scaling the bonus fixes the per-cell ORDERING and NOT collective proliferation.**
+  Enough untried cells still outvote one proven cell, because each keeps a positive share
+  and their number grows: with one 40-trial +4.0 cell, 60 barren cells still take most of
+  the budget. The existing `tests/test_pmo_credit_v2.py` negative control caught this
+  immediately -- keep such controls even when they encode a defect, because they are what
+  tells you which half of a defect your fix actually reached.
+- **HIERARCHICAL CREDIT HELPS ON THE REPLAY AND IS STILL NOT WIRED, because the metric
+  does not measure the decision.** Prequential (round-by-round, held-out) expected
+  realized improvement per allocated call: v1 -0.00710 / -0.00723 / -0.03570,
+  hierarchical **-0.00192 / -0.00589 / -0.02697**, uniform -0.00713 / -0.00716 / -0.03565.
+  Two findings: v1 is INDISTINGUISHABLE FROM UNIFORM (the joint cell as keyed carries no
+  allocation signal at ~1.05 trials/cell), and hierarchical beats both on 3/3. But the
+  artifacts store only the 16 candidates already SELECTED each round, not the pool the
+  credit path chose from, so this ranks a population the allocator was not choosing over.
+  A proxy that moves in the right direction is not the counterfactual.
+- **`HierarchicalCredit` overrides `allocate`, NOT `value`.** A first comparison scored
+  the two arms through `value()` and got byte-identical numbers on all three tasks --
+  which reads as "the prototype does nothing" rather than "you called the wrong method".
+  Check which method a subclass actually replaces before concluding an arm is inert.
+- **Restore an archive with the production `restore`, then bind the methods you need.**
+  `ProgramOptimizer.restore(snapshot)` validates the snapshot id and accepts a PMO
+  controller snapshot whole; `PmoPopulationController.selection/_allocate/_fit_value/
+  _credit_allocate` then run unchanged against that receiver via `__get__`. The
+  controller's own `restore` additionally demands the jump checkpoint, which no
+  allocation path reads. This is how a replay drives production code instead of a
+  transcription -- and it is what let a BEFORE arm be produced by the NEW code at
+  `prior_weight = 0.25 / observed_scale()`, reproducing the old absolute constant exactly.
+- **A guard that `continue`s past its own subject passes vacuously.** The first
+  jump-quota test called `_allocate(optimizer, [])`, which short-circuits on an empty
+  pool before the quota is built, so the assertion loop ran over an empty dict and the
+  test was green while checking nothing. It only became load-bearing once it fed a pool
+  holding all three channels and asserted the allocation was non-empty first.
+- **`test_pmo_dynamic_v21.py`'s `adaptive_program_optimizer.py` pin was ALREADY stale at
+  the branch base** (`dabaff25` on disk vs `3d185c06` expected), so its 3 failures are
+  pre-existing, not caused by editing that file. Hash the BASE revision's blob before
+  attributing a pin failure to your own change.

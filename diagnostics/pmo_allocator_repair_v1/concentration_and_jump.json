@@ -1,0 +1,149 @@
+{
+ "celecoxib_rediscovery": {
+  "before": {
+   "top1": 0.1558562679316615,
+   "top2": 0.3112486472241007,
+   "top8": 0.8066372031415439,
+   "n_holding_80": 8,
+   "floor": 0.000850630407988977
+  },
+  "after": {
+   "top1": 0.5805865793656344,
+   "top2": 0.7746519129250181,
+   "top8": 0.8059859814164408,
+   "n_holding_80": 6,
+   "floor": 0.0008534952248550738
+  },
+  "jump_available_per_round": [
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "jump_selected_per_round": [
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "jump_rounds_with_any_candidate": 1,
+  "jump_total_selected": 1,
+  "jump_quota_reserved_total": 25
+ },
+ "gsk3b": {
+  "before": {
+   "top1": 0.1470917594361953,
+   "top2": 0.2934059630066431,
+   "top8": 0.8063748293375188,
+   "n_holding_80": 8,
+   "floor": 0.0008489716612073073
+  },
+  "after": {
+   "top1": 0.6802781952451484,
+   "top2": 0.7658670743614486,
+   "top8": 0.8059563034510614,
+   "n_holding_80": 6,
+   "floor": 0.0008508067357271556
+  },
+  "jump_available_per_round": [
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "jump_selected_per_round": [
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "jump_rounds_with_any_candidate": 1,
+  "jump_total_selected": 1,
+  "jump_quota_reserved_total": 17
+ },
+ "perindopril_mpo": {
+  "before": {
+   "top1": 0.1556579884582083,
+   "top2": 0.3113159769164166,
+   "top8": 0.8063902791799449,
+   "n_holding_80": 8,
+   "floor": 0.0008504730506661345
+  },
+  "after": {
+   "top1": 0.6299185893584337,
+   "top2": 0.789340639202064,
+   "top8": 0.8066879520416644,
+   "n_holding_80": 5,
+   "floor": 0.0008491654575053421
+  },
+  "jump_available_per_round": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1
+  ],
+  "jump_selected_per_round": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1
+  ],
+  "jump_rounds_with_any_candidate": 1,
+  "jump_total_selected": 1,
+  "jump_quota_reserved_total": 17
+ }
+}

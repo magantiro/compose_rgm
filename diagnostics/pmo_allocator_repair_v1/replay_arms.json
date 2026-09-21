@@ -1,0 +1,464 @@
+{
+ "celecoxib_rediscovery": {
+  "before": {
+   "allocation": "niche_score",
+   "archive_heavy_atoms": {
+    "n": 234,
+    "min": 1.0,
+    "p25": 7.0,
+    "median": 14.0,
+    "p75": 23.0,
+    "max": 38.0,
+    "mean": 15.205128205128204
+   },
+   "drawn_parent_heavy_atoms": {
+    "n": 20000,
+    "min": 1.0,
+    "p25": 4.0,
+    "median": 8.0,
+    "p75": 22.0,
+    "max": 38.0,
+    "mean": 11.9559
+   },
+   "drawn_under_10_heavy_fraction": 0.6852,
+   "drawn_mean_parent_score": 0.09050083961096052,
+   "archive_mean_score": 0.07162876395099943,
+   "best_archive_score": 0.22033898305084745,
+   "concentration": {
+    "endpoints_holding_80pct": 8,
+    "archive_size": 234,
+    "top8_mass": 0.8066372031415439,
+    "top_members": [
+     {
+      "smiles": "Bc1c2c([PH4])c3c-2c1-3",
+      "mass": 0.1558562679316615,
+      "heavy_atoms": 8
+     },
+     {
+      "smiles": "Nc1c2c(I)c3c-2c1-3",
+      "mass": 0.15539237929243924,
+      "heavy_atoms": 8
+     },
+     {
+      "smiles": "CCC=O",
+      "mass": 0.11656208061294203,
+      "heavy_atoms": 4
+     },
+     {
+      "smiles": "CC1=CC=C(C(CNc2ccc(Br)cc2Cl)C(N)(F)c2cccnc2)C1",
+      "mass": 0.11626003225954432,
+      "heavy_atoms": 26
+     },
+     {
+      "smiles": "CCCF",
+      "mass": 0.07829985450167382,
+      "heavy_atoms": 4
+     },
+     {
+      "smiles": "CNC(F)(c1cccnc1)C(CNc1ccc(Br)cc1Cl)C1=CC=C1C",
+      "mass": 0.07777720643481821,
+      "heavy_atoms": 26
+     },
+     {
+      "smiles": "Nc1c2c(O)c3c-2c1-3",
+      "mass": 0.05901181275998457,
+      "heavy_atoms": 8
+     },
+     {
+      "smiles": "O=C=O",
+      "mass": 0.047477569348480214,
+      "heavy_atoms": 3
+     }
+    ]
+   },
+   "mass_weighted_qed": 0.4352970815914718,
+   "mass_weighted_sa": 3.887219620026829,
+   "archive_mean_qed": 0.46844664101265193,
+   "archive_mean_sa": 4.180399113642338
+  },
+  "after": {
+   "allocation": "niche_evidence",
+   "archive_heavy_atoms": {
+    "n": 234,
+    "min": 1.0,
+    "p25": 7.0,
+    "median": 14.0,
+    "p75": 23.0,
+    "max": 38.0,
+    "mean": 15.205128205128204
+   },
+   "drawn_parent_heavy_atoms": {
+    "n": 20000,
+    "min": 1.0,
+    "p25": 26.0,
+    "median": 26.0,
+    "p75": 26.0,
+    "max": 38.0,
+    "mean": 23.4297
+   },
+   "drawn_under_10_heavy_fraction": 0.10235,
+   "drawn_mean_parent_score": 0.18545305653504635,
+   "archive_mean_score": 0.07162876395099943,
+   "best_archive_score": 0.22033898305084745,
+   "concentration": {
+    "endpoints_holding_80pct": 6,
+    "archive_size": 234,
+    "top8_mass": 0.8059859814164408,
+    "top_members": [
+     {
+      "smiles": "CC1=CC=C(C(CNc2ccc(Br)cc2Cl)C(N)(F)c2cccnc2)C1",
+      "mass": 0.5805865793656344,
+      "heavy_atoms": 26
+     },
+     {
+      "smiles": "CNC(F)(c1cccnc1)C(CNc1ccc(Br)cc1Cl)C1=CC=C1C",
+      "mass": 0.1940653335593837,
+      "heavy_atoms": 26
+     },
+     {
+      "smiles": "Nc1c2c(I)c3c-2c1-3",
+      "mass": 0.009115670235051623,
+      "heavy_atoms": 8
+     },
+     {
+      "smiles": "Bc1c2c([PH4])c3c-2c1-3",
+      "mass": 0.007811681819331839,
+      "heavy_atoms": 8
+     },
+     {
+      "smiles": "CCC=O",
+      "mass": 0.004630136409514534,
+      "heavy_atoms": 4
+     },
+     {
+      "smiles": "Nc1c2c(O)c3c-2c1-3",
+      "mass": 0.003968014001950299,
+      "heavy_atoms": 8
+     },
+     {
+      "smiles": "CCCF",
+      "mass": 0.0033853368523607654,
+      "heavy_atoms": 4
+     },
+     {
+      "smiles": "O=C=O",
+      "mass": 0.0024232291732136746,
+      "heavy_atoms": 3
+     }
+    ]
+   },
+   "mass_weighted_qed": 0.5503262206886828,
+   "mass_weighted_sa": 3.978121188606875,
+   "archive_mean_qed": 0.46844664101265193,
+   "archive_mean_sa": 4.180399113642338
+  }
+ },
+ "gsk3b": {
+  "before": {
+   "allocation": "niche_score",
+   "archive_heavy_atoms": {
+    "n": 234,
+    "min": 1.0,
+    "p25": 9.0,
+    "median": 16.0,
+    "p75": 28.0,
+    "max": 40.0,
+    "mean": 18.367521367521366
+   },
+   "drawn_parent_heavy_atoms": {
+    "n": 20000,
+    "min": 1.0,
+    "p25": 9.0,
+    "median": 10.0,
+    "p75": 21.0,
+    "max": 40.0,
+    "mean": 15.6007
+   },
+   "drawn_under_10_heavy_fraction": 0.38375,
+   "drawn_mean_parent_score": 0.09673741666666669,
+   "archive_mean_score": 0.06445156695156695,
+   "best_archive_score": 0.29,
+   "concentration": {
+    "endpoints_holding_80pct": 8,
+    "archive_size": 234,
+    "top8_mass": 0.8063748293375188,
+    "top_members": [
+     {
+      "smiles": "CCOc1c2c(Cl)c3c-2c1-3",
+      "mass": 0.1470917594361953,
+      "heavy_atoms": 10
+     },
+     {
+      "smiles": "CC1([IH]N(N)F)CNN1",
+      "mass": 0.14631420357044786,
+      "heavy_atoms": 9
+     },
+     {
+      "smiles": "CC1C(C)C2CC3CC(=O)C2(C(C#N)C1NC1=C(P)C=C(Br)C(C(N)[IH]OOCNNCO)N1)C3(C)C",
+      "mass": 0.14585007860793697,
+      "heavy_atoms": 37
+     },
+     {
+      "smiles": "CC(C)(CN(N)F)N1CCC1O",
+      "mass": 0.14532851255030546,
+      "heavy_atoms": 12
+     },
+     {
+      "smiles": "C",
+      "mass": 0.07442305196366808,
+      "heavy_atoms": 1
+     },
+     {
+      "smiles": "CCCNF",
+      "mass": 0.07324764049185244,
+      "heavy_atoms": 5
+     },
+     {
+      "smiles": "CNc1c2c(Cl)c3c-2c1-3",
+      "mass": 0.03710153353860956,
+      "heavy_atoms": 9
+     },
+     {
+      "smiles": "CCC1C2C(=O)C(C(C#N)C(NC3=C(P)C=C(NC)C(C(=N)N)N3)C(C=O)C2CC2CCCNC2)C1(C)C",
+      "mass": 0.03701804917850325,
+      "heavy_atoms": 38
+     }
+    ]
+   },
+   "mass_weighted_qed": 0.3277497348070582,
+   "mass_weighted_sa": 5.273160397423654,
+   "archive_mean_qed": 0.4189201772218995,
+   "archive_mean_sa": 4.96974900692057
+  },
+  "after": {
+   "allocation": "niche_evidence",
+   "archive_heavy_atoms": {
+    "n": 234,
+    "min": 1.0,
+    "p25": 9.0,
+    "median": 16.0,
+    "p75": 28.0,
+    "max": 40.0,
+    "mean": 18.367521367521366
+   },
+   "drawn_parent_heavy_atoms": {
+    "n": 20000,
+    "min": 1.0,
+    "p25": 37.0,
+    "median": 37.0,
+    "p75": 37.0,
+    "max": 40.0,
+    "mean": 32.4473
+   },
+   "drawn_under_10_heavy_fraction": 0.0757,
+   "drawn_mean_parent_score": 0.23648283333333334,
+   "archive_mean_score": 0.06445156695156695,
+   "best_archive_score": 0.29,
+   "concentration": {
+    "endpoints_holding_80pct": 6,
+    "archive_size": 234,
+    "top8_mass": 0.8059563034510614,
+    "top_members": [
+     {
+      "smiles": "CC1C(C)C2CC3CC(=O)C2(C(C#N)C1NC1=C(P)C=C(Br)C(C(N)[IH]OOCNNCO)N1)C3(C)C",
+      "mass": 0.6802781952451484,
+      "heavy_atoms": 37
+     },
+     {
+      "smiles": "CCC1C2C(=O)C(C(C#N)C(NC3=C(P)C=C(NC)C(C(=N)N)N3)C(C=O)C2CC2CCCNC2)C1(C)C",
+      "mass": 0.08558887911630018,
+      "heavy_atoms": 38
+     },
+     {
+      "smiles": "CC1([IH]N(N)F)CNN1",
+      "mass": 0.01748063594715605,
+      "heavy_atoms": 9
+     },
+     {
+      "smiles": "CC(C)(CN(N)F)N1CCC1O",
+      "mass": 0.009106839478098807,
+      "heavy_atoms": 12
+     },
+     {
+      "smiles": "CCOc1c2c(Cl)c3c-2c1-3",
+      "mass": 0.005586705639019415,
+      "heavy_atoms": 10
+     },
+     {
+      "smiles": "C",
+      "mass": 0.0027194410099049466,
+      "heavy_atoms": 1
+     },
+     {
+      "smiles": "CCCNF",
+      "mass": 0.0026764911163487315,
+      "heavy_atoms": 5
+     },
+     {
+      "smiles": "CNc1c2c(Cl)c3c-2c1-3",
+      "mass": 0.0025191158990847716,
+      "heavy_atoms": 9
+     }
+    ]
+   },
+   "mass_weighted_qed": 0.12441643324466384,
+   "mass_weighted_sa": 7.058084438578106,
+   "archive_mean_qed": 0.4189201772218995,
+   "archive_mean_sa": 4.96974900692057
+  }
+ },
+ "perindopril_mpo": {
+  "before": {
+   "allocation": "niche_score",
+   "archive_heavy_atoms": {
+    "n": 234,
+    "min": 1.0,
+    "p25": 9.0,
+    "median": 18.5,
+    "p75": 28.0,
+    "max": 38.0,
+    "mean": 18.525641025641026
+   },
+   "drawn_parent_heavy_atoms": {
+    "n": 20000,
+    "min": 1.0,
+    "p25": 8.0,
+    "median": 9.0,
+    "p75": 29.0,
+    "max": 38.0,
+    "mean": 14.05625
+   },
+   "drawn_under_10_heavy_fraction": 0.62645,
+   "drawn_mean_parent_score": 0.13750192342586193,
+   "archive_mean_score": 0.11045769300802132,
+   "best_archive_score": 0.4979959839195493,
+   "concentration": {
+    "endpoints_holding_80pct": 8,
+    "archive_size": 234,
+    "top8_mass": 0.8063902791799449,
+    "top_members": [
+     {
+      "smiles": "C",
+      "mass": 0.1556579884582083,
+      "heavy_atoms": 1
+     },
+     {
+      "smiles": "CCCC(OC1CCCCC1C(C)C)C(=O)Nc1ccc2[nH]c(=NCOO)sc2c1",
+      "mass": 0.1556579884582083,
+      "heavy_atoms": 30
+     },
+     {
+      "smiles": "NCCC(N)NNOF",
+      "mass": 0.15507113293184938,
+      "heavy_atoms": 9
+     },
+     {
+      "smiles": "CCC(OC1CCCCC1C(C)C)C(=O)Nc1ccc2[nH]c(=NCOO)sc2c1",
+      "mass": 0.07890088243799405,
+      "heavy_atoms": 29
+     },
+     {
+      "smiles": "CCC(N)(CC)CC#N",
+      "mass": 0.07803274059676461,
+      "heavy_atoms": 9
+     },
+     {
+      "smiles": "COCON(F)OCCl",
+      "mass": 0.07803274059676461,
+      "heavy_atoms": 9
+     },
+     {
+      "smiles": "Br",
+      "mass": 0.05274375861244482,
+      "heavy_atoms": 1
+     },
+     {
+      "smiles": "NC1CC1NNOF",
+      "mass": 0.05229304708771092,
+      "heavy_atoms": 8
+     }
+    ]
+   },
+   "mass_weighted_qed": 0.39533351694748015,
+   "mass_weighted_sa": 5.0116065167872925,
+   "archive_mean_qed": 0.4682980224363692,
+   "archive_mean_sa": 4.590064049527486
+  },
+  "after": {
+   "allocation": "niche_evidence",
+   "archive_heavy_atoms": {
+    "n": 234,
+    "min": 1.0,
+    "p25": 9.0,
+    "median": 18.5,
+    "p75": 28.0,
+    "max": 38.0,
+    "mean": 18.525641025641026
+   },
+   "drawn_parent_heavy_atoms": {
+    "n": 20000,
+    "min": 1.0,
+    "p25": 29.0,
+    "median": 30.0,
+    "p75": 30.0,
+    "max": 38.0,
+    "mean": 27.3091
+   },
+   "drawn_under_10_heavy_fraction": 0.07155,
+   "drawn_mean_parent_score": 0.4101288267770478,
+   "archive_mean_score": 0.11045769300802132,
+   "best_archive_score": 0.4979959839195493,
+   "concentration": {
+    "endpoints_holding_80pct": 5,
+    "archive_size": 234,
+    "top8_mass": 0.8066879520416644,
+    "top_members": [
+     {
+      "smiles": "CCCC(OC1CCCCC1C(C)C)C(=O)Nc1ccc2[nH]c(=NCOO)sc2c1",
+      "mass": 0.6299185893584337,
+      "heavy_atoms": 30
+     },
+     {
+      "smiles": "CCC(OC1CCCCC1C(C)C)C(=O)Nc1ccc2[nH]c(=NCOO)sc2c1",
+      "mass": 0.15942204984363031,
+      "heavy_atoms": 29
+     },
+     {
+      "smiles": "NCCC(N)NNOF",
+      "mass": 0.004431082901983668,
+      "heavy_atoms": 9
+     },
+     {
+      "smiles": "C",
+      "mass": 0.0037388136918773455,
+      "heavy_atoms": 1
+     },
+     {
+      "smiles": "CCC(N)(CC)CC#N",
+      "mass": 0.002823298987012815,
+      "heavy_atoms": 9
+     },
+     {
+      "smiles": "COCON(F)OCCl",
+      "mass": 0.0024268078964710064,
+      "heavy_atoms": 9
+     },
+     {
+      "smiles": "NC1CC1NNOF",
+      "mass": 0.0021022745438341716,
+      "heavy_atoms": 8
+     },
+     {
+      "smiles": "Br",
+      "mass": 0.0018250348184214013,
+      "heavy_atoms": 1
+     }
+    ]
+   },
+   "mass_weighted_qed": 0.4087594360416024,
+   "mass_weighted_sa": 4.345878823573484,
+   "archive_mean_qed": 0.4682980224363692,
+   "archive_mean_sa": 4.590064049527486
+  }
+ }
+}
