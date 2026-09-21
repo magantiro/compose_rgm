@@ -1827,6 +1827,35 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **fa7_0 and fa7_2 have ZERO one-module eligible children even under the repair**, while
   braf_0 has two. A rank improvement measured over a multi-draw closure is not the same
   claim as a one-module witness; do not let the first stand in for the second.
+- **THE LAPTOP `.venv` IS NOT THE PRODUCTION CHEMISTRY KERNEL, and a region-law rank is a
+  statement about whichever kernel is loaded.** `/Users/rmaganti/compose_rgm_git/.venv`
+  runs python 3.12 / **rdkit 2026.03.6** / numpy 2.5.3; the production image pins python
+  3.11 / **rdkit 2024.3.5** / numpy 1.26.4 / scipy 1.13.1 / networkx 3.3 / torch 2.4.0.
+  Rebuilding the pinned stack takes about a minute:
+  `uv venv --python 3.11 ~/compose_region_pinned_env` then
+  `uv pip install --python ~/compose_region_pinned_env/bin/python rdkit==2024.3.5
+  numpy==1.26.4 scipy==1.13.1 networkx==3.3 torch==2.4.0 pytest`. torch is needed only
+  because `t4_fiber_campaign` imports it transitively -- but it IS needed, because
+  without it you must transcribe the gate instead of importing it, and a transcribed
+  gate cannot fail usefully.
+- **THE DANGEROUS PART: `expand` catches `RuntimeError` per draw**, and rdkit 2024.3.5
+  raises `RuntimeError: Invariant Violation ... could not find atom1 (Canon.cpp:222)`
+  from `Chem.MolToSmiles` on Kekule-degenerate hypervalent-sulfur rings that 2026.03.6
+  canonicalizes happily. So a production-kernel refusal is SWALLOWED AS A DROPPED DRAW,
+  never as a crash, and is invisible in every artifact. Counting refusals requires
+  wrapping `molecular_graph_to_smiles` -- and rebinding it in each module that imported
+  the symbol directly (`t4_fiber_campaign`, `bridge_region_law`), not just on its home
+  module.
+- **MEASURED, and it is PARITY: `scripts/t4_region_law_kernel_parity.py` over all six
+  braf/fa7 delta=0.6 cells, 212 region-to-child states per kernel, zero oracle calls.**
+  `max_abs_delta` similarity 0.0 / QED 0.0 / SA 0.0; 0 canonical-SMILES disagreements;
+  0 verdict flips; 0 rank moves; **0 refusals under EITHER kernel**. Campaign path too:
+  braf_0 at 24 shallow draws from one seed gives OFF 0 / ON 4 under both, same max
+  excision, same shape census, same best QED to sixteen digits, same example SMILES.
+  47 wiring+repair tests pass under the pinned stack. So these particular sources never
+  construct the pathological ring -- which is a MEASUREMENT about these cells, not a
+  guarantee about a cell whose search wanders into hypervalent sulfur. Re-run the parity
+  script for any new cell set rather than citing this one.
 - **`git worktree add` + `git merge FETCH_HEAD`:** `git merge origin/<branch>` fails with
   "not something we can merge" in a fresh worktree whose remote refs were not fetched
   into that name; `git fetch origin <branch>` then `git merge FETCH_HEAD` works. The only
