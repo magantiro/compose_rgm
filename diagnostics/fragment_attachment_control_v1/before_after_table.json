@@ -1,0 +1,459 @@
+{
+  "schema": "compose_fragment_attachment_before_after_v1",
+  "comparison": "identical instances, identical sampler configuration, identical checkpoint; the arms differ only in whether the controller reads the prompt's declared attachment interfaces",
+  "arms": {
+    "before": {
+      "label": "baseline",
+      "arm_name": "frozen_sampler_baseline",
+      "shard_count": 30,
+      "sampler_sha256": "805b2d10fa863c278dfd760fb3b9f5fd29eb94f91ef1653b1bf5ebe44aaab9ae",
+      "attachment_sha256": "698d57036e25eba4e23d910e3e5adffe70c6582b440aeb4dd8b3389b0e2f6691",
+      "attachment_config": {
+        "attachment_first": true,
+        "enabled": false,
+        "realize_redirected_order": true,
+        "redirect_attachment": true,
+        "release_linker_join": true,
+        "require_separated_cores": true,
+        "restrict_interfaces": true
+      },
+      "kernel": {
+        "numpy": "2.5.3",
+        "platform": "macOS-26.5.2-arm64-arm-64bit",
+        "python": "3.12.9",
+        "rdkit": "2026.03.6",
+        "torch": "2.14.0"
+      },
+      "checkpoint": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt"
+    },
+    "after": {
+      "label": "attachment_control",
+      "arm_name": "attachment_control",
+      "shard_count": 30,
+      "sampler_sha256": "805b2d10fa863c278dfd760fb3b9f5fd29eb94f91ef1653b1bf5ebe44aaab9ae",
+      "attachment_sha256": "c2cf0215f1c18c38fa12ff7c6eaf68c5a7bf7886c73bb791da9b086fd5e29aca",
+      "attachment_config": {
+        "attachment_first": true,
+        "enabled": true,
+        "realize_redirected_order": true,
+        "redirect_attachment": true,
+        "release_linker_join": true,
+        "require_separated_cores": true,
+        "restrict_interfaces": true
+      },
+      "kernel": {
+        "numpy": "2.5.3",
+        "platform": "macOS-26.5.2-arm64-arm-64bit",
+        "python": "3.12.9",
+        "rdkit": "2026.03.6",
+        "torch": "2.14.0"
+      },
+      "checkpoint": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt"
+    }
+  },
+  "instances_compared": 30,
+  "partial": false,
+  "column_semantics": {
+    "chemical_validity_over_committed_pct": "valid AND connected, over COMMITTED endpoints. The architectural claim; expected exactly 100.",
+    "chemical_validity_over_attempts": "valid AND connected, over ATTEMPTS. Sampler efficiency, and the like-for-like column against a published validity number.",
+    "fragment_containment": "prompt fragment present, over ATTEMPTS.",
+    "task_success": "fragment present AND every declared attachment site extended, over ATTEMPTS."
+  },
+  "tasks": {
+    "motif_extension": {
+      "instances": 30,
+      "before": {
+        "rows": 30,
+        "summary": {
+          "chemical_validity_over_attempts": {
+            "mean": 85.39999999999999,
+            "std": 0.21602468994692955
+          },
+          "fragment_containment": {
+            "mean": 84.8,
+            "std": 0.408248290463863
+          },
+          "task_success": {
+            "mean": 41.43333333333333,
+            "std": 0.8055363982396396
+          },
+          "produced": {
+            "mean": 85.39999999999999,
+            "std": 0.21602468994692955
+          }
+        },
+        "per_seed": {
+          "0": {
+            "chemical_validity_over_attempts": 85.2,
+            "fragment_containment": 84.8,
+            "task_success": 41.9,
+            "produced": 85.2
+          },
+          "1": {
+            "chemical_validity_over_attempts": 85.7,
+            "fragment_containment": 85.3,
+            "task_success": 40.3,
+            "produced": 85.7
+          },
+          "2": {
+            "chemical_validity_over_attempts": 85.3,
+            "fragment_containment": 84.3,
+            "task_success": 42.1,
+            "produced": 85.3
+          }
+        },
+        "per_drug": {
+          "BARICITINIB": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 74.33333333333333,
+            "fragment_containment": 74.33333333333333,
+            "task_success": 7.666666666666667,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "CYCLOTHIAZIDE": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 95.0,
+            "fragment_containment": 95.0,
+            "task_success": 63.333333333333336,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "ELIGLUSTAT": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 100.0,
+            "fragment_containment": 99.33333333333333,
+            "task_success": 76.66666666666667,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "ERLOTINIB": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 90.33333333333333,
+            "fragment_containment": 90.0,
+            "task_success": 49.0,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "FUTIBATINIB": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 76.66666666666667,
+            "fragment_containment": 74.0,
+            "task_success": 29.333333333333332,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "LESINURAD": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 50.333333333333336,
+            "fragment_containment": 48.0,
+            "task_success": 24.333333333333332,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "LIOTHYRONINE": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 94.66666666666667,
+            "fragment_containment": 94.66666666666667,
+            "task_success": 82.0,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "LOVASTATIN": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 77.0,
+            "fragment_containment": 77.0,
+            "task_success": 3.6666666666666665,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "MARIBAVIR": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 99.33333333333333,
+            "fragment_containment": 99.33333333333333,
+            "task_success": 33.666666666666664,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "SPIRAPRIL": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 96.33333333333333,
+            "fragment_containment": 96.33333333333333,
+            "task_success": 44.666666666666664,
+            "declared_interfaces": [
+              1
+            ]
+          }
+        },
+        "chemical_validity_over_committed_pct": 100.0,
+        "committed_endpoints": 2562,
+        "emitted_after_task_filter": 1243,
+        "censored_by_task_filter": 1319,
+        "censoring_pct_of_committed": 51.4832162373146,
+        "committed_endpoints_persisted": 2562,
+        "molecules_recoverable": true,
+        "declared_interfaces_per_prompt": [
+          1
+        ],
+        "redirections": 0,
+        "interface_rejections": 0,
+        "staging_rejections": 0,
+        "separation_failures": 0
+      },
+      "after": {
+        "rows": 30,
+        "summary": {
+          "chemical_validity_over_attempts": {
+            "mean": 85.89999999999999,
+            "std": 1.2083045973594524
+          },
+          "fragment_containment": {
+            "mean": 85.89999999999999,
+            "std": 1.2083045973594524
+          },
+          "task_success": {
+            "mean": 83.23333333333333,
+            "std": 1.2036980056845232
+          },
+          "produced": {
+            "mean": 85.89999999999999,
+            "std": 1.2083045973594524
+          }
+        },
+        "per_seed": {
+          "0": {
+            "chemical_validity_over_attempts": 87.6,
+            "fragment_containment": 87.6,
+            "task_success": 84.9,
+            "produced": 87.6
+          },
+          "1": {
+            "chemical_validity_over_attempts": 85.2,
+            "fragment_containment": 85.2,
+            "task_success": 82.1,
+            "produced": 85.2
+          },
+          "2": {
+            "chemical_validity_over_attempts": 84.9,
+            "fragment_containment": 84.9,
+            "task_success": 82.7,
+            "produced": 84.9
+          }
+        },
+        "per_drug": {
+          "BARICITINIB": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 77.33333333333333,
+            "fragment_containment": 77.33333333333333,
+            "task_success": 72.33333333333333,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "CYCLOTHIAZIDE": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 94.0,
+            "fragment_containment": 94.0,
+            "task_success": 93.66666666666667,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "ELIGLUSTAT": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 100.0,
+            "fragment_containment": 100.0,
+            "task_success": 100.0,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "ERLOTINIB": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 94.66666666666667,
+            "fragment_containment": 94.66666666666667,
+            "task_success": 87.0,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "FUTIBATINIB": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 76.0,
+            "fragment_containment": 76.0,
+            "task_success": 74.66666666666667,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "LESINURAD": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 48.666666666666664,
+            "fragment_containment": 48.666666666666664,
+            "task_success": 45.333333333333336,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "LIOTHYRONINE": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 96.0,
+            "fragment_containment": 96.0,
+            "task_success": 90.66666666666667,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "LOVASTATIN": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 76.66666666666667,
+            "fragment_containment": 76.66666666666667,
+            "task_success": 74.33333333333333,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "MARIBAVIR": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 99.33333333333333,
+            "fragment_containment": 99.33333333333333,
+            "task_success": 99.33333333333333,
+            "declared_interfaces": [
+              1
+            ]
+          },
+          "SPIRAPRIL": {
+            "seeds": 3,
+            "chemical_validity_over_attempts": 96.33333333333333,
+            "fragment_containment": 96.33333333333333,
+            "task_success": 95.0,
+            "declared_interfaces": [
+              1
+            ]
+          }
+        },
+        "chemical_validity_over_committed_pct": 100.0,
+        "committed_endpoints": 2577,
+        "emitted_after_task_filter": 2497,
+        "censored_by_task_filter": 80,
+        "censoring_pct_of_committed": 3.104384943733023,
+        "committed_endpoints_persisted": 2577,
+        "molecules_recoverable": true,
+        "declared_interfaces_per_prompt": [
+          1
+        ],
+        "redirections": 5134,
+        "interface_rejections": 19986,
+        "staging_rejections": 8,
+        "separation_failures": 0
+      },
+      "delta": {
+        "chemical_validity_over_attempts": 0.5,
+        "fragment_containment": 1.0999999999999943,
+        "task_success": 41.800000000000004,
+        "produced": 0.5
+      },
+      "per_drug_delta": {
+        "BARICITINIB": {
+          "task_success_before": 7.666666666666667,
+          "task_success_after": 72.33333333333333,
+          "task_success_delta": 64.66666666666666,
+          "chemical_validity_over_attempts_delta": 3.0,
+          "declared_interfaces": [
+            1
+          ]
+        },
+        "CYCLOTHIAZIDE": {
+          "task_success_before": 63.333333333333336,
+          "task_success_after": 93.66666666666667,
+          "task_success_delta": 30.333333333333336,
+          "chemical_validity_over_attempts_delta": -1.0,
+          "declared_interfaces": [
+            1
+          ]
+        },
+        "ELIGLUSTAT": {
+          "task_success_before": 76.66666666666667,
+          "task_success_after": 100.0,
+          "task_success_delta": 23.33333333333333,
+          "chemical_validity_over_attempts_delta": 0.0,
+          "declared_interfaces": [
+            1
+          ]
+        },
+        "ERLOTINIB": {
+          "task_success_before": 49.0,
+          "task_success_after": 87.0,
+          "task_success_delta": 38.0,
+          "chemical_validity_over_attempts_delta": 4.333333333333343,
+          "declared_interfaces": [
+            1
+          ]
+        },
+        "FUTIBATINIB": {
+          "task_success_before": 29.333333333333332,
+          "task_success_after": 74.66666666666667,
+          "task_success_delta": 45.33333333333334,
+          "chemical_validity_over_attempts_delta": -0.6666666666666714,
+          "declared_interfaces": [
+            1
+          ]
+        },
+        "LESINURAD": {
+          "task_success_before": 24.333333333333332,
+          "task_success_after": 45.333333333333336,
+          "task_success_delta": 21.000000000000004,
+          "chemical_validity_over_attempts_delta": -1.6666666666666714,
+          "declared_interfaces": [
+            1
+          ]
+        },
+        "LIOTHYRONINE": {
+          "task_success_before": 82.0,
+          "task_success_after": 90.66666666666667,
+          "task_success_delta": 8.666666666666671,
+          "chemical_validity_over_attempts_delta": 1.3333333333333286,
+          "declared_interfaces": [
+            1
+          ]
+        },
+        "LOVASTATIN": {
+          "task_success_before": 3.6666666666666665,
+          "task_success_after": 74.33333333333333,
+          "task_success_delta": 70.66666666666666,
+          "chemical_validity_over_attempts_delta": -0.3333333333333286,
+          "declared_interfaces": [
+            1
+          ]
+        },
+        "MARIBAVIR": {
+          "task_success_before": 33.666666666666664,
+          "task_success_after": 99.33333333333333,
+          "task_success_delta": 65.66666666666666,
+          "chemical_validity_over_attempts_delta": 0.0,
+          "declared_interfaces": [
+            1
+          ]
+        },
+        "SPIRAPRIL": {
+          "task_success_before": 44.666666666666664,
+          "task_success_after": 95.0,
+          "task_success_delta": 50.333333333333336,
+          "chemical_validity_over_attempts_delta": 0.0,
+          "declared_interfaces": [
+            1
+          ]
+        }
+      }
+    }
+  }
+}
