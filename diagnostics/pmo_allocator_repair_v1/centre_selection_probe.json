@@ -1,0 +1,80 @@
+{
+ "celecoxib_rediscovery": {
+  "distance_centres|archive_rank": {
+   "top1": 0.5170307394906462,
+   "eff_parents": 9.186186388666542,
+   "sub10_mass": 0.10522312153326141,
+   "admitted_sub10": 6
+  },
+  "distance_centres|admitted_rank": {
+   "top1": 0.2952042409335445,
+   "eff_parents": 20.214152633484705,
+   "sub10_mass": 0.4379628693689138,
+   "admitted_sub10": 6
+  },
+  "evidence_centres|archive_rank": {
+   "top1": 0.4562868168799957,
+   "eff_parents": 12.22825153806033,
+   "sub10_mass": 0.09640630571574484,
+   "admitted_sub10": 2
+  },
+  "evidence_centres|admitted_rank": {
+   "top1": 0.2952042409335445,
+   "eff_parents": 20.214152633484712,
+   "sub10_mass": 0.16533912867684208,
+   "admitted_sub10": 2
+  }
+ },
+ "gsk3b": {
+  "distance_centres|archive_rank": {
+   "top1": 0.5123510521444574,
+   "eff_parents": 9.426081932239983,
+   "sub10_mass": 0.07683630548655893,
+   "admitted_sub10": 4
+  },
+  "distance_centres|admitted_rank": {
+   "top1": 0.2952042409335445,
+   "eff_parents": 20.214152633484705,
+   "sub10_mass": 0.2896762020283701,
+   "admitted_sub10": 4
+  },
+  "evidence_centres|archive_rank": {
+   "top1": 0.32210122283578047,
+   "eff_parents": 18.24783739750831,
+   "sub10_mass": 0.05384615384615378,
+   "admitted_sub10": 0
+  },
+  "evidence_centres|admitted_rank": {
+   "top1": 0.2952042409335445,
+   "eff_parents": 20.214152633484705,
+   "sub10_mass": 0.05384615384615378,
+   "admitted_sub10": 0
+  }
+ },
+ "perindopril_mpo": {
+  "distance_centres|archive_rank": {
+   "top1": 0.5229827978579795,
+   "eff_parents": 8.824536157841527,
+   "sub10_mass": 0.07663691432414167,
+   "admitted_sub10": 6
+  },
+  "distance_centres|admitted_rank": {
+   "top1": 0.2952042409335445,
+   "eff_parents": 20.214152633484694,
+   "sub10_mass": 0.41830474971079423,
+   "admitted_sub10": 6
+  },
+  "evidence_centres|archive_rank": {
+   "top1": 0.4557786239496215,
+   "eff_parents": 12.541074985134179,
+   "sub10_mass": 0.05982905982905974,
+   "admitted_sub10": 0
+  },
+  "evidence_centres|admitted_rank": {
+   "top1": 0.2952042409335445,
+   "eff_parents": 20.214152633484694,
+   "sub10_mass": 0.05982905982905974,
+   "admitted_sub10": 0
+  }
+ }
+}

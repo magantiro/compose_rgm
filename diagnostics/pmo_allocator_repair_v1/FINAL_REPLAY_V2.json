@@ -1,0 +1,549 @@
+{
+ "schema_version": "pmo_allocator_repair_final_v2",
+ "oracle_calls_charged": 0,
+ "answers_to_coordinator": {
+  "Q1_is_top1_an_overshoot_of_the_weighting": "NO -- it was the ADMITTED SET, not the weight function. The sensitivity sweep is in weight_sensitivity.json: over the original distance-chosen admitted set, every weighting trades top-1 mass against fragment mass on ONE axis, because 4-6 of the 8 admitted endpoints WERE fragments. archive_rank top1 0.581/eff 8.7/sub10 0.106; admitted_rank 0.326/18.7/0.446; softmax at T=1x,5x,20x the observed scale 0.696/6.6/0.079, 0.516/9.2/0.109, 0.248/20.8/0.480. There is no setting that buys breadth without buying fragments. Fixing CENTRE selection removes the tradeoff instead of navigating it: the admitted set goes from 6/8 sub-10 fragments to 2/8, 4/8 to 0/8 and 6/8 to 0/8, and admitted scores go from [0.22,0.21,0.026,0.026,0.069,0.027,0.081,0.081] to [0.22,0.21,0.188,0.174,0.143,0.107,0.134,0.112] on celecoxib.",
+  "Q2_effective_parents": "exp(entropy) of the parent distribution: 23.5->25.2, 22.7->19.9, 23.2->12.0. The intermediate state the coordinator saw (evidence weighting over distance-chosen centres) was 8.7/7.6/7.8, which WAS too narrow. Top-1 now takes 4.3/5.7/7.8 of 16 queries per round rather than 9.3/10.9/10.1.",
+  "Q3_stall": "IT DID LATCH, and it is now fixed. Measured on the frozen replay, 64 consecutive unproductive children moved the top parent's mass by 0.05%/0.27%/0.23% -- the allocator could not distinguish a working parent from a stalled one, because the tilt added reward-scale terms (~0.007) to a dimensionless base of 1.0. Rewritten as a ratio in measured-reward units (upside/observed_scale), the same probe now gives 16.7%/26.1%/32.6% decay, monotone in the number of dead children. No new constant: the divisor is the run's own counted mean upside per child."
+ },
+ "oracle_soundness_contrast": {
+  "statement": "The repair improves chemistry where the oracle is sound and degrades it where the oracle is hackable. A single mass-weighted average across the three tasks hides this and reads as a regression in the allocator.",
+  "sound_oracles": {
+   "celecoxib_rediscovery": {
+    "qed": [
+     0.422,
+     0.499
+    ],
+    "sa": [
+     3.93,
+     3.54
+    ],
+    "both_improve": true
+   },
+   "perindopril_mpo": {
+    "qed": [
+     0.404,
+     0.437
+    ],
+    "sa": [
+     5.03,
+     4.41
+    ],
+    "both_improve": true
+   }
+  },
+  "hackable_oracle": {
+   "gsk3b": {
+    "qed": [
+     0.342,
+     0.164
+    ],
+    "sa": [
+     5.27,
+     6.81
+    ],
+    "both_degrade": true,
+    "attribution": "NOT an allocator defect. Measured independently by the coordinator (diagnostics/pmo_offmanifold_reward_hacking_v1.json): gsk3b's fingerprint-RandomForest oracle REWARDS off-manifold chemistry, r(score,QED) = -0.433 and r(score,SA) = +0.684. An allocator that follows measured score correctly follows a corrupt signal. The new top parent is the 37-heavy-atom CC1C(C)C2CC3CC(=O)C2(C(C#N)C1NC1=C(P)C=C(Br)C(C(N)[IH]OOCNNCO)N1)C3(C)C.",
+    "consequence": "Any gsk3b chemistry number from this controller measures the oracle, not the search. Read gsk3b on score only, or fix the oracle before reading its chemistry at all."
+   }
+  }
+ },
+ "per_task": [
+  {
+   "task": "celecoxib_rediscovery",
+   "HISTORICAL_BEFORE_note": "niche_score partition AND the original additive tilt, i.e. the configuration that actually ran",
+   "archive_median_heavy": 14.0,
+   "drawn_median_heavy": [
+    8.0,
+    26.0
+   ],
+   "drawn_under10_heavy": [
+    0.6852,
+    0.15315
+   ],
+   "drawn_mean_parent_score": [
+    0.09050083961096052,
+    0.15752295839716177
+   ],
+   "top1_parent_mass": [
+    0.156,
+    0.26635055361611065
+   ],
+   "queries_on_top1_of_16": [
+    2.5,
+    4.3
+   ],
+   "effective_parents_exp_entropy": [
+    23.461516327033564,
+    25.164227634610743
+   ],
+   "sub10_heavy_parent_mass": [
+    0.6870228651495215,
+    0.15595999143975273
+   ],
+   "mass_weighted_qed": [
+    0.4352970815914718,
+    0.49905887300670765
+   ],
+   "mass_weighted_sa": [
+    3.887219620026829,
+    3.539504681806091
+   ],
+   "stall_relative_mass_drop_after_64_dead_children": 0.16725189915507907,
+   "stall_curve": [
+    [
+     0,
+     0.26635055361611065
+    ],
+    [
+     8,
+     0.24817019180273475
+    ],
+    [
+     64,
+     0.22180291768280944
+    ]
+   ]
+  },
+  {
+   "task": "gsk3b",
+   "HISTORICAL_BEFORE_note": "niche_score partition AND the original additive tilt, i.e. the configuration that actually ran",
+   "archive_median_heavy": 16.0,
+   "drawn_median_heavy": [
+    10.0,
+    37.0
+   ],
+   "drawn_under10_heavy": [
+    0.38375,
+    0.0589
+   ],
+   "drawn_mean_parent_score": [
+    0.09673741666666669,
+    0.22006233333333333
+   ],
+   "top1_parent_mass": [
+    0.147,
+    0.3545414597206663
+   ],
+   "queries_on_top1_of_16": [
+    2.4,
+    5.7
+   ],
+   "effective_parents_exp_entropy": [
+    22.66288440315984,
+    19.867364259469195
+   ],
+   "sub10_heavy_parent_mass": [
+    0.3815978388546878,
+    0.06146211116479152
+   ],
+   "mass_weighted_qed": [
+    0.3277497348070582,
+    0.1636800739655427
+   ],
+   "mass_weighted_sa": [
+    5.273160397423654,
+    6.807146078046086
+   ],
+   "stall_relative_mass_drop_after_64_dead_children": 0.2612056192820856,
+   "stall_curve": [
+    [
+     0,
+     0.3545414597206663
+    ],
+    [
+     8,
+     0.2970374197618392
+    ],
+    [
+     64,
+     0.26193323817315506
+    ]
+   ]
+  },
+  {
+   "task": "perindopril_mpo",
+   "HISTORICAL_BEFORE_note": "niche_score partition AND the original additive tilt, i.e. the configuration that actually ran",
+   "archive_median_heavy": 18.5,
+   "drawn_median_heavy": [
+    9.0,
+    30.0
+   ],
+   "drawn_under10_heavy": [
+    0.62645,
+    0.05215
+   ],
+   "drawn_mean_parent_score": [
+    0.13750192342586193,
+    0.39779606179853616
+   ],
+   "top1_parent_mass": [
+    0.156,
+    0.48878622877366024
+   ],
+   "queries_on_top1_of_16": [
+    2.5,
+    7.8
+   ],
+   "effective_parents_exp_entropy": [
+    23.181837345990104,
+    12.04025078851233
+   ],
+   "sub10_heavy_parent_mass": [
+    0.6264917184872416,
+    0.052183540750398605
+   ],
+   "mass_weighted_qed": [
+    0.39533351694748015,
+    0.43734534277123105
+   ],
+   "mass_weighted_sa": [
+    5.0116065167872925,
+    4.40500619490274
+   ],
+   "stall_relative_mass_drop_after_64_dead_children": 0.3261313083913924,
+   "stall_curve": [
+    [
+     0,
+     0.48878622877366024
+    ],
+    [
+     8,
+     0.3865068865026792
+    ],
+    [
+     64,
+     0.32937773646001195
+    ]
+   ]
+  }
+ ],
+ "mutation_battery": {
+  "M1_evidence_weight_reverted_to_uniform_per_niche": {
+   "applied": true,
+   "failed_tests": [
+    "test_evidence_allocation_mass_is_monotone_in_score",
+    "test_evidence_allocation_prefers_the_better_of_two_admitted_endpoints"
+   ],
+   "summary": "2 failed, 26 passed in 1.44s",
+   "killed": true
+  },
+  "M2_evidence_weight_ignores_niche_mask": {
+   "applied": true,
+   "failed_tests": [
+    "test_niching_still_caps_how_many_endpoints_draw_exploitation_mass"
+   ],
+   "summary": "1 failed, 27 passed in 1.37s",
+   "killed": true
+  },
+  "M3_escape_arming_no_longer_restarts_counter": {
+   "applied": true,
+   "failed_tests": [
+    "test_escape_drains_on_an_unbroken_plateau"
+   ],
+   "summary": "1 failed, 27 passed in 1.35s",
+   "killed": true
+  },
+  "M4_jump_floor_quota_restored": {
+   "applied": true,
+   "failed_tests": [
+    "test_jump_lane_holds_no_reserved_floor_in_any_quota_regime[early-0-False]",
+    "test_jump_lane_holds_no_reserved_floor_in_any_quota_regime[normal-9-False]",
+    "test_jump_lane_holds_no_reserved_floor_in_any_quota_regime[escape-9-True]",
+    "test_jump_lane_is_still_reachable_without_a_reserved_floor"
+   ],
+   "summary": "4 failed, 24 passed in 1.39s",
+   "killed": true
+  },
+  "M5_credit_bonus_back_to_absolute_constant": {
+   "applied": true,
+   "failed_tests": [
+    "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.007]",
+    "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.05]"
+   ],
+   "summary": "2 failed, 26 passed in 1.41s",
+   "killed": true
+  },
+  "M7_credit_schema_not_bumped": {
+   "applied": true,
+   "failed_tests": [
+    "test_credit_snapshot_schema_refuses_the_reweighted_v1_payload"
+   ],
+   "summary": "1 failed, 27 passed in 1.43s",
+   "killed": true
+  },
+  "M9_centres_back_to_distance_only": {
+   "applied": true,
+   "failed_tests": [
+    "test_evidence_centres_prefer_scoring_molecules_over_distant_fragments"
+   ],
+   "summary": "1 failed, 27 passed in 1.37s",
+   "killed": true
+  },
+  "M10_tilt_back_to_additive_base_one": {
+   "applied": true,
+   "failed_tests": [
+    "test_parent_tilt_lets_measured_upside_outvote_novelty",
+    "test_delivered_upside_still_outranks_a_stalled_parent"
+   ],
+   "summary": "2 failed, 26 passed in 1.39s",
+   "killed": true
+  },
+  "M11_evidence_mode_uses_legacy_partition": {
+   "applied": true,
+   "failed_tests": [
+    "test_evidence_mode_actually_routes_through_the_evidence_partition"
+   ],
+   "summary": "1 failed, 27 passed in 1.38s",
+   "killed": true
+  },
+  "M8_observed_scale_hardcoded": {
+   "applied": true,
+   "failed_tests": [
+    "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.007]",
+    "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.05]",
+    "test_observed_scale_is_counted_not_configured"
+   ],
+   "summary": "3 failed, 25 passed in 1.39s",
+   "killed": true
+  }
+ },
+ "weight_sensitivity": {
+  "celecoxib_rediscovery": {
+   "probe_vs_production_max_abs_error": 0.000722417730335212,
+   "LEGACY niche_score": {
+    "top1": 0.1558562679316615,
+    "top2": 0.3112486472241007,
+    "eff_parents": 23.461516327033564,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.6870228651495215
+   },
+   "archive_rank (shipped)": {
+    "top1": 0.5805865793656344,
+    "top2": 0.7746519129250181,
+    "eff_parents": 8.715173355069417,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.10600761621878431
+   },
+   "admitted_rank": {
+    "top1": 0.32575397563310565,
+    "top2": 0.4710083541670975,
+    "eff_parents": 18.66720269512398,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.4462881464493068
+   },
+   "softmax T=1x scale": {
+    "top1": 0.6959692357169747,
+    "top2": 0.8017093991256338,
+    "eff_parents": 6.624024482428937,
+    "above_2x_floor": 2,
+    "sub10_heavy_mass": 0.079487182070948
+   },
+   "softmax T=5x scale": {
+    "top1": 0.5163268373186305,
+    "top2": 0.7724892733967752,
+    "eff_parents": 9.23547872369586,
+    "above_2x_floor": 7,
+    "sub10_heavy_mass": 0.10870730779980645
+   },
+   "softmax T=20x scale": {
+    "top1": 0.24780975906894578,
+    "top2": 0.4015140140705679,
+    "eff_parents": 20.777434217406096,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.4796825671260137
+   },
+   "uniform_admitted": {
+    "top1": 0.15544407283537728,
+    "top2": 0.31088814567075457,
+    "eff_parents": 23.43493338840611,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.6862504645113342
+   }
+  },
+  "gsk3b": {
+   "probe_vs_production_max_abs_error": 0.0006697764927648953,
+   "LEGACY niche_score": {
+    "top1": 0.1470917594361953,
+    "top2": 0.2934059630066431,
+    "eff_parents": 22.66288440315984,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.3815978388546878
+   },
+   "archive_rank (shipped)": {
+    "top1": 0.6802781952451484,
+    "top2": 0.7658670743614486,
+    "eff_parents": 7.62894963559674,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.07601627499903331
+   },
+   "admitted_rank": {
+    "top1": 0.3894063053646751,
+    "top2": 0.5197782077227007,
+    "eff_parents": 16.875114481234693,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.25482909689327726
+   },
+   "softmax T=1x scale": {
+    "top1": 0.7699101614626597,
+    "top2": 0.8017092612669198,
+    "eff_parents": 5.539181538400665,
+    "above_2x_floor": 2,
+    "sub10_heavy_mass": 0.05384629282990309
+   },
+   "softmax T=5x scale": {
+    "top1": 0.6400305634035546,
+    "top2": 0.751776507209663,
+    "eff_parents": 8.397910922724021,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.08767923751701029
+   },
+   "softmax T=20x scale": {
+    "top1": 0.29765941632886644,
+    "top2": 0.43507039143784787,
+    "eff_parents": 19.88492178784284,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.29414430947447606
+   },
+   "uniform_admitted": {
+    "top1": 0.1463092463092464,
+    "top2": 0.2926184926184928,
+    "eff_parents": 22.61155564120484,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.38111888111888115
+   }
+  },
+  "perindopril_mpo": {
+   "probe_vs_production_max_abs_error": 0.0011135515919992178,
+   "LEGACY niche_score": {
+    "top1": 0.1556579884582083,
+    "top2": 0.3113159769164166,
+    "eff_parents": 23.181837345990104,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.6264917184872416
+   },
+   "archive_rank (shipped)": {
+    "top1": 0.6299185893584337,
+    "top2": 0.789340639202064,
+    "eff_parents": 7.767401260903746,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.07192358340453214
+   },
+   "admitted_rank": {
+    "top1": 0.40986261321014855,
+    "top2": 0.5129692921537113,
+    "eff_parents": 16.816216014360936,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.3485691693847507
+   },
+   "softmax T=1x scale": {
+    "top1": 0.7985577341657147,
+    "top2": 0.8017094017094022,
+    "eff_parents": 4.94641126740076,
+    "above_2x_floor": 2,
+    "sub10_heavy_mass": 0.05982905982905974
+   },
+   "softmax T=5x scale": {
+    "top1": 0.6798245747646595,
+    "top2": 0.8017082071090252,
+    "eff_parents": 6.819375207935968,
+    "above_2x_floor": 2,
+    "sub10_heavy_mass": 0.059830254429436965
+   },
+   "softmax T=20x scale": {
+    "top1": 0.5403672484055494,
+    "top2": 0.7496656266334369,
+    "eff_parents": 9.833375464630583,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.11187283490502503
+   },
+   "uniform_admitted": {
+    "top1": 0.1556934105321203,
+    "top2": 0.3113868210642406,
+    "eff_parents": 23.12406959994489,
+    "above_2x_floor": 8,
+    "sub10_heavy_mass": 0.6275709953129309
+   }
+  }
+ },
+ "centre_selection_probe": {
+  "celecoxib_rediscovery": {
+   "distance_centres|archive_rank": {
+    "top1": 0.5170307394906462,
+    "eff_parents": 9.186186388666542,
+    "sub10_mass": 0.10522312153326141,
+    "admitted_sub10": 6
+   },
+   "distance_centres|admitted_rank": {
+    "top1": 0.2952042409335445,
+    "eff_parents": 20.214152633484705,
+    "sub10_mass": 0.4379628693689138,
+    "admitted_sub10": 6
+   },
+   "evidence_centres|archive_rank": {
+    "top1": 0.4562868168799957,
+    "eff_parents": 12.22825153806033,
+    "sub10_mass": 0.09640630571574484,
+    "admitted_sub10": 2
+   },
+   "evidence_centres|admitted_rank": {
+    "top1": 0.2952042409335445,
+    "eff_parents": 20.214152633484712,
+    "sub10_mass": 0.16533912867684208,
+    "admitted_sub10": 2
+   }
+  },
+  "gsk3b": {
+   "distance_centres|archive_rank": {
+    "top1": 0.5123510521444574,
+    "eff_parents": 9.426081932239983,
+    "sub10_mass": 0.07683630548655893,
+    "admitted_sub10": 4
+   },
+   "distance_centres|admitted_rank": {
+    "top1": 0.2952042409335445,
+    "eff_parents": 20.214152633484705,
+    "sub10_mass": 0.2896762020283701,
+    "admitted_sub10": 4
+   },
+   "evidence_centres|archive_rank": {
+    "top1": 0.32210122283578047,
+    "eff_parents": 18.24783739750831,
+    "sub10_mass": 0.05384615384615378,
+    "admitted_sub10": 0
+   },
+   "evidence_centres|admitted_rank": {
+    "top1": 0.2952042409335445,
+    "eff_parents": 20.214152633484705,
+    "sub10_mass": 0.05384615384615378,
+    "admitted_sub10": 0
+   }
+  },
+  "perindopril_mpo": {
+   "distance_centres|archive_rank": {
+    "top1": 0.5229827978579795,
+    "eff_parents": 8.824536157841527,
+    "sub10_mass": 0.07663691432414167,
+    "admitted_sub10": 6
+   },
+   "distance_centres|admitted_rank": {
+    "top1": 0.2952042409335445,
+    "eff_parents": 20.214152633484694,
+    "sub10_mass": 0.41830474971079423,
+    "admitted_sub10": 6
+   },
+   "evidence_centres|archive_rank": {
+    "top1": 0.4557786239496215,
+    "eff_parents": 12.541074985134179,
+    "sub10_mass": 0.05982905982905974,
+    "admitted_sub10": 0
+   },
+   "evidence_centres|admitted_rank": {
+    "top1": 0.2952042409335445,
+    "eff_parents": 20.214152633484694,
+    "sub10_mass": 0.05982905982905974,
+    "admitted_sub10": 0
+   }
+  }
+ }
+}

@@ -349,3 +349,131 @@ def test_credit_floor_guarantees_a_jump_cell_positive_share():
     shares = credit.allocate([refine, jump])
     assert shares[1] >= credit.exploration_floor / 2 * 0.999
     assert shares[0] > shares[1]
+
+
+# ---- Centre selection: a niche must be seeded on a PROMISING basin ----
+
+
+def test_evidence_centres_prefer_scoring_molecules_over_distant_fragments():
+    """The fragments are the most distant things in the archive, so distance alone picks
+    them. A centre must earn its niche by carrying evidence as well as by being far."""
+    from compose_v4.control.edit_learning_data import evidence_niches, exploration_niches
+
+    scores = {LEADER: 0.90, RUNNER_UP: 0.85, "c1ccc(CCN)cc1": 0.70, "CC(=O)Nc1ccccc1O": 0.65}
+    scores.update({fragment: 0.01 for fragment in FRAGMENTS})
+    endpoints = sorted(scores)
+    utilities = [scores[e] for e in endpoints]
+    distance_centres = exploration_niches(endpoints, utilities)["centers"]
+    evidence_centres = evidence_niches(endpoints, utilities)["centers"]
+    assert sum(c in FRAGMENTS for c in evidence_centres) < sum(
+        c in FRAGMENTS for c in distance_centres
+    ), (
+        f"evidence centres {evidence_centres} must seed fewer fragment niches than "
+        f"distance centres {distance_centres}"
+    )
+
+
+def test_evidence_niches_degrade_to_max_min_when_utility_is_flat():
+    """With no spread in utility there is no evidence to weight by, so the rule must
+    reduce to the pure separation rule rather than collapsing onto one centre."""
+    from compose_v4.control.edit_learning_data import evidence_niches, exploration_niches
+
+    endpoints = sorted({LEADER, RUNNER_UP, *FRAGMENTS})
+    flat = [0.5] * len(endpoints)
+    assert evidence_niches(endpoints, flat)["centers"] == exploration_niches(
+        endpoints, flat
+    )["centers"]
+
+
+def test_legacy_niche_score_still_uses_the_distance_only_partition():
+    """T4 arms run on niche_score; its partition must not move."""
+    import compose_v4.control.adaptive_program_optimizer as module
+
+    calls = []
+    original = module.exploration_niches
+    module.exploration_niches = lambda *a, **k: calls.append("used") or original(*a, **k)
+    try:
+        _mass(_archive("niche_score", {LEADER: 0.9, RUNNER_UP: 0.8, FRAGMENTS[0]: 0.01}))
+    finally:
+        module.exploration_niches = original
+    assert calls, "niche_score must still route through exploration_niches"
+
+
+# ---- The allocator must move off a parent whose children stop working ----
+
+
+def test_parent_mass_decays_as_children_fail_to_improve():
+    """A stalled parent must lose mass. Otherwise the plateau defect returns as a latch.
+
+    With the tilt written as `1 + upside + bonus`, both evidence terms sit at the reward
+    scale (~0.007) against a base of 1, so 64 unproductive children moved a real parent's
+    mass by 0.05-0.27% -- indistinguishable from a working parent.
+    """
+    scores = {LEADER: 0.90, RUNNER_UP: 0.88}
+    scores.update({fragment: 0.40 for fragment in FRAGMENTS})
+    masses = []
+    for children in (0, 8, 64):
+        optimizer = _archive("niche_evidence", scores)
+        optimizer.population_state = initial_population_state()
+        leader_id = next(k for k, v in optimizer.entries.items() if v["endpoint"] == LEADER)
+        other_id = next(k for k, v in optimizer.entries.items() if v["endpoint"] == RUNNER_UP)
+        optimizer.population_state["parent_outcomes"] = {
+            # a second parent supplies the measured scale; the leader delivers nothing
+            other_id: {"children": 8, "positive_improvement_sum": 8 * 0.02},
+            leader_id: {"children": children, "positive_improvement_sum": 0.0},
+        }
+        _bind_controller_methods(optimizer)
+        keys, weights = PmoPopulationController.selection(optimizer)
+        masses.append(
+            sum(
+                float(w)
+                for k, w in zip(keys, weights, strict=True)
+                if optimizer.entries[k]["endpoint"] == LEADER
+            )
+        )
+    assert masses[0] > masses[1] > masses[2], f"a stalled parent must lose mass, got {masses}"
+    assert (masses[0] - masses[2]) / masses[0] > 0.05, (
+        f"the decay must be material, not a rounding artifact: {masses}"
+    )
+
+
+def test_delivered_upside_still_outranks_a_stalled_parent():
+    """The other direction: damping a stalled parent must not damp a productive one."""
+    scores = {LEADER: 0.90, RUNNER_UP: 0.90}
+    scores.update({fragment: 0.40 for fragment in FRAGMENTS})
+    optimizer = _archive("niche_evidence", scores)
+    optimizer.population_state = initial_population_state()
+    working = next(k for k, v in optimizer.entries.items() if v["endpoint"] == LEADER)
+    stalled = next(k for k, v in optimizer.entries.items() if v["endpoint"] == RUNNER_UP)
+    optimizer.population_state["parent_outcomes"] = {
+        working: {"children": 20, "positive_improvement_sum": 20 * 0.03},
+        stalled: {"children": 20, "positive_improvement_sum": 0.0},
+    }
+    _bind_controller_methods(optimizer)
+    keys, weights = PmoPopulationController.selection(optimizer)
+    mass = {}
+    for k, w in zip(keys, weights, strict=True):
+        endpoint = optimizer.entries[k]["endpoint"]
+        mass[endpoint] = mass.get(endpoint, 0.0) + float(w)
+    assert mass[LEADER] > mass[RUNNER_UP] * 1.5, (
+        "identically scored parents must separate on whether their children delivered"
+    )
+
+
+def test_evidence_mode_actually_routes_through_the_evidence_partition():
+    """Wiring, not definition. A repaired partition that no caller reaches is inert.
+
+    The companion test checks `evidence_niches` behaves; this checks the production
+    selection REACHES it. A mutation that points the evidence mode back at the
+    distance-only partition passes every behavioural test and fails only this one.
+    """
+    import compose_v4.control.adaptive_program_optimizer as module
+
+    seen = []
+    original = module.evidence_niches
+    module.evidence_niches = lambda *a, **k: seen.append("used") or original(*a, **k)
+    try:
+        _mass(_archive("niche_evidence", {LEADER: 0.9, RUNNER_UP: 0.8, FRAGMENTS[0]: 0.01}))
+    finally:
+        module.evidence_niches = original
+    assert seen, "niche_evidence must route through evidence_niches, not the legacy partition"
