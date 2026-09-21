@@ -2234,3 +2234,48 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **The capability actually missing is CONDITIONAL CONTROL OF WHERE A VALID EDIT LANDS**, not
   validity and not fragment preservation. Containment is 84.8-93.4%; placement is 3.5-93.5%. Name it
   "conditional task success" everywhere so the diagnosis cannot drift back into a validity claim.
+
+## 2026-09-21 (de novo: COMPOSE's QED beats its corpus; the whole gap is SA, and SA is the preview defect)
+
+- **First real COMPOSE de-novo row** (N=50, one seed, frozen default sampler, rdkit 2024.3.5,
+  `diagnostics/denovo_generation_v1/partial_seed20260920_n50_v1.json`):
+      validity 1.000   uniqueness 1.000   quality 0.280 +- 0.063   diversity 0.8925
+  Validity and uniqueness at 1.000 are the construction guarantee showing up empirically
+  (`valid_state_fraction` and `connected_fraction` both 1.000). Diversity 0.8925 BEATS both
+  published systems (GenMol V2 0.830, V1 0.818) and matches its own corpus (0.888).
+- **THE DECOMPOSITION IS THE RESULT, not the headline number.** Against the corpus control:
+                     mean QED  QED pass   mean SA  SA pass  quality
+      GuacaMol train    0.553    44.7%      2.92    90.0%    42.4%
+      COMPOSE (N=50)    0.591    50.0%      4.11    46.0%    28.0%
+  **COMPOSE's drug-likeness EXCEEDS its own training corpus** (0.591 vs 0.553). The entire quality
+  deficit is synthetic accessibility: SA pass collapses 90% -> 46%. Never report the 0.28 without
+  the decomposition; the aggregate reads as "worse generator" when the model is better on one half
+  and worse on the other for a known reason.
+- **The SA failure is ATTRIBUTED, not guessed:** a strained-ring census measures 50% of generated
+  molecules carrying a 3- or 4-membered ring (40% three-, 14% four-; SSSR 3:25 4:7 5:31 6:97),
+  reproducing the documented 51% small-ring rate of the step-1,000 Lineage B preview almost exactly.
+  The weak number is the known preview defect appearing in precisely the metric half it should.
+- **CORRECTION to my own earlier framing: 0.4236 is NOT a "ceiling".** It is what corpus FIDELITY
+  scores on the published metric. COMPOSE's QED already exceeds it, so the metric is not a cap --
+  it is a reference point that a drug-likeness-seeking generator is expected to pass.
+- **A STRONGER DE-NOVO GENERATOR CANNOT BE PROMOTED, ONLY TRAINED.** A full recursive scan of
+  `compose-v4-artifacts` (79 dirs, 81,274 entries, 4,421 `.pt`) found ZERO de-novo training
+  artifacts -- no `checkpoint.best_so_far`, no `manifest.training`, no `tree_source_prior`, and none
+  of the three known run labels resolve. That volume was created 2026-08-09, AFTER the July
+  generator runs, and every general model on it is EDITING (`frozen_process_sha256 = 0c938177`).
+  The numerically better step-2,500 checkpoint (small rings 51% -> 40%, FCD 23.0 -> 19.2) was
+  deliberately not promoted and its only homes were reaped `/private/tmp` paths.
+- **Catalog drift does not apply to this path, verified by grep not assumption.** The de-novo model
+  is constructed from `payload["ring_catalog"]` deserialized from the checkpoint and never calls
+  `build_production_ringcore_catalog`. That is STRICTLY STRONGER than the fingerprint check --
+  byte-identical to the training catalog -- so this Mac's local drift to `82fd910c` is irrelevant
+  to these numbers.
+- **Unconditional means the trained initial law, and it is checkable.** The prior is
+  `DegreeBoundedCarbonTreePrior` serialized in the checkpoint; t=0 states are random degree-capped
+  all-carbon alkane trees carrying no heteroatom, bond-order, ring or scaffold information, and are
+  not corpus molecules. Slots are allocated directly at `n_slots=40`, so the tight-graph
+  `atom_insert` hazard cannot bite -- this path never parses SMILES into a state.
+- **COST, so nobody re-derives it: 72.65 s/trajectory measured on the real path.** 1,000 molecules
+  is ~20 core-hours; the predeclared 6-point Pareto sweep would be ~265 core-hours. Not justifiable
+  on a preview checkpoint, and the 40-container 3x1,000 run was stopped after producing 1 of 60
+  shards in 80 minutes.
