@@ -21,6 +21,58 @@ channel quota is touched.
                   -> _delete_pendant_fragment(law=<THIS>)
                     -> law.order(graph, rng)   <== the distribution changes HERE
 
+INTEGRATION -- THE ONE CALL SITE THE COORDINATOR ADDS
+-----------------------------------------------------
+``_channel_proposal`` is reached as ``self._channel_proposal(...)`` from
+``_generate_channel_pool``, so it can be overridden in
+``pmo_population_controller.py`` -- the file the controller owns -- without
+touching ``dynamic_program_synthesis.py``, which is pinned by roughly twenty
+live T4 contracts, or ``dynamic_program_synthesis_v21.py``.  Note that
+overriding ``_mutate`` would NOT work: v21 calls
+``DynamicProgramOptimizer._mutate(self, entry)`` unbound, so a subclass
+override is never consulted.
+
+Add to ``PmoPopulationController``::
+
+    self.online_memory = OnlineProposalMemory()      # in __init__
+
+    def _channel_proposal(self, channel, entry):     # the one call site
+        return memory_channel_proposal(
+            self, channel, entry, super()._channel_proposal, self.online_memory
+        )
+
+and feed it in ``observe_batch``, where counted scores already arrive::
+
+    self.online_memory.observe_scored_molecule(
+        endpoint=..., score=..., graph=decode_state(...)
+    )
+    self.online_memory.observe_transition(...)
+
+Until something passes the memory, this module is INERT -- which is the
+failure this repository has hit three times.  ``memory_channel_proposal``
+therefore refuses to be a no-op silently: with a warm memory on the shallow
+lane it never falls back, and
+``tests/test_pmo_online_memory.py::test_the_adapter_installs_the_law_on_the_production_path``
+drives the adapter through the shipped consumption probe, so dropping the
+``region_law=`` keyword turns a named test red.
+
+SCOPE, STATED UP FRONT
+----------------------
+Only the **shallow** lane is biased.  The structured lane calls
+``synthesize_structured_program``, whose signature has no ``region_law``
+parameter at all, so the keyword cannot reach its draw site; claiming that
+lane would be claiming a hook that does not exist.  The jump lane is a
+separate proposer.
+
+Measured from the completed PMO-v2 run's own final-round channel counters
+(three tasks summed, read from the round snapshots rather than from the
+attribution report, whose embedded counters are the stale round-13 reading it
+corrects in its own text): shallow 979 proposals / 725 executions / 319 oracle
+selections, structured 939 / 688 / 302, jump 1,091 / 3 / 3, total 3,009 / 1,416
+/ 624.  So the shallow lane is 32.5% of proposals and **51.1% of everything
+that reached the oracle** -- a live lane and not a corner, but one lane of
+three, and any result should say so.
+
 TWO MEMORIES, AND WHY THEY ARE NOT SYMMETRIC
 --------------------------------------------
 :class:`EditOutcomeMemory` (**primary**) stores counted transitions
