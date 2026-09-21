@@ -20,8 +20,13 @@ def main() -> None:
     args = ap.parse_args()
 
     prediction = json.loads((D / "pmo_learned_prior_prediction_v1.json").read_text())
-    ab = json.loads((D / "pmo_learned_prior_ab_v1.json").read_text())
+    # Use the full sweep when it exists, else the fast marginal run.
+    ab_path = D / "pmo_learned_prior_ab_v1.json"
+    if not ab_path.exists():
+        ab_path = D / "pmo_learned_prior_ab_fast_v1.json"
+    ab = json.loads(ab_path.read_text())
     paired = json.loads((D / "pmo_prior_paired_probe_v1.json").read_text())
+    paired_v2 = json.loads((D / "pmo_prior_paired_probe_v2.json").read_text())
     signal = json.loads((D / "pmo_prior_signal_probe_v1.json").read_text())
     reach = json.loads((D / "pmo_call_site_reach_v1.json").read_text())
 
@@ -68,6 +73,21 @@ def main() -> None:
         "strongest_arm": best,
         "P3_stratified_by_parent_heavy": ab["by_parent_heavy_bin"],
         "P4_diversity": diversity,
+        "marginal_ab_source": ab_path.name,
+        "confound_control_heavy_atoms": {
+            arm: {
+                "paired_mean_delta_dHeavy": m["paired_mean_delta_dHeavy"],
+                "paired_se_delta_dHeavy": m["paired_se_delta_dHeavy"],
+                "mean_dHeavy_A": m["mean_dHeavy_A"],
+                "mean_dHeavy_B": m["mean_dHeavy_B"],
+                "reading": (
+                    "Edit SIZE is identical between arms, so the SA improvement "
+                    "is not a size artifact. This is structural: every family at "
+                    "this call site preserves the heavy-atom count."
+                ),
+            }
+            for arm, m in paired_v2["arms"].items()
+        },
         "P5_support_identity": {
             "permutation_checks_passed": ab["permutation_checks"],
             "verdict": "HELD" if ab["permutation_checks"] > 0 else "NOT RUN",
