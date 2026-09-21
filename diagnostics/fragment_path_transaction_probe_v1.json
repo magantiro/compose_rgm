@@ -1,0 +1,201 @@
+{
+  "schema": "compose_fragment_path_transaction_probe_v1",
+  "question": "is the close-then-open path transaction executable, and is each of its constituents rankable by the proposal law?",
+  "why": "A composite whose constituents are each individually in support is an ACCELERATION -- it bundles moves the prior could make but does not make in sequence. A composite needing a constituent the prior cannot rank is a capability EXTENSION and must be declared as one rather than wrapped.",
+  "hard_zero_standard": "A zero surviving ONE budget increase is not a hard zero: LOVASTATIN motif read 0.0000 at 256 AND at 2048 draws, then 0.80 at 8192. This probe sweeps [256, 2048, 16384] before calling any constituent unrankable.",
+  "drugs_where_the_transaction_executes": [
+    "CYCLOTHIAZIDE",
+    "LESINURAD"
+  ],
+  "rows": [
+    {
+      "drug": "CYCLOTHIAZIDE",
+      "start_path_length": 1,
+      "seed_slot": 13,
+      "far_core_anchor": 14,
+      "steps": [
+        {
+          "step": "insert carbon on the seed",
+          "rule": "atom_insert",
+          "executes": true,
+          "lock_permits": true,
+          "path_length_after": 1
+        },
+        {
+          "step": "ring-close the new atom to the far core",
+          "rule": "bond_insert",
+          "executes": true,
+          "lock_permits": true,
+          "path_length_after": 1
+        },
+        {
+          "step": "open the original seed-to-far-core bond",
+          "rule": "bond_delete",
+          "executes": true,
+          "lock_permits": true,
+          "path_length_after": 2
+        }
+      ],
+      "final_path_length": 2,
+      "cores_separated": true,
+      "final_smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CCC1CC3C=CC1C3)NS2(=O)=O",
+      "status": "TRANSACTION EXECUTES and lengthens the path",
+      "constituent_rankability": [
+        {
+          "constituent": "insert carbon on the seed",
+          "ladder": {
+            "256": false,
+            "2048": true
+          },
+          "first_rankable_at_draws": 2048,
+          "verdict": "IN_SUPPORT"
+        },
+        {
+          "constituent": "ring-close the new atom to the far core",
+          "ladder": {
+            "256": false,
+            "2048": false,
+            "16384": false
+          },
+          "first_rankable_at_draws": null,
+          "verdict": "NO_HIT_UP_TO_16384"
+        },
+        {
+          "constituent": "open the original seed-to-far-core bond",
+          "ladder": {
+            "256": false,
+            "2048": true
+          },
+          "first_rankable_at_draws": 2048,
+          "verdict": "IN_SUPPORT"
+        }
+      ]
+    },
+    {
+      "drug": "ELIGLUSTAT",
+      "start_path_length": 1,
+      "seed_slot": 6,
+      "far_core_anchor": 5,
+      "steps": [
+        {
+          "step": "insert carbon on the seed",
+          "rule": "atom_insert",
+          "executes": true,
+          "lock_permits": true,
+          "path_length_after": 1
+        },
+        {
+          "step": "ring-close the new atom to the far core",
+          "rule": "bond_insert",
+          "executes": false,
+          "lock_permits": false,
+          "path_length_after": null
+        }
+      ],
+      "status": "TRANSACTION NOT EXECUTABLE at step 2"
+    },
+    {
+      "drug": "LESINURAD",
+      "start_path_length": 1,
+      "seed_slot": 11,
+      "far_core_anchor": 12,
+      "steps": [
+        {
+          "step": "insert carbon on the seed",
+          "rule": "atom_insert",
+          "executes": true,
+          "lock_permits": true,
+          "path_length_after": 1
+        },
+        {
+          "step": "ring-close the new atom to the far core",
+          "rule": "bond_insert",
+          "executes": true,
+          "lock_permits": true,
+          "path_length_after": 1
+        },
+        {
+          "step": "open the original seed-to-far-core bond",
+          "rule": "bond_delete",
+          "executes": true,
+          "lock_permits": true,
+          "path_length_after": 2
+        }
+      ],
+      "final_path_length": 2,
+      "cores_separated": true,
+      "final_smiles": "O=C(O)CSc1nnc(Br)n1CCC1CC1",
+      "status": "TRANSACTION EXECUTES and lengthens the path",
+      "constituent_rankability": [
+        {
+          "constituent": "insert carbon on the seed",
+          "ladder": {
+            "256": true
+          },
+          "first_rankable_at_draws": 256,
+          "verdict": "IN_SUPPORT"
+        },
+        {
+          "constituent": "ring-close the new atom to the far core",
+          "ladder": {
+            "256": false,
+            "2048": true
+          },
+          "first_rankable_at_draws": 2048,
+          "verdict": "IN_SUPPORT"
+        },
+        {
+          "constituent": "open the original seed-to-far-core bond",
+          "ladder": {
+            "256": false,
+            "2048": true
+          },
+          "first_rankable_at_draws": 2048,
+          "verdict": "IN_SUPPORT"
+        }
+      ]
+    },
+    {
+      "drug": "LIOTHYRONINE",
+      "start_path_length": 1,
+      "seed_slot": 3,
+      "far_core_anchor": 4,
+      "steps": [
+        {
+          "step": "insert carbon on the seed",
+          "rule": "atom_insert",
+          "executes": true,
+          "lock_permits": true,
+          "path_length_after": 1
+        },
+        {
+          "step": "ring-close the new atom to the far core",
+          "rule": "bond_insert",
+          "executes": false,
+          "lock_permits": false,
+          "path_length_after": null
+        }
+      ],
+      "status": "TRANSACTION NOT EXECUTABLE at step 2"
+    }
+  ],
+  "verdict": "TRANSACTION IS EXECUTABLE AND COMPOSABLE -- v2 is an ACCELERATION, not a capability extension",
+  "executability": {
+    "executes": [
+      "CYCLOTHIAZIDE",
+      "LESINURAD"
+    ],
+    "fails_at_ring_close": [
+      "ELIGLUSTAT",
+      "LIOTHYRONINE"
+    ],
+    "failure_cause": "both failures are step 2, the ring-close to the far core, and both drugs are ones the original structural audit recorded with ZERO free valence at their declared sites. A saturated anchor cannot accept another bond, so this is the same start-state property that made the direct join unable to express the task -- not a new limitation.",
+    "precondition_for_v2": "the composite may only fire where the far core anchor has free valence, which is a structural property of the state and needs no instance identity"
+  },
+  "constituent_verdict": {
+    "LESINURAD": "all three constituents IN_SUPPORT",
+    "CYCLOTHIAZIDE": "insert and open IN_SUPPORT; ring-close NO_HIT up to 16,384 draws",
+    "reading": "The same ring-close move class is IN_SUPPORT on LESINURAD, so the CYCLOTHIAZIDE miss is most likely rarity at that particular site rather than a vocabulary boundary. Under the standard this workstream now uses -- a zero surviving ONE budget increase is not hard, since LOVASTATIN read 0.0000 at 256 AND 2048 before recovering at 8192 -- 16,384 draws is NOT sufficient to call it hard. UNRESOLVED, and it must be pushed further before any claim that a constituent is unrankable."
+  },
+  "macro_versus_extension": "Every constituent measured so far is a move the prior can rank. The composite would therefore bundle moves the prior could already make but does not make in sequence, which is an acceleration. No constituent has been shown unrankable, and the one open case is flagged rather than resolved by assumption."
+}
