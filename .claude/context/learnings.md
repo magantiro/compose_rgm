@@ -3218,3 +3218,59 @@ independently of whether fa7_0 ever closes.**
   are separated only by instrumenting the support the decision is made against. Where the capability
   IS present and merely rare, budget lifts it (fragments' 0.0000 -> 0.80 at 8192); where it is
   absent, no budget does (T4's hard zero, de novo's states with no non-small option).
+
+## 2026-09-21 (goal-conditioned transport, Step 1: read evidence understates what the path installs)
+
+- **A COORDINATOR WARNING FALSIFIED, and the correction is the rule.** I warned that sulfur is not
+  installable because every growth module reads `("C","N","O")` / `("C","N","O","F")` in source, so
+  S/P/Cl/Br/I are reachable only via `atom_restate_semantic` -- and told the agent to enumerate
+  unreachable targets before testing celecoxib. MEASURED on the real proposal path from CNOF-ONLY
+  sources: endpoints containing **B, F, I, P and S** across 97 endpoints (S in 4, P 8, I 6, B 21).
+  **The vocabulary READ from source understates what the path INSTALLS**, and where read evidence
+  and executed evidence disagree the executed one is authoritative. Celecoxib's sulfonamide is not
+  blocked. Only `amlodipine_mpo` (Cl) went unreached, correctly labelled a BOUND not a proof --
+  presence at n=97 demonstrates installability, absence demonstrates nothing.
+- **TRANSPORT SCALE, measured over 108 correspondences on 15 declared-structure tasks: min 19 /
+  median 36 / max 56 primitives**, against a realization ceiling of median 16 / max 23 with
+  teacher-scale plans at 29-40 never binding. **Staging is forced, not chosen.** Note the estimate
+  ROSE from the earlier raw-MCS reading of 21-40 under two corrections; a correction that only ever
+  shortens the work it implies is the one to distrust.
+- **Three defects that validation found rather than confirmed:**
+  (a) RDKit's `completeRingsOnly` does NOT yield a ring-complete core -- it still admits a LONE RING
+  ATOM as an attachment point, so celecoxib's core came back as benzene plus one pyrazole atom whose
+  other four are deleted, claiming an atom is already correct while its ring must be rebuilt. Prune
+  to a FIXED POINT, because dropping one atom can break a ring that was fully covered.
+  (b) An atom-only core representation reports `scale = 0` for benzene -> cyclohexane. Retaining an
+  atom skeleton does not retain BOND ORDERS; add `core_bond_changes` and guard it with "scale 0
+  implies the canonical SMILES are equal".
+  (c) **A tautological assertion hid a real ordering defect.** `len(fragments) >= 1` is always true;
+  made real (exactly one fragment must survive at EVERY step) it FAILED -- an in-set-degree peel
+  reached two fragments, because in-set degree ignores how an atom connects to the retained core.
+  The fix was to change the ORDERING, not the assertion.
+- **CROSS-STREAM: two independent workstreams hit the same structural requirement.** 7 of 108
+  correspondences fail connectivity, ALL on `median1` (bridged bicyclic camphor): when the retained
+  core's pieces are joined only through deleted atoms, **no ordering can preserve connectivity** --
+  the transport is an excision PLUS a reattachment bond. That is the identical move class as T4's
+  `5ht1b_2` witness (8-atom interior two-bridge excision plus one reattachment). Declare it
+  (`requires_reattachment`) so the planner picks another alignment or stages the bond. NB
+  `bond_insert` is outside the frozen Active8 codec surface, so the reattachment primitive is
+  `cycle_close`.
+- **A diagnosis field that reads as a failure will be treated as one.** Adding `requires_reattachment`
+  to a `validate()` result broke five tests doing `all(checks.values())`, because `False` there is a
+  HEALTHY outcome. Separate VERDICT keys from DIAGNOSIS keys explicitly and share the split between
+  the driver and the tests.
+- **PMO DISCARDS, unlike T4** (the second gate): merged pool 32-33 -> selected 16, **16-17 discarded
+  per round, 6 of 6 rounds capacity-limited**, while `lock_query_subset` discards **0**. So a
+  selection layer sited at `_credit_allocate` is load-bearing and one at the lock would be inert.
+  Gotcha: the full pool is published as `eligible_pool`; `proposal_pool` is the LOCKED batch's key.
+- **GOAL AUDIT, read from pinned PyTDC 1.1.15 with `ast` (TDC never imported, no pickle
+  downloaded): 19 of 23 PMO tasks DECLARE structure; only 4 are black-box** (drd2, gsk3b, jnk3,
+  qed). Declared target structure 5, reference-in-composite 6, SMARTS 3, molecular formula 3, target
+  pair 2. A first pass reporting 5 declared / 10 black-box was wrong in the direction that matters,
+  from three patterns now each pinned by a test: a keyword naming a MODULE CONSTANT
+  (`median1` -> `camphor_smiles`), a reference assigned to a LOCAL inside a function body (every
+  composite MPO and `valsartan_smarts`), and a task defined as a CLASS (`jnk3`). Keep `unresolved`
+  distinct from `black_box`: one is a finding about the benchmark, the other a gap in the reader.
+  SCOPE: for the six composite MPOs the declared reference is ONE TERM of a multi-objective score,
+  so transporting to it is a heuristic and those must be validated on TASK SCORE, never on
+  similarity-to-reference.
