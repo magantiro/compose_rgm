@@ -1887,6 +1887,26 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   not contradictions, and they re-confirm that these cells fail marginally rather than
   categorically. Read the within-experiment OFF-vs-ON contrast at matched seed; never
   read the OFF column as a reproduction of `candidate_exhaustion`.
+- **A 297-failure suite tally attributed to 5 real failures, and 13 of the 18 candidates
+  were LOAD ARTIFACTS.** Full suite at HEAD: 297 failed / 101 errors / 5848 passed in
+  43:37. That number is almost entirely PRE-EXISTING: re-running the 78 distinct failing
+  FILES at branch base `4cfd398d` gives 279 failed / 40 errors, so the branch is sitting
+  on a large pre-existing editing-V2 / process-V2 registry drift that has nothing to do
+  with the T4 change. Set-differencing the failing TEST IDS (not counts) leaves 18 that
+  fail at HEAD and pass at base. Re-running those 18 in isolation on an IDLE machine:
+  **13 pass** -- 30 torch/training tests green in 7.4 s, 4 more T4 tests green -- so they
+  were contention artifacts of the 43-minute run, exactly the hazard recorded on
+  2026-08-03. Only **5** fail deterministically, and every one is a content-addressed pin:
+  `runtime input mismatch ... t4_fiber_campaign.py: e9bfbea4` (1),
+  `material input mismatch ... dynamic_program_synthesis.py: a1370685` (3), plus one
+  knock-on `Regex pattern did not match` where the test expects a specific message and an
+  earlier hash mismatch fires first. **Zero substantive regressions.**
+- **METHOD: compare failing TEST IDS between revisions, never failure COUNTS, and never a
+  full-suite count against a subset count.** My first instinct was to read 297-vs-40 as a
+  catastrophe; the counts were not comparable (whole suite vs 78 files) and the ID-level
+  diff was 18, of which most were noise. Then re-run every candidate in isolation on an
+  unloaded machine BEFORE calling any of them a regression -- otherwise a contended run
+  manufactures a dozen phantom failures and buries the five that are real.
 - **`git worktree add` + `git merge FETCH_HEAD`:** `git merge origin/<branch>` fails with
   "not something we can merge" in a fresh worktree whose remote refs were not fetched
   into that name; `git fetch origin <branch>` then `git merge FETCH_HEAD` works. The only
