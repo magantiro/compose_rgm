@@ -1,0 +1,29 @@
+{
+  "authorization_form": "The owner authorized BY REFERENCE to the sentence quoted in full in the message immediately preceding theirs, rather than retyping it. Both the reference and a separate explicit launch directive appear in the same message. Recorded this way so the audit trail states what actually happened rather than a tidier version.",
+  "authorization_sentence": "Authorize one scored PMO-v2 run of pmo_population_controller_v1_scored_contract_corrected (payload sha256 38afd1c4f5bbe5f863423a2a51051b979cf8cf7986017720bbb0872463bf8220, pinning base 7287c6f58199ef8a56819a5a8ff323d871010030b25c0145e272f47cebd28220) over exactly gsk3b, perindopril_mpo and celecoxib_rediscovery at 250 charged oracle calls each -- 750 total, no prescreen, automatic_retries 0, backfill false -- on the basis that the re-pointed live-parent support gate PASSES under the realizer the controller actually binds through (6 supported non-root parents against a floor of 4; gate decision f222e4021e282f7e37c80ba3b8bda67fa31829fe1c52d5a63c4f179d0dc7c4d9), with the AssetPinnedOracle positive control required to pass BEFORE started.json on gsk3b, against v1 comparators gsk3b 0.21 / perindopril_mpo 0.486 / celecoxib_rediscovery 0.196 -- and with the predeclared read binding: realized program scale and retained fraction are read BEFORE bind rate, so a doubled binding yield at unchanged program scale is not reportable as success.",
+  "authorized_at_utc": "2026-09-21T03:59:22.169606+00:00",
+  "charged_calls_per_task": 250,
+  "charged_calls_total": 750,
+  "contracts": {
+    "base": "7287c6f58199ef8a56819a5a8ff323d871010030b25c0145e272f47cebd28220",
+    "live_parent_gate": "f222e4021e282f7e37c80ba3b8bda67fa31829fe1c52d5a63c4f179d0dc7c4d9",
+    "scored_corrected": "38afd1c4f5bbe5f863423a2a51051b979cf8cf7986017720bbb0872463bf8220"
+  },
+  "gsk3b_ivg_target_0_952": {
+    "reason": "Unsourced. Absent from the published no-prescreen table (the prescreened value is 0.988) and appears nowhere in docs/. Promotion requires beating 2 of 3, so an unsourced number could arbitrate promotion. Owner decision: record ABSENT until properly sourced. The other two targets (celecoxib 0.798, perindopril 0.645) transcribe exactly.",
+    "status": "ABSENT_NOT_A_PROMOTION_CRITERION"
+  },
+  "owner_response_verbatim": "\"And separately, yes, I would give the PMO-v2 authorization now using the exact sentence Claude supplied. That experiment is ready and we badly need the number.\" -- together with the directive \"PMO: launch the ready matched PMO-v2 250-call run on GSK3B, Perindopril MPO and Celecoxib rediscovery as soon as its existing executable authorization requirements are satisfied. This is now the highest-priority new scored experiment.\"",
+  "predeclared_read": "Realized program scale and retained fraction are read BEFORE bind rate. A doubled binding yield at unchanged program scale is NOT reportable as success. Falsifier: programs at retained_fraction ~1.000 with median ~16 primitives mean the repair did not help regardless of bind rate; measured success shape is median 31 primitives at retained 0.630, band 0.52-0.96.",
+  "schema_version": "pmo_v2_scored_authorization_v1",
+  "tasks": [
+    "gsk3b",
+    "perindopril_mpo",
+    "celecoxib_rediscovery"
+  ],
+  "v1_comparators": {
+    "celecoxib_rediscovery": 0.196,
+    "gsk3b": 0.21,
+    "perindopril_mpo": 0.486
+  }
+}
