@@ -3156,3 +3156,65 @@ independently of whether fa7_0 ever closes.**
   interior is invisible from the return value. Require the decomposition to
   predict the real verdict on every call (`gate_disagreements == 0`) or the
   attribution is void.
+
+## 2026-09-21 (CORRECTION to the support test: a zero surviving ONE budget increase is not a hard zero)
+
+- **SHARPENS the "does the recovery fraction rise with draw budget" test recorded earlier today.**
+  I stated it as a single increase. That is too weak. MEASURED on the fragment panel: **LOVASTATIN
+  motif read 0.0000 at 256 draws AND again at 2048** -- an eightfold increase buying nothing, which
+  imitates a hard zero convincingly -- **then lifted to 0.80 at 8192.** BARICITINIB did the same on
+  a smaller scale (0.0000 at 256 -> 0.4615 at 2048). Every apparent zero on the panel eventually
+  lifted. T4's `recovered_fraction = 0.0000` survives ANY budget, which is what makes it genuinely
+  outside the support. **Require REPEATED increases across a wide range before calling a zero hard**,
+  and report the realized fraction as a LOWER BOUND, never as a claim that the remainder is absent.
+- Panel result for the record: superstructure **0 redirects on 10 drugs** -- no exposure by
+  construction, since there is no declared interface to steer toward; motif 0.5728 at 256 draws;
+  decoration 0.3763 at 128 (the worst case). In-support on all three, so a program may be scored
+  on this path.
+
+## 2026-09-21 (fragment linker v1 FALSIFIED: the transaction never occurs under the prior)
+
+- **v1 fired its own predeclared falsifier.** The path program used `realized_linker_length` as its
+  state variable with a per-event monotone path predicate replacing coverage staging. Predeclared
+  falsifier: "realized length stays at the seed for >90% of committed endpoints". MEASURED: it
+  commits **ZERO** endpoints -- 61 refusals across four drugs while the attachment-only arm commits
+  26. Worse than the threshold, so it fires unambiguously. Predeclaring the criterion is what made
+  this a clean result instead of an argument about a threshold.
+- **ROOT CAUSE, measured three ways, and it is not a strict predicate.** (a) 600 model draws from a
+  seeded start: 30 passed the region lock, **all 30 left length unchanged, 0 lengthened it**.
+  (b) With the program OFF entirely, **1,440 events across 120 rollouts never once reached a length
+  above 1**. (c) Mechanism: both bonds of the seeded bridge are **bridges in the graph sense**, so
+  deleting either disconnects the molecule and the executor refuses the state. Lengthening therefore
+  requires **close-then-open** -- ring through the far core first, then remove the original bond --
+  a coordinated transaction of at least three events.
+- **So a per-event predicate cannot gate it:** the first step creates a pendant, which does not
+  change path length, so the predicate refuses it and the trajectory dies at event zero. The design
+  assumed a predicate could steer an existing capability; **the capability is absent, so there was
+  nothing to steer.**
+- **RULE for any composite/macro primitive: the in-support check applies to EACH CONSTITUENT.** A
+  composite whose constituents are each individually rankable by the prior is an ACCELERATION -- it
+  bundles moves the prior could already make in the wrong order. A composite requiring even one
+  constituent the prior cannot rank is a CAPABILITY EXTENSION wearing a macro's clothes and must be
+  declared as such. Run the rising-power-curve probe on each constituent separately and report the
+  curves.
+
+## 2026-09-21 (the session's unifying pattern: absent by construction vs badly searched)
+
+- **All four workstreams converged on the same distinction, and in every case only a measurement
+  separated the two readings:**
+  - **T4 / fa7_0** -- the barrier is ARCHITECTURAL, located at the goal-abstraction layer
+    (`recovered_fraction = 0.0000`), not a proposal-coverage failure. Two obvious repairs measured
+    INERT, and placement is a real axis pointing the wrong way under a similarity ball.
+  - **De novo / small rings** -- a consequence of a DECLARED v1 host scope (`_eligible_grow_host_graph`
+    admits only acyclic neutral carbon and asserts a forest), not a reward, policy or scheduling
+    failure. On 3 of 12 audited rollout states EVERY legal template is a small ring.
+  - **PMO / transport** -- the required moves are ~21-40 primitives against a measured realization
+    ceiling of median 16 / max 23, so a single program cannot cover most transports. Staging is
+    forced, not chosen.
+  - **Fragments / linker** -- the close-then-open transaction never occurs under the prior at all
+    (0 of 1,440 unconstrained events lengthened the path).
+- **In every case the tempting reading was "the search is bad" and the correct one was "the
+  capability is absent by construction".** They are indistinguishable from an aggregate score and
+  are separated only by instrumenting the support the decision is made against. Where the capability
+  IS present and merely rare, budget lifts it (fragments' 0.0000 -> 0.80 at 8192); where it is
+  absent, no budget does (T4's hard zero, de novo's states with no non-small option).
