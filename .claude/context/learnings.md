@@ -1690,3 +1690,44 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   witnesses at -9..-8 heavy atoms. The -0.0017 QED margin was measured over similarity-passing
   endpoints the CURRENT proposal law reaches; it does not bound what a large-excision law reaches.
   A bound computed inside a restricted support is a statement about that support, not about the cell.
+
+## 2026-09-20 (T4 objective refinement: the comparator is settled, and what it cost to settle)
+
+- **The T4 comparators are NON-STRICT and correct as shipped, and chasing them recovers NOTHING.**
+  `t4_fiber_campaign.py:153` is `if similarity < self.delta or quality < QED_MIN or access >
+  SA_MAX: return None` with `QED_MIN, SA_MAX = 0.6, 4.0` (:58). The strict `>`/`<` form described
+  in the `Fiber` docstring is HISTORICAL, not what runs. Re-scoring every stored endpoint of all
+  15 held-target cells under both comparators gives `comparator_only_gain = 0` in EVERY cell.
+  I hypothesised a free cell recovery here on the strength of a -0.0017 margin; it is a clean
+  decisive negative. Do not re-open it.
+- **BUT the similarity comparator IS load-bearing, and QED/SA are not.** 45 fa7_0 endpoints
+  (6-129 across the panel) sit at similarity EXACTLY 0.600, because Tanimoto is a ratio of small
+  integers and lands on rational bounds routinely. ZERO endpoints anywhere sit on the QED or SA
+  bound -- those are continuous and never do. So changing the similarity comparison to strict
+  would silently delete real endpoints in every cell, while the other two are inert. Asymmetric,
+  and not guessable from the code.
+- **fa7_0's QED ceiling is ONE functional group, and it is the pharmacophore.** `QED.properties`
+  reports ALERTS=2 on both the source and its best endpoint, from two SMARTS
+  (`[C&!R]=[N&!R]`, `N=[C&R0][N,n,O,S]`) that both fire on the SAME acyclic amidine -- the FA7
+  S1-pocket binding group. ALERTS carries QED's largest weight (0.95 of 3.92), worth x1.41. Every
+  alert-relieving edit LEAVES the delta=0.6 ball: unconstrained Pareto max QED 0.901, constrained
+  to sim >= 0.6 it is 0.633. **Quote both numbers or the headroom is fiction.**
+- **Padding is load-bearing on a REAL rescue, not just in principle** (sharpens the 2026-08-08
+  entry). braf_0's only known one-edit rescue is an `atom_insert` -- exactly the family a tight
+  graph deletes. Measured on the fa7_0 leader: tight 24 slots -> 428 marks, **0** `atom_insert`;
+  padded 40 -> 733 marks, **305**. A tight-graph probe would have reported that cell unrescuable.
+- **GENERALISING A SELECTOR FROM THE CELL THAT MOTIVATED IT IS THE TRAP, EVEN WHEN THE RULE IS
+  PERFECTLY PREDICTIVE THERE.** "Endpoint fails only QED" is a flawless predictor on fa7_0 (5 fire
+  -> 5 lift, 20 do not -> 0 lift). braf_1 refutes it: a violation-ranked panel lifts 5 where the
+  QED-only panel lifts 1, and braf_0 fires the QED label ZERO times in its whole panel yet still
+  yields a rescue. A rule validated on one cell is a description of that cell.
+- **A cell can hold eligible molecules ONE legal rewrite outside its reachable support.** None of
+  the four eligible successors of fa7_0's leader appear among the 9,527 distinct endpoints the cell
+  generated, and `round_one_decision.selected = 0` means that set IS the campaign's entire output.
+  Independent corroboration, from the small-edit direction, of the same support gap the witness
+  census found from the large-excision direction -- and the two witness pools look DISJOINT, so a
+  repair validated on one does not automatically cover the other.
+- **Report benchmark eligibility and chemical plausibility as two numbers.** fa7_0's 15 eligible
+  endpoints are 14 distinct, of which ~4 are conventionally drug-like; the rest are exocyclic
+  quinoids and strained azirines that pass the thresholds, `med_chem_gate` AND `LEGACY_SCREENED`
+  (15/15 survive). Eligibility is a floor, not a score.
