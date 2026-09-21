@@ -19,6 +19,9 @@ from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.control import pmo_population_controller as PPC
 from compose_v4.control import pmo_realization as PR
 from compose_v4.control.adaptive_program_optimizer import ProgramSearchConfig
+from compose_v4.control.docking_value import identity
+from compose_v4.control.pmo_action_roles import action_role_supervision
+from compose_v4.control.pmo_joint_dependency_jump import enumerate_role_successors
 from compose_v4.control.pmo_population_controller import (
     JUMP_PAIRING_INDEPENDENT,
     JUMP_PAIRING_SUPPORT_CONDITIONED,
@@ -26,7 +29,12 @@ from compose_v4.control.pmo_population_controller import (
     PmoPopulationController,
     supported_plan_index,
 )
-from compose_v4.rewrite.trace_shard import encode_state
+from compose_v4.experiments.pmo_dependency_region_program import (
+    DependencyRegionConfig,
+    dependency_region_program,
+)
+from compose_v4.experiments.whole_ring_plan import execute_program
+from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECKPOINT = json.loads(
@@ -91,6 +99,101 @@ def _eligibility(row):
     return {**row, "oracle_eligible": True}
 
 
+# ---- a (parent, plan) witness that GENUINELY realizes ----
+#
+# WHY THIS EXISTS.  A refusal-only guard is vacuous in the discriminating direction:
+# the teacher catalog realizes nothing on the fixture parent, so every refusal it makes
+# is correct BY ACCIDENT, and a certificate that refuses a REALIZABLE plan satisfies it
+# anyway.  MEASURED: an off-by-one in the depth-0 threshold
+# (``static_first_step_feasible`` demanding two carriers of the descriptor instead of
+# one) passed this entire file -- 14 of 14 green -- while refusing a pair the searcher
+# realizes.  Only a POSITIVE control can see that class of defect.
+#
+# The positive control is therefore CONSTRUCTED rather than searched for.  A short legal
+# program is executed on the parent through the production executor, and the plan's
+# roles are read off that execution by the SAME ``action_role_supervision`` loop that
+# builds every catalog latent (``pmo_joint_dependency_jump._generic_role_sequence``), so
+# a realization exists BY CONSTRUCTION.  The two sides of the guard are independent code
+# paths: ``realize`` never consults ``plan_parent_support``, so the expectation is not
+# recomputed from the code under test.
+
+CARBON = 2
+_WITNESS: dict[str, tuple] = {}
+
+
+def _witness_actions(source):
+    """Insert a carbon, insert a second carbon ON IT, then delete a parent atom.
+
+    Shaped so the positive control is not degenerate: the second insertion binds the
+    first insertion's product, which is the created-handle dependency the root
+    ``propagate`` call checks for reachability, and the deletion consumes a PREEXISTING
+    atom, which is the demand its element/charge budget checks.  Each step takes the
+    FIRST candidate in the pinned enumerator's own canonical order, so the witness is
+    deterministic -- and it is rebuilt from the live enumerator rather than pinned to a
+    fixture, so a chemistry-kernel change re-derives it instead of invalidating it.
+    """
+
+    def carbon_inserts(graph):
+        for candidate in enumerate_role_successors(graph, {"executor_rule": "atom_insert"}):
+            if int(candidate.action_record["payload"]["atom_type"]) == CARBON:
+                yield candidate
+
+    for first in carbon_inserts(source):
+        created = {int(first.action_record["payload"]["slot"])}
+        for second in carbon_inserts(first.successor):
+            neighbors = {int(row[0]) for row in second.action_record["payload"]["neighbors"]}
+            if not created & neighbors:
+                continue
+            occupied = created | {int(second.action_record["payload"]["slot"])}
+            for third in enumerate_role_successors(
+                second.successor, {"executor_rule": "atom_delete"}
+            ):
+                if int(third.action_record["payload"]["v"]) not in occupied:
+                    return [first.action_record, second.action_record, third.action_record]
+    raise AssertionError("no witness program is executable on the fixture parent")
+
+
+def _witness():
+    """The constructed ``(parent, plan)`` pair; built once, reused by every test."""
+
+    if "pair" not in _WITNESS:
+        source = _parent()
+        actions = _witness_actions(source)
+        _endpoint, receipt = execute_program(source, actions)
+        states = list(receipt["states"])
+        created: dict[int, tuple[int, int]] = {}
+        next_ordinal = 0
+        roles = []
+        for step, (state, record) in enumerate(zip(states[:-1], actions, strict=True)):
+            role, next_ordinal = action_role_supervision(
+                decode_state(state), record, created, step, next_ordinal
+            )
+            roles.append(role)
+        program = dependency_region_program(
+            states,
+            list(actions),
+            config=DependencyRegionConfig(
+                runtime_maximum_primitives=PR.MAXIMUM_PRIMITIVES,
+                runtime_maximum_components=PR.MAXIMUM_COMPONENTS,
+            ),
+        )
+        plan = {
+            "plan_id": identity({"schema_version": "pmo_joint_role_plan_v1", "roles": roles}),
+            "roles": roles,
+            "primitive_count": len(roles),
+            # The plan's DECLARED completion conditions, read from the SAME extraction
+            # ``PR.finalize`` runs against the realization.  Declaring anything else
+            # would be refused as ``declared_component_count_not_realized`` and the
+            # witness would stop being a witness.
+            "component_count": int(program["component_count"]),
+            "created_dependency_count": sum(
+                len(role["created_handle_dependencies"]) for role in roles
+            ),
+        }
+        _WITNESS["pair"] = (source, plan)
+    return _WITNESS["pair"]
+
+
 # ---- the certificate itself ----
 
 
@@ -104,6 +207,11 @@ def test_certificate_refusal_is_a_necessary_condition_on_the_real_catalog():
         if not PR.plan_parent_support(source, plan, spec)["supported"]:
             refused.append(plan)
     assert refused, "fixture parent must refuse some plans for this guard to mean anything"
+    # This direction alone cannot see a certificate that refuses too much: the catalog
+    # realizes nothing here, so "refuse everything" satisfies every assertion below.
+    # The bound is the cheap half of closing that;
+    # ``test_certificate_admits_a_pair_that_genuinely_realizes`` is the real half.
+    assert len(refused) < len(CHECKPOINT["plan_latents"]), "refusing every plan is not sound"
     for plan in refused[:20]:
         result = PR.realize(
             source,
@@ -116,6 +224,47 @@ def test_certificate_refusal_is_a_necessary_condition_on_the_real_catalog():
         )
         assert not result["realizations"], plan["plan_id"]
         assert result["outcome"] != PR.OUTCOME_COMPLETED
+
+
+def test_certificate_admits_a_pair_that_genuinely_realizes():
+    """The DISCRIMINATING direction: refusing a REALIZABLE plan is unsound.
+
+    Turns RED for any certificate that wrongly refuses -- which the refusal-only guard
+    above cannot do, because on its fixture every refusal is correct by accident.
+    """
+
+    source, plan = _witness()
+    binding = PR.realize_plan_binding(source, plan)
+    # Independent evidence that a realization exists, produced by the production binder.
+    assert binding["outcome"] == PR.OUTCOME_COMPLETED, (
+        binding["outcome"],
+        binding.get("completion_rejections"),
+    )
+    assert binding["bindings"], "the witness must genuinely realize on this parent"
+    certificate = PR.plan_parent_support(source, plan, PR.PRODUCTION_SPECIFICATION)
+    assert certificate["supported"] is True, certificate
+    assert certificate["stage"] is None
+    assert certificate["reason"] is None
+
+
+def test_witness_is_a_nontrivial_positive_control():
+    """A degenerate witness would be as vacuous as the hole it closes."""
+
+    source, plan = _witness()
+    assert int(source.n_atoms) == PARENT_SLOTS, "a tight graph has no atom_insert support"
+    assert PR.plan_validity(plan)["valid"], PR.plan_validity(plan)
+    rules = [role["executor_rule"] for role in plan["roles"]]
+    assert len(rules) >= 3
+    # The dataflow edge that makes the plan a PROGRAM rather than N unrelated edits.
+    assert plan["created_dependency_count"] >= 1
+    # A PREEXISTING deletion, so the element/charge budget has a demand to check.
+    assert "atom_delete" in rules
+    demand = PR.plan_demand(plan)
+    assert demand.remaining_preexisting_deletes[0] >= 1
+    assert demand.remaining_insert_total[0] >= 1
+    # Each stage must be REACHED: a witness refused early never exercises the later
+    # stages, so a mutation there would stay invisible.
+    assert PR.static_first_step_feasible(source, plan, PR.PRODUCTION_SPECIFICATION)
 
 
 def test_certificate_is_necessary_not_sufficient_and_says_which_stage_refused():
