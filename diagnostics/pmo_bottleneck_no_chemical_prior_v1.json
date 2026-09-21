@@ -1,0 +1,59 @@
+{
+  "ALTERNATIVES_RULED_OUT_BY_MEASUREMENT": [
+    "Jump mechanism: support conditioning raised exact realization 10.8x (0.275% -> 2.96%) and every success stayed additive; move size was never the binding constraint.",
+    "Initialization: measured excellent (QED 0.763, 85% >= 0.6).",
+    "Oracle asset defects: gsk3b/drd2 lazy-load fixed via AssetPinnedOracle, positive control runs before started.json.",
+    "Budget accounting: execute_task now takes charged_calls_per_task from the contract; the 1000-constant defect is gone."
+  ],
+  "PREDICTION_TO_TEST": "If the proposal draw is weighted by the learned editing model, median QED of scored molecules should stay near the initialization's 0.763 rather than collapsing to ~0.41, and gsk3b's r(score,QED) should stop being negative. That is a zero-oracle prediction measurable on replayed parents before any scored run.",
+  "THE_FIX": "Put a learned prior over real chemistry into the PMO proposal draw. COMPOSE ALREADY HAS trained editing models (B-edit / RingCore, Q_theta(y|x,t) fitted on real molecular edits) that score legal successors; they are simply not wired into the PMO path, which uses rng instead. This is the same 'validated capability sitting inert behind an unused call site' pattern as the region law and exact_early_ring. It is NOT a QED/SA filter: a filter is a patch, it would be uncounted objective evaluation where QED is the objective, and it cannot create good proposals -- only reject bad ones after they are generated.",
+  "VERDICT": "LOCATED: the PMO proposal distribution has no prior over real chemistry. It draws randomly over the legal fiber, so it walks off the drug-like manifold on every task.",
+  "WHY_THIS_IS_THE_BOTTLENECK": "The legal fiber is astronomically larger than the drug-like manifold, so uniform-ish sampling from it MUST drift off-manifold; the measured QED collapse is the predicted consequence, not a surprise. Validity-closure guarantees every state is a complete valid connected molecule -- a VALENCE property -- and says nothing about plausibility. GenMol and InVirtuoGen sample from learned distributions over REAL molecules, which is why they do not meet this failure mode; the comparison has been reading as an algorithmic gap when a large part of it is a missing generative prior.",
+  "evidence_chain": {
+    "1_initialization_is_excellent": {
+      "median_heavy": 21.0,
+      "median_qed": 0.763,
+      "median_sa": 3.575,
+      "pct_qed_ge_0_6": 85.0,
+      "pct_sa_le_4": 74.0,
+      "reading": "FALSIFIES the hypothesis that PMO starts from weak molecules. It does not.",
+      "source": "docs/PMO_INIT_BANK.json, 100 molecules, objective-blind, fixed before any task runs"
+    },
+    "2_chemistry_collapses_on_every_task": {
+      "celecoxib_rediscovery": {
+        "d_qed": -0.314,
+        "d_sa": 0.581,
+        "median_qed": 0.449,
+        "median_sa": 4.156,
+        "pct_qed_ge_0_6": 20.5
+      },
+      "gsk3b": {
+        "d_qed": -0.356,
+        "d_sa": 1.26,
+        "median_qed": 0.406,
+        "median_sa": 4.835,
+        "pct_qed_ge_0_6": 20.5
+      },
+      "perindopril_mpo": {
+        "d_qed": -0.319,
+        "d_sa": 0.88,
+        "median_qed": 0.444,
+        "median_sa": 4.455,
+        "pct_qed_ge_0_6": 25.6
+      },
+      "reading": "QED>=0.6 falls 85% -> ~20-26% UNIVERSALLY. This is not oracle-specific."
+    },
+    "3_on_a_foolable_oracle_it_becomes_reward_hacking": {
+      "gsk3b_corr_score_qed": -0.4326,
+      "gsk3b_corr_score_sa": 0.6838,
+      "reading": "Where the oracle is a fingerprint predictor it PAYS for going off-manifold. The similarity/descriptor oracles do not, but the search degrades chemistry there anyway -- so hacking is the consequence, not the cause."
+    },
+    "4_the_proposal_path_has_no_model": {
+      "measured": "grep for torch.load / *.pt / load_factorized / rate_model / FactorizedTracelet across modal_apps/pmo_population_v1_app.py, experiments/pmo_population_v1.py, control/pmo_population_controller.py, control/dynamic_program_synthesis_v2.py and _v21.py returns NOTHING.",
+      "reading": "PMO proposals are RANDOM DRAWS OVER THE LEGAL FIBER.",
+      "what_is_there_instead": "shallow_rng, structured_rng, arbitration_rng -- numpy Generators -- plus heuristic tilts (e.g. the region law's free-gate-margin weighting). The only 'checkpoint' loaded is the jump lane's plan latents, i.e. the dead transplant library."
+    }
+  },
+  "oracle_calls_spent": 0,
+  "schema_version": "pmo_bottleneck_no_chemical_prior_v1"
+}
