@@ -1,0 +1,37 @@
+{
+  "budget_consequence": "250 calls WERE charged against the 750-call authorization and must be counted. Relaunching would charge a further 250 for a measurement already in hand, and the worker would in any case refuse a repeat under this run_id because started.json exists.",
+  "call_id": "fc-01M30MKMQN7CDYR2QAAHCQAXZ0",
+  "charged_oracle_calls": 250,
+  "hardening_added": "The launcher now confirms every spawned call is observable before the receipt may say SPAWNED_ALL; an unobservable call writes LAUNCH_NOT_CONFIRMED and raises. Verified against this call (COMPLETED) and a fabricated id (UNCONFIRMED).",
+  "measured": {
+    "artifact_volume": [
+      "result.json with charged_oracle_calls 250",
+      "oracle_positive_control.json, 13/13 agreeing, max_abs_delta 0.0",
+      "started.json, progress.json, and 250 oracle/query_NNNNNN directories"
+    ],
+    "function_call_return_value": {
+      "auc_budget": 250,
+      "auc_top10_at_budget": 0.11999999999999998,
+      "best_score": 0.21,
+      "charged_oracle_calls": 250,
+      "how": "modal.FunctionCall.from_id(call_id).get(timeout=0) returned this",
+      "oracle_positive_control_passed": true,
+      "task": "gsk3b"
+    },
+    "modal_app_state": {
+      "app_id": "ap-g9RsUP5Bx2PtZ5pUYe6oxr",
+      "description": "compose-pmo-population-v1-corrected",
+      "source": "modal app list --json, profile rahul-94866, environment main",
+      "state": "deployed",
+      "stopped_at": null
+    }
+  },
+  "purpose": "Independent confirmation that the launch recorded in corrected_scored_launch_receipt.json actually ran, after a report that the Modal app did not exist and the spawn had been killed.",
+  "receipt_is_accurate": true,
+  "run_id": "859a42ffaf96fb46bcee309c2bc0141846d2551b03497e08898714203ccc96a0",
+  "schema_version": "pmo_corrected_scored_launch_verification_v1",
+  "verdict": "LAUNCH_TOOK_AND_COMPLETED",
+  "verified_at_utc": "2026-09-21T00:38:22.960782+00:00",
+  "why_the_app_looked_absent": "`modal app list` renders a TABLE that wraps a long Description across lines, so grepping the rendered table for the full app name matches nothing. The same grep against `modal app list --json` returns the app in state 'deployed' with stopped_at null. The absence was a rendering artifact of the listing, not a fact about Modal.",
+  "why_the_detach_gotcha_does_not_apply": "The learnings entry about `modal run --detach` concerns `.spawn()` inside an EPHEMERAL app created by `modal run`, which stops when its entrypoint returns and takes the spawned function with it. This launcher calls Function.from_name(APP, 'run_task').spawn() against a DEPLOYED app, so the call runs server-side and does not depend on the launcher process. Function.from_name raises if that deployed function does not exist, which is why a missing app could not have produced a spawned call id here."
+}

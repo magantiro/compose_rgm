@@ -188,16 +188,55 @@ def launch(tasks: tuple[str, ...] | None = None) -> dict:
         "calls": {},
     }
     _write(LAUNCH, receipt)
+    # `from_name` resolves a DEPLOYED function, so this already raises if the app is
+    # not deployed; the call then runs server-side and does not depend on this
+    # process staying alive.  (The `modal run --detach` gotcha in the learnings is a
+    # different shape: it applies to `.spawn()` inside an EPHEMERAL app created by
+    # `modal run`, which stops when its entrypoint returns.  There is no ephemeral
+    # app here.)
     function = Function.from_name(APP, "run_task")
     for task in selected:
         call = function.spawn({"run_id": run_id, "task": task, "contract_payload_sha256": PAYLOAD})
         receipt["calls"][task] = {"call_id": call.object_id, "status": "SPAWNED"}
         _write(LAUNCH, receipt)
         print(task, call.object_id, flush=True)
+    # A spawn that returned an id is not evidence the call is alive.  Confirm each one
+    # is observable before the receipt is allowed to say SPAWNED_ALL, so a receipt can
+    # never read as success while nothing is running -- the same rule as the oracle
+    # positive control: construction is not evidence of function.
+    unconfirmed = []
+    for task, row in receipt["calls"].items():
+        state, detail = _confirm_call(row["call_id"])
+        row["status"], row["spawn_confirmed"] = state, state != "UNCONFIRMED"
+        if detail:
+            row["detail"] = detail
+        if state == "UNCONFIRMED":
+            unconfirmed.append(f"{task}: {detail}")
+    if unconfirmed:
+        receipt["status"] = "LAUNCH_NOT_CONFIRMED"
+        _write(LAUNCH, receipt)
+        raise RuntimeError(
+            "spawned calls are not observable, so nothing is running: "
+            + "; ".join(unconfirmed)
+        )
     receipt["status"] = "SPAWNED_ALL"
     _write(LAUNCH, receipt)
     print(json.dumps(receipt, indent=2, sort_keys=True))
     return receipt
+
+
+def _confirm_call(call_id: str) -> tuple[str, str | None]:
+    """Observe a spawned call: RUNNING, COMPLETED, or UNCONFIRMED with the reason."""
+    import modal
+
+    try:
+        modal.FunctionCall.from_id(call_id).get(timeout=0)
+    except TimeoutError:
+        # Still executing, which is the expected state immediately after a spawn.
+        return "RUNNING", None
+    except Exception as error:  # noqa: BLE001 - any other failure means it is not alive
+        return "UNCONFIRMED", f"{type(error).__name__}: {error}"
+    return "COMPLETED", None
 
 
 def status() -> None:
