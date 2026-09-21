@@ -211,13 +211,29 @@ def _pendant_fragments(graph, *, maximum):
     return tuple(sorted(set(fragments), key=lambda row: (len(row[0]), row)))
 
 
-def _delete_pendant_fragment(source, rng, *, maximum=MAX_SEGMENT_LENGTH):
-    choices = _pendant_fragments(source, maximum=maximum)
-    if not choices:
-        raise ValueError("no bounded pendant fragment is connected by a bridge")
+def _delete_pendant_fragment(source, rng, *, maximum=MAX_SEGMENT_LENGTH, law=None):
+    """Excise one bridge-separated substituent, chosen by the region-draw law.
+
+    ``law is None`` is the historical behaviour and is preserved exactly: uniform
+    over fragments of at most ``maximum`` atoms, ordered by the same single
+    ``rng.permutation`` call, so every existing caller stays byte-identical.
+    Passing a :class:`~compose_v4.control.bridge_region_law.BridgeRegionLaw`
+    replaces only WHICH region is tried first; the deletion schedule, the
+    executor calls and the acceptance rule below are untouched.
+    """
+
+    if law is None:
+        choices = _pendant_fragments(source, maximum=maximum)
+        if not choices:
+            raise ValueError("no bounded pendant fragment is connected by a bridge")
+        ordered = [choices[int(raw)] for raw in rng.permutation(len(choices))]
+    else:
+        regions = law.order(source, rng)
+        if not regions:
+            raise ValueError("no bounded pendant fragment is connected by a bridge")
+        ordered = [(region.fragment, int(region.anchor)) for region in regions]
     failures = []
-    for raw in rng.permutation(len(choices)):
-        fragment, anchor = choices[int(raw)]
+    for fragment, anchor in ordered:
         current, actions, remaining = source, [], set(fragment)
         try:
             while True:
@@ -367,8 +383,15 @@ def _local_module(source, rng, *, family, label):
     )
 
 
-def compile_generic_module(source: MolecularGraph, rng, family: str):
-    """Bind one generic module to the supplied exact state and execute it."""
+def compile_generic_module(
+    source: MolecularGraph, rng, family: str, *, region_law=None
+):
+    """Bind one generic module to the supplied exact state and execute it.
+
+    ``region_law`` is threaded to the two modules that excise a bridge-separated
+    substituent (``substituent_delete`` and the delete half of
+    ``segment_replace``).  ``None`` keeps v1's uniform bounded law.
+    """
     if family not in GENERIC_MODULES:
         raise ValueError(f"unknown dynamic generic module: {family}")
     if family == "segment_grow":
@@ -401,7 +424,9 @@ def compile_generic_module(source: MolecularGraph, rng, family: str):
             },
         )
     if family == "segment_replace":
-        delete_actions, contracted, anchor, path = _delete_pendant_fragment(source, rng)
+        delete_actions, contracted, anchor, path = _delete_pendant_fragment(
+            source, rng, law=region_law
+        )
         capacity = min(MAX_SEGMENT_LENGTH, 40 - contracted.n_real_atoms)
         if capacity < 1:
             raise ValueError("segment replacement has no insertion capacity")
@@ -427,7 +452,9 @@ def compile_generic_module(source: MolecularGraph, rng, family: str):
             },
         )
     if family == "substituent_delete":
-        actions, _, anchor, path = _delete_pendant_fragment(source, rng)
+        actions, _, anchor, path = _delete_pendant_fragment(
+            source, rng, law=region_law
+        )
         return _execute_actions(
             source,
             family,
@@ -479,6 +506,7 @@ def synthesize_dynamic_program(
     max_modules: int = 3,
     max_primitives: int = 32,
     max_blocks: int = 8,
+    region_law=None,
 ):
     """Construct one complete K-module program without any task evaluation."""
     if not 1 <= max_modules <= MAX_GENERIC_MODULES:
@@ -500,7 +528,9 @@ def synthesize_dynamic_program(
         accepted = None
         for family in _weighted_module_order(rng, near_capacity=near_capacity):
             try:
-                product, stage = compile_generic_module(current, rng, family)
+                product, stage = compile_generic_module(
+                    current, rng, family, region_law=region_law
+                )
             except ValueError as error:
                 failures[f"{family}:{error!s}"] += 1
                 continue
@@ -562,6 +592,7 @@ def synthesize_named_module_sequence(
     *,
     max_primitives=32,
     max_blocks=8,
+    region_law=None,
 ):
     """Compile a prospectively chosen generic module sequence on exact states."""
     if not 1 <= len(families) <= 3 or any(
@@ -570,7 +601,9 @@ def synthesize_named_module_sequence(
         raise ValueError("named dynamic sequence requires one to three generic modules")
     current, stages, selected = source, [], []
     for index, family in enumerate(families):
-        current, stage = compile_generic_module(current, rng, family)
+        current, stage = compile_generic_module(
+            current, rng, family, region_law=region_law
+        )
         stages.append(stage)
         selected.append(
             {

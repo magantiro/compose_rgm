@@ -1690,3 +1690,66 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   witnesses at -9..-8 heavy atoms. The -0.0017 QED margin was measured over similarity-passing
   endpoints the CURRENT proposal law reaches; it does not bound what a large-excision law reaches.
   A bound computed inside a restricted support is a statement about that support, not about the cell.
+## 2026-09-20 (T4 region draw: the cap and the uniform weight are ONE joint defect)
+
+- **`MAX_SEGMENT_LENGTH = 8` is not a size preference, it is an EXPRESSIBILITY bound, and the
+  uniform weight beside it is the other half of the same defect.** `_delete_pendant_fragment`
+  draws uniformly over bridge-separated fragments of at most 8 atoms, so a coherent 9-15 atom
+  substituent is not drawable at all -- it must be spelt as 2-3 INDEPENDENT bounded cuts whose
+  joint mass is a product of per-module terms. Every clean eligible witness of all five exhausted
+  delta=0.6 cells is a net EXCISION of 7-15 heavy atoms (57 witnesses, production provenance),
+  which is exactly the move class the cap cannot express in one draw.
+- **MEASURED, both halves are individually insufficient and the joint change is not.** Pure-prune
+  closure, horizon 3, best-eligible mass rank (the shipped `BridgeRegionLaw` drives the harness,
+  nothing is transcribed):
+      cell      role     v1        cap_only   conditioned_only   repair
+      braf_0    failed   161/165   22/347     88/165             1/307
+      braf_1    failed    49/101   17/272     10/101             1/264
+      fa7_2     failed   189/276  110/546     23/276             9/492
+      braf_2    control   35/83    14/203     24/83              1/192
+      fa7_1     control    2/258   22/438      1/254             1/379
+      5ht1b_0   control    1/15     3/16       1/15              1/16
+  `fa7_1` is the decisive control: raising the cap ALONE demotes it 2 -> 22 (eligible mass share
+  0.146 -> 0.052), reproducing the known cap-raising regression; the joint change instead promotes
+  it to 1 at share 0.377. No control regressed under the joint change.
+- **A single-draw delete-half measurement separates the law from the rest of the program.** For
+  replace/grow-mode witnesses the region draw is only the delete half, so ask which rank a region
+  whose child is a SUBSTRUCTURE of the witness gets. v1 covers **0 of 41 witnesses across all five
+  cells** -- the cap makes every needed region undrawable in one draw -- while the joint law covers
+  all of them for four cells at ranks 2-4. This is what rescues fa7_0, whose pure-prune closure has
+  no eligible endpoint at all but whose five (complete-pool) witnesses all have their delete half at
+  rank 2.
+- **The T4 proposal path is 48 SLOTS, not the 40 of the editing corpus.** `whole_ring_plan`
+  refuses anything else outright (`n_atoms != 48 or not 1 <= n_real_atoms <= 40`), and
+  `t4_fiber_campaign` builds every parent as `pad_molecular_graph(smiles_to_molecular_graph(p), 48)`.
+  So `assert_production_state_semantics` / `production_state_from_smiles` (40-slot, editing corpus)
+  is the WRONG preflight for this path -- it constructs a state the T4 executor rejects. The
+  equivalent evidence here is that production actually executes the states, which is cheap to check.
+- **A pendant excision's endpoint has an exact closed form, and the executor is the only thing
+  that may certify it.** Deleting a bridge-separated fragment leaf-by-leaf returns hydrogens to
+  atoms that are themselves deleted, so the only surviving effect is that the retained anchor
+  recovers the bridge bond's hydrogens. Measured over 5 real sources: **72 regions executed,
+  0 endpoint mismatches**. Keep the closed form for weighting hundreds of candidates cheaply, and
+  keep a test that drives the LIVE `_delete_pendant_fragment` -- a transcribed reference could not
+  fail if the executor drifted.
+- **5ht1b_2 is blocked by the EXECUTOR's charge policy, not by the region law, and needs a
+  DIFFERENT region shape as well.** Two independent facts, both measured:
+  (a) its witness `C1=CC2=NC=C(CCCc3ccccc3)[C@H]2C=C1n1cnnc1` is a single **8-atom interior
+  (two-bridge) excision plus one reattachment bond** joining the two flanks -- reached exactly,
+  once stereochemistry is stripped (MolecularGraph carries no stereo, so a stereo-bearing witness
+  SMILES never matches a graph-derived one; the contract sets `stereochemistry_claim: false`).
+  A one-bridge pendant draw cannot express it, and neither can any deletion-only search, because
+  the remainder would be disconnected.
+  (b) even given that region, `whole_ring_plan.execute_program` calls `charge_policy_preserved` at
+  EVERY step, and `audit_charge_policy_transition` reports `formal_charge_deleted_slots=(12,)` plus
+  charged-centre element/H/bond-row changes, so deleting the `[NH+]` is refused outright. Measured
+  on the real source: **9 of 16 pendant regions are refused by the charge policy**; zero refusals on
+  every neutral cell. Also `bond_insert` is OUTSIDE the frozen Active8 codec surface
+  (`atom_delete, atom_insert, atom_restate_semantic, bond_reorder, bond_reroute, cycle_close,
+  cycle_open, ring_system_restate`), so the reattachment primitive is `cycle_close`.
+  Conclusion: a region law is the wrong layer for this cell; the repair is a charge-policy decision
+  plus a two-boundary region shape, and both should be named rather than folded into a size claim.
+- **Keep the tilt a RE-RANKING, never a filter.** Weights are `max(floor, exp(margin/T))` with
+  `floor = 0.05`, so every region the executor could reach keeps positive probability and the
+  uncapped support is a strict superset of v1's. A filter here would have deleted exactly the
+  charge-changing cuts that one cell's only witnesses need.
