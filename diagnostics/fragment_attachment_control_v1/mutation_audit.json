@@ -1,0 +1,19 @@
+{
+  "schema": "compose_fragment_attachment_mutation_audit_v1",
+  "question": "Does the test suite actually constrain the controller, or does it only exercise it?",
+  "method": "Each production guard was disabled in turn on a COPY of the tree (the sweep was importing from src at the time) and tests/test_fragment_attachment_control.py was re-run. A mutation that leaves the suite green is a guard nothing tests.",
+  "kernel": {"rdkit": "2026.03.6", "python": "3.12.9"},
+  "mutations": [
+    {"mutation": "interface restriction bypassed", "result": "killed"},
+    {"mutation": "attachment-first staging bypassed", "result": "killed"},
+    {"mutation": "redirection made the identity", "result": "killed"},
+    {"mutation": "redirected bond-order realization dropped", "result": "killed"},
+    {"mutation": "core separation check always passes", "result": "killed"},
+    {"mutation": "linker join released even when the controller is off", "result": "killed"},
+    {"mutation": "region lock ignores released pairs", "result": "killed"},
+    {"mutation": "coverage counts locked neighbours as external", "result": "killed"}
+  ],
+  "surviving_mutations": [],
+  "verdict": "8 of 8 killed",
+  "why_these_can_fail": "The successors the admission tests score are built by hand from array edits, not recomputed from the controller, so the expectation does not move with the code under test. The off-path controls assert the SAME successor is admitted with the controller disabled, which is what separates 'the controller refused it' from 'the state was never legal'."
+}
