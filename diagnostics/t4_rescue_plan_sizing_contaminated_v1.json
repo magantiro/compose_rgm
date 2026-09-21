@@ -1,0 +1,44 @@
+{
+ "braf_0_d06": {
+  "heavy": 40,
+  "room": 0,
+  "plans": 0,
+  "seconds": 0.4,
+  "error": null
+ },
+ "braf_1_d06": {
+  "heavy": 39,
+  "room": 1,
+  "plans": 8,
+  "seconds": 0.0,
+  "error": null
+ },
+ "fa7_0_d06": {
+  "heavy": 32,
+  "room": 8,
+  "plans": 24,
+  "seconds": 0.0,
+  "error": null
+ },
+ "fa7_2_d06": {
+  "heavy": 35,
+  "room": 5,
+  "plans": 16,
+  "seconds": 0.0,
+  "error": null
+ },
+ "5ht1b_2_d06": {
+  "heavy": 31,
+  "room": 9,
+  "plans": 12,
+  "seconds": 0.0,
+  "error": null
+ },
+ "fa7_2_d04": {
+  "heavy": 35,
+  "room": 5,
+  "plans": 16,
+  "seconds": 0.0,
+  "error": null
+ }
+}
