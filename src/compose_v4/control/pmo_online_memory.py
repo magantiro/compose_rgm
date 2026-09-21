@@ -558,6 +558,82 @@ class OnlineProposalMemory:
         default_factory=lambda: {"syntheses": 0, "region_weight_evaluations": 0}
     )
 
+    # -- durable state ----------------------------------------------------
+
+    def payload(self) -> dict[str, Any]:
+        """Serialise every counted observation this memory holds.
+
+        Without this a resumed campaign silently restarts the memory COLD and
+        re-learns from nothing -- arm B would drift back toward arm A for its
+        remaining rounds and the divergence would be invisible in the artifact.
+        That is the same failure the credit and pool-continuity payloads exist to
+        prevent, recorded in `PmoPopulationController.snapshot`.
+
+        ``totals``/``counts`` are keyed by tuples, which JSON cannot express as
+        object keys, so they are written as explicit [key, value] pairs rather
+        than stringified -- a stringified key cannot be read back to the tuple it
+        came from without a parser that would drift from this writer.
+        """
+
+        def pairs(mapping: dict) -> list:
+            # Keys are tuples for the context maps and plain ints for the size
+            # residual, so encode a scalar key as itself rather than forcing it
+            # through list() -- which raised on the int-keyed map.
+            def encode(key):
+                return list(key) if isinstance(key, tuple) else key
+
+            return [
+                [encode(key), value]
+                for key, value in sorted(mapping.items(), key=lambda kv: str(kv[0]))
+            ]
+
+        return {
+            "schema_version": "pmo_online_memory_payload_v1",
+            "ordinal": int(self.ordinal),
+            "donor_ceiling": float(self.donor_ceiling),
+            "cost": dict(self.cost),
+            "frontier": dict(self.frontier.scores),
+            "size": {"totals": pairs(self.size.totals), "counts": pairs(self.size.counts)},
+            "edits": {
+                "rows": list(self.edits.rows),
+                "totals": pairs(self.edits.totals),
+                "counts": pairs(self.edits.counts),
+            },
+            "donors": {
+                "rows": list(self.donors.rows),
+                "totals": pairs(self.donors.totals),
+                "counts": pairs(self.donors.counts),
+            },
+        }
+
+    def restore_payload(self, payload: dict[str, Any]) -> None:
+        """Rebuild from :meth:`payload`. Refuses a payload it did not write."""
+
+        if payload.get("schema_version") != "pmo_online_memory_payload_v1":
+            raise ValueError(
+                "online memory payload schema changed; refusing to resume a memory "
+                "whose encoding this reader did not write"
+            )
+
+        def unpair(rows, cast) -> dict:
+            return {
+                (tuple(key) if isinstance(key, list) else key): cast(value)
+                for key, value in rows
+            }
+
+        self.ordinal = int(payload["ordinal"])
+        self.donor_ceiling = float(payload["donor_ceiling"])
+        self.cost = dict(payload["cost"])
+        self.frontier.scores = dict(payload["frontier"])
+        self.size.totals = defaultdict(float, unpair(payload["size"]["totals"], float))
+        self.size.counts = defaultdict(int, unpair(payload["size"]["counts"], int))
+        self.edits.rows = list(payload["edits"]["rows"])
+        self.edits.totals = defaultdict(float, unpair(payload["edits"]["totals"], float))
+        self.edits.counts = defaultdict(int, unpair(payload["edits"]["counts"], int))
+        self.donors.rows = list(payload["donors"]["rows"])
+        self.donors.totals = defaultdict(float, unpair(payload["donors"]["totals"], float))
+        self.donors.counts = defaultdict(int, unpair(payload["donors"]["counts"], int))
+
     # -- updates ----------------------------------------------------------
 
     def observe_scored_molecule(

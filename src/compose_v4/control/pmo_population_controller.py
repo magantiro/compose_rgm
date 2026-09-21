@@ -964,6 +964,12 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             # re-learn from nothing, which is measurably worse than the credit path.
             "credit": self.credit.payload(),
             "pool_continuity": self._pool_continuity.payload(),
+            # Same reason as credit and pool_continuity above: without this a
+            # resumed arm B silently restarts its memory COLD and drifts back
+            # toward arm A, invisibly, for every remaining round.
+            "online_memory": (
+                None if self.online_memory is None else self.online_memory.payload()
+            ),
         }
         return json.loads(json.dumps({**body, "snapshot_id": identity(body)}))
 
@@ -987,6 +993,20 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         result.shallow_rng.bit_generator.state = state["shallow_rng"]
         result.structured_rng.bit_generator.state = state["structured_rng"]
         result.population_state = json.loads(json.dumps(state["population_state"]))
+        memory_payload = state.get("online_memory")
+        if memory_payload is not None:
+            # A snapshot carrying memory state may only be restored into an arm that
+            # HAS a memory: silently discarding it would resume arm B as arm A.
+            if result.online_memory is None:
+                raise ValueError(
+                    "snapshot carries online-memory state but this controller was "
+                    "constructed without it; resuming would silently change the arm"
+                )
+            result.online_memory.restore_payload(memory_payload)
+        elif result.online_memory is not None and result.online_memory.ordinal:
+            raise ValueError(
+                "controller has a warm online memory but the snapshot carries none"
+            )
         result._population_bootstrap_pool_id = state["bootstrap_pool_id"]
         # Absent keys restore empty objects so a snapshot taken before these were
         # persisted still loads, rather than failing a resume outright.
