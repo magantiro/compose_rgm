@@ -517,3 +517,57 @@ def test_proposal_cost_is_counted_separately_from_any_oracle_call():
     assert memory.cost["region_weight_evaluations"] > before
     assert set(memory.cost) == {"syntheses", "region_weight_evaluations"}
     assert "oracle" not in " ".join(memory.cost).lower()
+
+
+def test_frontier_gain_is_independent_of_update_order():
+    """Recording the observation before or after asking what it contributed
+    must give the SAME answer, or the learning target depends on call order."""
+
+    def gain(record_first: bool) -> float:
+        ledger = FrontierLedger()
+        for index in range(TOP_K):
+            ledger.observe(f"m{index}", 0.40)
+        if record_first:
+            ledger.observe("new", 0.90)
+        value = ledger.frontier_gain(0.90, exclude="new")
+        return value
+
+    assert gain(True) == pytest.approx(gain(False))
+    assert gain(False) > 0.0, "the probe must exercise a real gain"
+
+
+def test_transition_learns_the_gain_the_child_contributed_on_arrival():
+    """Discriminating fixture for the update-order bug.
+
+    A child that is ALREADY in the top ten is the case where counting it twice
+    and counting it once displace different elements. Nine molecules at 0.90
+    plus the 0.95 child: excluding it, the baseline top-ten mean is 8.10/10 and
+    adding it gives 9.05/10, a gain of 0.095. Counting it twice the baseline is
+    already 9.05/10 and the gain collapses to 0.005 -- a twentyfold
+    understatement of what the run's best molecule contributed. An earlier
+    fixture used ten 0.40s and a 0.95, where both readings coincide at 0.055,
+    so it could not see the defect.
+    """
+
+    memory = OnlineProposalMemory()
+    graph = _source()
+    for index in range(9):
+        memory.frontier.observe(f"m{index}", 0.90)
+    region = bridge_separated_regions(graph, maximum=None)[0]
+    # Record the molecule FIRST -- the order observe_batch naturally produces.
+    memory.observe_scored_molecule(endpoint="winner", score=0.95)
+    memory.observe_transition(
+        parent_graph=graph, parent_endpoint="p", parent_score=0.90,
+        child_endpoint="winner", child_score=0.95,
+        child_heavy=int(graph.n_real_atoms) - region.size,
+        family="substituent_delete", touched_slots=region.fragment,
+    )
+    row = memory.edits.rows[-1]
+    assert row["child_endpoint"] == "winner"
+    outcome = 0.095 + 0.5 * (0.95 - 0.90)
+    delta_heavy = -region.size
+    assert row["residual"] == pytest.approx(
+        outcome - memory.size.expected(delta_heavy), abs=1e-9
+    )
+    # And the order-dependent reading must NOT reproduce it.
+    assert abs(0.005 + 0.5 * 0.05 - outcome) > 0.05

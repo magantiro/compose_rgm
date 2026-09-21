@@ -271,17 +271,34 @@ class FrontierLedger:
             raise ValueError(f"counted score for {endpoint!r} changed")
         self.scores[endpoint] = float(score)
 
-    def top_k_mean(self, extra: float | None = None) -> float:
-        values = sorted(self.scores.values(), reverse=True)
+    def top_k_mean(
+        self, extra: float | None = None, *, exclude: str | None = None
+    ) -> float:
+        values = [
+            value for key, value in self.scores.items() if key != exclude
+        ]
         if extra is not None:
-            values = sorted([*values, float(extra)], reverse=True)
-        head = values[:TOP_K]
+            values.append(float(extra))
+        head = sorted(values, reverse=True)[:TOP_K]
         return float(sum(head) / TOP_K) if head else 0.0
 
-    def frontier_gain(self, score: float) -> float:
-        """``U10(A + {G'}) - U10(A)`` -- never negative, zero off the frontier."""
+    def frontier_gain(self, score: float, *, exclude: str | None = None) -> float:
+        """``U10(A + {G'}) - U10(A)`` -- never negative, zero off the frontier.
 
-        return max(0.0, self.top_k_mean(score) - self.top_k_mean())
+        ``exclude`` removes one endpoint from the BASELINE, which is what makes
+        the answer independent of whether the caller has already recorded the
+        observation.  Without it the result depends on update order: recording
+        the molecule first and then asking what it contributed counts it twice
+        and understates its arrival.  Order-dependence in a learning target is
+        the kind of defect that produces a plausible number rather than an
+        error, so the ordering is removed rather than documented.
+        """
+
+        return max(
+            0.0,
+            self.top_k_mean(score, exclude=exclude)
+            - self.top_k_mean(exclude=exclude),
+        )
 
 
 # ---- Size-confound control ----------------------------------------------
@@ -590,7 +607,7 @@ class OnlineProposalMemory:
         """
 
         delta_heavy = int(child_heavy) - int(parent_graph.n_real_atoms)
-        gain = self.frontier.frontier_gain(child_score)
+        gain = self.frontier.frontier_gain(child_score, exclude=child_endpoint)
         relative = 0.0 if parent_score is None else float(child_score) - float(parent_score)
         outcome = gain + 0.5 * relative
         self.size.observe(delta_heavy, outcome)

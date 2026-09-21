@@ -249,6 +249,52 @@ def evidence_coverage(source, memory):
     }
 
 
+def diversity(endpoints: list[str]) -> dict:
+    """Internal diversity of the distinct endpoints.
+
+    "Distinct canonical endpoint" is a weak bar on its own -- a set of
+    near-duplicates differing by one methyl each is distinct and useless -- so
+    report mean pairwise Tanimoto DISTANCE and distinct Bemis-Murcko scaffolds
+    beside the count. DIAGNOSTIC ONLY, like `chemistry`.
+    """
+
+    from rdkit import Chem, DataStructs, RDLogger
+    from rdkit.Chem import rdFingerprintGenerator
+    from rdkit.Chem.Scaffolds import MurckoScaffold
+
+    RDLogger.DisableLog("rdApp.*")
+    generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+    prints, scaffolds, failed_scaffolds = [], set(), []
+    for smiles in sorted({e for e in endpoints if e}):
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            continue
+        prints.append(generator.GetFingerprint(mol))
+        try:
+            scaffolds.add(MurckoScaffold.MurckoScaffoldSmiles(mol=mol))
+        except (ValueError, RuntimeError):
+            failed_scaffolds.append(smiles)
+    if len(prints) < 2:
+        return {
+            "n": len(prints),
+            "distinct_scaffolds": len(scaffolds),
+            "scaffold_failures": len(failed_scaffolds),
+        }
+    distances = []
+    for i in range(len(prints)):
+        for j in range(i + 1, len(prints)):
+            distances.append(1.0 - DataStructs.TanimotoSimilarity(prints[i], prints[j]))
+    return {
+        "n": len(prints),
+        "distinct_scaffolds": len(scaffolds),
+        "mean_pairwise_tanimoto_distance": float(np.mean(distances)),
+        "min_pairwise_tanimoto_distance": float(np.min(distances)),
+        "near_duplicate_pairs_below_0_1": int(sum(1 for d in distances if d < 0.1)),
+        "pairs": len(distances),
+        "scaffold_failures": len(failed_scaffolds),
+    }
+
+
 def chemistry(endpoints: list[str]) -> dict:
     """DIAGNOSTIC ONLY. Never consulted by the memory or the law."""
 
@@ -366,6 +412,15 @@ def main() -> int:
                         ),
                         "chemistry_diagnostic": chemistry(
                             [r["endpoint"] for r in rows[arm]]
+                        ),
+                        "diversity_diagnostic": diversity(
+                            [r["endpoint"] for r in rows[arm]]
+                        ),
+                        # Persist the MOLECULES, not only the counters: a run
+                        # that stores aggregates cannot answer a question posed
+                        # after the fact.
+                        "endpoints": sorted(
+                            {r["endpoint"] for r in rows[arm] if r["endpoint"]}
                         ),
                     }
                     for arm in ARMS
