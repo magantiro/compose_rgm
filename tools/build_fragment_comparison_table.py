@@ -103,6 +103,7 @@ def main() -> None:
                 "task": task,
                 "category": category,
                 "complete": block["complete"],
+                "withheld_reason": block.get("withheld_reason"),
                 "copied_from": block.get("copied_from"),
                 "constraint_decomposition": block.get("constraint_decomposition"),
                 "COMPOSE": compose,
@@ -137,6 +138,8 @@ def main() -> None:
           f"{'div':>7s} {'dist':>7s}")
     for row in rows:
         flag = "" if row["complete"] else "  [PARTIAL]"
+        if row.get("withheld_reason"):
+            flag += f"  [WITHHELD: {row['withheld_reason']}]"
         for method in ("COMPOSE", "GenMol", "SAFE-GPT", "InVirtuoGen"):
             entry = row[method]
             line = " ".join(fmt(entry, m) for m in METRICS)

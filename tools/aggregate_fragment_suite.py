@@ -39,6 +39,16 @@ TASK_ORDER = (
 )
 MORPHING_SOURCE = "linker_design"
 
+# Tasks whose numbers describe a different task from the published one. See
+# diagnostics/fragment_official_suite_v2/linker_design_invalidation.json: the two
+# retained cores are joined by a direct bond that the region lock then pins, so
+# the generated linker is always zero atoms long. Their shards are kept as
+# evidence of the defect; their rows are not results.
+WITHHELD_TASKS = {
+    "linker_design": "zero-length linker pinned by the region lock",
+    "scaffold_morphing": "copies linker_design, which is withheld",
+}
+
 
 def load_shards(shard_dir: Path) -> list[dict]:
     shards = []
@@ -207,6 +217,7 @@ def summarise(table: dict, expected_drugs: int, expected_seeds: int) -> dict:
         }
         out[task] = {
             "complete": complete,
+            "withheld_reason": WITHHELD_TASKS.get(task),
             "constraint_decomposition": decomposition,
             "seeds_present": sorted(by_seed),
             "drugs_per_seed": {s: len(by_seed[s]) for s in sorted(by_seed)},
@@ -269,6 +280,8 @@ def main() -> None:
         drugs = block["drugs_per_seed"]
         n = f"{sum(drugs.values())}"
         flag = "" if block["complete"] else "  [PARTIAL]"
+        if block.get("withheld_reason"):
+            flag += f"  [WITHHELD: {block['withheld_reason']}]"
         print(
             f"{task:26s} {n:>5s} "
             f"{s['validity']['mean']:6.2f} {s['uniqueness']['mean']:6.2f} "
