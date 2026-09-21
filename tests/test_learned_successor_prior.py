@@ -359,3 +359,112 @@ def test_path_log_likelihood_rejects_a_malformed_path() -> None:
         prior.path_log_likelihood([source], [("cycle_close", object())])
     with pytest.raises(LearnedSuccessorPriorError):
         prior.path_log_likelihood([source, source], [])
+
+
+def test_the_weight_cache_is_transparent() -> None:
+    """A warm weight lookup must equal a cold computation, exactly.
+
+    The reference is a FRESH prior instance that has never populated its cache,
+    so the comparison does not run through the code path under test. Without
+    this, a cache that silently returned uniform weights would still satisfy the
+    floor and normalization guards.
+    """
+    model = _model()
+    warm = LearnedSuccessorPrior(model)
+    checked = 0
+    for _row, source in _parents():
+        for family in sorted(ENUMERATORS):
+            try:
+                actions = ENUMERATORS[family](source)
+            except (ValueError, RuntimeError, KeyError, IndexError, TypeError):
+                continue
+            if len(actions) < 4:
+                continue
+            first = warm.weights(source, family=family, actions=actions)
+            second = warm.weights(source, family=family, actions=actions)
+            cold = LearnedSuccessorPrior(model).weights(
+                source, family=family, actions=actions
+            )
+            np.testing.assert_allclose(second, first, rtol=0, atol=0)
+            np.testing.assert_allclose(second, cold, rtol=1e-12, atol=1e-12)
+            # And it must not have degenerated to the uniform law.
+            if float(cold.max()) > float(cold.min()) * 1.0000001:
+                assert abs(float(second.max()) - 1.0 / len(actions)) > 1e-9, (
+                    "cached weights collapsed to uniform"
+                )
+            checked += 1
+            break
+    assert checked >= 3
+
+
+def test_a_mutated_weight_cache_is_caught() -> None:
+    """Negative control for the guard above: prove it can go red.
+
+    Corrupts the cache in-place, exactly as the surviving mutation did, and
+    requires the transparency comparison to fail.
+    """
+    model = _model()
+    prior = LearnedSuccessorPrior(model)
+    for _row, source in _parents():
+        for family in sorted(ENUMERATORS):
+            try:
+                actions = ENUMERATORS[family](source)
+            except (ValueError, RuntimeError, KeyError, IndexError, TypeError):
+                continue
+            if len(actions) < 4:
+                continue
+            first = prior.weights(source, family=family, actions=actions)
+            if float(first.max()) <= float(first.min()) * 1.0000001:
+                continue  # a genuinely flat law cannot demonstrate the failure
+            for key in list(prior._weight_cache):
+                prior._weight_cache[key] = np.full(len(actions), 1.0 / len(actions))
+            corrupted = prior.weights(source, family=family, actions=actions)
+            assert not np.allclose(corrupted, first), (
+                "the transparency guard cannot detect a corrupted cache"
+            )
+            return
+    pytest.skip("fixture produced no non-flat weight vector")
+
+
+def test_guidance_strength_actually_changes_the_weights() -> None:
+    """Temperature and floor must be part of the cache key and must bite.
+
+    A sweep over guidance strength is only meaningful if the settings reach the
+    weights. A cache keyed without them would silently return the first
+    setting's weights for every later one, and a sweep would report a flat
+    non-result that was an artifact.
+    """
+    model = _model()
+    prior = LearnedSuccessorPrior(model)
+    compared = 0
+    for _row, source in _parents():
+        for family in sorted(ENUMERATORS):
+            try:
+                actions = ENUMERATORS[family](source)
+            except (ValueError, RuntimeError, KeyError, IndexError, TypeError):
+                continue
+            if len(actions) < 6:
+                continue
+            prior.floor, prior.temperature = 0.05, 1.0
+            flat = prior.weights(source, family=family, actions=actions)
+            if float(flat.max()) <= float(flat.min()) * 1.0000001:
+                continue
+            prior.floor, prior.temperature = 0.05, 0.2
+            sharp = prior.weights(source, family=family, actions=actions)
+            assert not np.allclose(flat, sharp), (
+                "lowering the temperature did not change the weights; the "
+                "setting is not reaching the law"
+            )
+            assert float(sharp.max()) > float(flat.max()), (
+                "a lower temperature must concentrate mass, not spread it"
+            )
+            prior.floor, prior.temperature = 0.5, 1.0
+            floored = prior.weights(source, family=family, actions=actions)
+            assert float(floored.max()) / float(floored.min()) <= 2.0000001, (
+                "a floor of 0.5 must cap the spread at 2x"
+            )
+            compared += 1
+            break
+        if compared >= 3:
+            break
+    assert compared >= 3, "fixture produced too few non-flat laws to compare"
