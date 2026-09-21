@@ -175,6 +175,32 @@ def summarise(rows: list[dict], task: str) -> dict:
         for key in COLUMNS
     }
 
+    # Per drug, averaged over that drug's seeds.  ONE controller is used for
+    # every drug, so a gain carried by a single drug would be a different
+    # finding from a gain that shows up across the panel -- and only this
+    # breakdown can tell them apart.
+    by_drug: dict[str, list[dict]] = defaultdict(list)
+    for row in rows:
+        by_drug[row["drug"]].append(row)
+    per_drug = {
+        drug: {
+            "seeds": len(drug_rows),
+            "chemical_validity_over_attempts": statistics.fmean(
+                [100.0 * r["committed_chemically_valid"] / r["attempts"] for r in drug_rows]
+            ),
+            "fragment_containment": statistics.fmean(
+                [100.0 * r["committed_fragment_preserving"] / r["attempts"] for r in drug_rows]
+            ),
+            "task_success": statistics.fmean(
+                [100.0 * r["emitted_nonempty"] / r["attempts"] for r in drug_rows]
+            ),
+            "declared_interfaces": sorted(
+                {len(r.get("declared_interfaces", ())) for r in drug_rows}
+            ),
+        }
+        for drug, drug_rows in sorted(by_drug.items())
+    }
+
     committed = sum(int(r["committed_endpoints"]) for r in rows)
     valid = sum(int(r["committed_chemically_valid"]) for r in rows)
     emitted = sum(int(r["emitted_nonempty"]) for r in rows)
@@ -184,6 +210,7 @@ def summarise(rows: list[dict], task: str) -> dict:
         "rows": len(rows),
         "summary": summary,
         "per_seed": per_seed,
+        "per_drug": per_drug,
         "chemical_validity_over_committed_pct": (
             100.0 * valid / committed if committed else float("nan")
         ),
@@ -260,6 +287,22 @@ def main() -> None:
                 key: a["summary"][key]["mean"] - b["summary"][key]["mean"]
                 for key in COLUMNS
             },
+            "per_drug_delta": {
+                drug: {
+                    "task_success_before": b["per_drug"][drug]["task_success"],
+                    "task_success_after": a["per_drug"][drug]["task_success"],
+                    "task_success_delta": (
+                        a["per_drug"][drug]["task_success"]
+                        - b["per_drug"][drug]["task_success"]
+                    ),
+                    "chemical_validity_over_attempts_delta": (
+                        a["per_drug"][drug]["chemical_validity_over_attempts"]
+                        - b["per_drug"][drug]["chemical_validity_over_attempts"]
+                    ),
+                    "declared_interfaces": a["per_drug"][drug]["declared_interfaces"],
+                }
+                for drug in sorted(set(b["per_drug"]) & set(a["per_drug"]))
+            },
         }
 
     payload = {
@@ -329,6 +372,21 @@ def main() -> None:
             f"{block['delta']['fragment_containment']:>+11.2f} "
             f"{block['delta']['task_success']:>+12.2f}"
         )
+    for task, block in tasks.items():
+        drugs = block["per_drug_delta"]
+        improved = sum(1 for d in drugs.values() if d["task_success_delta"] > 0)
+        regressed = sum(1 for d in drugs.values() if d["task_success_delta"] < 0)
+        print(
+            f"\n{task}: task success improved on {improved}/{len(drugs)} drugs, "
+            f"regressed on {regressed}"
+        )
+        print(f"  {'drug':14s} {'ifaces':>6s} {'before':>8s} {'after':>8s} {'delta':>8s}")
+        for drug, d in drugs.items():
+            print(
+                f"  {drug:14s} {d['declared_interfaces']!s:>6s} "
+                f"{d['task_success_before']:>8.2f} {d['task_success_after']:>8.2f} "
+                f"{d['task_success_delta']:>+8.2f}"
+            )
     print(f"\nwrote {args.output}")
 
 
