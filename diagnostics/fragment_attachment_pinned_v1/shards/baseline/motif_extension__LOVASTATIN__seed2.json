@@ -1,0 +1,349 @@
+{
+  "schema": "compose_fragment_official_suite_v1",
+  "protocol": {
+    "source": "in_virtuo_gen/evaluation/downstream.py @ b50bb3ae",
+    "samples_per_prompt": 100,
+    "seeds": 3,
+    "task_row": "unweighted mean over the task's drugs",
+    "scaffold_morphing": "upstream copies the linker result"
+  },
+  "kernel": {
+    "rdkit": "2024.03.5",
+    "numpy": "1.26.4",
+    "torch": "2.4.0",
+    "python": "3.11.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit"
+  },
+  "checkpoint": {
+    "path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "completed_steps": 16000,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "atom_vocabulary": "ORGANIC"
+  },
+  "sampler": {
+    "config": {
+      "mark_attempts_per_event": 24,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "config_sha256": "805b2d10fa863c278dfd760fb3b9f5fd29eb94f91ef1653b1bf5ebe44aaab9ae"
+  },
+  "attachment_control": {
+    "config": {
+      "attachment_first": true,
+      "enabled": false,
+      "realize_redirected_order": true,
+      "redirect_attachment": true,
+      "release_linker_join": true,
+      "require_separated_cores": true,
+      "restrict_interfaces": true
+    },
+    "config_sha256": "698d57036e25eba4e23d910e3e5adffe70c6582b440aeb4dd8b3389b0e2f6691",
+    "arm": "frozen_sampler_baseline"
+  },
+  "metric_provenance": {
+    "validity_uniqueness_quality_diversity": "official in_virtuo_gen.train_utils.metrics.evaluate_smiles @ b50bb3ae, already_smiles=True",
+    "distance": "NOT in the released evaluator: evaluate_smiles returns no distance key. Estimator is the official in_virtuo_gen.utils.mol.calculate_average_tanimoto(prompt=...); reference = the dummy-stripped prompt fragment(s)",
+    "fragment_preservation": "independent audit, atom-level non-overlapping substructure match, run over COMMITTED endpoints as well as emitted samples"
+  },
+  "results": {
+    "motif_extension": {
+      "task": "motif_extension",
+      "prompts_declared": 1,
+      "prompts_scored": 1,
+      "samples_per_prompt": 100,
+      "seeds": 3,
+      "per_seed": [
+        {
+          "validity": 4.0,
+          "uniqueness": 100.0,
+          "quality": 0.0,
+          "diversity": 0.7415,
+          "distance": 0.6770515950700751,
+          "distance_to_original_drug": 0.7100453805554185
+        }
+      ],
+      "summary": {
+        "validity": {
+          "mean": 4.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 100.0,
+          "std": 0.0
+        },
+        "quality": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "diversity": {
+          "mean": 0.7415,
+          "std": 0.0
+        },
+        "distance": {
+          "mean": 0.6770515950700751,
+          "std": 0.0
+        },
+        "distance_to_original_drug": {
+          "mean": 0.7100453805554185,
+          "std": 0.0
+        }
+      },
+      "build_failures": [],
+      "per_drug": {
+        "LOVASTATIN": [
+          {
+            "seed": 2,
+            "rng_seed": 851109939,
+            "official": {
+              "validity": 4.0,
+              "uniqueness": 100.0,
+              "diversity": 0.7415,
+              "quality": 0.0,
+              "distance": 0.6770515950700751,
+              "distance_to_original_drug": 0.7100453805554185
+            },
+            "attempts": 100,
+            "validity_denominator": 100,
+            "emitted_nonempty": 4,
+            "distance_reference_prompt": "CC[C@H](C)C(=O)O[C@H]1C[C@@H](C)C=C2C=C[C@H](C)C[C@H]21",
+            "unique_valid_count": 4,
+            "committed_endpoints": 75,
+            "committed_chemically_valid": 75,
+            "committed_fragment_preserving": 75,
+            "emitted_fragment_preserving": 4,
+            "constraint_failures": 71,
+            "lock_rejections": 2907,
+            "budget_exhausted": 36,
+            "executor_refusals": 0,
+            "mean_events": 10.07,
+            "families": {
+              "atom_insert": 740,
+              "atom_delete": 193,
+              "atom_restate": 34,
+              "bond_reorder": 21,
+              "bond_insert": 8,
+              "bond_reroute": 11
+            },
+            "seconds": 160.06,
+            "committed_endpoint_smiles": [
+              "CCC(=O)C(CO)NCC(CC=NN)C(=O)OC1CC(C)C=C2C=CC(C)(C)CC21",
+              "CCC(C)C(=O)OC1CC(C)C=C2C=CC(C)CC21",
+              "CCC(CCCCNC(=NC)C(C)(C)C)C(=O)OC1CC(C)(C)C=C2C=CC(C)(C)CC21",
+              "CC(C#CC(C)C(C)C(=O)OC1CC(C)C=C2C=CC(C)CC21)=CCO",
+              "CC1C=CC2=CC(C)(C)CC(OC(=O)C(C)C(C)([IH2])C=CN)C2C1C",
+              "C=CC1C(C)C(C)(C)C(=O)OC12CC(C)(C)C=C1C=CC(C)(O)CC12",
+              "CCCCCC1C=C(C)C2=CC(C)(C)CC(OC(=O)C(CC)CCCCC)C2C1",
+              "CCOC(=O)C(C(=O)OC1CC(C)(C)C=C2C=C(C)C(C(C)(C)C)CC21)C(C)(C)C",
+              "CCC(C)C(=O)OC1CC(C)(C)C=C2C=CC(C)CC21",
+              "CCC(CN(C)CC)C(=O)OC1CC(C)C=C2C=CC(C)(C)CC21",
+              "CC(=O)NCCC(CCCN(C)C)C(=O)OC1CC(C)C=C2C=CC(C)(C)CC21",
+              "CCC(=NCSCCC(CS)C(=O)OC1CC(C)C=C2C=C(C(N)=O)C(C)CC21)C(N)=O",
+              "CC(CC=CC(O)CC(F)F)C(=O)OC1(O)C2CC(C)(C)C=CC2=CC(C)C1(C)C",
+              "CC1C=C2C=CC(C)(C)C(C)C2C(OC(=O)C(CC(O)OC(=O)NCCO)C(C)C)C1",
+              "CC1C=C2C=CC(C)CC2C(OC(=O)C(C)(C)CCC(=O)N(CCF)C(C)(C)C)C1",
+              "CCN(C)C12CC(C)(C)C=CC1=CC(C)CC2OC(=O)C(C(C)C)C(C[PH4])C(=O)O",
+              "CCC(CC#CC(=O)NC)C(=O)OC1CC(C)(C)C=C2C(CF)=CC(C)C(O)C21",
+              "CCC[SH2]CCC(C)(C)C(=O)OC1CC(C)C=C2C=CC(C)CC21",
+              "CCC(CCCN(C)CC)C(=O)OC1CC(C)C=C2C=CC(C)CC21",
+              "CCC(C)C(=O)OC1CC(C)C=C2C=CC(C)CC21",
+              "CC1C=C2C=CC(C)(C)CC2C(OC(=O)C2(C)CCN(C=O)CC2O)C1",
+              "CCC1C=C2C=CC(C)(C)CC2C(OC(=O)C(C(N)=O)C(C)=CC(=O)NO)C1",
+              "CC1C=CC2=CC(C)(C)CC(OC(=O)C(CCCOC(=O)CN(C)CC(N)=O)CCC(=O)NO)C2C1",
+              "CCC(C(=O)OC1CC(CO)C=C2C=CC(C)(CC)CC21)C(C)(C)CNO",
+              "CC1C=C2C=CC(C)CC2C(OC(=O)C(C)CCC(C)SO)C1",
+              "CCCCCC(=O)C(CO)C(=O)OC1CC(C)C=C2C=CC(C)CC21",
+              "CC1=C2C=CC(C)(C)CC2(C)C(OC(=O)C(CCC(=O)O)CC(=O)O)CC1C",
+              "COCCC(C)(C)C(=O)OC1CC(CCCC(=O)O)C=C2C=CC(C)CC21",
+              "CCC(C(C#N)C(=O)OC1CC(C)(C)C=C2C=CC(C)(O)CC21)C(C)(C)C",
+              "CC1C=C2C=CC(C)CC2C(OC(=O)C(CNC(C)(C)C(=O)O)C(C)(C)C)C1",
+              "CCC(C)C(=O)OC1CC(C)C=C2C=CC(C)CC21",
+              "CCOCC(O)CCC(C(=O)OC1CC(C)C=C2C=CC(C)CC21)C(C)(C)C",
+              "CC=CC1CC(OC(=O)CNO)C#CC1C(=O)OC1CC(C)(C)C=C2C=CC(C)(C)CC21",
+              "C=CC(N)(CC(N)=O)C(=O)OC1CC(C)(O)C(Cl)=C2C=CC(C)CC21",
+              "CCN(CC)CCC(C(=O)NC(C)(C)CO)C(=O)OC1CC(C)C=C2C=CC(C)CC21",
+              "CC1C=C2C=CC(C)CC2C(OC(=O)C(C)CCCCCN(C)C=O)C1",
+              "C=CCC#CC(CC)C(=O)OC1CC2C=C3C=CC(CC(C(=C)C)OC2)CC31",
+              "CCC(CC(C)N(C)CCCO)C(=O)OC1CC(C)(C)C=C2C=CC(C)CC21",
+              "CCC(C)C(=O)OC1CC(C)C=C2C=CC(C)CC21",
+              "CC1C=C2C=CC(C(=O)O)CC2C(OC(=O)C(CC(=O)O)C(C)(C)C)C1",
+              "CC1C=C2C=CC(C)CC2C(OC(=O)C(CC(=O)N(C)CC(Cl)Cl)C(=O)O)C1",
+              "CCC(C)C(=O)OC1CC(C)C=C2C=C(C)C(C)CC21",
+              "C=C1C(C)C=CC2=CC(C)CC(OC(=O)C(C)C(C)(C)C)C12",
+              "CCC(C)C(=O)OC1CC(C)C=C2C=CC(C)CC21",
+              "CC1C=C2C=CC(C)CC2C(OC(=O)C(Cl)(CO)CCCCN(C)C)C1",
+              "CCC(N)(CC)C(=O)OC1CC(C)(C)C=C2C=CC(C[PH3]CCP(=O)=O)CC21",
+              "CCC1C=CC2=CC(C)CC(OC(=O)C(CCC(=O)O)C(O)=NC)C2C1",
+              "CC1C=C2C=CC(CCC(=O)O)CC2C(OC(=O)C(C(=O)O)C(C)(C)C)C1",
+              "COC(=O)CC(C(=O)OC1CC(C)C=C2C=CC(C)CC21)C(C)C",
+              "CCC(C)C(=O)OC1CC(C)C=C2C(O)=CC(C)CC21",
+              "CC1C=C2C=CC(C)CC2C(OC(=O)C(C)(C)CCCCCC(=O)O)C1",
+              "CCOC(=O)C(O)(CC(=O)O)C(=O)OC1C2CC(C)(OC)C=CC2=CC(C)C1Br",
+              "CC1C=CC2=CC(C)C(O)C(OC(=O)C(C(C)[IH2])C(C)(C)C)C2(C)C1",
+              "CCC(C(=O)OC1C(=O)C(C)C=C2C(C)=CC(CCNC)CC21)C(C)(C)C",
+              "CC1C=C2C3=CC(CCCCCC3)CC2C(OC(=O)C(CCNC(C)(C)C)C(C)(C)C)C1",
+              "CCC(C)C(=O)OC1C2CC(C)C=CC2=CC(C)C1C",
+              "C=CC(CC#CCBr)C(=O)OC1CC(C)(C)C=C2C=CC(C)(C)CC21",
+              "CC(=O)CCC(C=O)C(C(=O)OC1CC(C)C=C2C=CC(C)CC21)C(C)C",
+              "CC1C=C2C=CC(C)(C)CC2C(OC(=O)C(CN)CCCN(C)CCCC(=O)O)C1",
+              "CC1C=C2C=CC(CCCN)CC2C(OC(=O)C(C(N)=O)C(C)(C)C)C1",
+              "C=CCOCCCC(CCCCC)C(=O)OC1CC(C)(C)C=C2C=C(C)C(C)CC21",
+              "C=CCC(C(=O)OC1CC2C=C3C4=CC(CC4C2)CC31)C(N)C(C)(C)C",
+              "CCC1C=CC2=CC(C)CC(OC(=O)C(C(C)(C)C)C(C)(C)C(F)(F)F)C2C1",
+              "CCC(CNC(C)C)C(=O)OC1C2CC(C)C=CC2=CC(C)C1C",
+              "CC1C=C2C=CC(C)CC2C(OC(=O)C(CCCNN=O)COC=O)C1",
+              "C=CC1C=C2C=CC(C(=S)NC)CC2C(OC(=O)C(CCCBr)C(C)C)C1",
+              "CCC(C)C(=O)OC1CC(C)C=C2C=CC(C)(C)CC21",
+              "C=CC(=O)C(CC(N)=O)C(=O)OC1CC(C)C=C2C3=CC(CC3)CC21",
+              "CC(=O)OCCC(C)C(=O)OC1(C)CC(C)C=C2C(C)=CC(C)(C)CC21",
+              "CCC(C)C(=O)OC1CC(C)C(C)=C2C=CC(C)CC21",
+              "CCN=C(C)NC=CCC(CC#N)C(=O)OC1CC(C)(C)C=C2C=CC(C)CC21",
+              "CCC#CCC(C(=O)OC1C2CC(C)(C)C=CC2=CC(CF)C1O)C(C)C",
+              "CC1C=CC2=CC(C)(CO)CC(OC(=O)C(CCC(=O)O)C(=O)O)C2C1",
+              "CC1=C2C=CC(C)CC2C(OC(=O)C(C)CCCCOCC(C)C)CC1C",
+              "CC(C)C1C=C2C=CC(C)(C)CC2C(OC(=O)C(CCC(=O)O)C(O)CO)C1"
+            ],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "",
+              "CC1C=CC2=CC(C)(C)CC(OC(=O)C(C)C(C)([IH2])C=CN)C2C1C",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "CC1C=C2C=CC(C)(C)C(C)C2C(OC(=O)C(CC(O)OC(=O)NCCO)C(C)C)C1",
+              "",
+              "",
+              "",
+              "CCC(CC#CC(=O)NC)C(=O)OC1CC(C)(C)C=C2C(CF)=CC(C)C(O)C21",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "C=C1C(C)C=CC2=CC(C)CC(OC(=O)C(C)C(C)(C)C)C12",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "interface_rejections": 0,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 0,
+            "declared_interfaces": [
+              17
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                17
+              ],
+              "requirements": [
+                [
+                  17,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                19
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                17
+              ],
+              "required": {
+                "17": 1
+              },
+              "covered": {
+                "17": 0
+              },
+              "satisfied": false
+            }
+          }
+        ]
+      }
+    }
+  }
+}

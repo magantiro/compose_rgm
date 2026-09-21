@@ -31,6 +31,20 @@ IGNORED_FIELDS = frozenset({"seconds"})
 # benchmark reports (validity is in percent, diversity in [0, 1]).
 FLOAT_NOISE_TOLERANCE = 1e-12
 
+# The molecules COMPOSE emitted, and the numbers a row publishes.  A difference
+# in either is a result-bearing divergence.  Everything else on a row is an
+# internal diagnostic -- a refusal census, a timing -- which is worth reporting
+# when it moves but does not by itself invalidate a published number.  The
+# distinction is reported, never used to suppress: a diagnostic divergence is
+# still named, counted and exemplified.
+MOLECULE_FIELDS = frozenset({"emitted_samples", "committed_endpoint_smiles"})
+PUBLISHED_FIELDS = frozenset({
+    "official", "attempts", "committed_endpoints", "committed_chemically_valid",
+    "committed_fragment_preserving", "emitted_fragment_preserving",
+    "emitted_nonempty", "committed_interfaces_covered", "unique_valid_count",
+    "constraint_failures", "separation_failures", "validity_denominator",
+})
+
 
 def _numeric_deltas(left, right):
     """Yield (name, |delta|) for a changed field, descending into a metric dict.
@@ -115,6 +129,15 @@ def main() -> None:
                                     "unpinned": left_value, "pinned": right_value,
                                 })
 
+    molecule_divergences = sorted(
+        {name for name in per_field if name.split(".")[0] in MOLECULE_FIELDS}
+    )
+    published_divergences = sorted(
+        {name for name in per_field if name.split(".")[0] in PUBLISHED_FIELDS}
+    )
+    diagnostic_divergences = sorted(
+        set(per_field) - set(molecule_divergences) - set(published_divergences)
+    )
     payload = {
         "schema": "compose_fragment_kernel_parity_panel_v1",
         "question": (
@@ -129,8 +152,21 @@ def main() -> None:
         "float_noise_tolerance": FLOAT_NOISE_TOLERANCE,
         "max_abs_delta_by_field": {k: v for k, v in sorted(worst.items())},
         "disagreements_beyond_noise_by_field": per_field,
+        "molecules_diverged": molecule_divergences,
+        "published_quantities_diverged": published_divergences,
+        "diagnostic_counters_diverged": diagnostic_divergences,
         "disagreement_examples": examples,
         "verdict": _verdict(per_field, worst),
+        "result_verdict": (
+            "RESULTS_DIVERGE" if (molecule_divergences or published_divergences)
+            else "RESULTS_AGREE"
+        ),
+        "result_verdict_note": (
+            "result_verdict covers the emitted molecules and the quantities a "
+            "row publishes. A divergence confined to diagnostic_counters_diverged "
+            "leaves every published number and every molecule unchanged, and is "
+            "reported rather than suppressed."
+        ),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, indent=2))

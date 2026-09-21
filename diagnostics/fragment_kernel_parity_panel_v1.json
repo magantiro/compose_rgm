@@ -1,0 +1,138 @@
+{
+  "schema": "compose_fragment_kernel_parity_panel_v1",
+  "question": "does the pinned production kernel reproduce the laptop kernel's fragment rows across the whole panel, not just one shard?",
+  "unpinned_rdkit": [
+    "2026.03.6"
+  ],
+  "pinned_rdkit": [
+    "2024.03.5"
+  ],
+  "rows_compared": 106,
+  "shards_missing_a_pinned_twin": [
+    "baseline/scaffold_decoration__LESINURAD__seed1.json",
+    "baseline/scaffold_decoration__LESINURAD__seed2.json",
+    "baseline/scaffold_decoration__LIOTHYRONINE__seed0.json",
+    "baseline/scaffold_decoration__LIOTHYRONINE__seed1.json",
+    "baseline/scaffold_decoration__LIOTHYRONINE__seed2.json",
+    "baseline/scaffold_decoration__LOVASTATIN__seed0.json",
+    "baseline/scaffold_decoration__LOVASTATIN__seed1.json",
+    "baseline/scaffold_decoration__LOVASTATIN__seed2.json",
+    "baseline/scaffold_decoration__MARIBAVIR__seed0.json",
+    "baseline/scaffold_decoration__MARIBAVIR__seed1.json",
+    "baseline/scaffold_decoration__MARIBAVIR__seed2.json",
+    "baseline/scaffold_decoration__SPIRAPRIL__seed0.json",
+    "baseline/scaffold_decoration__SPIRAPRIL__seed1.json",
+    "baseline/scaffold_decoration__SPIRAPRIL__seed2.json",
+    "attachment/scaffold_decoration__BARICITINIB__seed0.json",
+    "attachment/scaffold_decoration__BARICITINIB__seed1.json",
+    "attachment/scaffold_decoration__BARICITINIB__seed2.json",
+    "attachment/scaffold_decoration__CYCLOTHIAZIDE__seed0.json",
+    "attachment/scaffold_decoration__CYCLOTHIAZIDE__seed1.json",
+    "attachment/scaffold_decoration__CYCLOTHIAZIDE__seed2.json",
+    "attachment/scaffold_decoration__ELIGLUSTAT__seed0.json",
+    "attachment/scaffold_decoration__ELIGLUSTAT__seed1.json",
+    "attachment/scaffold_decoration__ELIGLUSTAT__seed2.json",
+    "attachment/scaffold_decoration__ERLOTINIB__seed0.json",
+    "attachment/scaffold_decoration__ERLOTINIB__seed1.json",
+    "attachment/scaffold_decoration__ERLOTINIB__seed2.json",
+    "attachment/scaffold_decoration__FUTIBATINIB__seed0.json",
+    "attachment/scaffold_decoration__FUTIBATINIB__seed1.json",
+    "attachment/scaffold_decoration__FUTIBATINIB__seed2.json",
+    "attachment/scaffold_decoration__LESINURAD__seed0.json",
+    "attachment/scaffold_decoration__LESINURAD__seed1.json",
+    "attachment/scaffold_decoration__LESINURAD__seed2.json",
+    "attachment/scaffold_decoration__LIOTHYRONINE__seed0.json",
+    "attachment/scaffold_decoration__LIOTHYRONINE__seed1.json",
+    "attachment/scaffold_decoration__LIOTHYRONINE__seed2.json",
+    "attachment/scaffold_decoration__LOVASTATIN__seed0.json",
+    "attachment/scaffold_decoration__LOVASTATIN__seed1.json",
+    "attachment/scaffold_decoration__LOVASTATIN__seed2.json",
+    "attachment/scaffold_decoration__MARIBAVIR__seed0.json",
+    "attachment/scaffold_decoration__MARIBAVIR__seed1.json",
+    "attachment/scaffold_decoration__MARIBAVIR__seed2.json",
+    "attachment/scaffold_decoration__SPIRAPRIL__seed0.json",
+    "attachment/scaffold_decoration__SPIRAPRIL__seed1.json",
+    "attachment/scaffold_decoration__SPIRAPRIL__seed2.json",
+    "attachment/superstructure_generation__BARICITINIB__seed0.json",
+    "attachment/superstructure_generation__BARICITINIB__seed1.json",
+    "attachment/superstructure_generation__BARICITINIB__seed2.json",
+    "attachment/superstructure_generation__CYCLOTHIAZIDE__seed0.json",
+    "attachment/superstructure_generation__CYCLOTHIAZIDE__seed1.json",
+    "attachment/superstructure_generation__CYCLOTHIAZIDE__seed2.json",
+    "attachment/superstructure_generation__ELIGLUSTAT__seed0.json",
+    "attachment/superstructure_generation__ELIGLUSTAT__seed1.json",
+    "attachment/superstructure_generation__ELIGLUSTAT__seed2.json",
+    "attachment/superstructure_generation__ERLOTINIB__seed0.json",
+    "attachment/superstructure_generation__ERLOTINIB__seed1.json",
+    "attachment/superstructure_generation__ERLOTINIB__seed2.json",
+    "attachment/superstructure_generation__FUTIBATINIB__seed0.json",
+    "attachment/superstructure_generation__FUTIBATINIB__seed1.json",
+    "attachment/superstructure_generation__FUTIBATINIB__seed2.json",
+    "attachment/superstructure_generation__LESINURAD__seed0.json",
+    "attachment/superstructure_generation__LESINURAD__seed1.json",
+    "attachment/superstructure_generation__LESINURAD__seed2.json",
+    "attachment/superstructure_generation__LIOTHYRONINE__seed0.json",
+    "attachment/superstructure_generation__LIOTHYRONINE__seed1.json",
+    "attachment/superstructure_generation__LIOTHYRONINE__seed2.json",
+    "attachment/superstructure_generation__LOVASTATIN__seed0.json",
+    "attachment/superstructure_generation__LOVASTATIN__seed1.json",
+    "attachment/superstructure_generation__LOVASTATIN__seed2.json",
+    "attachment/superstructure_generation__MARIBAVIR__seed0.json",
+    "attachment/superstructure_generation__MARIBAVIR__seed1.json",
+    "attachment/superstructure_generation__MARIBAVIR__seed2.json",
+    "attachment/superstructure_generation__SPIRAPRIL__seed0.json",
+    "attachment/superstructure_generation__SPIRAPRIL__seed1.json",
+    "attachment/superstructure_generation__SPIRAPRIL__seed2.json"
+  ],
+  "ignored_fields": [
+    "seconds"
+  ],
+  "float_noise_tolerance": 1e-12,
+  "max_abs_delta_by_field": {
+    "interface_rejections": 1.0,
+    "lock_rejections": 1.0,
+    "official.distance": 0.0,
+    "official.distance_to_original_drug": 0.0,
+    "official.diversity": 4.440892098500626e-16,
+    "official.quality": 0.0,
+    "official.uniqueness": 0.0,
+    "official.validity": 0.0
+  },
+  "disagreements_beyond_noise_by_field": {
+    "interface_rejections": 1,
+    "lock_rejections": 1
+  },
+  "molecules_diverged": [],
+  "published_quantities_diverged": [],
+  "diagnostic_counters_diverged": [
+    "interface_rejections",
+    "lock_rejections"
+  ],
+  "disagreement_examples": [
+    {
+      "arm": "attachment",
+      "key": [
+        "motif_extension",
+        "LESINURAD",
+        0
+      ],
+      "field": "interface_rejections",
+      "unpinned": 138,
+      "pinned": 137
+    },
+    {
+      "arm": "attachment",
+      "key": [
+        "motif_extension",
+        "LESINURAD",
+        0
+      ],
+      "field": "lock_rejections",
+      "unpinned": 2806,
+      "pinned": 2807
+    }
+  ],
+  "verdict": "DIVERGENT",
+  "result_verdict": "RESULTS_AGREE",
+  "result_verdict_note": "result_verdict covers the emitted molecules and the quantities a row publishes. A divergence confined to diagnostic_counters_diverged leaves every published number and every molecule unchanged, and is reported rather than suppressed."
+}
