@@ -3514,3 +3514,52 @@ independently of whether fa7_0 ever closes.**
 - **`pgrep | head -1` made a 119%-CPU process read as a 0.0% deadlock.** Same family as a container
   census whose value could not vary: an instrument that cannot report the true state will
   confidently report a false one.
+
+## 2026-09-21 (a PRECONDITION can be an artifact of the ROUTE, not a property of the substrate)
+
+- **THE LESSON, and it is the most transferable thing the fragment work produced.** A free-valence
+  precondition looked exactly like a well-formed declared scope: it had a structural predicate, it
+  explained two drug failures, it activated without any instance identity, and it converted
+  anomalies into a stated limit. **It was a symptom of performing the steps in the wrong order.**
+  Before scoping a mechanism to the instances where it happens to work, check whether a DIFFERENT
+  ROUTE to the same transformation removes the restriction entirely. A well-formed scope and a
+  symptom of a bad route are indistinguishable from the inside.
+- **MEASURED, the three columns that settled it** (declared-site hydrogens in the retained core vs
+  after seeding, 10 linker drugs):
+  - **Declared sites are NOT saturated in the drug** -- every one carries at least one hydrogen in
+    the core. So the attachment model is NOT mismatched panel-wide and **the motif and decoration
+    results are unaffected.** (The frightening possibility, refuted.)
+  - **The seeding is CORRECT**: `after_seed` is exactly `core - 1` on every drug and every site --
+    the linker bond consuming precisely the valence the declared site offers. Intended chemistry,
+    not a defect.
+  - **The route was the problem**: close-then-open ring-closes to the far anchor BEFORE removing the
+    old bond, so the anchor must transiently carry TWO external bonds. A site offering one free
+    valence -- the normal case -- cannot. It ran only where a site happened to have spare valence
+    beyond what the task requires.
+- **THE FIX: `bond_reroute` exchanges the bridge ATOMICALLY** ("No disconnected state is ever
+  visible"), needs no transient valence, and is TWO events instead of three. MEASURED:
+  close-then-open reaches a length-2 linker on **4 of 10** drugs; **insert-then-reroute on 10 of
+  10**, every endpoint valid with cores separated. **So the precondition is DELETED, not scoped**,
+  which also retires the falsifier written to guard it.
+- **A FALSIFICATION CAN BE PRODUCTIVE, and rescoping would have destroyed that.** Holding the
+  panel-wide reading of the predeclared vacuity falsifier (90.3% vs a >90% threshold) is what forced
+  the valence question, which refuted two possibilities and found the better route. Accepting the
+  applicable-subset reading would have left a matched arm running on a mechanism restricted to 2
+  drugs by an artifact.
+- **"The test was underpowered" is a criticism of the TEST, not an escape from it.** Both were true
+  at once: the falsifier fired, AND it was badly designed -- a threshold set casually with no power
+  analysis, on a denominator a later addition changed. Re-running larger to see whether it lands the
+  other side is measuring until the answer changes. **Fix the NEXT falsifier, do not re-litigate
+  this one.** Predeclare threshold, n from a power calculation, denominator, and what a pass
+  licenses -- committed to a file BEFORE the first sample.
+- **A HAND-CONSTRUCTED sequence bounds what is REACHABLE; it does not predict YIELD.** The same
+  mechanism executed on 4/10 drugs by hand and committed on 2/10 under the sampler. Always report
+  both and expect the sampler number to be lower.
+- **A predicate with no way to make progress must RELEASE.** Gating on path progress in states where
+  the transaction cannot fire strangled the trajectory -- committed 38 -> 3 -- and would have read
+  as the mechanism destroying yield. Same failure as the previous version, one layer up.
+- **A guard test at the START state can pass for the wrong reason.** A
+  `sites_offered_for_a_single_core_prompt` mutation SURVIVED because at the start state a
+  single-core prompt has no atoms outside its core, so ANY implementation returns None. Re-tested on
+  a grown state where the guard actually binds, it is killed. The floor-guard lesson, at fixture
+  level.
