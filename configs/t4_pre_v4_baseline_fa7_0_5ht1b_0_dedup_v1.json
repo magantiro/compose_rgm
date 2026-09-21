@@ -1,0 +1,76 @@
+{
+  "schema_version": "t4_pre_v4_baseline_dedup_contract_v1",
+  "contract_payload_sha256": "89081d043e21718be910e4eb52b6522af2d6402654d2b689e5d156e75f4275e8",
+  "status": "NO_LAUNCH_DUPLICATE_EXISTING_SCORED_HISTORY",
+  "decision": "Do not spend new scored calls: both requested 49-call seed-0 cells already have complete authoritative pre-v4 history under the bound old controller contracts.",
+  "authorization": "Prepared for review only; no scored or Modal launch is authorized by this artifact.",
+  "scope": {
+    "cells": ["fa7_0", "5ht1b_0"],
+    "charged_calls_per_cell": 49,
+    "total_charged_call_ceiling": 98,
+    "delta": 0.4,
+    "docking_seed": 20260919,
+    "batch": 8,
+    "parents": 4,
+    "parent_explore": 0.3,
+    "exploration": 2,
+    "v4_enabled": false,
+    "v4_giant_pool": false,
+    "proposal_budget": "reuse the old bounded shallow, anchored-replacement and route-complete-region settings below"
+  },
+  "cells": [
+    {
+      "cell": "fa7_0",
+      "controller_seed": 2026091903,
+      "existing_contract": "configs/t4_shared_retained_fiber_fa7_d04_v1.json",
+      "existing_contract_payload_sha256": "3d948a7032dbf035fd35a0d8a346840b0551730ad5b66ac7a3a4d0d3101a4ec3",
+      "existing_run_id": "32dc75bf92f6f625b351efc06a179c515e62148dcf90ff6c3a3679a6f251759a",
+      "existing_volume": "compose-t4-shared-retained-fiber-fa7-d04-v1",
+      "existing_summary": "32dc75bf92f6f625b351efc06a179c515e62148dcf90ff6c3a3679a6f251759a/summary.json",
+      "existing_status": "complete_budget",
+      "existing_charged_calls": 49,
+      "existing_final_best": -9.7
+    },
+    {
+      "cell": "5ht1b_0",
+      "controller_seed": 2026091906,
+      "existing_contract": "configs/t4_shared_retained_fiber_5ht1b_d04_v1.json",
+      "existing_contract_payload_sha256": "50328721b6bdf9f3d092bd032ce72ca2383c2c6985c613cf19390e881a65b30d",
+      "existing_run_id": "b4bdd4eb2407bb3490e75ab552fd4e940b24ba60cbe36fb6491916b8046a25a8",
+      "existing_volume": "compose-t4-shared-retained-fiber-5ht1b-d04-v1",
+      "existing_summary": "b4bdd4eb2407bb3490e75ab552fd4e940b24ba60cbe36fb6491916b8046a25a8/summary.json",
+      "existing_status": "complete_budget",
+      "existing_charged_calls": 49,
+      "existing_final_best": -12.6
+    }
+  ],
+  "proposal": {
+    "shallow": {"draws": 480, "horizon": 3},
+    "anchored_replacement": {"draws": 512, "horizon": 3},
+    "route_complete_region": {
+      "pool_size": 192,
+      "realization_limit": 96,
+      "beam_width": 48,
+      "expansion_width": 48,
+      "max_bindings_per_template": 4,
+      "maximum_expansions": 4000,
+      "scale_balanced": true
+    }
+  },
+  "shared_runtime": {
+    "fiber_control": "reuse exact old contract/runtime only",
+    "archive_admission": "reuse exact old contract/runtime only",
+    "evaluator": "reuse exact old contract/runtime only",
+    "automatic_retries": 0,
+    "no_backfill": true,
+    "publish_before_docking": true,
+    "per_query_receipts": true,
+    "per_expert_proposal_receipts": true,
+    "resume_complete_receipts_only": true
+  },
+  "promotion": {
+    "new_calls_authorized": false,
+    "requires_new_payload_specific_authorization": true,
+    "reason": "authoritative existing summaries already contain complete 49-call seed-0 histories for both requested cells"
+  }
+}

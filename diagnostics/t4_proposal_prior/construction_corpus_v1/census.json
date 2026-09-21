@@ -1,0 +1,29 @@
+{
+  "schema_version": "t4_construction_corpus_v1",
+  "decisions": 7294,
+  "per_target": {
+    "5ht1b": 1662,
+    "braf": 1099,
+    "fa7": 197,
+    "jak2": 1975,
+    "parp1": 2361
+  },
+  "per_arm": {
+    "full146": 2450,
+    "v0": 1584,
+    "v0d06": 1370,
+    "v1": 653,
+    "v21": 1237
+  },
+  "distinct_modes": 74,
+  "distinct_source_states": 7294,
+  "modes_present_in_every_target": 18,
+  "decisions_with_a_measured_score": 0,
+  "new_oracle_calls": 0,
+  "raw_decisions": 27737,
+  "distinct_decisions": 7294,
+  "duplicate_fraction": 0.7370299599812524,
+  "decisions_seen_in_more_than_one_cell": 0,
+  "checkpoints": 71,
+  "destination": "diagnostics/t4_proposal_prior/construction_corpus_v1/decisions.jsonl.gz"
+}
