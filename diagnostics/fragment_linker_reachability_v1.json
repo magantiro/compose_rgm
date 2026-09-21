@@ -1,0 +1,314 @@
+{
+  "schema": "compose_fragment_linker_reachability_v1",
+  "question": "does releasing the constructed join and steering growth to the declared interfaces make a genuine (non-zero-atom) linker reachable?",
+  "verdict": "NOT REACHABLE UNDER THIS START STATE",
+  "drugs_with_every_declared_site_saturated_by_the_join": [
+    "BARICITINIB",
+    "ELIGLUSTAT",
+    "ERLOTINIB",
+    "SPIRAPRIL"
+  ],
+  "drugs_reaching_a_separated_linker": [],
+  "rows": [
+    {
+      "drug": "BARICITINIB",
+      "start_smiles": "CCS(=O)(=O)N1CC(CC#N)(c2ncnc3[nH]ccc23)C1",
+      "structural": {
+        "free_valence_by_interface": {
+          "7": 0,
+          "11": 0
+        },
+        "interfaces_with_free_valence": 0,
+        "cores_directly_bonded_at_start": true,
+        "join_released_from_lock": [
+          [
+            7,
+            11
+          ]
+        ],
+        "first_event_can_increase_coverage": false
+      },
+      "attempts": 30,
+      "committed_endpoints": 0,
+      "task_success": 0,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 42,
+      "lock_rejections": 678,
+      "budget_exhausted": 30,
+      "mean_events": 0.0,
+      "seconds": 20.8
+    },
+    {
+      "drug": "CYCLOTHIAZIDE",
+      "start_smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(C1CC3C=CC1C3)NS2(=O)=O",
+      "structural": {
+        "free_valence_by_interface": {
+          "12": 1,
+          "13": 1
+        },
+        "interfaces_with_free_valence": 2,
+        "cores_directly_bonded_at_start": true,
+        "join_released_from_lock": [
+          [
+            12,
+            13
+          ]
+        ],
+        "first_event_can_increase_coverage": true
+      },
+      "attempts": 30,
+      "committed_endpoints": 29,
+      "task_success": 0,
+      "separation_failures": 29,
+      "constraint_failures": 0,
+      "staging_rejections": 43,
+      "interface_rejections": 152,
+      "lock_rejections": 433,
+      "budget_exhausted": 2,
+      "mean_events": 13.333333333333334,
+      "seconds": 57.1
+    },
+    {
+      "drug": "ELIGLUSTAT",
+      "start_smiles": "c1cc2c(cc1N1CCCC1)OCCO2",
+      "structural": {
+        "free_valence_by_interface": {
+          "5": 0,
+          "6": 0
+        },
+        "interfaces_with_free_valence": 0,
+        "cores_directly_bonded_at_start": true,
+        "join_released_from_lock": [
+          [
+            5,
+            6
+          ]
+        ],
+        "first_event_can_increase_coverage": false
+      },
+      "attempts": 30,
+      "committed_endpoints": 0,
+      "task_success": 0,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 332,
+      "lock_rejections": 388,
+      "budget_exhausted": 30,
+      "mean_events": 0.0,
+      "seconds": 18.8
+    },
+    {
+      "drug": "ERLOTINIB",
+      "start_smiles": "C#COCCOC",
+      "structural": {
+        "free_valence_by_interface": {
+          "1": 0,
+          "2": 0
+        },
+        "interfaces_with_free_valence": 0,
+        "cores_directly_bonded_at_start": true,
+        "join_released_from_lock": [
+          [
+            1,
+            2
+          ]
+        ],
+        "first_event_can_increase_coverage": false
+      },
+      "attempts": 30,
+      "committed_endpoints": 0,
+      "task_success": 0,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 64,
+      "lock_rejections": 656,
+      "budget_exhausted": 30,
+      "mean_events": 0.0,
+      "seconds": 19.5
+    },
+    {
+      "drug": "FUTIBATINIB",
+      "start_smiles": "C=CC(=O)N1CC[C@H](c2cc(OC)cc(OC)c2)C1",
+      "structural": {
+        "free_valence_by_interface": {
+          "7": 1,
+          "8": 0
+        },
+        "interfaces_with_free_valence": 1,
+        "cores_directly_bonded_at_start": true,
+        "join_released_from_lock": [
+          [
+            7,
+            8
+          ]
+        ],
+        "first_event_can_increase_coverage": true
+      },
+      "attempts": 30,
+      "committed_endpoints": 21,
+      "task_success": 0,
+      "separation_failures": 21,
+      "constraint_failures": 0,
+      "staging_rejections": 37,
+      "interface_rejections": 55,
+      "lock_rejections": 843,
+      "budget_exhausted": 30,
+      "mean_events": 0.7,
+      "seconds": 28.1
+    },
+    {
+      "drug": "LESINURAD",
+      "start_smiles": "O=C(O)CSc1nnc(Br)n1C1CC1",
+      "structural": {
+        "free_valence_by_interface": {
+          "10": 0,
+          "11": 1
+        },
+        "interfaces_with_free_valence": 1,
+        "cores_directly_bonded_at_start": true,
+        "join_released_from_lock": [
+          [
+            10,
+            11
+          ]
+        ],
+        "first_event_can_increase_coverage": true
+      },
+      "attempts": 30,
+      "committed_endpoints": 5,
+      "task_success": 0,
+      "separation_failures": 5,
+      "constraint_failures": 0,
+      "staging_rejections": 8,
+      "interface_rejections": 24,
+      "lock_rejections": 760,
+      "budget_exhausted": 30,
+      "mean_events": 0.16666666666666666,
+      "seconds": 21.6
+    },
+    {
+      "drug": "LIOTHYRONINE",
+      "start_smiles": "N[C@@H](Cc1ccc(O)c(I)c1)C(=O)O",
+      "structural": {
+        "free_valence_by_interface": {
+          "2": 2,
+          "3": 0
+        },
+        "interfaces_with_free_valence": 1,
+        "cores_directly_bonded_at_start": true,
+        "join_released_from_lock": [
+          [
+            2,
+            3
+          ]
+        ],
+        "first_event_can_increase_coverage": true
+      },
+      "attempts": 30,
+      "committed_endpoints": 20,
+      "task_success": 0,
+      "separation_failures": 20,
+      "constraint_failures": 0,
+      "staging_rejections": 79,
+      "interface_rejections": 22,
+      "lock_rejections": 837,
+      "budget_exhausted": 30,
+      "mean_events": 0.6666666666666666,
+      "seconds": 26.1
+    },
+    {
+      "drug": "LOVASTATIN",
+      "start_smiles": "CC[C@H](C)C(=O)O[C@H]1C[C@@H](C)C=C2C=C[C@H](C)[C@H]([C@@H]3C[C@@H](O)CC(=O)O3)[C@H]21",
+      "structural": {
+        "free_valence_by_interface": {
+          "17": 1,
+          "18": 1
+        },
+        "interfaces_with_free_valence": 2,
+        "cores_directly_bonded_at_start": true,
+        "join_released_from_lock": [
+          [
+            17,
+            18
+          ]
+        ],
+        "first_event_can_increase_coverage": true
+      },
+      "attempts": 30,
+      "committed_endpoints": 23,
+      "task_success": 0,
+      "separation_failures": 23,
+      "constraint_failures": 0,
+      "staging_rejections": 7,
+      "interface_rejections": 113,
+      "lock_rejections": 1069,
+      "budget_exhausted": 29,
+      "mean_events": 2.033333333333333,
+      "seconds": 39.4
+    },
+    {
+      "drug": "MARIBAVIR",
+      "start_smiles": "CC(C)Nc1nc2cc(Cl)c(Cl)cc2n1[C@H]1O[C@@H](CO)[C@H](O)[C@@H]1O",
+      "structural": {
+        "free_valence_by_interface": {
+          "14": 0,
+          "15": 1
+        },
+        "interfaces_with_free_valence": 1,
+        "cores_directly_bonded_at_start": true,
+        "join_released_from_lock": [
+          [
+            14,
+            15
+          ]
+        ],
+        "first_event_can_increase_coverage": true
+      },
+      "attempts": 30,
+      "committed_endpoints": 0,
+      "task_success": 0,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 13,
+      "lock_rejections": 707,
+      "budget_exhausted": 30,
+      "mean_events": 0.0,
+      "seconds": 20.9
+    },
+    {
+      "drug": "SPIRAPRIL",
+      "start_smiles": "O=C(O)[C@@H]1CC2(CN1c1ccccc1)SCCS2",
+      "structural": {
+        "free_valence_by_interface": {
+          "7": 0,
+          "8": 0
+        },
+        "interfaces_with_free_valence": 0,
+        "cores_directly_bonded_at_start": true,
+        "join_released_from_lock": [
+          [
+            7,
+            8
+          ]
+        ],
+        "first_event_can_increase_coverage": false
+      },
+      "attempts": 30,
+      "committed_endpoints": 0,
+      "task_success": 0,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 1,
+      "interface_rejections": 58,
+      "lock_rejections": 661,
+      "budget_exhausted": 30,
+      "mean_events": 0.0,
+      "seconds": 23.3
+    }
+  ]
+}
