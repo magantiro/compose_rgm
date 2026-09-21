@@ -2312,3 +2312,62 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   had already died of preemption and those entries were stale or terminating. A task count in a
   listing is not proof of live capacity -- check the function-call state, as the same listing
   misled a phantom-run diagnosis earlier the same day.
+
+## 2026-09-21 (a launcher repair FORCES a supersession; and a mutation battery that refused for the wrong reason)
+
+- **A launcher cannot be repaired while keeping the run identity it pins, and the honest
+  resolution is an explicit supersession with a reconstruction proof -- never a quiet re-pin.**
+  The 5ht1b_2 v1 wrapper validated against the superseded v1 contract module AND required an
+  authorized status INSIDE the scientific payload. Repairing it changes
+  `modal_apps/t4_5ht1b2_protonation_rescue_<arm>_app.py`, which is pinned in
+  `runtime_inputs_sha256`, which lives INSIDE the payload -- so the contract identity had to move
+  (`d7d2fbc2 -> f4c00e06`, `4486c376 -> ea7c5c73`). This is the 2026-07-29 lesson ("changing the
+  launcher necessarily changes the run identity") reaching an AUTHORIZED artifact, where it is
+  sharper: the guard is working, and re-pointing the pin to keep the old authorization would
+  manufacture consent. What makes the supersession safe is a `launch_path_revision` block carrying
+  `supersedes_payload_sha256` plus a `reconstruct_superseded_payload()` that rebuilds the
+  authorized payload EXACTLY, so the claim "only plumbing moved" is checkable rather than asserted.
+- **Verify a supersession with a diff that does NOT import the reconstruction function.** A
+  comparison whose expectation is recomputed from the code under test cannot fail (2026-08-02,
+  again). Method that works: flatten both payloads to leaf paths, classify EVERY difference against
+  an explicit allow-list of prefixes, and require the unexplained set to be EMPTY -- then run the
+  branch's own reconstruction separately as a cross-check. Measured here: 7 differing leaves per
+  arm (5 supersession-metadata, 1 repaired-wrapper hash, 1 added-validator hash), 0 removed,
+  0 unexplained, every non-plumbing leaf and every other runtime-input hash byte-identical.
+- **A MUTATION BATTERY RUN IN A TREE WITHOUT `.git` REFUSES FOR THE WRONG REASON.** My first run
+  read a triumphant 20/20 negatives refused -- and 0/4 positive controls. The validator's
+  `require_clean_runtime` shells out to `git diff --exit-code`, which fired first in a temp copy
+  built with `ignore_patterns('.git', ...)`, so 10 of the 20 "refusals" were the missing repo, not
+  the mutation, and proved nothing. **The COSMETIC RE-SERIALIZATION positive control is what caught
+  it** -- a case that changes bytes and nothing else, which MUST still pass. Fix: copy `.git`,
+  detach it into a standalone repo (a worktree's `.git` is a FILE pointing at the parent), and
+  COMMIT each mutation so the tree is clean and only the SEMANTIC check can decide. Then 22/22
+  refuse with the correct reason and 4/4 positives pass. **Always include a control that perturbs
+  something irrelevant; without it, "everything refused" is indistinguishable from "the harness is
+  broken".**
+- **A crosswire test whose harness derives the contract path FROM the arm cannot test the
+  crosswire.** My two reported "HOLES" were my own test: changing `arm` made the harness load that
+  arm's own contract, which correctly validates. The real crosswire is arm X + contract Y, and the
+  validator refuses it. Before recording a hole, check the test actually constructs the condition.
+- **A shard can retain what its own diagnostic artifact threw away.** The de-novo N=50 artifact
+  stored counters only (1,086 bytes), so "SA conditional on ring strain" read as unanswerable --
+  but the committed shard on the volume kept per-molecule SMILES and the analysis was fully
+  recoverable. Before declaring a post-hoc question dead, check the RAW artifact, not the reduction.
+  (Does not weaken "persist the molecules": it was luck that the shard schema differed.)
+- **The de-novo small-ring finding is ASSOCIATION, and it is CONFOUNDED WITH SIZE.** n=50 split
+  25/25 on presence of a 3- or 4-ring, pinned kernel: SA 4.585 vs 3.639 (diff +0.946, permutation
+  p=0.0034), QED 0.531 vs 0.651 (-0.120, p=0.0173), quality 0.16 vs 0.40 -- but strained molecules
+  are also **+4.0 heavy atoms** (p=0.0402), and SA rises with size independently of strain. So the
+  earlier "the ENTIRE quality gap is SA" is TOO STRONG twice over: QED is significantly worse too,
+  and the SA effect is not cleanly attributable to strain at this sample size. Any checkpoint sweep
+  must report SA and QED stratified by heavy-atom bin AND strain, or it cannot distinguish "training
+  fixed pathological ring chemistry" from "training shrank the molecules".
+- **Check a checkpoint for RESUME-CRITICAL keys before planning to resume it.** Lineage B's
+  `checkpoint.best_so_far.pt` carries the complete recipe (seed 20260717, batch 64, lr 3e-4,
+  adamw_decoupled_v1, warmup 500, eval every 250, hidden 256, mp 6, horizon 16.0), the serialized
+  `TypedRingCatalog`, and `completed_steps: 1000` -- but **no optimizer, scheduler or RNG state**.
+  So it cannot be resumed, only warm-started with a fresh optimizer, which is a restart wearing a
+  resume's clothes. Re-running from scratch at the serialized seed is the only way to reproduce the
+  trajectory -- and it buys a free correctness gate, because the reconstruction passes through
+  step 1,000 and must match the stored checkpoint. Also note `training_steps: 3000`: the original
+  de-novo run targeted 3,000 steps, not the 16,000 of the editing runs.
