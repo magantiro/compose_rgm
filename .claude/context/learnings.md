@@ -1745,3 +1745,36 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   not a COMPOSE-validity check, so a probe that filters on `MolFromSmiles is not None` will admit
   endpoints the production path refuses -- and `t4_fiber_campaign` documents that the intervention
   layer still emits radicals, which is what `_rebalance` exists to prevent.
+
+## 2026-09-20 (branch health on t4-objective-dynamic-reset: large, pre-existing, and worth stating)
+
+- **`pytest tests/` on this branch is 292 failed / 5,806 passed / 101 errors**, and the failures
+  are pre-existing rather than introduced. Attributed three ways rather than asserted: (1) every
+  test file whose import or config-read closure touches the changed PMO modules -- 13 files, 122
+  passed / 8 failed; (2) those same 8 reproduce IDENTICALLY at baseline in a clean detached
+  worktree, same names and counts, and live in `test_pmo_dynamic_v21*.py` whose config was never
+  resealed; (3) the bulk is the editing-V2 family cascading from one collection error, "semantic
+  capability registry bindings have drifted", with the two largest contributors running 4 passed /
+  41 errors at baseline too. Structural backing: `_PROCESS_V2_IMPLEMENTATION_RELATIVE_PATHS` is an
+  explicit file list, not a glob, so new `experiments/` modules cannot move the process identity.
+- **`scripts/prelaunch_gate.py` does NOT pass on this branch**: it lints `src/`, which carries ~314
+  pre-existing ruff findings on the current ruff version (newer rules -- RUF022/UP035). This is NOT
+  the gate for the T4 held-target launches; those are gated by `tools/preflight.py` (drift=0) plus
+  the app's own `_local_task` runtime-input verification, which is what actually pins the 14 runtime
+  inputs. Know which gate governs which launch path before treating a red gate as a blocker -- or
+  before treating a green one as coverage.
+- **Reporting a suite as "one known failure" when it is 292/101 is an understatement that changes
+  the decision**, even when the attribution is correct. State the magnitude and the attribution
+  together; the attribution is what makes it safe, not the size.
+- **Two harness traps that cost a full-suite run each.** `cmd 2>&1 | tail -N` as a background task
+  keeps only N lines, so 292 failures cannot be classified afterwards from a 30-line tail. And a
+  buffered pipe loses EVERYTHING if the job is killed -- a re-run died at exit 144 after 9 minutes
+  having written 0 bytes because `grep` buffers. Redirect raw output to a FILE and filter at read
+  time. Generalizes the 2026-07-29 `nohup` lesson to piped background jobs.
+- **PARKED, needs an owner decision: `live_parent_support_gate_sha256` is an unresolvable pin.**
+  Both scored PMO contracts pin `510f6920...` for `configs/pmo_population_live_parent_gate_v2.json`,
+  and that value matches neither the file's current bytes, nor its current payload hash, nor either
+  of those at baseline -- it was already stale before this session's work, and NO Python reads it.
+  Correctly left unguessed: the field name carries neither the `_file_sha256` (physical bytes) nor
+  the `_semantic_sha256` (self-hash) convention, and writing the wrong role into a pin is its own
+  failure mode, per the 2026-08-02 entry on exactly that corruption.
