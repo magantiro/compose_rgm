@@ -2422,3 +2422,32 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **This is a training-DISTRIBUTION correction, not an objective.** It changes which states the ring
   decision is supervised at; it adds no SA term, no QED term and no reward, and the compiled endpoint
   is provably unchanged. That is what makes it admissible where a benchmark-chasing penalty is not.
+
+## 2026-09-21 (CORRECTION: the identical validation curve was INHERITED BY RESUME, not reproduced)
+
+- **CORRECTS the entry above ("The from-scratch reproduction gate was ALREADY RUN ... and it PASSED
+  -- by two runs with DIFFERENT code identities"). That claim was WRONG and I am withdrawing it.**
+  The continuation run `compose-v4-stage3-flexible-graft-3k-fullcache-c39520c-v2` did not train from
+  scratch. Its own `manifest.training.json` -> `run_identity.recipe.arguments` carries
+  `resume_checkpoint = /artifacts/compose-v4-stage3-flexible-graft-3k-1ac6f19-v1/
+  checkpoint.recovery.pt` together with `allow_resume_provenance_mismatch: true`. So it RESUMED from
+  Lineage B's exact recovery state -- weights, optimizer moments and RNG -- and the step 1..1000
+  `history` entries are byte-identical because `history` is a LIST CARRIED INSIDE THE RECOVERY
+  CHECKPOINT and restored on resume. They are the same numbers, not two independent measurements of
+  the same number. **A matching stored history proves shared ancestry, not reproducibility.** Before
+  reading any agreement between two runs as an equivalence result, diff their recipe arguments for
+  `resume_checkpoint` / `initialize_*`; ancestry is recorded there and nowhere in the metrics.
+- **What survives, and it is the more useful fact:** step 2500 IS the genuine continuation of the
+  Lineage B trajectory, resumed from its exact optimizer and RNG state rather than restarted. So
+  "Lineage B trained 1,500 steps longer" already exists as an artifact and answers the continued-
+  training question directly -- better than a from-scratch rerun would, since a rerun could only
+  approximate the trajectory it is resuming.
+- **The standing caveat that replaces the withdrawn claim:** steps 0->1000 and steps 1000->2500 ran
+  under DIFFERENT source revisions (`source_sha256` 98ca9b28... vs 99354484...), which is why the
+  launcher needed `allow_resume_provenance_mismatch`. The corpus is identical across both
+  (train sha256 70526d92..., reference 1f8e92f7..., same byte counts), and the recipes differ only in
+  run-scoped paths plus the resume flags. So a step-1000 vs step-2500 comparison is a comparison
+  across a code-revision boundary as well as a training-step boundary, and must be reported that way.
+  Whether the de-novo path is invariant across those revisions remains **UNMEASURED**; the cheap test
+  that would settle it is the gate's `--load-checkpoint` mode, whose report emits the recomputed
+  `initial_validation` beside the stored `selected_validation` for the same weights.
