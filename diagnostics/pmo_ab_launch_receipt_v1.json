@@ -1,0 +1,45 @@
+{
+  "app": "compose-pmo-population-v1-corrected",
+  "arms": {
+    "A_baseline": "bb8b7530cd77618ef68cf985da09e67bd7bdbe5bcd0617f627042391d3b8f590",
+    "B_memory": "637c7cd75b89141548ff1dcaa88e37e8fbd8737c730b6db5fee796e2c4170c90"
+  },
+  "automatic_retries": 0,
+  "calls": {
+    "A_baseline/celecoxib_rediscovery": {
+      "call_id": "fc-01M31KJ4J414RRZS230C1AG7QT",
+      "run_id": "8d02a667384b248fed0a5fbb432a93714cc2a3a127ffdc05a4153f37ac3f89a0"
+    },
+    "A_baseline/gsk3b": {
+      "call_id": "fc-01M31KJ4BZGP1A58FH6QECNKY7",
+      "run_id": "23dea50839d44d08634063cd154dc172fc896f0851d42b29f5b7f5b2108a5def"
+    },
+    "A_baseline/perindopril_mpo": {
+      "call_id": "fc-01M31KJ4DSZSS82JAPVBBZG7V5",
+      "run_id": "21136cba1aa552680cb1c7e24834534856fc564a078c8aa5d07f928950343a50"
+    },
+    "B_memory/celecoxib_rediscovery": {
+      "call_id": "fc-01M31KJ4R56F5GPRSWQ9YHVSKJ",
+      "run_id": "37bb856e15309543795e14cdccf44d1b672e957cb9af1e902af08d630f3e241b"
+    },
+    "B_memory/gsk3b": {
+      "call_id": "fc-01M31KJ4KPX5RJ9EJFCRXCZZJA",
+      "run_id": "da723a9e9b4d73ac983352e17ffd49ececeebccfb700b19b338c771c08a9e75c"
+    },
+    "B_memory/perindopril_mpo": {
+      "call_id": "fc-01M31KJ4ND5SYB217CVGJFXA3W",
+      "run_id": "27c049291b60d5ef94126f29afb4cdd23b12edf2102405eae62ab8ae25060468"
+    }
+  },
+  "charged_calls_per_task": 250,
+  "charged_calls_total": 1500,
+  "created_at_utc": "2026-09-21T09:08:11.942248+00:00",
+  "matched": "payloads differ in exactly one top-level key: arm",
+  "schema_version": "pmo_ab_launch_receipt_v1",
+  "status": "SPAWNED_ALL",
+  "tasks": [
+    "gsk3b",
+    "perindopril_mpo",
+    "celecoxib_rediscovery"
+  ]
+}

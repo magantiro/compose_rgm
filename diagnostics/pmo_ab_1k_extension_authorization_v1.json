@@ -1,0 +1,55 @@
+{
+  "additional_per_arm": 750,
+  "additional_total": 1500,
+  "arms": {
+    "A_baseline_1k": {
+      "contract": "configs/pmo_ab_a_baseline_1k_contract_v1.json",
+      "enable_online_memory": false,
+      "payload_sha256": "eb0e253c9a37779a03b1493b7344e937ce0551ed1be3abfc4d261baa5d131968"
+    },
+    "B_memory_1k": {
+      "contract": "configs/pmo_ab_b_memory_1k_contract_v1.json",
+      "enable_online_memory": true,
+      "payload_sha256": "fbce1f091394e9e40cfa7acb733dd3fc5884c6e4a9cc250d8c97b1c40834bd06"
+    }
+  },
+  "authority": "Owner instruction: 'resume, document the revision boundary, and get the 1k result... do not burn 500 extra calls just to make the code-revision story prettier.'",
+  "authorized_at_utc": "2026-09-21T15:47:02.142092+00:00",
+  "automatic_retries": 0,
+  "charged_calls_per_task": 1000,
+  "do_not_stop_early": "The shape through 1000 is the result. B being ahead at 500 is NOT a stopping condition -- the question is whether the advantage COMPOUNDS or was an early boost.",
+  "interpretation_predeclared": {
+    "compounds": "B keeps climbing while A flattens -> online task-conditioned structural search compounds with budget; promote and broaden.",
+    "converges": "B loses its advantage by 1k -> the 250 result was early-search acceleration and the paper is not built on it.",
+    "plateaus": "B ends ~0.35-0.40 -> structural memory helps but does not find the high-reward basin; go straight to basin discovery / proposal content / parent diversity, NOT more persistence work."
+  },
+  "matched_comparison_proof": "Three differing leaves between the arms: arm/name, arm/enable_online_memory, and each arm's own extension pointer. Budget, tasks, implementation pins and the extension block itself are byte-identical. The only scientific difference is structural memory.",
+  "metrics_required": [
+    "best_score",
+    "top10_mean",
+    "auc_at_budget",
+    "unique_scored_molecules",
+    "fraction_of_proposals_from_structural_memory",
+    "fraction_of_frontier_improvements_from_memory_derived_descendants"
+  ],
+  "prior_charged": 250,
+  "reporting_required_at": [
+    250,
+    500,
+    750,
+    1000
+  ],
+  "revision_boundary_disclosure": {
+    "calls_1_to_250": "the revision at the 250-call seal",
+    "calls_251_to_1000": "this revision",
+    "no_old_calls_regenerated_or_rescored": true,
+    "proposal_semantics_unchanged": true,
+    "stored_state_restored_exactly": "round-trip tested; a dropped component breaks the round trip",
+    "what_changed": "persistence and resume accounting only -- memory payload/restore, an increase-only ledger budget rule, and a worker extension path distinct from retry/backfill"
+  },
+  "schema_version": "pmo_ab_1k_extension_authorization_v1",
+  "status": "AUTHORIZED",
+  "tasks": [
+    "celecoxib_rediscovery"
+  ]
+}

@@ -27,8 +27,13 @@ CONTRACT = "configs/pmo_population_controller_v1_scored_contract_corrected.json"
 AB_CONTRACTS = {
     "A_baseline": "configs/pmo_ab_a_baseline_contract_v1.json",
     "B_memory": "configs/pmo_ab_b_memory_contract_v1.json",
+    # The 1k extension arms. Separate sealed payloads, each recording the 250-call
+    # payload it extends and the revision boundary inside the trajectory.
+    "A_baseline_1k": "configs/pmo_ab_a_baseline_1k_contract_v1.json",
+    "B_memory_1k": "configs/pmo_ab_b_memory_1k_contract_v1.json",
 }
 AB_AUTHORIZATION = "diagnostics/pmo_ab_scored_authorization_v1.json"
+AB_AUTHORIZATION_1K = "diagnostics/pmo_ab_1k_extension_authorization_v1.json"
 CONTROLLER_CONTRACT = "configs/pmo_population_controller_v1.json"
 ORACLE_CONTRACT = "configs/pmo_dynamic_v21_development_v1.json"
 # The pinned oracle-asset capsule.  PyTDC resolves `oracle/<name>.pkl` RELATIVE to the
@@ -60,6 +65,9 @@ image = (
     .add_local_file(ROOT / AB_CONTRACTS["A_baseline"], str(REMOTE_ROOT / AB_CONTRACTS["A_baseline"]), copy=True)
     .add_local_file(ROOT / AB_CONTRACTS["B_memory"], str(REMOTE_ROOT / AB_CONTRACTS["B_memory"]), copy=True)
     .add_local_file(ROOT / AB_AUTHORIZATION, str(REMOTE_ROOT / AB_AUTHORIZATION), copy=True)
+    .add_local_file(ROOT / AB_AUTHORIZATION_1K, str(REMOTE_ROOT / AB_AUTHORIZATION_1K), copy=True)
+    .add_local_file(ROOT / AB_CONTRACTS["B_memory_1k"], str(REMOTE_ROOT / AB_CONTRACTS["B_memory_1k"]), copy=True)
+    .add_local_file(ROOT / AB_CONTRACTS["A_baseline_1k"], str(REMOTE_ROOT / AB_CONTRACTS["A_baseline_1k"]), copy=True)
     .add_local_file(ROOT / CONTROLLER_CONTRACT,
                     str(REMOTE_ROOT / CONTROLLER_CONTRACT), copy=True)
     .add_local_file(ROOT / ORACLE_CONTRACT, str(REMOTE_ROOT / ORACLE_CONTRACT), copy=True)
@@ -159,7 +167,8 @@ def run_task(spec: dict) -> dict:
         contract_envelope = json.loads((root / AB_CONTRACTS[arm]).read_text())
         if spec["contract_payload_sha256"] != contract_envelope.get("payload_sha256"):
             raise ValueError("scored payload authorization identity changed")
-        authorization = json.loads((root / AB_AUTHORIZATION).read_text())
+        receipt_rel = AB_AUTHORIZATION_1K if arm.endswith("_1k") else AB_AUTHORIZATION
+        authorization = json.loads((root / receipt_rel).read_text())
         entry = (authorization.get("arms") or {}).get(arm) or {}
         if entry.get("payload_sha256") != spec["contract_payload_sha256"]:
             raise ValueError("A/B authorization receipt does not bind this arm's payload")
@@ -192,7 +201,35 @@ def run_task(spec: dict) -> dict:
     folder = ARTIFACT_ROOT / "pmo_population_controller_v1" / run_id / task_name
     started = folder / "started.json"
     result_path = folder / "result.json"
-    if result_path.exists() or started.exists():
+    extend = bool(spec.get("extend_to_budget"))
+    if extend:
+        # An EXTENSION is neither a retry nor a backfill. A retry re-runs a task that
+        # failed and could double-charge; a backfill invents a task that never ran.
+        # This continues a COMPLETED, authorized trajectory to a strictly larger
+        # authorized budget, resuming the campaign and the query ledger from their own
+        # durable state -- so no charged call is re-spent and none is forgotten.
+        if not result_path.exists():
+            raise RuntimeError(
+                "extension requires a COMPLETED prior run; a mid-flight or absent run "
+                "would be a retry, which stays forbidden"
+            )
+        prior = json.loads(result_path.read_text())
+        prior_budget = int(prior.get("charged_calls") or prior.get("auc_budget") or 0)
+        new_budget = int(contract_envelope["payload"]["budget"]["charged_calls_per_task"])
+        if new_budget <= prior_budget:
+            raise RuntimeError(
+                f"extension must raise the budget: prior {prior_budget}, new {new_budget}"
+            )
+        # Preserve the prior result rather than overwrite it: it is the record of a
+        # completed scored run at its own budget and revision.
+        archive = folder / f"result_at_{prior_budget}_calls.json"
+        if not archive.exists():
+            archive.write_text(result_path.read_text())
+        result_path.unlink()
+        if started.exists():
+            started.unlink()
+        volume.commit()
+    elif result_path.exists() or started.exists():
         raise RuntimeError("task already started or completed; retries/backfill forbidden")
 
     # The positive control runs BEFORE `started.json` is written, so a control
