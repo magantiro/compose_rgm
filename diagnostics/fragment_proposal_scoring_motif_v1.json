@@ -1,0 +1,107 @@
+{
+  "schema": "compose_fragment_proposal_scoring_probe_v1",
+  "question": "does the fragment path execute transitions its proposal law never ranked, the way the T4 path does?",
+  "task": "motif_extension",
+  "support_draws_per_redirect": 256,
+  "comparison": "successor molecule, not action identity",
+  "totals": {
+    "redirects_observed": 103,
+    "executable_redirects": 103,
+    "recovered": 59
+  },
+  "recovered_fraction_overall": 0.5728155339805825,
+  "verdict": "PROPOSAL_IS_SCORED",
+  "rows": [
+    {
+      "drug": "BARICITINIB",
+      "declared_interfaces": 1,
+      "attempts": 6,
+      "redirects_observed": 13,
+      "executable_redirects": 13,
+      "recovered_by_model_proposal": 0,
+      "recovered_fraction": 0.0
+    },
+    {
+      "drug": "CYCLOTHIAZIDE",
+      "declared_interfaces": 1,
+      "attempts": 6,
+      "redirects_observed": 7,
+      "executable_redirects": 7,
+      "recovered_by_model_proposal": 6,
+      "recovered_fraction": 0.8571428571428571
+    },
+    {
+      "drug": "ELIGLUSTAT",
+      "declared_interfaces": 1,
+      "attempts": 6,
+      "redirects_observed": 10,
+      "executable_redirects": 10,
+      "recovered_by_model_proposal": 9,
+      "recovered_fraction": 0.9
+    },
+    {
+      "drug": "ERLOTINIB",
+      "declared_interfaces": 1,
+      "attempts": 6,
+      "redirects_observed": 25,
+      "executable_redirects": 25,
+      "recovered_by_model_proposal": 10,
+      "recovered_fraction": 0.4
+    },
+    {
+      "drug": "FUTIBATINIB",
+      "declared_interfaces": 1,
+      "attempts": 6,
+      "redirects_observed": 8,
+      "executable_redirects": 8,
+      "recovered_by_model_proposal": 6,
+      "recovered_fraction": 0.75
+    },
+    {
+      "drug": "LESINURAD",
+      "declared_interfaces": 1,
+      "attempts": 6,
+      "redirects_observed": 5,
+      "executable_redirects": 5,
+      "recovered_by_model_proposal": 3,
+      "recovered_fraction": 0.6
+    },
+    {
+      "drug": "LIOTHYRONINE",
+      "declared_interfaces": 1,
+      "attempts": 6,
+      "redirects_observed": 9,
+      "executable_redirects": 9,
+      "recovered_by_model_proposal": 9,
+      "recovered_fraction": 1.0
+    },
+    {
+      "drug": "LOVASTATIN",
+      "declared_interfaces": 1,
+      "attempts": 6,
+      "redirects_observed": 5,
+      "executable_redirects": 5,
+      "recovered_by_model_proposal": 0,
+      "recovered_fraction": 0.0
+    },
+    {
+      "drug": "MARIBAVIR",
+      "declared_interfaces": 1,
+      "attempts": 6,
+      "redirects_observed": 16,
+      "executable_redirects": 16,
+      "recovered_by_model_proposal": 13,
+      "recovered_fraction": 0.8125
+    },
+    {
+      "drug": "SPIRAPRIL",
+      "declared_interfaces": 1,
+      "attempts": 6,
+      "redirects_observed": 5,
+      "executable_redirects": 5,
+      "recovered_by_model_proposal": 3,
+      "recovered_fraction": 0.6
+    }
+  ],
+  "note": "recovered_fraction is a LOWER BOUND: a redirected transition the model proposes with low probability may not appear in a finite sample, so a low value needs the draw count stated beside it."
+}

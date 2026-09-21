@@ -1,0 +1,43 @@
+{
+  "schema": "compose_fragment_proposal_scoring_panel_v1",
+  "question": "across the WHOLE panel, does the fragment path execute transitions its proposal law never ranked?",
+  "verdict": "PROPOSAL_IS_IN_SUPPORT ACROSS THE PANEL -- every apparent zero lifted with a larger draw budget",
+  "per_task": {
+    "superstructure_generation": {
+      "redirects": 0,
+      "drugs": 10,
+      "note": "declares no interface, so the controller never redirects; no exposure by construction, not by measurement of recovery"
+    },
+    "motif_extension": {
+      "overall_recovered_fraction_at_256_draws": 0.5728,
+      "drugs": 10
+    },
+    "scaffold_decoration": {
+      "overall_recovered_fraction_at_128_draws": 0.3763,
+      "drugs": 3,
+      "note": "redirects most, so it is the worst case"
+    }
+  },
+  "power_curves": {
+    "scaffold_decoration/BARICITINIB (20 redirects)": {
+      "64": 0.5,
+      "256": 0.7,
+      "1024": 0.85
+    },
+    "motif_extension/BARICITINIB (13 redirects)": {
+      "256": 0.0,
+      "2048": 0.4615
+    },
+    "motif_extension/LOVASTATIN (5 redirects)": {
+      "256": 0.0,
+      "2048": 0.0,
+      "8192": 0.8
+    }
+  },
+  "the_finding_that_nearly_went_wrong": "LOVASTATIN motif read 0.0000 at 256 AND at 2048 draws -- an eightfold increase with no recovery, which is a persuasive imitation of the T4 hard zero. It lifts to 0.80 at 8192. A zero that survives one budget increase is still not a hard zero; T4s survives ANY budget because the gated molecule is outside the support entirely.",
+  "consequence": "No hard zero exists anywhere on the fragment panel. The attachment controller re-ranks inside the proposal law everywhere it acts, and a path program may be scored on this path. The asterisk on the earlier worst-case-only claim is closed.",
+  "limits": [
+    "Every recovered_fraction is a LOWER BOUND at its draw budget; none of these establish that an unrecovered transition is absent, only that it is rarer than the budget resolves.",
+    "Redirect counts are small per drug (5 to 25), so a per-drug fraction is noisy; the panel claim rests on the DIRECTION of every curve, not on any single value."
+  ]
+}
