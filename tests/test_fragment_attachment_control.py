@@ -573,3 +573,137 @@ def test_every_drug_builds_a_context_under_the_controller(task):
         context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
         assert context.attachment is not None
         assert len(context.attachment.lock_groups) == 1
+
+
+# ---- The aggregator's refusals ----
+#
+# A before/after table is only evidence if nothing per-instance can hide inside
+# it.  These pin the refusals rather than the happy path: each one builds an
+# arm that SHOULD be rejected and requires the rejection.
+
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parents[1]
+if str(_ROOT / "tools") not in sys.path:
+    sys.path.insert(0, str(_ROOT / "tools"))
+
+from build_fragment_attachment_table import (
+    ArmError,
+    check_row_guards,
+    load_arm,
+)
+
+
+def _shard(
+    tmp_path: Path,
+    name: str,
+    *,
+    sampler: str = "sampler-a",
+    control: str = "control-a",
+    drug: str = "BARICITINIB",
+    seed: int = 0,
+    produced: int = 40,
+    valid: int | None = None,
+    contained: int = 30,
+    success: int = 20,
+) -> Path:
+    import json
+
+    payload = {
+        "sampler": {"config_sha256": sampler},
+        "attachment_control": {"config_sha256": control, "arm": "x", "config": {}},
+        "kernel": {"rdkit": "2026.03.6"},
+        "checkpoint": {"path": "/ckpt.pt"},
+        "results": {
+            "motif_extension": {
+                "per_drug": {
+                    drug: [
+                        {
+                            "seed": seed,
+                            "attempts": 100,
+                            "committed_endpoints": produced,
+                            "committed_chemically_valid": (
+                                produced if valid is None else valid
+                            ),
+                            "committed_fragment_preserving": contained,
+                            "emitted_nonempty": success,
+                            "committed_endpoint_smiles": ["C"] * produced,
+                            "emitted_samples": ["C"] * success + [""] * (100 - success),
+                        }
+                    ]
+                }
+            }
+        },
+    }
+    path = tmp_path / name
+    path.write_text(json.dumps(payload))
+    return path
+
+
+def test_aggregator_refuses_shards_that_disagree_on_the_controller(tmp_path):
+    _shard(tmp_path, "a.json", control="control-a")
+    _shard(tmp_path, "b.json", control="control-b", drug="ERLOTINIB")
+    with pytest.raises(ArmError, match="attachment controller"):
+        load_arm(tmp_path, label="arm")
+
+
+def test_aggregator_refuses_shards_that_disagree_on_the_sampler(tmp_path):
+    _shard(tmp_path, "a.json", sampler="sampler-a")
+    _shard(tmp_path, "b.json", sampler="sampler-b", drug="ERLOTINIB")
+    with pytest.raises(ArmError, match="sampler"):
+        load_arm(tmp_path, label="arm")
+
+
+def test_aggregator_names_a_pre_controller_shard_instead_of_reading_it_as_agreement(
+    tmp_path,
+):
+    import json
+
+    path = _shard(tmp_path, "a.json")
+    payload = json.loads(path.read_text())
+    del payload["attachment_control"]
+    path.write_text(json.dumps(payload))
+    arm = load_arm(tmp_path, label="arm")
+    assert arm["attachment_sha256"] == "absent:pre_attachment_control"
+
+
+def test_row_guard_refuses_a_committed_endpoint_that_is_not_chemically_valid():
+    row = {
+        "drug": "X", "seed": 0, "committed_endpoints": 40,
+        "committed_chemically_valid": 39, "committed_fragment_preserving": 30,
+        "emitted_nonempty": 20,
+    }
+    with pytest.raises(ArmError, match="BY CONSTRUCTION"):
+        check_row_guards("motif_extension", row)
+
+
+def test_row_guard_refuses_success_above_containment():
+    row = {
+        "drug": "X", "seed": 0, "committed_endpoints": 40,
+        "committed_chemically_valid": 40, "committed_fragment_preserving": 10,
+        "emitted_nonempty": 20,
+    }
+    with pytest.raises(ArmError, match="is violated"):
+        check_row_guards("motif_extension", row)
+
+
+def test_row_guard_refuses_containment_above_produced():
+    row = {
+        "drug": "X", "seed": 0, "committed_endpoints": 40,
+        "committed_chemically_valid": 40, "committed_fragment_preserving": 41,
+        "emitted_nonempty": 20,
+    }
+    with pytest.raises(ArmError, match="is violated"):
+        check_row_guards("motif_extension", row)
+
+
+def test_row_guard_accepts_the_admissible_ordering():
+    check_row_guards(
+        "motif_extension",
+        {
+            "drug": "X", "seed": 0, "committed_endpoints": 40,
+            "committed_chemically_valid": 40, "committed_fragment_preserving": 30,
+            "emitted_nonempty": 30,
+        },
+    )

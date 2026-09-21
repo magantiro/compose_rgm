@@ -1,0 +1,51 @@
+{
+  "schema": "compose_fragment_attachment_frozen_identity_v1",
+  "frozen_before_sweep": true,
+  "commit": "d42053a50bdede85f40ac3022bc546254bb4c5c9",
+  "sampler": {
+    "config": {
+      "mark_attempts_per_event": 24,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "config_sha256": "805b2d10fa863c278dfd760fb3b9f5fd29eb94f91ef1653b1bf5ebe44aaab9ae"
+  },
+  "arms": {
+    "baseline": {
+      "config": {
+        "attachment_first": true,
+        "enabled": false,
+        "realize_redirected_order": true,
+        "redirect_attachment": true,
+        "release_linker_join": true,
+        "require_separated_cores": true,
+        "restrict_interfaces": true
+      },
+      "config_sha256": "698d57036e25eba4e23d910e3e5adffe70c6582b440aeb4dd8b3389b0e2f6691",
+      "arm": "frozen_sampler_baseline"
+    },
+    "attachment_control": {
+      "config": {
+        "attachment_first": true,
+        "enabled": true,
+        "realize_redirected_order": true,
+        "redirect_attachment": true,
+        "release_linker_join": true,
+        "require_separated_cores": true,
+        "restrict_interfaces": true
+      },
+      "config_sha256": "c2cf0215f1c18c38fa12ff7c6eaf68c5a7bf7886c73bb791da9b086fd5e29aca",
+      "arm": "attachment_control"
+    }
+  },
+  "kernel": {
+    "rdkit": "2026.03.6",
+    "numpy": "2.5.3",
+    "torch": "2.14.0",
+    "python": "3.12.9",
+    "platform": "macOS-26.5.2-arm64-arm-64bit"
+  },
+  "checkpoint": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+  "note": "ONE sampler configuration and ONE controller configuration across every drug and every task. The sampler hash is unchanged from the v2 sweep (805b2d10...), so the arms differ ONLY in the controller."
+}
