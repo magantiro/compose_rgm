@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import gzip
 import json
 import statistics
 from pathlib import Path
@@ -60,11 +61,16 @@ def axis(rows: list[dict[str, Any]], get) -> dict[str, float] | None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--audit", default="diagnostics/pmo_jump_funnel_audit_v1.json")
+    parser.add_argument("--audit", default="diagnostics/pmo_jump_funnel_audit_v1.json.gz")
     parser.add_argument("--shift", default="diagnostics/pmo_jump_distribution_shift_v1.json")
     args = parser.parse_args()
 
-    audit = json.loads(Path(args.audit).read_text())
+    path = Path(args.audit)
+    if path.suffix == ".gz":
+        with gzip.open(path, "rt") as handle:
+            audit = json.load(handle)
+    else:
+        audit = json.loads(path.read_text())
     shift = json.loads(Path(args.shift).read_text())
     rows = audit["rows"]
 

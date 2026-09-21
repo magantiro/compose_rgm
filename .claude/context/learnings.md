@@ -2141,3 +2141,75 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   unmodified production `Fiber.check`, the predeclared settings perturbation still moves yield, and
   the abstention/reverse controls still behave. Demanding numerical parity would let a
   canonical-SMILES spelling difference block a valid launch. Record divergence; do not gate on it.
+
+## 2026-09-21 (PMO jump lane: the realizer is correct and the PROPOSER is mis-scaled)
+
+- **The offline/production gap is a PARENT-SIZE gap, and both populations sit on one curve.**
+  Replaying all **1,091** stored jump proposals from the completed 3x250 run (`35fc7bcd...`),
+  zero oracle calls: **96.9% `proven_incompatible`, 2.8% budget, 0.3% executed**. Holding the 95
+  plan latents FIXED and varying only the parent population, depth-0 admissibility is
+  teacher_witness 100% (106 matched pairs) -> teacher_root 33.8% -> production_init 31.8% ->
+  production_archive **21.6%**. But binned by parent heavy atoms the two production populations
+  agree at matched size (15-19: 22.8% vs 21.8%; 20-24: 32.9% vs 36.5%), and admissibility is
+  monotone in size: **7.7% at 1-9 heavy atoms -> 41.1% at 30+**. The parents are not different
+  molecules, they are SMALLER molecules: attempt-weighted median **9.0** heavy atoms against
+  production_init 20 and teacher_root 24, with 92 of 226 distinct parents under 10 heavy atoms
+  (the archive holds literal `C`, `N`, `Br`, `Cl`, `[SH4]` entries, and `Br` received 42 jump
+  attempts). **587 of 1,091 attempts (53.8%) were aimed at parents under 10 heavy atoms.**
+- **The discriminator is the INTERACTION, not the archive.** All three channels see the same
+  parents (median heavy 9.0 / 12.0 / 9.0; under-10 share 52.6% / 45.5% / 53.8%) and shallow and
+  structured execute **100%** of their proposals there. The jump lane executes **0.3%**, because
+  it pairs median-28-primitive teacher-scale plans demanding median 6 preexisting-atom deletions
+  against 9-atom parents. Execution rate by parent size: 0/587 under 10 heavy atoms, 0/159 at
+  10-19, 3/218 at 20-29. **740 of 1,091 attempts (67.8%) used teacher-scale plans (>=27
+  primitives) and ZERO completed under ANY arm** -- exact 0, beam4 0, beam8 0.
+- **`proven_incompatible` is SOUND, verified independently.** Disabling `propagate` entirely and
+  raising the budget ~300x (20,000 nodes / 60 s) found a realization in **0 of the 1,072** pairs
+  the exact arm called incompatible. This reproduces the earlier witness gate (0 unsound over 24
+  pairs where a realization is known to exist) at 45x the scale. So the incompatibility is a
+  proof about the parent, not a search defect -- verdict B is excluded by measurement.
+- **The beam binds MORE and binds WRONG -- check the semantics before crediting a bind rate.**
+  Beam width 4 bound 13 pairs to the exact arm's 9, but only **9 of its 31 bindings realize the
+  plan's declared `component_count`** (width 8: 20 of 61), and **31/31 and 61/61 are purely
+  additive (retained_fraction 1.000, median 16 primitives)**. That is exactly the falsifier the
+  contract predeclared. "The beam binds more" and "the beam realizes the requested
+  transformation" are different questions and only the second one would have favoured the beam.
+- **The exact realizer's own production successes carry the falsifier shape too.** All 9
+  completions (at the full 20 s cap) are retained **1.000**, median **14** primitives, **0** at
+  teacher scale and **0** in the teacher retained band 0.52-0.96 -- against the offline
+  comparator of 5 completions at median 31 primitives, retained 0.630, 3 in band. The repair's
+  measured benefit does not appear on production parents at all, because removing substructure
+  from a 9-atom parent is arithmetically impossible.
+- **A lane-shared wall budget silently truncates a per-attempt cap, and it cost 6 realizations.**
+  `_generate_jump_pool` passes `seconds_cap=min(PRODUCTION_SECONDS_CAP, wall_seconds - elapsed)`,
+  so late attempts in a batch get a cap far below 20 s. Replaying at the full cap, 30 stored
+  `search_budget_exhausted` resolve to **12 proven_incompatible and 6 completed** -- production
+  recorded 3 executions where the same pairs at the honest cap give 9. This is a real separable
+  defect, but second-order: 9/1091 is still 0.82%.
+- **METHOD -- the controller stored the verdict all along.** `pmo_population_controller.py`
+  embeds `realized['outcome']` in its rejection `reason` string, so the whole classification was
+  recoverable from stored artifacts at zero cost before any replay. Read what a failure path
+  already records before building an instrument.
+- **`snapshot.history` in the PMO round artifacts is CUMULATIVE across rounds.** Unioning the 15
+  round files multiplied every attempt by the number of rounds that followed it -- 7,776 records
+  for 1,091 real attempts, and one success counted 14 times. The final round alone is the
+  complete record; the per-round channel counters are the cross-check that catches it.
+- **Instrument by WRAPPING the pinned function.** `propagate` is resolved as a module global
+  inside `realize`'s `search`, so patching `pmo_realization.propagate` in the audit process alone
+  intercepts every call while the ORIGINAL still decides. 1073/1091 agreement with the outcome
+  production stored is what licenses the decomposition; a transcription has nothing to check
+  itself against.
+- **CORRECTION to `pmo_v2_scored_attribution_v1.json`:** the jump lane placed **2** archive
+  entries (gsk3b `fc33df003b91`, celecoxib `a177033588c6`, both surviving rounds 1-14 with
+  `provenance.planner_channel == joint_dependency_region_jump`), not 0, and the true final-round
+  proposal counts are 351/362/378 = **1,091**, not 319/340/346 (those are round 13). Downstream
+  is not the bottleneck: of 3 executions, 3 were selected, 2 charged and scored, 1 improved its
+  parent (+0.040). Verdict D is excluded.
+- **`/private/tmp` was reaped MID-COMMAND again**, destroying 330 MB of downloaded run artifacts
+  between one Bash call and the next (disk went 1.1 -> 4.1 GiB and the scratchpad subdirectory
+  vanished). Re-downloaded under `$HOME`. The 2026-08-08 entry said this; it recurs because the
+  scratchpad path is the default suggestion. Downloads that take minutes to re-fetch are not
+  disposable probes.
+- **`modal volume get` on a directory needs the destination to exist**, and `modal volume ls` of a
+  campaign directory is the cheap way to size a download before taking it (3.6 MB per round file,
+  45 files = 330 MB) when the disk is under 2.5 GiB.
