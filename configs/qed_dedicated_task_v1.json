@@ -1,0 +1,45 @@
+{
+  "schema_version": "qed_edit_task_contract_v1",
+  "protocol": "qed-dedicated-task-v1",
+  "benchmark": "constrained QED editing, Jin et al. ICLR-2019 panel; GrIDDD (Ninniri et al., NeurIPS 2025) reports the comparator number on its own panel",
+  "panel": {
+    "artifact": "data/jin/qed_test.txt",
+    "sha256": "70410377",
+    "count": 800,
+    "note": "sha256 prefix only; the runner re-verifies the full digest at load"
+  },
+  "region": {
+    "qed_target": 0.9,
+    "similarity_floor": 0.4
+  },
+  "similarity": {
+    "kind": "tanimoto_morgan",
+    "radius": 2,
+    "bits": 2048,
+    "use_chirality": false,
+    "reference": "original_source"
+  },
+  "slots": {
+    "allocated_graph_slots": 48,
+    "max_active_heavy_atoms": 40,
+    "why_two_numbers": "whole_ring_plan.execute_program requires graph.n_atoms == 48 (allocated array width) AND 1 <= graph.n_real_atoms <= 40 (active heavy-atom ceiling). PRODUCTION_MAX_ATOMS = 40 is the ACTIVE ceiling and is not the padding width; padding to 40 slots fails closed."
+  },
+  "archive_top_k": 8,
+  "support_policy": {
+    "admission": "valid molecule AND tanimoto >= similarity_floor",
+    "reward": "QED, unmodified, on the admitted set only",
+    "qed_target_is_not_an_admission_gate": "output feasibility (success) is evaluated on returned endpoints; intermediate program states and proposed endpoints are NOT required to satisfy the QED target",
+    "rationale": "FiberControl shape: feasibility constrains the support, reward ranks inside it. Putting the similarity indicator in the reward spends budget on zero-scored molecules."
+  },
+  "excluded_inherited_gates": [
+    "sa_max = 4.0 (src/compose_v4/control/program_task.py:77) -- synthetic accessibility is not part of this benchmark",
+    "qed_min = 0.6 (src/compose_v4/control/program_task.py:76) -- a second, lower QED floor that would also make a contract qed_target field decorative",
+    "compose_v4.gates.med_chem_gate.is_valid via t4_endpoint_selection.acceptable_endpoint -- an inherited medicinal-chemistry heuristic, not a benchmark threshold"
+  ],
+  "authorization": {
+    "scored_launch_authorized": false,
+    "modal_launch_authorized": false,
+    "oracle_calls_authorized": 0,
+    "reason": "QED and Morgan-Tanimoto are local RDKit computations; this benchmark has no paid oracle"
+  }
+}
