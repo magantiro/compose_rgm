@@ -1856,6 +1856,13 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   construct the pathological ring -- which is a MEASUREMENT about these cells, not a
   guarantee about a cell whose search wanders into hypervalent sulfur. Re-run the parity
   script for any new cell set rather than citing this one.
+- **Direct refusal census on the campaign path, production kernel: 344,831
+  `molecular_graph_to_smiles` calls across braf_0/braf_1/braf_2 at 40 law-ON draws each,
+  REFUSED = 0.** 900 calls returned `None`, which is the ordinary invalid-state
+  rejection and not a kernel refusal -- do not conflate the two. This is the measurement
+  that closes the swallowed-RuntimeError hole, because identical endpoint counts across
+  kernels alone would not distinguish "neither kernel refused" from "both refused the
+  same states".
 - **`git worktree add` + `git merge FETCH_HEAD`:** `git merge origin/<branch>` fails with
   "not something we can merge" in a fresh worktree whose remote refs were not fetched
   into that name; `git fetch origin <branch>` then `git merge FETCH_HEAD` works. The only
