@@ -20,7 +20,7 @@
       "queries_per_round": 16
     },
     "controller_contract": "configs/pmo_population_controller_v1.json",
-    "controller_contract_sha256": "c8eaf6c506a19b6d491b753b3b58ed14ee07139c7deb2244db0c26feb39104de",
+    "controller_contract_sha256": "0e87d4c9404d5f8755b5217c9d919e1b06d1d591ea9f639cc2ab3517386c2de9",
     "corrected_source_capsule_manifest": "diagnostics/pmo_population_controller_v1/source_capsule_manifest_v2.json",
     "corrected_worker_app": "compose-pmo-population-v1-corrected",
     "corrected_worker_path": "modal_apps/pmo_population_v1_app.py",
@@ -44,7 +44,7 @@
       "src/compose_v4/control/edit_learning_data.py": "b0e71fdbd54c39727765edfe36253c0588b9882ecf8a52f6b65b7c590d711f71",
       "src/compose_v4/control/pmo_credit.py": "9c8e32adec82df973d7175215a424df29367af96c8870981a0909fcd2a77a164",
       "src/compose_v4/control/pmo_online_memory.py": "bbea7d6580e81d1075eec9be3eee7a24afa9fc5276644cb3307d11e2071620c6",
-      "src/compose_v4/control/pmo_population_controller.py": "ce8dee105b3bc3b910fda489bb64b01d8c4112251fd7917403932c9d9bdf7040",
+      "src/compose_v4/control/pmo_population_controller.py": "9953c580cdafbe7242ec1011d48834741509c6681449cbb44b4e17f2ad555caf",
       "src/compose_v4/control/pmo_realization.py": "153d2f49b08186abff6088c1f6c462fe2d96b83ede26587b90a8504c0671b308",
       "src/compose_v4/control/program_campaign.py": "205f4aef97489ee352df9d8284e9d21ad683c3d542d25ce748c03bd9f8d6644b",
       "src/compose_v4/experiments/pmo_oracle_assets.py": "5ec0b7c9b9185cd2b8edd14c2529f37e825311a2b39d6ce71c68423ab9f4d558",
@@ -100,5 +100,5 @@
       "celecoxib_rediscovery"
     ]
   },
-  "payload_sha256": "fbce1f091394e9e40cfa7acb733dd3fc5884c6e4a9cc250d8c97b1c40834bd06"
+  "payload_sha256": "54f0a0a10c9cc6e871343feb129014da8b5e5cef6b3a82d226083cc1d7b098b4"
 }

@@ -974,14 +974,28 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         return json.loads(json.dumps({**body, "snapshot_id": identity(body)}))
 
     @classmethod
-    def restore(cls, snapshot, *, hierarchy=None, jump_checkpoint=None):
+    def restore(
+        cls,
+        snapshot,
+        *,
+        hierarchy=None,
+        jump_checkpoint=None,
+        enable_online_memory: bool = False,
+    ):
+        # `run_program_campaign` passes optimizer_kwargs to BOTH the constructor and
+        # this classmethod, so the arm flag has to be accepted here too -- and it has
+        # to reach the constructor, or a resumed arm B would rebuild as arm A and then
+        # refuse its own snapshot's memory payload.
         if jump_checkpoint is None:
             raise ValueError("PMO population restore requires its sanitized jump checkpoint")
         result = ProgramOptimizer.restore.__func__(
             cls,
             snapshot,
             hierarchy=hierarchy,
-            constructor_kwargs={"jump_checkpoint": jump_checkpoint},
+            constructor_kwargs={
+                "jump_checkpoint": jump_checkpoint,
+                "enable_online_memory": enable_online_memory,
+            },
         )
         state = snapshot.get("pmo_population")
         if (

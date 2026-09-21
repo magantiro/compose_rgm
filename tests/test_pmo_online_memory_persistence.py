@@ -43,3 +43,20 @@ def test_a_dropped_field_is_caught():
     payload["edits"]["counts"] = []          # simulate dropping one component
     b = OnlineProposalMemory(); b.restore_payload(json.loads(json.dumps(payload)))
     assert b.payload() != a.payload(), "dropping a component went undetected"
+
+
+def test_restore_accepts_the_arm_flag_like_the_constructor():
+    """`run_program_campaign` passes optimizer_kwargs to BOTH __init__ and restore().
+
+    A flag accepted by only one of them makes the 250-call path work and the RESUME
+    path raise -- which is exactly how this surfaced, on the first extension.
+    """
+    import inspect
+
+    from compose_v4.control.pmo_population_controller import PmoPopulationController
+
+    init = inspect.signature(PmoPopulationController.__init__).parameters
+    restore = inspect.signature(PmoPopulationController.restore).parameters
+    for name in ("jump_checkpoint", "enable_online_memory"):
+        assert name in init, f"{name} missing from __init__"
+        assert name in restore, f"{name} missing from restore -- resume will raise"
