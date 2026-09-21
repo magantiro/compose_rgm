@@ -1,0 +1,19 @@
+{
+  "accounting_note": "250 charged calls, retained in cumulative development accounting. This is the v1 comparator the PMO-v2 run is measured against.",
+  "archive_key_rule": "Filed under the payload hash THIS RECEIPT carries, not the contract's current hash -- those differ whenever a re-seal ran first, and a fixed archive directory would let a second supersession overwrite the first attempt's record.",
+  "contract_payload_sha256": "103d9d9273753732fb7fc03207834c88e317c4d1d9bab11b3f3b2f265fc50075",
+  "outcome": {
+    "gsk3b": {
+      "auc_budget": 250,
+      "auc_top10_at_budget": 0.12,
+      "best_score": 0.21,
+      "charged": 250,
+      "note": "Independently verified from compose-v4-artifacts by the coordinator.",
+      "oracle_positive_control_passed": true,
+      "status": "VALID"
+    }
+  },
+  "run_id": "859a42ffaf96fb46bcee309c2bc0141846d2551b03497e08898714203ccc96a0",
+  "schema_version": "pmo_completed_run_archive_v2",
+  "why_archived": "The launcher refuses to start while a launch receipt exists, so the PMO-v2 run required moving this aside. Archived, not deleted: it is the record of a COMPLETE and VALID scored campaign."
+}

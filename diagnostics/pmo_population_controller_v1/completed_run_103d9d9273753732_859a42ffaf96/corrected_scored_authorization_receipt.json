@@ -1,0 +1,32 @@
+{
+  "authorization_basis": "User explicitly authorized the corrected payload after the terminal pre-oracle worker image failure.",
+  "authorized_at_utc": "2026-09-20T23:07:52.491829+00:00",
+  "corrected_worker": {
+    "app": "compose-pmo-population-v1-corrected",
+    "path": "modal_apps/pmo_population_v1_app.py",
+    "torch": "2.4.0",
+    "torch_index": "https://download.pytorch.org/whl/cpu"
+  },
+  "modal_source_upload_authorized": true,
+  "new_explicit_authorization_required": false,
+  "oracle_calls_authorized": 750,
+  "payload_sha256": "103d9d9273753732fb7fc03207834c88e317c4d1d9bab11b3f3b2f265fc50075",
+  "reason_for_new_payload": "The previous 3x250 payload 2e3f9195... ran to completion, but its gsk3b task is VOID: the worker restored the working directory after CONSTRUCTING the TDC oracle, while PyTDC loads oracle/gsk3b_current.pkl lazily on the first CALL by relative path, so all 250 charged calls returned the swallowed default_property 0.0 (diagnostics/pmo_gsk3b_oracle_diagnosis_v1.json, diagnostics/pmo_run_status_ledger.json).  This payload binds a worker that resolves asset-backed oracles for the oracle's full lifetime via AssetPinnedOracle, and that refuses to charge a single call until a pinned positive control CALLS the oracle and reproduces the frozen reference panel.  perindopril_mpo (0.486) and celecoxib_rediscovery (0.196) from the previous payload are unaffected and remain valid; only gsk3b is re-run.",
+  "schema_version": "pmo_population_scored_authorization_receipt_v2",
+  "scored_launch_authorized": true,
+  "status": "AUTHORIZED",
+  "supersedes_payload_sha256": "103d9d9273753732fb7fc03207834c88e317c4d1d9bab11b3f3b2f265fc50075",
+  "terminal_failed_modal_calls": {
+    "celecoxib_rediscovery": "fc-01M2YM84NCGHWCYQ6M597VV7FE",
+    "gsk3b": "fc-01M2YM84HG9EJT81D6AVB6A9D0",
+    "perindopril_mpo": "fc-01M2YM84KFK1P5D0D94JZ07A5N"
+  },
+  "terminal_failure": {
+    "automatic_retries": 0,
+    "backfill": false,
+    "error": "No module named 'torch'",
+    "error_type": "ModuleNotFoundError",
+    "oracle_calls_observed": 0,
+    "replacements": false
+  }
+}
