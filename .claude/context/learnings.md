@@ -2141,3 +2141,57 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   unmodified production `Fiber.check`, the predeclared settings perturbation still moves yield, and
   the abstention/reverse controls still behave. Demanding numerical parity would let a
   canonical-SMILES spelling difference block a valid launch. Record divergence; do not gate on it.
+
+## 2026-09-21 (de novo: the published quality metric is ABOVE the training corpus, measured)
+
+- **The GuacaMol training corpus itself scores quality 0.4236 on the published de-novo metric**
+  (valid AND unique AND QED >= 0.6 AND SA <= 4), with a held-out reference at 0.4330. Both at
+  validity 1.000, uniqueness 1.000, diversity ~0.888, n=5,000 each
+  (`diagnostics/denovo_generation_v1/corpus_reference_v1.json`).
+- **CONSEQUENCE, and it reframes the whole de-novo comparison: a model that PERFECTLY matched its
+  training distribution would score ~42% quality, not ~90%.** So "quality" on this metric does not
+  measure distribution fidelity -- it rewards deviation AWAY from the corpus toward drug-likeness.
+  Any baseline reporting ~90% quality is therefore reporting a distribution SHIFTED from GuacaMol,
+  not a faithful sample of it. State the corpus ceiling beside any de-novo quality claim, ours or
+  a comparator's, or the number reads as fidelity when it is the opposite.
+- **Diversity behaves the other way**: the corpus sits at 0.888, above the ~0.83 the baselines
+  report, so on that axis matching the corpus is the strong outcome. Quality and diversity pull in
+  opposite directions relative to the same reference, which is exactly why the IVG-style
+  quality-diversity FRONTIER is the more honest comparison than either single number.
+
+## 2026-09-21 (fragment verification: a pilot reproduced and was still not a result)
+
+- **The BARICITINIB superstructure pilot reproduced within seed noise** (100.00 validity / 99.67
+  uniqueness / 48.33 quality / 0.715 diversity over 3 seeds, 300/300 preservation) **and was not
+  representative.** The full 10-drug task row is 93.53 / 97.58 / 37.67 / 0.726. One drug is not a
+  task row; the pilot's apparent +8 uniqueness / +10 quality margin shrank to +13.98 / +2.87 once
+  measured against the whole instance set. Never promote a single-instance pilot to a headline.
+- **LINKER DESIGN IS STRUCTURALLY INVALID IN OUR HARNESS and must not be reported.**
+  `build_prompt_context` joins the two cores with a DIRECT BOND, then `RegionLock` pins the bond
+  order of every PAIR of locked slots -- which includes that join. The cores therefore stay
+  directly bonded and the emitted "linker" has ZERO atoms. Measured: 9/9 ELIGLUSTAT emissions match
+  `[NX3;r5]-[c]` where the real linker is 3 atoms; 15 locked slots carry 17 locked core-core bonds.
+  The endpoint check does not catch it because the other fragment's atom satisfies the attachment
+  requirement. Scaffold morphing shares the mechanism. Both withheld.
+- **`abs(hash((drug, task, seed)))` IS NOT A SEED.** `str` hashing is `PYTHONHASHSEED`-salted, so
+  the same key gave 704705714 / 159431064 / 4134730822 across three processes -- no row produced
+  this way is reproducible by anyone, including us. Use BLAKE2b (or any stable digest) for any
+  derived seed. This silently invalidated every fragment row until it was caught.
+- **The fragment-preservation guarantee is narrower than "100%", and the precise statement matters.**
+  GRAPH-LEVEL region preservation IS by construction: locked slots keep element, formal charge and
+  every pairwise bond order, so the core's induced labelled subgraph is byte-identical in every
+  committed state (100.0000% of committed endpoints chemically valid). RDKit SUBSTRUCTURE
+  preservation is NOT by construction -- measured 99.89 / 99.30 / 99.89%. Mechanism localised to a
+  single event class: `BondInsert` closing a ring THROUGH core atoms; states are Kekule so every
+  locked bond order is unchanged and the lock correctly admits it, but aromaticity is whole-molecule
+  RDKit perception, so core atoms flip aliphatic->aromatic and an aliphatic query atom stops
+  matching. Claim graph-level by construction; claim substructure as endpoint-enforced and measured.
+- **CONTAINMENT IS SOLVED, PLACEMENT IS NOT -- one mechanism gates three of five task rows.** Motif
+  extension is 85.4% committed and 99.30% fragment-CONTAINING yet only 41.4% valid: 1,319 endpoints
+  kept the motif and grew somewhere other than the one declared attachment site. Decoration is 93.5%
+  committed, 99.89% containing, 3.5% valid with 2,699 site failures. The missing capability is
+  attachment-site steering, not fragment preservation.
+- **I relayed comparator numbers I had not sourced.** GenMol V2 figures (99.7 / 89.8 / 39.0,
+  div 0.551, dist 0.769) appear in no pinned artifact; the upstream `reference_metrics.csv` says
+  97.5 / 83.6 / 34.8 / 0.599 / 0.762. A baseline quoted from a README is not a baseline. Pin the
+  comparator table by hash before it decides anything.
