@@ -2312,3 +2312,73 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   had already died of preemption and those entries were stale or terminating. A task count in a
   listing is not proof of live capacity -- check the function-call state, as the same listing
   misled a phantom-run diagnosis earlier the same day.
+
+## 2026-09-21 (PMO parent-first construction: the region is drawn on the parent, and the numbers that go with it)
+
+- **PMO parents carry 48 SLOTS, not 40 — measured, unanimous over all 226 parents of the
+  completed 3x250 run**, with free slots min 9 / median 34 and ZERO parents lacking insertion
+  capacity. Same slot capacity as the T4 proposal path. 48 is the slot CAPACITY of the state
+  array; 40 (`REPRESENTABLE_HEAVY_ATOMS`) is the separate heavy-atom CEILING the executor
+  enforces on endpoints — the two have been confused before, so say which you mean.
+  `assert_production_state_semantics` / `production_state_from_smiles` are the **40-slot
+  editing-corpus** preflight and are the WRONG check for this path. The practical bite is the
+  one the 2026-08-08 entry names: a TIGHT graph (what `smiles_to_molecular_graph` returns) has
+  no free slot and therefore no `atom_insert` support at all, which alone makes every
+  construction unrealizable and reads as "the mechanism does not work".
+- **Inverting the proposal order works, and the machinery is T4's.** `parent -> legal region ON
+  THAT PARENT -> transformation conditional on the region`, with `BridgeRegionLaw` reused
+  unchanged and only the feasibility margin swapped (T4 tilts by its free docking gate; PMO has
+  no similarity reference and no quality gate, so it tilts by construction headroom). Measured
+  over the same 1,091 production requests, zero oracle calls: **243 realizations across 115
+  parents and all three tasks, 221 distinct endpoints, 6,019 executor calls**, region sizes
+  1-12 (median 6) of which 25 exceed the v1 `MAX_SEGMENT_LENGTH = 8` that made them undrawable
+  in one module. Seeded, and reproduced EXACTLY across three runs.
+- **Realization RISES with parent size — 11.9% (1-9 heavy) vs 37.1% / 31.2% / 36.2% for
+  10-19 / 20-29 / 30-39.** Tiny parents simply carry no bridge-separated region. So a
+  parent-first result measured on the early PMO population is a LOWER bound on drug-sized
+  molecules, not an artifact of small ones. Check this band split before concluding anything
+  about a mechanism from a population whose median parent is 14 heavy atoms.
+- **`retained_fraction` disagreed with reality on 210 of 243 realizations.** The controller's
+  rule (`pmo_population_controller._retained_fraction`) asks whether the parent's original SLOT
+  is occupied in the endpoint, so a slot deleted and then REFILLED by a later insertion counts
+  as retained. Derive deletions from the `atom_delete` ACTIONS instead: median true retention
+  0.684 against the controller's 0.812, and the controller reads 1.000 on programs that excised
+  a whole substituent. Never quote a slot-based retention as evidence about excision.
+- **A descriptor relaxation changes WHICH plan is selected, not only whether it binds — so its
+  yield is not comparable to the arm it relaxes.** Dropping `neighbor_element_histogram` and
+  `creation_lag` (SPEC_R1) admits far more pairs (9 -> 72 of 95 on the largest parent) and
+  realizes FEWER overall: 13 of 788 attempts (1.65%) against the v1 descriptor's 2.96%, because
+  `supported_plan_index` returns the first SUPPORTED plan and the relaxation moves that index
+  onto different, larger plans. Excision yield rises 0.37% -> 1.96% while additive yield
+  collapses 9.80% -> 0.57%. Cost: 712,019 enumerated successors for 13 realizations. Report the
+  composition shift, or the aggregate reads as a straight regression.
+- **A wall-clock cap makes a yield load-dependent; state which half of a funnel is which.**
+  The same arm B code over identical inputs gave 13 / 12 / 13 successes across three runs,
+  entirely in the `search_budget_exhausted` vs `completed_realization` split, because
+  `PRODUCTION_SECONDS_CAP` is seconds. `proven_incompatible` (constraint propagation, no clock)
+  did not move. Arm C, which performs no search, reproduced byte-exactly. A yield quoted from a
+  wall-capped search needs the run-to-run range beside it.
+- **Executor calls are NOT expanded nodes.** A search arm is costed in nodes; a construction arm
+  performs no search and is costed in executor calls and regions tried. Reporting them side by
+  side is the only honest form — summing or dividing them manufactures a comparison that does
+  not exist. (Reaffirms the standing "match actual work, not returned K" rule.)
+- **Validity is a FLOOR, not a score, and this mechanism sits exactly on it.** All 243 endpoints
+  are RDKit-parseable (PMO's own eligibility rule) and 65.4% retain a ring, but the construction
+  is a random chain over the intent's element vocabulary, so it routinely emits peroxide and N-O
+  linkages. The mechanism guarantees validity and structural coherence, NOT medicinal-chemistry
+  plausibility. Same distinction T4 recorded as "eligibility is a floor, not a score".
+- **A refusal-only test is vacuous in the direction that matters, and the surviving mutation is
+  the SELECTIVE one.** `plan_parent_support`'s guard collected plans the certificate REFUSES and
+  asserted none realize; its fixture parent realizes nothing, so the assertion held under any
+  refusal. Corrected by measurement: an ALWAYS-refuse certificate does NOT survive (it fails
+  three other tests that need a supported plan), whereas a depth-0 off-by-one — still supporting
+  37 of 95 catalog plans while wrongly refusing a realizable pair — passed the entire file
+  14/14. The suite caught "refuses everything" by accident and missed "refuses too much", which
+  is the realistic bug shape. Fix = a CONSTRUCTED positive control: execute a legal program on
+  the parent, read its roles off that execution with `action_role_supervision`, and the pair
+  realizes by construction. Take the declared `component_count` from the same
+  `dependency_region_program` extraction `finalize` runs, or the realization is refused as
+  `declared_component_count_not_realized`.
+- **Build a witness, do not search for one.** A prior search over the six largest production
+  parents found nothing; constructing one took minutes, and rebuilding it from the LIVE
+  enumerator each run means a chemistry-kernel change re-derives it rather than invalidating it.
