@@ -1,5 +1,17 @@
 {
   "payload": {
+    "binder_observed": {
+      "function": "compose_v4.control.pmo_realization.realize_plan_binding",
+      "max_realizations": 4,
+      "node_budget": 64,
+      "outcomes": {
+        "completed_realization": 36,
+        "proven_incompatible": 1704,
+        "search_budget_exhausted": 52
+      },
+      "seconds_cap": 20.0,
+      "specification": "v1_exact"
+    },
     "decision": "SUPPORT_PASS_FOR_SEPARATE_SCORED_CONTRACT",
     "implementation_sha256": {
       "modal_apps/pmo_population_v1_app.py": "36f49f0ecf791e6ba823a1d3f19a2b34b69cc8e269d149f3c69d1ea1b61ad88a",
@@ -8,19 +20,21 @@
       "src/compose_v4/control/pmo_population_controller.py": "9c86474b8e3f3487a43366d1f3acdd6716f086e9d13f1df1fb2d099ed7c7b55d",
       "src/compose_v4/control/pmo_realization.py": "153d2f49b08186abff6088c1f6c462fe2d96b83ede26587b90a8504c0671b308",
       "src/compose_v4/experiments/pmo_oracle_assets.py": "5ec0b7c9b9185cd2b8edd14c2529f37e825311a2b39d6ce71c68423ab9f4d558",
-      "src/compose_v4/experiments/pmo_population_live_parent_gate.py": "518045a7941e5073ed75abfe0d0098d3d98c11f5267b2d217895a0fb40c095c5",
+      "src/compose_v4/experiments/pmo_population_live_parent_gate.py": "2b44294b0368b0c7f6f5c90dd7e6ae222b4ff49be1475b83fe5065f707f3e204",
       "tools/pmo_population_live_parent_gate.py": "d945af12ab262d5d5667a15b623b212407d7f7a6960b439fdcf258ece944faea"
     },
     "input_sha256": {
-      "exhaustive_result": "de044abe3b6c7eb1f5cbf53fd8591f5c26561753dedf4b3cbcb5cb9691fa71fc",
+      "exhaustive_result": "69bd859853f0f0721bf5084734f8f5fe1b9796cedd12c761e1e93306814c042b",
       "initialization": "a1f7840df1f75567565de633c4df3d013c3165df3e43cbf2ac87b156d5f206ff",
       "joint_checkpoint": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43"
     },
     "inputs": {
-      "exhaustive_result": "diagnostics/pmo_population_live_parent_gate_v1/scheduler_result.json",
+      "exhaustive_result": "diagnostics/pmo_population_live_parent_gate_v1/scheduler_result_realizer.json",
       "initialization": "diagnostics/parent_edit_cycles/prepared/init_20260921.json",
       "joint_checkpoint": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json"
     },
+    "load_caveat": "MEASURED and load-INDEPENDENT: 1704 of 1792 attempts (95.1%) are proven_incompatible by constraint propagation, which consults no clock.  Load-DEPENDENT: the 52 search_budget_exhausted vs 36 completed_realization split rides the 20.0s per-attempt cap.  The 7 -> 6 supported-parent delta against the beam rests entirely on parents 4, 11 and 13, each of which shows completed_realization=0 with search_budget_exhausted=13, so that delta carries the caveat.  The PASS does NOT: 6 >= the floor of 4 with margin, and recovering all three would make it 9.",
+    "measurement_revision": "realizer_bound_v1",
     "modal_launch_authorized": false,
     "oracle_calls": 0,
     "parent_policy": {
@@ -38,6 +52,17 @@
       "scale_order": "small, medium, large round-robin queues with fixed mass-weighted permutation",
       "task_conditioning": false
     },
+    "predeclared_read": {
+      "falsifier_status": "UNEVALUATED_NOT_FIRED",
+      "gate_observation": "Bound-program lengths are {14,16,17,23} in BOTH the beam and realizer arms -- median 16, max 23 -- while 45 of the 95 plan latents are >=29 primitives and ZERO of them bound in either arm.  Binding yield roughly doubled (73 vs 37 route-scale bindings) with program scale unchanged.",
+      "note": "Predeclared BEFORE the scored run, to stop a doubled binding yield at unchanged program scale being reported as success.",
+      "read_order": [
+        "1. realized program scale (primitive_count distribution)",
+        "2. retained_fraction distribution",
+        "3. only then bind rate / yield"
+      ],
+      "why_unevaluated": "The predeclared falsifier is the CONJUNCTION of retained_fraction ~1.000 AND median ~16 primitives.  This gate does not record retained_fraction, and its objective-blind descendants are a different parent population from the matched comparison that measured median 31 primitives at retained 0.630.  The scored run's artifacts settle it."
+    },
     "prohibitions": [
       "no oracle or Modal call",
       "no score or task informed plan selection",
@@ -47,22 +72,42 @@
     "schema_version": "pmo_population_live_parent_gate_v2",
     "scientific_question": "Does the task-blind PMO joint dependency-region composer retain route-scale support after a generic non-root descendant?",
     "scored_launch_authorized": false,
+    "supersedes": {
+      "beam_receipt": "diagnostics/pmo_population_live_parent_gate_v1/scheduler_result.json",
+      "beam_receipt_sha256": "de044abe3b6c7eb1f5cbf53fd8591f5c26561753dedf4b3cbcb5cb9691fa71fc",
+      "beam_support_observed": {
+        "descendant_exact_count": 14,
+        "parent_count": 16,
+        "route_scale_exact_count": 37,
+        "supported_parent_count": 7,
+        "supported_parent_indices": [
+          0,
+          2,
+          3,
+          4,
+          11,
+          13,
+          14
+        ],
+        "unique_route_scale_endpoints": 30
+      },
+      "note": "The support numbers below were re-measured after the gate was re-pointed from the width-4 beam (bind_joint_plan) to the complete realizer (realize_plan_binding) that the controller's jump lane binds through.  The beam-era receipt is SUPERSEDED but PRESERVED on disk; it is not deleted and not overwritten."
+    },
     "support_observed": {
       "descendant_exact_count": 14,
       "parent_count": 16,
-      "route_scale_exact_count": 37,
-      "supported_parent_count": 7,
+      "route_scale_exact_count": 73,
+      "supported_parent_count": 6,
       "supported_parent_indices": [
         0,
         2,
         3,
-        4,
-        11,
-        13,
-        14
+        7,
+        14,
+        15
       ],
-      "unique_route_scale_endpoints": 30
+      "unique_route_scale_endpoints": 59
     }
   },
-  "payload_sha256": "0bd8160baf5595f812f76d3e9b3966fe09aaf3c556ade90cf2b18a9812c08b7b"
+  "payload_sha256": "f222e4021e282f7e37c80ba3b8bda67fa31829fe1c52d5a63c4f179d0dc7c4d9"
 }
