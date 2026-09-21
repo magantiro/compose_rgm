@@ -179,3 +179,46 @@ def test_distance_reference_is_the_dummy_stripped_prompt():
     expected = Chem.MolToSmiles(Chem.MolFromSmiles(prompt.fragments[0]), canonical=True)
     assert reference == expected
     assert "*" not in reference
+
+
+def test_distance_reference_parses_for_every_released_prompt():
+    """An aromatic-N attachment point makes the dummy-stripped SMILES unparseable.
+
+    Upstream's ``calculate_average_tanimoto`` raises ``Invalid prompt SMILES
+    string`` on such a reference, which killed three shards mid-sweep.  Capping
+    the dummy with hydrogen fixes it; this pins that EVERY released prompt
+    yields a parseable reference, and that the fix is confined to the
+    pathological cases -- for any fragment whose stripped form already parsed,
+    the reference must be unchanged, or previously reported distances would
+    have silently moved.
+    """
+    suite = _run_suite()
+    changed = []
+    for prompt in _prompts():
+        stripped = ".".join(
+            Chem.MolToSmiles(q, canonical=True) for q in suite.audit_queries(prompt)
+        )
+        reference = suite.prompt_reference_smiles(prompt)
+        assert Chem.MolFromSmiles(reference) is not None, (
+            prompt.drug_name,
+            prompt.task.value,
+            reference,
+        )
+        if stripped != reference:
+            changed.append((prompt.drug_name, prompt.task.value))
+            # It may only differ where the old form could not be used at all.
+            assert Chem.MolFromSmiles(stripped) is None, (
+                prompt.drug_name,
+                prompt.task.value,
+            )
+    # LESINURAD (motif/linker/morphing) and MARIBAVIR (linker/morphing) attach at
+    # an aromatic nitrogen. Nothing else may move.
+    assert sorted(changed) == sorted(
+        [
+            ("LESINURAD", "motif_extension"),
+            ("LESINURAD", "linker_design"),
+            ("LESINURAD", "scaffold_morphing"),
+            ("MARIBAVIR", "linker_design"),
+            ("MARIBAVIR", "scaffold_morphing"),
+        ]
+    ), changed

@@ -139,11 +139,39 @@ def contains_all_fragments(smiles: str, queries: list[Chem.Mol]) -> bool:
 
 
 def prompt_reference_smiles(prompt) -> str:
-    """The dummy-stripped prompt, as the reference molecule for ``distance``."""
+    """The dummy-stripped prompt, as the reference MOLECULE for ``distance``.
+
+    This must be a SMILES RDKit can re-parse, which the audit query need not be.
+    Deleting a dummy from an attachment-bearing aromatic nitrogen leaves an
+    ``n`` with neither a substituent nor a hydrogen, and the resulting string
+    does not parse -- upstream's ``calculate_average_tanimoto`` raises
+    ``Invalid prompt SMILES string`` on it.  Capping the dummy with HYDROGEN
+    instead is both parseable and what the retained core physically is, which is
+    the same resolution ``retained_core`` already uses to build the start state.
+
+    For a fragment whose attachment point is not pathological the two routes
+    agree exactly, because deleting a dummy leaves an implicit hydrogen in the
+    freed valence anyway; ``tests/test_fragment_official_suite.py`` pins that
+    agreement across every released prompt so this cannot silently move a
+    reported distance.
+    """
     parts = []
-    for query in audit_queries(prompt):
-        parts.append(Chem.MolToSmiles(query, canonical=True))
-    return ".".join(p for p in parts if p)
+    for fragment in prompt.fragments:
+        mol = Chem.MolFromSmiles(fragment)
+        if mol is None:
+            raise ValueError(f"unparseable fragment {fragment!r}")
+        editable = Chem.RWMol(mol)
+        for atom in editable.GetAtoms():
+            if atom.GetAtomicNum() == 0:
+                atom.SetAtomicNum(1)
+                atom.SetIsotope(0)
+                atom.SetNoImplicit(False)
+                atom.SetFormalCharge(0)
+        core = editable.GetMol()
+        Chem.SanitizeMol(core)
+        core = Chem.RemoveHs(core)
+        parts.append(Chem.MolToSmiles(core, canonical=True))
+    return ".".join(x for x in parts if x)
 
 
 def _kernel_provenance() -> dict[str, str]:
