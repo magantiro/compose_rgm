@@ -1,0 +1,166 @@
+{
+ "VERDICT": "A",
+ "arms": {
+  "beam4_bindings": 31,
+  "beam4_bound": 13,
+  "beam4_declared_component_realized": 9,
+  "beam8_bindings": 61,
+  "beam8_bound": 13,
+  "beam8_declared_component_realized": 20,
+  "beam_purely_additive_fraction": 1.0,
+  "exact_completed": 9,
+  "noprune_realized": 9,
+  "unsound_prunes": 0
+ },
+ "by_plan_scale": {
+  "large16-26": {
+   "attempted": 233,
+   "beam4_bound": 8,
+   "exact_completed": 4
+  },
+  "medium8-15": {
+   "attempted": 103,
+   "beam4_bound": 5,
+   "exact_completed": 5
+  },
+  "small<=7": {
+   "attempted": 15,
+   "beam4_bound": 0,
+   "exact_completed": 0
+  },
+  "teacher>=27": {
+   "attempted": 740,
+   "beam4_bound": 0,
+   "exact_completed": 0
+  }
+ },
+ "classification": {
+  "attachment_no_legal_assignment": 163,
+  "dependency_region_mismatch": 450,
+  "downstream_validity_admission_rejection": 1,
+  "primitive_program_support_cap": 1,
+  "proven_structurally_incompatible": 455,
+  "search_budget_exhausted": 12,
+  "success_realization_completed": 9
+ },
+ "distribution_shift": {
+  "production_archive": {
+   "operand": 0.23637633907778297,
+   "pairs": 21470,
+   "root_admissible": 0.21620866325104798
+  },
+  "production_init": {
+   "operand": 0.32171052631578945,
+   "pairs": 1520,
+   "root_admissible": 0.31776315789473686
+  },
+  "teacher_root": {
+   "operand": 0.3518796992481203,
+   "pairs": 665,
+   "root_admissible": 0.3383458646616541
+  },
+  "teacher_witness_matched": {
+   "operand": 1.0,
+   "pairs": 106,
+   "root_admissible": 1.0
+  }
+ },
+ "environment": {
+  "networkx": "3.6.1",
+  "note": "NOT the pinned production image (python 3.11, rdkit 2024.3.5).  Parity is demonstrated two ways: this interpreter reproduces the offline benchmark depth-0 fractions EXACTLY (production_init 0.3217, teacher_root 0.3519) and agrees with the outcome production stored per attempt on 1073/1091, with all 18 differences explained by the lane wall-clock cap.",
+  "numpy": "2.5.3",
+  "python": "3.12.9",
+  "rdkit": "2026.03.6"
+ },
+ "funnel": {
+  "archive_entries": 2,
+  "charged_and_scored": 2,
+  "depth0_operand_available": 233,
+  "exact_completed_at_full_cap": 9,
+  "production_executions": 3,
+  "proposals": 1091,
+  "reached_full_plan_depth": 13,
+  "root_admissible": 218,
+  "selected_for_oracle": 3
+ },
+ "jump_exec_by_parent_size": {
+  "01-09": {
+   "attempts": 587,
+   "executions": 0
+  },
+  "10-19": {
+   "attempts": 159,
+   "executions": 0
+  },
+  "20-29": {
+   "attempts": 218,
+   "executions": 3
+  },
+  "30+": {
+   "attempts": 127,
+   "executions": 0
+  }
+ },
+ "new_oracle_calls": 0,
+ "pairs": 1091,
+ "parent_size_by_channel": {
+  "jump": {
+   "exec_rate": 0.3,
+   "median_heavy": 9.0,
+   "pct_under10": 53.8
+  },
+  "shallow": {
+   "exec_rate": 100.0,
+   "median_heavy": 9.0,
+   "pct_under10": 52.6
+  },
+  "structured": {
+   "exec_rate": 100.0,
+   "median_heavy": 12.0,
+   "pct_under10": 45.5
+  }
+ },
+ "parity": {
+  "agree": 1073,
+  "complete_at_full_cap": 6,
+  "disagreements_all_stored_budget_exhausted": true,
+  "resolve_to_incompatible_at_full_cap": 12,
+  "stored_budget_exhausted": 30,
+  "total": 1091
+ },
+ "realized_shape": {
+  "at_teacher_scale_ge27": 0,
+  "in_teacher_retained_band_0.52_0.96": 0,
+  "offline_comparator": {
+   "completions": 5,
+   "in_band": 3,
+   "median_primitives": 31,
+   "median_retained": 0.63
+  },
+  "primitive_counts": [
+   14,
+   16,
+   14,
+   23,
+   23,
+   16,
+   14,
+   14,
+   14
+  ],
+  "retained_fractions": [
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ]
+ },
+ "run_id": "35fc7bcd4bf5c964294698014c1ed40da483ad013f6b92c6201b01dee2d3d306",
+ "schema_version": "pmo_jump_funnel_verdict_v1",
+ "verdict_statement": "Mostly PROVEN INCOMPATIBLE.  The realizer is doing its job; the jump PROPOSER pairs teacher-scale plans with a production parent population they cannot apply to."
+}
