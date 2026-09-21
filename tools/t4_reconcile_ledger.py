@@ -98,6 +98,28 @@ ARMS: dict[str, tuple[str, str, str]] = {
         "5ht1b",
         "configs/t4_held_target_distilled_5ht1b_d04_250.json",
     ),
+    # Region-repair rescue arms for the cells that exhausted in round zero.  Registered
+    # before launch so they are visible from the moment their contracts exist; an arm
+    # whose volume does not exist yet reports as unlaunched.  Their per-cell budgets are
+    # 248/248/249, not 250, because the measured prior calls are debited -- read the
+    # budget from the contract, never from the arm name.  _standings groups by
+    # (target, seed_index, delta), so each rescue attempt groups with its parent attempts
+    # and the furthest-progressed is selected while the others stay visible.
+    "braf_d06_region_repair": (
+        "compose-t4-region-repair-rescue-braf-d06",
+        "braf",
+        "configs/t4_region_repair_rescue_braf_d06_v1.json",
+    ),
+    "fa7_d06_region_repair": (
+        "compose-t4-region-repair-rescue-fa7-d06",
+        "fa7",
+        "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+    ),
+    "fa7_d04_region_repair": (
+        "compose-t4-region-repair-rescue-fa7-d04",
+        "fa7",
+        "configs/t4_region_repair_rescue_fa7_d04_v1.json",
+    ),
 }
 
 TOLERANCE = 1e-9
