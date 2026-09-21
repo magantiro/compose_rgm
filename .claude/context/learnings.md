@@ -3563,3 +3563,73 @@ independently of whether fa7_0 ever closes.**
   single-core prompt has no atoms outside its core, so ANY implementation returns None. Re-tested on
   a grown state where the guard actually binds, it is killed. The floor-guard lesson, at fixture
   level.
+
+## 2026-09-21 (TWO production chemistry kernels: PMO is rdkit 2023.9.6, T4/editing is 2024.3.5)
+
+- **CORRECTS a standing instruction I repeated to several agents all session.** There are TWO
+  production chemistry kernels in this repo and **the PMO one is NOT 2024.3.5**.
+  `modal_apps/pmo_population_v1_app.py` builds its image with `uv pip install --system --no-deps
+  'PyTDC==1.1.15'` followed by **`rdkit==2023.9.6`**, numpy 1.26.4, pandas 2.1.4, scikit-learn
+  1.2.2, scipy 1.15.0, setuptools 75.6.0, plus an explicit `_rdkit_six_shim()` because PyTDC 1.1.15
+  imports `rdkit.six`, which modern RDKit does not ship. **The image holds ONE rdkit, so the PMO
+  runtime -- oracle AND COMPOSE executor -- runs on 2023.9.6**, while the T4/editing production pin
+  is 2024.3.5. Reproducing PMO numerics on `~/compose_region_pinned_env` (2024.3.5) is therefore NOT
+  reproducing the PMO container.
+- **Why the obvious mirror fails:** PyTDC 1.1.15 pins `rdkit>=2023.9.5,<2024.3.1`, so
+  `uv pip install PyTDC==1.1.15` against rdkit 2024.3.5 is flatly unsatisfiable; production uses
+  `--no-deps` plus the shim. `setuptools>=81` additionally breaks it because `tdc/metadata.py`
+  imports `pkg_resources`. **Working local mirror: python 3.11, rdkit 2023.9.6, PyTDC 1.1.15
+  `--no-deps`, setuptools 69.5.1, plus the shim** -- all 11 atlas-task oracles then construct AND
+  score offline.
+- **CONSEQUENCE: any local PMO number computed under 2024.3.5 needs a parity statement.** This repo
+  has already measured that two rdkit versions can write DIFFERENT canonical SMILES for the same
+  molecule, and that canonical SMILES is used as a CACHE KEY -- so a spelling difference is not
+  cosmetic in any procedure that dedupes on the string. Parity on drug-like molecules also says
+  nothing about parity on the exotic intermediates a search constructs.
+
+## 2026-09-21 (TEST A: construction is NOT the gap -- the refusal is charge, not search)
+
+- **MEASURED, zero oracle calls, 204 attempts (12 destinations x {recorded source, 8 init-bank
+  molecules, 8 live PMO parents}), using `winner_paths.find_path` which recomputes its own MCS
+  correspondence per pair -- so this is CONSTRUCTION for a new pair, not replay of a recorded
+  atom-address sequence:**
+      recorded source    12/12 witness_found; fresh compile reproduces the recorded step count
+                         exactly on 11 of 12, and finds 35 steps where the record has 38
+      transfer           102/192 overall
+      **transfer, NEUTRAL 102/108 = 94.4%, with 102/102 EXACT destination recovery**
+                         re-replayed independently through the production executor
+      search failures    6 of 192 = 3.1%, node budget exhausted at residual 1-6
+- **THE DOMINANT REFUSAL IS NOT SEARCH: 84 of 192 (43.8%) are rejected BEFORE any search with
+  `unreachable_charge_change`**, because 7 of 16 distinct transfer sources carry a net formal charge
+  and every atlas destination is neutral. That is the charge-PRESERVING scope locked on
+  2026-07-26/27 surfacing as a PMO ceiling, **exactly as it surfaced as a T4 ceiling on 5ht1b_2**.
+  **"COMPOSE cannot build these molecules" is FALSIFIED. Construction is not the gap.**
+- **THE TEACHER ROUTES ARE NOT HILL CLIMBS.** MEASURED with 33 diagnostic oracle calls on a
+  production-mirroring kernel: **6 of 11 recorded routes pass through a midpoint scoring BELOW their
+  own source** -- `perindopril_mpo` 0.360 -> **0.009** -> 0.809 (a 39x drop), `qed` 0.796 -> 0.251
+  -> 0.948, plus albuterol, celecoxib, gsk3b, thiothixene. A score-greedy optimizer cannot follow
+  these, so a controller that CAN construct a supplied destination may still never reach it blind.
+  **This independently corroborates the planned-transport dip finding on REAL recorded routes.**
+- **`runtime_supported` in the frozen route distillation is `len(route.actions) <= 32`** -- a route
+  LENGTH threshold, not an executor-support predicate. Its census reads as though jnk3, perindopril,
+  thiothixene and troglitazone have no supported routes; MEASURED, **194 of 194 routes replay
+  EXACTLY** under the current rewrite system, comparing every intermediate by canonical key,
+  including the 41-step and 42-step spines. **Read a support-sounding field's DEFINITION before
+  quoting it as a capability finding.**
+- **THE DOSSIER IS THREE SOURCE MOLECULES, not eleven** (supersedes the earlier "8 of 11 share a
+  start"). 194 routes, 11 tasks, **3 distinct sources**, and **9 of 11 task sections (88.7% of
+  routes) compile from one molecule**. Every section has exactly ONE lineage: a compiled spine plus
+  siblings reusing its action prefix verbatim. **Counting "137 programs" as breadth is counting
+  serialisations.**
+- **Recorded dossier scores are a DIFFERENT EVALUATOR twice over and must never be carried across:**
+  `gsk3b` and `jnk3` there carry `oracle_kind: frozen_tdc_forest` -- a local `.npz` forest, not a
+  PyTDC `Oracle` -- and pytdc 0.3.6 against production 1.1.15. `drd2` was deliberately excluded for
+  exactly this reason, which is the right precedent.
+- **`bond_reroute` appears ZERO times in all 194 routes** (7 of 8 Active8 families exercised). Do not
+  describe the dossier as full-vocabulary supervision.
+- **A guard whose test ANOTHER guard also satisfies is not load-bearing.** `bypass_input_hash_check`
+  survived a battery because the tampered fixture left `payload_sha256` stale, so the PAYLOAD-hash
+  guard raised the same exception the FILE-hash guard would have. Make the tamper internally
+  consistent (re-hash the payload) so only the target check can catch it.
+- **Budget a tree-copying mutation battery as a SERIAL job**: a 780 MB worktree copy per mutation,
+  11 pytest runs taking >20 minutes under contention against ~35 s each unloaded.
