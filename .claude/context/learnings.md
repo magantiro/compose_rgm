@@ -2870,3 +2870,50 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   at 29-40 NEVER binding -- **a single program cannot cover most of these transports, so the
   planner must emit STAGED sub-goals across rounds rather than one monolithic program.** For
   contrast `compile_source_to_target` retains 0 and would need ~50 primitives for celecoxib.
+
+## 2026-09-21 (transport Step 1: the correspondence, and three defects its own validation found)
+
+- **The S-insertability risk I raised is FALSIFIED, by execution.** From a CNOF-only source
+  the real PMO proposal path produced endpoints containing **B, F, I, P and S** -- elements
+  not in the source -- across 97 endpoints (S in 4, P 8, I 6, B 21). So the growth
+  vocabulary READ from `dynamic_program_synthesis.py` (`("C","N","O")` and `("C","N","O","F")`)
+  UNDERSTATES what the path installs, and the two evidence sources disagree with the
+  executed one authoritative. Celecoxib's sulfonamide is not blocked. **Only `amlodipine_mpo`
+  (Cl) is unreached, and that is a BOUND not a proof: presence at n=97 demonstrates
+  installability, absence does not demonstrate impossibility.**
+- **`completeRingsOnly` does NOT give you a ring-complete core.** It constrains the MCS
+  itself while still admitting a LONE ring atom as an attachment point: on the celecoxib
+  transport the core came back as benzene PLUS one atom of a pyrazole whose other four are
+  deleted. Counting that atom as retained claims a ring atom is already correct while its
+  ring must still be rebuilt, which understates install work in the one direction that
+  makes a transport look shorter than it is. Prune to a FIXED POINT -- dropping one atom can
+  break a ring that was fully covered, which is reachable on fused systems.
+- **An atom-only correspondence reports a transport of ZERO for benzene -> cyclohexane.**
+  Retaining an atom skeleton does not retain bond orders. The representation needs a
+  `core_bond_changes` term and `scale` must include it, guarded by "scale == 0 implies the
+  canonical SMILES are equal". Both corrections RAISE the transport estimate; a correction
+  that only ever shortens the estimate should be suspected.
+- **A TAUTOLOGICAL ASSERTION HID A REAL ORDERING DEFECT.** The deletion-order test asserted
+  `len(fragments) >= 1`, which is always true. Made real -- exactly one fragment must
+  survive at every step -- it FAILED: a lowest-in-set-degree peel reached two fragments on
+  the celecoxib pair, because in-set degree ignores how an atom connects to the RETAINED
+  CORE. Fixed by choosing, at each step, an atom that is not a cut vertex of the current
+  surviving graph. The ordering changed, not the assertion.
+- **Some correspondences are NOT realizable by deletion alone, and that is a move class
+  rather than a bug.** Running the validation at scale, 7 of 108 correspondences failed the
+  connectivity check, ALL on `median1`, whose target is the bridged bicyclic camphor. When
+  the retained core's pieces are joined only through atoms being deleted, NO ordering
+  preserves connectivity -- the transport is an excision PLUS a reattachment bond. This is
+  independently the same class as the T4 `5ht1b_2` witness ("a single 8-atom interior
+  two-bridge excision plus one reattachment bond... a deletion-only search cannot express
+  it"). Declare it (`requires_reattachment`) so the planner can pick another alignment or
+  stage the bond, rather than discovering it as an ordering failure.
+- **Adding a diagnostic key to a `validate()` dict broke five tests that read
+  `all(checks.values())`** -- `requires_reattachment: False` is a HEALTHY outcome being read
+  as a failure. Keep verdict keys and diagnosis keys separate, and have the driver and the
+  tests share one explicit notion of which is which.
+- **STEP 1 VALIDATED: 108 correspondences over 15 declared-structure tasks, 0 failures, 13
+  pairs with no shared ring-complete core.** Transport `scale` min 19 / median 36 / max 56 --
+  LARGER than the earlier raw-MCS reading of 21-40, because pruning and bond changes both
+  raise it. Against a realization ceiling of median 16 / max 23 primitives this strengthens
+  rather than weakens the staging conclusion.

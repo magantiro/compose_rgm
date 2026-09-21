@@ -37,6 +37,8 @@ CONTROLLER = ROOT / "src/compose_v4/control/pmo_population_controller.py"
 V21 = ROOT / "src/compose_v4/control/dynamic_program_synthesis_v21.py"
 SUITE = "tests/test_pmo_discovery.py"
 IDENTITY_SUITE = "tests/test_pmo_proposal_scoring_identity.py"
+TRANSPORT = ROOT / "src/compose_v4/control/pmo_transport_correspondence.py"
+TRANSPORT_SUITE = "tests/test_pmo_transport_correspondence.py"
 
 
 @dataclass(frozen=True)
@@ -181,6 +183,105 @@ MUTATIONS = (
             "test_the_scored_archive_records_the_produced_molecule",
         ),
         suite=IDENTITY_SUITE,
+    ),
+    # ---- Step 1: the transport correspondence ----
+    Mutation(
+        name="core_is_not_pruned_to_ring_complete",
+        path=TRANSPORT,
+        old="""        if not drop:
+            return current
+        current -= drop""",
+        new="""        return current
+        current -= drop""",
+        expect_red=(
+            "test_the_core_is_ring_complete_in_both_endpoints",
+            "test_a_lone_ring_atom_is_pruned_out_of_the_core",
+        ),
+        suite=TRANSPORT_SUITE,
+    ),
+    Mutation(
+        name="pruning_does_one_pass_instead_of_reaching_a_fixed_point",
+        path=TRANSPORT,
+        old="""        if not drop:
+            return current
+        current -= drop""",
+        new="""        if not drop:
+            return current
+        return current - drop""",
+        expect_red=("test_pruning_reaches_a_fixed_point_not_just_one_pass",),
+        suite=TRANSPORT_SUITE,
+    ),
+    Mutation(
+        name="scale_ignores_bond_order_changes",
+        path=TRANSPORT,
+        old="        return len(self.r_delete) + len(self.h_install) + len(self.core_bond_changes)",
+        new="        return len(self.r_delete) + len(self.h_install)",
+        expect_red=(
+            "test_a_bond_order_only_difference_is_counted_as_transport",
+            "test_zero_scale_is_reserved_for_genuinely_identical_molecules",
+        ),
+        suite=TRANSPORT_SUITE,
+    ),
+    Mutation(
+        name="attachment_enumerates_only_the_source_side",
+        path=TRANSPORT,
+        old="""                        _boundary(source, kept_source, set(delete), "source")
+                        + _boundary(target, kept_target, set(install), "target")""",
+        new="""                        _boundary(source, kept_source, set(delete), "source")""",
+        expect_red=("test_attachment_interfaces_are_enumerated_on_both_sides",),
+        suite=TRANSPORT_SUITE,
+    ),
+    Mutation(
+        # Reproduces the defect a tautological assertion had been hiding: an in-set
+        # degree peel ignores how an atom connects to the retained core.
+        name="deletion_order_reverts_to_an_in_set_degree_peel",
+        path=TRANSPORT,
+        old="""        ranked = sorted(
+            remaining, key=lambda index: (len(adjacency[index] & surviving), index)
+        )
+        pick = next((index for index in ranked if connected_without(index)), ranked[0])""",
+        new="""        ranked = sorted(
+            remaining, key=lambda index: (len(adjacency[index] & remaining), index)
+        )
+        pick = ranked[0]""",
+        expect_red=("test_deleting_in_the_recorded_order_keeps_every_intermediate_connected",),
+        suite=TRANSPORT_SUITE,
+    ),
+    Mutation(
+        name="install_order_ignores_rings",
+        path=TRANSPORT,
+        old="    return ring + chain",
+        new="    return chain + ring",
+        expect_red=("test_install_order_places_ring_atoms_before_acyclic_ones",),
+        suite=TRANSPORT_SUITE,
+    ),
+    Mutation(
+        name="unparseable_input_returns_empty_instead_of_raising",
+        path=TRANSPORT,
+        old="""    if source is None:
+        raise ValueError(f"source does not parse: {source_smiles!r}")""",
+        new="""    if source is None:
+        return []""",
+        expect_red=("test_unparseable_input_raises_rather_than_returning_no_core",),
+        suite=TRANSPORT_SUITE,
+    ),
+    Mutation(
+        name="disconnected_core_is_never_declared",
+        path=TRANSPORT,
+        old="        return seen != core",
+        new="        return False",
+        expect_red=("test_a_disconnected_core_is_declared_as_requiring_reattachment",),
+        suite=TRANSPORT_SUITE,
+    ),
+    Mutation(
+        # The predicate must DISCRIMINATE: one that always fires also passes the
+        # positive case, so the negative control is what makes the guard real.
+        name="every_core_is_declared_disconnected",
+        path=TRANSPORT,
+        old="        return seen != core",
+        new="        return True",
+        expect_red=("test_a_connected_core_is_not_flagged_for_reattachment",),
+        suite=TRANSPORT_SUITE,
     ),
     # ---- Positive control: bytes change, behaviour does not ----
     Mutation(

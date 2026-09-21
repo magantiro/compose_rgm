@@ -1,0 +1,247 @@
+{
+  "schema_version": "pmo_element_reachability_audit_v1",
+  "oracle_calls": 0,
+  "declared_growth_elements_read_from_source": [
+    "C",
+    "N",
+    "O",
+    "F"
+  ],
+  "executed_census": {
+    "source": "CC(=O)Nc1ccc(O)cc1",
+    "source_elements": [
+      "C",
+      "N",
+      "O"
+    ],
+    "endpoints_censused": 97,
+    "elements_observed": {
+      "B": 21,
+      "C": 97,
+      "F": 3,
+      "I": 6,
+      "N": 87,
+      "O": 88,
+      "P": 8,
+      "S": 4
+    },
+    "executor_rules": {
+      "atom_insert": 319,
+      "atom_delete": 122,
+      "cycle_close": 63,
+      "cycle_open": 20,
+      "atom_restate_semantic": 16,
+      "bond_reroute": 4,
+      "ring_system_restate": 3
+    }
+  },
+  "elements_installed_by_execution": [
+    "B",
+    "F",
+    "I",
+    "P",
+    "S"
+  ],
+  "targets": [
+    {
+      "task": "albuterol_similarity",
+      "goal_kind": "declared_target_structure",
+      "target_elements": [
+        "C",
+        "N",
+        "O"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "amlodipine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "target_elements": [
+        "C",
+        "Cl",
+        "N",
+        "O"
+      ],
+      "elements_outside_growth_vocabulary": [
+        "Cl"
+      ],
+      "installable_by_growth": false
+    },
+    {
+      "task": "celecoxib_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "target_elements": [
+        "C",
+        "F",
+        "N",
+        "O",
+        "S"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "deco_hop",
+      "goal_kind": "declared_smarts",
+      "target_elements": [
+        "C",
+        "N",
+        "O",
+        "S"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "target_elements": [
+        "C",
+        "N",
+        "O"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "median1",
+      "goal_kind": "declared_target_pair",
+      "target_elements": [
+        "C",
+        "O"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "median2",
+      "goal_kind": "declared_target_pair",
+      "target_elements": [
+        "C",
+        "N",
+        "O"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "mestranol_similarity",
+      "goal_kind": "declared_target_structure",
+      "target_elements": [
+        "C",
+        "O"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "osimertinib_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "target_elements": [
+        "C",
+        "N",
+        "O"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "target_elements": [
+        "C",
+        "N",
+        "O"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "ranolazine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "target_elements": [
+        "C",
+        "N",
+        "O"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "scaffold_hop",
+      "goal_kind": "declared_smarts",
+      "target_elements": [
+        "C",
+        "N",
+        "O",
+        "S"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "sitagliptin_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "target_elements": [
+        "C",
+        "F",
+        "N",
+        "O"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "thiothixene_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "target_elements": [
+        "C",
+        "N",
+        "O",
+        "S"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "troglitazone_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "target_elements": [
+        "C",
+        "N",
+        "O",
+        "S"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "valsartan_smarts",
+      "goal_kind": "declared_smarts",
+      "target_elements": [
+        "C",
+        "F",
+        "N",
+        "O"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    },
+    {
+      "task": "zaleplon_mpo",
+      "goal_kind": "declared_molecular_formula",
+      "target_elements": [
+        "C",
+        "N",
+        "O"
+      ],
+      "elements_outside_growth_vocabulary": [],
+      "installable_by_growth": true
+    }
+  ],
+  "blocked_targets": [
+    "amlodipine_mpo"
+  ],
+  "note": "A blocked target is not unreachable in principle: atom_restate_semantic can change an existing atom's element. It is unreachable by INSERTION, so the planner must emit restate-then-grow for those atoms rather than an insert."
+}

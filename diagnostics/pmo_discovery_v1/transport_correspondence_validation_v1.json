@@ -1,0 +1,2229 @@
+{
+  "schema_version": "pmo_transport_correspondence_validation_v1",
+  "oracle_calls": 0,
+  "programs_executed": 0,
+  "correspondences": 108,
+  "validation_failures": [],
+  "pairs_with_no_shared_ring_complete_core": [
+    {
+      "task": "median2",
+      "source": "CC1C(=O)N(C)C(c2ccccc2C2CC2)C1[NH3+]"
+    },
+    {
+      "task": "median2",
+      "source": "CCC(=O)NCC(=O)N1CCCC1c1cccc(Br)c1"
+    },
+    {
+      "task": "median2",
+      "source": "CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1"
+    },
+    {
+      "task": "median2",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1"
+    },
+    {
+      "task": "median2",
+      "source": "CC1CN(C(=O)COc2ccccc2Cl)C(C)C1C(=O)[O-]"
+    },
+    {
+      "task": "mestranol_similarity",
+      "source": "CCC(=O)NCC(=O)N1CCCC1c1cccc(Br)c1"
+    },
+    {
+      "task": "mestranol_similarity",
+      "source": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)c1ccccc1"
+    },
+    {
+      "task": "mestranol_similarity",
+      "source": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1"
+    },
+    {
+      "task": "thiothixene_rediscovery",
+      "source": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2ncnn2C)cn1"
+    },
+    {
+      "task": "thiothixene_rediscovery",
+      "source": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2nc(N)n[nH]2)cn1"
+    },
+    {
+      "task": "thiothixene_rediscovery",
+      "source": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2nc(Br)n[nH]2)cn1"
+    },
+    {
+      "task": "thiothixene_rediscovery",
+      "source": "CC1C(=O)N(C)C(c2ccccc2C2CC2)C1[NH3+]"
+    },
+    {
+      "task": "thiothixene_rediscovery",
+      "source": "CC1C(C(=O)[O-])CCN1C(=O)COc1ccccc1Cl"
+    }
+  ],
+  "scale_summary": {
+    "min": 19,
+    "median": 36,
+    "max": 56
+  },
+  "verdict": "STEP1_VALIDATED",
+  "rows": [
+    {
+      "task": "albuterol_similarity",
+      "goal_kind": "declared_target_structure",
+      "source": "CC(C)(CC#N)Nc1ccc(Br)cc1F",
+      "retain_core": 6,
+      "r_delete": 9,
+      "h_install": 11,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 20,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "albuterol_similarity",
+      "goal_kind": "declared_target_structure",
+      "source": "CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+      "retain_core": 7,
+      "r_delete": 19,
+      "h_install": 10,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 29,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "albuterol_similarity",
+      "goal_kind": "declared_target_structure",
+      "source": "CCC(CC#N)Nc1ccc(Br)c(F)c1",
+      "retain_core": 6,
+      "r_delete": 9,
+      "h_install": 11,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 20,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "albuterol_similarity",
+      "goal_kind": "declared_target_structure",
+      "source": "CCC(CC#N)Nc1ccc(Br)cc1",
+      "retain_core": 6,
+      "r_delete": 8,
+      "h_install": 11,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 19,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "albuterol_similarity",
+      "goal_kind": "declared_target_structure",
+      "source": "CCC(O)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+      "retain_core": 7,
+      "r_delete": 20,
+      "h_install": 10,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 30,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "amlodipine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1Cl)C(=O)N1CC(C(=O)[O-])CC1C",
+      "retain_core": 7,
+      "r_delete": 14,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 2,
+      "scale": 35,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "amlodipine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCC1C(C(=O)[O-])CCN1C(=O)COc1ccccc1Cl",
+      "retain_core": 7,
+      "r_delete": 14,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 2,
+      "scale": 35,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "amlodipine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC1CN(C(=O)COc2ccccc2Cl)C(C)C1C(=O)[O-]",
+      "retain_core": 7,
+      "r_delete": 14,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 2,
+      "scale": 35,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "amlodipine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC1C(C(=O)[O-])CCN1C(=O)COc1ccccc1Cl",
+      "retain_core": 7,
+      "r_delete": 13,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 2,
+      "scale": 34,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "amlodipine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)c1ccccc1",
+      "retain_core": 6,
+      "r_delete": 15,
+      "h_install": 22,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 37,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "celecoxib_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "source": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2ncnn2C)cn1",
+      "retain_core": 6,
+      "r_delete": 18,
+      "h_install": 20,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 38,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "celecoxib_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "source": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2nc(N)n[nH]2)cn1",
+      "retain_core": 6,
+      "r_delete": 18,
+      "h_install": 20,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 38,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "celecoxib_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "source": "CCC(CC#N)Nc1ccc(C)cc1F",
+      "retain_core": 7,
+      "r_delete": 8,
+      "h_install": 19,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 27,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "celecoxib_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "source": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2nc(Br)n[nH]2)cn1",
+      "retain_core": 6,
+      "r_delete": 18,
+      "h_install": 20,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 38,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "celecoxib_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccc(C)cc3)cc2s1",
+      "retain_core": 7,
+      "r_delete": 20,
+      "h_install": 19,
+      "core_bond_changes": 0,
+      "alpha": 2,
+      "scale": 39,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "deco_hop",
+      "goal_kind": "declared_smarts",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+      "retain_core": 10,
+      "r_delete": 16,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 37,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "deco_hop",
+      "goal_kind": "declared_smarts",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccc(O)cc3)cc2s1",
+      "retain_core": 10,
+      "r_delete": 17,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 38,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "deco_hop",
+      "goal_kind": "declared_smarts",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccc(C)cc3)cc2s1",
+      "retain_core": 10,
+      "r_delete": 17,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 38,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "deco_hop",
+      "goal_kind": "declared_smarts",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccc(Cl)cc3)cc2s1",
+      "retain_core": 10,
+      "r_delete": 17,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 38,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "deco_hop",
+      "goal_kind": "declared_smarts",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3F)cc2s1",
+      "retain_core": 10,
+      "r_delete": 17,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 38,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC1C(C(=O)[O-])CCN1C(=O)C(CCl)Oc1ccccc1",
+      "retain_core": 6,
+      "r_delete": 15,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 46,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC1C(C(=O)[O-])CCN1C(=O)C(CCl)Oc1ccccc1",
+      "retain_core": 6,
+      "r_delete": 15,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 2,
+      "scale": 46,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC1C(C(=O)[O-])CCN1C(=O)C(CCl)Oc1ccccc1",
+      "retain_core": 6,
+      "r_delete": 15,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 2,
+      "scale": 46,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 6,
+      "r_delete": 14,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 45,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 6,
+      "r_delete": 14,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 2,
+      "scale": 45,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 6,
+      "r_delete": 14,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 2,
+      "scale": 45,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1Cl)C(=O)N1CCC(C(=O)[O-])C1",
+      "retain_core": 6,
+      "r_delete": 14,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 45,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1Cl)C(=O)N1CCC(C(=O)[O-])C1",
+      "retain_core": 6,
+      "r_delete": 14,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 45,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1Cl)C(=O)N1CCC(C(=O)[O-])C1",
+      "retain_core": 6,
+      "r_delete": 14,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 45,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1F)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 6,
+      "r_delete": 15,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 46,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1F)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 6,
+      "r_delete": 15,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 46,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1F)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 6,
+      "r_delete": 15,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 46,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(=O)c1ccc(C(=O)NC(CC(=O)O)C2CC2)cc1",
+      "retain_core": 9,
+      "r_delete": 11,
+      "h_install": 28,
+      "core_bond_changes": 0,
+      "alpha": 7,
+      "scale": 39,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(=O)c1ccc(C(=O)NC(CC(=O)O)C2CC2)cc1",
+      "retain_core": 9,
+      "r_delete": 11,
+      "h_install": 28,
+      "core_bond_changes": 0,
+      "alpha": 7,
+      "scale": 39,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(=O)c1ccc(C(=O)NC(CC(=O)O)C2CC2)cc1",
+      "retain_core": 9,
+      "r_delete": 11,
+      "h_install": 28,
+      "core_bond_changes": 0,
+      "alpha": 9,
+      "scale": 39,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "fexofenadine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(=O)c1ccc(C(=O)NC(CC(=O)O)C2CC2)cc1",
+      "retain_core": 9,
+      "r_delete": 11,
+      "h_install": 28,
+      "core_bond_changes": 0,
+      "alpha": 8,
+      "scale": 39,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "median1",
+      "goal_kind": "declared_target_pair",
+      "source": "CC1(C(=O)[O-])CCCN(C(=O)C2CCCO2)C1",
+      "retain_core": 2,
+      "r_delete": 15,
+      "h_install": 9,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 24,
+      "checks": {
+        "requires_reattachment": true,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": false,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": true
+    },
+    {
+      "task": "median1",
+      "goal_kind": "declared_target_pair",
+      "source": "CC1CCC(C)(C(=O)[O-])CN1C(=O)C1(C)CCCO1",
+      "retain_core": 2,
+      "r_delete": 17,
+      "h_install": 9,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 26,
+      "checks": {
+        "requires_reattachment": true,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": false,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": true
+    },
+    {
+      "task": "median1",
+      "goal_kind": "declared_target_pair",
+      "source": "CC1CCC(C)(C(=O)[O-])CN1C(=O)C1(C)CCCO1",
+      "retain_core": 2,
+      "r_delete": 17,
+      "h_install": 9,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 26,
+      "checks": {
+        "requires_reattachment": true,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": false,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": true
+    },
+    {
+      "task": "median1",
+      "goal_kind": "declared_target_pair",
+      "source": "CC1CCC(C)(C(=O)N2CCCC(C)(C(=O)[O-])C2)O1",
+      "retain_core": 2,
+      "r_delete": 17,
+      "h_install": 9,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 26,
+      "checks": {
+        "requires_reattachment": true,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": false,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": true
+    },
+    {
+      "task": "median1",
+      "goal_kind": "declared_target_pair",
+      "source": "CC1CCC(C)(C(=O)N2CCCC(C)(C(=O)[O-])C2)O1",
+      "retain_core": 2,
+      "r_delete": 17,
+      "h_install": 9,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 26,
+      "checks": {
+        "requires_reattachment": true,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": false,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": true
+    },
+    {
+      "task": "median1",
+      "goal_kind": "declared_target_pair",
+      "source": "CC1C(C(=O)[O-])CCCN1C(=O)C1(C)CCCO1",
+      "retain_core": 2,
+      "r_delete": 16,
+      "h_install": 9,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 25,
+      "checks": {
+        "requires_reattachment": true,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": false,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": true
+    },
+    {
+      "task": "median1",
+      "goal_kind": "declared_target_pair",
+      "source": "CC1(C(=O)N2CCCC(C(=O)[O-])C2)CCCO1",
+      "retain_core": 2,
+      "r_delete": 15,
+      "h_install": 9,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 24,
+      "checks": {
+        "requires_reattachment": true,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": false,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": true
+    },
+    {
+      "task": "mestranol_similarity",
+      "goal_kind": "declared_target_structure",
+      "source": "CC(Oc1cccc(Cl)c1)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 2,
+      "r_delete": 19,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 40,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "mestranol_similarity",
+      "goal_kind": "declared_target_structure",
+      "source": "CC(Oc1ccc(Cl)cc1)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 2,
+      "r_delete": 19,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 40,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "osimertinib_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C=Cc1ccc(C(=O)NC(CC(=O)OC)C2CC2)cc1",
+      "retain_core": 6,
+      "r_delete": 14,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 45,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "osimertinib_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC1CN(C(=O)COc2ccccc2Cl)C(C)C1C(=O)[O-]",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 29,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 42,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "osimertinib_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCC(NC(=O)C(C)Sc1ccccn1)c1cccc(C)c1",
+      "retain_core": 6,
+      "r_delete": 16,
+      "h_install": 31,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 47,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "osimertinib_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C=CCC(NC(=O)C1CCOCC1)c1c(C)nn(C)c1C",
+      "retain_core": 4,
+      "r_delete": 17,
+      "h_install": 33,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 50,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "osimertinib_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C=CCC(NC(=O)C1CCOCC1)c1c(C)nn(C)c1C",
+      "retain_core": 4,
+      "r_delete": 17,
+      "h_install": 33,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 50,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "osimertinib_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C=CCC(NC(=O)C1CCOCC1)c1c(C)nn(C)c1C",
+      "retain_core": 4,
+      "r_delete": 17,
+      "h_install": 33,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 50,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "osimertinib_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3F)cc2s1",
+      "retain_core": 4,
+      "r_delete": 23,
+      "h_install": 33,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 56,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 18,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 18,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 18,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 18,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCCC(NC(=O)C1CCOCC1)c1c(C)nn(C)c1C",
+      "retain_core": 6,
+      "r_delete": 15,
+      "h_install": 20,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 35,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCC(c1c(C)nn(C)c1C)N(C)C(=O)C1CCOCC1",
+      "retain_core": 5,
+      "r_delete": 16,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 37,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCC(c1c(C)nn(C)c1C)N(C)C(=O)C1CCOCC1",
+      "retain_core": 5,
+      "r_delete": 16,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 8,
+      "scale": 37,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C=CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 18,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C=CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 18,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C=CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 18,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C=CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 18,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 18,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 18,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 18,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "perindopril_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "retain_core": 8,
+      "r_delete": 13,
+      "h_install": 18,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "ranolazine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCC(NC(=O)CSc1ccccn1)c1cccc(C)c1C",
+      "retain_core": 8,
+      "r_delete": 14,
+      "h_install": 23,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 37,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "ranolazine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3C)cc2s1",
+      "retain_core": 4,
+      "r_delete": 22,
+      "h_install": 27,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 49,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "ranolazine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC1C(C(=O)[O-])CCN1C(=O)COc1ccccc1Cl",
+      "retain_core": 9,
+      "r_delete": 11,
+      "h_install": 22,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 33,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "ranolazine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCC1C(C(=O)[O-])CCN1C(=O)COc1ccccc1Cl",
+      "retain_core": 9,
+      "r_delete": 12,
+      "h_install": 22,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 34,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "ranolazine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1Cl)C(=O)N1CCC(C(=O)[O-])C1CO",
+      "retain_core": 9,
+      "r_delete": 13,
+      "h_install": 22,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 35,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "ranolazine_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1Cl)C(=O)N1CCC(C(=O)[O-])C1CO",
+      "retain_core": 9,
+      "r_delete": 13,
+      "h_install": 22,
+      "core_bond_changes": 0,
+      "alpha": 7,
+      "scale": 35,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "scaffold_hop",
+      "goal_kind": "declared_smarts",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+      "retain_core": 10,
+      "r_delete": 16,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 37,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "scaffold_hop",
+      "goal_kind": "declared_smarts",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccc(O)cc3)cc2s1",
+      "retain_core": 10,
+      "r_delete": 17,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 38,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "scaffold_hop",
+      "goal_kind": "declared_smarts",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccc(C)cc3)cc2s1",
+      "retain_core": 10,
+      "r_delete": 17,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 38,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "scaffold_hop",
+      "goal_kind": "declared_smarts",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccc(Cl)cc3)cc2s1",
+      "retain_core": 10,
+      "r_delete": 17,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 38,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "scaffold_hop",
+      "goal_kind": "declared_smarts",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3F)cc2s1",
+      "retain_core": 10,
+      "r_delete": 17,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 38,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "sitagliptin_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(C)OCc1ccc(C(=O)N2CCN(c3ccccc3O)CC2)cc1",
+      "retain_core": 2,
+      "r_delete": 24,
+      "h_install": 26,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 50,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "sitagliptin_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1F)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 7,
+      "r_delete": 14,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 35,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "sitagliptin_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1F)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 7,
+      "r_delete": 14,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 35,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "sitagliptin_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(Oc1ccccc1F)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 7,
+      "r_delete": 14,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 35,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "sitagliptin_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCC(=O)NCC(=O)N1CCCC1c1cccc(Br)c1",
+      "retain_core": 6,
+      "r_delete": 14,
+      "h_install": 22,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 36,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "sitagliptin_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CCC(NC(=O)C1CCOCC1)c1cn(C)nc1C",
+      "retain_core": 4,
+      "r_delete": 15,
+      "h_install": 24,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 39,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "sitagliptin_mpo",
+      "goal_kind": "declared_reference_structure_in_composite",
+      "source": "CC(=O)c1ccc(C(=O)NC(CC(=O)O)C2CC2)cc1",
+      "retain_core": 8,
+      "r_delete": 12,
+      "h_install": 20,
+      "core_bond_changes": 0,
+      "alpha": 7,
+      "scale": 32,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "troglitazone_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccc(C)cc3)cc2s1",
+      "retain_core": 9,
+      "r_delete": 18,
+      "h_install": 22,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 40,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "troglitazone_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccc(O)cc3)cc2s1",
+      "retain_core": 8,
+      "r_delete": 19,
+      "h_install": 23,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 42,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "troglitazone_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "source": "CCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+      "retain_core": 8,
+      "r_delete": 17,
+      "h_install": 23,
+      "core_bond_changes": 0,
+      "alpha": 3,
+      "scale": 40,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "troglitazone_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "source": "CCC1C=C2C(=O)N=C(C(C#N)=CC3=C(C(=O)OC)OCC3)N=C2S1",
+      "retain_core": 2,
+      "r_delete": 23,
+      "h_install": 29,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 52,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "troglitazone_rediscovery",
+      "goal_kind": "declared_target_structure",
+      "source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccc(Cl)cc3)cc2s1",
+      "retain_core": 8,
+      "r_delete": 19,
+      "h_install": 23,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 42,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "valsartan_smarts",
+      "goal_kind": "declared_smarts",
+      "source": "CC(C)OCc1ccc(C(=O)N2CCN(c3ccccc3O)CC2)cc1",
+      "retain_core": 2,
+      "r_delete": 24,
+      "h_install": 26,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 50,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "valsartan_smarts",
+      "goal_kind": "declared_smarts",
+      "source": "CC(Oc1ccccc1F)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 7,
+      "r_delete": 14,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 35,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "valsartan_smarts",
+      "goal_kind": "declared_smarts",
+      "source": "CC(Oc1ccccc1F)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 7,
+      "r_delete": 14,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 35,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "valsartan_smarts",
+      "goal_kind": "declared_smarts",
+      "source": "CC(Oc1ccccc1F)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retain_core": 7,
+      "r_delete": 14,
+      "h_install": 21,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 35,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "valsartan_smarts",
+      "goal_kind": "declared_smarts",
+      "source": "CCC(=O)NCC(=O)N1CCCC1c1cccc(Br)c1",
+      "retain_core": 6,
+      "r_delete": 14,
+      "h_install": 22,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 36,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "valsartan_smarts",
+      "goal_kind": "declared_smarts",
+      "source": "CCC(NC(=O)C1CCOCC1)c1cn(C)nc1C",
+      "retain_core": 4,
+      "r_delete": 15,
+      "h_install": 24,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 39,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "valsartan_smarts",
+      "goal_kind": "declared_smarts",
+      "source": "CC(=O)c1ccc(C(=O)NC(CC(=O)O)C2CC2)cc1",
+      "retain_core": 8,
+      "r_delete": 12,
+      "h_install": 20,
+      "core_bond_changes": 0,
+      "alpha": 7,
+      "scale": 32,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "zaleplon_mpo",
+      "goal_kind": "declared_molecular_formula",
+      "source": "CCC(NC(=O)C(C)Sc1ccccn1)c1cccc(C)c1",
+      "retain_core": 6,
+      "r_delete": 16,
+      "h_install": 17,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 33,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "zaleplon_mpo",
+      "goal_kind": "declared_molecular_formula",
+      "source": "CCC(NC(=O)CSc1ccccn1)c1cccc(C)c1C",
+      "retain_core": 6,
+      "r_delete": 16,
+      "h_install": 17,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 33,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "zaleplon_mpo",
+      "goal_kind": "declared_molecular_formula",
+      "source": "CCC(CC#N)Nc1cccc(Br)c1F",
+      "retain_core": 9,
+      "r_delete": 6,
+      "h_install": 14,
+      "core_bond_changes": 0,
+      "alpha": 7,
+      "scale": 20,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "zaleplon_mpo",
+      "goal_kind": "declared_molecular_formula",
+      "source": "CCC(CC#N)Nc1cccc(Br)c1F",
+      "retain_core": 9,
+      "r_delete": 6,
+      "h_install": 14,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 20,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "zaleplon_mpo",
+      "goal_kind": "declared_molecular_formula",
+      "source": "CCC(CC#N)Nc1cccc(Br)c1F",
+      "retain_core": 9,
+      "r_delete": 6,
+      "h_install": 14,
+      "core_bond_changes": 0,
+      "alpha": 7,
+      "scale": 20,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "zaleplon_mpo",
+      "goal_kind": "declared_molecular_formula",
+      "source": "CCC(CC#N)Nc1cccc(Br)c1F",
+      "retain_core": 9,
+      "r_delete": 6,
+      "h_install": 14,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 20,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "zaleplon_mpo",
+      "goal_kind": "declared_molecular_formula",
+      "source": "CCC(=O)NCC(=O)N1CCCC1c1cccc(Br)c1",
+      "retain_core": 6,
+      "r_delete": 14,
+      "h_install": 17,
+      "core_bond_changes": 0,
+      "alpha": 4,
+      "scale": 31,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "zaleplon_mpo",
+      "goal_kind": "declared_molecular_formula",
+      "source": "CCC(CC#N)Nc1ccccc1F",
+      "retain_core": 9,
+      "r_delete": 5,
+      "h_install": 14,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 19,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "zaleplon_mpo",
+      "goal_kind": "declared_molecular_formula",
+      "source": "CCC(CC#N)Nc1ccccc1F",
+      "retain_core": 9,
+      "r_delete": 5,
+      "h_install": 14,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 19,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "zaleplon_mpo",
+      "goal_kind": "declared_molecular_formula",
+      "source": "CCC(CC#N)Nc1ccccc1F",
+      "retain_core": 9,
+      "r_delete": 5,
+      "h_install": 14,
+      "core_bond_changes": 0,
+      "alpha": 6,
+      "scale": 19,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    },
+    {
+      "task": "zaleplon_mpo",
+      "goal_kind": "declared_molecular_formula",
+      "source": "CCC(CC#N)Nc1ccccc1F",
+      "retain_core": 9,
+      "r_delete": 5,
+      "h_install": 14,
+      "core_bond_changes": 0,
+      "alpha": 5,
+      "scale": 19,
+      "checks": {
+        "requires_reattachment": false,
+        "deletion_connectivity_satisfied_or_reattachment_declared": true,
+        "partitions_source": true,
+        "core_is_ring_complete_substructure": true,
+        "deletion_keeps_source_connected": true,
+        "zero_scale_implies_identical": true
+      },
+      "requires_reattachment": false
+    }
+  ]
+}

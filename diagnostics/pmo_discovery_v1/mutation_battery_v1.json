@@ -1,8 +1,8 @@
 {
   "schema_version": "pmo_discovery_mutation_battery_v1",
   "suite": "tests/test_pmo_discovery.py",
-  "mutations": 13,
-  "killed": 13,
+  "mutations": 22,
+  "killed": 22,
   "positive_controls_green": true,
   "all_guards_load_bearing": true,
   "rows": [
@@ -170,6 +170,122 @@
       "observed_red": [
         "test_every_proposal_endpoint_is_its_own_executed_program_endpoint",
         "test_the_scored_archive_records_the_produced_molecule"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "core_is_not_pruned_to_ring_complete",
+      "file": "pmo_transport_correspondence.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_a_lone_ring_atom_is_pruned_out_of_the_core",
+        "test_the_core_is_ring_complete_in_both_endpoints"
+      ],
+      "observed_red": [
+        "test_a_disconnected_core_is_declared_as_requiring_reattachment",
+        "test_a_lone_ring_atom_is_pruned_out_of_the_core",
+        "test_every_offline_check_passes_on_real_pairs",
+        "test_pruning_reaches_a_fixed_point_not_just_one_pass",
+        "test_the_core_is_ring_complete_in_both_endpoints"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "pruning_does_one_pass_instead_of_reaching_a_fixed_point",
+      "file": "pmo_transport_correspondence.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_pruning_reaches_a_fixed_point_not_just_one_pass"
+      ],
+      "observed_red": [
+        "test_pruning_reaches_a_fixed_point_not_just_one_pass"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "scale_ignores_bond_order_changes",
+      "file": "pmo_transport_correspondence.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_a_bond_order_only_difference_is_counted_as_transport",
+        "test_zero_scale_is_reserved_for_genuinely_identical_molecules"
+      ],
+      "observed_red": [
+        "test_a_bond_order_only_difference_is_counted_as_transport",
+        "test_zero_scale_is_reserved_for_genuinely_identical_molecules"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "attachment_enumerates_only_the_source_side",
+      "file": "pmo_transport_correspondence.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_attachment_interfaces_are_enumerated_on_both_sides"
+      ],
+      "observed_red": [
+        "test_attachment_interfaces_are_enumerated_on_both_sides"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "deletion_order_reverts_to_an_in_set_degree_peel",
+      "file": "pmo_transport_correspondence.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_deleting_in_the_recorded_order_keeps_every_intermediate_connected"
+      ],
+      "observed_red": [
+        "test_deleting_in_the_recorded_order_keeps_every_intermediate_connected",
+        "test_every_offline_check_passes_on_real_pairs"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "install_order_ignores_rings",
+      "file": "pmo_transport_correspondence.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_install_order_places_ring_atoms_before_acyclic_ones"
+      ],
+      "observed_red": [
+        "test_install_order_places_ring_atoms_before_acyclic_ones"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "unparseable_input_returns_empty_instead_of_raising",
+      "file": "pmo_transport_correspondence.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_unparseable_input_raises_rather_than_returning_no_core"
+      ],
+      "observed_red": [
+        "test_unparseable_input_raises_rather_than_returning_no_core"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "disconnected_core_is_never_declared",
+      "file": "pmo_transport_correspondence.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_a_disconnected_core_is_declared_as_requiring_reattachment"
+      ],
+      "observed_red": [
+        "test_a_disconnected_core_is_declared_as_requiring_reattachment"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "every_core_is_declared_disconnected",
+      "file": "pmo_transport_correspondence.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_a_connected_core_is_not_flagged_for_reattachment"
+      ],
+      "observed_red": [
+        "test_a_connected_core_is_not_flagged_for_reattachment"
       ],
       "status": "KILLED"
     },
