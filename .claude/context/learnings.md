@@ -2609,3 +2609,64 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - `enumerate_cycle_close_edges` runs the semantic admission mask and is expensive: 92 zero-excision
   requests cost roughly the wall time of 999 excision ones. Worth it -- a hand-rolled pair search would
   move the ring chemistry out of the kernel and into the module -- but budget for it.
+
+## 2026-09-21 (the chemical prior fixes SA, not QED -- and it was measured at a call site reaching 8.8% of proposals)
+
+- **PREDECLARED PREDICTION FAILED ON QED, AND THE PRIOR IS A LARGE CLEAN WIN ON SA.** Both real,
+  neither cancels the other. Paired on **913 identical decisions** (same parent, same family, same
+  candidate list, same RNG; only the selection rule differs), 80 real production parents, 2,448
+  attempts/arm, pinned kernel WITH torch so no mixed-environment caveat applies:
+      mean dQED   A -0.0383   B -0.0402   paired delta **-0.0018 +- 0.0035  (sigma -0.5)**  FAILED
+      mean dSA    A +0.5192   B +0.3313   paired delta **-0.1879 +- 0.0297  (sigma -6.3)**  WIN
+      %SA<=4      26.3% -> 33.9% (T1.0) -> 36.4% (floor .02/T0.15)
+  The falsifier was sealed at `ae53cd07` BEFORE measuring and is byte-unchanged; it was not relaxed.
+- **TWO CONTROLS MAKE THE QED NULL A REAL ANSWER RATHER THAN A SHRUG.** (1) **93.3% disagreement
+  rate** -- the prior changes the decision on essentially every draw, so this is not "guidance too
+  weak to bite", and sweeping temperature to 0.15 does not rescue QED. (2) **Paired dHeavy =
+  0.000000 with ZERO variance** -- the SA win is structural, not a size artifact, because all five
+  families at that site preserve heavy-atom count. Support identity held 306/306 (B's candidate list
+  is always a permutation of A's), so the prior re-ranks and never filters.
+- **THE SCOPING FINDING, AND IT REDIRECTS THE WORK: the call site reaches only 8.8% of production
+  proposals (503 of 5,742 archived entries), and all five of its families PRESERVE heavy-atom
+  count.** So `atom_insert` (n=498) and `atom_delete` (n=324) -- the two largest net-negative
+  families in the per-edit census -- **never route through it**. **A QED null measured there is not
+  a result about the proposal stream.** I sent the agent to the wrong site; the damaging families
+  and the model's strongest capability are both somewhere else.
+- **THE MODEL DOES SCORE PLACEMENT, which is exactly what the parent-first construction branch
+  needs.** `atom_insert` marks carry `neighbors` as well as `atom_type`. Enrichment against a
+  uniform draw over the same legal insert marks, oxygen-bearing production parents:
+      C_onto_C 7.98 | C_onto_N 6.33 | O_onto_C 2.85 | N_onto_C 1.42 | O_onto_N 0.52 | N_onto_N 0.45 | O_onto_O 0.15
+  Heteroatom-onto-heteroatom suppressed **~15-18x** relative to C-C -- precisely the polyperoxide /
+  `N#CCNOCO` class the construction branch emits. **CAVEATS THE AGENT STATED AND I AM KEEPING: the
+  O_onto_O row rests on 5 states (indicative, not measured), and the MAGNITUDES ARE NOT STABLE
+  across parent subsets** (an all-parent sample put O_onto_N at 0.118 where the oxygen-restricted
+  one puts it at 0.52). **The ORDERING reproduces; never quote a single magnitude.**
+- **CONSEQUENCE: wire the prior into the CONSTRUCTION lane, not `current_state_program`.** That is
+  where the placement knowledge and the measured damage are both located. `path_log_likelihood`
+  ships for ranking a constructed path -- rank different-length paths by `per_step`, same-length by
+  `total`, always report `unjoined_steps`.
+- **A per-family attribution from 9-15 states was BACKWARDS against 199-300.** An earlier signal
+  probe reported signal in atom_restate/cycle_close and none in bond_reroute; the better-powered
+  paired data has **bond_reroute improving most** (dQED -0.0311 -> -0.0188). The paired numbers
+  supersede it. Also: SA improves in ALL FIVE families while QED improves in none materially, and
+  `cycle_close` is dQED-POSITIVE in both arms with the worst dSA (+0.9) -- independently
+  reproducing the "QED and SA disagree about ring closure" finding from the construction branch.
+- **DIVERSITY IS THE TRADE AND IT IS MILD AT THE DEFAULT.** Distinct endpoints 1464 (A) -> 1359
+  (92.8%) at floor .05/T1.0 -> 1136 (77.6%) at floor .02/T0.15. Parents covered identical (67 of
+  80) in every arm. The sharpest arm buys +10.1 points of %SA<=4 for -22% distinct endpoints;
+  floor 0.05 / T1.0 is the defensible operating point.
+- **Do NOT weight the FAMILY choice with this model.** It puts 0.38 on atom_restate but only 0.063
+  on cycle_close -- and cycle_close is the one family whose edits GAIN QED. Keep family uniform.
+- **THE CHECKPOINT IS PROVISIONAL AND WAS SINGLE-COPY.** `ringcore_a7546e2_best.pt` (16,000 steps,
+  scope `3721d69851110fdd`, ring catalog `639ff6078c32d43c` matching the frozen production value)
+  is a `PROVISIONAL_EDITING_CHECKPOINT` selected by hazard-inclusive GM loss, which
+  `configs/ringcore_v1_checkpoint_selection.json` **forbids for frozen results** -- so it is fine
+  for a mechanism probe and NOT for a published number. **Its Modal run directory is gone from both
+  profiles**; backed up to `~/compose_ckpt_backup/` and verified byte-identical (`24117dfe...`).
+  Every remote sibling is <=3000 steps.
+- **Precedent worth knowing: `control/learned_proposal.py` already exists** --
+  `return_weighted_proposal_nce_v1`, a 4096-dim linear NCE over Morgan fingerprints trained on
+  campaign RETURN, consumed by rejection sampling, whose result was a **best-score null** and whose
+  README says "do not extend this recipe unchanged". It does NOT bear on a chemistry prior: it is
+  task-trained, so it carries objective information and is a different object. If anything its null
+  supports the diagnosis that the missing thing is chemistry, not return.
