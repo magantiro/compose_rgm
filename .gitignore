@@ -128,4 +128,5 @@ diagnostics/**/source_capsule_v[0-9]/
 
 # Side-loaded PyPI packages for that evaluator's import path. Declared properly as
 # the "fragment_eval" extra in pyproject.toml; install rather than commit.
+.pydeps
 .pydeps/
