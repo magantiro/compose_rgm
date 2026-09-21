@@ -2059,3 +2059,45 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   row is 93.53 / 97.58 / 37.67 / 0.726. The per-drug spread is large -- CYCLOTHIAZIDE scores
   quality 0.00 on all three seeds because its core is simply not drug-like -- so a single
   instance over-states uniqueness and quality and hides the validity deficit entirely.
+
+## 2026-09-21 (the fragment "validity" column was task success -- a 90-point mislabel)
+
+- **A stricter condition reported under a weaker condition's name understates you, and it
+  understated COMPOSE by up to 90 points.** The fragment harness emits an unparseable placeholder
+  for any endpoint failing the TASK constraint, so the official `evaluate_smiles` counts it
+  invalid. The resulting number was printed in a table column headed "validity" beside GenMol --
+  whose evaluator never inspects the prompt fragment at all. Corrected, per-sample, over 90 shards:
+      task            old "validity"   chemical validity (comparator definition)   GenMol
+      motif                  41.43                       85.40                      82.90
+      superstructure         93.53                       93.63                      97.50
+      decoration              3.50                       93.47                      96.60
+  Decoration went from "catastrophic, 93 points behind" to "3 points behind", and motif from
+  41 points behind to **2.5 points AHEAD**. The decomposition had been in the artifact the whole
+  time; the TABLE was what conflated them. **Check which quantity sits under each column heading
+  before comparing to anyone, especially when your own pipeline self-censors its output.**
+- **Per-sample audit of the two rows whose emissions were persisted (200 attempts) settles the
+  mechanism, and it is conflation -- not an adapter bypass or a serialization failure.**
+  motif/BARICITINIB/seed0: 100 attempts, 71 produced, and of those 71 **chemically valid 71,
+  connected 71, graph-valid 71 (re-enters a production MolecularGraph and passes
+  `is_valid_state`), fragment-containing 71**, task-successful **8**. All 63 rejections are
+  `task_only: missing_fragment_or_attachment`; zero are chemistry. `emitted` is always literally
+  a committed endpoint, so nothing is produced outside the commit path.
+  superstructure/BARICITINIB/seed0: 100/100 on every condition.
+- **`100% valid` and `100% valid of what` are different claims and the denominator decides.**
+  100.0000% of COMMITTED endpoints are chemically valid on all three tasks -- that is the
+  by-construction property. Chemical validity over ATTEMPTS is 85.4-93.6%, and the entire gap is
+  trajectories that committed NOTHING (rejection budget exhausted or zero events). That is a
+  sampler-efficiency number, not a validity number, and collapsing the two in either direction is
+  wrong. State the denominator every time.
+- **Self-censoring poisons the secondary metrics, and counters cannot repair them.** Uniqueness,
+  quality, diversity and distance were scored over the EMITTED set. For superstructure only 3 of
+  2,809 committed endpoints were withheld, so those numbers stand. For motif (~51% censored) and
+  decoration (~96%) they describe the surviving subset, not the generator, and fixing them needs
+  the molecules re-scored -- which is impossible after the fact because only counts and five
+  example SMILES per row were persisted. **Persist the full emission list, or accept that any
+  metric over a filtered set is uncorrectable later.**
+- **The missing capability is conditional control of WHERE a valid edit lands, not validity.**
+  Motif is 85.4% chemically valid and 84.8% fragment-containing yet 41.4% task-successful;
+  decoration is 93.5% / 93.4% / 3.5%. The region lock forbids touching the core but does nothing
+  to direct growth to a declared attachment site. Name that "conditional task success", never
+  "validity".

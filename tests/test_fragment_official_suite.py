@@ -222,3 +222,63 @@ def test_distance_reference_parses_for_every_released_prompt():
             ("MARIBAVIR", "scaffold_morphing"),
         ]
     ), changed
+
+
+def test_task_success_is_never_reported_as_chemical_validity():
+    """The two quantities must stay distinct, and ordered.
+
+    The suite's original "validity" column was task success: the sampler
+    withholds any endpoint failing the task constraint and emits an unparseable
+    placeholder, which the official function counts as invalid. Placed beside a
+    baseline whose evaluator never inspects the prompt fragment, that understated
+    COMPOSE by 42 points on motif extension and 90 on scaffold decoration.
+
+    Two invariants hold by construction and are asserted over every shard:
+    a molecule cannot satisfy the task without being chemically valid, and it
+    cannot contain the fragment without having been produced at all.
+    """
+    import json
+
+    shard_dir = ROOT / "diagnostics/fragment_official_suite_v2/shards"
+    shards = sorted(shard_dir.glob("*.json"))
+    assert shards, "no shards to audit"
+
+    checked = 0
+    for path in shards:
+        shard = json.loads(path.read_text())
+        for task, result in shard["results"].items():
+            for drug, entries in result["per_drug"].items():
+                for row in entries:
+                    where = f"{task}/{drug}/seed{row['seed']}"
+                    produced = row["committed_endpoints"]
+                    valid = row["committed_chemically_valid"]
+                    contained = row["committed_fragment_preserving"]
+                    task_ok = row["emitted_nonempty"]
+
+                    # Every committed endpoint is a valid connected molecule.
+                    assert valid == produced, where
+                    # Containment and task success are subsets, in that order.
+                    assert contained <= produced, where
+                    assert task_ok <= produced, where
+                    # The old "validity" column can only ever be <= the
+                    # comparator's definition. If these were ever equal-by-
+                    # construction the distinction would be vacuous; assert the
+                    # ordering, not equality.
+                    assert task_ok <= valid, where
+                    checked += 1
+    assert checked == 90, checked
+
+
+def test_corrected_table_reports_task_success_separately():
+    """The corrected artifact must carry both columns, not one relabelled."""
+    import json
+
+    path = ROOT / "diagnostics/fragment_official_suite_v2/corrected_table.json"
+    payload = json.loads(path.read_text())
+    for task, block in payload["tasks"].items():
+        keys = set(block["summary"])
+        assert {"chemical_validity", "task_success", "fragment_containment"} <= keys, task
+        # Secondary metrics must be flagged wherever the task filter removed a
+        # material share of the committed endpoints.
+        if block["censoring_pct_of_committed"] > 5.0:
+            assert not block["secondary_metrics_valid"], task

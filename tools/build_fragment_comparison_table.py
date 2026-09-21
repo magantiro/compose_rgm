@@ -132,6 +132,10 @@ def main() -> None:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, indent=2))
 
+    print("!! COMPOSE's row below prints TASK SUCCESS in the validity column.")
+    print("!! That is NOT the comparator's definition of validity, which never")
+    print("!! inspects the prompt fragment. For the like-for-like comparison read")
+    print("!! diagnostics/fragment_official_suite_v2/corrected_table.json.")
     print(f"sampler {suite['identity']['sampler_config_sha256'][:16]}  "
           f"rdkit {suite['identity']['kernel']['rdkit']}")
     print(f"{'task':24s} {'method':13s} {'valid':>7s} {'uniq':>7s} {'qual':>7s} "
@@ -140,12 +144,12 @@ def main() -> None:
         flag = "" if row["complete"] else "  [PARTIAL]"
         if row.get("withheld_reason"):
             flag += f"  [WITHHELD: {row['withheld_reason']}]"
-        for method in ("COMPOSE", "GenMol", "SAFE-GPT", "InVirtuoGen"):
-            entry = row[method]
+        for method in ("COMPOSE(task_success)", "GenMol", "SAFE-GPT", "InVirtuoGen"):
+            entry = row["COMPOSE" if method.startswith("COMPOSE") else method]
             line = " ".join(fmt(entry, m) for m in METRICS)
-            label = row["task"] if method == "COMPOSE" else ""
-            print(f"{label:24s} {method:13s} {line}"
-                  f"{flag if method == 'COMPOSE' else ''}")
+            label = row["task"] if method.startswith("COMPOSE") else ""
+            print(f"{label:24s} {method:21s} {line}"
+                  f"{flag if method.startswith('COMPOSE') else ''}")
         print()
     print(f"wrote {args.output}")
 

@@ -1,0 +1,100 @@
+{
+  "schema": "compose_fragment_corrected_table_v1",
+  "sampler_config_sha256": "805b2d10fa863c278dfd760fb3b9f5fd29eb94f91ef1653b1bf5ebe44aaab9ae",
+  "correction": "The column previously printed as 'validity' is task_success. chemical_validity is the GenMol-comparable quantity and is what belongs beside a baseline validity column.",
+  "tasks": {
+    "motif_extension": {
+      "rows": 30,
+      "withheld": false,
+      "summary": {
+        "chemical_validity": {
+          "mean": 85.39999999999999,
+          "std": 0.21602468994692955
+        },
+        "fragment_containment": {
+          "mean": 84.8,
+          "std": 0.408248290463863
+        },
+        "task_success": {
+          "mean": 41.43333333333333,
+          "std": 0.8055363982396396
+        },
+        "produced": {
+          "mean": 85.39999999999999,
+          "std": 0.21602468994692955
+        }
+      },
+      "valid_share_of_produced_pct": 100.0,
+      "committed_endpoints": 2562,
+      "emitted_after_task_filter": 1243,
+      "censored_by_task_filter": 1319,
+      "censoring_pct_of_committed": 51.4832162373146,
+      "secondary_metrics_valid": false,
+      "secondary_metrics_note": [
+        "uniqueness/quality/diversity/distance were scored over the emitted set, which excludes 1319 of 2562 committed endpoints (51.5%). They describe the surviving subset, NOT the generator, and cannot be corrected from counters -- re-scoring the committed endpoints requires the molecules, which were not persisted."
+      ]
+    },
+    "scaffold_decoration": {
+      "rows": 30,
+      "withheld": false,
+      "summary": {
+        "chemical_validity": {
+          "mean": 93.46666666666665,
+          "std": 0.40276819911981615
+        },
+        "fragment_containment": {
+          "mean": 93.36666666666667,
+          "std": 0.4027681991198201
+        },
+        "task_success": {
+          "mean": 3.5,
+          "std": 0.3559026084010437
+        },
+        "produced": {
+          "mean": 93.46666666666665,
+          "std": 0.40276819911981615
+        }
+      },
+      "valid_share_of_produced_pct": 100.0,
+      "committed_endpoints": 2804,
+      "emitted_after_task_filter": 105,
+      "censored_by_task_filter": 2699,
+      "censoring_pct_of_committed": 96.25534950071327,
+      "secondary_metrics_valid": false,
+      "secondary_metrics_note": [
+        "uniqueness/quality/diversity/distance were scored over the emitted set, which excludes 2699 of 2804 committed endpoints (96.3%). They describe the surviving subset, NOT the generator, and cannot be corrected from counters -- re-scoring the committed endpoints requires the molecules, which were not persisted."
+      ]
+    },
+    "superstructure_generation": {
+      "rows": 30,
+      "withheld": false,
+      "summary": {
+        "chemical_validity": {
+          "mean": 93.63333333333333,
+          "std": 0.16996731711975632
+        },
+        "fragment_containment": {
+          "mean": 93.53333333333335,
+          "std": 0.16996731711976099
+        },
+        "task_success": {
+          "mean": 93.53333333333335,
+          "std": 0.16996731711976099
+        },
+        "produced": {
+          "mean": 93.63333333333333,
+          "std": 0.16996731711975632
+        }
+      },
+      "valid_share_of_produced_pct": 100.0,
+      "committed_endpoints": 2809,
+      "emitted_after_task_filter": 2806,
+      "censored_by_task_filter": 3,
+      "censoring_pct_of_committed": 0.10679957280170879,
+      "secondary_metrics_valid": true,
+      "secondary_metrics_note": [
+        "uniqueness/quality/diversity/distance were scored over the emitted set, which excludes 3 of 2809 committed endpoints (0.1%). Censoring is immaterial, so they stand."
+      ]
+    }
+  }
+}
