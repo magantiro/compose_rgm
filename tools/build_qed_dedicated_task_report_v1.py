@@ -152,6 +152,20 @@ def main() -> None:
                 ),
                 "reading": "the wasted budget is eliminated, not reduced, because an endpoint "
                            "below the similarity floor can no longer become a candidate",
+                "legacy_full_panel_solve_rate": legacy["rate"],
+                "legacy_sources": legacy["records"],
+                "corrected_pilot_solve_rate": metrics["solved_at_k_rate"],
+                "corrected_sources": metrics["sources"],
+                "CONFOUNDED_do_not_attribute_the_solve_rate_gap_to_the_support_fix": (
+                    "two things changed between the legacy run and this one: the similarity "
+                    "floor moved into the support, AND the proposal pool per round went from 8 "
+                    "to 48, so this run inspects roughly eight times as many molecules per "
+                    "source (326 distinct property-evaluated against a legacy proposal path "
+                    "that property-evaluated only what it charged). The support fix is "
+                    "established INDEPENDENTLY by the zero-waste measurement; the difference "
+                    "in solve rate is not attributable to it alone, and the two runs also "
+                    "cover different source sets (800 against a 50-source systematic sample)."
+                ),
             },
         },
         "pilot": {

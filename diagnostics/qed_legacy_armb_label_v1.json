@@ -6,6 +6,13 @@
   "the similarity floor lived in the REWARD (score = QED * indicator), so endpoints below the floor were admitted as candidates and consumed charged queries while scoring 0.0",
   "the task was ProgramTask(kind='pmo'), a dispatch label, not a dedicated QED-editing task with contract-governed thresholds"
  ],
+ "search_configuration": {
+  "budget": 48,
+  "rounds": 5,
+  "queries_per_round": 8,
+  "proposal_pool_per_round": 8,
+  "property_evaluated_in_proposal_path": false
+ },
  "records": 800,
  "source_index_range": [
   0,

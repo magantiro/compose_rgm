@@ -38,8 +38,16 @@ def main() -> None:
 
     solved = charged = zero_scored = inadmissible_charged = proposed = 0
     indices = []
+    config = {}
     for record in records:
         indices.append(record["index"])
+        if not config:
+            config = {
+                key: record.get(key)
+                for key in ("budget", "rounds", "queries_per_round")
+            }
+            config["proposal_pool_per_round"] = record.get("queries_per_round")
+            config["property_evaluated_in_proposal_path"] = False
         scored = record.get("scored", [])
         charged += len(scored)
         zero_scored += sum(1 for row in scored if row["score"] <= 0.0)
@@ -71,6 +79,7 @@ def main() -> None:
                 "QED-editing task with contract-governed thresholds"
             ),
         ],
+        "search_configuration": config,
         "records": len(records),
         "source_index_range": [min(indices), max(indices)] if indices else None,
         "charged_scored_endpoints": charged,

@@ -13,14 +13,11 @@
  "frozen_path_check": {
   "method": "git diff against merge-base with main, plus untracked files",
   "positive_control": {
-   "total_changed_or_new_paths_seen": 6,
+   "total_changed_or_new_paths_seen": 3,
    "sample": [
-    "diagnostics/qed_dedicated_task_comparison_v1.json",
-    "diagnostics/qed_dedicated_task_fix_verification_v1.json",
-    "diagnostics/qed_dedicated_task_v1.json",
     "diagnostics/qed_legacy_armb_label_v1.json",
-    "tools/analyze_qed_dedicated_task_v1.py",
-    "tools/build_qed_dedicated_task_report_v1.py"
+    "tools/build_qed_dedicated_task_report_v1.py",
+    "tools/label_legacy_qed_armb_v1.py"
    ],
    "why": "a frozen-path check that saw NOTHING would also report CLEAN. This confirms the check observes real changes before concluding none of them are frozen."
   },
@@ -354,7 +351,12 @@
    "legacy_zero_scored_endpoints": 14058,
    "corrected_zero_scored_charged_per_source": 0.0,
    "corrected_admitted_fraction_of_proposals": 0.7539976553341149,
-   "reading": "the wasted budget is eliminated, not reduced, because an endpoint below the similarity floor can no longer become a candidate"
+   "reading": "the wasted budget is eliminated, not reduced, because an endpoint below the similarity floor can no longer become a candidate",
+   "legacy_full_panel_solve_rate": 0.085,
+   "legacy_sources": 800,
+   "corrected_pilot_solve_rate": 0.24,
+   "corrected_sources": 50,
+   "CONFOUNDED_do_not_attribute_the_solve_rate_gap_to_the_support_fix": "two things changed between the legacy run and this one: the similarity floor moved into the support, AND the proposal pool per round went from 8 to 48, so this run inspects roughly eight times as many molecules per source (326 distinct property-evaluated against a legacy proposal path that property-evaluated only what it charged). The support fix is established INDEPENDENTLY by the zero-waste measurement; the difference in solve rate is not attributable to it alone, and the two runs also cover different source sets (800 against a 50-source systematic sample)."
   }
  },
  "pilot": {
@@ -825,6 +827,13 @@
    "the similarity floor lived in the REWARD (score = QED * indicator), so endpoints below the floor were admitted as candidates and consumed charged queries while scoring 0.0",
    "the task was ProgramTask(kind='pmo'), a dispatch label, not a dedicated QED-editing task with contract-governed thresholds"
   ],
+  "search_configuration": {
+   "budget": 48,
+   "rounds": 5,
+   "queries_per_round": 8,
+   "proposal_pool_per_round": 8,
+   "property_evaluated_in_proposal_path": false
+  },
   "records": 800,
   "source_index_range": [
    0,
