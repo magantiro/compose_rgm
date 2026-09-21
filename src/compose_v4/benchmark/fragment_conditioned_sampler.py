@@ -115,6 +115,11 @@ class SamplingReceipt:
     # -- is what distinguishes a designed linker from an inherited seed.  Empty
     # for single-core prompts, where the quantity is undefined.
     linker_lengths: list[int] = field(default_factory=list)
+    # Events refused because they did not lengthen a path still short of its
+    # target.  Zero unless the path program is active.
+    path_rejections: int = 0
+    # The per-trajectory target drawn from the declared band, one per attempt.
+    path_targets: list[int] = field(default_factory=list)
 
 
 class FragmentConditioningError(RuntimeError):
@@ -437,6 +442,12 @@ def sample_completion(
     control = control or AttachmentControlConfig()
     spec = context.attachment or AttachmentSpec((), (), (frozenset(context.locked_slots),))
     controller = AttachmentController(spec, context.locked_slots, control)
+    # The path target is drawn ONCE per trajectory, from the declared band, and
+    # only when the specification declares two retained regions.  Drawing it
+    # here rather than per event keeps one linker goal per trajectory; drawing
+    # it at all is skipped when the program is vacuous, so a single-core prompt
+    # keeps a bit-identical RNG stream.
+    path_target = controller.path_target(rng) if controller.path_active else 0
     lock = RegionLock(
         context.start_state,
         context.locked_slots,
@@ -472,9 +483,15 @@ def sample_completion(
                 receipt.lock_rejections += 1
                 continue
             admitted, reason = controller.permits(successor, state)
+            if admitted:
+                admitted, reason = controller.path_permits(
+                    successor, state, path_target
+                )
             if not admitted:
                 if reason == "undeclared_interface":
                     receipt.interface_rejections += 1
+                elif reason in ("no_path_progress", "path_disconnected"):
+                    receipt.path_rejections += 1
                 else:
                     receipt.staging_rejections += 1
                 continue
@@ -496,6 +513,8 @@ def sample_completion(
         state = successor
         events += 1
 
+    if controller.path_active:
+        receipt.path_targets.append(path_target)
     receipt.events.append(events)
     if events == 0:
         return None

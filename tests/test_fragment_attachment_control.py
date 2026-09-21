@@ -1021,3 +1021,67 @@ def test_one_frozen_parameter_set_covers_every_prompt():
         f"the controller held {len(seen)} distinct parameter sets across the "
         "panel; it must hold exactly one"
     )
+
+
+# ---- Two-interface path program ----
+#
+# v1 of this predicate is FALSIFIED (see
+# diagnostics/fragment_path_program_v1_falsification.json): a per-event monotone
+# path predicate is unsatisfiable, because no single legal event lengthens the
+# core-to-core path. It is retained OFF by default, and these guards hold the
+# properties the next version must also satisfy.
+
+
+def test_path_program_is_off_by_default():
+    assert AttachmentControlConfig().path_program is False
+    assert AttachmentControlConfig(enabled=True).path_program is False
+
+
+def test_path_program_is_vacuous_for_a_single_core_prompt():
+    """Activation must come from the SPECIFICATION: two retained regions."""
+    config = AttachmentControlConfig(enabled=True, path_program=True)
+    for task in (FragmentTask.MOTIF_EXTENSION, FragmentTask.SCAFFOLD_DECORATION):
+        prompt = _prompt(task, "BARICITINIB")
+        context = build_prompt_context(prompt, control=config)
+        controller = AttachmentController(
+            context.attachment, context.locked_slots, config
+        )
+        assert not controller.path_active
+        assert not controller.path_unsatisfied(context.start_state, 3)
+        ok, _ = controller.path_permits(
+            context.start_state, context.start_state, 3
+        )
+        assert ok
+
+
+def test_path_program_activates_on_a_two_core_prompt():
+    config = AttachmentControlConfig(enabled=True, path_program=True)
+    for prompt in _linker_prompts():
+        context = build_prompt_context(
+            prompt, control=config, linker_bridge_atoms=1
+        )
+        controller = AttachmentController(
+            context.attachment, context.locked_slots, config
+        )
+        assert controller.path_active, prompt.drug_name
+        # Seed length 1 against a target of 3 is unsatisfied -- which is exactly
+        # what coverage staging could NOT express, since both interfaces are
+        # already covered by the seed at event 0.
+        assert controller.path_unsatisfied(context.start_state, 3)
+        assert not controller.path_unsatisfied(context.start_state, 1)
+
+
+def test_path_target_is_drawn_from_the_declared_band():
+    config = AttachmentControlConfig(
+        enabled=True, path_program=True, path_length_min=2, path_length_max=5
+    )
+    prompt = _linker_prompts()[0]
+    context = build_prompt_context(prompt, control=config, linker_bridge_atoms=1)
+    controller = AttachmentController(
+        context.attachment, context.locked_slots, config
+    )
+    rng = np.random.default_rng(20260921)
+    draws = {controller.path_target(rng) for _ in range(200)}
+    assert draws <= {2, 3, 4, 5}
+    # It must VARY -- a target pinned per instance is per-instance tuning.
+    assert len(draws) > 1

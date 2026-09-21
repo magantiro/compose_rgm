@@ -88,6 +88,24 @@ class AttachmentControlConfig:
     # actually has.  Without this the prior's order is carried onto a site that
     # cannot accept it and the executor refuses the whole event.
     realize_redirected_order: bool = True
+    # ---- Two-interface path construction ----
+    #
+    # A declared-interface specification cannot express "build a linker between
+    # these two sites".  Measured: with a seeded one-atom bridge the seed
+    # already covers BOTH declared interfaces at event 0, so coverage staging is
+    # vacuous from the first step and 121 of 122 committed endpoints hold the
+    # seeded length.  Coverage is the wrong predicate; the length of the
+    # core-to-core PATH is the right one, and it must be a decision variable
+    # rather than whatever the prior happens to leave behind.
+    #
+    # Vacuous unless the prompt declares two retained regions, which is a
+    # property of the SPECIFICATION and never of a drug or a task name.
+    path_program: bool = False
+    # Inclusive band the realized path length is steered into.  One band for
+    # every instance; the target is drawn per TRAJECTORY from it, so a run
+    # explores the declared band instead of pinning one length per prompt.
+    path_length_min: int = 2
+    path_length_max: int = 5
 
 
 @dataclass(frozen=True)
@@ -266,6 +284,70 @@ class AttachmentController:
         return None
 
     # ---- Pathwise admission ----
+
+    # ---- Two-interface path construction ----
+
+    @property
+    def path_active(self) -> bool:
+        """True only when the SPECIFICATION declares two retained regions.
+
+        Single-core prompts have one lock group and the program is vacuous, the
+        same way the attachment controller is vacuous on a prompt that declares
+        no interface.  Nothing here reads a drug or a task.
+        """
+        return (
+            self._config.enabled
+            and self._config.path_program
+            and len(self._spec.lock_groups) >= 2
+        )
+
+    def path_target(self, rng) -> int:
+        """Draw this trajectory's target path length from the declared band.
+
+        Drawn per TRAJECTORY, never fixed per instance: one band covers every
+        prompt, and a run explores it rather than pinning a single length to a
+        drug.
+        """
+        low = int(self._config.path_length_min)
+        high = max(low, int(self._config.path_length_max))
+        return int(rng.integers(low, high + 1))
+
+    def path_unsatisfied(self, state: MolecularGraph, target: int) -> bool:
+        """True while the realized core-to-core path is shorter than ``target``.
+
+        The predicate is the MEASUREMENT: ``realized_linker_length`` is the same
+        function the artifact reports, so the program and the number that judges
+        it cannot disagree.  A path longer than the target is left alone -- the
+        program builds a linker, it does not trim one, and refusing longer states
+        would reject chemistry the prior legitimately produced.
+        """
+        if not self.path_active:
+            return False
+        realized = self.realized_linker_length(state)
+        return realized is not None and realized < target
+
+    def path_permits(
+        self, successor: MolecularGraph, predecessor: MolecularGraph, target: int
+    ) -> tuple[bool, str]:
+        """Admit only events that lengthen the path while it is short.
+
+        This is the path analogue of attachment-first staging, and it is what
+        coverage staging cannot express: with a seeded bridge both interfaces
+        are already covered, so a coverage predicate is satisfied at event 0
+        while the path is still one atom long.
+        """
+        if not self.path_active:
+            return True, ""
+        if not self.path_unsatisfied(predecessor, target):
+            return True, ""
+        before = self.realized_linker_length(predecessor)
+        after = self.realized_linker_length(successor)
+        if after is None:
+            # The event severed the cores; a linker prompt has no such endpoint.
+            return False, "path_disconnected"
+        if before is not None and after <= before:
+            return False, "no_path_progress"
+        return True, ""
 
     def permits(self, successor: MolecularGraph, predecessor: MolecularGraph) -> tuple[bool, str]:
         """Admit or refuse a candidate successor; returns (ok, reason_code)."""

@@ -1,0 +1,30 @@
+{
+  "schema": "compose_fragment_path_program_v1_falsification_v1",
+  "what_was_built": "a per-event monotone path predicate: while the realized core-to-core path is shorter than a per-trajectory target drawn from a global band, admit only events that lengthen it",
+  "predeclared_falsifier": "if realized length stays at the seed for >90% of committed endpoints, the DESIGN is wrong rather than the budget being small",
+  "outcome": "FALSIFIED, and worse than the stated threshold: the program commits ZERO endpoints",
+  "measured": {
+    "arm_off_attachment_only": {
+      "committed": 26,
+      "length_histogram": {
+        "1": 26
+      },
+      "above_seed": 0,
+      "path_rejections": 0
+    },
+    "arm_on_path_program": {
+      "committed": 0,
+      "length_histogram": {},
+      "above_seed": 0,
+      "path_rejections": 61
+    }
+  },
+  "root_cause_measured": {
+    "single_event_test": "over 600 model draws from a seeded start state, 30 passed the region lock and ALL 30 left the path length unchanged; 0 lengthened it",
+    "unconstrained_reachability": "with the path program OFF, 120 rollouts of 12 events each (1,440 events) across 3 drugs never reached a path length above 1, not once",
+    "mechanism": "both bonds of the seeded bridge are BRIDGES in the graph-theoretic sense on all 5 drugs checked, so deleting either disconnects the molecule and the executor refuses that state. Lengthening therefore requires close-then-open -- form a ring through the far core first, then remove the original bond -- which is a coordinated transaction of at least three events."
+  },
+  "why_the_predicate_cannot_work": "A per-event monotone predicate refuses the intermediate states of a multi-event transaction. The first step of lengthening creates a pendant, which does not change the path length, so the predicate refuses it and the trajectory dies at event 0.",
+  "what_this_implies_for_v2": "The program must PROPOSE the transaction rather than gate individual events: a composite path-insertion primitive performing insert, ring-close to the far core, and open of the original bond, admitted as one structural move whose constituents are each individually executable and in the proposal support. That is a region-plus-program construction rather than an event filter.",
+  "status": "path_program is retained OFF by default and is inert; no linker number is reported"
+}
