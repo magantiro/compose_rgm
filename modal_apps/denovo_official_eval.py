@@ -438,7 +438,10 @@ def score_seed(
 
     from rdkit import Chem, RDLogger
 
-    from compose_v4.eval.denovo_benchmark import denovo_benchmark_metrics
+    from compose_v4.eval.denovo_benchmark import (
+        denovo_benchmark_metrics,
+        strained_ring_census,
+    )
 
     RDLogger.DisableLog("rdApp.*")
     volume.reload()
@@ -494,6 +497,18 @@ def score_seed(
             ]
         )
     )
+    # Census over the distinct valid molecules -- the same set the quality
+    # numerator is drawn from -- so the two are directly comparable.
+    from rdkit import Chem as _Chem
+
+    distinct = sorted(
+        {
+            _Chem.MolToSmiles(_Chem.MolFromSmiles(t))
+            for t in generated
+            if t and _Chem.MolFromSmiles(t) is not None
+        }
+    )
+    metrics["strained_ring_census"] = strained_ring_census(distinct)
     metrics["versions"] = _runtime_versions()
     metrics["input_sha256"] = _assert_pinned_inputs()
 

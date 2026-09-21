@@ -220,6 +220,52 @@ def denovo_benchmark_metrics(
     return report
 
 
+def strained_ring_census(smiles: Sequence[str]) -> dict[str, object]:
+    """DIAGNOSTIC: how much of the sample carries 3- and 4-membered rings.
+
+    Not a published metric.  It exists because the ``SA <= 4`` half of the
+    quality conjunction is dominated by strained small rings, and the de-novo
+    base checkpoint has a documented defect of overproducing them
+    (aziridine/epoxide).  Reporting the census beside the quality number turns
+    "quality is low" into an attributable cause rather than a bare score.
+
+    ``ring_size_histogram`` counts RINGS (SSSR); the fractions count MOLECULES
+    containing at least one ring of that size, so a molecule with both a 3- and
+    a 4-ring is counted once in ``fraction_with_strained_ring``.
+    """
+
+    histogram: dict[int, int] = {}
+    with_three = 0
+    with_four = 0
+    with_either = 0
+    total = 0
+    for text in smiles:
+        if not text:
+            continue
+        mol = Chem.MolFromSmiles(text)
+        if mol is None:
+            continue
+        total += 1
+        sizes = [len(ring) for ring in mol.GetRingInfo().AtomRings()]
+        for size in sizes:
+            histogram[size] = histogram.get(size, 0) + 1
+        distinct = set(sizes)
+        if 3 in distinct:
+            with_three += 1
+        if 4 in distinct:
+            with_four += 1
+        if 3 in distinct or 4 in distinct:
+            with_either += 1
+
+    return {
+        "molecules": total,
+        "ring_size_histogram": dict(sorted(histogram.items())),
+        "fraction_with_3_ring": with_three / total if total else 0.0,
+        "fraction_with_4_ring": with_four / total if total else 0.0,
+        "fraction_with_strained_ring": with_either / total if total else 0.0,
+    }
+
+
 def aggregate_seed_metrics(per_seed: Sequence[dict[str, object]]) -> dict[str, object]:
     """Mean and sample standard deviation of each metric across seeds.
 

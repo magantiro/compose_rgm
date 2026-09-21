@@ -191,3 +191,35 @@ def test_aggregate_single_seed_has_undefined_spread():
     summary = aggregate_seed_metrics([{"validity": 1.0, "quality": 0.5}])
     assert summary["seeds"] == 1
     assert summary["validity_std"] is None
+
+
+def test_strained_ring_census_counts_rings_and_molecules():
+    from compose_v4.eval.denovo_benchmark import strained_ring_census
+
+    # aziridine (3), cyclobutane (4), benzene (6), and one molecule with BOTH
+    # a 3- and a 4-ring so the molecule-level fraction cannot double count.
+    census = strained_ring_census(["C1CN1", "C1CCC1", _BENZENE, "C1CC1C1CCC1"])
+    assert census["molecules"] == 4
+    # rings: 3-ring x2 (aziridine + the both-molecule), 4-ring x2, 6-ring x1
+    assert census["ring_size_histogram"] == {3: 2, 4: 2, 6: 1}
+    assert census["fraction_with_3_ring"] == 0.5
+    assert census["fraction_with_4_ring"] == 0.5
+    # 3 of 4 molecules carry a strained ring -- NOT 0.5 + 0.5 = 1.0.
+    assert census["fraction_with_strained_ring"] == 0.75
+
+
+def test_strained_ring_census_ignores_unparseable_and_empty():
+    from compose_v4.eval.denovo_benchmark import strained_ring_census
+
+    census = strained_ring_census(["C1CN1", "", "not-a-molecule"])
+    assert census["molecules"] == 1
+    assert census["fraction_with_3_ring"] == 1.0
+
+
+def test_strained_ring_census_on_acyclic_is_zero():
+    from compose_v4.eval.denovo_benchmark import strained_ring_census
+
+    census = strained_ring_census(["CCCC", "CCO"])
+    assert census["molecules"] == 2
+    assert census["ring_size_histogram"] == {}
+    assert census["fraction_with_strained_ring"] == 0.0
