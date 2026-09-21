@@ -51,6 +51,10 @@ from compose_v4.control.pmo_credit import (
 from compose_v4.control.pmo_joint_dependency_jump import (
     CHECKPOINT_SCHEMA,
 )
+from compose_v4.control.pmo_online_memory import (
+    OnlineProposalMemory,
+    memory_channel_proposal,
+)
 from compose_v4.control.pmo_realization import (
     PRODUCTION_MAX_REALIZATIONS,
     PRODUCTION_NODE_BUDGET,
@@ -218,7 +222,13 @@ def _niche_order(candidates: list[dict[str, Any]], *, seed: int) -> list[int]:
 class PmoPopulationController(DynamicV21ProgramOptimizer):
     """Live PMO archive with local, global and complete-jump proposal modes."""
 
-    def __init__(self, *args, jump_checkpoint: dict[str, Any], **kwargs):
+    def __init__(
+        self,
+        *args,
+        jump_checkpoint: dict[str, Any],
+        enable_online_memory: bool = False,
+        **kwargs,
+    ):
         if jump_checkpoint.get("schema_version") != CHECKPOINT_SCHEMA:
             raise ValueError("PMO population controller needs a sanitized joint checkpoint")
         super().__init__(*args, **kwargs)
@@ -229,6 +239,23 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         self._population_bootstrap_pool_id = None
         self._pool_continuity = BootstrapPoolContinuity()
         self.credit = PopulationCredit()
+        # Arm B of the matched comparison. OFF by default, so the unflagged controller
+        # is byte-identical to arm A: a cold or absent memory makes `region_law()`
+        # return None, and an unlawed draw consumes `rng.permutation` while ANY law
+        # object consumes `rng.random` -- so a 'uniform law' would not be a no-op.
+        self.online_memory = OnlineProposalMemory() if enable_online_memory else None
+        self.online_memory_attribution_failures = 0
+
+    def _channel_proposal(self, channel, entry):
+        """The one integration point for the online structural memory.
+
+        Delegates to the unmodified production implementation whenever the memory is
+        absent, cold, or the lane is not the shallow one -- so this is a no-op in arm A.
+        """
+
+        return memory_channel_proposal(
+            self, channel, entry, super()._channel_proposal, self.online_memory
+        )
 
     def observed_upside_scale(self) -> float:
         """Mean positive parent improvement per child, counted from this run.
@@ -813,6 +840,45 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             static_score=static_score,
         )
 
+    def _observe_into_online_memory(self, candidate: dict[str, Any], score: float) -> None:
+        """Record one counted oracle observation and its transition into the memory.
+
+        Everything here comes from the candidate the controller already holds plus the
+        score just charged -- no oracle internals, no task identity, no off-ledger
+        property evaluation.
+        """
+
+        trace = candidate.get("trace") or {}
+        endpoint = candidate.get("endpoint") or trace.get("endpoint")
+        if not endpoint:
+            return
+        child = decode_state(trace["states"][-1]) if trace.get("states") else None
+        self.online_memory.observe_scored_molecule(
+            endpoint=endpoint, score=score, graph=child
+        )
+        provenance = candidate.get("provenance") or {}
+        parent_score = provenance.get("parent_measured_score")
+        source = candidate.get("source_state")
+        if source is None or not trace.get("actions"):
+            return
+        parent_graph = decode_state(source)
+        families = [a.get("model_family") for a in trace["actions"] if a.get("model_family")]
+        touched = tuple(
+            int(x) for x in (provenance.get("actual_changes") or {}).get(
+                "changed_original_slots", ()
+            )
+        )
+        self.online_memory.observe_transition(
+            parent_graph=parent_graph,
+            parent_endpoint=provenance.get("parent_endpoint") or "",
+            parent_score=None if parent_score is None else float(parent_score),
+            child_endpoint=endpoint,
+            child_score=score,
+            child_heavy=int(child.n_real_atoms) if child is not None else 0,
+            family=families[0] if families else "unknown",
+            touched_slots=touched,
+        )
+
     def observe_batch(self, batch_id, outcomes):
         if self.pending is None or self.pending.get("batch_id") != batch_id:
             raise ValueError("PMO population outcome lacks its pending batch")
@@ -832,6 +898,14 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             score = float(score)
             scored.append(score)
             counts["scored_outcomes"] += 1
+            if self.online_memory is not None:
+                # Feed the memory only COUNTED observations, at the moment the ledger
+                # records them. A failure here must neither kill a scored run nor pass
+                # silently, so it is counted and surfaced in the snapshot.
+                try:
+                    self._observe_into_online_memory(candidate, score)
+                except Exception:  # noqa: BLE001 - attribution is best-effort, never fatal
+                    self.online_memory_attribution_failures += 1
             parent_score = candidate["provenance"].get("parent_measured_score")
             if parent_score is not None:
                 gain = score - float(parent_score)
