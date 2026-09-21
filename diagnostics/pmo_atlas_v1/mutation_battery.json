@@ -1,0 +1,154 @@
+{
+ "baseline_failing_tests": [],
+ "baseline_green": true,
+ "controls_green": 1,
+ "controls_total": 1,
+ "elapsed_seconds": 369.11,
+ "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
+ "mutations": [
+  {
+   "exit_code": 0,
+   "expected_tests": [
+    "test_load_refuses_an_input_whose_bytes_moved"
+   ],
+   "failing_tests": [],
+   "kind": "negative",
+   "name": "bypass_input_hash_check",
+   "path": "src/compose_v4/experiments/pmo_atlas_routes.py",
+   "tail": "...............                                                          [100%]\n15 passed in 32.98s\n",
+   "verdict": "SURVIVED"
+  },
+  {
+   "exit_code": 1,
+   "expected_tests": [
+    "test_replay_detects_an_interior_divergence_not_only_the_endpoint"
+   ],
+   "failing_tests": [
+    "test_replay_detects_an_interior_divergence_not_only_the_endpoint"
+   ],
+   "kind": "negative",
+   "name": "stop_comparing_interior_states",
+   "path": "src/compose_v4/experiments/pmo_atlas_routes.py",
+   "tail": null,
+   "verdict": "killed"
+  },
+  {
+   "exit_code": 1,
+   "expected_tests": [
+    "test_replay_detects_an_interior_divergence_not_only_the_endpoint"
+   ],
+   "failing_tests": [
+    "test_replay_detects_an_interior_divergence_not_only_the_endpoint"
+   ],
+   "kind": "negative",
+   "name": "let_exact_ignore_interior_mismatches",
+   "path": "src/compose_v4/experiments/pmo_atlas_routes.py",
+   "tail": null,
+   "verdict": "killed"
+  },
+  {
+   "exit_code": 1,
+   "expected_tests": [
+    "test_checkpoints_are_committed_48_slot_states_inside_support"
+   ],
+   "failing_tests": [
+    "test_checkpoints_are_committed_48_slot_states_inside_support",
+    "test_checkpoints_are_ordered_and_strictly_advance",
+    "test_the_anchor_checkpoint_is_the_recorded_endpoint"
+   ],
+   "kind": "negative",
+   "name": "rebuild_checkpoints_by_reparsing_smiles",
+   "path": "src/compose_v4/experiments/pmo_atlas_routes.py",
+   "tail": null,
+   "verdict": "killed"
+  },
+  {
+   "exit_code": 1,
+   "expected_tests": [
+    "test_the_anchor_checkpoint_is_the_recorded_endpoint"
+   ],
+   "failing_tests": [
+    "test_the_anchor_checkpoint_is_the_recorded_endpoint"
+   ],
+   "kind": "negative",
+   "name": "clamp_the_anchor_short_of_the_endpoint",
+   "path": "src/compose_v4/experiments/pmo_atlas_routes.py",
+   "tail": null,
+   "verdict": "killed"
+  },
+  {
+   "exit_code": 1,
+   "expected_tests": [
+    "test_checkpoint_fraction_outside_the_unit_interval_is_refused"
+   ],
+   "failing_tests": [
+    "test_checkpoint_fraction_outside_the_unit_interval_is_refused"
+   ],
+   "kind": "negative",
+   "name": "drop_the_checkpoint_fraction_range_check",
+   "path": "src/compose_v4/experiments/pmo_atlas_routes.py",
+   "tail": null,
+   "verdict": "killed"
+  },
+  {
+   "exit_code": 1,
+   "expected_tests": [
+    "test_a_payload_without_the_regime_label_is_refused"
+   ],
+   "failing_tests": [
+    "test_a_payload_without_the_regime_label_is_refused"
+   ],
+   "kind": "negative",
+   "name": "make_the_regime_label_guard_a_no_op",
+   "path": "src/compose_v4/experiments/pmo_atlas_routes.py",
+   "tail": null,
+   "verdict": "killed"
+  },
+  {
+   "exit_code": 1,
+   "expected_tests": [
+    "test_prohibited_consumers_are_refused_and_diagnostics_are_allowed"
+   ],
+   "failing_tests": [
+    "test_prohibited_consumers_are_refused_and_diagnostics_are_allowed"
+   ],
+   "kind": "negative",
+   "name": "empty_the_prohibited_consumer_set",
+   "path": "src/compose_v4/experiments/pmo_atlas_routes.py",
+   "tail": null,
+   "verdict": "killed"
+  },
+  {
+   "exit_code": 1,
+   "expected_tests": [
+    "test_the_census_separates_programs_from_independent_lineages"
+   ],
+   "failing_tests": [
+    "test_the_census_separates_programs_from_independent_lineages"
+   ],
+   "kind": "negative",
+   "name": "count_programs_where_the_census_counts_sources",
+   "path": "src/compose_v4/experiments/pmo_atlas_routes.py",
+   "tail": null,
+   "verdict": "killed"
+  },
+  {
+   "exit_code": 0,
+   "expected_tests": [],
+   "failing_tests": [],
+   "kind": "positive_control",
+   "name": "cosmetic_comment_only",
+   "path": "src/compose_v4/experiments/pmo_atlas_routes.py",
+   "tail": null,
+   "verdict": "green_as_required"
+  }
+ ],
+ "negatives_killed": 8,
+ "negatives_survived": [
+  "bypass_input_hash_check"
+ ],
+ "negatives_total": 9,
+ "python": "/Users/rmaganti/compose_region_pinned_env/bin/python",
+ "schema_version": "pmo_atlas_mutation_battery_v1",
+ "suite": "tests/test_pmo_atlas_routes.py"
+}
