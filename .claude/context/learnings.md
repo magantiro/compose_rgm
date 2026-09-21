@@ -2379,3 +2379,46 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   **-0.054 (SE 0.039)**, i.e. NOT distinguishable from zero, while heavy atoms carry -0.0165
   (SE 0.0029). So the QED half of the association is essentially all size. Quoting the raw
   conditional split alone would have attributed both to ring strain.
+
+## 2026-09-21 (the de-novo small-ring defect is a SUPPORT defect, and its fix was built and never wired)
+
+- **The model is NOT biased toward small rings; the legal SUPPORT at ring-formation time is.**
+  Measured, from the committed `diagnostics/ring_calibration/step2500_exact_support_audit_12.json`
+  (265 ring events over 100 rollouts at step 2500): the typed ring catalog's own unconditional
+  small-ring mass is **0.0302** (285 small of 3,092 templates = 9.2% by count), but uniform over the
+  legal support AT THE STATES WHERE RING EVENTS ACTUALLY FIRE is **0.4431**. The model's prior given
+  that support is **0.2837** and it produced **0.2804** (observed small-event fraction 0.25). So the
+  learned policy sits well BELOW uniform-over-support -- it is already pushing away from small rings
+  -- while the support it is conditioned on is ~15x enriched in small rings relative to the catalog.
+  **CONSEQUENCE: an SA penalty or a small-ring rate penalty is the wrong instrument.** It would push
+  a policy that is already anti-small-ring against a support that leaves it no alternative. The
+  defect is upstream, in WHICH STATES the ring decision is taken at.
+- **Why the support is degenerate: ring growth is supervised LATE, on crowded states.** The de-novo
+  transport compiler emits one sequential program in which cardinality events (`atom_insert`/
+  `atom_delete`) and ring events interleave in compiler order. By the time `ring_system_grow` fires,
+  the molecule is near the 40-atom cap with few free slots, and large-ring templates are no longer
+  executable -- so conditioning on "a ring grows" renormalises onto whatever remains, which is
+  mostly small. The 2026-07-19 audit independently localised **every newly created small ring to
+  `ring_system_grow`, not to Graft**, which is consistent.
+- **THE FIX ALREADY EXISTS, IS TESTED, AND IS UNREACHABLE.** `src/compose_v4/rewrite/
+  commuting_schedule.py` (added `50880537`, **2026-07-20 -- one day AFTER the step-1000 checkpoint**)
+  detects commuting adjacent events BY EXECUTION and moves whole ring transactions to the earliest
+  state at which they are actually executable, with `atom_insert`/`atom_delete` as phase barriers and
+  a swap accepted only when both orders are legal and array-exact after the pair -- so slot gauge and
+  the corpus endpoint are unchanged. `compile_carbon_tree_to_target` exposes it as
+  `event_schedule="exact_early_ring"` (default `"sequential"`), and `tests/test_commuting_schedule.py`
+  passes 6/6. **But `exact_early_ring` appears NOWHERE outside `tree_transport.py`**: no trainer flag,
+  no recipe key, no Modal passthrough, and `build_tree_transport_path_records` has no
+  `event_schedule` parameter at all, so neither of its two `compile_carbon_tree_to_target` call sites
+  (`experiments/tracelet_conditional.py:192`, `:454`) can forward one. Lineage B therefore trained on
+  `"sequential"`. This is the 2026-09-20 region-law lesson again, in a second place: **a validated
+  repair behind an opt-in keyword is INERT until a caller passes it, and "the module has tests" hides
+  that completely.** Grep for the keyword at CALL sites, not definition sites.
+- **The plumbing gap is exactly five hops**, all additive and default-preserving: recipe argument ->
+  gate CLI flag -> `build_tree_transport_path_records(..., event_schedule=...)` -> its two
+  `compile_carbon_tree_to_target` call sites -> Modal `build_tracelet_recipe_argv` passthrough. Any
+  wiring must be mutation-tested at the CALL sites (drop the keyword at each hop and require a named
+  test to go red), because two hops share one sink and a single consultation test would stay green.
+- **This is a training-DISTRIBUTION correction, not an objective.** It changes which states the ring
+  decision is supervised at; it adds no SA term, no QED term and no reward, and the compiled endpoint
+  is provably unchanged. That is what makes it admissible where a benchmark-chasing penalty is not.
