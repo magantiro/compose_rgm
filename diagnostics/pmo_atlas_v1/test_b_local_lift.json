@@ -9,11 +9,11 @@
    "jump_checkpoint": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json",
    "jump_checkpoint_sha256": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43"
   },
-  "diagnostic_oracle_calls": 256,
-  "elapsed_seconds": 1820.03,
+  "diagnostic_oracle_calls": 2101,
+  "elapsed_seconds": 5573.69,
   "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
   "information_regime_statement": "Answer-known, panel-informed and winner-informed PMO development evidence. Destinations are published task answers or transcribed competitor winners. This is a challenge set and a diagnostic instrument, never a training distribution, prior, library or initialization for a scored no-prescreen run.",
-  "partial": true,
+  "partial": false,
   "probe_positions": [
    {
     "fraction": 0.25,
@@ -87,6 +87,258 @@
       }
      ],
      "task": "celecoxib_rediscovery",
+     "tolerance": 1e-09
+    },
+    "gsk3b": {
+     "charged_to_diagnostic_budget": false,
+     "checks": 3,
+     "max_abs_delta": 0.0,
+     "note": "Reference-panel calls bypass the counted ledger deliberately: they are an instrument check, and they are reported separately from the diagnostic budget.",
+     "observations": [
+      {
+       "delta": 0.0,
+       "expected": 0.03,
+       "label": "shared_source",
+       "observed": 0.03
+      },
+      {
+       "delta": 0.0,
+       "expected": 1.0,
+       "label": "recorded_destination",
+       "observed": 1.0
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.01,
+       "label": "route_midpoint",
+       "observed": 0.01
+      }
+     ],
+     "task": "gsk3b",
+     "tolerance": 1e-09
+    },
+    "isomers_c7h8n2o2": {
+     "charged_to_diagnostic_budget": false,
+     "checks": 3,
+     "max_abs_delta": 0.0,
+     "note": "Reference-panel calls bypass the counted ledger deliberately: they are an instrument check, and they are reported separately from the diagnostic budget.",
+     "observations": [
+      {
+       "delta": 0.0,
+       "expected": 0.6703200460356393,
+       "label": "shared_source",
+       "observed": 0.6703200460356393
+      },
+      {
+       "delta": 0.0,
+       "expected": 1.0,
+       "label": "recorded_destination",
+       "observed": 1.0
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.7225273536420722,
+       "label": "route_midpoint",
+       "observed": 0.7225273536420722
+      }
+     ],
+     "task": "isomers_c7h8n2o2",
+     "tolerance": 1e-09
+    },
+    "jnk3": {
+     "charged_to_diagnostic_budget": false,
+     "checks": 3,
+     "max_abs_delta": 0.0,
+     "note": "Reference-panel calls bypass the counted ledger deliberately: they are an instrument check, and they are reported separately from the diagnostic budget.",
+     "observations": [
+      {
+       "delta": 0.0,
+       "expected": 0.0,
+       "label": "shared_source",
+       "observed": 0.0
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.98,
+       "label": "recorded_destination",
+       "observed": 0.98
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.07,
+       "label": "route_midpoint",
+       "observed": 0.07
+      }
+     ],
+     "task": "jnk3",
+     "tolerance": 1e-09
+    },
+    "median1": {
+     "charged_to_diagnostic_budget": false,
+     "checks": 3,
+     "max_abs_delta": 0.0,
+     "note": "Reference-panel calls bypass the counted ledger deliberately: they are an instrument check, and they are reported separately from the diagnostic budget.",
+     "observations": [
+      {
+       "delta": 0.0,
+       "expected": 0.20254787341673336,
+       "label": "shared_source",
+       "observed": 0.20254787341673336
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.40648479068406884,
+       "label": "recorded_destination",
+       "observed": 0.40648479068406884
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.2756589232099856,
+       "label": "route_midpoint",
+       "observed": 0.2756589232099856
+      }
+     ],
+     "task": "median1",
+     "tolerance": 1e-09
+    },
+    "mestranol_similarity": {
+     "charged_to_diagnostic_budget": false,
+     "checks": 3,
+     "max_abs_delta": 0.0,
+     "note": "Reference-panel calls bypass the counted ledger deliberately: they are an instrument check, and they are reported separately from the diagnostic budget.",
+     "observations": [
+      {
+       "delta": 0.0,
+       "expected": 0.1673414304993252,
+       "label": "shared_source",
+       "observed": 0.1673414304993252
+      },
+      {
+       "delta": 0.0,
+       "expected": 1.0,
+       "label": "recorded_destination",
+       "observed": 1.0
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.3090277777777778,
+       "label": "route_midpoint",
+       "observed": 0.3090277777777778
+      }
+     ],
+     "task": "mestranol_similarity",
+     "tolerance": 1e-09
+    },
+    "perindopril_mpo": {
+     "charged_to_diagnostic_budget": false,
+     "checks": 3,
+     "max_abs_delta": 0.0,
+     "note": "Reference-panel calls bypass the counted ledger deliberately: they are an instrument check, and they are reported separately from the diagnostic budget.",
+     "observations": [
+      {
+       "delta": 0.0,
+       "expected": 0.36023741111440966,
+       "label": "shared_source",
+       "observed": 0.36023741111440966
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.8088297765764039,
+       "label": "recorded_destination",
+       "observed": 0.8088297765764039
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.00926369370668851,
+       "label": "route_midpoint",
+       "observed": 0.00926369370668851
+      }
+     ],
+     "task": "perindopril_mpo",
+     "tolerance": 1e-09
+    },
+    "qed": {
+     "charged_to_diagnostic_budget": false,
+     "checks": 3,
+     "max_abs_delta": 0.0,
+     "note": "Reference-panel calls bypass the counted ledger deliberately: they are an instrument check, and they are reported separately from the diagnostic budget.",
+     "observations": [
+      {
+       "delta": 0.0,
+       "expected": 0.7960834588871699,
+       "label": "shared_source",
+       "observed": 0.7960834588871699
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.948442042791664,
+       "label": "recorded_destination",
+       "observed": 0.948442042791664
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.2505671844979284,
+       "label": "route_midpoint",
+       "observed": 0.2505671844979284
+      }
+     ],
+     "task": "qed",
+     "tolerance": 1e-09
+    },
+    "thiothixene_rediscovery": {
+     "charged_to_diagnostic_budget": false,
+     "checks": 3,
+     "max_abs_delta": 0.0,
+     "note": "Reference-panel calls bypass the counted ledger deliberately: they are an instrument check, and they are reported separately from the diagnostic budget.",
+     "observations": [
+      {
+       "delta": 0.0,
+       "expected": 0.24615384615384617,
+       "label": "shared_source",
+       "observed": 0.24615384615384617
+      },
+      {
+       "delta": 0.0,
+       "expected": 1.0,
+       "label": "recorded_destination",
+       "observed": 1.0
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.1282051282051282,
+       "label": "route_midpoint",
+       "observed": 0.1282051282051282
+      }
+     ],
+     "task": "thiothixene_rediscovery",
+     "tolerance": 1e-09
+    },
+    "troglitazone_rediscovery": {
+     "charged_to_diagnostic_budget": false,
+     "checks": 3,
+     "max_abs_delta": 0.0,
+     "note": "Reference-panel calls bypass the counted ledger deliberately: they are an instrument check, and they are reported separately from the diagnostic budget.",
+     "observations": [
+      {
+       "delta": 0.0,
+       "expected": 0.12413793103448276,
+       "label": "shared_source",
+       "observed": 0.12413793103448276
+      },
+      {
+       "delta": 0.0,
+       "expected": 1.0,
+       "label": "recorded_destination",
+       "observed": 1.0
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.22962962962962963,
+       "label": "route_midpoint",
+       "observed": 0.22962962962962963
+      }
+     ],
+     "task": "troglitazone_rediscovery",
      "tolerance": 1e-09
     }
    },
@@ -200,6 +452,789 @@
     "task": "celecoxib_rediscovery",
     "top_ten_new_count": 10,
     "top_ten_new_mean": 0.16564300895641818
+   },
+   {
+    "best_new": 0.3008849557522124,
+    "best_overall": 0.3008849557522124,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.8621,
+    "checkpoint_label": "near_anchor",
+    "checkpoint_step_index": 25,
+    "distinct_new_above_seed": 7,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.060144215011471686,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 128,
+     "lookups": 128,
+     "seconds": 0.052,
+     "task": "celecoxib_rediscovery"
+    },
+    "remaining_teacher_steps": 4,
+    "seconds": 105.95,
+    "seed_heavy_atoms": 24,
+    "seed_score": 0.24074074074074073,
+    "seed_smiles": "CC=CC=C(C)c1cc(C(F)(F)F)nn1C=CC=C(C)S(N)(=O)=O",
+    "task": "celecoxib_rediscovery",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.2558755903669736
+   },
+   {
+    "best_new": 0.868421052631579,
+    "best_overall": 1.0,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 1.0,
+    "checkpoint_label": "anchor",
+    "checkpoint_step_index": 29,
+    "distinct_new_above_seed": 0,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": -0.13157894736842102,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 192,
+     "lookups": 192,
+     "seconds": 0.069,
+     "task": "celecoxib_rediscovery"
+    },
+    "remaining_teacher_steps": 0,
+    "seconds": 170.44,
+    "seed_heavy_atoms": 26,
+    "seed_score": 1.0,
+    "seed_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+    "task": "celecoxib_rediscovery",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.7362308971601335
+   },
+   {
+    "best_new": 0.28,
+    "best_overall": 0.28,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.2593,
+    "checkpoint_label": "early",
+    "checkpoint_step_index": 7,
+    "distinct_new_above_seed": 58,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.28,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 64,
+     "lookups": 64,
+     "seconds": 1.044,
+     "task": "gsk3b"
+    },
+    "remaining_teacher_steps": 20,
+    "seconds": 108.63,
+    "seed_heavy_atoms": 21,
+    "seed_score": 0.0,
+    "seed_smiles": "SC(=CCCN1CCCCCC1)NNCc1ccccc1",
+    "task": "gsk3b",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.221
+   },
+   {
+    "best_new": 0.63,
+    "best_overall": 0.63,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.8519,
+    "checkpoint_label": "near_anchor",
+    "checkpoint_step_index": 23,
+    "distinct_new_above_seed": 3,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.040000000000000036,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 128,
+     "lookups": 128,
+     "seconds": 1.979,
+     "task": "gsk3b"
+    },
+    "remaining_teacher_steps": 4,
+    "seconds": 97.61,
+    "seed_heavy_atoms": 21,
+    "seed_score": 0.59,
+    "seed_smiles": "O=C1NN=C(c2ccccc2)C1=NNC1CCCOCC1",
+    "task": "gsk3b",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.571
+   },
+   {
+    "best_new": 0.96,
+    "best_overall": 1.0,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 1.0,
+    "checkpoint_label": "anchor",
+    "checkpoint_step_index": 27,
+    "distinct_new_above_seed": 0,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": -0.040000000000000036,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 192,
+     "lookups": 192,
+     "seconds": 3.048,
+     "task": "gsk3b"
+    },
+    "remaining_teacher_steps": 0,
+    "seconds": 103.28,
+    "seed_heavy_atoms": 22,
+    "seed_score": 1.0,
+    "seed_smiles": "COc1ccc(NN=C2C(=O)NN=C2c2ccccc2)cc1",
+    "task": "gsk3b",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.8019999999999999
+   },
+   {
+    "best_new": 0.7225273536420722,
+    "best_overall": 0.7225273536420722,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.3333,
+    "checkpoint_label": "early",
+    "checkpoint_step_index": 2,
+    "distinct_new_above_seed": 3,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.11599669392943879,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 64,
+     "lookups": 64,
+     "seconds": 0.036,
+     "task": "isomers_c7h8n2o2"
+    },
+    "remaining_teacher_steps": 4,
+    "seconds": 31.38,
+    "seed_heavy_atoms": 8,
+    "seed_score": 0.6065306597126334,
+    "seed_smiles": "C=CC=C(C)NC=O",
+    "task": "isomers_c7h8n2o2",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.5694807288138513
+   },
+   {
+    "best_new": 0.8187307530779818,
+    "best_overall": 0.8187307530779818,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.8333,
+    "checkpoint_label": "near_anchor",
+    "checkpoint_step_index": 5,
+    "distinct_new_above_seed": 20,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.6833954698413691,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 128,
+     "lookups": 128,
+     "seconds": 0.07,
+     "task": "isomers_c7h8n2o2"
+    },
+    "remaining_teacher_steps": 1,
+    "seconds": 31.05,
+    "seed_heavy_atoms": 11,
+    "seed_score": 0.1353352832366127,
+    "seed_smiles": "COC(=O)NC(C)=CC=CN",
+    "task": "isomers_c7h8n2o2",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.6428102751708425
+   },
+   {
+    "best_new": 1.0,
+    "best_overall": 1.0,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 1.0,
+    "checkpoint_label": "anchor",
+    "checkpoint_step_index": 6,
+    "distinct_new_above_seed": 0,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.0,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 192,
+     "lookups": 192,
+     "seconds": 0.108,
+     "task": "isomers_c7h8n2o2"
+    },
+    "remaining_teacher_steps": 0,
+    "seconds": 43.25,
+    "seed_heavy_atoms": 11,
+    "seed_score": 1.0,
+    "seed_smiles": "COC(=O)Nc1cccnc1",
+    "task": "isomers_c7h8n2o2",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.8644102570089716
+   },
+   {
+    "best_new": 0.14,
+    "best_overall": 0.14,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.2381,
+    "checkpoint_label": "early",
+    "checkpoint_step_index": 10,
+    "distinct_new_above_seed": 38,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.09000000000000001,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 64,
+     "lookups": 64,
+     "seconds": 0.945,
+     "task": "jnk3"
+    },
+    "remaining_teacher_steps": 32,
+    "seconds": 133.33,
+    "seed_heavy_atoms": 26,
+    "seed_score": 0.05,
+    "seed_smiles": "C=C(CCc1cnccc1NC)c1nc(C(=C)C2CCCNCC2)cs1",
+    "task": "jnk3",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.12100000000000002
+   },
+   {
+    "best_new": 0.41,
+    "best_overall": 0.41,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.8571,
+    "checkpoint_label": "near_anchor",
+    "checkpoint_step_index": 36,
+    "distinct_new_above_seed": 21,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.06,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 128,
+     "lookups": 128,
+     "seconds": 2.019,
+     "task": "jnk3"
+    },
+    "remaining_teacher_steps": 6,
+    "seconds": 141.12,
+    "seed_heavy_atoms": 35,
+    "seed_score": 0.35,
+    "seed_smiles": "C=CC=CNCC=CC(=C)c1ncn(-c2ccc(-c3ccnc(NC(C)=CC=CC#N)n3)cc2)n1",
+    "task": "jnk3",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.39699999999999996
+   },
+   {
+    "best_new": 0.96,
+    "best_overall": 0.98,
+    "budget": 64,
+    "charged_calls": 59,
+    "checkpoint_fraction": 1.0,
+    "checkpoint_label": "anchor",
+    "checkpoint_step_index": 42,
+    "distinct_new_above_seed": 0,
+    "distinct_new_molecules": 58,
+    "lift_best_new_minus_seed": -0.020000000000000018,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 187,
+     "lookups": 187,
+     "seconds": 2.896,
+     "task": "jnk3"
+    },
+    "remaining_teacher_steps": 0,
+    "seconds": 168.68,
+    "seed_heavy_atoms": 38,
+    "seed_score": 0.98,
+    "seed_smiles": "N#Cc1ccc(Nc2nccc(-c3ccc(-n4cnc(-c5ccc(Nc6cccs6)cc5)n4)cc3)n2)cc1",
+    "task": "jnk3",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.924
+   },
+   {
+    "best_new": 0.31126486012524596,
+    "best_overall": 0.3237619541190881,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.2857,
+    "checkpoint_label": "early",
+    "checkpoint_step_index": 4,
+    "distinct_new_above_seed": 0,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": -0.012497093993842134,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 64,
+     "lookups": 64,
+     "seconds": 0.019,
+     "task": "median1"
+    },
+    "remaining_teacher_steps": 10,
+    "seconds": 133.23,
+    "seed_heavy_atoms": 12,
+    "seed_score": 0.3237619541190881,
+    "seed_smiles": "CCC(C)C1CCC(C)CC1O",
+    "task": "median1",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.2795322929099998
+   },
+   {
+    "best_new": 0.3351254609444432,
+    "best_overall": 0.3351254609444432,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.8571,
+    "checkpoint_label": "near_anchor",
+    "checkpoint_step_index": 12,
+    "distinct_new_above_seed": 1,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.029701850053680146,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 128,
+     "lookups": 128,
+     "seconds": 0.039,
+     "task": "median1"
+    },
+    "remaining_teacher_steps": 2,
+    "seconds": 142.37,
+    "seed_heavy_atoms": 19,
+    "seed_score": 0.30542361089076303,
+    "seed_smiles": "CCC1(C(C)C2CCC(C)CC2O)CCCCC1=O",
+    "task": "median1",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.2667915038667381
+   },
+   {
+    "best_new": 0.3759269138367869,
+    "best_overall": 0.40648479068406884,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 1.0,
+    "checkpoint_label": "anchor",
+    "checkpoint_step_index": 14,
+    "distinct_new_above_seed": 0,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": -0.03055787684728195,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 192,
+     "lookups": 192,
+     "seconds": 0.061,
+     "task": "median1"
+    },
+    "remaining_teacher_steps": 0,
+    "seconds": 146.98,
+    "seed_heavy_atoms": 20,
+    "seed_score": 0.40648479068406884,
+    "seed_smiles": "CC1CCC(C(C)C23CCC(CC2=O)C3(C)C)C(O)C1",
+    "task": "median1",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.3247990471120078
+   },
+   {
+    "best_new": 0.2899505766062603,
+    "best_overall": 0.2899505766062603,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.2308,
+    "checkpoint_label": "early",
+    "checkpoint_step_index": 6,
+    "distinct_new_above_seed": 56,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.15079200055448036,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 64,
+     "lookups": 64,
+     "seconds": 0.016,
+     "task": "mestranol_similarity"
+    },
+    "remaining_teacher_steps": 20,
+    "seconds": 151.29,
+    "seed_heavy_atoms": 22,
+    "seed_score": 0.13915857605177992,
+    "seed_smiles": "C=CC=CC(=CO)CN[SH4]c1cc(C(=O)N(CC)CC)cs1",
+    "task": "mestranol_similarity",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.2621327157650394
+   },
+   {
+    "best_new": 0.654690618762475,
+    "best_overall": 0.654690618762475,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.8462,
+    "checkpoint_label": "near_anchor",
+    "checkpoint_step_index": 22,
+    "distinct_new_above_seed": 2,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.12886902251834365,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 128,
+     "lookups": 128,
+     "seconds": 0.03,
+     "task": "mestranol_similarity"
+    },
+    "remaining_teacher_steps": 4,
+    "seconds": 146.34,
+    "seed_heavy_atoms": 23,
+    "seed_score": 0.5258215962441314,
+    "seed_smiles": "C=C(CC1CCc2cc(OC)ccc2C1CC)C(O)(CC)CC",
+    "task": "mestranol_similarity",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.5197126687859492
+   },
+   {
+    "best_new": 1.0,
+    "best_overall": 1.0,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 1.0,
+    "checkpoint_label": "anchor",
+    "checkpoint_step_index": 26,
+    "distinct_new_above_seed": 0,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.0,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 192,
+     "lookups": 192,
+     "seconds": 0.046,
+     "task": "mestranol_similarity"
+    },
+    "remaining_teacher_steps": 0,
+    "seconds": 160.82,
+    "seed_heavy_atoms": 23,
+    "seed_score": 1.0,
+    "seed_smiles": "C#CC1(O)CCC2C3CCc4cc(OC)ccc4C3CCC21C",
+    "task": "mestranol_similarity",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.9569803107998606
+   },
+   {
+    "best_new": 0.3792566630111542,
+    "best_overall": 0.3792566630111542,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.2632,
+    "checkpoint_label": "early",
+    "checkpoint_step_index": 10,
+    "distinct_new_above_seed": 33,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.23915390951167914,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 64,
+     "lookups": 64,
+     "seconds": 0.035,
+     "task": "perindopril_mpo"
+    },
+    "remaining_teacher_steps": 28,
+    "seconds": 172.22,
+    "seed_heavy_atoms": 28,
+    "seed_score": 0.14010275349947504,
+    "seed_smiles": "C=C(NC(C)c1ccccc1CC)C1=CC(C(=C)C2CCCC(Br)CO2)=CC1",
+    "task": "perindopril_mpo",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.36581134884446764
+   },
+   {
+    "best_new": 0.22616441645522128,
+    "best_overall": 0.22616441645522128,
+    "budget": 64,
+    "charged_calls": 62,
+    "checkpoint_fraction": 0.8421,
+    "checkpoint_label": "near_anchor",
+    "checkpoint_step_index": 32,
+    "distinct_new_above_seed": 19,
+    "distinct_new_molecules": 61,
+    "lift_best_new_minus_seed": 0.02802920233044906,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 126,
+     "lookups": 126,
+     "seconds": 0.063,
+     "task": "perindopril_mpo"
+    },
+    "remaining_teacher_steps": 6,
+    "seconds": 127.68,
+    "seed_heavy_atoms": 36,
+    "seed_score": 0.19813521412477222,
+    "seed_smiles": "CCCCCN(CC(=O)O)C(=O)C(C)NC(CCN(CC)c1coc(C(Br)CCC)c1)C(=O)OCC",
+    "task": "perindopril_mpo",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.21414347428325514
+   },
+   {
+    "best_new": 0.8068106321971811,
+    "best_overall": 0.8088297765764039,
+    "budget": 64,
+    "charged_calls": 61,
+    "checkpoint_fraction": 1.0,
+    "checkpoint_label": "anchor",
+    "checkpoint_step_index": 38,
+    "distinct_new_above_seed": 0,
+    "distinct_new_molecules": 60,
+    "lift_best_new_minus_seed": -0.0020191443792227926,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 187,
+     "lookups": 187,
+     "seconds": 0.097,
+     "task": "perindopril_mpo"
+    },
+    "remaining_teacher_steps": 0,
+    "seconds": 159.83,
+    "seed_heavy_atoms": 38,
+    "seed_score": 0.8088297765764039,
+    "seed_smiles": "CCCC(Br)c1cc2c(ccn2CCC(NC(C)C(=O)N2C(C(=O)O)CC3CCCCC32)C(=O)OCC)o1",
+    "task": "perindopril_mpo",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.7649159621222326
+   },
+   {
+    "best_new": 0.8828194600941799,
+    "best_overall": 0.8828194600941799,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.24,
+    "checkpoint_label": "early",
+    "checkpoint_step_index": 6,
+    "distinct_new_above_seed": 14,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.12907595821284834,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 64,
+     "lookups": 64,
+     "seconds": 0.054,
+     "task": "qed"
+    },
+    "remaining_teacher_steps": 19,
+    "seconds": 119.6,
+    "seed_heavy_atoms": 23,
+    "seed_score": 0.7537435018813315,
+    "seed_smiles": "CCCN(CC)Cc1csc([SH2](=O)NCc2ncccc2C)c1",
+    "task": "qed",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.8506951044533404
+   },
+   {
+    "best_new": 0.9317478171917137,
+    "best_overall": 0.9317478171917137,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.84,
+    "checkpoint_label": "near_anchor",
+    "checkpoint_step_index": 21,
+    "distinct_new_above_seed": 12,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.11176876817189796,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 128,
+     "lookups": 128,
+     "seconds": 0.11,
+     "task": "qed"
+    },
+    "remaining_teacher_steps": 4,
+    "seconds": 109.56,
+    "seed_heavy_atoms": 23,
+    "seed_score": 0.8199790490198158,
+    "seed_smiles": "CCC=C(NC)C1=CC=C(C2N=C3C=NN(C(C)C)C3N2)CC1",
+    "task": "qed",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.8735500032679923
+   },
+   {
+    "best_new": 0.9484416673618907,
+    "best_overall": 0.948442042791664,
+    "budget": 64,
+    "charged_calls": 63,
+    "checkpoint_fraction": 1.0,
+    "checkpoint_label": "anchor",
+    "checkpoint_step_index": 25,
+    "distinct_new_above_seed": 0,
+    "distinct_new_molecules": 62,
+    "lift_best_new_minus_seed": -3.7542977326943117e-07,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 191,
+     "lookups": 191,
+     "seconds": 0.17,
+     "task": "qed"
+    },
+    "remaining_teacher_steps": 0,
+    "seconds": 136.58,
+    "seed_heavy_atoms": 23,
+    "seed_score": 0.948442042791664,
+    "seed_smiles": "CC(C)N1N=CC2=NC(c3ccc(-c4ccccn4)cc3)NC21",
+    "task": "qed",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.9330602530535852
+   },
+   {
+    "best_new": 0.224,
+    "best_overall": 0.224,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.2439,
+    "checkpoint_label": "early",
+    "checkpoint_step_index": 10,
+    "distinct_new_above_seed": 24,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.07145762711864406,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 64,
+     "lookups": 64,
+     "seconds": 0.011,
+     "task": "thiothixene_rediscovery"
+    },
+    "remaining_teacher_steps": 31,
+    "seconds": 86.04,
+    "seed_heavy_atoms": 18,
+    "seed_score": 0.15254237288135594,
+    "seed_smiles": "CNS(=O)(=O)C1C=C(CN2CCCCCC2)CS1",
+    "task": "thiothixene_rediscovery",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.19198398263275088
+   },
+   {
+    "best_new": 0.25316455696202533,
+    "best_overall": 0.25316455696202533,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.8537,
+    "checkpoint_label": "near_anchor",
+    "checkpoint_step_index": 35,
+    "distinct_new_above_seed": 37,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.14127644507391346,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 128,
+     "lookups": 128,
+     "seconds": 0.024,
+     "task": "thiothixene_rediscovery"
+    },
+    "remaining_teacher_steps": 6,
+    "seconds": 148.63,
+    "seed_heavy_atoms": 28,
+    "seed_score": 0.11188811188811189,
+    "seed_smiles": "C=C(S)C(=CC(=C)S(=O)(=O)N(C)C)C(C=CC=CC)=CCCN(C)CCNC",
+    "task": "thiothixene_rediscovery",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.1979930404233931
+   },
+   {
+    "best_new": 0.8888888888888888,
+    "best_overall": 1.0,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 1.0,
+    "checkpoint_label": "anchor",
+    "checkpoint_step_index": 41,
+    "distinct_new_above_seed": 0,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": -0.11111111111111116,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 192,
+     "lookups": 192,
+     "seconds": 0.043,
+     "task": "thiothixene_rediscovery"
+    },
+    "remaining_teacher_steps": 0,
+    "seconds": 131.99,
+    "seed_heavy_atoms": 30,
+    "seed_score": 1.0,
+    "seed_smiles": "CN1CCN(CCC=C2c3ccccc3Sc3ccc(S(=O)(=O)N(C)C)cc32)CC1",
+    "task": "thiothixene_rediscovery",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.8164814228129028
+   },
+   {
+    "best_new": 0.1986754966887417,
+    "best_overall": 0.1986754966887417,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.2424,
+    "checkpoint_label": "early",
+    "checkpoint_step_index": 8,
+    "distinct_new_above_seed": 36,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.056831525057536025,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 64,
+     "lookups": 64,
+     "seconds": 0.015,
+     "task": "troglitazone_rediscovery"
+    },
+    "remaining_teacher_steps": 25,
+    "seconds": 171.27,
+    "seed_heavy_atoms": 26,
+    "seed_score": 0.14184397163120568,
+    "seed_smiles": "C=S(=O)(CCc1ccccc1CC)C1=CC(CC2CCCSCO2)=CC1",
+    "task": "troglitazone_rediscovery",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.17378387937882886
+   },
+   {
+    "best_new": 0.6274509803921569,
+    "best_overall": 0.6274509803921569,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 0.8485,
+    "checkpoint_label": "near_anchor",
+    "checkpoint_step_index": 28,
+    "distinct_new_above_seed": 8,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.1964164976335362,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 128,
+     "lookups": 128,
+     "seconds": 0.033,
+     "task": "troglitazone_rediscovery"
+    },
+    "remaining_teacher_steps": 5,
+    "seconds": 174.89,
+    "seed_heavy_atoms": 29,
+    "seed_score": 0.43103448275862066,
+    "seed_smiles": "Cc1c(C)c2c(c(C)c1O)CCC(C)(COC1=CC=C(CCSC(N)O)CC1)O2",
+    "task": "troglitazone_rediscovery",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.5019621249874222
+   },
+   {
+    "best_new": 0.8695652173913043,
+    "best_overall": 1.0,
+    "budget": 64,
+    "charged_calls": 64,
+    "checkpoint_fraction": 1.0,
+    "checkpoint_label": "anchor",
+    "checkpoint_step_index": 33,
+    "distinct_new_above_seed": 0,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": -0.13043478260869568,
+    "oracle_ledger": {
+     "cache_hits": 0,
+     "distinct_molecules_evaluated": 192,
+     "lookups": 192,
+     "seconds": 0.051,
+     "task": "troglitazone_rediscovery"
+    },
+    "remaining_teacher_steps": 0,
+    "seconds": 197.37,
+    "seed_heavy_atoms": 31,
+    "seed_score": 1.0,
+    "seed_smiles": "Cc1c(C)c2c(c(C)c1O)CCC(C)(COc1ccc(CC3SC(=O)NC3=O)cc1)O2",
+    "task": "troglitazone_rediscovery",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.775378086484114
    }
   ],
   "schema_version": "pmo_atlas_test_b_local_lift_v1",
@@ -224,5 +1259,5 @@
    "troglitazone_rediscovery"
   ]
  },
- "payload_sha256": "4cd32c4a5e60536414ac1a6fc1f74b3dc7b138cc251741bb7c087dafd13c5189"
+ "payload_sha256": "57883f45a2a9c7cb25272cc66592e3d0a15e9b010fd0ac1586b480fe9f490a45"
 }
