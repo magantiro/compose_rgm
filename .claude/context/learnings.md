@@ -2052,3 +2052,47 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   actions and asserts `trace["states"] == bound["states"]`, and it cross-checks
   `retained_fraction` computed by `finalize` from the executed graph against the controller's own
   recomputation from `decode_state(endpoint_state)` -- two independent paths to one number.
+
+## 2026-09-20 (PMO-v2: the support gate was measuring the binder production had replaced)
+
+- **A gate that declares its own authority is exactly the file to re-point when the runtime
+  moves, and nothing in the suite noticed.** `pmo_population_live_parent_gate.py` -- whose
+  docstring says "Scoring is prohibited until the resulting receipt passes the non-root support
+  floor" -- still imported `bind_joint_plan` (the width-4 beam) at two call sites after the
+  controller's jump lane moved to `realize_plan_binding`. Its sealed v2 decision therefore
+  certified support for a binder production no longer runs. Found by grepping remaining callers
+  of the replaced function, NOT by a test.
+- **Re-pointed gate PASSES; the verdict is robust, the parent set moved.** Scheduler lane, inputs
+  byte-identical to the beam-era receipt (initialization, checkpoint payload, plan ids), 16
+  parents / 14 exact descendants / 128 plan attempts each = 1,792 attempts, 0 oracle calls:
+  `supported_parent_count` **6** against a floor of 4 (beam: 7); route-scale bindings **73** vs
+  37; unique route-scale endpoints **59** vs 30. Lost parents {4,11,13}, gained {7,15}.
+- **Carrying the realizer's outcome up is what makes a FAIL readable.** Over the 1,792 attempts:
+  `proven_incompatible` 1,704 (95.1%), `search_budget_exhausted` 52 (2.9%),
+  `completed_realization` 36 (2.0%). The three lost parents each show comp=0 / exh=13 -- every
+  one of their 13 step-0-feasible plans ran to the 20 s cap. `proven_incompatible` is
+  LOAD-INDEPENDENT (constraint propagation, no clock); the exh/comp split is NOT, so the 7->6
+  delta carries a machine-load caveat that the PASS verdict does not (6 >= 4 with margin).
+- **The realized program SCALE did not move, and that is the thing to watch.** Bound-program
+  lengths are {14,16,17,23} in BOTH arms -- median 16, max 23 -- while **45 of the 95 plan
+  latents are >=29 primitives and ZERO of them bound in either arm**. That is the shape the
+  predeclared falsifier names ("median ~16 primitives"), but its other conjunct is
+  `retained_fraction ~1.000` and the gate does not record retained fraction, so the falsifier is
+  **UNEVALUATED, not fired** -- and the gate's objective-blind descendants are a different parent
+  population from the matched comparison that measured median 31 at retained 0.630. Settle it on
+  the scored run's artifacts; do not read it as a verdict either way.
+- **Derive a drift test from the CALL SITE, never from a name written twice.**
+  `tests/test_pmo_gate_binder_parity.py` identifies a binder call STRUCTURALLY (a call whose
+  second positional argument is `plan`), resolves the callee through the module's own
+  `from ... import` bindings, and requires the gate's resolved target, its keyword-parameter set
+  and the runtime function OBJECT to equal the controller's. Neither binder is named in the test,
+  so it cannot agree with a stale constant. Proven by mutation BOTH directions: 3/3 red against
+  the unfixed gate, 2/3 red when the controller is pointed at `bind_realized_plan` (the
+  keyword-set check correctly stays green there -- same signature, different function).
+- **The mechanical resealer would have buried this.** `reseal_pmo_population_contracts.py`
+  re-hashes every key already present in `implementation_sha256`, so running it re-pins the gate
+  SOURCE while `support_observed` -- ordinary semantics, guarded only against change -- keeps the
+  beam-era numbers. The integration had already re-pinned the controller and added
+  `pmo_realization.py` to that config while its support numbers stayed from the beam run: a
+  config that VALIDATES while binding a stale measurement, the 2026-08-02 failure class again.
+  `support_observed` must be RE-MEASURED from the new receipt, never re-pinned.
