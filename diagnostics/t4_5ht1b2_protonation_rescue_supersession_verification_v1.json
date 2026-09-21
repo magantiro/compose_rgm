@@ -1,0 +1,243 @@
+{
+  "VERDICT": "PASS -- no scientific change beyond the runtime-validator repair",
+  "automatic_retries": 0,
+  "crosswire_controls": {
+    "arm_d04_with_d06_contract": "REFUSED",
+    "arm_d06_with_d04_contract": "REFUSED (arm d06 expects the d06 contract, got the d04 contract)",
+    "note": "My first battery scored these as HOLES. That was MY test's error, not a validator gap: the harness derived the contract path FROM the arm, so changing the arm merely validated the other arm correctly. Re-tested against the real crosswire, both refuse."
+  },
+  "field_level_diff": {
+    "arms": {
+      "d04": {
+        "UNEXPLAINED_DIFFERENCES": [],
+        "VERDICT": "PASS",
+        "added": [
+          "/launch_path_revision/added_runtime_inputs/src/compose_v4/experiments/t4_protonation_rescue_contract_v2.py",
+          "/launch_path_revision/changed_runtime_inputs/modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py/from",
+          "/launch_path_revision/changed_runtime_inputs/modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py/to",
+          "/launch_path_revision/reason",
+          "/launch_path_revision/supersedes_payload_sha256",
+          "/runtime_inputs_sha256/src/compose_v4/experiments/t4_protonation_rescue_contract_v2.py"
+        ],
+        "all_non_plumbing_leaves_identical": true,
+        "authorized_payload_sha256": "4486c376e1c378670d4aa9d6c07c3343366035cf67b6821547e2edefdc890a5c",
+        "changed": [
+          "/runtime_inputs_sha256/modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py"
+        ],
+        "classified_allowed": {
+          "added_v2_validator_hash": [
+            "/runtime_inputs_sha256/src/compose_v4/experiments/t4_protonation_rescue_contract_v2.py"
+          ],
+          "repaired_wrapper_hash": [
+            "/runtime_inputs_sha256/modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py"
+          ],
+          "supersession_metadata": [
+            "/launch_path_revision/added_runtime_inputs/src/compose_v4/experiments/t4_protonation_rescue_contract_v2.py",
+            "/launch_path_revision/changed_runtime_inputs/modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py/from",
+            "/launch_path_revision/changed_runtime_inputs/modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py/to",
+            "/launch_path_revision/reason",
+            "/launch_path_revision/supersedes_payload_sha256"
+          ]
+        },
+        "leaf_counts": {
+          "new": 230,
+          "old": 224
+        },
+        "other_runtime_input_hashes_identical": true,
+        "removed": [],
+        "superseding_payload_sha256": "ea7c5c7372b9ad2a7b9263bc5fefd99a60a422b71d19c29048e54bf5cdfde404"
+      },
+      "d06": {
+        "UNEXPLAINED_DIFFERENCES": [],
+        "VERDICT": "PASS",
+        "added": [
+          "/launch_path_revision/added_runtime_inputs/src/compose_v4/experiments/t4_protonation_rescue_contract_v2.py",
+          "/launch_path_revision/changed_runtime_inputs/modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py/from",
+          "/launch_path_revision/changed_runtime_inputs/modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py/to",
+          "/launch_path_revision/reason",
+          "/launch_path_revision/supersedes_payload_sha256",
+          "/runtime_inputs_sha256/src/compose_v4/experiments/t4_protonation_rescue_contract_v2.py"
+        ],
+        "all_non_plumbing_leaves_identical": true,
+        "authorized_payload_sha256": "d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb",
+        "changed": [
+          "/runtime_inputs_sha256/modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py"
+        ],
+        "classified_allowed": {
+          "added_v2_validator_hash": [
+            "/runtime_inputs_sha256/src/compose_v4/experiments/t4_protonation_rescue_contract_v2.py"
+          ],
+          "repaired_wrapper_hash": [
+            "/runtime_inputs_sha256/modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py"
+          ],
+          "supersession_metadata": [
+            "/launch_path_revision/added_runtime_inputs/src/compose_v4/experiments/t4_protonation_rescue_contract_v2.py",
+            "/launch_path_revision/changed_runtime_inputs/modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py/from",
+            "/launch_path_revision/changed_runtime_inputs/modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py/to",
+            "/launch_path_revision/reason",
+            "/launch_path_revision/supersedes_payload_sha256"
+          ]
+        },
+        "leaf_counts": {
+          "new": 238,
+          "old": 232
+        },
+        "other_runtime_input_hashes_identical": true,
+        "removed": [],
+        "superseding_payload_sha256": "f4c00e06a124c61f56e742f5cac6e53820a4bb83f4360292af25c18b9d8ad520"
+      }
+    },
+    "overall": "PASS"
+  },
+  "method_note_on_the_first_battery": "The first run showed 20/20 refusals and 0/4 positive controls, because the temp tree had no .git and the clean-runtime check (git diff --exit-code) fired first -- so 10 of the 20 refusals were for the wrong reason and proved nothing. The COSMETIC re-serialization control is what caught it. Corrected by committing each mutation into a clean standalone repo, which forces the SEMANTIC check to decide; positive controls then pass 4/4.",
+  "negative_controls": {
+    "negatives": [
+      {
+        "case": "d06: delta mutated (resealed)",
+        "detail": "RAISED::ValueError::arm 'd06' requires delta 0.6, contract declares 0.4",
+        "refused": true
+      },
+      {
+        "case": "d06: ceiling mutated (resealed)",
+        "detail": "RAISED::ValueError::arm 'd06' requires a 248-call per-cell horizon, contract declares 249",
+        "refused": true
+      },
+      {
+        "case": "d06: cell identity mutated (resealed)",
+        "detail": "RAISED::ValueError::launch_path_revision does not reconstruct the payload it claims to supersede: rebuilt 3c6f3d095c0a7ad8fac98135d34d47728c0429f07ac1610e48e64e1ff1580506",
+        "refused": true
+      },
+      {
+        "case": "d06: wrong supersedes (old-payload) hash",
+        "detail": "RAISED::ValueError::launch_path_revision does not reconstruct the payload it claims to supersede: rebuilt d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb",
+        "refused": true
+      },
+      {
+        "case": "d06: authorization metadata inside payload",
+        "detail": "RAISED::ValueError::authorization metadata is present inside the scientific payload at 'authorization'; authorization must point AT an immutable payload by hash and never",
+        "refused": true
+      },
+      {
+        "case": "d06: payload status claims AUTHORIZED",
+        "detail": "RAISED::ValueError::contract status 'AUTHORIZED' asserts in-payload authorization; the payload must stay at 'PREPARED_AWAITING_OWNER_AUTHORIZATION' and be authorized exte",
+        "refused": true
+      },
+      {
+        "case": "d06: authorization receipt missing",
+        "detail": "RAISED::ValueError::authorization receipt is absent: diagnostics/t4_5ht1b2_protonation_rescue_authorization_v1.json",
+        "refused": true
+      },
+      {
+        "case": "d06: wrong authorization payload hash",
+        "detail": "RAISED::ValueError::launch authorization does not bind the contract payload: supplied ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, contract is f4c00e",
+        "refused": true
+      },
+      {
+        "case": "d06: pinned wrapper drifts on disk",
+        "detail": "RAISED::ValueError::runtime input mismatch for modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py: e6daa8f1a6f233ae8bdf0bea6f50ef2e484051a22ef4fde6b604925ce57d00da",
+        "refused": true
+      },
+      {
+        "case": "d06: arm declared as the other arm",
+        "detail": "NO_RAISE",
+        "refused": false
+      },
+      {
+        "case": "d04: delta mutated (resealed)",
+        "detail": "RAISED::ValueError::arm 'd04' requires delta 0.4, contract declares 0.6",
+        "refused": true
+      },
+      {
+        "case": "d04: ceiling mutated (resealed)",
+        "detail": "RAISED::ValueError::arm 'd04' requires a 249-call per-cell horizon, contract declares 248",
+        "refused": true
+      },
+      {
+        "case": "d04: cell identity mutated (resealed)",
+        "detail": "RAISED::ValueError::launch_path_revision does not reconstruct the payload it claims to supersede: rebuilt 33c8c8f664d7f53131fbc1ebc92dc101689813a1a7bfb5a86be96208bce267be",
+        "refused": true
+      },
+      {
+        "case": "d04: wrong supersedes (old-payload) hash",
+        "detail": "RAISED::ValueError::launch_path_revision does not reconstruct the payload it claims to supersede: rebuilt 4486c376e1c378670d4aa9d6c07c3343366035cf67b6821547e2edefdc890a5c",
+        "refused": true
+      },
+      {
+        "case": "d04: authorization metadata inside payload",
+        "detail": "RAISED::ValueError::authorization metadata is present inside the scientific payload at 'authorization'; authorization must point AT an immutable payload by hash and never",
+        "refused": true
+      },
+      {
+        "case": "d04: payload status claims AUTHORIZED",
+        "detail": "RAISED::ValueError::contract status 'AUTHORIZED' asserts in-payload authorization; the payload must stay at 'PREPARED_AWAITING_OWNER_AUTHORIZATION' and be authorized exte",
+        "refused": true
+      },
+      {
+        "case": "d04: authorization receipt missing",
+        "detail": "RAISED::ValueError::authorization receipt is absent: diagnostics/t4_5ht1b2_protonation_rescue_authorization_v1.json",
+        "refused": true
+      },
+      {
+        "case": "d04: wrong authorization payload hash",
+        "detail": "RAISED::ValueError::launch authorization does not bind the contract payload: supplied ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, contract is ea7c5c",
+        "refused": true
+      },
+      {
+        "case": "d04: pinned wrapper drifts on disk",
+        "detail": "RAISED::ValueError::runtime input mismatch for modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py: 0195d2789efb1e6bb8f10dbc1e7fce5d90b3e1b6c3395d56917c2039ae8d40ca",
+        "refused": true
+      },
+      {
+        "case": "d04: arm declared as the other arm",
+        "detail": "NO_RAISE",
+        "refused": false
+      }
+    ],
+    "positives": [
+      {
+        "case": "d06: COSMETIC re-serialization only (must still pass)",
+        "detail": "NO_RAISE",
+        "passes": true
+      },
+      {
+        "case": "d04: COSMETIC re-serialization only (must still pass)",
+        "detail": "NO_RAISE",
+        "passes": true
+      },
+      {
+        "case": "d06: UNMUTATED positive control",
+        "detail": "NO_RAISE",
+        "passes": true
+      },
+      {
+        "case": "d04: UNMUTATED positive control",
+        "detail": "NO_RAISE",
+        "passes": true
+      }
+    ]
+  },
+  "oracle_calls_spent_during_verification": 0,
+  "performed_by": "coordinator, independently of the implementing branch's own tests",
+  "reconstruction_cross_check": {
+    "d04": {
+      "exact": true,
+      "reconstructed": "4486c376e1c378670d4aa9d6c07c3343366035cf67b6821547e2edefdc890a5c"
+    },
+    "d06": {
+      "exact": true,
+      "reconstructed": "d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb"
+    }
+  },
+  "runtime_resolved_values": {
+    "d04": {
+      "charged_calls_per_cell": 249,
+      "delta": 0.4
+    },
+    "d06": {
+      "charged_calls_per_cell": 248,
+      "delta": 0.6
+    }
+  },
+  "schema_version": "t4_5ht1b2_supersession_verification_v1",
+  "why_independent": "A comparison whose expectation is recomputed from the code under test cannot fail. The field-level diff below was computed WITHOUT importing reconstruct_superseded_payload; that function was then run separately as a cross-check and agreed."
+}

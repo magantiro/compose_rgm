@@ -1,0 +1,46 @@
+{
+  "authorization_form": "The owner pre-authorized conditionally -- 'yes to both' covering the PMO-v2 re-seal and the 5ht1b_2 launch -- with the explicit rule that the PINNED production-kernel gate is authoritative and exact parity with the 2026 kernel is NOT required. That gate is now green.",
+  "authorization_sentence": "I authorize the two 5ht1b_2 protonation rescue arms -- configs/t4_5ht1b2_protonation_rescue_d06_v1.json at payload sha256 d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb and configs/t4_5ht1b2_protonation_rescue_d04_v1.json at 4486c376e1c378670d4aa9d6c07c3343366035cf67b6821547e2edefdc890a5c -- to charge up to 497 oracle calls in total, at the per-cell ceilings 248 (delta 0.6) and 249 (delta 0.4), as a versioned protonation-aware rescue distinct from the region-repair rescue, and I accept that these results must be reported as a named rescue phase and never spliced into the unchanged-v1 panel table.",
+  "authorized_at_utc": "2026-09-21T05:31:35.094437+00:00",
+  "authorized_payload_sha256": {
+    "d04": "4486c376e1c378670d4aa9d6c07c3343366035cf67b6821547e2edefdc890a5c",
+    "d06": "d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb"
+  },
+  "authorized_payload_sha256_at_authorization": {
+    "d04": "4486c376e1c378670d4aa9d6c07c3343366035cf67b6821547e2edefdc890a5c",
+    "d06": "d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb"
+  },
+  "correction": {
+    "distinguish_from_the_region_rescue": "The region-repair rescue embedded authorization in-payload and its launcher accepts that, so it is consistent there. This contract's validator requires the external form. The lesson is to use the mechanism the launch path actually reads, not the one used last time.",
+    "resolution": "Contracts restored byte-for-byte to the authorized payloads and verified to recompute to d7d2fbc2 and 4486c376 with no authorization block and status back to prepared. This receipt stays EXTERNAL and is passed to the launcher via its intended --authorization-payload-sha256 argument.",
+    "the_rule": "SCIENTIFIC PAYLOAD IS NOT AUTHORIZATION METADATA. Authorization POINTS AT an immutable payload by hash; it must never become part of it. Recording consent must not change the bytes that were consented to.",
+    "what_i_did_wrong": "I recorded authorization by INSERTING an `authorization` block and flipping `status` INSIDE the scientific payload. That mutated the payload and moved its hash off the value the owner had authorized (d7d2fbc2 -> d74a6f5d, 4486c376 -> 4863298b), so the launcher was then being asked to accept a contract nobody had authorized."
+  },
+  "gate_result": {
+    "abstention_endpoints": {
+      "0.4": 0,
+      "0.6": 0
+    },
+    "docking_calls": 0,
+    "eligible_unique_d04": 44,
+    "eligible_unique_d06": 12,
+    "kernel": "rdkit 2024.03.5",
+    "kernel_agreement": "pinned reproduced the 2026 counts exactly (12 and 44); parity was not required",
+    "oracle_calls": 0,
+    "reads_similarity_qed_sa_or_reward": false,
+    "reads_target_identity": false,
+    "reverse_contrast_sites": {
+      "0.4": 2,
+      "0.6": 2
+    },
+    "settings_consumed_every_arm": true
+  },
+  "mechanism_distinct_from": "region-repair rescue (bridge_region_law); the two must never be mixed in one arm or the mechanism becomes unattributable",
+  "owner_response_verbatim": "yes to both",
+  "per_cell_ceilings": {
+    "5ht1b_2_d04": 249,
+    "5ht1b_2_d06": 248
+  },
+  "schema_version": "t4_5ht1b2_protonation_rescue_authorization_v1",
+  "total_charged_call_ceiling": 497
+}
