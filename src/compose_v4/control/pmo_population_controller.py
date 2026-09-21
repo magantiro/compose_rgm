@@ -48,6 +48,14 @@ from compose_v4.control.pmo_credit import (
     credit_key_from_candidate,
     improvement,
 )
+from compose_v4.control.pmo_discovery import (
+    SCHEMA_VERSION as DISCOVERY_CREDIT_SCHEMA,
+)
+from compose_v4.control.pmo_discovery import (
+    DiscoveryConfig,
+    DiscoveryCredit,
+    discovery_quota,
+)
 from compose_v4.control.pmo_joint_dependency_jump import (
     CHECKPOINT_SCHEMA,
 )
@@ -227,6 +235,8 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         *args,
         jump_checkpoint: dict[str, Any],
         enable_online_memory: bool = False,
+        enable_discovery: bool = False,
+        discovery_fraction: float | None = None,
         **kwargs,
     ):
         if jump_checkpoint.get("schema_version") != CHECKPOINT_SCHEMA:
@@ -238,7 +248,23 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         self.population_state = initial_population_state()
         self._population_bootstrap_pool_id = None
         self._pool_continuity = BootstrapPoolContinuity()
-        self.credit = PopulationCredit()
+        # Arm C is arm B PLUS a discovery allocator, never discovery alone: the
+        # frontier evidence it credits by is computed by the memory's FrontierLedger,
+        # so a discovery arm without a memory would silently fall back to arm B's
+        # allocation and report itself as C.
+        if enable_discovery and not enable_online_memory:
+            raise ValueError(
+                "the discovery allocator requires the online memory: arm C is arm B "
+                "plus discovery, and its frontier evidence comes from the memory"
+            )
+        self.enable_discovery = bool(enable_discovery)
+        if self.enable_discovery:
+            config = DiscoveryConfig() if discovery_fraction is None else DiscoveryConfig(
+                discovery_fraction=float(discovery_fraction)
+            )
+            self.credit = DiscoveryCredit(config=config)
+        else:
+            self.credit = PopulationCredit()
         # Arm B of the matched comparison. OFF by default, so the unflagged controller
         # is byte-identical to arm A: a cold or absent memory makes `region_law()`
         # return None, and an unlawed draw consumes `rng.permutation` while ANY law
@@ -692,18 +718,59 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             rows.sort(key=lambda row: (-predicted.get(row["candidate_id"], 0.0), row["candidate_id"]))
         chosen: list[dict[str, Any]] = []
         draws: list[dict[str, str]] = []
+        # HARD exploration floor, in realized slots rather than in expectation. The
+        # basin-stratified weight mix already guarantees every basin a share, but a
+        # share is an expectation and one PMO batch draws ~14 slots, so an expectation
+        # is not a floor over a single round. Zero for arm B, which leaves the draw
+        # below byte-identical.
+        reserved = (
+            discovery_quota(room, fraction=self.credit.config.discovery_fraction)
+            if self.enable_discovery
+            else 0
+        )
+        discovery_drawn = 0
         while len(chosen) < room:
             live = [index for index, key in enumerate(cells) if by_cell[key]]
             if not live:
                 break
-            weights = np.asarray([shares[index] for index in live], dtype=float)
+            pool, role = live, "credit"
+            if discovery_drawn < reserved:
+                eligible = [
+                    index for index in live if self.credit.is_discovery_cell(cells[index])
+                ]
+                # Fall back to the full live set when no thin basin has a candidate
+                # left, so a reservation can never idle an oracle slot.
+                if eligible:
+                    pool, role = eligible, "discovery"
+            weights = np.asarray([shares[index] for index in pool], dtype=float)
             weights = weights / weights.sum()
-            pick = int(self.rng.choice(live, p=weights))
+            pick = int(self.rng.choice(pool, p=weights))
             key = cells[pick]
             chosen.append(by_cell[key].pop(0))
-            draws.append(key.payload())
+            draws.append(key.payload() if not reserved else {**key.payload(), "role": role})
+            if role == "discovery":
+                discovery_drawn += 1
         return chosen, {
-            "mode": "joint_credit_cell_allocation",
+            "mode": (
+                "joint_credit_cell_allocation_with_discovery_reservation"
+                if reserved
+                else "joint_credit_cell_allocation"
+            ),
+            **(
+                {
+                    "discovery_reserved_slots": reserved,
+                    "discovery_slots_drawn": discovery_drawn,
+                    "discovery_cells_available": sum(
+                        1 for key in cells if self.credit.is_discovery_cell(key)
+                    ),
+                    "basins_available": len({key.basin for key in cells}),
+                    "minimum_basin_share": (
+                        self.credit.exploration_floor / len({key.basin for key in cells})
+                    ),
+                }
+                if reserved
+                else {}
+            ),
             "exploration_floor": self.credit.exploration_floor,
             "cells_available": len(cells),
             "minimum_share": float(min(shares)) if len(shares) else 0.0,
@@ -996,6 +1063,18 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
                         key,
                         improvement(score, float(parent_score), direction="maximize"),
                     )
+                    # Arm C additionally credits what this child added to the graded
+                    # quantity -- the mean of the top ten distinct scored molecules --
+                    # BESIDE the parent-relative term, never instead of it. `exclude`
+                    # removes the child from the baseline, so the answer does not
+                    # depend on the memory having already recorded it above.
+                    if self.enable_discovery and self.online_memory is not None:
+                        self.credit.observe_frontier(
+                            key,
+                            self.online_memory.frontier.frontier_gain(
+                                score, exclude=candidate["endpoint"]
+                            ),
+                        )
         ProgramOptimizer.observe_batch(self, batch_id, outcomes)
         current = max(scored, default=prior_best if prior_best is not None else -math.inf)
         improved = prior_best is None or current > prior_best
@@ -1040,6 +1119,8 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         hierarchy=None,
         jump_checkpoint=None,
         enable_online_memory: bool = False,
+        enable_discovery: bool = False,
+        discovery_fraction: float | None = None,
     ):
         # `run_program_campaign` passes optimizer_kwargs to BOTH the constructor and
         # this classmethod, so the arm flag has to be accepted here too -- and it has
@@ -1054,6 +1135,8 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             constructor_kwargs={
                 "jump_checkpoint": jump_checkpoint,
                 "enable_online_memory": enable_online_memory,
+                "enable_discovery": enable_discovery,
+                "discovery_fraction": discovery_fraction,
             },
         )
         state = snapshot.get("pmo_population")
@@ -1085,7 +1168,29 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         result._population_bootstrap_pool_id = state["bootstrap_pool_id"]
         # Absent keys restore empty objects so a snapshot taken before these were
         # persisted still loads, rather than failing a resume outright.
-        result.credit = PopulationCredit.restore(state["credit"]) if state.get("credit") else PopulationCredit()
+        credit_payload = state.get("credit")
+        if credit_payload:
+            is_discovery = credit_payload.get("schema_version") == DISCOVERY_CREDIT_SCHEMA
+            # Same hazard as the online-memory guard above: restoring a discovery
+            # snapshot into a plain arm would silently drop the frontier evidence and
+            # the basin floor, resuming arm C as arm B under arm C's run identity.
+            if is_discovery and not result.enable_discovery:
+                raise ValueError(
+                    "snapshot carries discovery-credit state but this controller was "
+                    "constructed without it; resuming would silently change the arm"
+                )
+            if result.enable_discovery and not is_discovery:
+                raise ValueError(
+                    "controller is a discovery arm but the snapshot carries plain "
+                    "credit; resuming would silently change the arm"
+                )
+            result.credit = (
+                DiscoveryCredit.restore(credit_payload)
+                if is_discovery
+                else PopulationCredit.restore(credit_payload)
+            )
+        else:
+            result.credit = DiscoveryCredit() if result.enable_discovery else PopulationCredit()
         result._pool_continuity = BootstrapPoolContinuity.restore(state.get("pool_continuity"))
         return result
 
