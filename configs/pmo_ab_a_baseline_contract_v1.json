@@ -25,7 +25,7 @@
     "corrected_worker_app": "compose-pmo-population-v1-corrected",
     "corrected_worker_path": "modal_apps/pmo_population_v1_app.py",
     "implementation_sha256": {
-      "modal_apps/pmo_population_v1_app.py": "0087b667bc6e6084fb3ea9514403a790339610a3e6e1696f7bf6050dd0b784a8",
+      "modal_apps/pmo_population_v1_app.py": "c0f0591ea1cca0676449721517c306937e55a05d8845cb77508f758aeb12845c",
       "src/compose_v4/control/adaptive_program_optimizer.py": "ade9157972c234d65dd768b72b00d21c7c86baa0076fdc7eb89c1929e11be8b2",
       "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",
       "src/compose_v4/control/edit_learning_data.py": "5caea7a874190c90b295c7e641f7be3825cbe27728d2a396d5158f2d2298af37",
@@ -87,5 +87,5 @@
       "celecoxib_rediscovery"
     ]
   },
-  "payload_sha256": "6fcf71ce0407b77d394103bdb1ca39e47b0df1da48cffaf17be32e15132ae7dc"
+  "payload_sha256": "c2f615c865ee73d43eb93f41d31b46d8aa54cfb37cdb5e228e30d23e177ba043"
 }

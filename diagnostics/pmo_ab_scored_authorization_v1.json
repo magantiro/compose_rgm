@@ -3,12 +3,12 @@
     "A_baseline": {
       "contract": "configs/pmo_ab_a_baseline_contract_v1.json",
       "enable_online_memory": false,
-      "payload_sha256": "6fcf71ce0407b77d394103bdb1ca39e47b0df1da48cffaf17be32e15132ae7dc"
+      "payload_sha256": "c2f615c865ee73d43eb93f41d31b46d8aa54cfb37cdb5e228e30d23e177ba043"
     },
     "B_memory": {
       "contract": "configs/pmo_ab_b_memory_contract_v1.json",
       "enable_online_memory": true,
-      "payload_sha256": "1fce6ace747d703beee2912d74e867d2c6c4b9dfe24fb9cb41190c12fc3a7d91"
+      "payload_sha256": "a48ac78339de5e61e9662f85845f57673edc2e33430a65f90e0d5c03c6d91d75"
     }
   },
   "authority": "Owner granted standing launch authorization for this overnight PMO work and is away ('you have authorization for modal and everything... you don't have to ask'). The active goal names this experiment explicitly: 'A = strong current productive controller. B = same initialization, executor, chemistry, budget, and controller + online task-adaptive structural proposal memory. Start with GSK3B, Celecoxib, Perindopril.'",
@@ -22,6 +22,7 @@
     "online_memory": "all five predeclared criteria: proposal distribution changes and does so DIFFERENTLY per task from identical code with no task branch; 75-79 distinct endpoints of 80 and 0 near-duplicate pairs; 24 parents across all three tasks; no collapse to shallow edits; cost measured in load-independent counters; 10/10 mutations killed"
   },
   "predeclared_caveat_gsk3b": "gsk3b's score is NOT interpretable as search quality. Its fingerprint-RandomForest oracle rewards off-manifold chemistry (r(score,QED) = -0.433, r(score,SA) = +0.684) and the repaired allocator correctly directs mass at the hacked molecules (mass-weighted QED 0.328 -> 0.124). Promotion evidence must come from perindopril_mpo and celecoxib_rediscovery. Recorded BEFORE the run so a favourable gsk3b number cannot be read as success after the fact.",
+  "reseal_note": "Re-sealed after the worker was made arm-aware. The contract pins the worker and the worker must read the contract, so the app hash necessarily moves once; sealing before that edit would have pinned a worker that cannot resolve the arm. No scientific field changed -- the two payloads still differ in exactly one top-level key.",
   "schema_version": "pmo_ab_scored_authorization_v1",
   "status": "AUTHORIZED",
   "tasks": [

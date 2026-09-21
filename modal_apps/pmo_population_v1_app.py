@@ -21,6 +21,14 @@ VOLUME_NAME = "compose-v4-artifacts"
 RUN_APP = "compose-pmo-population-v1-corrected"
 
 CONTRACT = "configs/pmo_population_controller_v1_scored_contract_corrected.json"
+# The matched A/B. Both arms are SEPARATELY SEALED payloads whose only top-level
+# difference is `arm.enable_online_memory`; the spawn spec may name one of these two and
+# nothing else, and the payload it names must be listed in the A/B authorization receipt.
+AB_CONTRACTS = {
+    "A_baseline": "configs/pmo_ab_a_baseline_contract_v1.json",
+    "B_memory": "configs/pmo_ab_b_memory_contract_v1.json",
+}
+AB_AUTHORIZATION = "diagnostics/pmo_ab_scored_authorization_v1.json"
 CONTROLLER_CONTRACT = "configs/pmo_population_controller_v1.json"
 ORACLE_CONTRACT = "configs/pmo_dynamic_v21_development_v1.json"
 # The pinned oracle-asset capsule.  PyTDC resolves `oracle/<name>.pkl` RELATIVE to the
@@ -49,6 +57,9 @@ image = (
     .add_local_file(ROOT / "modal_apps/pmo_population_v1_app.py",
                     str(REMOTE_ROOT / "modal_apps/pmo_population_v1_app.py"), copy=True)
     .add_local_file(ROOT / CONTRACT, str(REMOTE_ROOT / CONTRACT), copy=True)
+    .add_local_file(ROOT / AB_CONTRACTS["A_baseline"], str(REMOTE_ROOT / AB_CONTRACTS["A_baseline"]), copy=True)
+    .add_local_file(ROOT / AB_CONTRACTS["B_memory"], str(REMOTE_ROOT / AB_CONTRACTS["B_memory"]), copy=True)
+    .add_local_file(ROOT / AB_AUTHORIZATION, str(REMOTE_ROOT / AB_AUTHORIZATION), copy=True)
     .add_local_file(ROOT / CONTROLLER_CONTRACT,
                     str(REMOTE_ROOT / CONTROLLER_CONTRACT), copy=True)
     .add_local_file(ROOT / ORACLE_CONTRACT, str(REMOTE_ROOT / ORACLE_CONTRACT), copy=True)
@@ -140,12 +151,27 @@ def run_task(spec: dict) -> dict:
     run_id = spec["run_id"]
     task_name = spec["task"]
     contract = load_contract(root)
-    contract_envelope = json.loads((root / CONTRACT).read_text())
-    if spec["contract_payload_sha256"] != contract_envelope.get("payload_sha256"):
-        raise ValueError("scored payload authorization identity changed")
-    authorization = json.loads((root / AUTHORIZATION).read_text())
-    if authorization.get("payload_sha256") != spec["contract_payload_sha256"]:
-        raise ValueError("scored authorization receipt does not bind payload")
+    arm = spec.get("arm")
+    if arm is not None:
+        # Matched A/B. The arm may only name a baked, separately authorized payload.
+        if arm not in AB_CONTRACTS:
+            raise ValueError(f"unknown A/B arm {arm!r}")
+        contract_envelope = json.loads((root / AB_CONTRACTS[arm]).read_text())
+        if spec["contract_payload_sha256"] != contract_envelope.get("payload_sha256"):
+            raise ValueError("scored payload authorization identity changed")
+        authorization = json.loads((root / AB_AUTHORIZATION).read_text())
+        entry = (authorization.get("arms") or {}).get(arm) or {}
+        if entry.get("payload_sha256") != spec["contract_payload_sha256"]:
+            raise ValueError("A/B authorization receipt does not bind this arm's payload")
+        if contract_envelope["payload"].get("arm", {}).get("name") != arm:
+            raise ValueError("contract payload does not declare the arm it was spawned as")
+    else:
+        contract_envelope = json.loads((root / CONTRACT).read_text())
+        if spec["contract_payload_sha256"] != contract_envelope.get("payload_sha256"):
+            raise ValueError("scored payload authorization identity changed")
+        authorization = json.loads((root / AUTHORIZATION).read_text())
+        if authorization.get("payload_sha256") != spec["contract_payload_sha256"]:
+            raise ValueError("scored authorization receipt does not bind payload")
     old_oracle = json.loads((root / ORACLE_CONTRACT).read_text())["payload"]
     verify_runtime_environment(root, old_oracle)
     _rdkit_six_shim()
