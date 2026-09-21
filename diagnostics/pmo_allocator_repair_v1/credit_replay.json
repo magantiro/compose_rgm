@@ -1,0 +1,35 @@
+{
+ "celecoxib_rediscovery": {
+  "observed_scale": 0.0069022382715326945,
+  "cells": 191,
+  "trials_per_cell": 1.057591623036649,
+  "before_share_on_earning_cells": 0.32586608375367404,
+  "after_share_on_earning_cells": 0.6372558489060988,
+  "before_top_cell_share": 0.007391946960234236,
+  "after_top_cell_share": 0.03725965722551702,
+  "before_min_share": 0.0039209085781368915,
+  "after_min_share": 0.002247841467205027
+ },
+ "gsk3b": {
+  "observed_scale": 0.01094884488448845,
+  "cells": 196,
+  "trials_per_cell": 1.030612244897959,
+  "before_share_on_earning_cells": 0.3887945053559275,
+  "after_share_on_earning_cells": 0.6628335507266603,
+  "before_top_cell_share": 0.009239488964157803,
+  "after_top_cell_share": 0.04574240650072132,
+  "before_min_share": 0.0037471827035608527,
+  "after_min_share": 0.002198923381452955
+ },
+ "perindopril_mpo": {
+  "observed_scale": 0.006803555454818219,
+  "cells": 191,
+  "trials_per_cell": 1.057591623036649,
+  "before_share_on_earning_cells": 0.3767812600617719,
+  "after_share_on_earning_cells": 0.6651312657409267,
+  "before_top_cell_share": 0.010474433282361632,
+  "after_top_cell_share": 0.0851711974057978,
+  "before_min_share": 0.003621806280894149,
+  "after_min_share": 0.0022151352951478446
+ }
+}

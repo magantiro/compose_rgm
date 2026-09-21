@@ -1,0 +1,59 @@
+{
+  "schema_version": "pmo_allocator_repair_predeclaration_v1",
+  "written_before_any_after_measurement": true,
+  "replay_source": {
+    "run_id": "35fc7bcd4bf5c964294698014c1ed40da483ad013f6b92c6201b01dee2d3d306",
+    "volume": "compose-v4-artifacts",
+    "path": "pmo_population_controller_v1/",
+    "tasks": ["celecoxib_rediscovery", "gsk3b", "perindopril_mpo"],
+    "rounds_per_task": 15,
+    "archive_entries_per_task": 234,
+    "oracle_calls_per_task": 250,
+    "oracle_calls_this_work": 0,
+    "scorer": "FROZEN -- every score read from snapshot.observations; no oracle is constructed"
+  },
+  "method": {
+    "no_transcription": "BEFORE and AFTER both drive the production ProgramOptimizer.selection / PmoPopulationController.selection on an object restored by the production ProgramOptimizer.restore. Nothing is reimplemented in the harness.",
+    "kernel": "~/compose_region_pinned_env (python 3.11, rdkit 2024.3.5, numpy 1.26.4, torch 2.4.0)"
+  },
+  "predeclared_outcomes": [
+    {
+      "id": "P1_parent_heavy_atoms",
+      "claim": "Parents actually drawn should track the archive's own heavy-atom distribution rather than sitting ~7 atoms below it.",
+      "before_expectation": "median drawn ~9 against archive median ~16",
+      "pass_condition": "AFTER median drawn is within 2 heavy atoms of the archive median, and the sub-10 drawn share falls substantially from its BEFORE value",
+      "fail_is_informative": true
+    },
+    {
+      "id": "P2_singleton_score_sensitivity",
+      "claim": "A badly-scoring singleton should lose mass when its score drops.",
+      "before_expectation": "swinging a one-atom fragment from 0.01 to 0.99 changes its parent mass by exactly 0.0000",
+      "pass_condition": "AFTER, the same swing moves the singleton's mass by a strictly positive amount, and the direction is monotone (higher score -> more mass)",
+      "control": "a drug-like archive member swung over the same range must also move (it moved 0.0083 -> 0.1083 BEFORE); if the control stops moving the fix is broken, not working"
+    },
+    {
+      "id": "P3_escape_drains",
+      "claim": "Plateau escape must drain rather than latch.",
+      "before_expectation": "escape True for 8 consecutive rounds, never releasing",
+      "pass_condition": "AFTER, no escape episode on the same measured best-score sequence exceeds its declared duration, and escape is False for at least one round inside the BEFORE 8-round latch window"
+    },
+    {
+      "id": "P4_jump_floor_removed",
+      "claim": "The measured-dead jump lane must not hold a fixed floor quota, but must keep a recoverable exploration floor.",
+      "pass_condition": "AFTER, the jump lane's guaranteed floor quota is 0 while its achievable share is strictly positive when its measured yield is competitive"
+    },
+    {
+      "id": "P5_trials_per_cell",
+      "claim": "Exploration weight sized for docking fragments credit into ~1-trial cells.",
+      "before_expectation": "~1.1 trials per cell; untried value 0.2500 outranks a 1-trial cell that delivered +0.05",
+      "pass_condition": "AFTER, an untried cell no longer strictly outranks a 1-trial cell that delivered an improvement at the MEASURED reward scale (mean positive improvement u ~ 0.0077)"
+    },
+    {
+      "id": "P6_mass_concentration",
+      "claim": "Fewer than 10 molecules should not hold ~80% of parent mass by virtue of structural isolation.",
+      "before_expectation": "~8 endpoints hold ~80%",
+      "pass_condition": "reported either way; a rise in the count is only meaningful alongside P1 and P2"
+    }
+  ],
+  "negative_result_policy": "A fix that does not move its predeclared metric is reported as a clean negative and is not re-tuned until it does."
+}

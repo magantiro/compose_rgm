@@ -1,0 +1,118 @@
+{
+ "celecoxib_rediscovery": [
+  {
+   "role": "fragment",
+   "endpoint": "CCC=O",
+   "heavy": 4,
+   "before_delta": 0.04054327048817887,
+   "after_delta": 0.35208068267516895,
+   "before_low": 0.0008522440623911957,
+   "before_high": 0.04139551455057007,
+   "after_low": 0.0008558426327811012,
+   "after_high": 0.35293652530795006
+  },
+  {
+   "role": "fragment",
+   "endpoint": "CCCF",
+   "heavy": 4,
+   "before_delta": 0.028531231729985312,
+   "after_delta": 0.2503073971905317,
+   "before_low": 0.0008559628745323872,
+   "before_high": 0.029387194604517698,
+   "after_low": 0.0008592225677006996,
+   "after_high": 0.2511666197582324
+  },
+  {
+   "role": "fragment",
+   "endpoint": "O=C=O",
+   "heavy": 3,
+   "before_delta": 0.0145538643951117,
+   "after_delta": 0.25373660489674144,
+   "before_low": 0.0008593176628816998,
+   "before_high": 0.0154131820579934,
+   "after_low": 0.0008620054407099507,
+   "after_high": 0.2545986103374514
+  },
+  {
+   "role": "CONTROL",
+   "endpoint": "CC1=CC=C(C(CNc2ccc(Br)cc2Cl)C(N)(F)c2cccnc2)C1",
+   "heavy": 26,
+   "before_delta": 0.11540891595668533,
+   "after_delta": 0.5797335473180042,
+   "before_low": 0.0008511163028589913,
+   "before_high": 0.11626003225954432,
+   "after_low": 0.000853032047630244,
+   "after_high": 0.5805865793656344
+  }
+ ],
+ "gsk3b": [
+  {
+   "role": "fragment",
+   "endpoint": "C",
+   "heavy": 1,
+   "before_delta": -0.00893294982931049,
+   "after_delta": 0.35170316007253694,
+   "before_low": 0.07442305196366808,
+   "before_high": 0.06549010213435759,
+   "after_low": 0.0029673986736714984,
+   "after_high": 0.35467055874620845
+  },
+  {
+   "role": "fragment",
+   "endpoint": "CCCNF",
+   "heavy": 5,
+   "before_delta": 0.00336535943289841,
+   "after_delta": 0.2891189828435748,
+   "before_low": 0.07324764049185244,
+   "before_high": 0.07661299992475085,
+   "after_low": 0.002920544543971804,
+   "after_high": 0.29203952738754657
+  },
+  {
+   "role": "CONTROL",
+   "endpoint": "CC1C(C)C2CC3CC(=O)C2(C(C#N)C1NC1=C(P)C=C(Br)C(C(N)[IH]OOCNNCO)N1)C3(C)C",
+   "heavy": 37,
+   "before_delta": 0.14499968514350312,
+   "after_delta": 0.6794254537785338,
+   "before_low": 0.0008503934644338469,
+   "before_high": 0.14585007860793697,
+   "after_low": 0.000852741466614681,
+   "after_high": 0.6802781952451484
+  }
+ ],
+ "perindopril_mpo": [
+  {
+   "role": "fragment",
+   "endpoint": "Br",
+   "heavy": 1,
+   "before_delta": -3.873282393006966e-05,
+   "after_delta": 0.2609876739600446,
+   "before_low": 0.05274375861244482,
+   "before_high": 0.05270502578851475,
+   "after_low": 0.002721766900990325,
+   "after_high": 0.2637094408610349
+  },
+  {
+   "role": "fragment",
+   "endpoint": "C",
+   "heavy": 1,
+   "before_delta": -0.017751147974021386,
+   "after_delta": 0.469056792546396,
+   "before_low": 0.1556579884582083,
+   "before_high": 0.13790684048418692,
+   "after_low": 0.00640190388573916,
+   "after_high": 0.4754586964321351
+  },
+  {
+   "role": "CONTROL",
+   "endpoint": "CCCC(OC1CCCCC1C(C)C)C(=O)Nc1ccc2[nH]c(=NCOO)sc2c1",
+   "heavy": 30,
+   "before_delta": 0.1548032094973824,
+   "after_delta": 0.6290675784205578,
+   "before_low": 0.0008547789608258943,
+   "before_high": 0.1556579884582083,
+   "after_low": 0.0008510109378758503,
+   "after_high": 0.6299185893584337
+  }
+ ]
+}

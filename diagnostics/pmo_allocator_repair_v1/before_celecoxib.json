@@ -1,0 +1,201 @@
+{
+ "task": "celecoxib_rediscovery",
+ "archive_size": 234,
+ "archive_heavy_atoms": {
+  "n": 234,
+  "min": 1.0,
+  "p25": 7.0,
+  "median": 14.0,
+  "p75": 23.0,
+  "max": 38.0,
+  "mean": 15.205128205128204
+ },
+ "drawn_parent_heavy_atoms": {
+  "n": 20000,
+  "min": 1.0,
+  "p25": 4.0,
+  "median": 8.0,
+  "p75": 21.0,
+  "max": 38.0,
+  "mean": 11.8334
+ },
+ "drawn_under_10_heavy_fraction": 0.68985,
+ "archive_under_10_heavy_fraction": 0.3974358974358974,
+ "concentration": {
+  "endpoints_holding_80pct": 13,
+  "archive_size": 234,
+  "top8_mass": 0.7956245923055806,
+  "top_members": [
+   {
+    "smiles": "Nc1c2c(I)c3c-2c1-3",
+    "mass": 0.1680776561160546,
+    "heavy_atoms": 8
+   },
+   {
+    "smiles": "Bc1c2c([PH4])c3c-2c1-3",
+    "mass": 0.14814908287651854,
+    "heavy_atoms": 8
+   },
+   {
+    "smiles": "CCC=O",
+    "mass": 0.11892507211537022,
+    "heavy_atoms": 4
+   },
+   {
+    "smiles": "CC1=CC=C(C(CNc2ccc(Br)cc2Cl)C(N)(F)c2cccnc2)C1",
+    "mass": 0.11057799935813437,
+    "heavy_atoms": 26
+   },
+   {
+    "smiles": "CCCF",
+    "mass": 0.07557039117231756,
+    "heavy_atoms": 4
+   },
+   {
+    "smiles": "CNC(F)(c1cccnc1)C(CNc1ccc(Br)cc1Cl)C1=CC=C1C",
+    "mass": 0.07357584553907448,
+    "heavy_atoms": 26
+   },
+   {
+    "smiles": "Nc1c2c(O)c3c-2c1-3",
+    "mass": 0.055327566329201515,
+    "heavy_atoms": 8
+   },
+   {
+    "smiles": "O=C=O",
+    "mass": 0.04542097879890924,
+    "heavy_atoms": 3
+   }
+  ]
+ },
+ "mass_weighted_qed": 0.4358416768404917,
+ "mass_weighted_sa": 3.882872848874895,
+ "archive_mean_qed": 0.46844664101265193,
+ "archive_mean_sa": 4.180399113642338,
+ "escape_history": [
+  {
+   "round": 0,
+   "best_score": null,
+   "rounds_without_improvement": 0,
+   "escape_rounds_remaining": 0,
+   "allocation_decisions": 0
+  },
+  {
+   "round": 1,
+   "best_score": 0.13793103448275862,
+   "rounds_without_improvement": 0,
+   "escape_rounds_remaining": 0,
+   "allocation_decisions": 1
+  },
+  {
+   "round": 2,
+   "best_score": 0.13793103448275862,
+   "rounds_without_improvement": 1,
+   "escape_rounds_remaining": 0,
+   "allocation_decisions": 2
+  },
+  {
+   "round": 3,
+   "best_score": 0.13793103448275862,
+   "rounds_without_improvement": 2,
+   "escape_rounds_remaining": 0,
+   "allocation_decisions": 3
+  },
+  {
+   "round": 4,
+   "best_score": 0.20491803278688525,
+   "rounds_without_improvement": 0,
+   "escape_rounds_remaining": 0,
+   "allocation_decisions": 4
+  },
+  {
+   "round": 5,
+   "best_score": 0.20491803278688525,
+   "rounds_without_improvement": 1,
+   "escape_rounds_remaining": 0,
+   "allocation_decisions": 5
+  },
+  {
+   "round": 6,
+   "best_score": 0.20491803278688525,
+   "rounds_without_improvement": 1,
+   "escape_rounds_remaining": 0,
+   "allocation_decisions": 5
+  },
+  {
+   "round": 7,
+   "best_score": 0.22033898305084745,
+   "rounds_without_improvement": 0,
+   "escape_rounds_remaining": 0,
+   "allocation_decisions": 6
+  },
+  {
+   "round": 8,
+   "best_score": 0.22033898305084745,
+   "rounds_without_improvement": 1,
+   "escape_rounds_remaining": 0,
+   "allocation_decisions": 7
+  },
+  {
+   "round": 9,
+   "best_score": 0.22033898305084745,
+   "rounds_without_improvement": 2,
+   "escape_rounds_remaining": 0,
+   "allocation_decisions": 8
+  },
+  {
+   "round": 10,
+   "best_score": 0.22033898305084745,
+   "rounds_without_improvement": 3,
+   "escape_rounds_remaining": 2,
+   "allocation_decisions": 9
+  },
+  {
+   "round": 11,
+   "best_score": 0.22033898305084745,
+   "rounds_without_improvement": 4,
+   "escape_rounds_remaining": 2,
+   "allocation_decisions": 10
+  },
+  {
+   "round": 12,
+   "best_score": 0.22033898305084745,
+   "rounds_without_improvement": 5,
+   "escape_rounds_remaining": 2,
+   "allocation_decisions": 11
+  },
+  {
+   "round": 13,
+   "best_score": 0.22033898305084745,
+   "rounds_without_improvement": 6,
+   "escape_rounds_remaining": 2,
+   "allocation_decisions": 12
+  },
+  {
+   "round": 14,
+   "best_score": 0.22033898305084745,
+   "rounds_without_improvement": 7,
+   "escape_rounds_remaining": 2,
+   "allocation_decisions": 13
+  }
+ ],
+ "credit_trials": {
+  "cells": 191,
+  "total_trials": 202,
+  "trials_per_cell": 1.057591623036649,
+  "histogram": {
+   "1": 181,
+   "2": 9,
+   "3": 1
+  },
+  "basins": 90
+ },
+ "reward_scale": {
+  "positive_improvement_sum": 1.3942521308496043,
+  "improvements": 58,
+  "trials": 202,
+  "mean_positive_improvement_per_win": 0.024038829842234558,
+  "mean_positive_improvement_per_trial": 0.0069022382715326945
+ },
+ "best_observed_score": 0.22033898305084745
+}

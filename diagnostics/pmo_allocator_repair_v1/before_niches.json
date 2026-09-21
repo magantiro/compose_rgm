@@ -1,0 +1,224 @@
+{
+ "celecoxib_rediscovery": [
+  {
+   "center": "CC1=CC=C(C(CNc2ccc(Br)cc2Cl)C(N)(F)c2cccnc2)C1",
+   "center_heavy": 26,
+   "members": 203,
+   "selected": 2,
+   "sel": [
+    [
+     "CC1=CC=C(C(CNc2ccc(Br)cc2Cl)C(N)(F)c2cccnc2)C1",
+     26,
+     0.2203
+    ],
+    [
+     "CNC(F)(c1cccnc1)C(CNc1ccc(Br)cc1Cl)C1=CC=C1C",
+     26,
+     0.2101
+    ]
+   ]
+  },
+  {
+   "center": "[SH4]",
+   "center_heavy": 1,
+   "members": 14,
+   "selected": 2,
+   "sel": [
+    [
+     "CCC=O",
+     4,
+     0.0256
+    ],
+    [
+     "CCCF",
+     4,
+     0.0256
+    ]
+   ]
+  },
+  {
+   "center": "O=C=[SH4]",
+   "center_heavy": 3,
+   "members": 9,
+   "selected": 2,
+   "sel": [
+    [
+     "Bc1c2c([PH4])c3c-2c1-3",
+     8,
+     0.069
+    ],
+    [
+     "O=C=O",
+     3,
+     0.0267
+    ]
+   ]
+  },
+  {
+   "center": "C=[PH3]",
+   "center_heavy": 2,
+   "members": 8,
+   "selected": 2,
+   "sel": [
+    [
+     "Nc1c2c(I)c3c-2c1-3",
+     8,
+     0.0814
+    ],
+    [
+     "Nc1c2c(O)c3c-2c1-3",
+     8,
+     0.0814
+    ]
+   ]
+  }
+ ],
+ "gsk3b": [
+  {
+   "center": "CC1C(C)C2CC3CC(=O)C2(C(C#N)C1NC1=C(P)C=C(Br)C(C(N)[IH]OOCNNCO)N1)C3(C)C",
+   "center_heavy": 37,
+   "members": 189,
+   "selected": 2,
+   "sel": [
+    [
+     "CC1C(C)C2CC3CC(=O)C2(C(C#N)C1NC1=C(P)C=C(Br)C(C(N)[IH]OOCNNCO)N1)C3(C)C",
+     37,
+     0.29
+    ],
+    [
+     "CCC1C2C(=O)C(C(C#N)C(NC3=C(P)C=C(NC)C(C(=N)N)N3)C(C=O)C2CC2CCCNC2)C1(C)C",
+     38,
+     0.27
+    ]
+   ]
+  },
+  {
+   "center": "[SH4]",
+   "center_heavy": 1,
+   "members": 4,
+   "selected": 2,
+   "sel": [
+    [
+     "C",
+     1,
+     0.0
+    ],
+    [
+     "CCCNF",
+     5,
+     0.0
+    ]
+   ]
+  },
+  {
+   "center": "CCl",
+   "center_heavy": 2,
+   "members": 16,
+   "selected": 2,
+   "sel": [
+    [
+     "CNc1c2c(Cl)c3c-2c1-3",
+     9,
+     0.05
+    ],
+    [
+     "CCOc1c2c(Cl)c3c-2c1-3",
+     10,
+     0.02
+    ]
+   ]
+  },
+  {
+   "center": "NN(N)F",
+   "center_heavy": 4,
+   "members": 25,
+   "selected": 2,
+   "sel": [
+    [
+     "CC1([IH]N(N)F)CNN1",
+     9,
+     0.12
+    ],
+    [
+     "CC(C)(CN(N)F)N1CCC1O",
+     12,
+     0.07
+    ]
+   ]
+  }
+ ],
+ "perindopril_mpo": [
+  {
+   "center": "CCCC(OC1CCCCC1C(C)C)C(=O)Nc1ccc2[nH]c(=NCOO)sc2c1",
+   "center_heavy": 30,
+   "members": 200,
+   "selected": 2,
+   "sel": [
+    [
+     "CCCC(OC1CCCCC1C(C)C)C(=O)Nc1ccc2[nH]c(=NCOO)sc2c1",
+     30,
+     0.498
+    ],
+    [
+     "CCC(OC1CCCCC1C(C)C)C(=O)Nc1ccc2[nH]c(=NCOO)sc2c1",
+     29,
+     0.4629
+    ]
+   ]
+  },
+  {
+   "center": "P",
+   "center_heavy": 1,
+   "members": 6,
+   "selected": 2,
+   "sel": [
+    [
+     "Br",
+     1,
+     0.0
+    ],
+    [
+     "C",
+     1,
+     0.0
+    ]
+   ]
+  },
+  {
+   "center": "NF",
+   "center_heavy": 2,
+   "members": 19,
+   "selected": 2,
+   "sel": [
+    [
+     "NC1CC1NNOF",
+     8,
+     0.0048
+    ],
+    [
+     "NCCC(N)NNOF",
+     9,
+     0.0048
+    ]
+   ]
+  },
+  {
+   "center": "CCl",
+   "center_heavy": 2,
+   "members": 9,
+   "selected": 2,
+   "sel": [
+    [
+     "CCC(N)(CC)CC#N",
+     9,
+     0.0052
+    ],
+    [
+     "COCON(F)OCCl",
+     9,
+     0.0038
+    ]
+   ]
+  }
+ ]
+}

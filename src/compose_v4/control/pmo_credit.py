@@ -49,7 +49,11 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
-SCHEMA_VERSION = "pmo_credit_v1"
+# v2: `prior_weight` changed UNITS. In v1 it was an absolute oracle-improvement
+# optimism bonus; it is now a dimensionless multiple of `observed_scale()`. A v1
+# snapshot carries 0.25 in the old units and would be silently misread, so the schema
+# version is bumped and `restore` refuses it rather than resuming on a wrong scale.
+SCHEMA_VERSION = "pmo_credit_v2"
 
 # Action scale. One composer with a scale variable, not three algorithms.
 REFINE = "refine"
@@ -73,9 +77,14 @@ ACYCLIC_BASIN = "acyclic"
 # floor already carried by `ProgramSearchConfig.exploration`.
 DEFAULT_EXPLORATION_FLOOR = 0.2
 
-# Optimism given to a cell with no trials, in oracle-improvement units. Bounded on
-# purpose: an unvisited cell should be worth trying, not worth monopolizing.
-DEFAULT_PRIOR_WEIGHT = 0.25
+# Optimism given to a cell with no trials, in MULTIPLES of the run's own measured mean
+# upside per trial -- not in absolute oracle-improvement units. A fixed 0.25 was sized
+# for a docking score: against PMO's measured mean upside per trial (~0.007) it made an
+# untried cell strictly outrank a cell that had already delivered a real improvement, so
+# proliferating new cells beat accumulating evidence in any of them and the joint credit
+# fragmented to ~1.1 trials per cell. Dimensionless here, so one value covers every
+# oracle and the scale is counted rather than assumed.
+DEFAULT_PRIOR_WEIGHT = 1.0
 
 CREDIT_AXES = ("basin", "parent", "family", "scale")
 
@@ -254,16 +263,30 @@ class PopulationCredit:
 
     # ---- Value and allocation ----
 
+    def observed_scale(self) -> float:
+        """Mean positive improvement per trial, summed over the joint. Counted, not set.
+
+        This is the unit the optimism bonus is denominated in. With no trials anywhere it
+        is 0.0, which makes every untried cell's bonus identical and therefore leaves the
+        cold-start allocation uniform -- exactly where it already was.
+        """
+        trials = sum(cell.trials for cell in self.cells.values())
+        if not trials:
+            return 0.0
+        return sum(cell.positive_improvement_sum for cell in self.cells.values()) / trials
+
     def value(self, key: CreditKey) -> float:
-        """Expected upside per trial, plus a bounded optimism bonus for thin cells.
+        """Expected upside per trial, plus a scale-aware optimism bonus for thin cells.
 
         A negative `df` contributes zero rather than a penalty: the parent remains in the
         archive, so a failed child costs one call, not a regression. The bonus shrinks as
-        `1 / sqrt(trials + 1)` -- a search setting, not a calibrated confidence bound.
+        `1 / sqrt(trials + 1)` and is measured in multiples of `observed_scale()`, so an
+        untried cell is worth about one typical trial's upside rather than a constant
+        that no measured improvement on this task could ever overtake.
         """
         cell = self.cell(key)
         upside = cell.positive_improvement_sum / cell.trials if cell.trials else 0.0
-        return upside + self.prior_weight / math.sqrt(cell.trials + 1)
+        return upside + self.prior_weight * self.observed_scale() / math.sqrt(cell.trials + 1)
 
     def allocate(self, keys) -> np.ndarray:
         """Budget shares over `keys`: `(1 - eps) * q_credit + eps * uniform`.
@@ -291,6 +314,7 @@ class PopulationCredit:
             "schema_version": SCHEMA_VERSION,
             "exploration_floor": self.exploration_floor,
             "prior_weight": self.prior_weight,
+            "observed_scale": self.observed_scale(),
             "minimum_share": (
                 self.exploration_floor / len(keys) if keys else 0.0
             ),

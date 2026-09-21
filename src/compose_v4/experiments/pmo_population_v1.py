@@ -52,7 +52,7 @@ def configuration(seed: int = 20260920) -> ProgramSearchConfig:
 
     return replace(
         ProgramSearchConfig.program_only_recipe(seed=seed, score_direction="maximize"),
-        parent_allocation="niche_score",
+        parent_allocation="niche_evidence",
         attempts_per_batch=128,
         candidates_per_batch=QUERIES_PER_ROUND,
         wall_seconds=45.0,

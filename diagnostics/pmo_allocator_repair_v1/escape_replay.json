@@ -1,0 +1,74 @@
+{
+ "celecoxib_rediscovery": {
+  "improved_sequence": [
+   true,
+   false,
+   false,
+   true,
+   false,
+   false,
+   true,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "before_pattern": ".........EEEE",
+  "before_max_consecutive": 4,
+  "before_escape_rounds": 4,
+  "after_pattern": "..........EE.",
+  "after_max_consecutive": 2,
+  "after_escape_rounds": 2,
+  "before_still_latched_at_end": true
+ },
+ "gsk3b": {
+  "improved_sequence": [
+   true,
+   false,
+   true,
+   true,
+   true,
+   false,
+   true,
+   true,
+   false,
+   true,
+   false,
+   false,
+   true
+  ],
+  "before_pattern": ".............",
+  "before_max_consecutive": 0,
+  "before_escape_rounds": 0,
+  "after_pattern": ".............",
+  "after_max_consecutive": 0,
+  "after_escape_rounds": 0,
+  "before_still_latched_at_end": false
+ },
+ "perindopril_mpo": {
+  "improved_sequence": [
+   true,
+   true,
+   true,
+   true,
+   false,
+   false,
+   true,
+   true,
+   true,
+   false,
+   false,
+   true,
+   false
+  ],
+  "before_pattern": ".............",
+  "before_max_consecutive": 0,
+  "before_escape_rounds": 0,
+  "after_pattern": ".............",
+  "after_max_consecutive": 0,
+  "after_escape_rounds": 0,
+  "before_still_latched_at_end": false
+ }
+}
