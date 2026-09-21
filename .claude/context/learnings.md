@@ -3324,3 +3324,34 @@ independently of whether fa7_0 ever closes.**
   anchored growth the next adjacent atom is a ring neighbour anyway, so the explicit ring grouping is
   redundant with it, and ring integrity at a STAGE BOUNDARY is a separate guard in the chunker.
   Record the distinction rather than deleting the surviving mutation.
+
+## 2026-09-21 (the dip is an ORDERING artifact -- deep but one stage wide -- and a coordinator-set trap)
+
+- **VERDICT `INTERLEAVING_REMOVES_MOST_DIPS`.** Over 35 declared-target pairs, prune-first dips on
+  10; interleaving rescues **9 of 10**, preserving the endpoint on **6 of 10**.
+      dip DEPTH relative to source:  median 65.9%, min 13.0%, max 100.0%; 0/10 shallower than 10%
+      dip WIDTH:                     median 1 stage, MAX 1
+- **"Deep but narrow" is decisive in BOTH directions, which is why depth and width had to be
+  measured separately.** A median 66% collapse kills the "tunable selection tolerance" option
+  outright -- the objective does not wobble, it collapses, so no plausible threshold absorbs it.
+  A width of exactly one stage bounds the fix: **a transport channel needs protected budget for ONE
+  ROUND**, not an open-ended commitment. An architectural requirement of a very bounded kind.
+- **MECHANISM: the dip is an artifact of stage ORDER, not of transport.** Prune-then-install strips
+  structure the target does not want BEFORE adding structure it does, so the midpoint is smaller
+  than both endpoints. Installing first keeps the molecule out of the trough with identical
+  endpoints: `0.2235 -> 0.1014 -> 0.6515` becomes `0.2235 -> 0.2826 -> 0.6515`.
+- **CAVEAT that makes this a policy rather than a default: interleaving preserves the endpoint on
+  only 6 of 10.** Stage ordering must therefore be chosen PER TRANSPORT on trajectory shape subject
+  to validity and endpoint preservation, never fixed to one order.
+- **A COORDINATOR-SET TRAP, and the agent avoided it.** I told the agent that if no alignment were
+  monotone, "a score-greedy controller provably cannot follow a transport -- a publishable statement
+  about the objective." Its first alignment run returned exactly that: `NO_ALIGNMENT_IS_MONOTONE`,
+  0/10 rescued. **It was nearly VACUOUS.** 26 of 35 pairs admit exactly ONE alignment and **7 of the
+  10 dipping pairs had no alternative at all**, so "not rescued" was definitionally true for them;
+  among the 3 that did have an alternative, **3 of 3 were rescued**. `correspondences` derives its
+  top-K from the matches of a SINGLE MCS, so alignment diversity exists only for symmetric
+  molecules -- it was never a general lever.
+  **TWO LESSONS. (1) Ask whether the thing being tested EXISTS before reporting that it failed** --
+  same class as "a metric that cannot vary is not a measurement". **(2) Pre-blessing one branch as
+  "publishable" creates pressure to reach it.** State what each outcome would mean, never which one
+  would be a good result.
