@@ -3,17 +3,18 @@
     "A_baseline": {
       "contract": "configs/pmo_ab_a_baseline_contract_v1.json",
       "enable_online_memory": false,
-      "payload_sha256": "fe6c5d45483eeb992ad42ba7b7b1280c3897837af155a5925068b79d7d2f26da"
+      "payload_sha256": "bb8b7530cd77618ef68cf985da09e67bd7bdbe5bcd0617f627042391d3b8f590"
     },
     "B_memory": {
       "contract": "configs/pmo_ab_b_memory_contract_v1.json",
       "enable_online_memory": true,
-      "payload_sha256": "f0dc7b902dc2e3bf8043d360479963cb1afa9036f1c91dfa08a9bb3eed0a2b0b"
+      "payload_sha256": "637c7cd75b89141548ff1dcaa88e37e8fbd8737c730b6db5fee796e2c4170c90"
     }
   },
   "authority": "Owner granted standing launch authorization for this overnight PMO work and is away ('you have authorization for modal and everything... you don't have to ask'). The active goal names this experiment explicitly: 'A = strong current productive controller. B = same initialization, executor, chemistry, budget, and controller + online task-adaptive structural proposal memory. Start with GSK3B, Celecoxib, Perindopril.'",
   "authorized_at_utc": "2026-09-21T08:48:47.593200+00:00",
   "automatic_retries": 0,
+  "chain_note": "A content-addressed identity move has a transitive blast radius: the base controller contract pins the worker, the A/B contracts pin the base contract by hash, and the receipt pins the A/B payloads. All three layers re-pinned together; only hash pointers moved.",
   "charged_calls_per_task": 250,
   "charged_calls_total": 1500,
   "chemistry_contrast": "The repair improves chemistry where the oracle is sound and degrades it where the oracle is hackable: celecoxib QED 0.422->0.499 SA 3.93->3.54; perindopril QED 0.404->0.437 SA 5.03->4.41; gsk3b QED 0.342->0.164 SA 5.27->6.81.",
