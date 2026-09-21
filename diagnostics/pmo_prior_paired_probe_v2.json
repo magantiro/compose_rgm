@@ -1,0 +1,74 @@
+{
+  "arms": {
+    "0.05:1.0": {
+      "by_family": {
+        "atom_restate_semantic": {
+          "disagreement_rate_pct": 97.33333333333333,
+          "n": 300,
+          "paired_mean_delta_dQED": -0.0043303525428886784,
+          "paired_se_delta_dQED": 0.0068084359715397755
+        },
+        "bond_reroute": {
+          "disagreement_rate_pct": 94.47236180904522,
+          "n": 199,
+          "paired_mean_delta_dQED": 0.020958618281426093,
+          "paired_se_delta_dQED": 0.007191986662417451
+        },
+        "cycle_close": {
+          "disagreement_rate_pct": 93.62745098039215,
+          "n": 204,
+          "paired_mean_delta_dQED": -0.008539763025090085,
+          "paired_se_delta_dQED": 0.007008272920395762
+        },
+        "cycle_open": {
+          "disagreement_rate_pct": 88.38383838383838,
+          "n": 198,
+          "paired_mean_delta_dQED": -0.013839467212395984,
+          "paired_se_delta_dQED": 0.006769228631929632
+        },
+        "ring_system_restate": {
+          "disagreement_rate_pct": 50.0,
+          "n": 12,
+          "paired_mean_delta_dQED": -0.006337024511655909,
+          "paired_se_delta_dQED": 0.006750085281156096
+        }
+      },
+      "disagreement_rate_pct": 93.31872946330778,
+      "mean_dHeavy_A": 0.0,
+      "mean_dHeavy_B": 0.0,
+      "mean_dQED_A": -0.03830976319465704,
+      "mean_dQED_B": -0.0401572015124834,
+      "mean_dSA_A": 0.5191998746872479,
+      "mean_dSA_B": 0.33127599896573023,
+      "n_paired_decisions": 913,
+      "on_disagreements_only": {
+        "n": 852,
+        "paired_mean_delta_dQED": -0.0019797079626472577,
+        "paired_mean_delta_dSA": -0.20137851940580484,
+        "paired_se_delta_dQED": 0.0037504094816572416
+      },
+      "paired_mean_delta_dHeavy": 0.0,
+      "paired_mean_delta_dQED": -0.0018474383178263567,
+      "paired_mean_delta_dSA": -0.18792387572151778,
+      "paired_se_delta_dHeavy": 0.0,
+      "paired_se_delta_dQED": 0.003499872714572967,
+      "paired_se_delta_dSA": 0.029704374727827717,
+      "pct_losing_QED_A": 64.18400876232201,
+      "pct_losing_QED_B": 62.869660460021905
+    }
+  },
+  "oracle_calls_spent": 0,
+  "prior_statistics": {
+    "candidates_joined": 9026,
+    "candidates_scored": 9099,
+    "model_forwards": 41,
+    "orders_drawn": 914,
+    "successor_executions": 309
+  },
+  "schema_version": "pmo_prior_paired_probe_v1",
+  "settings": {
+    "draws": 6,
+    "sample": 50,
+    "seed": 20260921
+  }
+}

@@ -487,3 +487,41 @@ def test_inlined_state_identity_matches_the_production_helper() -> None:
         )
         checked += 1
     assert checked >= 5
+
+
+def test_this_call_site_cannot_change_heavy_atom_count() -> None:
+    """Every family at this call site preserves the heavy-atom count.
+
+    This is a SCOPE fact, and it is why a QED result measured here is not a
+    result about the whole proposal stream: `atom_insert` and `atom_delete` --
+    the two largest families in the production per-edit census and both net
+    negative on QED -- do not route through `current_state_program` at all.
+    Pinning it keeps a future reader from over-reading a QED null measured here.
+    """
+    from compose_v4.control.edit_program import execute_bound_program
+
+    checked = 0
+    for _row, source in _parents():
+        if source.n_real_atoms < 4:
+            continue
+        for family in sorted(ENUMERATORS):
+            try:
+                actions = ENUMERATORS[family](source)
+            except (ValueError, RuntimeError, KeyError, IndexError, TypeError):
+                continue
+            for action in actions[:6]:
+                try:
+                    program, binding, _detail = current_state_program(
+                        source, np.random.default_rng(3), family=family
+                    )
+                    endpoint, _r = execute_bound_program(source, program, tuple(binding))
+                except (ValueError, RuntimeError, KeyError, IndexError, TypeError):
+                    continue
+                assert endpoint.n_real_atoms == source.n_real_atoms, (
+                    f"{family} changed the heavy-atom count "
+                    f"{source.n_real_atoms} -> {endpoint.n_real_atoms}; the scope "
+                    "note on this call site is wrong and must be revised"
+                )
+                checked += 1
+                break
+    assert checked >= 5

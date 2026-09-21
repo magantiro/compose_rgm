@@ -81,13 +81,33 @@ from compose_v4.rewrite.semantic_atom_restate import _target_restate
 
 # ---- Family wiring ----------------------------------------------------------
 
-#: Proposal-path family -> the executor rule the model scores it under.
+#: The five families the `current_state_program` draw site can produce.  Every
+#: one of them PRESERVES the heavy-atom count, which is why a QED result
+#: measured at that site is not a result about the whole proposal stream:
+#: `atom_insert` and `atom_delete` are the largest families in the production
+#: per-edit census and neither routes through it.
+CALL_SITE_FAMILIES = (
+    "atom_restate_semantic",
+    "bond_reroute",
+    "cycle_close",
+    "cycle_open",
+    "ring_system_restate",
+)
+
+#: family -> the executor rule the model scores it under.  The construction
+#: families are present so `path_log_likelihood` can score a BUILD path, where
+#: the damage measured on the PMO lane actually lives; they are not reachable
+#: from the current draw site.
 FAMILY_TO_EXECUTOR_RULE = {
     "atom_restate_semantic": "atom_restate",
     "bond_reroute": "bond_reroute",
     "cycle_close": "bond_insert",
     "cycle_open": "bond_delete",
     "ring_system_restate": "ring_system_restate",
+    "atom_insert": "atom_insert",
+    "atom_delete": "atom_delete",
+    "atom_restate": "atom_restate",
+    "bond_reorder": "bond_reorder",
 }
 
 #: Families whose coordinate join is certified to reach the model mark's own
@@ -99,6 +119,12 @@ SUCCESSOR_EXACT_COORDINATE_JOIN = frozenset(
         "bond_reroute",
         "cycle_close",
         "ring_system_restate",
+        # These carry the model's OWN action class, so the join is an identity
+        # comparison rather than a translation.
+        "atom_insert",
+        "atom_delete",
+        "atom_restate",
+        "bond_reorder",
     }
 )
 
@@ -125,6 +151,21 @@ def _coordinate_key(rule: str, action: Any) -> Any:
         return (int(action.a), int(action.b), int(action.order))
     if rule == "bond_delete":
         return (int(action.a), int(action.b))
+    if rule == "atom_insert":
+        # `neighbors` is what makes this a PLACEMENT score and not merely an
+        # element score: it pins which existing atom the new one attaches to and
+        # with what bond order.
+        return (
+            int(action.slot),
+            int(action.atom_type),
+            int(action.formal_charge),
+            int(action.implicit_h_count),
+            tuple((int(v), int(o)) for v, o in action.neighbors),
+        )
+    if rule == "atom_delete":
+        return (int(action.v),)
+    if rule == "bond_reorder":
+        return (int(action.a), int(action.b), int(action.new_order))
     return action
 
 
@@ -149,6 +190,11 @@ def _candidate_key(state: MolecularGraph, family: str, action: Any) -> Any:
         return (int(action.a), int(action.b), int(action.order))
     if family == "cycle_open":
         return (int(action.a), int(action.b))
+    rule = FAMILY_TO_EXECUTOR_RULE.get(family)
+    if rule in ("atom_insert", "atom_delete", "atom_restate", "bond_reorder"):
+        # A recorded trace action for these families already IS the model's own
+        # action class, so the join is an identity comparison.
+        return _coordinate_key(rule, action)
     return action
 
 

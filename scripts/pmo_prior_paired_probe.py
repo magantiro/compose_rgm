@@ -108,6 +108,7 @@ def main() -> None:
                         "same": a[0] == b[0],
                         "dq_a": a[1] - pq, "dq_b": b[1] - pq,
                         "ds_a": a[2] - ps, "ds_b": b[2] - ps,
+                        "dh_a": a[3] - base[2], "dh_b": b[3] - base[2],
                     })
 
     out = {
@@ -137,6 +138,16 @@ def main() -> None:
             "mean_dSA_B": statistics.fmean(r["ds_b"] for r in rec),
             "paired_mean_delta_dSA": statistics.fmean(sdiff),
             "paired_se_delta_dSA": statistics.pstdev(sdiff) / (n ** 0.5) if n > 1 else 0.0,
+            # CONFOUND CONTROL: if B merely picks SMALLER edits, the SA gain is a
+            # size artifact rather than chemistry. Report the paired heavy-atom
+            # change so the two explanations can be told apart.
+            "mean_dHeavy_A": statistics.fmean(r["dh_a"] for r in rec),
+            "mean_dHeavy_B": statistics.fmean(r["dh_b"] for r in rec),
+            "paired_mean_delta_dHeavy": statistics.fmean(
+                r["dh_b"] - r["dh_a"] for r in rec),
+            "paired_se_delta_dHeavy": (
+                statistics.pstdev([r["dh_b"] - r["dh_a"] for r in rec]) / (n ** 0.5)
+                if n > 1 else 0.0),
         }
         if changed:
             cd = [r["dq_b"] - r["dq_a"] for r in changed]
@@ -163,13 +174,13 @@ def main() -> None:
 
     args.out.write_text(json.dumps(out, indent=2, sort_keys=True))
     print(f"{'arm':12s} {'n':>6s} {'disagree%':>10s} {'dQED_A':>8s} {'dQED_B':>8s} "
-          f"{'paired':>9s} {'+-se':>7s} {'%loseA':>7s} {'%loseB':>7s} {'pairSA':>8s}")
+          f"{'paired':>9s} {'+-se':>7s} {'%loseA':>7s} {'%loseB':>7s} {'pairSA':>8s} {'pairHv':>8s}")
     for name, m in out["arms"].items():
         print(f"{name:12s} {m['n_paired_decisions']:6d} {m['disagreement_rate_pct']:9.1f}% "
               f"{m['mean_dQED_A']:8.4f} {m['mean_dQED_B']:8.4f} "
               f"{m['paired_mean_delta_dQED']:+9.4f} {m['paired_se_delta_dQED']:7.4f} "
               f"{m['pct_losing_QED_A']:6.1f}% {m['pct_losing_QED_B']:6.1f}% "
-              f"{m['paired_mean_delta_dSA']:+8.4f}")
+              f"{m['paired_mean_delta_dSA']:+8.4f} {m['paired_mean_delta_dHeavy']:+8.4f}")
     print("wrote", args.out)
 
 

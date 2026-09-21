@@ -1,0 +1,135 @@
+{
+  "oracle_calls_spent": 0,
+  "placement_classes": {
+    "B_onto_C": {
+      "median_enrichment_vs_uniform": 0.0020643453924321536,
+      "median_model_share": 0.0001525095349368957,
+      "median_uniform_share": 0.07063197026022305,
+      "states": 27
+    },
+    "B_onto_N": {
+      "median_enrichment_vs_uniform": 0.004485225245955624,
+      "median_model_share": 3.195738176168589e-05,
+      "median_uniform_share": 0.007575757575757576,
+      "states": 25
+    },
+    "Br_onto_C": {
+      "median_enrichment_vs_uniform": 0.03523906330361745,
+      "median_model_share": 0.001293176634995136,
+      "median_uniform_share": 0.0438871473354232,
+      "states": 27
+    },
+    "Br_onto_N": {
+      "median_enrichment_vs_uniform": 0.008898759455361286,
+      "median_model_share": 5.962323351185611e-05,
+      "median_uniform_share": 0.007434944237918215,
+      "states": 25
+    },
+    "C_onto_C": {
+      "median_enrichment_vs_uniform": 8.283787073220466,
+      "median_model_share": 0.6081016639606128,
+      "median_uniform_share": 0.07063197026022305,
+      "states": 27
+    },
+    "C_onto_N": {
+      "median_enrichment_vs_uniform": 4.106413430289051,
+      "median_model_share": 0.02920818668966442,
+      "median_uniform_share": 0.007575757575757576,
+      "states": 25
+    },
+    "Cl_onto_C": {
+      "median_enrichment_vs_uniform": 0.08771421403198167,
+      "median_model_share": 0.0036449433333006526,
+      "median_uniform_share": 0.0438871473354232,
+      "states": 27
+    },
+    "Cl_onto_N": {
+      "median_enrichment_vs_uniform": 0.01716308481825308,
+      "median_model_share": 0.00011862982384452151,
+      "median_uniform_share": 0.007434944237918215,
+      "states": 25
+    },
+    "F_onto_C": {
+      "median_enrichment_vs_uniform": 0.10640889303130147,
+      "median_model_share": 0.004836767865059158,
+      "median_uniform_share": 0.0438871473354232,
+      "states": 27
+    },
+    "F_onto_N": {
+      "median_enrichment_vs_uniform": 0.006577788714310287,
+      "median_model_share": 4.1097814657070145e-05,
+      "median_uniform_share": 0.007434944237918215,
+      "states": 25
+    },
+    "I_onto_C": {
+      "median_enrichment_vs_uniform": 0.0032824188089450035,
+      "median_model_share": 0.0005920543209768176,
+      "median_uniform_share": 0.1862348178137652,
+      "states": 27
+    },
+    "I_onto_N": {
+      "median_enrichment_vs_uniform": 0.0034066222311643973,
+      "median_model_share": 7.598413898507949e-05,
+      "median_uniform_share": 0.022727272727272728,
+      "states": 25
+    },
+    "N_onto_C": {
+      "median_enrichment_vs_uniform": 1.459431430276374,
+      "median_model_share": 0.10272696960683214,
+      "median_uniform_share": 0.07063197026022305,
+      "states": 27
+    },
+    "N_onto_N": {
+      "median_enrichment_vs_uniform": 0.13230871807470931,
+      "median_model_share": 0.0008334573191169639,
+      "median_uniform_share": 0.007575757575757576,
+      "states": 25
+    },
+    "O_onto_C": {
+      "median_enrichment_vs_uniform": 2.8243197616274633,
+      "median_model_share": 0.19113113185516187,
+      "median_uniform_share": 0.06293706293706294,
+      "states": 27
+    },
+    "O_onto_N": {
+      "median_enrichment_vs_uniform": 0.11787097232924663,
+      "median_model_share": 0.0010553207981473416,
+      "median_uniform_share": 0.007575757575757576,
+      "states": 25
+    },
+    "P_onto_C": {
+      "median_enrichment_vs_uniform": 0.017133390914978137,
+      "median_model_share": 0.0023456249339296924,
+      "median_uniform_share": 0.1412639405204461,
+      "states": 27
+    },
+    "P_onto_N": {
+      "median_enrichment_vs_uniform": 0.008360489998068904,
+      "median_model_share": 0.00012694343868508803,
+      "median_uniform_share": 0.015151515151515152,
+      "states": 25
+    },
+    "S_onto_C": {
+      "median_enrichment_vs_uniform": 0.05731621197278226,
+      "median_model_share": 0.009001718855328522,
+      "median_uniform_share": 0.16170212765957448,
+      "states": 27
+    },
+    "S_onto_N": {
+      "median_enrichment_vs_uniform": 0.012693597501941658,
+      "median_model_share": 0.00014253032665570965,
+      "median_uniform_share": 0.015151515151515152,
+      "states": 25
+    }
+  },
+  "prior_statistics": {
+    "candidates_joined": 0,
+    "candidates_scored": 0,
+    "model_forwards": 24,
+    "orders_drawn": 0,
+    "successor_executions": 0
+  },
+  "reading": "enrichment < 1 means the learned law puts LESS mass on that placement class than a uniform draw over the same legal insert marks would. O_onto_O is the peroxide class the construction lane emits.",
+  "schema_version": "pmo_prior_placement_probe_v1",
+  "states_used": 28
+}
