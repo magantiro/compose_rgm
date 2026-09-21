@@ -5,12 +5,12 @@
     "A_baseline_1k": {
       "contract": "configs/pmo_ab_a_baseline_1k_contract_v1.json",
       "enable_online_memory": false,
-      "payload_sha256": "ff92e9dba67da60ca0f894b2b1174cd3ef80470da550e1e4e7a6774fa0fd854a"
+      "payload_sha256": "97a8a8106fa33fcc0bb95800fdd3ce68243f58106600f582106bc4627d1caba6"
     },
     "B_memory_1k": {
       "contract": "configs/pmo_ab_b_memory_1k_contract_v1.json",
       "enable_online_memory": true,
-      "payload_sha256": "54f0a0a10c9cc6e871343feb129014da8b5e5cef6b3a82d226083cc1d7b098b4"
+      "payload_sha256": "5cd54226b8e471387e86b007675c7bc8fcad754972b682aa4a92246d4f4534cd"
     }
   },
   "authority": "Owner instruction: 'resume, document the revision boundary, and get the 1k result... do not burn 500 extra calls just to make the code-revision story prettier.'",

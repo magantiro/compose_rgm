@@ -245,6 +245,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         # object consumes `rng.random` -- so a 'uniform law' would not be a no-op.
         self.online_memory = OnlineProposalMemory() if enable_online_memory else None
         self.online_memory_attribution_failures = 0
+        self.online_memory_reconstruction: dict[str, Any] | None = None
 
     def _channel_proposal(self, channel, entry):
         """The one integration point for the online structural memory.
@@ -889,6 +890,60 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             touched_slots=touched,
         )
 
+    def _reconstruct_online_memory(self) -> dict[str, Any]:
+        """Rebuild the online memory from the archive's own counted observations.
+
+        A snapshot taken before the memory was persistable carries none, so a plain
+        resume would restart arm B's memory COLD -- quietly turning a 1000-call
+        memory experiment into a 250-call one followed by a reset, with nothing in
+        the artifact to show it.
+
+        The learned content is reconstructible because every quantity the memory
+        holds is a sum or a bounded max over counted observations, and all of those
+        are durable in the archive.  Only the audit ordinal stamped on each donor
+        row depends on arrival order, so a replay reproduces the learned state
+        without needing the live ordering.
+
+        This is a RECONSTRUCTION from durable evidence, not a restored in-process
+        object: the live memory was never serialised, so byte-equality with it is
+        unavailable and is not claimed.  Replay goes through the SAME observation
+        path the live run used, so the two cannot drift apart.
+        """
+
+        scores: dict[str, float] = {}
+        for observation in self.observations.values():
+            endpoint, score = observation.get("endpoint"), observation.get("score")
+            if endpoint and score is not None:
+                scores[endpoint] = float(score)
+        replayed = skipped = failed = 0
+        for _, entry in sorted(self.entries.items()):
+            score = scores.get(entry.get("endpoint"))
+            if score is None:
+                skipped += 1
+                continue
+            try:
+                self._observe_into_online_memory(entry, score)
+            except Exception:  # noqa: BLE001 - mirrors the live path's best-effort attribution
+                failed += 1
+            else:
+                replayed += 1
+        if self.entries and not replayed:
+            # An archive full of scored entries that reconstructs nothing means the
+            # join or the entry shape moved; resuming on an empty memory here would
+            # be the silent arm change this whole path exists to prevent.
+            raise ValueError(
+                f"online-memory reconstruction replayed 0 of {len(self.entries)} "
+                "archived entries; refusing to resume arm B on an empty memory"
+            )
+        return {
+            "source": "archived_counted_observations",
+            "entries": len(self.entries),
+            "replayed": replayed,
+            "skipped_unscored": skipped,
+            "attribution_failures": failed,
+            "byte_equality_with_live_memory_claimed": False,
+        }
+
     def observe_batch(self, batch_id, outcomes):
         if self.pending is None or self.pending.get("batch_id") != batch_id:
             raise ValueError("PMO population outcome lacks its pending batch")
@@ -970,6 +1025,10 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             "online_memory": (
                 None if self.online_memory is None else self.online_memory.payload()
             ),
+            # Records that this arm's memory was REBUILT from archived observations
+            # rather than restored from a persisted payload, so the revision boundary
+            # is legible from the run's own artifact instead of from the commit log.
+            "online_memory_reconstruction": self.online_memory_reconstruction,
         }
         return json.loads(json.dumps({**body, "snapshot_id": identity(body)}))
 
@@ -1017,10 +1076,12 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
                     "constructed without it; resuming would silently change the arm"
                 )
             result.online_memory.restore_payload(memory_payload)
-        elif result.online_memory is not None and result.online_memory.ordinal:
-            raise ValueError(
-                "controller has a warm online memory but the snapshot carries none"
-            )
+        elif result.online_memory is not None:
+            if result.online_memory.ordinal:
+                raise ValueError(
+                    "controller has a warm online memory but the snapshot carries none"
+                )
+            result.online_memory_reconstruction = result._reconstruct_online_memory()
         result._population_bootstrap_pool_id = state["bootstrap_pool_id"]
         # Absent keys restore empty objects so a snapshot taken before these were
         # persisted still loads, rather than failing a resume outright.

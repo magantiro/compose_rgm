@@ -152,6 +152,7 @@ def run_task(spec: dict) -> dict:
     from compose_v4.experiments.pmo_population_v1 import (
         execute_task,
         load_contract,
+        resolve_extension_prior,
     )
 
     volume.reload()
@@ -208,13 +209,8 @@ def run_task(spec: dict) -> dict:
         # This continues a COMPLETED, authorized trajectory to a strictly larger
         # authorized budget, resuming the campaign and the query ledger from their own
         # durable state -- so no charged call is re-spent and none is forgotten.
-        if not result_path.exists():
-            raise RuntimeError(
-                "extension requires a COMPLETED prior run; a mid-flight or absent run "
-                "would be a retry, which stays forbidden"
-            )
-        prior = json.loads(result_path.read_text())
-        prior_budget = int(prior.get("charged_calls") or prior.get("auc_budget") or 0)
+        prior_path, prior_budget = resolve_extension_prior(folder)
+        failure_path = folder / "failure.json"
         new_budget = int(contract_envelope["payload"]["budget"]["charged_calls_per_task"])
         if new_budget <= prior_budget:
             raise RuntimeError(
@@ -224,10 +220,17 @@ def run_task(spec: dict) -> dict:
         # completed scored run at its own budget and revision.
         archive = folder / f"result_at_{prior_budget}_calls.json"
         if not archive.exists():
-            archive.write_text(result_path.read_text())
-        result_path.unlink()
+            archive.write_text(prior_path.read_text())
+        if result_path.exists():
+            result_path.unlink()
         if started.exists():
             started.unlink()
+        if failure_path.exists():
+            # Preserve the failed attempt's record rather than delete it, and clear
+            # the live slot so this attempt's own outcome cannot be read as that one.
+            index = len(list(folder.glob("failure_attempt_*.json")))
+            (folder / f"failure_attempt_{index}.json").write_text(failure_path.read_text())
+            failure_path.unlink()
         volume.commit()
     elif result_path.exists() or started.exists():
         raise RuntimeError("task already started or completed; retries/backfill forbidden")

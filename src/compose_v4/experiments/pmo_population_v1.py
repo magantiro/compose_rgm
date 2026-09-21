@@ -130,6 +130,57 @@ def load_contract(root: Path) -> dict:
     return contract
 
 
+
+def resolve_extension_prior(folder, *, result_name="result.json", started_name="started.json",
+                            failure_name="failure.json"):
+    """Locate the COMPLETED prior run an extension resumes, or refuse with the reason.
+
+    An extension archives the prior result and removes ``result.json`` BEFORE the run
+    itself starts, so an extension that fails partway leaves neither a result nor a
+    clean slate.  Requiring ``result.json`` would make the extension un-resumable and
+    make its own half-finished state read as a forbidden retry of the original run.
+
+    Returns ``(prior_path, prior_budget)``.  Raises with the specific reason otherwise.
+    """
+    folder = Path(folder)
+    result_path, started = folder / result_name, folder / started_name
+    failure_path = folder / failure_name
+    archives = sorted(
+        folder.glob("result_at_*_calls.json"),
+        key=lambda path: int(path.name.split("_")[2]),
+    )
+    if result_path.exists():
+        prior_path = result_path
+    elif archives:
+        # The archive is strictly STRONGER evidence than ``result.json``: it proves the
+        # prior run completed AND that this extension has run before.  It is only safe
+        # to resume once that attempt has TERMINATED -- a container still running left
+        # ``started.json`` and no ``failure.json``, and a second container against the
+        # same durable state could double-charge.
+        if started.exists() and not failure_path.exists():
+            raise RuntimeError(
+                "a prior extension attempt is still in flight (started, no failure); "
+                "refusing a second container against the same durable state"
+            )
+        prior_path = archives[-1]
+    else:
+        raise RuntimeError(
+            "extension requires a COMPLETED prior run; a mid-flight or absent run "
+            "would be a retry, which stays forbidden"
+        )
+    prior = json.loads(prior_path.read_text())
+    prior_budget = int(prior.get("charged_calls") or prior.get("auc_budget") or 0)
+    if prior_path != result_path:
+        # Two independent paths to one number: the name the archive was written under,
+        # and the charged-call count recorded inside it.
+        named_budget = int(prior_path.name.split("_")[2])
+        if named_budget != prior_budget:
+            raise RuntimeError(
+                f"archive name says {named_budget} charged calls, its content says "
+                f"{prior_budget}; refusing to extend from an ambiguous prior run"
+            )
+    return prior_path, prior_budget
+
 def execute_task(
     contract: dict,
     root: Path,

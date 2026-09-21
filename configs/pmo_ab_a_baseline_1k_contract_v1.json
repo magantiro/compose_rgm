@@ -20,7 +20,7 @@
       "queries_per_round": 16
     },
     "controller_contract": "configs/pmo_population_controller_v1.json",
-    "controller_contract_sha256": "0e87d4c9404d5f8755b5217c9d919e1b06d1d591ea9f639cc2ab3517386c2de9",
+    "controller_contract_sha256": "12af12d80845b0dd456e44bbf8a3ecb9445551dbc308ef9773ff612b0a97cfc7",
     "corrected_source_capsule_manifest": "diagnostics/pmo_population_controller_v1/source_capsule_manifest_v2.json",
     "corrected_worker_app": "compose-pmo-population-v1-corrected",
     "corrected_worker_path": "modal_apps/pmo_population_v1_app.py",
@@ -38,17 +38,17 @@
       }
     },
     "implementation_sha256": {
-      "modal_apps/pmo_population_v1_app.py": "36593de9fed971da22e6b47fa612821a7c01ca2a41bd66e627f2ef256862c065",
+      "modal_apps/pmo_population_v1_app.py": "f97e1e235804ddf5834ec76d7e24b951beee3968c13d8590ba93ea4a65e0242b",
       "src/compose_v4/control/adaptive_program_optimizer.py": "1f1937ca6035f2797235878925a515aff543089d044a8c06cd6197aea6a64a23",
       "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",
       "src/compose_v4/control/edit_learning_data.py": "b0e71fdbd54c39727765edfe36253c0588b9882ecf8a52f6b65b7c590d711f71",
       "src/compose_v4/control/pmo_credit.py": "9c8e32adec82df973d7175215a424df29367af96c8870981a0909fcd2a77a164",
       "src/compose_v4/control/pmo_online_memory.py": "bbea7d6580e81d1075eec9be3eee7a24afa9fc5276644cb3307d11e2071620c6",
-      "src/compose_v4/control/pmo_population_controller.py": "9953c580cdafbe7242ec1011d48834741509c6681449cbb44b4e17f2ad555caf",
+      "src/compose_v4/control/pmo_population_controller.py": "1e9b658c0ccae4685084bbadb0c748749a5ed8f4532a2f00859227755bab2869",
       "src/compose_v4/control/pmo_realization.py": "153d2f49b08186abff6088c1f6c462fe2d96b83ede26587b90a8504c0671b308",
       "src/compose_v4/control/program_campaign.py": "205f4aef97489ee352df9d8284e9d21ad683c3d542d25ce748c03bd9f8d6644b",
       "src/compose_v4/experiments/pmo_oracle_assets.py": "5ec0b7c9b9185cd2b8edd14c2529f37e825311a2b39d6ce71c68423ab9f4d558",
-      "src/compose_v4/experiments/pmo_population_v1.py": "eafc755e5eec80373ff0d134c03f7c9782085fc54e73383489a61a8aa24332bf"
+      "src/compose_v4/experiments/pmo_population_v1.py": "9f1e8afe184ddb078e6ce0a6108e669f02d5fd81d4147cfe35970e5f7bd5dd43"
     },
     "modal_launch_authorized": false,
     "oracle": {
@@ -100,5 +100,5 @@
       "celecoxib_rediscovery"
     ]
   },
-  "payload_sha256": "ff92e9dba67da60ca0f894b2b1174cd3ef80470da550e1e4e7a6774fa0fd854a"
+  "payload_sha256": "97a8a8106fa33fcc0bb95800fdd3ce68243f58106600f582106bc4627d1caba6"
 }
