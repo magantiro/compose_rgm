@@ -179,3 +179,34 @@ def test_enumerate_refinements_raises_on_an_unrepresentable_source():
     radical = "[CH]c1ccc(CN(CCC(C)CCN)C(=O)c2cccc3ccccc23)cc1C=C"
     with pytest.raises(SourceNotRepresentable):
         enumerate_refinements(FA7_0_SEED, FA7_0_DELTA, radical)
+
+
+# ---- Scope: why only the QED bound ------------------------------------------
+
+#: fa7_0's best QED-passing endpoint. It CLEARS QED and SA and fails similarity
+#: by 0.0627, i.e. the mirror image of the leader pinned above.
+FA7_0_SIMILARITY_MISS = "CC(C)CCN(CC1=CCC=C(CN)C=CC=C1)C(=O)c1cccc2ccccc12"
+
+
+def test_a_similarity_failure_is_not_repaired_by_one_edit():
+    """The negative control for REFINABLE_BOUNDS, and it is not the obvious one.
+
+    Similarity is NOT locally immovable -- one rewrite moves it +0.0756 here,
+    clearing delta. The reason this endpoint is still unrescuable is that the
+    similarity-raising edits and the QED-preserving edits are disjoint.
+    """
+
+    props = endpoint_properties(FA7_0_SEED, FA7_0_DELTA, FA7_0_SIMILARITY_MISS)
+    assert props["sim"] < FA7_0_DELTA
+    assert props["qed"] >= QED_MIN
+    assert not free_objective_near_miss(props, FA7_0_DELTA)
+
+    rows = _refined(FA7_0_SEED, FA7_0_DELTA, FA7_0_SIMILARITY_MISS)
+
+    # similarity does move, and far enough on its own
+    assert max(row.similarity for row in rows) >= FA7_0_DELTA
+    # but never while QED and SA are held
+    holding = [r for r in rows if r.qed >= QED_MIN and r.sa <= SA_MAX]
+    assert holding
+    assert max(row.similarity for row in holding) < FA7_0_DELTA
+    assert not any(row.eligible for row in rows)

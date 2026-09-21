@@ -74,11 +74,16 @@ RDLogger.DisableLog("rdApp.*")
 
 SCHEMA_VERSION = "t4_objective_refinement_v1"
 
-#: Bounds a single local rewrite can realistically move, and bounds it cannot.
-#: QED is a smooth function of eight molecular descriptors and responds to a
-#: one-atom edit; similarity to a FIXED external seed and SA do not improve
-#: reliably by editing away from that seed, so an endpoint failing those is a
-#: support problem and is deliberately NOT refined here.
+#: The bound this refinement targets.
+#:
+#: NOT because similarity is locally immovable -- measured on fa7_0's best
+#: QED-passing endpoint (similarity 0.5373), one legal rewrite reaches
+#: similarity 0.6129, a +0.0756 move that clears delta.  The reason is that on
+#: that endpoint the similarity-raising edits and the QED-preserving edits are
+#: DISJOINT: of 953 successors, the 331 holding QED >= 0.6 and SA <= 4.0 top out
+#: at similarity 0.5606, and 0 successors are eligible.  So a similarity failure
+#: is not repaired by one edit even though similarity itself moves, while a QED
+#: near-miss is.  Widening this tuple is a measurement, not a config change.
 REFINABLE_BOUNDS = ("qed",)
 
 
@@ -96,8 +101,12 @@ class SourceNotRepresentable(ValueError):
 # ---- Property helpers -------------------------------------------------------
 
 
-def _properties(mol, fiber: Fiber) -> dict | None:
-    """The production T4 property vector for `mol`, or None if it is not scorable."""
+def properties_for_fiber(mol, fiber: Fiber) -> dict | None:
+    """The production T4 property vector for `mol`, or None if it is not scorable.
+
+    Takes an already-built ``Fiber`` so a caller scoring a whole shard pays the
+    seed fingerprint once rather than per molecule.
+    """
 
     if mol is None:
         return None
@@ -115,7 +124,7 @@ def _properties(mol, fiber: Fiber) -> dict | None:
 def endpoint_properties(seed_smiles: str, delta: float, smiles: str) -> dict | None:
     """Free property vector (qed, sa, sim, v) of `smiles` against `seed_smiles`."""
 
-    return _properties(Chem.MolFromSmiles(smiles), Fiber(seed_smiles, delta))
+    return properties_for_fiber(Chem.MolFromSmiles(smiles), Fiber(seed_smiles, delta))
 
 
 def free_objective_near_miss(properties: dict, delta: float) -> bool:
@@ -191,7 +200,7 @@ def enumerate_refinements(
     """
 
     fiber = Fiber(seed_smiles, delta, support=support)
-    base = _properties(Chem.MolFromSmiles(smiles), fiber)
+    base = properties_for_fiber(Chem.MolFromSmiles(smiles), fiber)
     if base is None:
         raise ValueError(f"refinement source is not a scorable molecule: {smiles!r}")
 
@@ -200,7 +209,7 @@ def enumerate_refinements(
         mol = Chem.MolFromSmiles(product)
         if mol is None or "." in product or mol.GetNumHeavyAtoms() > REPRESENTABLE_HEAVY_ATOMS:
             continue
-        props = _properties(mol, fiber)
+        props = properties_for_fiber(mol, fiber)
         if props is None:
             continue
         rows.append(
@@ -237,7 +246,7 @@ def refine_endpoint(
     """
 
     fiber = Fiber(seed_smiles, delta, support=support)
-    base = _properties(Chem.MolFromSmiles(smiles), fiber)
+    base = properties_for_fiber(Chem.MolFromSmiles(smiles), fiber)
     report = {
         "schema_version": SCHEMA_VERSION,
         "seed_smiles": seed_smiles,
@@ -285,5 +294,6 @@ __all__ = [
     "endpoint_properties",
     "enumerate_refinements",
     "free_objective_near_miss",
+    "properties_for_fiber",
     "refine_endpoint",
 ]
