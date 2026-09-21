@@ -19,7 +19,6 @@ import pytest
 from compose_v4.control.adaptive_program_optimizer import ProgramOptimizer, ProgramSearchConfig
 from compose_v4.control.pmo_credit import (
     SCHEMA_VERSION,
-    CreditCell,
     CreditKey,
     PopulationCredit,
 )

@@ -200,24 +200,39 @@ def test_marginal_rejects_an_axis_outside_the_credit_key():
 
 
 def test_value_is_upside_per_trial_plus_a_shrinking_optimism_bonus():
+    """`prior_weight` is a MULTIPLE of `observed_scale()`, not an absolute bonus.
+
+    It was an absolute constant sized for a docking score, which made an untried cell
+    strictly outrank a cell that had already delivered a measured PMO improvement.
+    """
     credit = PopulationCredit(prior_weight=0.25)
     key = _key()
-    assert credit.value(key) == pytest.approx(0.25)
+    # No trials anywhere: the scale is undefined, so the bonus is zero rather than a
+    # constant. Every cell is equal here, so the allocation is uniform either way.
+    assert credit.value(key) == pytest.approx(0.0)
     credit.observe(key, 1.0)
-    assert credit.value(key) == pytest.approx(1.0 + 0.25 / math.sqrt(2))
+    assert credit.observed_scale() == pytest.approx(1.0)
+    assert credit.value(key) == pytest.approx(1.0 + 0.25 * 1.0 / math.sqrt(2))
     credit.observe(key, -1.0)
     # the negative outcome halves the per-trial upside; it never goes below zero
-    assert credit.value(key) == pytest.approx(0.5 + 0.25 / math.sqrt(3))
+    assert credit.observed_scale() == pytest.approx(0.5)
+    assert credit.value(key) == pytest.approx(0.5 + 0.25 * 0.5 / math.sqrt(3))
 
 
 def test_the_optimism_bonus_shrinks_monotonically_with_evidence():
-    """Zero-improvement observations isolate the bonus: upside stays 0, so value IS it."""
+    """Zero-improvement observations isolate the bonus: upside stays 0, so value IS it.
+
+    The scale is held fixed by a separate productive cell, because the bonus is now
+    denominated in it and an archive with no improvement anywhere has no scale to use.
+    """
     credit = PopulationCredit()
+    scale_source = _key(parent="scale_source")
+    credit.observe(scale_source, 1.0)
     key = _key()
     bonuses = []
     for _ in range(5):
         assert credit.cell(key).positive_improvement_sum == 0.0
-        bonuses.append(credit.value(key))
+        bonuses.append(credit.value(key) / credit.observed_scale())
         credit.observe(key, 0.0)
     assert bonuses == sorted(bonuses, reverse=True)
     assert bonuses[0] > bonuses[-1]

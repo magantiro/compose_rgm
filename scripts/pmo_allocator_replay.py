@@ -40,8 +40,13 @@ def round_files(task: str) -> list[str]:
     return sorted(glob.glob(os.path.join(REPLAY_ROOT, task, "campaign", "round_*", "complete.json")))
 
 
+def read_json(path: str) -> dict:
+    with open(path) as handle:
+        return json.load(handle)
+
+
 def load_snapshot(path: str) -> dict:
-    return json.load(open(path))["snapshot"]
+    return read_json(path)["snapshot"]
 
 
 def restore_view(snapshot: dict):
@@ -105,7 +110,7 @@ def quantiles(values) -> dict[str, float]:
     if not len(array):
         return {}
     return {
-        "n": int(len(array)),
+        "n": len(array),
         "min": float(array[0]),
         "p25": float(np.percentile(array, 25)),
         "median": float(np.median(array)),
@@ -179,7 +184,7 @@ def observed_scores(view) -> dict[str, float]:
 def escape_history(task: str) -> list[dict]:
     rows = []
     for path in round_files(task):
-        payload = json.load(open(path))
+        payload = read_json(path)
         state = payload["snapshot"]["pmo_population"]["population_state"]
         rows.append(
             {

@@ -913,11 +913,11 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
 
 __all__ = [
     "CHANNELS",
-    "advance_plateau_state",
     "JUMP_CHANNEL",
     "MODE_BY_CHANNEL",
     "SCHEMA",
     "PmoPopulationController",
+    "advance_plateau_state",
     "initial_population_state",
     "population_features",
 ]

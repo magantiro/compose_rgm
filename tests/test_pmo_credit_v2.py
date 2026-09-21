@@ -119,8 +119,12 @@ def test_v1_is_the_arm_that_fails_proliferation():
         return float(_v1_exploitation(credit, keys)[1:].sum())
 
     one, many = region(1), region(60)
-    assert many > 10.0 * one, (one, many)
-    # the measured headline: 30 barren cells outbid a 40-trial +4.0 cell
+    # Scaling the optimism bonus to the run's own measured reward fixed the ORDERING
+    # between one untried cell and one cell with delivered evidence, but it does NOT
+    # fix proliferation: enough barren cells still outbid a single productive one,
+    # because their number grows while each keeps a positive share. That collective
+    # failure is what the hierarchical backoff in this module exists to address.
+    assert many > one, (one, many)
     keys = [productive] + [
         _cell(basin=f"FRAG{i}", parent=f"q{i}", family="cycle_close", scale="jump")
         for i in range(30)
@@ -218,11 +222,16 @@ def test_descendant_of_productive_basin_inherits_credit():
 
 
 def test_v1_gives_both_descendants_the_identical_flat_prior():
-    """The negative control for inheritance: v1 cannot tell the two children apart."""
+    """The negative control for inheritance: v1 cannot tell the two children apart.
+
+    The prior is now scaled to the run's measured reward rather than fixed at 0.25, but
+    it is still FLAT: both descendants receive the same value regardless of which parent
+    they came from, which is exactly the inheritance the backoff supplies.
+    """
     credit, _anchor, _barren = _productive(cls=PopulationCredit)
     good = _cell(basin="PROVEN", parent="gen1")
     bad = _cell(basin="BARREN", parent="b1")
-    assert credit.value(good) == credit.value(bad) == pytest.approx(0.25)
+    assert credit.value(good) == credit.value(bad) == pytest.approx(credit.observed_scale())
 
 
 def test_inheritance_survives_every_kappa():
