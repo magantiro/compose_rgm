@@ -1,0 +1,91 @@
+{
+  "DE_NOVO": {
+    "correction": "The recorded claim that exact_early_ring is INERT was WRONG: it delivers -0.1169 vs sequential. The n=24 probe measured free slots, which provably cannot move under reordering.",
+    "finding": "Small-ring prevalence is a consequence of a DECLARED v1 host scope (_eligible_grow_host_graph admits only acyclic neutral carbon and asserts a forest), not a reward, policy or scheduling defect. On 3 of 12 audited rollout states EVERY legal template is a small ring.",
+    "gate": "ring_dependency_block 0.1956 vs gate <0.15 -- FAILED, and it does not beat the already-shipped exact_early_ring at 0.1926.",
+    "state": "ANSWERED, awaiting owner scope decision.",
+    "unwired": "Lineage B trained on `sequential`; exact_early_ring (0.305 -> 0.193) has been unwired since 2026-07-20. Five hops, NINE call sites, two sharing a sink."
+  },
+  "FRAGMENTS": {
+    "attribution": "Mechanism delta motif +50.70 / decoration +89.93 at matched budget. Tested not asserted: baseline lift collapses with declared interface count -- 1 interface +6.67, 19 of 20 multi-interface pairs gained exactly 0.00.",
+    "decoration": {
+      "compose": 93.5,
+      "genmol": 96.6,
+      "verdict": "behind"
+    },
+    "linker": "NO NUMBER REPORTED. v1 falsified by its own predeclared criterion; the close-then-open transaction never occurs under the prior (0 of 1,440 unconstrained events lengthened the path).",
+    "motif": {
+      "compose": 98.8,
+      "genmol": 82.9,
+      "uniqueness": "89.86 vs 77.5 ahead",
+      "verdict": "ahead"
+    },
+    "source": "pinned kernel, both arms matched at mark_attempts_per_event=96, comparators hash-pinned at b50bb3ae",
+    "superstructure": {
+      "compose": 98.87,
+      "genmol": 97.5,
+      "note": "negative control: delta exactly 0.00 at both budgets",
+      "verdict": "ahead"
+    }
+  },
+  "OPEN_OWNER_DECISIONS": [
+    "de novo: scope the claim to atomic ring installation on acyclic carbon, or extend to fused/heteroatom hosts (would reach ~9-10%, but invalidates the forest DP)",
+    "A/perindopril: clean single-revision rerun at 250 (~250 calls) to remove the last asymmetric caveat",
+    "19 GB of regenerable .uv-cache inside the repo"
+  ],
+  "PMO": {
+    "headline": "Online structural memory is TASK-DEPENDENT: 1 clean win, 1 exploitation win, 1 loss.",
+    "matched_1000_celecoxib": {
+      "A_auc": 0.2489,
+      "A_best": 0.3364,
+      "B_auc": 0.3138,
+      "B_best": 0.3838,
+      "B_best_frozen_from_call": 500
+    },
+    "matched_250": {
+      "celecoxib_rediscovery": {
+        "A_auc": 0.1471,
+        "B_auc": 0.1916,
+        "winner": "B"
+      },
+      "gsk3b": {
+        "A_auc": 0.199,
+        "B_auc": 0.2722,
+        "caveat": "official score legitimate and stays in the table; B's chemistry is WORSE (top-10 QED 0.367 vs 0.423, SA 6.31 vs 6.12) and r(score,SA) rises 0.456->0.668. Better official score, worse med-chem diagnostics.",
+        "winner": "B"
+      },
+      "perindopril_mpo": {
+        "A_auc": 0.3309,
+        "B_auc": 0.3075,
+        "caveat": "revision-asymmetric; A's last 202 calls ran under a later revision than B's 250",
+        "winner": "A"
+      }
+    },
+    "mechanism_located": "Staged transport paths to declared targets EXIST (44/44, median 2 stages, under the 23-primitive ceiling) but 39% dip below their own starting score, so score-greedy selection abandons the required intermediate. That is the plateau mechanism.",
+    "source": "durable query ledgers, matched A/B, arm flag folded into optimizer_kwargs_sha256",
+    "state": "Controller redirected to goal-conditioned transport. Step 1 (correspondence) VALIDATED, stage splitter VALIDATED, alternative-alignment check running. Nothing scored pending."
+  },
+  "T4": {
+    "banked_mechanism": "replace-completion law: fa7_1 +86%, braf_2 +50%, 5ht1b_0 +75% eligible-per-draw, no control regressed.",
+    "budget": "COMPOSE 250 oracle calls/cell vs InVirtuoGen 1000",
+    "delta_0.4": {
+      "compose_sum": -169.2,
+      "coverage": "15/15",
+      "delta": -8.799999999999983,
+      "ivg_sum": -160.4,
+      "wins": "10/15"
+    },
+    "delta_0.6": {
+      "compose_sum": -153.0,
+      "coverage": "14/15",
+      "delta": -7.599999999999994,
+      "ivg_sum": -145.4,
+      "wins": "12/14"
+    },
+    "source": "diagnostics/t4_final_ivg_table_v1.json (round locks; both rescues terminated)",
+    "state": "COMPLETE. One unsolved cell (fa7_0 d0.6) -- reachable not infeasible; barrier located at the goal-abstraction layer (recovered_fraction=0.0000)."
+  },
+  "generated_at_utc": "2026-09-21T21:32:03.517950+00:00",
+  "note": "Built from authoritative artifacts only: T4 from round locks via t4_final_ivg_table_v1, PMO from durable ledgers. Not from checkpoints, not from agent prose.",
+  "schema_version": "compose_progress_scoreboard_v1"
+}
