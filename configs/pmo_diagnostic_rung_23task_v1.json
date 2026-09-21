@@ -1,0 +1,305 @@
+{
+ "payload": {
+  "authorization_note": "Only the owner authorizes oracle spend. This payload is fail-closed; a separate receipt naming this payload_sha256 is the sole runtime authority.",
+  "budget": {
+   "adaptive_call_fraction": 0.75,
+   "adaptive_calls": 96,
+   "adaptive_rounds": 6,
+   "automatic_retries": 0,
+   "backfill": false,
+   "budget_authority": "execute_task requires charged_calls_per_task and cross-checks it against this contract; the round count is derived from the budget by rounds_for_budget, so neither the ledger nor the campaign shape can be inherited from a module constant.",
+   "calls_include_initialization": true,
+   "charged_calls_ceiling": 2944,
+   "charged_calls_for_currently_runnable_tasks": 2816,
+   "charged_calls_per_task": 128,
+   "initialization_calls": 16,
+   "queries_per_round": 16,
+   "rounds": 7,
+   "seeds": 1,
+   "spin_up_calls": 32
+  },
+  "controller": {
+   "initial_batch_fn": "compose_v4.control.dynamic_program_synthesis_v21.initial_dynamic_program_batch_v21",
+   "optimizer_type": "compose_v4.control.pmo_population_controller.PmoPopulationController",
+   "rationale": "the strongest currently VALID controller: the same PmoPopulationController geometry that produced the only valid PMO readings on record",
+   "seed": 20260920,
+   "serialized": {
+    "adaptive": true,
+    "attempts_per_batch": 128,
+    "candidates_per_batch": 16,
+    "channel_probabilities": [
+     0.7777777777777778,
+     0.2222222222222222,
+     0.0
+    ],
+    "cold_start_retrieval_candidates": 0,
+    "composition_donor_trials": 8,
+    "composition_execution_trials": 16,
+    "composition_probability": 0.0,
+    "composition_stop_probability": 0.5,
+    "continuation_root": "exact_current_state",
+    "current_state_edit_probability": 0.25,
+    "decompose_programs": true,
+    "double_mutation_probability": 0.25,
+    "exploration": 0.2,
+    "max_bindings": 64,
+    "max_blocks": 8,
+    "max_composed_programs": 2,
+    "max_primitives": 32,
+    "mutation_context_limit": 128,
+    "mutation_sampling": "random",
+    "parent_allocation": "niche_score",
+    "proposal_cache_entries": 128,
+    "proposal_mode": "program_only",
+    "require_broad_runtime": false,
+    "score_direction": "maximize",
+    "seed": 20260920,
+    "wall_seconds": 45.0
+   },
+   "source": "compose_v4.experiments.pmo_population_v1.configuration"
+  },
+  "implementation_sha256": {
+   "modal_apps/pmo_diagnostic_rung_v1_app.py": "d67ade1d9727fcdfe5c3a240a1641efd91fd12b44b08c84a6e4713aff2fe5e4d",
+   "src/compose_v4/control/adaptive_program_optimizer.py": "dabaff25d07654abebafa3ed42ecc3c454f2d16287bd2a0f2c52f440ed7c04c7",
+   "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",
+   "src/compose_v4/control/dynamic_program_synthesis_v21.py": "d5f4d432f3a51d49a1c6f962e079a5ae729c731031998d78caf14f1d3891b743",
+   "src/compose_v4/control/pmo_credit.py": "ec1eb66589f241dec65eaa73a540f32ac8b032d7562889f7adf1a3b299834112",
+   "src/compose_v4/control/pmo_population_controller.py": "f136d26fe248dab575dfef2d4eddc6741e3dbb8a934755d5cfad057a52a5466a",
+   "src/compose_v4/control/program_campaign.py": "884f13cbbe49c06a94aafb59880daf38f313b6f4717af012c1fe8eb9074c469e",
+   "src/compose_v4/control/program_task.py": "56a61194ff4f1a2ef9e5f1b295dc5a90b2a6782a6ac407d56bd4039658cde63c",
+   "src/compose_v4/experiments/pmo_diagnostic_rung_v1.py": "8edebcb3c61f041b0e5f6f1a9d38d492b3bea96521712a708284b0d69a3862a6",
+   "src/compose_v4/experiments/pmo_oracle_assets.py": "5ec0b7c9b9185cd2b8edd14c2529f37e825311a2b39d6ce71c68423ab9f4d558",
+   "src/compose_v4/experiments/pmo_population_v1.py": "a553cf66264a88d3750ea26d3ddd29f3f04f7ddd1a122084bdfe5b659c9fb655"
+  },
+  "initialization": {
+   "all_scores_charged": true,
+   "count": 16,
+   "lock_sha256": "c8032311daa067628048679465fb4397d2a26bf0593143e3ed0a4cbec7195478",
+   "path": "diagnostics/parent_edit_cycles/prepared/init_20260921.json",
+   "sha256": "a1f7840df1f75567565de633c4df3d013c3165df3e43cbf2ac87b156d5f206ff",
+   "source_sha256": "b679b4dc54006acf570fefb80f49d83a46c18c979c9e376fdd4d37b2cec5f860",
+   "task_independent": true
+  },
+  "joint_checkpoint": {
+   "fit_scope": "shared_all_routes",
+   "path": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json",
+   "payload_sha256": "730bc905c128b9feb802262e1f98bdcb6479431b88347a05defb26c2b84fab35",
+   "sha256": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43"
+  },
+  "modal_launch_authorized": false,
+  "oracle": {
+   "adapter": "native PyTDC Oracle(name=task) wrapped in AssetPinnedOracle",
+   "asset_policy": "an asset-backed task is REFUSED unless its pinned pickle is present with the digest recorded here, and its positive control must pass before the first charged call; a blocked task charges zero",
+   "asset_root": "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets",
+   "assets": {
+    "drd2": {
+     "asset_filename": "drd2_current.pkl",
+     "asset_present_in_capsule": false,
+     "asset_sha256": null,
+     "positive_control_required_before_first_charged_call": true,
+     "positive_control_status": "MEASURED"
+    },
+    "gsk3b": {
+     "asset_filename": "gsk3b_current.pkl",
+     "asset_present_in_capsule": true,
+     "asset_sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5",
+     "positive_control_required_before_first_charged_call": true,
+     "positive_control_status": "MEASURED"
+    },
+    "jnk3": {
+     "asset_filename": "jnk3_current.pkl",
+     "asset_present_in_capsule": true,
+     "asset_sha256": "cde8576fb4fa3f60b9f258ff9cf1b9ff346eb50d196d5cbbe25965efc1864889",
+     "positive_control_required_before_first_charged_call": true,
+     "positive_control_status": "MEASURED"
+    }
+   },
+   "calls_include_initialization": true,
+   "capsule_contents": [
+    "gsk3b_current.pkl",
+    "jnk3_current.pkl"
+   ],
+   "direction": "maximize",
+   "environment": {
+    "numpy": "1.26.4",
+    "pandas": "2.1.4",
+    "pytdc": "1.1.15",
+    "rdkit": "2023.09.6",
+    "requests": "2.32.4",
+    "scikit_learn": "1.2.2",
+    "scipy": "1.15.0",
+    "seaborn": "0.13.2",
+    "setuptools": "75.6.0"
+   },
+   "positive_control_before_first_charged_call": true,
+   "prescreen": false,
+   "range": [
+    0,
+    1
+   ],
+   "source_files": {
+    "pytdc_metadata": "0925dc34498dd5502429c6d278be70758f1d536417af9cc95392c28e014fe6e6",
+    "tdc_oracle_py": "211be401ec5f3c06ddca37e72064bbeb4de52437b218bb3f4a4a381eec1de1f5",
+    "tdc_oracles_py": "d2b2194e3573eb620759998e83d8803eacfd5cbd00531e862ebe3283c301cabe"
+   }
+  },
+  "oracle_calls_authorized": 0,
+  "readouts": {
+   "auc": {
+    "budget": 128,
+    "comparability": "within-rung only; never against a published 10000-call AUC",
+    "key": "auc_top10_at_budget",
+    "structural_discount_note": "a run holding constant top-10 level c scores c*(1 - frequency/(2*budget))"
+   },
+   "per_task_diagnostics": [
+    "nonzero_score_rate",
+    "improvement_probability_by_program_family",
+    "improvement_probability_by_edit_scale",
+    "productive_lineage_depth",
+    "realization_refusal_causes",
+    "archive_churn",
+    "successful_basin_diversity"
+   ],
+   "primary": [
+    "best_at_32",
+    "best_at_64",
+    "best_at_128"
+   ]
+  },
+  "reference_molecule_policy": {
+   "evidence": "the shared initialization block is loaded through _load_initialization, which raises if any candidate row carries a 'score' or 'task' key",
+   "initialization_is_task_independent": true,
+   "prescreen": false,
+   "reference_molecules_in_archive": false,
+   "reference_molecules_in_initialization": false,
+   "reference_molecules_in_selection": false
+  },
+  "schema_version": "pmo_diagnostic_rung_23task_v1",
+  "scientific_question": "We hold valid 250-call readings on three PMO tasks only (gsk3b 0.21, perindopril_mpo 0.486, celecoxib_rediscovery 0.196). Is COMPOSE weak across PMO generally, or badly matched to those three landscapes? A short rung across all 23 tasks separates the two and localizes the failure per task.",
+  "scored_launch_authorized": false,
+  "status": "PENDING_OWNER_AUTHORIZATION",
+  "task_partition": {
+   "asset_backed": [
+    "drd2",
+    "gsk3b",
+    "jnk3"
+   ],
+   "blocked_pending_asset_pin": [
+    "drd2"
+   ],
+   "blocked_tasks_charge_zero": true,
+   "pure_rdkit_no_asset": [
+    "albuterol_similarity",
+    "amlodipine_mpo",
+    "celecoxib_rediscovery",
+    "deco_hop",
+    "fexofenadine_mpo",
+    "isomers_c7h8n2o2",
+    "isomers_c9h10n2o2pf2cl",
+    "median1",
+    "median2",
+    "mestranol_similarity",
+    "osimertinib_mpo",
+    "perindopril_mpo",
+    "qed",
+    "ranolazine_mpo",
+    "scaffold_hop",
+    "sitagliptin_mpo",
+    "thiothixene_rediscovery",
+    "troglitazone_rediscovery",
+    "valsartan_smarts",
+    "zaleplon_mpo"
+   ],
+   "runnable_now": [
+    "albuterol_similarity",
+    "amlodipine_mpo",
+    "celecoxib_rediscovery",
+    "deco_hop",
+    "fexofenadine_mpo",
+    "gsk3b",
+    "isomers_c7h8n2o2",
+    "isomers_c9h10n2o2pf2cl",
+    "jnk3",
+    "median1",
+    "median2",
+    "mestranol_similarity",
+    "osimertinib_mpo",
+    "perindopril_mpo",
+    "qed",
+    "ranolazine_mpo",
+    "scaffold_hop",
+    "sitagliptin_mpo",
+    "thiothixene_rediscovery",
+    "troglitazone_rediscovery",
+    "valsartan_smarts",
+    "zaleplon_mpo"
+   ]
+  },
+  "task_registry_verification": {
+   "all_resolve_exactly": true,
+   "fuzzy_fallback_hazard": {
+    "behaviour": "a non-exact name resolves to the closest registry entry, silently",
+    "near_miss_entries_present": [
+     "sitagliptin_mpo_prev",
+     "zaleplon_mpo_prev"
+    ],
+    "threshold": 0.8
+   },
+   "n_tasks": 23,
+   "oracle_constructed": false,
+   "path": "diagnostics/pmo_task_registry_verification_v1.json",
+   "registry_provenance": {
+    "kind": "wheel",
+    "metadata_sha256": "f169cd7464eb5e8ba4339015c65aaf614d52356c5ff42872b89821c278cc692c",
+    "path": "/Users/rmaganti/Library/Caches/pip/wheels/24/6a/27/95aa98f441aa4ae1845d105118d281003baa66883096fa0c2f/pytdc-1.1.15-py3-none-any.whl",
+    "sha256": "c27c2cbe3c00632972e7119662703f7fe935d9ade288b19544e8168238b08546"
+   },
+   "sha256": "08d961db70023ad04498d442b51e9e78ed40ae028a296ce6f74a57676b7bfc18",
+   "suite_provenance": {
+    "agreement": "exact, 23/23",
+    "note": "PyTDC does not define the PMO suite; it ships the oracles. Suite membership is taken from two independent published transcriptions that agree exactly.",
+    "sources": [
+     {
+      "path": "docs/invirtuogen_pmo_targets.json",
+      "sha256": "87cf4adaecd0463af152b201bc1f1c45e17c329b5c029f1c1faffcd7c2cd9019",
+      "source": "arXiv:2509.26405 (InVirtuoGen), PMO table WITH ZINC250k prescreening"
+     },
+     {
+      "path": "docs/genmol_pmo_targets.json",
+      "sha256": "2dc20475db68fbfd66d277bb186faa2d79caf60634bd70f1feb4a035d10d4a45",
+      "source": "arXiv:2501.06158v3 Table (PMO AUC top-10, mean of 3 runs)"
+     }
+    ]
+   }
+  },
+  "tasks": [
+   "albuterol_similarity",
+   "amlodipine_mpo",
+   "celecoxib_rediscovery",
+   "deco_hop",
+   "drd2",
+   "fexofenadine_mpo",
+   "gsk3b",
+   "isomers_c7h8n2o2",
+   "isomers_c9h10n2o2pf2cl",
+   "jnk3",
+   "median1",
+   "median2",
+   "mestranol_similarity",
+   "osimertinib_mpo",
+   "perindopril_mpo",
+   "qed",
+   "ranolazine_mpo",
+   "scaffold_hop",
+   "sitagliptin_mpo",
+   "thiothixene_rediscovery",
+   "troglitazone_rediscovery",
+   "valsartan_smarts",
+   "zaleplon_mpo"
+  ],
+  "what_this_rung_is_not": "Not a benchmark claim. The budget is far below the official 10000 calls, and pmo_top_ten_auc trapezoids up from (0,0), so a rung AUC is structurally depressed relative to a published figure and is reported within-rung only.",
+  "worker_app": "compose-pmo-diagnostic-rung-23task-v1",
+  "worker_path": "modal_apps/pmo_diagnostic_rung_v1_app.py"
+ },
+ "payload_sha256": "aac1fa9f4c092597274bbdaa4cad41a1c0efa7eecec68b91cf7be92dae57f3e2"
+}
