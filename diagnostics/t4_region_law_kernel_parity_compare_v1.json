@@ -1,0 +1,59 @@
+{
+ "best_eligible_rank_left": {
+  "braf_0": 1,
+  "braf_1": 1,
+  "braf_2": 1,
+  "fa7_0": null,
+  "fa7_1": 1,
+  "fa7_2": null
+ },
+ "best_eligible_rank_right": {
+  "braf_0": 1,
+  "braf_1": 1,
+  "braf_2": 1,
+  "fa7_0": null,
+  "fa7_1": 1,
+  "fa7_2": null
+ },
+ "canonical_smiles_disagreements": 0,
+ "eligible_left": {
+  "braf_0": 2,
+  "braf_1": 4,
+  "braf_2": 4,
+  "fa7_0": 0,
+  "fa7_1": 4,
+  "fa7_2": 0
+ },
+ "eligible_right": {
+  "braf_0": 2,
+  "braf_1": 4,
+  "braf_2": 4,
+  "fa7_0": 0,
+  "fa7_1": 4,
+  "fa7_2": 0
+ },
+ "findings": [],
+ "left_kernel": {
+  "networkx": "3.3",
+  "numpy": "1.26.4",
+  "rdkit": "2024.03.5",
+  "scipy": "1.13.1"
+ },
+ "max_abs_delta": {
+  "qed": 0.0,
+  "sa": 0.0,
+  "similarity": 0.0
+ },
+ "parity": true,
+ "rank_moves": 0,
+ "refusals_left": 0,
+ "refusals_right": 0,
+ "right_kernel": {
+  "networkx": "3.6.1",
+  "numpy": "2.5.3",
+  "rdkit": "2026.03.6",
+  "scipy": "1.18.1"
+ },
+ "schema_version": "t4_region_law_kernel_parity_v1_compare",
+ "verdict_flips": 0
+}

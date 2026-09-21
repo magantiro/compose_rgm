@@ -245,6 +245,7 @@ def proposal_worker(task: dict) -> dict:
     from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
     from compose_v4.chem.state import pad_molecular_graph
     from compose_v4.control.docking_value import identity
+    from compose_v4.control.region_law_contract import region_law_for_proposal_lane
     from compose_v4.control.route_distilled_goal_expert import (
         RouteDistilledGoalExpert,
         propose_route_expert_candidates,
@@ -256,6 +257,39 @@ def proposal_worker(task: dict) -> dict:
     started = time.time()
     fiber = Fiber(task["original_seed"], contract["delta"], support=contract["support"])
     telemetry = {}
+
+    def _probe_draw(law, attempt):
+        """One production proposal draw, used only to prove the law is consumed.
+
+        It calls `expand` itself -- same function, same lane, same horizon -- so
+        what the check verifies is the path this worker is about to run, not a
+        transcription of it. Its RNG is a separate stream, so probing cannot
+        perturb the scored draw below.
+        """
+
+        return expand(
+            task["parent"],
+            task["parent_score"],
+            fiber,
+            np.random.default_rng(task["proposal_seed"] + 1_000_003 * (attempt + 1)),
+            draws=1,
+            multi_region=False,
+            horizon=contract["proposal"]["shallow"]["horizon"],
+            proposal_lane="shallow",
+            region_law=law,
+        )
+
+    # Resolve the contract's region-draw law and PROVE the runtime consumes it
+    # before anything is charged. Called on every expert, because a field parked
+    # on a lane that cannot honour it must fail on the worker that would
+    # otherwise have ignored it. Absent field -> (None, {}) -> byte-identical.
+    region_law, region_law_telemetry = region_law_for_proposal_lane(
+        contract,
+        lane=expert,
+        delta=contract["delta"],
+        reference_smiles=task["original_seed"],
+        draw=_probe_draw,
+    )
     if expert in {"shallow", "anchored_replacement"}:
         records = expand(
             task["parent"],
@@ -266,8 +300,10 @@ def proposal_worker(task: dict) -> dict:
             multi_region=True,
             horizon=contract["proposal"][expert]["horizon"],
             proposal_lane=expert,
+            region_law=region_law,
         )
         telemetry = {"raw_draws": contract["proposal"][expert]["draws"]}
+        telemetry.update(region_law_telemetry)
     elif expert == "route_complete_region":
         envelope = json.loads((REMOTE / CHECKPOINT).read_text())
         if identity(envelope["payload"]) != envelope["payload_sha256"]:

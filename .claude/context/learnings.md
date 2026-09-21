@@ -1818,3 +1818,181 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   `nitya` at 3 containers / 507.7 s against `rahul-94866` at 40 containers / 34.2 s -- **14.8x**.
   The running campaigns hold `nitya`. Run zero-oracle side work on the other workspace, and re-run
   the probe (about two cents) rather than assuming capacity.
+## 2026-09-20 (T4 region draw: the cap and the uniform weight are ONE joint defect)
+
+- **`MAX_SEGMENT_LENGTH = 8` is not a size preference, it is an EXPRESSIBILITY bound, and the
+  uniform weight beside it is the other half of the same defect.** `_delete_pendant_fragment`
+  draws uniformly over bridge-separated fragments of at most 8 atoms, so a coherent 9-15 atom
+  substituent is not drawable at all -- it must be spelt as 2-3 INDEPENDENT bounded cuts whose
+  joint mass is a product of per-module terms. Every clean eligible witness of all five exhausted
+  delta=0.6 cells is a net EXCISION of 7-15 heavy atoms (57 witnesses, production provenance),
+  which is exactly the move class the cap cannot express in one draw.
+- **MEASURED, both halves are individually insufficient and the joint change is not.** Pure-prune
+  closure, horizon 3, best-eligible mass rank (the shipped `BridgeRegionLaw` drives the harness,
+  nothing is transcribed):
+      cell      role     v1        cap_only   conditioned_only   repair
+      braf_0    failed   161/165   22/347     88/165             1/307
+      braf_1    failed    49/101   17/272     10/101             1/264
+      fa7_2     failed   189/276  110/546     23/276             9/492
+      braf_2    control   35/83    14/203     24/83              1/192
+      fa7_1     control    2/258   22/438      1/254             1/379
+      5ht1b_0   control    1/15     3/16       1/15              1/16
+  `fa7_1` is the decisive control: raising the cap ALONE demotes it 2 -> 22 (eligible mass share
+  0.146 -> 0.052), reproducing the known cap-raising regression; the joint change instead promotes
+  it to 1 at share 0.377. No control regressed under the joint change.
+- **A single-draw delete-half measurement separates the law from the rest of the program.** For
+  replace/grow-mode witnesses the region draw is only the delete half, so ask which rank a region
+  whose child is a SUBSTRUCTURE of the witness gets. v1 covers **0 of 41 witnesses across all five
+  cells** -- the cap makes every needed region undrawable in one draw -- while the joint law covers
+  all of them for four cells at ranks 2-4. This is what rescues fa7_0, whose pure-prune closure has
+  no eligible endpoint at all but whose five (complete-pool) witnesses all have their delete half at
+  rank 2.
+- **The T4 proposal path is 48 SLOTS, not the 40 of the editing corpus.** `whole_ring_plan`
+  refuses anything else outright (`n_atoms != 48 or not 1 <= n_real_atoms <= 40`), and
+  `t4_fiber_campaign` builds every parent as `pad_molecular_graph(smiles_to_molecular_graph(p), 48)`.
+  So `assert_production_state_semantics` / `production_state_from_smiles` (40-slot, editing corpus)
+  is the WRONG preflight for this path -- it constructs a state the T4 executor rejects. The
+  equivalent evidence here is that production actually executes the states, which is cheap to check.
+- **A pendant excision's endpoint has an exact closed form, and the executor is the only thing
+  that may certify it.** Deleting a bridge-separated fragment leaf-by-leaf returns hydrogens to
+  atoms that are themselves deleted, so the only surviving effect is that the retained anchor
+  recovers the bridge bond's hydrogens. Measured over 5 real sources: **72 regions executed,
+  0 endpoint mismatches**. Keep the closed form for weighting hundreds of candidates cheaply, and
+  keep a test that drives the LIVE `_delete_pendant_fragment` -- a transcribed reference could not
+  fail if the executor drifted.
+- **5ht1b_2 is blocked by the EXECUTOR's charge policy, not by the region law, and needs a
+  DIFFERENT region shape as well.** Two independent facts, both measured:
+  (a) its witness `C1=CC2=NC=C(CCCc3ccccc3)[C@H]2C=C1n1cnnc1` is a single **8-atom interior
+  (two-bridge) excision plus one reattachment bond** joining the two flanks -- reached exactly,
+  once stereochemistry is stripped (MolecularGraph carries no stereo, so a stereo-bearing witness
+  SMILES never matches a graph-derived one; the contract sets `stereochemistry_claim: false`).
+  A one-bridge pendant draw cannot express it, and neither can any deletion-only search, because
+  the remainder would be disconnected.
+  (b) even given that region, `whole_ring_plan.execute_program` calls `charge_policy_preserved` at
+  EVERY step, and `audit_charge_policy_transition` reports `formal_charge_deleted_slots=(12,)` plus
+  charged-centre element/H/bond-row changes, so deleting the `[NH+]` is refused outright. Measured
+  on the real source: **9 of 16 pendant regions are refused by the charge policy**; zero refusals on
+  every neutral cell. Also `bond_insert` is OUTSIDE the frozen Active8 codec surface
+  (`atom_delete, atom_insert, atom_restate_semantic, bond_reorder, bond_reroute, cycle_close,
+  cycle_open, ring_system_restate`), so the reattachment primitive is `cycle_close`.
+  Conclusion: a region law is the wrong layer for this cell; the repair is a charge-policy decision
+  plus a two-boundary region shape, and both should be named rather than folded into a size claim.
+- **Keep the tilt a RE-RANKING, never a filter.** Weights are `max(floor, exp(margin/T))` with
+  `floor = 0.05`, so every region the executor could reach keeps positive probability and the
+  uncapped support is a strict superset of v1's. A filter here would have deleted exactly the
+  charge-changing cuts that one cell's only witnesses need.
+
+## 2026-09-20 (the region repair was inert: a keyword nothing passed)
+
+- **A validated repair with an opt-in keyword is INERT until some caller passes it, and
+  "the module has tests" hides that completely.** `bridge_region_law` was measured,
+  tested (20 passing) and merged; `synthesize_dynamic_program` accepted `region_law=`;
+  `dynamic_program_synthesis.py` hashed to the post-repair `a1370685`. Every one of
+  those facts is true and none of them made the repair reachable. **MEASURED: no
+  production caller passed it**, so a rescue launched on that commit would have run
+  `law=None` -- v1 verbatim -- and spent up to 1,241 oracle calls reproducing the same
+  `candidate_exhaustion`. The tell is available statically and costs one grep: search
+  for the keyword at CALL sites, not at definition sites.
+- **The field is `proposal.shallow.region_law`, and ABSENT is the only byte-identical
+  OFF.** `_delete_pendant_fragment` consumes `rng.permutation` when unlawed and
+  `rng.random` (Efraimidis-Spirakis) under ANY law object, so `UNIFORM_BOUNDED_V1`
+  reproduces v1's SUPPORT but not v1's DRAWS. An "off" implemented as a uniform law
+  would have moved every existing run while reading as a no-op. No uniform law is
+  registered in `region_law_contract` for exactly that reason -- a name that looks like
+  "off" but is not is worse than no name.
+- **A consumption check must RUN the path, not read the signature.** `inspect.signature`
+  would have passed both of today's earlier defects (a receipt reading `SPAWNED_ALL`
+  while nothing ran; a contract declaring `charged_calls_per_task: 250` beside a module
+  constant of 1000), because in both the field existed and was dropped one hop later.
+  `assert_region_law_is_consumed(draw)` takes the CALLER's own draw closure, installs a
+  probe that raises from `order`, and requires the production path to reach it. The
+  probe exception is deliberately not a `ValueError`/`RuntimeError`/`KeyError`/
+  `IndexError`/`TypeError`: `synthesize_dynamic_program` catches `ValueError` per family
+  and `expand` catches all five per draw, so any of those would be swallowed by the very
+  path being observed. MEASURED cost on braf_0: consumed on attempt 1 in 0.03 s.
+- **Bound the probe with FIXED seeds, not random ones.** `_weighted_module_order` is a
+  permutation over thirteen families and only two route through the law, so a single
+  draw can legitimately miss it. Sixteen deterministic seeds make the check reproducible:
+  for a given code state it always passes or always fails, so a failure is a wiring
+  defect rather than an unlucky draw.
+- **MUTATION-PROVEN, four ways.** Dropping the keyword at `expand`, at
+  `synthesize_dynamic_program`, at both delete modules, and a resolver that ignores the
+  field each turn `tests/test_region_law_contract_wiring.py` red. NOTE the near-miss:
+  dropping the law from `substituent_delete` ALONE leaves the consultation test GREEN,
+  because `segment_replace` still threads it -- caught only by the separate behavioural
+  test asserting the production module can excise past the eight-atom cap. One test per
+  hop is not enough when two hops share a sink.
+- **OFF vs ON on the campaign's own path, braf_0, 24 shallow draws, ZERO oracle calls:
+  OFF 0 eligible (reproducing the live `candidate_exhaustion`), ON 4 eligible**, best at
+  similarity 0.640 / QED 0.711 / SA 2.32 from a 15-heavy-atom excision. All four ON
+  endpoints exceed v1's cap, which is the axis that made them undrawable in one module.
+- **The rescue re-pin is exactly three files per arm, and TWO MORE MUST BE ADDED.**
+  `modal_apps/t4_integrated_route_fiber_parp1_app.py`, `dynamic_program_synthesis.py`
+  and `t4_fiber_campaign.py` move; `bridge_region_law.py` and `region_law_contract.py`
+  are in NO existing `runtime_inputs_sha256`, so a rescue contract that does not add
+  them leaves the module implementing the repair unpinned and free to drift.
+- **Attribute a red test before blaming your own change.** Of three hash-pin failures at
+  HEAD, two come from MERGING the repair and one (`t4_integrated_route_fiber_parp1_v1`)
+  was ALREADY stale on four files at the branch base `4cfd398d` -- a superseded v1
+  contract, unrelated to either change. Measured by re-running at the merge commit and
+  by hashing the base revision's own blobs, not inferred from the diff.
+- **SCOPING, MEASURED: the region law neither reaches nor SUPPRESSES the micro-edit
+  witness pool.** Two disjoint witness pools are known for these cells -- large
+  bridge-separated excisions (7-15 heavy atoms) and plus-or-minus-one-atom edits of an
+  existing endpoint. Enumerating the law's support on the real sources: size-1 regions
+  number **8 (braf_0), 5 (fa7_0), 9 (fa7_2) under BOTH v1 and the repair** -- identical,
+  because v1's eight-atom cap only removes LARGE regions, and the repair's support floor
+  keeps every drawable region strictly positive. So the micro shape was always drawable
+  and still is. What the repair changes is RANK: braf_0's only two one-module eligible
+  children are 14- and 15-atom excisions (sim 0.632/QED 0.635/SA 2.41 and
+  0.616/0.719/2.22), and the conditioned tilt puts them at ranks **1 and 2 of 42**.
+  **No micro excision is eligible in ONE module on any of the three cells** (0 of 42, 26,
+  38), so the plus-or-minus-one-atom pool is reached -- if at all -- through families the
+  law does not touch (`atom_insert`/`atom_delete`/`functionalize`/`restate`), which are
+  byte-identical between arms. CONSEQUENCE: for a cell whose only in-ball rescue is a
+  one-atom edit of a DESCENDANT, wiring the region law changes nothing in the region
+  draw, and takes nothing away either. State that scope before the rescue, not after.
+- **fa7_0 and fa7_2 have ZERO one-module eligible children even under the repair**, while
+  braf_0 has two. A rank improvement measured over a multi-draw closure is not the same
+  claim as a one-module witness; do not let the first stand in for the second.
+- **THE LAPTOP `.venv` IS NOT THE PRODUCTION CHEMISTRY KERNEL, and a region-law rank is a
+  statement about whichever kernel is loaded.** `/Users/rmaganti/compose_rgm_git/.venv`
+  runs python 3.12 / **rdkit 2026.03.6** / numpy 2.5.3; the production image pins python
+  3.11 / **rdkit 2024.3.5** / numpy 1.26.4 / scipy 1.13.1 / networkx 3.3 / torch 2.4.0.
+  Rebuilding the pinned stack takes about a minute:
+  `uv venv --python 3.11 ~/compose_region_pinned_env` then
+  `uv pip install --python ~/compose_region_pinned_env/bin/python rdkit==2024.3.5
+  numpy==1.26.4 scipy==1.13.1 networkx==3.3 torch==2.4.0 pytest`. torch is needed only
+  because `t4_fiber_campaign` imports it transitively -- but it IS needed, because
+  without it you must transcribe the gate instead of importing it, and a transcribed
+  gate cannot fail usefully.
+- **THE DANGEROUS PART: `expand` catches `RuntimeError` per draw**, and rdkit 2024.3.5
+  raises `RuntimeError: Invariant Violation ... could not find atom1 (Canon.cpp:222)`
+  from `Chem.MolToSmiles` on Kekule-degenerate hypervalent-sulfur rings that 2026.03.6
+  canonicalizes happily. So a production-kernel refusal is SWALLOWED AS A DROPPED DRAW,
+  never as a crash, and is invisible in every artifact. Counting refusals requires
+  wrapping `molecular_graph_to_smiles` -- and rebinding it in each module that imported
+  the symbol directly (`t4_fiber_campaign`, `bridge_region_law`), not just on its home
+  module.
+- **MEASURED, and it is PARITY: `scripts/t4_region_law_kernel_parity.py` over all six
+  braf/fa7 delta=0.6 cells, 212 region-to-child states per kernel, zero oracle calls.**
+  `max_abs_delta` similarity 0.0 / QED 0.0 / SA 0.0; 0 canonical-SMILES disagreements;
+  0 verdict flips; 0 rank moves; **0 refusals under EITHER kernel**. Campaign path too:
+  braf_0 at 24 shallow draws from one seed gives OFF 0 / ON 4 under both, same max
+  excision, same shape census, same best QED to sixteen digits, same example SMILES.
+  47 wiring+repair tests pass under the pinned stack. So these particular sources never
+  construct the pathological ring -- which is a MEASUREMENT about these cells, not a
+  guarantee about a cell whose search wanders into hypervalent sulfur. Re-run the parity
+  script for any new cell set rather than citing this one.
+- **Direct refusal census on the campaign path, production kernel: 344,831
+  `molecular_graph_to_smiles` calls across braf_0/braf_1/braf_2 at 40 law-ON draws each,
+  REFUSED = 0.** 900 calls returned `None`, which is the ordinary invalid-state
+  rejection and not a kernel refusal -- do not conflate the two. This is the measurement
+  that closes the swallowed-RuntimeError hole, because identical endpoint counts across
+  kernels alone would not distinguish "neither kernel refused" from "both refused the
+  same states".
+- **`git worktree add` + `git merge FETCH_HEAD`:** `git merge origin/<branch>` fails with
+  "not something we can merge" in a fresh worktree whose remote refs were not fetched
+  into that name; `git fetch origin <branch>` then `git merge FETCH_HEAD` works. The only
+  conflict was `learnings.md`, which is append-only -- resolve by keeping BOTH blocks in
+  order, never by choosing a side.
