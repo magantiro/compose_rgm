@@ -1,0 +1,305 @@
+{
+ "payload": {
+  "evaluator_boundary": "These values are produced by PyTDC Oracle objects in an environment that mirrors the production PMO container. The recorded curriculum scores used PyTDC 0.3.6 / RDKit 2024.03.5, and gsk3b/jnk3 there used a local frozen forest rather than a PyTDC Oracle. The two sets of numbers are not comparable and none is carried across.",
+  "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
+  "panels": {
+   "albuterol_similarity": [
+    {
+     "basis": "measured_and_frozen",
+     "label": "shared_source",
+     "smiles": "COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+     "value": 0.2459546925566343
+    },
+    {
+     "basis": "a_priori",
+     "label": "recorded_destination",
+     "smiles": "CC(C)(C)NCC(O)c1ccc(O)c(CO)c1",
+     "value": 1.0
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "route_midpoint",
+     "smiles": "C=C(C=NS(=C)(=C)C)C(=C)NCCCCC",
+     "value": 0.21333333333333332
+    }
+   ],
+   "celecoxib_rediscovery": [
+    {
+     "basis": "measured_and_frozen",
+     "label": "shared_source",
+     "smiles": "COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+     "value": 0.15625
+    },
+    {
+     "basis": "a_priori",
+     "label": "recorded_destination",
+     "smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+     "value": 1.0
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "route_midpoint",
+     "smiles": "NS(=O)(=O)C=CCCN1CCCCCC1=CCCF",
+     "value": 0.08771929824561403
+    }
+   ],
+   "gsk3b": [
+    {
+     "basis": "measured_and_frozen",
+     "label": "shared_source",
+     "smiles": "COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+     "value": 0.03
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "recorded_destination",
+     "smiles": "COc1ccc(NN=C2C(=O)NN=C2c2ccccc2)cc1",
+     "value": 1.0
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "route_midpoint",
+     "smiles": "OC(=CNNC1CCCOCC1)NNCC1=CCC=CC1",
+     "value": 0.01
+    }
+   ],
+   "isomers_c7h8n2o2": [
+    {
+     "basis": "measured_and_frozen",
+     "label": "shared_source",
+     "smiles": "CC(=O)Nc1ccccc1",
+     "value": 0.6703200460356393
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "recorded_destination",
+     "smiles": "COC(=O)Nc1cccnc1",
+     "value": 1.0
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "route_midpoint",
+     "smiles": "C=CC=C(C)NC(=O)O",
+     "value": 0.7225273536420722
+    }
+   ],
+   "jnk3": [
+    {
+     "basis": "measured_and_frozen",
+     "label": "shared_source",
+     "smiles": "COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+     "value": 0.0
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "recorded_destination",
+     "smiles": "N#Cc1ccc(Nc2nccc(-c3ccc(-n4cnc(-c5ccc(Nc6cccs6)cc5)n4)cc3)n2)cc1",
+     "value": 0.98
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "route_midpoint",
+     "smiles": "C=C(CCC1C=NC=CC1=NCNC(C)=CC=CC#N)C1=NC(C(=C)C2CCNCCC2=C)=NC1",
+     "value": 0.07
+    }
+   ],
+   "median1": [
+    {
+     "basis": "measured_and_frozen",
+     "label": "shared_source",
+     "smiles": "CC1CCCCC1O",
+     "value": 0.20254787341673336
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "recorded_destination",
+     "smiles": "CC1CCC(C(C)C23CCC(CC2=O)C3(C)C)C(O)C1",
+     "value": 0.40648479068406884
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "route_midpoint",
+     "smiles": "CCCC(C=O)C(C)C1CCC(C)CC1O",
+     "value": 0.2756589232099856
+    }
+   ],
+   "mestranol_similarity": [
+    {
+     "basis": "measured_and_frozen",
+     "label": "shared_source",
+     "smiles": "COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+     "value": 0.1673414304993252
+    },
+    {
+     "basis": "a_priori",
+     "label": "recorded_destination",
+     "smiles": "C#CC1(O)CCC2C3CCc4cc(OC)ccc4C3CCC21C",
+     "value": 1.0
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "route_midpoint",
+     "smiles": "C=CC=CC(CC)CCCC1=CC(C(=C)C(O)(CC)CC)=CC1",
+     "value": 0.3090277777777778
+    }
+   ],
+   "perindopril_mpo": [
+    {
+     "basis": "measured_and_frozen",
+     "label": "shared_source",
+     "smiles": "COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+     "value": 0.36023741111440966
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "recorded_destination",
+     "smiles": "CCCC(Br)c1cc2c(ccn2CCC(NC(C)C(=O)N2C(C(=O)O)CC3CCCCC32)C(=O)OCC)o1",
+     "value": 0.8088297765764039
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "route_midpoint",
+     "smiles": "C=C(C1=CCC(C(C=O)NC(C)C(=O)N(CCCCC)CC(=O)O)=C1)C1CCCC(Br)CO1",
+     "value": 0.00926369370668851
+    }
+   ],
+   "qed": [
+    {
+     "basis": "measured_and_frozen",
+     "label": "shared_source",
+     "smiles": "COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+     "value": 0.7960834588871699
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "recorded_destination",
+     "smiles": "CC(C)N1N=CC2=NC(c3ccc(-c4ccccn4)cc3)NC21",
+     "value": 0.948442042791664
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "route_midpoint",
+     "smiles": "CC=NN(CNC(=N)C1=CC(CC(CCC)NC)=CC1)C(C)C",
+     "value": 0.2505671844979284
+    }
+   ],
+   "thiothixene_rediscovery": [
+    {
+     "basis": "measured_and_frozen",
+     "label": "shared_source",
+     "smiles": "COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+     "value": 0.24615384615384617
+    },
+    {
+     "basis": "a_priori",
+     "label": "recorded_destination",
+     "smiles": "CN1CCN(CCC=C2c3ccccc3Sc3ccc(S(=O)(=O)N(C)C)cc32)CC1",
+     "value": 1.0
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "route_midpoint",
+     "smiles": "CCNCCC=CC1=CC(S(=O)(=O)NC)SC1",
+     "value": 0.1282051282051282
+    }
+   ],
+   "troglitazone_rediscovery": [
+    {
+     "basis": "measured_and_frozen",
+     "label": "shared_source",
+     "smiles": "COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+     "value": 0.12413793103448276
+    },
+    {
+     "basis": "a_priori",
+     "label": "recorded_destination",
+     "smiles": "Cc1c(C)c2c(c(C)c1O)CCC(C)(COc1ccc(CC3SC(=O)NC3=O)cc1)O2",
+     "value": 1.0
+    },
+    {
+     "basis": "measured_and_frozen",
+     "label": "route_midpoint",
+     "smiles": "Cc1cc(CC[SH2](C)(O)C2=CC(CC3CCCSC(N)O3)=CC2)c(C)c(O)c1C",
+     "value": 0.22962962962962963
+    }
+   ]
+  },
+  "purpose": "Positive control run before the first charged diagnostic call of every atlas run, so a silently failing oracle cannot produce a plausible ledger.",
+  "schema_version": "pmo_atlas_reference_panel_v1",
+  "software": {
+   "numpy": "1.26.4",
+   "pytdc": "1.1.15",
+   "python": "3.11.13",
+   "rdkit": "2023.09.6"
+  },
+  "tasks": {
+   "albuterol_similarity": {
+    "asset_backed": false,
+    "has_nontrivial_intermediate": true,
+    "oracle_name": "albuterol_similarity",
+    "probes": 3
+   },
+   "celecoxib_rediscovery": {
+    "asset_backed": false,
+    "has_nontrivial_intermediate": true,
+    "oracle_name": "celecoxib_rediscovery",
+    "probes": 3
+   },
+   "gsk3b": {
+    "asset_backed": true,
+    "has_nontrivial_intermediate": true,
+    "oracle_name": "gsk3b",
+    "probes": 3
+   },
+   "isomers_c7h8n2o2": {
+    "asset_backed": false,
+    "has_nontrivial_intermediate": true,
+    "oracle_name": "isomers_c7h8n2o2",
+    "probes": 3
+   },
+   "jnk3": {
+    "asset_backed": true,
+    "has_nontrivial_intermediate": true,
+    "oracle_name": "jnk3",
+    "probes": 3
+   },
+   "median1": {
+    "asset_backed": false,
+    "has_nontrivial_intermediate": true,
+    "oracle_name": "median1",
+    "probes": 3
+   },
+   "mestranol_similarity": {
+    "asset_backed": false,
+    "has_nontrivial_intermediate": true,
+    "oracle_name": "mestranol_similarity",
+    "probes": 3
+   },
+   "perindopril_mpo": {
+    "asset_backed": false,
+    "has_nontrivial_intermediate": true,
+    "oracle_name": "perindopril_mpo",
+    "probes": 3
+   },
+   "qed": {
+    "asset_backed": false,
+    "has_nontrivial_intermediate": true,
+    "oracle_name": "qed",
+    "probes": 3
+   },
+   "thiothixene_rediscovery": {
+    "asset_backed": false,
+    "has_nontrivial_intermediate": true,
+    "oracle_name": "thiothixene_rediscovery",
+    "probes": 3
+   },
+   "troglitazone_rediscovery": {
+    "asset_backed": false,
+    "has_nontrivial_intermediate": true,
+    "oracle_name": "troglitazone_rediscovery",
+    "probes": 3
+   }
+  }
+ },
+ "payload_sha256": "fc3854e6e02259b924648cf2b0a47670c22cadea44e13bf5bb245a0d54ba6991"
+}
