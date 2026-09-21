@@ -1656,3 +1656,37 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   ZERO plans under the v4 composer because at 40 heavy atoms it has no growth headroom and
   every v4 mode is growth. That is consistent with its witness requiring an 11-14 atom
   EXCISION. Check headroom against the expert's modes before costing a rescue arm.
+
+## 2026-09-20 (CORRECTION: the T4 failure decomposition was right about mechanism, wrong about scope)
+
+- **CORRECTS the entry above ("5ht1b_2 -- outside the vocabulary, NOT repairable by budget").
+  That claim was TOO STRONG and the mechanism was different.** Measured witness census over all
+  five exhausted delta=0.6 cells: 5ht1b_2's source carries net charge **+1** and all FOUR of its
+  clean eligible witnesses carry net charge **0**, at heavy-atom deltas -8 to -7. The net-charge
+  change is real, but it is achieved by **EXCISING the [NH+]-bearing fragment** -- ordinary atom
+  deletion, already in the vocabulary -- not by a charge-state or protonation edit. So the cell is
+  reachable without any new action axis.
+  **How the error was made, because the shape recurs:** three code facts were verified correctly
+  (`factorized_fiber.py:397` raises on charged states; created atoms hardcoded `formal_charge=0`;
+  `source_corruption.py:209` rejects net-charge-changing successors) and then generalized from the
+  EDITING vocabulary and the corruption/training path to a claim about what the **T4 proposal path**
+  can reach. Verifying a guard exists is not the same as establishing that the guard is the binding
+  constraint on a different code path. A direct measurement on actual witnesses beat the inference.
+  Reaffirms the standing rule: separate MEASURED from INFERRED, and never state an inference in the
+  voice of a measurement.
+- **The direction mismatch is 5 of 5, not 3 of 5 -- braf_0 was never a special case.** Every clean
+  eligible witness in EVERY exhausted cell is a net EXCISION:
+      braf_0   12 witnesses  -15..-13      fa7_2    12 witnesses  -13..-9
+      braf_1   12 witnesses  -15..-12      5ht1b_2   4 witnesses   -8..-7
+      fa7_0     5 witnesses   -9..-8
+  Not one is a growth. `generic_feasibility_headroom_v4` is growth-only in every `macro_mode`
+  (`direct_ring_growth`, `grow_then_close`, `grow_then_ring`, `replace_then_ring`,
+  `double_ring_growth`, `grow_then_double_ring`), so a rescue built on it is directionally wrong for
+  all five. It allocates 0 plans on braf_0 only because braf_0 sits at the 40-atom ceiling with zero
+  headroom; the other four get 8-24 plans that point the wrong way, which is WORSE than zero because
+  it looks like coverage. **A rescue arm must be checked for DIRECTION against the witnesses, not
+  just for non-empty plan allocation.**
+- **fa7_0's "QED-bound, not a proposal failure" reading also weakens.** It has 5 clean excision
+  witnesses at -9..-8 heavy atoms. The -0.0017 QED margin was measured over similarity-passing
+  endpoints the CURRENT proposal law reaches; it does not bound what a large-excision law reaches.
+  A bound computed inside a restricted support is a statement about that support, not about the cell.
