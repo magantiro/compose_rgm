@@ -1,0 +1,122 @@
+{
+  "app": "compose-t4-held-target-distilled-5ht1b-d04-250",
+  "arm": "5ht1b_d04",
+  "blockers": [
+    {
+      "consequence": "mode=resume would start a SECOND run_cell for the live 5ht1b_0 and 5ht1b_1 concurrently with their running containers - duplicate charged calls and the stale-mount checkpoint-overwrite hazard; mode=launch would compute a fresh run_id and restart all three cells at 250 calls each",
+      "id": "no_single_cell_target",
+      "measured": "modal_apps/t4_integrated_route_fiber_parp1_app.py local_entrypoint main(mode, run_id) exposes no cell selector; drive() builds tasks = [{**task, 'cell': row['cell']} for row in contract['cells']] and calls run_cell.map over ALL declared cells"
+    },
+    {
+      "consequence": "the existing output prefix cannot be resumed for 5ht1b_2 by any mode; this is the designed fail-closed guard, not a defect",
+      "id": "resume_fails_closed_on_this_cell",
+      "measured": "_resume_state executed locally against an exact replica of the cell directory raises RuntimeError('an unfinished query lock exists with no recoverable checkpoint; automatic or ambiguous scored retry is forbidden')"
+    },
+    {
+      "consequence": "a fresh-prefix relaunch would charge 250 on top of the 1 already forfeited = 251 against a 250 authorization",
+      "id": "budget_cannot_be_set_to_249",
+      "measured": "run_cell fresh start sets state.budget = contract['charged_calls_per_cell'] (250); no task field overrides it; _resume_state on an empty folder returns None, confirming a fresh prefix starts at 250"
+    }
+  ],
+  "cell": "5ht1b_2",
+  "charged_call_accounting": {
+    "basis": "run_cell publishes round_000_lock.json BEFORE dock_worker.remote under publish_before_docking with automatic_retries=0, no_backfill, never_resubmit_reserved_or_missing_query_receipt; _resume_state debits every query of a lock above the last checkpoint in full and never re-docks it",
+    "correct_relaunch_allowance": 249,
+    "forfeited_calls": 1,
+    "ledger_null_is_not_zero": "the ledger row reads null because there is no result.json to read, not because no call was charged"
+  },
+  "contract": {
+    "cells_declared": [
+      "5ht1b_0",
+      "5ht1b_1",
+      "5ht1b_2"
+    ],
+    "charged_calls_per_cell": 250,
+    "file": "configs/t4_held_target_distilled_5ht1b_d04_250.json",
+    "file_sha256": "e7607c7689fd6203de063883b5a25cd07405e3886c5f56285c67548904c169a9",
+    "matches_run_launch_json": true,
+    "note": "contract delta agrees with the arm name; this is NOT the jak2-d06 naming trap",
+    "operative_delta": 0.4,
+    "payload_sha256": "cdb3c46f46c7b19fb439fda3960c75ebff52b064b68a5025e6ea6f8565050c91",
+    "total_charged_call_ceiling": 750
+  },
+  "gates": {
+    "app_local_launch_gate_reproduced_read_only": {
+      "git_diff_on_runtime_paths_exit": 0,
+      "result": "GREEN",
+      "runtime_input_mismatches": 0,
+      "runtime_inputs_verified": 14,
+      "untracked_runtime_inputs": 0
+    },
+    "scripts/prelaunch_gate.py": "NOT RUN - it gates corpus/training launches (requires a guacamol corpus file on a Modal volume) and no launch is possible here; the authoritative gate for this path is the app's own _local_task check, reproduced above",
+    "tools/preflight.py": {
+      "commit": "a244f13530ff",
+      "drift_files": 0,
+      "mounted": [
+        "src",
+        "configs"
+      ],
+      "result": "GREEN"
+    }
+  },
+  "measured_cell_state": {
+    "artifacts": [
+      "round_000_lock.json"
+    ],
+    "charged_before_key_present": false,
+    "checkpoint_present": false,
+    "lock_envelope_self_verifies": true,
+    "lock_kind": "root",
+    "lock_mtime_edt": "2026-09-20 17:54",
+    "lock_payload_sha256": "88dc0886957f48598bf28550d397434fad9ef047311c975cf8a0bcf116d00f7e",
+    "lock_queries": 1,
+    "lock_query_id": "8cb564a63b096c6f88757c1ffbc1084769db7e24073a2f9e814d30f48d2ecaef_5ht1b_2_root",
+    "lock_query_smiles_matches_contract_cell": true,
+    "observed_unchanged_at_edt": [
+      "2026-09-20 20:22",
+      "2026-09-20 20:25",
+      "2026-09-20 20:29"
+    ],
+    "parent_score_key_present": false,
+    "result_present": false,
+    "stale_for_minutes_at_last_observation": 155
+  },
+  "outcome": "NOT_LAUNCHED",
+  "recorded_at_utc": "2026-09-21T00:30:00Z",
+  "run_id": "8cb564a63b096c6f88757c1ffbc1084769db7e24073a2f9e814d30f48d2ecaef",
+  "schema_version": "t4_held_target_cell_recovery_blocked_v1",
+  "sibling_cells_live": {
+    "5ht1b_0": {
+      "advanced_during_this_audit": true,
+      "latest_artifact": "round_005_lock.json",
+      "mtime_edt": "2026-09-20 20:23"
+    },
+    "5ht1b_1": {
+      "checkpoint_present": true,
+      "latest_artifact": "round_004_lock.json",
+      "mtime_edt": "2026-09-20 19:32"
+    }
+  },
+  "smallest_safe_path_not_executed": {
+    "open_question_for_owner": "remote_status in the base app hardcodes the cell tuple ('parp1_0','parp1_1','parp1_2'), so status polling on a rescue arm reports not_started; cosmetic, but read locks not status",
+    "shape": "a single-cell rescue arm following the committed precedent configs/t4_integrated_route_fiber_parp1_rescue_v1.json + modal_apps/t4_integrated_route_fiber_parp1_rescue_app.py",
+    "steps": [
+      "new contract: cells = [5ht1b_2] only, charged_calls_per_cell = 249, total_charged_call_ceiling = 249, plus a rescue block pinning original run_id and the forfeited root lock sha256 88dc0886...",
+      "new 26-line wrapper app in the style of t4_integrated_route_fiber_held_5ht1b_d04_app.py setting a NEW COMPOSE_HELD_APP, COMPOSE_HELD_VOLUME and COMPOSE_HELD_OUTPUT so it cannot collide with the live run",
+      "launch with modal run --detach (main uses drive.spawn)"
+    ],
+    "why_it_touches_no_pinned_byte": "the wrapper only sets env vars and re-exports app/main; the base app modal_apps/t4_integrated_route_fiber_parp1_app.py keeps sha256 aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3, so runtime_inputs_sha256 still verifies",
+    "why_it_was_not_executed": "it mints a NEW contract identity and a new authorization status field, and places the cell's result under a different run_id and volume from the other 14 panel cells - an owner decision on authorization and on cross-run reconciliation, not a continuation of the existing launch"
+  },
+  "superseded": {
+    "artifacts_deleted_uncommitted": [
+      "configs/t4_held_target_5ht1b_2_d04_rescue_v1.json",
+      "modal_apps/t4_integrated_route_fiber_held_5ht1b_2_d04_rescue_app.py"
+    ],
+    "by": "configs/t4_region_repair_rescue_plan_v1.json",
+    "reason": "the rescue scope moved to the four/five region-repair cells, and 5ht1b_2 is excluded on mechanism: its witnesses need a different region shape (two-boundary interior excision plus one reattachment bond) and the production executor's charge policy refuses 9 of 16 pendant regions on that source",
+    "state": "the 5ht1b_2 single-cell rescue path recorded in smallest_safe_path_not_executed was SUPERSEDED before anything was committed",
+    "what_this_record_still_establishes": "the cell is dead from an infrastructure loss and has forfeited exactly 1 charged call; that is independent of the repair-coverage exclusion and remains true"
+  },
+  "volume": "compose-t4-held-target-distilled-5ht1b-d04-250"
+}
