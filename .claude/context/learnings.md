@@ -2564,3 +2564,48 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   recomputed the committed reference audit's own 12 states through the production support path and got
   **12/12 agreement to 16 digits**. The ring catalog is byte-identical between step-1000 and step-2500
   (`template_repr_sha256 25bb9f52...`), so the instrument transfers between arms.
+
+## 2026-09-21 (parent-first construction: addition is damaging at EVERY size, and ring closure is a 4x mitigation)
+
+- **CORRECTS my own "damage scales ~7x with program length" reading.** That curve is real but it lives
+  INSIDE the region-EXCISION branch (3-5 primitives +0.081 mean dQED, 6-9 -0.028, 10-14 -0.135,
+  15+ -0.159). Length-controlled with synthetic intents, **pure ADDITION is net-negative at every size
+  including a single atom**: 1 insert **-0.023**, 2 **-0.061**, 3 **-0.100**, 4 **-0.160**. So the
+  +0.081 belongs to REMOVING a fragment, not to short programs as such. Two branches, two curves --
+  do not generalise one to the other, and the sharper statement is "adding without removing is
+  damaging at any size".
+- **RING CLOSURE IS A ~4x DAMAGE REDUCER, AND QED AND SA DISAGREE ABOUT IT.** 3 atoms + 1 closure is
+  **-0.022 against -0.100** for 3 atoms alone; 5 + 1 closure **-0.067 against -0.160** for 4 alone --
+  a closure turns a floppy chain into a ring. But mean dSA moves the OPPOSITE way: **+0.88 / +1.07
+  against +0.25 / +0.34**. **Quoting either metric alone inverts the conclusion.** A placement prior
+  should be built to exploit closure at a known SA cost rather than rediscover it.
+- **The missing prior is element PLACEMENT, not element VOCABULARY.** Drawing the chain uniformly from
+  an intent's element set gives polyperoxides -- `C1COOCOOCCC2OOOO1` from `('C','O')` -- which are
+  valid, executable and RDKit-parseable, and not molecules. Narrowing or widening the element SET
+  cannot fix this; the damage is in where elements sit relative to each other.
+- **Branch-split chemistry against the run's own random selection (mean dQED -0.0837, 66.1% losing):**
+      region_excision  yield 24.3%  mean dQED **-0.065**  mean dSA **-0.25**  endpoint SA med 4.13
+      zero_excision    yield 55.4%  mean dQED **-0.125**  mean dSA **+1.97**  endpoint SA med **6.23**
+  The excision branch is slightly BETTER than random selection; the construction branch is about twice
+  as damaging and pushes SA to effectively unmakeable. **Yield is 94-98% for builds of <=4 atoms, so
+  REACH IS NOT THE LIMIT -- CHEMISTRY IS.**
+- **A library can pin a branch to the worst end of a curve.** All 8 catalog plans with no excision
+  demand ask for 12-13 insertions, so the zero-excision branch was measured at the worst length by the
+  LIBRARY, not by the move class. The first reading ("short parent-first programs improve
+  drug-likeness") was too broad and a length control refuted it. Control the variable the library
+  happens to fix before attributing an effect to the mechanism.
+- **A PHANTOM MUTATION SURVIVOR: the test of the test was missing.** A mutation string written with
+  single quotes against double-quoted source made `str.replace` a silent no-op, so the unmutated file
+  passed and read as a weak guard. Same class as a tautological expectation. **A mutation runner must
+  diff the file and refuse to report a verdict when the mutation did not apply.**
+- **A field that echoes the request cannot witness that the request was met.** `rings_closed` was
+  copied from `intent.close_bonds` -- the DEMAND -- rather than counted from the realized actions, and
+  survived the battery. Count outcomes from executed actions, never from the specification that asked
+  for them. Companion finding: **a support floor is only tested where it binds** -- a floor test that
+  never hit a negative margin let a law mutated from re-ranking into filtering pass.
+- **An assumption encoded as a test can be refuted by the test.** A single inserted atom CAN close a
+  three-ring onto a neighbour of its anchor; the branch was more capable than assumed, and the test
+  written to pin the assumed limit failed instead. Worth doing deliberately.
+- `enumerate_cycle_close_edges` runs the semantic admission mask and is expensive: 92 zero-excision
+  requests cost roughly the wall time of 999 excision ones. Worth it -- a hand-rolled pair search would
+  move the ring chemistry out of the kernel and into the module -- but budget for it.
