@@ -2798,3 +2798,79 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   evidence; the same listing misled a phantom-run diagnosis the day before.
 - The advance is `modal run --detach <app> --mode advance --run-id <id>
   --confirm-prior-call-terminal`, and `--detach` is mandatory because `main()` uses `.spawn()`.
+
+## 2026-09-21 (PMO 1k A/B: online structural memory wins at every budget)
+
+- **MEASURED, matched 1000-call A/B on `celecoxib_rediscovery`, identical initialization, identical
+  code, payloads differing in exactly three leaves (`/arm/name`, `/arm/enable_online_memory`,
+  `/extension/extends_payload_sha256`):**
+      calls    A best   B best   A top10  B top10
+        250    0.2385   0.3441    0.2177   0.3102
+        500    0.2857   0.3838    0.2713   0.3556
+        750    0.3061   0.3838    0.2930   0.3671
+       1000    0.3364   0.3838    0.3287   0.3714
+      AUC@1000  0.2489   0.3138   (+26.1%)
+  B wins at EVERY checkpoint on EVERY metric, and **B reached its final best at 500 calls** -- A
+  never caught it over the remaining 500. The effect did NOT decay with budget, which is the
+  question a 250-call result cannot answer. ONE task, ONE seed: this justifies scaling the
+  algorithm, it does not establish a benchmark claim.
+- **Mechanism is ATTRIBUTED, not self-reported.** Memory provenance is read from the tag the memory
+  channel writes at synthesis time (`pmo_online_memory` in the candidate's provenance metadata), not
+  from a controller flag: 82 memory-derived calls of 250 rising to 198 of 500, and 3/12 then 4/14
+  frontier improvements from memory-derived descendants. Arm A's zeros are STRUCTURAL (no memory
+  object exists), which is what makes it a control rather than a missing measurement.
+- **A frontier improvement is only defined on the CHARGED SEQUENCE.** The archive has no order, so an
+  archive-wide attribution figure belongs to no checkpoint. Compute it over the charged-call prefix.
+
+## 2026-09-21 (CORRECTION: `exact_early_ring` was never inert -- the probe measured the one quantity that cannot move)
+
+- **CORRECTS the 2026-09-21 entry "`exact_early_ring` IS INERT on the mechanism".** It is not.
+  MEASURED on 270 molecules / 646 ring decision points, matched three arms, pinned kernel:
+      sequential  (what Lineage B trained on)   P_support(3/4-ring) 0.3049 +- 0.0065
+      exact_early_ring (shipped 2026-07-20)                         0.1926 +- 0.0049
+      ring_dependency_block (new)                                   0.1956 +- 0.0050
+  The shipped scheduler delivers **-0.1169 +- 0.0071** against sequential and captures essentially
+  the whole available gain. **The earlier n=24 probe concluded "inert" because it measured FREE
+  SLOTS, which provably cannot move under a reordering** -- free slots are identical across all
+  three arms (11.883). Measuring the one quantity incapable of showing the effect, then believing
+  the null, is the error. Pick the metric that CAN move before reading a null.
+- **The slot-scarcity story is dead and it pointed the WRONG WAY.** `r(mass, log
+  legal_template_count) = -0.87 to -0.92` against `r(mass, free_slots) = +0.13`, **wrong sign**.
+  Small molecules have MORE small-ring mass, so "create the minimum required atoms, then commit the
+  ring" -- which is what the brief instructed -- moves the damaging direction. Mass tracks support
+  SIZE, not crowding.
+- **The residual is a per-ring-system-ORDINAL effect that NO schedule can remove.** Mean by ordinal:
+  0 -> 0.1371 (passes the <0.15 gate), 1 -> 0.1890, 2 -> 0.2754, 3 -> 0.3255, 4 -> 0.4497. Each
+  commitment constricts the support the next is decided against, and a trace carries ~2.5 ring
+  systems. Along a real trace the last `atom_restate` cuts legal templates **1034 -> 295** (mass
+  0.1199 -> 0.2237) and the first ring grow leaves **28** templates at 0.3571. So the repair is a
+  SUPPORT question or a scoped claim, not a scheduling one.
+- **CONSEQUENCE worth acting on separately: Lineage B trained on `sequential` while a scheduler
+  worth 0.30 -> 0.19 has sat unwired since 2026-07-20** -- one day after the step-1000 checkpoint.
+  Five additive plumbing hops, two sharing a sink.
+- **A per-item fallback cannot protect a corpus.** Committing a ring early invalidates a LATER graft
+  on 3 of 150 real molecules, and the per-system fallback cannot see it because the commitment it
+  would undo already succeeded. Without a TRACE-level fallback the schedule silently shrinks the
+  corpus ~2%, invisibly in any per-arm mean.
+- **Modal `.map()` with ordered output can deliver ZERO rows** from a run that processed 536
+  molecules across 62 containers, because one stalled shard queues all the rest -- pass
+  `order_outputs=False`. And **killing the local driver does not stop the app**: it held 99
+  containers and starved the next launch until `modal app stop`.
+
+## 2026-09-21 (four agents, one laptop: the resource failure modes are the same shape as the data ones)
+
+- **Uncapped local fan-out across concurrent agents took the machine to 65 MB free of 32 GB** with
+  19.8M pages purged, and **19 of the 44 python processes had orphaned to `ppid=1`** -- parent dead,
+  still holding ~0.25 GB and ~40% CPU each, forever. `pkill -f <script.py>` never matches them
+  because a spawn-pool child's cmdline is `python -c from multiprocessing.spawn import spawn_main`.
+  Sweep by `ppid==1` and by that string, and cap concurrent local processes per agent (3 here).
+  Serial is also FASTER: the repo's own measurement has oversubscription taking a build from 5,507
+  entries/h to 250.
+- **A grep for orphans matches its own command line.** An agent reported `spawn_orphans=3` that were
+  its own `grep`; bracket the pattern (`[m]ultiprocessing.spawn`) or the count is fiction.
+- **Disk hit 3.7 GiB free of 926 GiB and an agent's `git worktree add` died with `No space left on
+  device`.** A full checkout is ~800M per worktree; `git worktree add --no-checkout` +
+  `sparse-checkout set src tests` is **20M**. Use sparse worktrees for agents that only need to run
+  tests. Also: `du` cannot read `~/Desktop`/`~/Documents`/`~/Downloads` without Full Disk Access, so
+  a home-directory survey can silently miss the majority of the volume -- 362 GB visible against 899
+  GB used here.
