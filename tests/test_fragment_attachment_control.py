@@ -30,6 +30,7 @@ from compose_v4.benchmark.fragment_attachment_control import (
     external_neighbour_count,
 )
 from compose_v4.benchmark.fragment_conditioned_sampler import (
+    FragmentConditioningError,
     RegionLock,
     SamplerConfig,
     _declared_sites,
@@ -707,3 +708,96 @@ def test_row_guard_accepts_the_admissible_ordering():
             "emitted_nonempty": 30,
         },
     )
+
+
+# ---- The corrected linker start state ----
+#
+# The original construction bonds the two retained cores DIRECTLY, which makes a
+# genuine linker unreachable: the join consumes the hydrogen each declared site
+# needed, so on several released drugs both sites start saturated and no first
+# event can increase coverage.  ``linker_bridge_atoms`` seeds unlocked carbons
+# between the sites instead.  These tests pin the properties that make the
+# corrected state a fair statement of the task, and they drive the production
+# ``build_prompt_context`` rather than reconstructing a start state locally.
+
+
+def _linker_prompts():
+    return [p for p in _prompts() if p.task is FragmentTask.LINKER_DESIGN]
+
+
+def test_direct_join_leaves_the_two_cores_bonded_on_every_released_drug():
+    """The defect itself, pinned so a silent revert is visible."""
+    for prompt in _linker_prompts():
+        context = build_prompt_context(prompt, linker_bridge_atoms=0)
+        controller = AttachmentController(
+            context.attachment, context.locked_slots, _ON
+        )
+        assert not controller.cores_are_separated(context.start_state), (
+            f"{prompt.drug_name}: the direct join is supposed to leave the cores "
+            "bonded; if this passes, the zero-atom-linker defect is gone and the "
+            "invalidation needs revisiting"
+        )
+
+
+def test_a_seeded_bridge_separates_the_cores_on_every_released_drug():
+    for prompt in _linker_prompts():
+        context = build_prompt_context(prompt, linker_bridge_atoms=1)
+        controller = AttachmentController(
+            context.attachment, context.locked_slots, _ON
+        )
+        assert controller.cores_are_separated(context.start_state), (
+            f"{prompt.drug_name}: a seeded bridge must leave no direct core-core bond"
+        )
+
+
+def test_the_seeded_bridge_is_not_locked():
+    """The linker is what the generator designs, so it must stay editable."""
+    for prompt in _linker_prompts():
+        direct = build_prompt_context(prompt, linker_bridge_atoms=0)
+        seeded = build_prompt_context(prompt, linker_bridge_atoms=2)
+        assert len(seeded.locked_slots) == len(direct.locked_slots), (
+            f"{prompt.drug_name}: seeding a bridge must not enlarge the retained "
+            "region -- the bridge belongs to neither core"
+        )
+        real = int(np.count_nonzero(seeded.start_state.atom_types != NULL_IDX))
+        direct_real = int(np.count_nonzero(direct.start_state.atom_types != NULL_IDX))
+        assert real == direct_real + 2, (
+            f"{prompt.drug_name}: two seeded carbons must add exactly two atoms"
+        )
+
+
+def test_seeding_a_bridge_releases_nothing_from_the_lock():
+    """A released pair only exists to undo a join this adapter constructed.
+
+    With a bridge there is no core-core bond to undo, so releasing one would
+    weaken the retained region for no reason.
+    """
+    for prompt in _linker_prompts():
+        seeded = build_prompt_context(
+            prompt, control=_ON, linker_bridge_atoms=1
+        )
+        assert seeded.attachment.released_pairs == frozenset(), (
+            f"{prompt.drug_name}: a seeded-bridge start has no constructed join "
+            "to release"
+        )
+        direct = build_prompt_context(prompt, control=_ON, linker_bridge_atoms=0)
+        assert direct.attachment.released_pairs, (
+            f"{prompt.drug_name}: the direct join must still be released when it "
+            "is the construction in use"
+        )
+
+
+def test_bridge_seeding_is_inert_for_a_single_core_task():
+    """Only linker-shaped prompts have anything to bridge."""
+    for task in (FragmentTask.MOTIF_EXTENSION, FragmentTask.SCAFFOLD_DECORATION):
+        prompt = _prompt(task, "BARICITINIB")
+        base = build_prompt_context(prompt, linker_bridge_atoms=0)
+        seeded = build_prompt_context(prompt, linker_bridge_atoms=3)
+        assert seeded.start_smiles == base.start_smiles
+        assert seeded.locked_slots == base.locked_slots
+
+
+def test_a_negative_bridge_length_is_refused():
+    prompt = _linker_prompts()[0]
+    with pytest.raises(FragmentConditioningError, match="non-negative"):
+        build_prompt_context(prompt, linker_bridge_atoms=-1)

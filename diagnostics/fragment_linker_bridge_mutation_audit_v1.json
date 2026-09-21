@@ -1,0 +1,46 @@
+{
+  "schema": "compose_fragment_linker_bridge_mutation_audit_v1",
+  "positive_control_unmutated_tree_green": true,
+  "mutations": [
+    {
+      "mutation": "lock_the_bridge",
+      "expected_test": "test_the_seeded_bridge_is_not_locked",
+      "killed_by_expected_test": true,
+      "all_failing_tests": [
+        "test_the_seeded_bridge_is_not_locked"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "also_keep_the_direct_join",
+      "expected_test": "test_a_seeded_bridge_separates_the_cores_on_every_released_drug",
+      "killed_by_expected_test": true,
+      "all_failing_tests": [
+        "test_a_seeded_bridge_separates_the_cores_on_every_released_drug",
+        "test_the_seeded_bridge_is_not_locked",
+        "test_seeding_a_bridge_releases_nothing_from_the_lock"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "release_a_join_that_does_not_exist",
+      "expected_test": "test_seeding_a_bridge_releases_nothing_from_the_lock",
+      "killed_by_expected_test": true,
+      "all_failing_tests": [
+        "test_seeding_a_bridge_releases_nothing_from_the_lock"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "drop_the_negative_guard",
+      "expected_test": "test_a_negative_bridge_length_is_refused",
+      "killed_by_expected_test": true,
+      "all_failing_tests": [
+        "test_a_negative_bridge_length_is_refused"
+      ],
+      "verdict": "KILLED"
+    }
+  ],
+  "killed": 4,
+  "total": 4
+}

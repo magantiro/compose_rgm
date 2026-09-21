@@ -185,17 +185,42 @@ def build_prompt_context(
     *,
     config: SamplerConfig | None = None,
     control: AttachmentControlConfig | None = None,
+    linker_bridge_atoms: int = 0,
 ) -> PromptContext:
     """Build the fixed start state and the locked slot set for one prompt.
 
-    Single-core tasks start at the retained core itself.  Linker design starts at
-    the two cores joined by one bond between their declared attachment atoms:
-    the executor only admits connected states, so a disconnected pair is not a
-    legal state, and asking a source-agnostic prior to re-derive the second core
-    by chance is not conditioning.  Both cores are locked, so every committed
-    state retains both and only the join region is free to be edited.
+    Single-core tasks start at the retained core itself.
+
+    Linker design cannot start from the two cores alone: the executor only
+    admits CONNECTED states, so a disconnected pair is not a legal state, and
+    asking a source-agnostic prior to re-derive the second core by chance is not
+    conditioning.  Something has to bridge them, and ``linker_bridge_atoms``
+    chooses what.
+
+    ``linker_bridge_atoms == 0`` joins the two declared sites with a DIRECT
+    bond.  This is the original construction and it is MEASURED to be
+    structurally unable to express the task: the join consumes the very hydrogen
+    each declared site needed, so on four of the ten released drugs both sites
+    start with zero free valence and no first event can increase coverage.
+    Every emitted "linker" is then zero atoms long, which the benchmark's own
+    endpoint test cannot detect because each core satisfies the other core's
+    attachment requirement.  Retained only so the invalidated rows stay
+    reproducible.
+
+    ``linker_bridge_atoms >= 1`` inserts that many UNLOCKED carbons in a chain
+    between the two declared sites.  The cores are then separated by
+    construction, each declared site's external neighbour is a linker atom
+    rather than the opposite core, and the chain is free to grow, shrink and
+    change element because it belongs to neither retained region.  One atom is
+    the minimum that makes the task expressible; it is a seed to design from,
+    not a linker, so any row built this way must report the realized linker
+    length beside it.
     """
     config = config or SamplerConfig()
+    if linker_bridge_atoms < 0:
+        raise FragmentConditioningError(
+            f"linker_bridge_atoms must be non-negative, got {linker_bridge_atoms}"
+        )
 
     if prompt.task in (FragmentTask.LINKER_DESIGN, FragmentTask.SCAFFOLD_MORPHING):
         if len(prompt.fragments) != 2:
@@ -222,7 +247,27 @@ def build_prompt_context(
                 )
             atom.SetNoImplicit(True)
             atom.SetNumExplicitHs(total_h - 1)
-        combined.AddBond(join[0], join[1], Chem.BondType.SINGLE)
+        if linker_bridge_atoms == 0:
+            combined.AddBond(join[0], join[1], Chem.BondType.SINGLE)
+            bridge_slots: tuple[int, ...] = ()
+            join_is_direct = True
+        else:
+            # Chain the seeded carbons between the two declared sites.  They are
+            # appended after both cores, so core slot indices are unchanged and
+            # ``group_bounds`` below still addresses the retained regions.
+            previous = join[0]
+            for _ in range(linker_bridge_atoms):
+                index = combined.AddAtom(Chem.Atom(6))
+                combined.AddBond(previous, index, Chem.BondType.SINGLE)
+                previous = index
+            combined.AddBond(previous, join[1], Chem.BondType.SINGLE)
+            bridge_slots = tuple(
+                range(
+                    left.GetNumAtoms() + right.GetNumAtoms(),
+                    left.GetNumAtoms() + right.GetNumAtoms() + linker_bridge_atoms,
+                )
+            )
+            join_is_direct = False
         declared = [
             (site, count) for site, count in _declared_sites(prompt.fragments[0])
         ] + [
@@ -233,7 +278,9 @@ def build_prompt_context(
             tuple(range(left.GetNumAtoms())),
             tuple(range(left.GetNumAtoms(), left.GetNumAtoms() + right.GetNumAtoms())),
         )
-        join_pair = join
+        # Only a DIRECT join has to be released from the lock; a seeded bridge is
+        # already outside every locked region, so there is nothing to release.
+        join_pair = join if join_is_direct else None
         start = combined.GetMol()
         try:
             Chem.SanitizeMol(start)
@@ -241,7 +288,10 @@ def build_prompt_context(
             raise FragmentConditioningError(
                 f"joined linker start did not sanitize: {exc}"
             ) from exc
+        # The bridge carbons are deliberately NOT locked: they are the linker the
+        # generator is being asked to design.
         locked = tuple(range(left.GetNumAtoms() + right.GetNumAtoms()))
+        assert all(slot not in locked for slot in bridge_slots)
     else:
         core, _sites = retained_core(prompt.fragments[0])
         start = core
