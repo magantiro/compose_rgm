@@ -1996,3 +1996,103 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   into that name; `git fetch origin <branch>` then `git merge FETCH_HEAD` works. The only
   conflict was `learnings.md`, which is append-only -- resolve by keeping BOTH blocks in
   order, never by choosing a side.
+## 2026-09-20 (PMO-v2: promoting the realizer, and budgeting a COMPLETE search)
+
+- **Choose a search budget from the SUCCESS cost distribution, never from the mean.** The
+  realizer replaced the jump lane's width-4 beam. A 12 s per-attempt cap looked comfortable on
+  aggregates (mean 4.94 s/attempt, median 0.30, 9.1 attempts per 45 s lane) and **silently lost
+  3 of the 6 measured realizations**, because every realization the matched comparison found
+  needed **51-55 expanded nodes of a 64 budget** -- so the first one arrives at ~80% of the way
+  through, and capping near the mean truncates exactly the productive tail. 20 s keeps 6 of 6 at
+  6.88 s/attempt. The cut is safe only because the two distributions SEPARATE: every success
+  finishes within 16.92 s while the unproductive searches run 18-64 s. **The expensive searches
+  are the ones that produce nothing** -- the opposite of the intuition that would have set the
+  cap by average cost.
+- **Measure the production configuration, not the component.** The matched-comparison numbers
+  were time-to-FIRST realization under 3 concurrent workers; the production adapter collects
+  SEVERAL (the controller ranks bindings by retained fraction against a random target, so one row
+  makes that target inert). Re-measuring at the real setting -- node_budget 64, collect_all,
+  max_realizations 4, single process -- was what produced the cap decision, and it reproduced the
+  headline exactly through the adapter: 5 teacher-scale pairs, median 31 primitives, median
+  retained 0.630, 3 in the 0.52-0.96 band. Single process ran **1.3-2.1x faster** than the
+  3-worker measurement, restating the standing rule that parallelism is free during
+  implementation and not during measurement.
+- **A wall cap checked between expansions is SOFT.** `over_budget()` runs between node
+  expansions, so the executor replay and program extraction of an in-flight node complete past
+  it: measured max 20.77 s against a 20.0 s cap (~4%). Budget the lane with that headroom rather
+  than assuming the cap is hard.
+- **Record the throughput trade in the contract instead of discovering it later.** The lane now
+  makes ~6.5 attempts per 45 s batch instead of up to 32. That is the intended trade -- fewer,
+  deeper attempts -- but a later run judged against the beam's attempt count would read it as a
+  regression. Raising `wall_seconds` is the available lever and was deliberately NOT taken: it
+  affects all three lanes.
+- **A preflight can stop gating its own runtime the moment you swap the thing it measures.**
+  `pmo_population_live_parent_gate.py` says "scoring is prohibited until the resulting receipt
+  passes the non-root support floor" and binds with `bind_joint_plan` -- the BEAM. After the
+  controller moved to `realize_plan_binding`, that gate measures a binder production no longer
+  uses, so its sealed decision does not gate the new runtime. Found by grepping for remaining
+  callers of the replaced function, not by any test. **After replacing a production function,
+  grep its other callers and ask which of them are GATES.** Deliberately not rewired in the same
+  pass: the gate could legitimately fail under the realizer's per-attempt cost, and that is a
+  measurement the owner should sanction, not a side effect of an integration commit.
+- **A moved contract identity SHOULD break the launcher, and re-pinning it would forge an
+  authorization.** Re-sealing moved `pmo_population_controller_v1_scored_contract_corrected.json`,
+  whose old hash is pinned in `tools/launch_pmo_population_v1_corrected.py` plus four receipts and
+  a source capsule. The launcher now refuses with "corrected contract payload hash changed" --
+  correct, because PMO-v2 is a different runtime from the one that authorization covered. The
+  receipts are records of the SUPERSEDED identity and must stay addressing it. Distinguish this
+  from the 2026-08-02 re-pin sweep: there the pins were maintenance on a non-authorizing binding
+  contract; here the pin is an AUTHORIZATION and re-pointing it would manufacture consent.
+- **Mutation is the only proof an adapter test is load-bearing.** Six production mutations --
+  dropping the source state from `states`, pointing `endpoint_state` at the source, collapsing the
+  returned rows to one, ignoring `max_realizations`, returning search order instead of the
+  content-addressed order, and drifting the production predicate onto a relaxation -- each had to
+  make a NAMED test fail. All six were killed. The strongest of these guards does not recompute
+  anything from the adapter: it drives the real consumer (`_joint_program`), which replays the
+  actions and asserts `trace["states"] == bound["states"]`, and it cross-checks
+  `retained_fraction` computed by `finalize` from the executed graph against the controller's own
+  recomputation from `decode_state(endpoint_state)` -- two independent paths to one number.
+
+## 2026-09-20 (PMO-v2: the support gate was measuring the binder production had replaced)
+
+- **A gate that declares its own authority is exactly the file to re-point when the runtime
+  moves, and nothing in the suite noticed.** `pmo_population_live_parent_gate.py` -- whose
+  docstring says "Scoring is prohibited until the resulting receipt passes the non-root support
+  floor" -- still imported `bind_joint_plan` (the width-4 beam) at two call sites after the
+  controller's jump lane moved to `realize_plan_binding`. Its sealed v2 decision therefore
+  certified support for a binder production no longer runs. Found by grepping remaining callers
+  of the replaced function, NOT by a test.
+- **Re-pointed gate PASSES; the verdict is robust, the parent set moved.** Scheduler lane, inputs
+  byte-identical to the beam-era receipt (initialization, checkpoint payload, plan ids), 16
+  parents / 14 exact descendants / 128 plan attempts each = 1,792 attempts, 0 oracle calls:
+  `supported_parent_count` **6** against a floor of 4 (beam: 7); route-scale bindings **73** vs
+  37; unique route-scale endpoints **59** vs 30. Lost parents {4,11,13}, gained {7,15}.
+- **Carrying the realizer's outcome up is what makes a FAIL readable.** Over the 1,792 attempts:
+  `proven_incompatible` 1,704 (95.1%), `search_budget_exhausted` 52 (2.9%),
+  `completed_realization` 36 (2.0%). The three lost parents each show comp=0 / exh=13 -- every
+  one of their 13 step-0-feasible plans ran to the 20 s cap. `proven_incompatible` is
+  LOAD-INDEPENDENT (constraint propagation, no clock); the exh/comp split is NOT, so the 7->6
+  delta carries a machine-load caveat that the PASS verdict does not (6 >= 4 with margin).
+- **The realized program SCALE did not move, and that is the thing to watch.** Bound-program
+  lengths are {14,16,17,23} in BOTH arms -- median 16, max 23 -- while **45 of the 95 plan
+  latents are >=29 primitives and ZERO of them bound in either arm**. That is the shape the
+  predeclared falsifier names ("median ~16 primitives"), but its other conjunct is
+  `retained_fraction ~1.000` and the gate does not record retained fraction, so the falsifier is
+  **UNEVALUATED, not fired** -- and the gate's objective-blind descendants are a different parent
+  population from the matched comparison that measured median 31 at retained 0.630. Settle it on
+  the scored run's artifacts; do not read it as a verdict either way.
+- **Derive a drift test from the CALL SITE, never from a name written twice.**
+  `tests/test_pmo_gate_binder_parity.py` identifies a binder call STRUCTURALLY (a call whose
+  second positional argument is `plan`), resolves the callee through the module's own
+  `from ... import` bindings, and requires the gate's resolved target, its keyword-parameter set
+  and the runtime function OBJECT to equal the controller's. Neither binder is named in the test,
+  so it cannot agree with a stale constant. Proven by mutation BOTH directions: 3/3 red against
+  the unfixed gate, 2/3 red when the controller is pointed at `bind_realized_plan` (the
+  keyword-set check correctly stays green there -- same signature, different function).
+- **The mechanical resealer would have buried this.** `reseal_pmo_population_contracts.py`
+  re-hashes every key already present in `implementation_sha256`, so running it re-pins the gate
+  SOURCE while `support_observed` -- ordinary semantics, guarded only against change -- keeps the
+  beam-era numbers. The integration had already re-pinned the controller and added
+  `pmo_realization.py` to that config while its support numbers stayed from the beam run: a
+  config that VALIDATES while binding a stale measurement, the 2026-08-02 failure class again.
+  `support_observed` must be RE-MEASURED from the new receipt, never re-pinned.

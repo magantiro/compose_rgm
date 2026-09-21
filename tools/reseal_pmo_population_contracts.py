@@ -34,6 +34,12 @@ CONTINUITY = "src/compose_v4/control/bootstrap_pool_continuity.py"
 # contract that did not pin them could authorize a runtime whose numbers can change
 # without the identity moving.
 ORACLE_ASSETS = "src/compose_v4/experiments/pmo_oracle_assets.py"
+# The realizer is the jump lane's binder: it decides which programs the controller is
+# even able to propose, and it replaced a width-4 beam whose bindings had the defect
+# (purely additive, retained 1.000) the PMO-v2 revision exists to repair.  A contract
+# that pinned the controller but not its binder would authorize a runtime whose
+# proposals can change without the identity moving.
+REALIZATION = "src/compose_v4/control/pmo_realization.py"
 BASE = "configs/pmo_population_controller_v1.json"
 DEPENDENTS = (
     "configs/pmo_population_controller_v1_scored_contract.json",
@@ -74,7 +80,7 @@ def reseal(path: Path, *, base_payload_sha256: str | None) -> tuple[str, bool]:
     if implementation and CONTROLLER in implementation:
         # Declaring the new dependency is the ONE structural change this tool may make.
         # It is recorded so the guard below can allow exactly it and nothing else.
-        declared = (CREDIT, REMOTE_APP, CONTINUITY, ORACLE_ASSETS)
+        declared = (CREDIT, REMOTE_APP, CONTINUITY, ORACLE_ASSETS, REALIZATION)
         additions = [name for name in declared if name not in implementation]
         declared_new_dependency = bool(additions)
         for name in declared:
