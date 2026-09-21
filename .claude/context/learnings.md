@@ -2195,3 +2195,42 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   div 0.551, dist 0.769) appear in no pinned artifact; the upstream `reference_metrics.csv` says
   97.5 / 83.6 / 34.8 / 0.599 / 0.762. A baseline quoted from a README is not a baseline. Pin the
   comparator table by hash before it decides anything.
+
+## 2026-09-21 (fragment "validity" was task success; the correction was worth +44 and +90 points)
+
+- **A reported metric contradicted an architectural invariant, and the invariant was right.** The
+  fragment harness reported motif-extension "validity" at 41.4% and scaffold decoration at 3.5%.
+  COMPOSE's committed states are validity-closed BY CONSTRUCTION, so chemical validity that low is
+  impossible unless something bypasses the executor. Per-sample audit of the row reporting
+  "validity 8.00": 100 attempts -> 71 produced; of those 71, chemically valid 71, connected 71,
+  graph-valid 71 (re-enters a production `MolecularGraph` and passes `is_valid_state`),
+  fragment-containing 71, TASK-SUCCESSFUL 8. All 63 rejections were
+  `task_only: missing_fragment_or_attachment`; ZERO were chemistry. The harness was labelling
+  conditional-task failure as chemical invalidity.
+- **CORRECTED, like-for-like against baselines whose evaluators never inspect the fragment:**
+      motif          85.40 vs GenMol 82.90  -> COMPOSE AHEAD (+2.50); was reported as 41.43
+      superstructure 93.63 vs 97.50         -> -3.87; the correction moved it UP from 93.53
+      decoration     93.47 vs 96.60         -> -3.13; was reported as 3.50
+  Worth +44 points on motif and +90 on decoration. **When a measured number contradicts a
+  construction-level guarantee, audit the metric before believing the number.**
+- **The two competing explanations were RULED OUT by measurement, not argument.** Adapter bypass:
+  every emitted string is literally a committed endpoint. Serialization/kernel failure: chemical
+  validity of produced molecules is 100.0000% on all three tasks. Naming the alternatives and
+  killing them is what makes the conflation finding safe to act on.
+- **DENOMINATORS: "100% valid" and "85.4% valid" are both true and mean different things.** 100% is
+  the share of COMMITTED endpoints that are chemically valid -- the architectural claim. 85.4-93.6%
+  is validity over ATTEMPTS, and the entire gap is trajectories that committed NOTHING (rejection
+  budget exhausted or zero events). That is SAMPLER EFFICIENCY, not validity. State which
+  denominator every validity number uses, always.
+- **PERSIST THE MOLECULES, NOT JUST THE COUNTERS -- this cost us real data.** Shards stored counts
+  plus five example SMILES. So the corrected primary metrics could be rebuilt from counters, but
+  uniqueness/quality/diversity/distance for motif (~51% censored) and decoration (~96%) were scored
+  over the self-censored emitted set and are NOT repairable -- they describe survivors, not the
+  generator, and are flagged INVALID rather than quietly reported. Superstructure survived only
+  because it censored 3 of 2,809. A run that stores aggregates cannot answer a question posed after
+  the fact.
+- **Guards now assert the invariant instead of assuming it:** across all 90 shards,
+  `committed_chemically_valid == committed` and `task_success <= containment <= produced`.
+- **The capability actually missing is CONDITIONAL CONTROL OF WHERE A VALID EDIT LANDS**, not
+  validity and not fragment preservation. Containment is 84.8-93.4%; placement is 3.5-93.5%. Name it
+  "conditional task success" everywhere so the diagnosis cannot drift back into a validity claim.
