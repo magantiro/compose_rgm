@@ -1,4 +1,51 @@
 {
+  "MOTIF_DECOMPOSITION": {
+    "ARITHMETIC": "Eliminating alert-introducing edits entirely would move mean per-edit dQED from -0.0837 to -0.0454 -- about 46% of the damage removed, still negative.",
+    "READING": "A handful of motifs -- peroxide, hydrazine, N-O -- carry roughly 3x the damage and about 40% of edits, and they are exactly what shows up by eye in both the reward-hacked gsk3b endpoints (`[IH]OOCNNCO`) and the parent-first construction output (`N#CCNOCO`, `OOC1NC=C(Cl)C=C1Br`). A prior trained on real molecules should suppress them nearly for free, since drug corpora barely contain them. BUT alert-free edits are STILL net-negative at -0.045 with a 60% loss rate, so motif suppression is not the whole answer and a SMARTS blacklist would capture at most half the benefit while adding a hand-tuned rule set. The remaining damage is broad off-manifold drift and needs genuine distributional modelling -- which is the argument for doing the learned prior properly rather than shortcutting it.",
+    "by_motif": {
+      "N-O_single": {
+        "mean_d_qed": -0.173,
+        "n": 77
+      },
+      "bare_P": {
+        "mean_d_qed": -0.0719,
+        "n": 12
+      },
+      "four_ring": {
+        "mean_d_qed": -0.0561,
+        "n": 71
+      },
+      "hydrazine_NN": {
+        "mean_d_qed": -0.2143,
+        "n": 70
+      },
+      "hypervalent_S_P_I": {
+        "mean_d_qed": -0.1411,
+        "n": 44
+      },
+      "peroxide": {
+        "mean_d_qed": -0.2944,
+        "n": 44
+      },
+      "three_ring": {
+        "mean_d_qed": -0.0752,
+        "n": 42
+      }
+    },
+    "introduces_alert_motif": {
+      "mean_d_qed": -0.1417,
+      "n": 279,
+      "pct_losing": 75.3,
+      "share": 0.397
+    },
+    "introduces_none": {
+      "mean_d_qed": -0.0454,
+      "n": 423,
+      "pct_losing": 60.0,
+      "share": 0.603
+    },
+    "question": "How much of the per-edit damage is a few identifiable bad motifs, versus broad off-manifold drift?"
+  },
   "PREDICTION": "Under a model-weighted draw, mean per-edit dQED should move materially toward 0 (or positive) and the 66.1% loss rate should fall. That is measurable on replayed parents at zero oracle cost and is a sharper test than the aggregate median-QED prediction, because it is per-edit and attributable.",
   "READING_1_no_single_bad_operator": "EVERY family is net-negative, spanning -0.055 to -0.171. So this is not one pathological operator to disable -- it is what random selection from the legal fiber does. The drug-like manifold is a thin subset of the legal fiber, so a random legal move leaves it. This is the predicted consequence of having no prior, measured at the level of individual edits.",
   "READING_2_damage_scales_with_program_length": "1-2 primitive actions cost -0.027 QED; 9 actions cost -0.195, about 7x. Each additional unguided step is another weighted coin flip against drug-likeness. CONSEQUENCE FOR THE STRUCTURAL-JUMP WORK: pushing toward larger coherent programs WITHOUT a chemical prior actively makes chemistry worse. Coherence must arrive together with chemistry, or bigger is simply worse.",
