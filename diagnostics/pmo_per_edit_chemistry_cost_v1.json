@@ -1,0 +1,73 @@
+{
+  "PREDICTION": "Under a model-weighted draw, mean per-edit dQED should move materially toward 0 (or positive) and the 66.1% loss rate should fall. That is measurable on replayed parents at zero oracle cost and is a sharper test than the aggregate median-QED prediction, because it is per-edit and attributable.",
+  "READING_1_no_single_bad_operator": "EVERY family is net-negative, spanning -0.055 to -0.171. So this is not one pathological operator to disable -- it is what random selection from the legal fiber does. The drug-like manifold is a thin subset of the legal fiber, so a random legal move leaves it. This is the predicted consequence of having no prior, measured at the level of individual edits.",
+  "READING_2_damage_scales_with_program_length": "1-2 primitive actions cost -0.027 QED; 9 actions cost -0.195, about 7x. Each additional unguided step is another weighted coin flip against drug-likeness. CONSEQUENCE FOR THE STRUCTURAL-JUMP WORK: pushing toward larger coherent programs WITHOUT a chemical prior actively makes chemistry worse. Coherence must arrive together with chemistry, or bigger is simply worse.",
+  "READING_3_the_signal_exists_and_is_unused": "33.9% of edits do NOT lose QED. A prior does not need to invent good moves -- it needs to prefer the third of legal moves that already preserve or improve chemistry. That is a ranking problem over an existing support, which is why weighting the draw is the right shape of fix and a post-hoc QED/SA filter is not.",
+  "by_family_present": {
+    "atom_delete": {
+      "mean_d_heavy": 1.3,
+      "mean_d_qed": -0.0855,
+      "mean_d_sa": 0.2693,
+      "n": 324
+    },
+    "atom_insert": {
+      "mean_d_heavy": 3.15,
+      "mean_d_qed": -0.1,
+      "mean_d_sa": 0.2411,
+      "n": 498
+    },
+    "atom_restate": {
+      "mean_d_heavy": 0.69,
+      "mean_d_qed": -0.0554,
+      "mean_d_sa": 0.2685,
+      "n": 102
+    },
+    "bond_reroute": {
+      "mean_d_heavy": 1.75,
+      "mean_d_qed": -0.0967,
+      "mean_d_sa": 0.4216,
+      "n": 60
+    },
+    "cycle_attach": {
+      "mean_d_heavy": -0.26,
+      "mean_d_qed": -0.1557,
+      "mean_d_sa": 0.5483,
+      "n": 66
+    },
+    "cycle_insert": {
+      "mean_d_heavy": 3.39,
+      "mean_d_qed": -0.0637,
+      "mean_d_sa": 0.4705,
+      "n": 324
+    },
+    "ring_system_restate": {
+      "mean_d_heavy": 2.7,
+      "mean_d_qed": -0.1709,
+      "mean_d_sa": 1.0779,
+      "n": 50
+    }
+  },
+  "by_program_length": {
+    "1": -0.0271,
+    "10plus": -0.0987,
+    "2": -0.0275,
+    "3": -0.1151,
+    "4": -0.0829,
+    "5": -0.0853,
+    "6": -0.104,
+    "7": -0.1553,
+    "8": -0.0844,
+    "9": -0.1948
+  },
+  "kernel": "rdkit 2024.03.5 pinned",
+  "method": "For every archive entry of the completed 3x250 run, decode_state(source_state) -> parent SMILES, compare QED/SA/heavy against the recorded endpoint, and attribute to the model_family set of the executed trace actions. 702 parent->child edits across three tasks.",
+  "n_edits": 702,
+  "oracle_calls_spent": 0,
+  "overall": {
+    "mean_d_heavy": 1.97,
+    "mean_d_qed": -0.0837,
+    "mean_d_sa": 0.3505,
+    "pct_edits_losing_qed": 66.1
+  },
+  "schema_version": "pmo_per_edit_chemistry_cost_v1"
+}
