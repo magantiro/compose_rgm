@@ -1,0 +1,63 @@
+{
+  "schema_version": "pmo_transport_distance_probe_v1",
+  "oracle_calls": 0,
+  "init_bank": "docs/PMO_INIT_BANK.json",
+  "results": [
+    {
+      "target_smiles": "CC1=CC=C(C=C1)C1=CC(=NN1C1=CC=C(C=C1)S(N)(=O)=O)C(F)(F)F",
+      "target_heavy_atoms": 26,
+      "bank_size": 100,
+      "best_tanimoto": 0.1486,
+      "median_tanimoto": 0.087,
+      "best_mcs_source": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)c1ccccc1",
+      "retained_atoms": 9,
+      "retained_fraction_of_target": 0.3462,
+      "atoms_to_install": 17,
+      "atoms_to_delete": 12,
+      "implied_primitive_transport": 29,
+      "task": "celecoxib_rediscovery"
+    },
+    {
+      "target_smiles": "CC(C)(C)NCC(O)c1ccc(O)c(CO)c1",
+      "target_heavy_atoms": 17,
+      "bank_size": 100,
+      "best_tanimoto": 0.1579,
+      "median_tanimoto": 0.087,
+      "best_mcs_source": "CCC(NC(=O)C(C)Sc1ccccn1)c1cccc(C)c1",
+      "retained_atoms": 9,
+      "retained_fraction_of_target": 0.5294,
+      "atoms_to_install": 8,
+      "atoms_to_delete": 13,
+      "implied_primitive_transport": 21,
+      "task": "albuterol_similarity"
+    },
+    {
+      "target_smiles": "COc1ccc2[C@H]3CC[C@@]4(C)[C@@H](CC[C@@]4(O)C#C)[C@@H]3CCc2c1",
+      "target_heavy_atoms": 23,
+      "bank_size": 100,
+      "best_tanimoto": 0.15,
+      "median_tanimoto": 0.0968,
+      "best_mcs_source": "CC(Oc1cccc(Cl)c1)C(=O)N1CCC(C(=O)[O-])C1C",
+      "retained_atoms": 8,
+      "retained_fraction_of_target": 0.3478,
+      "atoms_to_install": 15,
+      "atoms_to_delete": 13,
+      "implied_primitive_transport": 28,
+      "task": "mestranol_similarity"
+    },
+    {
+      "target_smiles": "Cc1c(C)c2OC(C)(COc3ccc(CC4SC(=O)NC4=O)cc3)CCc2c(C)c1O",
+      "target_heavy_atoms": 31,
+      "bank_size": 100,
+      "best_tanimoto": 0.1739,
+      "median_tanimoto": 0.1059,
+      "best_mcs_source": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccc(C)cc3)cc2s1",
+      "retained_atoms": 9,
+      "retained_fraction_of_target": 0.2903,
+      "atoms_to_install": 22,
+      "atoms_to_delete": 18,
+      "implied_primitive_transport": 40,
+      "task": "troglitazone_rediscovery"
+    }
+  ]
+}

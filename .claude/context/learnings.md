@@ -2821,3 +2821,52 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   rather than generic, and a teacher-route prior fitted on this very corpus already FAILED to
   improve complete-program yield -- with the REGION LAW causing the loss and the family
   projection neutral.
+
+## 2026-09-21 (PMO transport: where selection bites, what the tasks declare, and how far the transport is)
+
+- **Identity is NOT sufficient for a selection layer; the stage must also DISCARD.** On T4,
+  `expand` keeps EVERY eligible endpoint -- no budget, no top-k -- so a law ranking those
+  endpoints cannot change what returns even though the ranked and gated molecules are
+  provably the same. **PMO is different, MEASURED at production settings** (attempts 128,
+  candidates_per_batch 16, wall 45 s, CHANNEL_CANDIDATE_LIMIT 16), 6 real rounds, zero
+  oracle calls: merged pool **32-33**, selected **16**, **discarded by ALLOCATION 16-17 per
+  round (97 total, 6/6 rounds capacity-limited)**, **discarded by LOCK 0**. Shallow and
+  structured channels both fill to the limit; the jump lane contributes 0-2, consistent
+  with its measured death. So `_credit_allocate` is load-bearing and a bandit sited there
+  bites; a component sited at `lock_query_subset` would be inert. **Ask both questions of
+  any new component: is the object it conditions the object that is scored, and does
+  anything downstream discard?**
+- **GOTCHA: the full pool is published as `eligible_pool`. `proposal_pool` is the LOCKED
+  batch's key**, set later by `lock_query_subset`. Reading the wrong one raises rather than
+  silently measuring the wrong set -- but only because the key is absent; a rename would
+  make it silent.
+- **19 of 23 PMO tasks DECLARE structural content; only 4 are black-box** (drd2, gsk3b,
+  jnk3, qed). Read from the PINNED PyTDC 1.1.15 source with `ast`, so TDC is never imported,
+  no predictor pickle downloads, and no name can resolve through TDC's fuzzy matcher:
+  declared_target_structure 5, declared_reference_in_composite 6 (every `_mpo`),
+  declared_smarts 3, declared_molecular_formula 3, declared_target_pair 2. A declared target
+  is a task INPUT in the sense delta and the start molecule are inputs in T4; "no prescreen"
+  is about not pre-scoring ZINC250k to build task-specific vocabularies, not about ignoring
+  declared task structure.
+- **A first pass reported only 5 declared and 10 black-box -- wrong in the direction that
+  matters -- from THREE patterns, each now pinned by a test carrying its own module source:**
+  a keyword naming a MODULE CONSTANT rather than a literal (`median1` passes
+  `target_smiles_1=camphor_smiles`); a reference assigned to a LOCAL inside a function body,
+  which is how every composite MPO and `valsartan_smarts` declare theirs; and a task defined
+  as a CLASS (`jnk3`), reported *unresolved* by a scan walking only Assign and FunctionDef.
+  **Keep `unresolved` distinct from `black_box`: one is a finding, the other is a gap in the
+  reader.** A SMARTS like `CN(C=O)Cc1ccc(c2ccccc2)cc1` also parses as SMILES, so RDKit cannot
+  separate them -- TDC's variable NAMING does, and RDKit then validates.
+- **THE TRANSPORT IS 21-40 PRIMITIVES, which is ABOVE what PMO currently realizes.** MEASURED
+  from the 100-molecule init bank to four declared targets (ring-complete MCS, so a partial
+  ring is not counted as retained):
+      celecoxib      26 heavy  best Tanimoto 0.149  retain 9 (35%)  del 12  install 17  ~29
+      albuterol      17        0.158                retain 9 (53%)  del 13  install  8  ~21
+      mestranol      23        0.150                retain 8 (35%)  del 13  install 15  ~28
+      troglitazone   31        0.174                retain 9 (29%)  del 18  install 22  ~40
+  The bank is FAR from every declared target (median Tanimoto ~0.09) and the retained core is
+  a near-constant 8-9 atoms, so the first stage is mostly "install the target's core". Against
+  the measured realization ceiling -- median 16 primitives, max 23, with teacher-scale plans
+  at 29-40 NEVER binding -- **a single program cannot cover most of these transports, so the
+  planner must emit STAGED sub-goals across rounds rather than one monolithic program.** For
+  contrast `compile_source_to_target` retains 0 and would need ~50 primitives for celecoxib.
