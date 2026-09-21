@@ -1,4 +1,42 @@
 {
+  "CORRECTIONS_FROM_THE_FUNNEL_AUDIT": {
+    "archive_entries_from_jump": {
+      "detail": "gsk3b fc33df003b91 and celecoxib a177033588c6, both surviving rounds 1-14 with provenance.planner_channel == joint_dependency_region_jump. I sampled 7 of 15 rounds and concluded zero; the correct figure is 2 of 2,448.",
+      "i_reported": 0,
+      "measured": 2
+    },
+    "jump_proposals_total": {
+      "detail": "I read the ROUND-13 channel counters (319/340/346). The true final-round totals are 351/362/378 = 1,091. Snapshot history is CUMULATIVE across rounds, so the final round alone is the complete record.",
+      "i_reported": 1005,
+      "measured": 1091
+    },
+    "source": "diagnostics/pmo_jump_funnel_verdict_v1.json (replay of all 1,091 stored proposals)",
+    "what_does_not_change": "The attribution conclusion stands and is strengthened: 2 archive entries of 2,448 and 3 production executions of 1,091 proposals still means the realizer contributed essentially nothing to the scored gains, which came from the pooled channels. VERDICT REMAINS REVISE, NOT PROMOTE."
+  },
+  "ROOT_CAUSE_VERDICT": {
+    "integration_point_named_no_redesign": "PmoPopulationController._generate_jump_pool (pmo_population_controller.py:262-) pairs parent_schedule[attempt % len] with plans[(plan_offset + attempt) % len] -- indexed INDEPENDENTLY, so plan scale is never conditioned on parent support. `static_first_step_feasible` plus a root `propagate` are pinned zero-search certificates costing ~0.2 ms that would have rejected 72% of attempts before any search.",
+    "mechanism": "Offline, teacher-scale plans were bound to teacher-sized parents (median 24 heavy atoms). In production the SAME plans are bound to archive parents of attempt-weighted median 9. A median-28-primitive plan demanding median 6 preexisting-atom deletions cannot be realized on a 9-atom parent, so proven_incompatible is the CORRECT answer, not a search failure.",
+    "realizer_successes_carry_the_falsifier_shape_too": "All 9 production completions are retained 1.000, median 14 primitives, 0 at teacher scale, 0 in the teacher band -- against the offline comparator of median 31 at retained 0.630. The repair's measured benefit does not appear on production parents at all, because there is nothing to remove from a 9-atom parent.",
+    "second_order_defect": "_generate_jump_pool passes seconds_cap=min(PRODUCTION_SECONDS_CAP, wall_seconds - elapsed), so late attempts in a batch get a cap far below 20 s. At the honest cap the same pairs yield 9 realizations against production's 3. Real and separable, but 9/1091 is still 0.82% and does not change the verdict.",
+    "the_axis_is_parent_SIZE_and_both_populations_lie_on_one_curve": {
+      "note": "The parents are not different molecules, they are SMALLER ones.",
+      "production_init_at_matched_size_agrees": "21.8% / 36.5% / 40.7%",
+      "root_admissible_by_parent_heavy_atoms": {
+        "1-9": "7.7%",
+        "10-14": "17.3%",
+        "15-19": "22.8%",
+        "20-24": "32.9%",
+        "25-29": "35.7%",
+        "30+": "41.1%"
+      }
+    },
+    "the_interaction_not_the_archive": "All three channels see the same parents (under-10 share 52.6% / 45.5% / 53.8%), and shallow and structured execute 100% of their proposals there. The jump lane executes 0.3%. Execution by parent size: 0/587 under 10, 0/159 at 10-19, 3/218 at 20-29.",
+    "the_smoking_gun": "production_init contains ZERO parents under 15 heavy atoms; the archive has 92 of 226 under 10 -- literal C, N, Br, Cl, [SH4] entries. `Br` received 42 jump attempts. 587 of 1,091 attempts (53.8%) were aimed at parents under 10 heavy atoms.",
+    "verdict": "A -- the realizer is correct; the jump PROPOSER is mis-scaled for the production parent population",
+    "why_not_B": "Disabling propagate and raising the budget ~300x (20,000 nodes / 60 s) found a realization in 0 of the 1,072 pairs the exact arm called incompatible -- ZERO unsound prunes at 45x the scale of the earlier witness gate. Only 1.1% hit a budget cap.",
+    "why_not_C_and_this_is_the_important_one": "The beam binds MORE (13 pairs vs 9) but binds WRONG: only 9 of its 31 bindings realize the plan's declared component_count, and 31/31 are purely additive at retained_fraction 1.000, median 16 primitives -- EXACTLY the predeclared falsifier. It bound 0 of the 740 teacher-scale attempts. 'The beam is better' is refuted on semantics.",
+    "why_not_D": "3 production executions -> 3 selected for oracle -> 2 charged and scored -> 1 improved its parent (+0.040)."
+  },
   "VERDICT": "REVISE_NOT_PROMOTE",
   "archive_channel_census": {
     "dynamic_v21_pooled_channels": 2448,
