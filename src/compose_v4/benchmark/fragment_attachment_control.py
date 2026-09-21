@@ -217,6 +217,49 @@ class AttachmentController:
                         return False
         return True
 
+    def realized_linker_length(self, state: MolecularGraph) -> int | None:
+        """Atoms on the shortest core-to-core path, excluding both cores.
+
+        This is the number that says whether a linker was DESIGNED or merely
+        inherited.  The corrected start state seeds an unlocked bridge, because
+        the executor refuses a disconnected pair and the alternative -- joining
+        the cores directly -- cannot express the task at all.  A seed is not a
+        result, so the seed length has to be reported beside every linker row
+        and the distribution above it is what shows the generator did work.
+
+        Returns ``None`` for a single-core prompt, where the quantity is not
+        defined, and ``None`` when no core-to-core path exists.  ``0`` means the
+        cores are directly bonded, i.e. the zero-atom linker.
+        """
+        groups = self._spec.lock_groups
+        if len(groups) < 2:
+            return None
+        source, target = groups[0], groups[1]
+        # Breadth-first over NON-core atoms: the path length we want counts only
+        # the atoms between the cores, so core slots are never intermediates.
+        frontier = {int(i) for i in source}
+        interior = frozenset().union(*groups)
+        seen = set(frontier)
+        distance = 0
+        while frontier:
+            nxt: set[int] = set()
+            for i in frontier:
+                row = state.bonds[i]
+                for j in range(len(row)):
+                    if int(row[j]) <= 0 or j in seen:
+                        continue
+                    if j in target:
+                        return distance
+                    if j in interior:
+                        continue
+                    if not is_element(int(state.atom_types[j])):
+                        continue
+                    nxt.add(j)
+                    seen.add(j)
+            frontier = nxt
+            distance += 1
+        return None
+
     # ---- Pathwise admission ----
 
     def permits(self, successor: MolecularGraph, predecessor: MolecularGraph) -> tuple[bool, str]:

@@ -82,6 +82,16 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--samples", type=int, default=30)
     parser.add_argument("--drug", action="append", default=None)
+    parser.add_argument(
+        "--bridge-atoms",
+        type=int,
+        default=0,
+        help=(
+            "seed this many UNLOCKED carbons between the two declared sites "
+            "instead of joining the cores with a direct bond. 0 reproduces the "
+            "construction the v2 invalidation measured."
+        ),
+    )
     args = parser.parse_args()
 
     from evaluate_tracelet_rollouts import load_factorized_rollout_checkpoint
@@ -100,7 +110,10 @@ def main() -> None:
             continue
         if args.drug and prompt.drug_name.upper() not in {d.upper() for d in args.drug}:
             continue
-        context = build_prompt_context(prompt, config=config, control=control)
+        context = build_prompt_context(
+            prompt, config=config, control=control,
+            linker_bridge_atoms=args.bridge_atoms,
+        )
         controller = AttachmentController(
             context.attachment, context.locked_slots, control
         )
@@ -149,6 +162,7 @@ def main() -> None:
     reached = [r["drug"] for r in rows if r["task_success"] > 0]
     payload = {
         "schema": "compose_fragment_linker_reachability_v1",
+        "bridge_atoms": args.bridge_atoms,
         "question": (
             "does releasing the constructed join and steering growth to the "
             "declared interfaces make a genuine (non-zero-atom) linker reachable?"

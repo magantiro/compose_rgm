@@ -1,0 +1,43 @@
+{
+  "schema": "compose_fragment_linker_length_mutation_audit_v1",
+  "positive_control_unmutated_tree_green": true,
+  "mutations": [
+    {
+      "mutation": "off_by_one",
+      "expected_test": "test_realized_length_reports_the_seed_the_construction_supplied",
+      "all_failing_tests": [
+        "test_realized_length_is_zero_for_the_direct_join",
+        "test_realized_length_reports_the_seed_the_construction_supplied",
+        "test_realized_length_grows_when_the_linker_grows",
+        "test_realized_length_never_routes_through_a_third_core"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "core_atoms_usable_as_intermediates",
+      "expected_test": "test_realized_length_never_routes_through_a_third_core",
+      "all_failing_tests": [
+        "test_realized_length_never_routes_through_a_third_core"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "null_slots_walkable",
+      "expected_test": "test_realized_length_does_not_walk_padding_slots",
+      "all_failing_tests": [
+        "test_realized_length_does_not_walk_padding_slots"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "single_core_returns_zero",
+      "expected_test": "test_realized_length_is_undefined_for_a_single_core_prompt",
+      "all_failing_tests": [
+        "test_realized_length_is_undefined_for_a_single_core_prompt"
+      ],
+      "verdict": "KILLED"
+    }
+  ],
+  "killed": 4,
+  "total": 4
+}

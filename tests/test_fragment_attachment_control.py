@@ -27,6 +27,7 @@ from rdkit import Chem
 from compose_v4.benchmark.fragment_attachment_control import (
     AttachmentControlConfig,
     AttachmentController,
+    AttachmentSpec,
     external_neighbour_count,
 )
 from compose_v4.benchmark.fragment_conditioned_sampler import (
@@ -801,3 +802,143 @@ def test_a_negative_bridge_length_is_refused():
     prompt = _linker_prompts()[0]
     with pytest.raises(FragmentConditioningError, match="non-negative"):
         build_prompt_context(prompt, linker_bridge_atoms=-1)
+
+
+# ---- Realized linker length ----
+#
+# The corrected start state hands the generator a seed bridge, so a linker row
+# is only meaningful beside the distribution of realized lengths. These tests
+# pin the measurement against hand-built states where the answer is known by
+# inspection, and against the production start states where the seed length is
+# the construction's own parameter.
+
+
+def _controller_for(prompt, *, bridge: int):
+    context = build_prompt_context(prompt, control=_ON, linker_bridge_atoms=bridge)
+    return context, AttachmentController(
+        context.attachment, context.locked_slots, _ON
+    )
+
+
+def test_realized_length_is_undefined_for_a_single_core_prompt():
+    prompt = _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
+    context, controller = _controller_for(prompt, bridge=0)
+    assert controller.realized_linker_length(context.start_state) is None
+
+
+def test_realized_length_is_zero_for_the_direct_join():
+    """The zero-atom linker the invalidation named, measured as zero."""
+    for prompt in _linker_prompts():
+        context, controller = _controller_for(prompt, bridge=0)
+        assert controller.realized_linker_length(context.start_state) == 0, (
+            f"{prompt.drug_name}: a directly-bonded pair of cores is a zero-atom linker"
+        )
+
+
+def test_realized_length_reports_the_seed_the_construction_supplied():
+    for bridge in (1, 2, 3):
+        for prompt in _linker_prompts():
+            context, controller = _controller_for(prompt, bridge=bridge)
+            assert controller.realized_linker_length(context.start_state) == bridge, (
+                f"{prompt.drug_name}: a {bridge}-atom seed must measure as {bridge}"
+            )
+
+
+def test_realized_length_grows_when_the_linker_grows():
+    """Extend the seed by one atom and the measurement must follow."""
+    prompt = _linker_prompts()[0]
+    context, controller = _controller_for(prompt, bridge=1)
+    state = context.start_state
+    assert controller.realized_linker_length(state) == 1
+    # Find the seed atom: the one non-core atom bonded to a core atom.
+    cores = frozenset().union(*context.attachment.lock_groups)
+    seed = next(
+        j
+        for i in cores
+        for j in range(len(state.bonds[i]))
+        if int(state.bonds[i][j]) > 0 and j not in cores
+    )
+    # Splice a fresh carbon between the seed and the core it reaches on one side.
+    other = context.attachment.lock_groups[1]
+    anchor = next(j for j in other if int(state.bonds[seed][j]) > 0)
+    grown = copy.deepcopy(state)
+    slot = _first_null_slot(state)
+    grown.atom_types[slot] = state.atom_types[seed]
+    grown.formal_charges[slot] = 0
+    grown.implicit_h_counts[slot] = 2
+    grown.bonds[seed][anchor] = 0
+    grown.bonds[anchor][seed] = 0
+    for a, b in ((seed, slot), (slot, anchor)):
+        grown.bonds[a][b] = 1
+        grown.bonds[b][a] = 1
+    assert controller.realized_linker_length(grown) == 2
+
+
+def test_realized_length_is_none_when_no_core_to_core_path_exists():
+    prompt = _linker_prompts()[0]
+    context, controller = _controller_for(prompt, bridge=1)
+    severed = copy.deepcopy(context.start_state)
+    severed.bonds[:, :] = 0
+    assert controller.realized_linker_length(severed) is None
+
+
+def _synthetic_spec(groups, interfaces=()):
+    """An AttachmentSpec over hand-chosen slot groups, for guards the released
+    two-fragment prompts cannot reach."""
+    return AttachmentSpec(
+        interfaces=tuple(interfaces),
+        requirements=tuple((i, 1) for i in interfaces),
+        lock_groups=tuple(frozenset(g) for g in groups),
+        released_pairs=frozenset(),
+    )
+
+
+def _chain_state(n_slots, bonds, elements=6):
+    state = build_prompt_context(
+        _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
+    ).start_state
+    blank = copy.deepcopy(state)
+    blank.atom_types[:] = NULL_IDX
+    blank.formal_charges[:] = 0
+    blank.implicit_h_counts[:] = 0
+    blank.bonds[:, :] = 0
+    for i in range(n_slots):
+        blank.atom_types[i] = elements
+    for a, b in bonds:
+        blank.bonds[a][b] = 1
+        blank.bonds[b][a] = 1
+    return blank
+
+
+def test_realized_length_never_routes_through_a_third_core():
+    """With three retained cores, a path through the middle one is not a linker.
+
+    The released prompts declare exactly two fragments, so this guard is
+    unreachable from the benchmark; it is tested directly rather than left as an
+    untested branch.  Slots 0 and 4 are the two cores being measured, slot 2 is
+    a third core, and the ONLY short route from 0 to 4 runs through it.
+    """
+    # 0-1-2-3-4 chain, with 2 a third locked core; plus a long free detour
+    # 0-5-6-7-8-4 that does not touch any core.
+    state = _chain_state(9, [(0, 1), (1, 2), (2, 3), (3, 4),
+                             (0, 5), (5, 6), (6, 7), (7, 8), (8, 4)])
+    spec = _synthetic_spec([{0}, {4}, {2}])
+    controller = AttachmentController(spec, (0, 2, 4), _ON)
+    assert controller.realized_linker_length(state) == 4, (
+        "the 3-atom route through the third core must not be counted; the "
+        "4-atom core-free route is the linker"
+    )
+
+
+def test_realized_length_does_not_walk_padding_slots():
+    """A null slot is not an atom, even if a stale bond row points at one.
+
+    States are slot-stable, so a padded slot can carry a bond row left by an
+    earlier occupant; walking one would invent a linker atom that does not
+    exist.
+    """
+    state = _chain_state(3, [(0, 1), (1, 2)])
+    state.atom_types[1] = NULL_IDX  # the intermediate is padding, not an atom
+    spec = _synthetic_spec([{0}, {2}])
+    controller = AttachmentController(spec, (0, 2), _ON)
+    assert controller.realized_linker_length(state) is None

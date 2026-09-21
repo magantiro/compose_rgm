@@ -1,0 +1,275 @@
+{
+  "schema": "compose_fragment_linker_reachability_v1",
+  "bridge_atoms": 1,
+  "question": "does releasing the constructed join and steering growth to the declared interfaces make a genuine (non-zero-atom) linker reachable?",
+  "verdict": "REACHABLE",
+  "drugs_with_every_declared_site_saturated_by_the_join": [
+    "BARICITINIB",
+    "ELIGLUSTAT",
+    "ERLOTINIB",
+    "SPIRAPRIL"
+  ],
+  "drugs_reaching_a_separated_linker": [
+    "BARICITINIB",
+    "CYCLOTHIAZIDE",
+    "ELIGLUSTAT",
+    "ERLOTINIB",
+    "FUTIBATINIB",
+    "LESINURAD",
+    "LIOTHYRONINE",
+    "LOVASTATIN",
+    "SPIRAPRIL"
+  ],
+  "rows": [
+    {
+      "drug": "BARICITINIB",
+      "start_smiles": "CCS(=O)(=O)N1CC(CC#N)(Cc2ncnc3[nH]ccc23)C1",
+      "structural": {
+        "free_valence_by_interface": {
+          "7": 0,
+          "12": 0
+        },
+        "interfaces_with_free_valence": 0,
+        "cores_directly_bonded_at_start": false,
+        "join_released_from_lock": [],
+        "first_event_can_increase_coverage": false
+      },
+      "attempts": 30,
+      "committed_endpoints": 3,
+      "task_success": 3,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 50,
+      "lock_rejections": 692,
+      "budget_exhausted": 29,
+      "mean_events": 0.5666666666666667,
+      "seconds": 20.9
+    },
+    {
+      "drug": "CYCLOTHIAZIDE",
+      "start_smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CC1CC3C=CC1C3)NS2(=O)=O",
+      "structural": {
+        "free_valence_by_interface": {
+          "12": 1,
+          "14": 1
+        },
+        "interfaces_with_free_valence": 2,
+        "cores_directly_bonded_at_start": false,
+        "join_released_from_lock": [],
+        "first_event_can_increase_coverage": true
+      },
+      "attempts": 30,
+      "committed_endpoints": 23,
+      "task_success": 23,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 333,
+      "lock_rejections": 933,
+      "budget_exhausted": 19,
+      "mean_events": 4.866666666666666,
+      "seconds": 38.7
+    },
+    {
+      "drug": "ELIGLUSTAT",
+      "start_smiles": "c1cc2c(cc1CN1CCCC1)OCCO2",
+      "structural": {
+        "free_valence_by_interface": {
+          "5": 0,
+          "7": 0
+        },
+        "interfaces_with_free_valence": 0,
+        "cores_directly_bonded_at_start": false,
+        "join_released_from_lock": [],
+        "first_event_can_increase_coverage": false
+      },
+      "attempts": 30,
+      "committed_endpoints": 28,
+      "task_success": 28,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 528,
+      "lock_rejections": 205,
+      "budget_exhausted": 3,
+      "mean_events": 12.2,
+      "seconds": 34.0
+    },
+    {
+      "drug": "ERLOTINIB",
+      "start_smiles": "C#CCOCCOC",
+      "structural": {
+        "free_valence_by_interface": {
+          "1": 0,
+          "3": 0
+        },
+        "interfaces_with_free_valence": 0,
+        "cores_directly_bonded_at_start": false,
+        "join_released_from_lock": [],
+        "first_event_can_increase_coverage": false
+      },
+      "attempts": 30,
+      "committed_endpoints": 15,
+      "task_success": 15,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 210,
+      "lock_rejections": 689,
+      "budget_exhausted": 27,
+      "mean_events": 1.6,
+      "seconds": 19.7
+    },
+    {
+      "drug": "FUTIBATINIB",
+      "start_smiles": "C=CC(=O)N1CC[C@H](Cc2cc(OC)cc(OC)c2)C1",
+      "structural": {
+        "free_valence_by_interface": {
+          "7": 1,
+          "9": 0
+        },
+        "interfaces_with_free_valence": 1,
+        "cores_directly_bonded_at_start": false,
+        "join_released_from_lock": [],
+        "first_event_can_increase_coverage": true
+      },
+      "attempts": 30,
+      "committed_endpoints": 15,
+      "task_success": 15,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 125,
+      "lock_rejections": 861,
+      "budget_exhausted": 28,
+      "mean_events": 1.5666666666666667,
+      "seconds": 25.8
+    },
+    {
+      "drug": "LESINURAD",
+      "start_smiles": "O=C(O)CSc1nnc(Br)n1CC1CC1",
+      "structural": {
+        "free_valence_by_interface": {
+          "10": 0,
+          "12": 1
+        },
+        "interfaces_with_free_valence": 1,
+        "cores_directly_bonded_at_start": false,
+        "join_released_from_lock": [],
+        "first_event_can_increase_coverage": true
+      },
+      "attempts": 30,
+      "committed_endpoints": 17,
+      "task_success": 17,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 108,
+      "lock_rejections": 903,
+      "budget_exhausted": 22,
+      "mean_events": 3.533333333333333,
+      "seconds": 24.5
+    },
+    {
+      "drug": "LIOTHYRONINE",
+      "start_smiles": "N[C@@H](CCc1ccc(O)c(I)c1)C(=O)O",
+      "structural": {
+        "free_valence_by_interface": {
+          "2": 2,
+          "4": 0
+        },
+        "interfaces_with_free_valence": 1,
+        "cores_directly_bonded_at_start": false,
+        "join_released_from_lock": [],
+        "first_event_can_increase_coverage": true
+      },
+      "attempts": 30,
+      "committed_endpoints": 8,
+      "task_success": 8,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 61,
+      "lock_rejections": 867,
+      "budget_exhausted": 30,
+      "mean_events": 0.9333333333333333,
+      "seconds": 21.5
+    },
+    {
+      "drug": "LOVASTATIN",
+      "start_smiles": "CC[C@H](C)C(=O)O[C@H]1C[C@@H](C)C=C2C=C[C@H](C)[C@H](C[C@@H]3C[C@@H](O)CC(=O)O3)[C@H]21",
+      "structural": {
+        "free_valence_by_interface": {
+          "17": 1,
+          "19": 1
+        },
+        "interfaces_with_free_valence": 2,
+        "cores_directly_bonded_at_start": false,
+        "join_released_from_lock": [],
+        "first_event_can_increase_coverage": true
+      },
+      "attempts": 30,
+      "committed_endpoints": 7,
+      "task_success": 7,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 43,
+      "lock_rejections": 810,
+      "budget_exhausted": 30,
+      "mean_events": 0.4,
+      "seconds": 21.3
+    },
+    {
+      "drug": "MARIBAVIR",
+      "start_smiles": "CC(C)Nc1nc2cc(Cl)c(Cl)cc2n1C[C@H]1O[C@@H](CO)[C@H](O)[C@@H]1O",
+      "structural": {
+        "free_valence_by_interface": {
+          "14": 0,
+          "16": 1
+        },
+        "interfaces_with_free_valence": 1,
+        "cores_directly_bonded_at_start": false,
+        "join_released_from_lock": [],
+        "first_event_can_increase_coverage": true
+      },
+      "attempts": 30,
+      "committed_endpoints": 0,
+      "task_success": 0,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 13,
+      "lock_rejections": 707,
+      "budget_exhausted": 30,
+      "mean_events": 0.0,
+      "seconds": 16.3
+    },
+    {
+      "drug": "SPIRAPRIL",
+      "start_smiles": "O=C(O)[C@@H]1CC2(CN1Cc1ccccc1)SCCS2",
+      "structural": {
+        "free_valence_by_interface": {
+          "7": 0,
+          "9": 0
+        },
+        "interfaces_with_free_valence": 0,
+        "cores_directly_bonded_at_start": false,
+        "join_released_from_lock": [],
+        "first_event_can_increase_coverage": false
+      },
+      "attempts": 30,
+      "committed_endpoints": 6,
+      "task_success": 6,
+      "separation_failures": 0,
+      "constraint_failures": 0,
+      "staging_rejections": 0,
+      "interface_rejections": 148,
+      "lock_rejections": 744,
+      "budget_exhausted": 28,
+      "mean_events": 0.8333333333333334,
+      "seconds": 23.2
+    }
+  ]
+}
