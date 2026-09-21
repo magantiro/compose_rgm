@@ -1,50 +1,80 @@
 {
-  "schema": "compose_fragment_kernel_parity_v1",
-  "question": "Do the REPORTED metrics depend on the RDKit build? Scored the same 100 emitted strings on both. This does NOT test whether the GENERATOR would produce different molecules on the pinned kernel: the sampler calls RDKit inside its own accept/reject loop, so that is a separate and larger question.",
-  "row": {
-    "task": "superstructure_generation",
-    "drug": "BARICITINIB",
-    "seed": 0
-  },
+  "schema": "compose_fragment_kernel_parity_v2",
+  "question": "Do the REPORTED metrics depend on the RDKit build? The same emitted strings were scored on the laptop build that generated them and on the production pin. This does NOT test whether the GENERATOR is kernel-invariant: the sampler calls RDKit inside its own accept/reject loop, which is a separate and larger question that is not claimed here.",
   "generating_kernel": "2026.03.6",
-  "laptop": {
-    "rdkit": "2026.03.6",
-    "metrics": {
-      "validity": 100.0,
-      "uniqueness": 100.0,
-      "diversity": 0.72238,
-      "quality": 50.0,
-      "distance": 0.6241786743707118,
-      "distance_to_original_drug": 0.7347109328582015
+  "laptop_kernel": "2026.03.6",
+  "pinned_kernel": "2024.03.5",
+  "pinned_env": "uv venv python 3.11.13, rdkit==2024.3.5, numpy==1.26.4; torch stubbed (unused on the already_smiles path)",
+  "rows": [
+    {
+      "row": "superstructure_generation/BARICITINIB/seed0",
+      "attempts": 100,
+      "emitted_nonempty": 100,
+      "failure_placeholders": 0,
+      "unique_valid_laptop": 100,
+      "unique_valid_pinned": 100,
+      "laptop_metrics": {
+        "validity": 100.0,
+        "uniqueness": 100.0,
+        "diversity": 0.72238,
+        "quality": 50.0,
+        "distance": 0.6241786743707118,
+        "distance_to_original_drug": 0.7347109328582015
+      },
+      "pinned_metrics": {
+        "validity": 100.0,
+        "uniqueness": 100.0,
+        "diversity": 0.7223800000000001,
+        "quality": 50.0,
+        "distance": 0.6241786743707118,
+        "distance_to_original_drug": 0.7347109328582015
+      },
+      "deltas": {
+        "validity": 0.0,
+        "uniqueness": 0.0,
+        "quality": 0.0,
+        "diversity": -1.1102230246251565e-16,
+        "distance": 0.0,
+        "distance_to_original_drug": 0.0
+      },
+      "max_abs_delta": 1.1102230246251565e-16
     },
-    "emitted_nonempty": 100,
-    "unique_valid": 100
-  },
-  "pinned": {
-    "rdkit": "2024.03.5",
-    "metrics": {
-      "validity": 100.0,
-      "uniqueness": 100.0,
-      "diversity": 0.7223800000000001,
-      "quality": 50.0,
-      "distance": 0.6241786743707118,
-      "distance_to_original_drug": 0.7347109328582015
-    },
-    "emitted_nonempty": 100,
-    "unique_valid": 100,
-    "torch_stubbed": true
-  },
-  "deltas": {
-    "validity": 0.0,
-    "uniqueness": 0.0,
-    "quality": 0.0,
-    "diversity": -1.1102230246251565e-16,
-    "distance": 0.0,
-    "distance_to_original_drug": 0.0
-  },
-  "max_abs_delta": 1.1102230246251565e-16,
-  "distance_reference_identical": true,
+    {
+      "row": "motif_extension/BARICITINIB/seed0",
+      "attempts": 100,
+      "emitted_nonempty": 8,
+      "failure_placeholders": 92,
+      "unique_valid_laptop": 8,
+      "unique_valid_pinned": 8,
+      "laptop_metrics": {
+        "validity": 8.0,
+        "uniqueness": 100.0,
+        "diversity": 0.7278749999999999,
+        "quality": 0.0,
+        "distance": 0.7810973710366999,
+        "distance_to_original_drug": 0.7942308498773534
+      },
+      "pinned_metrics": {
+        "validity": 8.0,
+        "uniqueness": 100.0,
+        "diversity": 0.727875,
+        "quality": 0.0,
+        "distance": 0.7810973710366999,
+        "distance_to_original_drug": 0.7942308498773534
+      },
+      "deltas": {
+        "validity": 0.0,
+        "uniqueness": 0.0,
+        "quality": 0.0,
+        "diversity": -1.1102230246251565e-16,
+        "distance": 0.0,
+        "distance_to_original_drug": 0.0
+      },
+      "max_abs_delta": 1.1102230246251565e-16
+    }
+  ],
+  "max_abs_delta_overall": 1.1102230246251565e-16,
   "verdict": "IDENTICAL_TO_FLOATING_POINT_ROUNDING",
-  "coverage": "one row (superstructure/BARICITINIB/seed 0), 100 emissions, zero failure placeholders",
-  "verdict_note": "max absolute delta 1.11022e-16 is one double-precision ULP on diversity (0.72238 vs 0.7223800000000001), i.e. summation-order rounding, not a chemistry difference. Every other metric is bit-identical, including distance at full precision."
+  "verdict_note": "max absolute delta 1.11022e-16 is one double-precision ULP on diversity, i.e. summation-order rounding. Validity, uniqueness, quality and both distances are bit-identical on both rows, including the row where 92 of 100 attempts are failure placeholders -- so the path that counts a failed attempt as invalid is kernel-invariant too.",
+  "coverage": "2 rows, 200 attempts, 108 emitted molecules, 92 failure placeholders"
 }
