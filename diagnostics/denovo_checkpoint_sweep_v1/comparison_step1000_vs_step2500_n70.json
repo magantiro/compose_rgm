@@ -1,0 +1,166 @@
+{
+  "design": {
+    "caveats": [
+      "n=70 per arm: no endpoint difference reaches 95% significance; read directions, not verdicts.",
+      "steps 0->1000 and 1000->2500 ran under different source revisions (source_sha256 98ca9b28... vs 99354484...), with allow_resume_provenance_mismatch=true. The corpus is identical."
+    ],
+    "checkpoints": {
+      "step1000": {
+        "run": "compose-v4-stage3-flexible-graft-3k-1ac6f19-v1",
+        "run_identity_sha256": "a1907ed17569d0cd509440e7b3ac1cc9e34d1c3576fe366a6c7bfe4d48af7073",
+        "sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c"
+      },
+      "step2500": {
+        "resumed_from": "the step-1000 run's checkpoint.recovery.pt (exact optimizer+RNG state)",
+        "run": "compose-v4-stage3-flexible-graft-3k-fullcache-c39520c-v2",
+        "sha256": "bb53e00237bd4be60436e149c7f92cd75b30ce555ae96d9264164e303150abb1"
+      }
+    },
+    "controls": {
+      "corpus_identical": true,
+      "note": "ring_removing_events==0 is what licenses the endpoint ring-size histogram to stand in for ring CREATION.",
+      "ring_catalog_fingerprint": "50337de077f374db",
+      "ring_catalog_identical": true,
+      "ring_removing_events": 0,
+      "train_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791"
+    },
+    "kernel": "pinned production image: python 3.11.12, torch 2.4.0+cu121, numpy 1.26.4, scipy 1.13.1, networkx 3.3, rdkit 2024.03.5",
+    "matched": true,
+    "matched_on": "identical trajectory seeds (same shard index ranges), base_seed 20260920, total 200, horizon 16.0",
+    "n_per_arm": 70,
+    "shard_ranges": [
+      "000020_000030",
+      "000030_000040",
+      "000050_000060",
+      "000060_000070",
+      "000080_000090",
+      "000140_000150",
+      "000150_000160"
+    ]
+  },
+  "finding": "Per-molecule strained prevalence 0.4429 -> 0.5143 (z=+0.85) and the per-RING closure-policy shape 0.1679 -> 0.1948 (z=+0.77): neither improved, both edged up. Meanwhile molecules shrank 28.70 -> 26.87 heavy atoms, rings per molecule fell 3.74 -> 3.30, and ring-forming events per trajectory fell 3.31 -> 2.86. Quality rose 0.171 -> 0.300 (z=+1.79). The ring-size histogram moved the wrong way chemically: 6-membered rings 152 -> 111 while 3-membered rings 26 -> 38. So the quality gain is consistent with producing smaller, less ring-dense molecules rather than with better ring chemistry. Holding molecule size fixed, ring strain has NO detectable effect on QED at EITHER checkpoint (+0.033+-0.039 and -0.037+-0.037) while size does (-0.024 per heavy atom, |z|~8); the SA strain penalty is real at both (+0.791+-0.217 and +0.496+-0.218).",
+  "outcome_metrics": {
+    "diversity": {
+      "step1000": 0.8905720448692285,
+      "step2500": 0.8855594651561334
+    },
+    "quality": {
+      "delta": 0.12857142857142856,
+      "significant_at_95": false,
+      "step1000": 0.17142857142857143,
+      "step2500": 0.3,
+      "z": 1.7920811366508622
+    },
+    "uniqueness": {
+      "step1000": 1.0,
+      "step2500": 1.0
+    },
+    "valid_state_fraction_over_committed": {
+      "step1000": 1.0,
+      "step2500": 1.0
+    },
+    "validity_over_attempts": {
+      "note": "denominator is ATTEMPTS. valid_state_fraction over COMMITTED endpoints is 1.0 in both arms (the architectural guarantee).",
+      "step1000": 1.0,
+      "step2500": 1.0
+    }
+  },
+  "question": "Does continued training from step 1000 to step 2500 remove the de-novo small-ring defect?",
+  "ring_pathology": {
+    "fraction_of_molecules_with_strained_ring_OUTCOME": {
+      "delta": 0.0714285714285714,
+      "significant_at_95": false,
+      "step1000": 0.44285714285714284,
+      "step2500": 0.5142857142857142,
+      "z": 0.8459314876412072
+    },
+    "mean_heavy_atoms": {
+      "step1000": 28.7,
+      "step2500": 26.87142857142857
+    },
+    "per_ring_strained_fraction_MECHANISM": {
+      "delta": 0.02686626350748489,
+      "significant_at_95": false,
+      "step1000": 0.16793893129770993,
+      "step2500": 0.19480519480519481,
+      "z": 0.7739299960527903
+    },
+    "ring_forming_events_per_trajectory": {
+      "step1000": 3.3142857142857145,
+      "step2500": 2.857142857142857
+    },
+    "ring_size_histogram": {
+      "step1000": {
+        "3": 26,
+        "4": 18,
+        "5": 63,
+        "6": 152,
+        "7": 3
+      },
+      "step2500": {
+        "3": 38,
+        "4": 7,
+        "5": 73,
+        "6": 111,
+        "7": 2
+      }
+    },
+    "rings_per_molecule": {
+      "step1000": 3.742857142857143,
+      "step2500": 3.3
+    }
+  },
+  "size_partialled_regression": {
+    "1000": {
+      "n": 70,
+      "qed": {
+        "heavy_atom_coefficient": -0.024122099700720042,
+        "heavy_atom_stderr": 0.0031356973616433396,
+        "intercept": 1.2004011962537031,
+        "raw_strained_difference": -0.13317639063800207,
+        "strained_coefficient": 0.0334436710664753,
+        "strained_stderr": 0.03872893868452414
+      },
+      "sa": {
+        "heavy_atom_coefficient": 0.0235930118219929,
+        "heavy_atom_stderr": 0.017563380268457024,
+        "intercept": 3.3616562409117,
+        "raw_strained_difference": 0.9542612227505809,
+        "strained_coefficient": 0.7912957622663248,
+        "strained_stderr": 0.2169249768267088
+      },
+      "strained_count": 31,
+      "terms": [
+        "intercept",
+        "strained",
+        "heavy_atoms"
+      ]
+    },
+    "2500": {
+      "n": 70,
+      "qed": {
+        "heavy_atom_coefficient": -0.024812638286460305,
+        "heavy_atom_stderr": 0.0031741742586933134,
+        "intercept": 1.2499776548547312,
+        "raw_strained_difference": -0.10000445106192479,
+        "strained_coefficient": -0.03667546249419411,
+        "strained_stderr": 0.03721706434838211
+      },
+      "sa": {
+        "heavy_atom_coefficient": 0.05837650806696835,
+        "heavy_atom_stderr": 0.018623671258611547,
+        "intercept": 2.3131497329693365,
+        "raw_strained_difference": 0.6444831764309953,
+        "strained_coefficient": 0.4954895398286998,
+        "strained_stderr": 0.21836178960136574
+      },
+      "strained_count": 36,
+      "terms": [
+        "intercept",
+        "strained",
+        "heavy_atoms"
+      ]
+    }
+  },
+  "verdict": "NO. The defect does not improve; the closure-policy shape is flat-to-worse. The modest quality gain is attributable to smaller, less ring-dense molecules."
+}
