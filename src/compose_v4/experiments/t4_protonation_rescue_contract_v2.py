@@ -377,6 +377,36 @@ def validate_rescue_preflight_v2(
     ) != contract.get("exploration"):
         raise ValueError("later-round allocation drift")
 
+    # -- every input that decides whether a number is produced --
+    pins = contract.get("runtime_inputs_sha256", {})
+    if expected["app"] not in pins:
+        raise ValueError(
+            f"arm {arm!r} does not pin its own wrapper {expected['app']}; a contract "
+            "that does not pin its launcher cannot prove which code spent its budget"
+        )
+    material_hashes: dict[str, str] = {}
+    for relative, expected_digest in sorted(pins.items()):
+        path = root / relative
+        actual = sha256_file(path)
+        if actual != expected_digest:
+            raise ValueError(f"runtime input mismatch for {relative}: {actual}")
+        material_hashes[relative] = actual
+
+    runtime_paths = sorted({*material_hashes, relative_contract, AUTHORIZATION_RECEIPT})
+    if require_clean_runtime:
+        subprocess.run(
+            ["git", "diff", "--exit-code", "HEAD", "--", *runtime_paths],
+            cwd=root,
+            check=True,
+        )
+        untracked = subprocess.check_output(
+            ["git", "ls-files", "--others", "--exclude-standard", "--", *runtime_paths],
+            cwd=root,
+            text=True,
+        )
+        if untracked.strip():
+            raise ValueError(f"untracked rescue runtime inputs: {untracked.strip()}")
+
     # -- launch-path revision continuity (see reconstruct_superseded_payload) --
     bound_identities = {contract_identity}
     superseded_identity: str | None = None
@@ -389,6 +419,26 @@ def validate_rescue_preflight_v2(
                 f"supersede: rebuilt {superseded_identity}, declared {declared!r}"
             )
         bound_identities.add(superseded_identity)
+
+    # -- external authorization: points AT the payload, never part of it --
+    authorized = _authorized_payload_hashes(root)
+    receipt_hash = authorized.get(arm)
+    if receipt_hash is None:
+        raise ValueError(f"authorization receipt names no payload for arm {arm!r}")
+    if receipt_hash not in bound_identities:
+        raise ValueError(
+            f"the authorization receipt authorizes {receipt_hash} for arm {arm!r}, "
+            f"which is neither this payload ({contract_identity}) nor the launch-path "
+            "revision it supersedes"
+        )
+    if (
+        authorization_payload_sha256 is not None
+        and authorization_payload_sha256 != contract_identity
+    ):
+        raise ValueError(
+            "launch authorization does not bind the contract payload: supplied "
+            f"{authorization_payload_sha256}, contract is {contract_identity}"
+        )
 
     # -- zero-oracle proposal gate, production-pinned kernel, binds this payload --
     gate_path = root / PINNED_GATE
@@ -447,56 +497,6 @@ def validate_rescue_preflight_v2(
         raise ValueError("relayed zero-oracle proposal gate physical hash mismatch")
     if identity(unseal(relayed_path)) != relayed.get("payload_sha256"):
         raise ValueError("relayed zero-oracle proposal gate payload hash mismatch")
-
-    # -- every input that decides whether a number is produced --
-    pins = contract.get("runtime_inputs_sha256", {})
-    if expected["app"] not in pins:
-        raise ValueError(
-            f"arm {arm!r} does not pin its own wrapper {expected['app']}; a contract "
-            "that does not pin its launcher cannot prove which code spent its budget"
-        )
-    material_hashes: dict[str, str] = {}
-    for relative, expected_digest in sorted(pins.items()):
-        path = root / relative
-        actual = sha256_file(path)
-        if actual != expected_digest:
-            raise ValueError(f"runtime input mismatch for {relative}: {actual}")
-        material_hashes[relative] = actual
-
-    runtime_paths = sorted({*material_hashes, relative_contract, AUTHORIZATION_RECEIPT})
-    if require_clean_runtime:
-        subprocess.run(
-            ["git", "diff", "--exit-code", "HEAD", "--", *runtime_paths],
-            cwd=root,
-            check=True,
-        )
-        untracked = subprocess.check_output(
-            ["git", "ls-files", "--others", "--exclude-standard", "--", *runtime_paths],
-            cwd=root,
-            text=True,
-        )
-        if untracked.strip():
-            raise ValueError(f"untracked rescue runtime inputs: {untracked.strip()}")
-
-    # -- external authorization: points AT the payload, never part of it --
-    authorized = _authorized_payload_hashes(root)
-    receipt_hash = authorized.get(arm)
-    if receipt_hash is None:
-        raise ValueError(f"authorization receipt names no payload for arm {arm!r}")
-    if receipt_hash not in bound_identities:
-        raise ValueError(
-            f"the authorization receipt authorizes {receipt_hash} for arm {arm!r}, "
-            f"which is neither this payload ({contract_identity}) nor the launch-path "
-            "revision it supersedes"
-        )
-    if (
-        authorization_payload_sha256 is not None
-        and authorization_payload_sha256 != contract_identity
-    ):
-        raise ValueError(
-            "launch authorization does not bind the contract payload: supplied "
-            f"{authorization_payload_sha256}, contract is {contract_identity}"
-        )
 
     return {
         "schema_version": "t4_5ht1b2_protonation_rescue_preflight_v2",

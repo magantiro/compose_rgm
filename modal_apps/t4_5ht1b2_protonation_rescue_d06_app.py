@@ -31,31 +31,55 @@ MOOD = "https://raw.githubusercontent.com/SeulLee05/MOOD/main/scorer"
 
 
 CONTRACT_PATH = ROOT / CONTRACT
-AUTHORIZED_STATUS = "AUTHORIZED_BY_OWNER_FOR_PROTONATION_RESCUE"
+ARM = "d06"
+PREPARED_STATUS = "PREPARED_AWAITING_OWNER_AUTHORIZATION"
 REQUIRED_EXPERT = "protonation_aware_retained_subgraph"
+AUTHORIZATION_METADATA_KEYS = (
+    "authorization",
+    "authorization_form",
+    "authorization_sentence",
+    "authorized_at_utc",
+    "authorized_payload_sha256",
+    "owner_response_verbatim",
+)
 
 
-def _assert_authorized() -> None:
-    """Refuse to construct the arm until the owner authorizes it AND the mechanism is requested.
+def _assert_wired_and_externally_authorized() -> None:
+    """Refuse to construct the arm unless the mechanism is requested and consent is EXTERNAL.
 
-    Two separate refusals, because they fail for different reasons.  The first is the
-    authorization itself: this file is committed before any owner decision, so importing
-    it must not be capable of spawning a scored run.  The second is the mechanism.  This
-    arm exists only to test the protonation-aware proposal expert; if that expert is not
-    actually requested in the contract's proposal block and cold-start floor, the run
-    would reproduce the candidate exhaustion it exists to fix while still charging its
-    whole budget -- the same failure the region-law arms guard against with their
-    ``region_law`` field assertion.
+    Two separate refusals, because they fail for different reasons.
 
-    The check lives at import time, which is before ``modal run`` can spawn anything.
+    The first is the mechanism.  This arm exists only to test the protonation-aware
+    proposal expert; if that expert is not actually requested in the contract's proposal
+    block and cold-start floor, the run would reproduce the candidate exhaustion it exists
+    to fix while still charging its whole budget -- the same failure the region-law arms
+    guard against with their ``region_law`` field assertion.
+
+    The second is the SHAPE of authorization.  An earlier revision of this file demanded
+    an authorized status INSIDE the contract payload.  That is backwards: writing consent
+    into the payload moves the payload's hash off the very value that was consented to.
+    So the payload must stay PREPARED and must carry no consent metadata at all.  Owner
+    authorization lives in the external receipt, names the payload by hash, and reaches
+    this wrapper through ``--authorization-payload-sha256``, which is checked against the
+    payload identity in ``validate_rescue_preflight_v2`` before anything spawns.
+
+    The check lives at import time, which is before ``modal run`` can spawn anything.  It
+    deliberately confers NO launch authority -- it only refuses obvious misuse.
     """
 
     payload = json.loads(CONTRACT_PATH.read_text())["payload"]
     status = payload.get("status")
-    if status != AUTHORIZED_STATUS:
+    if status != PREPARED_STATUS:
         raise RuntimeError(
-            f"{CONTRACT} is not authorized for launch (status={status!r}); the owner must "
-            f"set status to {AUTHORIZED_STATUS!r} and re-seal the contract first"
+            f"{CONTRACT} status is {status!r}, not {PREPARED_STATUS!r}; authorization "
+            "must point at this payload by hash from the external receipt and must never "
+            "be written into the payload"
+        )
+    present = sorted(key for key in AUTHORIZATION_METADATA_KEYS if key in payload)
+    if present:
+        raise RuntimeError(
+            f"{CONTRACT} carries authorization metadata {present} inside the scientific "
+            "payload; recording consent must not change the bytes consented to"
         )
     proposal = payload.get("proposal") or {}
     if REQUIRED_EXPERT not in proposal:
@@ -76,7 +100,7 @@ def _assert_authorized() -> None:
         )
 
 
-_assert_authorized()
+_assert_wired_and_externally_authorized()
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -1326,17 +1350,23 @@ def _local_task(authorization_payload_sha256: str) -> dict:
 
     from compose_v4.control.docking_value import identity
     from compose_v4.experiments.t4_matched_pilot import unseal
-    from compose_v4.experiments.t4_protonation_rescue_contract import (
-        validate_rescue_preflight,
+    from compose_v4.experiments.t4_protonation_rescue_contract_v2 import (
+        validate_rescue_preflight_v2,
     )
 
     contract = unseal(ROOT / CONTRACT)
-    preflight = validate_rescue_preflight(
+    preflight = validate_rescue_preflight_v2(
         ROOT,
         ROOT / CONTRACT,
+        arm=ARM,
         authorization_payload_sha256=authorization_payload_sha256,
         require_clean_runtime=True,
     )
+    # The ceiling this run may charge comes from the CONTRACT, never from a constant in
+    # this file.  Cross-check the two readings so a wrapper pointed at the wrong contract
+    # cannot inherit the other arm's budget.
+    if preflight["charged_call_ceiling"] != contract["total_charged_call_ceiling"]:
+        raise ValueError("preflight and contract disagree on the charged-call ceiling")
     body = {
         "schema_version": "t4_5ht1b2_protonation_rescue_launch_v1",
         "contract_payload_sha256": identity(contract),
@@ -1361,18 +1391,47 @@ def main(
 
     from compose_v4.experiments.t4_matched_pilot import seal, unseal
 
-    if mode == "preflight":
-        from compose_v4.experiments.t4_protonation_rescue_contract import (
-            validate_rescue_preflight,
+    if mode in {"preflight", "launch_dry_run"}:
+        from compose_v4.experiments.t4_protonation_rescue_contract_v2 import (
+            validate_rescue_preflight_v2,
         )
 
+        report = validate_rescue_preflight_v2(
+            ROOT,
+            ROOT / CONTRACT,
+            arm=ARM,
+            authorization_payload_sha256=authorization_payload_sha256 or None,
+            require_clean_runtime=True,
+        )
+        if mode == "preflight":
+            print(json.dumps(report, indent=2, sort_keys=True))
+            return
+        # launch_dry_run builds exactly what mode=launch would spawn and then STOPS: no
+        # reservation is written, no function is spawned, no oracle call is charged.  It
+        # exists so the launch path can be exercised before it is trusted with a budget.
+        if not authorization_payload_sha256:
+            raise ValueError(
+                "a separately authorized contract payload SHA-256 is required"
+            )
+        task = _local_task(authorization_payload_sha256)
+        destination = (
+            ROOT
+            / "diagnostics/t4_5ht1b2_protonation_rescue_d06/launches"
+            / (task["run_id"] + ".json")
+        )
         print(
             json.dumps(
-                validate_rescue_preflight(
-                    ROOT,
-                    ROOT / CONTRACT,
-                    require_clean_runtime=True,
-                ),
+                {
+                    "schema_version": "t4_5ht1b2_protonation_rescue_launch_dry_run_v1",
+                    "status": "DRY_RUN_NOTHING_SPAWNED",
+                    "arm": ARM,
+                    "oracle_calls_charged": 0,
+                    "preflight": report,
+                    "task": task,
+                    "volume": VOLUME_NAME,
+                    "would_write_receipt": str(destination.relative_to(ROOT)),
+                    "receipt_already_exists": destination.exists(),
+                },
                 indent=2,
                 sort_keys=True,
             )
@@ -1413,7 +1472,9 @@ def main(
         print(json.dumps(receipt, sort_keys=True))
         return
     if mode not in {"advance", "status"} or not run_id:
-        raise ValueError("use mode=preflight/launch, or advance/status with run_id")
+        raise ValueError(
+            "use mode=preflight/launch_dry_run/launch, or advance/status with run_id"
+        )
     receipt_path = (
         ROOT
         / "diagnostics/t4_5ht1b2_protonation_rescue_d06/launches"

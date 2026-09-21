@@ -136,6 +136,19 @@
       "wrapper": "modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py"
     },
     "launch_authority": "NOT LAUNCHED. PENDING owner authorization.",
+    "launch_path_revision": {
+      "added_runtime_inputs": {
+        "src/compose_v4/experiments/t4_protonation_rescue_contract_v2.py": "3d0a08406cebc80613fad0f294e54d42b665a98650028fb595eeaa27e5996ac0"
+      },
+      "changed_runtime_inputs": {
+        "modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py": {
+          "from": "71ab07c391b7c5cf0dd3b78f51199201321016f3561ba0e7d3d3e1f7c5908bbb",
+          "to": "7d1246437032721c89020b6664ac14174d57bf89ae5fdc17a3c076d95c9d2cb6"
+        }
+      },
+      "reason": "the wrapper pinned here validated against the superseded v1 contract module and required an authorized status inside the scientific payload; both are repaired. Only the wrapper pin moved and only the v2 validator pin was added -- no delta, ceiling, cell, proposal, allocation or endpoint-gate field changed, which reconstruct_superseded_payload proves by rebuilding the superseded payload.",
+      "supersedes_payload_sha256": "4486c376e1c378670d4aa9d6c07c3343366035cf67b6821547e2edefdc890a5c"
+    },
     "mechanism": {
       "admitted_site_rule": "a real nitrogen carrying exactly three single bonds to real atoms, whose (formal_charge, implicit_h) is (+1,1) or (0,0); the action swaps it to the other. This is tertiary-amine protonation at physiological pH and it is reversible by the rule's own symmetry, so invertibility holds by construction.",
       "expert": "protonation_aware_retained_subgraph",
@@ -221,7 +234,7 @@
     "runtime_inputs_sha256": {
       "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
       "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
-      "modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py": "71ab07c391b7c5cf0dd3b78f51199201321016f3561ba0e7d3d3e1f7c5908bbb",
+      "modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py": "7d1246437032721c89020b6664ac14174d57bf89ae5fdc17a3c076d95c9d2cb6",
       "src/compose_v4/control/protonation_aware_proposal.py": "97842262c5c7a0aa0f330045f82d107bbd441b63a01b1c4e82f8f1f7134ca413",
       "src/compose_v4/control/protonation_restate_program.py": "be8502c1488520a72253ce1978a0e55000b17674101643abb4677dcb31cc5626",
       "src/compose_v4/control/route_distilled_goal_expert.py": "092eb28b6a115a328be7f94ab115317b8f9c196b1f510aaed7a216911cee215e",
@@ -232,6 +245,7 @@
       "src/compose_v4/experiments/t4_integrated_route_fiber_v2.py": "aeee1616ed67c5af77de7da8eae4519ddedda929618286d6d966868d543503ed",
       "src/compose_v4/experiments/t4_protonation_integrated_route_fiber.py": "8ec1218efb282c039aa326ab71a6a31a605fa695458a925dcf364ece6d404910",
       "src/compose_v4/experiments/t4_protonation_rescue_contract.py": "6d141576e245ef0fbafd2341699e5aee30586b06a47f042fbb9ae492a30a4cca",
+      "src/compose_v4/experiments/t4_protonation_rescue_contract_v2.py": "3d0a08406cebc80613fad0f294e54d42b665a98650028fb595eeaa27e5996ac0",
       "src/compose_v4/experiments/t4_shared_controller_scored_runtime.py": "d6aa710b9423ae8bc703d7b5b81206c9f076bfd2a502e8701de850e5974557bd",
       "src/compose_v4/gates/med_chem_gate.py": "4503e1e72d7c8022b3b5cf24f36bfd2e63dea5a4eb261cb018ce06d508928946",
       "src/compose_v4/rewrite/action_codec_v5.py": "dd2b85dbf49e9ae2c3c6bcf77708ab2a49e7e9ab6035a24c6ddccdbea0bd32b1",
@@ -325,5 +339,5 @@
       "version": "protonation_rescue_v1"
     }
   },
-  "payload_sha256": "4486c376e1c378670d4aa9d6c07c3343366035cf67b6821547e2edefdc890a5c"
+  "payload_sha256": "ea7c5c7372b9ad2a7b9263bc5fefd99a60a422b71d19c29048e54bf5cdfde404"
 }
