@@ -2101,3 +2101,71 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   decoration is 93.5% / 93.4% / 3.5%. The region lock forbids touching the core but does nothing
   to direct growth to a declared attachment site. Name that "conditional task success", never
   "validity".
+
+## 2026-09-21 (fragments: the linker harness is repairable, and the capability behind it is not there)
+
+- **CORRECTED HARNESS, MEASURED: seeding an unlocked bridge makes linker design expressible; the
+  direct join never could.** The adapter joined the two retained cores with a DIRECT BOND because
+  the executor only admits connected states. Structural audit over all ten released drugs, no model
+  needed: the join consumes the very hydrogen each declared site needed, so **4 of 10 drugs
+  (BARICITINIB, ELIGLUSTAT, ERLOTINIB, SPIRAPRIL) start with ZERO free valence at BOTH declared
+  sites** and no first event can increase coverage -- the trajectory dies at event zero however good
+  the proposal distribution is. Releasing the join from the region lock (the strongest available fix
+  short of changing the start state) does NOT rescue it: 0 separated linkers over 10 drugs x 30
+  attempts, separation failures 5-29 per drug. With `linker_bridge_atoms=1` the cores are separated
+  by construction on 10/10, separation failures fall to **0 on every drug**, and separated linkers
+  reach 9 of 10 drugs.
+- **AND THE CAPABILITY IS STILL ABSENT -- the honesty metric is REALIZED LENGTH, not separation.**
+  Of 122 committed two-core endpoints, **121 hold the linker at exactly the seeded length of 1**;
+  one ERLOTINIB endpoint reaches 3. So the 114/300 "task successes" are almost entirely the free
+  atom the harness handed over. A seed is not a result: any linker row must carry the realized
+  length distribution beside it, or the seed reads as the generator's work.
+- **MECHANISM, MEASURED not inferred (10/10 drugs): the seed itself covers BOTH declared interfaces
+  at event 0**, so attachment staging is vacuous from the first step and the controller has nothing
+  to steer. A one-atom bridge satisfies the benchmark's declared constraint -- each site acquires an
+  external neighbour -- which means **the declared interface specification alone does not express
+  "build a linker between these two sites"**. That needs a structural program over the PATH between
+  two interfaces. Same shape as the standing finding that containment is solved and PLACEMENT is
+  not, one level up: here the constraint language itself is too weak, not just the controller.
+- **A MUTATION BATTERY KEYED ON A STALE expected-test NAME REPORTS `SURVIVED` WHEN A DIFFERENT NAMED
+  TEST CORRECTLY WENT RED.** Two guards read as surviving; both were killed, by the NEW tests I had
+  just written, while the battery still compared against the old names. The tell is in the data the
+  battery already collects -- `all_failing_tests` was non-empty on a "survivor". **Assert that a
+  SURVIVED verdict has an EMPTY failing-test list**, or a passing battery is no evidence. Adjacent
+  to the 2026-09-21 phantom-survivor entry (a mutation string that silently failed to apply): there
+  the mutation did not happen, here the verdict was scored against the wrong expectation.
+- **Two guards in the length measurement are unreachable from the released prompts** -- routing a
+  core-to-core path through a THIRD retained core, and walking a padding slot. The released
+  benchmark declares exactly two fragments and states are slot-stable, so neither can be reached
+  from a prompt. Tested directly against hand-built states rather than left as untested branches;
+  cf. the standing rule that a check kept as defence in depth still needs a witness.
+- **PINNED-vs-LAPTOP KERNEL PARITY HOLDS FOR THE FRAGMENT PATH, exactly, including the molecules.**
+  Re-running the attachment sweep shard for shard under the pinned stack (python 3.11 / rdkit
+  2024.3.5 / numpy 1.26.4 / torch 2.4.0) against the laptop stack (3.12 / 2026.03.6 / 2.5.3):
+  every emitted SMILES, every committed endpoint, every count and every family census is
+  BYTE-IDENTICAL; the only numeric difference anywhere is `official.diversity` at **2.22e-16**, one
+  ULP, i.e. summation order. Wall clock differs (the pinned stack ran ~2x FASTER, 81s vs 172s per
+  shard) and is not a result. This does NOT generalise: the T4 feasibility grid diverged on 105 of
+  600 evaluations over a Kekule-degenerate hypervalent-sulfur ring the search invents. These
+  fragment prompts start from drug-like cores and never construct that chemistry -- a MEASUREMENT
+  about this panel, not a licence to skip the check on another.
+- **A parity report must separate float noise from a difference, and must refuse to write off
+  anything non-numeric.** Calling a 2.22e-16 diversity delta "DIVERGENT" would block a valid launch;
+  calling a changed SMILES "noise" would hide a real one. The comparator descends into metric dicts,
+  yields `inf` for any non-numeric change so it can never be tolerated, and reports
+  `EXACT_PARITY` / `PARITY_TO_FLOAT_NOISE` / `DIVERGENT` as three distinct verdicts.
+- **The vendored `.pydeps` tree carries a cpython-312 numpy that SHADOWS the pinned numpy 1.26.4.**
+  Putting it on `PYTHONPATH` under the pinned python 3.11 fails with
+  `No module named 'numpy._core._multiarray_umath'`. Generation needs none of it -- only the official
+  upstream evaluator does (pandas/tqdm) -- so the pinned fragment env installs those directly and
+  `.pydeps` stays off the path entirely. Build it once:
+  `uv venv --python 3.11 ~/compose_fragment_pinned_env` then rdkit==2024.3.5, numpy==1.26.4,
+  scipy==1.13.1, networkx==3.3, torch==2.4.0, 'pandas<2.3', tqdm, pytest.
+- **Instance-agnosticism is a publication-validity claim and was asserted only in a docstring.** Now
+  enforced: no drug name from the released manifest may appear in the controller source (drug list
+  read FROM the manifest, so a new drug is covered the day it lands), the controller may not read
+  `FragmentTask` / `prompt.task` / `drug_name`, and one frozen parameter set must serve every
+  prompt -- checked against the config the CONTROLLER holds, not the one the caller passed, so a
+  per-instance `replace()` inside the constructor is caught. 3/3 mutations killed. Deactivating on a
+  prompt that declares no interface stays legitimate: that is a property of the SPECIFICATION, which
+  is why superstructure needs no special case.
