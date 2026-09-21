@@ -1,0 +1,66 @@
+{
+  "schema": "compose_fragment_upstream_provenance_v1",
+  "why_this_file_exists": "The upstream evaluator's bytes are NOT vendored into this repository: InVirtuoGen is released under CC BY-NC-SA 4.0 and copying it here would propagate that licence onto this MIT-licensed tree. tools/fetch_official_fragment_evaluator.py downloads the exact pinned blobs and verifies each SHA-256 before use. This record is what lets a reader tie a published row to the code that scored it without that copy existing.",
+  "upstream": {
+    "repository": "https://github.com/invirtuolabs/InVirtuoGen_results",
+    "commit": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "licence": "CC BY-NC-SA 4.0 (non-commercial, share-alike)",
+    "licence_note": "We neither redistribute nor modify these files. They are fetched at run time, hash-verified, and used only to SCORE our own samples.",
+    "blobs": {
+      "in_virtuo_gen/evaluation/downstream.py": {
+        "destination": "in_virtuo_gen/evaluation/downstream.py",
+        "sha256": "ab34f586b41f1ad6e21cd933b08e7ff86eb44711c9c9a4c31c29f894cc9c7b50"
+      },
+      "in_virtuo_gen/train_utils/metrics.py": {
+        "destination": "in_virtuo_gen/train_utils/metrics.py",
+        "sha256": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099"
+      },
+      "in_virtuo_gen/utils/mol.py": {
+        "destination": "in_virtuo_gen/utils/mol.py",
+        "sha256": "ed5609c72a3effe2547f4b264e35be8134affccc206978605307d1365a028145"
+      },
+      "references/fragments.csv": {
+        "destination": "references/fragments.csv",
+        "sha256": "43db9adbcf7f8895be6197bccdf729517c4433b7fdbf637f413fa9c8055c3a31"
+      },
+      "references/frags_downstream.csv": {
+        "destination": "references/frags_downstream.csv",
+        "sha256": "dceeec39f389dda928a210694449948645be73d12da0ad93bc843ba1f2bb5975"
+      },
+      "references/reference_metrics.csv": {
+        "destination": "references/reference_metrics.csv",
+        "sha256": "e75676431628987d3d0bacbafc3028ffd7ebc8d797ecb03fb386b13a453823f9"
+      }
+    }
+  },
+  "what_it_scored": {
+    "metrics_from_upstream": [
+      "validity",
+      "uniqueness",
+      "quality",
+      "diversity"
+    ],
+    "metric_entry_point": "in_virtuo_gen.train_utils.metrics.evaluate_smiles(already_smiles=True)",
+    "distance_entry_point": "in_virtuo_gen.utils.mol.calculate_average_tanimoto(prompt=...) -- NOT returned by evaluate_smiles; upstream reads baselines' distance from references/reference_metrics.csv instead",
+    "conditioning_instances": "references/fragments.csv -- verified cell-by-cell against data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv, 50/50 identical (diagnostics/fragment_official_suite_v2/conditioning_instance.json)",
+    "baseline_numbers": "references/reference_metrics.csv -- GenMol and SAFE-GPT rows quoted as published comparators",
+    "artifacts_produced": [
+      "diagnostics/fragment_official_suite_v2/shards/*.json",
+      "diagnostics/fragment_official_suite_v2/suite_table.json",
+      "diagnostics/fragment_official_suite_v2/corrected_table.json",
+      "diagnostics/fragment_official_suite_v2/comparison_table.json",
+      "diagnostics/fragment_official_suite_v2/kernel_parity.json"
+    ]
+  },
+  "stubbed_not_copied": {
+    "in_virtuo_gen.preprocess.preprocess_tokenize.custom_decode_sequence": "unreachable when already_smiles=True",
+    "in_virtuo_gen.utils.fragments.bridge_smiles_fragments": "unreachable when already_smiles=True",
+    "in_virtuo_gen.utils.fragments.bridge_smiles_fragments_fix": "unreachable when already_smiles=True"
+  },
+  "reconstruct": "python3 tools/fetch_official_fragment_evaluator.py",
+  "local_python_dependencies_for_that_path": {
+    "pandas": "imported by upstream metrics.py",
+    "tqdm": "imported transitively on the upstream import path",
+    "note": "declared as the 'fragment_eval' extra in pyproject.toml"
+  }
+}

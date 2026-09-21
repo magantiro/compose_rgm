@@ -34,11 +34,26 @@ TASK_TO_CATEGORY = {
     "scaffold_decoration": "decoration",
 }
 METRICS = ("validity", "uniqueness", "quality", "diversity", "distance")
-VENDOR = Path(".vendor_official")
+def _upstream_root() -> Path:
+    """The hash-verified upstream tree, FETCHED rather than vendored.
+
+    The blobs are not committed (CC BY-NC-SA 4.0), so resolve them through the
+    fetcher, which downloads and SHA-256 verifies them on a fresh clone.
+    """
+    import sys as _sys
+
+    tools = Path(__file__).resolve().parent
+    if str(tools) not in _sys.path:
+        _sys.path.insert(0, str(tools))
+    from fetch_official_fragment_evaluator import fetch, verify_only
+
+    root = fetch()
+    verify_only()
+    return Path(root)
 
 
 def load_reference_metrics() -> dict[str, dict[str, dict]]:
-    path = VENDOR / "references_reference_metrics.csv"
+    path = _upstream_root() / "references" / "reference_metrics.csv"
     out: dict[str, dict[str, dict]] = {}
     with path.open(newline="", encoding="utf-8") as handle:
         for row in csv.DictReader(handle):
@@ -55,7 +70,11 @@ def load_reference_metrics() -> dict[str, dict[str, dict]]:
 
 
 def load_ivg() -> dict[str, dict]:
-    payload = json.loads((VENDOR / "ivg_results_with_std.json").read_text())
+    # InVirtuoGen's own results are not among the pinned blobs; they are optional.
+    local = Path(".vendor_official/ivg_results_with_std.json")
+    if not local.exists():
+        return {}
+    payload = json.loads(local.read_text())
     out = {}
     for category, block in payload.items():
         entry = block.get("InVirtuoGen", {})

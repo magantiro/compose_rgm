@@ -114,3 +114,18 @@ artifacts/tdc_originals/
 # Capsules committed before this rule stay tracked; .gitignore does not affect them.
 diagnostics/**/source_capsule/
 diagnostics/**/source_capsule_v[0-9]/
+
+# Official InVirtuoGen evaluator, fetched not vendored. It is released under
+# CC BY-NC-SA 4.0 and copying it into this MIT tree would propagate that licence,
+# which is why tools/fetch_official_fragment_evaluator.py downloads the pinned
+# blobs and verifies each SHA-256 instead. Those hashes, the upstream commit and
+# the record of which artifacts it scored live in
+# diagnostics/fragment_official_suite_v2/upstream_provenance.json, so the exact
+# bytes are reconstructible:
+#   python3 tools/fetch_official_fragment_evaluator.py
+.official_eval_cache/
+.vendor_official/
+
+# Side-loaded PyPI packages for that evaluator's import path. Declared properly as
+# the "fragment_eval" extra in pyproject.toml; install rather than commit.
+.pydeps/

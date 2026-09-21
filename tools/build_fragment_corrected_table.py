@@ -157,7 +157,16 @@ def main() -> None:
     import csv as _csv
 
     ref = {}
-    ref_path = Path(".vendor_official/references_reference_metrics.csv")
+    import sys as _sys
+
+    _tools = Path(__file__).resolve().parent
+    if str(_tools) not in _sys.path:
+        _sys.path.insert(0, str(_tools))
+    from fetch_official_fragment_evaluator import fetch, verify_only
+
+    fetch()
+    verify_only()
+    ref_path = Path(fetch()) / "references" / "reference_metrics.csv"
     if ref_path.exists():
         with ref_path.open(newline="", encoding="utf-8") as handle:
             for r in _csv.DictReader(handle):
