@@ -1,0 +1,419 @@
+{
+  "schema": "compose_fragment_official_suite_v1",
+  "protocol": {
+    "source": "in_virtuo_gen/evaluation/downstream.py @ b50bb3ae",
+    "samples_per_prompt": 100,
+    "seeds": 3,
+    "task_row": "unweighted mean over the task's drugs",
+    "scaffold_morphing": "upstream copies the linker result"
+  },
+  "kernel": {
+    "rdkit": "2024.03.5",
+    "numpy": "1.26.4",
+    "torch": "2.4.0+cu121",
+    "python": "3.11.12",
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36"
+  },
+  "checkpoint": {
+    "path": "/root/checkpoint/ringcore_a7546e2_best.pt",
+    "completed_steps": 16000,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "atom_vocabulary": "ORGANIC"
+  },
+  "sampler": {
+    "config": {
+      "mark_attempts_per_event": 96,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "config_sha256": "7a7268a2f6cd5ca8d42c9f7560fe2b7ea4f1875cf827668e224914d68fbc1125"
+  },
+  "attachment_control": {
+    "config": {
+      "attachment_first": true,
+      "enabled": true,
+      "realize_redirected_order": true,
+      "redirect_attachment": true,
+      "release_linker_join": true,
+      "require_separated_cores": true,
+      "restrict_interfaces": true
+    },
+    "config_sha256": "c2cf0215f1c18c38fa12ff7c6eaf68c5a7bf7886c73bb791da9b086fd5e29aca",
+    "arm": "attachment_control"
+  },
+  "metric_provenance": {
+    "validity_uniqueness_quality_diversity": "official in_virtuo_gen.train_utils.metrics.evaluate_smiles @ b50bb3ae, already_smiles=True",
+    "distance": "NOT in the released evaluator: evaluate_smiles returns no distance key. Estimator is the official in_virtuo_gen.utils.mol.calculate_average_tanimoto(prompt=...); reference = the dummy-stripped prompt fragment(s)",
+    "fragment_preservation": "independent audit, atom-level non-overlapping substructure match, run over COMMITTED endpoints as well as emitted samples"
+  },
+  "results": {
+    "scaffold_decoration": {
+      "task": "scaffold_decoration",
+      "prompts_declared": 1,
+      "prompts_scored": 1,
+      "samples_per_prompt": 100,
+      "seeds": 3,
+      "per_seed": [
+        {
+          "validity": 90.0,
+          "uniqueness": 100.0,
+          "quality": 11.0,
+          "diversity": 0.712288888888889,
+          "distance": 0.885091602011919,
+          "distance_to_original_drug": 0.7628592236216332
+        }
+      ],
+      "summary": {
+        "validity": {
+          "mean": 90.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 100.0,
+          "std": 0.0
+        },
+        "quality": {
+          "mean": 11.0,
+          "std": 0.0
+        },
+        "diversity": {
+          "mean": 0.712288888888889,
+          "std": 0.0
+        },
+        "distance": {
+          "mean": 0.885091602011919,
+          "std": 0.0
+        },
+        "distance_to_original_drug": {
+          "mean": 0.7628592236216332,
+          "std": 0.0
+        }
+      },
+      "build_failures": [],
+      "per_drug": {
+        "MARIBAVIR": [
+          {
+            "seed": 1,
+            "rng_seed": 1410131505,
+            "official": {
+              "validity": 90.0,
+              "uniqueness": 100.0,
+              "diversity": 0.712288888888889,
+              "quality": 11.0,
+              "distance": 0.885091602011919,
+              "distance_to_original_drug": 0.7628592236216332
+            },
+            "attempts": 100,
+            "validity_denominator": 100,
+            "emitted_nonempty": 90,
+            "distance_reference_prompt": "c1ccc2c(c1)ncn2[C@@H]1CCCO1",
+            "unique_valid_count": 90,
+            "committed_endpoints": 100,
+            "committed_chemically_valid": 100,
+            "committed_fragment_preserving": 100,
+            "emitted_fragment_preserving": 90,
+            "constraint_failures": 10,
+            "lock_rejections": 546,
+            "budget_exhausted": 0,
+            "executor_refusals": 0,
+            "mean_events": 13.35,
+            "families": {
+              "atom_insert": 1086,
+              "bond_reorder": 53,
+              "atom_delete": 64,
+              "atom_restate": 86,
+              "bond_reroute": 42,
+              "bond_insert": 4
+            },
+            "seconds": 358.05,
+            "committed_endpoint_smiles": [
+              "B=C(CN(C)C1C(=C)C(n2c(N)nc3cc(O)c(C)cc32)OC1=N)N=C",
+              "Cc1cc2nc(C)n(C3OC(=O)C(C(C)N(C)C)C3=O)c2cc1C",
+              "C=C1C(C)C(C)OC1n1c(N)nc2cc(OC)c(NCC)cc21",
+              "Cc1cc2nc(C)n(C3OC(O)C(NC=O)C3C)c2cc1C",
+              "C=C1C(=O)C(C)(C)OC1n1c(Cl)nc2cc(C)c(C)cc21",
+              "C=C(C)C(=O)Oc1cc2nc(C)n(C3OC(=O)C(Br)C3=O)c2cc1C",
+              "CCc1cc2nc(O)n(C3OC(C)C(C)C3=O)c2cc1O",
+              "Cc1cc2nc(O)n(C3OC(=O)C(=O)C3=O)c2cc1NC(=O)CO",
+              "Cc1cc2nc(N)n(C3OC(C)C(=O)C3C#N)c2cc1O",
+              "Cc1cc2c(cc1O)nc(F)n2C1OC(C)(O)C(C#N)C1C",
+              "C#CC(C)(C)NC1C(=C)OC(n2c(CC)nc3cc(C)c(C)cc32)C1C",
+              "C=Nc1cc2nc(C)n(C3OC(=O)C(=C)C3C)c2cc1C",
+              "Cc1cc2nc(C)n(C3OC(=O)C(O)C3O)c2cc1NC(=O)NC(C)(C)C",
+              "CCCN(CC)CC1C(O)C(=O)OC1n1c(C(=O)OC(=O)OCC)nc2cc(Cl)c(C)cc21",
+              "CC=C1C(=O)OC(n2c(OC)nc3ccc(C)cc32)C1=O",
+              "Cc1cc2c(cc1F)nc(C)n2C1OC(=O)C(Cl)(OCl)C1=NOC=O",
+              "CC(=O)NC1C(S)OC(n2c(O)nc3cc(C)c(O)cc32)C1CO",
+              "B=C(Nc1cc2nc(C)n(C3OC(F)C(CCO)C3C)c2cc1C)NC(C)CCCF",
+              "C=C1C(=C(O)O)C(=O)OC1n1c(C)nc2cc(C)c(C)cc21",
+              "COc1cc2nc(C)n(C3OC(CCN=C(N)CCO)C(NCCOF)C3O)c2cc1C",
+              "Cc1cc2nc(C)n(C3OC(C)C(C=O)C3C)c2cc1F",
+              "Cc1cc2nc(N)n(C3OC(C)C(C)C3C)c2cc1NC(=O)N(C)C",
+              "Cc1cc2c(cc1O)nc(O)n2C1OC(=N)C(C=CCNO)C1C",
+              "Cc1cc2ncn(C3OC(C)(C)C(=O)C3NCC(=O)OC(C)CCl)c2cc1N",
+              "Cc1cc2nc(O)n(C3OC(=O)C(=O)C3=NOC(=O)CC(=O)O)c2cc1O",
+              "Cc1nc2cc(O)c(NC(=O)C(=O)NC(N)=S)cc2n1C1OC(=O)C(O)C1(C)C",
+              "CC[IH]N=C1C(O)OC(n2c(C)nc3cc(C)c(C)cc32)C1C",
+              "Cc1cc2c(cc1CCCC(C)C)nc(C)n2C1OC(C)C(O)C1O",
+              "Cc1cc2c(cc1O)nc(N)n2C1OC(=N)C(N)C1CC(C)C",
+              "Cc1cc2c(cc1O)nc(C(=O)O)n2C1OC(C)(C)C(C(=O)O)C1C",
+              "Cc1cc2nc(C)n(C3OC(O)C(C)(O)C3=N)c2cc1O",
+              "CCC(CC1C(=O)OC(n2c(O)nc3cc(C)c(F)cc32)C1O)C(C)C",
+              "C=C1C(n2c(C)nc3cc(F)c(C)cc32)OC(C)C1(C)C",
+              "Cc1cc2nc(C)n(C3OC(C)(C)CC3=O)c2cc1C",
+              "C=C1OC2C(Oc3nc4cc(N)c(C)cc4n32)C1O",
+              "Cc1cc2c(cc1O)nc(N)n2C1OC(=O)C(C(=O)N(CN(C)C)C(C)C)C1C",
+              "Cc1cc2nc(O)n(C3OC(OCCI)C(C)C3C)c2cc1C",
+              "C=C1C(n2c(C)nc3cc(C)c(C)cc32)OC(=O)C1(C)C",
+              "Cc1cc2c(cc1F)nc(N)n2C1OC(=O)C(C)C1=O",
+              "C=C1C(=O)C(C)(C)OC1n1c(C)nc2cc(O)c(C)cc21",
+              "Cc1cc2nc(C)n(C3OC(O)C(C)C3Br)c2cc1C",
+              "CCSc1cc2c(cc1C)nc(C)n2C1OC(=O)C(CC(C)(C)C)C1CC(=O)C#N",
+              "Cc1cc2c(cc1Cl)nc(C)n2C1OC(CO)C(C)C1O",
+              "CCCC1C(C)C(C)OC1n1c(CC)nc2cc(C)c(NN=O)cc21",
+              "C=C(F)C1OC(n2c(C)nc3cc(C)c(N=C(C)N)cc32)C(=C)C1C",
+              "C=C1OC(n2c(C)nc3cc(C)c(O)cc32)C(O)C1=C",
+              "Cc1cc2nc(O)n(C3OC(O)C(N)C3O)c2cc1C",
+              "C=CC(CCCCCCC=O)Nc1cc2nc(C)n(C3OC(C)C(O)C3C)c2cc1C",
+              "C=C1C(C)C(=O)OC1n1c(N)nc2cc3cc(C)[nH]c3cc21",
+              "CC(=S)C(C)=C1C(=O)C(C)OC1n1c(C)nc2cc(C)c(O)cc21",
+              "CC=C1OC(n2cnc3cc(C)c(C)cc32)C(N)C1C",
+              "Cc1nc2cc(C(=O)O)c(O)cc2n1C1OC(=O)C(C)(C)C1COCCCl",
+              "NC1C(=O)C(n2c(C(F)(F)F)nc3cc(Cl)c(O)cc32)OC1=C=S",
+              "Cc1nc2cc(CO)c(O)cc2n1C1OC(F)C(C)C1O",
+              "Cc1cc2c(cc1O)nc(C)n2C1OC(C)(C)C(C=NN(C)C(=N)NCCO)C1CO",
+              "C=C1C(C(=O)NC)C(=O)OC1n1c(C)nc2cc(C)c(C)cc21",
+              "C=C1C(CC)OC(n2c(C)nc3cc(C)c(C)cc32)C1CNC",
+              "Cc1cc2c(cc1O)nc(C(C)(C)C(=O)O)n2C1OC(=O)C(=O)C1=O",
+              "CCOc1cc2c(cc1C(=O)OC(C)(C)C)nc(Br)n2C1OC(=O)C(O)C1O",
+              "Cc1cc2c(cc1NC(C)C(O)C(=O)O)nc(C=O)n2C1OCC(C)C1C",
+              "CCCc1cc2nc(C(=S)CN(C)[PH4])n(C3OC(=O)C(=O)C3=O)c2cc1O",
+              "C=C1C(=O)C(n2c(N)nc3cc(O)ccc32)OC1(C)I",
+              "Cc1cc2nc(C)n(C3OC(C)C(NCCC(C(N)=O)C(=O)O)C3=O)c2cc1S",
+              "C=CC1OC(n2c(Cl)nc3cc(C)c(F)cc32)C(C)C1C",
+              "COCCOCC1OC(n2c(F)nc3cc(C)c(F)cc32)C(O)C1C#N",
+              "CSc1cc2nc(C)n(C3OC(CSCC(=O)NCCC(C)C)C(C)C3C)c2cc1O",
+              "C=Cc1cc2c(cc1O)nc(F)n2C1OC(C)C(F)C1=O",
+              "CCC(O)=Nc1cc2c(cc1N)nc(C)n2C1OC(=O)C(C)C1C",
+              "CCC1C(C)OC(n2c(C)nc3cc(C)c(N)cc32)C1C",
+              "C=C1CC(O)C(n2c(O)nc3cc(O)c(OC=NC)cc32)O1",
+              "COCCC(C)(C)C(=O)NCCCC1C(=O)OC(n2c(C)nc3cc(O)c(C)cc32)C1O",
+              "Cc1cc2c(cc1O)nc(C)n2C1OC(O)C(O)C1CCO",
+              "CCOC(=O)C(C)(C)NCC1OC(n2c(O)nc3cc(C)c(O)cc32)C(O)C1C",
+              "CCC1C(=O)OC(n2c(C)nc3cc(F)c(C)cc32)C1C",
+              "CCC(C)(CCCCN(C)C)CNCC1OC(n2c(N)nc3cc(OC)c(C)cc32)C(=O)C1=O",
+              "Cc1cc2c(cc1O)nc(O)n2C1OC(C)C(C)C1N",
+              "CCC1OC(n2c(Cl)nc3cc(O)c(C)cc32)C(C)C1C",
+              "C=C1OC(n2c(C)nc3ccc(CC)cc32)C(C)(O)C1F",
+              "CC(C)(C)CNC(=O)NN=C1C(=O)OC(n2c(N)nc3cc(C[IH2])c(O)cc32)C1CO",
+              "CCCN(C(C)C)C(C)C1C(=O)C(=O)OC1n1c(C)nc2ccc(O)cc21",
+              "CCN(CC(=O)OC)C(=O)C1OC(n2c(S)nc3cc(C)c(O)cc32)C(=N)C1O",
+              "C#CC1(C)OC(n2c(C)nc3cc(S)c(O)cc32)C(=O)C1I",
+              "B=C1OC(n2c(C)nc3cc(O)c(C)cc32)C(C)C1N",
+              "BC1(C)OC(n2c(O)nc3cc(O)c(O)cc32)C(=C)C1CC",
+              "Cc1cc2nc(C)n(C3OC(=NC(C)(C)C)C(C)(O)C3O)c2cc1O",
+              "Cc1nc2cc(S)c(Br)cc2n1C1OC(=O)C(C)C1Br",
+              "Cc1cc2nc(C)n(C3OC(=O)C(N(C)CCN(C)C=O)C3C)c2cc1C",
+              "COC(=O)c1cc2c(cc1CCCl)nc(C)n2C1OC(=O)C(O)C1=O",
+              "C=Cc1cc2nc(C)n(C3OC(C)C(=C)C3C)c2cc1C",
+              "CC(C)Cc1cc2nc(O)n(C3OCC(F)C3=O)c2cc1O",
+              "CC1OC(n2c(O)nc3cc(N)c(O)cc32)C(CO)C1(C)O",
+              "CCC1C(CCNC(=O)N(C)C)C(=O)OC1n1c(C)nc2cc(O)c(C)cc21",
+              "C=C1OC2C(=CCc3nc4cc(C)c(N)cc4n32)C1=O",
+              "Cc1cc2nc(C)n(C3OC(=O)C(C)C3CO)c2cc1NN=O",
+              "Cc1cc2c(cc1N)nc(C)n2C1OC(=O)C(PN)C1=O",
+              "CNc1cc2nc(F)n(C3OC(C)C(C)(N4CCN(C(C)(C)C)C4)C3(C)C)c2cc1C",
+              "C#CCNC1C(N)C(C)OC1n1c(C)nc2cc([SH3])c(Br)cc21",
+              "CCON=C1C(=N)C(CO)OC1n1c(C)nc2cc(C)c(C(=O)O)cc21",
+              "Cc1cc2nc(C)n(C3OC(C)C(NC(N)=O)C3=N)c2cc1C",
+              "CCCc1cc2nc(O)n(C3OC(CO)C(O)C3C)c2cc1F"
+            ],
+            "emitted_samples": [
+              "B=C(CN(C)C1C(=C)C(n2c(N)nc3cc(O)c(C)cc32)OC1=N)N=C",
+              "Cc1cc2nc(C)n(C3OC(=O)C(C(C)N(C)C)C3=O)c2cc1C",
+              "C=C1C(C)C(C)OC1n1c(N)nc2cc(OC)c(NCC)cc21",
+              "Cc1cc2nc(C)n(C3OC(O)C(NC=O)C3C)c2cc1C",
+              "C=C1C(=O)C(C)(C)OC1n1c(Cl)nc2cc(C)c(C)cc21",
+              "C=C(C)C(=O)Oc1cc2nc(C)n(C3OC(=O)C(Br)C3=O)c2cc1C",
+              "CCc1cc2nc(O)n(C3OC(C)C(C)C3=O)c2cc1O",
+              "Cc1cc2nc(O)n(C3OC(=O)C(=O)C3=O)c2cc1NC(=O)CO",
+              "Cc1cc2nc(N)n(C3OC(C)C(=O)C3C#N)c2cc1O",
+              "Cc1cc2c(cc1O)nc(F)n2C1OC(C)(O)C(C#N)C1C",
+              "C#CC(C)(C)NC1C(=C)OC(n2c(CC)nc3cc(C)c(C)cc32)C1C",
+              "C=Nc1cc2nc(C)n(C3OC(=O)C(=C)C3C)c2cc1C",
+              "Cc1cc2nc(C)n(C3OC(=O)C(O)C3O)c2cc1NC(=O)NC(C)(C)C",
+              "CCCN(CC)CC1C(O)C(=O)OC1n1c(C(=O)OC(=O)OCC)nc2cc(Cl)c(C)cc21",
+              "",
+              "Cc1cc2c(cc1F)nc(C)n2C1OC(=O)C(Cl)(OCl)C1=NOC=O",
+              "CC(=O)NC1C(S)OC(n2c(O)nc3cc(C)c(O)cc32)C1CO",
+              "B=C(Nc1cc2nc(C)n(C3OC(F)C(CCO)C3C)c2cc1C)NC(C)CCCF",
+              "C=C1C(=C(O)O)C(=O)OC1n1c(C)nc2cc(C)c(C)cc21",
+              "COc1cc2nc(C)n(C3OC(CCN=C(N)CCO)C(NCCOF)C3O)c2cc1C",
+              "Cc1cc2nc(C)n(C3OC(C)C(C=O)C3C)c2cc1F",
+              "Cc1cc2nc(N)n(C3OC(C)C(C)C3C)c2cc1NC(=O)N(C)C",
+              "Cc1cc2c(cc1O)nc(O)n2C1OC(=N)C(C=CCNO)C1C",
+              "",
+              "Cc1cc2nc(O)n(C3OC(=O)C(=O)C3=NOC(=O)CC(=O)O)c2cc1O",
+              "Cc1nc2cc(O)c(NC(=O)C(=O)NC(N)=S)cc2n1C1OC(=O)C(O)C1(C)C",
+              "CC[IH]N=C1C(O)OC(n2c(C)nc3cc(C)c(C)cc32)C1C",
+              "Cc1cc2c(cc1CCCC(C)C)nc(C)n2C1OC(C)C(O)C1O",
+              "Cc1cc2c(cc1O)nc(N)n2C1OC(=N)C(N)C1CC(C)C",
+              "Cc1cc2c(cc1O)nc(C(=O)O)n2C1OC(C)(C)C(C(=O)O)C1C",
+              "Cc1cc2nc(C)n(C3OC(O)C(C)(O)C3=N)c2cc1O",
+              "CCC(CC1C(=O)OC(n2c(O)nc3cc(C)c(F)cc32)C1O)C(C)C",
+              "C=C1C(n2c(C)nc3cc(F)c(C)cc32)OC(C)C1(C)C",
+              "",
+              "C=C1OC2C(Oc3nc4cc(N)c(C)cc4n32)C1O",
+              "Cc1cc2c(cc1O)nc(N)n2C1OC(=O)C(C(=O)N(CN(C)C)C(C)C)C1C",
+              "Cc1cc2nc(O)n(C3OC(OCCI)C(C)C3C)c2cc1C",
+              "C=C1C(n2c(C)nc3cc(C)c(C)cc32)OC(=O)C1(C)C",
+              "Cc1cc2c(cc1F)nc(N)n2C1OC(=O)C(C)C1=O",
+              "C=C1C(=O)C(C)(C)OC1n1c(C)nc2cc(O)c(C)cc21",
+              "Cc1cc2nc(C)n(C3OC(O)C(C)C3Br)c2cc1C",
+              "CCSc1cc2c(cc1C)nc(C)n2C1OC(=O)C(CC(C)(C)C)C1CC(=O)C#N",
+              "Cc1cc2c(cc1Cl)nc(C)n2C1OC(CO)C(C)C1O",
+              "CCCC1C(C)C(C)OC1n1c(CC)nc2cc(C)c(NN=O)cc21",
+              "C=C(F)C1OC(n2c(C)nc3cc(C)c(N=C(C)N)cc32)C(=C)C1C",
+              "C=C1OC(n2c(C)nc3cc(C)c(O)cc32)C(O)C1=C",
+              "Cc1cc2nc(O)n(C3OC(O)C(N)C3O)c2cc1C",
+              "C=CC(CCCCCCC=O)Nc1cc2nc(C)n(C3OC(C)C(O)C3C)c2cc1C",
+              "C=C1C(C)C(=O)OC1n1c(N)nc2cc3cc(C)[nH]c3cc21",
+              "CC(=S)C(C)=C1C(=O)C(C)OC1n1c(C)nc2cc(C)c(O)cc21",
+              "",
+              "Cc1nc2cc(C(=O)O)c(O)cc2n1C1OC(=O)C(C)(C)C1COCCCl",
+              "NC1C(=O)C(n2c(C(F)(F)F)nc3cc(Cl)c(O)cc32)OC1=C=S",
+              "Cc1nc2cc(CO)c(O)cc2n1C1OC(F)C(C)C1O",
+              "Cc1cc2c(cc1O)nc(C)n2C1OC(C)(C)C(C=NN(C)C(=N)NCCO)C1CO",
+              "C=C1C(C(=O)NC)C(=O)OC1n1c(C)nc2cc(C)c(C)cc21",
+              "C=C1C(CC)OC(n2c(C)nc3cc(C)c(C)cc32)C1CNC",
+              "Cc1cc2c(cc1O)nc(C(C)(C)C(=O)O)n2C1OC(=O)C(=O)C1=O",
+              "CCOc1cc2c(cc1C(=O)OC(C)(C)C)nc(Br)n2C1OC(=O)C(O)C1O",
+              "",
+              "CCCc1cc2nc(C(=S)CN(C)[PH4])n(C3OC(=O)C(=O)C3=O)c2cc1O",
+              "",
+              "Cc1cc2nc(C)n(C3OC(C)C(NCCC(C(N)=O)C(=O)O)C3=O)c2cc1S",
+              "C=CC1OC(n2c(Cl)nc3cc(C)c(F)cc32)C(C)C1C",
+              "COCCOCC1OC(n2c(F)nc3cc(C)c(F)cc32)C(O)C1C#N",
+              "CSc1cc2nc(C)n(C3OC(CSCC(=O)NCCC(C)C)C(C)C3C)c2cc1O",
+              "C=Cc1cc2c(cc1O)nc(F)n2C1OC(C)C(F)C1=O",
+              "CCC(O)=Nc1cc2c(cc1N)nc(C)n2C1OC(=O)C(C)C1C",
+              "CCC1C(C)OC(n2c(C)nc3cc(C)c(N)cc32)C1C",
+              "",
+              "COCCC(C)(C)C(=O)NCCCC1C(=O)OC(n2c(C)nc3cc(O)c(C)cc32)C1O",
+              "Cc1cc2c(cc1O)nc(C)n2C1OC(O)C(O)C1CCO",
+              "CCOC(=O)C(C)(C)NCC1OC(n2c(O)nc3cc(C)c(O)cc32)C(O)C1C",
+              "CCC1C(=O)OC(n2c(C)nc3cc(F)c(C)cc32)C1C",
+              "CCC(C)(CCCCN(C)C)CNCC1OC(n2c(N)nc3cc(OC)c(C)cc32)C(=O)C1=O",
+              "Cc1cc2c(cc1O)nc(O)n2C1OC(C)C(C)C1N",
+              "CCC1OC(n2c(Cl)nc3cc(O)c(C)cc32)C(C)C1C",
+              "",
+              "CC(C)(C)CNC(=O)NN=C1C(=O)OC(n2c(N)nc3cc(C[IH2])c(O)cc32)C1CO",
+              "",
+              "CCN(CC(=O)OC)C(=O)C1OC(n2c(S)nc3cc(C)c(O)cc32)C(=N)C1O",
+              "C#CC1(C)OC(n2c(C)nc3cc(S)c(O)cc32)C(=O)C1I",
+              "B=C1OC(n2c(C)nc3cc(O)c(C)cc32)C(C)C1N",
+              "BC1(C)OC(n2c(O)nc3cc(O)c(O)cc32)C(=C)C1CC",
+              "Cc1cc2nc(C)n(C3OC(=NC(C)(C)C)C(C)(O)C3O)c2cc1O",
+              "Cc1nc2cc(S)c(Br)cc2n1C1OC(=O)C(C)C1Br",
+              "Cc1cc2nc(C)n(C3OC(=O)C(N(C)CCN(C)C=O)C3C)c2cc1C",
+              "COC(=O)c1cc2c(cc1CCCl)nc(C)n2C1OC(=O)C(O)C1=O",
+              "C=Cc1cc2nc(C)n(C3OC(C)C(=C)C3C)c2cc1C",
+              "",
+              "CC1OC(n2c(O)nc3cc(N)c(O)cc32)C(CO)C1(C)O",
+              "CCC1C(CCNC(=O)N(C)C)C(=O)OC1n1c(C)nc2cc(O)c(C)cc21",
+              "C=C1OC2C(=CCc3nc4cc(C)c(N)cc4n32)C1=O",
+              "Cc1cc2nc(C)n(C3OC(=O)C(C)C3CO)c2cc1NN=O",
+              "Cc1cc2c(cc1N)nc(C)n2C1OC(=O)C(PN)C1=O",
+              "CNc1cc2nc(F)n(C3OC(C)C(C)(N4CCN(C(C)(C)C)C4)C3(C)C)c2cc1C",
+              "C#CCNC1C(N)C(C)OC1n1c(C)nc2cc([SH3])c(Br)cc21",
+              "CCON=C1C(=N)C(CO)OC1n1c(C)nc2cc(C)c(C(=O)O)cc21",
+              "Cc1cc2nc(C)n(C3OC(C)C(NC(N)=O)C3=N)c2cc1C",
+              "CCCc1cc2nc(O)n(C3OC(CO)C(O)C3C)c2cc1F"
+            ],
+            "interface_rejections": 42,
+            "staging_rejections": 1043,
+            "redirections": 490,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 90,
+            "declared_interfaces": [
+              0,
+              1,
+              7,
+              10,
+              11,
+              12
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                0,
+                1,
+                7,
+                10,
+                11,
+                12
+              ],
+              "requirements": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  1,
+                  1
+                ],
+                [
+                  7,
+                  1
+                ],
+                [
+                  10,
+                  1
+                ],
+                [
+                  11,
+                  1
+                ],
+                [
+                  12,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                14
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                0,
+                1,
+                7,
+                10,
+                11,
+                12
+              ],
+              "required": {
+                "0": 1,
+                "1": 1,
+                "7": 1,
+                "10": 1,
+                "11": 1,
+                "12": 1
+              },
+              "covered": {
+                "0": 0,
+                "1": 0,
+                "7": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0
+              },
+              "satisfied": false
+            }
+          }
+        ]
+      }
+    }
+  }
+}

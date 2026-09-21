@@ -1,0 +1,459 @@
+{
+  "schema": "compose_fragment_global_knob_sweep_v1",
+  "knob": "mark_attempts_per_event",
+  "scope": "GLOBAL: one value for every drug and every task. The sweep varies it BETWEEN runs only; the CLI offers no way to scope a sampler knob to an instance.",
+  "arm": "attachment_control (the mechanism is held fixed; only the budget moves)",
+  "kernel": {
+    "rdkit": "2024.3.5",
+    "numpy": "1.26.4",
+    "python": "3.11.12",
+    "platform": "Linux-x86_64 (Modal)"
+  },
+  "protocol": "10 drugs x 3 seeds x 100 samples per task, pinned kernel",
+  "values_swept": [
+    24,
+    48,
+    96
+  ],
+  "per_task": {
+    "24": {
+      "motif_extension": {
+        "chemical_validity_over_attempts": 85.9,
+        "task_success_over_attempts": 83.2333,
+        "chemical_validity_over_committed": 100.0,
+        "budget_exhausted_per_100": 35.1333,
+        "seconds_per_shard": 203.956,
+        "per_drug_chem_validity": {
+          "BARICITINIB": 77.33,
+          "CYCLOTHIAZIDE": 94.0,
+          "ELIGLUSTAT": 100.0,
+          "ERLOTINIB": 94.67,
+          "FUTIBATINIB": 76.0,
+          "LESINURAD": 48.67,
+          "LIOTHYRONINE": 96.0,
+          "LOVASTATIN": 76.67,
+          "MARIBAVIR": 99.33,
+          "SPIRAPRIL": 96.33
+        }
+      },
+      "superstructure_generation": {
+        "chemical_validity_over_attempts": 93.6333,
+        "task_success_over_attempts": 93.5333,
+        "chemical_validity_over_committed": 100.0,
+        "budget_exhausted_per_100": 7.4667,
+        "seconds_per_shard": 336.235,
+        "per_drug_chem_validity": {
+          "BARICITINIB": 100.0,
+          "CYCLOTHIAZIDE": 97.67,
+          "ELIGLUSTAT": 100.0,
+          "ERLOTINIB": 100.0,
+          "FUTIBATINIB": 98.33,
+          "LESINURAD": 100.0,
+          "LIOTHYRONINE": 100.0,
+          "LOVASTATIN": 92.33,
+          "MARIBAVIR": 100.0,
+          "SPIRAPRIL": 48.0
+        }
+      },
+      "scaffold_decoration": {
+        "chemical_validity_over_attempts": 93.7667,
+        "task_success_over_attempts": 84.1667,
+        "chemical_validity_over_committed": 100.0,
+        "budget_exhausted_per_100": 11.8,
+        "seconds_per_shard": 397.899,
+        "per_drug_chem_validity": {
+          "BARICITINIB": 100.0,
+          "CYCLOTHIAZIDE": 96.33,
+          "ELIGLUSTAT": 100.0,
+          "ERLOTINIB": 100.0,
+          "FUTIBATINIB": 97.67,
+          "LESINURAD": 100.0,
+          "LIOTHYRONINE": 100.0,
+          "LOVASTATIN": 94.0,
+          "MARIBAVIR": 100.0,
+          "SPIRAPRIL": 49.67
+        }
+      }
+    },
+    "48": {
+      "motif_extension": {
+        "chemical_validity_over_attempts": 94.8667,
+        "task_success_over_attempts": 94.1333,
+        "chemical_validity_over_committed": 100.0,
+        "budget_exhausted_per_100": 19.5333,
+        "seconds_per_shard": 309.9723,
+        "per_drug_chem_validity": {
+          "BARICITINIB": 93.33,
+          "CYCLOTHIAZIDE": 99.67,
+          "ELIGLUSTAT": 100.0,
+          "ERLOTINIB": 99.67,
+          "FUTIBATINIB": 92.33,
+          "LESINURAD": 71.33,
+          "LIOTHYRONINE": 100.0,
+          "LOVASTATIN": 93.0,
+          "MARIBAVIR": 100.0,
+          "SPIRAPRIL": 99.33
+        }
+      },
+      "superstructure_generation": {
+        "chemical_validity_over_attempts": 97.2,
+        "task_success_over_attempts": 97.0333,
+        "chemical_validity_over_committed": 100.0,
+        "budget_exhausted_per_100": 3.3333,
+        "seconds_per_shard": 373.9447,
+        "per_drug_chem_validity": {
+          "BARICITINIB": 100.0,
+          "CYCLOTHIAZIDE": 100.0,
+          "ELIGLUSTAT": 100.0,
+          "ERLOTINIB": 100.0,
+          "FUTIBATINIB": 100.0,
+          "LESINURAD": 100.0,
+          "LIOTHYRONINE": 100.0,
+          "LOVASTATIN": 99.33,
+          "MARIBAVIR": 100.0,
+          "SPIRAPRIL": 72.67
+        }
+      },
+      "scaffold_decoration": {
+        "chemical_validity_over_attempts": 97.5333,
+        "task_success_over_attempts": 90.2667,
+        "chemical_validity_over_committed": 100.0,
+        "budget_exhausted_per_100": 4.4333,
+        "seconds_per_shard": 442.5217,
+        "per_drug_chem_validity": {
+          "BARICITINIB": 100.0,
+          "CYCLOTHIAZIDE": 99.67,
+          "ELIGLUSTAT": 100.0,
+          "ERLOTINIB": 100.0,
+          "FUTIBATINIB": 100.0,
+          "LESINURAD": 100.0,
+          "LIOTHYRONINE": 100.0,
+          "LOVASTATIN": 100.0,
+          "MARIBAVIR": 100.0,
+          "SPIRAPRIL": 75.67
+        }
+      }
+    },
+    "96": {
+      "motif_extension": {
+        "chemical_validity_over_attempts": 99.2,
+        "task_success_over_attempts": 98.8,
+        "chemical_validity_over_committed": 100.0,
+        "budget_exhausted_per_100": 8.6,
+        "seconds_per_shard": 384.46,
+        "per_drug_chem_validity": {
+          "BARICITINIB": 100.0,
+          "CYCLOTHIAZIDE": 100.0,
+          "ELIGLUSTAT": 100.0,
+          "ERLOTINIB": 100.0,
+          "FUTIBATINIB": 99.67,
+          "LESINURAD": 92.33,
+          "LIOTHYRONINE": 100.0,
+          "LOVASTATIN": 100.0,
+          "MARIBAVIR": 100.0,
+          "SPIRAPRIL": 100.0
+        }
+      },
+      "superstructure_generation": {
+        "chemical_validity_over_attempts": 99.1,
+        "task_success_over_attempts": 98.8667,
+        "chemical_validity_over_committed": 100.0,
+        "budget_exhausted_per_100": 1,
+        "seconds_per_shard": 392.332,
+        "per_drug_chem_validity": {
+          "BARICITINIB": 100.0,
+          "CYCLOTHIAZIDE": 100.0,
+          "ELIGLUSTAT": 100.0,
+          "ERLOTINIB": 100.0,
+          "FUTIBATINIB": 100.0,
+          "LESINURAD": 100.0,
+          "LIOTHYRONINE": 100.0,
+          "LOVASTATIN": 100.0,
+          "MARIBAVIR": 100.0,
+          "SPIRAPRIL": 91.0
+        }
+      },
+      "scaffold_decoration": {
+        "chemical_validity_over_attempts": 99.5333,
+        "task_success_over_attempts": 93.5,
+        "chemical_validity_over_committed": 100.0,
+        "budget_exhausted_per_100": 0.8,
+        "seconds_per_shard": 449.0667,
+        "per_drug_chem_validity": {
+          "BARICITINIB": 100.0,
+          "CYCLOTHIAZIDE": 100.0,
+          "ELIGLUSTAT": 100.0,
+          "ERLOTINIB": 100.0,
+          "FUTIBATINIB": 100.0,
+          "LESINURAD": 100.0,
+          "LIOTHYRONINE": 100.0,
+          "LOVASTATIN": 100.0,
+          "MARIBAVIR": 100.0,
+          "SPIRAPRIL": 95.33
+        }
+      }
+    }
+  },
+  "secondary_metrics": {
+    "24": {
+      "motif_extension": {
+        "over_emitted": {
+          "validity": {
+            "mean": 83.23333333333333,
+            "std": 16.317032682309474
+          },
+          "uniqueness": {
+            "mean": 78.21745313994941,
+            "std": 26.09958812159399
+          },
+          "quality": {
+            "mean": 14.466666666666667,
+            "std": 15.51071314357345
+          },
+          "diversity": {
+            "mean": 0.6001935862799203,
+            "std": 0.11075859387066525
+          }
+        },
+        "over_emitted_rows": 30,
+        "over_committed": {
+          "validity": {
+            "mean": 100.0,
+            "std": 0.0
+          },
+          "uniqueness": {
+            "mean": 76.57597565077847,
+            "std": 25.220114667485014
+          },
+          "quality": {
+            "mean": 17.962184618928156,
+            "std": 17.564127799879792
+          },
+          "diversity": {
+            "mean": 0.6020192111891702,
+            "std": 0.1097772610998823
+          }
+        },
+        "over_committed_rows": 30,
+        "committed_endpoints": 2577,
+        "unique_committed_endpoints": 2016
+      },
+      "scaffold_decoration": {
+        "over_emitted": {
+          "validity": {
+            "mean": 84.16666666666667,
+            "std": 20.134685385065136
+          },
+          "uniqueness": {
+            "mean": 98.54775254768767,
+            "std": 2.7320348794036793
+          },
+          "quality": {
+            "mean": 25.1,
+            "std": 21.47145391754674
+          },
+          "diversity": {
+            "mean": 0.5806036210936701,
+            "std": 0.09524242363669252
+          }
+        },
+        "over_emitted_rows": 30,
+        "over_committed": {
+          "validity": {
+            "mean": 100.0,
+            "std": 0.0
+          },
+          "uniqueness": {
+            "mean": 95.88780268811473,
+            "std": 5.561401567651281
+          },
+          "quality": {
+            "mean": 29.72089275705634,
+            "std": 21.65121151334996
+          },
+          "diversity": {
+            "mean": 0.586681562225358,
+            "std": 0.09556336000410191
+          }
+        },
+        "over_committed_rows": 30,
+        "committed_endpoints": 2813,
+        "unique_committed_endpoints": 2717
+      },
+      "superstructure_generation": {
+        "over_emitted": {
+          "validity": {
+            "mean": 93.53333333333333,
+            "std": 15.534334731669572
+          },
+          "uniqueness": {
+            "mean": 97.57853006749058,
+            "std": 6.43383261066685
+          },
+          "quality": {
+            "mean": 37.666666666666664,
+            "std": 23.444023166304504
+          },
+          "diversity": {
+            "mean": 0.7261047121188804,
+            "std": 0.04499284772441199
+          }
+        },
+        "over_emitted_rows": 30,
+        "over_committed": {
+          "validity": {
+            "mean": 100.0,
+            "std": 0.0
+          },
+          "uniqueness": {
+            "mean": 97.59086432589329,
+            "std": 6.4054141422870945
+          },
+          "quality": {
+            "mean": 39.54479362149833,
+            "std": 22.4171996779915
+          },
+          "diversity": {
+            "mean": 0.7263357006001847,
+            "std": 0.04476251007412319
+          }
+        },
+        "over_committed_rows": 30,
+        "committed_endpoints": 2809,
+        "unique_committed_endpoints": 2770
+      }
+    },
+    "96": {
+      "motif_extension": {
+        "over_emitted": {
+          "validity": {
+            "mean": 98.8,
+            "std": 2.3295206946208196
+          },
+          "uniqueness": {
+            "mean": 89.85744701225308,
+            "std": 16.920281109720012
+          },
+          "quality": {
+            "mean": 21.033333333333335,
+            "std": 18.856445994819797
+          },
+          "diversity": {
+            "mean": 0.6093658504209215,
+            "std": 0.0947732463184061
+          }
+        },
+        "over_emitted_rows": 30,
+        "over_committed": {
+          "validity": {
+            "mean": 100.0,
+            "std": 0.0
+          },
+          "uniqueness": {
+            "mean": 89.80659534387564,
+            "std": 16.865343711797333
+          },
+          "quality": {
+            "mean": 21.453433865274754,
+            "std": 19.268950807507547
+          },
+          "diversity": {
+            "mean": 0.6094618478466892,
+            "std": 0.09474899998164141
+          }
+        },
+        "over_committed_rows": 30,
+        "committed_endpoints": 2976,
+        "unique_committed_endpoints": 2671
+      },
+      "scaffold_decoration": {
+        "over_emitted": {
+          "validity": {
+            "mean": 93.5,
+            "std": 4.917655267841915
+          },
+          "uniqueness": {
+            "mean": 98.1408976794719,
+            "std": 3.1650737504712736
+          },
+          "quality": {
+            "mean": 26.966666666666665,
+            "std": 22.406075564949393
+          },
+          "diversity": {
+            "mean": 0.5835529184156154,
+            "std": 0.09463903134090519
+          }
+        },
+        "over_emitted_rows": 30,
+        "over_committed": {
+          "validity": {
+            "mean": 100.0,
+            "std": 0.0
+          },
+          "uniqueness": {
+            "mean": 98.12105596201455,
+            "std": 2.9667199957210504
+          },
+          "quality": {
+            "mean": 28.774563056571704,
+            "std": 22.760048183343148
+          },
+          "diversity": {
+            "mean": 0.5878897620735766,
+            "std": 0.09453911967559346
+          }
+        },
+        "over_committed_rows": 30,
+        "committed_endpoints": 2986,
+        "unique_committed_endpoints": 2930
+      },
+      "superstructure_generation": {
+        "over_emitted": {
+          "validity": {
+            "mean": 98.86666666666666,
+            "std": 3.2530327730015607
+          },
+          "uniqueness": {
+            "mean": 99.69588014981272,
+            "std": 0.5319085247768072
+          },
+          "quality": {
+            "mean": 39.2,
+            "std": 22.6
+          },
+          "diversity": {
+            "mean": 0.7281088953325853,
+            "std": 0.04130855326364851
+          }
+        },
+        "over_emitted_rows": 30,
+        "over_committed": {
+          "validity": {
+            "mean": 100.0,
+            "std": 0.0
+          },
+          "uniqueness": {
+            "mean": 99.69588014981272,
+            "std": 0.5319085247768072
+          },
+          "quality": {
+            "mean": 39.617316753561774,
+            "std": 22.53568420735566
+          },
+          "diversity": {
+            "mean": 0.7283711216452092,
+            "std": 0.0410467340007136
+          }
+        },
+        "over_committed_rows": 30,
+        "committed_endpoints": 2973,
+        "unique_committed_endpoints": 2964
+      }
+    }
+  },
+  "chosen_value": 96,
+  "why": "Monotone on every task with diminishing returns, and 96 is where the budget stops being the binding constraint: exhaustions fall to 8.6 / 1.0 / 0.8 per hundred attempts and chemical validity reaches 99.2 / 99.1 / 99.5, so any remaining loss is chemistry rather than budget. Beyond this point a larger budget has almost nothing left to recover.",
+  "cost": "wall clock only: motif 204 -> 384 s per shard, superstructure 336 -> 392, decoration 398 -> 449. Exhausting the budget ends a trajectory, so the knob trades sampling effort for attempts that finish and cannot change what is chemically admissible.",
+  "caveat": "Secondary metrics improve rather than narrow: motif uniqueness 78.22 -> 89.86 and quality 14.47 -> 21.03, diversity 0.60 -> 0.61. The larger budget lets harder trajectories finish rather than biasing toward easy ones."
+}
