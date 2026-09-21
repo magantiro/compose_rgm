@@ -38,10 +38,7 @@ from pathlib import Path
 import numpy as np
 from rdkit import Chem
 
-from compose_v4.chem.molecular_graph import (
-    molecular_graph_to_smiles,
-    smiles_to_molecular_graph,
-)
+from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.control.completion_law_contract import (
     CONTRACT_LANE,
@@ -101,7 +98,9 @@ def run(contract: Path, *, cell_name: str, draws: int, law_on: bool, seed_offset
                 region_law=region_law,
                 completion_law=completion_law,
             )
-            endpoint = molecular_graph_to_smiles(trace["states"][-1])
+            # `trace["states"]` holds ENCODED state dicts, not graphs; the
+            # program's final molecule is carried directly as `trace["endpoint"]`.
+            endpoint = trace["endpoint"]
         except (ValueError, RuntimeError, KeyError, IndexError, TypeError):
             continue
         program_key = _canon(endpoint)

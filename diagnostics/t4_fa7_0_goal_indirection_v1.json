@@ -1,0 +1,16 @@
+{
+ "cell": "fa7_0",
+ "completion_law": "free_gate_margin_v1",
+ "contract": "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+ "draws": 150,
+ "eligible_program_endpoints": [],
+ "gated_eligible_total": 0,
+ "oracle_calls": 0,
+ "program_endpoint_eligible_rate": 0.0,
+ "program_endpoints_eligible": 0,
+ "programs_considered": 150,
+ "recovered_fraction": 0.0,
+ "region_law": "free_gate_margin_v1",
+ "schema_version": "t4_fa7_0_goal_indirection_probe_v1",
+ "seconds": 376.7
+}
