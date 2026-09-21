@@ -1,0 +1,177 @@
+{
+ "cell": "fa7_0",
+ "contract": "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+ "delta": 0.6,
+ "docking_calls": 0,
+ "draws": 480,
+ "eligible": 1,
+ "eligible_endpoints": [
+  {
+   "families": [
+    "base"
+   ],
+   "heavy": 27,
+   "heavy_delta": -5,
+   "program_families": [
+    "segment_replace",
+    "cycle_open",
+    "substituent_delete"
+   ],
+   "qed": 0.642219,
+   "sa": 2.5254,
+   "similarity": 0.689655,
+   "smiles": "C=c1ccc(CN(CCC(C)C)C(=O)c2cccc3ccccc23)cc1=C"
+  }
+ ],
+ "eligible_per_draw": 0.0020833333333333333,
+ "funnel": {
+  "best_qed_among_similarity_passing": 0.6422194763348329,
+  "best_sa_among_similarity_and_qed_passing": 2.5254350711497633,
+  "best_similarity_among_qed_passing": 0.6896551724137931,
+  "distinct_endpoints_checked": 7795,
+  "eligible": 1,
+  "gate_calls": 10811,
+  "gate_disagreements": 0,
+  "max_heavy_excision": 23,
+  "parsed": 6213,
+  "pass_qed": 367,
+  "pass_sa": 4438,
+  "pass_similarity": 691,
+  "pass_similarity_and_qed": 1,
+  "pass_similarity_and_qed_and_sa": 1,
+  "pass_structural": 5126
+ },
+ "horizon": 3,
+ "lane": "shallow",
+ "multi_region": true,
+ "near_misses": [
+  {
+   "heavy": 27,
+   "pass_sa": true,
+   "pass_structural": true,
+   "qed": 0.642219,
+   "qed_shortfall": -0.042219,
+   "sa": 2.5254,
+   "similarity": 0.689655,
+   "smiles": "C=c1ccc(CN(CCC(C)C)C(=O)c2cccc3ccccc23)cc1=C"
+  },
+  {
+   "heavy": 30,
+   "pass_sa": true,
+   "pass_structural": true,
+   "qed": 0.472242,
+   "qed_shortfall": 0.127758,
+   "sa": 2.8935,
+   "similarity": 0.640625,
+   "smiles": "C=c1ccccc1=CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+  },
+  {
+   "heavy": 30,
+   "pass_sa": true,
+   "pass_structural": true,
+   "qed": 0.472077,
+   "qed_shortfall": 0.127923,
+   "sa": 2.5621,
+   "similarity": 0.606061,
+   "smiles": "C=CC(N)=Cc1cccc(CN(CCC(C)C)C(=O)c2cccc3ccccc23)c1"
+  },
+  {
+   "heavy": 31,
+   "pass_sa": true,
+   "pass_structural": true,
+   "qed": 0.457103,
+   "qed_shortfall": 0.142897,
+   "sa": 3.0177,
+   "similarity": 0.640625,
+   "smiles": "CC=c1ccccc1=CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+  },
+  {
+   "heavy": 31,
+   "pass_sa": true,
+   "pass_structural": true,
+   "qed": 0.457103,
+   "qed_shortfall": 0.142897,
+   "sa": 2.9421,
+   "similarity": 0.630769,
+   "smiles": "C=c1ccccc1=C(C)C(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+  },
+  {
+   "heavy": 31,
+   "pass_sa": true,
+   "pass_structural": true,
+   "qed": 0.453591,
+   "qed_shortfall": 0.146409,
+   "sa": 2.9203,
+   "similarity": 0.71875,
+   "smiles": "C=c1c(C(=O)N(CCC(C)C)Cc2ccc3ccc(C(=N)N)cc3c2)cccc1=CC"
+  },
+  {
+   "heavy": 31,
+   "pass_sa": true,
+   "pass_structural": true,
+   "qed": 0.453591,
+   "qed_shortfall": 0.146409,
+   "sa": 2.8867,
+   "similarity": 0.741935,
+   "smiles": "C=c1cccc(C(=O)N(CCC(C)C)Cc2ccc3ccc(C(=N)N)cc3c2)c1=CC"
+  },
+  {
+   "heavy": 32,
+   "pass_sa": true,
+   "pass_structural": true,
+   "qed": 0.446223,
+   "qed_shortfall": 0.153777,
+   "sa": 3.1599,
+   "similarity": 0.647059,
+   "smiles": "C=c1cc(CN(CCC(C)C)C(=O)c2cccc3ccccc23)ccc1=CC=NC(=N)N"
+  },
+  {
+   "heavy": 31,
+   "pass_sa": true,
+   "pass_structural": true,
+   "qed": 0.434396,
+   "qed_shortfall": 0.165604,
+   "sa": 2.9213,
+   "similarity": 0.636364,
+   "smiles": "C=c1ccc(C(=N)N)cc1=CCCN(CCC(C)C)C(=O)c1cccc2ccccc12"
+  },
+  {
+   "heavy": 31,
+   "pass_sa": true,
+   "pass_structural": true,
+   "qed": 0.432087,
+   "qed_shortfall": 0.167913,
+   "sa": 2.9925,
+   "similarity": 0.671875,
+   "smiles": "C=c1ccc(CN(CCC(C)C)C(=O)c2cccc3ccccc23)cc1=CCC(=N)N"
+  },
+  {
+   "heavy": 29,
+   "pass_sa": true,
+   "pass_structural": true,
+   "qed": 0.43069,
+   "qed_shortfall": 0.16931,
+   "sa": 2.2374,
+   "similarity": 0.603175,
+   "smiles": "CC(C)=Cc1cccc(CN(CCC(C)C)C(=O)c2cccc3ccccc23)c1"
+  },
+  {
+   "heavy": 32,
+   "pass_sa": true,
+   "pass_structural": true,
+   "qed": 0.427816,
+   "qed_shortfall": 0.172184,
+   "sa": 2.9764,
+   "similarity": 0.626866,
+   "smiles": "C=c1ccc(C(=N)N)cc1=CC(=O)CN(CCC(C)C)C(=O)c1cccc2ccccc12"
+  }
+ ],
+ "oracle_calls": 0,
+ "region_law": "free_gate_margin_v1",
+ "schema_version": "t4_fa7_0_reachability_probe_v1",
+ "seconds": 1625.9,
+ "seed": 2026091903,
+ "source_heavy_atoms": 32,
+ "source_smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+ "support": "compose_valid"
+}

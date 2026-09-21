@@ -1,0 +1,193 @@
+{
+ "cell": "fa7_0",
+ "completions_per_region": 64,
+ "contract": "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+ "delta": 0.6,
+ "distinct_eligible_endpoints": 2,
+ "docking_calls": 0,
+ "eligible_endpoints": [
+  {
+   "deleted_atoms": 10,
+   "elements": [
+    "C"
+   ],
+   "heavy": 23,
+   "heavy_delta": -9,
+   "inserted_atoms": 1,
+   "qed": 0.632753,
+   "sa": 2.2658,
+   "similarity": 0.696429,
+   "smiles": "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+  },
+  {
+   "deleted_atoms": 10,
+   "elements": [
+    "O",
+    "C"
+   ],
+   "heavy": 24,
+   "heavy_delta": -8,
+   "inserted_atoms": 2,
+   "qed": 0.626372,
+   "sa": 2.331,
+   "similarity": 0.661017,
+   "smiles": "COC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+  }
+ ],
+ "eligible_inserted_atoms_histogram": {
+  "1": 22,
+  "2": 11
+ },
+ "oracle_calls": 0,
+ "pooled_eligible_fraction": 0.00859375,
+ "productive_regions": [
+  {
+   "best": {
+    "deleted_atoms": 10,
+    "elements": [
+     "C"
+    ],
+    "heavy": 23,
+    "heavy_delta": -9,
+    "inserted_atoms": 1,
+    "qed": 0.632753,
+    "sa": 2.2658,
+    "similarity": 0.696429,
+    "smiles": "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+   },
+   "capacity": 8,
+   "completions_executed": 64,
+   "deleted_atoms": 10,
+   "eligible": 9,
+   "eligible_fraction": 0.140625
+  },
+  {
+   "best": {
+    "deleted_atoms": 10,
+    "elements": [
+     "C"
+    ],
+    "heavy": 23,
+    "heavy_delta": -9,
+    "inserted_atoms": 1,
+    "qed": 0.632753,
+    "sa": 2.2658,
+    "similarity": 0.696429,
+    "smiles": "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+   },
+   "capacity": 8,
+   "completions_executed": 64,
+   "deleted_atoms": 10,
+   "eligible": 5,
+   "eligible_fraction": 0.078125
+  },
+  {
+   "best": {
+    "deleted_atoms": 10,
+    "elements": [
+     "C"
+    ],
+    "heavy": 23,
+    "heavy_delta": -9,
+    "inserted_atoms": 1,
+    "qed": 0.632753,
+    "sa": 2.2658,
+    "similarity": 0.696429,
+    "smiles": "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+   },
+   "capacity": 8,
+   "completions_executed": 64,
+   "deleted_atoms": 10,
+   "eligible": 5,
+   "eligible_fraction": 0.078125
+  },
+  {
+   "best": {
+    "deleted_atoms": 10,
+    "elements": [
+     "C"
+    ],
+    "heavy": 23,
+    "heavy_delta": -9,
+    "inserted_atoms": 1,
+    "qed": 0.632753,
+    "sa": 2.2658,
+    "similarity": 0.696429,
+    "smiles": "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+   },
+   "capacity": 8,
+   "completions_executed": 64,
+   "deleted_atoms": 10,
+   "eligible": 4,
+   "eligible_fraction": 0.0625
+  },
+  {
+   "best": {
+    "deleted_atoms": 10,
+    "elements": [
+     "C"
+    ],
+    "heavy": 23,
+    "heavy_delta": -9,
+    "inserted_atoms": 1,
+    "qed": 0.632753,
+    "sa": 2.2658,
+    "similarity": 0.696429,
+    "smiles": "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+   },
+   "capacity": 8,
+   "completions_executed": 64,
+   "deleted_atoms": 10,
+   "eligible": 4,
+   "eligible_fraction": 0.0625
+  },
+  {
+   "best": {
+    "deleted_atoms": 10,
+    "elements": [
+     "C"
+    ],
+    "heavy": 23,
+    "heavy_delta": -9,
+    "inserted_atoms": 1,
+    "qed": 0.632753,
+    "sa": 2.2658,
+    "similarity": 0.696429,
+    "smiles": "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+   },
+   "capacity": 8,
+   "completions_executed": 64,
+   "deleted_atoms": 10,
+   "eligible": 3,
+   "eligible_fraction": 0.046875
+  },
+  {
+   "best": {
+    "deleted_atoms": 10,
+    "elements": [
+     "C"
+    ],
+    "heavy": 23,
+    "heavy_delta": -9,
+    "inserted_atoms": 1,
+    "qed": 0.632753,
+    "sa": 2.2658,
+    "similarity": 0.696429,
+    "smiles": "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+   },
+   "capacity": 8,
+   "completions_executed": 64,
+   "deleted_atoms": 10,
+   "eligible": 3,
+   "eligible_fraction": 0.046875
+  }
+ ],
+ "region_law": "free_gate_margin_v1",
+ "regions_drawn": 60,
+ "regions_with_an_eligible_completion": 7,
+ "schema_version": "t4_fa7_0_completion_headroom_v1",
+ "seconds": 234.3,
+ "seed": 2026091903,
+ "source_heavy_atoms": 32,
+ "support": "compose_valid"
+}
