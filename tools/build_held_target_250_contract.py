@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 
 from compose_v4.control.docking_value import identity
@@ -39,13 +40,29 @@ def main() -> None:
     base_path = ROOT / args.base
     payload = dict(unseal(base_path))
     target = args.target
+
+    # The OPERATIVE delta is the one the campaign filters on; the `d06`/`d04` token in the
+    # output name is only a label.  These disagreed once already: the jak2 contract is named
+    # `..._d06_250.json`, declares delta 0.4, and carried prose saying "delta 0.6" because
+    # this builder hardcoded it -- which sent two separate readings of the panel to the wrong
+    # baseline column before the reconciler started taking delta from the contract.  Derive
+    # the prose from the operative value, and refuse a name that contradicts it.
+    delta = payload.get("delta")
+    if delta is None:
+        raise SystemExit("base contract declares no operative `delta`")
+    named = re.search(r"_d0(\d)_", args.output)
+    if named and abs(float(f"0.{named.group(1)}") - float(delta)) > 1e-9:
+        raise SystemExit(
+            f"output name says delta 0.{named.group(1)} but the contract declares {delta}; "
+            "rename the output or fix the base contract -- do not ship contradicting prose"
+        )
     payload.update(
         {
             "schema_version": f"t4_held_target_distilled_{target}_d06_250_contract_v1",
             "status": "SEALED_PENDING_EXACT_USER_AUTHORIZATION",
             "scientific_problem": f"test transfer of a route-trained structural-action prior to {target} with every {target} route excluded from fitting",
             "primary_model_output": "FiberControl selection over complete shallow, anchored, and leave-target-out route programs",
-            "claim_boundary": f"held-target {target} panel at delta 0.6 with 250 charged calls per cell; no {target} route enters the prior",
+            "claim_boundary": f"held-target {target} panel at delta {delta} with 250 charged calls per cell; no {target} route enters the prior",
             "frozen_from": {
                 **payload.get("frozen_from", {}),
                 "controller_contract": args.base,
@@ -70,7 +87,7 @@ def main() -> None:
 
     runtime = payload["runtime_inputs_sha256"]
     for key in list(runtime):
-        if key.endswith("route_expert_checkpoint.json") or key.endswith("checkpoint.json"):
+        if key.endswith(("route_expert_checkpoint.json", "checkpoint.json")):
             runtime.pop(key, None)
         if key.startswith("modal_apps/"):
             runtime.pop(key, None)
