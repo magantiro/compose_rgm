@@ -1,0 +1,36 @@
+{
+  "also_measured": "NEITHER arm produces usable chemistry on gsk3b: 0/10 above QED 0.6 and 0/10 below SA 4.0 in both arms. gsk3b at 250 calls yields no drug-like molecules regardless of memory.",
+  "arms": {
+    "A_baseline": {
+      "auc": 0.199,
+      "best_score": 0.41,
+      "r_score_qed": -0.402,
+      "r_score_sa": 0.456,
+      "top10_mean_qed": 0.423,
+      "top10_mean_sa": 6.12,
+      "top10_qed_ge_0.6": 0,
+      "top10_sa_le_4": 0
+    },
+    "B_memory": {
+      "auc": 0.2722,
+      "best_score": 0.53,
+      "r_score_qed": -0.403,
+      "r_score_sa": 0.668,
+      "top10_mean_qed": 0.367,
+      "top10_mean_sa": 6.31,
+      "top10_qed_ge_0.6": 0,
+      "top10_sa_le_4": 0
+    }
+  },
+  "budget": 250,
+  "consequence": "The gsk3b 0.530 is NOT a reportable result and must not enter any promotion comparison. It measures exploitation of a fingerprint predictor, not molecular design.",
+  "contrast": "On celecoxib_rediscovery -- a similarity objective that cannot be fooled this way -- the same mechanism is a genuine win (AUC 0.2489 -> 0.3138, +26.1%). The honest statement is that online memory improves SEARCH, and on a foolable objective it searches harder toward the exploit.",
+  "finding": "B scores 29% higher on the oracle while its top-10 are chemically WORSE than A's -- lower QED, higher SA -- and memory strengthens the score/unsynthesizability coupling from +0.456 to +0.668. B's top molecules carry phosphorus in aromatic rings (n1cpcc21, cpcn) and hypervalent iodine ([IH]).",
+  "implication_for_the_panel": "A heterogeneous PMO panel must report per-task CHEMISTRY alongside score. A suite mean over tasks of mixed foolability would have hidden this entirely -- gsk3b's +36.8% AUC would have been averaged in as progress.",
+  "method": "Read every charged query result from each arm's durable ledger and scored QED and SA under the pinned kernel (rdkit 2024.3.5) with the repo's own sascorer. Zero oracle calls; no molecule was re-scored by the oracle.",
+  "oracle_calls_spent_on_this_audit": 0,
+  "question": "gsk3b is the oracle where reward hacking was MEASURED. Does online structural memory SUPPRESS the off-manifold drift, or AMPLIFY it by remembering that garbage scored well?",
+  "recorded_at_utc": "2026-09-21T18:46:48.787298+00:00",
+  "schema_version": "pmo_ab_gsk3b_chemistry_audit_v1",
+  "verdict": "AMPLIFIES"
+}
