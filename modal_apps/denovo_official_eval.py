@@ -240,6 +240,55 @@ def probe() -> dict:
     }
 
 
+@app.function(image=image, volumes={str(VOL): volume}, timeout=3600, cpu=4, memory=8192)
+def corpus_reference(limit: int = 5000) -> dict:
+    """Score the TRAINING CORPUS itself on the published metric.
+
+    This is the calibration a generated-sample number is meaningless without:
+    ``QED >= 0.6 AND SA <= 4`` is a strong filter -- aspirin (QED 0.550) and
+    caffeine (0.538) both fail it -- so "quality 40%" means nothing until the
+    rate real drug-like molecules achieve on the SAME metric is known.  It is
+    an upper reference for a generator trained on this corpus, not a target,
+    and it is NOT a published baseline.
+    """
+
+    from compose_v4.eval.denovo_benchmark import denovo_benchmark_metrics
+
+    _assert_pinned_inputs()
+    rows: dict[str, dict] = {}
+    for name, path in (("train", TRAIN_SMILES), ("heldout_reference", REFERENCE_SMILES)):
+        smiles = _read_smiles(path, limit=limit)
+        metrics = denovo_benchmark_metrics(list(smiles))
+        metrics["source"] = name
+        metrics["limit"] = limit
+        rows[name] = metrics
+        print(
+            json.dumps(
+                {
+                    "phase": "corpus_reference",
+                    "source": name,
+                    "n": metrics["attempted"],
+                    "validity": metrics["validity"],
+                    "uniqueness": metrics["uniqueness"],
+                    "quality": metrics["quality"],
+                    "quality_given_valid_unique": metrics["quality_given_valid_unique"],
+                    "diversity": metrics["diversity"],
+                }
+            ),
+            flush=True,
+        )
+
+    out = VOL / "corpus_reference.json"
+    out.write_text(json.dumps(rows, indent=2, default=str))
+    volume.commit()
+    return rows
+
+
+@app.local_entrypoint()
+def corpus_reference_entry(limit: int = 5000) -> None:
+    print(json.dumps(corpus_reference.remote(limit), indent=2, default=str))
+
+
 # ---- sampling ---------------------------------------------------------------
 
 
