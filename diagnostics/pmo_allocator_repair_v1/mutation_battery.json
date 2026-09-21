@@ -5,7 +5,7 @@
    "test_evidence_allocation_mass_is_monotone_in_score",
    "test_evidence_allocation_prefers_the_better_of_two_admitted_endpoints"
   ],
-  "summary": "2 failed, 20 passed in 1.33s",
+  "summary": "2 failed, 26 passed in 1.44s",
   "killed": true
  },
  "M2_evidence_weight_ignores_niche_mask": {
@@ -13,7 +13,7 @@
   "failed_tests": [
    "test_niching_still_caps_how_many_endpoints_draw_exploitation_mass"
   ],
-  "summary": "1 failed, 21 passed in 1.32s",
+  "summary": "1 failed, 27 passed in 1.37s",
   "killed": true
  },
  "M3_escape_arming_no_longer_restarts_counter": {
@@ -21,7 +21,7 @@
   "failed_tests": [
    "test_escape_drains_on_an_unbroken_plateau"
   ],
-  "summary": "1 failed, 21 passed in 1.37s",
+  "summary": "1 failed, 27 passed in 1.35s",
   "killed": true
  },
  "M4_jump_floor_quota_restored": {
@@ -32,7 +32,7 @@
    "test_jump_lane_holds_no_reserved_floor_in_any_quota_regime[escape-9-True]",
    "test_jump_lane_is_still_reachable_without_a_reserved_floor"
   ],
-  "summary": "4 failed, 18 passed in 1.33s",
+  "summary": "4 failed, 24 passed in 1.39s",
   "killed": true
  },
  "M5_credit_bonus_back_to_absolute_constant": {
@@ -41,15 +41,7 @@
    "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.007]",
    "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.05]"
   ],
-  "summary": "2 failed, 20 passed in 1.35s",
-  "killed": true
- },
- "M6_parent_tilt_back_to_absolute_constant": {
-  "applied": true,
-  "failed_tests": [
-   "test_parent_tilt_lets_measured_upside_outvote_novelty"
-  ],
-  "summary": "1 failed, 21 passed in 1.34s",
+  "summary": "2 failed, 26 passed in 1.41s",
   "killed": true
  },
  "M7_credit_schema_not_bumped": {
@@ -57,7 +49,32 @@
   "failed_tests": [
    "test_credit_snapshot_schema_refuses_the_reweighted_v1_payload"
   ],
-  "summary": "1 failed, 21 passed in 1.33s",
+  "summary": "1 failed, 27 passed in 1.43s",
+  "killed": true
+ },
+ "M9_centres_back_to_distance_only": {
+  "applied": true,
+  "failed_tests": [
+   "test_evidence_centres_prefer_scoring_molecules_over_distant_fragments"
+  ],
+  "summary": "1 failed, 27 passed in 1.37s",
+  "killed": true
+ },
+ "M10_tilt_back_to_additive_base_one": {
+  "applied": true,
+  "failed_tests": [
+   "test_parent_tilt_lets_measured_upside_outvote_novelty",
+   "test_delivered_upside_still_outranks_a_stalled_parent"
+  ],
+  "summary": "2 failed, 26 passed in 1.39s",
+  "killed": true
+ },
+ "M11_evidence_mode_uses_legacy_partition": {
+  "applied": true,
+  "failed_tests": [
+   "test_evidence_mode_actually_routes_through_the_evidence_partition"
+  ],
+  "summary": "1 failed, 27 passed in 1.38s",
   "killed": true
  },
  "M8_observed_scale_hardcoded": {
@@ -67,7 +84,7 @@
    "test_delivered_evidence_outranks_an_untried_cell_at_every_reward_scale[0.05]",
    "test_observed_scale_is_counted_not_configured"
   ],
-  "summary": "3 failed, 19 passed in 1.30s",
+  "summary": "3 failed, 25 passed in 1.39s",
   "killed": true
  }
 }

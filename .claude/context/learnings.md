@@ -2661,3 +2661,60 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   the branch base** (`dabaff25` on disk vs `3d185c06` expected), so its 3 failures are
   pre-existing, not caused by editing that file. Hash the BASE revision's blob before
   attributing a pin failure to your own change.
+
+## 2026-09-21 (the allocator follow-up: concentration was the ADMITTED SET, and the tilt could not see a stalled parent)
+
+- **When a weight family trades breadth against quality on ONE axis, the choice set is
+  wrong -- stop tuning the weight.** After the first repair, top-1 parent mass sat at
+  0.58/0.63/0.68 and a sweep over weight families said every setting bought breadth by
+  buying fragments back: `archive_rank` top1 0.581 / effective parents 8.7 / sub-10 mass
+  0.106; `admitted_rank` 0.326 / 18.7 / 0.446; softmax at T = 1x, 5x, 20x the observed
+  scale 0.696 / 6.6 / 0.079, 0.516 / 9.2 / 0.109, 0.248 / 20.8 / 0.480. No setting won
+  both. **Cause: 4-6 of the 8 niche-ADMITTED endpoints were fragments**, so spreading
+  mass over the admitted set IS spreading it over garbage. The tradeoff was a property of
+  the choice set, not of the weighting.
+- **`exploration_niches` picks every centre after the first by DISTANCE ALONE, and the
+  thing furthest from a drug-like lead is a one-atom fragment.** New `evidence_niches`
+  scales the max-min separation by min-max-normalised utility, so a centre earns its
+  niche by being far from the others AND carrying evidence. Parameter-free (the
+  normalisation is the archive's own range) and it degrades to the pure max-min rule when
+  utility is flat. `exploration_niches` is left byte-identical -- live T4 arms use it.
+  MEASURED: admitted sub-10 fragments 6/8 -> 2/8, 4/8 -> 0/8, 6/8 -> 0/8; celecoxib
+  admitted scores [0.22, 0.21, 0.026, 0.026, 0.069, 0.027, 0.081, 0.081] ->
+  [0.22, 0.21, 0.188, 0.174, 0.143, 0.107, 0.134, 0.112]; group sizes 203/14/9/8 ->
+  134/40/31/29. **Both axes improve at once, which is the tell that the tradeoff was
+  never real.**
+- **A dimensionless base of 1.0 makes an evidence term invisible.** The parent tilt was
+  `1 + upside + bonus`, and on PMO both evidence terms sit at the reward scale (~0.007)
+  against a base of 1. MEASURED on the frozen replay: **64 consecutive unproductive
+  children moved the top parent's mass by 0.05% / 0.27% / 0.23%** -- the allocator could
+  not tell a working parent from a stalled one, which is the plateau defect re-entering
+  through the front door and it bites far harder once that parent holds a third of the
+  mass. Rewritten as a RATIO in measured-reward units (`1 + upside/observed_scale +
+  prior/sqrt(n+1)`), the same probe gives **16.7% / 26.1% / 32.6%** decay, monotone in
+  dead children. Untried and "delivers one typical improvement per child" both land at
+  factor 2.0; many children with zero upside lands at ~1.1. No new constant.
+  **LESSON: check the UNITS of every term you add together. An additive constant is an
+  implicit claim about the scale of everything beside it.**
+- **A behavioural test of a repaired function does NOT test that anything calls it.** The
+  mutation pointing `niche_evidence` back at the legacy distance-only partition SURVIVED
+  the whole battery, because the centre test called `evidence_niches` directly. Adding a
+  wiring probe that patches the module global the production `selection` resolves killed
+  it. Same shape as the 2026-09-20 inert `region_law` repair; it recurs because the
+  function test feels like enough. **Pair every "the new rule behaves" test with a "the
+  production path reaches the new rule" test.**
+- **Changing a shared term moves BOTH arms, so a before/after column can quietly stop
+  being the shipped baseline.** Normalising the tilt changed the `niche_score` arm too
+  (top-1 0.156 -> 0.185), so the legacy column in the final run is a configuration that
+  never ran. Quote the historical baseline from the measurement taken BEFORE the shared
+  change, and say which is which.
+- **Report chemistry per oracle, never as one average across tasks.** The repair moves
+  mass-weighted QED 0.422 -> 0.499 and SA 3.93 -> 3.54 on celecoxib and 0.404 -> 0.437 /
+  5.03 -> 4.41 on perindopril, while on gsk3b it moves QED 0.342 -> 0.164 and SA
+  5.27 -> 6.81. The gsk3b direction is NOT an allocator defect: that oracle's
+  fingerprint-RandomForest REWARDS off-manifold chemistry (r(score,QED) = -0.433,
+  r(score,SA) = +0.684, `diagnostics/pmo_offmanifold_reward_hacking_v1.json`), so an
+  allocator that correctly follows measured score correctly follows a corrupt signal.
+  **A score-following component cannot be evaluated on chemistry against a hackable
+  oracle** -- read gsk3b on score only, or fix the oracle first. Averaging the three
+  tasks produces a number that reads as a regression in work that improved 2 of 3.

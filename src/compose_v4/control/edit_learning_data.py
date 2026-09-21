@@ -159,3 +159,59 @@ def exploration_niches(endpoints, utilities, *, max_niches=4, per_niche=2):
         "incumbent": endpoints[first],
         "objective_unchanged": True,
     }
+
+
+def evidence_niches(endpoints, utilities, *, max_niches=4, per_niche=2):
+    """Max-min partition whose centres must be BOTH distant and promising.
+
+    `exploration_niches` picks every centre after the first by distance alone, so the
+    molecules furthest from the incumbent found the niches -- and the thing furthest
+    from a drug-like lead is a one-atom fragment. Measured on a completed 3x250 PMO run,
+    3 of 4 centres were 1-3 heavy-atom fragments (`[SH4]`, `CCl`, `NN(N)F`, `P`, `NF`,
+    `O=C=[SH4]`), the drug-like niche held 189-203 of 234 endpoints and contributed 2
+    admitted parents, and the three fragment niches contributed 6 scoring 0.000-0.12
+    against incumbents at 0.22-0.50.
+
+    Niching is supposed to preserve distinct PROMISING basins. Scaling the separation by
+    the endpoint's own min-max normalised utility says exactly that: a centre earns its
+    niche by being far from the others AND by carrying evidence. The normalisation is
+    taken from the archive's own observed range, so there is no task constant and no
+    absolute threshold; with no spread in utility it degrades to the pure max-min rule.
+
+    `exploration_niches` is deliberately left untouched -- live T4 arms allocate through
+    it, and changing it would move a running campaign.
+    """
+    if len(endpoints) != len(utilities) or not endpoints or len(set(endpoints)) != len(endpoints):
+        raise ValueError("niches need aligned unique endpoints and measured utilities")
+    if not all(math.isfinite(u) for u in utilities) or any(
+        type(v) is not int or v < 1 for v in (max_niches, per_niche)
+    ):
+        raise ValueError("finite utilities and positive bounded niche dimensions required")
+    features = [molecular_features(s)[1] for s in endpoints]
+    distance = 1 - graph_kernel(features, features)
+    values = np.asarray(utilities, dtype=float)
+    span = float(values.max() - values.min())
+    merit = (values - values.min()) / span if span > 0 else np.ones(len(values))
+    first = max(range(len(endpoints)), key=lambda i: (utilities[i], endpoints[i]))
+    centers = [first]
+    while len(centers) < min(max_niches, len(endpoints)):
+        remaining = [i for i in range(len(endpoints)) if i not in centers]
+        chosen = max(
+            remaining, key=lambda i: (min(distance[i, centers]) * merit[i], endpoints[i])
+        )
+        if min(distance[chosen, centers]) < 1e-12:
+            break
+        centers.append(chosen)
+    groups = [[] for _ in centers]
+    for i in range(len(endpoints)):
+        groups[int(np.argmin(distance[i, centers]))].append(i)
+    selected = [
+        sorted(group, key=lambda i: (-utilities[i], endpoints[i]))[:per_niche] for group in groups
+    ]
+    return {
+        "centers": [endpoints[i] for i in centers],
+        "members": [[endpoints[i] for i in group] for group in groups],
+        "selected": [[endpoints[i] for i in group] for group in selected],
+        "incumbent": endpoints[first],
+        "objective_unchanged": True,
+    }

@@ -18,7 +18,7 @@ import numpy as np
 
 from compose_v4.control.current_state_edits import current_state_program
 from compose_v4.control.docking_value import identity
-from compose_v4.control.edit_learning_data import exploration_niches
+from compose_v4.control.edit_learning_data import evidence_niches, exploration_niches
 from compose_v4.control.edit_program import EditProgram, attachment_bindings, extract_program
 from compose_v4.control.edit_program_graph import (
     combine_bound_programs,
@@ -336,9 +336,14 @@ class ProgramOptimizer:
             np.ones(len(endpoints)) if self.config.parent_allocation == "score_blind" else 1 / ranks
         )
         if self.config.parent_allocation in ("niche_score", "niche_evidence"):
-            key = (tuple(endpoints), tuple(costs))
+            partition = (
+                exploration_niches
+                if self.config.parent_allocation == "niche_score"
+                else evidence_niches
+            )
+            key = (tuple(endpoints), tuple(costs), partition.__name__)
             if self._niche_cache is None or self._niche_cache[0] != key:
-                self._niche_cache = (key, exploration_niches(endpoints, -costs))
+                self._niche_cache = (key, partition(endpoints, -costs))
             niches = self._niche_cache[1]
             selected = [set(group) for group in niches["selected"]]
             if self.config.parent_allocation == "niche_score":

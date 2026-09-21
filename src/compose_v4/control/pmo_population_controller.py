@@ -288,8 +288,18 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             trials = int(stats.get("children", 0))
             positive = float(stats.get("positive_improvement_sum", 0.0))
             upside = positive / max(1, trials)
-            uncertainty = 1.0 / math.sqrt(trials + 1)
-            factors.append(1.0 + upside + NOVELTY_PRIOR_TRIALS * scale * uncertainty)
+            uncertainty = NOVELTY_PRIOR_TRIALS / math.sqrt(trials + 1)
+            # The tilt is a RATIO in measured-reward units, not an additive nudge on a
+            # dimensionless 1.0. Added to 1.0, both evidence terms sit ~0.007 against a
+            # base of 1, so 64 consecutive unproductive children moved a parent's mass by
+            # 0.05-0.27% -- the allocator could not tell a working parent from a stalled
+            # one. Dividing the earned upside by the run's own scale puts "this parent
+            # delivers about one typical improvement per child" at the same weight as
+            # "this parent has never been tried", and drops a parent with many children
+            # and no upside to roughly half of either.
+            factors.append(
+                1.0 + (upside / scale if scale > 0.0 else 0.0) + uncertainty
+            )
         weighted = probability * np.asarray(factors, dtype=float)
         return keys, weighted / weighted.sum()
 

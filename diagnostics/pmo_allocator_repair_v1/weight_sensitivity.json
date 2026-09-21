@@ -1,0 +1,158 @@
+{
+ "celecoxib_rediscovery": {
+  "probe_vs_production_max_abs_error": 0.000722417730335212,
+  "LEGACY niche_score": {
+   "top1": 0.1558562679316615,
+   "top2": 0.3112486472241007,
+   "eff_parents": 23.461516327033564,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.6870228651495215
+  },
+  "archive_rank (shipped)": {
+   "top1": 0.5805865793656344,
+   "top2": 0.7746519129250181,
+   "eff_parents": 8.715173355069417,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.10600761621878431
+  },
+  "admitted_rank": {
+   "top1": 0.32575397563310565,
+   "top2": 0.4710083541670975,
+   "eff_parents": 18.66720269512398,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.4462881464493068
+  },
+  "softmax T=1x scale": {
+   "top1": 0.6959692357169747,
+   "top2": 0.8017093991256338,
+   "eff_parents": 6.624024482428937,
+   "above_2x_floor": 2,
+   "sub10_heavy_mass": 0.079487182070948
+  },
+  "softmax T=5x scale": {
+   "top1": 0.5163268373186305,
+   "top2": 0.7724892733967752,
+   "eff_parents": 9.23547872369586,
+   "above_2x_floor": 7,
+   "sub10_heavy_mass": 0.10870730779980645
+  },
+  "softmax T=20x scale": {
+   "top1": 0.24780975906894578,
+   "top2": 0.4015140140705679,
+   "eff_parents": 20.777434217406096,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.4796825671260137
+  },
+  "uniform_admitted": {
+   "top1": 0.15544407283537728,
+   "top2": 0.31088814567075457,
+   "eff_parents": 23.43493338840611,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.6862504645113342
+  }
+ },
+ "gsk3b": {
+  "probe_vs_production_max_abs_error": 0.0006697764927648953,
+  "LEGACY niche_score": {
+   "top1": 0.1470917594361953,
+   "top2": 0.2934059630066431,
+   "eff_parents": 22.66288440315984,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.3815978388546878
+  },
+  "archive_rank (shipped)": {
+   "top1": 0.6802781952451484,
+   "top2": 0.7658670743614486,
+   "eff_parents": 7.62894963559674,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.07601627499903331
+  },
+  "admitted_rank": {
+   "top1": 0.3894063053646751,
+   "top2": 0.5197782077227007,
+   "eff_parents": 16.875114481234693,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.25482909689327726
+  },
+  "softmax T=1x scale": {
+   "top1": 0.7699101614626597,
+   "top2": 0.8017092612669198,
+   "eff_parents": 5.539181538400665,
+   "above_2x_floor": 2,
+   "sub10_heavy_mass": 0.05384629282990309
+  },
+  "softmax T=5x scale": {
+   "top1": 0.6400305634035546,
+   "top2": 0.751776507209663,
+   "eff_parents": 8.397910922724021,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.08767923751701029
+  },
+  "softmax T=20x scale": {
+   "top1": 0.29765941632886644,
+   "top2": 0.43507039143784787,
+   "eff_parents": 19.88492178784284,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.29414430947447606
+  },
+  "uniform_admitted": {
+   "top1": 0.1463092463092464,
+   "top2": 0.2926184926184928,
+   "eff_parents": 22.61155564120484,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.38111888111888115
+  }
+ },
+ "perindopril_mpo": {
+  "probe_vs_production_max_abs_error": 0.0011135515919992178,
+  "LEGACY niche_score": {
+   "top1": 0.1556579884582083,
+   "top2": 0.3113159769164166,
+   "eff_parents": 23.181837345990104,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.6264917184872416
+  },
+  "archive_rank (shipped)": {
+   "top1": 0.6299185893584337,
+   "top2": 0.789340639202064,
+   "eff_parents": 7.767401260903746,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.07192358340453214
+  },
+  "admitted_rank": {
+   "top1": 0.40986261321014855,
+   "top2": 0.5129692921537113,
+   "eff_parents": 16.816216014360936,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.3485691693847507
+  },
+  "softmax T=1x scale": {
+   "top1": 0.7985577341657147,
+   "top2": 0.8017094017094022,
+   "eff_parents": 4.94641126740076,
+   "above_2x_floor": 2,
+   "sub10_heavy_mass": 0.05982905982905974
+  },
+  "softmax T=5x scale": {
+   "top1": 0.6798245747646595,
+   "top2": 0.8017082071090252,
+   "eff_parents": 6.819375207935968,
+   "above_2x_floor": 2,
+   "sub10_heavy_mass": 0.059830254429436965
+  },
+  "softmax T=20x scale": {
+   "top1": 0.5403672484055494,
+   "top2": 0.7496656266334369,
+   "eff_parents": 9.833375464630583,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.11187283490502503
+  },
+  "uniform_admitted": {
+   "top1": 0.1556934105321203,
+   "top2": 0.3113868210642406,
+   "eff_parents": 23.12406959994489,
+   "above_2x_floor": 8,
+   "sub10_heavy_mass": 0.6275709953129309
+  }
+ }
+}
