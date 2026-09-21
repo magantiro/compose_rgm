@@ -55,8 +55,8 @@ class _IdentitySmilesTokenizer:
         return ids if isinstance(ids, str) else str(ids)
 
 
-def _official_evaluate_smiles():
-    """Import the verified upstream ``evaluate_smiles``."""
+def _official_module_path() -> str:
+    """Make the verified upstream package importable and return its root."""
     tools = Path(__file__).resolve().parents[3] / "tools"
     if str(tools) not in sys.path:
         sys.path.insert(0, str(tools))
@@ -66,9 +66,67 @@ def _official_evaluate_smiles():
     verify_only()
     if str(pkg_root) not in sys.path:
         sys.path.insert(0, str(pkg_root))
+    return str(pkg_root)
+
+
+def _official_evaluate_smiles():
+    """Import the verified upstream ``evaluate_smiles``."""
+    _official_module_path()
     from in_virtuo_gen.train_utils.metrics import evaluate_smiles
 
     return evaluate_smiles
+
+
+def _official_average_tanimoto():
+    """Import the verified upstream ``calculate_average_tanimoto``."""
+    _official_module_path()
+    from in_virtuo_gen.utils.mol import calculate_average_tanimoto
+
+    return calculate_average_tanimoto
+
+
+def official_unique_valid(samples: Sequence[str]) -> list[str]:
+    """The exact set the official metric calls 'unique valid', in emission order.
+
+    Reproduces ``evaluate_smiles``'s own accounting: a sample is valid when
+    ``Chem.MolToSmiles(Chem.MolFromSmiles(s))`` is truthy, and uniqueness
+    de-duplicates the RAW emitted string.  Deriving the set this way -- rather
+    than re-filtering with a rule of our own -- keeps ``distance`` scored over
+    the same molecules as ``diversity`` and ``quality``.
+    """
+    unique: list[str] = []
+    seen: set[str] = set()
+    for sample in samples:
+        mol = Chem.MolFromSmiles(sample) if sample else None
+        if mol is None:
+            continue
+        if not Chem.MolToSmiles(mol, canonical=True):
+            continue
+        if sample in seen:
+            continue
+        seen.add(sample)
+        unique.append(sample)
+    return unique
+
+
+def official_distance(samples: Sequence[str], reference_smiles: str) -> float:
+    """Mean Tanimoto DISTANCE from ``reference_smiles`` over unique valid samples.
+
+    NOT produced by the released evaluator.  ``evaluate_smiles`` returns no
+    ``distance`` key and ``downstream.py`` never calls this path: upstream reads
+    the published baselines' distance out of ``references/reference_metrics.csv``
+    instead.  What IS upstream is the estimator -- this calls the verified
+    ``calculate_average_tanimoto(smiles_list, prompt=...)`` from
+    ``in_virtuo_gen/utils/mol.py``, which returns
+    ``mean(1 - FingerprintSimilarity(ECFP4-2048(sample), ECFP4-2048(prompt)))``.
+    The REFERENCE is ours to choose and changes the number materially, so every
+    caller must say which reference it passed.
+    """
+    unique = official_unique_valid(samples)
+    if not unique:
+        return float("nan")
+    calculate_average_tanimoto = _official_average_tanimoto()
+    return float(calculate_average_tanimoto(unique, prompt=reference_smiles))
 
 
 def assert_emission_invariants(samples: Sequence[str]) -> None:
@@ -126,5 +184,7 @@ def official_prompt_metrics(
 __all__ = [
     "FAILED_SAMPLE_PLACEHOLDER",
     "assert_emission_invariants",
+    "official_distance",
     "official_prompt_metrics",
+    "official_unique_valid",
 ]

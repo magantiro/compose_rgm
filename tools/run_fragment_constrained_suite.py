@@ -25,13 +25,16 @@ computed inside the official evaluator.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import platform
 import time
 from collections import defaultdict
+from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
+from rdkit import Chem
 
 from compose_v4.benchmark.fragment_conditioned_sampler import (
     FragmentConditioningError,
@@ -46,12 +49,101 @@ from compose_v4.benchmark.fragment_constrained import (
 )
 from compose_v4.benchmark.fragment_official_metrics import (
     FAILED_SAMPLE_PLACEHOLDER,
+    official_distance,
     official_prompt_metrics,
+    official_unique_valid,
 )
 
 MANIFEST = Path("data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv")
 OFFICIAL_SAMPLES_PER_PROMPT = 100
 OFFICIAL_SEEDS = 3
+
+
+def prompt_rng_seed(drug_name: str, task_value: str, seed: int) -> int:
+    """A REPRODUCIBLE per-(drug, task, seed) RNG seed.
+
+    ``hash()`` on a str is salted by ``PYTHONHASHSEED``, so a seed derived from
+    it differs in every process and no run using it can be reproduced -- not
+    even by re-running the identical command.  BLAKE2b is stable across
+    processes, machines and interpreter versions.
+    """
+    key = f"{drug_name}|{task_value}|{seed}".encode()
+    return int.from_bytes(hashlib.blake2b(key, digest_size=8).digest(), "big") % (2**32)
+
+
+def frozen_sampler_identity(config: SamplerConfig) -> dict:
+    """The sampler configuration and its hash, recorded BEFORE the sweep.
+
+    One configuration is used for every task, drug and seed.  The hash is over
+    the canonical JSON of the dataclass, so any per-instance tuning would move
+    it and be visible in the artifact.
+    """
+    payload = {k: v for k, v in sorted(asdict(config).items())}
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return {
+        "config": payload,
+        "config_sha256": hashlib.sha256(canonical.encode()).hexdigest(),
+    }
+
+
+# ---- Independent fragment-preservation audit ----
+#
+# This does NOT reuse ``check_fragment_constraint``.  That function decides
+# which samples are emitted, so scoring the emitted samples with it again would
+# be a comparison whose expectation is recomputed from the code under test and
+# could not fail.  Here the query is rebuilt from the prompt string by a
+# different route and matched independently, and it is run over the COMMITTED
+# endpoints -- every state COMPOSE actually produced, before any filtering --
+# which is what separates "preserved by the pathwise lock" from "preserved by
+# discarding the failures".
+
+_DUMMY = Chem.MolFromSmarts("[#0]")
+
+
+def audit_queries(prompt) -> list[Chem.Mol]:
+    """Dummy-stripped, independently constructed substructure queries."""
+    queries = []
+    for fragment in prompt.fragments:
+        mol = Chem.MolFromSmiles(fragment)
+        if mol is None:
+            raise ValueError(f"audit could not parse fragment {fragment!r}")
+        stripped = Chem.DeleteSubstructs(mol, _DUMMY)
+        stripped.UpdatePropertyCache(strict=False)
+        Chem.FastFindRings(stripped)
+        queries.append(stripped)
+    return queries
+
+
+def contains_all_fragments(smiles: str, queries: list[Chem.Mol]) -> bool:
+    """True when every query embeds, pairwise NON-OVERLAPPING, in ``smiles``."""
+    mol = Chem.MolFromSmiles(smiles) if smiles else None
+    if mol is None or len(Chem.GetMolFrags(mol)) != 1:
+        return False
+    per_query = [
+        mol.GetSubstructMatches(q, uniquify=False, useChirality=False, maxMatches=1000)
+        for q in queries
+    ]
+    if any(not matches for matches in per_query):
+        return False
+
+    def bind(index: int, used: frozenset) -> bool:
+        if index == len(per_query):
+            return True
+        for match in per_query[index]:
+            atoms = frozenset(match)
+            if atoms.isdisjoint(used) and bind(index + 1, used | atoms):
+                return True
+        return False
+
+    return bind(0, frozenset())
+
+
+def prompt_reference_smiles(prompt) -> str:
+    """The dummy-stripped prompt, as the reference molecule for ``distance``."""
+    parts = []
+    for query in audit_queries(prompt):
+        parts.append(Chem.MolToSmiles(query, canonical=True))
+    return ".".join(p for p in parts if p)
 
 
 def _kernel_provenance() -> dict[str, str]:
@@ -99,9 +191,8 @@ def run_task(
                 )
                 continue
 
-            rng = np.random.default_rng(
-                abs(hash((prompt.drug_name, task.value, seed))) % (2**32)
-            )
+            rng_seed = prompt_rng_seed(prompt.drug_name, task.value, seed)
+            rng = np.random.default_rng(rng_seed)
             receipt = SamplingReceipt()
             emitted: list[str] = []
             started = time.time()
@@ -113,16 +204,36 @@ def run_task(
             elapsed = time.time() - started
 
             metrics = official_prompt_metrics(emitted, expected_samples=samples)
-            drug_metrics.append(metrics)
 
+            queries = audit_queries(prompt)
+            reference = prompt_reference_smiles(prompt)
             committed = receipt.committed_endpoints
+            committed_preserving = sum(
+                contains_all_fragments(s, queries) for s in committed
+            )
+            emitted_real = [s for s in emitted if s]
+            emitted_preserving = sum(
+                contains_all_fragments(s, queries) for s in emitted_real
+            )
+            metrics["distance"] = official_distance(emitted, reference)
+            metrics["distance_to_original_drug"] = official_distance(
+                emitted, prompt.original_smiles
+            )
+            drug_metrics.append(metrics)
             per_drug_detail[prompt.drug_name].append(
                 {
                     "seed": seed,
+                    "rng_seed": rng_seed,
                     "official": metrics,
                     "attempts": samples,
+                    "validity_denominator": samples,
+                    "emitted_nonempty": len(emitted_real),
+                    "distance_reference_prompt": reference,
+                    "unique_valid_count": len(official_unique_valid(emitted)),
                     "committed_endpoints": len(committed),
                     "committed_chemically_valid": _chemically_valid(committed),
+                    "committed_fragment_preserving": committed_preserving,
+                    "emitted_fragment_preserving": emitted_preserving,
                     "constraint_failures": receipt.constraint_failures,
                     "lock_rejections": receipt.lock_rejections,
                     "budget_exhausted": receipt.budget_exhausted,
@@ -145,8 +256,8 @@ def run_task(
         if drug_metrics:
             per_seed_rows.append(
                 {
-                    key: float(np.mean([m[key] for m in drug_metrics]))
-                    for key in ("validity", "uniqueness", "quality", "diversity")
+                    key: float(np.nanmean([m[key] for m in drug_metrics]))
+                    for key in _ROW_KEYS
                 }
             )
 
@@ -155,7 +266,7 @@ def run_task(
             "mean": float(np.mean([r[key] for r in per_seed_rows])),
             "std": float(np.std([r[key] for r in per_seed_rows])),
         }
-        for key in ("validity", "uniqueness", "quality", "diversity")
+        for key in _ROW_KEYS
     } if per_seed_rows else {}
 
     return {
@@ -169,6 +280,16 @@ def run_task(
         "build_failures": build_failures,
         "per_drug": {k: v for k, v in per_drug_detail.items()},
     }
+
+
+_ROW_KEYS = (
+    "validity",
+    "uniqueness",
+    "quality",
+    "diversity",
+    "distance",
+    "distance_to_original_drug",
+)
 
 
 def _chemically_valid(smiles_list) -> int:
@@ -247,11 +368,22 @@ def main() -> None:
             "corpus_scope_hash": meta.get("corpus_scope_hash"),
             "atom_vocabulary": "ORGANIC" if len(model.atom_vocabulary.classes) == 15 else "CNOF",
         },
-        "sampler": {
-            "n_slots": config.n_slots,
-            "max_events": config.max_events,
-            "operational_horizon": config.operational_horizon,
-            "mark_attempts_per_event": config.mark_attempts_per_event,
+        "sampler": frozen_sampler_identity(config),
+        "metric_provenance": {
+            "validity_uniqueness_quality_diversity": (
+                "official in_virtuo_gen.train_utils.metrics.evaluate_smiles "
+                "@ b50bb3ae, already_smiles=True"
+            ),
+            "distance": (
+                "NOT in the released evaluator: evaluate_smiles returns no "
+                "distance key. Estimator is the official "
+                "in_virtuo_gen.utils.mol.calculate_average_tanimoto(prompt=...); "
+                "reference = the dummy-stripped prompt fragment(s)"
+            ),
+            "fragment_preservation": (
+                "independent audit, atom-level non-overlapping substructure "
+                "match, run over COMMITTED endpoints as well as emitted samples"
+            ),
         },
         "results": results,
     }
