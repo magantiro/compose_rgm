@@ -2564,3 +2564,54 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   behind it. Pass `order_outputs=False` whenever results are reduced as a set. Separately: killing
   the LOCAL driver does not stop the app -- it held 99 containers afterwards and starved the next
   launch until `modal app stop`.
+
+## 2026-09-21 (the ring-support collapse is the HOST, and it is a documented v1 scope)
+
+- **ANSWERED: committing one ring system drops the legal template count 1034 -> 28 because
+  `_eligible_grow_host_graph` (`ring_system_fiber.py:2160`) admits only ACYCLIC, CARBON, NEUTRAL,
+  SINGLE-BONDED atoms and asserts the result is a FOREST.** Its docstring says so in one line:
+  *"Carbon, neutral, acyclic single-bond support for v1 ring installation."* So committing a ring
+  system permanently removes its atoms from the scaffold every later ring decision is made against,
+  and installing a heteroatom removes one more while raising a bond order SPLITS the host without
+  removing any atom at all. A molecule's ring systems compete for one shrinking carbon forest.
+- **This is a SCOPE restriction, not a catalog gap, and the catalog proves it by itself: 0 of 3,092
+  templates require a cyclic host.** Every template's `source_bonds` pattern is a forest, so ring
+  systems are installed ATOMICALLY onto acyclic carbon -- fused systems are single templates, never
+  a ring grown onto an existing ring. Nothing in the catalog can reuse a ring the molecule already
+  built. MEASURED, needs no molecules, so no sample of states can explain it away.
+- **The small-ring share of the catalog is a steep function of remaining host, and that single table
+  is the whole mechanism:**
+      host atoms  3      4      5      6      7      8      9     10     12     14     18    30+
+      templates   2      5     13     34     77    154    324    564    955  1,883  2,965  3,092
+      3/4-ring  100%   100%  46.2%  47.1%  57.1%  42.9%  25.0%  17.0%  15.3%  10.5%   9.4%   9.2%
+  A large ring needs a large contiguous carbon tree; a three-ring needs three atoms. A support
+  measured on a small host is small-ring-enriched BY CONSTRUCTION. The knee is host ~7-9.
+- **This retro-explains the correlation that looked backwards.** The acceptance run measured
+  `r(mass, free_slots) = +0.13` -- smaller molecules showing MORE small-ring mass, which read as
+  nonsense. Smaller molecule -> smaller host -> the survivors are the small rings. The sign was
+  right; the mediator was the host, not the slots.
+- **MEASURED on real traces (90 ring decisions, 34 molecules, block schedule):** host atoms
+  26.9 -> 20.1 -> 14.2 -> 13.3 by ring-system ordinal, carried almost entirely by committed cycles
+  (0.0 -> 17.2) and NOT heteroatoms (0.4 -> 1.2) under a schedule that commits rings first --
+  which is what it should be. `r(small mass, largest_host_tree) = -0.673`,
+  `r(log legal, largest_host_tree) = +0.772`.
+- **The catalog table is a LOWER BOUND; observed mass runs 1.4x-2x above it** (ordinal 2: predicted
+  ~15.3%, observed 29.8%). Two further mechanisms the atom count alone misses: fitting needs the
+  right branching SHAPE, not just enough atoms; and **host COMPONENTS rise 1.21 -> 1.83 -> 2.35**
+  with ordinal, because a committed ring can SPLIT the remaining forest and a template needs one
+  contiguous piece. Report `largest_host_tree`, never `host_atoms` alone.
+- **CONSEQUENCE, and it closes the de-novo small-ring line: no schedule, reward, or catalog addition
+  can fix this.** Scheduling moves WHEN a ring is committed and cannot stop it consuming its atoms;
+  the model already sits below uniform on small rings and cannot pick a template outside the
+  support; and 2,965 of 3,092 templates already fit an 18-atom host, so adding templates changes
+  nothing while the host is small. Exactly two doors remain: extend `_eligible_grow_host_graph` to
+  cyclic/heteroatom scaffolds (a real capability change that invalidates the forest assertion its
+  DP relies on), or scope the claim to atomic ring installation on acyclic carbon.
+- **SEPARATE, still open, and cheap: `exact_early_ring` reaches no training path.** Lineage B
+  trained on `sequential` while a scheduler worth 0.3049 -> 0.1926 has sat unwired since
+  2026-07-20. **CORRECTS the recorded "five additive hops": it is five hops but NINE call sites** --
+  `train_tracelet_cnof_gate.py` calls `build_tree_transport_path_records` at FOUR sites (1226, 2885,
+  2897, 2909) and that builder has TWO `compile_carbon_tree_to_target` sinks
+  (`tracelet_conditional.py` 192, 454). The two sinks share one parameter, so a consultation test
+  exercising only one stays green -- the exact near-miss the region-law wiring hit. Mutation-test at
+  the CALL sites, not the definition.
