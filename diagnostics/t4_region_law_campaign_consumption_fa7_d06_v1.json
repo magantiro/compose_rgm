@@ -1,0 +1,171 @@
+{
+ "cells": [
+  {
+   "cell": "fa7_0",
+   "delta": 0.6,
+   "heavy_atoms": 32,
+   "off": {
+    "best_qed": null,
+    "best_similarity": null,
+    "eligible": 0,
+    "example": null,
+    "excisions_over_v1_cap": 0,
+    "max_excision": 0,
+    "micro_example": null,
+    "seconds": 157.68,
+    "shape_census": {
+     "growth": 0,
+     "large_excision": 0,
+     "micro_within_two_atoms": 0,
+     "small_excision": 0
+    }
+   },
+   "on": {
+    "best_qed": null,
+    "best_similarity": null,
+    "eligible": 0,
+    "example": null,
+    "excisions_over_v1_cap": 0,
+    "max_excision": 0,
+    "micro_example": null,
+    "seconds": 158.04,
+    "shape_census": {
+     "growth": 0,
+     "large_excision": 0,
+     "micro_within_two_atoms": 0,
+     "small_excision": 0
+    }
+   },
+   "region_law_consumption_attempts": 5,
+   "seed": 2026091903,
+   "status": "failed_live"
+  },
+  {
+   "cell": "fa7_2",
+   "delta": 0.6,
+   "heavy_atoms": 35,
+   "off": {
+    "best_qed": null,
+    "best_similarity": null,
+    "eligible": 0,
+    "example": null,
+    "excisions_over_v1_cap": 0,
+    "max_excision": 0,
+    "micro_example": null,
+    "seconds": 127.12,
+    "shape_census": {
+     "growth": 0,
+     "large_excision": 0,
+     "micro_within_two_atoms": 0,
+     "small_excision": 0
+    }
+   },
+   "on": {
+    "best_qed": 0.7007862950535141,
+    "best_similarity": 0.640625,
+    "eligible": 4,
+    "example": {
+     "created": 1,
+     "deleted": 13,
+     "delta": 0.6,
+     "families": [
+      "scale"
+     ],
+     "heavy": 23,
+     "parent": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+     "parent_score": 0.0,
+     "program_families": [
+      "segment_replace"
+     ],
+     "proposal_lane": "shallow",
+     "qed": 0.6202773313200581,
+     "regions": 1,
+     "sa": 2.7278372915842546,
+     "similarity": 0.640625,
+     "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CN)c1=O"
+    },
+    "excisions_over_v1_cap": 4,
+    "max_excision": 12,
+    "micro_example": null,
+    "seconds": 129.7,
+    "shape_census": {
+     "growth": 0,
+     "large_excision": 4,
+     "micro_within_two_atoms": 0,
+     "small_excision": 0
+    }
+   },
+   "region_law_consumption_attempts": 5,
+   "seed": 2026091905,
+   "status": "failed_live"
+  },
+  {
+   "cell": "fa7_1",
+   "delta": 0.6,
+   "heavy_atoms": 29,
+   "off": {
+    "best_qed": null,
+    "best_similarity": null,
+    "eligible": 0,
+    "example": null,
+    "excisions_over_v1_cap": 0,
+    "max_excision": 0,
+    "micro_example": null,
+    "seconds": 82.57,
+    "shape_census": {
+     "growth": 0,
+     "large_excision": 0,
+     "micro_within_two_atoms": 0,
+     "small_excision": 0
+    }
+   },
+   "on": {
+    "best_qed": 0.7680246926690059,
+    "best_similarity": 0.7777777777777778,
+    "eligible": 6,
+    "example": {
+     "created": 1,
+     "deleted": 4,
+     "delta": 0.6,
+     "families": [
+      "scale"
+     ],
+     "heavy": 26,
+     "parent": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+     "parent_score": 0.0,
+     "program_families": [
+      "segment_replace"
+     ],
+     "proposal_lane": "shallow",
+     "qed": 0.6469545819708961,
+     "regions": 1,
+     "sa": 3.1495728283519053,
+     "similarity": 0.7777777777777778,
+     "smiles": "CCCCC(CCl)NC(=O)C1CCCN1C(=O)C(N)Cc1ccccc1"
+    },
+    "excisions_over_v1_cap": 0,
+    "max_excision": 6,
+    "micro_example": null,
+    "seconds": 113.04,
+    "shape_census": {
+     "growth": 0,
+     "large_excision": 0,
+     "micro_within_two_atoms": 0,
+     "small_excision": 6
+    }
+   },
+   "region_law_consumption_attempts": 3,
+   "seed": 2026091904,
+   "status": "control"
+  }
+ ],
+ "contract": "configs/t4_held_target_distilled_fa7_d06_250.json",
+ "contract_payload_sha256": "cb34d1d1ecfec41d683dbfe18b082aeb4dc65b0f0dbf8baae9d7186d097cc5ef",
+ "declared_draws": 480,
+ "docking_calls": 0,
+ "draws_used": 120,
+ "lane": "shallow",
+ "oracle_calls": 0,
+ "region_law_request": "free_gate_margin_v1",
+ "schema_version": "t4_region_law_campaign_consumption_v1"
+}
