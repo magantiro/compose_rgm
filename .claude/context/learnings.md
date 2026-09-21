@@ -2169,3 +2169,64 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   per-instance `replace()` inside the constructor is caught. 3/3 mutations killed. Deactivating on a
   prompt that declares no interface stays legitimate: that is a property of the SPECIFICATION, which
   is why superstructure needs no special case.
+
+## 2026-09-21 (fragments: two negatives that were properties of the MEASUREMENT, and the rule that catches both)
+
+- **BEFORE NAMING A VOCABULARY BOUNDARY, CHECK THE CANDIDATE AGAINST WHAT THE PRIOR ACTUALLY
+  PROPOSES AT THAT SITE.** Asking "does the prior propose X" when X is malformed returns a
+  confident NO. Asking "what does the prior propose here" catches it in one call. This is now the
+  standing rule for every support probe in this repo, and it was paid for twice in one day.
+- **THE PHOSPHORUS BUG: `atom_type` is a VOCABULARY INDEX, not an atomic number.**
+  `ELEMENTS = ['null','B','C','N','O','F','P','S','Cl','Br','I','SCAR']`, so index 2 is carbon and
+  index **6 is PHOSPHORUS**. A probe constructing its linker atom as `atom_type=6` was inserting a
+  phosphorus atom and asking whether the model proposes it. It does not, **correctly** -- and the
+  result read as `insert carbon NO_HIT up to 32,768 draws` on two drugs, which was close to the
+  evidence needed to declare a constituent unrankable and a planned composite primitive a
+  capability EXTENSION rather than an acceleration. **The tell was in the artifact the whole time:
+  a bare `P` in the constructed successor SMILES.** A negative result whose molecules nobody reads
+  is a negative result nobody has checked. Second correction in the same fix: a carbon joined by
+  one single bond is a METHYL and needs `implicit_h_count=3`; a count the valence cannot support
+  makes the insert unexecutable, so h=2 fails for a different reason than h=6-is-phosphorus.
+  After both fixes the constituent flipped to IN_SUPPORT -- and the model's single most frequent
+  insert at that site was `(carbon, 3 hydrogens)`, exactly the atom the probe should have built.
+  The prior was never silent; it was answering a different question.
+- **A ZERO THAT SURVIVES ONE BUDGET INCREASE IS NOT A HARD ZERO.** LOVASTATIN motif read exactly
+  `0.0000` at 256 draws AND again at 2048 -- an eightfold increase buying nothing, which imitates
+  a hard zero convincingly -- then recovered to **0.80 at 8192**. BARICITINIB motif did the same
+  at smaller scale (0.0000 at 256, 0.4615 at 2048). The earlier statement of the test, "does it
+  rise with budget", is TOO WEAK: it needs repeated increases across a wide range before a zero
+  may be called hard. Contrast the genuine article: T4's `recovered_fraction = 0.0000` survives
+  any budget because the gated molecule is outside the proposal support entirely.
+- **Quantify the rarity before spending the ladder.** At the CYCLOTHIAZIDE ring-close state
+  `bond_insert` is only **8 of 6,000 draws (0.13%)** and the specific atom pair is a fraction of
+  that, so the expected number of hits in 16,384 draws is of order ONE. A zero there is
+  unremarkable and carries no information; the honest label is UNRESOLVED, not "boundary" and not
+  "fine". Estimating the per-draw rate first tells you what ladder rung would actually be
+  decisive instead of guessing.
+- **`pgrep -f <name> | head -1` picks the zsh WRAPPER, not the python process.** A 30-minute
+  probe read as `0.0% CPU` and looked like the macOS fork deadlock; the real child was at 119%.
+  Check the pid whose command is the interpreter, or read `ps -eo pid,ppid,%cpu,command` and look
+  at the whole tree, before diagnosing a hang.
+- **A per-event monotone predicate cannot gate a multi-event transaction.** The v1 two-interface
+  path program admitted only events that lengthened the realized core-to-core path; it committed
+  ZERO endpoints against an attachment-only arm's 26. Root cause measured: **no single legal event
+  lengthens the path** (600 draws, 30 passed the region lock, all 30 left the length unchanged),
+  and with the program OFF **1,440 events across 120 rollouts never once exceeded length 1**. The
+  mechanism is that both bonds of the seeded bridge are BRIDGES in the graph sense, so deleting
+  either disconnects the molecule and the executor refuses it -- lengthening requires
+  close-then-open (ring through the far core first, then remove the original bond), a coordinated
+  transaction of at least three events whose first step changes nothing the predicate can see.
+  **The transaction never occurs under the prior at all, so there was nothing for a filter to
+  steer.** A program must PROPOSE such a transaction, not gate the events of one.
+- **A composite is an ACCELERATION only if every constituent is individually rankable by the
+  proposal law**; one unrankable constituent makes it a capability EXTENSION wearing a macro's
+  clothes, and that has to be declared rather than wrapped. Measured per constituent on the
+  hand-constructed transaction: LESINURAD all three IN_SUPPORT, CYCLOTHIAZIDE insert and open
+  IN_SUPPORT with ring-close unresolved.
+- **A precondition that turns several unexplained failures into one declared scope is a good
+  precondition.** The transaction fails at ring-close on ELIGLUSTAT and LIOTHYRONINE, and both are
+  drugs the original structural audit already recorded with ZERO free valence at their declared
+  sites -- a saturated anchor cannot accept another bond. So the composite fires only where the
+  far-core anchor has free valence: a structural property of the state, needing no instance
+  identity, that explains both failures as the known start-state defect rather than as two new
+  limitations.
