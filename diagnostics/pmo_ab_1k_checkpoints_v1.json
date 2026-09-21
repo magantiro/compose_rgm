@@ -1,7 +1,7 @@
 {
   "arms": {
     "A_baseline": {
-      "charged_calls_observed": 522,
+      "charged_calls_observed": 1000,
       "checkpoints": [
         {
           "auc_top10_at_budget": 0.14711235958044097,
@@ -26,14 +26,38 @@
           "memory_proposal_fraction": 0.0,
           "top10_mean": 0.27128248443175995,
           "unique_scored_molecules": 500
+        },
+        {
+          "auc_top10_at_budget": 0.2253207222613268,
+          "best_score": 0.30612244897959184,
+          "charged_calls": 750,
+          "frontier_improvements": 17,
+          "memory_derived_frontier_improvements": 0,
+          "memory_derived_scored_calls": 0,
+          "memory_improvement_fraction": 0.0,
+          "memory_proposal_fraction": 0.0,
+          "top10_mean": 0.2929764720633646,
+          "unique_scored_molecules": 750
+        },
+        {
+          "auc_top10_at_budget": 0.24887376757580607,
+          "best_score": 0.3364485981308411,
+          "charged_calls": 1000,
+          "frontier_improvements": 21,
+          "memory_derived_frontier_improvements": 0,
+          "memory_derived_scored_calls": 0,
+          "memory_improvement_fraction": 0.0,
+          "memory_proposal_fraction": 0.0,
+          "top10_mean": 0.32874322873028944,
+          "unique_scored_molecules": 1000
         }
       ],
-      "latest_committed_round": "round_0035",
+      "latest_committed_round": "round_0061",
       "online_memory_reconstruction": null,
       "run_id": "8d02a667384b248fed0a5fbb432a93714cc2a3a127ffdc05a4153f37ac3f89a0"
     },
     "B_memory": {
-      "charged_calls_observed": 490,
+      "charged_calls_observed": 1000,
       "checkpoints": [
         {
           "auc_top10_at_budget": 0.19158258958359187,
@@ -46,17 +70,46 @@
           "memory_proposal_fraction": 0.328,
           "top10_mean": 0.31021252686363193,
           "unique_scored_molecules": 250
+        },
+        {
+          "auc_top10_at_budget": 0.26210716052858857,
+          "best_score": 0.3838383838383838,
+          "charged_calls": 500,
+          "frontier_improvements": 14,
+          "memory_derived_frontier_improvements": 4,
+          "memory_derived_scored_calls": 198,
+          "memory_improvement_fraction": 0.2857142857142857,
+          "memory_proposal_fraction": 0.396,
+          "top10_mean": 0.35559032500586146,
+          "unique_scored_molecules": 500
+        },
+        {
+          "auc_top10_at_budget": 0.2955879019345626,
+          "best_score": 0.3838383838383838,
+          "charged_calls": 750,
+          "frontier_improvements": 14,
+          "memory_derived_frontier_improvements": 4,
+          "memory_derived_scored_calls": 306,
+          "memory_improvement_fraction": 0.2857142857142857,
+          "memory_proposal_fraction": 0.408,
+          "top10_mean": 0.36714657273837037,
+          "unique_scored_molecules": 750
+        },
+        {
+          "auc_top10_at_budget": 0.3138190421651204,
+          "best_score": 0.3838383838383838,
+          "charged_calls": 1000,
+          "frontier_improvements": 14,
+          "memory_derived_frontier_improvements": 4,
+          "memory_derived_scored_calls": 419,
+          "memory_improvement_fraction": 0.2857142857142857,
+          "memory_proposal_fraction": 0.419,
+          "top10_mean": 0.37138383838383837,
+          "unique_scored_molecules": 1000
         }
       ],
-      "latest_committed_round": "round_0031",
-      "online_memory_reconstruction": {
-        "attribution_failures": 0,
-        "byte_equality_with_live_memory_claimed": false,
-        "entries": 234,
-        "replayed": 234,
-        "skipped_unscored": 0,
-        "source": "archived_counted_observations"
-      },
+      "latest_committed_round": "round_0061",
+      "online_memory_reconstruction": null,
       "run_id": "37bb856e15309543795e14cdccf44d1b672e957cb9af1e902af08d630f3e241b"
     }
   },

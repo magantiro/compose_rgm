@@ -23,8 +23,9 @@
     }
   },
   "budget": 250,
-  "consequence": "The gsk3b 0.530 is NOT a reportable result and must not enter any promotion comparison. It measures exploitation of a fingerprint predictor, not molecular design.",
+  "consequence": "CORRECTED. The gsk3b 0.530 IS a legitimate official PMO result and STAYS in the benchmark table. The official gsk3b objective imposes no QED>=0.6 or SA<=4 constraint -- IVG reports it under exactly this oracle (0.952 +- 0.016, no-prescreen). Deleting it, or silently adding a chemistry filter the benchmark does not have, would be changing the objective to one we prefer. The correct statement is: BETTER OFFICIAL PMO SCORE, WORSE MEDICINAL-CHEMISTRY DIAGNOSTICS. Report the chemistry audit BESIDE the official score, never in place of it.",
   "contrast": "On celecoxib_rediscovery -- a similarity objective that cannot be fooled this way -- the same mechanism is a genuine win (AUC 0.2489 -> 0.3138, +26.1%). The honest statement is that online memory improves SEARCH, and on a foolable objective it searches harder toward the exploit.",
+  "corrected_at_utc": "2026-09-21T18:57:07.960568+00:00",
   "finding": "B scores 29% higher on the oracle while its top-10 are chemically WORSE than A's -- lower QED, higher SA -- and memory strengthens the score/unsynthesizability coupling from +0.456 to +0.668. B's top molecules carry phosphorus in aromatic rings (n1cpcc21, cpcn) and hypervalent iodine ([IH]).",
   "implication_for_the_panel": "A heterogeneous PMO panel must report per-task CHEMISTRY alongside score. A suite mean over tasks of mixed foolability would have hidden this entirely -- gsk3b's +36.8% AUC would have been averaged in as progress.",
   "method": "Read every charged query result from each arm's durable ledger and scored QED and SA under the pinned kernel (rdkit 2024.3.5) with the repo's own sascorer. Zero oracle calls; no molecule was re-scored by the oracle.",
@@ -32,5 +33,7 @@
   "question": "gsk3b is the oracle where reward hacking was MEASURED. Does online structural memory SUPPRESS the off-manifold drift, or AMPLIFY it by remembering that garbage scored well?",
   "recorded_at_utc": "2026-09-21T18:46:48.787298+00:00",
   "schema_version": "pmo_ab_gsk3b_chemistry_audit_v1",
-  "verdict": "AMPLIFIES"
+  "superseded_claim": "An earlier version of this file said the 0.530 'is NOT a reportable result and must not enter any promotion comparison'. That was an over-correction by the coordinator and is withdrawn: it substituted our own eligibility criteria for the benchmark's.",
+  "verdict": "AMPLIFIES_EXPLOITATION_AND_THE_PMO_SCORE_IS_LEGITIMATE",
+  "what_the_audit_does_establish": "That B's gain on this task comes from exploiting the fingerprint predictor harder rather than from better chemistry -- mean QED 0.367 vs 0.423, mean SA 6.31 vs 6.12, r(score,SA) +0.668 vs +0.456. That is a real and publishable auxiliary finding about the MECHANISM, and it is the reason to carry chemistry diagnostics through the whole panel."
 }
