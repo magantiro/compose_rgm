@@ -2195,3 +2195,55 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   div 0.551, dist 0.769) appear in no pinned artifact; the upstream `reference_metrics.csv` says
   97.5 / 83.6 / 34.8 / 0.599 / 0.762. A baseline quoted from a README is not a baseline. Pin the
   comparator table by hash before it decides anything.
+
+## 2026-09-21 (a contract that pins its own launcher cannot have its launcher repaired for free)
+
+- **Both 5ht1b_2 protonation-rescue wrappers were committed, sealed, hash-pinned -- and had
+  never been IMPORTED once.** They called `validate_rescue_preflight` from the PRE-EXISTING
+  v1 module, which hardcodes `delta != 0.6 -> raise` and `charged_calls_per_cell != 49 ->
+  raise`, while the arms declare v2 schema, deltas 0.6 AND 0.4, and ceilings 248/249. The
+  first line of either wrapper's execution raises. Nothing in sealing, hashing, gating or
+  authorizing an arm exercises its launch path; only running it does. `modal run <app> --help`
+  parses the entrypoint signature locally, spawns nothing and costs nothing -- it would have
+  caught both the schema refusal and the unwired argument in seconds.
+- **The wrapper's own guard institutionalized the error it looked like it prevented.**
+  `_assert_authorized()` refused to import unless the contract payload carried
+  `status == AUTHORIZED_BY_OWNER_FOR_PROTONATION_RESCUE`. That *requires* writing consent into
+  the scientific payload, which moves the payload's hash off the value that was consented to.
+  A guard demanding in-payload authorization is not a safety check; it is a mechanism that
+  destroys the binding it appears to enforce. The rule: **authorization POINTS AT an immutable
+  payload by hash and never becomes part of it.** Enforce it -- the v2 preflight walks the whole
+  payload and refuses any of nine consent keys at any depth, plus any authorized-looking status.
+- **A payload that pins its own launcher has a circular repair problem, and it is real, not
+  theoretical.** `runtime_inputs_sha256` pins `modal_apps/<arm>_app.py` so the remote worker can
+  prove it runs the protonation-wired code -- a genuine guard. But that same file also carries
+  the LOCAL launch plumbing. So repairing a local-only launcher bug moves a pin, which moves the
+  payload identity, which breaks BOTH the zero-oracle feasibility gate (its arm records
+  `contract_payload_sha256`) and the owner's authorization receipt. Measured: repairing the
+  wrappers moved d06 `d7d2fbc2 -> f4c00e06` and d04 `4486c376 -> ea7c5c73`.
+- **Resolve it by PROVING continuity, not by asserting it or by loosening the pin.** Each contract
+  now carries a `launch_path_revision` naming `supersedes_payload_sha256`, the exact
+  `changed_runtime_inputs` `{from,to}` and the exact `added_runtime_inputs`.
+  `reconstruct_superseded_payload` undoes precisely those edits and re-hashes; the preflight
+  requires the authorized identity back. Any OTHER mutation -- a delta, a ceiling, a cell, a
+  proposal setting, one added field -- survives the reconstruction and breaks the hash. This is
+  strictly stronger than the v1 check, which only compared the supplied hash against the current
+  identity and never consulted the receipt or the gate at all.
+- **Check ORDER decides which guards you can prove.** The reconstruction guard is so strong it
+  initially shadowed four other refusals: removing the wrapper pin, drifting a runtime input and
+  adding a field all reported "does not reconstruct" rather than their own diagnosis. Reordering
+  to pins -> continuity -> authorization -> evidence gates made each refusal individually
+  reachable and named. **A refusal you cannot reach is a refusal you cannot test**, and a single
+  catch-all guard hides the specific ones behind it.
+- **To exercise a Modal `@app.local_entrypoint()` in-process, call `main.info.raw_f(...)`.**
+  `LocalEntrypoint` exposes no `raw_f` directly; it hangs off `.info`. This runs the real
+  production function with no app creation, no network and no spawn -- the right way to verify a
+  launch path under a "do not launch" constraint. Pair it with a `mode="launch_dry_run"` that
+  builds exactly what `mode="launch"` would spawn and then stops before `.spawn()`.
+- **PRE-EXISTING, unrelated, still broken:** the superseded 49-call arm
+  (`configs/t4_shared_retained_fiber_5ht1b2_protonation_rescue_v1.json`) pins
+  `t4_fiber_campaign.py` at `ed5338a8`, which the region-law merge moved to `e9bfbea4`, so
+  `tests/test_t4_5ht1b2_protonation_rescue.py::test_preflight_is_fail_closed_and_hash_bound`
+  fails identically at the base commit. Verified by running that test in a throwaway checkout of
+  the base -- which is the cheap way to separate "I broke it" from "it was already broken", and
+  costs about a minute.
