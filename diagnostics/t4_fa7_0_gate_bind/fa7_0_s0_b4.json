@@ -1,0 +1,59 @@
+{
+ "cell": "fa7_0",
+ "contract": "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+ "delta": 0.6,
+ "delta_eligible_per_draw": -0.0020833333333333333,
+ "docking_calls": 0,
+ "off": {
+  "completion_law": null,
+  "completion_law_candidates": null,
+  "completion_law_consumption_attempts": null,
+  "draws": 480,
+  "eligible": 1,
+  "eligible_per_draw": 0.0020833333333333333,
+  "endpoints": [
+   {
+    "heavy": 27,
+    "heavy_delta": -5,
+    "pharmacophore_preserved": false,
+    "qed": 0.642219,
+    "sa": 2.5254,
+    "similarity": 0.689655,
+    "smiles": "C=c1ccc(CN(CCC(C)C)C(=O)c2cccc3ccccc23)cc1=C"
+   }
+  ],
+  "max_binding_combinations": 8,
+  "max_bindings_per_subgoal": 4,
+  "pharmacophore_groups_required": [
+   "amidine",
+   "carboxamide"
+  ],
+  "pharmacophore_preserved": 0,
+  "region_law": "free_gate_margin_v1",
+  "seconds": 662.4,
+  "seed": 2026091903
+ },
+ "on": {
+  "completion_law": "free_gate_margin_v1",
+  "completion_law_candidates": 16,
+  "completion_law_consumption_attempts": 20,
+  "draws": 480,
+  "eligible": 0,
+  "eligible_per_draw": 0.0,
+  "endpoints": [],
+  "max_binding_combinations": 8,
+  "max_bindings_per_subgoal": 4,
+  "pharmacophore_groups_required": [
+   "amidine",
+   "carboxamide"
+  ],
+  "pharmacophore_preserved": 0,
+  "region_law": "free_gate_margin_v1",
+  "seconds": 725.2,
+  "seed": 2026091903
+ },
+ "oracle_calls": 0,
+ "schema_version": "t4_fa7_0_completion_gate_v1",
+ "source_smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+ "support": "compose_valid"
+}

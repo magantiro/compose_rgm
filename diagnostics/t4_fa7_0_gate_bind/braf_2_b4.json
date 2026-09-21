@@ -1,0 +1,139 @@
+{
+ "cell": "braf_2",
+ "contract": "configs/t4_held_target_distilled_braf_d06_250.json",
+ "delta": 0.6,
+ "delta_eligible_per_draw": 0.0041666666666666675,
+ "docking_calls": 0,
+ "off": {
+  "completion_law": null,
+  "completion_law_candidates": null,
+  "completion_law_consumption_attempts": null,
+  "draws": 480,
+  "eligible": 4,
+  "eligible_per_draw": 0.008333333333333333,
+  "endpoints": [
+   {
+    "heavy": 26,
+    "heavy_delta": -11,
+    "pharmacophore_preserved": true,
+    "qed": 0.736177,
+    "sa": 1.9981,
+    "similarity": 0.655738,
+    "smiles": "CC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+   },
+   {
+    "heavy": 25,
+    "heavy_delta": -12,
+    "pharmacophore_preserved": true,
+    "qed": 0.675752,
+    "sa": 2.1924,
+    "similarity": 0.619048,
+    "smiles": "O=CNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+   },
+   {
+    "heavy": 26,
+    "heavy_delta": -11,
+    "pharmacophore_preserved": true,
+    "qed": 0.653943,
+    "sa": 2.0714,
+    "similarity": 0.655738,
+    "smiles": "NC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+   },
+   {
+    "heavy": 26,
+    "heavy_delta": -11,
+    "pharmacophore_preserved": true,
+    "qed": 0.647621,
+    "sa": 2.0788,
+    "similarity": 0.666667,
+    "smiles": "O=C(O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+   }
+  ],
+  "max_binding_combinations": 8,
+  "max_bindings_per_subgoal": 4,
+  "pharmacophore_groups_required": [
+   "carboxamide"
+  ],
+  "pharmacophore_preserved": 4,
+  "region_law": null,
+  "seconds": 609.1,
+  "seed": 2026091802
+ },
+ "on": {
+  "completion_law": "free_gate_margin_v1",
+  "completion_law_candidates": 16,
+  "completion_law_consumption_attempts": 2,
+  "draws": 480,
+  "eligible": 6,
+  "eligible_per_draw": 0.0125,
+  "endpoints": [
+   {
+    "heavy": 26,
+    "heavy_delta": -11,
+    "pharmacophore_preserved": true,
+    "qed": 0.736177,
+    "sa": 1.9981,
+    "similarity": 0.655738,
+    "smiles": "CC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+   },
+   {
+    "heavy": 25,
+    "heavy_delta": -12,
+    "pharmacophore_preserved": true,
+    "qed": 0.675752,
+    "sa": 2.1924,
+    "similarity": 0.619048,
+    "smiles": "O=CNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+   },
+   {
+    "heavy": 26,
+    "heavy_delta": -11,
+    "pharmacophore_preserved": true,
+    "qed": 0.653943,
+    "sa": 2.0714,
+    "similarity": 0.655738,
+    "smiles": "NC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+   },
+   {
+    "heavy": 26,
+    "heavy_delta": -11,
+    "pharmacophore_preserved": true,
+    "qed": 0.647621,
+    "sa": 2.0788,
+    "similarity": 0.666667,
+    "smiles": "O=C(O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+   },
+   {
+    "heavy": 26,
+    "heavy_delta": -11,
+    "pharmacophore_preserved": true,
+    "qed": 0.631768,
+    "sa": 2.3053,
+    "similarity": 0.634921,
+    "smiles": "C=C(N)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+   },
+   {
+    "heavy": 28,
+    "heavy_delta": -9,
+    "pharmacophore_preserved": true,
+    "qed": 0.607884,
+    "sa": 2.0985,
+    "similarity": 0.65625,
+    "smiles": "CCNC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+   }
+  ],
+  "max_binding_combinations": 8,
+  "max_bindings_per_subgoal": 4,
+  "pharmacophore_groups_required": [
+   "carboxamide"
+  ],
+  "pharmacophore_preserved": 6,
+  "region_law": null,
+  "seconds": 658.9,
+  "seed": 2026091802
+ },
+ "oracle_calls": 0,
+ "schema_version": "t4_fa7_0_completion_gate_v1",
+ "source_smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+ "support": "compose_valid"
+}
