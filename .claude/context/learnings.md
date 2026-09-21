@@ -3447,3 +3447,42 @@ independently of whether fa7_0 ever closes.**
   means the composite bundles moves the prior could already make but does not make in sequence --
   an ACCELERATION. One unrankable constituent would make it a capability EXTENSION, which must be
   declared as such rather than wrapped in a macro.
+
+## 2026-09-21 (ordering selector: admissibility is a FILTER, never a score term)
+
+- **MEASURED over 35 transports: 0 have no admissible ordering; prune-first would dip on 10; the
+  policy finds a dip-free ordering on 5 of those 10. RESIDUAL 5/35 = 14.3%, protected rounds
+  median 1 / max 1.** Verdict `FLOOR_IS_CHEAP_INSURANCE`: the transport channel needs budget
+  insulated from score-based selection on 14% of transports for exactly one round each. Bounded and
+  specific -- insurance, not the mechanism.
+- **THE NUMBER THAT MATTERS WENT DOWN: 5/10, not the 9/10 interleaving alone achieves.** Interleaving
+  removes the dip on 9 of 10 but **preserves the endpoint on only 6 of 10** -- four of those nine
+  land somewhere other than the target. **Admissibility (every intermediate valid and connected, the
+  final molecule IS the target) must be a HARD FILTER, never a term in the shape score.** Scoring
+  shape without it selects orderings that never arrive: a beautiful trajectory to the wrong
+  molecule. This gap is the entire reason to build a selector rather than switch the default to
+  interleaved.
+- **Express a protected-budget requirement as the chosen ordering's TROUGH WIDTH, not as a budget
+  fraction.** The floor then provably protects a SINGLE CROSSING and cannot later be read as an
+  open-ended allowance.
+- **THREE SURVIVING MUTATIONS, THREE DIFFERENT MEANINGS -- telling them apart is the real work, and
+  a battery summary makes them look identical:**
+  (a) **fixture gap** -- the guard is real but no fixture exercises it (the anchored-pick mutation
+      survived while the aggregate showed it worth 32 points of connectivity). Fix the fixtures.
+  (b) **redundancy** -- a separate "does it dip" term could not be killed because a dip-free
+      ordering has depth 0.0 AND width 0 by construction. **Remove it as decoration rather than
+      keeping it with a test written around it.** A term that cannot be killed because it is implied
+      by construction is not a guard, it is a comment.
+  (c) **untestable on real data** -- depth-vs-width ordering is undecidable from the measured set
+      because no pair offers two DIPPING ADMISSIBLE candidates of differing depth. Pin it on
+      constructed candidates through the key function directly.
+  The recurring shape underneath all three: a conditional assertion over a fixture that cannot fail
+  it. Three distinct fixtures were needed -- mixed, residual, synthetic -- because the dipping
+  fixture's candidates are all inadmissible.
+- **A classification of what a benchmark DECLARES is not a claim about what it SUPPLIES to the
+  optimizer.** The 19-of-23 goal audit was correct and reusable; converting it into "therefore the
+  target is a task input" asserted a data flow nobody had traced. Tracing
+  `config.target -> visualize_top_smiles -> saved plot` settled it.
+- **A goal-conditioned scoring-identity gate must land WITH the realizer, not after it.** It needs
+  the proposals to exist, but if it reads 0.0000 the way T4's `expand` did, every downstream
+  improvement in goal selection is unobservable and the realizer would be measuring nothing.
