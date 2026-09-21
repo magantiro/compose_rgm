@@ -227,6 +227,33 @@
  "rescue_trigger_rule": "a cell qualifies ONLY on measured mechanistic failure -- candidate exhaustion with zero eligible support. Never on target identity and never on whether COMPOSE trails the published baseline.",
  "schema_version": "t4_rescue_feasibility_headroom_preparation_v1",
  "scientific_problem": "test whether a generic feasibility-conditioned proposal expert converts six terminally exhausted T4 cells into recursively searchable trajectories, without relaxing any benchmark constraint",
+ "status": "SUPERSEDED_NOT_FOR_LAUNCH",
+ "superseded": {
+  "established_by_commit": "d676cfe7",
+  "evidence": [
+   "diagnostics/t4_rescue_expert_direction_mismatch_v1.json",
+   "diagnostics/t4_rescue_witness_census_v1.json"
+  ],
+  "measured_plan_allocation_on_the_rescue_sources": {
+   "5ht1b_2_d06": 12,
+   "braf_0_d06": 0,
+   "braf_1_d06": 8,
+   "fa7_0_d06": 24,
+   "fa7_2_d04": 16,
+   "fa7_2_d06": 16
+  },
+  "reason": "the expert this config selects, generic_feasibility_headroom_v4, is growth-only, while every clean eligible witness for all five exhausted cells is a net excision of 7 to 15 heavy atoms. The proposal direction cannot produce the transformation any of the cells need.",
+  "retained_because": "this is the record of a tool assessed and rejected on measured evidence. The cell set, the lock-derived ceilings and the expert-vocabulary reasoning remain correct and are reusable by a pruning-capable successor; only the chosen expert is wrong.",
+  "still_valid_in_this_file": [
+   "the six-cell set and their cell_keys",
+   "charged_calls_per_cell (lock-derived 248 x5 + 249 = 1489)",
+   "rescue_trigger_rule",
+   "expert_vocabulary_rationale for EXCLUDING protonation_aware_retained_subgraph",
+   "claim_boundary",
+   "endpoint_gates_unchanged"
+  ],
+  "superseded_by": "the general region-draw (pruning) repair -- one coherent draw over bridge-separated substituents of arbitrary size, replacing the fragmentation of a coherent excision into independent uniform draws"
+ },
  "support": "compose_valid",
  "total_charged_call_ceiling": 1489
 }
