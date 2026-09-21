@@ -70,6 +70,44 @@ compatibility propagation.
 Exact execution does not imply cheap planning or transfer; a dependency graph is not a
 proven quotient; a heuristic allocation is not a Doob transform.
 
+## Controller scope: shared process, task-appropriate control
+
+The claim is **a common validity-closed generative process over molecular graphs**, with task
+constraints and objectives expressed through a shared structural control interface -- NOT one
+identical controller configuration for every benchmark. The strongest baselines do not impose that
+on themselves: GenMol changes its inference procedure per task (fragment remasking for PMO/lead-op,
+molecular-context guidance for guided generation, separate pipelines per family, and V2 beats V1 on
+de novo/fragments while V1 remains better on PMO); InVirtuoGen uses direct flow sampling for de
+novo, a dedicated conditioning procedure for fragments, GA+PPO for PMO, a docking-PPO pipeline for
+lead optimization, and even a different checkpoint for de novo/fragments than for PMO.
+
+Three levels, and they are different:
+
+- **ACROSS benchmark families -- different controllers are legitimate.** Fragment-constrained
+  generation, black-box optimization and constrained lead optimization are different problems; de
+  novo has no objective feedback at all. Forcing one algorithm across all four is artificial and
+  costs performance.
+- **WITHIN a family -- the algorithm and its hyperparameters are FROZEN across instances.** One PMO
+  controller over all 23 oracles, only the oracle changing. One lead-optimization controller across
+  every protein, seed and delta -- target, start molecule and delta are benchmark INPUTS, never
+  reasons to retune. One fragment controller across every drug and task type.
+- **NEVER per-instance.** No GSK3B controller, no BARICITINIB attachment rule, no BRAF-specific
+  proposal probabilities, no `if target == 5ht1b`. A mechanism must activate from structural
+  features or a constraint specification, never from an identity. That is the line between a
+  general capability and benchmark engineering.
+
+A fragment controller consuming the benchmark's own declared constraints -- motif, attachment sites,
+locked atoms, linker endpoints -- is NOT a hack; it is what a fragment-conditioned generator is
+supposed to do, and it may legitimately behave differently for linker design than for motif
+extension because the constraint itself differs.
+
+**Consequence for T4.** The region-repair and protonation mechanisms are general structural proposal
+channels, not per-target rescues. The final panel should be ONE T4 controller carrying shallow,
+structured, region and protonation-aware channels, routed by molecular-state features rather than
+protein identity, then frozen and run over the whole panel. The current per-cell rescue arms are
+development experiments that establish which mechanisms work; they are not required to be the
+canonical final evaluation.
+
 ## Reasoning discipline
 
 Per intervention record: observation -> a competing explanation -> cheapest discriminating
