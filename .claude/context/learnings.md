@@ -2096,3 +2096,48 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   `pmo_realization.py` to that config while its support numbers stayed from the beam run: a
   config that VALIDATES while binding a stale measurement, the 2026-08-02 failure class again.
   `support_observed` must be RE-MEASURED from the new receipt, never re-pinned.
+
+## 2026-09-21 (the PMO-v2 launch chain: three guards, three real defects, zero charged calls)
+
+- **A re-pinned contract on disk does NOT reach a deployed Modal app until the app is redeployed.**
+  `pmo_population_v1_app.py` bakes the contract with `add_local_file(..., copy=True)`, which fixes
+  it at IMAGE BUILD time, and the launcher spawns against a DEPLOYED function via
+  `Function.from_name`. So the container kept validating against the v1-era contract long after the
+  file on disk had moved. The worker's own check
+  (`spec["contract_payload_sha256"] != contract_envelope["payload_sha256"]`) caught it and raised
+  `scored payload authorization identity changed` BEFORE charging anything. Fix is `modal deploy`,
+  not a code change -- but the failure reads like a contract bug, so know the shape.
+- **An edit to a pinned file that lands AFTER a re-seal leaves exactly one stale pin, and it fails
+  at the far end of the chain.** `pmo_population_live_parent_gate.py` was re-pointed from the beam
+  binder to the realizer after the integration re-sealed, so the base contract pinned `518045a7`
+  while disk held `2b44294b`. The failure surfaced as `input identity mismatch` inside the
+  container, not at seal time. **When an agent edits a pinned source file, re-pin in the SAME pass
+  or the next launch pays for it.**
+- **THE NEAR-MISS WORTH REMEMBERING: the capsule rebuild script would have silently DE-AUTHORIZED
+  the run.** `prepare_pmo_250_pilot.py` sets `status =
+  FROZEN_FAIL_CLOSED_PENDING_NEW_EXPLICIT_PAYLOAD_AUTHORIZATION`, forces `scored_launch_authorized`
+  and `modal_launch_authorized` to False, overwrites `budget`, and RECOMPUTES the payload hash --
+  moving the contract off the exact hash the owner authorized. It is the right tool for preparing a
+  NEW pilot and the wrong tool for refreshing a capsule against an AUTHORIZED payload. Update the
+  capsule's `source_files` hashes surgically instead and leave the contract payload untouched.
+  Read what a "prepare" script mutates before running it on a sealed artifact.
+- **Re-pointing an authorization pin is only legitimate once the authorization names the new
+  value.** The launcher pinned `103d9d92` (v1, beam binder) and refused. An agent had deliberately
+  left it refusing, correctly calling a pre-emptive re-pin "manufacturing consent". After the owner
+  authorized `38afd1c4` explicitly, re-pointing became the correct resolution rather than a bypass.
+  The v1 authorization receipt was ARCHIVED beside its completed run, never edited.
+- **Archive a superseded launch receipt under the payload hash the RECEIPT carries, not the
+  contract's current hash** -- they differ whenever a re-seal ran first, and a fixed archive
+  directory lets a second supersession overwrite the first attempt's record.
+- **A scripted rewrite of authorization contracts is correctly refused as self-modification.** The
+  resolution is individual visible edits, not a workaround. Four edits (gate pin, base payload,
+  scored `controller_contract_sha256`, scored payload) re-sealed the chain; the ORIGINAL
+  authorization record was left unedited and a `reseal_supersession` block appended, so the history
+  of what was first approved survives alongside what actually ran.
+- **PARITY IS NOT THE GATE; THE PINNED KERNEL IS THE MEASUREMENT.** I proposed requiring
+  `max_abs_delta = 0` between an rdkit 2026.03.6 gate and its 2024.3.5 re-run. Wrong criterion:
+  the pinned production kernel's own result is authoritative, and a differing endpoint count
+  (e.g. 12/44 -> 9/37) is a PASS provided each arm stays non-trivial, eligibility comes through the
+  unmodified production `Fiber.check`, the predeclared settings perturbation still moves yield, and
+  the abstention/reverse controls still behave. Demanding numerical parity would let a
+  canonical-SMILES spelling difference block a valid launch. Record divergence; do not gate on it.
