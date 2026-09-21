@@ -1863,6 +1863,30 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   that closes the swallowed-RuntimeError hole, because identical endpoint counts across
   kernels alone would not distinguish "neither kernel refused" from "both refused the
   same states".
+- **OFF-vs-ON on the campaign path, six cells, production kernel, 120 shallow draws,
+  matched seed, ZERO oracle calls** (`diagnostics/t4_region_law_campaign_consumption_*`):
+      cell     status    OFF   ON   maxcut   ON shapes micro/small/large
+      braf_0   failed      0    6       15   0/0/6
+      braf_1   failed      4   16       15   0/0/16
+      braf_2   control     0   20       15   0/0/20
+      fa7_0    failed      0    0        0   0/0/0
+      fa7_2    failed      0    4       12   0/0/4
+      fa7_1    control     0    6        6   0/6/0
+  Three of four failed cells gain on the shallow lane; **fa7_0 does not**, exactly as its
+  support predicted (zero one-module eligible children under the repair, and the witness
+  census found none for it). Neither control regresses; both improve.
+- **BOTH HALVES OF THE JOINT REPAIR ARE LOAD-BEARING, IN DIFFERENT CELLS.** fa7_1 gains
+  only cuts of <=6 atoms -- INSIDE v1's eight-atom cap -- so there the conditioned TILT
+  alone did the work and the uncapping contributed nothing; braf_0/1/2 and fa7_2 gain
+  only cuts BEYOND the cap. A single-cell reading would have attributed the whole effect
+  to whichever half that cell happened to need.
+- **CAVEAT that must travel with these numbers: this OFF arm is NOT the live campaign's
+  OFF arm.** Different seed, shallow lane only, 120 of 480 declared draws, and no
+  `anchored_replacement` or `route_complete_region`. braf_2 SEARCHED live yet scores
+  OFF 0 here, and braf_1 EXHAUSTED live yet scores OFF 4 -- both are seed/draw artifacts,
+  not contradictions, and they re-confirm that these cells fail marginally rather than
+  categorically. Read the within-experiment OFF-vs-ON contrast at matched seed; never
+  read the OFF column as a reproduction of `candidate_exhaustion`.
 - **`git worktree add` + `git merge FETCH_HEAD`:** `git merge origin/<branch>` fails with
   "not something we can merge" in a fresh worktree whose remote refs were not fetched
   into that name; `git fetch origin <branch>` then `git merge FETCH_HEAD` works. The only
