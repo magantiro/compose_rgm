@@ -220,3 +220,31 @@ def test_every_panel_source_is_admitted_by_the_dedicated_task():
         if not task.endpoint_evaluator()({"smiles": smiles})["oracle_eligible"]:
             refused.append(smiles)
     assert refused == []
+
+
+def test_direction_resolver_fails_loudly_rather_than_defaulting():
+    """A resolver that returned a default on confusion would be worse than useless."""
+
+    class _NoKind:
+        oracle_protocol = "local:test"
+
+    with pytest.raises((AttributeError, RuntimeError)):
+        resolve_score_direction(_NoKind())
+
+
+def test_direction_resolver_discriminates_rather_than_accepting_both():
+    """Exactly one direction must survive the guard, or the resolver must refuse."""
+    from compose_v4.control.parent_edit_search import prepare_query_batch
+    from compose_v4.tasks.qed_edit_task import _DirectionProbeSearch
+
+    task = _task()
+    survived = []
+    for direction in ("maximize", "minimize"):
+        try:
+            prepare_query_batch(
+                _DirectionProbeSearch(task.oracle_protocol, direction), task, count=0, seed=0
+            )
+        except ValueError as error:
+            if "direction disagrees" not in str(error):
+                survived.append(direction)
+    assert survived == ["maximize"]
