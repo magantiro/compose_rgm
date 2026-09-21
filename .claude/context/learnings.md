@@ -3411,3 +3411,39 @@ independently of whether fa7_0 ever closes.**
   10,000 calls is 0.798; our arm B reached AUC 0.3138 at 1,000. Matching 0.798 over 10k after those
   first 1,000 requires an average top-ten level of ~0.852 across the remaining 9,000 calls. A single
   perfect target molecule is not the objective; a strong top-ten CURVE is.
+
+## 2026-09-21 (before naming a vocabulary boundary, check the candidate against what the prior PROPOSES)
+
+- **A NEGATIVE THAT LOOKS LIKE A PROPERTY OF THE MODEL AND IS A PROPERTY OF THE MEASUREMENT.** A
+  probe reported `insert carbon` as **NO_HIT up to 32,768 draws on two drugs** -- close to the
+  evidence needed to declare a constituent unrankable and a composite primitive a capability
+  EXTENSION rather than an acceleration. **It was a units bug: `atom_type` is a VOCABULARY INDEX,
+  not an atomic number.** `ELEMENTS = ['null','B','C','N','O','F','P',...]`, so `CARBON = 6` is
+  **phosphorus**. The probe was inserting a phosphorus linker and asking whether the prior proposes
+  it. It does not, correctly.
+- **The tell was in the artifact the whole time** -- a bare `P` in the constructed SMILES. A negative
+  result whose molecules nobody reads is a negative result nobody has checked.
+- **The fix revealed the answer.** With carbon looked up BY NAME and given three hydrogens (a
+  single-bonded carbon is a methyl; an unsupported H-count makes the insert unexecutable), insert
+  flipped to IN_SUPPORT -- and **the model's most frequent insert at that site was exactly
+  `(carbon, 3 hydrogens)`**, the atom that should have been constructed. The prior was not silent;
+  it was answering a different question.
+- **GENERAL RULE, adopted for every support probe: before naming a boundary, check the candidate
+  against what the prior ACTUALLY PROPOSES at that site.** Asking "does the prior propose X" when X
+  is malformed returns a confident no; asking "what does the prior propose here" catches it in one
+  call. Companion to "a metric that cannot vary is not a measurement" and "ask whether the thing
+  being tested exists before reporting that it failed".
+- **Applying the raised standard correctly:** a constituent reading NO_HIT to 16,384 draws was
+  recorded **UNRESOLVED**, not as a boundary and not as a non-issue, because the same move class is
+  in-support elsewhere on the panel and because LOVASTATIN needed 8,192 to recover from a zero that
+  had survived 2,048. Naming something unresolved is more useful than guessing either way.
+- **A PRECONDITION derived from failure analysis is better than two unexplained failures.** The
+  close-then-open transaction executes on 2 of 4 linker drugs; both failures are the SAME step
+  (ring-close) on the two drugs the original structural audit already recorded as having **zero free
+  valence at their declared sites**. A saturated anchor cannot accept another bond. So the composite
+  fires only where the far-core anchor has free valence -- a structural property of the state,
+  activating without any instance identity, that converts two anomalies into one declared scope.
+- **Macro vs extension is decided PER CONSTITUENT.** All three constituents in-support on one drug
+  means the composite bundles moves the prior could already make but does not make in sequence --
+  an ACCELERATION. One unrankable constituent would make it a capability EXTENSION, which must be
+  declared as such rather than wrapped in a macro.
