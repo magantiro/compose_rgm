@@ -1,0 +1,32 @@
+{
+  "schema": "compose_fragment_kernel_parity_panel_v1",
+  "question": "does the pinned production kernel reproduce the laptop kernel's fragment rows across the whole panel, not just one shard?",
+  "unpinned_rdkit": [
+    "2024.03.5"
+  ],
+  "pinned_rdkit": [
+    "2024.03.5"
+  ],
+  "rows_compared": 180,
+  "shards_missing_a_pinned_twin": [],
+  "ignored_fields": [
+    "seconds"
+  ],
+  "float_noise_tolerance": 1e-12,
+  "max_abs_delta_by_field": {
+    "official.distance": 0.0,
+    "official.distance_to_original_drug": 0.0,
+    "official.diversity": 3.3306690738754696e-16,
+    "official.quality": 0.0,
+    "official.uniqueness": 0.0,
+    "official.validity": 0.0
+  },
+  "disagreements_beyond_noise_by_field": {},
+  "molecules_diverged": [],
+  "published_quantities_diverged": [],
+  "diagnostic_counters_diverged": [],
+  "disagreement_examples": [],
+  "verdict": "PARITY_TO_FLOAT_NOISE",
+  "result_verdict": "RESULTS_AGREE",
+  "result_verdict_note": "result_verdict covers the emitted molecules and the quantities a row publishes. A divergence confined to diagnostic_counters_diverged leaves every published number and every molecule unchanged, and is reported rather than suppressed."
+}
