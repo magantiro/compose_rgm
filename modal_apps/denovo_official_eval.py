@@ -480,6 +480,34 @@ def sample_shard(task: dict) -> dict:
 # ---- scoring ----------------------------------------------------------------
 
 
+def _read_seed_shards(shard_dir: Path, seed: int) -> tuple[list[dict], int | None, list[str]]:
+    """Records for one seed, refusing shards that span more than one design.
+
+    Per-trajectory seeds are derived from ``(seed, total)``, so two shards with
+    the same ``seed`` but different ``total`` are different trajectory families.
+    They can coexist in one directory under plausible names whenever an earlier
+    run used a different N, and the glob matches both -- pooling them would mix
+    two experiments into one headline number while every count still looked
+    reasonable.  Fail closed instead.
+    """
+
+    paths = sorted(shard_dir.glob(f"seed{seed}_*.json"))
+    records: list[dict] = []
+    totals: dict[int, list[str]] = {}
+    for path in paths:
+        payload = json.loads(path.read_text())
+        totals.setdefault(int(payload.get("total", 0)), []).append(path.name)
+        records.extend(payload["records"])
+    if len(totals) > 1:
+        raise RuntimeError(
+            f"shards for seed {seed} span more than one sampling design in {shard_dir}: "
+            + "; ".join(f"total={total}: {sorted(names)}" for total, names in sorted(totals.items()))
+        )
+    records.sort(key=lambda item: item["index"])
+    total_expected = next(iter(totals)) if totals else None
+    return records, (total_expected or None), [path.name for path in paths]
+
+
 @app.function(image=image, volumes={str(VOL): volume}, timeout=3600, cpu=4, memory=8192)
 def score_available(seed: int, horizon: float = OPERATIONAL_HORIZON) -> dict:
     """Score whatever shards have landed for one seed, WITHOUT requiring the
@@ -503,14 +531,7 @@ def score_available(seed: int, horizon: float = OPERATIONAL_HORIZON) -> dict:
     _assert_pinned_inputs()
 
     shard_dir = VOL / "shards" / horizon_tag(horizon)
-    paths = sorted(shard_dir.glob(f"seed{seed}_*.json"))
-    records: list[dict] = []
-    total_expected = None
-    for path in paths:
-        payload = json.loads(path.read_text())
-        total_expected = int(payload.get("total", 0)) or total_expected
-        records.extend(payload["records"])
-    records.sort(key=lambda item: item["index"])
+    records, total_expected, shard_names = _read_seed_shards(shard_dir, seed)
 
     generated = [item["smiles"] or "" for item in records]
     metrics = denovo_benchmark_metrics(generated)
@@ -527,7 +548,7 @@ def score_available(seed: int, horizon: float = OPERATIONAL_HORIZON) -> dict:
     metrics["strained_ring_census"] = strained_ring_census(distinct)
     metrics["seed"] = seed
     metrics["horizon"] = horizon
-    metrics["shards_present"] = len(paths)
+    metrics["shards_present"] = len(shard_names)
     metrics["target_total"] = total_expected
     metrics["complete"] = bool(total_expected and len(records) == total_expected)
     metrics["mean_events"] = (
@@ -594,17 +615,13 @@ def score_seed(
     volume.reload()
 
     shard_dir = VOL / "shards" / horizon_tag(horizon)
-    paths = sorted(shard_dir.glob(f"seed{seed}_*.json"))
-    records: list[dict] = []
-    for path in paths:
-        records.extend(json.loads(path.read_text())["records"])
-    records.sort(key=lambda item: item["index"])
+    records, _total, shard_names = _read_seed_shards(shard_dir, seed)
 
     indices = [item["index"] for item in records]
     if indices != list(range(samples_per_seed)):
         raise RuntimeError(
             f"seed {seed} @ {horizon}: expected contiguous 0..{samples_per_seed - 1}, "
-            f"got {len(indices)} records from {len(paths)} shards"
+            f"got {len(indices)} records from {len(shard_names)} shards"
         )
 
     # One entry per ATTEMPT; an empty string is a generation that emitted no
