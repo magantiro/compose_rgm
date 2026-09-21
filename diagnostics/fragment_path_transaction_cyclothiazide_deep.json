@@ -1,0 +1,82 @@
+{
+  "schema": "compose_fragment_path_transaction_probe_v1",
+  "question": "is the close-then-open path transaction executable, and is each of its constituents rankable by the proposal law?",
+  "why": "A composite whose constituents are each individually in support is an ACCELERATION -- it bundles moves the prior could make but does not make in sequence. A composite needing a constituent the prior cannot rank is a capability EXTENSION and must be declared as one rather than wrapped.",
+  "hard_zero_standard": "A zero surviving ONE budget increase is not a hard zero: LOVASTATIN motif read 0.0000 at 256 AND at 2048 draws, then 0.80 at 8192. This probe sweeps [16384, 65536, 262144] before calling any constituent unrankable.",
+  "drugs_where_the_transaction_executes": [
+    "CYCLOTHIAZIDE"
+  ],
+  "rows": [
+    {
+      "drug": "CYCLOTHIAZIDE",
+      "start_path_length": 1,
+      "seed_slot": 13,
+      "far_core_anchor": 14,
+      "steps": [
+        {
+          "step": "insert carbon on the seed",
+          "rule": "atom_insert",
+          "executes": true,
+          "lock_permits": true,
+          "path_length_after": 1
+        },
+        {
+          "step": "ring-close the new atom to the far core",
+          "rule": "bond_insert",
+          "executes": true,
+          "lock_permits": true,
+          "path_length_after": 1
+        },
+        {
+          "step": "open the original seed-to-far-core bond",
+          "rule": "bond_delete",
+          "executes": true,
+          "lock_permits": true,
+          "path_length_after": 2
+        }
+      ],
+      "final_path_length": 2,
+      "cores_separated": true,
+      "final_smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CCC1CC3C=CC1C3)NS2(=O)=O",
+      "status": "TRANSACTION EXECUTES and lengthens the path",
+      "constituent_rankability": [
+        {
+          "constituent": "insert carbon on the seed",
+          "ladder": {
+            "16384": true
+          },
+          "first_rankable_at_draws": 16384,
+          "verdict": "IN_SUPPORT"
+        },
+        {
+          "constituent": "ring-close the new atom to the far core",
+          "ladder": {
+            "16384": false,
+            "65536": true
+          },
+          "first_rankable_at_draws": 65536,
+          "verdict": "IN_SUPPORT"
+        },
+        {
+          "constituent": "open the original seed-to-far-core bond",
+          "ladder": {
+            "16384": true
+          },
+          "first_rankable_at_draws": 16384,
+          "verdict": "IN_SUPPORT"
+        }
+      ]
+    }
+  ],
+  "resolution": {
+    "question": "was CYCLOTHIAZIDE ring-close a second vocabulary boundary, or site rarity?",
+    "answer": "SITE RARITY -- it recovers to IN_SUPPORT at 65,536 draws, having missed at 16,384",
+    "ladder": {
+      "16384": "no hit",
+      "65536": "HIT"
+    },
+    "why_16384_carried_no_information": "At the ring-close state bond_insert is only 8 of 6,000 draws (0.13%) and the specific atom pair is a fraction of that, so the expected number of hits in 16,384 draws is of order one. A zero at that rung is unremarkable and discriminates nothing. Estimating the per-draw rate FIRST is what showed which rung would actually be decisive.",
+    "verdict": "ALL THREE CONSTITUENTS IN_SUPPORT on both drugs where the transaction executes. No second vocabulary boundary.",
+    "consequence": "v2 is an ACCELERATION and is to be described as one: it bundles moves the prior can already rank but does not make in sequence."
+  }
+}
