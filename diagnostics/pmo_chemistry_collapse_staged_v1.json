@@ -1,0 +1,45 @@
+{
+  "COULD_NOT_SETTLE": "The capability inventory proposed settling the 8-anionic-initialization AUC cost by comparing anionic and neutral init lineages in a completed campaign. That is NOT possible from the stored artifacts: the archive's 32 root entries are already-edited bootstrap products, not the init molecules, and no provenance pointer crosses that boundary. Lineage back to a specific init molecule is unrecoverable, so the anionic question needs a fresh instrumented run, not a re-read.",
+  "FINDING": "The chemistry collapse happens in TWO separable stages with DIFFERENT causes, and the first one is task-independent.",
+  "STAGE_1_bootstrap": "init -> gen 0 loses QED>=0.6 from 87.5% to 46.9% -- roughly FORTY POINTS -- in a single edit, BEFORE any scored search can have informed anything, and identically for every task. Heavy atoms RISE here (20 -> 22), so this is not shrinkage. This is the missing chemical prior in its purest form: one random legal edit from a drug-like molecule destroys drug-likeness about 40% of the time.",
+  "STAGE_2_search": "gen 0 -> gen >=1 takes QED>=0.6 from 46.9% to 16-22% while heavy atoms FALL 22 -> 11-16. The size collapse appears only here, which matches the parent allocator handing ~80% of parent mass to at most 8 molecules whose niche centres replay as 1-3 atom fragments, score-independently.",
+  "WHY_THE_SEPARATION_MATTERS": "The two defects are now attributable to different layers and can be fixed and measured independently: stage 1 is proposal quality (no learned prior over real chemistry anywhere in the PMO path), stage 2 is parent allocation. Neither fix alone should be expected to recover the full gap, and a repair that only moves one stage should not be read as solving the collapse.",
+  "kernel": "rdkit 2024.03.5 pinned",
+  "oracle_calls_spent": 0,
+  "schema_version": "pmo_chemistry_collapse_staged_v1",
+  "stages": {
+    "bootstrap_roots_gen0": {
+      "median_heavy": 22.0,
+      "median_qed": 0.587,
+      "median_sa": 3.959,
+      "note": "IDENTICAL across all three tasks (same 32 entries, same statistics) -- deterministic, seeded, task-blind.",
+      "pct_qed_ge_0_6": 46.9
+    },
+    "descendants_gen_ge_1": {
+      "celecoxib_rediscovery": {
+        "median_heavy": 11.0,
+        "median_qed": 0.436,
+        "median_sa": 4.227,
+        "pct_qed_ge_0_6": 16.3
+      },
+      "gsk3b": {
+        "median_heavy": 14.0,
+        "median_qed": 0.384,
+        "median_sa": 4.961,
+        "pct_qed_ge_0_6": 16.3
+      },
+      "perindopril_mpo": {
+        "median_heavy": 16.0,
+        "median_qed": 0.431,
+        "median_sa": 4.606,
+        "pct_qed_ge_0_6": 22.3
+      }
+    },
+    "init_16_drawn": {
+      "median_heavy": 20.0,
+      "median_qed": 0.716,
+      "median_sa": 3.49,
+      "pct_qed_ge_0_6": 87.5
+    }
+  }
+}
