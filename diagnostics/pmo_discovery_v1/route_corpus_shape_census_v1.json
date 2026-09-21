@@ -1,0 +1,92 @@
+{
+  "schema_version": "pmo_route_corpus_shape_census_v1",
+  "oracle_calls": 0,
+  "generic_pair_compiler": {
+    "compiler": "compile_source_to_target",
+    "pairs": 4,
+    "compiled": 4,
+    "retained_fraction_median": 0.0,
+    "routes_through_null": 4,
+    "rows": [
+      {
+        "source": "CC(=O)Nc1ccc(O)cc1",
+        "target": "CC(=O)Nc1ccc(OC)cc1",
+        "status": "compiled",
+        "steps": 25,
+        "source_heavy_atoms": 11,
+        "min_heavy_atoms_on_route": 0,
+        "retained_fraction": 0.0,
+        "passes_through_null": true,
+        "compiler": "delete_to_null_then_construct_v1"
+      },
+      {
+        "source": "O=C(NC1CCNCC1)c1ccccc1",
+        "target": "O=C(NC1CCN(C)CC1)c1ccccc1",
+        "status": "compiled",
+        "steps": 35,
+        "source_heavy_atoms": 15,
+        "min_heavy_atoms_on_route": 0,
+        "retained_fraction": 0.0,
+        "passes_through_null": true,
+        "compiler": "delete_to_null_then_construct_v1"
+      },
+      {
+        "source": "COc1ccc(CCN)cc1",
+        "target": "COc1ccc(CCNC)cc1",
+        "status": "compiled",
+        "steps": 25,
+        "source_heavy_atoms": 11,
+        "min_heavy_atoms_on_route": 0,
+        "retained_fraction": 0.0,
+        "passes_through_null": true,
+        "compiler": "delete_to_null_then_construct_v1"
+      },
+      {
+        "source": "CC(=O)Nc1ccc(O)cc1",
+        "target": "O=C(NC1CCNCC1)c1ccccc1",
+        "status": "compiled",
+        "steps": 29,
+        "source_heavy_atoms": 11,
+        "min_heavy_atoms_on_route": 0,
+        "retained_fraction": 0.0,
+        "passes_through_null": true,
+        "compiler": "delete_to_null_then_construct_v1"
+      }
+    ]
+  },
+  "witness_corpus": {
+    "corpus": "diagnostics/ivg_winner_paths/pairs/*.json.gz",
+    "files": 176,
+    "statuses": {
+      "witness_found": 160,
+      "unsupported_representation": 3,
+      "unreachable_charge_change": 10,
+      "search_unresolved": 3
+    },
+    "witness_routes": 160,
+    "distinct_targets": 82,
+    "retained_fraction": {
+      "min": 0.35,
+      "median": 0.8125,
+      "mean": 0.7683,
+      "max": 1.0
+    },
+    "routes_through_null": 0,
+    "steps": {
+      "min": 5,
+      "median": 17.0,
+      "max": 47
+    },
+    "ring_rank_changing_routes": 138,
+    "families": {
+      "atom_insert": 1314,
+      "atom_delete": 1202,
+      "cycle_close": 279,
+      "bond_reorder": 156,
+      "cycle_open": 70,
+      "ring_system_restate": 33,
+      "atom_restate_semantic": 16
+    }
+  },
+  "verdict": "GENERIC_COMPILER_UNUSABLE_FOR_SEMANTIC_ROUTES"
+}
