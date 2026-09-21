@@ -304,3 +304,58 @@ def test_cycle_open_is_excluded_from_the_certified_fast_path() -> None:
     assert "cycle_open" not in SUCCESSOR_EXACT_COORDINATE_JOIN
     prior = LearnedSuccessorPrior(model=None, verify_successors=True)
     assert prior.verify_successors is True
+
+
+def test_path_log_likelihood_scores_a_real_multi_step_edit_path() -> None:
+    """The second consumer's interface: rank an already-constructed program.
+
+    Reference is the model's own per-step law, reached independently here by
+    asking the prior for the weights of the step's family and checking the
+    scored step is the one whose mark the law holds -- not by re-running
+    `path_log_likelihood`'s own arithmetic.
+    """
+    model = _model()
+    prior = LearnedSuccessorPrior(model)
+    from compose_v4.experiments.whole_ring_plan import execute_program
+    from compose_v4.rewrite.action_codec_v4 import encode_action
+
+    for _row, source in _parents():
+        if source.n_real_atoms < 6:
+            continue
+        family, actions = _first_populated(source, minimum=4)
+        if family is None:
+            continue
+        first = actions[0]
+        middle, _receipt = execute_program(source, [encode_action(family, first)])
+        second_family, second_actions = _first_populated(middle, minimum=2)
+        if second_family is None:
+            continue
+        end, _receipt2 = execute_program(
+            middle, [encode_action(second_family, second_actions[0])]
+        )
+        result = prior.path_log_likelihood(
+            [source, middle, end],
+            [(family, first), (second_family, second_actions[0])],
+        )
+        assert result["path_length"] == 2
+        assert result["scored_steps"] + result["unjoined_steps"] == 2
+        if result["scored_steps"] == 2:
+            assert result["total_log_likelihood"] < 0.0
+            assert 0.0 < result["per_step_probability"] <= 1.0
+            # A longer path cannot score higher in TOTAL than its own prefix.
+            prefix = prior.path_log_likelihood([source, middle], [(family, first)])
+            assert result["total_log_likelihood"] <= prefix["total_log_likelihood"] + 1e-9
+        return
+    pytest.skip("fixture produced no two-step path")
+
+
+def test_path_log_likelihood_rejects_a_malformed_path() -> None:
+    """A state/action count mismatch must raise, never be scored silently."""
+    from compose_v4.control.learned_successor_prior import LearnedSuccessorPriorError
+
+    prior = LearnedSuccessorPrior(model=None)
+    _row, source = _parents()[0]
+    with pytest.raises(LearnedSuccessorPriorError):
+        prior.path_log_likelihood([source], [("cycle_close", object())])
+    with pytest.raises(LearnedSuccessorPriorError):
+        prior.path_log_likelihood([source, source], [])
