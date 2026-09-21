@@ -34,7 +34,17 @@
       },
       "run_id": "79fec4984821e97de6decefd213e45a47b3d2b901a1a9c021ee0dfd3ed1561f4",
       "status": "INVALID_ORACLE_RUNTIME_RELATIVE_PATH",
-      "superseded_by": "a fresh 250-call gsk3b run on the corrected worker",
+      "superseded_by": {
+        "auc_budget": 250,
+        "auc_top10_at_budget": 0.11999999999999998,
+        "best_score": 0.21,
+        "charged_oracle_calls": 250,
+        "contract_payload_sha256": "103d9d9273753732fb7fc03207834c88e317c4d1d9bab11b3f3b2f265fc50075",
+        "note": "Same frozen v1 controller and the same 250-call settings; the worker's oracle asset resolution is the only change, so the comparison isolates the fix. The controller's own physical hash is unchanged and still matches both the contract and the source-capsule pin.",
+        "oracle_positive_control": "PASSED 13/13, max_abs_delta 0.0, before the first charged call",
+        "run_id": "859a42ffaf96fb46bcee309c2bc0141846d2551b03497e08898714203ccc96a0",
+        "task": "gsk3b"
+      },
       "task": "gsk3b",
       "the_zero_carries_no_information_about_gsk3b_chemistry": true,
       "voided_at_utc": "2026-09-20T23:04:32.785509+00:00"
