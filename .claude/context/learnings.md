@@ -2054,3 +2054,44 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   caffeine (0.538) both FAIL it**; ibuprofen 0.822, celecoxib 0.754, diazepam 0.792 pass. A test
   fixture that assumes a famous drug passes will fail, and that is the fixture being wrong, not the
   metric.
+
+## 2026-09-21 (de-novo run death: PREEMPTION vs shard length, and a wrong first diagnosis)
+
+- **The 3x1,000 de-novo run DIED at 1 of 60 shards, killed by 27 container preemptions -- not by
+  slow container ramp-up, which is what I first concluded and reported.** The tell I initially
+  misread: shards were not appearing, and I attributed it to Modal allocating the 40 containers
+  gradually. The log actually carried 27 x `Container terminated due to preemption. Your Function
+  will be restarted with the same input.`, the app ended `stopped` with 0 tasks, and the local
+  `.map()` raised `RemoteError` when one shard exhausted its retry budget -- which kills the WHOLE
+  run, including the 59 shards that were still healthy.
+- **THE RULE: a preemptible shard must be shorter than the preemption interval, because a retry
+  without intra-shard checkpointing restarts from ZERO.** `sample_shard` had
+  `retries=modal.Retries(max_retries=3)` and no resume, while one shard was 50 trajectories x
+  **72.65 s measured = ~61 minutes**. Every preemption discarded up to an hour of sampling and the
+  retry re-did it from the start, so 3 retries could not carry it. This is the same class as the
+  2026-07-29 note (`max_retries=1` cannot carry a multi-hour run) but the CORRECTED general form:
+  retries only make forward progress when each retry resumes from committed state. Absent a resume
+  path, the lever is not the retry count -- it is the WORK UNIT. At 72.65 s/trajectory a
+  10-trajectory shard is ~12 min and lands between preemptions; 3,000 trajectories is then 300
+  shards instead of 60. Size the shard from the MEASURED per-item cost, never from a round number
+  of items.
+- **One raising shard destroys an otherwise-healthy fan-out.** `sample_shard.map(...)` propagates
+  the exception, so a single exhausted-retry shard ended a run whose other 59 units were fine and
+  whose completed work was already durable on the volume. For a long fan-out whose outputs are
+  committed per-unit, consider consuming results defensively so one dead unit degrades the run to
+  "partial" rather than "dead" -- the shards on the volume are re-scorable either way, which is the
+  only reason nothing was lost here.
+- **Do not read "no output yet" as "still starting".** Both explanations predict silence, so
+  silence cannot discriminate them. What discriminates is the log's FAILURE vocabulary and the
+  app's task count: `grep -c preemption` and `modal app list` settled it in one command each, and
+  would have settled it an hour earlier. A monitor filter that greps only for progress markers is
+  blind to exactly this (cf. the Monitor "silence is not success" rule) -- my own watcher was armed
+  for `SEED_COMPLETE` and would never have fired.
+- **Measured de-novo result stands, at N=50** (the one shard that committed, scored in the pinned
+  kernel, rdkit 2024.03.5): validity 1.000, uniqueness 1.000, quality 0.280 (+-0.063 at N=50),
+  diversity 0.8925, mean QED **0.591** vs corpus 0.553, mean SA **4.11** vs corpus 2.92, SA pass
+  **46%** vs corpus 90%. `strained_ring_census`: **50% of molecules carry a 3- or 4-membered ring**
+  (40% 3-ring, 14% 4-ring), reproducing the documented 51% small-ring rate at step 1,000. So the
+  quality deficit is entirely SYNTHETIC ACCESSIBILITY, not drug-likeness -- COMPOSE's QED exceeds
+  its own corpus. Do not quote 0.4236 as a "ceiling": it is what corpus FIDELITY scores, and the
+  model is already above it on QED.
