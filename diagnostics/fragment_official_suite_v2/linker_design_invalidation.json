@@ -1,0 +1,25 @@
+{
+  "schema": "compose_fragment_task_invalidation_v1",
+  "tasks_invalidated": [
+    "linker_design",
+    "scaffold_morphing"
+  ],
+  "verdict": "NOT A VALID MEASUREMENT OF THE TASK -- DO NOT REPORT AS A BENCHMARK ROW",
+  "finding": "The sampler cannot produce a linker. build_prompt_context joins the two retained cores with a DIRECT BOND between their declared attachment atoms, because the executor only admits connected states. It then locks every atom of both cores, and RegionLock pins the bond order of every PAIR of locked slots -- which includes that join bond. So the two fragments remain directly bonded in every committed state and the linker is always zero atoms long.",
+  "code_evidence": {
+    "join_construction": "fragment_conditioned_sampler.build_prompt_context: combined.AddBond(join[0], join[1], Chem.BondType.SINGLE) with locked = tuple(range(left.GetNumAtoms() + right.GetNumAtoms()))",
+    "pinning": "RegionLock.__init__ builds self._bonds over every pair of locked slots and permits() refuses any successor that changes one"
+  },
+  "measured_evidence": {
+    "prompt": "ELIGLUSTAT linker_design, fragments ['[11*]N1CCCC1', '[17*]c1ccc2c(c1)OCCO2']",
+    "start_state": "c1cc2c(cc1N1CCCC1)OCCO2",
+    "locked_slots": 15,
+    "locked_nonzero_core_core_bonds": 17,
+    "core_internal_bonds": "pyrrolidine 5 + benzodioxole 11 = 16, so the 17th IS the join bond",
+    "direct_bond_rate": "9 of 9 emitted molecules match [NX3;r5]-[c]",
+    "original_drug_linker_length": "3 atoms (CH2-CH-CH) between the pyrrolidine N and the aryl carbon in eliglustat"
+  },
+  "why_the_endpoint_check_does_not_catch_it": "check_fragment_constraint requires each fragment's declared attachment site to have at least one external heavy neighbour not in that fragment's own match. The other fragment's atom satisfies that, so a zero-length linker passes the constraint.",
+  "consequence": "Any validity/uniqueness/quality/diversity row computed for linker_design, and the scaffold_morphing row that upstream copies from it, describes a different task from the published one and must not be placed beside a GenMol or InVirtuoGen linker number. The shards are retained as evidence of the defect, not as a result.",
+  "fix_direction_not_implemented": "The join bond must be excluded from the locked pair set and a minimum linker length enforced pathwise, or the two cores must be carried as a genuinely disconnected prompt with connectivity required only at the endpoint. Both are sampler changes and were deliberately NOT made here, because the sweep was run under one frozen configuration."
+}
