@@ -965,6 +965,92 @@ def static_first_step_feasible(source, plan: dict[str, Any], spec: RoleSpecifica
     return operand_availability(source, {}, 0, roles[0], spec) > 0
 
 
+# ---- zero-search parent x plan support certificate ----
+
+SUPPORT_CERTIFICATE_SCHEMA = "pmo_plan_parent_support_v1"
+
+# Stages, in the order they are evaluated.  ``reason`` always names the FIRST stage
+# that refused, so a refusal is attributable rather than a single undifferentiated
+# "does not bind" string.
+SUPPORT_STAGE_PLAN = "plan_validity"
+SUPPORT_STAGE_DEPTH0 = "depth0_operand_availability"
+SUPPORT_STAGE_ROOT_PROPAGATION = "root_constraint_propagation"
+SUPPORT_STAGES = (SUPPORT_STAGE_PLAN, SUPPORT_STAGE_DEPTH0, SUPPORT_STAGE_ROOT_PROPAGATION)
+
+
+def plan_parent_support(
+    source,
+    plan: dict[str, Any],
+    spec: RoleSpecification = PRODUCTION_SPECIFICATION,
+) -> dict[str, Any]:
+    """Can this parent legally support this structural program AT ALL?
+
+    A zero-search NECESSARY condition, composed from the pinned certificates rather
+    than transcribed from them: ``plan_validity`` (a defect of the latent, which no
+    parent could repair), ``static_first_step_feasible`` (depth-0 operand
+    availability) and one root ``propagate`` call over ``plan_demand``.  ``propagate``
+    documents every one of its checks as a necessary condition, so a plan this
+    function refuses has NO realization on this parent under ``spec`` -- refusing it
+    cannot change what is reachable, only what is paid for.
+
+    The converse does NOT hold: the certificate is necessary, never sufficient.  A
+    supported pair can still be proven incompatible deeper in the search, and the
+    funnel must keep the two apart.
+
+    Task-agnostic and reward-blind by construction: the only inputs are the parent
+    graph, the plan latent and the role specification.  No oracle value, no task
+    identity and no target descriptor is reachable from here.
+
+    Cost is what makes this a CONDITIONING device rather than a filter applied after
+    the expense: measured at ~0.6 ms per pair against a realization attempt capped at
+    ``PRODUCTION_SECONDS_CAP`` seconds.
+    """
+
+    roles = plan.get("roles")
+    if not roles:
+        return {
+            "supported": False,
+            "stage": SUPPORT_STAGE_PLAN,
+            "reason": "empty_role_sequence",
+            "specification": spec.name,
+        }
+    validity = plan_validity(plan)
+    if not validity["valid"]:
+        return {
+            "supported": False,
+            "stage": SUPPORT_STAGE_PLAN,
+            "reason": ";".join(validity["reasons"]) or "invalid_plan",
+            "specification": spec.name,
+        }
+    if not static_first_step_feasible(source, plan, spec):
+        return {
+            "supported": False,
+            "stage": SUPPORT_STAGE_DEPTH0,
+            "reason": "no_atom_carries_a_required_operand_descriptor",
+            "specification": spec.name,
+        }
+    refusal = propagate(
+        _Prefix(graph=source, actions=(), created=(), next_ordinal=0),
+        0,
+        plan,
+        plan_demand(plan),
+        spec,
+    )
+    if refusal is not None:
+        return {
+            "supported": False,
+            "stage": SUPPORT_STAGE_ROOT_PROPAGATION,
+            "reason": refusal,
+            "specification": spec.name,
+        }
+    return {
+        "supported": True,
+        "stage": None,
+        "reason": None,
+        "specification": spec.name,
+    }
+
+
 # ---- is the teacher's own action inside the runtime fiber? ----
 
 

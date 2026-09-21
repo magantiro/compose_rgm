@@ -1,0 +1,456 @@
+{
+ "BOTTLENECK_LOCATION": {
+  "answer": "It SELECTS excision geometry and loses it deeper. The root certificate is necessary but far from sufficient for a plan that must consume parent atoms.",
+  "arm_b_attempted_pairs_by_geometry": {
+   "abstained": 348,
+   "additive": 204,
+   "excision_demanding": 539
+  },
+  "arm_b_realizations_by_geometry": {
+   "additive": 20,
+   "excision_demanding": 2
+  },
+  "caveat_on_realized_retained_fraction": "``retained_fraction`` is the controller's own SLOT-based rule (pmo_population_controller._retained_fraction): a parent slot that is deleted and then refilled by a later insertion counts as retained. For the 20 realizations whose plan demands no preexisting deletion at all there is no ambiguity; for the 2 excision-demanding ones the 1.000 reading cannot distinguish 'kept' from 'deleted and refilled'.",
+  "every_parent_x_excision_plan_pair": {
+   "excision_plans": 87,
+   "pairs": 19662,
+   "parents": 226,
+   "refusal_stage": {
+    "depth0_operand_availability": 15755,
+    "root_constraint_propagation": 370
+   },
+   "supported_at_root": 3537,
+   "supported_fraction": 0.17989014342386328
+  },
+  "plan_catalog": {
+   "purely_additive": 8,
+   "requires_preexisting_deletes": 87
+  },
+  "question": "Does support conditioning select AWAY from excision geometry, or select it and lose it deeper in the search?",
+  "yield_by_geometry": {
+   "additive": 0.09803921568627451,
+   "excision_demanding": 0.0037105751391465678
+  }
+ },
+ "FALSIFIER_VERDICTS": {
+  "F1_no_impossible_pair_selected": {
+   "measured": 0,
+   "verdict": "PASS"
+  },
+  "F2_yield_improves_by_an_order_of_magnitude": {
+   "improvement_factor": 10.768057424854195,
+   "measured_yield": 0.029609690444145357,
+   "production_yield": 0.002749770852428964,
+   "verdict": "PASS"
+  },
+  "F3_successes_keep_large_jump_geometry": {
+   "measured_median_realized_primitive_count": 14.0,
+   "measured_median_realized_retained_fraction": 1.0,
+   "teacher_comparator": {
+    "median_primitives": 31,
+    "median_retained": 0.63
+   },
+   "verdict": "FAIL"
+  },
+  "F4_not_one_exceptional_parent": {
+   "distinct_success_parents": 16,
+   "distinct_success_tasks": 3,
+   "verdict": "PASS"
+  },
+  "F5_certificate_materially_reduces_realization_work": {
+   "certificate_cost": {
+    "certificates_evaluated": 23845,
+    "ms_per_certificate": 0.8981619278825043,
+    "ms_per_request": 19.630312713435668,
+    "requests": 1091,
+    "seconds_total": 21.416671170358313
+   },
+   "expanded_nodes_per_realization_ratio_A_over_B": 1.1241928974979822,
+   "seconds_per_realization_ratio_A_over_B": 1.2411305121577993,
+   "verdict": "FAIL"
+  }
+ },
+ "PREDECLARED_FALSIFIERS": {
+  "F1_no_impossible_pair_selected": {
+   "fails_if": "> 0",
+   "metric": "arm_b.selected_pairs_refused_by_certificate",
+   "statement": "Every (parent, plan) pair the conditioned arm SELECTS must pass the zero-search support certificate. The certificate is a necessary condition, so a selected pair it refuses would mean the sampler is not drawing from the feasible relation it claims to."
+  },
+  "F2_yield_improves_by_an_order_of_magnitude": {
+   "fails_if": "< 0.027498",
+   "metric": "arm_b.exact_realizations / arm_b.realization_attempted",
+   "statement": "Exact-realization yield per REALIZATION ATTEMPT must improve by at least 10x over the production rate of 3/1091 = 0.275%. Stated on the like-for-like denominator: production attempted a realization on every one of its 1,091 proposals.",
+   "threshold": 0.027497708524289642
+  },
+  "F3_successes_keep_large_jump_geometry": {
+   "fails_if": ">= 0.999",
+   "metric": "arm_b.realized.median_retained_fraction",
+   "statement": "Successful conditioned programs must NOT collapse toward a purely additive edit. Production's 9 honest-cap completions were retained 1.000 at median 14 primitives against the offline teacher comparator of median 31 at retained 0.630. PASS requires the median realized retained fraction below 0.999, i.e. at least half the successes REMOVE something from the parent.",
+   "threshold": 0.999
+  },
+  "F4_not_one_exceptional_parent": {
+   "fails_if": "distinct_success_parents < 2 or distinct_success_tasks < 2",
+   "metric": "arm_b.distinct_success_parents, arm_b.distinct_success_tasks",
+   "statement": "Successful executions must not all come from one parent or one task."
+  },
+  "F5_certificate_materially_reduces_realization_work": {
+   "fails_if": "< 2.0",
+   "metric": "work_per_realization.expanded_nodes ratio A/B",
+   "statement": "The cheap pass must buy work, not just correctness. Realization SECONDS PER EXACT REALIZATION and EXPANDED NODES PER EXACT REALIZATION, both measured over the same 1,091 replayed requests, must fall by at least 2x against the independent arm. Seconds are load-dependent; expanded nodes are not, and the verdict is taken on the node ratio with seconds reported beside it.",
+   "threshold": 2.0
+  }
+ },
+ "abstention_refusal_reasons": {
+  "no_atom_carries_a_required_operand_descriptor": 33060
+ },
+ "arm_a_independent": {
+  "arm": "independent_index_v1",
+  "distinct_success_parents": 5,
+  "distinct_success_tasks": 3,
+  "funnel": {
+   "admitted_endpoint": 6,
+   "certificate_compatible": 218,
+   "distinct_archive_eligible_endpoint": 5,
+   "exact_realization": 6,
+   "parent_plan_requests": 1091,
+   "realization_attempted": 1091,
+   "support_abstentions": 0,
+   "valid_endpoint": 6
+  },
+  "geometry": {
+   "created_dependency_edges": {
+    "median": 13.0,
+    "values": [
+     13,
+     13,
+     13,
+     13,
+     22,
+     22
+    ]
+   },
+   "heavy_atom_delta": {
+    "median": 12.0,
+    "values": [
+     3,
+     3,
+     12,
+     12,
+     12,
+     12
+    ]
+   },
+   "intended_primitive_count": {
+    "median": 14.0,
+    "values": [
+     14,
+     14,
+     14,
+     14,
+     23,
+     23
+    ]
+   },
+   "intended_retained_fraction": {
+    "median": 1.0,
+    "values": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "realized_primitive_count": {
+    "median": 14.0,
+    "values": [
+     14,
+     14,
+     14,
+     14,
+     23,
+     23
+    ]
+   },
+   "realized_retained_fraction": {
+    "count_below_0_999": 0,
+    "median": 1.0,
+    "values": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  "outcomes": {
+   "completed_realization": 6,
+   "proven_incompatible": 1064,
+   "search_budget_exhausted": 21
+  },
+  "selected_pairs_refused_by_certificate": 873,
+  "work": {
+   "expanded_nodes_per_exact_realization": 168.83333333333334,
+   "expanded_nodes_total": 1013,
+   "median_success_expanded_nodes": 23.0,
+   "median_success_seconds": 20.48274010400928,
+   "realization_seconds_total": 1036.661338484817,
+   "seconds_per_exact_realization": 172.77688974746948,
+   "successors_enumerated_total": 227702
+  },
+  "yield_per_realization_attempt": 0.005499541704857928,
+  "yield_per_request": 0.005499541704857928
+ },
+ "arm_b_support_conditioned": {
+  "arm": "support_conditioned_v1",
+  "distinct_success_parents": 16,
+  "distinct_success_tasks": 3,
+  "funnel": {
+   "admitted_endpoint": 22,
+   "certificate_compatible": 743,
+   "distinct_archive_eligible_endpoint": 18,
+   "exact_realization": 22,
+   "parent_plan_requests": 1091,
+   "realization_attempted": 743,
+   "support_abstentions": 348,
+   "valid_endpoint": 22
+  },
+  "geometry": {
+   "created_dependency_edges": {
+    "median": 13.0,
+    "values": [
+     8,
+     13,
+     13,
+     13,
+     13,
+     13,
+     13,
+     13,
+     13,
+     13,
+     13,
+     13,
+     13,
+     13,
+     14,
+     14,
+     14,
+     15,
+     22,
+     22,
+     22,
+     22
+    ]
+   },
+   "heavy_atom_delta": {
+    "median": 12.0,
+    "values": [
+     1,
+     3,
+     3,
+     3,
+     3,
+     12,
+     12,
+     12,
+     12,
+     12,
+     12,
+     12,
+     12,
+     12,
+     12,
+     12,
+     12,
+     12,
+     12,
+     12,
+     12,
+     12
+    ]
+   },
+   "intended_primitive_count": {
+    "median": 14.0,
+    "values": [
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     15,
+     16,
+     16,
+     16,
+     17,
+     23,
+     23,
+     23,
+     23
+    ]
+   },
+   "intended_retained_fraction": {
+    "median": 1.0,
+    "values": [
+     0.8846,
+     0.963,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "realized_primitive_count": {
+    "median": 14.0,
+    "values": [
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     14,
+     15,
+     16,
+     16,
+     16,
+     17,
+     23,
+     23,
+     23,
+     23
+    ]
+   },
+   "realized_retained_fraction": {
+    "count_below_0_999": 0,
+    "median": 1.0,
+    "values": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ]
+   }
+  },
+  "outcomes": {
+   "completed_realization": 22,
+   "proven_incompatible": 663,
+   "search_budget_exhausted": 58
+  },
+  "selected_pairs_refused_by_certificate": 0,
+  "work": {
+   "expanded_nodes_per_exact_realization": 150.1818181818182,
+   "expanded_nodes_total": 3304,
+   "median_success_expanded_nodes": 27.0,
+   "median_success_seconds": 20.40823785449902,
+   "realization_seconds_total": 3062.604244444723,
+   "seconds_per_exact_realization": 139.2092838383965,
+   "successors_enumerated_total": 729321
+  },
+  "yield_per_realization_attempt": 0.029609690444145357,
+  "yield_per_request": 0.02016498625114574
+ },
+ "certificate_cost": {
+  "certificates_evaluated": 23845,
+  "ms_per_certificate": 0.8981619278825043,
+  "ms_per_request": 19.630312713435668,
+  "requests": 1091,
+  "seconds_total": 21.416671170358313
+ },
+ "production_as_it_ran": {
+  "exact_executions": 3,
+  "note": "Stored outcomes of the scored run under the STARVED cap. Arm A above re-runs the same pairs at the honest cap, so the difference between this block and arm A isolates the seconds_cap defect from the pairing defect.",
+  "proposals": 1091,
+  "yield": 0.002749770852428964
+ },
+ "provenance": {
+  "code_revision": "7a83dfab3ad12629202827216f5a7d75fc58cc92",
+  "contract_payload_sha256": "ba9515615b341019f09f66f3224e590b4ca596dee6bb7c97c759dbe418f1ff4b",
+  "distinct_realization_jobs": 1600,
+  "input_sha256": {
+   "checkpoints.json": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43",
+   "jump_attempts_final.json": "aae65adee706b29b5a9770211840b1df07433ad6e0c57926637993a463b61484",
+   "parent_entries.json": "1971c6df688e9297558514d05cac57adf98f488d61da6bbadcdf3e2ba8a8bde8"
+  },
+  "numpy": "1.26.4",
+  "oracle_calls": 0,
+  "plan_order_parity_against_stored_pairs": {
+   "checked": 1091,
+   "mismatches": 0
+  },
+  "python": "3.11.13",
+  "rdkit": "2024.03.5",
+  "realization_wall_seconds": 723.7074894999969,
+  "realizer": {
+   "max_realizations": 4,
+   "node_budget": 64,
+   "note": "BOTH arms run at the HONEST 20 s cap, so the pairing is the only difference between them. The production run's starved cap (min(20, wall_seconds - elapsed)) is reported separately below.",
+   "seconds_cap": 20.0,
+   "specification": "v1_exact"
+  },
+  "replayed_run_id": "35fc7bcd4bf5c964294698014c1ed40da483ad013f6b92c6201b01dee2d3d306",
+  "run_plan_attempts_per_batch": 32,
+  "run_seed": 20260920,
+  "run_wall_seconds": 45.0,
+  "tasks": [
+   "gsk3b",
+   "perindopril_mpo",
+   "celecoxib_rediscovery"
+  ],
+  "total_seconds": 745.3939962089935,
+  "workers": 5
+ },
+ "schema_version": "pmo_conditioned_jump_gate_v1",
+ "status": "MEASURED"
+}

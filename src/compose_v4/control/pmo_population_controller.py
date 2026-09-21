@@ -56,6 +56,7 @@ from compose_v4.control.pmo_realization import (
     PRODUCTION_NODE_BUDGET,
     PRODUCTION_SECONDS_CAP,
     PRODUCTION_SPECIFICATION,
+    plan_parent_support,
     realize_plan_binding,
 )
 from compose_v4.rewrite.trace_shard import decode_state
@@ -69,6 +70,86 @@ MODE_BY_CHANNEL = {
     JUMP_CHANNEL: "jump_from_elite",
 }
 FINGERPRINT = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+
+# ---- how a (parent, plan) pair is drawn in the jump lane ----
+#
+# The legal action set of this process is STATE-DEPENDENT.  ``independent_index_v1``
+# drew ``P(plan) * P(parent)``: it indexed the parent schedule and the plan order with
+# separate counters, so plan scale was never conditioned on what the parent can
+# support.  Measured consequence on the completed 3x250 scored run: 72.0% of 1,091
+# proposals were PROVEN dead before the search took a single step, and the lane
+# executed 3 of them.
+#
+# ``support_conditioned_v1`` draws ``P(plan | parent, plan in F(parent))`` instead, by
+# restricting the SAME ordered plan sequence to the sub-sequence this parent can
+# support and indexing into that.  The restriction is a zero-search NECESSARY
+# condition (``plan_parent_support``), so it removes no realizable pair -- only pairs
+# no search of any shape could have completed.
+JUMP_PAIRING_INDEPENDENT = "independent_index_v1"
+JUMP_PAIRING_SUPPORT_CONDITIONED = "support_conditioned_v1"
+JUMP_PAIRINGS = (JUMP_PAIRING_INDEPENDENT, JUMP_PAIRING_SUPPORT_CONDITIONED)
+
+# The policy production runs.  Named rather than defaulted through a keyword: a repair
+# reachable only when a caller opts in is inert, and the inertness is invisible from
+# the module's own tests.
+PRODUCTION_JUMP_PAIRING = JUMP_PAIRING_SUPPORT_CONDITIONED
+
+
+def supported_plan_index(
+    source,
+    plans: list[dict[str, Any]],
+    position: int,
+    *,
+    specification=PRODUCTION_SPECIFICATION,
+    support=plan_parent_support,
+    memo: dict[str, dict[str, Any]] | None = None,
+) -> tuple[int | None, dict[str, Any]]:
+    """Index into ``plans`` of the plan this parent draws, conditioned on support.
+
+    ``plans`` is the lane's intended order -- a band round-robin over mass-weighted
+    within-band permutations -- and ``position`` is the same rotating counter the
+    unconditioned policy used.  Conditioning restricts that ORDER to its supported
+    sub-sequence and indexes into it, so the band interleaving and the within-band
+    mass weighting are preserved CONDITIONAL on compatibility rather than replaced by
+    a compatibility ranking.  Nothing is re-weighted by how compatible a plan is.
+
+    Returns ``(None, census)`` when this parent supports no plan at all.  That is an
+    ABSTENTION and the caller must return the proposal opportunity: shrinking a plan
+    until it binds would manufacture exactly the shallow additive "jump" the
+    predeclared falsifier names.
+    """
+
+    feasible: list[int] = []
+    census = {
+        "plans_scanned": 0,
+        "certificates_evaluated": 0,
+        "certificates_memoized": 0,
+        "supported": 0,
+        "refusals_by_stage": {},
+        "refusals_by_reason": {},
+    }
+    for index, plan in enumerate(plans):
+        census["plans_scanned"] += 1
+        key = str(plan["plan_id"])
+        certificate = None if memo is None else memo.get(key)
+        if certificate is None:
+            certificate = support(source, plan, specification)
+            census["certificates_evaluated"] += 1
+            if memo is not None:
+                memo[key] = certificate
+        else:
+            census["certificates_memoized"] += 1
+        if certificate["supported"]:
+            feasible.append(index)
+            census["supported"] += 1
+            continue
+        stage = str(certificate["stage"])
+        reason = str(certificate["reason"])
+        census["refusals_by_stage"][stage] = census["refusals_by_stage"].get(stage, 0) + 1
+        census["refusals_by_reason"][reason] = census["refusals_by_reason"].get(reason, 0) + 1
+    if not feasible:
+        return None, census
+    return feasible[position % len(feasible)], census
 
 
 def _blank_channel() -> dict[str, int | float]:
@@ -84,6 +165,12 @@ def _blank_channel() -> dict[str, int | float]:
         "scored_outcomes": 0,
         "parent_improvements": 0,
         "positive_improvement_sum": 0.0,
+        # Lane accounting kept DISJOINT from "proposals": an abstention proposed
+        # nothing, and a lane stopped for want of an honest search cap did not refuse
+        # anything.  Folding either into a rejection counter is what made the previous
+        # jump-lane funnel unreadable.
+        "support_abstentions": 0,
+        "honest_cap_lane_stops": 0,
     }
 
 
@@ -193,6 +280,12 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         self.jump_checkpoint = json.loads(json.dumps(jump_checkpoint))
         self.jump_checkpoint_id = identity(self.jump_checkpoint)
         self.jump_rng = np.random.default_rng(np.random.SeedSequence([self.config.seed, 311, 2]))
+        self.jump_pairing = PRODUCTION_JUMP_PAIRING
+        # Certificates are pure functions of (parent state, plan, spec), and an archive
+        # entry's endpoint state is immutable, so the entry id and plan id key it
+        # exactly.  Without this the lane re-certifies the same parent on every attempt
+        # it receives in a batch.
+        self._jump_support_memo: dict[str, dict[str, dict[str, Any]]] = {}
         self.population_state = initial_population_state()
         self._population_bootstrap_pool_id = None
         self._pool_continuity = BootstrapPoolContinuity()
@@ -267,6 +360,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             return attempts, candidates, 0.0
         plan_attempts = min(self.config.attempts_per_batch, 32, len(plans))
         plan_offset = (self.batches * plan_attempts) % len(plans)
+        searches = 0
         for attempt in range(plan_attempts):
             if (
                 len(candidates) >= CHANNEL_CANDIDATE_LIMIT
@@ -274,22 +368,63 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             ):
                 break
             entry, parent = parent_schedule[attempt % len(parent_schedule)]
-            plan = plans[(plan_offset + attempt) % len(plans)]
             source = decode_state(entry["trace"]["states"][-1])
+            if self.jump_pairing == JUMP_PAIRING_SUPPORT_CONDITIONED:
+                index, census = supported_plan_index(
+                    source,
+                    plans,
+                    plan_offset + attempt,
+                    specification=PRODUCTION_SPECIFICATION,
+                    memo=self._jump_support_memo.setdefault(entry["entry_id"], {}),
+                )
+                if index is None:
+                    # ABSTAIN.  This parent supports no plan in the lane's vocabulary,
+                    # so there is no jump to make from it.  The opportunity is returned
+                    # rather than spent: shrinking a plan until it binds is how a jump
+                    # lane degenerates into an additive shallow edit at retained
+                    # fraction 1.000, which is the predeclared falsifier.
+                    counts = self.population_state["channels"][JUMP_CHANNEL]
+                    counts["support_abstentions"] = counts.get("support_abstentions", 0) + 1
+                    attempts.append(
+                        {
+                            "attempt": attempt,
+                            **parent,
+                            "planner_channel": JUMP_CHANNEL,
+                            "mode": MODE_BY_CHANNEL[JUMP_CHANNEL],
+                            "plan_id": None,
+                            "status": "support_abstained",
+                            "reason": "parent supports no plan in the jump vocabulary",
+                            "support_census": census,
+                        }
+                    )
+                    continue
+                plan = plans[index]
+            else:
+                plan = plans[(plan_offset + attempt) % len(plans)]
+            # Prefer SKIPPING an attempt over running it with a STARVED cap.  The
+            # previous form passed ``min(PRODUCTION_SECONDS_CAP, wall_seconds -
+            # elapsed)``, so late attempts in a batch searched under a cap far below
+            # the measured one and reported ``search_budget_exhausted`` on pairs the
+            # honest cap realizes -- a false search defect, which is worse than a
+            # missing attempt because it reads as evidence about the realizer.  One
+            # attempt is always allowed so a short lane budget cannot silently disable
+            # the lane instead of overrunning it by a bounded amount.
+            if (
+                searches
+                and perf_counter() - began + PRODUCTION_SECONDS_CAP > self.config.wall_seconds
+            ):
+                counts = self.population_state["channels"][JUMP_CHANNEL]
+                counts["honest_cap_lane_stops"] = counts.get("honest_cap_lane_stops", 0) + 1
+                break
             retention_target = float(self.jump_rng.random())
+            searches += 1
             try:
-                # The jump lane's own wall budget binds this attempt as well, so one
-                # hopeless plan cannot consume the lane the way an unbounded complete
-                # search would.  The smaller of the two caps applies.
                 realized = realize_plan_binding(
                     source,
                     plan,
                     specification=PRODUCTION_SPECIFICATION,
                     node_budget=PRODUCTION_NODE_BUDGET,
-                    seconds_cap=min(
-                        PRODUCTION_SECONDS_CAP,
-                        max(self.config.wall_seconds - (perf_counter() - began), 0.0),
-                    ),
+                    seconds_cap=PRODUCTION_SECONDS_CAP,
                     max_realizations=PRODUCTION_MAX_REALIZATIONS,
                 )
                 bound = realized["bindings"]
