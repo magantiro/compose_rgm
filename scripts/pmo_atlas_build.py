@@ -303,9 +303,9 @@ def main(argv: list[str] | None = None) -> int:
             "replayed_exact": sum(1 for r in task_records if r["replay"]["exact"]),
             "spine_program_id": spine["program_id"] if spine else None,
             "spine_primitive_steps": spine["primitive_steps"] if spine else None,
-            "source_smiles": task_records[0]["source_smiles"],
-            "destination_smiles": task_records[0]["destination_smiles"],
-            "destination_role": task_records[0]["destination_role"],
+            "source_smiles": (spine or task_records[0])["source_smiles"],
+            "destination_smiles": (spine or task_records[0])["destination_smiles"],
+            "destination_role": (spine or task_records[0])["destination_role"],
         }
 
     source_counts = Counter(r["source_smiles"] for r in records)

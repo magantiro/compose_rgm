@@ -280,8 +280,13 @@ def _winner_routes(payload: dict[str, Any], relative_path: str) -> list[AtlasRou
     """
 
     roots = {root["root_id"]: root for root in payload["roots"]}
+    programs = list(payload["programs"])
+    # The spine is the program whose action list IS the shared prefix, i.e. the
+    # shortest one.  Choosing it by variant name would pin a label rather than a
+    # structural fact, and the perindopril variants are not ordered by length.
+    spine_steps = min(len(program["receipt"]["actions"]) for program in programs)
     routes: list[AtlasRoute] = []
-    for program in payload["programs"]:
+    for program in programs:
         receipt = program["receipt"]
         source_id = receipt.get("source_id") or program.get("source_id")
         if source_id is None:
@@ -312,7 +317,7 @@ def _winner_routes(payload: dict[str, Any], relative_path: str) -> list[AtlasRou
                 recorded_endpoint_smiles=receipt.get("endpoint", destination),
                 actions=tuple(receipt["actions"]),
                 recorded_states=tuple(receipt["states"]),
-                is_spine=program.get("variant_id") == "shorter_segment",
+                is_spine=len(receipt["actions"]) == spine_steps,
             )
         )
     return routes

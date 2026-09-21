@@ -115,3 +115,8 @@ artifacts/tdc_originals/
 diagnostics/**/source_capsule/
 diagnostics/**/source_capsule_v[0-9]/
 diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets/
+
+# PyTDC downloads its oracle pickles to ./oracle relative to the working
+# directory, and the atlas diagnostic runs write campaign scratch here.
+/oracle/
+/.pmo_atlas_runs/

@@ -217352,7 +217352,7 @@
   },
   "code_revision": {
    "branch": "pmo-teacher-atlas-20260921",
-   "commit": "8b7f0abc0da99b29265dec57fa83dedb89f19808",
+   "commit": "4af1b206d745a28ae5f3fa007250dedd1217c2ee",
    "worktree_dirty": true
   },
   "executor": {
@@ -217672,12 +217672,12 @@
    },
    "perindopril_mpo": {
     "destination_role": "target",
-    "destination_smiles": "BC(CCC)c1cc2c(ccn2CCC(NC(C)C(=O)N2C(C(=O)O)CC3CCCCC32)C(=O)OCC)o1",
+    "destination_smiles": "CCCC(Br)c1cc2c(ccn2CCC(NC(C)C(=O)N2C(C(=O)O)CC3CCCCC32)C(=O)OCC)o1",
     "programs": 11,
     "replayed_exact": 11,
     "source_smiles": "COc1ccccc1CNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
-    "spine_primitive_steps": 67,
-    "spine_program_id": "diagnostics/pmo_winner_program_curriculum/curriculum.json::perindopril_mpo::shorter_segment"
+    "spine_primitive_steps": 38,
+    "spine_program_id": "diagnostics/pmo_winner_program_curriculum/curriculum.json::perindopril_mpo::distal_br"
    },
    "qed": {
     "destination_role": "target",
@@ -230204,7 +230204,7 @@
      "cycle_close": 4,
      "cycle_open": 3
     },
-    "is_spine": false,
+    "is_spine": true,
     "lineage_id": "diagnostics/pmo_winner_program_curriculum/curriculum.json::perindopril_mpo::original_root_0",
     "primitive_steps": 38,
     "program_id": "diagnostics/pmo_winner_program_curriculum/curriculum.json::perindopril_mpo::distal_br",
@@ -230798,7 +230798,7 @@
      "cycle_close": 6,
      "cycle_open": 3
     },
-    "is_spine": true,
+    "is_spine": false,
     "lineage_id": "diagnostics/pmo_winner_program_curriculum/curriculum.json::perindopril_mpo::original_root_0",
     "primitive_steps": 67,
     "program_id": "diagnostics/pmo_winner_program_curriculum/curriculum.json::perindopril_mpo::shorter_segment",
@@ -230830,7 +230830,7 @@
   "summary": {
    "distinct_destinations": 22,
    "distinct_sources": 3,
-   "elapsed_seconds": 51.836,
+   "elapsed_seconds": 169.988,
    "replayed_exact": 194,
    "replayed_inexact": 0,
    "routes": 194,
@@ -230841,5 +230841,5 @@
    "tasks": 11
   }
  },
- "payload_sha256": "741de16a6a5fd98d78fe7886ec79ca48dd882b3f99deaaf77e576a7d701d34ee"
+ "payload_sha256": "b31846c858db73a2b2059b59dd25052a3f56adb8fa024358a41dad83f584edea"
 }
