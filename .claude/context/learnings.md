@@ -2961,3 +2961,69 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   targets), NC-licensed, and **flatly inadmissible for T4, where those ARE the benchmark's answers**.
   A prior fitted on this exact corpus already failed on yield. Check a corpus's audit file before
   treating its name as a description.
+
+## 2026-09-21 (INFORMATION BOUNDARY CORRECTED: a benchmark-declared target is a task INPUT, not leakage)
+
+- **VERIFIED IN SOURCE, not assumed.** `tdc/chem_utils/oracle/oracle.py:748`:
+  `celecoxib_rediscovery = rediscovery_meta(target_smiles='CC1=CC=C(C=C1)C1=CC(=NN1C1=CC=C(C=C1)S(N)(=O)=O)C(F)(F)F', fp='ECFP4')`
+  The rediscovery/similarity targets are LITERALS in the public task definition. The same holds
+  for albuterol/mestranol similarity and the other explicit structural tasks.
+- **CONSEQUENCE, and it overrides the earlier reading of the standing rule.** `mission.md` says "Do
+  not preload same-task PMO winners, hidden oracle information, target SMILES, or task->program
+  lookups". That was written against WINNER ROUTES and PRESCREENED VOCABULARIES. Applying it to a
+  target the benchmark itself declares was over-application: it is a task INPUT in exactly the sense
+  that T4's delta and start molecule are inputs, and the mission already says those "are benchmark
+  INPUTS, never reasons to retune". IVG's no-prescreen flag (`--use_prescreen`) is about not
+  pre-scoring the ~250k ZINC set to build task-specific vocabularies, not about ignoring declared
+  task structure. **If the benchmark declares the target, use the target.** Owner decision,
+  2026-09-21; the mission line should be amended to say HIDDEN oracle information and UNDECLARED
+  targets.
+- **What must remain general is the CONTROLLER** that turns an arbitrary declared goal into
+  executable programs -- never a per-task rule, never `if task == celecoxib`, never hand-written
+  molecular content. Still prohibited: same-task winner routes, prescreened vocabularies, oracle
+  internals, hidden component scores, uncounted same-task history, and computing a property on an
+  uncounted candidate to select it.
+- **ARCHITECTURE this licenses (one algorithm, 23 tasks):**
+      goal/basin selection -> structural transport program -> exact execution -> online memory
+  with only the GOAL SOURCE varying: `T_declared` where the task supplies a structure
+  (rediscovery, similarity, SMARTS, formula) and `T_archive` -- diverse high-reward scored
+  molecules as pseudo-targets -- for black-box tasks (gsk3b/jnk3/drd2).
+- **This avoids the failed teacher REGION prior by construction.** Do not learn which region a
+  historical teacher edited; COMPUTE the region from the G-to-T graph difference, yielding
+  `(retain core, R_delete, H_install, alpha, D)` directly. The measured negative attributed the
+  entire loss to the region law (p=0.0001) with the family projection NEUTRAL (p=0.63), so teacher
+  routes are retained for REALIZATION knowledge -- "given a desired transformation, how do I realize
+  it coherently" -- which makes this a compiler rather than an imitation model.
+- **Memory is the LOCAL optimizer, not the global strategy.** Measured across three matched 250-call
+  tasks: celecoxib win, gsk3b win by harder exploitation, perindopril LOSS. A mechanism that is
+  task-dependent at the global level and reliable at the local one belongs downstream of basin
+  selection, not in place of it.
+- **The graph-difference planner IS the scaffold-preserving bridge compiler** that
+  `compile_source_to_target` is not (`delete_to_null_then_construct_v1`, retained_fraction 0.000 on
+  4 of 4 pairs including one differing by a single methyl). One build serves both the controller and
+  the answer-known proxy-task laboratory, and it removes any need for the NC-licensed,
+  competitor-derived `ivg_winner_paths` corpus.
+
+## 2026-09-21 (a proposal law bites only where something is DISCARDED)
+
+- **Verifying that the ranked object IS the scored object is NECESSARY BUT NOT SUFFICIENT.** On the
+  T4 path `expand` keeps EVERY eligible endpoint -- it builds each variant, calls `fiber.check`, and
+  on a pass writes `found[gate["smiles"]]`. No budget, no top-k, no selection among eligible
+  endpoints. So a law ranking those endpoints cannot change what `expand` returns even though the
+  ranked and gated molecules are provably identical. **Ranking only matters where something is
+  discarded.** Ask BOTH questions of any proposal law: is the ranked object the scored object, and
+  does anything downstream actually discard candidates.
+- **A 24.8% structural discard that changes nothing.** `attachment_bindings` enumerates up to 128
+  exact bindings per subgoal and the loop uses only `assignments[0]`; measured over 101 real
+  subgoals, 25 carry more than one binding. Widening to k=4/combos=8 gave **byte-identical results
+  on 3 of 3 cells**. A discard is only a defect if removing it changes an outcome -- census first,
+  then measure, then decide; do not ship the widening on the census alone.
+- **GENERATION mechanisms are not exposed to this trap** (they change what exists); SELECTION layers
+  are. Site a bandit or re-ranker where the path is genuinely capacity-limited, which on PMO is the
+  oracle budget and the per-round query count, not proposal admission.
+- **DISCRIMINATING TEST for "outside the support" vs "rare under the prior": does the recovery
+  fraction RISE with the draw budget?** The fragment path first read 0.376 at 128 draws, which looks
+  exactly like T4's exposure; it rises monotonically to 0.50 / 0.70 / 0.85 at 64 / 256 / 1024. T4's
+  0.0000 is a hard zero no budget lifts. Reporting 0.85 as a LOWER BOUND rather than claiming the
+  remainder absent is the correct form. Without the power curve a viable design would have been
+  withdrawn on a false positive.
