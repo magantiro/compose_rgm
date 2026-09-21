@@ -245,6 +245,8 @@ def expand(
     proposal_lane: str = "shallow",
     region_law=None,
     completion_law=None,
+    max_bindings_per_subgoal: int = 1,
+    max_binding_combinations: int = 4,
 ) -> list[dict]:
     """Free complete programs from one parent; only queryable endpoints are returned.
 
@@ -331,36 +333,57 @@ def expand(
             for index, candidate in edit.items():
                 subs[index] = candidate
             merged = replace(goal, subgoals=tuple(subs))
-            bindings, ok = [], True
+            # `attachment_bindings` enumerates up to 128 exact bindings per
+            # subgoal and this loop historically used `assignments[0]` -- the
+            # FIRST -- discarding the rest. Measured on real fa7_0 goals, 24.8%
+            # of subgoals (25 of 101) carry more than one binding, so that
+            # single choice silently removes reachable endpoints. The default
+            # `max_bindings_per_subgoal=1` keeps exactly one combination and is
+            # byte-identical to that historical behaviour; raising it widens the
+            # PLACEMENT support, which is a different axis from what the region
+            # and completion laws move (they choose WHAT to build, this chooses
+            # WHERE it lands).
+            per_subgoal, ok = [], True
             for subgoal in merged.subgoals:
                 census = attachment_bindings(subgoal, source)
                 if not census.assignments:
                     ok = False
                     break
-                bindings.append(census.assignments[0])
+                per_subgoal.append(
+                    list(census.assignments[:max(1, max_bindings_per_subgoal)])
+                )
             if not ok:
                 continue
-            try:
-                built, _ = instantiate_goal(source, merged, tuple(bindings))
-                endpoint = molecular_graph_to_smiles(built)
-            except (ValueError, KeyError, IndexError, TypeError):
-                continue
-            gate = fiber.check(endpoint)
-            if gate is None or gate["smiles"] in found or gate["smiles"] == parent:
-                continue
-            created = sum(len(c.output_atoms) for c in edit.values())
-            found[gate["smiles"]] = {
-                **gate,
-                "parent": parent,
-                "parent_score": parent_score,
-                "families": families,
-                "program_families": program_families,
-                "proposal_lane": proposal_lane,
-                "regions": len(edit),
-                "created": created,
-                "deleted": sum(1 for c in edit.values() for t in c.target_atoms if t is None),
-                "delta": fiber.delta,
-            }
+            combinations = list(itertools.product(*per_subgoal))
+            if max_binding_combinations > 0:
+                combinations = combinations[:max_binding_combinations]
+            for bindings in combinations:
+                try:
+                    built, _ = instantiate_goal(source, merged, tuple(bindings))
+                    endpoint = molecular_graph_to_smiles(built)
+                except (ValueError, KeyError, IndexError, TypeError):
+                    continue
+                # The molecule handed to the gate is the molecule just built --
+                # no abstraction sits between them, which is the identity the
+                # module-endpoint conditioning could not establish.
+                gate = fiber.check(endpoint)
+                if gate is None or gate["smiles"] in found or gate["smiles"] == parent:
+                    continue
+                created = sum(len(c.output_atoms) for c in edit.values())
+                found[gate["smiles"]] = {
+                    **gate,
+                    "parent": parent,
+                    "parent_score": parent_score,
+                    "families": families,
+                    "program_families": program_families,
+                    "proposal_lane": proposal_lane,
+                    "regions": len(edit),
+                    "created": created,
+                    "deleted": sum(
+                        1 for c in edit.values() for t in c.target_atoms if t is None
+                    ),
+                    "delta": fiber.delta,
+                }
     return list(found.values())
 
 

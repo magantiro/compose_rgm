@@ -84,7 +84,7 @@ def _preserves(smiles: str, groups: dict) -> bool:
     )
 
 
-def _arm(payload, cell, *, completion_on, draws, seed_offset) -> dict:
+def _arm(payload, cell, *, completion_on, draws, seed_offset, max_bindings=1, max_combos=4) -> dict:
     shaped = json.loads(json.dumps(payload))
     lane = shaped["proposal"][CONTRACT_LANE]
     if completion_on:
@@ -138,6 +138,8 @@ def _arm(payload, cell, *, completion_on, draws, seed_offset) -> dict:
         proposal_lane=CONTRACT_LANE,
         region_law=region_law,
         completion_law=completion_law,
+        max_bindings_per_subgoal=max_bindings,
+        max_binding_combinations=max_combos,
     )
     preserved = [r for r in records if _preserves(r["smiles"], groups)]
     return {
@@ -146,6 +148,8 @@ def _arm(payload, cell, *, completion_on, draws, seed_offset) -> dict:
             int(completion_law.candidates) if completion_law is not None else None
         ),
         "completion_law_consumption_attempts": consumption,
+        "max_bindings_per_subgoal": max_bindings,
+        "max_binding_combinations": max_combos,
         "region_law": "free_gate_margin_v1" if region_law is not None else None,
         "draws": draws,
         "seed": seed,
@@ -175,13 +179,17 @@ def main() -> None:
     p.add_argument("--cell", required=True)
     p.add_argument("--draws", type=int, default=480)
     p.add_argument("--seed-offset", type=int, default=0)
+    p.add_argument("--max-bindings", type=int, default=1)
+    p.add_argument("--max-combinations", type=int, default=4)
     p.add_argument("--out", required=True, type=Path)
     a = p.parse_args()
 
     payload = unseal(a.contract)
     cell = next(c for c in payload["cells"] if c["cell"] == a.cell)
-    off = _arm(payload, cell, completion_on=False, draws=a.draws, seed_offset=a.seed_offset)
-    on = _arm(payload, cell, completion_on=True, draws=a.draws, seed_offset=a.seed_offset)
+    off = _arm(payload, cell, completion_on=False, draws=a.draws, seed_offset=a.seed_offset,
+               max_bindings=a.max_bindings, max_combos=a.max_combinations)
+    on = _arm(payload, cell, completion_on=True, draws=a.draws, seed_offset=a.seed_offset,
+              max_bindings=a.max_bindings, max_combos=a.max_combinations)
     report = {
         "schema_version": SCHEMA_VERSION,
         "contract": str(a.contract),
