@@ -2451,3 +2451,37 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   Whether the de-novo path is invariant across those revisions remains **UNMEASURED**; the cheap test
   that would settle it is the gate's `--load-checkpoint` mode, whose report emits the recomputed
   `initial_validation` beside the stored `selected_validation` for the same weights.
+
+## 2026-09-21 (continued training does NOT fix the small-ring defect; quality rose by SHRINKING molecules)
+
+- **MEASURED, matched n=70 per arm on identical trajectory seeds, pinned production kernel**
+  (`diagnostics/denovo_checkpoint_sweep_v1/`), step 1000 vs step 2500 of the SAME Lineage B
+  trajectory (step 2500 resumed from step 1000's recovery state; ring catalog byte-identical,
+  fingerprint `50337de077f374db`; corpus identical):
+      validity/attempts     1.0000 -> 1.0000     uniqueness   1.0000 -> 1.0000
+      diversity             0.8906 -> 0.8856     quality      0.1714 -> 0.3000  (z=+1.79)
+      molecules w/ 3-4 ring 0.4429 -> 0.5143  (z=+0.85)
+      per-RING strained     0.1679 -> 0.1948  (z=+0.77)     <- the closure-policy shape
+      rings/molecule          3.74 -> 3.30      heavy atoms  28.70 -> 26.87
+      ring-forming events/traj 3.31 -> 2.86
+      ring sizes  {3:26,4:18,5:63,6:152,7:3} -> {3:38,4:7,5:73,6:111,7:2}
+  **The defect did not improve on either axis; both edged UP.** No endpoint difference reaches 95%
+  significance at n=70, so read directions rather than verdicts -- but there is no hint of the
+  improvement continued training was supposed to deliver.
+- **The quality gain is attributable to SHRINKING, not to better ring chemistry, and only the
+  per-RING metric shows it.** Quality rose 0.171 -> 0.300 while molecules lost 1.83 heavy atoms and
+  0.44 rings each and the model fired 0.46 fewer ring-forming events per trajectory. The per-molecule
+  prevalence cannot separate those; the per-ring fraction `P(size | a ring exists)` is invariant to
+  molecule size and ring count, and it went the WRONG way. Chemically the histogram is worse too:
+  6-membered rings 152 -> 111 while 3-membered rings 26 -> 38. **Always report the per-ring shape
+  beside any aggregate quality gain, or "quality improved" will be read as "chemistry improved".**
+- **QED strain effect is ZERO once size is held fixed, REPLICATED at both checkpoints**
+  (+0.033+-0.039 at step 1000, -0.037+-0.037 at step 2500), while heavy-atom count carries it
+  (-0.024 per atom, |z|~8 in both). The SA strain penalty is real at both (+0.791+-0.217 and
+  +0.496+-0.218). So of the original n=50 conditional split, the SA half was a genuine strain effect
+  and the QED half was molecule size -- and that decomposition now replicates across two checkpoints.
+- **This converges with the support audit and settles the mechanism.** The model already sits below
+  uniform-over-support on small rings (0.284 vs 0.443), so it is not the policy that is broken; more
+  gradient steps cannot repair a support that is ~15x enriched in small rings relative to the
+  catalog. Two independent lines -- a longitudinal checkpoint comparison and a static support census
+  -- agree that the defect is upstream of the learned rates. **Do not spend further training on it.**
