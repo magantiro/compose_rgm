@@ -234,6 +234,15 @@ def run_task(spec: dict) -> dict:
             charged_calls_per_task=int(
                 contract_envelope["payload"]["budget"]["charged_calls_per_task"]
             ),
+            # The ARM comes from the authorizing contract, never from the spawn spec:
+            # each arm is a separately sealed payload with its own authorization, so a
+            # caller cannot select a runtime the owner did not authorize. Absent key =>
+            # arm A, which is the unflagged production controller.
+            enable_online_memory=bool(
+                (contract_envelope["payload"].get("arm") or {}).get(
+                    "enable_online_memory", False
+                )
+            ),
             progress=progress,
         )
         result["run_id"] = run_id

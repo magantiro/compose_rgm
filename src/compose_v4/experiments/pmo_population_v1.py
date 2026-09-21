@@ -139,6 +139,7 @@ def execute_task(
     evaluate: Callable[[str], float],
     charged_calls_per_task: int,
     progress=None,
+    enable_online_memory: bool = False,
 ) -> dict:
     """Run one PMO-v1 task after a separately authorized scored launch.
 
@@ -180,7 +181,13 @@ def execute_task(
         initial_parent_fraction=0.2,
         progress=report,
         optimizer_type=PmoPopulationController,
-        optimizer_kwargs={"jump_checkpoint": checkpoint},
+        optimizer_kwargs={
+            "jump_checkpoint": checkpoint,
+            # Arm selector for the matched comparison. It rides in optimizer_kwargs, so
+            # run_program_campaign folds it into `optimizer_kwargs_sha256` and the two
+            # arms cannot share a run identity even if every other input matches.
+            "enable_online_memory": bool(enable_online_memory),
+        },
         initial_batch_fn=initial_dynamic_program_batch_v21,
     )
     curve = _score_curve(ledger.rows)
