@@ -187,6 +187,14 @@ def load_arm_a() -> dict[str, Any]:
 
 # ---- arms B and C: worker plumbing ----
 
+def _sascorer():
+    """The same sascorer ``bridge_region_law`` resolves, loaded once per process."""
+
+    from compose_v4.control.bridge_region_law import _sascorer as resolve
+
+    return resolve()
+
+
 _W: dict[str, Any] = {}
 
 
@@ -297,9 +305,11 @@ def run_parent_first(job: tuple[str, str, int]) -> dict[str, Any]:
         "executor_calls": calls["n"],
         "regions_tried": int(result.get("regions_tried", 0)),
         "seconds": seconds,
+        "branch": str(result.get("branch", "")),
         "demands_excision": bool(intent.demands_excision),
         "intent_excise_atoms": int(intent.excise_atoms),
         "intent_insert_atoms": int(intent.insert_atoms),
+        "intent_close_bonds": int(intent.close_bonds),
     }
     if result["realized"]:
         out.update(
@@ -314,6 +324,7 @@ def run_parent_first(job: tuple[str, str, int]) -> dict[str, Any]:
                 "deleted_parent_atoms": len(result["deleted_parent_slots"]),
                 "refilled_slots": len(result["refilled_slots"]),
                 "retention_measures_disagree": bool(result["retention_measures_disagree"]),
+                "rings_closed": int(result.get("rings_closed", 0)),
             }
         )
         # Endpoint chemistry, under the PMO eligibility rule (RDKit parseability).
@@ -329,7 +340,38 @@ def run_parent_first(job: tuple[str, str, int]) -> dict[str, Any]:
         out["endpoint_rings"] = (
             int(molecule.GetRingInfo().NumRings()) if molecule is not None else 0
         )
+        # Drug-likeness and synthetic accessibility of parent and endpoint, and the
+        # DELTA, which is the quantity that matters: the completed run loses 0.0837
+        # QED per edit on average and the damage scales ~7x with program length, so a
+        # longer coherent program is a longer walk off the manifold unless something
+        # steers it.  Pure RDKit; no oracle is reachable from here.
+        out.update(_endpoint_quality(source, molecule))
     return out
+
+
+def _endpoint_quality(source, molecule) -> dict[str, Any]:
+    from rdkit import Chem
+    from rdkit.Chem import QED
+
+    from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
+
+    sascorer = _sascorer()
+    parent_smiles = molecular_graph_to_smiles(source)
+    parent = Chem.MolFromSmiles(parent_smiles) if parent_smiles else None
+    if parent is None or molecule is None:
+        return {"quality_measured": False}
+    parent_qed, endpoint_qed = QED.qed(parent), QED.qed(molecule)
+    parent_sa = sascorer.calculateScore(parent)
+    endpoint_sa = sascorer.calculateScore(molecule)
+    return {
+        "quality_measured": True,
+        "parent_qed": float(parent_qed),
+        "endpoint_qed": float(endpoint_qed),
+        "delta_qed": float(endpoint_qed - parent_qed),
+        "parent_sa": float(parent_sa),
+        "endpoint_sa": float(endpoint_sa),
+        "delta_sa": float(endpoint_sa - parent_sa),
+    }
 
 
 # ---- request schedule (identical to arm A's) ----
@@ -685,6 +727,88 @@ def reduce_parent_first(requests: list[dict[str, Any]], results: list[dict]) -> 
     }
 
 
+def reduce_by_branch(results: list[dict]) -> dict[str, Any]:
+    """The two move classes, reported APART.
+
+    Zero-excision retains every parent atom by construction, so averaging the two
+    branches' retention together would produce a number describing neither.  The same
+    goes for QED: the branches build different amounts, and program length is the
+    strongest predictor of damage.
+    """
+
+    out: dict[str, Any] = {}
+    for branch in (PFP.BRANCH_REGION_EXCISION, PFP.BRANCH_ZERO_EXCISION):
+        rows = [row for row in results if row.get("branch") == branch]
+        realized = [row for row in rows if row["realized"]]
+        quality = [row for row in realized if row.get("quality_measured")]
+        reasons: collections.Counter = collections.Counter(
+            str(row["reason"]) for row in rows if not row["realized"]
+        )
+        entry = {
+            "attempts": len(rows),
+            "realized": len(realized),
+            "yield": len(realized) / max(1, len(rows)),
+            "distinct_endpoints": len({row["endpoint_key"] for row in realized}),
+            "distinct_parents": len({row["entry_id"] for row in realized}),
+            "executor_calls": sum(row["executor_calls"] for row in rows),
+            "abstention_reasons": dict(reasons.most_common()),
+            "primitive_count": _distribution(
+                [float(row["primitive_count"]) for row in realized]
+            ),
+            "delta_heavy_atoms": _distribution(
+                [float(row["delta_heavy_atoms"]) for row in realized]
+            ),
+            "true_retained_fraction": _distribution(
+                [float(row["true_retained_fraction"]) for row in realized]
+            ),
+            "controller_retained_fraction": _distribution(
+                [float(row["retained_fraction"]) for row in realized]
+            ),
+            "rings_closed_total": sum(int(row.get("rings_closed", 0)) for row in realized),
+            "delta_qed": _distribution([float(row["delta_qed"]) for row in quality]),
+            "endpoint_qed": _distribution([float(row["endpoint_qed"]) for row in quality]),
+            "delta_sa": _distribution([float(row["delta_sa"]) for row in quality]),
+            "endpoint_sa": _distribution([float(row["endpoint_sa"]) for row in quality]),
+            "share_losing_drug_likeness": (
+                sum(1 for row in quality if row["delta_qed"] < 0) / len(quality)
+                if quality
+                else None
+            ),
+        }
+        # Damage against program length, the curve the completed run measured at ~7x
+        # from 1-2 actions to 9.  Reported per branch because the branches build
+        # different amounts and would otherwise be confounded with each other.
+        by_length: dict[str, dict[str, float]] = {}
+        for row in quality:
+            bucket = (
+                "1-2"
+                if row["primitive_count"] <= 2
+                else "3-5"
+                if row["primitive_count"] <= 5
+                else "6-9"
+                if row["primitive_count"] <= 9
+                else "10-14"
+                if row["primitive_count"] <= 14
+                else "15+"
+            )
+            slot = by_length.setdefault(bucket, {"n": 0, "sum_delta_qed": 0.0})
+            slot["n"] += 1
+            slot["sum_delta_qed"] += float(row["delta_qed"])
+        for slot in by_length.values():
+            slot["mean_delta_qed"] = slot["sum_delta_qed"] / max(1, slot["n"])
+        entry["delta_qed_by_program_length"] = dict(sorted(by_length.items()))
+        out[branch] = entry
+    out["note"] = (
+        "The two branches are DIFFERENT MOVE CLASSES and are never averaged. "
+        "Zero-excision retains every parent atom by construction -- that is a fact "
+        "about the move, not a degeneracy -- so its retained fraction is 1.000 by "
+        "definition and carries no information. QED deltas are the comparable "
+        "quantity, and the completed run's baseline is -0.0837 per edit with 66.1% "
+        "of edits losing drug-likeness."
+    )
+    return out
+
+
 def capability_statement(arm_c: dict) -> dict[str, Any]:
     """What the mechanism CAN and CANNOT currently construct, from its own counts.
 
@@ -712,20 +836,34 @@ def capability_statement(arm_c: dict) -> dict[str, Any]:
                 "one attachment' is inside the support, not a special case"
             ),
             (
-                "programs whose roles are read off the realized execution, in the v1 "
+                    "programs whose roles are read off the realized execution, in the v1 "
                 "representation, and are therefore comparable to mined latents"
+            ),
+            (
+                "CONSTRUCTION WITH NO EXCISION, at a drawn attachment site, including "
+                "ring closure onto the constructed atoms -- the gap the first round "
+                "reported.  Additions and ring attachment are now first-class moves "
+                "rather than abstentions."
             ),
         ],
         "cannot_currently_construct": [
             {
-                "gap": "pure construction with NO excision",
+                "gap": "CLOSED: pure construction with no excision",
                 "evidence_count": reasons.get("intent_demands_no_excision", 0),
                 "detail": (
-                    "construct_parent_first_program REQUIRES an excision demand and "
-                    "abstains otherwise.  The owner's reset explicitly wants "
-                    "additions and ring-system attachment to be first-class, so this "
-                    "is a real gap, not a scoping choice.  It is one branch: draw an "
-                    "attachment site instead of a region when excise_atoms == 0."
+                    "Closed by the zero-excision branch.  This counter should now be "
+                    "0; a non-zero value means the dispatch regressed."
+                ),
+            },
+            {
+                "gap": "chemically plausible construction",
+                "evidence_count": None,
+                "detail": (
+                    "THE BINDING LIMITATION.  The chain is drawn uniformly from the "
+                    "intent's element vocabulary, so a 12-atom build from ('C','O') "
+                    "produces polyperoxides.  Valid, executable, and not a molecule.  "
+                    "The element PLACEMENT, not merely the vocabulary, is what is "
+                    "missing -- see delta_qed_by_program_length."
                 ),
             },
             {
@@ -738,12 +876,13 @@ def capability_statement(arm_c: dict) -> dict[str, Any]:
                 ),
             },
             {
-                "gap": "ring-system construction",
+                "gap": "TEMPLATED ring-system placement",
                 "evidence_count": None,
                 "detail": (
-                    "the construction is a CHAIN of single-bonded atoms.  A whole "
-                    "ring system is not built, though the excision side handles ring "
-                    "regions by opening them first."
+                    "rings are now built by closing cycles on the constructed chain, "
+                    "so ring formation is supported.  What is not supported is "
+                    "placing a NAMED scaffold from a catalog -- the ring that forms "
+                    "is whatever the closure fiber admits, not a chosen one."
                 ),
             },
             {
@@ -994,6 +1133,7 @@ def main() -> None:
                 "arm_c_parent_first": arm_c,
                 "descriptive_diagnostics": diagnostics,
                 "capability_statement": capability_statement(arm_c),
+                "arm_c_by_branch": reduce_by_branch(rows_c),
                 "provenance": provenance,
             },
             indent=2,
