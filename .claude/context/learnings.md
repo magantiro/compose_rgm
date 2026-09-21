@@ -2670,3 +2670,57 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   README says "do not extend this recipe unchanged". It does NOT bear on a chemistry prior: it is
   task-trained, so it carries objective information and is a different object. If anything its null
   supports the diagnosis that the missing thing is chemistry, not return.
+
+## 2026-09-21 (teacher-route prior: recognises regions, generates WORSE programs -- do not put it under PMO)
+
+- **DECISIVE NEGATIVE: a teacher-route structural prior LOWERS complete-program yield against a
+  generic control, on BOTH populations.** 48 draws per parent per arm, 11,232 draws, module count
+  drawn once per (parent, draw) and SHARED by every declared arm so no arm can win by declaring
+  shorter programs:
+      arm                    T4 held-out (15 parents)   generic ZINC (24 parents)
+      declared_uniform CTRL        0.850                      0.962
+      declared_prior TEACHER       0.749                      0.929
+  Paired: T4 **-0.1014** [95% -0.164, -0.042], sign +3/-8, p=0.227; generic **-0.0330**
+  [-0.057, -0.006], +5/-17, **p=0.017**. Diversity moves the same way (generic -2.50 distinct
+  endpoints/parent, p=0.0043). **Exact teacher-endpoint recovery is 0 of 11,232 draws in EVERY arm.**
+- **ATTRIBUTION IS CONSISTENT ACROSS BOTH POPULATIONS AND NAMES ONE COMPONENT:** the REGION LAW costs
+  the yield (T4 -0.064 p=0.0034; generic -0.026 p=0.0001) while the FAMILY projection is NEUTRAL
+  (T4 -0.019 p=1.00; generic +0.010 p=0.63). Mechanism: teacher-like regions are LARGER, and larger
+  excisions are refused more often by the executor.
+- **THE RECOGNITION-vs-GENERATION LESSON REAPPEARED ONE LEVEL DOWN, AND THIS TIME INSIDE THE REGION
+  LAW.** Leave-source-out against an ANALYTIC uniform control (exact hypergeometric, no sampling
+  error on either side) the learned law ranks the teacher's region better -- recall@5 **0.867 vs
+  0.665**, MRR 0.471 vs 0.410 -- and generates significantly WORSE complete programs. And the
+  ranking edge itself is **not established**: the exact Poisson-binomial test (each source has its
+  own support size and target count, so the control is NOT one binomial rate) gives p=0.054 on the
+  single best cell of four and 0.39/0.48/0.52 on the rest, at n=15 sources. **Better at recognising
+  where a teacher cut; worse at producing a program.**
+- **ONE COMPONENT SURVIVES, AND IT IS A T4 RESULT ABOUT REGION SCALE, NOT A PMO PRIOR.** On the
+  production path, 15 parents x 48 draws, released atoms per draw:
+      production_v1 (shipped)              yield 1.000   mean 1.44   max  8.33
+      production_route_law (LEARNED)       yield 0.994   mean 3.86   max 21.00
+      production_free_gate_v1 (engineered) yield 0.999   mean 3.27   max 15.00
+  Paired vs v1 the learned law is **+2.424 atoms, unanimous +15/-0**, and it beats the engineered
+  task-gated law (+0.596, +11/-4) **without consuming the similarity reference and delta that
+  `free_gate_margin_v1` requires** -- which is why it is expressible for PMO where neither exists.
+  Every clean eligible witness in the five exhausted T4 delta=0.6 cells is a 7-15 heavy-atom
+  excision, **a class v1 cannot express at max 8.33.** Decide this on T4's own rescue evidence.
+- **CONTAMINATION FINDING, act on separately: `t4_compositional_structural_subgoal_generator` is NOT
+  admissible as a no-prescreen PMO prior.** Its `training_trace_counts` are
+  `{"pmo_dependency_region": 85, "t4_complete": 50}` in fold 0 and 85 of 191/193 in folds 1-2 --
+  **44-63% of its training routes are PMO routes**, from a corpus whose own result file states "All
+  PMO supervision is answer-known, panel-informed or winner-informed development evidence".
+- **Data hygiene that worked: make the fitter RAISE rather than rely on discipline.**
+  `route_prior_fit.py` refuses `pmo_route_distillation/`, `pmo_teacher_route_gap_v1.json`,
+  `pmo_winner_program_curriculum/` and `pmo_public_winner_recovery/`, and the certificate records
+  `pmo_oracle_values_read: 0`, `pmo_task_identities_read: 0`, `docking_scores_read: 0`.
+- **A FLOOR GUARD THAT ASSERTS `min(weight) > 0` IS SATISFIED BY THE UN-FLOORED LAW.** That mutation
+  initially SURVIVED; repaired to assert the floor actually BINDS. Second time tonight this exact
+  shape appeared -- a floor is only tested where it binds.
+- **Teacher routes do not decompose into production modules:** only **65 of 238** dependency
+  components match a single family's emission signature, so a fitted family head is the wrong shape
+  and the family term had to be projected through a MEASURED emission matrix instead.
+- **Limit that belongs beside every number here:** the teacher routes are COMPILED WITNESSES -- a
+  search reconstructed a reported endpoint -- so the corpus rule mix is partly a property of that
+  compiler. Yield is unaffected, but **no claim that the prior learned chemistry rather than
+  route-compiler habit is supported**, and 15 source molecules carry every leave-source-out number.
