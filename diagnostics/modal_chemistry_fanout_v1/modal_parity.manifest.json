@@ -1,0 +1,32 @@
+{
+ "completed_units": 15,
+ "distinct_containers": 1,
+ "docking_calls": 0,
+ "merged_identity_sha256": "26a185ad59ab562047e5cafbb3b515e49ecdcaf8bbdf363b346f2605ca003846",
+ "meta": {
+  "block_network": true,
+  "map_container_seconds": 2.47,
+  "map_wall_seconds": 74.6,
+  "max_containers": 15,
+  "parameters": {
+   "ablate": true,
+   "arms": [],
+   "attribution": true,
+   "budget": 6000,
+   "cells": [],
+   "delta": 0.6,
+   "granularity": "arm",
+   "seed": 1
+  },
+  "source_commit": "c005900b581c17fe09cd984bac89857081cf2747"
+ },
+ "oracle_calls": 0,
+ "planned_units": 15,
+ "run_id": "chemistry_kernel_parity/a6af0e5ce07cd7682981",
+ "schema_version": "zero_oracle_chemistry_fanout_v1",
+ "unit_seconds_max": 0.59,
+ "unit_seconds_mean": 0.16,
+ "unit_seconds_total": 2.47,
+ "workload": "chemistry_kernel_parity",
+ "zero_oracle_violations": []
+}

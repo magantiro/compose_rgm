@@ -1460,3 +1460,73 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   exposed to the same construct-then-restore-cwd pattern. Not measured. This bites the 5-task rung
   (jnk3) and the 23-task rung. `perindopril_mpo` and `celecoxib_rediscovery` are pure-RDKit
   evaluators with no asset file and no cwd dependency -- measured unaffected.
+
+## 2026-09-20 (zero-oracle chemistry fan-out to Modal)
+
+- **MODAL CONTAINER CONCURRENCY IS A WORKSPACE RESOURCE, AND `nitya` IS CURRENTLY
+  STARVED.** A chemistry-free, volume-free probe (`--scaling-probe-tasks 40
+  --scaling-probe-seconds 20`, identical code, minutes apart): **nitya 3 distinct
+  containers / 507.7 s wall**, **rahul-94866 40 distinct containers / 34.2 s wall** --
+  **14.8x**, for the same 800 busy-seconds. `max_containers=40` and `min_containers=40`
+  were set on both. The ten running T4 campaigns hold nitya's capacity, so zero-oracle
+  side work belongs on the other workspace -- which is also the courteous answer, since
+  it leaves the scored campaigns their containers. **Run the probe before blaming your
+  own fan-out**; it costs about two cents and it settled a question I had already
+  mis-attributed twice (first to Modal's autoscaler ramp, then to the Volume-V1
+  concurrent-writer cap, which the repo's own `mine_edit_traces_app` documents at 5 and
+  which happened to match the measured 3.46 closely enough to be convincing). The
+  volume-free probe is what separated scheduler from storage.
+- **`os.uname().nodename` is the literal string `"modal"` in EVERY Modal container.** A
+  distinct-container census built on it reports 1 however wide the fan-out was. Same
+  family as the 2026-08-02 lesson: a metric that cannot vary is not a measurement. Use a
+  module-level `uuid4().hex` -- one value per process, so distinct values count
+  containers.
+- **A launcher-side environment variable does not reach the container.** A Modal app
+  module is imported TWICE: locally to build the app, and inside the container, where
+  the environment holds only what the image's `.env()` set. A decorator argument
+  (`max_containers`) is baked into the function spec at deploy time and travels; a
+  module-level `os.environ.get(...)` READ AT RUNTIME does not. `ZOC_RESUME=1` was
+  therefore silently False in every container and resume never fired -- visible only
+  because the resumed units took 36 s each instead of milliseconds. Pass runtime flags
+  as call arguments.
+- **THE T4-v2 FEASIBILITY SEARCH IS CHEMISTRY-KERNEL-SENSITIVE THROUGH ITS CACHE KEY.**
+  Same code, same seed, two RDKit versions: the evaluation sequences agree for 105 of
+  600 endpoints and then diverge permanently. The divergent pair is
+  `CC(C)C1CN(C(=O)C2=CC=CC3=S2C=CC=C3)C1c1ccc2ccccc2c1` (rdkit 2026.03.6) vs
+  `CC(C)C1CN(C(=O)C2=CC=CC3=CC=CC=S32)C1c1ccc2ccccc2c1` (rdkit 2024.03.5) -- **same
+  InChI, different canonical SMILES, and they do not canonicalise together even within
+  ONE kernel**. It is a Kekule-degenerate hypervalent-sulfur fused ring that the search
+  itself constructs. `FeasibilityContext.evaluate` keys `self.cache` on that string and
+  derives similarity and SA from the parsed form, so one differing string re-routes
+  every subsequent decision (59 differing leaves, all in one of two cells).
+  **`Chem.MolToSmiles` is not a stable molecular identity for these species; InChI is.**
+- **The repo's default `.venv` is the DRIFTED environment, not the pinned one.** It runs
+  **rdkit 2026.03.6 / numpy 2.5.3 / python 3.12** against the pinned production
+  **rdkit 2024.03.5 / numpy 1.26.4 / python 3.11**. So local T4-v2 numbers are not the
+  numbers the pinned environment produces. `uv venv --python 3.11` plus the five pins
+  builds a matching venv in under a minute and reproduced the Modal artifact **bit for
+  bit** (canonical sha256 `35b99dec812b2b535566a91c186f592053b63d21be1d1bb3282355d291461e02`).
+  Do this before comparing any local run to a Modal one.
+- **A chemistry-kernel parity table is the cheap preflight, but scope it honestly.** Over
+  746 real corpus molecules the two kernels agree EXACTLY on canonical SMILES, ring and
+  aromatic perception, formal charge, QED, SA and Tanimoto (same sha256). That
+  falsified my first hypothesis -- the drift is not in the scoring primitives. It lives
+  on pathological intermediates the SEARCH generates, which no corpus-molecule table
+  contains. Parity on real molecules does not imply parity on the search's own states.
+- **Filtering a launch log with a grep that omits failure patterns DISCARDS the
+  failure.** `modal run ... 2>&1 | grep -E '^\[map\] done|...' | tail` reported two
+  `[plan]` lines and nothing else for a run that died at 96 of 108 units; the reason was
+  filtered out and never written anywhere. Always include `Traceback|Exception|Error` in
+  a launch filter, or keep the full log and filter when reading.
+- **Content-addressing a run namespace on the source commit means a commit between a
+  crash and its resume invalidates the resume.** This is the same guard as
+  `_source_fingerprint` and is correct, but it has an operational consequence: resume
+  the crashed run first, commit second.
+- **Equivalence chain that actually proves a migration.** Three comparisons, not one:
+  (1) production `run_cell` vs the harness decomposition ON THE SAME MACHINE proves the
+  decomposition and the reducer; (2) the same pair ON MODAL proves it again
+  independently; (3) pinned-local `run_cell` vs the Modal fan-out proves transport. Each
+  compares canonical sorted-key JSON SHA-256 with only the timing fields stripped, and
+  the comparator carries negative controls (perturb one funnel count, drop one arm, swap
+  two cells -> all detected; change only `elapsed_seconds` -> not detected). Without (1)
+  and (2) a local/Modal disagreement cannot be attributed.

@@ -1,0 +1,519 @@
+{
+ "blocker_found": {
+  "consequence_for_the_campaign": "Any parp1_2 number in the existing local T4-v2 artifacts was produced by a kernel that does not raise where the pinned kernel does. That cell's v2 result should be treated as unverified until the law's _canonical path is made robust.",
+  "error": "RuntimeError: Invariant Violation / could not find atom1 (and atom2) / Code/GraphMol/Canon.cpp line 222-223 / RDKIT: 2024.03.5, raised from Chem.MolToSmiles inside scripts/t4_v2_feasibility_proposal.py::_canonical, called from replace_moves.",
+  "harness_behaviour": "Two runs were destroyed by it before the harness was hardened: an uncaught exception inside .map aborts the whole fan-out, which is the 'lost at the very end' failure mode in a different costume. run_unit now records the failure as a unit row, the reducer reduces over what computed, and both the merged artifact (complete: false, missing_units) and the manifest (artifact_complete, failures) refuse to present the result as whole.",
+  "what": "Eight of the 108 units cannot be computed under the PINNED chemistry kernel. All eight are the cell parp1_2 -- its four arms and its four h-component freezes; only its attribution unit survives.",
+  "what_this_is_not": "This is NOT a harness defect and NOT caused by Modal. It is a pre-existing latent defect in the T4-v2 proposal law, surfaced by running it in the environment the repository pins. Nothing in scripts/ was modified to work around it; fixing it is a decision for the T4 campaign owner.",
+  "why_it_was_invisible_locally": "It is an RDKit 2024.03.5 C++ assertion. The laptop's default .venv runs rdkit 2026.03.6, which does not raise it, so a local run of the same grid completes and reports parp1_2 as an ordinary result."
+ },
+ "chemistry_kernel_parity": {
+  "identical": true,
+  "local_parity_sha256": "711c1d6291a6ed50432a1177892c01bf6a20830c9c8c5f7c262b76ca388fa648",
+  "modal_parity_sha256": "711c1d6291a6ed50432a1177892c01bf6a20830c9c8c5f7c262b76ca388fa648",
+  "molecules_compared": 746
+ },
+ "cost": {
+  "billing_basis": "Modal bills core-seconds, so the wall clock past the container-count choice is a scheduling preference, not an optimisation.",
+  "headline": "4,068.6 container-seconds (~9 US cents) and 246 s of wall clock, against a projected 1.6 h of uninterrupted laptop time that would also have been computed under the wrong chemistry kernel.",
+  "local_serial_baseline": {
+   "caveat": "A PROJECTION from one paired unit applied to the measured grid container-seconds, not a measured serial run. It is also generous to the laptop: the machine carried a load of 200-265 for most of this session and 10-12 at the moment of the paired measurement. The same two-cell slice at budget 600 took 111.7 s in the drifted venv and 181.4 s in the pinned one on the same machine minutes apart, which is how unreliable a local timer is here.",
+   "measured_paired_unit": "fa7_0 / v2_full at budget 6000: 69.28 s on the laptop under the pinned kernel at load 10-12, 48.21 s in a Modal container -- 1.44x.",
+   "projected_serial_hours": 1.62,
+   "projected_serial_seconds": 5847
+  },
+  "production_grid": {
+   "container_seconds": 4068.64,
+   "units": 108,
+   "usd": 0.0894,
+   "wall_seconds_at_32_containers": 246.13
+  }
+ },
+ "cost_model": {
+  "container_second_usd": 2.198e-05,
+  "cpu_core_second_usd": 1.31e-05,
+  "gib_second_usd": 2.22e-06,
+  "provenance": "Modal published on-demand CPU and memory rates; the arithmetic is recorded so the figure can be re-derived against the workspace's own billing page.",
+  "unit_cpu_cores": 1.0,
+  "unit_memory_gib": 4.0
+ },
+ "docking_calls": 0,
+ "equivalence": {
+  "claims": {
+   "harness_exact_under_drifted_kernel": true,
+   "harness_exact_under_pinned_kernel_on_modal": true,
+   "laptop_default_venv_equals_modal": false,
+   "laptop_equals_modal_under_matched_kernels": true
+  },
+  "identities": {
+   "local_drifted_kernel_harness_decomposition": "de48a751a230f9b0cc15728225781a204b741a15941784697dd43adc20ef6502",
+   "local_drifted_kernel_run_cell": "de48a751a230f9b0cc15728225781a204b741a15941784697dd43adc20ef6502",
+   "local_pinned_kernel_run_cell": "35b99dec812b2b535566a91c186f592053b63d21be1d1bb3282355d291461e02",
+   "modal_harness_decomposition_arm_granularity": "35b99dec812b2b535566a91c186f592053b63d21be1d1bb3282355d291461e02",
+   "modal_harness_run_cell_cell_granularity": "35b99dec812b2b535566a91c186f592053b63d21be1d1bb3282355d291461e02"
+  },
+  "method": "Canonical sorted-key JSON SHA-256 of the merged artifact with the machine-dependent fields removed. The reference arm calls the PRODUCTION function scripts/t4_v2_feasibility_gate.run_cell, not a transcription of it, so a change in run_cell changes the reference.",
+  "slice": "cells fa7_0 + braf_2, budget 600, seed 1, delta 0.6, all 4 arms + 4 freezes + attribution",
+  "timing_fields_excluded": [
+   "elapsed_seconds",
+   "wall_seconds",
+   "seconds_per_1k_proposals"
+  ]
+ },
+ "findings": {
+  "container_concurrency_is_a_workspace_resource": "A chemistry-free, volume-free scaling probe of 40 tasks x 20 busy-seconds, run minutes apart with identical code: the nitya workspace (the T4 profile) supplied 3 distinct containers and 507.7s of wall clock; the rahul-94866 workspace supplied 40 distinct containers and 34.2s. The harness was never the limit. The most likely explanation is that the ten running T4 campaigns are consuming nitya's container capacity, which is also the reason zero-oracle side work should not be sent there.",
+  "harness_is_exact": "The decomposition plus fan-out plus volume round-trip plus reducer reproduces the production run_cell artifact bit-for-bit under canonical sorted-key JSON, on both machines independently, and across the two granularities.",
+  "the_laptop_is_the_drifted_environment": "The repository's default .venv runs rdkit 2026.03.6 / numpy 2.5.3 / python 3.12; the pinned production environment is rdkit 2024.03.5 / numpy 1.26.4 / python 3.11. Local T4-v2 results produced in the default .venv are NOT the results the pinned environment produces. A uv venv --python 3.11 with the pins reproduces the Modal artifact exactly, so the migration improves correctness rather than merely relocating compute.",
+  "where_the_kernels_disagree": "Not in QED, SA, Tanimoto or ring perception: a parity table over 746 real corpus molecules is byte-identical between the two environments. The divergence is in Chem.MolToSmiles for a Kekule-degenerate hypervalent-sulfur fused ring that the SEARCH constructs. The two strings have the same InChI but do not canonicalise together even within one kernel. Because the search keys its endpoint cache on that string and derives similarity and SA from the parsed form, one differing string re-routes every subsequent decision."
+ },
+ "harness": {
+  "durability": "Every unit writes its row to the volume and commits BEFORE returning; the launcher additionally mirrors each row locally as it arrives (order_outputs=False). Verified in practice: a run that died at 96 of 108 units left all 96 rows intact on the volume, and ZOC_RESUME=1 skips them on relaunch.",
+  "files": [
+   "modal_apps/zero_oracle_chemistry_fanout_app.py",
+   "modal_apps/zero_oracle_chemistry_workloads.py",
+   "modal_apps/zero_oracle_chemistry_local_driver.py"
+  ],
+  "isolation": "Own app name (compose-zero-oracle-chemistry-fanout), own volume (compose-zero-oracle-fanout-v2), own content-addressed output namespace. No other volume is mounted, read or written. Nothing under src/compose_v4, configs/ or any pre-existing modal_apps module is modified; the three files are new.",
+  "manifest_naming": "manifest_path_for() uses Path.with_suffix, so merged.json -> merged.manifest.json; string concatenation would yield merged.json.manifest.json and find nothing.",
+  "provenance": "The launch commit is read on the LAUNCHER with FileNotFoundError/OSError caught and passed to the containers as an argument; no container ever shells out to git.",
+  "shape": "plan (1 container) -> run_unit (N containers, one unit per call) -> reduce (1 container)",
+  "unit_is_the_shard": "Modal's .map distributes one call per work unit and load-balances across warm containers, so the shard size is one unit and the container count is a dial on wall clock, not on cost.",
+  "zero_oracle_guards": [
+   "the image carries no docking binary, no receptor set, no openbabel and no TDC -- it is the pinned chemistry image and nothing else",
+   "block_network=True on every function, verified by an outbound TCP probe from inside a container rather than by restating the flag",
+   "assert_zero_oracle() runs inside every unit and refuses to proceed if an oracle module or docking binary has appeared; the evidence is carried in every unit row and summarised in the manifest as zero_oracle_violations"
+  ]
+ },
+ "migrated_workload": {
+  "default_grid": "12 sources x (4 arms + 4 h-component freezes + 1 bottleneck attribution) = 108 units. NOTE: the audit holds 15 sources but the gate's FAILED+CONTROLS+SANITY groups name only 12 (the jak2_* cells are not in any group), so the 'fifteen-source grid' is a 12-source grid as the gate is currently written.",
+  "driver": "scripts/t4_v2_feasibility_gate.py (run stage), imported and called unmodified",
+  "granularities": {
+   "arm": "one unit per (source, arm), (source, frozen component) and (source, attribution) -- 9x the parallelism, and measured ~25% more container-seconds because each unit re-imports the gate and re-reads the audit",
+   "cell": "one unit per source, calling run_cell verbatim -- the reference the arm decomposition is proved against"
+  },
+  "name": "t4_v2_feasibility"
+ },
+ "oracle_calls": 0,
+ "production_budget_equivalence": {
+  "grid_containers": 32,
+  "grid_failed_units": [
+   {
+    "arm": null,
+    "cell": "parp1_2",
+    "component": "sa",
+    "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+    "error_type": "RuntimeError",
+    "kind": "freeze"
+   },
+   {
+    "arm": "v2_unguided_selection",
+    "cell": "parp1_2",
+    "component": null,
+    "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+    "error_type": "RuntimeError",
+    "kind": "arm"
+   },
+   {
+    "arm": "v2_moveset_only",
+    "cell": "parp1_2",
+    "component": null,
+    "error": "Invariant Violation\n\tcould not find atom2\n\tViolation occurred on line 223 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom2\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+    "error_type": "RuntimeError",
+    "kind": "arm"
+   },
+   {
+    "arm": null,
+    "cell": "parp1_2",
+    "component": "sim",
+    "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+    "error_type": "RuntimeError",
+    "kind": "freeze"
+   },
+   {
+    "arm": "v2_blind_proposal",
+    "cell": "parp1_2",
+    "component": null,
+    "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+    "error_type": "RuntimeError",
+    "kind": "arm"
+   },
+   {
+    "arm": "v2_full",
+    "cell": "parp1_2",
+    "component": null,
+    "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+    "error_type": "RuntimeError",
+    "kind": "arm"
+   },
+   {
+    "arm": null,
+    "cell": "parp1_2",
+    "component": "qed",
+    "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+    "error_type": "RuntimeError",
+    "kind": "freeze"
+   },
+   {
+    "arm": null,
+    "cell": "parp1_2",
+    "component": "size",
+    "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+    "error_type": "RuntimeError",
+    "kind": "freeze"
+   }
+  ],
+  "grid_unit_seconds_max": 182.0,
+  "grid_unit_seconds_mean": 40.5,
+  "grid_unit_seconds_total": 4068.6,
+  "grid_units": 108,
+  "identical": true,
+  "laptop_over_modal_per_unit_ratio": 1.44,
+  "local_pinned_sha256": "895c3604e32bd74edd3adabc581e9e3f3d1d5ebafa165cc1c60d0e8be448139d",
+  "local_wall_seconds": 69.28,
+  "modal_sha256": "895c3604e32bd74edd3adabc581e9e3f3d1d5ebafa165cc1c60d0e8be448139d",
+  "modal_wall_seconds": 48.206,
+  "projected_local_serial_seconds": 5847.0,
+  "projection_basis": "One unit measured on both sides (fa7_0 / v2_full, budget 6000): 69.28s on the laptop under the pinned kernel at load ~10-12, 48.206s in a Modal container. The serial-local figure is that ratio applied to the measured grid container-seconds -- a PROJECTION from one paired unit, not a measured serial run, and the laptop carried a load of 200-265 for most of this session, where it would be far worse.",
+  "unit": "fa7_0 / v2_full, budget 6000, seed 1"
+ },
+ "raw": {
+  "grid_artifact_complete": false,
+  "grid_artifact_missing_units": [
+   {
+    "arm": "v2_full",
+    "cell": "parp1_2",
+    "component": null,
+    "kind": "arm",
+    "unit_id": "fe24573444bada678ed9c91d"
+   },
+   {
+    "arm": "v2_blind_proposal",
+    "cell": "parp1_2",
+    "component": null,
+    "kind": "arm",
+    "unit_id": "0c2ec7ded2427c05876ee937"
+   },
+   {
+    "arm": "v2_unguided_selection",
+    "cell": "parp1_2",
+    "component": null,
+    "kind": "arm",
+    "unit_id": "f04c114bc85a383715ab0751"
+   },
+   {
+    "arm": "v2_moveset_only",
+    "cell": "parp1_2",
+    "component": null,
+    "kind": "arm",
+    "unit_id": "08b6e119a1af6b0d1277fb98"
+   },
+   {
+    "arm": null,
+    "cell": "parp1_2",
+    "component": "qed",
+    "kind": "freeze",
+    "unit_id": "c2b8ed722e109b2eb1011f2a"
+   },
+   {
+    "arm": null,
+    "cell": "parp1_2",
+    "component": "sa",
+    "kind": "freeze",
+    "unit_id": "794aa0286e2916d136de28ff"
+   },
+   {
+    "arm": null,
+    "cell": "parp1_2",
+    "component": "sim",
+    "kind": "freeze",
+    "unit_id": "6e915eb08d6658370c9d7a7f"
+   },
+   {
+    "arm": null,
+    "cell": "parp1_2",
+    "component": "size",
+    "kind": "freeze",
+    "unit_id": "269bfca6caec979c1782a931"
+   }
+  ],
+  "grid_manifest": {
+   "artifact_complete": false,
+   "completed_units": 100,
+   "distinct_containers": 32,
+   "docking_calls": 0,
+   "failed_units": 8,
+   "failures": [
+    {
+     "arm": "v2_moveset_only",
+     "cell": "parp1_2",
+     "component": null,
+     "error": "Invariant Violation\n\tcould not find atom2\n\tViolation occurred on line 223 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom2\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+     "error_type": "RuntimeError",
+     "kind": "arm",
+     "unit_id": "08b6e119a1af6b0d1277fb98"
+    },
+    {
+     "arm": "v2_blind_proposal",
+     "cell": "parp1_2",
+     "component": null,
+     "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+     "error_type": "RuntimeError",
+     "kind": "arm",
+     "unit_id": "0c2ec7ded2427c05876ee937"
+    },
+    {
+     "arm": null,
+     "cell": "parp1_2",
+     "component": "size",
+     "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+     "error_type": "RuntimeError",
+     "kind": "freeze",
+     "unit_id": "269bfca6caec979c1782a931"
+    },
+    {
+     "arm": null,
+     "cell": "parp1_2",
+     "component": "sim",
+     "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+     "error_type": "RuntimeError",
+     "kind": "freeze",
+     "unit_id": "6e915eb08d6658370c9d7a7f"
+    },
+    {
+     "arm": null,
+     "cell": "parp1_2",
+     "component": "sa",
+     "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+     "error_type": "RuntimeError",
+     "kind": "freeze",
+     "unit_id": "794aa0286e2916d136de28ff"
+    },
+    {
+     "arm": null,
+     "cell": "parp1_2",
+     "component": "qed",
+     "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+     "error_type": "RuntimeError",
+     "kind": "freeze",
+     "unit_id": "c2b8ed722e109b2eb1011f2a"
+    },
+    {
+     "arm": "v2_unguided_selection",
+     "cell": "parp1_2",
+     "component": null,
+     "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+     "error_type": "RuntimeError",
+     "kind": "arm",
+     "unit_id": "f04c114bc85a383715ab0751"
+    },
+    {
+     "arm": "v2_full",
+     "cell": "parp1_2",
+     "component": null,
+     "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+     "error_type": "RuntimeError",
+     "kind": "arm",
+     "unit_id": "fe24573444bada678ed9c91d"
+    }
+   ],
+   "merged_identity_sha256": "cb6ac40958de8c10af48411e1fb0680a0401acf2b76b6f559492e066b44ac3fa",
+   "meta": {
+    "block_network": true,
+    "buffer_containers": 0,
+    "map_container_seconds": 4068.64,
+    "map_wall_seconds": 246.13,
+    "max_containers": 32,
+    "min_containers": 32,
+    "parameters": {
+     "ablate": true,
+     "arms": [],
+     "attribution": true,
+     "budget": 6000,
+     "cells": [],
+     "delta": 0.6,
+     "granularity": "arm",
+     "seed": 1
+    },
+    "resume_enabled": false,
+    "source_commit": "625f77a285df81aed4b143b3f0b2a6885063f490"
+   },
+   "oracle_calls": 0,
+   "planned_units": 108,
+   "resumed_units": 0,
+   "run_id": "t4_v2_feasibility/58d1c4b70c7950e6e052",
+   "schema_version": "zero_oracle_chemistry_fanout_v1",
+   "unit_seconds_max": 182.03,
+   "unit_seconds_mean": 37.67,
+   "unit_seconds_total": 4068.64,
+   "workload": "t4_v2_feasibility",
+   "zero_oracle_violations": []
+  },
+  "local_timings": {
+   "drifted_baseline": {
+    "cells": 2,
+    "per_cell_seconds": {
+     "braf_2": 39.45,
+     "fa7_0": 72.22
+    },
+    "stage": "baseline_serial_local",
+    "wall_seconds": 111.67
+   },
+   "drifted_decomposition": {
+    "stage": "decompose_serial_local_arm",
+    "unit_seconds_max": 36.37,
+    "unit_seconds_total": 115.11,
+    "units": 18,
+    "wall_seconds": 115.17
+   },
+   "pinned_baseline": {
+    "cells": 2,
+    "per_cell_seconds": {
+     "braf_2": 53.82,
+     "fa7_0": 127.56
+    },
+    "stage": "baseline_serial_local",
+    "wall_seconds": 181.38
+   },
+   "pinned_single_unit_budget_6000": {
+    "stage": "decompose_serial_local_arm",
+    "unit_seconds_max": 69.28,
+    "unit_seconds_total": 69.28,
+    "units": 1,
+    "wall_seconds": 69.28
+   }
+  },
+  "modal_arm_manifest": {
+   "completed_units": 18,
+   "distinct_containers": 1,
+   "docking_calls": 0,
+   "merged_identity_sha256": "35b99dec812b2b535566a91c186f592053b63d21be1d1bb3282355d291461e02",
+   "meta": {
+    "block_network": true,
+    "map_container_seconds": 76.65,
+    "map_wall_seconds": 184.15,
+    "max_containers": 18,
+    "parameters": {
+     "ablate": true,
+     "arms": [],
+     "attribution": true,
+     "budget": 600,
+     "cells": [
+      "fa7_0",
+      "braf_2"
+     ],
+     "delta": 0.6,
+     "granularity": "arm",
+     "seed": 1
+    },
+    "source_commit": "c005900b581c17fe09cd984bac89857081cf2747"
+   },
+   "oracle_calls": 0,
+   "planned_units": 18,
+   "run_id": "t4_v2_feasibility/a739508ad47594c3c6c4",
+   "schema_version": "zero_oracle_chemistry_fanout_v1",
+   "unit_seconds_max": 25.53,
+   "unit_seconds_mean": 4.26,
+   "unit_seconds_total": 76.65,
+   "workload": "t4_v2_feasibility",
+   "zero_oracle_violations": []
+  },
+  "modal_cell_manifest": {
+   "completed_units": 2,
+   "distinct_containers": 1,
+   "docking_calls": 0,
+   "merged_identity_sha256": "72350a35454e5aad8d302e276215bfcab4f32f0062470efb90d16f3d9f92842f",
+   "meta": {
+    "block_network": true,
+    "map_container_seconds": 61.41,
+    "map_wall_seconds": 192.71,
+    "max_containers": 4,
+    "parameters": {
+     "ablate": true,
+     "arms": [],
+     "attribution": true,
+     "budget": 600,
+     "cells": [
+      "fa7_0",
+      "braf_2"
+     ],
+     "delta": 0.6,
+     "granularity": "cell",
+     "seed": 1
+    },
+    "source_commit": "c005900b581c17fe09cd984bac89857081cf2747"
+   },
+   "oracle_calls": 0,
+   "planned_units": 2,
+   "run_id": "t4_v2_feasibility/5a9e21455ec985144628",
+   "schema_version": "zero_oracle_chemistry_fanout_v1",
+   "unit_seconds_max": 39.05,
+   "unit_seconds_mean": 30.71,
+   "unit_seconds_total": 61.41,
+   "workload": "t4_v2_feasibility",
+   "zero_oracle_violations": []
+  },
+  "saturation_sweep": null,
+  "trajectory_divergence": {
+   "arm": "fa7_0 / v2_moveset_only, budget 600, seed 1",
+   "identical_prefix_length": 105,
+   "local_sa": 4.54992436,
+   "local_smiles": "CC(C)C1CN(C(=O)C2=CC=CC3=S2C=CC=C3)C1c1ccc2ccccc2c1",
+   "modal_sa": 4.624736448,
+   "modal_smiles": "CC(C)C1CN(C(=O)C2=CC=CC3=CC=CC=S32)C1c1ccc2ccccc2c1",
+   "total_evaluations": 600
+  }
+ },
+ "recommendations": {
+  "pmo_binder_repair": "BLOCKED, not rejected. It is zero-oracle and shard-shaped (2,185 plan x parent pairs with an exhaustive referee), and its inputs are committed (a 13 MB checkpoint and a 12 KB init). But scripts/pmo_binder_repair_v1.py is itself UNCOMMITTED in another session's worktree, so it cannot be launched from a clean committed worktree and must not be vendored into another branch. Migrating it is a ten-minute job once that script is committed.",
+  "t4_support_stage_audit": "MIGRATE -- it already has --cell sharding and a --reduce --shard-dir stage, is zero-oracle by construction, and its extra inputs are committed repo JSON (a 6-10 KB config and a ~110 KB checkpoint per protein). It installs process-global measurement wrappers, which is SAFER one-unit-per-container than it is locally, where several cells share a patched process. Caveat: only 12-15 units, so the wall-clock win is bounded by the slowest single cell rather than by the container count.",
+  "t4_v2_feasibility_gate": "MIGRATE -- done, demonstrated end to end. It is the best-shaped of the three: 108 independent units, deterministic per unit, no checkpoint, and its only extra input is a 442 KB JSON audit.",
+  "which_workspace": "Run zero-oracle side work on rahul-94866 while the T4 campaigns hold nitya, and cap max_containers so the PMO campaign keeps headroom. Re-measure with --scaling-probe-tasks before assuming capacity; the probe costs about two cents."
+ },
+ "reproduce": {
+  "compare": "python modal_apps/zero_oracle_chemistry_local_driver.py compare --left local.json --right modal.json",
+  "environment": "uv venv --python 3.11 <path> && uv pip install numpy==1.26.4 scipy==1.13.1 networkx==3.3 rdkit==2024.3.5 torch==2.4.0",
+  "local_baseline": "python modal_apps/zero_oracle_chemistry_local_driver.py baseline --cells fa7_0,braf_2 --budget 600 --seed 1 --out local.json",
+  "modal_fanout": "MODAL_PROFILE=rahul-94866 ZOC_MAX_CONTAINERS=32 ZOC_MIN_CONTAINERS=32 modal run modal_apps/zero_oracle_chemistry_fanout_app.py --workload t4_v2_feasibility --budget 6000 --out grid.json",
+  "scaling_probe": "MODAL_PROFILE=<profile> ZOC_MAX_CONTAINERS=40 ZOC_MIN_CONTAINERS=40 modal run modal_apps/zero_oracle_chemistry_fanout_app.py --scaling-probe-tasks 40 --scaling-probe-seconds 20"
+ },
+ "saturation": {
+  "method": "modal run ... --scaling-probe-tasks 40 --scaling-probe-seconds 20. No chemistry, no volume mount, a busy wait rather than a sleep, and a per-process UUID as the container identity. It isolates the SCHEDULER from the storage layer and from the workload.",
+  "prewarm_is_required_to_measure_this": "Modal's autoscaler ramps on backlog, and an 18-unit map that requested 18 containers was measured running on exactly ONE. min_containers must be set or a container count is an autoscaler transient rather than a setting.",
+  "realised_on_the_production_grid": {
+   "container_seconds": 4068.64,
+   "distinct_containers": 32,
+   "effective_concurrency": 16.53,
+   "max_containers": 32,
+   "min_containers": 32,
+   "unit_seconds_max": 182.0,
+   "unit_seconds_mean": 40.5,
+   "units": 108,
+   "wall_seconds": 246.13,
+   "workspace": "rahul-94866"
+  },
+  "scheduler_capacity_measured": {
+   "nitya": {
+    "busy_seconds": 800.0,
+    "distinct_containers": 3,
+    "effective_concurrency": 1.58,
+    "max_containers": 40,
+    "min_containers": 40,
+    "tasks": 40,
+    "wall_seconds": 507.7
+   },
+   "rahul-94866": {
+    "busy_seconds": 800.0,
+    "distinct_containers": 40,
+    "effective_concurrency": 23.38,
+    "max_containers": 40,
+    "min_containers": 40,
+    "tasks": 40,
+    "wall_seconds": 34.2
+   }
+  },
+  "which_container_count_saturates": "About 32 for this workload, and the limit is the unit-time distribution rather than the scheduler. Unit cost is long-tailed -- mean 40.5 s, max 182.0 s -- so once every unit is running concurrently the wall clock is floored by the single longest unit plus container start. The measured 246.1 s is already within 1.35x of that 182 s floor, and the realised concurrency of 16.53 against 32 containers is the tail draining, not a scheduler cap. Going beyond ~32 containers buys at most a further ~25%; cutting the wall clock further needs a finer decomposition of the slowest arms, not more containers. Below 32 the harness is linear in container count, because container-seconds are essentially invariant (the same 108 units run either way)."
+ },
+ "schema_version": "modal_chemistry_fanout_v1",
+ "source_commit": "625f77a285df81aed4b143b3f0b2a6885063f490",
+ "title": "Zero-oracle chemistry fan-out on Modal: harness, equivalence proof, and measured cost"
+}

@@ -172,8 +172,19 @@ def compare_artifacts(
     """Canonical, timing-stripped equivalence of two merged artifacts."""
 
     strip = workloads.workload(workload_name)["strip_timing"]
-    left_clean = strip(left)
-    right_clean = strip(right)
+
+    def drop_bookkeeping(payload: dict) -> dict:
+        # Harness provenance, not chemistry.  Safe to exclude from the hash BECAUSE an
+        # incomplete artifact is already unequal by content: the units it is missing are
+        # absent from ``cells``.  Reported separately so the reader still sees it.
+        return {
+            key: value
+            for key, value in payload.items()
+            if key not in ("complete", "missing_units")
+        }
+
+    left_clean = strip(drop_bookkeeping(left))
+    right_clean = strip(drop_bookkeeping(right))
     left_identity = workloads.canonical_sha256(left_clean)
     right_identity = workloads.canonical_sha256(right_clean)
     per_cell = {}
@@ -193,6 +204,10 @@ def compare_artifacts(
             ),
         }
     return {
+        "left_complete": left.get("complete", True),
+        "right_complete": right.get("complete", True),
+        "left_missing_units": len(left.get("missing_units") or []),
+        "right_missing_units": len(right.get("missing_units") or []),
         "timing_fields_excluded": (
             list(workloads.T4_V2_TIMING_FIELDS)
             if workload_name == "t4_v2_feasibility"

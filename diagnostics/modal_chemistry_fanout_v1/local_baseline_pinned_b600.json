@@ -1,0 +1,1414 @@
+{
+ "artifact": {
+  "budget": 600,
+  "cells": {
+   "braf_2": {
+    "arms": {
+     "v2_blind_proposal": {
+      "arm": {
+       "budget": 600,
+       "chemistry_filter": true,
+       "conditioned_proposal": false,
+       "frozen": [],
+       "guided_selection": true,
+       "prune_pathological_parents": true,
+       "seed": 1
+      },
+      "chemistry_filter": {
+       "benchmark_eligible_distinct": 23,
+       "clean_eligible_distinct": 21,
+       "enabled": true,
+       "motif_census": {
+        "N-F": 1,
+        "O-F": 1
+       },
+       "pathological_eligible_distinct": 2,
+       "prune_pathological_parents": true,
+       "removed_examples": [
+        {
+         "motifs": [
+          "O-F"
+         ],
+         "smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccc(NOF)cc2)ccn1"
+        },
+        {
+         "motifs": [
+          "N-F"
+         ],
+         "smiles": "NC(=O)N(F)c1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+        }
+       ]
+      },
+      "distinct_eligible_scaffolds": 3,
+      "eligible_quality": {
+       "heavy_delta": {
+        "max": -7.0,
+        "mean": -11.61905,
+        "median": -11.0,
+        "min": -15.0,
+        "n": 21,
+        "p10": -15.0,
+        "p90": -11.0
+       },
+       "qed": {
+        "max": 0.79967,
+        "mean": 0.70381,
+        "median": 0.69763,
+        "min": 0.61151,
+        "n": 21,
+        "p10": 0.62803,
+        "p90": 0.79844
+       },
+       "sa": {
+        "max": 2.95302,
+        "mean": 2.25302,
+        "median": 2.19237,
+        "min": 1.86077,
+        "n": 21,
+        "p10": 1.99806,
+        "p90": 2.58639
+       },
+       "similarity": {
+        "max": 0.69355,
+        "mean": 0.62717,
+        "median": 0.62295,
+        "min": 0.6,
+        "n": 21,
+        "p10": 0.6,
+        "p90": 0.65574
+       }
+      },
+      "eligible_witnesses": [
+       {
+        "heavy_delta": -15,
+        "mode": "replace",
+        "qed": 0.79967,
+        "sa": 2.07318,
+        "similarity": 0.61017,
+        "smiles": "O=C(Nc1cccnc1)c1cc(Oc2cccnc2)ccn1"
+       },
+       {
+        "heavy_delta": -15,
+        "mode": "replace",
+        "qed": 0.79967,
+        "sa": 2.09226,
+        "similarity": 0.63793,
+        "smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccncc2)ccn1"
+       },
+       {
+        "heavy_delta": -15,
+        "mode": "prune",
+        "qed": 0.79844,
+        "sa": 1.86077,
+        "similarity": 0.62712,
+        "smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccccc2)ccn1"
+       },
+       {
+        "heavy_delta": -13,
+        "mode": "grow",
+        "qed": 0.77798,
+        "sa": 1.91115,
+        "similarity": 0.62295,
+        "smiles": "COc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -11,
+        "mode": "grow",
+        "qed": 0.76269,
+        "sa": 2.41539,
+        "similarity": 0.6,
+        "smiles": "O=C(Nc1cccnc1)c1cc(Oc2cccnc2C(F)(F)F)ccn1"
+       },
+       {
+        "heavy_delta": -11,
+        "mode": "replace",
+        "qed": 0.74279,
+        "sa": 2.1314,
+        "similarity": 0.63492,
+        "smiles": "O=C(Nc1cccnc1)c1cc(Oc2cccc(C(F)(F)F)c2)ccn1"
+       },
+       {
+        "heavy_delta": -11,
+        "mode": "replace",
+        "qed": 0.73618,
+        "sa": 1.99806,
+        "similarity": 0.65574,
+        "smiles": "CC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -12,
+        "mode": "grow",
+        "qed": 0.73569,
+        "sa": 2.23404,
+        "similarity": 0.6,
+        "smiles": "O=C(O)c1cc(Oc2ccnc(C(=O)Nc3cccnc3)c2)ccn1"
+       },
+       {
+        "heavy_delta": -11,
+        "mode": "replace",
+        "qed": 0.73049,
+        "sa": 2.1534,
+        "similarity": 0.60317,
+        "smiles": "NC(=O)Oc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -14,
+        "mode": "prune",
+        "qed": 0.72279,
+        "sa": 2.01666,
+        "similarity": 0.62295,
+        "smiles": "Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -11,
+        "mode": "replace",
+        "qed": 0.69763,
+        "sa": 2.28684,
+        "similarity": 0.62903,
+        "smiles": "O=C(F)Oc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -11,
+        "mode": "replace",
+        "qed": 0.69671,
+        "sa": 2.83032,
+        "similarity": 0.6,
+        "smiles": "CS(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       }
+      ],
+      "funnel": {
+       "all_three_pass": 23,
+       "chemically_valid": 600,
+       "eligible": 21,
+       "endpoints": 600,
+       "qed_pass": 340,
+       "reached_gate": 579,
+       "sa_pass": 569,
+       "similarity_and_qed_pass": 23,
+       "similarity_pass": 124
+      },
+      "gate_reconstruction_disagreements": 0,
+      "margins": {
+       "delta_qed": {
+        "max": 0.28285,
+        "mean": -0.01005,
+        "median": 0.03497,
+        "min": -0.47363,
+        "n": 579,
+        "p10": -0.35616,
+        "p90": 0.18072
+       },
+       "delta_sa": {
+        "max": 3.0,
+        "mean": 1.49205,
+        "median": 1.60151,
+        "min": -1.79359,
+        "n": 579,
+        "p10": 1.05243,
+        "p90": 1.91115
+       },
+       "delta_sim": {
+        "max": 0.4,
+        "mean": -0.12725,
+        "median": -0.13425,
+        "min": -0.56491,
+        "n": 579,
+        "p10": -0.37143,
+        "p90": 0.09355
+       }
+      },
+      "mode_census": {
+       "grow": 322,
+       "prune": 30,
+       "remodel": 2,
+       "replace": 245
+      },
+      "mode_census_eligible": {
+       "grow": 7,
+       "prune": 4,
+       "remodel": 0,
+       "replace": 10
+      },
+      "policy_contexts": 1,
+      "steps": 65
+     },
+     "v2_full": {
+      "arm": {
+       "budget": 600,
+       "chemistry_filter": true,
+       "conditioned_proposal": true,
+       "frozen": [],
+       "guided_selection": true,
+       "prune_pathological_parents": true,
+       "seed": 1
+      },
+      "chemistry_filter": {
+       "benchmark_eligible_distinct": 13,
+       "clean_eligible_distinct": 12,
+       "enabled": true,
+       "motif_census": {
+        "N-F": 1
+       },
+       "pathological_eligible_distinct": 1,
+       "prune_pathological_parents": true,
+       "removed_examples": [
+        {
+         "motifs": [
+          "N-F"
+         ],
+         "smiles": "CCN(F)C(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+        }
+       ]
+      },
+      "distinct_eligible_scaffolds": 1,
+      "eligible_quality": {
+       "heavy_delta": {
+        "max": -7.0,
+        "mean": -11.33333,
+        "median": -12.0,
+        "min": -15.0,
+        "n": 12,
+        "p10": -14.0,
+        "p90": -8.0
+       },
+       "qed": {
+        "max": 0.79844,
+        "mean": 0.68261,
+        "median": 0.67575,
+        "min": 0.60718,
+        "n": 12,
+        "p10": 0.62378,
+        "p90": 0.79535
+       },
+       "sa": {
+        "max": 2.71951,
+        "mean": 2.26768,
+        "median": 2.30311,
+        "min": 1.86077,
+        "n": 12,
+        "p10": 1.90522,
+        "p90": 2.52524
+       },
+       "similarity": {
+        "max": 0.65574,
+        "mean": 0.61999,
+        "median": 0.61905,
+        "min": 0.6,
+        "n": 12,
+        "p10": 0.60317,
+        "p90": 0.64179
+       }
+      },
+      "eligible_witnesses": [
+       {
+        "heavy_delta": -15,
+        "mode": "prune",
+        "qed": 0.79844,
+        "sa": 1.86077,
+        "similarity": 0.62712,
+        "smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccccc2)ccn1"
+       },
+       {
+        "heavy_delta": -14,
+        "mode": "prune",
+        "qed": 0.79535,
+        "sa": 1.90522,
+        "similarity": 0.62295,
+        "smiles": "Cc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -12,
+        "mode": "replace",
+        "qed": 0.71123,
+        "sa": 2.29641,
+        "similarity": 0.60938,
+        "smiles": "C=CNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -12,
+        "mode": "replace",
+        "qed": 0.69633,
+        "sa": 2.25331,
+        "similarity": 0.60317,
+        "smiles": "O=COc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -11,
+        "mode": "replace",
+        "qed": 0.6869,
+        "sa": 2.30311,
+        "similarity": 0.6,
+        "smiles": "O=C(F)Cc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -12,
+        "mode": "replace",
+        "qed": 0.67575,
+        "sa": 2.19237,
+        "similarity": 0.61905,
+        "smiles": "O=CNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -12,
+        "mode": "replace",
+        "qed": 0.66096,
+        "sa": 2.71951,
+        "similarity": 0.6129,
+        "smiles": "O=[SH]Oc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -12,
+        "mode": "replace",
+        "qed": 0.65699,
+        "sa": 2.3613,
+        "similarity": 0.60938,
+        "smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccc(NC=S)cc2)ccn1"
+       },
+       {
+        "heavy_delta": -11,
+        "mode": "replace",
+        "qed": 0.65394,
+        "sa": 2.07139,
+        "similarity": 0.65574,
+        "smiles": "NC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -7,
+        "mode": "grow",
+        "qed": 0.62443,
+        "sa": 2.39273,
+        "similarity": 0.64179,
+        "smiles": "O=C(O)Cc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1C(F)(F)F"
+       },
+       {
+        "heavy_delta": -8,
+        "mode": "grow",
+        "qed": 0.62378,
+        "sa": 2.52524,
+        "similarity": 0.63235,
+        "smiles": "O=CCc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1C(F)(F)F"
+       },
+       {
+        "heavy_delta": -10,
+        "mode": "grow",
+        "qed": 0.60718,
+        "sa": 2.3308,
+        "similarity": 0.60606,
+        "smiles": "CCC(=S)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       }
+      ],
+      "funnel": {
+       "all_three_pass": 13,
+       "chemically_valid": 600,
+       "eligible": 12,
+       "endpoints": 600,
+       "qed_pass": 218,
+       "reached_gate": 560,
+       "sa_pass": 549,
+       "similarity_and_qed_pass": 13,
+       "similarity_pass": 104
+      },
+      "gate_reconstruction_disagreements": 0,
+      "margins": {
+       "delta_qed": {
+        "max": 0.29895,
+        "mean": -0.06126,
+        "median": -0.03795,
+        "min": -0.46338,
+        "n": 560,
+        "p10": -0.34546,
+        "p90": 0.1616
+       },
+       "delta_sa": {
+        "max": 2.31627,
+        "mean": 1.32597,
+        "median": 1.41431,
+        "min": -1.96637,
+        "n": 560,
+        "p10": 0.81386,
+        "p90": 1.7646
+       },
+       "delta_sim": {
+        "max": 0.4,
+        "mean": -0.13453,
+        "median": -0.12857,
+        "min": -0.53243,
+        "n": 560,
+        "p10": -0.36471,
+        "p90": 0.04789
+       }
+      },
+      "mode_census": {
+       "grow": 335,
+       "prune": 24,
+       "remodel": 0,
+       "replace": 240
+      },
+      "mode_census_eligible": {
+       "grow": 3,
+       "prune": 2,
+       "remodel": 0,
+       "replace": 7
+      },
+      "policy_contexts": 10,
+      "steps": 53
+     },
+     "v2_moveset_only": {
+      "arm": {
+       "budget": 600,
+       "chemistry_filter": true,
+       "conditioned_proposal": false,
+       "frozen": [],
+       "guided_selection": false,
+       "prune_pathological_parents": true,
+       "seed": 1
+      },
+      "chemistry_filter": {
+       "benchmark_eligible_distinct": 4,
+       "clean_eligible_distinct": 4,
+       "enabled": true,
+       "motif_census": {},
+       "pathological_eligible_distinct": 0,
+       "prune_pathological_parents": true,
+       "removed_examples": []
+      },
+      "distinct_eligible_scaffolds": 1,
+      "eligible_quality": {
+       "heavy_delta": {
+        "max": -11.0,
+        "mean": -13.0,
+        "median": -12.0,
+        "min": -15.0,
+        "n": 4,
+        "p10": -15.0,
+        "p90": -11.0
+       },
+       "qed": {
+        "max": 0.79844,
+        "mean": 0.71273,
+        "median": 0.72279,
+        "min": 0.65394,
+        "n": 4,
+        "p10": 0.65394,
+        "p90": 0.79844
+       },
+       "sa": {
+        "max": 2.19237,
+        "mean": 2.0353,
+        "median": 2.07139,
+        "min": 1.86077,
+        "n": 4,
+        "p10": 1.86077,
+        "p90": 2.19237
+       },
+       "similarity": {
+        "max": 0.65574,
+        "mean": 0.63121,
+        "median": 0.62712,
+        "min": 0.61905,
+        "n": 4,
+        "p10": 0.61905,
+        "p90": 0.65574
+       }
+      },
+      "eligible_witnesses": [
+       {
+        "heavy_delta": -15,
+        "mode": "prune",
+        "qed": 0.79844,
+        "sa": 1.86077,
+        "similarity": 0.62712,
+        "smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccccc2)ccn1"
+       },
+       {
+        "heavy_delta": -14,
+        "mode": "prune",
+        "qed": 0.72279,
+        "sa": 2.01666,
+        "similarity": 0.62295,
+        "smiles": "Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -12,
+        "mode": "prune",
+        "qed": 0.67575,
+        "sa": 2.19237,
+        "similarity": 0.61905,
+        "smiles": "O=CNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -11,
+        "mode": "prune",
+        "qed": 0.65394,
+        "sa": 2.07139,
+        "similarity": 0.65574,
+        "smiles": "NC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       }
+      ],
+      "funnel": {
+       "all_three_pass": 4,
+       "chemically_valid": 600,
+       "eligible": 4,
+       "endpoints": 600,
+       "qed_pass": 168,
+       "reached_gate": 532,
+       "sa_pass": 400,
+       "similarity_and_qed_pass": 4,
+       "similarity_pass": 99
+      },
+      "gate_reconstruction_disagreements": 0,
+      "margins": {
+       "delta_qed": {
+        "max": 0.309,
+        "mean": -0.15923,
+        "median": -0.23137,
+        "min": -0.53983,
+        "n": 532,
+        "p10": -0.42547,
+        "p90": 0.20032
+       },
+       "delta_sa": {
+        "max": 2.94508,
+        "mean": 0.92073,
+        "median": 1.20542,
+        "min": -1.36537,
+        "n": 532,
+        "p10": -0.42286,
+        "p90": 2.11681
+       },
+       "delta_sim": {
+        "max": 0.4,
+        "mean": -0.21688,
+        "median": -0.25263,
+        "min": -0.55775,
+        "n": 532,
+        "p10": -0.48636,
+        "p90": 0.13529
+       }
+      },
+      "mode_census": {
+       "grow": 252,
+       "prune": 48,
+       "remodel": 31,
+       "replace": 268
+      },
+      "mode_census_eligible": {
+       "grow": 0,
+       "prune": 4,
+       "remodel": 0,
+       "replace": 0
+      },
+      "policy_contexts": 1,
+      "steps": 57
+     },
+     "v2_unguided_selection": {
+      "arm": {
+       "budget": 600,
+       "chemistry_filter": true,
+       "conditioned_proposal": true,
+       "frozen": [],
+       "guided_selection": false,
+       "prune_pathological_parents": true,
+       "seed": 1
+      },
+      "chemistry_filter": {
+       "benchmark_eligible_distinct": 3,
+       "clean_eligible_distinct": 3,
+       "enabled": true,
+       "motif_census": {},
+       "pathological_eligible_distinct": 0,
+       "prune_pathological_parents": true,
+       "removed_examples": []
+      },
+      "distinct_eligible_scaffolds": 1,
+      "eligible_quality": {
+       "heavy_delta": {
+        "max": -11.0,
+        "mean": -12.33333,
+        "median": -12.0,
+        "min": -14.0,
+        "n": 3,
+        "p10": -14.0,
+        "p90": -11.0
+       },
+       "qed": {
+        "max": 0.72279,
+        "mean": 0.68416,
+        "median": 0.67575,
+        "min": 0.65394,
+        "n": 3,
+        "p10": 0.65394,
+        "p90": 0.72279
+       },
+       "sa": {
+        "max": 2.19237,
+        "mean": 2.09347,
+        "median": 2.07139,
+        "min": 2.01666,
+        "n": 3,
+        "p10": 2.01666,
+        "p90": 2.19237
+       },
+       "similarity": {
+        "max": 0.65574,
+        "mean": 0.63258,
+        "median": 0.62295,
+        "min": 0.61905,
+        "n": 3,
+        "p10": 0.61905,
+        "p90": 0.65574
+       }
+      },
+      "eligible_witnesses": [
+       {
+        "heavy_delta": -14,
+        "mode": "prune",
+        "qed": 0.72279,
+        "sa": 2.01666,
+        "similarity": 0.62295,
+        "smiles": "Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -12,
+        "mode": "prune",
+        "qed": 0.67575,
+        "sa": 2.19237,
+        "similarity": 0.61905,
+        "smiles": "O=CNc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       },
+       {
+        "heavy_delta": -11,
+        "mode": "prune",
+        "qed": 0.65394,
+        "sa": 2.07139,
+        "similarity": 0.65574,
+        "smiles": "NC(=O)Nc1ccc(Oc2ccnc(C(=O)Nc3cccnc3)c2)cc1"
+       }
+      ],
+      "funnel": {
+       "all_three_pass": 3,
+       "chemically_valid": 600,
+       "eligible": 3,
+       "endpoints": 600,
+       "qed_pass": 28,
+       "reached_gate": 483,
+       "sa_pass": 343,
+       "similarity_and_qed_pass": 3,
+       "similarity_pass": 151
+      },
+      "gate_reconstruction_disagreements": 0,
+      "margins": {
+       "delta_qed": {
+        "max": 0.24243,
+        "mean": -0.29921,
+        "median": -0.32994,
+        "min": -0.53884,
+        "n": 483,
+        "p10": -0.45571,
+        "p90": -0.11844
+       },
+       "delta_sa": {
+        "max": 2.29297,
+        "mean": 0.4942,
+        "median": 0.23901,
+        "min": -1.24641,
+        "n": 483,
+        "p10": -0.25764,
+        "p90": 1.52956
+       },
+       "delta_sim": {
+        "max": 0.4,
+        "mean": -0.06464,
+        "median": -0.08148,
+        "min": -0.5359,
+        "n": 483,
+        "p10": -0.25625,
+        "p90": 0.16923
+       }
+      },
+      "mode_census": {
+       "grow": 247,
+       "prune": 57,
+       "remodel": 89,
+       "replace": 206
+      },
+      "mode_census_eligible": {
+       "grow": 0,
+       "prune": 3,
+       "remodel": 0,
+       "replace": 0
+      },
+      "policy_contexts": 12,
+      "steps": 73
+     }
+    },
+    "attribution": {
+     "attribution": "retained_region",
+     "regions_feasible_before_repair": 4,
+     "regions_qed_passing": 11,
+     "regions_similarity_passing": 10,
+     "single_cut_regions": 21,
+     "source_smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+     "v1_endpoint_sample": 29,
+     "v1_endpoints_at_witness_scale": 8,
+     "v1_max_region_overlap": 0.80435,
+     "v1_max_region_overlap_at_witness_scale": 0.80435,
+     "v1_max_similarity_among_qed_passing": 0.65,
+     "v1_reproduced_witness": false,
+     "witness": {
+      "qed": 0.79844,
+      "qed_gain": 0.5439,
+      "qed_gain_per_similarity_cost": 1.45865,
+      "qed_ok": true,
+      "removed_heavy": 15,
+      "repairs": 0,
+      "sa": 1.86077,
+      "sa_ok": true,
+      "sim_ok": true,
+      "similarity": 0.62712,
+      "similarity_cost": 0.37288,
+      "smiles": "O=C(Nc1cccnc1)c1cc(Oc2ccccc2)ccn1"
+     },
+     "witness_heavy_delta": -15,
+     "witness_similarity": 0.62712
+    },
+    "cell": "braf_2",
+    "delta": 0.6,
+    "elapsed_seconds": 53.82,
+    "h_component_freeze": {
+     "qed": {
+      "all_three_pass": 15,
+      "chemically_valid": 600,
+      "eligible": 15,
+      "endpoints": 600,
+      "qed_pass": 380,
+      "reached_gate": 586,
+      "sa_pass": 579,
+      "similarity_and_qed_pass": 15,
+      "similarity_pass": 84
+     },
+     "sa": {
+      "all_three_pass": 6,
+      "chemically_valid": 600,
+      "eligible": 6,
+      "endpoints": 600,
+      "qed_pass": 319,
+      "reached_gate": 579,
+      "sa_pass": 468,
+      "similarity_and_qed_pass": 6,
+      "similarity_pass": 90
+     },
+     "sim": {
+      "all_three_pass": 3,
+      "chemically_valid": 600,
+      "eligible": 3,
+      "endpoints": 600,
+      "qed_pass": 160,
+      "reached_gate": 569,
+      "sa_pass": 424,
+      "similarity_and_qed_pass": 3,
+      "similarity_pass": 109
+     },
+     "size": {
+      "all_three_pass": 15,
+      "chemically_valid": 600,
+      "eligible": 15,
+      "endpoints": 600,
+      "qed_pass": 209,
+      "reached_gate": 557,
+      "sa_pass": 548,
+      "similarity_and_qed_pass": 15,
+      "similarity_pass": 132
+     }
+    },
+    "observed_status": "searching",
+    "slot_preflight": {
+     "free_slots_in_padded_source": 11,
+     "heavy_atoms": 37,
+     "padded_graph_slots": 48,
+     "passed": true,
+     "tight_graph_slots": 37,
+     "tight_graph_would_forbid_atom_birth": true
+    },
+    "source": {
+     "formal_charge": 0,
+     "headroom_heavy_atoms": 3,
+     "heavy": 37,
+     "qed": 0.25454,
+     "rings": 4,
+     "sa": 2.38238,
+     "source_qed_margin": -0.34546,
+     "source_sa_margin": 1.61762
+    },
+    "source_smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+    "v1": {
+     "all_three_pass": 3,
+     "chemically_valid": 5303,
+     "eligible": 3,
+     "endpoints": 7420,
+     "qed_pass": 63,
+     "reached_gate": 5303,
+     "sa_pass": 4706,
+     "similarity_and_qed_pass": 3,
+     "similarity_pass": 1373
+    },
+    "v1_reference_delta": 0.6
+   },
+   "fa7_0": {
+    "arms": {
+     "v2_blind_proposal": {
+      "arm": {
+       "budget": 600,
+       "chemistry_filter": true,
+       "conditioned_proposal": false,
+       "frozen": [],
+       "guided_selection": true,
+       "prune_pathological_parents": true,
+       "seed": 1
+      },
+      "chemistry_filter": {
+       "benchmark_eligible_distinct": 2,
+       "clean_eligible_distinct": 2,
+       "enabled": true,
+       "motif_census": {},
+       "pathological_eligible_distinct": 0,
+       "prune_pathological_parents": true,
+       "removed_examples": []
+      },
+      "distinct_eligible_scaffolds": 1,
+      "eligible_quality": {
+       "heavy_delta": {
+        "max": -8.0,
+        "mean": -8.5,
+        "median": -9.0,
+        "min": -9.0,
+        "n": 2,
+        "p10": -9.0,
+        "p90": -8.0
+       },
+       "qed": {
+        "max": 0.63275,
+        "mean": 0.61789,
+        "median": 0.60302,
+        "min": 0.60302,
+        "n": 2,
+        "p10": 0.60302,
+        "p90": 0.63275
+       },
+       "sa": {
+        "max": 2.4672,
+        "mean": 2.3665,
+        "median": 2.2658,
+        "min": 2.2658,
+        "n": 2,
+        "p10": 2.2658,
+        "p90": 2.4672
+       },
+       "similarity": {
+        "max": 0.69643,
+        "mean": 0.67872,
+        "median": 0.66102,
+        "min": 0.66102,
+        "n": 2,
+        "p10": 0.66102,
+        "p90": 0.69643
+       }
+      },
+      "eligible_witnesses": [
+       {
+        "heavy_delta": -9,
+        "mode": "replace",
+        "qed": 0.63275,
+        "sa": 2.2658,
+        "similarity": 0.69643,
+        "smiles": "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+       },
+       {
+        "heavy_delta": -8,
+        "mode": "grow",
+        "qed": 0.60302,
+        "sa": 2.4672,
+        "similarity": 0.66102,
+        "smiles": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)CF"
+       }
+      ],
+      "funnel": {
+       "all_three_pass": 2,
+       "chemically_valid": 600,
+       "eligible": 2,
+       "endpoints": 600,
+       "qed_pass": 174,
+       "reached_gate": 600,
+       "sa_pass": 570,
+       "similarity_and_qed_pass": 2,
+       "similarity_pass": 97
+      },
+      "gate_reconstruction_disagreements": 0,
+      "margins": {
+       "delta_qed": {
+        "max": 0.32274,
+        "mean": -0.09982,
+        "median": -0.1314,
+        "min": -0.46292,
+        "n": 600,
+        "p10": -0.37082,
+        "p90": 0.23094
+       },
+       "delta_sa": {
+        "max": 2.35768,
+        "mean": 0.99883,
+        "median": 1.03403,
+        "min": -1.46409,
+        "n": 600,
+        "p10": 0.31536,
+        "p90": 1.68038
+       },
+       "delta_sim": {
+        "max": 0.4,
+        "mean": -0.1168,
+        "median": -0.13333,
+        "min": -0.53103,
+        "n": 600,
+        "p10": -0.26154,
+        "p90": 0.0875
+       }
+      },
+      "mode_census": {
+       "grow": 237,
+       "prune": 25,
+       "remodel": 38,
+       "replace": 299
+      },
+      "mode_census_eligible": {
+       "grow": 1,
+       "prune": 0,
+       "remodel": 0,
+       "replace": 1
+      },
+      "policy_contexts": 1,
+      "steps": 59
+     },
+     "v2_full": {
+      "arm": {
+       "budget": 600,
+       "chemistry_filter": true,
+       "conditioned_proposal": true,
+       "frozen": [],
+       "guided_selection": true,
+       "prune_pathological_parents": true,
+       "seed": 1
+      },
+      "chemistry_filter": {
+       "benchmark_eligible_distinct": 3,
+       "clean_eligible_distinct": 1,
+       "enabled": true,
+       "motif_census": {
+        "O-Cl": 1,
+        "O-F": 1
+       },
+       "pathological_eligible_distinct": 2,
+       "prune_pathological_parents": true,
+       "removed_examples": [
+        {
+         "motifs": [
+          "O-F"
+         ],
+         "smiles": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)OF"
+        },
+        {
+         "motifs": [
+          "O-Cl"
+         ],
+         "smiles": "CC(C)CCN(Cc1ccc2ccc(C(=N)N)cc2c1)C(=O)OCl"
+        }
+       ]
+      },
+      "distinct_eligible_scaffolds": 1,
+      "eligible_quality": {
+       "heavy_delta": {
+        "max": -8.0,
+        "mean": -8.0,
+        "median": -8.0,
+        "min": -8.0,
+        "n": 1,
+        "p10": -8.0,
+        "p90": -8.0
+       },
+       "qed": {
+        "max": 0.62637,
+        "mean": 0.62637,
+        "median": 0.62637,
+        "min": 0.62637,
+        "n": 1,
+        "p10": 0.62637,
+        "p90": 0.62637
+       },
+       "sa": {
+        "max": 2.33098,
+        "mean": 2.33098,
+        "median": 2.33098,
+        "min": 2.33098,
+        "n": 1,
+        "p10": 2.33098,
+        "p90": 2.33098
+       },
+       "similarity": {
+        "max": 0.66102,
+        "mean": 0.66102,
+        "median": 0.66102,
+        "min": 0.66102,
+        "n": 1,
+        "p10": 0.66102,
+        "p90": 0.66102
+       }
+      },
+      "eligible_witnesses": [
+       {
+        "heavy_delta": -8,
+        "mode": "grow",
+        "qed": 0.62637,
+        "sa": 2.33098,
+        "similarity": 0.66102,
+        "smiles": "COC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+       }
+      ],
+      "funnel": {
+       "all_three_pass": 3,
+       "chemically_valid": 600,
+       "eligible": 1,
+       "endpoints": 600,
+       "qed_pass": 110,
+       "reached_gate": 600,
+       "sa_pass": 574,
+       "similarity_and_qed_pass": 3,
+       "similarity_pass": 141
+      },
+      "gate_reconstruction_disagreements": 0,
+      "margins": {
+       "delta_qed": {
+        "max": 0.34627,
+        "mean": -0.1702,
+        "median": -0.19409,
+        "min": -0.46422,
+        "n": 600,
+        "p10": -0.37985,
+        "p90": 0.10859
+       },
+       "delta_sa": {
+        "max": 3.0,
+        "mean": 1.13929,
+        "median": 1.21108,
+        "min": -1.78924,
+        "n": 600,
+        "p10": 0.44668,
+        "p90": 1.78891
+       },
+       "delta_sim": {
+        "max": 0.4,
+        "mean": -0.11858,
+        "median": -0.12632,
+        "min": -0.6,
+        "n": 600,
+        "p10": -0.32059,
+        "p90": 0.12059
+       }
+      },
+      "mode_census": {
+       "grow": 266,
+       "prune": 47,
+       "remodel": 47,
+       "replace": 239
+      },
+      "mode_census_eligible": {
+       "grow": 1,
+       "prune": 0,
+       "remodel": 0,
+       "replace": 0
+      },
+      "policy_contexts": 16,
+      "steps": 69
+     },
+     "v2_moveset_only": {
+      "arm": {
+       "budget": 600,
+       "chemistry_filter": true,
+       "conditioned_proposal": false,
+       "frozen": [],
+       "guided_selection": false,
+       "prune_pathological_parents": true,
+       "seed": 1
+      },
+      "chemistry_filter": {
+       "benchmark_eligible_distinct": 0,
+       "clean_eligible_distinct": 0,
+       "enabled": true,
+       "motif_census": {},
+       "pathological_eligible_distinct": 0,
+       "prune_pathological_parents": true,
+       "removed_examples": []
+      },
+      "distinct_eligible_scaffolds": 0,
+      "eligible_quality": {
+       "heavy_delta": null,
+       "qed": null,
+       "sa": null,
+       "similarity": null
+      },
+      "eligible_witnesses": [],
+      "funnel": {
+       "all_three_pass": 0,
+       "chemically_valid": 600,
+       "eligible": 0,
+       "endpoints": 600,
+       "qed_pass": 109,
+       "reached_gate": 600,
+       "sa_pass": 521,
+       "similarity_and_qed_pass": 0,
+       "similarity_pass": 34
+      },
+      "gate_reconstruction_disagreements": 0,
+      "margins": {
+       "delta_qed": {
+        "max": 0.31243,
+        "mean": -0.19182,
+        "median": -0.24347,
+        "min": -0.52228,
+        "n": 600,
+        "p10": -0.42436,
+        "p90": 0.21424
+       },
+       "delta_sa": {
+        "max": 3.0,
+        "mean": 0.76158,
+        "median": 0.75048,
+        "min": -1.47133,
+        "n": 600,
+        "p10": -0.15303,
+        "p90": 1.71277
+       },
+       "delta_sim": {
+        "max": 0.4,
+        "mean": -0.24869,
+        "median": -0.26667,
+        "min": -0.58333,
+        "n": 600,
+        "p10": -0.39268,
+        "p90": -0.07143
+       }
+      },
+      "mode_census": {
+       "grow": 179,
+       "prune": 74,
+       "remodel": 33,
+       "replace": 313
+      },
+      "mode_census_eligible": {
+       "grow": 0,
+       "prune": 0,
+       "remodel": 0,
+       "replace": 0
+      },
+      "policy_contexts": 1,
+      "steps": 67
+     },
+     "v2_unguided_selection": {
+      "arm": {
+       "budget": 600,
+       "chemistry_filter": true,
+       "conditioned_proposal": true,
+       "frozen": [],
+       "guided_selection": false,
+       "prune_pathological_parents": true,
+       "seed": 1
+      },
+      "chemistry_filter": {
+       "benchmark_eligible_distinct": 0,
+       "clean_eligible_distinct": 0,
+       "enabled": true,
+       "motif_census": {},
+       "pathological_eligible_distinct": 0,
+       "prune_pathological_parents": true,
+       "removed_examples": []
+      },
+      "distinct_eligible_scaffolds": 0,
+      "eligible_quality": {
+       "heavy_delta": null,
+       "qed": null,
+       "sa": null,
+       "similarity": null
+      },
+      "eligible_witnesses": [],
+      "funnel": {
+       "all_three_pass": 0,
+       "chemically_valid": 600,
+       "eligible": 0,
+       "endpoints": 600,
+       "qed_pass": 64,
+       "reached_gate": 589,
+       "sa_pass": 441,
+       "similarity_and_qed_pass": 0,
+       "similarity_pass": 38
+      },
+      "gate_reconstruction_disagreements": 0,
+      "margins": {
+       "delta_qed": {
+        "max": 0.29508,
+        "mean": -0.2666,
+        "median": -0.32594,
+        "min": -0.48035,
+        "n": 589,
+        "p10": -0.40145,
+        "p90": 0.01369
+       },
+       "delta_sa": {
+        "max": 3.0,
+        "mean": 0.35943,
+        "median": 0.37335,
+        "min": -1.86161,
+        "n": 589,
+        "p10": -0.79651,
+        "p90": 1.29621
+       },
+       "delta_sim": {
+        "max": 0.4,
+        "mean": -0.25799,
+        "median": -0.27416,
+        "min": -0.55775,
+        "n": 589,
+        "p10": -0.41818,
+        "p90": -0.07826
+       }
+      },
+      "mode_census": {
+       "grow": 194,
+       "prune": 49,
+       "remodel": 115,
+       "replace": 241
+      },
+      "mode_census_eligible": {
+       "grow": 0,
+       "prune": 0,
+       "remodel": 0,
+       "replace": 0
+      },
+      "policy_contexts": 15,
+      "steps": 58
+     }
+    },
+    "attribution": {
+     "attribution": "not_expressible_within_probe",
+     "note": "no single-cut region plus <=2 repairs reached feasibility; this bounds the probe, not the fiber",
+     "regions_feasible_before_repair": 0,
+     "regions_qed_passing": 2,
+     "regions_similarity_passing": 5,
+     "single_cut_regions": 15,
+     "source_smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+     "v1_endpoint_sample": 31,
+     "witness": null
+    },
+    "cell": "fa7_0",
+    "delta": 0.6,
+    "elapsed_seconds": 127.56,
+    "h_component_freeze": {
+     "qed": {
+      "all_three_pass": 1,
+      "chemically_valid": 600,
+      "eligible": 1,
+      "endpoints": 600,
+      "qed_pass": 298,
+      "reached_gate": 600,
+      "sa_pass": 587,
+      "similarity_and_qed_pass": 1,
+      "similarity_pass": 121
+     },
+     "sa": {
+      "all_three_pass": 1,
+      "chemically_valid": 600,
+      "eligible": 1,
+      "endpoints": 600,
+      "qed_pass": 98,
+      "reached_gate": 600,
+      "sa_pass": 588,
+      "similarity_and_qed_pass": 1,
+      "similarity_pass": 108
+     },
+     "sim": {
+      "all_three_pass": 0,
+      "chemically_valid": 600,
+      "eligible": 0,
+      "endpoints": 600,
+      "qed_pass": 172,
+      "reached_gate": 587,
+      "sa_pass": 469,
+      "similarity_and_qed_pass": 0,
+      "similarity_pass": 177
+     },
+     "size": {
+      "all_three_pass": 7,
+      "chemically_valid": 600,
+      "eligible": 7,
+      "endpoints": 600,
+      "qed_pass": 161,
+      "reached_gate": 600,
+      "sa_pass": 583,
+      "similarity_and_qed_pass": 7,
+      "similarity_pass": 130
+     }
+    },
+    "observed_status": "candidate_exhaustion",
+    "slot_preflight": {
+     "free_slots_in_padded_source": 16,
+     "heavy_atoms": 32,
+     "padded_graph_slots": 48,
+     "passed": true,
+     "tight_graph_slots": 32,
+     "tight_graph_would_forbid_atom_birth": true
+    },
+    "source": {
+     "formal_charge": 0,
+     "headroom_heavy_atoms": 8,
+     "heavy": 32,
+     "qed": 0.2841,
+     "rings": 4,
+     "sa": 2.28723,
+     "source_qed_margin": -0.3159,
+     "source_sa_margin": 1.71277
+    },
+    "source_smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+    "v1": {
+     "all_three_pass": 0,
+     "chemically_valid": 7289,
+     "eligible": 0,
+     "endpoints": 9527,
+     "qed_pass": 160,
+     "reached_gate": 7289,
+     "sa_pass": 5653,
+     "similarity_and_qed_pass": 0,
+     "similarity_pass": 1537
+    },
+    "v1_reference_delta": 0.6
+   }
+  },
+  "chemistry_filter": true,
+  "delta": 0.6,
+  "prune_pathological_parents": true,
+  "schema_version": "t4_v2_feasibility_controller_v1",
+  "seed": 1
+ },
+ "timing": {
+  "cells": 2,
+  "per_cell_seconds": {
+   "braf_2": 53.82,
+   "fa7_0": 127.56
+  },
+  "stage": "baseline_serial_local",
+  "wall_seconds": 181.38
+ },
+ "workload": "t4_v2_feasibility",
+ "zero_oracle_evidence": {
+  "docking_calls": 0,
+  "forbidden_binaries_present": [],
+  "forbidden_modules_imported": [],
+  "oracle_calls": 0
+ }
+}

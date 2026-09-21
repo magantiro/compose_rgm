@@ -275,7 +275,37 @@ def run_unit(
             print(f"[unit:resume] {item['unit_id']} already on the volume", flush=True)
             return existing
 
-    row = workloads.execute_item(item)
+    try:
+        row = workloads.execute_item(item)
+        row["ok"] = True
+    except BaseException as error:  # noqa: BLE001 - a bad unit must not kill the map
+        # One unit that cannot be computed must not destroy the other 107.  RDKit raises
+        # C++ invariant violations as RuntimeError from inside MolToSmiles, and an
+        # uncaught one aborts the whole .map -- the "lost at the very end" failure mode
+        # in a different costume.  The failure is RECORDED, never silenced: it lands on
+        # the volume like any other row and the reducer refuses to present the merged
+        # artifact as complete.
+        import traceback
+
+        row = {
+            "unit_id": item["unit_id"],
+            "workload": item["workload"],
+            "kind": item["kind"],
+            "cell": item.get("cell"),
+            "arm": item.get("arm"),
+            "component": item.get("component"),
+            "payload": None,
+            "ok": False,
+            "error_type": type(error).__name__,
+            "error": str(error)[:4000],
+            "traceback": traceback.format_exc()[-4000:],
+            "wall_seconds": round(time.time() - started, 3),
+        }
+        print(
+            f"[unit:FAILED] {item['unit_id']} {row['error_type']}: "
+            f"{row['error'][:200]}",
+            flush=True,
+        )
     row["run_id"] = run_id
     row["source_commit"] = commit
     row["container_uuid"] = CONTAINER_UUID
@@ -316,15 +346,50 @@ def reduce_run(run_id: str, workload_name: str, plan: list[dict], meta: dict) ->
     print(f"[reduce] {len(rows)} unit rows for {len(plan)} planned units", flush=True)
 
     definition = workloads.workload(workload_name)
-    merged = definition["reduce"](plan, rows)
+    succeeded = [row for row in rows if row.get("ok", True)]
+    failed = [row for row in rows if not row.get("ok", True)]
+    done = {row["unit_id"] for row in succeeded}
+    # Reduce over what actually computed, and say so at the top of the artifact.  A
+    # partial artifact that does not announce itself is worse than no artifact.
+    effective_plan = [item for item in plan if item["unit_id"] in done]
+    missing = [item for item in plan if item["unit_id"] not in done]
+    merged = definition["reduce"](effective_plan, succeeded)
+    merged["complete"] = not missing
+    merged["missing_units"] = [
+        {
+            "unit_id": item["unit_id"],
+            "kind": item["kind"],
+            "cell": item.get("cell"),
+            "arm": item.get("arm"),
+            "component": item.get("component"),
+        }
+        for item in missing
+    ]
+    if failed:
+        print(f"[reduce] {len(failed)} unit(s) FAILED", flush=True)
 
     unit_seconds = sum(float(row.get("wall_seconds") or 0.0) for row in rows)
+    failure_rows = [
+        {
+            "unit_id": row["unit_id"],
+            "kind": row.get("kind"),
+            "cell": row.get("cell"),
+            "arm": row.get("arm"),
+            "component": row.get("component"),
+            "error_type": row.get("error_type"),
+            "error": (row.get("error") or "")[:600],
+        }
+        for row in failed
+    ]
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "workload": workload_name,
         "run_id": run_id,
         "planned_units": len(plan),
-        "completed_units": len(rows),
+        "completed_units": len(succeeded),
+        "failed_units": len(failed),
+        "failures": failure_rows,
+        "artifact_complete": not missing,
         "unit_seconds_total": round(unit_seconds, 2),
         "unit_seconds_mean": round(unit_seconds / max(len(rows), 1), 2),
         "unit_seconds_max": round(

@@ -1,0 +1,112 @@
+{
+ "artifact_complete": false,
+ "completed_units": 100,
+ "distinct_containers": 32,
+ "docking_calls": 0,
+ "failed_units": 8,
+ "failures": [
+  {
+   "arm": "v2_moveset_only",
+   "cell": "parp1_2",
+   "component": null,
+   "error": "Invariant Violation\n\tcould not find atom2\n\tViolation occurred on line 223 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom2\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+   "error_type": "RuntimeError",
+   "kind": "arm",
+   "unit_id": "08b6e119a1af6b0d1277fb98"
+  },
+  {
+   "arm": "v2_blind_proposal",
+   "cell": "parp1_2",
+   "component": null,
+   "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+   "error_type": "RuntimeError",
+   "kind": "arm",
+   "unit_id": "0c2ec7ded2427c05876ee937"
+  },
+  {
+   "arm": null,
+   "cell": "parp1_2",
+   "component": "size",
+   "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+   "error_type": "RuntimeError",
+   "kind": "freeze",
+   "unit_id": "269bfca6caec979c1782a931"
+  },
+  {
+   "arm": null,
+   "cell": "parp1_2",
+   "component": "sim",
+   "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+   "error_type": "RuntimeError",
+   "kind": "freeze",
+   "unit_id": "6e915eb08d6658370c9d7a7f"
+  },
+  {
+   "arm": null,
+   "cell": "parp1_2",
+   "component": "sa",
+   "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+   "error_type": "RuntimeError",
+   "kind": "freeze",
+   "unit_id": "794aa0286e2916d136de28ff"
+  },
+  {
+   "arm": null,
+   "cell": "parp1_2",
+   "component": "qed",
+   "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+   "error_type": "RuntimeError",
+   "kind": "freeze",
+   "unit_id": "c2b8ed722e109b2eb1011f2a"
+  },
+  {
+   "arm": "v2_unguided_selection",
+   "cell": "parp1_2",
+   "component": null,
+   "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+   "error_type": "RuntimeError",
+   "kind": "arm",
+   "unit_id": "f04c114bc85a383715ab0751"
+  },
+  {
+   "arm": "v2_full",
+   "cell": "parp1_2",
+   "component": null,
+   "error": "Invariant Violation\n\tcould not find atom1\n\tViolation occurred on line 222 in file Code/GraphMol/Canon.cpp\n\tFailed Expression: firstFromAtom1\n\tRDKIT: 2024.03.5\n\tBOOST: 1_85\n",
+   "error_type": "RuntimeError",
+   "kind": "arm",
+   "unit_id": "fe24573444bada678ed9c91d"
+  }
+ ],
+ "merged_identity_sha256": "cb6ac40958de8c10af48411e1fb0680a0401acf2b76b6f559492e066b44ac3fa",
+ "meta": {
+  "block_network": true,
+  "buffer_containers": 0,
+  "map_container_seconds": 4068.64,
+  "map_wall_seconds": 246.13,
+  "max_containers": 32,
+  "min_containers": 32,
+  "parameters": {
+   "ablate": true,
+   "arms": [],
+   "attribution": true,
+   "budget": 6000,
+   "cells": [],
+   "delta": 0.6,
+   "granularity": "arm",
+   "seed": 1
+  },
+  "resume_enabled": false,
+  "source_commit": "625f77a285df81aed4b143b3f0b2a6885063f490"
+ },
+ "oracle_calls": 0,
+ "planned_units": 108,
+ "resumed_units": 0,
+ "run_id": "t4_v2_feasibility/58d1c4b70c7950e6e052",
+ "schema_version": "zero_oracle_chemistry_fanout_v1",
+ "unit_seconds_max": 182.03,
+ "unit_seconds_mean": 37.67,
+ "unit_seconds_total": 4068.64,
+ "workload": "t4_v2_feasibility",
+ "zero_oracle_violations": []
+}

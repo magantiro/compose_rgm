@@ -1,0 +1,36 @@
+{
+ "completed_units": 1,
+ "distinct_containers": 1,
+ "docking_calls": 0,
+ "merged_identity_sha256": "9744492ee4970e3839522831fcd17c246f0b2c8e0f9a206f4bbd453b755b8d63",
+ "meta": {
+  "block_network": true,
+  "map_container_seconds": 4.03,
+  "map_wall_seconds": 29.92,
+  "max_containers": 2,
+  "parameters": {
+   "ablate": true,
+   "arms": [
+    "v2_moveset_only"
+   ],
+   "attribution": true,
+   "budget": 600,
+   "cells": [
+    "fa7_0"
+   ],
+   "delta": 0.6,
+   "granularity": "arm",
+   "seed": 1
+  },
+  "source_commit": "c005900b581c17fe09cd984bac89857081cf2747"
+ },
+ "oracle_calls": 0,
+ "planned_units": 1,
+ "run_id": "t4_v2_trajectory_trace/a780562914bea4fc04d2",
+ "schema_version": "zero_oracle_chemistry_fanout_v1",
+ "unit_seconds_max": 4.03,
+ "unit_seconds_mean": 4.03,
+ "unit_seconds_total": 4.03,
+ "workload": "t4_v2_trajectory_trace",
+ "zero_oracle_violations": []
+}

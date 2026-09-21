@@ -1,0 +1,27 @@
+{
+ "cells_compared": 2,
+ "cells_identical": 1,
+ "first_difference": "$.cells.fa7_0.arms.v2_blind_proposal.funnel.sa_pass: 571 vs 570",
+ "identical": false,
+ "left_sha256": "de48a751a230f9b0cc15728225781a204b741a15941784697dd43adc20ef6502",
+ "per_cell": {
+  "braf_2": {
+   "first_difference": null,
+   "identical": true,
+   "left_sha256": "28544da16969ff2b98cb7c14d9fa1283de173b8f27b87bac063ed3a241dc89e9",
+   "right_sha256": "28544da16969ff2b98cb7c14d9fa1283de173b8f27b87bac063ed3a241dc89e9"
+  },
+  "fa7_0": {
+   "first_difference": "$.cells.fa7_0.arms.v2_blind_proposal.funnel.sa_pass: 571 vs 570",
+   "identical": false,
+   "left_sha256": "4b88ba23632f0d3bf5ee7a09ef693a4735d8dffe6bf71d5c797997ff373279b4",
+   "right_sha256": "481034022ffb759559a863799b36824136ba7e7bdca3ad5d9ed69514608e1ea8"
+  }
+ },
+ "right_sha256": "35b99dec812b2b535566a91c186f592053b63d21be1d1bb3282355d291461e02",
+ "timing_fields_excluded": [
+  "elapsed_seconds",
+  "wall_seconds",
+  "seconds_per_1k_proposals"
+ ]
+}
