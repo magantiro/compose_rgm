@@ -1,0 +1,18 @@
+{
+  "schema": "compose_fragment_conditioning_instance_v1",
+  "upstream": {
+    "repo": "invirtuolabs/InVirtuoGen_results",
+    "commit": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "path": "references/fragments.csv",
+    "sha256": "43db9adbcf7f8895be6197bccdf729517c4433b7fdbf637f413fa9c8055c3a31"
+  },
+  "repo_manifest": "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv",
+  "drugs_checked": 10,
+  "cells_checked": 50,
+  "mismatches": 0,
+  "findings": [],
+  "protocol_deltas": {
+    "superstructure_attach_point_randomization": "Upstream downstream.py wraps this same core in list_individual_attach_points(core, depth=2) and draws one variant per sample with random.choice from the UNSEEDED global random module. COMPOSE conditions on the bare core and does not pin growth positions. Same input molecule, different prompt decoration; upstream's own draw is not reproducible.",
+    "scaffold_morphing": "Upstream copies the linker_design result into scaffold_morphing rather than running a separate task; we do the same."
+  }
+}

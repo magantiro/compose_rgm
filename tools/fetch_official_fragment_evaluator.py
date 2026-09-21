@@ -54,6 +54,12 @@ OFFICIAL_BLOBS: dict[str, tuple[str, str]] = {
         "references/reference_metrics.csv",
         "e75676431628987d3d0bacbafc3028ffd7ebc8d797ecb03fb386b13a453823f9",
     ),
+    # The CONDITIONING INSTANCES themselves.  downstream.py reads the
+    # superstructure inputs from this file, not from frags_downstream.csv.
+    "references/fragments.csv": (
+        "references/fragments.csv",
+        "43db9adbcf7f8895be6197bccdf729517c4433b7fdbf637f413fa9c8055c3a31",
+    ),
 }
 
 _STUB_TOKENIZE = '''"""Stub. Unreachable when evaluate_smiles(already_smiles=True)."""
