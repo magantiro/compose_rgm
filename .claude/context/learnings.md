@@ -1808,6 +1808,25 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   was ALREADY stale on four files at the branch base `4cfd398d` -- a superseded v1
   contract, unrelated to either change. Measured by re-running at the merge commit and
   by hashing the base revision's own blobs, not inferred from the diff.
+- **SCOPING, MEASURED: the region law neither reaches nor SUPPRESSES the micro-edit
+  witness pool.** Two disjoint witness pools are known for these cells -- large
+  bridge-separated excisions (7-15 heavy atoms) and plus-or-minus-one-atom edits of an
+  existing endpoint. Enumerating the law's support on the real sources: size-1 regions
+  number **8 (braf_0), 5 (fa7_0), 9 (fa7_2) under BOTH v1 and the repair** -- identical,
+  because v1's eight-atom cap only removes LARGE regions, and the repair's support floor
+  keeps every drawable region strictly positive. So the micro shape was always drawable
+  and still is. What the repair changes is RANK: braf_0's only two one-module eligible
+  children are 14- and 15-atom excisions (sim 0.632/QED 0.635/SA 2.41 and
+  0.616/0.719/2.22), and the conditioned tilt puts them at ranks **1 and 2 of 42**.
+  **No micro excision is eligible in ONE module on any of the three cells** (0 of 42, 26,
+  38), so the plus-or-minus-one-atom pool is reached -- if at all -- through families the
+  law does not touch (`atom_insert`/`atom_delete`/`functionalize`/`restate`), which are
+  byte-identical between arms. CONSEQUENCE: for a cell whose only in-ball rescue is a
+  one-atom edit of a DESCENDANT, wiring the region law changes nothing in the region
+  draw, and takes nothing away either. State that scope before the rescue, not after.
+- **fa7_0 and fa7_2 have ZERO one-module eligible children even under the repair**, while
+  braf_0 has two. A rank improvement measured over a multi-draw closure is not the same
+  claim as a one-module witness; do not let the first stand in for the second.
 - **`git worktree add` + `git merge FETCH_HEAD`:** `git merge origin/<branch>` fails with
   "not something we can merge" in a fresh worktree whose remote refs were not fetched
   into that name; `git fetch origin <branch>` then `git merge FETCH_HEAD` works. The only
