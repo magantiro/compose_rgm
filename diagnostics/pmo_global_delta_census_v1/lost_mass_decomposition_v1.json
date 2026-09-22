@@ -1,0 +1,178 @@
+{
+ "average_attribution": {
+  "completion_content": {
+   "mean_removed": 0.254,
+   "share": 0.2751
+  },
+  "region_selection": {
+   "mean_removed": 0.238,
+   "share": 0.2577
+  },
+  "scale": {
+   "mean_removed": 0.4313,
+   "share": 0.4672
+  }
+ },
+ "axes": {
+  "completion_content": "installed_region_has_ring",
+  "region_selection": "n_anchor_groups",
+  "scale": "largest_changed_region"
+ },
+ "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
+ "marginal": {
+  "CONTROLLER proposals (charged)": {
+   "completion_content": 0.4189,
+   "n": 2583,
+   "region_selection": 0.4615,
+   "scale": 0.1955
+  },
+  "NULL random drug-like pair": {
+   "completion_content": 0.795,
+   "n": 400,
+   "region_selection": 0.9475,
+   "scale": 0.685
+  },
+  "PRODUCTIVE (POOL_1, measured V_local)": {
+   "completion_content": 0.8056,
+   "n": 36,
+   "region_selection": 1.0,
+   "scale": 0.8889
+  },
+  "PRODUCTIVE (POOL_3, constructible transfer)": {
+   "completion_content": 0.951,
+   "n": 102,
+   "region_selection": 1.0,
+   "scale": 0.8922
+  },
+  "PRODUCTIVE (POOL_4, no answer-known material)": {
+   "completion_content": 0.7,
+   "n": 10,
+   "region_selection": 1.0,
+   "scale": 0.9
+  }
+ },
+ "new_oracle_calls": 0,
+ "schema_version": "pmo_lost_mass_decomposition_v1",
+ "sequential_orders": {
+  "completion_content|region_selection|scale": [
+   {
+    "axis": "completion_content",
+    "removed": 1501,
+    "removed_fraction_of_all": 0.581107239643825,
+    "survived": 1082
+   },
+   {
+    "axis": "region_selection",
+    "removed": 463,
+    "removed_fraction_of_all": 0.17924893534649633,
+    "survived": 619
+   },
+   {
+    "axis": "scale",
+    "removed": 421,
+    "removed_fraction_of_all": 0.1629887727448703,
+    "survived": 198
+   }
+  ],
+  "completion_content|scale|region_selection": [
+   {
+    "axis": "completion_content",
+    "removed": 1501,
+    "removed_fraction_of_all": 0.581107239643825,
+    "survived": 1082
+   },
+   {
+    "axis": "scale",
+    "removed": 775,
+    "removed_fraction_of_all": 0.30003871467286103,
+    "survived": 307
+   },
+   {
+    "axis": "region_selection",
+    "removed": 109,
+    "removed_fraction_of_all": 0.042198993418505616,
+    "survived": 198
+   }
+  ],
+  "region_selection|completion_content|scale": [
+   {
+    "axis": "region_selection",
+    "removed": 1391,
+    "removed_fraction_of_all": 0.5385210994967092,
+    "survived": 1192
+   },
+   {
+    "axis": "completion_content",
+    "removed": 573,
+    "removed_fraction_of_all": 0.2218350754936121,
+    "survived": 619
+   },
+   {
+    "axis": "scale",
+    "removed": 421,
+    "removed_fraction_of_all": 0.1629887727448703,
+    "survived": 198
+   }
+  ],
+  "region_selection|scale|completion_content": [
+   {
+    "axis": "region_selection",
+    "removed": 1391,
+    "removed_fraction_of_all": 0.5385210994967092,
+    "survived": 1192
+   },
+   {
+    "axis": "scale",
+    "removed": 912,
+    "removed_fraction_of_all": 0.3530778164924506,
+    "survived": 280
+   },
+   {
+    "axis": "completion_content",
+    "removed": 82,
+    "removed_fraction_of_all": 0.031746031746031744,
+    "survived": 198
+   }
+  ],
+  "scale|completion_content|region_selection": [
+   {
+    "axis": "scale",
+    "removed": 2078,
+    "removed_fraction_of_all": 0.8044909020518777,
+    "survived": 505
+   },
+   {
+    "axis": "completion_content",
+    "removed": 198,
+    "removed_fraction_of_all": 0.07665505226480836,
+    "survived": 307
+   },
+   {
+    "axis": "region_selection",
+    "removed": 109,
+    "removed_fraction_of_all": 0.042198993418505616,
+    "survived": 198
+   }
+  ],
+  "scale|region_selection|completion_content": [
+   {
+    "axis": "scale",
+    "removed": 2078,
+    "removed_fraction_of_all": 0.8044909020518777,
+    "survived": 505
+   },
+   {
+    "axis": "region_selection",
+    "removed": 225,
+    "removed_fraction_of_all": 0.08710801393728224,
+    "survived": 280
+   },
+   {
+    "axis": "completion_content",
+    "removed": 82,
+    "removed_fraction_of_all": 0.031746031746031744,
+    "survived": 198
+   }
+  ]
+ }
+}

@@ -42,7 +42,7 @@ OUT = "diagnostics/pmo_global_delta_census_v1"
 #: A target region counts as productive at or above this fraction of the task's
 #: own anchor productivity.  Anchors differ 0.32 (median1) to 0.99 (qed), so an
 #: absolute bar would silently drop whole tasks.
-PRODUCTIVE_FRACTION_OF_ANCHOR = 0.85
+PRODUCTIVE_FRACTION_OF_ANCHOR = 0.60
 #: and the lift must be real, not a rounding difference.
 MIN_VLOCAL_LIFT = 0.15
 
@@ -178,6 +178,31 @@ def build_pools() -> dict:
                 }
             )
 
+    # POOL_4 uses NO answer-known material: both ends are states the blind run
+    # itself reached, both carry a measured V_local, and the target is simply the
+    # more productive of the two.  If POOL_4 agrees with POOL_1 the requirement is
+    # not an artifact of aiming at a published answer.
+    pool4 = []
+    for source in entry:
+        for target in entry:
+            if source["task"] != target["task"] or source["smiles"] == target["smiles"]:
+                continue
+            lift = target["v_local"] - source["v_local"]
+            if lift < MIN_VLOCAL_LIFT:
+                continue
+            pool4.append(
+                {
+                    "pool": "POOL_4_BLIND_TO_BLIND_MEASURED",
+                    "task": source["task"],
+                    "source": source["smiles"],
+                    "target": target["smiles"],
+                    "source_v_local": source["v_local"],
+                    "target_v_local": target["v_local"],
+                    "v_local_lift": lift,
+                    "answer_known_material_used": False,
+                }
+            )
+
     pool3 = [
         {
             "pool": "POOL_3_CONSTRUCTIBLE_TRANSFER",
@@ -190,7 +215,8 @@ def build_pools() -> dict:
         for row in collect_test_a()
     ]
     return {"POOL_1_MEASURED_VLOCAL": pool1, "POOL_2_BLIND_BEST_TO_ANCHOR": pool2,
-            "POOL_3_CONSTRUCTIBLE_TRANSFER": pool3}
+            "POOL_3_CONSTRUCTIBLE_TRANSFER": pool3,
+            "POOL_4_BLIND_TO_BLIND_MEASURED": pool4}
 
 
 def main() -> None:

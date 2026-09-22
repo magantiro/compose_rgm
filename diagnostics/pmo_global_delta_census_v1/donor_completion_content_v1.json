@@ -1,0 +1,81 @@
+{
+ "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
+ "information_regime_statement": "The REQUIRED side is answer-known development evidence. The SUPPLIED side is the task-independent objective-blind init bank and carries no answer information. Nothing here may become a prior or library for a scored run.",
+ "new_oracle_calls": 0,
+ "profiles": {
+  "CURRENT::grow_actions": {
+   "description": "dynamic_program_synthesis._grow_actions builds a linear single-bonded chain of elements drawn uniformly from ('C','N','O'); segment_replace draws its length uniformly from 1..min(MAX_SEGMENT_LENGTH=8, 40-n). It can never install a ring, a branch, or an element outside C/N/O.",
+   "frac_branched": 0.0,
+   "frac_expressible_as_grow_chain": 1.0,
+   "frac_has_ring": 0.0,
+   "size_max": 8
+  },
+  "REQUIRED::POOL_1_MEASURED_VLOCAL": {
+   "frac_branched": 0.6944,
+   "frac_expressible_as_grow_chain": 0.2222,
+   "frac_has_ring": 0.8056,
+   "frac_size_ge_13": 0.3611,
+   "frac_size_ge_6": 0.6667,
+   "heteroatoms_median": 4,
+   "n": 36,
+   "size_max": 29,
+   "size_median": 11,
+   "size_p25": 3,
+   "size_p75": 14
+  },
+  "REQUIRED::POOL_2_BLIND_BEST_TO_ANCHOR": {
+   "frac_branched": 0.6364,
+   "frac_expressible_as_grow_chain": 0.1818,
+   "frac_has_ring": 0.8182,
+   "frac_size_ge_13": 0.2727,
+   "frac_size_ge_6": 0.5455,
+   "heteroatoms_median": 4,
+   "n": 11,
+   "size_max": 17,
+   "size_median": 7,
+   "size_p25": 2,
+   "size_p75": 15
+  },
+  "REQUIRED::POOL_3_CONSTRUCTIBLE_TRANSFER": {
+   "frac_branched": 0.8137,
+   "frac_expressible_as_grow_chain": 0.0686,
+   "frac_has_ring": 0.951,
+   "frac_size_ge_13": 0.4314,
+   "frac_size_ge_6": 0.7647,
+   "heteroatoms_median": 5,
+   "n": 102,
+   "size_max": 30,
+   "size_median": 12,
+   "size_p25": 7,
+   "size_p75": 16
+  },
+  "REQUIRED::POOL_4_BLIND_TO_BLIND_MEASURED": {
+   "frac_branched": 0.5556,
+   "frac_expressible_as_grow_chain": 0.2222,
+   "frac_has_ring": 0.7778,
+   "frac_size_ge_13": 0.3333,
+   "frac_size_ge_6": 0.6667,
+   "heteroatoms_median": 5,
+   "n": 9,
+   "size_max": 21,
+   "size_median": 10,
+   "size_p25": 3,
+   "size_p75": 16
+  },
+  "SUPPLIED::init_bank_pendant_cuts": {
+   "frac_branched": 0.6763,
+   "frac_expressible_as_grow_chain": 0.1917,
+   "frac_has_ring": 0.6432,
+   "frac_size_ge_13": 0.4089,
+   "frac_size_ge_6": 0.6994,
+   "heteroatoms_median": 3,
+   "n": 1690,
+   "size_max": 27,
+   "size_median": 11,
+   "size_p25": 3,
+   "size_p75": 17
+  }
+ },
+ "question": "Could donor chemistry supply the completion content a required generic macro edit needs -- not whether donor transport works as a search strategy.",
+ "schema_version": "pmo_donor_completion_content_v1"
+}

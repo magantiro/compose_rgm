@@ -1,0 +1,1109 @@
+{
+ "created_at_utc": "2026-09-22T05:14:26.217068+00:00",
+ "cut_points": {
+  "LARGE_REGION": 13,
+  "SMALL_REGION": 5
+ },
+ "families": [
+  "F0_restate_only",
+  "F1_local_single_site_edit",
+  "F2_single_site_substituent_exchange",
+  "F3_distributed_local_decoration",
+  "F4_multi_site_scaffold_replacement",
+  "F5_multi_site_large_edit",
+  "F_unclassified"
+ ],
+ "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
+ "information_regime_statement": "Every family and requirement below is a predicate over the global graph delta alone. No task identity, target structure or fragment content enters any definition. Nothing here may become a prior, library or initialization for a scored no-prescreen run without a separate authorization.",
+ "joint_requirement": [
+  "region_scale_ge_6",
+  "multi_site_ge_2_anchor_groups",
+  "installs_ring_content"
+ ],
+ "new_oracle_calls": 0,
+ "populations": {
+  "NULL_RANDOM_PAIR": {
+   "coverage_curve": [
+    {
+     "count": 267,
+     "cumulative_coverage": 0.6675,
+     "families_used": 1,
+     "family_added": "F4_multi_site_scaffold_replacement"
+    },
+    {
+     "count": 106,
+     "cumulative_coverage": 0.9325,
+     "families_used": 2,
+     "family_added": "F3_distributed_local_decoration"
+    },
+    {
+     "count": 16,
+     "cumulative_coverage": 0.9725,
+     "families_used": 3,
+     "family_added": "F1_local_single_site_edit"
+    },
+    {
+     "count": 6,
+     "cumulative_coverage": 0.9875,
+     "families_used": 4,
+     "family_added": "F5_multi_site_large_edit"
+    },
+    {
+     "count": 4,
+     "cumulative_coverage": 0.9975,
+     "families_used": 5,
+     "family_added": "F0_restate_only"
+    },
+    {
+     "count": 1,
+     "cumulative_coverage": 1.0,
+     "families_used": 6,
+     "family_added": "F2_single_site_substituent_exchange"
+    }
+   ],
+   "family_counts": {
+    "F0_restate_only": 4,
+    "F1_local_single_site_edit": 16,
+    "F2_single_site_substituent_exchange": 1,
+    "F3_distributed_local_decoration": 106,
+    "F4_multi_site_scaffold_replacement": 267,
+    "F5_multi_site_large_edit": 6
+   },
+   "joint": {
+    "ci95": [
+     0.5412,
+     0.6371
+    ],
+    "hits": 236,
+    "n": 400,
+    "rate": 0.59
+   },
+   "n": 400,
+   "requirements": {
+    "both_excises_and_installs": {
+     "ci95": [
+      0.936,
+      0.9752
+     ],
+     "hits": 384,
+     "n": 400,
+     "rate": 0.96
+    },
+    "excises_ring_content": {
+     "ci95": [
+      0.7448,
+      0.8248
+     ],
+     "hits": 315,
+     "n": 400,
+     "rate": 0.7875
+    },
+    "installs_ring_content": {
+     "ci95": [
+      0.7527,
+      0.8317
+     ],
+     "hits": 318,
+     "n": 400,
+     "rate": 0.795
+    },
+    "multi_site_ge_2_anchor_groups": {
+     "ci95": [
+      0.9211,
+      0.9654
+     ],
+     "hits": 379,
+     "n": 400,
+     "rate": 0.9475
+    },
+    "multi_site_ge_3_anchor_groups": {
+     "ci95": [
+      0.7713,
+      0.8477
+     ],
+     "hits": 325,
+     "n": 400,
+     "rate": 0.8125
+    },
+    "region_scale_ge_13": {
+     "ci95": [
+      0.0657,
+      0.1221
+     ],
+     "hits": 36,
+     "n": 400,
+     "rate": 0.09
+    },
+    "region_scale_ge_6": {
+     "ci95": [
+      0.6379,
+      0.7286
+     ],
+     "hits": 274,
+     "n": 400,
+     "rate": 0.685
+    },
+    "ring_count_changes": {
+     "ci95": [
+      0.5944,
+      0.6879
+     ],
+     "hits": 257,
+     "n": 400,
+     "rate": 0.6425
+    }
+   }
+  },
+  "POOL_1_MEASURED_VLOCAL": {
+   "coverage_curve": [
+    {
+     "count": 32,
+     "cumulative_coverage": 0.8889,
+     "families_used": 1,
+     "family_added": "F4_multi_site_scaffold_replacement"
+    },
+    {
+     "count": 4,
+     "cumulative_coverage": 1.0,
+     "families_used": 2,
+     "family_added": "F3_distributed_local_decoration"
+    }
+   ],
+   "family_counts": {
+    "F3_distributed_local_decoration": 4,
+    "F4_multi_site_scaffold_replacement": 32
+   },
+   "joint": {
+    "ci95": [
+     0.5893,
+     0.8625
+    ],
+    "hits": 27,
+    "n": 36,
+    "rate": 0.75
+   },
+   "n": 36,
+   "requirements": {
+    "both_excises_and_installs": {
+     "ci95": [
+      0.9036,
+      1.0
+     ],
+     "hits": 36,
+     "n": 36,
+     "rate": 1.0
+    },
+    "excises_ring_content": {
+     "ci95": [
+      0.8583,
+      0.9951
+     ],
+     "hits": 35,
+     "n": 36,
+     "rate": 0.9722
+    },
+    "installs_ring_content": {
+     "ci95": [
+      0.6497,
+      0.9025
+     ],
+     "hits": 29,
+     "n": 36,
+     "rate": 0.8056
+    },
+    "multi_site_ge_2_anchor_groups": {
+     "ci95": [
+      0.9036,
+      1.0
+     ],
+     "hits": 36,
+     "n": 36,
+     "rate": 1.0
+    },
+    "multi_site_ge_3_anchor_groups": {
+     "ci95": [
+      0.5893,
+      0.8625
+     ],
+     "hits": 27,
+     "n": 36,
+     "rate": 0.75
+    },
+    "region_scale_ge_13": {
+     "ci95": [
+      0.422,
+      0.7286
+     ],
+     "hits": 21,
+     "n": 36,
+     "rate": 0.5833
+    },
+    "region_scale_ge_6": {
+     "ci95": [
+      0.7469,
+      0.9559
+     ],
+     "hits": 32,
+     "n": 36,
+     "rate": 0.8889
+    },
+    "ring_count_changes": {
+     "ci95": [
+      0.6192,
+      0.8828
+     ],
+     "hits": 28,
+     "n": 36,
+     "rate": 0.7778
+    }
+   }
+  },
+  "POOL_2_BLIND_BEST_TO_ANCHOR": {
+   "coverage_curve": [
+    {
+     "count": 8,
+     "cumulative_coverage": 0.7273,
+     "families_used": 1,
+     "family_added": "F4_multi_site_scaffold_replacement"
+    },
+    {
+     "count": 2,
+     "cumulative_coverage": 0.9091,
+     "families_used": 2,
+     "family_added": "F3_distributed_local_decoration"
+    },
+    {
+     "count": 1,
+     "cumulative_coverage": 1.0,
+     "families_used": 3,
+     "family_added": "F1_local_single_site_edit"
+    }
+   ],
+   "family_counts": {
+    "F1_local_single_site_edit": 1,
+    "F3_distributed_local_decoration": 2,
+    "F4_multi_site_scaffold_replacement": 8
+   },
+   "joint": {
+    "ci95": [
+     0.4344,
+     0.9025
+    ],
+    "hits": 8,
+    "n": 11,
+    "rate": 0.7273
+   },
+   "n": 11
+  },
+  "POOL_3_CONSTRUCTIBLE_TRANSFER": {
+   "coverage_curve": [
+    {
+     "count": 88,
+     "cumulative_coverage": 0.8627,
+     "families_used": 1,
+     "family_added": "F4_multi_site_scaffold_replacement"
+    },
+    {
+     "count": 11,
+     "cumulative_coverage": 0.9706,
+     "families_used": 2,
+     "family_added": "F3_distributed_local_decoration"
+    },
+    {
+     "count": 3,
+     "cumulative_coverage": 1.0,
+     "families_used": 3,
+     "family_added": "F5_multi_site_large_edit"
+    }
+   ],
+   "family_counts": {
+    "F3_distributed_local_decoration": 11,
+    "F4_multi_site_scaffold_replacement": 88,
+    "F5_multi_site_large_edit": 3
+   },
+   "joint": {
+    "ci95": [
+     0.7603,
+     0.9011
+    ],
+    "hits": 86,
+    "n": 102,
+    "rate": 0.8431
+   },
+   "n": 102,
+   "requirements": {
+    "both_excises_and_installs": {
+     "ci95": [
+      0.9637,
+      1.0
+     ],
+     "hits": 102,
+     "n": 102,
+     "rate": 1.0
+    },
+    "excises_ring_content": {
+     "ci95": [
+      0.5108,
+      0.697
+     ],
+     "hits": 62,
+     "n": 102,
+     "rate": 0.6078
+    },
+    "installs_ring_content": {
+     "ci95": [
+      0.8903,
+      0.9789
+     ],
+     "hits": 97,
+     "n": 102,
+     "rate": 0.951
+    },
+    "multi_site_ge_2_anchor_groups": {
+     "ci95": [
+      0.9637,
+      1.0
+     ],
+     "hits": 102,
+     "n": 102,
+     "rate": 1.0
+    },
+    "multi_site_ge_3_anchor_groups": {
+     "ci95": [
+      0.6632,
+      0.8281
+     ],
+     "hits": 77,
+     "n": 102,
+     "rate": 0.7549
+    },
+    "region_scale_ge_13": {
+     "ci95": [
+      0.501,
+      0.688
+     ],
+     "hits": 61,
+     "n": 102,
+     "rate": 0.598
+    },
+    "region_scale_ge_6": {
+     "ci95": [
+      0.8171,
+      0.9387
+     ],
+     "hits": 91,
+     "n": 102,
+     "rate": 0.8922
+    },
+    "ring_count_changes": {
+     "ci95": [
+      0.7603,
+      0.9011
+     ],
+     "hits": 86,
+     "n": 102,
+     "rate": 0.8431
+    }
+   }
+  },
+  "POOL_4_BLIND_TO_BLIND_MEASURED": {
+   "coverage_curve": [
+    {
+     "count": 6,
+     "cumulative_coverage": 0.6,
+     "families_used": 1,
+     "family_added": "F4_multi_site_scaffold_replacement"
+    },
+    {
+     "count": 3,
+     "cumulative_coverage": 0.9,
+     "families_used": 2,
+     "family_added": "F5_multi_site_large_edit"
+    },
+    {
+     "count": 1,
+     "cumulative_coverage": 1.0,
+     "families_used": 3,
+     "family_added": "F3_distributed_local_decoration"
+    }
+   ],
+   "family_counts": {
+    "F3_distributed_local_decoration": 1,
+    "F4_multi_site_scaffold_replacement": 6,
+    "F5_multi_site_large_edit": 3
+   },
+   "joint": {
+    "ci95": [
+     0.3127,
+     0.8318
+    ],
+    "hits": 6,
+    "n": 10,
+    "rate": 0.6
+   },
+   "n": 10
+  },
+  "PROPOSED_CHARGED": {
+   "coverage_curve": [
+    {
+     "count": 912,
+     "cumulative_coverage": 0.3531,
+     "families_used": 1,
+     "family_added": "F3_distributed_local_decoration"
+    },
+    {
+     "count": 883,
+     "cumulative_coverage": 0.6949,
+     "families_used": 2,
+     "family_added": "F1_local_single_site_edit"
+    },
+    {
+     "count": 283,
+     "cumulative_coverage": 0.8045,
+     "families_used": 3,
+     "family_added": "F0_restate_only"
+    },
+    {
+     "count": 225,
+     "cumulative_coverage": 0.8916,
+     "families_used": 4,
+     "family_added": "F2_single_site_substituent_exchange"
+    },
+    {
+     "count": 159,
+     "cumulative_coverage": 0.9532,
+     "families_used": 5,
+     "family_added": "F4_multi_site_scaffold_replacement"
+    },
+    {
+     "count": 121,
+     "cumulative_coverage": 1.0,
+     "families_used": 6,
+     "family_added": "F5_multi_site_large_edit"
+    }
+   ],
+   "family_counts": {
+    "F0_restate_only": 283,
+    "F1_local_single_site_edit": 883,
+    "F2_single_site_substituent_exchange": 225,
+    "F3_distributed_local_decoration": 912,
+    "F4_multi_site_scaffold_replacement": 159,
+    "F5_multi_site_large_edit": 121
+   },
+   "joint": {
+    "ci95": [
+     0.067,
+     0.0876
+    ],
+    "hits": 198,
+    "n": 2583,
+    "rate": 0.0767
+   },
+   "n": 2583,
+   "requirements": {
+    "both_excises_and_installs": {
+     "ci95": [
+      0.41,
+      0.4481
+     ],
+     "hits": 1108,
+     "n": 2583,
+     "rate": 0.429
+    },
+    "excises_ring_content": {
+     "ci95": [
+      0.1657,
+      0.1953
+     ],
+     "hits": 465,
+     "n": 2583,
+     "rate": 0.18
+    },
+    "installs_ring_content": {
+     "ci95": [
+      0.4,
+      0.438
+     ],
+     "hits": 1082,
+     "n": 2583,
+     "rate": 0.4189
+    },
+    "multi_site_ge_2_anchor_groups": {
+     "ci95": [
+      0.4423,
+      0.4807
+     ],
+     "hits": 1192,
+     "n": 2583,
+     "rate": 0.4615
+    },
+    "multi_site_ge_3_anchor_groups": {
+     "ci95": [
+      0.1195,
+      0.1456
+     ],
+     "hits": 341,
+     "n": 2583,
+     "rate": 0.132
+    },
+    "region_scale_ge_13": {
+     "ci95": [
+      0.0021,
+      0.0071
+     ],
+     "hits": 10,
+     "n": 2583,
+     "rate": 0.0039
+    },
+    "region_scale_ge_6": {
+     "ci95": [
+      0.1807,
+      0.2113
+     ],
+     "hits": 505,
+     "n": 2583,
+     "rate": 0.1955
+    },
+    "ring_count_changes": {
+     "ci95": [
+      0.508,
+      0.5465
+     ],
+     "hits": 1362,
+     "n": 2583,
+     "rate": 0.5273
+    }
+   }
+  },
+  "PROPOSED_CHARGED::joint_dependency_region_jump": {
+   "coverage_curve": [
+    {
+     "count": 8,
+     "cumulative_coverage": 0.8,
+     "families_used": 1,
+     "family_added": "F5_multi_site_large_edit"
+    },
+    {
+     "count": 2,
+     "cumulative_coverage": 1.0,
+     "families_used": 2,
+     "family_added": "F3_distributed_local_decoration"
+    }
+   ],
+   "family_counts": {
+    "F3_distributed_local_decoration": 2,
+    "F5_multi_site_large_edit": 8
+   },
+   "joint": {
+    "ci95": [
+     0.4902,
+     0.9433
+    ],
+    "hits": 8,
+    "n": 10,
+    "rate": 0.8
+   },
+   "n": 10
+  },
+  "PROPOSED_CHARGED::shallow_program_channel": {
+   "coverage_curve": [
+    {
+     "count": 435,
+     "cumulative_coverage": 0.3455,
+     "families_used": 1,
+     "family_added": "F3_distributed_local_decoration"
+    },
+    {
+     "count": 435,
+     "cumulative_coverage": 0.691,
+     "families_used": 2,
+     "family_added": "F1_local_single_site_edit"
+    },
+    {
+     "count": 148,
+     "cumulative_coverage": 0.8086,
+     "families_used": 3,
+     "family_added": "F0_restate_only"
+    },
+    {
+     "count": 120,
+     "cumulative_coverage": 0.9039,
+     "families_used": 4,
+     "family_added": "F2_single_site_substituent_exchange"
+    },
+    {
+     "count": 74,
+     "cumulative_coverage": 0.9627,
+     "families_used": 5,
+     "family_added": "F5_multi_site_large_edit"
+    },
+    {
+     "count": 47,
+     "cumulative_coverage": 1.0,
+     "families_used": 6,
+     "family_added": "F4_multi_site_scaffold_replacement"
+    }
+   ],
+   "family_counts": {
+    "F0_restate_only": 148,
+    "F1_local_single_site_edit": 435,
+    "F2_single_site_substituent_exchange": 120,
+    "F3_distributed_local_decoration": 435,
+    "F4_multi_site_scaffold_replacement": 47,
+    "F5_multi_site_large_edit": 74
+   },
+   "joint": {
+    "ci95": [
+     0.0442,
+     0.0697
+    ],
+    "hits": 70,
+    "n": 1259,
+    "rate": 0.0556
+   },
+   "n": 1259
+  },
+  "PROPOSED_CHARGED::structured_program_channel": {
+   "coverage_curve": [
+    {
+     "count": 475,
+     "cumulative_coverage": 0.3615,
+     "families_used": 1,
+     "family_added": "F3_distributed_local_decoration"
+    },
+    {
+     "count": 448,
+     "cumulative_coverage": 0.7024,
+     "families_used": 2,
+     "family_added": "F1_local_single_site_edit"
+    },
+    {
+     "count": 135,
+     "cumulative_coverage": 0.8052,
+     "families_used": 3,
+     "family_added": "F0_restate_only"
+    },
+    {
+     "count": 112,
+     "cumulative_coverage": 0.8904,
+     "families_used": 4,
+     "family_added": "F4_multi_site_scaffold_replacement"
+    },
+    {
+     "count": 105,
+     "cumulative_coverage": 0.9703,
+     "families_used": 5,
+     "family_added": "F2_single_site_substituent_exchange"
+    },
+    {
+     "count": 39,
+     "cumulative_coverage": 1.0,
+     "families_used": 6,
+     "family_added": "F5_multi_site_large_edit"
+    }
+   ],
+   "family_counts": {
+    "F0_restate_only": 135,
+    "F1_local_single_site_edit": 448,
+    "F2_single_site_substituent_exchange": 105,
+    "F3_distributed_local_decoration": 475,
+    "F4_multi_site_scaffold_replacement": 112,
+    "F5_multi_site_large_edit": 39
+   },
+   "joint": {
+    "ci95": [
+     0.0769,
+     0.1081
+    ],
+    "hits": 120,
+    "n": 1314,
+    "rate": 0.0913
+   },
+   "n": 1314
+  },
+  "PROPOSED_DISCARDED": {
+   "coverage_curve": [
+    {
+     "count": 11,
+     "cumulative_coverage": 0.5238,
+     "families_used": 1,
+     "family_added": "F1_local_single_site_edit"
+    },
+    {
+     "count": 4,
+     "cumulative_coverage": 0.7143,
+     "families_used": 2,
+     "family_added": "F2_single_site_substituent_exchange"
+    },
+    {
+     "count": 3,
+     "cumulative_coverage": 0.8571,
+     "families_used": 3,
+     "family_added": "F3_distributed_local_decoration"
+    },
+    {
+     "count": 2,
+     "cumulative_coverage": 0.9524,
+     "families_used": 4,
+     "family_added": "F0_restate_only"
+    },
+    {
+     "count": 1,
+     "cumulative_coverage": 1.0,
+     "families_used": 5,
+     "family_added": "F5_multi_site_large_edit"
+    }
+   ],
+   "family_counts": {
+    "F0_restate_only": 2,
+    "F1_local_single_site_edit": 11,
+    "F2_single_site_substituent_exchange": 4,
+    "F3_distributed_local_decoration": 3,
+    "F5_multi_site_large_edit": 1
+   },
+   "joint": {
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "hits": 0,
+    "n": 21,
+    "rate": 0.0
+   },
+   "n": 21,
+   "requirements": {
+    "both_excises_and_installs": {
+     "ci95": [
+      0.1381,
+      0.4996
+     ],
+     "hits": 6,
+     "n": 21,
+     "rate": 0.2857
+    },
+    "excises_ring_content": {
+     "ci95": [
+      0.0767,
+      0.4
+     ],
+     "hits": 4,
+     "n": 21,
+     "rate": 0.1905
+    },
+    "installs_ring_content": {
+     "ci95": [
+      0.1063,
+      0.4509
+     ],
+     "hits": 5,
+     "n": 21,
+     "rate": 0.2381
+    },
+    "multi_site_ge_2_anchor_groups": {
+     "ci95": [
+      0.0767,
+      0.4
+     ],
+     "hits": 4,
+     "n": 21,
+     "rate": 0.1905
+    },
+    "multi_site_ge_3_anchor_groups": {
+     "ci95": [
+      0.0085,
+      0.2267
+     ],
+     "hits": 1,
+     "n": 21,
+     "rate": 0.0476
+    },
+    "region_scale_ge_13": {
+     "ci95": [
+      0.0,
+      0.1546
+     ],
+     "hits": 0,
+     "n": 21,
+     "rate": 0.0
+    },
+    "region_scale_ge_6": {
+     "ci95": [
+      0.1063,
+      0.4509
+     ],
+     "hits": 5,
+     "n": 21,
+     "rate": 0.2381
+    },
+    "ring_count_changes": {
+     "ci95": [
+      0.2075,
+      0.5912
+     ],
+     "hits": 8,
+     "n": 21,
+     "rate": 0.381
+    }
+   }
+  },
+  "PROPOSED_DISCARDED::shallow_program_channel": {
+   "coverage_curve": [
+    {
+     "count": 3,
+     "cumulative_coverage": 0.3,
+     "families_used": 1,
+     "family_added": "F1_local_single_site_edit"
+    },
+    {
+     "count": 2,
+     "cumulative_coverage": 0.5,
+     "families_used": 2,
+     "family_added": "F3_distributed_local_decoration"
+    },
+    {
+     "count": 2,
+     "cumulative_coverage": 0.7,
+     "families_used": 3,
+     "family_added": "F2_single_site_substituent_exchange"
+    },
+    {
+     "count": 2,
+     "cumulative_coverage": 0.9,
+     "families_used": 4,
+     "family_added": "F0_restate_only"
+    },
+    {
+     "count": 1,
+     "cumulative_coverage": 1.0,
+     "families_used": 5,
+     "family_added": "F5_multi_site_large_edit"
+    }
+   ],
+   "family_counts": {
+    "F0_restate_only": 2,
+    "F1_local_single_site_edit": 3,
+    "F2_single_site_substituent_exchange": 2,
+    "F3_distributed_local_decoration": 2,
+    "F5_multi_site_large_edit": 1
+   },
+   "joint": {
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "hits": 0,
+    "n": 10,
+    "rate": 0.0
+   },
+   "n": 10
+  },
+  "PROPOSED_DISCARDED::structured_program_channel": {
+   "coverage_curve": [
+    {
+     "count": 8,
+     "cumulative_coverage": 0.7273,
+     "families_used": 1,
+     "family_added": "F1_local_single_site_edit"
+    },
+    {
+     "count": 2,
+     "cumulative_coverage": 0.9091,
+     "families_used": 2,
+     "family_added": "F2_single_site_substituent_exchange"
+    },
+    {
+     "count": 1,
+     "cumulative_coverage": 1.0,
+     "families_used": 3,
+     "family_added": "F3_distributed_local_decoration"
+    }
+   ],
+   "family_counts": {
+    "F1_local_single_site_edit": 8,
+    "F2_single_site_substituent_exchange": 2,
+    "F3_distributed_local_decoration": 1
+   },
+   "joint": {
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "hits": 0,
+    "n": 11,
+    "rate": 0.0
+   },
+   "n": 11
+  },
+  "PROPOSED_DUPLICATE": {
+   "coverage_curve": [
+    {
+     "count": 102,
+     "cumulative_coverage": 0.3604,
+     "families_used": 1,
+     "family_added": "F1_local_single_site_edit"
+    },
+    {
+     "count": 94,
+     "cumulative_coverage": 0.6926,
+     "families_used": 2,
+     "family_added": "F3_distributed_local_decoration"
+    },
+    {
+     "count": 44,
+     "cumulative_coverage": 0.8481,
+     "families_used": 3,
+     "family_added": "F0_restate_only"
+    },
+    {
+     "count": 30,
+     "cumulative_coverage": 0.9541,
+     "families_used": 4,
+     "family_added": "F2_single_site_substituent_exchange"
+    },
+    {
+     "count": 9,
+     "cumulative_coverage": 0.9859,
+     "families_used": 5,
+     "family_added": "F5_multi_site_large_edit"
+    },
+    {
+     "count": 4,
+     "cumulative_coverage": 1.0,
+     "families_used": 6,
+     "family_added": "F4_multi_site_scaffold_replacement"
+    }
+   ],
+   "family_counts": {
+    "F0_restate_only": 44,
+    "F1_local_single_site_edit": 102,
+    "F2_single_site_substituent_exchange": 30,
+    "F3_distributed_local_decoration": 94,
+    "F4_multi_site_scaffold_replacement": 4,
+    "F5_multi_site_large_edit": 9
+   },
+   "joint": {
+    "ci95": [
+     0.0144,
+     0.0548
+    ],
+    "hits": 8,
+    "n": 283,
+    "rate": 0.0283
+   },
+   "n": 283
+  },
+  "PROPOSED_DUPLICATE::shallow_program_channel": {
+   "coverage_curve": [
+    {
+     "count": 24,
+     "cumulative_coverage": 0.4211,
+     "families_used": 1,
+     "family_added": "F0_restate_only"
+    },
+    {
+     "count": 14,
+     "cumulative_coverage": 0.6667,
+     "families_used": 2,
+     "family_added": "F1_local_single_site_edit"
+    },
+    {
+     "count": 11,
+     "cumulative_coverage": 0.8596,
+     "families_used": 3,
+     "family_added": "F3_distributed_local_decoration"
+    },
+    {
+     "count": 8,
+     "cumulative_coverage": 1.0,
+     "families_used": 4,
+     "family_added": "F2_single_site_substituent_exchange"
+    }
+   ],
+   "family_counts": {
+    "F0_restate_only": 24,
+    "F1_local_single_site_edit": 14,
+    "F2_single_site_substituent_exchange": 8,
+    "F3_distributed_local_decoration": 11
+   },
+   "joint": {
+    "ci95": [
+     0.0,
+     0.0631
+    ],
+    "hits": 0,
+    "n": 57,
+    "rate": 0.0
+   },
+   "n": 57
+  },
+  "PROPOSED_DUPLICATE::structured_program_channel": {
+   "coverage_curve": [
+    {
+     "count": 88,
+     "cumulative_coverage": 0.3894,
+     "families_used": 1,
+     "family_added": "F1_local_single_site_edit"
+    },
+    {
+     "count": 83,
+     "cumulative_coverage": 0.7566,
+     "families_used": 2,
+     "family_added": "F3_distributed_local_decoration"
+    },
+    {
+     "count": 22,
+     "cumulative_coverage": 0.854,
+     "families_used": 3,
+     "family_added": "F2_single_site_substituent_exchange"
+    },
+    {
+     "count": 20,
+     "cumulative_coverage": 0.9425,
+     "families_used": 4,
+     "family_added": "F0_restate_only"
+    },
+    {
+     "count": 9,
+     "cumulative_coverage": 0.9823,
+     "families_used": 5,
+     "family_added": "F5_multi_site_large_edit"
+    },
+    {
+     "count": 4,
+     "cumulative_coverage": 1.0,
+     "families_used": 6,
+     "family_added": "F4_multi_site_scaffold_replacement"
+    }
+   ],
+   "family_counts": {
+    "F0_restate_only": 20,
+    "F1_local_single_site_edit": 88,
+    "F2_single_site_substituent_exchange": 22,
+    "F3_distributed_local_decoration": 83,
+    "F4_multi_site_scaffold_replacement": 4,
+    "F5_multi_site_large_edit": 9
+   },
+   "joint": {
+    "ci95": [
+     0.018,
+     0.0683
+    ],
+    "hits": 8,
+    "n": 226,
+    "rate": 0.0354
+   },
+   "n": 226
+  }
+ },
+ "requirement_definitions": {
+  "both_excises_and_installs": "predicate over global delta",
+  "excises_ring_content": "predicate over global delta",
+  "installs_ring_content": "predicate over global delta",
+  "multi_site_ge_2_anchor_groups": "predicate over global delta",
+  "multi_site_ge_3_anchor_groups": "predicate over global delta",
+  "region_scale_ge_13": "predicate over global delta",
+  "region_scale_ge_6": "predicate over global delta",
+  "ring_count_changes": "predicate over global delta"
+ },
+ "schema_version": "pmo_macro_grammar_v1"
+}
