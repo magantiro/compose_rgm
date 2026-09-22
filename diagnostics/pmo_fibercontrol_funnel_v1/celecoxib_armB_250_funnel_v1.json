@@ -1,0 +1,147 @@
+{
+ "schema_version": "pmo_fibercontrol_funnel_v1",
+ "task": "celecoxib_rediscovery",
+ "arm": "B_online_memory",
+ "charged_calls": 250,
+ "source_artifact": "B_memory_celecoxib_result_at_250_calls.json",
+ "run_id": "37bb856e15309543795e14cdccf44d1b672e957cb9af1e902af08d630f3e241b",
+ "new_oracle_calls": 0,
+ "phase0_oracle_parity": {
+  "registered_oracle": "tdc.chem_utils.oracle.oracle.rediscovery_meta(target,fp='ECFP4')",
+  "fingerprint": "AllChem.GetMorganFingerprint(mol,2) -> UIntSparseIntVect (COUNT-based, UNHASHED)",
+  "run_is_official": true,
+  "max_abs_committed_minus_official": 0.0,
+  "folded_bitvector_diagnostic_is_NOT_the_oracle": {
+   "diagnostic_used_previously": "GetMorganFingerprintAsBitVect(mol,2,nBits=2048)",
+   "mean_abs_delta": 0.0493,
+   "top1_overlap": "0/1",
+   "top10_overlap": "6/10",
+   "top25_overlap": "20/25"
+  }
+ },
+ "phase1_funnel": {
+  "attempts": 860,
+  "produced_endpoint": 444,
+  "distinct_endpoints": 411,
+  "eligible": 422,
+  "scored": 214,
+  "status": {
+   "eligible": 416,
+   "execution_rejected": 416,
+   "duplicate": 28
+  },
+  "by_channel": {
+   "joint_dependency_region_jump": {
+    "attempts": 357,
+    "pct_attempts": 41.5,
+    "endpoints": 0,
+    "scored": 0,
+    "reasons": {
+     "proven_incompatible": 346,
+     "search_budget_exhausted": 11
+    }
+   },
+   "structured_program_channel": {
+    "attempts": 291,
+    "endpoints": 233,
+    "scored": 120
+   },
+   "shallow_program_channel": {
+    "attempts": 212,
+    "endpoints": 211,
+    "scored": 94
+   }
+  },
+  "realized_structure": {
+   "ring_count_change_fraction": 0.428,
+   "delta_heavy_range": [
+    -20,
+    12
+   ],
+   "module_families_observed": 15
+  }
+ },
+ "phase1_reward_positive_tail": {
+  "ALL": {
+   "n": 207,
+   "p_improve": 0.203,
+   "mean_positive": 0.024,
+   "max": 0.1228
+  },
+  "1_local_edit": {
+   "n": 37,
+   "p_improve": 0.297,
+   "mean_positive": 0.043,
+   "mean": -0.0114
+  },
+  "4_ring_topology": {
+   "n": 95,
+   "p_improve": 0.116,
+   "mean_positive": 0.0163,
+   "mean": -0.0672
+  },
+  "6_multi_region": {
+   "n": 55,
+   "p_improve": 0.309,
+   "mean_positive": 0.0197,
+   "mean": -0.0197
+  }
+ },
+ "phase1_lineage_concentration": {
+  "initialization_molecules": 16,
+  "init_with_scored_descendant": 2,
+  "effective_init_lineages": 1.06,
+  "dominant_init_index": 7,
+  "dominant_init_smiles": "CCC(CC#N)Nc1ccc(Br)cc1Cl",
+  "dominant_init_official_score": 0.098,
+  "dominant_init_rank_at_initialization": "8th of 16",
+  "dominant_share_of_scored_calls": 0.989,
+  "best_init_index": 5,
+  "best_init_smiles": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2ncnn2C)cn1",
+  "best_init_official_score": 0.1897,
+  "best_init_scored_descendants": 0,
+  "attempt_level_parents": 120,
+  "effective_parents_attempt_level": 52.8,
+  "top_parent_attempt_share": 0.085
+ },
+ "phase2_verdict": {
+  "where_the_collapse_happens": "GENERATION, round 0",
+  "round0_eligible_pool_composition": {
+   "init_7": 19,
+   "other": 13,
+   "total": 32
+  },
+  "round0_parents_expanded": 14,
+  "round0_parents_producing_any_endpoint": 10,
+  "round0_per_parent_endpoint_yield": [
+   10,
+   6,
+   5,
+   3,
+   2,
+   2,
+   2,
+   1,
+   1,
+   1
+  ],
+  "round0_per_parent_attempts": [
+   21,
+   10,
+   10,
+   5,
+   4,
+   3,
+   3,
+   3,
+   3,
+   2,
+   1,
+   1,
+   1,
+   1
+  ],
+  "verdict": "CONTROL (generation-yield + attempt allocation), NOT absent support",
+  "bounded_support_defect": "joint_dependency_region_jump binds on 0/357 attempts"
+ }
+}
