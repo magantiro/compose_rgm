@@ -122,6 +122,13 @@ def render(report: dict) -> str:
             f"reasons {plan['unrealized_reasons']}, "
             f"bin fallback {plan['bin_fallback_fraction'] * 100:.1f}%"
         )
+        survived = plan.get("endpoint_matches_installed_skeleton")
+        trigger = plan.get("plan_trigger_fired_fraction")
+        lines.append(
+            "          endpoint skeleton == installed skeleton: "
+            + ("n/a" if survived is None else f"{survived * 100:.1f}%")
+            + ("" if trigger is None else f"   trigger fired {trigger * 100:.1f}%")
+        )
     lines.append("")
 
     lines.append("STRATIFIED SA AND QED (strained vs clean, within heavy-atom bin)")
@@ -132,21 +139,31 @@ def render(report: dict) -> str:
             f"    {'bin':<8}{'n clean':>9}{'n strained':>12}"
             f"{'dSA':>9}{'dQED':>9}"
         )
-        for label, cell in sorted(strata.items(), key=lambda item: item[0]):
+        for label, cell in strata.items():
+            # A cell below the minimum stratum reports None, never a value.
+            sa_difference = cell.get("within_bin_sa_difference")
+            qed_difference = cell.get("within_bin_qed_difference")
             lines.append(
                 f"    {label:<8}{cell['clean']['n']:>9}{cell['strained']['n']:>12}"
-                f"{cell.get('within_bin_sa_difference', float('nan')):9.3f}"
-                f"{cell.get('within_bin_qed_difference', float('nan')):9.3f}"
+                + (f"{sa_difference:9.3f}" if sa_difference is not None else f"{'-':>9}")
+                + (f"{qed_difference:9.3f}" if qed_difference is not None else f"{'-':>9}")
             )
         regression = row["decomposition"]["strain_size_regression"]
         for metric in ("sa", "qed"):
-            fit = regression[metric]
+            fit = regression.get(metric)
+            if not fit or fit.get("strained_coefficient") is None:
+                lines.append(f"    {metric.upper()} ~ strain  (too few strained molecules)")
+                continue
             lines.append(
                 f"    {metric.upper()} ~ strain {fit['strained_coefficient']:+.3f}"
                 f"+-{fit['strained_stderr']:.3f}"
                 f"   heavy {fit['heavy_atom_coefficient']:+.4f}"
                 f"+-{fit['heavy_atom_stderr']:.4f}"
-                f"   (raw contrast {fit['raw_strained_difference']:+.3f})"
+                + (
+                    f"   (raw contrast {fit['raw_strained_difference']:+.3f})"
+                    if fit.get("raw_strained_difference") is not None
+                    else "   (raw contrast undefined: one arm is empty)"
+                )
             )
     return "\n".join(lines)
 
