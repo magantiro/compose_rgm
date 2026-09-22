@@ -137,6 +137,7 @@ def _probe(
     budget: int,
     queries_per_round: int,
     seed: int,
+    already_seen: frozenset[str] = frozenset(),
 ) -> dict[str, Any]:
     protocol = identity(
         {
@@ -170,8 +171,15 @@ def _probe(
         ),
     )
     elapsed = time.time() - began
-    summary = summarize_lift(list(ledger.rows), row.endpoint)
+    rows = list(ledger.rows)
+    summary = summarize_lift(rows, row.endpoint)
+    # A probe re-charges molecules the blind run may already have scored. That is
+    # correct for measuring what the region YIELDS, and it would overstate
+    # NOVELTY, so the overlap is reported rather than left to be assumed away.
+    produced = {record["endpoint"] for record in rows} - {row.endpoint}
     return {
+        "already_scored_by_the_blind_run": len(produced & already_seen),
+        "produced_distinct": len(produced),
         "task": task_name,
         "selectors": labels,
         "seed_smiles": row.endpoint,
@@ -331,6 +339,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.probe_budget,
                 args.queries_per_round,
                 args.seed,
+                frozenset(item.endpoint for item in trajectory),
             )
             record["similarity_to_atlas"] = round(similarity[row.index - 1], 4)
             record["route_to_seed"] = ancestry(trajectory, row.endpoint)
