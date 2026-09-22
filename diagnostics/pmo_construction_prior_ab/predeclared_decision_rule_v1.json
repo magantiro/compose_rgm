@@ -1,0 +1,82 @@
+{
+  "schema_version": "pmo_construction_prior_ab_predeclaration_v1",
+  "declared_at_utc": "2026-09-22",
+  "declared_before": "any wiring change, any deploy, and any charged oracle call of this experiment",
+  "experiment": {
+    "name": "pmo_construction_prior_ab_celecoxib_250",
+    "task": "celecoxib_rediscovery",
+    "arms": {
+      "CP_OFF": "deployed B (allocator repair + online structural memory), construction prior ABSENT",
+      "CP_ON": "identical to CP_OFF plus the learned construction-lane prior on every construction draw the shallow lane makes"
+    },
+    "matched": "identical initialization (16 charged, same lock), identical controller seed 20260920, identical budget, identical executor, identical oracle, identical allocator, identical macro scheduling, identical exploration policy. The ONLY declared difference is the presence of the construction prior.",
+    "charged_calls_per_arm": 250,
+    "charged_calls_total": 500,
+    "frozen": [
+      "donor allocation",
+      "initialization count (16)",
+      "macro scheduling",
+      "exploration policy",
+      "parent allocator",
+      "online memory mechanism"
+    ]
+  },
+  "checkpoint_status": {
+    "path": "ringcore_a7546e2_best.pt",
+    "sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+    "label": "DEVELOPMENT_ONLY_CONSTRUCTION_PRIOR_QUALIFICATION",
+    "reason": "configs/ringcore_v1_checkpoint_selection.json forbids this checkpoint for frozen results: it was selected by hazard-inclusive GM loss, an explicitly forbidden criterion. The owner authorized its use as a DEVELOPMENT QUALIFICATION only. No number produced by this experiment may become a publication number."
+  },
+  "prior_evidence_zero_oracle": {
+    "closed_loop_manifold_drift_median_qed": {"off": -0.2393, "on": -0.1017, "reduction_pct": 57},
+    "closed_loop_final_median_qed": {"off": 0.422, "on": 0.560},
+    "paired_dqed": {"delta": 0.0367, "sigma": 6.3},
+    "paired_dsa": {"delta": -0.3671, "sigma": -7.6},
+    "heteroatom_onto_heteroatom_placement": {"off_pct": 34.6, "on_pct": 5.5},
+    "note": "Every figure above is a CHEMISTRY measurement with zero oracle calls. None of them is a scored-search result. This experiment tests whether the chemistry effect translates into scored search."
+  },
+  "decision_rule": {
+    "note": "This rule is committed BEFORE any score of this experiment is read. It is evaluated on the primary metrics below and nothing else.",
+    "primary_metrics": [
+      "auc_top10_at_budget at 250 charged calls",
+      "best_score at 250 charged calls",
+      "top-10 mean at 250 charged calls"
+    ],
+    "secondary_metrics": [
+      "population QED and SA trajectory by charged-call quartile",
+      "best-molecule proximity to the known productive region",
+      "proposal-family attribution of frontier improvements over the charged-call prefix"
+    ],
+    "branches": {
+      "PROMOTE_TO_BASE": {
+        "condition": "the prior improves CHEMISTRY (QED/SA drift) AND improves score or productive-region proximity",
+        "action": "the prior becomes the new base B'; large retentive and macro proposals get retested on top of it later"
+      },
+      "KEEP_AS_MANIFOLD_MECHANISM": {
+        "condition": "the prior improves CHEMISTRY but does NOT improve score",
+        "action": "keep it as a manifold mechanism; the next step is a learned GLOBAL goal/completion proposer, not more tuning here"
+      },
+      "REJECT": {
+        "condition": "the prior HURTS score",
+        "action": "do not rationalize and do not keep tuning it against celecoxib"
+      }
+    },
+    "reporting_commitment": "If the scored effect is null or negative, that is reported FIRST. A null is the more valuable result: it shows off-manifold drift is not sufficient to explain basin discovery."
+  },
+  "known_confound_declared_in_advance": {
+    "wall_clock": "The proposal loop terminates on whichever comes first of CHANNEL_CANDIDATE_LIMIT candidates, attempts_per_batch attempts, or config.wall_seconds = 45.0 (adaptive_program_optimizer.py and dynamic_program_synthesis_v21._generate_channel_pool). The prior costs a model forward per distinct source state, so the ON arm may complete FEWER proposal attempts in the same wall budget. Per-round attempt counts and proposal seconds will be reported for both arms so a score difference cannot be silently attributed to chemistry when it is attrition.",
+    "commitment": "If the ON arm makes materially fewer attempts per round, that is reported beside the score and the score difference is labelled CONFOUNDED rather than attributed to the prior."
+  },
+  "scope_declared_in_advance": {
+    "prior_aware_lanes": [
+      "shallow_program_channel via DynamicProgramOptimizer._mutate fresh-synthesis branch",
+      "shallow_program_channel via pmo_online_memory.memory_channel_proposal (the warm-memory lane arm B actually uses)"
+    ],
+    "NOT_prior_aware": [
+      "structured_program_channel (routes through dynamic_program_synthesis_v1, a different module)",
+      "joint_dependency_region_jump",
+      "recombination"
+    ],
+    "note": "This is a partial-coverage mechanism by construction. A null result is therefore a null about the shallow construction lane, not about a chemical prior in general."
+  }
+}
