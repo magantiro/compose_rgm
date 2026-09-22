@@ -43,15 +43,21 @@ TEST_FILES = (
     "tests/test_fragment_attachment_control.py",
     "tests/test_fragment_official_suite.py",
 )
-COPY = ("src", "tools", "tests", "scripts", "data", "pyproject.toml")
+COPY = (
+    "src", "tools", "tests", "scripts", "data", "pyproject.toml",
+    # Two official-suite tests read landed artifacts. ``diagnostics`` as a
+    # whole is 542 MB, so only the subtree they open is copied; a battery
+    # whose baseline is red for a missing fixture scores nothing.
+    "diagnostics/fragment_official_suite_v2",
+)
 
 # (name, relative path, exact anchor, replacement, expected test, is_positive_control)
 MUTATIONS: tuple[tuple[str, str, str, str, str, bool], ...] = (
     (
         "cosmetic_reformat_positive_control",
         CONTROL,
-        "    # ---- Two-interface path construction ----",
-        "    # ---- Two-interface path construction (cosmetic control) ----",
+        "    # ---- Pathwise admission ----",
+        "    # ---- Pathwise admission (cosmetic control, changes no behaviour) ----",
         "",
         True,
     ),
@@ -162,6 +168,7 @@ def _materialize(destination: Path) -> None:
         if not source.exists():
             continue
         target = destination / entry
+        target.parent.mkdir(parents=True, exist_ok=True)
         if source.is_dir():
             shutil.copytree(source, target, ignore=shutil.ignore_patterns("__pycache__"))
         else:

@@ -1,0 +1,149 @@
+{
+  "schema": "compose_fragment_path_v3_mutation_battery_v1",
+  "baseline_unmutated_tree_green": true,
+  "baseline_failing_tests": [],
+  "rules": {
+    "mutation_must_apply": "an ambiguous or no-op anchor ABORTS the run",
+    "killed_requires": "a NON-EMPTY list of newly failing named tests",
+    "positive_control": "a cosmetic edit must leave the suite green"
+  },
+  "mutations": [
+    {
+      "mutation": "cosmetic_reformat_positive_control",
+      "file": "src/compose_v4/benchmark/fragment_attachment_control.py",
+      "positive_control": true,
+      "expected_test": null,
+      "all_failing_tests": [],
+      "verdict": "GREEN_AS_REQUIRED"
+    },
+    {
+      "mutation": "path_program_active_for_a_single_core_prompt",
+      "file": "src/compose_v4/benchmark/fragment_attachment_control.py",
+      "positive_control": false,
+      "expected_test": "test_path_program_is_vacuous_for_a_single_core_prompt",
+      "all_failing_tests": [
+        "test_path_program_is_vacuous_for_a_single_core_prompt"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "path_program_on_by_default",
+      "file": "src/compose_v4/benchmark/fragment_attachment_control.py",
+      "positive_control": false,
+      "expected_test": "test_path_program_is_off_by_default",
+      "all_failing_tests": [
+        "test_path_program_is_off_by_default"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "target_pinned_to_the_band_floor_instead_of_drawn",
+      "file": "src/compose_v4/benchmark/fragment_attachment_control.py",
+      "positive_control": false,
+      "expected_test": "test_path_target_is_drawn_from_the_declared_band",
+      "all_failing_tests": [
+        "test_path_target_is_drawn_from_the_declared_band"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "unsatisfiable_predicate_blocks_again",
+      "file": "src/compose_v4/benchmark/fragment_attachment_control.py",
+      "positive_control": false,
+      "expected_test": "test_an_unsatisfiable_path_predicate_does_not_block",
+      "all_failing_tests": [
+        "test_an_unsatisfiable_path_predicate_does_not_block"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "free_valence_precondition_reinstated",
+      "file": "src/compose_v4/benchmark/fragment_attachment_control.py",
+      "positive_control": false,
+      "expected_test": "test_a_saturated_anchor_no_longer_blocks_the_transaction",
+      "all_failing_tests": [
+        "test_a_saturated_anchor_no_longer_blocks_the_transaction",
+        "test_the_transaction_commits_nothing_when_the_exchange_cannot_execute",
+        "test_the_transaction_lengthens_the_core_to_core_path",
+        "test_the_transaction_payload_comes_from_the_prior"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "bridge_exchange_dropped_so_the_transaction_only_inserts",
+      "file": "src/compose_v4/benchmark/fragment_conditioned_sampler.py",
+      "positive_control": false,
+      "expected_test": "test_the_transaction_lengthens_the_core_to_core_path",
+      "all_failing_tests": [
+        "test_the_transaction_lengthens_the_core_to_core_path",
+        "test_the_transaction_payload_comes_from_the_prior"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "reroute_moves_the_path_atom_instead_of_the_new_atom",
+      "file": "src/compose_v4/benchmark/fragment_conditioned_sampler.py",
+      "positive_control": false,
+      "expected_test": "test_the_transaction_lengthens_the_core_to_core_path",
+      "all_failing_tests": [
+        "test_the_transaction_lengthens_the_core_to_core_path",
+        "test_the_transaction_payload_comes_from_the_prior"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "payload_not_required_to_come_from_the_prior",
+      "file": "src/compose_v4/benchmark/fragment_conditioned_sampler.py",
+      "positive_control": false,
+      "expected_test": "test_the_transaction_payload_comes_from_the_prior",
+      "all_failing_tests": [
+        "test_the_transaction_payload_comes_from_the_prior"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "bridge_knob_dropped_where_run_task_calls_build_prompt_context",
+      "file": "tools/run_fragment_constrained_suite.py",
+      "positive_control": false,
+      "expected_test": "test_the_bridge_knob_reaches_the_prompt_context_call_site",
+      "all_failing_tests": [
+        "test_the_bridge_knob_defaults_to_the_direct_join_at_the_call_site",
+        "test_the_bridge_knob_reaches_the_prompt_context_call_site"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "bridge_knob_dropped_where_main_calls_run_task",
+      "file": "tools/run_fragment_constrained_suite.py",
+      "positive_control": false,
+      "expected_test": "test_the_bridge_knob_survives_the_args_to_run_task_hop",
+      "all_failing_tests": [
+        "test_the_bridge_knob_survives_the_args_to_run_task_hop"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "path_program_flag_ignored_by_the_runner",
+      "file": "tools/run_fragment_constrained_suite.py",
+      "positive_control": false,
+      "expected_test": "test_the_path_program_flag_reaches_the_controller_configuration",
+      "all_failing_tests": [
+        "test_the_path_program_flag_reaches_the_controller_configuration"
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "mutation": "protocol_omits_the_seeded_bridge",
+      "file": "tools/run_fragment_constrained_suite.py",
+      "positive_control": false,
+      "expected_test": "test_the_seeded_bridge_is_recorded_in_the_protocol_block",
+      "all_failing_tests": [
+        "test_the_seeded_bridge_is_recorded_in_the_protocol_block"
+      ],
+      "verdict": "KILLED"
+    }
+  ],
+  "killed": 12,
+  "total": 12,
+  "survivors": []
+}

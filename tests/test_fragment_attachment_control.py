@@ -1334,6 +1334,26 @@ def test_the_transaction_payload_comes_from_the_prior():
             f"{prompt.drug_name}: with no payload from the prior the transaction "
             "must be abandoned, never invented"
         )
+
+        # And the SITE is the prior's too. An atom_insert the model proposed
+        # somewhere ELSE must not be re-anchored onto the path atom: the module
+        # rewrites the payload's slot and neighbours unconditionally, so without
+        # the site filter any insert anywhere would be accepted and the prior
+        # would be choosing the atom while the module chose the position. The
+        # previous version of this test passed a payload already anchored at the
+        # path atom, which satisfies the filter whether or not it is there --
+        # a guard another guard also satisfies is not load-bearing.
+        elsewhere = dataclasses.replace(payload, neighbors=((_anchor, 1),))
+        assert _anchor != path_atom
+        off_site = _attempt_path_transaction(
+            _StubModel(_StubMark("atom_insert", elsewhere)),
+            system, context.start_state, controller, lock,
+            np.random.default_rng(0), SamplingReceipt(),
+        )
+        assert off_site is None, (
+            f"{prompt.drug_name}: a payload the prior proposed away from the "
+            "path atom must not be re-anchored onto it"
+        )
     assert carried >= 5
 
 
