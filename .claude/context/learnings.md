@@ -4438,12 +4438,18 @@ independently of whether fa7_0 ever closes.**
   campaign visits" I have.** The zero-oracle preflight put `anchored_replacement` at a MEDIAN OF
   ZERO eligible endpoints over 45 cell roots at 512 draws, empty on 27 of 45 -- every braf, fa7 and
   5ht1b cell. It was retained anyway, on the argument that a root-state probe does not cover the
-  parents a campaign actually searches from. After ~870 charged calls of the scored run, frontier
-  improvements attributed by the SYNTHESIS-TIME lane tag:
-      anchored_replacement 32   shallow 28   structured 27   unattributed 23
-  **The lane the preflight called dead is the largest single contributor.** Had it been dropped on
-  the preflight -- which looked like a defensible, measured, cell-independent decision -- the
-  controller would have lost its best channel before the first oracle call.
+  parents a campaign actually searches from.
+  Frontier improvements attributed by the SYNTHESIS-TIME lane tag, at two budgets:
+      at ~870 calls:    anchored_replacement 32   shallow 28   structured 27   unattributed 23
+      at ~2,180 calls:  structured 52   shallow 49   anchored_replacement 40   unattributed 25
+  **The lane the preflight called dead contributes on the same order as the other two.** Had it
+  been dropped on the preflight -- which looked like a defensible, measured, cell-independent
+  decision -- the controller would have lost roughly a third of its frontier progress before the
+  first oracle call.
+  **CORRECTION, stated once: I first wrote this up at ~870 calls as "the largest single
+  contributor", and by ~2,180 calls the ordering had reversed to structured > shallow > anchored.**
+  The durable finding is that a root-dead lane is a real campaign contributor; the RANKING among
+  three lanes is not stable at these sample sizes and must not be quoted without its budget.
 - **GENERAL RULE: a proposal channel's yield FROM THE ROOT is not its yield IN THE CAMPAIGN.** The
   root is one state, it is the state furthest from anything the search has learned, and for a
   similarity-constrained task it is the state where the ball is centred. Judge a lane by what it
