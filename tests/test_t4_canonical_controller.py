@@ -420,3 +420,63 @@ def test_no_route_distilled_expert_anywhere_in_the_arms():
         assert "route_complete_region" not in payload["experts"], arm
         assert "route_complete_region" not in payload["proposal"], arm
         assert "route_distilled" not in json.dumps(payload["runtime_inputs_sha256"]), arm
+
+@pytest.mark.parametrize(
+    "experts", [("shallow",), ("shallow", "anchored_replacement", "structured")]
+)
+def test_a_fitted_value_model_selects_on_each_arm_feature_width(experts):
+    """The arms have DIFFERENT feature widths, and only one of them gets exercised early.
+
+    `integrated_features` emits one indicator per expert, so arm A's vector is narrower
+    than arm B's and arm C's. Round one of any cell selects with an UNFITTED
+    `ProgramValue`, which is width-agnostic, so the first live evidence that a fitted
+    model works on the narrow width would otherwise arrive only once arm A starts --
+    hours into a scored campaign, on the arm that has no adaptive rule to absorb a
+    failure.
+    """
+
+    import numpy as np
+
+    from compose_v4.control.fiber_control import ProgramValue, SearchState
+    from compose_v4.experiments.t4_fiber_campaign import Fiber, expand
+    from compose_v4.experiments.t4_integrated_route_fiber import (
+        attach_features,
+        merge_expert_pools,
+        select_batch,
+    )
+
+    parent = "CC(C)CCN(C)C(=O)c1ccccc1"
+    fiber = Fiber(parent, 0.2, support="compose_valid")
+    pools = {
+        expert: expand(
+            parent, -7.5, fiber, np.random.default_rng(11 + index), draws=40,
+            multi_region=True, horizon=3, proposal_lane=expert,
+        )
+        for index, expert in enumerate(experts)
+    }
+    state = SearchState(archive={parent: -7.5}, budget=250, rounds=1)
+    merged = merge_expert_pools(pools, experts=experts)
+    fresh = [row for row in merged if row["smiles"] not in state.archive]
+    candidates = attach_features(fresh, state, fiber, experts=experts)
+    assert candidates
+
+    # One indicator per expert, so the widths must actually differ between the arms or
+    # this parametrization is testing the same thing twice.
+    width = len(candidates[0]["features"])
+    assert width == 16 + len(experts), (width, experts)
+
+    value = ProgramValue(penalty=1.0)
+    value.fit(
+        [np.asarray(row["features"], dtype=float).tolist() for row in candidates[:20]],
+        [float(np.random.default_rng(index).normal()) for index in range(20)],
+    )
+    assert value.weights is not None, "the value model did not fit on this arm's width"
+
+    selected = select_batch(
+        candidates, value, state, np.random.default_rng(3), round_index=3,
+        batch=12, exploration=3, expert_floor_rounds=2, experts=experts,
+    )
+    assert len(selected) == 12
+    # A fitted model must actually be consulted: if every pick came back `exploration`
+    # the fit would be inert and this test would pass without testing anything.
+    assert any(row["selection_kind"] == "model" for row in selected)
