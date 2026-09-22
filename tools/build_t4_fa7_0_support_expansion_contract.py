@@ -272,11 +272,21 @@ def main() -> int:
     args = parser.parse_args()
     status = AUTHORIZED_STATUS if args.status == "authorized" else DRAFT_STATUS
     payload = build(status)
-    digest = seal(ROOT / TARGET, payload)
+    seal(ROOT / TARGET, payload)
+    # `seal` returns the FILE hash, not the payload hash -- the two differ and this
+    # print labelled the wrong one on the first build. The payload hash is what the
+    # launcher, the worker identity check and every citation of this arm mean.
+    envelope = json.loads((ROOT / TARGET).read_text())
     revision = subprocess.check_output(
         ["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, text=True
     ).strip()
-    print(f"{TARGET}\n  status        {status}\n  payload_sha256 {digest}\n  built_at_rev  {revision}")
+    print(
+        f"{TARGET}\n"
+        f"  status          {status}\n"
+        f"  payload_sha256  {envelope['payload_sha256']}\n"
+        f"  file_sha256     {sha256_file(ROOT / TARGET)}\n"
+        f"  built_at_rev    {revision}"
+    )
     return 0
 
 
