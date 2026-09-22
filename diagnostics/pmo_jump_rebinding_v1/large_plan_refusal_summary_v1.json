@@ -1,0 +1,80 @@
+{
+  "answer_known_offline_diagnostic": true,
+  "budget": {
+    "node_budget": 64,
+    "seconds_cap": 20.0
+  },
+  "by_band": {
+    "12_18_target": {
+      "bound": 7,
+      "first_refusal_reason": {
+        "None": 39,
+        "insufficient_preexisting_atoms_of_a_required_identity": 6
+      },
+      "max_depth_reached_median": 13,
+      "mechanism": {
+        "bound": 7,
+        "operand_state_incompatible@root": 6,
+        "search_budget_exhausted": 32
+      },
+      "n": 45,
+      "reached_full_depth": 11
+    },
+    "above_20": {
+      "bound": 0,
+      "first_refusal_reason": {
+        "None": 1,
+        "insufficient_preexisting_atoms_of_a_required_identity": 13,
+        "no_atom_carries_a_required_operand_descriptor": 31
+      },
+      "max_depth_reached_median": 1,
+      "mechanism": {
+        "no_role_consistent_successor": 1,
+        "operand_descriptor_overspecified@depth": 25,
+        "operand_state_incompatible@root": 13,
+        "search_budget_exhausted": 6
+      },
+      "n": 45,
+      "reached_full_depth": 0
+    },
+    "below_12": {
+      "bound": 7,
+      "first_refusal_reason": {
+        "None": 10
+      },
+      "max_depth_reached_median": 6,
+      "mechanism": {
+        "bound": 7,
+        "search_budget_exhausted": 3
+      },
+      "n": 10,
+      "reached_full_depth": 7
+    }
+  },
+  "new_oracle_calls": 0,
+  "rdkit_version": "2023.09.6",
+  "schema_version": "pmo_jump_large_plan_refusal_v1",
+  "specification": {
+    "compared_fields": [
+      "atom_type",
+      "formal_charge",
+      "origin",
+      "created_ordinal"
+    ],
+    "name": "role_based_v1"
+  },
+  "strata": {
+    "12_18_target": {
+      "available": 61,
+      "sampled": 45
+    },
+    "above_20": {
+      "available": 286,
+      "sampled": 45
+    },
+    "below_12": {
+      "available": 10,
+      "sampled": 10
+    }
+  }
+}
