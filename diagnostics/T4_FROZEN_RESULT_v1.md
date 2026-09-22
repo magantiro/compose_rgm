@@ -53,7 +53,7 @@
 | JAK2 | 1 | **-10.6** | -9.7 | -0.9 | 97 | panel |
 | JAK2 | 2 | **-10.8** | -10.4 | -0.4 | 89 | panel |
 | JAK2 | 3 | **-10.8** | -10.3 | -0.5 | 113 | panel |
-| **SUM** | | **-153.0** | **-145.4** | **-7.6** | | 12/14 wins, mean **-0.543** |
+| **SUM** | | **-153.9** | **-145.4** | **-7.6** | | 12/14 wins, mean **-0.607** |
 
 ## Correction applied to the previous table
 
@@ -153,3 +153,34 @@ To make the claim fully clean: one frozen, target-agnostic escalation configurat
 over the whole panel, triggered only by the mechanical empty-pool event. Until then the
 honest claim is a shared control FRAMEWORK with a per-instance escalation configuration,
 disclosed once in the appendix.
+
+
+## Correction applied 2026-09-22 — 5HT1B seed 2, delta 0.6
+
+**−11.3 → −12.2**, gap +0.7 → **−0.2** (IVG −12.0). Charged calls unchanged at 222.
+
+The published value was a best-so-far the run had **already superseded**. Round locks prove
+−11.3 at call 121 and **−12.2 at call 134**, so at 222 charged calls the best-so-far was
+−12.2. A best-so-far cannot regress — this is a reconciliation error, not a stale snapshot.
+
+Evidence: `5ht1b_1/round_018_lock.json`, `worker_telemetry[].parent_score`, run
+`5f08e547828d…`, molecule `FC(F)(F)c1cccc(N2CC[NH2+]CC(=C3CC4=C(C3)Cc3ccccc3C4)C2)c1`.
+A lock's `parent_score` is the docked score of a molecule that was scored; locks are
+authority, checkpoints are not.
+
+Verified on six points before applying: receipt, cell/delta identity, eligibility under the
+pinned kernel (sim **0.6000**, QED 0.6949, SA 3.7006, 30 heavy), within the 250-call ledger,
+same oracle/version, and not a duplicate or cross-config join.
+
+*That similarity is exactly 0.6000 — the row survives only because the shipped comparator is
+non-strict.*
+
+**Deliberately NOT applied:** braf_2 d0.4 (−10.9→−11.2) and parp1_1 d0.6 (−12.7→−13.0). Both
+published pairs ARE points on their runs' committed trajectories — faithful snapshots of runs
+that later advanced. Leaving them is conservative.
+
+**Caveat:** the −0.2 margin sits inside the measured docking spread (1.6 on fa7_0, though 0.1
+on this target's own repeats).
+
+Corrected totals — δ0.4: **10/15 wins**, −169.4 vs −160.4 (unchanged).
+δ0.6: **13/14 wins**, −153.9 vs −145.4, mean gap −0.607.
