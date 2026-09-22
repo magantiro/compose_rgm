@@ -672,7 +672,7 @@ def score(total: int, prior_sha256: str, horizon: float = OPERATIONAL_HORIZON) -
     """Score every arm of one design against each other and against the corpus."""
 
     import numpy as np
-    from rdkit import RDLogger
+    from rdkit import Chem, RDLogger
 
     from compose_v4.eval.denovo_benchmark import (
         denovo_benchmark_metrics,
@@ -729,7 +729,15 @@ def score(total: int, prior_sha256: str, horizon: float = OPERATIONAL_HORIZON) -
             if signature is not None
         ]
         ring_census = ring_signature_census(signatures) if signatures else None
-        distinct = sorted({text for text in generated if text})
+        # Canonicalized, so two spellings of one molecule collapse -- the
+        # strained census is over DISTINCT molecules, not distinct strings.
+        distinct = sorted(
+            {
+                Chem.MolToSmiles(mol)
+                for mol in (Chem.MolFromSmiles(text) for text in generated if text)
+                if mol is not None
+            }
+        )
         row: dict = {
             "arm": arm,
             "shards": len(shard_names),
