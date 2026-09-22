@@ -43,6 +43,7 @@ from compose_v4.experiments.pmo_entry_diagnostic import (
     INIT_MEDIAN_QED,
     MATCHED_PROPOSALS,
     OBSERVED_ARMS,
+    PARENT_SOURCES,
     PASS_CRITERION,
     PRODUCTION_ARM,
     REGIME,
@@ -58,11 +59,11 @@ from compose_v4.experiments.pmo_entry_diagnostic import (
     load_atlas_payload,
     load_productive_regions,
     murcko_scaffold,
+    parent_source,
     payload_sha256,
     predicate_payload,
     rate_bound,
     rung_index,
-    select_parents,
     stable_seed,
 )
 
@@ -241,14 +242,16 @@ def _strata(parents) -> dict[str, Any]:
     for parent in parents:
         counts[parent.score_stratum] = counts.get(parent.score_stratum, 0) + 1
         roles[parent.role] = roles.get(parent.role, 0) + 1
-        scores.append(parent.score)
+        if parent.score is not None:
+            scores.append(parent.score)
         if parent.heavy_atoms is not None:
             heavy.append(parent.heavy_atoms)
     return {
         "by_score_stratum": counts,
         "by_role": roles,
-        "blind_score_min": round(min(scores), 6),
-        "blind_score_max": round(max(scores), 6),
+        "parents_carrying_a_score": len(scores),
+        "blind_score_min": round(min(scores), 6) if scores else None,
+        "blind_score_max": round(max(scores), 6) if scores else None,
         "heavy_atoms_min": min(heavy) if heavy else None,
         "heavy_atoms_max": max(heavy) if heavy else None,
         "heavy_atoms_median": statistics.median(heavy) if heavy else None,
@@ -315,8 +318,10 @@ def phase_measure(args: argparse.Namespace) -> int:
     if task not in regions:
         raise SystemExit(f"no atlas region for task {task}")
     region = regions[task]
-    rows = read_blind_trajectory(_blind_dir(task))
-    parents = select_parents(rows, task, per_stratum=args.parents_per_stratum)
+    source = parent_source(args.parent_source)
+    parents = source["function"](
+        repo_root, task, per_stratum=args.parents_per_stratum
+    )
     began = time.time()
 
     # One generator per parent, pulled ROUND ROBIN, so a prefix of the task's
@@ -325,7 +330,9 @@ def phase_measure(args: argparse.Namespace) -> int:
     # the first N has produced at least three bad measurements.
     streams = []
     for parent in parents:
-        seed = stable_seed(DIAGNOSTIC_SCHEMA, args.arm, task, parent.endpoint, "r0")
+        seed = stable_seed(
+            DIAGNOSTIC_SCHEMA, args.arm, args.parent_source, task, parent.endpoint, "r0"
+        )
         rng = np.random.default_rng(seed)
         streams.append(
             {
@@ -416,6 +423,8 @@ def phase_measure(args: argparse.Namespace) -> int:
         "task": task,
         "arm": args.arm,
         "arm_describe": entry_arm["describe"],
+        "parent_source": args.parent_source,
+        "parent_source_describe": source["describe"],
         "predicate_sha256": payload_sha256(predicate),
         "delta": ENTRY_DELTA,
         "rungs": [list(rung) for rung in RUNGS],
@@ -1066,6 +1075,16 @@ def main(argv: list[str] | None = None) -> int:
     measure.add_argument("--task", required=True, choices=sorted(GATE_TASKS))
     measure.add_argument("--draws", type=int, default=1000)
     measure.add_argument("--parents-per-stratum", type=int, default=2)
+    measure.add_argument(
+        "--parent-source",
+        default="blind_visited_stratified",
+        choices=sorted(PARENT_SOURCES),
+        help=(
+            "round-0 parent population. The default is the deployed run's own "
+            "visited molecules, which is what every shard written before this "
+            "flag existed used."
+        ),
+    )
     measure.add_argument("--descendant-entrants", type=int, default=8)
     measure.add_argument("--descendant-draws", type=int, default=32)
     measure.add_argument("--output", required=True)

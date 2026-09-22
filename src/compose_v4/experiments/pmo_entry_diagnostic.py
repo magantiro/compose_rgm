@@ -354,7 +354,7 @@ def load_productive_regions(
 class Parent:
     task: str
     endpoint: str
-    score: float
+    score: float | None
     role: str
     index: int
     heavy_atoms: int | None
@@ -421,6 +421,175 @@ def select_parents(rows: Sequence[Any], task: str, *, per_stratum: int) -> tuple
         )
     parents.sort(key=lambda parent: parent.index)
     return tuple(parents)
+
+
+# ---- Parent sources ----
+#
+# A proposal MECHANISM is registered in ``ARM_REGISTRY``.  An INITIALIZATION
+# change is a different axis: it alters which parents exist at round 0 while
+# leaving the mechanism byte-identical.  Arm 2 of the ladder is exactly that --
+# ``configs/pmo_population_controller_v1.json`` draws ``count: 16`` from a bank
+# of 100 -- so it is registered here rather than as a second copy of arm 1.
+
+ParentSource = Callable[..., tuple["Parent", ...]]
+
+PARENT_SOURCES: dict[str, dict[str, Any]] = {}
+
+
+def register_parent_source(
+    name: str, function: ParentSource, *, describe: dict[str, Any]
+) -> None:
+    """Register a round-0 parent population. Adding one must not edit the harness."""
+
+    if name in PARENT_SOURCES:
+        raise ValueError(f"parent source already registered: {name}")
+    PARENT_SOURCES[name] = {"name": name, "function": function, "describe": describe}
+
+
+def parent_source(name: str) -> dict[str, Any]:
+    if name not in PARENT_SOURCES:
+        raise KeyError(f"unknown parent source {name}; registered: {sorted(PARENT_SOURCES)}")
+    return PARENT_SOURCES[name]
+
+
+def blind_visited_stratified(
+    repo_root: Path | str, task: str, *, per_stratum: int = 2, **_: Any
+) -> tuple[Parent, ...]:
+    """The deployed run's OWN parent distribution: a stratified sample of what it visited.
+
+    This is the default and it is what every shard written before the registry
+    existed used, so those shards remain reproducible by name.
+    """
+
+    from compose_v4.experiments.pmo_atlas_discovery import read_blind_trajectory
+
+    directory = (
+        Path.home() / "compose_pmo_atlas_runs" / "test_c_blind" / f"{task}__blind_250"
+    )
+    return select_parents(read_blind_trajectory(directory), task, per_stratum=per_stratum)
+
+
+#: The production initialization bank and the selector that draws from it.  Both
+#: are read, never reimplemented: ``initialization_lock`` is the function that
+#: produced the sealed 16-molecule file the blind run actually started from.
+INIT_BANK = "docs/PMO_INIT_BANK.json"
+INIT_SEED = 20260921
+PRODUCTION_INIT_COUNT = 16
+
+
+def _init_bank_records(repo_root: Path | str) -> tuple[list[dict[str, Any]], str]:
+    """Build 48-slot states from the bank along PRODUCTION's own construction path.
+
+    Identical to ``tools/parent_edit_cycles.py``: pad to 48 slots, refuse a
+    molecule above the 40-heavy executor ceiling, execute the empty program, and
+    encode.  A SMILES round trip alone yields a TIGHT graph, which silently
+    deletes the entire ``atom_insert`` family from the legal support, so the pad
+    is load-bearing rather than cosmetic.
+    """
+
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.experiments.continuation_profile import sha256_file
+    from compose_v4.experiments.whole_ring_plan import execute_program
+    from compose_v4.rewrite.trace_shard import encode_state
+
+    root = Path(repo_root)
+    path = root / INIT_BANK
+    bank = json.loads(path.read_text())
+    records: list[dict[str, Any]] = []
+    for index, smiles in enumerate(bank["smiles"]):
+        state = pad_molecular_graph(smiles_to_molecular_graph(smiles), 48)
+        if state.n_real_atoms > 40:
+            raise ValueError("outside the declared 40-atom executor support")
+        execute_program(state, [])
+        records.append({"source_id": f"{INIT_BANK}:{index}", "state": encode_state(state)})
+    return records, sha256_file(path)
+
+
+def init_bank_population(
+    repo_root: Path | str, task: str, *, count: int, **_: Any
+) -> tuple[Parent, ...]:
+    """The round-0 population at a declared initialization COUNT.
+
+    ``count`` is the ONLY value that differs from the sealed file the blind run
+    used; the bank, the seed and the selector are production's.  These parents
+    carry no score -- initialization is objective-blind by construction and this
+    harness charges nothing -- so ``score`` is ``None`` and the stratum is
+    ``objective_blind`` rather than a fabricated quartile.
+    """
+
+    from compose_v4.control.program_task import initialization_lock
+
+    records, source_sha256 = _init_bank_records(repo_root)
+    locked = initialization_lock(
+        records, count=count, seed=INIT_SEED, source_sha256=source_sha256
+    )
+    parents = []
+    for at, candidate in enumerate(locked["candidates"]):
+        endpoint = candidate["endpoint"]
+        parents.append(
+            Parent(
+                task=task,
+                endpoint=endpoint,
+                score=None,
+                role="initialization",
+                index=at,
+                heavy_atoms=_heavy(endpoint),
+                score_stratum="objective_blind",
+                state=candidate["state"],
+            )
+        )
+    parents.sort(key=lambda parent: parent.endpoint)
+    return tuple(parents)
+
+
+register_parent_source(
+    "blind_visited_stratified",
+    blind_visited_stratified,
+    describe={
+        "role": "deployed_population",
+        "label": "stratified sample of the molecules the blind run actually visited",
+        "initialization_count": PRODUCTION_INIT_COUNT,
+        "carries_scores": True,
+        "source": "~/compose_pmo_atlas_runs/test_c_blind/<task>__blind_250",
+    },
+)
+
+register_parent_source(
+    "init_bank_16",
+    lambda repo_root, task, **kwargs: init_bank_population(
+        repo_root, task, count=PRODUCTION_INIT_COUNT
+    ),
+    describe={
+        "role": "round_zero_population",
+        "label": "the sealed 16-molecule initialization the blind run started from",
+        "initialization_count": 16,
+        "carries_scores": False,
+        "source": f"{INIT_BANK} via initialization_lock(count=16, seed={INIT_SEED})",
+        "why": (
+            "the MATCHED control for the 100-init arm: same bank, same selector, "
+            "same seed, same mechanism, count alone differing"
+        ),
+    },
+)
+
+register_parent_source(
+    "init_bank_100",
+    lambda repo_root, task, **kwargs: init_bank_population(repo_root, task, count=100),
+    describe={
+        "role": "round_zero_population",
+        "label": "the whole objective-blind bank as the round-0 population",
+        "initialization_count": 100,
+        "carries_scores": False,
+        "source": f"{INIT_BANK} via initialization_lock(count=100, seed={INIT_SEED})",
+        "budget_caveat": (
+            "100 initialization molecules are 1% of the official 10,000-call "
+            "budget, 10% at 1,000 and 40% at 250. This arm is NOT admissible at "
+            "a 250-call budget and must be reported against the budget it would "
+            "run at."
+        ),
+    },
+)
 
 
 # ---- Proposals ----
