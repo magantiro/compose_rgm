@@ -149,6 +149,52 @@ def _grow_actions(source, rng, *, length, elements, anchor=None):
     return actions, at, chosen
 
 
+def _conditioned_completion(
+    source, contracted, rng, *, anchor, capacity, delete_actions, law
+):
+    """Draw several blind completions for one region and re-rank them by margin.
+
+    The candidates come from the SAME distribution the unconditioned path draws
+    from -- one uniform length over ``1..capacity``, then a uniform C/N/O chain
+    at the retained interface -- so this narrows nothing.  ``law.order`` returns
+    them in weighted order and the head is the draw; every candidate keeps a
+    strictly positive weight, which is what makes this a re-ranking rather than
+    a filter.
+
+    Candidates are executed from ``contracted`` rather than by replaying the
+    deletion from ``source``, which is the same endpoint at a fraction of the
+    cost: ``_grow_actions`` already allocates its slots against ``contracted``,
+    and the production path then executes ``[*delete_actions, *grow_actions]``
+    from ``source``. ``tests/test_replace_completion_law.py`` asserts the two
+    agree rather than leaving it assumed.
+
+    A candidate that fails to grow or execute is dropped from the SLATE, not
+    from the support: the unconditioned path would have raised on exactly the
+    same draw. If no candidate executes this raises, which the caller already
+    treats as this family declining the state.
+    """
+
+    drawn, endpoints = [], []
+    for _ in range(int(law.candidates)):
+        growth = int(rng.integers(1, capacity + 1))
+        try:
+            grow_actions, _, elements = _grow_actions(
+                contracted,
+                rng,
+                length=growth,
+                elements=("C", "N", "O"),
+                anchor=anchor,
+            )
+            endpoint, _ = execute_program(contracted, list(grow_actions))
+        except (ValueError, KeyError, IndexError, TypeError, RuntimeError):
+            continue
+        drawn.append((grow_actions, elements, growth))
+        endpoints.append(endpoint)
+    if not drawn:
+        raise ValueError("segment replacement drew no executable completion")
+    return drawn[law.order(endpoints, rng)[0]]
+
+
 def _terminal_shrink(source, rng, *, requested_length):
     current, actions, path, anchor = source, [], [], None
     preferred = None
@@ -384,13 +430,21 @@ def _local_module(source, rng, *, family, label):
 
 
 def compile_generic_module(
-    source: MolecularGraph, rng, family: str, *, region_law=None
+    source: MolecularGraph, rng, family: str, *, region_law=None, completion_law=None
 ):
     """Bind one generic module to the supplied exact state and execute it.
 
     ``region_law`` is threaded to the two modules that excise a bridge-separated
     substituent (``substituent_delete`` and the delete half of
     ``segment_replace``).  ``None`` keeps v1's uniform bounded law.
+
+    ``completion_law`` conditions the REPLACEMENT half of ``segment_replace``.
+    ``None`` is the historical behaviour and is byte-identical: one uniform
+    length draw and one uniform C/N/O chain, consuming exactly the RNG the
+    unconditioned path always consumed.  A law instead draws
+    ``law.candidates`` blind completions from that same distribution and
+    re-ranks them by the endpoint's free gate margin, so the reachable set is
+    unchanged and only the weighting moves.
     """
     if family not in GENERIC_MODULES:
         raise ValueError(f"unknown dynamic generic module: {family}")
@@ -430,14 +484,25 @@ def compile_generic_module(
         capacity = min(MAX_SEGMENT_LENGTH, 40 - contracted.n_real_atoms)
         if capacity < 1:
             raise ValueError("segment replacement has no insertion capacity")
-        growth = int(rng.integers(1, capacity + 1))
-        grow_actions, _, elements = _grow_actions(
-            contracted,
-            rng,
-            length=growth,
-            elements=("C", "N", "O"),
-            anchor=anchor,
-        )
+        if completion_law is None:
+            growth = int(rng.integers(1, capacity + 1))
+            grow_actions, _, elements = _grow_actions(
+                contracted,
+                rng,
+                length=growth,
+                elements=("C", "N", "O"),
+                anchor=anchor,
+            )
+        else:
+            grow_actions, elements, growth = _conditioned_completion(
+                source,
+                contracted,
+                rng,
+                anchor=anchor,
+                capacity=capacity,
+                delete_actions=delete_actions,
+                law=completion_law,
+            )
         return _execute_actions(
             source,
             family,
@@ -507,6 +572,7 @@ def synthesize_dynamic_program(
     max_primitives: int = 32,
     max_blocks: int = 8,
     region_law=None,
+    completion_law=None,
 ):
     """Construct one complete K-module program without any task evaluation."""
     if not 1 <= max_modules <= MAX_GENERIC_MODULES:
@@ -529,7 +595,11 @@ def synthesize_dynamic_program(
         for family in _weighted_module_order(rng, near_capacity=near_capacity):
             try:
                 product, stage = compile_generic_module(
-                    current, rng, family, region_law=region_law
+                    current,
+                    rng,
+                    family,
+                    region_law=region_law,
+                    completion_law=completion_law,
                 )
             except ValueError as error:
                 failures[f"{family}:{error!s}"] += 1
@@ -593,6 +663,7 @@ def synthesize_named_module_sequence(
     max_primitives=32,
     max_blocks=8,
     region_law=None,
+    completion_law=None,
 ):
     """Compile a prospectively chosen generic module sequence on exact states."""
     if not 1 <= len(families) <= 3 or any(
@@ -602,7 +673,11 @@ def synthesize_named_module_sequence(
     current, stages, selected = source, [], []
     for index, family in enumerate(families):
         current, stage = compile_generic_module(
-            current, rng, family, region_law=region_law
+            current,
+            rng,
+            family,
+            region_law=region_law,
+            completion_law=completion_law,
         )
         stages.append(stage)
         selected.append(

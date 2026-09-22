@@ -1,0 +1,177 @@
+{
+  "cell": "fa7_0",
+  "distinct_eligible": 0,
+  "distinct_offered": 3271,
+  "draws": 200,
+  "elapsed_seconds": 292.7,
+  "eligible_rows": [],
+  "excisions_offered": 1162,
+  "gate_disagreements": 0,
+  "lane": "shallow",
+  "largest_excisions": [
+    {
+      "eligible": false,
+      "heavy_delta": -22,
+      "qed": null,
+      "retains_amidine": false,
+      "ring_delta": -4,
+      "sa": null,
+      "similarity": null,
+      "smiles": "CC(C)CCN(C)C=O.N"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -22,
+      "qed": null,
+      "retains_amidine": false,
+      "ring_delta": -4,
+      "sa": null,
+      "similarity": null,
+      "smiles": "CC(C)CCN(C)CCN"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -21,
+      "qed": null,
+      "retains_amidine": false,
+      "ring_delta": -3,
+      "sa": null,
+      "similarity": null,
+      "smiles": "C=O.[CH]C=Cc1[c]cccc1"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -21,
+      "qed": null,
+      "retains_amidine": false,
+      "ring_delta": -2,
+      "sa": null,
+      "similarity": null,
+      "smiles": "Cc1cccc2ccccc12"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -21,
+      "qed": null,
+      "retains_amidine": false,
+      "ring_delta": -2,
+      "sa": null,
+      "similarity": null,
+      "smiles": "O.c1ccc2ccccc2c1"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -21,
+      "qed": null,
+      "retains_amidine": false,
+      "ring_delta": -4,
+      "sa": null,
+      "similarity": null,
+      "smiles": "CC(C)CCN(C=O)CCN"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -21,
+      "qed": null,
+      "retains_amidine": false,
+      "ring_delta": -4,
+      "sa": null,
+      "similarity": null,
+      "smiles": "CC(C)CCN(C=O)CCO"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -21,
+      "qed": null,
+      "retains_amidine": false,
+      "ring_delta": -4,
+      "sa": null,
+      "similarity": null,
+      "smiles": "CC(C)CCN(C=O)NCN"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -21,
+      "qed": null,
+      "retains_amidine": false,
+      "ring_delta": -4,
+      "sa": null,
+      "similarity": null,
+      "smiles": "CC(C)CCN(C=O)OCN"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -21,
+      "qed": null,
+      "retains_amidine": false,
+      "ring_delta": -4,
+      "sa": null,
+      "similarity": null,
+      "smiles": "C=CN(CCN)CCC(C)C"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -21,
+      "qed": null,
+      "retains_amidine": true,
+      "ring_delta": -4,
+      "sa": null,
+      "similarity": null,
+      "smiles": "CC(C)CCN(C=N)CCN"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -21,
+      "qed": null,
+      "retains_amidine": false,
+      "ring_delta": -4,
+      "sa": null,
+      "similarity": null,
+      "smiles": "CC(C)CCN(CCN)N=O"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -20,
+      "qed": null,
+      "retains_amidine": true,
+      "ring_delta": -3,
+      "sa": null,
+      "similarity": null,
+      "smiles": "[CH]=c1ccc(C(=N)N)cc1=CC"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -20,
+      "qed": null,
+      "retains_amidine": true,
+      "ring_delta": -3,
+      "sa": null,
+      "similarity": null,
+      "smiles": "C=c1cc(C(=N)N)ccc1=CC"
+    },
+    {
+      "eligible": false,
+      "heavy_delta": -20,
+      "qed": null,
+      "retains_amidine": true,
+      "ring_delta": -3,
+      "sa": null,
+      "similarity": null,
+      "smiles": "C=CC=C1[C]C=C(C(=N)N)C=C1"
+    }
+  ],
+  "max_excision_heavy_atoms": 22,
+  "max_rings_installed": 4,
+  "offered_with_excision_ge_7": 300,
+  "offered_with_excision_ge_7_eligible": 0,
+  "offered_with_ring_change_and_excision_ge_7": 266,
+  "offered_with_ring_count_change": 1892,
+  "offered_with_ring_installed": 836,
+  "offered_with_ring_installed_and_excision_ge_7": 9,
+  "offered_with_ring_removed": 1056,
+  "oracle_calls": 0,
+  "schema_version": "t4_fa7_0_expressibility_v1",
+  "seed_heavy_atoms": 32,
+  "seed_index": 9,
+  "seed_rings": 4
+}
