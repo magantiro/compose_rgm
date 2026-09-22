@@ -518,3 +518,94 @@ def test_no_per_task_or_per_drug_two_core_knob_is_expressible():
         "--path-length-for-drug",
     ):
         assert forbidden not in options
+
+
+# ---- A linker row is unreadable without its realized-length distribution ----
+
+
+def test_a_linker_shard_records_the_seed_and_the_realized_lengths():
+    """Run the REAL run_task with a stub sampler and read what it persisted.
+
+    A 60-shard matched linker arm was launched and stopped 27 minutes in because
+    the runner recorded ``separation_failures`` and every other receipt counter
+    but not one path field, so it would have produced shards with no realized
+    length in them -- the exact quantity the run existed to measure. Counters
+    without the underlying values cannot answer a question posed afterwards.
+
+    The lengths are stored per committed endpoint rather than as a histogram for
+    the same reason.
+    """
+    suite = _suite_module()
+    lengths = [1, 2, 2, 3]
+    real = suite.sample_completion
+
+    def stub(model, system, context, rng, *, config, receipt, control):
+        del model, system, context, rng, config, control
+        if not receipt.linker_lengths:
+            receipt.linker_lengths.extend(lengths)
+            receipt.path_targets.extend([2, 3, 2, 3])
+            receipt.path_transactions = 5
+            receipt.path_transaction_refusals = 7
+            receipt.path_rejections = 11
+            receipt.events.append(3)
+
+    suite.sample_completion = stub
+    try:
+        result = suite.run_task(
+            None,
+            None,
+            _prompts(),
+            FragmentTask.LINKER_DESIGN,
+            seeds=1,
+            samples=2,
+            config=suite.SamplerConfig(),
+            control=suite.AttachmentControlConfig(enabled=True, path_program=True),
+            verbose=False,
+            seed_list=[0],
+            drugs=["BARICITINIB"],
+            linker_bridge_atoms=1,
+        )
+    finally:
+        suite.sample_completion = real
+
+    detail = result["per_drug"]["BARICITINIB"][0]
+    assert detail["realized_linker_lengths"] == lengths
+    assert detail["path_targets"] == [2, 3, 2, 3]
+    assert detail["path_transactions"] == 5
+    assert detail["path_transaction_refusals"] == 7
+    assert detail["path_rejections"] == 11
+    # The seed is measured from the START STATE with the same function the
+    # program uses as its predicate, so the number that judges the run and the
+    # number the run steers by cannot disagree.
+    assert detail["seeded_linker_length"] == 1
+
+
+def test_the_recorded_seed_follows_the_bridge_knob():
+    """A seed that did not move with the construction would be a constant.
+
+    A field that cannot vary is not a measurement.
+    """
+    suite = _suite_module()
+    real = suite.sample_completion
+
+    def stub(model, system, context, rng, *, config, receipt, control):
+        del model, system, context, rng, config, control
+        receipt.events.append(1)
+
+    suite.sample_completion = stub
+    try:
+        seeds = {}
+        for bridge in (1, 3):
+            result = suite.run_task(
+                None, None, _prompts(), FragmentTask.LINKER_DESIGN,
+                seeds=1, samples=1,
+                config=suite.SamplerConfig(),
+                control=suite.AttachmentControlConfig(enabled=True, path_program=True),
+                verbose=False, seed_list=[0], drugs=["BARICITINIB"],
+                linker_bridge_atoms=bridge,
+            )
+            seeds[bridge] = result["per_drug"]["BARICITINIB"][0]["seeded_linker_length"]
+    finally:
+        suite.sample_completion = real
+    assert seeds[1] == 1
+    assert seeds[3] == 3

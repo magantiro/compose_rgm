@@ -38,6 +38,8 @@ from rdkit import Chem
 
 from compose_v4.benchmark.fragment_attachment_control import (
     AttachmentControlConfig,
+    AttachmentController,
+    AttachmentSpec,
     interface_coverage_report,
 )
 from compose_v4.benchmark.fragment_conditioned_sampler import (
@@ -247,6 +249,16 @@ def run_task(
                 )
                 continue
 
+            # Measurement only: the same function the program uses as its
+            # predicate, so the number that judges the run and the number the
+            # run steers by cannot disagree.
+            controller_for_report = AttachmentController(
+                context.attachment
+                or AttachmentSpec((), (), (frozenset(context.locked_slots),)),
+                context.locked_slots,
+                control,
+            )
+
             rng_seed = prompt_rng_seed(prompt.drug_name, task.value, seed)
             rng = np.random.default_rng(rng_seed)
             receipt = SamplingReceipt()
@@ -312,6 +324,31 @@ def run_task(
                     # over EITHER denominator without re-running the sampler.
                     "committed_endpoint_smiles": list(committed),
                     "emitted_samples": list(emitted),
+                    # ---- Two-interface path accounting ----
+                    #
+                    # A linker row is only ABOUT designed linkers if the
+                    # realized-length distribution is beside it, and that
+                    # distribution is undefined without the length the
+                    # construction SEEDED. Both are recorded here, per committed
+                    # endpoint rather than as a summary: a run that stores
+                    # aggregates cannot answer a question posed after the fact,
+                    # and that has already cost this workstream a set of
+                    # secondary metrics permanently. All zero or empty for a
+                    # single-core prompt and with the program off, except
+                    # realized_linker_lengths, which is measured either way and
+                    # is exactly what makes the two arms comparable.
+                    "seeded_linker_length": (
+                        controller_for_report.realized_linker_length(
+                            context.start_state
+                        )
+                        if context.attachment
+                        else None
+                    ),
+                    "realized_linker_lengths": list(receipt.linker_lengths),
+                    "path_targets": list(receipt.path_targets),
+                    "path_transactions": receipt.path_transactions,
+                    "path_transaction_refusals": receipt.path_transaction_refusals,
+                    "path_rejections": receipt.path_rejections,
                     "interface_rejections": receipt.interface_rejections,
                     "staging_rejections": receipt.staging_rejections,
                     "redirections": receipt.redirections,
