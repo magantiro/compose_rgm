@@ -4387,6 +4387,28 @@ independently of whether fa7_0 ever closes.**
   0.5% vs 1.2%) while **6-rings fall 72.4% -> 53.7% and 3+4-rings rise 1.9% -> 22.4%**. The
   defect is not "too many rings" or "wrong sizes" -- it is *six-rings converted into
   three- and four-rings*, exactly what a shrinking acyclic-carbon host predicts.
+- **THE HYPOTHESIS IS CONFIRMED AT THE MODEL'S OWN CONDITIONAL LAW, not merely by the
+  intervention working.** On the pristine carbon trees the source prior actually produces --
+  maximal host, family restricted to `ring_system_grow` so every draw is a ring decision --
+  12 states x 16 draws at each of six conditioning times
+  (`diagnostics/denovo_ring_marginal_v1/ring_time_sensitivity_v1.json`):
+
+      frozen time   0.049    0.2     0.5     0.9    0.99   0.99966    corpus
+      small rings   2.9%    1.4%    2.8%    3.5%   1.8%     1.3%       1.87%
+      6-rings      71.8%   72.3%   69.3%   68.0%  67.0%    68.6%      72.43%
+      5-rings      24.8%   25.9%   26.9%   25.4%  29.9%    28.3%      24.10%
+
+  Standard errors are 0.8-1.2 points, so every cell is consistent with the corpus and with
+  every other cell. **Given a full host the model already samples the corpus ring law.** The
+  22.4% strained rings it produces in rollout are therefore what a SHRUNKEN host forces, not
+  what the network prefers -- which is exactly the hypothesis, now measured on the conditional
+  law rather than inferred from the fix.
+- **FALSIFIED en route: "an early conditioning time makes the model pick different rings".**
+  That worry is what motivated building the `first_ring_event` arm at all. The template law is
+  FLAT in time (2.9%+-1.2 at t = 0.049 against 1.3%+-0.8 at t = 0.99966). The realization point
+  still matters enormously -- but through the HAZARD, not through the ring law: installing at
+  t = 0 leaves the continuation reading "nearly done" (11 events against 28). Two effects of
+  time that are easy to conflate; measure them separately.
 - **The catalog is NOT the limit: 99.78% of corpus ring SYSTEMS and 99.43% of corpus
   MOLECULES have a signature the checkpoint's 3,092 templates can express.** So a plan drawn
   from the corpus law is realizable in principle and the arm's ceiling is p_train, not the
