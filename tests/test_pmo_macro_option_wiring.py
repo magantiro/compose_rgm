@@ -33,6 +33,7 @@ from compose_v4.experiments.pmo_macro_option_arms import (
     load_initialization,
     load_jump_checkpoint,
 )
+from compose_v4.rewrite.trace_shard import decode_state
 
 ROOT = Path(__file__).resolve().parents[1]
 SEED = 20260922
@@ -408,3 +409,27 @@ def test_a_continuation_is_not_offered_from_a_parent_the_round_did_not_draw(boot
         "advance without the selection law ever choosing its bridge, which makes the "
         "parent-mass floor decoration"
     )
+
+
+def test_every_stored_leg_is_a_48_slot_production_state(bootstrapped):
+    """PMO states are 48 slots, and this path never re-parses a SMILES to get one.
+
+    A state built by `smiles_to_molecular_graph` is TIGHT -- exactly `n_real_atoms` slots
+    -- which silently deletes the whole `atom_insert` family from the legal support, and
+    at 40 slots the PMO proposal path hard-refuses. Every state here comes from
+    `decode_state` on a trace the corpus or the executor produced, so the hazard cannot
+    arise; this pins that rather than trusting it.
+    """
+    folder, _campaign, kwargs, _, _ = bootstrapped
+    controller, _, _ = _restore_with_open_window(folder, kwargs)
+    checked = 0
+    for option_id in controller.option_registry.options:
+        for stored in controller.option_registry.construction(option_id)["stages"]:
+            state = decode_state(stored["source_state"])
+            assert state.n_slots == 48, (
+                f"a declared leg carries a {state.n_slots}-slot source; the PMO proposal "
+                "path requires an exact 48-slot state"
+            )
+            assert 1 <= state.n_real_atoms <= 40
+            checked += 1
+    assert checked, "no stored leg was available to check"
