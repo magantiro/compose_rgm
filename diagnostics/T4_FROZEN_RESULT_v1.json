@@ -327,14 +327,24 @@
   "schema_version": "t4_frozen_result_v1",
   "status": "FROZEN \u2014 this is the authoritative T4 result. Do not re-derive from a builder.",
   "successor_in_progress": {
+   "bar": "Eligibility and competitiveness, NOT reproduction of the old champions. VERIFIED aggregate slack at d0.6: the ten unaffected base rows sum to -113.7 and IVG's full 15-cell total is -153.1, so the five fallback-owned cells need only sum below -39.4, averaging -7.9 each. braf seed 1's current -9.0 is already a LOSS to IVG's -9.7.",
    "branch": "t4-generic-fallback-20260922",
-   "open_cost_decision": "Option A re-runs every previously-exhausted cell under the frozen algorithm (uniform 15/15); Option B runs only fa7 seed 1 and leaves four named rescues (cheaper, table stays mixed, one-algorithm claim would be FALSE).",
-   "phase_1": "seal the trigger/K/sampler/attempts/budget/seeds, and MEASURE offline how often each candidate trigger would have fired in the 10 cells that already search. Zero oracle calls.",
-   "status": "v1 REMAINS AUTHORITATIVE until v2 exists. Do not quote a v2 number before it is sealed and run.",
-   "what": "A v2 panel produced by ONE FROZEN ALGORITHM = primary controller + a generic zero-support fallback available to all 15 cells, sealed prospectively before any docking.",
-   "why": "v1 carries RESCUE rows that ran under different contracts and different mechanisms. Reporting them as ordinary rows would misstate the procedure; labelling them separately is honest but reads as an asterisk. A single declared algorithm removes both problems."
+   "cells_the_fallback_would_own": [
+    "braf seed 1 d0.6",
+    "braf seed 2 d0.6",
+    "fa7 seed 3 d0.6",
+    "5ht1b seed 3 d0.6",
+    "fa7 seed 1 d0.6 (currently blank)"
+   ],
+   "docking_authorization": "NOT granted. Sealing precedes docking; docking is a separate decision.",
+   "minimum_viable_alternative": "fa7 seed 1 alone closes 14/15 -> 15/15. The four existing rescue rows then remain procedurally heterogeneous and Methods must say so once, rather than claiming a single identical algorithm. This is sufficient for publication and is the fallback plan.",
+   "next_step_zero_oracle": "Run the frozen shared fallback on those five cells at 3-5 fixed seeds and report distinct ELIGIBLE completions per cell against the old rescue support, plus non-trigger controls. If fa7 seed 3 or 5ht1b seed 3 return zero support, the shared mechanism does NOT subsume the old rescues and that is the finding.",
+   "retained_rows": "A successful cell is NOT rerun. It is retained under a non-trigger equivalence proof: primary execution byte-identical up to the fallback check, and the fallback condition false on that row's historical trajectory, replayed offline from its committed locks.",
+   "status": "v1 REMAINS AUTHORITATIVE. Do not quote a v2 number before it is sealed and run.",
+   "structural_basis": "All five originally exhausted d0.6 cells share ONE failure mode: every clean eligible witness is a large EXCISION of ~7-15 heavy atoms and none requires growth. That includes 5ht1b seed 3, whose arm is LABELLED a protonation rescue but whose witness audit showed the net-charge change comes from excising the [NH+]-bearing fragment -- ordinary atom deletion. The old labels overstate how heterogeneous the machinery is.",
+   "trigger_DECIDED": "terminal primary-controller candidate_exhaustion ONLY -- never per-round zero-eligible. Rationale is correctness, not cost: a per-round trigger changes exploration inside successful cells, so trajectories could diverge everywhere and a full rerun would be owed."
   },
-  "updated_at_utc": "2026-09-22T04:09:21.126388+00:00"
+  "updated_at_utc": "2026-09-22T04:15:22.368214+00:00"
  },
- "payload_sha256": "f779d3479617d325e2238862e3e7aaafedca56f1311c7bec2fcc6bd311f7fe90"
+ "payload_sha256": "42bcbd491cc70d111026882d0436c96492d0467faa8214ed065f79e80e7264c7"
 }
