@@ -157,6 +157,18 @@
    }
   ],
   "created_at_utc": "2026-09-22T03:59:40.736075+00:00",
+  "decision_rule_status": {
+   "routing": "MET -- 30/30 regression, 5/5 on historically-fired cells",
+   "rule": "routing correct AND support restoration comparable => freeze and run the scored 3-seed T4",
+   "support_restoration": "MET -- 5 PASS, 0 FAIL, coverage complete",
+   "verdict": "BOTH CONDITIONS MET ON MEASURED EVIDENCE",
+   "what_still_blocks_a_scored_run_and_it_is_not_scientific": [
+    "neither the router nor the ladder has a production caller -- no app imports t4_unified_routing, no contract names the ladder.  Seven built-but-inert mechanisms precede this one.  THIS IS THE GATE.",
+    "Plan B costs 22,500 calls (30 cells x 3 seeds x 250), not 15,000; two seeds fit the authorization but weaken the SD",
+    "fa7_0 is marginal at 2/3 seeds and will sometimes contribute nothing in a scored run -- expect it rather than discover it; braf_0 and braf_1 are also seed-marginal on the trigger"
+   ],
+   "withdrawn": "the region_law-into-escalated-lanes recommendation.  It rested on fa7_0's zero, and the UNCONDITIONED ladder recovers fa7_0 at the production seed.  Residual claim is narrower and INFERRED: the law plausibly buys reliability and draw efficiency (2880 historical draws vs 6720 here), not capability.  Not a blocker.  NB the production declaration already commits to the conditioned kernel; that stands on its own rationale."
+  },
   "deltas": {
    "0.4": {
     "compose_sum": -169.4,
@@ -474,12 +486,22 @@
    "why_it_was_reversed": "T4 DOCKING IS NOT REPRODUCIBLE ACROSS RUNS. Measured: the fa7_0 seed scored -7.5, -8.30 and -8.8 in three runs -- 1.3 kcal/mol on ONE molecule -- because qvina02 is seeded but the conformer it docks comes from `obabel --gen3D`, which takes no seed. Per-cell margins in this panel are 0.2-0.7, so a rerun could lose two or three wins to conformer noise WITHOUT the algorithm being worse, and we would be committed to reporting the new table with no legitimate way back. Spending 7,500 oracle calls to acquire a table we might like less is a bad trade."
   },
   "ladder_evidence_status": {
-   "NAMING_CONSEQUENCE": "The controller is named for 'adaptive proposal escalation' and the escalation rungs are unevidenced.  Until rungs 1-3 fire, the honest name for what is demonstrated is a zero-support FALLBACK, not an escalation LADDER.  Do not write 'escalation' into a claim the ladder has not earned -- terminology carries claims.",
-   "detail": "Every landed event stopped at rung 0 with draws_spent = 0.  The two cells with no data (fa7_0, fa7_2) are exactly the two whose rung 0 cannot carry them: rung 0 yields 0-1 and 1-3 against a stop target of 4.",
-   "finding": "ladder_rungs_1_to_3_exercised: false -- the escalation ladder has NEVER run, on any cell, at any seed",
-   "if_both_cells_come_back_empty": "the unified controller does not subsume the historical arms, and Plan A with an appendix disclosure is the right table",
-   "what_IS_evidenced": "RUNG 0, the zero-support fallback.  It restores support on braf_0, braf_1 and 5ht1b_2 at roughly 1/50th the proposal compute the historical conditioned shallow lane spent (~20 s against 1132-1352 s), with exact SMILES overlap against the historical arms of 4/8, 10/22 and 2/4.",
-   "what_would_close_it": "six zero-oracle events on fa7_0 and fa7_2, all three seeds, conditioned and unconditioned"
+   "NAMING_NOW_EARNED": "'adaptive proposal escalation' is supported by measurement.  The earlier constraint against using the word is lifted.",
+   "RESOLVED": "2026-09-22.  The escalation ladder is LOAD-BEARING.  The earlier entry here said it had never fired and that 'escalation' was a name it had not earned.  That is retired.",
+   "endpoints": "93 distinct eligible, 93/93 med-chem plausible",
+   "fa7_0_is_marginal": "P(any eligible) = 2/3 seeds (3 / 0 / 2).  Quote 2/3, never 0/3.",
+   "gate_result": "5 PASS, 0 FAIL, coverage COMPLETE -- 15/15 trigger events, 10/10 controls",
+   "per_cell": {
+    "5ht1b_2": "14,12,19 P(any)=3/3",
+    "braf_0": "4,5,4 P(any)=3/3",
+    "braf_1": "6,8,8 P(any)=3/3",
+    "fa7_0": "3,0,2 P(any)=2/3",
+    "fa7_2": "3,3,2 P(any)=3/3"
+   },
+   "rungs_producing_eligible_endpoints": "0, 1, 2 and 3 have each produced across the panel",
+   "support_restoration_not_replay": "historical exact-SMILES overlap where a pool was recoverable: braf_0 5/9, braf_1 10/24, fa7_2 2/3 -- which is what the interpretation rule asked for",
+   "the_decisive_cell": "fa7_0, verified independently from the committed shard on d63b1804: rung 0 gave 0, rung 1 (960/lane) gave 0, rung 2 (1920/lane) gave 2, rung 3 (3840/lane) gave 1.  Its ENTIRE production-seed yield is ladder, mirroring the historical arm's own pattern.",
+   "the_two_kernels_move_in_OPPOSITE_directions": "region cells 48/48 pure excision at heavy deltas -15..-1; 5ht1b_2 is 27 grow / 11 replace / 7 prune.  This is the strongest available evidence that the routing yields genuinely different BEHAVIOUR rather than one mechanism relabelled -- put it in any writeup, because it is the thing a reviewer will press on."
   },
   "objective": "QuickVina2 docking of the best eligible lead, lower is better, subject to QED>=0.6, SA<=4.0, Tanimoto>=delta to the seed",
   "production_controller_declaration": {
@@ -568,5 +590,5 @@
    ]
   }
  },
- "payload_sha256": "42aa31c618f1b8bfa2348496e86a9373afe91e111beb87e2a57ae5d3ed8dc1a1"
+ "payload_sha256": "ea181ab3ace706d39c6e0a2f33c4547f88594c3cf77a1c1797dfc4f967ab80ef"
 }
