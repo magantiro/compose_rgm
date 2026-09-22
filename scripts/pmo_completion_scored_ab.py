@@ -38,7 +38,25 @@ REFERENCE_PANEL = {
         ("c1ccccc1", 0.07228915662650602),
         ("CC(=O)Oc1ccccc1C(=O)O", 0.11578947368421053),
     ),
+    "perindopril_mpo": (
+        ("CCCC(NC(C)C(=O)N1C2CCCCC2CC1C(=O)O)C(=O)OCC", 0.01831563888873418),
+        ("CC(=O)Oc1ccccc1C(=O)O", 0.11873257908909057),
+        ("Cn1c(=O)c2c(ncn2C)n(C)c1=O", 0.24253562503633297),
+        ("c1ccccc1", 0.0),
+    ),
+    "jnk3": (
+        ("O=C(Nc1cccc(-c2ccncc2)c1)c1ccc(Cl)cc1", 0.06),
+        ("CCCC(NC(C)C(=O)N1C2CCCCC2CC1C(=O)O)C(=O)OCC", 0.02),
+        ("CC1=CC=C(C=C1)C1=CC(=NN1C1=CC=C(C=C1)S(N)(=O)=O)C(F)(F)F", 0.02),
+        ("CC(=O)Oc1ccccc1C(=O)O", 0.0),
+    ),
 }
+
+#: Tasks whose evaluator opens a relative ``oracle/<name>.pkl``. The asset must
+#: resolve for the oracle's whole LIFETIME, not just its constructor -- a
+#: construct-then-restore-cwd pattern makes every call return PyTDC's swallowed
+#: default of 0.0 and produces a plausible all-zero ledger.
+ASSET_BACKED = ("jnk3", "drd2", "gsk3b")
 
 
 def _rdkit_six_shim() -> None:
@@ -93,6 +111,11 @@ def build_oracle(task_name: str):
     from tdc import Oracle
 
     oracle = Oracle(name=task_name)
+    if task_name in ASSET_BACKED:
+        from compose_v4.experiments.pmo_oracle_assets import AssetPinnedOracle
+
+        oracle = AssetPinnedOracle(oracle, ROOT, name=task_name)
+        oracle.prime(REFERENCE_PANEL[task_name][0][0])
     panel = REFERENCE_PANEL.get(task_name)
     control = []
     if panel is None:
