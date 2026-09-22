@@ -1,0 +1,164 @@
+{
+ "control": {
+  "file": "src/compose_v4/control/pmo_macro_option.py",
+  "mutation": "cosmetic_report_key_order",
+  "passed": true,
+  "returncode": 0,
+  "seconds": 0.5,
+  "tail": [
+   ".............................                                            [100%]",
+   "29 passed in 0.28s"
+  ]
+ },
+ "harness_trustworthy": true,
+ "killed": 11,
+ "negatives": 11,
+ "rows": [
+  {
+   "file": "src/compose_v4/control/pmo_macro_option.py",
+   "killed": true,
+   "mutation": "declare_a_macro_inside_the_ceiling",
+   "returncode": 1,
+   "seconds": 0.5,
+   "tail": [
+    "FAILED tests/test_pmo_macro_option.py::test_declaration_refuses_a_macro_one_round_could_realize",
+    "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "1 failed in 0.31s"
+   ],
+   "test": "tests/test_pmo_macro_option.py::test_declaration_refuses_a_macro_one_round_could_realize"
+  },
+  {
+   "file": "src/compose_v4/control/pmo_macro_option.py",
+   "killed": true,
+   "mutation": "accept_an_unbounded_window",
+   "returncode": 1,
+   "seconds": 0.5,
+   "tail": [
+    "FAILED tests/test_pmo_macro_option.py::test_declaration_refuses_an_unbounded_or_absent_window",
+    "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "1 failed in 0.31s"
+   ],
+   "test": "tests/test_pmo_macro_option.py::test_declaration_refuses_an_unbounded_or_absent_window"
+  },
+  {
+   "file": "src/compose_v4/control/pmo_macro_option.py",
+   "killed": true,
+   "mutation": "floor_never_applied",
+   "returncode": 1,
+   "seconds": 0.5,
+   "tail": [
+    "FAILED tests/test_pmo_macro_option.py::test_the_floor_lifts_a_starved_bridge_to_exactly_the_declared_share",
+    "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "1 failed in 0.31s"
+   ],
+   "test": "tests/test_pmo_macro_option.py::test_the_floor_lifts_a_starved_bridge_to_exactly_the_declared_share"
+  },
+  {
+   "file": "src/compose_v4/control/pmo_macro_option.py",
+   "killed": true,
+   "mutation": "floor_becomes_a_filter",
+   "returncode": 1,
+   "seconds": 0.5,
+   "tail": [
+    "FAILED tests/test_pmo_macro_option.py::test_the_floor_is_a_reranking_and_never_a_filter",
+    "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "1 failed in 0.29s"
+   ],
+   "test": "tests/test_pmo_macro_option.py::test_the_floor_is_a_reranking_and_never_a_filter"
+  },
+  {
+   "file": "src/compose_v4/control/pmo_macro_option.py",
+   "killed": true,
+   "mutation": "reservation_ignores_the_batch_limit",
+   "returncode": 1,
+   "seconds": 0.5,
+   "tail": [
+    "FAILED tests/test_pmo_macro_option.py::test_a_reservation_never_exceeds_the_authorized_batch",
+    "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "1 failed in 0.36s"
+   ],
+   "test": "tests/test_pmo_macro_option.py::test_a_reservation_never_exceeds_the_authorized_batch"
+  },
+  {
+   "file": "src/compose_v4/control/pmo_macro_option.py",
+   "killed": true,
+   "mutation": "reservation_displaces_from_the_head",
+   "returncode": 1,
+   "seconds": 0.5,
+   "tail": [
+    "FAILED tests/test_pmo_macro_option.py::test_a_reserved_continuation_displaces_from_the_tail_not_the_head",
+    "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "1 failed in 0.34s"
+   ],
+   "test": "tests/test_pmo_macro_option.py::test_a_reserved_continuation_displaces_from_the_tail_not_the_head"
+  },
+  {
+   "file": "src/compose_v4/control/pmo_macro_option.py",
+   "killed": true,
+   "mutation": "window_expires_one_round_early",
+   "returncode": 1,
+   "seconds": 0.5,
+   "tail": [
+    "FAILED tests/test_pmo_macro_option.py::test_a_one_round_window_covers_exactly_the_round_after_the_bridge_is_charged",
+    "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "1 failed in 0.33s"
+   ],
+   "test": "tests/test_pmo_macro_option.py::test_a_one_round_window_covers_exactly_the_round_after_the_bridge_is_charged"
+  },
+  {
+   "file": "src/compose_v4/control/pmo_macro_option.py",
+   "killed": true,
+   "mutation": "window_never_expires",
+   "returncode": 1,
+   "seconds": 0.5,
+   "tail": [
+    "FAILED tests/test_pmo_macro_option.py::test_a_one_round_window_covers_exactly_the_round_after_the_bridge_is_charged",
+    "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "1 failed in 0.34s"
+   ],
+   "test": "tests/test_pmo_macro_option.py::test_a_one_round_window_covers_exactly_the_round_after_the_bridge_is_charged"
+  },
+  {
+   "file": "src/compose_v4/control/pmo_macro_option.py",
+   "killed": true,
+   "mutation": "restore_accepts_a_lengthened_window",
+   "returncode": 1,
+   "seconds": 0.5,
+   "tail": [
+    "FAILED tests/test_pmo_macro_option.py::test_restore_refuses_a_window_lengthened_in_the_payload",
+    "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "1 failed in 0.27s"
+   ],
+   "test": "tests/test_pmo_macro_option.py::test_restore_refuses_a_window_lengthened_in_the_payload"
+  },
+  {
+   "file": "src/compose_v4/control/pmo_macro_option.py",
+   "killed": true,
+   "mutation": "frontier_moves_backwards",
+   "returncode": 1,
+   "seconds": 0.5,
+   "tail": [
+    "FAILED tests/test_pmo_macro_option.py::test_the_frontier_only_moves_forward",
+    "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "1 failed in 0.30s"
+   ],
+   "test": "tests/test_pmo_macro_option.py::test_the_frontier_only_moves_forward"
+  },
+  {
+   "file": "src/compose_v4/control/pmo_macro_option.py",
+   "killed": true,
+   "mutation": "protection_becomes_a_blanket_exemption",
+   "returncode": 1,
+   "seconds": 0.5,
+   "tail": [
+    "FAILED tests/test_pmo_macro_option.py::test_a_chain_that_expires_mid_way_is_terminal",
+    "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "1 failed in 0.30s"
+   ],
+   "test": "tests/test_pmo_macro_option.py::test_a_chain_that_expires_mid_way_is_terminal"
+  }
+ ],
+ "schema_version": "pmo_macro_option_mutation_battery_v1",
+ "suite": "library",
+ "survived": 0
+}

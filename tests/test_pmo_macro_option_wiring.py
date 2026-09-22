@@ -376,3 +376,35 @@ def test_a_declared_leg_reaches_the_charged_batch_under_the_matched_geometry(boo
             if row["provenance"].get("entry_channel") == MACRO_OPTION_CHANNEL_TAG
         ]
     assert locked, "no declared macro-option leg was ever locked into a charged batch"
+
+
+def test_a_continuation_is_not_offered_from_a_parent_the_round_did_not_draw(bootstrapped):
+    """The gate that makes the parent-mass floor load-bearing rather than decoration.
+
+    A continuation exists in production because the selection law CHOSE its parent. If a
+    stored leg were offered unconditionally, the option would advance from a bridge
+    nothing ever drew -- the continuation would arrive for free, and the floor lifting
+    that bridge's parent mass would be measuring nothing.
+
+    Both directions, because a guard is only tested where it binds: with the bridge in
+    the round's drawn set the leg IS offered, and with it absent -- everything else
+    identical -- it is not. If the positive direction ever stops producing a row this
+    fails loudly rather than passing on an empty comparison.
+    """
+    folder, _campaign, kwargs, _, task = bootstrapped
+    controller, _option_id, option = _restore_with_open_window(folder, kwargs)
+    eligibility = _eligibility(task)
+    waiting = option.stages[controller.option_registry.next_stage_index(_option_id)]
+    bridge = waiting.parent_endpoint
+
+    drawn = controller._macro_option_candidates(eligibility, set(), {bridge})
+    assert drawn, (
+        "the leg is not offered even from its own drawn parent, so the negative half "
+        "below would pass for the wrong reason"
+    )
+    undrawn = controller._macro_option_candidates(eligibility, set(), set())
+    assert undrawn == [], (
+        "a declared leg was offered from a parent the round never drew: the option can "
+        "advance without the selection law ever choosing its bridge, which makes the "
+        "parent-mass floor decoration"
+    )

@@ -27,6 +27,7 @@ from time import perf_counter
 
 LIBRARY = "src/compose_v4/control/pmo_macro_option.py"
 CONTROLLER = "src/compose_v4/control/pmo_macro_option_controller.py"
+ARMS = "src/compose_v4/experiments/pmo_macro_option_arms.py"
 FAST = "tests/test_pmo_macro_option.py"
 WIRING = "tests/test_pmo_macro_option_wiring.py"
 
@@ -170,7 +171,7 @@ NEGATIVES: list[tuple[str, str, str, str, str, str]] = [
         "            if stage.endpoint in archive_seen or stage.parent_endpoint not in drawn_parents:",
         "            if stage.endpoint in archive_seen:",
         WIRING,
-        "test_nothing_runs_at_all_when_macro_options_are_disabled",
+        "test_a_continuation_is_not_offered_from_a_parent_the_round_did_not_draw",
     ),
     (
         "stored_leg_endpoint_drift_tolerated",
@@ -199,6 +200,14 @@ NEGATIVES: list[tuple[str, str, str, str, str, str]] = [
         '        candidate["provenance"]["entry_channel"] = "something_else"',
         WIRING,
         "test_every_offered_leg_carries_its_channel_tag_at_synthesis_time",
+    ),
+    (
+        "harness_accepts_a_geometry_the_reservation_does_not_reach",
+        ARMS,
+        "    if int(queries_per_round) != int(config.candidates_per_batch):",
+        "    if False:",
+        WIRING,
+        "test_the_harness_refuses_a_geometry_where_the_reservation_is_not_the_binding_gate",
     ),
 ]
 
