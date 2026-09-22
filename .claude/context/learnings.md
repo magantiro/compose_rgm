@@ -4519,6 +4519,19 @@ independently of whether fa7_0 ever closes.**
   removes a ring system, which is what makes the realized marginal equal to the plan's. In the
   `0` arms it does, on a fifth of molecules, by a mechanism not identified. Compare the
   endpoint's own signature against what was installed -- never assume the plan survived.
+- **CORRECTION, and it is a SELECTION artifact, not sampling noise: the published N=50 de-novo
+  row does not reproduce.** `diagnostics/denovo_generation_v1/partial_seed20260920_n50_v1.json`
+  reports quality 0.280 / QED 0.591 / SA 4.112; arm A at n = 190, **the same checkpoint sha and
+  byte-identical sampler constants** (`MAX_ATOMS` 40, horizon 16.0, `TIME_STEP` 0.1,
+  `MAX_EVENTS` 128), reports 0.121 / 0.522 / 4.600 -- a quality difference of z = 2.77. That
+  artifact carries **`shards_present: 1`**: it is the single shard that committed before the
+  60-shard preemption cascade raised. Its molecules are **25.04 heavy atoms against arm A's
+  28.79**, and the repo's own size coefficient (-0.0213 QED per heavy atom) predicts
+  0.522 + 3.76 x 0.0213 = **0.602 against the 0.591 observed**. Fewer atoms means shorter
+  trajectories means a shard that finishes first -- so preemption selected on speed, and speed
+  correlates with the very thing being measured. **A surviving shard is not a random sample.**
+  Check `shards_present` before quoting any fan-out artifact, and never publish a row from a
+  run whose other shards died.
 - **A `timeout`-killed `modal run --detach` client STOPS the detached app.** The 90-minute
   client timeout fired at 91 of 100 shards; `modal app list` then showed no running app and
   the last 9 never landed, so the final `score` never ran either. `--detach` survives a
