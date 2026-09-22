@@ -140,6 +140,20 @@ ARMS: dict[str, tuple[str, str, str]] = {
         "5ht1b",
         "configs/t4_5ht1b2_protonation_rescue_d04_v1.json",
     ),
+    # fa7_0 at delta=0.6, the one blank cell in the frozen delta=0.6 panel.  A THIRD
+    # mechanism, registered separately for the same reason the protonation arms are:
+    # this arm adds the replace-completion law AND changes the round loop so an empty
+    # candidate pool runs a bounded support expansion instead of ending the cell.  The
+    # panel run charged 1 -- the seed's own root docking, which is why the table reads
+    # blank rather than scored -- and the predecessor support-expansion arm charged 0.
+    # The ceiling here is 247, not 248: the authorized 248 less the 1 root call this
+    # arm's own cancelled first launch charged.  Read the budget from the contract,
+    # never from the arm name.
+    "fa7_d06_support_expansion": (
+        "compose-t4-fa7-0-support-expansion",
+        "fa7",
+        "configs/t4_fa7_0_support_expansion_v1.json",
+    ),
 }
 
 TOLERANCE = 1e-9
