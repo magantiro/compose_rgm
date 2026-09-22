@@ -46,7 +46,27 @@
   "treatment_footprint": 0.7857,
   "verdict": "STILL_THROTTLED"
  },
+ "named_limitation_to_carry_beside_any_result": {
+  "if_the_result_is_negative": "round-0 exclusion is a LIVE alternative explanation that a later fully-threaded arm would have to rule out before the negative is attributed to the chemistry",
+  "if_the_result_is_positive": "the result is CONSERVATIVE -- a fully-threaded arm could only have more of the mechanism",
+  "placement": "beside the number, not in a footnote",
+  "statement": "arm B is UNDER-TREATED in round 0 relative to a hypothetical fully-threaded arm"
+ },
  "new_oracle_calls": 0,
+ "owner_review_and_launch_authorization": {
+  "decision": "LAUNCH AS-IS; the bootstrap round stays excluded; spend the 500 calls",
+  "decisive_argument": "threading round 0 now would change the mechanism's SCOPE after seeing a gate result, which is the same hazard as re-tuning the mechanism. If scope can move once a gate reads 0.786, the gate was never real. That outranks the scientific question of whether round-0 proposals are search or initialization.",
+  "the_gate_verdict_is_NOT_retroactively_changed": "it remains 0.786 / STILL_THROTTLED against its own 0.90 floor. The honest record is 'the gate failed on a denominator that counted a declared exclusion, the owner reviewed the residual and authorized the launch' -- NOT 'the gate passed'. The number did not move; only the decision did.",
+  "three_checkable_grounds": {
+   "1_the_exclusion_predates_the_gate": {
+    "verify": "git show eec75cf1:tests/test_completion_component_law.py",
+    "where": "DELIBERATELY_UNTHREADED at commit eec75cf1, with its reason",
+    "why_it_matters": "this is what distinguishes a declared design choice from a retrofit"
+   },
+   "2_unthrottled_where_it_runs": "rounds 1 and later 22 of 22 = 1.000; control 0.000",
+   "3_materiality": "1 round of 15 at 250 calls. The 6-of-28 appearance is an artifact of a 112-call synthetic check making round 0 a larger share than it will be."
+  }
+ },
  "pre_fix_treatment_footprint_measured_on_the_scored_run": 0.175,
  "problems": [
   "treatment footprint 0.7857 is below the 0.9 floor; the law still does not reach the proposals it governs"

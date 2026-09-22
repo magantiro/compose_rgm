@@ -30,6 +30,13 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = "configs/pmo_completion_ab_local_contract_v1.json"
 OUT = ROOT / "diagnostics/pmo_completion_repair_v1/scored_ab"
 
+#: The first A/B's records are KEPT. A re-run writes to its own label so nothing
+#: is deleted or rewritten; `superseded_reading` in the v1 report points forward.
+LABELS = {
+    "v1": "scored_ab",
+    "v2": "scored_ab_v2_footprint_restored",
+}
+
 #: Pinned reference values, measured in this environment before any arm ran.
 #: A constant oracle passes any nonzero check and fails these.
 REFERENCE_PANEL = {
@@ -220,7 +227,10 @@ def main() -> None:
     parser.add_argument("--task", default="celecoxib_rediscovery")
     parser.add_argument("--arm", required=True, choices=["A_deployed_b", "B_completion"])
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--label", default="v2", choices=sorted(LABELS))
     args = parser.parse_args()
+    global OUT
+    OUT = ROOT / "diagnostics/pmo_completion_repair_v1" / LABELS[args.label]
 
     contract = load_local_contract()
     if args.task not in contract["tasks"]:

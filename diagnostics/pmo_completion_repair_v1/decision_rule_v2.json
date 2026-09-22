@@ -1,57 +1,57 @@
 {
- "schema_version": "pmo_completion_decision_rule_v2",
- "written_before": "any score of the re-run was read; the footprint gate is zero-oracle and is a precondition, not an outcome",
-
- "why_a_second_predeclaration": "The v1 rule was written before any number existed. I have now SEEN the first A/B's numbers, so a rule written fresh today could be fitted to them without my intending it. This file therefore CARRIES THE v1 THRESHOLDS OVER UNCHANGED and says so: not because they are optimal, but because re-deriving them now would be fitting to a visible result. The only additions are the footprint precondition and the supersession record.",
-
- "supersession": {
-  "what_is_superseded": "diagnostics/pmo_completion_repair_v1/scored_ab_report_celecoxib_rediscovery.json, the first matched 250-call celecoxib A/B",
-  "its_numbers_stand": "AUC 0.1456 (B) vs 0.1878 (A), ratio 0.776, B behind at all four checkpoints. Those are a faithful record of what ran and are NOT deleted or rewritten.",
-  "why_its_INTERPRETATION_is_void": "The funnel (funnel_v1.json) measured the completion law reaching only 14 of 80 eligible attempts that used a completion family -- a footprint of 0.175. memory_channel_proposal, which REPLACES the shallow lane's synthesis whenever the online memory is warm, forwarded region_law but not completion_law, and its own counter records 196 syntheses through that route. The comparison therefore tested a throttle, not the mechanism.",
-  "status": "INCONCLUSIVE -- not evidence for or against large structured completions",
-  "authorization_basis_for_the_rerun": "The owner authorized a matched 250-call celecoxib A/B plus a conditional 500-call qualification panel. The authorized A/B did not actually run. This re-run COMPLETES that authorized experiment; the panel's unspent 500 calls cover it. Total PMO spend after this run: 1000 of 1000 authorized."
- },
-
- "precondition_footprint_gate": {
-  "artifact": "diagnostics/pmo_completion_repair_v1/footprint_check_v1.json",
-  "method": "the real execute_task, controller, memory, campaign and allocator against a deterministic SYNTHETIC scorer -- zero oracle calls",
-  "requirement": "treatment footprint >= 0.90 of eligible completion-family attempts, control exactly 0.0, and at least 20 completion-family attempts so the ratio means something",
-  "if_it_fails": "STOP and report. Do not spend 500 charged calls on a second throttle test.",
-  "pre_fix_measured_value": 0.175
- },
-
- "the_rule_carried_over_verbatim_from_v1": {
-  "task": "celecoxib_rediscovery",
-  "budget_per_arm": 250,
-  "arms": "A = deployed B (online memory ON, completion law ABSENT); B = identical plus the frozen completion law",
-  "primary_metric": "auc_top10_at_budget, denominator 250, the production pmo_top_ten_auc",
-  "secondary_metric": "top-10 mean of the charged sequence at checkpoints 100, 150, 200, 250",
-  "QUALIFY": "B_auc >= 1.10 * A_auc AND B leads A on the top-10 mean at >= 3 of the 4 checkpoints",
-  "REJECT": "B_auc <= 0.90 * A_auc",
-  "INCONCLUSIVE": "anything else",
-  "validity_check_not_an_outcome_gate": "Arm B must contain at least one charged proposal whose module parameters carry completion == 'component' or requested_size > 8. Zero means VOID rather than negative."
- },
-
- "what_a_REJECT_would_MEAN_this_time": "With the footprint restored, a REJECT is a real result ABOUT LARGE STRUCTURED COMPLETIONS on this task at this budget -- not about wiring. It must be reported as such and kept clearly distinct from the superseded throttle test.",
-
  "both_arms_are_re_run_rather_than_reusing_the_control": {
+  "considered_and_rejected": "reusing arm A's 250 calls to spend only 250 total",
   "the_control_is_provably_unaffected": "arm A passes completion_law=None, and the repaired adapter forwards getattr(optimizer, 'completion_law', None), which is None -- so A's code path is byte-identical before and after the fix.",
-  "why_it_is_re_run_anyway": "wall_seconds=45 per channel pool is a WALL-CLOCK budget, so machine load changes how many candidates a round can generate. Reusing a control measured under different load against a treatment measured now would confound the comparison with CPU contention. Both arms are run CONCURRENTLY so the load is symmetric by construction. That costs 250 charged calls and buys the matched pair.",
-  "considered_and_rejected": "reusing arm A's 250 calls to spend only 250 total"
+  "why_it_is_re_run_anyway": "wall_seconds=45 per channel pool is a WALL-CLOCK budget, so machine load changes how many candidates a round can generate. Reusing a control measured under different load against a treatment measured now would confound the comparison with CPU contention. Both arms are run CONCURRENTLY so the load is symmetric by construction. That costs 250 charged calls and buys the matched pair."
  },
-
- "the_mechanism_is_NOT_re_tuned": {
-  "frozen_arm": "scale_content_v1, frozen at commit c18f9c74 before any scored call",
-  "unchanged": "the octave scale law, the excision law, the component bank (identity b6e869a820c2b74b..., 634 components) and the scope are all byte-for-byte the behaviour that was frozen",
-  "what_moved_and_why": "the local contract's payload hash moved from 33acccff to 24592768 because its pinned FILE hashes moved: a one-line wiring fix in pmo_online_memory.py (now also pinned, since it is on the proposal path) and a cosmetic ruff pass on the two new modules. Neither changes what the law does. Re-tuning the law in light of the first result would be fitting to a number already seen and is not done."
- },
-
  "caveats_to_state_with_any_result": [
   "one task, one seed, 250 charged calls per arm: this justifies or refuses the next scaling step, it is not a benchmark claim",
   "top_auc trapezoids from (0,0), so a 250-call AUC is structurally depressed ~20% at a constant level and must never be compared to a published 10k figure",
   "run locally on the pinned PMO kernel (rdkit 2023.9.6), not in the deployed Modal image",
   "if this qualifies, the qualification panel is NOT run -- its budget was consumed by this re-run"
  ],
-
- "new_oracle_calls_at_time_of_writing": 0
+ "named_limitation": "arm B is under-treated in round 0. A positive result is therefore conservative; a negative result leaves round-0 exclusion as a live alternative explanation.",
+ "new_oracle_calls_at_time_of_writing": 0,
+ "precondition_footprint_gate": {
+  "artifact": "diagnostics/pmo_completion_repair_v1/footprint_check_v1.json",
+  "if_it_fails": "STOP and report. Do not spend 500 charged calls on a second throttle test.",
+  "method": "the real execute_task, controller, memory, campaign and allocator against a deterministic SYNTHETIC scorer -- zero oracle calls",
+  "outcome": {
+   "residual": "entirely round 0; rounds 1+ are 22 of 22 = 1.000, control 0.000",
+   "resolution": "owner reviewed the residual and authorized the launch; the gate verdict is recorded unchanged",
+   "see": "footprint_check_v1.json :: owner_review_and_launch_authorization",
+   "verdict_as_written": "STILL_THROTTLED (0.786 against a 0.90 floor)"
+  },
+  "pre_fix_measured_value": 0.175,
+  "requirement": "treatment footprint >= 0.90 of eligible completion-family attempts, control exactly 0.0, and at least 20 completion-family attempts so the ratio means something"
+ },
+ "run_root": "diagnostics/pmo_completion_repair_v1/scored_ab_v2_footprint_restored",
+ "schema_version": "pmo_completion_decision_rule_v2",
+ "supersession": {
+  "authorization_basis_for_the_rerun": "The owner authorized a matched 250-call celecoxib A/B plus a conditional 500-call qualification panel. The authorized A/B did not actually run. This re-run COMPLETES that authorized experiment; the panel's unspent 500 calls cover it. Total PMO spend after this run: 1000 of 1000 authorized.",
+  "its_numbers_stand": "AUC 0.1456 (B) vs 0.1878 (A), ratio 0.776, B behind at all four checkpoints. Those are a faithful record of what ran and are NOT deleted or rewritten.",
+  "status": "INCONCLUSIVE -- not evidence for or against large structured completions",
+  "what_is_superseded": "diagnostics/pmo_completion_repair_v1/scored_ab_report_celecoxib_rediscovery.json, the first matched 250-call celecoxib A/B",
+  "why_its_INTERPRETATION_is_void": "The funnel (funnel_v1.json) measured the completion law reaching only 14 of 80 eligible attempts that used a completion family -- a footprint of 0.175. memory_channel_proposal, which REPLACES the shallow lane's synthesis whenever the online memory is warm, forwarded region_law but not completion_law, and its own counter records 196 syntheses through that route. The comparison therefore tested a throttle, not the mechanism."
+ },
+ "the_mechanism_is_NOT_re_tuned": {
+  "frozen_arm": "scale_content_v1, frozen at commit c18f9c74 before any scored call",
+  "unchanged": "the octave scale law, the excision law, the component bank (identity b6e869a820c2b74b..., 634 components) and the scope are all byte-for-byte the behaviour that was frozen",
+  "what_moved_and_why": "the local contract's payload hash moved from 33acccff to 24592768 because its pinned FILE hashes moved: a one-line wiring fix in pmo_online_memory.py (now also pinned, since it is on the proposal path) and a cosmetic ruff pass on the two new modules. Neither changes what the law does. Re-tuning the law in light of the first result would be fitting to a number already seen and is not done."
+ },
+ "the_rule_carried_over_verbatim_from_v1": {
+  "INCONCLUSIVE": "anything else",
+  "QUALIFY": "B_auc >= 1.10 * A_auc AND B leads A on the top-10 mean at >= 3 of the 4 checkpoints",
+  "REJECT": "B_auc <= 0.90 * A_auc",
+  "arms": "A = deployed B (online memory ON, completion law ABSENT); B = identical plus the frozen completion law",
+  "budget_per_arm": 250,
+  "primary_metric": "auc_top10_at_budget, denominator 250, the production pmo_top_ten_auc",
+  "secondary_metric": "top-10 mean of the charged sequence at checkpoints 100, 150, 200, 250",
+  "task": "celecoxib_rediscovery",
+  "validity_check_not_an_outcome_gate": "Arm B must contain at least one charged proposal whose module parameters carry completion == 'component' or requested_size > 8. Zero means VOID rather than negative."
+ },
+ "v1_records_are_kept": "scored_ab/ is untouched; its report carries a superseded_reading block",
+ "what_a_REJECT_would_MEAN_this_time": "With the footprint restored, a REJECT is a real result ABOUT LARGE STRUCTURED COMPLETIONS on this task at this budget -- not about wiring. It must be reported as such and kept clearly distinct from the superseded throttle test.",
+ "why_a_second_predeclaration": "The v1 rule was written before any number existed. I have now SEEN the first A/B's numbers, so a rule written fresh today could be fitted to them without my intending it. This file therefore CARRIES THE v1 THRESHOLDS OVER UNCHANGED and says so: not because they are optimal, but because re-deriving them now would be fitting to a visible result. The only additions are the footprint precondition and the supersession record.",
+ "written_before": "any score of the re-run was read; the footprint gate is zero-oracle and is a precondition, not an outcome"
 }
