@@ -1,11 +1,11 @@
 {
  "payload": {
   "blind_budget": 250,
-  "diagnostic_oracle_calls": 447,
-  "elapsed_seconds": 853.49,
+  "diagnostic_oracle_calls": 575,
+  "elapsed_seconds": 1068.83,
   "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
   "information_regime_statement": "Answer-known, panel-informed and winner-informed PMO development evidence. Destinations are published task answers or transcribed competitor winners. This is a challenge set and a diagnostic instrument, never a training distribution, prior, library or initialization for a scored no-prescreen run.",
-  "partial": true,
+  "partial": false,
   "probe_budget": 64,
   "probes": [
    {
@@ -754,6 +754,138 @@
     "task": "qed",
     "top_ten_new_count": 10,
     "top_ten_new_mean": 0.923213849075716
+   },
+   {
+    "already_scored_by_the_blind_run": 1,
+    "best_new": 0.9203684292275611,
+    "best_overall": 0.9203684292275611,
+    "budget": 64,
+    "charged_calls": 64,
+    "distinct_new_above_seed": 29,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.2753685763433772,
+    "produced_distinct": 63,
+    "route_to_seed": [
+     {
+      "charged_call": 6,
+      "endpoint": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2ncnn2C)cn1",
+      "heavy_atoms": 24,
+      "planner_channel": null,
+      "program_primitives": null,
+      "role": "initialization",
+      "round_index": null,
+      "score": 0.7079585234362048
+     },
+     {
+      "charged_call": 21,
+      "endpoint": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2C2=IC=NN2C)cn1",
+      "heavy_atoms": 24,
+      "planner_channel": "shallow_program_channel",
+      "program_primitives": 1,
+      "role": "candidate",
+      "round_index": 0,
+      "score": 0.6449998528841839
+     }
+    ],
+    "rung": {
+     "anchor_productivity": 0.9331,
+     "fraction_of_anchor": 0.9199,
+     "ladder": [
+      {
+       "label": "early",
+       "top_ten_new_mean": 0.8507
+      },
+      {
+       "label": "near_anchor",
+       "top_ten_new_mean": 0.8736
+      },
+      {
+       "label": "anchor",
+       "top_ten_new_mean": 0.9331
+      }
+     ],
+     "measured": 0.8584,
+     "rung_reached": "early",
+     "rungs_reached": 1,
+     "rungs_total": 3
+    },
+    "seconds": 87.57,
+    "seed_charged_call": 21,
+    "seed_heavy_atoms": 24,
+    "seed_parent_endpoint": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2ncnn2C)cn1",
+    "seed_parent_score": null,
+    "seed_planner_channel": "shallow_program_channel",
+    "seed_role": "candidate",
+    "seed_score": 0.6449998528841839,
+    "seed_smiles": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2C2=IC=NN2C)cn1",
+    "selectors": [
+     "blind_nearest_atlas"
+    ],
+    "similarity_to_atlas": 0.2329,
+    "task": "qed",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.8583579483354375
+   },
+   {
+    "already_scored_by_the_blind_run": 0,
+    "best_new": 0.9359534678199269,
+    "best_overall": 0.9359534678199269,
+    "budget": 64,
+    "charged_calls": 64,
+    "distinct_new_above_seed": 26,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.21246765301787385,
+    "produced_distinct": 63,
+    "route_to_seed": [
+     {
+      "charged_call": 9,
+      "endpoint": "CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+      "heavy_atoms": 26,
+      "planner_channel": null,
+      "program_primitives": null,
+      "role": "initialization",
+      "round_index": null,
+      "score": 0.7234858148020531
+     }
+    ],
+    "rung": {
+     "anchor_productivity": 0.9331,
+     "fraction_of_anchor": 0.9307,
+     "ladder": [
+      {
+       "label": "early",
+       "top_ten_new_mean": 0.8507
+      },
+      {
+       "label": "near_anchor",
+       "top_ten_new_mean": 0.8736
+      },
+      {
+       "label": "anchor",
+       "top_ten_new_mean": 0.9331
+      }
+     ],
+     "measured": 0.8684,
+     "rung_reached": "early",
+     "rungs_reached": 1,
+     "rungs_total": 3
+    },
+    "seconds": 127.75,
+    "seed_charged_call": 9,
+    "seed_heavy_atoms": 26,
+    "seed_parent_endpoint": null,
+    "seed_parent_score": null,
+    "seed_planner_channel": null,
+    "seed_role": "initialization",
+    "seed_score": 0.7234858148020531,
+    "seed_smiles": "CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+    "selectors": [
+     "blind_median_score"
+    ],
+    "similarity_to_atlas": 0.1744,
+    "task": "qed",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.8683590911172265
    }
   ],
   "productive_region_definition": "A region is productive when the frozen local controller, started there with a 64-call budget, produces a top ten of DISTINCT new molecules at the level Test B measured from the teacher spine. Structural proximity selects what to verify and never decides.",
@@ -987,5 +1119,5 @@
    "path": "diagnostics/pmo_atlas_v1/test_b_local_lift.json"
   }
  },
- "payload_sha256": "10d3ed121d1881864c1244e3e0cc58e28fdcc7a27966f37d92f8d8090a7837c9"
+ "payload_sha256": "291475b76b1d27e03dadaec81fc0237a91145ae2b470f01212808e22cdc5d1f6"
 }
