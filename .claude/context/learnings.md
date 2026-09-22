@@ -3245,3 +3245,92 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   snapshot under `campaign/round_*/complete.json`), with `scripts/pmo_ab_1k_checkpoints.py`
   as the source of truth for those paths. Any "current-run donor pool" larger than 250
   molecules has to be pulled down first.
+
+## 2026-09-21 (the donor pool: a top-N by score is the most drifted slice the run owns)
+
+- **MEASURED on a completed 250-call celecoxib ledger, zero oracle calls, PMO production
+  kernel rdkit 2023.9.6: the 24 best-scoring molecules are the WORST-looking slice of the
+  population the run produced.**
+      pool                      n    basins   QED med   QED>=0.6   SA med   heavy med
+      top-24 by score (was)     24      21      0.323    4 (17%)    3.40       33
+      stratified bank (now)    160     121      0.503   58 (36%)    4.07       20
+        elite    (100)         100      66      0.538   42 (42%)    3.85       26
+        promising (0)            0       -         -        -          -        -
+        diverse   (60)          60      60      0.461   16 (27%)    4.78       10
+  Widening the elite alone from 24 to 100 lifts median QED 0.323 -> 0.538, which says the
+  drift is CONCENTRATED at the very top of the ranking, not spread through it. So "use the
+  best molecules as donors" selects precisely the material a fingerprint-predictor oracle
+  has pulled off-manifold.
+- **THE NON-COLLAPSE TEST, which is the one that mattered: on a real drifted population the
+  stratification does NOT collapse to elite.** Strata 100 / 0 / 60; pool basins 21 -> 121
+  (5.8x); and over 240 matched draws the realized donor mix was **diverse 123 / elite 93** --
+  the diverse stratum supplied MORE of the compiled transplants than elite did, because the
+  declared weights renormalize to 0.5/0.5 when a stratum is empty. Distinct donors actually
+  used went 24 -> 104. Test this on a completed run's own population; a synthetic fixture
+  whose strata are separable by construction cannot fail.
+- **AND THE HONEST HALF: the products are not better.** Matched arms, same parents, same
+  seeds, same retentive cut law, 240 attempts each:
+      arm          compiled   steps med   retained med   product QED med   product basins
+      top_n        207/240        11          0.850          0.512              145
+      stratified   216/240         6          0.857          0.489              110
+  More compiles and shorter programs, but descriptive QED is flat-to-slightly-worse and
+  product scaffold diversity is LOWER. Mechanism is visible in the same table: the diverse
+  stratum's members are small (heavy median 10), so their grafts are small, so products stay
+  nearer their parents. What is established is that the MATERIAL changed; that it helps the
+  scored top-ten curve is NOT measured and needs a scored run.
+- **Both arms' step medians (11 and 6) sit far below the 23-primitive realization ceiling, so
+  the length axis is not binding here.** The 36 -> 17 result that justified the retentive cut
+  law still stands and the bank adds nothing to it -- do not quote the bank as if it did.
+- **A stratum's members are faithful to the population, which is a limitation and not a
+  defect.** On a run whose archive has collapsed toward small fragments, "the best-scoring
+  representative of an unoccupied basin" is often a fragment. Deliberately NOT repaired with
+  a size floor: PMO eligibility is RDKit-parseability by design, and adding a chemistry
+  screen the benchmark does not supply is the thing the mission forbids. Owner decision.
+- **THE INERT-MECHANISM SHAPE, caught before shipping, and it was invisible to every unit
+  test.** The promising stratum learns from `provenance["parent_endpoint"]`. MEASURED:
+  `AdaptiveProgramOptimizer._parent` returns `{entry_id, parent_probability,
+  parent_measured_score}` and writes NO `parent_endpoint` -- only
+  `dynamic_program_synthesis_v22` writes that key, and the PMO controller descends from v21.
+  So the lookup was `""` on every counted transition and the stratum would have been
+  permanently empty in production, while six tests that seeded lineage by calling
+  `observe_lineage` directly stayed green. **The guard that catches it drives the PRODUCTION
+  loop**: `propose_batch` -> charge every candidate above its parent -> require the bank to
+  have learned those parents are productive. Resolve through `entry_id` -> archive entry,
+  which is also the parent the candidate was actually built from.
+  Collateral, stated not repaired: arm B's `EditOutcomeMemory.rows[*]["parent_endpoint"]` has
+  been `""` all along. Provenance only -- `totals`/`counts` never read it -- so no value moved,
+  but those rows could not be audited back to the molecule they came from, which is the only
+  reason the memory keeps provenance.
+- **A SECOND COUNTED-OBSERVATION GAP, read off two call sites rather than inferred.**
+  `program_campaign` charges bootstrap candidates through `add_measured_program` (:347) and
+  calls `observe_batch` -- which holds the memory hook -- only when the round is NOT a
+  bootstrap (:360). Under the cold-start PMO recipe that is every initialization molecule plus
+  roughly a fifth of later rounds (`initial_parent_fraction = 0.2`), so those counted molecules
+  reach the archive and never reach the online memory at all. The initialization bank is the
+  on-manifold material (median QED 0.763) the diverse stratum exists to keep available, so the
+  bank is fed from `add_measured_program` too -- and fed NOTHING ELSE there, because touching
+  `frontier`/`edits`/`donors`/`size` would move arm B's region law and arm C's frontier credit
+  in scored arms that are already running. That the wider gap is a defect in arm B's own
+  frontier is recorded and deliberately left alone.
+- **Arm D REQUIRES arm B and refuses otherwise**, at the scored entry point before the ledger
+  is built as well as in the controller, on the arm C precedent sitting directly above it: the
+  donors ARE the memory's bank, an empty pool makes the wired lane silently inert, and a
+  private top-N fallback would run the superseded ranking under the stratified arm's name.
+- **Draw the STRATUM first, then the member.** A uniform draw over the union hands each
+  stratum mass proportional to its SIZE, so the elite slice takes what was never declared to
+  it -- the same defect as the 2026-07-24 corruption-selection finding. Guard it with a fixture
+  where the two are unmistakable (100 elite members against one diverse member: declared
+  shares draw the single member ~50% of the time, size-proportional ~1%).
+- **A capacity that bounds a SELECTION is not a replay buffer, and the difference is
+  load-bearing.** Whether a molecule belongs in the promising stratum is decided by
+  observations that arrive AFTER it, so a molecule evicted at call 200 for a low score can be
+  the best donor in the run at call 600 when its child improves. Retain every counted row and
+  bound only what is selected.
+- **Two surviving mutations, both FIXTURE GAPS rather than redundancy -- each was caught by a
+  DIFFERENT test while the guard written for it did not bind.** (a) The diverse-stratum fixture
+  left no member of the occupied basin outside the elite, so every implementation returned the
+  same answer. (b) The promising fixture had ONE slot, so an admit-everything predicate was
+  invisible: the productive molecule still ranked first. Both are the same shape as the
+  standing "a guard is only tested where it binds" lesson, now at the level of stratum
+  CAPACITY: a selection guard needs room to spare before an over-admission can show up in the
+  answer.
