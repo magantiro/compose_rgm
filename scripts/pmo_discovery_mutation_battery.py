@@ -39,6 +39,8 @@ SUITE = "tests/test_pmo_discovery.py"
 IDENTITY_SUITE = "tests/test_pmo_proposal_scoring_identity.py"
 TRANSPORT = ROOT / "src/compose_v4/control/pmo_transport_correspondence.py"
 TRANSPORT_SUITE = "tests/test_pmo_transport_correspondence.py"
+DONOR = ROOT / "scripts/pmo_donor_transplant_feasibility.py"
+DONOR_SUITE = "tests/test_pmo_donor_transplant_feasibility.py"
 
 
 @dataclass(frozen=True)
@@ -355,6 +357,72 @@ MUTATIONS = (
         new="            else 99",
         expect_red=("test_protected_rounds_is_the_trough_width_not_an_open_allowance",),
         suite="tests/test_pmo_transport_staging.py",
+    ),
+    # ---- Donor-transplant feasibility: the cut draw is the whole claim ----
+    Mutation(
+        name="retentive_arm_collapses_to_uniform",
+        path=DONOR,
+        old="    released = np.asarray([len(cut.component) / n_real for cut in cuts], dtype=float)\n"
+            "    weights = np.maximum(0.05, np.exp(-released / 0.25))",
+        new="    weights = np.ones(len(cuts), dtype=float)",
+        expect_red=("test_retentive_prefers_small_releases_and_uniform_does_not",),
+        suite=DONOR_SUITE,
+    ),
+    Mutation(
+        name="retentive_floor_removed",
+        path=DONOR,
+        old="    weights = np.maximum(0.05, np.exp(-released / 0.25))",
+        new="    weights = np.exp(-released / 0.25)",
+        expect_red=("test_the_floor_actually_binds_on_a_large_release",),
+        suite=DONOR_SUITE,
+    ),
+    Mutation(
+        name="retentive_filters_instead_of_reranking",
+        path=DONOR,
+        old="    weights = np.maximum(0.05, np.exp(-released / 0.25))",
+        new="    weights = np.where(released > 0.5, 0.0, np.exp(-released / 0.25))",
+        expect_red=("test_retentive_shares_the_uniform_support_and_never_filters",),
+        suite=DONOR_SUITE,
+    ),
+    Mutation(
+        name="donor_pool_becomes_the_uncounted_prescreen_bank",
+        path=DONOR,
+        old='LEDGER = ROOT / "diagnostics/pmo_3x250_autopsy_v1.json"',
+        new='LEDGER = ROOT / "diagnostics/pmo_banks_all.json"',
+        expect_red=("test_the_ledger_is_a_charged_run_and_not_the_prescreen_bank",),
+        suite=DONOR_SUITE,
+    ),
+    Mutation(
+        name="score_key_stops_naming_the_charged_score",
+        path=DONOR,
+        old='SMILES_KEY, SCORE_KEY = "endpoint", "charged_score"',
+        new='SMILES_KEY, SCORE_KEY = "endpoint", "score"',
+        expect_red=("test_the_ledger_is_a_charged_run_and_not_the_prescreen_bank",),
+        suite=DONOR_SUITE,
+    ),
+    Mutation(
+        name="donor_pool_is_not_ranked_by_score",
+        path=DONOR,
+        old="    rows.sort(key=lambda r: (-r[SCORE_KEY], r[SMILES_KEY]))",
+        new="    rows.sort(key=lambda r: r[SMILES_KEY])",
+        expect_red=("test_ledger_rows_are_charged_scored_and_ranked",),
+        suite=DONOR_SUITE,
+    ),
+    Mutation(
+        name="retention_threshold_excludes_its_own_boundary",
+        path=DONOR,
+        old='"retained_at_least_half": sum(1 for v in retained if v >= 0.5),',
+        new='"retained_at_least_half": sum(1 for v in retained if v > 0.5),',
+        expect_red=("test_summarize_counts_retention_over_the_right_threshold",),
+        suite=DONOR_SUITE,
+    ),
+    Mutation(
+        name="POSITIVE_CONTROL_donor_cosmetic_comment",
+        path=DONOR,
+        old='LEDGER_PATH = ("celecoxib_distance", "all_rows")',
+        new='LEDGER_PATH = ("celecoxib_distance", "all_rows")  # cosmetic: behaviour unchanged',
+        expect_red=(),
+        suite=DONOR_SUITE,
     ),
     # ---- Positive control: bytes change, behaviour does not ----
     Mutation(

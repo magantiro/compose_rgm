@@ -1,0 +1,98 @@
+{
+  "arms": {
+    "retentive": {
+      "arm": "retentive",
+      "attempts": 240,
+      "compiled": 155,
+      "compiled_rate": 0.6458333333333334,
+      "descriptor_note": "descriptive chemistry sanity, NOT an objective and not used for selection",
+      "distinct_products": 140,
+      "novel_vs_scored_set": 139,
+      "qed": {
+        "max": 0.8905005638008572,
+        "mean": 0.4618741562742987,
+        "median": 0.43391089430622,
+        "min": 0.10076617998876554
+      },
+      "retained_at_least_half": 121,
+      "retained_fraction": {
+        "max": 0.972972972972973,
+        "mean": 0.663947959794734,
+        "median": 0.7222222222222222,
+        "min": 0.027027027027026973
+      },
+      "sa": {
+        "max": 5.491699780824944,
+        "mean": 3.6907421511687164,
+        "median": 3.7062044500841376,
+        "min": 1.4127001203020964
+      },
+      "statuses": {
+        "compiled": 155,
+        "mapping_violates_charged_center_policy": 6,
+        "search_unresolved": 1,
+        "self_proposal": 24,
+        "unsupported_size": 54
+      },
+      "steps": {
+        "max": 51.0,
+        "mean": 17.161290322580644,
+        "median": 17.0,
+        "min": 2.0
+      }
+    },
+    "uniform": {
+      "arm": "uniform",
+      "attempts": 240,
+      "compiled": 142,
+      "compiled_rate": 0.5916666666666667,
+      "descriptor_note": "descriptive chemistry sanity, NOT an objective and not used for selection",
+      "distinct_products": 138,
+      "novel_vs_scored_set": 136,
+      "qed": {
+        "max": 0.8905005638008572,
+        "mean": 0.4473587506449247,
+        "median": 0.42583144227349057,
+        "min": 0.08069406394522234
+      },
+      "retained_at_least_half": 46,
+      "retained_fraction": {
+        "max": 0.9583333333333334,
+        "mean": 0.38652418194671717,
+        "median": 0.32432432432432434,
+        "min": 0.027027027027026973
+      },
+      "sa": {
+        "max": 5.478192231540106,
+        "mean": 3.6141732132122164,
+        "median": 3.5804525323730982,
+        "min": 1.4127001203020964
+      },
+      "statuses": {
+        "compiled": 142,
+        "mapping_violates_charged_center_policy": 20,
+        "search_unresolved": 7,
+        "self_proposal": 1,
+        "unsupported_size": 70
+      },
+      "steps": {
+        "max": 63.0,
+        "mean": 36.190140845070424,
+        "median": 36.0,
+        "min": 7.0
+      }
+    }
+  },
+  "draws_per_pair": 4,
+  "elapsed_seconds": 117.41,
+  "information_regime": "molecules and scores REPLAYED from a completed charged run's ledger; no new scoring, no prescreen bank, no declared target",
+  "ledger": "diagnostics/pmo_3x250_autopsy_v1.json",
+  "ledger_rows": 250,
+  "oracle_calls": 0,
+  "pairs": 60,
+  "pool_size": 14,
+  "schema_version": "pmo_donor_transplant_feasibility_v1",
+  "seed": 20260921,
+  "states_built": 14,
+  "unbuildable_ledger_rows": []
+}

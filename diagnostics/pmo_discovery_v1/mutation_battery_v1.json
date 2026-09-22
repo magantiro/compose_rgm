@@ -1,8 +1,8 @@
 {
   "schema_version": "pmo_discovery_mutation_battery_v1",
   "suite": "tests/test_pmo_discovery.py",
-  "mutations": 29,
-  "killed": 29,
+  "mutations": 36,
+  "killed": 36,
   "positive_controls_green": true,
   "all_guards_load_bearing": true,
   "rows": [
@@ -387,6 +387,101 @@
         "test_protected_rounds_is_the_trough_width_not_an_open_allowance"
       ],
       "status": "KILLED"
+    },
+    {
+      "mutation": "retentive_arm_collapses_to_uniform",
+      "file": "pmo_donor_transplant_feasibility.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_retentive_prefers_small_releases_and_uniform_does_not"
+      ],
+      "observed_red": [
+        "test_retentive_prefers_small_releases_and_uniform_does_not"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "retentive_floor_removed",
+      "file": "pmo_donor_transplant_feasibility.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_floor_actually_binds_on_a_large_release"
+      ],
+      "observed_red": [
+        "test_the_floor_actually_binds_on_a_large_release"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "retentive_filters_instead_of_reranking",
+      "file": "pmo_donor_transplant_feasibility.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_retentive_shares_the_uniform_support_and_never_filters"
+      ],
+      "observed_red": [
+        "test_retentive_shares_the_uniform_support_and_never_filters",
+        "test_the_floor_actually_binds_on_a_large_release"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "donor_pool_becomes_the_uncounted_prescreen_bank",
+      "file": "pmo_donor_transplant_feasibility.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_ledger_is_a_charged_run_and_not_the_prescreen_bank"
+      ],
+      "observed_red": [
+        "test_ledger_rows_are_charged_scored_and_ranked",
+        "test_the_ledger_is_a_charged_run_and_not_the_prescreen_bank"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "score_key_stops_naming_the_charged_score",
+      "file": "pmo_donor_transplant_feasibility.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_ledger_is_a_charged_run_and_not_the_prescreen_bank"
+      ],
+      "observed_red": [
+        "test_ledger_rows_are_charged_scored_and_ranked",
+        "test_the_ledger_is_a_charged_run_and_not_the_prescreen_bank"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "donor_pool_is_not_ranked_by_score",
+      "file": "pmo_donor_transplant_feasibility.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_ledger_rows_are_charged_scored_and_ranked"
+      ],
+      "observed_red": [
+        "test_ledger_rows_are_charged_scored_and_ranked"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "retention_threshold_excludes_its_own_boundary",
+      "file": "pmo_donor_transplant_feasibility.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_summarize_counts_retention_over_the_right_threshold"
+      ],
+      "observed_red": [
+        "test_summarize_counts_retention_over_the_right_threshold"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "POSITIVE_CONTROL_donor_cosmetic_comment",
+      "file": "pmo_donor_transplant_feasibility.py",
+      "is_positive_control": true,
+      "expected_red": [],
+      "observed_red": [],
+      "status": "GREEN (correct)"
     },
     {
       "mutation": "POSITIVE_CONTROL_cosmetic_comment",

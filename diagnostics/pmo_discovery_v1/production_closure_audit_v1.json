@@ -1,0 +1,165 @@
+{
+  "closure_modules": 118,
+  "entry_point": "compose_v4.experiments.pmo_population_v1",
+  "oracle_calls": 0,
+  "rows": [
+    {
+      "bare_name_examples": [],
+      "bare_name_only": false,
+      "bare_name_references_in_closure": 0,
+      "dotted_examples": [
+        {
+          "line": 220,
+          "module": "compose_v4.control.dynamic_program_synthesis",
+          "text": "Passing a :class:`~compose_v4.control.bridge_region_law.BridgeRegionLaw`"
+        },
+        {
+          "line": 7,
+          "module": "compose_v4.control.pmo_online_memory",
+          "text": "law in the sense of :mod:`compose_v4.control.bridge_region_law` -- that is"
+        },
+        {
+          "line": 140,
+          "module": "compose_v4.control.pmo_online_memory",
+          "text": "from compose_v4.control.bridge_region_law import ("
+        },
+        {
+          "line": 653,
+          "module": "compose_v4.control.pmo_online_memory",
+          "text": "from compose_v4.control.bridge_region_law import bridge_separated_regions"
+        },
+        {
+          "line": 716,
+          "module": "compose_v4.control.pmo_online_memory",
+          "text": "from compose_v4.control.bridge_region_law import bridge_separated_regions"
+        }
+      ],
+      "dotted_references_in_closure": 5,
+      "in_import_closure": true,
+      "module": "compose_v4.control.bridge_region_law",
+      "reachable": true,
+      "supplies": "the T4 region repair -- conditioned, uncapped bridge-separated region draw"
+    },
+    {
+      "bare_name_examples": [],
+      "bare_name_only": false,
+      "bare_name_references_in_closure": 0,
+      "dotted_examples": [],
+      "dotted_references_in_closure": 0,
+      "in_import_closure": false,
+      "module": "compose_v4.control.donor_memory",
+      "reachable": false,
+      "supplies": "the scored donor pool and its cut distribution (uniform_oriented_single_bridge)"
+    },
+    {
+      "bare_name_examples": [
+        {
+          "line": 555,
+          "module": "compose_v4.control.adaptive_program_optimizer",
+          "text": "donor_program, _, donor_decomposition = self._branches(donor)"
+        },
+        {
+          "line": 556,
+          "module": "compose_v4.control.adaptive_program_optimizer",
+          "text": "branches = branch_components(donor_program)"
+        },
+        {
+          "line": 558,
+          "module": "compose_v4.control.adaptive_program_optimizer",
+          "text": "donor_program, _ = select_branch(donor_program, branch)"
+        },
+        {
+          "line": 563,
+          "module": "compose_v4.control.adaptive_program_optimizer",
+          "text": "donor_program.program_id,"
+        },
+        {
+          "line": 566,
+          "module": "compose_v4.control.adaptive_program_optimizer",
+          "text": "lambda donor_program=donor_program: attachment_bindings("
+        }
+      ],
+      "bare_name_only": true,
+      "bare_name_references_in_closure": 7,
+      "dotted_examples": [],
+      "dotted_references_in_closure": 0,
+      "in_import_closure": false,
+      "module": "compose_v4.control.donor_program",
+      "reachable": false,
+      "supplies": "molecular donor recombination -- pendant exchange between two complete molecules, with the retained core preserved by assertion after replay"
+    },
+    {
+      "bare_name_examples": [],
+      "bare_name_only": false,
+      "bare_name_references_in_closure": 0,
+      "dotted_examples": [
+        {
+          "line": 51,
+          "module": "compose_v4.control.pmo_population_controller",
+          "text": "from compose_v4.control.pmo_discovery import ("
+        },
+        {
+          "line": 54,
+          "module": "compose_v4.control.pmo_population_controller",
+          "text": "from compose_v4.control.pmo_discovery import ("
+        }
+      ],
+      "dotted_references_in_closure": 2,
+      "in_import_closure": true,
+      "module": "compose_v4.control.pmo_discovery",
+      "reachable": true,
+      "supplies": "arm C -- basin-stratified exploration floor and frontier credit"
+    },
+    {
+      "bare_name_examples": [],
+      "bare_name_only": false,
+      "bare_name_references_in_closure": 0,
+      "dotted_examples": [
+        {
+          "line": 5,
+          "module": "compose_v4.control.pmo_discovery",
+          "text": "Arm B (:mod:`compose_v4.control.pmo_online_memory`) changed which proposals are"
+        },
+        {
+          "line": 239,
+          "module": "compose_v4.control.pmo_discovery",
+          "text": ":class:`~compose_v4.control.pmo_online_memory.FrontierLedger` from counted"
+        },
+        {
+          "line": 62,
+          "module": "compose_v4.control.pmo_population_controller",
+          "text": "from compose_v4.control.pmo_online_memory import ("
+        }
+      ],
+      "dotted_references_in_closure": 3,
+      "in_import_closure": true,
+      "module": "compose_v4.control.pmo_online_memory",
+      "reachable": true,
+      "supplies": "arm B -- donor REGION associations and edit-outcome memory biasing the region law"
+    },
+    {
+      "bare_name_examples": [],
+      "bare_name_only": false,
+      "bare_name_references_in_closure": 0,
+      "dotted_examples": [],
+      "dotted_references_in_closure": 0,
+      "in_import_closure": false,
+      "module": "compose_v4.control.pmo_transport_correspondence",
+      "reachable": false,
+      "supplies": "the G->T correspondence planner (retain_core, R_delete, H_install, alpha, D)"
+    },
+    {
+      "bare_name_examples": [],
+      "bare_name_only": false,
+      "bare_name_references_in_closure": 0,
+      "dotted_examples": [],
+      "dotted_references_in_closure": 0,
+      "in_import_closure": false,
+      "module": "compose_v4.control.pmo_transport_staging",
+      "reachable": false,
+      "supplies": "the stage splitter and ordering selector under the realization ceiling"
+    }
+  ],
+  "schema_version": "pmo_production_closure_audit_v1",
+  "scope_note": "reachability, not execution: a module in the closure is imported, not necessarily called"
+}
