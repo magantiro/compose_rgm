@@ -753,6 +753,25 @@ def _prefix_block(rows, region_wide_count: int, at: int) -> dict[str, Any]:
     provenance: dict[str, int] = {}
     for row in entrants:
         provenance[row["provenance_class"]] = provenance.get(row["provenance_class"], 0) + 1
+    # With no entrant there is no entrant provenance, and reporting an empty map
+    # says nothing about which channel searches best. The nearest approaches
+    # carry the same synthesis-time tag and are the informative substitute: they
+    # answer "which channel gets closest" when the answer to "which channel
+    # enters" is nobody.
+    approaching = sorted(
+        (row for row in prefix if row["similarity"] is not None),
+        key=lambda row: -row["similarity"],
+    )[:25]
+    near_provenance: dict[str, int] = {}
+    for row in approaching:
+        near_provenance[row["provenance_class"]] = (
+            near_provenance.get(row["provenance_class"], 0) + 1
+        )
+    all_provenance: dict[str, int] = {}
+    for row in prefix:
+        all_provenance[row["provenance_class"]] = (
+            all_provenance.get(row["provenance_class"], 0) + 1
+        )
     basins = {row["nearest_reference_wide"] for row in entrants if row["nearest_reference_wide"]}
     scaffolds = {row["scaffold"] for row in entrants if row["scaffold"]}
     return {
@@ -774,6 +793,19 @@ def _prefix_block(rows, region_wide_count: int, at: int) -> dict[str, Any]:
         "diversity_basins_available": region_wide_count,
         "diversity_distinct_entrant_scaffolds": len(scaffolds),
         "entrant_provenance": provenance,
+        "nearest_25_provenance": near_provenance,
+        "all_proposal_provenance": all_provenance,
+        "nearest_approaches": [
+            {
+                "proposal_index": row["proposal_index"],
+                "similarity": row["similarity"],
+                "provenance_class": row["provenance_class"],
+                "endpoint": row["endpoint"],
+                "qed": round(row["qed"], 4) if row.get("qed") is not None else None,
+                "heavy_atoms": row.get("heavy_atoms"),
+            }
+            for row in approaching[:5]
+        ],
     }
 
 
@@ -879,15 +911,31 @@ def _permutation(shards, regions, delta: float) -> dict[str, Any]:
     }
 
 
-def _pass_criterion(arms: dict[str, Any], challenger: str | None) -> dict[str, Any]:
-    """Evaluate the predeclared criterion. Baseline-only runs report UNEVALUATED."""
+def _pass_criterion(
+    arms: dict[str, Any], challenger: str | None, baseline: str | None = None
+) -> dict[str, Any]:
+    """Evaluate the predeclared criterion. An unevaluable run reports UNEVALUATED.
 
-    baseline = "arm1_baseline_b"
+    The criterion is sealed over three primary tasks plus a control, so a run
+    covering fewer tasks CANNOT fire it in either direction and must say so
+    rather than return a verdict computed on a subset.
+    """
+
+    baseline = baseline or "arm1_baseline_b"
     verdict = {
         "criterion": PASS_CRITERION,
         "baseline_arm": baseline,
         "challenger_arm": challenger,
     }
+    if baseline not in arms:
+        verdict["verdict"] = "UNEVALUATED_NO_BASELINE_ARM"
+        verdict["statement"] = (
+            f"The sealed criterion compares against {baseline}, which is not "
+            f"among the measured arms {sorted(arms)}. Naming a different arm as "
+            "the baseline here would be re-tuning a sealed criterion after "
+            "seeing numbers, so nothing is substituted."
+        )
+        return verdict
     if challenger is None or challenger not in arms:
         verdict["verdict"] = "UNEVALUATED_NO_CHALLENGER_ARM"
         verdict["statement"] = (
@@ -896,6 +944,11 @@ def _pass_criterion(arms: dict[str, Any], challenger: str | None) -> dict[str, A
             "is not a verdict on C."
         )
         return verdict
+    missing = [
+        task
+        for task in (*PASS_CRITERION["primary_tasks"], PASS_CRITERION["control_task"])
+        if task not in arms[challenger]["per_task"] or task not in arms[baseline]["per_task"]
+    ]
     at = str(MATCHED_PROPOSALS[-1])
     rows = []
     for task in PASS_CRITERION["primary_tasks"]:
@@ -927,8 +980,23 @@ def _pass_criterion(arms: dict[str, Any], challenger: str | None) -> dict[str, A
     verdict["primary"] = rows
     verdict["primary_wins"] = wins
     verdict["qed_degraded"] = degraded
+    verdict["tasks_missing_from_this_run"] = missing
+    if missing:
+        verdict["verdict"] = "UNEVALUATED_CRITERION_SPANS_TASKS_NOT_MEASURED"
+        verdict["statement"] = (
+            "The sealed criterion spans "
+            f"{list(PASS_CRITERION['primary_tasks'])} plus the "
+            f"{PASS_CRITERION['control_task']} control, and this run is missing "
+            f"{missing}. A subset verdict would be a different criterion from "
+            "the one that was sealed, so none is emitted."
+        )
+        return verdict
     verdict["verdict"] = (
-        "PASS" if wins >= 2 and degraded is False else "FAIL" if degraded is not None else "UNEVALUATED_MISSING_CONTROL"
+        "PASS"
+        if wins >= 2 and degraded is False
+        else "FAIL"
+        if degraded is not None
+        else "UNEVALUATED_MISSING_CONTROL"
     )
     return verdict
 
@@ -1015,6 +1083,22 @@ def _ladder_table(arms: dict[str, Any], predicate: dict[str, Any]) -> dict[str, 
                         "proposals": prefix["proposals"],
                         "qed_drift_q1_to_q4": manifold["qed_drift_q1_to_q4"],
                         "median_qed": manifold["median_qed"],
+                        "parent_median_qed": block["parent_median_qed"],
+                        # The comparable manifold quantity across rows. A
+                        # regenerated arm draws every proposal ONE program from a
+                        # FIXED parent set, so nothing compounds and its drift
+                        # across proposal quartiles cannot show what a real
+                        # multi-round trajectory shows. The one-step drop from
+                        # the parent pool to the proposals is defined the same
+                        # way for every row.
+                        "one_step_qed_drop": (
+                            round(manifold["median_qed"] - block["parent_median_qed"], 4)
+                            if manifold["median_qed"] is not None
+                            and block["parent_median_qed"] is not None
+                            else None
+                        ),
+                        "drift_is_a_trajectory": arms[name]["role"]
+                        == "observed_production",
                         "best_basin_rung": prefix["best_rung"],
                         "best_similarity": prefix["best_similarity"],
                         "best_parent_similarity": parent_best,
@@ -1044,6 +1128,9 @@ def _ladder_table(arms: dict[str, Any], predicate: dict[str, Any]) -> dict[str, 
                             "per_draw_rate_upper_bound_95"
                         ],
                         "entrant_provenance": prefix["entrant_provenance"],
+                        "nearest_25_provenance": prefix["nearest_25_provenance"],
+                        "all_proposal_provenance": prefix["all_proposal_provenance"],
+                        "nearest_approaches": prefix["nearest_approaches"],
                     }
                 )
     return {
@@ -1057,6 +1144,15 @@ def _ladder_table(arms: dict[str, Any], predicate: dict[str, Any]) -> dict[str, 
             "rung (0.25). first_entry_proposal_index is None when nothing reached "
             "the committed 0.30 entry threshold. Neither is a zero and neither "
             "may be reported as one."
+        ),
+        "drift_reading": (
+            "qed_drift_q1_to_q4 is a TRAJECTORY quantity and is only that for "
+            "the observed production arm, where later proposals descend from "
+            "earlier ones. A regenerated arm draws every proposal one program "
+            "from a fixed parent set, so nothing compounds and its quartile "
+            "drift is close to noise by construction; drift_is_a_trajectory "
+            "marks which rows it means. one_step_qed_drop is defined identically "
+            "for every row and is the column to compare across arms."
         ),
         "lift_reading": (
             "best_lift_over_best_parent is the headline comparison across rows. "
@@ -1194,7 +1290,7 @@ def phase_report(args: argparse.Namespace) -> int:
         "causal_chains": chains,
         "manifold_context": _manifold_context(repo_root),
         "permutation_control": _permutation(shards, regions, ENTRY_DELTA),
-        "pass_criterion": _pass_criterion(arms, args.challenger),
+        "pass_criterion": _pass_criterion(arms, args.challenger, args.baseline),
         "ladder_table": _ladder_table(arms, predicate),
         "software": _software(),
     }
@@ -1284,6 +1380,14 @@ def main(argv: list[str] | None = None) -> int:
     report = sub.add_parser("report")
     report.add_argument("--inputs", nargs="+", required=True)
     report.add_argument("--challenger", default=None)
+    report.add_argument(
+        "--baseline",
+        default=None,
+        help=(
+            "arm the sealed criterion compares against. Defaults to "
+            "arm1_baseline_b; naming another does not change the sealed rule."
+        ),
+    )
     report.add_argument("--output", required=True)
     report.set_defaults(handler=phase_report)
 
