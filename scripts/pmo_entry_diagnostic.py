@@ -975,6 +975,111 @@ def _charged_approach_ladder(shards) -> dict[str, Any]:
     return out
 
 
+def _novelty_versus_b(shards) -> dict[str, Any]:
+    """Did an arm generate chemistry B NEVER generated -- not merely more proposals?
+
+    The owner's headline question, as a reported quantity. B's output is
+    everything the deployed controller was observed to produce on this task:
+    every endpoint of every proposal it made, charged or not. An arm's novel set
+    is what it produced that is absent from that.
+
+    Novelty ALONE is cheap -- a random walk invents new molecules constantly --
+    so it is reported beside two qualifications: how much of it is nearer a
+    productive region than ANYTHING B produced, and how much is nearer than B's
+    own best. Both use the structural proxy, whose measured fidelity to V_local
+    is partial and teacher-referenced, so a zero here does not prove an arm
+    found nothing valuable -- it proves it found nothing valuable THAT THIS
+    PROXY CAN SEE.
+    """
+
+    by_task: dict[str, Any] = {}
+    for task in sorted({shard["task"] for shard in shards}):
+        rows = [shard for shard in shards if shard["task"] == task]
+        production = [shard for shard in rows if shard["arm"] == PRODUCTION_ARM]
+        if not production:
+            continue
+        b_endpoints, b_best = set(), 0.0
+        for shard in production:
+            for row in shard["proposals"]:
+                if row.get("endpoint"):
+                    b_endpoints.add(row["endpoint"])
+                if row.get("similarity") is not None:
+                    b_best = max(b_best, row["similarity"])
+        arms = {}
+        for shard in rows:
+            key = _arm_key(shard)
+            if shard["arm"] == PRODUCTION_ARM:
+                continue
+            produced = [row for row in shard["proposals"] if row.get("endpoint")]
+            distinct = {row["endpoint"] for row in produced}
+            novel = [row for row in produced if row["endpoint"] not in b_endpoints]
+            novel_distinct = {row["endpoint"] for row in novel}
+            beats = [
+                row
+                for row in novel
+                if row.get("similarity") is not None and row["similarity"] > b_best
+            ]
+            arms[key] = {
+                "proposals": len(shard["proposals"]),
+                "executed": len(produced),
+                "distinct_molecules": len(distinct),
+                "novel_versus_b": len(novel_distinct),
+                "novel_fraction_of_distinct": round(len(novel_distinct) / len(distinct), 4)
+                if distinct
+                else None,
+                "novel_and_nearer_a_region_than_b_ever_got": len(
+                    {row["endpoint"] for row in beats}
+                ),
+                "best_novel_similarity": round(
+                    max((row["similarity"] for row in novel if row["similarity"] is not None), default=0.0),
+                    4,
+                ),
+                "novel_entrants_at_delta": len(
+                    {
+                        row["endpoint"]
+                        for row in novel
+                        if row.get("similarity") is not None
+                        and row["similarity"] >= ENTRY_DELTA
+                    }
+                ),
+                "examples_of_novel_and_nearer": [
+                    {
+                        "endpoint": row["endpoint"],
+                        "similarity": row["similarity"],
+                        "qed": round(row["qed"], 4) if row.get("qed") is not None else None,
+                        "provenance_class": row["provenance_class"],
+                    }
+                    for row in sorted(
+                        beats, key=lambda r: -r["similarity"]
+                    )[:5]
+                ],
+            }
+        by_task[task] = {
+            "b_distinct_molecules": len(b_endpoints),
+            "b_best_similarity": round(b_best, 4),
+            "arms": arms,
+        }
+    return {
+        "question": (
+            "Did the arm generate useful chemistry that B NEVER generated, as "
+            "opposed to more proposals?"
+        ),
+        "b_is": (
+            "every endpoint the deployed controller was observed to produce on "
+            "this task, charged or not, from the production arm's shard"
+        ),
+        "caveat": (
+            "novel_and_nearer uses the STRUCTURAL proxy. Its agreement with "
+            "V_local is partial and teacher-referenced (see "
+            "vlocal_proxy_validation_v1.json), so a zero means the arm found "
+            "nothing this proxy can see, NOT that it found nothing valuable. A "
+            "novel high-V_local molecule in an unrelated basin is invisible here "
+            "by construction and needs charged calls."
+        ),
+        "by_task": by_task,
+    }
+
+
 def _pass_criterion(
     arms: dict[str, Any], challenger: str | None, baseline: str | None = None
 ) -> dict[str, Any]:
@@ -1214,12 +1319,30 @@ def _ladder_table(arms: dict[str, Any], predicate: dict[str, Any]) -> dict[str, 
             if len(points) < 2:
                 continue
             first, last = points[0], points[-1]
+            gained = last[1] - points[-2][1]
+            drawn = last[0] - points[-2][0]
             growth.setdefault(task, {})[name] = {
-                "best_by_prefix": {str(at): value for at, value in points},
+                # An ordered LIST of pairs, not a dict: this payload is written
+                # with sort_keys, which orders "1000" before "300" and makes a
+                # budget curve read as though it went backwards.
+                "best_by_prefix": [[at, value] for at, value in points],
                 "budget_multiple": round(last[0] / first[0], 2),
                 "best_gained_over_that_multiple": round(last[1] - first[1], 4),
-                "gained_in_the_final_doubling": round(last[1] - points[-2][1], 4),
-                "still_climbing": last[1] > points[-2][1],
+                "gained_in_the_final_step": round(gained, 4),
+                "still_climbing": gained > 0,
+                # still_climbing alone invites over-reading a rounding-level
+                # gain as progress, so the rate and what it implies are beside
+                # it. Maxima grow sub-linearly, so this is an OPTIMISTIC bound.
+                "gain_per_thousand_proposals_in_the_final_step": round(
+                    gained / drawn * 1000, 5
+                )
+                if drawn
+                else None,
+                "proposals_to_reach_entry_at_that_rate": (
+                    int((ENTRY_DELTA - last[1]) / (gained / drawn))
+                    if gained > 0 and drawn
+                    else None
+                ),
             }
     return {
         "columns": (
@@ -1230,7 +1353,12 @@ def _ladder_table(arms: dict[str, Any], predicate: dict[str, Any]) -> dict[str, 
         "growth_reading": (
             "still_climbing distinguishes an under-powered zero from a reach "
             "statement. An arm whose best approach stopped moving while its "
-            "budget grew several fold is not short of draws."
+            "budget grew several fold is not short of draws. Read it WITH the "
+            "rate: a gain of a few thousandths over hundreds of proposals is "
+            "technically still climbing and implies a budget nobody will spend. "
+            "proposals_to_reach_entry_at_that_rate extrapolates the final step "
+            "linearly and is therefore an OPTIMISTIC bound, because the maximum "
+            "of a sample grows sub-linearly in the sample size."
         ),
         "entry_threshold": ENTRY_DELTA,
         "reading": (
@@ -1403,6 +1531,7 @@ def phase_report(args: argparse.Namespace) -> int:
         "manifold_context": _manifold_context(repo_root),
         "permutation_control": _permutation(shards, regions, ENTRY_DELTA),
         "charged_approach_ladder": _charged_approach_ladder(shards),
+        "novelty_versus_b": _novelty_versus_b(shards),
         "pass_criterion": _pass_criterion(arms, args.challenger, args.baseline),
         "ladder_table": _ladder_table(arms, predicate),
         "software": _software(),

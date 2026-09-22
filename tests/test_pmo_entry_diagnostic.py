@@ -473,16 +473,23 @@ def test_the_hundred_molecule_source_is_a_superset_at_48_slots():
         assert parent.score_stratum == "objective_blind"
 
 
-def test_the_hundred_molecule_arm_declares_its_budget_limit():
-    """100 initialization molecules are 40% of a 250-call budget.
+def test_the_hundred_molecule_arm_separates_validity_from_allocation_cost():
+    """Protocol validity and budget efficiency are different questions.
 
-    The arm must carry that where a reader of the shard sees it, not only in a
-    handback, or the number gets quoted against a budget it is inadmissible at.
+    The arm is valid at any budget provided all 100 initialization evaluations
+    are counted; spending 40% of a 250-call budget before the first decision is
+    an efficiency cost. An earlier version of this describe block conflated the
+    two and called the arm inadmissible, which would have excluded a valid arm.
     """
 
     describe = entry.parent_source("init_bank_100")["describe"]
-    assert "250" in describe["budget_caveat"]
-    assert "NOT admissible" in describe["budget_caveat"]
+    assert "VALID AT ANY BUDGET" in describe["protocol_validity"]
+    assert "counted toward the total" in describe["protocol_validity"]
+    cost = describe["allocation_cost"]
+    assert cost["250"] == 0.40 and cost["1000"] == 0.10 and cost["10000"] == 0.01
+    # The cost must be reported, never used to exclude the arm.
+    assert "not an" in cost["reading"] and "admissibility" in cost["reading"]
+    assert "budget_caveat" not in describe
 
 
 def test_the_default_population_keeps_the_original_seed_stream():

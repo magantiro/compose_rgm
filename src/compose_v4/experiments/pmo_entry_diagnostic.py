@@ -582,12 +582,25 @@ register_parent_source(
         "initialization_count": 100,
         "carries_scores": False,
         "source": f"{INIT_BANK} via initialization_lock(count=100, seed={INIT_SEED})",
-        "budget_caveat": (
-            "100 initialization molecules are 1% of the official 10,000-call "
-            "budget, 10% at 1,000 and 40% at 250. This arm is NOT admissible at "
-            "a 250-call budget and must be reported against the budget it would "
-            "run at."
+        # CORRECTED 2026-09-22 by the owner. An earlier note here called this
+        # arm inadmissible at 250 calls. That conflated two different things.
+        "protocol_validity": (
+            "VALID AT ANY BUDGET provided all 100 initialization evaluations are "
+            "counted toward the total. Initialization is objective-blind, so "
+            "nothing about the task enters through it."
         ),
+        "allocation_cost": {
+            "250": 0.40,
+            "500": 0.20,
+            "1000": 0.10,
+            "10000": 0.01,
+            "reading": (
+                "The fraction of the budget spent before the search makes its "
+                "first decision. This is an EFFICIENCY cost, not an "
+                "admissibility question, and it is reported beside the arm's "
+                "effect rather than used to exclude the arm."
+            ),
+        },
     },
 )
 
