@@ -227,11 +227,12 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         *args,
         jump_checkpoint: dict[str, Any],
         enable_online_memory: bool = False,
+        completion_law: Any = None,
         **kwargs,
     ):
         if jump_checkpoint.get("schema_version") != CHECKPOINT_SCHEMA:
             raise ValueError("PMO population controller needs a sanitized joint checkpoint")
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, completion_law=completion_law, **kwargs)
         self.jump_checkpoint = json.loads(json.dumps(jump_checkpoint))
         self.jump_checkpoint_id = identity(self.jump_checkpoint)
         self.jump_rng = np.random.default_rng(np.random.SeedSequence([self.config.seed, 311, 2]))
@@ -1040,6 +1041,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         hierarchy=None,
         jump_checkpoint=None,
         enable_online_memory: bool = False,
+        completion_law: Any = None,
     ):
         # `run_program_campaign` passes optimizer_kwargs to BOTH the constructor and
         # this classmethod, so the arm flag has to be accepted here too -- and it has
@@ -1054,6 +1056,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             constructor_kwargs={
                 "jump_checkpoint": jump_checkpoint,
                 "enable_online_memory": enable_online_memory,
+                "completion_law": completion_law,
             },
         )
         state = snapshot.get("pmo_population")

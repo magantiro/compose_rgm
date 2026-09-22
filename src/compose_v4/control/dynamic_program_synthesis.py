@@ -384,17 +384,28 @@ def _local_module(source, rng, *, family, label):
 
 
 def compile_generic_module(
-    source: MolecularGraph, rng, family: str, *, region_law=None
+    source: MolecularGraph, rng, family: str, *, region_law=None, completion_law=None
 ):
     """Bind one generic module to the supplied exact state and execute it.
 
     ``region_law`` is threaded to the two modules that excise a bridge-separated
     substituent (``substituent_delete`` and the delete half of
     ``segment_replace``).  ``None`` keeps v1's uniform bounded law.
+
+    ``completion_law`` is threaded to the two modules that COMPLETE -- that is,
+    that call :func:`_grow_actions` with a drawn length: ``segment_grow`` and the
+    grow half of ``segment_replace``.  ``None`` keeps v1's uniform bounded
+    eight-atom draw and its linear single-bonded C/N/O chain, byte-identical.  A
+    law may additionally supply the excision law for ``segment_replace`` through
+    ``CompletionLaw.region_law``, which is what lets parent RETENTION move at
+    all; an explicit ``region_law`` argument still wins.
     """
     if family not in GENERIC_MODULES:
         raise ValueError(f"unknown dynamic generic module: {family}")
     if family == "segment_grow":
+        if completion_law is not None:
+            actions, _product, parameters = completion_law.complete(source, rng)
+            return _execute_actions(source, family, actions, parameters)
         capacity = min(MAX_SEGMENT_LENGTH, 40 - source.n_real_atoms)
         if capacity < 1:
             raise ValueError("segment growth has no remaining heavy-atom capacity")
@@ -424,9 +435,33 @@ def compile_generic_module(
             },
         )
     if family == "segment_replace":
+        excision_law = region_law
+        if excision_law is None and completion_law is not None:
+            excision_law = completion_law.region_law
         delete_actions, contracted, anchor, path = _delete_pendant_fragment(
-            source, rng, law=region_law
+            source,
+            rng,
+            maximum=(
+                MAX_SEGMENT_LENGTH if excision_law is None else source.n_real_atoms - 1
+            ),
+            law=excision_law,
         )
+        if completion_law is not None:
+            grow_actions, _product, completion = completion_law.complete(
+                contracted, rng, anchor=anchor
+            )
+            return _execute_actions(
+                source,
+                family,
+                [*delete_actions, *grow_actions],
+                {
+                    "deleted_path": path,
+                    "deleted_atoms": len(path),
+                    "cycle_openings": len(delete_actions) - len(path),
+                    "retained_anchor": anchor,
+                    **completion,
+                },
+            )
         capacity = min(MAX_SEGMENT_LENGTH, 40 - contracted.n_real_atoms)
         if capacity < 1:
             raise ValueError("segment replacement has no insertion capacity")
@@ -507,6 +542,7 @@ def synthesize_dynamic_program(
     max_primitives: int = 32,
     max_blocks: int = 8,
     region_law=None,
+    completion_law=None,
 ):
     """Construct one complete K-module program without any task evaluation."""
     if not 1 <= max_modules <= MAX_GENERIC_MODULES:
@@ -529,7 +565,11 @@ def synthesize_dynamic_program(
         for family in _weighted_module_order(rng, near_capacity=near_capacity):
             try:
                 product, stage = compile_generic_module(
-                    current, rng, family, region_law=region_law
+                    current,
+                    rng,
+                    family,
+                    region_law=region_law,
+                    completion_law=completion_law,
                 )
             except ValueError as error:
                 failures[f"{family}:{error!s}"] += 1
@@ -767,6 +807,17 @@ def initial_dynamic_program_batch(
 class DynamicProgramOptimizer(ProgramOptimizer):
     """Reuse only measured self-discovered routes, mixed with fresh synthesis."""
 
+    def __init__(self, *args, completion_law=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Resolved once so a declared arm that the runtime cannot honour fails at
+        # construction rather than silently proposing v1 for a whole budget.
+        from compose_v4.control.completion_law_contract import resolve_completion_law
+
+        self.completion_law = resolve_completion_law(completion_law)
+        self.completion_law_declared = (
+            completion_law if isinstance(completion_law, str) else None
+        )
+
     def _mutate(self, entry):
         if self.rng.random() >= FRESH_SYNTHESIS_PROBABILITY:
             return super()._mutate(entry)
@@ -777,6 +828,7 @@ class DynamicProgramOptimizer(ProgramOptimizer):
             max_modules=3,
             max_primitives=self.config.max_primitives,
             max_blocks=self.config.max_blocks,
+            completion_law=getattr(self, "completion_law", None),
         )
         return (
             source,

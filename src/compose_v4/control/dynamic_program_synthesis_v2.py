@@ -220,6 +220,7 @@ def synthesize_structured_program(
     max_primitives=32,
     max_blocks=8,
     panel_cache=None,
+    completion_law=None,
 ):
     """Invoke the unchanged v1 structured branch as an explicit v2 channel."""
     result = synthesize_dynamic_program_v1(
@@ -229,6 +230,7 @@ def synthesize_structured_program(
         max_primitives=max_primitives,
         max_blocks=max_blocks,
         panel_cache=panel_cache,
+        completion_law=completion_law,
     )
     if result[4].get("v1_selection") == "preserved_dynamic_v0_channel":
         raise RuntimeError("explicit structured planner entered the shallow branch")
@@ -573,6 +575,7 @@ class DynamicV2ProgramOptimizer(DynamicProgramOptimizer):
                     max_modules=3,
                     max_primitives=self.config.max_primitives,
                     max_blocks=self.config.max_blocks,
+                    completion_law=getattr(self, "completion_law", None),
                 )
             else:
                 source, program, binding, _, detail = synthesize_structured_program(
@@ -582,6 +585,7 @@ class DynamicV2ProgramOptimizer(DynamicProgramOptimizer):
                     max_primitives=self.config.max_primitives,
                     max_blocks=self.config.max_blocks,
                     panel_cache=self._v2_panel_cache,
+                    completion_law=getattr(self, "completion_law", None),
                 )
         except ValueError as error:
             token = identity({"gate": gate, "error": str(error)})

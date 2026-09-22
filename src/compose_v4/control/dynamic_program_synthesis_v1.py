@@ -960,6 +960,7 @@ def compile_generic_module_v1(
     *,
     preferred_anchors: frozenset[int] = frozenset(),
     panel_cache: dict | None = None,
+    completion_law=None,
 ):
     """Bind one v1 family through a bounded executor-verified context panel."""
     if family not in GENERIC_MODULES:
@@ -1034,7 +1035,7 @@ def compile_generic_module_v1(
             rng,
             family=family,
         )
-    return compile_generic_module(source, rng, family)
+    return compile_generic_module(source, rng, family, completion_law=completion_law)
 
 
 def _following_context(product_graph: MolecularGraph, stage: dict) -> frozenset[int]:
@@ -1058,6 +1059,7 @@ def synthesize_dynamic_program_v1(
     max_primitives: int = 32,
     max_blocks: int = 8,
     panel_cache: dict | None = None,
+    completion_law=None,
 ):
     """Construct one protected v1 program with bounded contextual rebinding."""
     if not 1 <= max_modules <= 3:
@@ -1069,6 +1071,7 @@ def synthesize_dynamic_program_v1(
             max_modules=max_modules,
             max_primitives=max_primitives,
             max_blocks=max_blocks,
+            completion_law=completion_law,
         )
         prior[4]["v1_selection"] = "preserved_dynamic_v0_channel"
         return prior
@@ -1110,6 +1113,7 @@ def synthesize_dynamic_program_v1(
                     family,
                     preferred_anchors=preferred,
                     panel_cache=panel_cache,
+                    completion_law=completion_law,
                 )
                 program, assignment = extract_program(source, [*stages, stage])
             except ValueError as error:

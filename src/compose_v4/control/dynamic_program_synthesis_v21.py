@@ -353,6 +353,7 @@ class DynamicV21ProgramOptimizer(DynamicProgramOptimizer):
                     max_primitives=self.config.max_primitives,
                     max_blocks=self.config.max_blocks,
                     panel_cache=self._v21_panel_cache,
+                    completion_law=getattr(self, "completion_law", None),
                 )
                 return (
                     source,
