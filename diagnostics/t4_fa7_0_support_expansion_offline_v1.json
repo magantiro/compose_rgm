@@ -27,6 +27,64 @@
     "revision": "the anchored lane's contribution is now measured at 0 in 2048 draws, so the sizing rests on the shallow lane alone: 6720 shallow draws per event against a rate of about 1 per 1920 measured draws gives roughly 3.5 expected eligible endpoints, i.e. P(at least one) near 0.97. A round that still exhausts after that full ladder is a bounded, documented exhaustion rather than the coin flip the unexpanded loop would have been",
     "total_shallow_draws_per_event": 6720
   },
+  "expressibility_verdict": {
+    "decisive_evidence_1_generation": {
+      "draws": 480,
+      "eligible": 1,
+      "lane": "shallow",
+      "note": "generation, not gating: this endpoint came out of expand, it was not merely checked against Fiber.check",
+      "qed": 0.6264,
+      "retaining_amidine": 1,
+      "sa": 2.331,
+      "seed_index": 1,
+      "similarity": 0.661,
+      "smiles": "COC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1",
+      "what": "the production configuration GENERATED an eligible endpoint for fa7_0, reproduced in this tree under the pinned kernel"
+    },
+    "decisive_evidence_2_decomposition": {
+      "completion": {
+        "atoms": 2,
+        "branch": false,
+        "elements": [
+          "O",
+          "C"
+        ],
+        "non_cno": false,
+        "requires": "nothing beyond _grow_actions' existing vocabulary; it is the simplest object that function builds, and it is inside the 1-2 atom range the completion law biases toward",
+        "ring_content": false,
+        "topology": "linear, single-bonded"
+      },
+      "correction": "the carbonyl C=O of the carbamate is RETAINED from the seed, not installed, so no branched or double-bonded content has to be built",
+      "excision": {
+        "fragment": "naphthalen-1-yl",
+        "heavy_atoms": 10,
+        "requires": "the region law, because v1's MAX_SEGMENT_LENGTH=8 cannot express a 10-atom pendant in one draw",
+        "shape": "a single bridge-separated pendant"
+      },
+      "verified_by": "canonical SMILES identity: seed minus the naphthalenyl pendant, plus a linear O-C chain on the carbonyl carbon, equals the witness exactly",
+      "what": "the witness decomposes exactly into one excision plus one completion"
+    },
+    "measured_rate": {
+      "consequence": "one expansion event runs 6,720 shallow draws, so roughly 5.6 expected eligible endpoints, i.e. P(at least one) near 0.996. The budget is worth spending",
+      "pooled_approximate": "about 1 eligible endpoint per 1,200 shallow draws",
+      "prior_branch": {
+        "draws": 1440,
+        "eligible": 1,
+        "seeds": 3
+      },
+      "this_tree": {
+        "draws": 960,
+        "eligible": 1,
+        "seeds": [
+          0,
+          1
+        ]
+      }
+    },
+    "question": "can the enabled configuration express the transformation fa7_0 needs -- a coherent changed region of 7-15 heavy atoms -- or is a zero yield structural incapability rather than rarity?",
+    "verdict": "EXPRESSIBLE. The zero is rarity, not incapability.",
+    "why_the_general_concern_does_not_bind_here": "a completion half capped at 8 atoms and restricted to a linear single-bonded C/N/O chain genuinely cannot install ring or branched content, and on a task whose productive transitions are mostly ring-installing that is a real ceiling. fa7_0 is not such a cell: its transformation is excision-dominated and its completion is two linear atoms. The scale that mattered was the EXCISION scale, and that is exactly what the region law already uncaps"
+  },
   "kernel": "python 3.11.13 / rdkit 2024.03.5 / numpy 1.26.4 / torch 2.4.0 (T4 pinned)",
   "law_consumption_proven_through_the_production_path": {
     "anchored_replacement_lane": {
