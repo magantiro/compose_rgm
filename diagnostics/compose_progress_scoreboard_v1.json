@@ -1,126 +1,168 @@
 {
-  "DE_NOVO": {
-    "correction": "The recorded claim that exact_early_ring is INERT was WRONG: it delivers -0.1169 vs sequential. The n=24 probe measured free slots, which provably cannot move under reordering.",
-    "finding": "Small-ring prevalence is a consequence of a DECLARED v1 host scope (_eligible_grow_host_graph admits only acyclic neutral carbon and asserts a forest), not a reward, policy or scheduling defect. On 3 of 12 audited rollout states EVERY legal template is a small ring.",
-    "gate": "ring_dependency_block 0.1956 vs gate <0.15 -- FAILED, and it does not beat the already-shipped exact_early_ring at 0.1926.",
-    "state": "ANSWERED, awaiting owner scope decision.",
-    "unwired": "Lineage B trained on `sequential`; exact_early_ring (0.305 -> 0.193) has been unwired since 2026-07-20. Five hops, NINE call sites, two sharing a sink."
+ "DE_NOVO": {
+  "correction": "The recorded claim that exact_early_ring is INERT was WRONG: it delivers -0.1169 vs sequential. The n=24 probe measured free slots, which provably cannot move under reordering.",
+  "finding": "Small-ring prevalence is a consequence of a DECLARED v1 host scope (_eligible_grow_host_graph admits only acyclic neutral carbon and asserts a forest), not a reward, policy or scheduling defect. On 3 of 12 audited rollout states EVERY legal template is a small ring.",
+  "gate": "ring_dependency_block 0.1956 vs gate <0.15 -- FAILED, and it does not beat the already-shipped exact_early_ring at 0.1926.",
+  "state": "ANSWERED, awaiting owner scope decision.",
+  "unwired": "Lineage B trained on `sequential`; exact_early_ring (0.305 -> 0.193) has been unwired since 2026-07-20. Five hops, NINE call sites, two sharing a sink."
+ },
+ "FRAGMENTS": {
+  "attribution": "Mechanism delta motif +50.70 / decoration +89.93 at matched budget. Tested not asserted: baseline lift collapses with declared interface count -- 1 interface +6.67, 19 of 20 multi-interface pairs gained exactly 0.00.",
+  "decoration": {
+   "compose": 93.5,
+   "genmol": 96.6,
+   "verdict": "behind"
   },
-  "FRAGMENTS": {
-    "attribution": "Mechanism delta motif +50.70 / decoration +89.93 at matched budget. Tested not asserted: baseline lift collapses with declared interface count -- 1 interface +6.67, 19 of 20 multi-interface pairs gained exactly 0.00.",
-    "decoration": {
-      "compose": 93.5,
-      "genmol": 96.6,
-      "verdict": "behind"
-    },
-    "linker": "NO NUMBER. v1 and v2 both falsified as predeclared. v3 (insert-then-reroute) is a DECLARED CAPABILITY EXTENSION on 8 of 10 prompts, not an acceleration: as an ACTION the reroute form is unavailable 10/10; as a TRANSITION it is recovered 2/10, missing on 8 at a 16,384-draw cap. Trade: in-support route (close-then-open) reaches 4/10 drugs; reaching route reaches 10/10 by hand but is outside support on 8. Both arms must be shown.",
-    "motif": {
-      "compose": 98.8,
-      "genmol": 82.9,
-      "uniqueness": "89.86 vs 77.5 ahead",
-      "verdict": "ahead"
-    },
-    "source": "pinned kernel, both arms matched at mark_attempts_per_event=96, comparators hash-pinned at b50bb3ae",
-    "superstructure": {
-      "compose": 98.87,
-      "genmol": 97.5,
-      "note": "negative control: delta exactly 0.00 at both budgets",
-      "verdict": "ahead"
-    }
+  "linker": "NO NUMBER. v1 and v2 both falsified as predeclared. v3 (insert-then-reroute) is a DECLARED CAPABILITY EXTENSION on 8 of 10 prompts, not an acceleration: as an ACTION the reroute form is unavailable 10/10; as a TRANSITION it is recovered 2/10, missing on 8 at a 16,384-draw cap. Trade: in-support route (close-then-open) reaches 4/10 drugs; reaching route reaches 10/10 by hand but is outside support on 8. Both arms must be shown.",
+  "motif": {
+   "compose": 98.8,
+   "genmol": 82.9,
+   "uniqueness": "89.86 vs 77.5 ahead",
+   "verdict": "ahead"
   },
-  "OPEN_OWNER_DECISIONS": [
-    "de novo: scope the claim to atomic ring installation on acyclic carbon, or extend to fused/heteroatom hosts (~9-10% small-ring mass, but invalidates the forest DP)",
-    "A/perindopril: clean single-revision rerun at 250 (~250 calls) to remove the last asymmetric caveat",
-    "19 GB of regenerable .uv-cache inside the repo"
+  "source": "pinned kernel, both arms matched at mark_attempts_per_event=96, comparators hash-pinned at b50bb3ae",
+  "superstructure": {
+   "compose": 98.87,
+   "genmol": 97.5,
+   "note": "negative control: delta exactly 0.00 at both budgets",
+   "verdict": "ahead"
+  }
+ },
+ "OPEN_OWNER_DECISIONS": [
+  "de novo: scope the claim to atomic ring installation on acyclic carbon, or extend to fused/heteroatom hosts (~9-10% small-ring mass, but invalidates the forest DP)",
+  "A/perindopril: clean single-revision rerun at 250 (~250 calls) to remove the last asymmetric caveat",
+  "19 GB of regenerable .uv-cache inside the repo"
+ ],
+ "PMO": {
+  "donor_recombination": {
+   "binding_constraint": "The cut draw, not the executor. Shipped uniform_oriented_single_bridge gives median 36 primitives, ABOVE the 23-primitive realization ceiling; a retentive draw gives 17, below it. QED 0.426->0.434, SA 3.58->3.71, so retention is not bought with worse chemistry.",
+   "confidence": "medium -- one task, one ledger, 60 pairs, offline compilation, NOT a scored result",
+   "finding": "compile_transplant -- a scaffold-preserving bridge -- EXISTS but donor_program is ABSENT from the scored entry point's 118-module import closure. Third inert mechanism.",
+   "status": "wiring authorized with a CALL-SITE consumption check as a hard gate"
+  },
+  "headline": "Online structural memory is TASK-DEPENDENT: 1 clean win, 1 exploitation win, 1 loss.",
+  "kernel": {
+   "finding": "TWO production kernels: PMO is rdkit 2023.9.6 (PyTDC 1.1.15 requires <2024.3.1), T4/editing is 2024.3.5.",
+   "hazard": "Against the laptop .venv (2026.03.6), 1,472/37,784 (3.90%) off-path intermediates are a DIFFERENT MOLECULE by InChI. Artifacts survive only because the splitter never lands there -- a coincidence, not a property.",
+   "parity": "PASS -- all transport artifacts sha256-identical across both; full 37,784-intermediate lattice shows 0 SMILES and 0 sanitize-verdict disagreements; live scoring-identity gate reproduces byte-for-byte 144/144. Nothing re-based."
+  },
+  "matched_1000_celecoxib": {
+   "A_auc": 0.2489,
+   "A_best": 0.3364,
+   "B_auc": 0.3138,
+   "B_best": 0.3838,
+   "B_best_frozen_from_call": 500
+  },
+  "matched_250": {
+   "celecoxib_rediscovery": {
+    "A_auc": 0.1471,
+    "B_auc": 0.1916,
+    "winner": "B"
+   },
+   "gsk3b": {
+    "A_auc": 0.199,
+    "B_auc": 0.2722,
+    "caveat": "official score legitimate and stays in the table; B's chemistry is WORSE (top-10 QED 0.367 vs 0.423, SA 6.31 vs 6.12) and r(score,SA) rises 0.456->0.668. Better official score, worse med-chem diagnostics.",
+    "winner": "B"
+   },
+   "perindopril_mpo": {
+    "A_auc": 0.3309,
+    "B_auc": 0.3075,
+    "caveat": "revision-asymmetric; A's last 202 calls ran under a later revision than B's 250",
+    "winner": "A"
+   }
+  },
+  "mechanism_located": "Staged transport paths to declared targets EXIST (44/44, median 2 stages, under the 23-primitive ceiling) but 39% dip below their own starting score, so score-greedy selection abandons the required intermediate. That is the plateau mechanism.",
+  "source": "durable query ledgers, matched A/B, arm flag folded into optimizer_kwargs_sha256",
+  "state": "Controller redirected to goal-conditioned transport. Step 1 (correspondence) VALIDATED, stage splitter VALIDATED, alternative-alignment check running. Nothing scored pending.",
+  "three_test_decomposition": {
+   "A_can_we_CONSTRUCT_it": {
+    "dominant_refusal": "84/192 (43.8%) unreachable_charge_change -- 7 of 16 transfer sources carry net formal charge and every destination is neutral. The July charge-preserving scope surfacing as a PMO ceiling, as it did on T4's 5ht1b_2.",
+    "measured": "204 attempts, winner_paths.find_path recomputing its own MCS per pair. Recorded source 12/12. Transfer to NEUTRAL sources 102/108 = 94.4% with 102/102 EXACT destination recovery re-replayed through the production executor. Search failures 6/192 = 3.1%.",
+    "verdict": "YES -- construction is NOT the gap"
+   },
+   "B_can_we_EXPLOIT_it": {
+    "context": "Blind search reached top-10 0.3714 on celecoxib in 1,000 charged calls; from the anchor it reaches 0.7362 in 64. IVG no-prescreen celecoxib AUC@10k is 0.798.",
+    "measured": "2,101 diagnostic oracle calls, 33 runs (11 tasks x 3 checkpoints), 64-call budget. From the teacher anchor the frozen local controller yields a top-ten of NEW molecules at 0.7362-0.9859. Mean gap vs seed +0.0776 early, +0.0677 near-anchor.",
+    "metric_warning": "distinct_new_above_seed is DEGENERATE at a 1.0000 seed -- nothing can exceed it. Use top_ten_new_mean.",
+    "verdict": "YES -- exploitation is NOT the gap"
+   },
+   "C_can_we_DISCOVER_it": {
+    "broad_objective_half_MEASURED": {
+     "isomers_c7h8n2o2": "1/3 clear (best 0.7779, near_anchor)",
+     "median1": "0/3, all below_early -- and median1 was the exception in Test B too",
+     "qed": "3/3 probes clear a rung (best 0.9232 vs anchor rung 0.9331)"
+    },
+    "caveat": "3 probes per task is thin",
+    "rediscovery_half": "entry probes g1/g2 still running; the falsifier turns on the CONTRAST between the halves, so no verdict yet",
+    "verdict": "IN PROGRESS -- sealed two-sided falsifier, broad half complete"
+   },
+   "note": "Answer-known DEVELOPMENT_INFORMED_DIAGNOSTIC evidence. Not benchmark results."
+  }
+ },
+ "T4": {
+  "banked_mechanism": "replace-completion law: fa7_1 +86%, braf_2 +50%, 5ht1b_0 +75% eligible-per-draw, no control regressed.",
+  "budget": "COMPOSE 250 oracle calls/cell vs InVirtuoGen 1000",
+  "delta_0.4": {
+   "compose_sum": -169.2,
+   "coverage": "15/15",
+   "delta": -8.799999999999983,
+   "ivg_sum": -160.4,
+   "wins": "10/15"
+  },
+  "delta_0.6": {
+   "compose_sum": -153.0,
+   "coverage": "14/15",
+   "delta": -7.599999999999994,
+   "ivg_sum": -145.4,
+   "wins": "12/14"
+  },
+  "source": "diagnostics/t4_final_ivg_table_v1.json (round locks; both rescues terminated)",
+  "state": "COMPLETE. One unsolved cell (fa7_0 d0.6) -- reachable not infeasible; barrier located at the goal-abstraction layer (recovered_fraction=0.0000)."
+ },
+ "generated_at_utc": "2026-09-22T00:50:16.509944+00:00",
+ "note": "Built from authoritative artifacts only: T4 from round locks via t4_final_ivg_table_v1, PMO from durable ledgers. Not from checkpoints, not from agent prose.",
+ "pmo_ab_1k_celecoxib": {
+  "A_baseline": {
+   "auc": 0.2489,
+   "best": 0.3364,
+   "frontier_improvements": 21,
+   "top10": 0.3287
+  },
+  "B_memory": {
+   "auc": 0.3138,
+   "best": 0.3838,
+   "frontier_improvements": 14,
+   "memory_improvement_fraction": 0.286,
+   "memory_proposal_fraction": 0.419,
+   "top10": 0.3714
+  },
+  "artifact": "diagnostics/pmo_ab_1k_checkpoints_v1.json (branch on compose_pmo_ab)",
+  "headline": "B wins every metric at every checkpoint (AUC +26%), but B's best and frontier count FROZE at call 500 -- zero frontier improvements over calls 500-1000 -- while A kept climbing 9/15/17/21 and closed from -0.106 to -0.047 on best score.",
+  "reading": "B is the better LOCAL optimizer and cannot leave its basin. A explores slowly but keeps finding. Extrapolated, A overtakes B past ~1000 calls on best score.",
+  "status": "COMPLETE_1000_CALLS",
+  "task": "celecoxib_rediscovery",
+  "the_gap": "B at 1000 calls reaches top10 0.3714. The frozen local controller started in the teacher/anchor region reaches 0.7362 in 64 calls."
+ },
+ "pmo_next": {
+  "in_flight": [
+   "pmo-donor-wiring-20260921",
+   "pmo-macro-options-20260921",
+   "pmo-entry-diagnostic-20260921"
   ],
-  "PMO": {
-    "donor_recombination": {
-      "binding_constraint": "The cut draw, not the executor. Shipped uniform_oriented_single_bridge gives median 36 primitives, ABOVE the 23-primitive realization ceiling; a retentive draw gives 17, below it. QED 0.426->0.434, SA 3.58->3.71, so retention is not bought with worse chemistry.",
-      "confidence": "medium -- one task, one ledger, 60 pairs, offline compilation, NOT a scored result",
-      "finding": "compile_transplant -- a scaffold-preserving bridge -- EXISTS but donor_program is ABSENT from the scored entry point's 118-module import closure. Third inert mechanism.",
-      "status": "wiring authorized with a CALL-SITE consumption check as a hard gate"
-    },
-    "headline": "Online structural memory is TASK-DEPENDENT: 1 clean win, 1 exploitation win, 1 loss.",
-    "kernel": {
-      "finding": "TWO production kernels: PMO is rdkit 2023.9.6 (PyTDC 1.1.15 requires <2024.3.1), T4/editing is 2024.3.5.",
-      "hazard": "Against the laptop .venv (2026.03.6), 1,472/37,784 (3.90%) off-path intermediates are a DIFFERENT MOLECULE by InChI. Artifacts survive only because the splitter never lands there -- a coincidence, not a property.",
-      "parity": "PASS -- all transport artifacts sha256-identical across both; full 37,784-intermediate lattice shows 0 SMILES and 0 sanitize-verdict disagreements; live scoring-identity gate reproduces byte-for-byte 144/144. Nothing re-based."
-    },
-    "matched_1000_celecoxib": {
-      "A_auc": 0.2489,
-      "A_best": 0.3364,
-      "B_auc": 0.3138,
-      "B_best": 0.3838,
-      "B_best_frozen_from_call": 500
-    },
-    "matched_250": {
-      "celecoxib_rediscovery": {
-        "A_auc": 0.1471,
-        "B_auc": 0.1916,
-        "winner": "B"
-      },
-      "gsk3b": {
-        "A_auc": 0.199,
-        "B_auc": 0.2722,
-        "caveat": "official score legitimate and stays in the table; B's chemistry is WORSE (top-10 QED 0.367 vs 0.423, SA 6.31 vs 6.12) and r(score,SA) rises 0.456->0.668. Better official score, worse med-chem diagnostics.",
-        "winner": "B"
-      },
-      "perindopril_mpo": {
-        "A_auc": 0.3309,
-        "B_auc": 0.3075,
-        "caveat": "revision-asymmetric; A's last 202 calls ran under a later revision than B's 250",
-        "winner": "A"
-      }
-    },
-    "mechanism_located": "Staged transport paths to declared targets EXIST (44/44, median 2 stages, under the 23-primitive ceiling) but 39% dip below their own starting score, so score-greedy selection abandons the required intermediate. That is the plateau mechanism.",
-    "source": "durable query ledgers, matched A/B, arm flag folded into optimizer_kwargs_sha256",
-    "state": "Controller redirected to goal-conditioned transport. Step 1 (correspondence) VALIDATED, stage splitter VALIDATED, alternative-alignment check running. Nothing scored pending.",
-    "three_test_decomposition": {
-      "A_can_we_CONSTRUCT_it": {
-        "dominant_refusal": "84/192 (43.8%) unreachable_charge_change -- 7 of 16 transfer sources carry net formal charge and every destination is neutral. The July charge-preserving scope surfacing as a PMO ceiling, as it did on T4's 5ht1b_2.",
-        "measured": "204 attempts, winner_paths.find_path recomputing its own MCS per pair. Recorded source 12/12. Transfer to NEUTRAL sources 102/108 = 94.4% with 102/102 EXACT destination recovery re-replayed through the production executor. Search failures 6/192 = 3.1%.",
-        "verdict": "YES -- construction is NOT the gap"
-      },
-      "B_can_we_EXPLOIT_it": {
-        "context": "Blind search reached top-10 0.3714 on celecoxib in 1,000 charged calls; from the anchor it reaches 0.7362 in 64. IVG no-prescreen celecoxib AUC@10k is 0.798.",
-        "measured": "2,101 diagnostic oracle calls, 33 runs (11 tasks x 3 checkpoints), 64-call budget. From the teacher anchor the frozen local controller yields a top-ten of NEW molecules at 0.7362-0.9859. Mean gap vs seed +0.0776 early, +0.0677 near-anchor.",
-        "metric_warning": "distinct_new_above_seed is DEGENERATE at a 1.0000 seed -- nothing can exceed it. Use top_ten_new_mean.",
-        "verdict": "YES -- exploitation is NOT the gap"
-      },
-      "C_can_we_DISCOVER_it": {
-        "broad_objective_half_MEASURED": {
-          "isomers_c7h8n2o2": "1/3 clear (best 0.7779, near_anchor)",
-          "median1": "0/3, all below_early -- and median1 was the exception in Test B too",
-          "qed": "3/3 probes clear a rung (best 0.9232 vs anchor rung 0.9331)"
-        },
-        "caveat": "3 probes per task is thin",
-        "rediscovery_half": "entry probes g1/g2 still running; the falsifier turns on the CONTRAST between the halves, so no verdict yet",
-        "verdict": "IN PROGRESS -- sealed two-sided falsifier, broad half complete"
-      },
-      "note": "Answer-known DEVELOPMENT_INFORMED_DIAGNOSTIC evidence. Not benchmark results."
-    }
-  },
-  "T4": {
-    "banked_mechanism": "replace-completion law: fa7_1 +86%, braf_2 +50%, 5ht1b_0 +75% eligible-per-draw, no control regressed.",
-    "budget": "COMPOSE 250 oracle calls/cell vs InVirtuoGen 1000",
-    "delta_0.4": {
-      "compose_sum": -169.2,
-      "coverage": "15/15",
-      "delta": -8.799999999999983,
-      "ivg_sum": -160.4,
-      "wins": "10/15"
-    },
-    "delta_0.6": {
-      "compose_sum": -153.0,
-      "coverage": "14/15",
-      "delta": -7.599999999999994,
-      "ivg_sum": -145.4,
-      "wins": "12/14"
-    },
-    "source": "diagnostics/t4_final_ivg_table_v1.json (round locks; both rescues terminated)",
-    "state": "COMPLETE. One unsolved cell (fa7_0 d0.6) -- reachable not infeasible; barrier located at the goal-abstraction layer (recovered_fraction=0.0000)."
-  },
-  "generated_at_utc": "2026-09-22T00:50:16.509944+00:00",
-  "note": "Built from authoritative artifacts only: T4 from round locks via t4_final_ivg_table_v1, PMO from durable ledgers. Not from checkpoints, not from agent prose.",
-  "schema_version": "compose_progress_scoreboard_v1"
+  "oracle_spend_for_2_to_5": 0,
+  "plan": "owner-ordered: (2) wire donor/transplant with call-site consumption gate, (3) retentive cut law 36->17 primitives, (4) macro-options with bounded bridge protection, (5) teacher-atlas entry diagnostic as hidden evaluator, (6) B vs C 1k scored"
+ },
+ "pmo_test_c_verdict": {
+  "artifact": "diagnostics/pmo_atlas_v1/test_c_verdict.json (branch pmo-teacher-atlas-20260921)",
+  "both_apparent_successes_deflate": "qed was 0.9016 at INITIALIZATION (+0.0399 from 250 calls); perindopril blind lift over init is exactly +0.0000",
+  "corrects": "broad jnk3 38.2% and perindopril 38.4% sit with narrow celecoxib 37.2% and thiothixene 37.1%; narrow isomers 90.0% beats every broad task but qed",
+  "diagnostic_oracle_calls": 4831,
+  "headline": "0 of 11 tasks reach the anchor rung. The discovery gap is UNIVERSAL, not narrow-vs-broad.",
+  "status": "COMPLETE",
+  "tasks": 11,
+  "verdict": "NEITHER_SEALED_BRANCH"
+ },
+ "schema_version": "compose_progress_scoreboard_v1",
+ "updated_at_utc": "2026-09-22T01:58:56.088063+00:00"
 }
