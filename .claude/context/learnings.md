@@ -2803,3 +2803,81 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **A 780 MB worktree copy per mutation is the real cost of a tree-copying battery**, and it competes
   for CPU with whatever else is running: 11 pytest runs took over 20 minutes under contention against
   ~35 s each unloaded. Budget a battery as a serial job, not as background noise.
+
+## 2026-09-22 (PMO completion repair: SCALE and CONTENT are two defects, orthogonal, and both live in one function)
+
+- **The census's two headline gaps are ONE function's two parameters.** `segment_grow` and the grow
+  half of `segment_replace` complete with `_grow_actions`: a LINEAR SINGLE-BONDED C/N/O chain whose
+  length is `rng.integers(1, min(MAX_SEGMENT_LENGTH=8, 40-n)+1)`. That one draw simultaneously caps
+  SCALE at eight atoms and makes ring, branch and non-CNO CONTENT unreachable. Repairing them
+  separately and measuring a 2x2 shows they are genuinely orthogonal -- 768 attempts per arm over the
+  sixteen frozen PMO initialization parents, conditional on a completion module firing:
+      arm             region_med   >=13    ins    ring   branch   grow-chain-expressible
+      v1_current           5.0    0.019    6.0   0.272    0.063        0.715
+      content_only         5.0    0.006    5.0   0.513    0.354        0.228
+      scale_only           7.0    0.250    7.0   0.210    0.079        0.513
+      scale_content        7.0    0.191    7.0   0.605    0.454        0.189
+  Scale alone leaves ring content BELOW baseline; content alone leaves the thirteen-atom rate at
+  zero. Only the joint arm moves both, at unchanged executable yield (1.000) and diversity (0.964).
+- **A REPAIR MEASURED AT THE ARM LEVEL IS DILUTED BY WHATEVER ELSE THE PROPOSAL LAW DOES.**
+  `_weighted_module_order` is a uniform permutation over thirteen families and the first executable
+  one wins, so only **19.8-20.6%** of executed proposals carry a completion module at all. The
+  conditional thirteen-atom rate moves 0.019 -> 0.191 (10x) while the ARM-level rate moves
+  0.005 -> 0.039 -- the same 10x, five times smaller in absolute terms. Report BOTH: the conditional
+  number is the mechanism, the arm-level number is what a scored run experiences.
+- **A FLAT METRIC CAN BE AN ARTEFACT OF THE SUBPOPULATION IT IS AVERAGED OVER, and this nearly cost a
+  finding.** Parent RETENTION read 0.958 in all four arms, and even conditional on a completion
+  module the median excision was 1.0 in all four -- which looks like the expanded excision law doing
+  nothing. It is doing nothing *there*: `segment_grow` is two thirds of completion modules and
+  excises nothing by construction. Restricted to `segment_replace`, where the law can act:
+      arm             n   exc_med  exc_p90  exc_max  ret_med  region_med  >=13
+      v1_current     71     3.0       8       13      0.842      6.0     0.028
+      scale_only     61     6.0      13       17      0.750      8.0     0.344
+      scale_content  57     5.0      13       17      0.792      7.0     0.263
+  Always restrict to the rows where the mechanism is even expressible before reading a null.
+- **A component installs with Active8 primitives alone if hydrogen is RESERVED at insertion.** A
+  breadth-first spanning tree rooted at the attachment atom, one `atom_insert` per atom carrying its
+  tree-parent bond with `h_insert = h_final + total_bond_order - parent_bond_order`, then one
+  `cycle_close` per non-tree edge. Valence is then CONSTANT and correct at every intermediate, which
+  is why each intermediate passes `is_valid_state`. **`MAX_H_COUNT` is 4**, so a valence-six centre
+  reached through a single bond -- a sulfone or sulfonamide sulfur -- needs five reserved hydrogens
+  and is refused: 138 of 1,690 enumerated components (8.2%). Declared scope, counted offline by the
+  bank builder, not a silent drop. Charged components are excluded too (294, 17.4%) so net formal
+  charge is preserved. Retained: **634 unique components, median size 13, 89.1% ring-bearing, 91.6%
+  branched, 55.0% at or above thirteen atoms** -- richer than the census requirement of median 11 /
+  80.6% / 36.1%.
+- **VALIDATE A BANK BY INSTALLING IT, OFFLINE.** Every retained component is proved to execute on a
+  reference host at build time, so a runtime draw can never be refused for a reason the builder could
+  have found. The refusal census is part of the artifact.
+- **The OFF state must be verified against the PRE-REPAIR CODE LOADED FROM GIT, not a transcription.**
+  `git show <base>:<path>` into a temp module, then drive both over the same parents and seeds:
+  **640 of 640 draws identical**, endpoint and action list alike. A reference that is a copy of the
+  code under test cannot fail (2026-08-02, again). And an absent field is the ONLY byte-identical
+  OFF: an unlawed excision consumes `rng.permutation`, any law consumes `rng.random`.
+- **A MUTATION CAN SURVIVE BECAUSE THE TEST READS A COMMITTED ARTIFACT THE MUTATION DOES NOT
+  REBUILD.** Removing the bank builder's charge filter survived the whole battery, because the only
+  charge assertion was `all(not any(spec.charges))` on the SHIPPED bank file -- which a mutated
+  builder never regenerates. Killed by a test that drives `build_component_bank` on donors that do
+  carry charge and requires the refusal to be COUNTED. Same shape as the 2026-08-03 file-inventory
+  tautology, one level out: the guard was on the output, not on the rule that produced it.
+  Final battery: **17 negatives, 17 killed, 2 cosmetic positive controls green.**
+- **Two hops sharing one sink still needs two tests.** Dropping the law from `segment_replace` alone
+  leaves a whole-program consultation check green because `segment_grow` still threads it -- the
+  exact near-miss the region-law wiring hit. Each family gets its own consultation test.
+- **ESTIMATE THE RATE BEFORE BELIEVING A ZERO, again.** A 40-call synthetic smoke found 14 component
+  completions and ZERO requesting a size past the v1 ceiling, which read as "the scale half is
+  inert". Direct measurement: the law requests >8 on **35-42%** of draws, and at the production work
+  limits **31.6% of ACCEPTED completions** request >8 against 0% with the law absent. The smoke was
+  simply underpowered. The work limit is real but not the ceiling: `segment_replace` work-limit
+  refusals rise 1 -> 12 per 480 draws and the longest program reaches 31 of a 32-primitive budget.
+- **A wall-clock proposal budget makes a per-proposal cost into a POOL-SIZE cost.** The component
+  path is materially slower per attempt, and `wall_seconds=45` per channel pool is fixed, so the
+  repaired arm buys better proposals and pays in how many it can make. Record `proposal_attempts` and
+  `pool_size` per round in both arms, and run matched arms under SYMMETRIC machine load -- here
+  concurrently rather than sequentially, because a third-party job of unknown duration was already
+  holding a core and would have loaded one arm and not the other.
+- **Do not flip a deployed contract's authorization flag to run locally.** The PMO contract pins
+  `implementation_sha256` over sources this repair moves and carries `scored_launch_authorized:
+  false`; it is what the deployed Modal app validates against. The local A/B got its OWN contract
+  with its own hashes, its own authorization record naming the session instruction, and
+  `modal_launch_authorized: false`, and the deployed contract stayed byte-identical.
