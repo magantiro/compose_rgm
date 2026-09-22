@@ -147,9 +147,13 @@ def main() -> int:
                 "endpoints": [
                     {
                         "smiles": record["smiles"],
+                        # `Fiber.check` returns `qed` and `sa`. An earlier version of
+                        # this script read `quality`/`access`, which would have raised
+                        # only once an eligible endpoint was actually found -- i.e.
+                        # exactly when the probe mattered. Assert the shape instead.
                         "similarity": round(float(record["similarity"]), 4),
-                        "qed": round(float(record["quality"]), 4),
-                        "sa": round(float(record["access"]), 4),
+                        "qed": round(float(record["qed"]), 4),
+                        "sa": round(float(record["sa"]), 4),
                         "retains_amidine": _retains_amidine(record["smiles"]),
                     }
                     for record in sorted(records, key=lambda r: r["smiles"])
