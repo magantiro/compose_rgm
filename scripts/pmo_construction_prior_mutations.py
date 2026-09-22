@@ -141,6 +141,34 @@ MUTATIONS = [
     ),
     # -- CONTROL: bytes change, semantics do not.  This MUST stay green.
     (
+        "path_score_is_never_emitted",
+        TARGET_RELATIVE,
+        '        metadata["path_likelihood"] = construction_path_score(successor_prior, trace)',
+        "        pass",
+        "red",
+    ),
+    (
+        "path_score_hides_its_unjoined_steps",
+        TARGET_RELATIVE,
+        '        "unjoined_steps": score["unjoined_steps"],\n',
+        "",
+        "red",
+    ),
+    (
+        "path_score_swaps_its_comparability_rules",
+        TARGET_RELATIVE,
+        '        "rank_different_lengths_by": "per_step_log_likelihood",\n        "rank_same_length_by": "total_log_likelihood",',
+        '        "rank_different_lengths_by": "total_log_likelihood",\n        "rank_same_length_by": "per_step_log_likelihood",',
+        "red",
+    ),
+    (
+        "path_scoring_is_on_by_default",
+        TARGET_RELATIVE,
+        "    report_path_likelihood: bool = False,",
+        "    report_path_likelihood: bool = True,",
+        "red",
+    ),
+    (
         "controller_stops_setting_the_attribute_the_hop_reads",
         CONTROLLER_RELATIVE,
         "        self.construction_prior = construction_prior",

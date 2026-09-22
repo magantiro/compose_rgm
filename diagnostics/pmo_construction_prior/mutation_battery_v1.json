@@ -1,7 +1,7 @@
 {
   "baseline_green": true,
   "controls_passed": 1,
-  "killed": 17,
+  "killed": 21,
   "mutations": [
     {
       "expected": "red",
@@ -105,6 +105,34 @@
       "expected": "red",
       "file": "src/compose_v4/control/dynamic_program_synthesis.py",
       "mutation": "break_the_off_rng_stream_in_growth",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+      "mutation": "path_score_is_never_emitted",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+      "mutation": "path_score_hides_its_unjoined_steps",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+      "mutation": "path_score_swaps_its_comparability_rules",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+      "mutation": "path_scoring_is_on_by_default",
       "observed": "red",
       "verdict": "ok"
     },

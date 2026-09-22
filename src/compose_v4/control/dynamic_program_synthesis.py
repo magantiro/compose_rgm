@@ -42,7 +42,7 @@ from compose_v4.experiments.whole_ring_plan import (
     execute_program,
     fresh_slot,
 )
-from compose_v4.rewrite.action_codec_v4 import encode_action
+from compose_v4.rewrite.action_codec_v4 import decode_action, encode_action
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.operators import AtomDelete, AtomInsert, CycleOpenEdge
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
@@ -479,6 +479,50 @@ def _construction_parameters(parameters: dict, successor_prior) -> dict:
     return {**parameters, "construction_law": CONSTRUCTION_LAW_TAG}
 
 
+def construction_path_score(successor_prior, trace) -> dict:
+    """Rank one CONSTRUCTED program under the same learned law that built it.
+
+    ``synthesize_dynamic_program`` composes one to three modules and accepts the
+    first that executes; it never compares the completed programs against each
+    other.  This gives a caller that does compare them -- a basin-entry gate, a
+    pool selector -- a task-independent chemistry score for the whole path.
+
+    The comparability rules the underlying API declares are carried through
+    rather than left to the reader:
+
+    * ``per_step_log_likelihood`` ranks paths of DIFFERENT lengths, because
+      ``total`` falls monotonically with every additional step;
+    * ``total_log_likelihood`` ranks paths of the SAME length;
+    * ``unjoined_steps`` is always reported, because a path with an unjoined step
+      is scored on strictly less evidence and must not be silently compared
+      against one that is fully joined.
+
+    Returns ``None`` when there is no prior or no executed step, so a caller can
+    never mistake an unscored path for a badly scoring one.
+    """
+
+    if successor_prior is None:
+        return None
+    states = [decode_state(state) for state in trace["states"]]
+    steps = [decode_action(record) for record in trace["actions"]]
+    if not steps or len(states) != len(steps) + 1:
+        return None
+    try:
+        score = successor_prior.path_log_likelihood(states, steps)
+    except (ValueError, RuntimeError, KeyError, IndexError, TypeError):
+        return None
+    return {
+        "per_step_log_likelihood": score["per_step_log_likelihood"],
+        "total_log_likelihood": score["total_log_likelihood"],
+        "per_step_probability": score["per_step_probability"],
+        "scored_steps": score["scored_steps"],
+        "unjoined_steps": score["unjoined_steps"],
+        "path_length": score["path_length"],
+        "rank_different_lengths_by": "per_step_log_likelihood",
+        "rank_same_length_by": "total_log_likelihood",
+    }
+
+
 def compile_generic_module(
     source: MolecularGraph, rng, family: str, *, region_law=None, successor_prior=None
 ):
@@ -657,6 +701,7 @@ def synthesize_dynamic_program(
     max_blocks: int = 8,
     region_law=None,
     successor_prior=None,
+    report_path_likelihood: bool = False,
 ):
     """Construct one complete K-module program without any task evaluation."""
     if not 1 <= max_modules <= MAX_GENERIC_MODULES:
@@ -741,6 +786,12 @@ def synthesize_dynamic_program(
             else {"construction_law": CONSTRUCTION_LAW_TAG}
         ),
     }
+    if report_path_likelihood:
+        # Off by default: scoring the completed path re-enters the model on every
+        # state the construction draw did not already cache (a pure deletion
+        # module caches none of them), so it is a reporting cost a caller opts
+        # into rather than one every proposal pays.
+        metadata["path_likelihood"] = construction_path_score(successor_prior, trace)
     return source, program, assignment, trace, metadata
 
 

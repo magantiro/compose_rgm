@@ -48,7 +48,7 @@ from rdkit.Contrib.SA_Score import sascorer
 from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
 from compose_v4.control.dynamic_program_synthesis import synthesize_dynamic_program
 from compose_v4.control.learned_successor_prior import LearnedSuccessorPrior
-from compose_v4.rewrite.trace_shard import decode_state, encode_state
+from compose_v4.rewrite.trace_shard import decode_state
 
 RDLogger.DisableLog("rdApp.*")
 

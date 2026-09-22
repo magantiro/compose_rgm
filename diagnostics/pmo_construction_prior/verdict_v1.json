@@ -1,0 +1,101 @@
+{
+  "checkpoint": {
+    "path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+    "status": "PROVISIONAL_EDITING_CHECKPOINT -- forbidden for frozen results"
+  },
+  "kernel": "rdkit 2023.09.6 (PMO production)",
+  "mechanism_paired": {
+    "delta_heavy": {
+      "mean": 0.2365,
+      "n": 702,
+      "se": 0.1229,
+      "sigma": 1.92
+    },
+    "delta_qed": {
+      "mean": 0.0367,
+      "n": 702,
+      "se": 0.0058,
+      "sigma": 6.28
+    },
+    "delta_sa": {
+      "mean": -0.3671,
+      "n": 702,
+      "se": 0.0485,
+      "sigma": -7.57
+    },
+    "disagreement_rate": 0.8048,
+    "frac_qed_above_0.6": {
+      "off": 0.235,
+      "on": 0.2621
+    },
+    "frac_sa_at_most_4": {
+      "off": 0.4274,
+      "on": 0.5826
+    },
+    "n_paired_decisions": 702,
+    "permutation_p_delta_qed": 5e-05,
+    "permutation_p_delta_sa": 5e-05
+  },
+  "oracle_calls_spent": 0,
+  "outcome_closed_loop": {
+    "drift_reduction_fraction": 0.575,
+    "median_qed_generation_0": 0.6613,
+    "off_drift": -0.2393,
+    "off_frac_qed_above_0.6_final": 0.2734,
+    "off_frac_sa_at_most_4_final": 0.1992,
+    "off_median_heavy_final": 17.0,
+    "off_median_qed_final": 0.422,
+    "off_median_sa_final": 4.8682,
+    "on_drift": -0.1017,
+    "on_frac_qed_above_0.6_final": 0.4102,
+    "on_frac_sa_at_most_4_final": 0.3125,
+    "on_median_heavy_final": 19.0,
+    "on_median_qed_final": 0.5596,
+    "on_median_sa_final": 4.4746,
+    "what": "Score-free lineage from the real run's own 16 initialization entries, 15 generations x 16 proposals, parents drawn uniformly so no objective is read anywhere."
+  },
+  "outcome_open_loop": {
+    "off_drift_Q1_to_Q4": -0.1717,
+    "on_drift_Q1_to_Q4": -0.1628,
+    "reading": "Essentially unchanged, and expected to be: an open-loop arm inherits its parents' drift by construction.",
+    "what": "The same 702 decisions, ON and OFF, at the real 250-call run's OWN parents.  The parents are the drifted run's, so this cannot show drift PREVENTION -- only whether the chemistry produced at each point along that trajectory is better."
+  },
+  "schema_version": "pmo_construction_prior_verdict_v1",
+  "scope": [
+    "ONE task (celecoxib_rediscovery), ONE seed schedule, ZERO oracle calls.",
+    "The checkpoint is PROVISIONAL and forbidden for frozen results.",
+    "The closed-loop arm has no objective at all, so it measures the proposal law's own ratchet and not a scored campaign.",
+    "No scored PMO entry point sets `construction_prior` yet."
+  ],
+  "size_controls": {
+    "reading": "The fitted size slope is NEGATIVE, so the small size increase the prior brings works AGAINST its QED gain rather than explaining it; the gain survives both the regression intercept and the size-matched subset.",
+    "regression_intercept": 0.0379,
+    "regression_intercept_se": 0.0058,
+    "regression_intercept_sigma": 6.51,
+    "regression_slope_per_heavy_atom": -0.00527,
+    "regression_slope_se": 0.00178,
+    "size_matched_subset": {
+      "mean": 0.033,
+      "n": 401,
+      "se": 0.0056,
+      "sigma": 5.91
+    },
+    "size_matched_subset_delta_sa": {
+      "mean": -0.2698,
+      "n": 401,
+      "se": 0.038,
+      "sigma": -7.1
+    },
+    "why": "Unlike the earlier call site, where paired dHeavy was exactly 0.000000, the construction families change molecular size, and QED falls with size -- so an unpartialled QED gain is confounded."
+  },
+  "source_artifact": "diagnostics/pmo_construction_prior/celecoxib_drift_v1.json",
+  "support_identity": {
+    "candidates_joined": 37111,
+    "candidates_scored": 37398,
+    "join_rate": 0.9923,
+    "note": "An unjoined candidate keeps the support floor rather than being dropped, so the reachable set is identical in both arms whatever the join rate; `order` returns a permutation by construction and the suite asserts it."
+  },
+  "task": "celecoxib_rediscovery",
+  "verdict": "CLOSED_LOOP_DRIFT_REDUCED_OPEN_LOOP_DRIFT_UNCHANGED"
+}

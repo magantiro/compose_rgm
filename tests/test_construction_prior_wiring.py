@@ -607,3 +607,95 @@ def test_the_controller_restore_forwards_the_arm_into_the_constructor():
         f"`restore` does not forward {sorted({'enable_online_memory', name} - forwarded)} "
         "into the constructor, so a resumed run would silently change arm"
     )
+
+
+# ---- Ranking a constructed path ----
+
+
+class _PathScoringPrior(_ForcedPrior):
+    """A stub with the ``path_log_likelihood`` surface the real prior exposes."""
+
+    def __init__(self, *, unjoined: int = 0):
+        super().__init__()
+        self.unjoined = unjoined
+        self.paths: list[int] = []
+
+    def path_log_likelihood(self, states, actions):
+        steps = tuple(actions)
+        self.paths.append(len(steps))
+        scored = max(1, len(steps) - self.unjoined)
+        total = -1.5 * scored
+        return {
+            "total_log_likelihood": total,
+            "per_step_log_likelihood": total / scored,
+            "per_step_probability": 0.22,
+            "scored_steps": scored,
+            "unjoined_steps": self.unjoined,
+            "path_length": len(steps),
+            "step_log_likelihoods": tuple([-1.5] * len(steps)),
+        }
+
+
+def test_the_constructed_path_is_scored_and_reports_its_comparability_rules():
+    from compose_v4.control.dynamic_program_synthesis import construction_path_score
+
+    source = _source()
+    prior = _PathScoringPrior(unjoined=1)
+    _s, _p, _b, _t, metadata = synthesize_dynamic_program(
+        source,
+        np.random.default_rng(np.random.SeedSequence([9, 17])),
+        max_modules=2,
+        successor_prior=prior,
+        report_path_likelihood=True,
+    )
+    score = metadata["path_likelihood"]
+    assert score is not None and prior.paths
+    # `total` falls with length, so a caller comparing unequal paths must be told
+    # which field to use rather than left to discover it.
+    assert score["rank_different_lengths_by"] == "per_step_log_likelihood"
+    assert score["rank_same_length_by"] == "total_log_likelihood"
+    # A path scored on less evidence must never be silently comparable.
+    assert score["unjoined_steps"] == 1
+    assert score["scored_steps"] == score["path_length"] - 1
+    assert construction_path_score(None, {"states": [], "actions": []}) is None
+
+
+def test_path_scoring_is_off_by_default():
+    source = _source()
+    prior = _PathScoringPrior()
+    _s, _p, _b, _t, metadata = synthesize_dynamic_program(
+        source,
+        np.random.default_rng(np.random.SeedSequence([9, 17])),
+        max_modules=2,
+        successor_prior=prior,
+    )
+    assert "path_likelihood" not in metadata
+    assert prior.paths == []
+
+
+def test_the_real_prior_scores_a_constructed_path_end_to_end():
+    """The stub proves the plumbing; this proves the real API accepts the trace.
+
+    ``path_log_likelihood`` takes decoded ``(family, action)`` pairs, and the
+    executed trace stores encoded records -- a shape mismatch here would leave
+    the reporting path returning ``None`` forever and looking like a prior with
+    nothing to say.
+    """
+
+    from compose_v4.control.learned_successor_prior import (
+        FAMILY_TO_EXECUTOR_RULE,
+        LearnedSuccessorPrior,
+    )
+    from compose_v4.rewrite.action_codec_v4 import decode_action
+
+    source = _source()
+    _s, _p, _b, trace, _m = synthesize_dynamic_program(
+        source, np.random.default_rng(np.random.SeedSequence([2, 19])), max_modules=3
+    )
+    families = [decode_action(record)[0] for record in trace["actions"]]
+    assert families
+    unknown = [f for f in families if f not in FAMILY_TO_EXECUTOR_RULE]
+    assert not unknown, (
+        f"the executed trace carries families the prior cannot score: {unknown}"
+    )
+    assert "path_log_likelihood" in dir(LearnedSuccessorPrior)
