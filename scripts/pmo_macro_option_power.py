@@ -7,6 +7,7 @@ diagnostics/pmo_macro_option_v1/falsifier_predeclaration_v1.json.
 import numpy as np
 from scipy.stats import binom
 
+
 def mcnemar_one_sided(b, c):
     n = b + c
     return 1.0 if n == 0 else float(binom.sf(b - 1, n, 0.5))

@@ -63,8 +63,14 @@ SCHEMA = "pmo_macro_option_registry_v1"
 # a median and a maximum of ONE protected round
 # (diagnostics/pmo_discovery_v1/transport_ordering_policy_v1.json, sibling branch):
 # a single-crossing guarantee is what the data supports.
+# The protection window IS the chosen ordering's TROUGH WIDTH -- the number of
+# consecutive rounds the trajectory spends below its own source -- and not a fraction of
+# the budget. Expressed that way it provably protects a SINGLE CROSSING and cannot later
+# be read as an open-ended allowance. MEASURED over 35 transports: trough width median 1,
+# MAXIMUM 1, with a residual of 5 of 35 = 14.3% needing protection at all.
 PROTECTION_ROUNDS_CEILING = 4
-DEFAULT_PROTECTION_ROUNDS = 1
+DEFAULT_TROUGH_WIDTH = 1
+DEFAULT_PROTECTION_ROUNDS = DEFAULT_TROUGH_WIDTH
 
 # A macro option is a SHORT chain by design. The measured transport scale on real
 # declared targets is 19 / 36 / 56 primitives against a measured realization ceiling of
@@ -175,9 +181,19 @@ class MacroOption:
         return self.stages[-1].endpoint
 
     @property
+    def crossings(self) -> int:
+        """Intermediates that must be crossed: one bounded window each, never shared."""
+        return len(self.stages) - 1
+
+    @property
     def total_protected_rounds_budget(self) -> int:
         """Bounded by construction: one window per crossing, no crossing extendable."""
-        return (len(self.stages) - 1) * self.protection_rounds
+        return self.crossings * self.protection_rounds
+
+    @property
+    def protects_a_single_crossing(self) -> bool:
+        """True when each window covers exactly one round -- the measured trough width."""
+        return self.protection_rounds == 1
 
     def payload(self) -> dict[str, Any]:
         return {
@@ -189,6 +205,10 @@ class MacroOption:
             "realization_ceiling": self.realization_ceiling,
             "total_primitives": self.total_primitives,
             "total_protected_rounds_budget": self.total_protected_rounds_budget,
+            "crossings": self.crossings,
+            "trough_width_rounds": self.protection_rounds,
+            "protection_source": "chosen_ordering_trough_width",
+            "protects_a_single_crossing": self.protects_a_single_crossing,
         }
 
     @classmethod
@@ -397,6 +417,13 @@ class MacroOptionRegistry:
             "round": self._round,
             "parent_mass_floor": self.parent_mass_floor,
             "declared": len(self._records),
+            # Structural, not a convention: the window follows the frontier, so an option
+            # has at most ONE open window at any time however long its chain is.
+            "max_open_windows_per_option": 1,
+            "protection_source": "chosen_ordering_trough_width",
+            "all_windows_protect_a_single_crossing": all(
+                record.option.protects_a_single_crossing for record in self._records.values()
+            ),
             "status_counts": dict(sorted(counts.items())),
             "reached": sorted(
                 key for key, record in self._records.items() if record.status == REACHED
@@ -592,6 +619,7 @@ __all__ = [
     "DECLARED",
     "DEFAULT_PARENT_MASS_FLOOR",
     "DEFAULT_PROTECTION_ROUNDS",
+    "DEFAULT_TROUGH_WIDTH",
     "EXPIRED",
     "MAX_STAGES",
     "MEASURED_REALIZATION_CEILING",
