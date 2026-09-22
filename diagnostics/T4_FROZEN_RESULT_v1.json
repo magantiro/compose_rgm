@@ -473,9 +473,26 @@
    "who_erred": "The coordinator proposed the rerun and under-weighted the reproducibility risk already recorded in this same artifact under docking_reproducibility_caveat. The owner questioned it and the proposal was withdrawn before anything was launched. Zero oracle calls were spent.",
    "why_it_was_reversed": "T4 DOCKING IS NOT REPRODUCIBLE ACROSS RUNS. Measured: the fa7_0 seed scored -7.5, -8.30 and -8.8 in three runs -- 1.3 kcal/mol on ONE molecule -- because qvina02 is seeded but the conformer it docks comes from `obabel --gen3D`, which takes no seed. Per-cell margins in this panel are 0.2-0.7, so a rerun could lose two or three wins to conformer noise WITHOUT the algorithm being worse, and we would be committed to reporting the new table with no legitimate way back. Spending 7,500 oracle calls to acquire a table we might like less is a bad trade."
   },
+  "ladder_evidence_status": {
+   "NAMING_CONSEQUENCE": "The controller is named for 'adaptive proposal escalation' and the escalation rungs are unevidenced.  Until rungs 1-3 fire, the honest name for what is demonstrated is a zero-support FALLBACK, not an escalation LADDER.  Do not write 'escalation' into a claim the ladder has not earned -- terminology carries claims.",
+   "detail": "Every landed event stopped at rung 0 with draws_spent = 0.  The two cells with no data (fa7_0, fa7_2) are exactly the two whose rung 0 cannot carry them: rung 0 yields 0-1 and 1-3 against a stop target of 4.",
+   "finding": "ladder_rungs_1_to_3_exercised: false -- the escalation ladder has NEVER run, on any cell, at any seed",
+   "if_both_cells_come_back_empty": "the unified controller does not subsume the historical arms, and Plan A with an appendix disclosure is the right table",
+   "what_IS_evidenced": "RUNG 0, the zero-support fallback.  It restores support on braf_0, braf_1 and 5ht1b_2 at roughly 1/50th the proposal compute the historical conditioned shallow lane spent (~20 s against 1132-1352 s), with exact SMILES overlap against the historical arms of 4/8, 10/22 and 2/4.",
+   "what_would_close_it": "six zero-oracle events on fa7_0 and fa7_2, all three seeds, conditioned and unconditioned"
+  },
   "objective": "QuickVina2 docking of the best eligible lead, lower is better, subject to QED>=0.6, SA<=4.0, Tanimoto>=delta to the seed",
+  "production_controller_declaration": {
+   "DECLARATION": "q_region INCLUDES region_law: free_gate_margin_v1 whenever that kernel is activated, for ALL applicable molecular states -- never for named cells.",
+   "declared_BEFORE_any_measurement_of_the_cells_it_affects": true,
+   "declared_at_utc": "2026-09-22",
+   "rationale": "The historical region arms that actually rescued braf_0, braf_1, fa7_0 and fa7_2 ran the SHALLOW lane with region_law: free_gate_margin_v1 and region_law_consumption_attempts: 1; anchored and route returned 0.  The first unified ladder omitted that conditioning and escalated UNCONDITIONED lanes, so it was not reproducing the mechanism that produced the wins.  Putting it back makes the unified controller the same kernels with automatic orchestration, rather than a generic approximation.",
+   "still_one_controller": "support state -> applicability mask -> {q_local, q_region, q_state}.  No target-name conditional anywhere; free_gate_margin_v1 attaches to the kernel, not to a cell.",
+   "the_unconditioned_arm_is_an_ABLATION": "Run zero-oracle for mechanism attribution only.  It is NOT competing to become production after the answer is seen.",
+   "why_this_is_declared_now": "fa7_0 and fa7_2 are UNMEASURED and are the only cells that escalate.  Deciding the region kernel's conditioning after seeing their result would be post-hoc.  The declaration therefore stands regardless of what the ablation returns."
+  },
   "schema_version": "t4_frozen_result_v1",
-  "status": "LOCKED -- final evaluated T4 result; no further scored runs required",
+  "status": "LOCKED -- historical table final; no further auditing. Integration and prospective evaluation are separate work.",
   "successor_in_progress": {
    "bar": "Eligibility and competitiveness, NOT reproduction of the old champions. VERIFIED aggregate slack at d0.6: the ten unaffected base rows sum to -113.7 and IVG's full 15-cell total is -153.1, so the five fallback-owned cells need only sum below -39.4, averaging -7.9 each. braf seed 1's current -9.0 is already a LOSS to IVG's -9.7.",
    "branch": "t4-generic-fallback-20260922",
@@ -551,5 +568,5 @@
    ]
   }
  },
- "payload_sha256": "ab815a2e33e888872f52c14630a58bf1bc148a516f03548143470ca01cea5d6c"
+ "payload_sha256": "42aa31c618f1b8bfa2348496e86a9373afe91e111beb87e2a57ae5d3ed8dc1a1"
 }
