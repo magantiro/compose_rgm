@@ -1,0 +1,69 @@
+{
+ "payload": {
+  "charged_oracle_calls_spent_so_far": 0,
+  "context": {
+   "b_best_structural_approach": 0.2083,
+   "b_charged_calls": 250,
+   "b_distinct_molecules": 475,
+   "b_last_charged_call_that_improved_its_approach": 156,
+   "teacher_anchor_v_local": 0.7362
+  },
+  "cost_per_candidate": 64,
+  "option_requested_here": "2 -- a small costed confirmatory sample",
+  "option_used_for_the_gate": "1 -- offline proxy, validated, PARTIAL",
+  "recommended_now": 192,
+  "requests": [
+   {
+    "blocks": "the meaning of every later arm reading on this task",
+    "candidates": 3,
+    "charged_calls": 192,
+    "decides": "whether the structural gate's null is a null under the future-value definition too, or whether the gate is blind to a basin B already occupies",
+    "name": "off_route_calibration",
+    "priority": 1,
+    "what": "V_local at the blind run's own highest-scoring molecules on this task -- far from the teacher anchor, already scored, and the only way to learn whether high future value exists off-route here."
+   },
+   {
+    "candidates_available_now": 3,
+    "charged_calls": 192,
+    "name": "arm_candidates",
+    "priority": 2,
+    "recommendation": "DO NOT SPEND YET. On this task the available candidates sit at similarity ~0.21 with nothing but novelty to recommend them, and the priority-1 calibration is what makes their number interpretable. Spend when an arm produces a candidate with a reason, or after the calibration lands.",
+    "shortlist": [
+     {
+      "arm": "arm1_baseline_b",
+      "endpoint": "Cc1ccc([SH](=O)([N-]c2cc(-c3ccoc3)ccc2C)c2cn(C(C)F)nc2F)cc1",
+      "provenance_class": "broad_exploration",
+      "qed": 0.3495,
+      "similarity": 0.2125
+     },
+     {
+      "arm": "arm1_baseline_b",
+      "endpoint": "CCn1nc(F)c(S(=O)(=O)[N-]c2ccc(-c3ccoc3)cc2C)c1N",
+      "provenance_class": "broad_exploration",
+      "qed": 0.7456,
+      "similarity": 0.210526
+     },
+     {
+      "arm": "nc1_uniform_legal_edits",
+      "endpoint": "CCn1nc(F)c(S(=O)(=O)[N-]c2ccc(-c3ccon3)cc2C)c1C",
+      "provenance_class": "uniform_random_legal_edit",
+      "qed": 0.6889,
+      "similarity": 0.213333
+     }
+    ],
+    "what": "V_local at the novel molecules an arm produced that are nearer a productive region than anything B produced."
+   }
+  ],
+  "schema_version": "pmo_entry_vlocal_budget_request_v1",
+  "software": {
+   "numpy": "1.26.4",
+   "platform": "macOS-26.5.2-arm64-arm-64bit",
+   "python": "3.11.13",
+   "rdkit": "2023.09.6"
+  },
+  "task": "celecoxib_rediscovery",
+  "total_if_both_approved": 384,
+  "why_a_proxy_is_not_enough": "Every offline proxy that validates against Test B is teacher-referenced or a route-position artifact, so it scores a high-value molecule in an unrelated basin as zero. That is the case the superseding definition exists to credit."
+ },
+ "payload_sha256": "8cc88bbb0e6b75dadc4cdb638055cc39e150bf2627566787ae2460f493af24c3"
+}

@@ -519,6 +519,113 @@ def _verdict(scored, counterexamples) -> dict[str, Any]:
     }
 
 
+# ---- what a charged sample would have to buy ----
+
+
+def phase_request(args: argparse.Namespace) -> int:
+    """Cost the confirmatory V_local sample the proxy cannot replace.
+
+    The offline proxy is teacher-referenced, so it is blind to exactly the case
+    the new definition exists to credit: a high-value molecule in an unrelated
+    basin. Closing that blind spot needs charged calls, and this writes the
+    request rather than spending anything.
+
+    The request is NOT "measure V_local on the arms' best molecules". On
+    celecoxib no arm produced an entrant and the nearest novel molecules sit at
+    similarity ~0.21, so 64 calls each would buy a number about molecules
+    nothing suggests are interesting. The decisive and much cheaper purchase is
+    a CALIBRATION: V_local at the blind run's OWN best-scoring molecules, which
+    are far from the teacher anchor and already scored. It answers whether high
+    future value exists off-route at all on this task, and every later reading
+    of the gate depends on that answer:
+
+      * if off-route V_local is LOW, the structural proxy's blind spot costs
+        nothing here and the gate's null stands as a null under both
+        definitions;
+      * if off-route V_local is HIGH, B is already sitting in a productive basin
+        the structural gate cannot see, and the gate -- not the controller -- is
+        what needs replacing.
+    """
+
+    repo_root = Path(args.repo_root).resolve()
+    report = json.loads((repo_root / OUT / args.report).read_text())["payload"]
+    task = args.task
+    novelty = report["novelty_versus_b"]["by_task"][task]
+    ladder = report["charged_approach_ladder"][task]
+    candidates = []
+    for name, block in sorted(novelty["arms"].items()):
+        for row in block["examples_of_novel_and_nearer"][: args.per_arm]:
+            candidates.append({"arm": name, **row})
+    payload = {
+        "schema_version": "pmo_entry_vlocal_budget_request_v1",
+        "task": task,
+        "charged_oracle_calls_spent_so_far": 0,
+        "why_a_proxy_is_not_enough": (
+            "Every offline proxy that validates against Test B is "
+            "teacher-referenced or a route-position artifact, so it scores a "
+            "high-value molecule in an unrelated basin as zero. That is the case "
+            "the superseding definition exists to credit."
+        ),
+        "option_used_for_the_gate": "1 -- offline proxy, validated, PARTIAL",
+        "option_requested_here": "2 -- a small costed confirmatory sample",
+        "cost_per_candidate": VLOCAL_BUDGET,
+        "requests": [
+            {
+                "priority": 1,
+                "name": "off_route_calibration",
+                "what": (
+                    "V_local at the blind run's own highest-scoring molecules on "
+                    "this task -- far from the teacher anchor, already scored, "
+                    "and the only way to learn whether high future value exists "
+                    "off-route here."
+                ),
+                "candidates": args.calibration,
+                "charged_calls": VLOCAL_BUDGET * args.calibration,
+                "decides": (
+                    "whether the structural gate's null is a null under the "
+                    "future-value definition too, or whether the gate is blind "
+                    "to a basin B already occupies"
+                ),
+                "blocks": "the meaning of every later arm reading on this task",
+            },
+            {
+                "priority": 2,
+                "name": "arm_candidates",
+                "what": (
+                    "V_local at the novel molecules an arm produced that are "
+                    "nearer a productive region than anything B produced."
+                ),
+                "candidates_available_now": len(candidates),
+                "charged_calls": VLOCAL_BUDGET * len(candidates),
+                "recommendation": (
+                    "DO NOT SPEND YET. On this task the available candidates sit "
+                    "at similarity ~0.21 with nothing but novelty to recommend "
+                    "them, and the priority-1 calibration is what makes their "
+                    "number interpretable. Spend when an arm produces a "
+                    "candidate with a reason, or after the calibration lands."
+                ),
+                "shortlist": candidates,
+            },
+        ],
+        "total_if_both_approved": VLOCAL_BUDGET * (args.calibration + len(candidates)),
+        "recommended_now": VLOCAL_BUDGET * args.calibration,
+        "context": {
+            "b_best_structural_approach": novelty["b_best_similarity"],
+            "b_distinct_molecules": novelty["b_distinct_molecules"],
+            "b_last_charged_call_that_improved_its_approach": ladder[
+                "last_charged_call_that_improved_it"
+            ],
+            "b_charged_calls": ladder["charged_calls"],
+            "teacher_anchor_v_local": args.anchor_v_local,
+        },
+        "software": _software(),
+    }
+    _write(repo_root / OUT / f"vlocal_budget_request_{task}.json", payload)
+    print(f"recommended now: {payload['recommended_now']} charged calls")
+    print(f"total if both approved: {payload['total_if_both_approved']}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", default=".")
@@ -527,6 +634,13 @@ def main(argv: list[str] | None = None) -> int:
     supersede.set_defaults(handler=phase_supersede)
     validate = sub.add_parser("validate")
     validate.set_defaults(handler=phase_validate)
+    request = sub.add_parser("request")
+    request.add_argument("--task", default="celecoxib_rediscovery")
+    request.add_argument("--report", default="report_celecoxib_v1.json")
+    request.add_argument("--calibration", type=int, default=3)
+    request.add_argument("--per-arm", type=int, default=2)
+    request.add_argument("--anchor-v-local", type=float, default=0.7362)
+    request.set_defaults(handler=phase_request)
     args = parser.parse_args(argv)
     return int(args.handler(args))
 
