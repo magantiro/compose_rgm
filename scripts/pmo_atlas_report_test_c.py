@@ -27,7 +27,11 @@ import statistics
 from pathlib import Path
 from typing import Any
 
-from compose_v4.experiments.pmo_atlas_discovery import atlas_molecules
+from compose_v4.experiments.pmo_atlas_discovery import (
+    atlas_molecules,
+    nearest_approach,
+    read_blind_trajectory,
+)
 from compose_v4.experiments.pmo_atlas_routes import (
     DEVELOPMENT_INFORMED_LABEL,
     REGIME_STATEMENT,
@@ -137,6 +141,33 @@ def main(argv: list[str] | None = None) -> int:
     # molecule. That is measured here rather than left as a caveat.
     dossier = load_atlas(repo_root)
     reference_sets = {task: atlas_molecules(dossier, task=task) for task in sorted(blind)}
+    # A similarity to "the atlas" can be a similarity to a shared SOURCE rather
+    # than to the answer, so the approach to the DESTINATIONS alone is measured
+    # separately. That is the sharper question: did blind search get near what
+    # the teacher was aiming at, not near where it started.
+    destination_approach: dict[str, Any] = {}
+    for task, run in sorted(blind.items()):
+        destinations = sorted(
+            {
+                route.destination_smiles or route.recorded_endpoint_smiles
+                for route in dossier.for_task(task)
+                if route.is_spine
+            }
+            - {None}
+        )
+        run_dir = Path(run["run_dir"])
+        if not destinations or not (run_dir / "oracle").is_dir():
+            continue
+        trajectory = read_blind_trajectory(run_dir)
+        approach = nearest_approach(trajectory, destinations)
+        approach.pop("per_row_similarity", None)
+        approach.pop("running_max_curve", None)
+        destination_approach[task] = {
+            "destinations": destinations,
+            "max_similarity": approach["max_similarity"],
+            "at_charged_call": approach["at_charged_call"],
+            "nearest_blind_molecule": approach["nearest_blind_molecule"],
+        }
     union = set().union(*reference_sets.values()) if reference_sets else set()
     shared = (
         set.intersection(*(set(value) for value in reference_sets.values()))
@@ -226,6 +257,7 @@ def main(argv: list[str] | None = None) -> int:
             "union_molecules": len(union),
             "molecules_shared_by_every_task": len(shared),
         },
+        "nearest_approach_to_the_spine_destinations": destination_approach,
         "nearest_approach": {
             task: {
                 "max_similarity": row["max_similarity"],
