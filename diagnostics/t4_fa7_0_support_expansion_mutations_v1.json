@@ -1,6 +1,6 @@
 {
   "baseline_green": true,
-  "baseline_line": "38 passed in 0.46s",
+  "baseline_line": "40 passed in 4.34s",
   "controls_green": true,
   "killed": 11,
   "mutations": 11,
@@ -9,14 +9,14 @@
       "file": "modal_apps/t4_fa7_0_support_expansion_base_app.py",
       "killed": true,
       "mutation": "run_cell_never_expands",
-      "pytest": "1 failed in 0.06s",
+      "pytest": "1 failed in 0.07s",
       "target_test": "test_run_cell_expands_support_before_it_can_terminate"
     },
     {
       "file": "modal_apps/t4_fa7_0_support_expansion_base_app.py",
       "killed": true,
       "mutation": "terminal_publish_ungated",
-      "pytest": "1 failed in 0.07s",
+      "pytest": "1 failed in 0.08s",
       "target_test": "test_the_terminal_publish_is_gated_on_the_expansion_having_run"
     },
     {
@@ -65,21 +65,21 @@
       "file": "src/compose_v4/experiments/t4_support_expansion.py",
       "killed": true,
       "mutation": "fallback_stage_skipped",
-      "pytest": "1 failed in 0.05s",
+      "pytest": "1 failed in 0.06s",
       "target_test": "test_the_fallback_runs_first_and_can_satisfy_the_target_alone"
     },
     {
       "file": "src/compose_v4/experiments/t4_support_expansion.py",
       "killed": true,
       "mutation": "consumption_gate_accepts_a_no_op_event",
-      "pytest": "1 failed in 0.05s",
+      "pytest": "1 failed in 0.06s",
       "target_test": "test_publishing_exhaustion_without_an_expansion_is_refused"
     },
     {
       "file": "src/compose_v4/experiments/t4_support_expansion.py",
       "killed": true,
       "mutation": "already_seen_ignored",
-      "pytest": "1 failed in 0.05s",
+      "pytest": "1 failed in 0.06s",
       "target_test": "test_already_seen_endpoints_are_not_counted_as_found"
     },
     {

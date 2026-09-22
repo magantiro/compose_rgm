@@ -390,9 +390,18 @@ def proposal_worker(task: dict) -> dict:
             reference_smiles=task["original_seed"],
             delta=contract["delta"],
         )
+        # `proposal_lane` is cleared and the true stage moved to its own key.
+        # `t4_integrated_route_fiber._experts` validates a record's lane against the
+        # frozen expert vocabulary and RAISES on an unknown one, so a record carrying
+        # "zero_support_fallback" would kill `attach_features` at precisely the moment
+        # the fallback first succeeded. Widening the shared vocabulary instead would
+        # move `t4_integrated_route_fiber.py`, which other live arms pin.
         records = [
             {
                 **row,
+                "proposal_lane": None,
+                "proposal_experts": [],
+                "support_expansion_stage": "zero_support_fallback",
                 "parent_score": task["parent_score"],
                 "families": ("atom_delete",),
                 "program_families": ("atom_delete",),

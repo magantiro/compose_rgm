@@ -104,9 +104,15 @@ def build(status: str) -> dict:
         **inherited,
         "cells": cells,
         "proposal": proposal,
-        "charged_calls_per_cell": 248,
-        "total_charged_call_ceiling": 248,
-        "total_new_charged_call_ceiling": 248,
+        # 247, not 248. The owner authorized 248 charged docking calls for this cell
+        # IN TOTAL, and the first launch of this arm charged 1 -- the root docking of
+        # the seed -- before it was cancelled to repair a latent defect that would have
+        # killed the cell the moment the fallback stage first succeeded. Spending 248
+        # here would put the arm at 249 against an authorization that says "not one
+        # more", so the cancelled attempt is subtracted rather than forgiven.
+        "charged_calls_per_cell": 247,
+        "total_charged_call_ceiling": 247,
+        "total_new_charged_call_ceiling": 247,
         # ---- The expansion ----
         # A ladder step is DRAWS PER LANE and is realised as parallel replicate
         # workers at the lane's own base draw count, never as one deeper worker.
@@ -205,6 +211,24 @@ def build(status: str) -> dict:
         },
         "prior_charged_calls": {
             "fa7_0": 2,
+            "cancelled_first_launch_of_this_arm": {
+                "run_id": "837bb8c8dcca530f8e6538f0845a2866fe2b7ac00fcce85f9935e93ba9341578",
+                "contract_payload_sha256": (
+                    "b191a40b371328ef146c0ccc4f04616ad7814a277f0a7ce3470e6ab6ba25a89b"
+                ),
+                "charged_calls": 1,
+                "what_it_charged": "the root docking of the seed, round 0",
+                "why_cancelled": (
+                    "the zero-support fallback labelled its records "
+                    "proposal_lane='zero_support_fallback', which "
+                    "t4_integrated_route_fiber._experts validates against the frozen "
+                    "expert vocabulary and REJECTS, so attach_features would have raised "
+                    "the first time the fallback produced an eligible endpoint -- a "
+                    "failure that fires only on success. Cancelled at 1 charged call "
+                    "rather than left to fail mid-budget and strand an unfinished lock"
+                ),
+                "subtracted_from_this_arms_ceiling": True,
+            },
             "note": (
                 "the panel run charged 1 (the seed's own docking score, best -7.5) and "
                 "the predecessor support-expansion arm charged 0; the 248 ceiling is "
@@ -222,7 +246,9 @@ def build(status: str) -> dict:
             ),
             "granted_by": "owner, task brief 2026-09-22",
             "enforced_by": [
-                "charged_calls_per_cell and total_charged_call_ceiling are both 248",
+                "charged_calls_per_cell and total_charged_call_ceiling are both 247, "
+                "which is the authorized 248 less the 1 call the cancelled first launch "
+                "of this arm charged, so the arm's lifetime spend cannot exceed 248",
                 "cells carries fa7_0 alone, and the wrapper refuses any other list",
                 "the ledger binds on state.budget, which is initialised from "
                 "charged_calls_per_cell and decremented once per docked query",

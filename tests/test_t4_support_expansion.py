@@ -294,8 +294,12 @@ def test_the_contract_declares_one_cell_and_both_mechanisms():
     payload = _contract_payload()
     assert [row["cell"] for row in payload["cells"]] == ["fa7_0"]
     assert payload["delta"] == 0.6
-    assert payload["charged_calls_per_cell"] == 248
-    assert payload["total_charged_call_ceiling"] == 248
+    # 247 = the authorized 248 less the 1 call the cancelled first launch charged.
+    assert payload["charged_calls_per_cell"] == 247
+    assert payload["total_charged_call_ceiling"] == 247
+    prior = payload["prior_charged_calls"]["cancelled_first_launch_of_this_arm"]
+    assert prior["charged_calls"] == 1
+    assert payload["charged_calls_per_cell"] + prior["charged_calls"] == 248
     assert payload["proposal"]["shallow"]["region_law"] == "free_gate_margin_v1"
     assert payload["proposal"]["shallow"]["completion_law"] == "free_gate_margin_v1"
     SupportExpansionPolicy.from_contract(payload["support_expansion"])
@@ -495,3 +499,83 @@ def test_the_wrapper_refuses_a_contract_missing_any_mechanism():
                 guard()
     finally:
         target.write_text(original)
+
+
+# ---- The fallback record must survive the real feature path ----------------
+
+
+def test_a_real_fallback_record_survives_attach_features_and_selection():
+    """The shape bug that fires only when the fallback SUCCEEDS.
+
+    `t4_integrated_route_fiber._experts` validates a record's `proposal_lane`
+    against the frozen expert vocabulary and RAISES on an unknown one, so a record
+    carrying "zero_support_fallback" killed `attach_features` at exactly the moment
+    the fallback first produced an eligible endpoint. Stubbed `{"smiles": ...}`
+    records cannot catch that, so this drives the REAL fallback and pushes a REAL
+    record through the real feature and selection path.
+    """
+
+    import numpy as np
+
+    from compose_v4.control.fiber_control import ProgramValue, SearchState
+    from compose_v4.control.zero_support_fallback import fallback_candidates
+    from compose_v4.experiments.t4_fiber_campaign import Fiber
+    from compose_v4.experiments.t4_integrated_route_fiber import (
+        attach_features,
+        expert_census,
+        select_batch,
+    )
+
+    # A permissive reference so the fallback actually returns something: the point
+    # is the RECORD SHAPE, not this molecule's chemistry.
+    parent = "CC(C)CCN(C)C(=O)c1ccccc1"
+    fiber = Fiber(parent, 0.2, support="compose_valid")
+    produced, _ = fallback_candidates(
+        parent,
+        np.random.default_rng(20260922),
+        check=fiber.check,
+        reference_smiles=parent,
+        delta=0.2,
+    )
+    assert produced, "the fallback returned nothing, so this test proves nothing"
+    assert produced[0]["proposal_lane"] == "zero_support_fallback", (
+        "the fallback no longer labels its lane, so the app's re-labelling may be dead"
+    )
+
+    # The app's re-labelling, applied exactly as `proposal_worker` applies it.
+    records = [
+        {
+            **row,
+            "proposal_lane": None,
+            "proposal_experts": [],
+            "support_expansion_stage": "zero_support_fallback",
+            "parent_score": -7.5,
+            "families": ("atom_delete",),
+            "program_families": ("atom_delete",),
+            "regions": 1,
+            "created": int(row.get("inserted_atoms", 0)),
+            "deleted": int(row.get("deleted_atoms", 0)),
+        }
+        for row in produced
+    ]
+    state = SearchState(archive={parent: -7.5}, budget=8, rounds=0)
+    candidates = attach_features(records, state, fiber)
+    assert candidates, "attach_features dropped every real fallback record"
+    expert_census(candidates)
+    selected = select_batch(
+        candidates,
+        ProgramValue(penalty=1.0),
+        state,
+        np.random.default_rng(1),
+        round_index=1,
+        batch=4,
+        exploration=1,
+        expert_floor_rounds=2,
+    )
+    assert selected, "select_batch could not select a real fallback candidate"
+
+
+def test_the_app_clears_the_fallback_lane_label():
+    source = BASE_APP.read_text()
+    assert '"proposal_lane": None' in source
+    assert '"support_expansion_stage": "zero_support_fallback"' in source
