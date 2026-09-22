@@ -54,7 +54,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--blind", nargs="+", required=True)
-    parser.add_argument("--probe", default="diagnostics/pmo_atlas_v1/test_c_entry.json")
+    parser.add_argument("--probe", nargs="+", required=True)
     parser.add_argument("--prediction", default="diagnostics/pmo_atlas_v1/test_c_prediction.json")
     parser.add_argument("--output", default="diagnostics/pmo_atlas_v1/test_c_report.json")
     args = parser.parse_args(argv)
@@ -72,7 +72,16 @@ def main(argv: list[str] | None = None) -> int:
         for run in payload["runs"]:
             blind[run["task"]] = run
 
-    probes = _load(repo_root, args.probe)
+    probes: dict[str, Any] = {
+        "probes": [],
+        "structural_approach": [],
+        "diagnostic_oracle_calls": 0,
+    }
+    for relative in args.probe:
+        part = _load(repo_root, relative)
+        probes["probes"].extend(part["probes"])
+        probes["structural_approach"].extend(part["structural_approach"])
+        probes["diagnostic_oracle_calls"] += part["diagnostic_oracle_calls"]
     approaches = {row["task"]: row for row in probes["structural_approach"]}
 
     rows: list[dict[str, Any]] = []
@@ -127,7 +136,10 @@ def main(argv: list[str] | None = None) -> int:
                 {"artifact": relative, "file_sha256": file_sha256(repo_root / relative)}
                 for relative in args.blind
             ],
-            "probe": {"artifact": args.probe, "file_sha256": file_sha256(repo_root / args.probe)},
+            "probe": [
+                {"artifact": relative, "file_sha256": file_sha256(repo_root / relative)}
+                for relative in args.probe
+            ],
             "prediction": {
                 "artifact": args.prediction,
                 "file_sha256": file_sha256(repo_root / args.prediction),
