@@ -172,6 +172,51 @@ def donor_region_law(
 UNIFORM_ORIENTED_SINGLE_BRIDGE = BridgeRegionLaw(maximum=None, margin=None)
 
 
+# ---- The named cut-law arms ---------------------------------------------
+
+#: The retentive draw: the uniform SUPPORT, tilted toward cuts that release little.
+#: This is the PRODUCTION DEFAULT. Measured over 60 pairs of top-scoring molecules from a
+#: completed 250-call charged celecoxib ledger, same pairs and same compiler, differing
+#: ONLY in the cut draw: retained median 0.324 -> 0.722 and program length median 36 -> 17
+#: primitives. The length column is the one that decides something, because this branch
+#: measured the controller's realization ceiling at 23 primitives -- the shipped uniform
+#: draw puts the MEDIAN transplant above it and the retentive draw puts it below.
+RETENTIVE_RELEASED_FRACTION = "retentive_released_fraction_v1"
+
+#: The shipped `donor_memory.RECIPE["cut_distribution"]`, kept as a NAMED arm so a matched
+#: comparison selects it by name rather than reconstructing it. It resolves to ``None``,
+#: which is `donor_transplant_draw`'s unlawed `rng.permutation` branch -- the literal
+#: shipped draw, not a `BridgeRegionLaw` that merely reproduces its support.
+UNIFORM_ORIENTED_SINGLE_BRIDGE_ARM = "uniform_oriented_single_bridge"
+
+#: Arm name -> law factory, where ``None`` is the unlawed draw. Resolution goes through
+#: this table rather than a boolean so an unknown arm is a hard error instead of a silent
+#: fallback to whichever branch a stray truth value happened to select.
+CUT_LAWS: dict[str, Callable[[MolecularGraph], BridgeRegionLaw] | None] = {
+    RETENTIVE_RELEASED_FRACTION: donor_region_law,
+    UNIFORM_ORIENTED_SINGLE_BRIDGE_ARM: None,
+}
+
+#: What an unflagged donor lane draws. Named separately from the arm it currently points
+#: at, so moving the default is a one-line, greppable change rather than an edit buried in
+#: a signature.
+DEFAULT_CUT_LAW = RETENTIVE_RELEASED_FRACTION
+
+
+def resolve_cut_law(name: str) -> Callable[[MolecularGraph], BridgeRegionLaw] | None:
+    """The law factory a named arm denotes. Raises on an unknown name.
+
+    Raising matters more than it looks. The two arms differ in their PROBABILITIES over a
+    shared support, so a typo that fell back to the other arm would produce a run that
+    looks exactly like the one that was asked for and measures the other one.
+    """
+    if name not in CUT_LAWS:
+        raise ValueError(
+            f"unknown donor cut law {name!r}; the named arms are {sorted(CUT_LAWS)}"
+        )
+    return CUT_LAWS[name]
+
+
 # ---- Generation ----------------------------------------------------------
 
 

@@ -18,6 +18,7 @@ from compose_v4.control.docking_value import identity
 from compose_v4.control.dynamic_program_synthesis_v21 import (
     initial_dynamic_program_batch_v21,
 )
+from compose_v4.control.pmo_donor_channel import DEFAULT_CUT_LAW
 from compose_v4.control.pmo_population_controller import PmoPopulationController
 from compose_v4.control.program_campaign import ProgramQueryLedger, run_program_campaign
 from compose_v4.control.program_task import ProgramTask, pmo_top_ten_auc
@@ -192,6 +193,8 @@ def execute_task(
     progress=None,
     enable_online_memory: bool = False,
     enable_discovery: bool = False,
+    enable_donor_channel: bool = False,
+    donor_cut_law: str = DEFAULT_CUT_LAW,
 ) -> dict:
     """Run one PMO-v1 task after a separately authorized scored launch.
 
@@ -244,6 +247,23 @@ def execute_task(
             # optimizer_kwargs into `optimizer_kwargs_sha256`, so B and C cannot
             # share a run identity even when every other input matches.
             "enable_discovery": bool(enable_discovery),
+            # Arm D = donor recombination over molecules THIS RUN has scored. The two
+            # donor keys are present ONLY when the lane is on, and that is deliberate
+            # rather than tidy: `run_program_campaign` hashes this dict into
+            # `optimizer_kwargs_sha256`, writes it into the campaign manifest, and
+            # REFUSES a resume whose recipe moved ("campaign recipe changed during
+            # resume"). Adding a key unconditionally would therefore break every
+            # in-flight arm A/B/C run at its next preemption retry, while changing
+            # nothing about what they compute. Absent is the only byte-identical off,
+            # here exactly as it is at the channel set.
+            **(
+                {
+                    "enable_donor_channel": True,
+                    "donor_cut_law": str(donor_cut_law),
+                }
+                if enable_donor_channel
+                else {}
+            ),
         },
         initial_batch_fn=initial_dynamic_program_batch_v21,
     )

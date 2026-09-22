@@ -1,0 +1,33 @@
+{
+  "default_cut_law": "retentive_released_fraction_v1",
+  "donor_cut_law": "retentive_released_fraction_v1",
+  "entry_point": "compose_v4.experiments.pmo_population_v1.execute_task",
+  "law_consumed": {
+    "consumed": true,
+    "seed": 0,
+    "seeds_tried": 1
+  },
+  "live_channels": [
+    "shallow_program_channel",
+    "structured_program_channel",
+    "joint_dependency_region_jump",
+    "donor_transplant"
+  ],
+  "off_arm_optimizer_kwargs": [
+    "enable_discovery",
+    "enable_online_memory",
+    "jump_checkpoint"
+  ],
+  "on_arm_optimizer_kwargs": [
+    "donor_cut_law",
+    "enable_discovery",
+    "enable_donor_channel",
+    "enable_online_memory",
+    "jump_checkpoint"
+  ],
+  "oracle_calls": 0,
+  "restore_accepts_scored_kwargs": true,
+  "schema_version": "pmo_donor_scored_gate_v1",
+  "source_smiles": "CC1CCC(C)(C(=O)N2CCCC(C)(C(=O)[O-])C2)O1",
+  "verdict": "SCORED_ENTRY_POINT_REACHES_THE_DONOR_CUT_LAW"
+}

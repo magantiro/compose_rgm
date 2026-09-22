@@ -57,9 +57,10 @@ from compose_v4.control.pmo_discovery import (
     discovery_quota,
 )
 from compose_v4.control.pmo_donor_channel import (
+    DEFAULT_CUT_LAW,
     DONOR_CHANNEL,
-    donor_region_law,
     donor_transplant_draw,
+    resolve_cut_law,
 )
 from compose_v4.control.pmo_joint_dependency_jump import (
     CHECKPOINT_SCHEMA,
@@ -249,6 +250,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         enable_discovery: bool = False,
         discovery_fraction: float | None = None,
         enable_donor_channel: bool = False,
+        donor_cut_law: str = DEFAULT_CUT_LAW,
         **kwargs,
     ):
         if jump_checkpoint.get("schema_version") != CHECKPOINT_SCHEMA:
@@ -292,7 +294,12 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         # require the production path to reach it. A signature check cannot do this:
         # in both recorded inert-mechanism cases the argument existed and was dropped
         # one hop later.
-        self.donor_law = donor_region_law
+        # The NAMED arm is resolved here and always -- even when the lane is off -- so an
+        # unknown name is refused at construction rather than at the first draw of a
+        # scored run. The retentive arm is the production default; the shipped uniform
+        # draw stays reachable by name for a matched comparison.
+        self.donor_cut_law = str(donor_cut_law)
+        self.donor_law = resolve_cut_law(self.donor_cut_law)
         self.donor_rng = (
             np.random.default_rng(np.random.SeedSequence([self.config.seed, 311, 3]))
             if self.enable_donor_channel
@@ -1289,7 +1296,14 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             "jump_checkpoint_id": self.jump_checkpoint_id,
             "jump_rng": self.jump_rng.bit_generator.state,
             **(
-                {"donor_rng": self.donor_rng.bit_generator.state}
+                {
+                    "donor_rng": self.donor_rng.bit_generator.state,
+                    # Recorded so a resume cannot silently swap the arm. The two cut laws
+                    # differ in PROBABILITY over a shared support, so a swapped resume
+                    # would produce a run that reads as the arm it was asked for while
+                    # measuring the other one -- with nothing in the artifact to show it.
+                    "donor_cut_law": self.donor_cut_law,
+                }
                 if self.donor_rng is not None
                 else {}
             ),
@@ -1326,6 +1340,8 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         enable_online_memory: bool = False,
         enable_discovery: bool = False,
         discovery_fraction: float | None = None,
+        enable_donor_channel: bool = False,
+        donor_cut_law: str = DEFAULT_CUT_LAW,
     ):
         # `run_program_campaign` passes optimizer_kwargs to BOTH the constructor and
         # this classmethod, so the arm flag has to be accepted here too -- and it has
@@ -1342,6 +1358,8 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
                 "enable_online_memory": enable_online_memory,
                 "enable_discovery": enable_discovery,
                 "discovery_fraction": discovery_fraction,
+                "enable_donor_channel": enable_donor_channel,
+                "donor_cut_law": donor_cut_law,
             },
         )
         state = snapshot.get("pmo_population")
@@ -1353,6 +1371,11 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         result.jump_rng.bit_generator.state = state["jump_rng"]
         # Absent for a snapshot taken with the lane off, which must still restore.
         if result.donor_rng is not None and "donor_rng" in state:
+            if state.get("donor_cut_law", result.donor_cut_law) != result.donor_cut_law:
+                raise ValueError(
+                    "PMO donor cut law changed across resume: snapshot "
+                    f"{state.get('donor_cut_law')!r} vs runtime {result.donor_cut_law!r}"
+                )
             result.donor_rng.bit_generator.state = state["donor_rng"]
         result.shallow_rng.bit_generator.state = state["shallow_rng"]
         result.structured_rng.bit_generator.state = state["structured_rng"]

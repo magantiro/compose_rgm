@@ -140,6 +140,7 @@ def run_task(spec: dict) -> dict:
     from datetime import datetime, timezone
 
     from compose_v4.control.docking_value import identity
+    from compose_v4.control.pmo_donor_channel import DEFAULT_CUT_LAW
     from compose_v4.experiments.continuation_profile import verify_file
     from compose_v4.experiments.pmo_dynamic_v21 import verify_runtime_environment
     from compose_v4.experiments.pmo_oracle_assets import (
@@ -350,6 +351,24 @@ def run_task(spec: dict) -> dict:
                 (contract_envelope["payload"].get("arm") or {}).get(
                     "enable_online_memory", False
                 )
+            ),
+            # Arm D, resolved the same way and for the same reason: from the sealed
+            # payload, never from the spawn spec. `donor_cut_law` is read only when the
+            # lane is on, so an arm A/B/C payload cannot acquire a donor key it never
+            # declared -- which is what keeps its `optimizer_kwargs_sha256` where it is.
+            **(
+                {
+                    "enable_donor_channel": True,
+                    "donor_cut_law": str(
+                        (contract_envelope["payload"].get("arm") or {}).get(
+                            "donor_cut_law", DEFAULT_CUT_LAW
+                        )
+                    ),
+                }
+                if (contract_envelope["payload"].get("arm") or {}).get(
+                    "enable_donor_channel", False
+                )
+                else {}
             ),
             progress=progress,
         )
