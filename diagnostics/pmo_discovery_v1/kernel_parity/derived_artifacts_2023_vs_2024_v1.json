@@ -1,0 +1,35 @@
+{
+  "oracle_calls": 0,
+  "rdkit_versions": [
+    "2023.09.6",
+    "2024.03.5"
+  ],
+  "rows": [
+    {
+      "identical": true,
+      "script": "scripts/pmo_transport_correspondence_validation.py",
+      "sha256_by_rdkit": {
+        "2023.09.6": "4a7e63c48e61b5a382d7f32c9f8e6b89e013f35c7387079cc05f896987c72ef2",
+        "2024.03.5": "4a7e63c48e61b5a382d7f32c9f8e6b89e013f35c7387079cc05f896987c72ef2"
+      }
+    },
+    {
+      "identical": true,
+      "script": "scripts/pmo_transport_staging_validation.py",
+      "sha256_by_rdkit": {
+        "2023.09.6": "c2780e60e59f1d0ffddea51de0edce823f06f70680ae0c859f8e30bd3224529b",
+        "2024.03.5": "c2780e60e59f1d0ffddea51de0edce823f06f70680ae0c859f8e30bd3224529b"
+      }
+    },
+    {
+      "identical": true,
+      "script": "scripts/pmo_transport_ordering_policy.py",
+      "sha256_by_rdkit": {
+        "2023.09.6": "3e7c008b9e280ca0015d22fc44243486ecd9e0b70db966ae8fd7d35aa09efad9",
+        "2024.03.5": "3e7c008b9e280ca0015d22fc44243486ecd9e0b70db966ae8fd7d35aa09efad9"
+      }
+    }
+  ],
+  "schema_version": "pmo_transport_kernel_artifact_parity_v1",
+  "verdict": "DERIVED_ARTIFACT_PARITY"
+}

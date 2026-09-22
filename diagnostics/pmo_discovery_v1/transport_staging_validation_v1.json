@@ -28,6 +28,9 @@
       "source_similarity": 0.15789473684210525,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.15789473684210525,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.15789473684210525,
         1.0
@@ -52,6 +55,9 @@
       "source_similarity": 0.1527777777777778,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.1527777777777778,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.1527777777777778,
         0.17391304347826086,
@@ -77,6 +83,9 @@
       "source_similarity": 0.15254237288135594,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.15254237288135594,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.15254237288135594,
         1.0
@@ -101,6 +110,9 @@
       "source_similarity": 0.22077922077922077,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.22077922077922077,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.22077922077922077,
         0.2537313432835821,
@@ -126,6 +138,9 @@
       "source_similarity": 0.21518987341772153,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.21518987341772153,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.21518987341772153,
         0.2537313432835821,
@@ -151,6 +166,9 @@
       "source_similarity": 0.20512820512820512,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.20512820512820512,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.20512820512820512,
         0.2537313432835821,
@@ -176,6 +194,9 @@
       "source_similarity": 0.14864864864864866,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.14864864864864866,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.14864864864864866,
         0.1590909090909091,
@@ -201,6 +222,9 @@
       "source_similarity": 0.14285714285714285,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.14285714285714285,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.14285714285714285,
         0.1590909090909091,
@@ -226,6 +250,9 @@
       "source_similarity": 0.13846153846153847,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.13846153846153847,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.13846153846153847,
         0.5957446808510638,
@@ -251,6 +278,9 @@
       "source_similarity": 0.21839080459770116,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.09859154929577464,
+      "dip_depth_absolute": 0.119799,
+      "dip_depth_relative": 0.548554,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.21839080459770116,
         0.09859154929577464,
@@ -276,6 +306,9 @@
       "source_similarity": 0.2159090909090909,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.09859154929577464,
+      "dip_depth_absolute": 0.117318,
+      "dip_depth_relative": 0.543365,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.2159090909090909,
         0.09859154929577464,
@@ -301,6 +334,9 @@
       "source_similarity": 0.2159090909090909,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.09859154929577464,
+      "dip_depth_absolute": 0.117318,
+      "dip_depth_relative": 0.543365,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.2159090909090909,
         0.09859154929577464,
@@ -326,6 +362,9 @@
       "source_similarity": 0.24324324324324326,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.24324324324324326,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.24324324324324326,
         0.3333333333333333,
@@ -351,6 +390,9 @@
       "source_similarity": 0.2222222222222222,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.2222222222222222,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.2222222222222222,
         0.40384615384615385,
@@ -376,6 +418,9 @@
       "source_similarity": 0.21621621621621623,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.21621621621621623,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.21621621621621623,
         0.40384615384615385,
@@ -401,6 +446,9 @@
       "source_similarity": 0.16,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.16,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.16,
         0.37037037037037035,
@@ -426,6 +474,9 @@
       "source_similarity": 0.1568627450980392,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.0,
+      "dip_depth_absolute": 0.156863,
+      "dip_depth_relative": 1.0,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.1568627450980392,
         0.0,
@@ -451,6 +502,9 @@
       "source_similarity": 0.1568627450980392,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.0,
+      "dip_depth_absolute": 0.156863,
+      "dip_depth_relative": 1.0,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.1568627450980392,
         0.0,
@@ -476,6 +530,9 @@
       "source_similarity": 0.15,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.041666666666666664,
+      "dip_depth_absolute": 0.108333,
+      "dip_depth_relative": 0.722222,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.15,
         0.041666666666666664,
@@ -501,6 +558,9 @@
       "source_similarity": 0.14285714285714285,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.041666666666666664,
+      "dip_depth_absolute": 0.10119,
+      "dip_depth_relative": 0.708333,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.14285714285714285,
         0.041666666666666664,
@@ -526,6 +586,9 @@
       "source_similarity": 0.1827956989247312,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.1827956989247312,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.1827956989247312,
         0.24050632911392406,
@@ -551,6 +614,9 @@
       "source_similarity": 0.16494845360824742,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.16494845360824742,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.16494845360824742,
         0.2926829268292683,
@@ -576,6 +642,9 @@
       "source_similarity": 0.16,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.16,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.16,
         0.17857142857142858,
@@ -602,6 +671,9 @@
       "source_similarity": 0.2923076923076923,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.2542372881355932,
+      "dip_depth_absolute": 0.03807,
+      "dip_depth_relative": 0.130241,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.2923076923076923,
         0.2542372881355932,
@@ -627,6 +699,9 @@
       "source_similarity": 0.22666666666666666,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.22666666666666666,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.22666666666666666,
         0.3333333333333333,
@@ -652,6 +727,9 @@
       "source_similarity": 0.21333333333333335,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.21333333333333335,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.21333333333333335,
         0.2542372881355932,
@@ -677,6 +755,9 @@
       "source_similarity": 0.25333333333333335,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.25333333333333335,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.25333333333333335,
         0.2698412698412698,
@@ -702,6 +783,9 @@
       "source_similarity": 0.24691358024691357,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.09615384615384616,
+      "dip_depth_absolute": 0.15076,
+      "dip_depth_relative": 0.610577,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.24691358024691357,
         0.09615384615384616,
@@ -728,6 +812,9 @@
       "source_similarity": 0.22666666666666666,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.22666666666666666,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.22666666666666666,
         0.6037735849056604,
@@ -753,6 +840,9 @@
       "source_similarity": 0.21839080459770116,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.09859154929577464,
+      "dip_depth_absolute": 0.119799,
+      "dip_depth_relative": 0.548554,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.21839080459770116,
         0.09859154929577464,
@@ -778,6 +868,9 @@
       "source_similarity": 0.2159090909090909,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.09859154929577464,
+      "dip_depth_absolute": 0.117318,
+      "dip_depth_relative": 0.543365,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.2159090909090909,
         0.09859154929577464,
@@ -803,6 +896,9 @@
       "source_similarity": 0.2159090909090909,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.09859154929577464,
+      "dip_depth_absolute": 0.117318,
+      "dip_depth_relative": 0.543365,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.2159090909090909,
         0.09859154929577464,
@@ -828,6 +924,9 @@
       "source_similarity": 0.14814814814814814,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.03076923076923077,
+      "dip_depth_absolute": 0.117379,
+      "dip_depth_relative": 0.792308,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.14814814814814814,
         0.03076923076923077,
@@ -854,6 +953,9 @@
       "source_similarity": 0.14634146341463414,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.14634146341463414,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.14634146341463414,
         0.3508771929824561,
@@ -879,6 +981,9 @@
       "source_similarity": 0.14457831325301204,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.14457831325301204,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.14457831325301204,
         0.3508771929824561,
@@ -904,6 +1009,9 @@
       "source_similarity": 0.17391304347826086,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.14516129032258066,
+      "dip_depth_absolute": 0.028752,
+      "dip_depth_relative": 0.165323,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.17391304347826086,
         0.14516129032258066,
@@ -929,6 +1037,9 @@
       "source_similarity": 0.16129032258064516,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.09375,
+      "dip_depth_absolute": 0.06754,
+      "dip_depth_relative": 0.41875,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.16129032258064516,
         0.09375,
@@ -954,6 +1065,9 @@
       "source_similarity": 0.15384615384615385,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.09375,
+      "dip_depth_absolute": 0.060096,
+      "dip_depth_relative": 0.390625,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.15384615384615385,
         0.09375,
@@ -979,6 +1093,9 @@
       "source_similarity": 0.14814814814814814,
       "dips_below_source": true,
       "minimum_similarity_on_path": 0.03076923076923077,
+      "dip_depth_absolute": 0.117379,
+      "dip_depth_relative": 0.792308,
+      "dip_width_stages": 1,
       "similarity_trajectory": [
         0.14814814814814814,
         0.03076923076923077,
@@ -1005,6 +1122,9 @@
       "source_similarity": 0.14634146341463414,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.14634146341463414,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.14634146341463414,
         0.21875,
@@ -1030,6 +1150,9 @@
       "source_similarity": 0.14457831325301204,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.14457831325301204,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.14457831325301204,
         0.15625,
@@ -1055,6 +1178,9 @@
       "source_similarity": 0.19753086419753085,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.19753086419753085,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.19753086419753085,
         0.37037037037037035,
@@ -1080,6 +1206,9 @@
       "source_similarity": 0.18518518518518517,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.18518518518518517,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.18518518518518517,
         0.37037037037037035,
@@ -1105,6 +1234,9 @@
       "source_similarity": 0.16216216216216217,
       "dips_below_source": false,
       "minimum_similarity_on_path": 0.16216216216216217,
+      "dip_depth_absolute": 0.0,
+      "dip_depth_relative": 0.0,
+      "dip_width_stages": 0,
       "similarity_trajectory": [
         0.16216216216216217,
         1.0

@@ -1,0 +1,31 @@
+{
+  "canary_disagreements": 0,
+  "canary_strings": 15,
+  "canonical_smiles_disagreements": 0,
+  "disagreement_examples": [],
+  "intermediates_compared": 37784,
+  "keys_only_left": 0,
+  "keys_only_right": 0,
+  "left": {
+    "alignments": 108,
+    "distinct_canonical_smiles": 11863,
+    "intermediates": 37784,
+    "mode": "offpath_lattice",
+    "non_sanitizing": 14312,
+    "rdkit_version": "2023.09.6",
+    "records_sha256": "5a8e5b0613763228ba51e3a3f434e36fa699938339ee6bded2b5cc6eaf75a576"
+  },
+  "oracle_calls": 0,
+  "right": {
+    "alignments": 108,
+    "distinct_canonical_smiles": 11863,
+    "intermediates": 37784,
+    "mode": "offpath_lattice",
+    "non_sanitizing": 14312,
+    "rdkit_version": "2024.03.5",
+    "records_sha256": "5a8e5b0613763228ba51e3a3f434e36fa699938339ee6bded2b5cc6eaf75a576"
+  },
+  "sanitize_verdict_disagreements": 0,
+  "schema_version": "pmo_transport_kernel_parity_report_v1",
+  "verdict": "KERNEL_PARITY"
+}

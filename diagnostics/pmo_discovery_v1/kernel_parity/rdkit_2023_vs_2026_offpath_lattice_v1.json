@@ -1,0 +1,132 @@
+{
+  "canary_disagreements": 0,
+  "canary_strings": 15,
+  "canonical_smiles_disagreements": 1472,
+  "disagreement_examples": [
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|12|0|0",
+      "left": "C=CC(=C)NCCOc1ccccc1",
+      "right": "CC=C(C)NCCOc1ccccc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|12|0|1",
+      "left": "C=CC(=C)NCCOc1ccc(C)cc1",
+      "right": "CC=C(C)NCCOc1ccc(C)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|12|0|10",
+      "left": "C=CC(=C)NCCOc1ccc(C(O)CNC(C)(C)C)cc1CO",
+      "right": "CC=C(C)NCCOc1ccc(C(O)CNC(C)(C)C)cc1CO"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|12|0|2",
+      "left": "C=CC(=C)NCCOc1ccc(CC)cc1",
+      "right": "CC=C(C)NCCOc1ccc(CC)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|12|0|3",
+      "left": "C=CC(=C)NCCOc1ccc(CCN)cc1",
+      "right": "CC=C(C)NCCOc1ccc(CCN)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|12|0|4",
+      "left": "C=CC(=C)NCCOc1ccc(CCNC)cc1",
+      "right": "CC=C(C)NCCOc1ccc(CCNC)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|12|0|5",
+      "left": "C=CC(=C)NCCOc1ccc(CCNCC)cc1",
+      "right": "CC=C(C)NCCOc1ccc(CCNCC)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|12|0|6",
+      "left": "C=CC(=C)NCCOc1ccc(CCNC(C)C)cc1",
+      "right": "CC=C(C)NCCOc1ccc(CCNC(C)C)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|12|0|7",
+      "left": "C=CC(=C)NCCOc1ccc(CCNC(C)(C)C)cc1",
+      "right": "CC=C(C)NCCOc1ccc(CCNC(C)(C)C)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|12|0|8",
+      "left": "C=CC(=C)NCCOc1ccc(C(O)CNC(C)(C)C)cc1",
+      "right": "CC=C(C)NCCOc1ccc(C(O)CNC(C)(C)C)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|12|0|9",
+      "left": "C=CC(=C)NCCOc1ccc(C(O)CNC(C)(C)C)cc1C",
+      "right": "CC=C(C)NCCOc1ccc(C(O)CNC(C)(C)C)cc1C"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|13|0|0",
+      "left": "C=CCNCCOc1ccccc1",
+      "right": "CC=CNCCOc1ccccc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|13|0|1",
+      "left": "C=CCNCCOc1ccc(C)cc1",
+      "right": "CC=CNCCOc1ccc(C)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|13|0|10",
+      "left": "C=CCNCCOc1ccc(C(O)CNC(C)(C)C)cc1CO",
+      "right": "CC=CNCCOc1ccc(C(O)CNC(C)(C)C)cc1CO"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|13|0|2",
+      "left": "C=CCNCCOc1ccc(CC)cc1",
+      "right": "CC=CNCCOc1ccc(CC)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|13|0|3",
+      "left": "C=CCNCCOc1ccc(CCN)cc1",
+      "right": "CC=CNCCOc1ccc(CCN)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|13|0|4",
+      "left": "C=CCNCCOc1ccc(CCNC)cc1",
+      "right": "CC=CNCCOc1ccc(CCNC)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|13|0|5",
+      "left": "C=CCNCCOc1ccc(CCNCC)cc1",
+      "right": "CC=CNCCOc1ccc(CCNCC)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|13|0|6",
+      "left": "C=CCNCCOc1ccc(CCNC(C)C)cc1",
+      "right": "CC=CNCCOc1ccc(CCNC(C)C)cc1"
+    },
+    {
+      "key": "albuterol_similarity|CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1|0|13|0|7",
+      "left": "C=CCNCCOc1ccc(CCNC(C)(C)C)cc1",
+      "right": "CC=CNCCOc1ccc(CCNC(C)(C)C)cc1"
+    }
+  ],
+  "intermediates_compared": 37784,
+  "keys_only_left": 0,
+  "keys_only_right": 0,
+  "left": {
+    "alignments": 108,
+    "distinct_canonical_smiles": 11863,
+    "intermediates": 37784,
+    "mode": "offpath_lattice",
+    "non_sanitizing": 14312,
+    "rdkit_version": "2023.09.6",
+    "records_sha256": "5a8e5b0613763228ba51e3a3f434e36fa699938339ee6bded2b5cc6eaf75a576"
+  },
+  "oracle_calls": 0,
+  "right": {
+    "alignments": 108,
+    "distinct_canonical_smiles": 11946,
+    "intermediates": 37784,
+    "mode": "offpath_lattice",
+    "non_sanitizing": 14312,
+    "rdkit_version": "2026.03.6",
+    "records_sha256": "0dd2bfe6ca1d6c40c41cd1f9ff81ff3662476c94a965443148115f29ba04f77a"
+  },
+  "sanitize_verdict_disagreements": 0,
+  "schema_version": "pmo_transport_kernel_parity_report_v1",
+  "verdict": "KERNEL_DIVERGENCE"
+}
