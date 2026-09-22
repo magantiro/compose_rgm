@@ -80,6 +80,8 @@ def main() -> int:
 
     # ---- The canonical table: arm C, all 30 cells ----
     add("## Canonical controller (arm C), all 30 cells\n")
+    add("A best in (parentheses) is a RUNNING cell's current incumbent from its "
+        "checkpoint, not a final result.\n")
     add("| target | seed | delta | status | best | root | IVG (other run) | calls | "
         "rounds | expansions | eligible/1k draws |")
     add("|---|---|---|---|---|---|---|---|---|---|---|")
@@ -92,14 +94,20 @@ def main() -> int:
         reference = ivg.get((row["target"], index, row["delta"]))
         best = row.get("final_best")
         root = row.get("root_score")
-        best_text = "" if best is None else f"{best:.1f}"
+        # A running cell's incumbent is shown in parentheses so a partial table cannot be
+        # misread as a final one, and is never merged into `final_best`.
+        provisional = best is None and row.get("checkpoint_best") is not None
+        if provisional:
+            best = row["checkpoint_best"]
+        best_text = "" if best is None else (f"({best:.1f})" if provisional else f"{best:.1f}")
         root_text = "" if root is None else f"{root:.1f}"
         reference_text = "" if reference is None else f"{reference:.1f}"
         add(
             f"| {row['target'].upper()} | {index + 1} | {row['delta']} | "
             f"{row.get('status', '?')} | {best_text} | {root_text} | "
             f"{reference_text} | "
-            f"{row.get('reconciled_charged_calls', 0)} | {row.get('rounds', 0)} | "
+            f"{row.get('reconciled_charged_calls', 0)} | "
+            f"{row.get('rounds') or row.get('checkpoint_rounds', 0)} | "
             f"{row.get('expansion_triggered_rounds', 0)} | "
             f"{row.get('eligible_per_1000_draws', '')} |"
         )

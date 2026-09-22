@@ -35,41 +35,46 @@ RING_FAMILIES = ("cycle_close", "cycle_open", "ring_system_restate", "ring_syste
 
 
 def _download(run_id: str, destination: Path) -> Path:
-    """Mirror the run off the volume with the Python API.
+    """Mirror the run off the volume with the Python API, in ONE recursive listing.
 
-    `modal volume get` silently collapses a directory onto one path when the
-    destination does not already exist as a directory, prints OK and exits 0; and
-    `modal volume ls <vol> <subpath>` can return the PARENT listing. Both have produced
-    false readings in this repository, so neither is used.
+    `modal volume get` silently collapses a directory onto one path, prints OK and
+    exits 0; `modal volume ls <vol> <subpath>` can return the PARENT listing. Both have
+    produced false readings in this repository, so neither is used.
+
+    A per-directory walk is 60+ `VolumeListFiles` calls and trips the rate limit, which
+    aborts a mirror partway and leaves a reconciliation computed over whatever happened
+    to land. One recursive listing with backoff instead.
     """
+
+    import time
 
     import modal
 
     volume = modal.Volume.from_name(APP_NAME)
     destination.mkdir(parents=True, exist_ok=True)
-
-    def _walk(prefix: str) -> None:
+    entries = []
+    for attempt in range(6):
         try:
-            entries = list(volume.listdir(prefix))
+            entries = list(volume.listdir(run_id, recursive=True))
+            break
         except FileNotFoundError:
-            return
-        for entry in entries:
-            name = entry.path
-            # `str(FileEntryType.DIRECTORY)` is "2", not the member name, so compare
-            # on `.name`. Getting this wrong silently treats every directory as a file
-            # and downloads nothing.
-            if getattr(getattr(entry, "type", None), "name", "") == "DIRECTORY":
-                _walk(name)
-                continue
-            local = destination / name
-            if local.exists() and local.stat().st_size > 0 and local.name.startswith("round_"):
-                continue  # round locks are immutable; never re-download one
-            local.parent.mkdir(parents=True, exist_ok=True)
-            with local.open("wb") as handle:
-                for chunk in volume.read_file(name):
-                    handle.write(chunk)
+            return destination / run_id
+        except Exception as error:
+            if attempt == 5:
+                raise SystemExit(f"could not list the run volume: {error!r}") from error
+            time.sleep(20 * (attempt + 1))
 
-    _walk(run_id)
+    for entry in entries:
+        if getattr(getattr(entry, "type", None), "name", "") != "FILE":
+            continue
+        local = destination / entry.path
+        # Round locks are immutable, so one that is already mirrored is never re-fetched.
+        if local.name.startswith("round_") and local.exists() and local.stat().st_size > 0:
+            continue
+        local.parent.mkdir(parents=True, exist_ok=True)
+        with local.open("wb") as handle:
+            for chunk in volume.read_file(entry.path):
+                handle.write(chunk)
     return destination / run_id
 
 
@@ -230,6 +235,13 @@ def reconcile_cell(folder: Path) -> dict:
         checkpoint = _payload(checkpoint_path)
         record["checkpoint_charged_calls"] = checkpoint["charged_calls"]
         record["checkpoint_rounds"] = len(checkpoint["rounds"])
+        archive = checkpoint.get("archive") or {}
+        # A running cell has no `final_best`, so a partial table would show it blank and
+        # read as "produced nothing" -- which is exactly the reading a seed-only row is
+        # supposed to get, and would be wrong here. The checkpoint's incumbent is
+        # reported separately and never merged into `final_best`.
+        record["checkpoint_best"] = min(archive.values()) if archive else None
+        record["checkpoint_archive_size"] = len(archive)
     if result_path.exists():
         payload = _payload(result_path)
         record.update(
