@@ -3334,3 +3334,59 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   standing "a guard is only tested where it binds" lesson, now at the level of stratum
   CAPACITY: a selection guard needs room to spare before an over-admission can show up in the
   answer.
+
+## 2026-09-22 (CORRECTION: I measured against my own mutation harness's mutated source)
+
+- **CORRECTS the numbers in the entry above, "the donor pool: a top-N by score is the most
+  drifted slice the run owns". The MEASUREMENT method there was sound and several of its
+  numbers were not, because the run that produced them executed WHILE the mutation battery
+  had `pmo_online_memory.py` mutated on disk.** The battery rewrites a production file,
+  runs a suite, and restores it in a `finally`; anything else importing that module in the
+  same window imports the mutation. The tell was a 5-molecule difference in one stratum
+  across two runs with identical inputs, identical seed and identical bank contents --
+  `diverse` 60 against 55, which is exactly what the in-flight
+  `the_diverse_stratum_ignores_the_basins_already_occupied` mutation produces.
+  This is the 2026-08-03 "parallelism is free during implementation and NOT during
+  measurement" lesson in its WRITE form, and self-inflicted: the competing writer was my
+  own harness. **Never run a measurement while a mutation battery is live, and diff two
+  runs with identical inputs before trusting either.**
+- **CORRECTED NUMBERS (the committed artifact,
+  `diagnostics/pmo_discovery_v1/donor_bank_stratification_v1.json`, is the valid run):**
+      pool                     n    basins   QED med   QED>=0.6   heavy med
+      top-24 by score (was)    24      21      0.323    4 (17%)      33
+      stratified bank (now)   155     121      0.508   58 (37%)      20
+        elite                 100      66      0.538   42            26
+        promising               0       -         -     -             -
+        diverse                55      55      0.466   16            10
+  Basin coverage of the counted population: **21 of 121 (17%) -> 121 of 121 (100%)**.
+  Realized donor mix over 240 matched draws: **diverse 114 / elite 101**; distinct donors
+  actually used 24 -> 108. The non-collapse verdict and the "the top of the ranking is the
+  drifted part" finding both survive; only the stratum sizes and the product-side figures
+  moved.
+- **THE PRODUCT-SIDE RESULT IS A NEGATIVE AND IT IS SHARPER THAN THE FIRST READING.**
+      arm          compiled   steps med   product basins   basins NEW vs population
+      top_n        207/240        11           154                  114
+      stratified   215/240         5           113                   62
+  The per-stratum breakdown names the mechanism instead of leaving it to inference:
+  ELITE-derived transplants reach 37 new basins from 101 compiles at a median 7 primitives,
+  DIVERSE-derived ones 25 from 114 compiles at a median 4. **Donor SIZE drives structural
+  reach**, and on a population that has collapsed toward fragments the best-scoring
+  representative of an unoccupied basin is itself a fragment (diverse heavy median 10
+  against elite 26). So the bank widens the MATERIAL decisively and produces transplants
+  that move the scaffold LESS.
+  Deliberately not repaired: a size floor on the diverse stratum would be a chemistry screen
+  PMO does not supply. A non-screening alternative exists -- represent a basin by its member
+  with the most pendant cuts, i.e. the most donor MATERIAL, rather than its best score -- but
+  it is a design change on the evidence of one ledger and is left as an owner decision.
+- **"New basins reached" is a proxy I introduced, not the objective.** Under a future-value
+  objective a small graft that improves locally can be worth more than a scaffold jump that
+  does not, so this negative bounds the STRUCTURAL claim and says nothing about the scored
+  top-ten curve, which is unmeasured.
+- **A committed file lost one line between the edit that added it and the commit that should
+  have carried it, and every run in the working tree passed anyway.** `DonorProposal.payload`
+  was missing `"donor_stratum": self.donor_stratum` in HEAD while the dataclass field, the
+  constructor argument and the test asserting it were all committed -- so a clean checkout
+  would have been red and this tree never was. Caught only by `git diff` noticing the
+  working tree was AHEAD of HEAD after the battery restored its originals. **Run the suite
+  from a detached clean checkout before calling a branch done**, which is the same
+  discipline as reading a gate's SKIP count.
