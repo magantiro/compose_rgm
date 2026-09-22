@@ -1144,7 +1144,8 @@ def sample_tracelet_ancestral(
     ``transition_interceptor`` lets a caller REPLACE a drawn transition with its
     own, at the state and conditioning time the process had reached.  It is
     called as ``(state, sampled, frozen_time, rng)`` and returns ``None`` to
-    accept the model's draw, or ``(successor, rule_names)`` to substitute one.
+    accept the model's draw, or a sequence of ``(successor, rule_name)`` steps
+    to substitute for it.
     This deliberately changes the realized process -- it is how a globally
     sampled latent is realized mid-trajectory instead of at ``t = 0``, where a
     state the model only ever saw late would be off-distribution -- so it is
@@ -1223,11 +1224,15 @@ def sample_tracelet_ancestral(
                         state, sampled, frozen_time, rng
                     )
                     if replacement is not None:
-                        state, replacement_rules = replacement
-                        for rule in replacement_rules:
+                        # One committed state per recorded rule: the rollout
+                        # diagnostics require ``len(observations) ==
+                        # len(event_rules) + 1``, so a replacement that installs
+                        # several systems must hand back each intermediate.
+                        for successor, rule in replacement:
+                            state = successor
                             event_times.append(operational_time)
                             event_rules.append(str(rule))
-                        observations.append(compact_state_observation(state))
+                            observations.append(compact_state_observation(state))
                         continue
                 assert direct_runtime is not None
                 state = direct_runtime.apply(

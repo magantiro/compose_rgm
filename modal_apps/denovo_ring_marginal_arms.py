@@ -789,7 +789,12 @@ def main(
     # ``order_outputs=False`` because an ordered map makes a healthy fan-out
     # deliver nothing until its slowest shard returns.  Per-shard failures are
     # caught so one exhausted shard cannot destroy its healthy siblings.
-    for result in sample_shard.map(tasks, order_outputs=False, return_exceptions=True):
+    for result in sample_shard.map(
+        tasks,
+        order_outputs=False,
+        return_exceptions=True,
+        wrap_returned_exceptions=False,
+    ):
         if isinstance(result, Exception):
             failed += 1
             print(json.dumps({"phase": "shard_failed", "error": repr(result)}), flush=True)

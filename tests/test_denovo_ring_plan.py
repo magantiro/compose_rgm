@@ -616,9 +616,13 @@ def test_the_interceptor_fires_only_on_a_ring_draw_and_only_once() -> None:
         rule_name = "ring_system_grow"
         action = _cyclohexane_grow()
 
-    successor, rules = interceptor(_hexane(), _ARing(), 0.5, np.random.default_rng(0))
+    steps = interceptor(_hexane(), _ARing(), 0.5, np.random.default_rng(0))
+    # One committed state per recorded rule, which the rollout diagnostics
+    # require: len(observations) == len(event_rules) + 1.
+    assert len(steps) == 1
+    (successor, rule), = steps
     assert molecular_graph_to_smiles(successor) == "C1CCCCC1"
-    assert rules == ("ring_system_grow",)
+    assert rule == "ring_system_grow"
     assert interceptor.fired is True
     # A second ring draw must NOT re-realize the plan.
     assert interceptor(_hexane(), _ARing(), 0.5, np.random.default_rng(0)) is None
@@ -728,3 +732,124 @@ def test_an_interceptor_that_declines_leaves_the_process_byte_identical() -> Non
     assert molecular_graph_to_smiles(plain.final_state) == molecular_graph_to_smiles(
         declining.final_state
     )
+
+
+def test_a_start_arm_records_its_plan_events_in_the_rule_list() -> None:
+    # The event census counts ring-forming rules from ``event_rules``; a t = 0
+    # arm whose plan events were missing would be reported as installing no
+    # rings while its endpoints plainly carry them.
+    model = _PlanThenTerminalModel()
+    record = _arm("C0", model, _FixedPlanPrior(((6,),)))
+    assert record["event_rules"].count("ring_system_grow") == record["plan_events"] == 1
+    assert record["events"] == record["process_events"] + record["plan_events"]
+
+
+def test_a_first_ring_arm_does_not_double_count_its_plan_events() -> None:
+    model = _RingThenTerminalModel()
+    record = sample_denovo_arm(
+        model,
+        arm="C1",
+        rng=np.random.default_rng(0),
+        source_prior=_TerminalPrior(),
+        index=_index(),
+        plan_prior=_FixedPlanPrior(((6,),)),
+        n_slots=40,
+        operational_horizon=0.2,
+        time_step=0.1,
+        max_events=8,
+    )
+    assert record["event_rules"].count("ring_system_grow") == 1
+    assert record["events"] == record["process_events"] + record["plan_events"]
+
+
+# ---- Multi-system realization through the real rollout ----
+
+
+def _dodecane():
+    return pad_molecular_graph(smiles_to_molecular_graph("CCCCCCCCCCCC"), 40)
+
+
+def _dodecane_ring_grow(first: bool) -> RingSystemGrow:
+    """Close one half of dodecane; both halves give bicyclohexyl.
+
+    Hydrogen counts are the PRE-closure ones and differ between the halves,
+    because atoms 5 and 6 carry the bond joining them while atoms 0 and 11 are
+    chain ends.
+    """
+
+    members = range(6) if first else range(6, 12)
+    ends = (0, 5) if first else (6, 11)
+    chain_end = 0 if first else 11
+    return RingSystemGrow(
+        system_atoms=tuple(members),
+        interface_atoms=(),
+        scaffold_bonds=tuple(
+            RingBond(index, index + 1, 1) for index in list(members)[:-1]
+        ),
+        bond_reorders=(),
+        atom_payloads=tuple(
+            AtomPayload(index, CARBON, 0, 3 if index == chain_end else 2)
+            for index in members
+        ),
+        atom_insertions=(),
+        bond_insertions=(RingBond(*ends, 1),),
+    )
+
+
+class _TwoRingModel:
+    """Draws a ring, then the two plan installations, then terminates."""
+
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def sample_rewrite_mark(self, state, time, rng):
+        self.calls += 1
+        actions = {
+            1: _dodecane_ring_grow(True),
+            2: _dodecane_ring_grow(True),
+            3: _dodecane_ring_grow(False),
+        }
+        action = actions.get(self.calls)
+
+        class _Sampled:
+            total_hazard = 1000.0 if action is not None else 0.0
+            rule_name = "ring_system_grow" if action is not None else "<TERMINAL>"
+
+        _Sampled.action = action
+        return _Sampled()
+
+
+def test_a_multi_system_plan_keeps_the_rollout_diagnostics_aligned() -> None:
+    """One committed state per recorded event, through the REAL sampler.
+
+    A replacement that installs several systems but reports one observation
+    fails the rollout's own ``len(observations) == len(event_rules) + 1``
+    invariant.  Exercising this only on a one-system plan cannot catch it, which
+    is exactly how it reached a remote fan-out.
+    """
+
+    from compose_v4.experiments.denovo_ring_plan import FirstRingEventPlanInterceptor
+    from compose_v4.experiments.tracelet_conditional import sample_tracelet_ancestral
+
+    model = _TwoRingModel()
+    interceptor = FirstRingEventPlanInterceptor(
+        model, ((6,), (6,)), index=_index(), pin_signatures=True
+    )
+    rollout = sample_tracelet_ancestral(
+        model,
+        rng=np.random.default_rng(5),
+        n_slots=40,
+        initial_state=_dodecane(),
+        operational_horizon=0.3,
+        time_step=0.1,
+        max_events=8,
+        transition_interceptor=interceptor,
+    )
+    assert interceptor.outcome is not None
+    assert interceptor.outcome.events == 2
+    assert list(rollout.event_rules) == ["ring_system_grow", "ring_system_grow"]
+    assert len(rollout.diagnostics.canonical_state_keys) == len(rollout.event_rules) + 1
+    from compose_v4.eval.denovo_ring_marginal import ring_system_signature_of_smiles
+
+    endpoint = molecular_graph_to_smiles(rollout.final_state)
+    assert ring_system_signature_of_smiles(endpoint) == ((6,), (6,))

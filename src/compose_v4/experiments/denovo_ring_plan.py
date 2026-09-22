@@ -187,7 +187,14 @@ def restricted_ring_sampling(
 
 @dataclass
 class RingPlanOutcome:
-    """What the plan asked for and what the host could carry."""
+    """What the plan asked for and what the host could carry.
+
+    ``successors`` holds the committed state after EACH installation, because a
+    caller substituting the plan into a running trajectory has to hand the
+    rollout one state per recorded event -- the diagnostics require
+    ``len(observations) == len(event_rules) + 1``.  It is deliberately not
+    serialized: a shard stores molecules, not intermediate graphs.
+    """
 
     requested: MoleculeRingSignature
     order: tuple[RingSystemSignature, ...]
@@ -195,6 +202,7 @@ class RingPlanOutcome:
     unrealized: tuple[tuple[RingSystemSignature, str], ...] = ()
     events: int = 0
     bin_provenance: dict = field(default_factory=dict)
+    successors: tuple = ()
 
     @property
     def fully_realized(self) -> bool:
@@ -284,6 +292,7 @@ def realize_ring_plan(
     outcome = RingPlanOutcome(requested=plan, order=order)
     realized: list[RingSystemSignature] = []
     unrealized: list[tuple[RingSystemSignature, str]] = []
+    committed: list = []
     for signature in order:
         successor, got, reason = install_one_ring_system(
             model,
@@ -299,9 +308,11 @@ def realize_ring_plan(
             continue
         state = successor
         realized.append(got if got is not None else signature)
+        committed.append(state)
         outcome.events += 1
     outcome.realized = tuple(realized)
     outcome.unrealized = tuple(unrealized)
+    outcome.successors = tuple(committed)
     return state, outcome
 
 
@@ -386,7 +397,7 @@ class FirstRingEventPlanInterceptor:
         if self.fired or sampled.rule_name != RING_GROW_RULE:
             return None
         self.fired = True
-        successor, outcome = realize_ring_plan(
+        _successor, outcome = realize_ring_plan(
             self._model,
             state,
             self._plan,
@@ -400,7 +411,7 @@ class FirstRingEventPlanInterceptor:
         self.outcome = outcome
         # From here the ordinary process continues WITHOUT ring growth.
         self._model.disabled_sampling_rule_names = (RING_GROW_RULE,)
-        return successor, (RING_GROW_RULE,) * outcome.events
+        return tuple((state, RING_GROW_RULE) for state in outcome.successors)
 
 
 def sample_denovo_arm(
@@ -510,7 +521,11 @@ def sample_denovo_arm(
         record["plan_trigger_fired"] = bool(trigger_fired)
     if configuration is not None and configuration[1] == REALIZE_AT_START:
         # Plan events happen before the CTMC starts, so they are not in
-        # ``rollout.event_times``; total work is the sum.
+        # ``rollout.event_times``; total work is the sum.  They are PREPENDED to
+        # the rule list as well, because the event census counts ring-forming
+        # rules from it -- omitting them would report a ``t = 0`` arm as having
+        # installed no rings while its endpoints plainly carry them.
         record["events"] = len(rollout.event_times) + plan_events
         record["process_events"] = len(rollout.event_times)
+        record["event_rules"] = [RING_GROW_RULE] * plan_events + record["event_rules"]
     return record
