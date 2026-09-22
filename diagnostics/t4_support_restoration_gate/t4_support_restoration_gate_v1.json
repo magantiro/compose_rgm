@@ -742,9 +742,50 @@
   },
   "fa7_0": {
    "agrees_with_committed_audit": {
-    "1": true
+    "0": true,
+    "1": true,
+    "2": true
    },
    "cumulative_by_rung": {
+    "0": [
+     {
+      "cumulative_distinct": 0,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 0,
+      "kernel": "region",
+      "returned": 0,
+      "rung": 0,
+      "stage": "rung0_region"
+     },
+     {
+      "cumulative_distinct": 0,
+      "draws_per_lane": 960,
+      "elapsed_seconds": 1013.662,
+      "fresh_distinct": 0,
+      "returned": 0,
+      "rung": 1,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 2,
+      "draws_per_lane": 1920,
+      "elapsed_seconds": 2157.568,
+      "fresh_distinct": 2,
+      "returned": 2,
+      "rung": 2,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 3,
+      "draws_per_lane": 3840,
+      "elapsed_seconds": 3759.936,
+      "fresh_distinct": 1,
+      "returned": 1,
+      "rung": 3,
+      "stage": "draw_ladder"
+     }
+    ],
     "1": [
      {
       "cumulative_distinct": 0,
@@ -783,22 +824,85 @@
       "rung": 3,
       "stage": "draw_ladder"
      }
+    ],
+    "2": [
+     {
+      "cumulative_distinct": 1,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 1,
+      "kernel": "region",
+      "returned": 1,
+      "rung": 0,
+      "stage": "rung0_region"
+     },
+     {
+      "cumulative_distinct": 2,
+      "draws_per_lane": 960,
+      "elapsed_seconds": 1253.749,
+      "fresh_distinct": 1,
+      "returned": 1,
+      "rung": 1,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 2,
+      "draws_per_lane": 1920,
+      "elapsed_seconds": 2867.699,
+      "fresh_distinct": 0,
+      "returned": 0,
+      "rung": 2,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 2,
+      "draws_per_lane": 3840,
+      "elapsed_seconds": 5083.716,
+      "fresh_distinct": 0,
+      "returned": 0,
+      "rung": 3,
+      "stage": "draw_ladder"
+     }
     ]
    },
    "distinct_eligible_by_seed": {
-    "1": 0
+    "0": 3,
+    "1": 0,
+    "2": 2
    },
    "draws_spent_by_seed": {
-    "1": 6720
+    "0": 6720,
+    "1": 6720,
+    "2": 6720
    },
-   "drug_like_eligible_total": 0,
+   "drug_like_eligible_total": 5,
    "elapsed_seconds_by_seed": {
-    "1": 5802.48
+    "0": 5011.16,
+    "1": 5802.48,
+    "2": 7294.55
    },
-   "eligible_endpoints_total": 0,
-   "endpoint_smiles": [],
+   "eligible_endpoints_total": 5,
+   "endpoint_smiles": [
+    "C=c1cc(CN(CCC(C)C)C(=O)c2cccc3ccccc23)ccc1=CC",
+    "C=c1cc(CN(CCC(C)C)C(=O)c2cccc3ccccc23)ccc1=CC=CCN",
+    "C=c1cc(CN(CCC(C)C)C(=O)c2cccc3ccccc23)ccc1=CC=N",
+    "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1",
+    "CC(C)CCN(Cc1ccncc1)C(=O)c1cccc2ccccc12"
+   ],
    "expansion_consumed_by_seed": {
+    "0": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 3,
+     "stop_reason": "ladder_exhausted"
+    },
     "1": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 3,
+     "stop_reason": "ladder_exhausted"
+    },
+    "2": {
      "consumed": true,
      "fallback_ran": true,
      "ladder_attempts": 3,
@@ -820,47 +924,90 @@
     "stop_reason": "reached_target"
    },
    "margins": {
-    "qed": null,
-    "sa": null,
-    "similarity": null
+    "qed": {
+     "max": 0.041493,
+     "median": 0.012848,
+     "min": 0.001689,
+     "n": 5
+    },
+    "sa": {
+     "max": 1.992805,
+     "median": 1.293956,
+     "min": 0.988375,
+     "n": 5
+    },
+    "similarity": {
+     "max": 0.096429,
+     "median": 0.05625,
+     "min": 0.010169,
+     "n": 5
+    }
    },
-   "p_any_eligible": 0.0,
+   "p_any_eligible": 0.6667,
    "round_one_selected_by_seed": {
-    "1": 0
+    "0": 0,
+    "1": 0,
+    "2": 0
    },
    "routed_kernel": [
     "region"
    ],
    "routing_agrees": true,
    "rung_zero_yield_by_seed": {
-    "1": 0
+    "0": 0,
+    "1": 0,
+    "2": 1
    },
    "seeds_run": [
-    1
+    0,
+    1,
+    2
    ],
    "status": "RUN",
    "stop_reason_by_seed": {
-    "1": "ladder_exhausted"
+    "0": "ladder_exhausted",
+    "1": "ladder_exhausted",
+    "2": "ladder_exhausted"
    },
    "structural_character": {
     "direction_counts": {
      "grow": 0,
-     "prune": 0,
+     "prune": 5,
      "replace": 0
     },
-    "heavy_delta": null,
-    "rewrite_families": [],
-    "ring_delta": null,
-    "rungs_producing": []
+    "heavy_delta": {
+     "max": -1.0,
+     "median": -4.0,
+     "min": -9.0,
+     "n": 5
+    },
+    "rewrite_families": [
+     "atom_delete",
+     "base",
+     "retained_deletion",
+     "retained_element"
+    ],
+    "ring_delta": {
+     "max": -1.0,
+     "median": -1.0,
+     "min": -2.0,
+     "n": 5
+    },
+    "rungs_producing": [
+     0,
+     1,
+     2,
+     3
+    ]
    },
    "trigger_confirmed_all_seeds": true,
    "verdict": {
-    "detail": "routing landed on 'region', which matches the historical arm, and that lane ran to its declared bound and produced zero eligible endpoints; the routing logic is right and the wiring is not yet behaviourally equivalent",
-    "failure_kind": "WIRING",
+    "detail": "3 distinct eligible endpoints recovered (0 at rung 0)",
+    "failure_kind": null,
     "historical_kernel": "region",
     "routed_kernel": "region",
     "routing_agrees_with_historical_arm": true,
-    "verdict": "FAIL"
+    "verdict": "PASS"
    },
    "wall_clock_stops": []
   },
@@ -1318,25 +1465,29 @@
  "controls_all_searched": true,
  "coverage": {
   "control_events_landed": 10,
-  "covered": {
-   "5ht1b_2": "seeds 0,1,2 COMPLETE",
-   "braf_0": "seeds 0,1,2 COMPLETE",
-   "braf_1": "seeds 0,1,2 COMPLETE",
-   "fa7_0": "SEED 1 ONLY. Seeds 0 and 2 were still in flight when this was written and may land in diagnostics/t4_support_restoration_gate/shards later; re-reduce if so.",
-   "fa7_2": "seeds 0,1,2 COMPLETE - all three ran the FULL ladder to ladder_exhausted"
-  },
-  "fa7_0_caveat": "the FAIL rests on ONE seed (index 1, a VARIANCE PROBE, not the production derivation), so P(any eligible) = 0/1 and not 0/3. Seeds 0 and 2 were in flight. Do not quote 0/3.",
-  "ladder_demonstrably_works": "escalation is NOT broken and this is measured, not assumed: braf_0 seed 1 produced eligible endpoints at rungs 1 AND 3, and fa7_2 produced at rungs 1 and 2, across all three of its seeds. So rungs 1, 2 and 3 have each yielded eligible endpoints on some cell. fa7_0's zero is therefore a CELL-SPECIFIC result, not a broken ladder.",
+  "control_events_planned": 10,
+  "escalation_is_load_bearing_not_decorative": "the two cells rung 0 cannot carry are exactly the two that needed the ladder, and they got there: fa7_0 produced ALL THREE of its production-seed endpoints from ladder rungs (rung 0 yielded 0 at that seed) and fa7_2 produced from rungs 1 and 2. Across the panel rungs 0, 1, 2 and 3 have each yielded eligible endpoints. Escalation is doing real work, not padding.",
+  "fa7_0_is_the_marginal_cell_and_should_be_reported_as_such": "P(any eligible) = 2/3. The PRODUCTION seed (index 0) yields 3 eligible, ALL from ladder rungs; variance seed 2 yields 2; variance seed 1 yields ZERO after the full 6720 draws. So the cell is recoverable but not reliably so, and a single-seed read of it can land on either verdict. An earlier reduction of this gate, run when only seed 1 had committed, recorded fa7_0 as FAIL/WIRING on that one seed -- correct for the evidence then available and wrong about the cell. Quote 2/3, never 0/1 and never 3/3.",
   "ladder_rungs_1_to_3_exercised": true,
-  "status": "NEARLY COMPLETE",
-  "the_configuration_difference_this_points_at": "the historical fa7_0 ladder arm found 4 eligible in 2880 draws; the unified controller found 0 in 6720. The arms escalated lanes carrying region_law='free_gate_margin_v1' (measured in their own round-one worker telemetry), while the five held-target d06 contracts declare no region_law, so the unified controller escalates UNCONDITIONED lanes. More draws against an unconditioned distribution is exactly the thing the repo's own notes say does not fix a distribution that misses the transformation. INFERRED, not measured: no arm has been run with the law wired into the escalated lanes to confirm it recovers fa7_0.",
-  "trigger_events_landed": 13,
+  "status": "COMPLETE",
+  "trigger_events_landed": 15,
   "trigger_events_planned": 15,
-  "what_this_establishes": "4 of 5 trigger cells PASS. The automatically routed kernel recovers useful support on braf_0, braf_1, fa7_2 and 5ht1b_2, at margins and structural scale comparable to the historical arms, and that support survives the production selection path. fa7_0 FAILS, and the failure is WIRING not ROUTING: routing correctly selected `region`, matching its historical arm, and the routed kernel plus the full escalation ladder ran to the declared bound (6720 draws, ladder_exhausted, 5802 s) producing ZERO eligible endpoints."
+  "trigger_reproduction": "fa7_0, fa7_2 and 5ht1b_2 reproduce the historical round-one exhaustion at ALL THREE seeds. braf_0 and braf_1 do NOT (braf_0 seed 1 selects 1; braf_1 seeds 1 and 2 select 4 and 8), so their exhaustion is seed-marginal rather than structural and those rows carry ladder_fired_without_trigger.",
+  "verdict": "5 of 5 trigger cells PASS. No ROUTING failure and no WIRING failure."
  },
  "docking_calls": 0,
- "failure_kinds": {
-  "fa7_0": "WIRING"
+ "failure_kinds": {},
+ "headline": {
+  "answer": "YES on all five cells, scored on support rather than molecular identity.",
+  "any_wall_clock_stop": false,
+  "controls_all_searched_ladder_unreachable": true,
+  "distinct_eligible_endpoints_total": 93,
+  "docking_calls": 0,
+  "med_chem_plausible_total": 93,
+  "oracle_calls": 0,
+  "question": "does the automatic unified controller recover the useful proposal SUPPORT the historical per-cell arms produced?",
+  "routing_agrees_with_every_historical_arm": true,
+  "trigger_cells_passing": 5
  },
  "kernel": "rdkit 2024.03.5 (T4 production)",
  "ladder": {
@@ -1381,7 +1532,9 @@
   "braf_1_seed0",
   "braf_1_seed1",
   "braf_1_seed2",
+  "fa7_0_seed0",
   "fa7_0_seed1",
+  "fa7_0_seed2",
   "fa7_2_seed0",
   "fa7_2_seed1",
   "fa7_2_seed2",
@@ -1398,7 +1551,7 @@
  ],
  "trigger_cells_run": 5,
  "verdict_counts": {
-  "FAIL": 1,
-  "PASS": 4
+  "FAIL": 0,
+  "PASS": 5
  }
 }
