@@ -3758,3 +3758,84 @@ independently of whether fa7_0 ever closes.**
   dead** -- nothing prints until shard #1 returns, and containers capture subprocess output so
   `modal app logs` is empty too. Check the TASK COUNT, not the log, and do not restructure a fan-out
   mid-run on the strength of silence.
+
+## 2026-09-21 (PMO located at the manifold; and two overstatements of mine, corrected by the owner)
+
+- **THE PMO DIAGNOSIS, now stated without hedging:** COMPOSE has sufficient LOCAL optimization and
+  sufficient TRANSPORT capability, but its blind GLOBAL proposal distribution does not reliably
+  remain in, or enter, productive molecular basins. Three measurements carry it: celecoxib blind
+  U10 = 0.3714 at 1,000 calls against U10 = 0.7362 in **64** calls for the same frozen local
+  controller placed in the productive region; 0 of 11 atlas tasks reach the anchor rung blind; and
+  the blind population systematically leaves the drug-like manifold.
+- **THE MANIFOLD MEASUREMENT (`diagnostics/pmo_atlas_v1/manifold_drift_v1.json`, recomputed from the
+  committed Test C blind ledgers, ZERO new oracle calls, rdkit 2023.9.6).** All 11 tasks start from
+  the same init bank at median QED 0.716. By the final call-quartile:
+      qed +0.033 | mestranol -0.096 | celecoxib -0.130 | albuterol -0.151 | thiothixene -0.151
+      isomers -0.155 | median1 -0.166 | troglitazone -0.263 | jnk3 -0.311 | perindopril -0.348
+      gsk3b -0.359
+  **qed is the ONLY task that does not drift, and it is the only task whose OBJECTIVE IS
+  drug-likeness** -- its reward pins the manifold that every other task's does not. That is the
+  mechanism, and it explains the Test C pattern without the narrow-vs-broad taxonomy the complete
+  data already refuted. `isomers` is the predicted EXCEPTION and confirms it: the only task whose
+  heavy-atom median FALLS (21.5 -> 14.5), drifting TOWARD its small C7H8N2O2 target, and the only
+  non-qed task above 90% of anchor. **Drift is not bad per se; drift AWAY from the target's region
+  is.** INFERRED, NOT ESTABLISHED: r(%anchor, QED drift) = +0.475 at n=11 is p~0.14. The qed
+  contrast is the solid part; do not quote the correlation as a finding.
+- **THE ALLOCATOR REPAIR IS NECESSARY AND NOT SUFFICIENT, and this was nearly a wasted lever.** Every
+  one of those blind runs already used `niche_evidence` -- the repair that replaced the 1-3 heavy-atom
+  fragment niche centres -- confirmed in each campaign manifest, and drifted anyway. Check what a run
+  ACTUALLY used before proposing a fix it already has.
+- **WHY IVG does not meet this, and it is not a cleverer reward.** Its generator is a pretrained
+  distribution over real molecules, so every proposal lands on the manifold; the legal fiber COMPOSE
+  samples is vastly larger, and validity-closure is a VALENCE guarantee that says nothing about
+  plausibility. IVG gets manifold adherence free on all 23 tasks; we get it on qed only. Its
+  no-prescreen setup is 100 pretrained-model samples scored in-run + a live scored population +
+  a genetic prompter + a 300-example replay buffer + PPO -- an ONLINE bank, not the prescored ZINC
+  bank, which is `--use_prescreen` only.
+- **`docs/PMO_INIT_BANK.json` holds 100 molecules and the controller draws `count: 16`.** Matching
+  IVG's initialization breadth is a CONFIG VALUE, not new data.
+- **CORRECTION, mine: "100-init is inadmissible at a 250-call budget" is WRONG.** It is
+  PROTOCOL-VALID at any budget provided all 100 evaluations are counted toward the total; it is
+  merely a poor ALLOCATION there (40% of 250, 20% of 500, 1% of 10,000 -- the last being
+  IVG-matched). **`protocol-valid` and `budget-efficient` are different predicates and both must be
+  measured.** Calling a bad allocation "inadmissible" would have deleted a legitimate arm.
+- **CORRECTION, mine: "its 122 unspent authorized calls won't help" was too categorical.** What is
+  MEASURED is that the CURRENT PROPOSAL MECHANISM exhausted its yield. More calls through that same
+  proposal law probably do not help; that is not the same claim. The distinction is exactly the
+  lesson being applied to PMO -- **more oracle budget != better search when the proposal
+  distribution never produces the needed chemistry** -- and collapsing it hides the reason.
+- **A BASIN SHOULD BE DEFINED BY FUTURE VALUE, NOT BY RESEMBLANCE TO A KNOWN ANSWER (owner).**
+  `V_local(G) = E[top-10 after 64 local calls | G]`; a good basin is high `V_local`, and the teacher
+  region is a POSITIVE CONTROL rather than the target. This prevents overfitting development to one
+  known answer, and makes "C found a structurally different region with equal future value" a
+  SUCCESS instead of a miss. **COST TRAP: exact `V_local` is 64 oracle calls per candidate**, so it
+  is unavailable to a zero-charged-call gate -- it needs an offline proxy whose agreement with true
+  `V_local` is validated on points already scored (the teacher region and the blind endpoints, free),
+  and a proxy whose fidelity is unmeasured is not a basin definition.
+
+## 2026-09-21 (T4 5ht1b_2: both protonation rescue arms closed a cell that was null at BOTH deltas)
+
+- **RESULT, reconciled by exact identity and verified independently.** 5ht1b_2 reads `null` at both
+  thresholds in the locks-based reconciliation -- the one blank 5HT1B cell.
+      arm    contract     delta (EXECUTABLE)  calls     status                best
+      d04    c51c6144     0.4                 249/249   complete_budget       **-12.5**
+      d06    d95fb5a1     0.6                 126/248   candidate_exhaustion  **-10.8**
+  Both at code revision `e86a2181`. GenMol for 5HT1B seed 3 is -11.6 (d0.4) and -10.5 (d0.6), so
+  both beat the comparator. **They must be reported as a NAMED protonation-rescue phase** -- their
+  own `claim_boundary` forbids splicing them into the unchanged-v1 panel table.
+- **Executable `delta` was diffed against the prose `claim_boundary` on BOTH arms and matches**, which
+  is the check that caught the jak2 d06 contract carrying 0.4. Do it every time.
+- **Both winners re-scored independently under the pinned T4 kernel, and both are eligible:**
+      d04  sim **0.4000**  QED 0.6736  SA 3.9776  heavy 36
+      d06  sim 0.6769      QED 0.6263  SA 3.7766  heavy 31   net charge 0
+  The d04 winner sits EXACTLY on the similarity bound, so it survives only because the shipped
+  comparator is non-strict -- the asymmetry recorded on 2026-09-20, now load-bearing on a real win.
+- **Both came from the predicted mechanisms, which is what makes them more than luck.** d04 took SA
+  from the source's 4.687 to 3.978, a **0.709 repair**, and 5ht1b_2 was diagnosed as demanding a
+  substantial SA repair. d06 is NEUTRAL against a charged seed, reached by EXCISING the [NH+]
+  fragment -- the route the witness census predicted, not a protonation edit.
+- **The stall watchdog reported this cell as `STALLED_AT_ROOT ... locks=1 newest=round_000_lock.json
+  ckpt=False` while it was at round 31 with a completed result.** The watchdog shells out to
+  `modal volume ls`, which silently returns the PARENT listing -- the 2026-09-20 gotcha, now
+  producing a false STALL rather than a false OK. Use `modal.Volume.listdir` (exact) before acting on
+  a watchdog verdict.
