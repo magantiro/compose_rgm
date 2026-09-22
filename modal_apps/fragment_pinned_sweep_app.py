@@ -94,6 +94,54 @@ image = (
 
 app = modal.App("compose-fragment-pinned-sweep")
 
+ARMS = ("baseline", "attachment", "path_program")
+
+
+def shard_argv(
+    arm: str,
+    task: str,
+    drug: str,
+    seed: int,
+    mark_attempts: int,
+    linker_bridge_atoms: int,
+    checkpoint: str,
+    output: str,
+    executable: str,
+    runner: str,
+) -> list[str]:
+    """The exact command one shard runs.
+
+    Separated from the Modal function so a test can execute it. The argv IS the
+    runtime configuration authority for every pinned row, and a knob that is
+    plumbed as far as the local entrypoint but never reaches this list is inert
+    while looking wired at every level a reader checks.
+    """
+    if arm not in ARMS:
+        raise ValueError(f"unknown arm: {arm!r}")
+    argv = [
+        executable,
+        runner,
+        "--checkpoint", checkpoint,
+        "--output", output,
+        "--task", task,
+        "--drug", drug,
+        "--seed-list", str(seed),
+        "--samples", str(SAMPLES),
+        # GLOBAL: one value for the whole panel. The sweep varies it BETWEEN
+        # runs, never between drugs or tasks within one.
+        "--mark-attempts-per-event", str(mark_attempts),
+        # GLOBAL, and a property of the START STATE rather than of any config
+        # dataclass, so it is passed identically to every arm of a comparison.
+        # Two arms that differ in it are not a matched comparison of the
+        # mechanism, they are a comparison of two different tasks.
+        "--linker-bridge-atoms", str(linker_bridge_atoms),
+    ]
+    if arm in {"attachment", "path_program"}:
+        argv.append("--attachment-control")
+    if arm == "path_program":
+        argv.append("--path-program")
+    return argv
+
 
 @app.function(
     image=image,
@@ -105,27 +153,22 @@ app = modal.App("compose-fragment-pinned-sweep")
     retries=modal.Retries(max_retries=3),
 )
 def run_shard(
-    arm: str, task: str, drug: str, seed: int, mark_attempts: int = 24
+    arm: str,
+    task: str,
+    drug: str,
+    seed: int,
+    mark_attempts: int = 24,
+    linker_bridge_atoms: int = 0,
 ) -> dict:
     """Run one shard through the real CLI and return its parsed payload."""
-    if arm not in {"baseline", "attachment"}:
-        raise ValueError(f"unknown arm: {arm!r}")
     out = Path(f"/tmp/{task}__{drug}__seed{seed}.json")
-    argv = [
-        sys.executable,
-        str(REMOTE_ROOT / "tools/run_fragment_constrained_suite.py"),
-        "--checkpoint", str(REMOTE_CHECKPOINT),
-        "--output", str(out),
-        "--task", task,
-        "--drug", drug,
-        "--seed-list", str(seed),
-        "--samples", str(SAMPLES),
-        # GLOBAL: one value for the whole panel. The sweep varies it BETWEEN
-        # runs, never between drugs or tasks within one.
-        "--mark-attempts-per-event", str(mark_attempts),
-    ]
-    if arm == "attachment":
-        argv.append("--attachment-control")
+    argv = shard_argv(
+        arm, task, drug, seed, mark_attempts, linker_bridge_atoms,
+        checkpoint=str(REMOTE_CHECKPOINT),
+        output=str(out),
+        executable=sys.executable,
+        runner=str(REMOTE_ROOT / "tools/run_fragment_constrained_suite.py"),
+    )
     proc = subprocess.run(
         argv, cwd=str(REMOTE_ROOT), capture_output=True, text=True, check=False
     )
@@ -139,14 +182,16 @@ def run_shard(
     return payload
 
 
-def _requested(spec: str, mark_attempts: int) -> list[tuple[str, str, str, int, int]]:
+def _requested(
+    spec: str, mark_attempts: int, linker_bridge_atoms: int
+) -> list[tuple[str, str, str, int, int, int]]:
     """Expand 'arm:task,arm:task' into shard tuples, preserving the given order.
 
     Order is the caller's, deliberately: it decides which row completes first
     when a run is interrupted, and the publication-critical gap should close
     before an already-verified one.
     """
-    work: list[tuple[str, str, str, int, int]] = []
+    work: list[tuple[str, str, str, int, int, int]] = []
     for group in spec.split(","):
         group = group.strip()
         if not group:
@@ -156,7 +201,10 @@ def _requested(spec: str, mark_attempts: int) -> list[tuple[str, str, str, int, 
             raise ValueError(f"expected 'arm:task', got {group!r}")
         for drug in DRUGS:
             for seed in SEEDS:
-                work.append((arm.strip(), task.strip(), drug, seed, mark_attempts))
+                work.append((
+                    arm.strip(), task.strip(), drug, seed,
+                    mark_attempts, linker_bridge_atoms,
+                ))
     return work
 
 
@@ -166,12 +214,13 @@ def main(
                   "attachment:superstructure_generation",
     output_root: str = "diagnostics/fragment_attachment_pinned_v1/shards",
     mark_attempts: int = 24,
+    linker_bridge_atoms: int = 0,
 ) -> None:
     root = Path(output_root)
     if not root.is_absolute():
         root = ROOT / root
 
-    work = _requested(shards, mark_attempts)
+    work = _requested(shards, mark_attempts, linker_bridge_atoms)
     # Skip what already exists, so a resumed run redoes nothing.
     pending = [
         item for item in work
@@ -186,7 +235,7 @@ def main(
     for item, result in zip(
         pending, run_shard.starmap(pending, return_exceptions=True)
     ):
-        arm, task, drug, seed, _attempts = item
+        arm, task, drug, seed, _attempts, _bridge = item
         label = f"{arm}/{task}/{drug}/seed{seed}"
         if isinstance(result, Exception):
             failed += 1
