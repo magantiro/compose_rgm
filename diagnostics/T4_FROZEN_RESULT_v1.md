@@ -80,3 +80,13 @@ Cells marked `RESCUE` ran under their own versioned contract with a proposal law
 DIFFERS from the v1 arm. Their claim boundaries forbid splicing them into an
 "unchanged-v1" panel without naming them. They are named here.
 
+
+## Successor in progress (v1 remains authoritative)
+
+A **v2** panel is being prepared from ONE FROZEN ALGORITHM — primary controller plus a generic
+zero-support fallback available to all 15 cells, sealed prospectively before any docking
+(branch `t4-generic-fallback-20260922`). Its purpose is to remove the `RESCUE` column: a row
+produced by the declared algorithm is an ordinary result, and the fallback is described once in
+Methods.
+
+**Until v2 is sealed and run, the numbers above are the ones to quote.** Do not mix v1 and v2 rows.

@@ -325,7 +325,16 @@
   },
   "objective": "QuickVina2 docking of the best eligible lead, lower is better, subject to QED>=0.6, SA<=4.0, Tanimoto>=delta to the seed",
   "schema_version": "t4_frozen_result_v1",
-  "status": "FROZEN \u2014 this is the authoritative T4 result. Do not re-derive from a builder."
+  "status": "FROZEN \u2014 this is the authoritative T4 result. Do not re-derive from a builder.",
+  "successor_in_progress": {
+   "branch": "t4-generic-fallback-20260922",
+   "open_cost_decision": "Option A re-runs every previously-exhausted cell under the frozen algorithm (uniform 15/15); Option B runs only fa7 seed 1 and leaves four named rescues (cheaper, table stays mixed, one-algorithm claim would be FALSE).",
+   "phase_1": "seal the trigger/K/sampler/attempts/budget/seeds, and MEASURE offline how often each candidate trigger would have fired in the 10 cells that already search. Zero oracle calls.",
+   "status": "v1 REMAINS AUTHORITATIVE until v2 exists. Do not quote a v2 number before it is sealed and run.",
+   "what": "A v2 panel produced by ONE FROZEN ALGORITHM = primary controller + a generic zero-support fallback available to all 15 cells, sealed prospectively before any docking.",
+   "why": "v1 carries RESCUE rows that ran under different contracts and different mechanisms. Reporting them as ordinary rows would misstate the procedure; labelling them separately is honest but reads as an asterisk. A single declared algorithm removes both problems."
+  },
+  "updated_at_utc": "2026-09-22T04:09:21.126388+00:00"
  },
- "payload_sha256": "acaf7dad784cf0aea4513701fe5e0232c7dc531b55defb0e2f59fd96072f6c17"
+ "payload_sha256": "f779d3479617d325e2238862e3e7aaafedca56f1311c7bec2fcc6bd311f7fe90"
 }
