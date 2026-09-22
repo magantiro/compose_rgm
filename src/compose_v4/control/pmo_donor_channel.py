@@ -292,7 +292,6 @@ class DonorProposal:
     def payload(self) -> dict:
         return {
             "donor": self.donor,
-            "donor_stratum": self.donor_stratum,
             "endpoint": self.endpoint,
             "retained_fraction": self.retained_fraction,
             "removed_atoms": self.removed_atoms,
