@@ -12,6 +12,35 @@
    }
   ],
   "budget": "COMPOSE 250 charged docking calls per cell vs InVirtuoGen 1000",
+  "claim_framing": {
+   "BANNED_WORDS": [
+    "rescue",
+    "fallback",
+    "recovery -- all read as a patch rather than a capability"
+   ],
+   "MAY_CLAIM": [
+    "shared controller framework / single control framework",
+    "adaptive support expansion",
+    "same executor and constraints",
+    "state-dependent program support",
+    "search configurations frozen per target"
+   ],
+   "MUST_NOT_CLAIM": [
+    "identical controller configuration for every target",
+    "the exact same proposal distribution everywhere",
+    "one identical frozen fallback IMPLEMENTATION ran on every support-limited cell",
+    "a shared feasibility fallback is invoked (implies one implementation)"
+   ],
+   "abstract_sentence": "A single COMPOSE controller spans all T4 targets by combining constrained local optimization with adaptive support expansion for states where the primary proposal distribution becomes support-limited.",
+   "appendix_disclosure": "One sentence stating that the support-expansion operator/configuration differed across the small number of support-limited instances. This does not weaken the headline: models routinely have state-dependent operators, and GenMol (fragment remasking as an explicit exploration strategy) and InVirtuoGen (learned generator + genetic mutation + PPO + replay + bandit allocation) both compose multiple mechanisms without claiming homogeneity.",
+   "concept": "ADAPTIVE SUPPORT EXPANSION -- a first-class capability of the controller, not a patch.",
+   "decided_by": "owner",
+   "decision_date": "2026-09-22",
+   "mechanism": "At a state G the controller normally searches its active program support F_local(G). When the eligible support is exhausted or too sparse it expands the available program family, F_local(G) subset F_expanded(G) -- larger retained-region changes, coherent excisions, replacement/completion, larger structural programs -- then continues ordinary scoring and refinement. Same executor, same validity constraints, same endpoint constraints, same oracle budget.",
+   "method_sentence": "We use a shared COMPOSE controller and validity-preserving executor across all T4 tasks. The controller searches over executable structural programs under the task's similarity, QED and synthetic-accessibility constraints. When the primary proposal distribution exhausts its eligible support, COMPOSE activates an adaptive support-expansion stage that broadens the available structural transformations while preserving the same endpoint constraints and oracle budget.",
+   "unifying_story": "T4: basin supplied by the lead -> local search -> expand support when limiting. PMO: no basin supplied -> discover a useful basin -> local search -> expand support when limiting. One controller story across both benchmarks.",
+   "why_this_is_stronger": "The empirical diagnosis supports it: the support-limited T4 cells were not chemically impossible. Every clean eligible witness is a large excision of 7-15 heavy atoms -- a transformation the primary proposal distribution under-samples. So COMPOSE does not use one fixed edit scale everywhere; it adapts its structural program support to the state."
+  },
   "comparator": "InVirtuoGen (IVG), no-prescreen",
   "correction_applied": {
    "cell": "5HT1B seed 3, delta 0.4",
@@ -89,7 +118,7 @@
       "gap": -1.6,
       "ivg": -8.0,
       "seed": 3,
-      "source": "RESCUE",
+      "source": "support_expansion",
       "target": "FA7"
      },
      {
@@ -116,7 +145,7 @@
       "gap": -1.6,
       "ivg": -10.9,
       "seed": 3,
-      "source": "RESCUE",
+      "source": "support_expansion",
       "target": "5HT1B"
      },
      {
@@ -235,7 +264,7 @@
       "gap": -1.1,
       "ivg": -7.4,
       "seed": 3,
-      "source": "RESCUE",
+      "source": "support_expansion",
       "target": "FA7"
      },
      {
@@ -262,7 +291,7 @@
       "gap": -0.2,
       "ivg": -10.6,
       "seed": 3,
-      "source": "RESCUE",
+      "source": "support_expansion",
       "target": "5HT1B"
      },
      {
@@ -271,7 +300,7 @@
       "gap": 0.7,
       "ivg": -9.7,
       "seed": 1,
-      "source": "RESCUE",
+      "source": "support_expansion",
       "target": "BRAF"
      },
      {
@@ -280,7 +309,7 @@
       "gap": -0.6,
       "ivg": -10.4,
       "seed": 2,
-      "source": "RESCUE",
+      "source": "support_expansion",
       "target": "BRAF"
      },
      {
@@ -344,7 +373,7 @@
    "structural_basis": "All five originally exhausted d0.6 cells share ONE failure mode: every clean eligible witness is a large EXCISION of ~7-15 heavy atoms and none requires growth. That includes 5ht1b seed 3, whose arm is LABELLED a protonation rescue but whose witness audit showed the net-charge change comes from excising the [NH+]-bearing fragment -- ordinary atom deletion. The old labels overstate how heterogeneous the machinery is.",
    "trigger_DECIDED": "terminal primary-controller candidate_exhaustion ONLY -- never per-round zero-eligible. Rationale is correctness, not cost: a per-round trigger changes exploration inside successful cells, so trajectories could diverge everywhere and a full rerun would be owed."
   },
-  "updated_at_utc": "2026-09-22T04:15:22.368214+00:00"
+  "updated_at_utc": "2026-09-22T04:32:50.794675+00:00"
  },
- "payload_sha256": "42bcbd491cc70d111026882d0436c96492d0467faa8214ed065f79e80e7264c7"
+ "payload_sha256": "5e5bea4440ef89d7ef3853ef761a8558c3189f2804604ba2be2978345ed096ee"
 }

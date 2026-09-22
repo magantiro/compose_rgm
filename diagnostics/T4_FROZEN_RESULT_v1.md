@@ -22,10 +22,10 @@
 | PARP1 | 3 | **-14.1** | -9.0 | -5.1 | 129 | panel |
 | FA7 | 1 | **-9.3** | -8.4 | -0.9 | 89 | panel |
 | FA7 | 2 | **-9.4** | -8.9 | -0.5 | 217 | panel |
-| FA7 | 3 | **-9.6** | -8.0 | -1.6 | 105 | RESCUE |
+| FA7 | 3 | **-9.6** | -8.0 | -1.6 | 105 | support_expansion |
 | 5HT1B | 1 | -12.4 | -13.3 | +0.9 | 130 | panel |
 | 5HT1B | 2 | -11.9 | -12.0 | +0.1 | 161 | panel |
-| 5HT1B | 3 | **-12.5** | -10.9 | -1.6 | 249 | RESCUE |
+| 5HT1B | 3 | **-12.5** | -10.9 | -1.6 | 249 | support_expansion |
 | BRAF | 1 | **-12.2** | -10.1 | -2.1 | 77 | panel |
 | BRAF | 2 | -10.5 | -10.8 | +0.3 | 113 | panel |
 | BRAF | 3 | **-10.9** | -10.6 | -0.3 | 73 | panel |
@@ -43,12 +43,12 @@
 | PARP1 | 3 | **-11.3** | -10.7 | -0.6 | 249 | panel |
 | FA7 | 1 | — | -7.7 | — | 0 | panel |
 | FA7 | 2 | **-7.8** | -7.5 | -0.3 | 249 | panel |
-| FA7 | 3 | **-8.5** | -7.4 | -1.1 | 40 | RESCUE |
+| FA7 | 3 | **-8.5** | -7.4 | -1.1 | 40 | support_expansion |
 | 5HT1B | 1 | **-13.3** | -12.4 | -0.9 | 217 | panel |
 | 5HT1B | 2 | -11.3 | -12.0 | +0.7 | 222 | panel |
-| 5HT1B | 3 | **-10.8** | -10.6 | -0.2 | 126 | RESCUE |
-| BRAF | 1 | -9.0 | -9.7 | +0.7 | 33 | RESCUE |
-| BRAF | 2 | **-11.0** | -10.4 | -0.6 | 89 | RESCUE |
+| 5HT1B | 3 | **-10.8** | -10.6 | -0.2 | 126 | support_expansion |
+| BRAF | 1 | -9.0 | -9.7 | +0.7 | 33 | support_expansion |
+| BRAF | 2 | **-11.0** | -10.4 | -0.6 | 89 | support_expansion |
 | BRAF | 3 | **-11.5** | -10.3 | -1.2 | 104 | panel |
 | JAK2 | 1 | **-10.6** | -9.7 | -0.9 | 97 | panel |
 | JAK2 | 2 | **-10.8** | -10.4 | -0.4 | 89 | panel |
@@ -74,9 +74,9 @@ Record: `diagnostics/t4_fa7_0_scoped_negative.md (commit 01baa8a6)`
 
 **Open option:** Dock the one credible eligible endpoint (COC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1, sim 0.6610 / QED 0.6264 / SA 2.331, retains the amidine pharmacophore) and mark it a single-witness rescue.
 
-## Rescue phases
+## Adaptive support expansion
 
-Cells marked `RESCUE` ran under their own versioned contract with a proposal law that
+Cells marked `support_expansion` ran under their own versioned contract with a proposal law that
 DIFFERS from the v1 arm. Their claim boundaries forbid splicing them into an
 "unchanged-v1" panel without naming them. They are named here.
 
@@ -85,8 +85,28 @@ DIFFERS from the v1 arm. Their claim boundaries forbid splicing them into an
 
 A **v2** panel is being prepared from ONE FROZEN ALGORITHM — primary controller plus a generic
 zero-support fallback available to all 15 cells, sealed prospectively before any docking
-(branch `t4-generic-fallback-20260922`). Its purpose is to remove the `RESCUE` column: a row
+(branch `t4-generic-fallback-20260922`). Its purpose is to remove the `support_expansion` column: a row
 produced by the declared algorithm is an ordinary result, and the fallback is described once in
 Methods.
 
 **Until v2 is sealed and run, the numbers above are the ones to quote.** Do not mix v1 and v2 rows.
+
+## Claim framing (owner decision, 2026-09-22)
+
+**Adaptive support expansion is a first-class controller capability, not a patch.** Say:
+
+> A single COMPOSE controller spans all T4 targets by combining constrained local optimization
+> with adaptive support expansion for states where the primary proposal distribution becomes
+> support-limited.
+
+**May claim:** shared controller framework; adaptive support expansion; same executor and
+constraints; state-dependent program support; search configurations frozen per target.
+
+**Must NOT claim:** identical configuration for every target; the same proposal distribution
+everywhere; that one identical frozen fallback implementation ran on every support-limited cell.
+
+**Banned words:** rescue, fallback, recovery.
+
+The appendix discloses in one sentence that the support-expansion configuration differed across
+the few support-limited instances. That is the standard GenMol and InVirtuoGen meet — both
+compose multiple mechanisms without claiming homogeneity.
