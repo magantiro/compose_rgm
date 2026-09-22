@@ -1,0 +1,111 @@
+{
+  "checkpoint_status": "PROVISIONAL_EDITING_CHECKPOINT -- forbidden for frozen results",
+  "hetero_on_hetero_suppression_x": 6.33,
+  "kernel": "rdkit 2023.09.6 (PMO production)",
+  "off": {
+    "carbon_onto_carbon_rate": 0.1918,
+    "element_mix": {
+      "C": 0.3602,
+      "N": 0.5269,
+      "O": 0.1128
+    },
+    "heteroatom_onto_heteroatom_rate": 0.3464,
+    "insertions": 1152,
+    "top_pairs": [
+      [
+        "N_onto_N",
+        283,
+        0.2457
+      ],
+      [
+        "N_onto_C",
+        272,
+        0.2361
+      ],
+      [
+        "C_onto_C",
+        221,
+        0.1918
+      ],
+      [
+        "C_onto_N",
+        151,
+        0.1311
+      ],
+      [
+        "O_onto_C",
+        66,
+        0.0573
+      ],
+      [
+        "O_onto_N",
+        64,
+        0.0556
+      ],
+      [
+        "N_onto_O",
+        45,
+        0.0391
+      ],
+      [
+        "C_onto_O",
+        38,
+        0.033
+      ]
+    ]
+  },
+  "on": {
+    "carbon_onto_carbon_rate": 0.4696,
+    "element_mix": {
+      "C": 0.7153,
+      "N": 0.1814,
+      "O": 0.1033
+    },
+    "heteroatom_onto_heteroatom_rate": 0.0547,
+    "insertions": 1152,
+    "top_pairs": [
+      [
+        "C_onto_C",
+        541,
+        0.4696
+      ],
+      [
+        "C_onto_N",
+        203,
+        0.1762
+      ],
+      [
+        "N_onto_C",
+        165,
+        0.1432
+      ],
+      [
+        "O_onto_C",
+        100,
+        0.0868
+      ],
+      [
+        "C_onto_O",
+        79,
+        0.0686
+      ],
+      [
+        "N_onto_N",
+        27,
+        0.0234
+      ],
+      [
+        "N_onto_O",
+        12,
+        0.0104
+      ],
+      [
+        "O_onto_N",
+        10,
+        0.0087
+      ]
+    ]
+  },
+  "oracle_calls_spent": 0,
+  "schema_version": "pmo_construction_placement_census_v1"
+}
