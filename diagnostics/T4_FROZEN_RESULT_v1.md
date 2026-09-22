@@ -110,3 +110,19 @@ everywhere; that one identical frozen fallback implementation ran on every suppo
 The appendix discloses in one sentence that the support-expansion configuration differed across
 the few support-limited instances. That is the standard GenMol and InVirtuoGen meet — both
 compose multiple mechanisms without claiming homogeneity.
+
+## Docking reproducibility caveat (discovered 2026-09-22)
+
+**MEASURED: the fa7_0 seed molecule scored −7.5, −8.30 and −8.8 across three runs — a 1.3
+kcal/mol spread on ONE molecule, one target, one fixed box.** `qvina02` is seeded, but the
+conformer is built by `obabel --gen3D`, which takes no seed (verified in source; inferred as
+the cause, no repeated-conformer experiment run).
+
+**Read the aggregate and the win count with confidence; do not lean on any single row's
+margin.** Per-cell gaps of 0.2–0.7 appear throughout this table and cannot be called
+reproducible against a 1.3 spread. The aggregates (δ0.4 −9.0 over 15 cells, δ0.6 −7.6 over 14)
+are far less exposed.
+
+This does **not** affect the within-run search: candidates and the incumbent share one pipeline
+and one conformer generator, so selection inside a run is fair. Not fixed, deliberately —
+seeding conformer generation changes the docking adapter that every T4 contract pins.
