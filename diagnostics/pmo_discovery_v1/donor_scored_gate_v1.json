@@ -1,6 +1,22 @@
 {
+  "arm_off": "B (online memory, no donor lane)",
+  "arm_on": "D (online memory + donor recombination)",
   "default_cut_law": "retentive_released_fraction_v1",
   "donor_cut_law": "retentive_released_fraction_v1",
+  "donor_strata_offered": {
+    "diverse": {
+      "members": 0,
+      "weight": 0.0
+    },
+    "elite": {
+      "members": 4,
+      "weight": 1.0
+    },
+    "promising": {
+      "members": 0,
+      "weight": 0.0
+    }
+  },
   "entry_point": "compose_v4.experiments.pmo_population_v1.execute_task",
   "law_consumed": {
     "consumed": true,
@@ -28,6 +44,21 @@
   "oracle_calls": 0,
   "restore_accepts_scored_kwargs": true,
   "schema_version": "pmo_donor_scored_gate_v1",
+  "scored_bank": {
+    "basins": 4,
+    "capacity": 300,
+    "counted_molecules": 4,
+    "parents_with_an_improving_child": 0,
+    "rows_without_basin": 0,
+    "selected": {
+      "diverse": 0,
+      "elite": 4,
+      "promising": 0
+    },
+    "weights": {
+      "elite": 1.0
+    }
+  },
   "source_smiles": "CC1CCC(C)(C(=O)N2CCCC(C)(C(=O)[O-])C2)O1",
   "verdict": "SCORED_ENTRY_POINT_REACHES_THE_DONOR_CUT_LAW"
 }
