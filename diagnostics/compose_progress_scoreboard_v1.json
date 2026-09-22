@@ -144,6 +144,43 @@
   "task": "celecoxib_rediscovery",
   "the_gap": "B at 1000 calls reaches top10 0.3714. The frozen local controller started in the teacher/anchor region reaches 0.7362 in 64 calls."
  },
+ "pmo_completion_repair": {
+  "branch": "pmo-global-delta-census-20260922 @ c62a7d3f",
+  "caveats": "one task, one seed, 250 calls; the crossover rests on two checkpoints; top_auc is structurally depressed ~20% at 250 calls and must never be compared to a published 10k figure",
+  "corrected_ab": {
+   "A_deployed_B": {
+    "auc": 0.1878,
+    "best": 0.2824,
+    "t10_250": 0.2704
+   },
+   "B_plus_completion_law": {
+    "auc": 0.1744,
+    "best": 0.2883,
+    "t10_250": 0.2774
+   },
+   "auc_ratio": 0.929,
+   "calls_per_arm": 250,
+   "finding": "CROSSOVER \u2014 B trails to 150, overtakes at 200, ends ahead on top-ten mean AND best score while losing AUC, which charges the early deficit more than it credits the late gain",
+   "task": "celecoxib_rediscovery",
+   "verdict": "INCONCLUSIVE (between 0.90 reject and 1.10 qualify)"
+  },
+  "named_limitation": "arm B ran without the law in round 0 (authorized bootstrap exclusion), which makes this result CONSERVATIVE \u2014 B finished ahead carrying less of the mechanism",
+  "open_question_not_started": "does the crossover widen at 1,000 calls? (~2,000 calls to answer)",
+  "phases": [
+   "zero-oracle 2x2",
+   "scored A/B #1 = REJECT",
+   "funnel = the REJECT measured a THROTTLE",
+   "corrected A/B #2 = INCONCLUSIVE with a crossover"
+  ],
+  "scope": "PMO only \u2014 no claim extended to T4",
+  "status": "COMPLETE \u2014 1,000 of 1,000 authorized calls spent, panel not run",
+  "throttle_removal_effect": {
+   "auc": "0.1456 -> 0.1744 (+19.8%)",
+   "best": "0.25 -> 0.2883 (+15.3%)",
+   "charged_completions": "9 -> 28 (3.1x)"
+  },
+  "validation": "the control reproduced its first run TO THE DIGIT (best 0.2824427480916031, AUC 0.1878), proving the wiring fix touched only the treatment under real concurrent load"
+ },
  "pmo_next": {
   "in_flight": [
    "pmo-donor-wiring-20260921",
@@ -188,5 +225,16 @@
   "one_blank": "FA7 seed 1 delta 0.6 \u2014 deliberate scoped negative, IVG -7.7",
   "status": "FROZEN"
  },
- "updated_at_utc": "2026-09-22T04:00:41.499539+00:00"
+ "t4_canonical": {
+  "branch": "t4-canonical-shared-controller-20260922",
+  "commits": 41,
+  "design": "ONE frozen controller, all 30 cells. A LOCAL (15 @ d0.6), B COORDINATED (15 @ d0.6), C ADAPTIVE (all 30) = 60 cell-runs x 250",
+  "notable_preflight_findings": [
+   "only 1 of 15 d0.6 cells has zero eligible at root (5ht1b_2) vs 5 on the old panel \u2014 braf_0 now 14, braf_1 32, fa7_2 9, fa7_0 1. INFERRED, not scored: root yield is not campaign outcome",
+   "the route-distilled route_complete_region expert CANNOT appear in a whole-panel controller \u2014 every checkpoint is leave-one-target-out over the benchmark answers; the coordinated role went to structured",
+   "the Modal ceiling is ~100 CONCURRENT CPUs, not containers, so the three max_containers limits must SUM"
+  ],
+  "status": "PRE-LAUNCH, 15,000 calls authorized, 0 spent"
+ },
+ "updated_at_utc": "2026-09-22T10:54:40.729613+00:00"
 }
