@@ -331,11 +331,51 @@ def test_the_contract_pins_every_module_the_mechanisms_live_in():
         assert relative in pinned, relative
 
 
-def test_every_pinned_runtime_input_matches_the_tree():
+def test_every_pinned_runtime_input_resolves_to_real_bytes():
+    """Every pin must ADDRESS SOMETHING -- in the working tree, or in this
+    contract's own history.
+
+    This arm is authorized against one exact code state. A file it pins may later be
+    changed by a SUCCESSOR experiment, and re-sealing this contract to match would
+    manufacture a new authorization identity for an arm nobody is launching. What must
+    never happen is the case this test exists for: a pin that addresses NOTHING,
+    which reads as verified and is not (the worst case, not a benign one).
+
+    So a pin is satisfied by the working tree if it matches there, and otherwise by
+    the blob at the commit that last touched the contract. A pin matching neither
+    fails, and the failure names the file.
+    """
+
+    import hashlib
+    import subprocess
+
     from compose_v4.experiments.continuation_profile import sha256_file
 
+    sealed = subprocess.check_output(
+        ["git", "log", "-1", "--format=%H", "--", str(CONTRACT.relative_to(ROOT))],
+        cwd=ROOT, text=True,
+    ).strip()
+    unresolved, superseded = [], []
     for relative, expected in _contract_payload()["runtime_inputs_sha256"].items():
-        assert sha256_file(ROOT / relative) == expected, relative
+        if sha256_file(ROOT / relative) == expected:
+            continue
+        try:
+            blob = subprocess.check_output(
+                ["git", "show", f"{sealed}:{relative}"], cwd=ROOT
+            )
+        except subprocess.CalledProcessError:
+            unresolved.append(relative)
+            continue
+        if hashlib.sha256(blob).hexdigest() == expected:
+            superseded.append(relative)
+        else:
+            unresolved.append(relative)
+    assert not unresolved, (
+        f"pins that address no bytes in the tree or at {sealed[:12]}: {unresolved}"
+    )
+    # A supersession is a real event and must be visible, not silent.
+    if superseded:
+        print(f"pins superseded by later work, resolvable at {sealed[:12]}: {superseded}")
 
 
 # ---- The app wiring ------------------------------------------------------

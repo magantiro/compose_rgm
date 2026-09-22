@@ -257,10 +257,17 @@ def _resume_state(folder: Path, task: dict, contract: dict) -> dict | None:
 
 
 # ---- Proposal -----------------------------------------------------------------------
+# Container budget, MEASURED: this workspace tops out near 100 concurrent CPUs
+# (300 one-CPU tasks x 25 busy seconds ran at implied parallelism 72.8 over 100
+# distinct containers; the same probe at cpu=4 gave 26.7 x 4 = ~107 CPUs, so the
+# ceiling is CPUs, not containers). A `run_cell` container idles while its maps run
+# but still reserves a CPU, so the three limits are chosen to SUM to that ceiling:
+# 20 cells in flight + 56 proposal workers + 24 dockers = 100. Raising `run_cell`
+# instead would starve the workers those very cells are waiting on.
 @app.function(
     **common,
     cpu=(1.0, 1.0),
-    max_containers=64,
+    max_containers=56,
     timeout=3600,
     retries=modal.Retries(max_retries=3, initial_delay=5.0),
 )
@@ -399,7 +406,7 @@ def proposal_worker(task: dict) -> dict:
 # ---- Oracle -------------------------------------------------------------------------
 # retries=0 is LOAD-BEARING: a retry here issues a second real oracle call against one
 # query id, which the ledger would still count once.
-@app.function(**common, cpu=(1.0, 1.0), max_containers=40, timeout=900, retries=0)
+@app.function(**common, cpu=(1.0, 1.0), max_containers=24, timeout=900, retries=0)
 def dock_worker(task: dict) -> dict:
     """One locked docking request, charged once, with no retry."""
 
@@ -442,7 +449,7 @@ def dock_worker(task: dict) -> dict:
 @app.function(
     **common,
     cpu=(1.0, 1.0),
-    max_containers=32,
+    max_containers=20,
     timeout=23 * 3600,
     retries=modal.Retries(max_retries=8, initial_delay=10.0),
 )
@@ -1008,7 +1015,7 @@ def remote_status(task: dict) -> dict:
 
 
 # ---- Zero-oracle preflight ----------------------------------------------------------
-@app.function(**common, cpu=(1.0, 1.0), max_containers=80, timeout=5400, retries=0)
+@app.function(**common, cpu=(1.0, 1.0), max_containers=56, timeout=5400, retries=0)
 def preflight_lane(task: dict) -> dict:
     """ONE lane of ONE (arm, cell) from the ROOT parent, at the contract's own draw
     count. ZERO oracle calls.
