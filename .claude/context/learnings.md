@@ -3697,3 +3697,25 @@ independently of whether fa7_0 ever closes.**
   0.374-0.458, above the A/B's best) carries `uncounted_calls: 249455`. Also worth knowing: the 1k
   A/B molecules are NOT on local disk (counters only) -- they live on the Modal volume at
   `pmo_population_controller_v1/<run_id>/<task>/oracle/query_*/result.json`.
+
+## 2026-09-21 (CORRECTION: `ppid=1` does NOT mean abandoned -- a blind orphan sweep nearly killed Test C)
+
+- **CORRECTS the earlier entry treating every `ppid=1` python process as a leaked orphan to sweep.**
+  That is true for a pool whose PARENT DIED, and false for a job an agent launched DETACHED on
+  purpose. Both look identical in `ps`.
+- **NEAR MISS, and only a silently failing `kill` prevented it.** A blind sweep of all five `ppid=1`
+  python processes would have destroyed, 35 minutes in: two `pmo_atlas_blind_search.py` groups at
+  95% CPU (Test C, the decisive discovery measurement), `pmo_atlas_entry_probe.py` at 100% (also
+  Test C), and `fragment_path_composite_scoring` at 111% (the v3 constituent probe). All four were
+  doing exactly the work that had been commissioned.
+- **THE DISCRIMINATOR IS CPU AND ELAPSED TIME, NOT PARENTAGE.** A leaked pool child burns CPU with
+  no artifact advancing; a detached job burns CPU and its output file keeps growing. Before killing
+  anything, read the **command line** and check whether its artifact is being written. Sweep only
+  what is both parentless AND either idle or matching a pattern nothing is expected to be producing.
+- **A kill that "fails silently" must be checked, not assumed.** The sweep printed no confirmation
+  and the orphan count did not move; had it succeeded the work would have been gone with no record
+  of what was lost.
+- **MEMORY PRESSURE IS NOT EVIDENCE ABOUT WHICH PROCESSES TO KILL.** At 59 MB free the four live
+  probes held **2.14 GB total** -- killing them could not have fixed a 32 GB machine, and the
+  pressure was in the compressor (~797k pages stored) and elsewhere. Measure the candidates' actual
+  RSS against the shortfall before treating them as the cause.
