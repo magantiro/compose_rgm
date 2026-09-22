@@ -1,0 +1,229 @@
+{
+ "payload": {
+  "arm_results_observed_before_supersession": [
+   {
+    "arm": "arm0_production_blind_run",
+    "best_similarity": 0.25,
+    "committed": "747c6d81 2026-09-21T23:03:36-04:00",
+    "entries_at_sealed_delta": 0,
+    "parent_source": null,
+    "path": "diagnostics/pmo_entry_diagnostic_v1/shards/arm0_production_blind_run__albuterol_similarity.json",
+    "proposals_drawn": 933,
+    "task": "albuterol_similarity"
+   },
+   {
+    "arm": "arm0_production_blind_run",
+    "best_similarity": 0.2083,
+    "committed": "c18bf728 2026-09-21T23:17:21-04:00",
+    "entries_at_sealed_delta": 0,
+    "parent_source": null,
+    "path": "diagnostics/pmo_entry_diagnostic_v1/shards/arm0_production_blind_run__celecoxib_rediscovery.json",
+    "proposals_drawn": 911,
+    "task": "celecoxib_rediscovery"
+   },
+   {
+    "arm": "arm0_production_blind_run",
+    "best_similarity": 0.1313,
+    "committed": "747c6d81 2026-09-21T23:03:36-04:00",
+    "entries_at_sealed_delta": 0,
+    "parent_source": null,
+    "path": "diagnostics/pmo_entry_diagnostic_v1/shards/arm0_production_blind_run__jnk3.json",
+    "proposals_drawn": 910,
+    "task": "jnk3"
+   },
+   {
+    "arm": "arm0_production_blind_run",
+    "best_similarity": 0.2289,
+    "committed": "747c6d81 2026-09-21T23:03:36-04:00",
+    "entries_at_sealed_delta": 0,
+    "parent_source": null,
+    "path": "diagnostics/pmo_entry_diagnostic_v1/shards/arm0_production_blind_run__perindopril_mpo.json",
+    "proposals_drawn": 838,
+    "task": "perindopril_mpo"
+   },
+   {
+    "arm": "arm0_production_blind_run",
+    "best_similarity": 0.2278,
+    "committed": "747c6d81 2026-09-21T23:03:36-04:00",
+    "entries_at_sealed_delta": 0,
+    "parent_source": null,
+    "path": "diagnostics/pmo_entry_diagnostic_v1/shards/arm0_production_blind_run__qed.json",
+    "proposals_drawn": 931,
+    "task": "qed"
+   },
+   {
+    "arm": "arm1_baseline_b",
+    "best_similarity": 0.2125,
+    "committed": "d9520213 2026-09-21T23:40:47-04:00",
+    "entries_at_sealed_delta": 0,
+    "parent_source": "blind_visited_stratified",
+    "path": "diagnostics/pmo_entry_diagnostic_v1/shards/arm1_baseline_b__celecoxib_rediscovery.json",
+    "proposals_drawn": 1000,
+    "task": "celecoxib_rediscovery"
+   },
+   {
+    "arm": "arm1_baseline_b",
+    "best_similarity": 0.1912,
+    "committed": "0af8b7d7 2026-09-21T23:33:21-04:00",
+    "entries_at_sealed_delta": 0,
+    "parent_source": "init_bank_100",
+    "path": "diagnostics/pmo_entry_diagnostic_v1/shards/arm1_baseline_b__init_bank_100__celecoxib_rediscovery.json",
+    "proposals_drawn": 1000,
+    "task": "celecoxib_rediscovery"
+   },
+   {
+    "arm": "arm1_baseline_b",
+    "best_similarity": 0.1831,
+    "committed": "0af8b7d7 2026-09-21T23:33:21-04:00",
+    "entries_at_sealed_delta": 0,
+    "parent_source": "init_bank_16",
+    "path": "diagnostics/pmo_entry_diagnostic_v1/shards/arm1_baseline_b__init_bank_16__celecoxib_rediscovery.json",
+    "proposals_drawn": 1000,
+    "task": "celecoxib_rediscovery"
+   },
+   {
+    "arm": "nc1_uniform_legal_edits",
+    "best_similarity": 0.1667,
+    "committed": "747c6d81 2026-09-21T23:03:36-04:00",
+    "entries_at_sealed_delta": 0,
+    "parent_source": null,
+    "path": "diagnostics/pmo_entry_diagnostic_v1/shards/nc1_uniform_legal_edits__albuterol_similarity.json",
+    "proposals_drawn": 300,
+    "task": "albuterol_similarity"
+   },
+   {
+    "arm": "nc1_uniform_legal_edits",
+    "best_similarity": 0.2133,
+    "committed": "",
+    "entries_at_sealed_delta": 0,
+    "parent_source": null,
+    "path": "diagnostics/pmo_entry_diagnostic_v1/shards/nc1_uniform_legal_edits__celecoxib_rediscovery.json",
+    "proposals_drawn": 300,
+    "task": "celecoxib_rediscovery"
+   },
+   {
+    "arm": "nc1_uniform_legal_edits",
+    "best_similarity": 0.1183,
+    "committed": "0af8b7d7 2026-09-21T23:33:21-04:00",
+    "entries_at_sealed_delta": 0,
+    "parent_source": null,
+    "path": "diagnostics/pmo_entry_diagnostic_v1/shards/nc1_uniform_legal_edits__jnk3.json",
+    "proposals_drawn": 300,
+    "task": "jnk3"
+   },
+   {
+    "arm": "nc1_uniform_legal_edits",
+    "best_similarity": 0.2133,
+    "committed": "cd31c965 2026-09-21T23:26:27-04:00",
+    "entries_at_sealed_delta": 0,
+    "parent_source": null,
+    "path": "diagnostics/pmo_entry_diagnostic_v1/superseded/nc1_uniform_legal_edits__celecoxib_rediscovery__300draws.json",
+    "proposals_drawn": 300,
+    "task": "celecoxib_rediscovery"
+   }
+  ],
+  "charged_oracle_calls": 0,
+  "cost_of_the_new_definition": {
+   "exact_cost_per_candidate": 64,
+   "why_it_cannot_be_the_gate_directly": "64 charged calls per candidate, so ten candidates cost 640 -- more than the scored run this gate precedes. The gate must therefore use a validated offline proxy, or ask for an explicit budget."
+  },
+  "distinct_outcomes_across_arms": [
+   0
+  ],
+  "every_observed_arm_returned_the_same_result": true,
+  "new_definition": {
+   "budget_per_candidate": 64,
+   "name": "V_local",
+   "statement": "V_local(G) = E[top-10 score after 64 local calls | G]. A productive basin is a molecule or region of high V_local, regardless of whether it resembles a known teacher endpoint.",
+   "teacher_region_role": "POSITIVE CONTROL, no longer the definition"
+  },
+  "precondition_holds": false,
+  "precondition_stated_by_the_owner": "Changing the sealed predicate is legitimate ONLY because no arm number has been read yet.",
+  "precondition_statement": "This precondition is FALSE and the supersession is recorded anyway, with the evidence, rather than being written as though it held. Arm results had been measured, committed and read under the sealed predicate before the refinement arrived.",
+  "reason_from_the_owner": "A good basin is a molecule or region with high V_local, whether or not it resembles the known teacher answer. The teacher region is then a POSITIVE CONTROL (V_local is huge there -- 0.7362 in 64 calls on celecoxib), not the target definition. Asking 'did C recreate the teacher's chemistry' overfits development to one known answer, and if C finds a completely different molecule with the same future value that is arguably a BETTER result. The gate should be able to say so.",
+  "schema_version": "pmo_entry_predicate_supersession_v1",
+  "software": {
+   "numpy": "1.26.4",
+   "platform": "macOS-26.5.2-arm64-arm-64bit",
+   "python": "3.11.13",
+   "rdkit": "2023.09.6"
+  },
+  "supersedes": {
+   "delta": 0.3,
+   "pass_criterion": {
+    "control_task": "qed",
+    "decides": "whether the global-search work (arms 2-4, collectively C) is scored. A null here is decisive and cheap: it says the mechanism does not do the thing it was built to do.",
+    "matched_proposals": [
+     100,
+     500,
+     1000
+    ],
+    "primary_tasks": [
+     "celecoxib_rediscovery",
+     "albuterol_similarity",
+     "jnk3"
+    ],
+    "qed_not_degraded": "C's best rung on qed at 1,000 proposals is not below B's, and C's entry rate on qed at 1,000 proposals is at least B's.",
+    "rule": "C PASSES when, on at least 2 of the 3 primary tasks, C's best rung at 1,000 matched proposals is at least ONE named rung above B's best rung at 1,000 matched proposals, AND qed is not degraded.",
+    "rungs": [
+     [
+      "above_chance",
+      0.25
+     ],
+     [
+      "entry",
+      0.3
+     ],
+     [
+      "near_anchor_band",
+      0.4
+     ],
+     [
+      "anchor_band",
+      0.6
+     ],
+     [
+      "anchor",
+      0.85
+     ]
+    ],
+    "why_not_narrow_versus_broad": "Test C measured the discovery gap as UNIVERSAL: jnk3 reached 38.2% of anchor and perindopril_mpo 38.4%, both broad-objective, sitting with narrow celecoxib at 37.2%. The primary set therefore mixes two rediscovery tasks with one broad-objective task, and no task other than qed is treated as expected-easy. qed is the control precisely because it was already 0.9016 at INITIALIZATION."
+   },
+   "path": "diagnostics/pmo_entry_diagnostic_v1/predicate_v1.json",
+   "payload_sha256": "84077b8bde3a7a85778d5be0aadd1971ba8d6cf90db78129e2afaf4120682a3b",
+   "rungs": [
+    [
+     "above_chance",
+     0.25
+    ],
+    [
+     "entry",
+     0.3
+    ],
+    [
+     "near_anchor_band",
+     0.4
+    ],
+    [
+     "anchor_band",
+     0.6
+    ],
+    [
+     "anchor",
+     0.85
+    ]
+   ],
+   "statement": "A proposal ENTERS the productive region of task T when the maximum Tanimoto similarity of its Morgan(radius 2, 2048 bits, no chirality) fingerprint to the region's reference molecules is at least delta. The primary region is the SPINE ANCHOR -- the single molecule Test B seeded and measured productive, identical to the task's declared destination. The wide region adds sibling route endpoints whose productivity was never measured and is a sensitivity only."
+  },
+  "tasks_observed": [
+   "albuterol_similarity",
+   "celecoxib_rediscovery",
+   "jnk3",
+   "perindopril_mpo",
+   "qed"
+  ],
+  "total_entries_observed_at_sealed_delta": 0,
+  "what_makes_it_defensible_anyway": "Every observed arm returned the SAME result -- zero entrants at the sealed threshold and zero at the rung below it -- so no arm was favoured or disfavoured by the old predicate and the change cannot have been chosen to move a specific number. That is weaker than the owner's precondition and is offered as such, not as a substitute for it. The owner should decide whether it suffices."
+ },
+ "payload_sha256": "3e584d536a70de23aac57ce316f0ed11330cdb7b5c9706c9efc1d7fe023282c5"
+}

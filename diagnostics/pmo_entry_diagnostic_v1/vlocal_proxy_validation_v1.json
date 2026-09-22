@@ -1,0 +1,547 @@
+{
+ "payload": {
+  "best_offline_proxy": "structural_similarity_to_anchor",
+  "charged_oracle_calls": 0,
+  "counterexamples_to_similarity_as_a_basin_definition": [
+   {
+    "by_rising_similarity": [
+     {
+      "checkpoint": "early",
+      "similarity": 0.391304,
+      "v_local": 0.2795
+     },
+     {
+      "checkpoint": "near_anchor",
+      "similarity": 0.490566,
+      "v_local": 0.2668
+     },
+     {
+      "checkpoint": "anchor",
+      "similarity": 1.0,
+      "v_local": 0.3248
+     }
+    ],
+    "task": "median1"
+   },
+   {
+    "by_rising_similarity": [
+     {
+      "checkpoint": "early",
+      "similarity": 0.155963,
+      "v_local": 0.3658
+     },
+     {
+      "checkpoint": "near_anchor",
+      "similarity": 0.33,
+      "v_local": 0.2141
+     },
+     {
+      "checkpoint": "anchor",
+      "similarity": 1.0,
+      "v_local": 0.7649
+     }
+    ],
+    "task": "perindopril_mpo"
+   },
+   {
+    "by_rising_similarity": [
+     {
+      "checkpoint": "near_anchor",
+      "similarity": 0.136364,
+      "v_local": 0.198
+     },
+     {
+      "checkpoint": "early",
+      "similarity": 0.178082,
+      "v_local": 0.192
+     },
+     {
+      "checkpoint": "anchor",
+      "similarity": 1.0,
+      "v_local": 0.8165
+     }
+    ],
+    "task": "thiothixene_rediscovery"
+   }
+  ],
+  "points": [
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "early",
+    "proxy_heavy_atoms": 20,
+    "proxy_own_oracle_score": 0.21455938697318006,
+    "proxy_qed": 0.9244099287875148,
+    "proxy_structural_similarity_to_anchor": 0.107692,
+    "seed_smiles": "CCNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+    "task": "albuterol_similarity",
+    "v_local": 0.27960586461892895
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "near_anchor",
+    "proxy_heavy_atoms": 17,
+    "proxy_own_oracle_score": 0.4117647058823529,
+    "proxy_qed": 0.4776735441136044,
+    "proxy_structural_similarity_to_anchor": 0.285714,
+    "seed_smiles": "C=C(CCC(O)CCO)C(O)CNC(C)(C)C",
+    "task": "albuterol_similarity",
+    "v_local": 0.42369051827354126
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "anchor",
+    "proxy_heavy_atoms": 17,
+    "proxy_own_oracle_score": 1.0,
+    "proxy_qed": 0.6389509580864461,
+    "proxy_structural_similarity_to_anchor": 1.0,
+    "seed_smiles": "CC(C)(C)NCC(O)c1ccc(O)c(CO)c1",
+    "task": "albuterol_similarity",
+    "v_local": 0.9858543865259568
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "early",
+    "proxy_heavy_atoms": 20,
+    "proxy_own_oracle_score": 0.10434782608695652,
+    "proxy_qed": 0.9244099287875148,
+    "proxy_structural_similarity_to_anchor": 0.128571,
+    "seed_smiles": "CCNS(=O)(=O)c1cc(C(=O)N2CCCCCC2)cs1",
+    "task": "celecoxib_rediscovery",
+    "v_local": 0.16564300895641818
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "near_anchor",
+    "proxy_heavy_atoms": 24,
+    "proxy_own_oracle_score": 0.24074074074074073,
+    "proxy_qed": 0.8149340885012102,
+    "proxy_structural_similarity_to_anchor": 0.287879,
+    "seed_smiles": "CC=CC=C(C)c1cc(C(F)(F)F)nn1C=CC=C(C)S(N)(=O)=O",
+    "task": "celecoxib_rediscovery",
+    "v_local": 0.2558755903669736
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "anchor",
+    "proxy_heavy_atoms": 26,
+    "proxy_own_oracle_score": 1.0,
+    "proxy_qed": 0.7541053298167572,
+    "proxy_structural_similarity_to_anchor": 1.0,
+    "seed_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+    "task": "celecoxib_rediscovery",
+    "v_local": 0.7362308971601335
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "early",
+    "proxy_heavy_atoms": 21,
+    "proxy_own_oracle_score": 0.0,
+    "proxy_qed": 0.532761955449633,
+    "proxy_structural_similarity_to_anchor": 0.098592,
+    "seed_smiles": "SC(=CCCN1CCCCCC1)NNCc1ccccc1",
+    "task": "gsk3b",
+    "v_local": 0.221
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "near_anchor",
+    "proxy_heavy_atoms": 21,
+    "proxy_own_oracle_score": 0.59,
+    "proxy_qed": 0.815119865656596,
+    "proxy_structural_similarity_to_anchor": 0.448276,
+    "seed_smiles": "O=C1NN=C(c2ccccc2)C1=NNC1CCCOCC1",
+    "task": "gsk3b",
+    "v_local": 0.571
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "anchor",
+    "proxy_heavy_atoms": 22,
+    "proxy_own_oracle_score": 1.0,
+    "proxy_qed": 0.8468586711514716,
+    "proxy_structural_similarity_to_anchor": 1.0,
+    "seed_smiles": "COc1ccc(NN=C2C(=O)NN=C2c2ccccc2)cc1",
+    "task": "gsk3b",
+    "v_local": 0.8019999999999999
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "early",
+    "proxy_heavy_atoms": 8,
+    "proxy_own_oracle_score": 0.6065306597126334,
+    "proxy_qed": 0.4237386241878896,
+    "proxy_structural_similarity_to_anchor": 0.095238,
+    "seed_smiles": "C=CC=C(C)NC=O",
+    "task": "isomers_c7h8n2o2",
+    "v_local": 0.5694807288138513
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "near_anchor",
+    "proxy_heavy_atoms": 11,
+    "proxy_own_oracle_score": 0.1353352832366127,
+    "proxy_qed": 0.5787850752967746,
+    "proxy_structural_similarity_to_anchor": 0.214286,
+    "seed_smiles": "COC(=O)NC(C)=CC=CN",
+    "task": "isomers_c7h8n2o2",
+    "v_local": 0.6428102751708425
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "anchor",
+    "proxy_heavy_atoms": 11,
+    "proxy_own_oracle_score": 1.0,
+    "proxy_qed": 0.6586017485181702,
+    "proxy_structural_similarity_to_anchor": 1.0,
+    "seed_smiles": "COC(=O)Nc1cccnc1",
+    "task": "isomers_c7h8n2o2",
+    "v_local": 0.8644102570089716
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "early",
+    "proxy_heavy_atoms": 26,
+    "proxy_own_oracle_score": 0.05,
+    "proxy_qed": 0.7480700039858659,
+    "proxy_structural_similarity_to_anchor": 0.117647,
+    "seed_smiles": "C=C(CCc1cnccc1NC)c1nc(C(=C)C2CCCNCC2)cs1",
+    "task": "jnk3",
+    "v_local": 0.12100000000000002
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "near_anchor",
+    "proxy_heavy_atoms": 35,
+    "proxy_own_oracle_score": 0.35,
+    "proxy_qed": 0.23523575112442724,
+    "proxy_structural_similarity_to_anchor": 0.309278,
+    "seed_smiles": "C=CC=CNCC=CC(=C)c1ncn(-c2ccc(-c3ccnc(NC(C)=CC=CC#N)n3)cc2)n1",
+    "task": "jnk3",
+    "v_local": 0.39699999999999996
+   },
+   {
+    "charged_calls_already_paid": 59,
+    "checkpoint_label": "anchor",
+    "proxy_heavy_atoms": 38,
+    "proxy_own_oracle_score": 0.98,
+    "proxy_qed": 0.24199997716206842,
+    "proxy_structural_similarity_to_anchor": 1.0,
+    "seed_smiles": "N#Cc1ccc(Nc2nccc(-c3ccc(-n4cnc(-c5ccc(Nc6cccs6)cc5)n4)cc3)n2)cc1",
+    "task": "jnk3",
+    "v_local": 0.924
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "early",
+    "proxy_heavy_atoms": 12,
+    "proxy_own_oracle_score": 0.3237619541190881,
+    "proxy_qed": 0.6753549385562247,
+    "proxy_structural_similarity_to_anchor": 0.391304,
+    "seed_smiles": "CCC(C)C1CCC(C)CC1O",
+    "task": "median1",
+    "v_local": 0.2795322929099998
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "near_anchor",
+    "proxy_heavy_atoms": 19,
+    "proxy_own_oracle_score": 0.30542361089076303,
+    "proxy_qed": 0.8392396440209932,
+    "proxy_structural_similarity_to_anchor": 0.490566,
+    "seed_smiles": "CCC1(C(C)C2CCC(C)CC2O)CCCCC1=O",
+    "task": "median1",
+    "v_local": 0.2667915038667381
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "anchor",
+    "proxy_heavy_atoms": 20,
+    "proxy_own_oracle_score": 0.40648479068406884,
+    "proxy_qed": 0.8335736212255418,
+    "proxy_structural_similarity_to_anchor": 1.0,
+    "seed_smiles": "CC1CCC(C(C)C23CCC(CC2=O)C3(C)C)C(O)C1",
+    "task": "median1",
+    "v_local": 0.3247990471120078
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "early",
+    "proxy_heavy_atoms": 22,
+    "proxy_own_oracle_score": 0.13915857605177992,
+    "proxy_qed": 0.5357986742767514,
+    "proxy_structural_similarity_to_anchor": 0.068182,
+    "seed_smiles": "C=CC=CC(=CO)CN[SH4]c1cc(C(=O)N(CC)CC)cs1",
+    "task": "mestranol_similarity",
+    "v_local": 0.2621327157650394
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "near_anchor",
+    "proxy_heavy_atoms": 23,
+    "proxy_own_oracle_score": 0.5258215962441314,
+    "proxy_qed": 0.6962642263802956,
+    "proxy_structural_similarity_to_anchor": 0.343284,
+    "seed_smiles": "C=C(CC1CCc2cc(OC)ccc2C1CC)C(O)(CC)CC",
+    "task": "mestranol_similarity",
+    "v_local": 0.5197126687859492
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "anchor",
+    "proxy_heavy_atoms": 23,
+    "proxy_own_oracle_score": 1.0,
+    "proxy_qed": 0.7968347529245803,
+    "proxy_structural_similarity_to_anchor": 1.0,
+    "seed_smiles": "C#CC1(O)CCC2C3CCc4cc(OC)ccc4C3CCC21C",
+    "task": "mestranol_similarity",
+    "v_local": 0.9569803107998606
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "early",
+    "proxy_heavy_atoms": 28,
+    "proxy_own_oracle_score": 0.14010275349947504,
+    "proxy_qed": 0.48319229360760224,
+    "proxy_structural_similarity_to_anchor": 0.155963,
+    "seed_smiles": "C=C(NC(C)c1ccccc1CC)C1=CC(C(=C)C2CCCC(Br)CO2)=CC1",
+    "task": "perindopril_mpo",
+    "v_local": 0.36581134884446764
+   },
+   {
+    "charged_calls_already_paid": 62,
+    "checkpoint_label": "near_anchor",
+    "proxy_heavy_atoms": 36,
+    "proxy_own_oracle_score": 0.19813521412477222,
+    "proxy_qed": 0.1384444525383749,
+    "proxy_structural_similarity_to_anchor": 0.33,
+    "seed_smiles": "CCCCCN(CC(=O)O)C(=O)C(C)NC(CCN(CC)c1coc(C(Br)CCC)c1)C(=O)OCC",
+    "task": "perindopril_mpo",
+    "v_local": 0.21414347428325514
+   },
+   {
+    "charged_calls_already_paid": 61,
+    "checkpoint_label": "anchor",
+    "proxy_heavy_atoms": 38,
+    "proxy_own_oracle_score": 0.8088297765764039,
+    "proxy_qed": 0.2622919282022028,
+    "proxy_structural_similarity_to_anchor": 1.0,
+    "seed_smiles": "CCCC(Br)c1cc2c(ccn2CCC(NC(C)C(=O)N2C(C(=O)O)CC3CCCCC32)C(=O)OCC)o1",
+    "task": "perindopril_mpo",
+    "v_local": 0.7649159621222326
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "early",
+    "proxy_heavy_atoms": 23,
+    "proxy_own_oracle_score": 0.7537435018813315,
+    "proxy_qed": 0.7537435018813315,
+    "proxy_structural_similarity_to_anchor": 0.105882,
+    "seed_smiles": "CCCN(CC)Cc1csc([SH2](=O)NCc2ncccc2C)c1",
+    "task": "qed",
+    "v_local": 0.8506951044533404
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "near_anchor",
+    "proxy_heavy_atoms": 23,
+    "proxy_own_oracle_score": 0.8199790490198158,
+    "proxy_qed": 0.8199790490198158,
+    "proxy_structural_similarity_to_anchor": 0.371429,
+    "seed_smiles": "CCC=C(NC)C1=CC=C(C2N=C3C=NN(C(C)C)C3N2)CC1",
+    "task": "qed",
+    "v_local": 0.8735500032679923
+   },
+   {
+    "charged_calls_already_paid": 63,
+    "checkpoint_label": "anchor",
+    "proxy_heavy_atoms": 23,
+    "proxy_own_oracle_score": 0.948442042791664,
+    "proxy_qed": 0.948442042791664,
+    "proxy_structural_similarity_to_anchor": 1.0,
+    "seed_smiles": "CC(C)N1N=CC2=NC(c3ccc(-c4ccccn4)cc3)NC21",
+    "task": "qed",
+    "v_local": 0.9330602530535852
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "early",
+    "proxy_heavy_atoms": 18,
+    "proxy_own_oracle_score": 0.15254237288135594,
+    "proxy_qed": 0.7954955736825071,
+    "proxy_structural_similarity_to_anchor": 0.178082,
+    "seed_smiles": "CNS(=O)(=O)C1C=C(CN2CCCCCC2)CS1",
+    "task": "thiothixene_rediscovery",
+    "v_local": 0.19198398263275088
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "near_anchor",
+    "proxy_heavy_atoms": 28,
+    "proxy_own_oracle_score": 0.11188811188811189,
+    "proxy_qed": 0.35092749976421983,
+    "proxy_structural_similarity_to_anchor": 0.136364,
+    "seed_smiles": "C=C(S)C(=CC(=C)S(=O)(=O)N(C)C)C(C=CC=CC)=CCCN(C)CCNC",
+    "task": "thiothixene_rediscovery",
+    "v_local": 0.1979930404233931
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "anchor",
+    "proxy_heavy_atoms": 30,
+    "proxy_own_oracle_score": 1.0,
+    "proxy_qed": 0.6041780809786208,
+    "proxy_structural_similarity_to_anchor": 1.0,
+    "seed_smiles": "CN1CCN(CCC=C2c3ccccc3Sc3ccc(S(=O)(=O)N(C)C)cc32)CC1",
+    "task": "thiothixene_rediscovery",
+    "v_local": 0.8164814228129028
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "early",
+    "proxy_heavy_atoms": 26,
+    "proxy_own_oracle_score": 0.14184397163120568,
+    "proxy_qed": 0.6141807103480406,
+    "proxy_structural_similarity_to_anchor": 0.112245,
+    "seed_smiles": "C=S(=O)(CCc1ccccc1CC)C1=CC(CC2CCCSCO2)=CC1",
+    "task": "troglitazone_rediscovery",
+    "v_local": 0.17378387937882886
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "near_anchor",
+    "proxy_heavy_atoms": 29,
+    "proxy_own_oracle_score": 0.43103448275862066,
+    "proxy_qed": 0.5689023999363292,
+    "proxy_structural_similarity_to_anchor": 0.417722,
+    "seed_smiles": "Cc1c(C)c2c(c(C)c1O)CCC(C)(COC1=CC=C(CCSC(N)O)CC1)O2",
+    "task": "troglitazone_rediscovery",
+    "v_local": 0.5019621249874222
+   },
+   {
+    "charged_calls_already_paid": 64,
+    "checkpoint_label": "anchor",
+    "proxy_heavy_atoms": 31,
+    "proxy_own_oracle_score": 1.0,
+    "proxy_qed": 0.7166041254699328,
+    "proxy_structural_similarity_to_anchor": 1.0,
+    "seed_smiles": "Cc1c(C)c2c(c(C)c1O)CCC(C)(COc1ccc(CC3SC(=O)NC3=O)cc1)O2",
+    "task": "troglitazone_rediscovery",
+    "v_local": 0.775378086484114
+   }
+  ],
+  "proxies": {
+   "heavy_atoms": {
+    "field": "proxy_heavy_atoms",
+    "non_anchor_within_task_concordant": 6,
+    "non_anchor_within_task_discordant": 3,
+    "non_anchor_within_task_kendall_tau": 0.3333,
+    "note": "size",
+    "offline": true,
+    "pooled_spearman_all": 0.0307,
+    "pooled_spearman_non_anchor": -0.2027,
+    "tasks_where_it_ranks_wrong": [
+     "albuterol_similarity",
+     "median1",
+     "perindopril_mpo"
+    ],
+    "within_task_concordant": 22,
+    "within_task_discordant": 4,
+    "within_task_kendall_tau": 0.6923
+   },
+   "own_oracle_score": {
+    "field": "proxy_own_oracle_score",
+    "non_anchor_within_task_concordant": 8,
+    "non_anchor_within_task_discordant": 3,
+    "non_anchor_within_task_kendall_tau": 0.4545,
+    "note": "free for a molecule the run already charged, and NOT available for a new proposal without spending a call -- so it bounds what a proxy could achieve rather than being usable as one",
+    "offline": false,
+    "pooled_spearman_all": 0.8693,
+    "pooled_spearman_non_anchor": 0.764,
+    "tasks_where_it_ranks_wrong": [
+     "isomers_c7h8n2o2",
+     "perindopril_mpo",
+     "thiothixene_rediscovery"
+    ],
+    "within_task_concordant": 30,
+    "within_task_discordant": 3,
+    "within_task_kendall_tau": 0.8182
+   },
+   "qed": {
+    "field": "proxy_qed",
+    "non_anchor_within_task_concordant": 5,
+    "non_anchor_within_task_discordant": 6,
+    "non_anchor_within_task_kendall_tau": -0.0909,
+    "note": "drug-likeness",
+    "offline": true,
+    "pooled_spearman_all": 0.0745,
+    "pooled_spearman_non_anchor": 0.0006,
+    "tasks_where_it_ranks_wrong": [
+     "albuterol_similarity",
+     "celecoxib_rediscovery",
+     "jnk3",
+     "median1",
+     "thiothixene_rediscovery",
+     "troglitazone_rediscovery"
+    ],
+    "within_task_concordant": 20,
+    "within_task_discordant": 13,
+    "within_task_kendall_tau": 0.2121
+   },
+   "structural_similarity_to_anchor": {
+    "field": "proxy_structural_similarity_to_anchor",
+    "non_anchor_within_task_concordant": 8,
+    "non_anchor_within_task_discordant": 3,
+    "non_anchor_within_task_kendall_tau": 0.4545,
+    "note": "the superseded predicate, now assessed as a PROXY for V_local",
+    "offline": true,
+    "pooled_spearman_all": 0.6337,
+    "pooled_spearman_non_anchor": 0.2784,
+    "tasks_where_it_ranks_wrong": [
+     "median1",
+     "perindopril_mpo",
+     "thiothixene_rediscovery"
+    ],
+    "within_task_concordant": 30,
+    "within_task_discordant": 3,
+    "within_task_kendall_tau": 0.8182
+   }
+  },
+  "question": "V_local costs 64 charged calls per candidate and cannot be computed inside a zero-call gate. Does any OFFLINE quantity predict it well enough to stand in?",
+  "schema_version": "pmo_entry_vlocal_proxy_validation_v1",
+  "software": {
+   "numpy": "1.26.4",
+   "platform": "macOS-26.5.2-arm64-arm-64bit",
+   "python": "3.11.13",
+   "rdkit": "2023.09.6"
+  },
+  "validation_set": {
+   "budget_per_point": 64,
+   "charged_calls_already_paid": 2101,
+   "limits": "Every point is a TEACHER-ROUTE checkpoint, so the set spans distance-to-anchor by construction and contains no molecule from an unrelated basin. A proxy validated here is validated for ranking positions along a route, which is NOT the same as ranking a novel basin -- the case the new definition exists to cover. Three points per task is also too few to separate close proxies.",
+   "new_charged_calls": 0,
+   "points": 33,
+   "source": "diagnostics/pmo_atlas_v1/test_b_local_lift.json",
+   "tasks": 11
+  },
+  "verdict": {
+   "consequence_for_the_gate": "The structural rung ladder remains sound as a POSITIVE-CONTROL detector -- it answers 'did the arm re-find the known productive region'. It cannot answer 'did the arm find a DIFFERENT productive region', and no offline substitute for that was found. That second question needs a costed V_local sample and an explicit budget.",
+   "counterexample_tasks": [
+    "median1",
+    "perindopril_mpo",
+    "thiothixene_rediscovery"
+   ],
+   "label": "PARTIAL_PROXY_ONLY_AND_IT_CANNOT_SEE_A_NOVEL_BASIN",
+   "offline_proxies_with_signal": [
+    "structural_similarity_to_anchor (+0.818 within task, +0.455 excluding anchors)",
+    "heavy_atoms (+0.692 within task, +0.333 excluding anchors)"
+   ],
+   "offline_proxies_without_signal": [
+    "qed (-0.091)"
+   ],
+   "similarity_matches_the_own_score_ceiling": true,
+   "statement": "The superseded structural predicate IS a moderate proxy for V_local within task (tau +0.818), exactly matching the molecule's own oracle score, which is the strongest signal available and is NOT free for a new proposal -- on this validation set the two are indistinguishable, which is a property of a set built from route positions rather than evidence that structure carries as much as a score does. The agreement rests on the anchor points, where similarity is 1.0 by construction: excluding them it falls to tau +0.455, ranking wrong on 3 tasks (median1, perindopril_mpo, thiothixene_rediscovery). Offline signal also appears in: heavy_atoms (+0.692 within task, +0.333 excluding anchors). No signal: qed (-0.091). DECISIVE LIMIT, and it is structural rather than statistical: every proxy measured here is teacher-REFERENCED or a route-position artifact, so by construction it scores a high-value molecule in an unrelated basin as zero -- exactly the case the new definition exists to credit. No offline proxy in hand can do that. That is a finding about the gate, not a measurement failure: crediting a novel basin requires charged calls.",
+   "why_the_counterexamples_matter": "On these tasks a molecule FURTHER from the teacher anchor has HIGHER future value, so resemblance and future value disagree in the data rather than only in principle. This is the owner's refinement measured rather than argued."
+  }
+ },
+ "payload_sha256": "b8e52b31c556e2e47b56a80e7544dee4a453fb9c8a8b6548983758cd382eee1d"
+}
