@@ -1,0 +1,330 @@
+{
+ "schema_version": "pmo_macro_horizon_summary_v1",
+ "evidence_role": "answer_known_offline_diagnostic",
+ "task": "celecoxib_rediscovery",
+ "new_charged_oracle_calls": 0,
+ "oracle": "tdc.chem_utils.oracle.oracle.rediscovery_meta(target, fp='ECFP4') -- count-based unhashed Morgan",
+ "kernel": "rdkit 2023.09.6 (PMO production)",
+ "realization_ceiling_primitives": 23,
+ "attempted": 28,
+ "statuses": {
+  "unreachable_charge_change": 8,
+  "witness_found": 11,
+  "search_unresolved": 9
+ },
+ "witnesses": 11,
+ "primitive_routes_dipping_below_source": 9,
+ "monotone_macro_staging_exists": 9,
+ "single_macro_routes": 4,
+ "segments_needed": [
+  1,
+  1,
+  1,
+  1,
+  2,
+  2,
+  2,
+  2,
+  2
+ ],
+ "failing_sources": [
+  {
+   "name": "init_06",
+   "source_score": 0.1746031746031746,
+   "source_relative_tolerance": 0.01221001221001572
+  },
+  {
+   "name": "init_08",
+   "source_score": 0.1693548387096774,
+   "source_relative_tolerance": 0.00935483870967957
+  }
+ ],
+ "macro_sizes_required": [
+  8,
+  8,
+  9,
+  9,
+  11,
+  14,
+  18,
+  21,
+  21,
+  23,
+  23,
+  23,
+  23,
+  23
+ ],
+ "limitations": [
+  "n=11 witnesses, one task, one target; not a benchmark claim",
+  "the DP segments a GIVEN route from find_path's MCS correspondence; 'no monotone staging' means not along THIS route, not that none exists",
+  "9 of 28 pairs are search_unresolved -- a SEARCH BUDGET artifact, never a reachability claim",
+  "8 of 28 are unreachable_charge_change: anionic sources against a neutral target, the known charge-preserving scope",
+  "this establishes that a monotone staging EXISTS; it says nothing about whether a blind controller can FIND it"
+ ],
+ "routes": [
+  {
+   "source_name": "init_02",
+   "source_smiles": "CCCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+   "n_primitives": 32,
+   "source": 0.049586776859504134,
+   "endpoint": 1.0,
+   "min_primitive_score": 0.049586776859504134,
+   "primitive_dips_below_source": false,
+   "min_segments_unbounded": 1,
+   "min_segments_capped": 2,
+   "boundaries_capped": [
+    0,
+    9,
+    32
+   ],
+   "boundary_scores_capped": [
+    0.049586776859504134,
+    0.16483516483516483,
+    1.0
+   ],
+   "macro_sizes": [
+    9,
+    23
+   ],
+   "source_relative_tolerance": 0.0,
+   "macro_feasible_within_five": true
+  },
+  {
+   "source_name": "init_03",
+   "source_smiles": "CCC(NC(=O)C1CCOCC1)c1cn(C)nc1C",
+   "n_primitives": 25,
+   "source": 0.0782608695652174,
+   "endpoint": 1.0,
+   "min_primitive_score": 0.03389830508474576,
+   "primitive_dips_below_source": true,
+   "min_segments_unbounded": 1,
+   "min_segments_capped": 2,
+   "boundaries_capped": [
+    0,
+    14,
+    25
+   ],
+   "boundary_scores_capped": [
+    0.0782608695652174,
+    0.10317460317460317,
+    1.0
+   ],
+   "macro_sizes": [
+    14,
+    11
+   ],
+   "source_relative_tolerance": 0.0,
+   "macro_feasible_within_five": true
+  },
+  {
+   "source_name": "init_04",
+   "source_smiles": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)c1ccccc1",
+   "n_primitives": 31,
+   "source": 0.13392857142857142,
+   "endpoint": 1.0,
+   "min_primitive_score": 0.11627906976744186,
+   "primitive_dips_below_source": true,
+   "min_segments_unbounded": 1,
+   "min_segments_capped": 2,
+   "boundaries_capped": [
+    0,
+    8,
+    31
+   ],
+   "boundary_scores_capped": [
+    0.13392857142857142,
+    0.16483516483516483,
+    1.0
+   ],
+   "macro_sizes": [
+    8,
+    23
+   ],
+   "source_relative_tolerance": 0.0,
+   "macro_feasible_within_five": true
+  },
+  {
+   "source_name": "init_06",
+   "source_smiles": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3cccc(F)c3)cc2s1",
+   "n_primitives": 35,
+   "source": 0.1746031746031746,
+   "endpoint": 1.0,
+   "min_primitive_score": 0.015503875968992248,
+   "primitive_dips_below_source": true,
+   "min_segments_unbounded": 1,
+   "min_segments_capped": null,
+   "boundaries_capped": null,
+   "boundary_scores_capped": null,
+   "macro_sizes": null,
+   "source_relative_tolerance": 0.01221001221001572,
+   "macro_feasible_within_five": false
+  },
+  {
+   "source_name": "init_08",
+   "source_smiles": "CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+   "n_primitives": 28,
+   "source": 0.1693548387096774,
+   "endpoint": 1.0,
+   "min_primitive_score": 0.0078125,
+   "primitive_dips_below_source": true,
+   "min_segments_unbounded": 1,
+   "min_segments_capped": null,
+   "boundaries_capped": null,
+   "boundary_scores_capped": null,
+   "macro_sizes": null,
+   "source_relative_tolerance": 0.00935483870967957,
+   "macro_feasible_within_five": false
+  },
+  {
+   "source_name": "init_11",
+   "source_smiles": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COC3CCCCC3)cc2s1",
+   "n_primitives": 31,
+   "source": 0.09774436090225563,
+   "endpoint": 1.0,
+   "min_primitive_score": 0.09523809523809523,
+   "primitive_dips_below_source": true,
+   "min_segments_unbounded": 1,
+   "min_segments_capped": 2,
+   "boundaries_capped": [
+    0,
+    8,
+    31
+   ],
+   "boundary_scores_capped": [
+    0.09774436090225563,
+    0.11016949152542373,
+    1.0
+   ],
+   "macro_sizes": [
+    8,
+    23
+   ],
+   "source_relative_tolerance": 0.0,
+   "macro_feasible_within_five": true
+  },
+  {
+   "source_name": "init_13",
+   "source_smiles": "C=CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+   "n_primitives": 32,
+   "source": 0.049586776859504134,
+   "endpoint": 1.0,
+   "min_primitive_score": 0.049586776859504134,
+   "primitive_dips_below_source": false,
+   "min_segments_unbounded": 1,
+   "min_segments_capped": 2,
+   "boundaries_capped": [
+    0,
+    9,
+    32
+   ],
+   "boundary_scores_capped": [
+    0.049586776859504134,
+    0.16483516483516483,
+    1.0
+   ],
+   "macro_sizes": [
+    9,
+    23
+   ],
+   "source_relative_tolerance": 0.0,
+   "macro_feasible_within_five": true
+  },
+  {
+   "source_name": "blindtop_1_0.3366",
+   "source_smiles": "Cc1ccc(C(C)(F)C(N)(F)c2cccc3ccccc23)cc1",
+   "n_primitives": 18,
+   "source": 0.33663366336633666,
+   "endpoint": 1.0,
+   "min_primitive_score": 0.08620689655172414,
+   "primitive_dips_below_source": true,
+   "min_segments_unbounded": 1,
+   "min_segments_capped": 1,
+   "boundaries_capped": [
+    0,
+    18
+   ],
+   "boundary_scores_capped": [
+    0.33663366336633666,
+    1.0
+   ],
+   "macro_sizes": [
+    18
+   ],
+   "source_relative_tolerance": 0.0,
+   "macro_feasible_within_five": true
+  },
+  {
+   "source_name": "blindmid_1_0.1364",
+   "source_smiles": "CC1=CC(F)=C(C(F)Cc2cc(N)c(Cl)cc2Br)CC1",
+   "n_primitives": 21,
+   "source": 0.13636363636363635,
+   "endpoint": 1.0,
+   "min_primitive_score": 0.11764705882352941,
+   "primitive_dips_below_source": true,
+   "min_segments_unbounded": 1,
+   "min_segments_capped": 1,
+   "boundaries_capped": [
+    0,
+    21
+   ],
+   "boundary_scores_capped": [
+    0.13636363636363635,
+    1.0
+   ],
+   "macro_sizes": [
+    21
+   ],
+   "source_relative_tolerance": 0.0,
+   "macro_feasible_within_five": true
+  },
+  {
+   "source_name": "blindmid_2_0.1356",
+   "source_smiles": "CC1=CC=C(C(CNc2ccc(Br)cc2)CONCO)CC1",
+   "n_primitives": 23,
+   "source": 0.13559322033898305,
+   "endpoint": 1.0,
+   "min_primitive_score": 0.04838709677419355,
+   "primitive_dips_below_source": true,
+   "min_segments_unbounded": 1,
+   "min_segments_capped": 1,
+   "boundaries_capped": [
+    0,
+    23
+   ],
+   "boundary_scores_capped": [
+    0.13559322033898305,
+    1.0
+   ],
+   "macro_sizes": [
+    23
+   ],
+   "source_relative_tolerance": 0.0,
+   "macro_feasible_within_five": true
+  },
+  {
+   "source_name": "blindmid_3_0.1351",
+   "source_smiles": "CC1=CC=C(C(C)C(C)Nc2ccc(Br)cc2Cl)CC1",
+   "n_primitives": 21,
+   "source": 0.13513513513513514,
+   "endpoint": 1.0,
+   "min_primitive_score": 0.05263157894736842,
+   "primitive_dips_below_source": true,
+   "min_segments_unbounded": 1,
+   "min_segments_capped": 1,
+   "boundaries_capped": [
+    0,
+    21
+   ],
+   "boundary_scores_capped": [
+    0.13513513513513514,
+    1.0
+   ],
+   "macro_sizes": [
+    21
+   ],
+   "source_relative_tolerance": 0.0,
+   "macro_feasible_within_five": true
+  }
+ ]
+}
