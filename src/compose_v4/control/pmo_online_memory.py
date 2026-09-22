@@ -900,6 +900,16 @@ def memory_channel_proposal(
     ``synthesize_dynamic_program`` the production path runs, with the learned
     law supplied through the existing ``region_law=`` keyword.  Nothing about
     the executor, the eligibility gate or the candidate record changes.
+
+    It ALSO threads ``optimizer.construction_prior`` into the same call.  That is
+    not an extra mechanism, it is the same one: this function INTERCEPTS the
+    shallow lane whenever the memory is warm, so a construction prior wired only
+    into ``DynamicProgramOptimizer._mutate`` would be consulted on the fraction of
+    shallow proposals this lane does not take -- silently shrinking as the memory
+    warms, and shrinking most in exactly the arm the prior is being measured in.
+    ``construction_prior`` is declared on ``DynamicProgramOptimizer`` as a class
+    attribute, so it is always present, and ``None`` keeps ``synthesize_dynamic_program``
+    on v1's exact RNG stream.
     """
 
     if memory is None or not memory.warm or channel != shallow_channel:
@@ -919,6 +929,7 @@ def memory_channel_proposal(
         max_primitives=optimizer.config.max_primitives,
         max_blocks=optimizer.config.max_blocks,
         region_law=law,
+        successor_prior=optimizer.construction_prior,
     )
     return (
         source,

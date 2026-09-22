@@ -228,6 +228,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         jump_checkpoint: dict[str, Any],
         enable_online_memory: bool = False,
         construction_prior=None,
+        construction_prior_spec=None,
         **kwargs,
     ):
         if jump_checkpoint.get("schema_version") != CHECKPOINT_SCHEMA:
@@ -253,6 +254,32 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         # only byte-identical off: `DynamicProgramOptimizer._mutate` reads this
         # attribute and `synthesize_dynamic_program` keeps v1's exact RNG stream when
         # it is absent.  It reads no oracle, no task identity and no score.
+        #
+        # `construction_prior_spec` is the PRODUCTION form of the same seam: a
+        # JSON-serializable declaration that survives `identity(optimizer_kwargs)` and
+        # `restore`, where a live model object would raise on the first and be dropped
+        # by the second.  Exactly one of the two may be given; supplying both would
+        # leave the arm's declared identity and its actual law free to disagree.
+        if construction_prior is not None and construction_prior_spec is not None:
+            raise ValueError(
+                "supply the construction prior as an object OR as a spec, not both: "
+                "two sources for one law let the declared arm identity and the law "
+                "actually consulted drift apart"
+            )
+        self.construction_prior_spec = (
+            None
+            if construction_prior_spec is None
+            else json.loads(json.dumps(construction_prior_spec))
+        )
+        if construction_prior_spec is not None:
+            from compose_v4.control.pmo_construction_prior import (
+                ConstructionPriorSpec,
+                build_construction_prior,
+            )
+
+            construction_prior = build_construction_prior(
+                ConstructionPriorSpec.from_payload(construction_prior_spec)
+            )
         self.construction_prior = construction_prior
 
     def _channel_proposal(self, channel, entry):
@@ -1049,6 +1076,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         jump_checkpoint=None,
         enable_online_memory: bool = False,
         construction_prior=None,
+        construction_prior_spec=None,
     ):
         # `run_program_campaign` passes optimizer_kwargs to BOTH the constructor and
         # this classmethod, so the arm flag has to be accepted here too -- and it has
@@ -1066,6 +1094,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
                 "jump_checkpoint": jump_checkpoint,
                 "enable_online_memory": enable_online_memory,
                 "construction_prior": construction_prior,
+                "construction_prior_spec": construction_prior_spec,
             },
         )
         state = snapshot.get("pmo_population")
