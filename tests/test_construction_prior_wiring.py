@@ -454,8 +454,9 @@ def test_the_module_family_choice_never_consults_the_prior():
     and cycle_close is the one family whose edits GAIN drug-likeness.  Family
     selection must therefore stay uniform."""
 
-    from compose_v4.control import dynamic_program_synthesis as module
     import inspect
+
+    from compose_v4.control import dynamic_program_synthesis as module
 
     text = inspect.getsource(module._weighted_module_order)
     assert "prior" not in text
@@ -478,3 +479,131 @@ def test_the_element_name_round_trips_through_the_prior_branch():
     )
     assert chosen == ["N", "N"]
     assert IDX_TO_ELEMENT[ELEMENT_TO_IDX["N"]] == "N"
+
+
+# ---- The controller seam ----
+
+
+def _mutate_prior_attribute_name() -> str:
+    """The attribute ``_mutate`` reads, derived from the CALL SITE.
+
+    Deriving it structurally rather than writing the name twice is what makes the
+    controller test able to fail: a test that hard-codes ``construction_prior``
+    agrees with a stale constant instead of with the code.
+    """
+
+    import ast
+    import inspect
+    import textwrap
+
+    tree = ast.parse(textwrap.dedent(inspect.getsource(DynamicProgramOptimizer._mutate)))
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        for keyword in node.keywords:
+            if keyword.arg != "successor_prior":
+                continue
+            value = keyword.value
+            if (
+                isinstance(value, ast.Attribute)
+                and isinstance(value.value, ast.Name)
+                and value.value.id == "self"
+            ):
+                return value.attr
+    raise AssertionError(
+        "`_mutate` no longer passes a `self.<attribute>` as `successor_prior`; "
+        "the controller seam has moved and this test cannot locate it"
+    )
+
+
+def test_the_controller_sets_the_attribute_the_mutate_hop_reads():
+    import ast
+    import inspect
+
+    from compose_v4.control import pmo_population_controller as controller
+
+    name = _mutate_prior_attribute_name()
+    tree = ast.parse(inspect.getsource(controller.PmoPopulationController))
+    assigned = {
+        target.attr
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Assign)
+        for target in node.targets
+        if isinstance(target, ast.Attribute)
+        and isinstance(target.value, ast.Name)
+        and target.value.id == "self"
+    }
+    assert name in assigned, (
+        f"`DynamicProgramOptimizer._mutate` reads `self.{name}` but the PMO "
+        "controller never assigns it, so the prior can never reach the lane"
+    )
+    assert DynamicProgramOptimizer in controller.PmoPopulationController.__mro__
+
+
+def test_the_controller_constructor_and_restore_carry_the_same_arm_parameters():
+    """A flag accepted by ``__init__`` and not by ``restore`` makes the fresh path
+    work and the RESUME path raise -- or, worse, silently rebuild the other arm."""
+
+    import inspect
+
+    from compose_v4.control.pmo_population_controller import PmoPopulationController
+
+    constructor = set(inspect.signature(PmoPopulationController.__init__).parameters)
+    restore = set(inspect.signature(PmoPopulationController.restore).parameters)
+    arms = {"enable_online_memory", _mutate_prior_attribute_name()}
+    assert arms <= constructor
+    assert arms <= restore
+
+
+def test_the_controller_defaults_to_the_uniform_construction_draw():
+    import inspect
+
+    from compose_v4.control.pmo_population_controller import PmoPopulationController
+
+    name = _mutate_prior_attribute_name()
+    for signature in (
+        inspect.signature(PmoPopulationController.__init__),
+        inspect.signature(PmoPopulationController.restore),
+    ):
+        assert signature.parameters[name].default is None
+
+
+def test_the_controller_restore_forwards_the_arm_into_the_constructor():
+    """Accepting a parameter is not passing it.
+
+    A ``restore`` that accepts the arm and drops it one line later rebuilds the
+    UNIFORM arm from a snapshot that was produced by the prior-ranked one, with
+    nothing in the artifact to show the swap -- which is worse than the
+    ``TypeError`` an unaccepted keyword would have raised.
+    """
+
+    import ast
+    import inspect
+    import textwrap
+
+    from compose_v4.control.pmo_population_controller import PmoPopulationController
+
+    name = _mutate_prior_attribute_name()
+    tree = ast.parse(
+        textwrap.dedent(inspect.getsource(PmoPopulationController.restore))
+    )
+    forwarded = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        for keyword in node.keywords:
+            if keyword.arg != "constructor_kwargs":
+                continue
+            if not isinstance(keyword.value, ast.Dict):
+                continue
+            for key, value in zip(keyword.value.keys, keyword.value.values):
+                if (
+                    isinstance(key, ast.Constant)
+                    and isinstance(value, ast.Name)
+                    and key.value == value.id
+                ):
+                    forwarded.add(key.value)
+    assert {"enable_online_memory", name} <= forwarded, (
+        f"`restore` does not forward {sorted({'enable_online_memory', name} - forwarded)} "
+        "into the constructor, so a resumed run would silently change arm"
+    )

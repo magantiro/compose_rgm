@@ -227,6 +227,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         *args,
         jump_checkpoint: dict[str, Any],
         enable_online_memory: bool = False,
+        construction_prior=None,
         **kwargs,
     ):
         if jump_checkpoint.get("schema_version") != CHECKPOINT_SCHEMA:
@@ -246,6 +247,13 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         self.online_memory = OnlineProposalMemory() if enable_online_memory else None
         self.online_memory_attribution_failures = 0
         self.online_memory_reconstruction: dict[str, Any] | None = None
+        # The task-independent chemical prior over the CONSTRUCTION draw.  It is an
+        # already-built object rather than a checkpoint path, so the controller never
+        # imports torch and a test can drive this seam with a stub.  `None` is the
+        # only byte-identical off: `DynamicProgramOptimizer._mutate` reads this
+        # attribute and `synthesize_dynamic_program` keeps v1's exact RNG stream when
+        # it is absent.  It reads no oracle, no task identity and no score.
+        self.construction_prior = construction_prior
 
     def _channel_proposal(self, channel, entry):
         """The one integration point for the online structural memory.
@@ -1040,11 +1048,14 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         hierarchy=None,
         jump_checkpoint=None,
         enable_online_memory: bool = False,
+        construction_prior=None,
     ):
         # `run_program_campaign` passes optimizer_kwargs to BOTH the constructor and
         # this classmethod, so the arm flag has to be accepted here too -- and it has
         # to reach the constructor, or a resumed arm B would rebuild as arm A and then
-        # refuse its own snapshot's memory payload.
+        # refuse its own snapshot's memory payload.  The same applies to the
+        # construction prior: a resumed run that silently dropped it would continue as
+        # the uniform arm with nothing in the artifact to show it.
         if jump_checkpoint is None:
             raise ValueError("PMO population restore requires its sanitized jump checkpoint")
         result = ProgramOptimizer.restore.__func__(
@@ -1054,6 +1065,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             constructor_kwargs={
                 "jump_checkpoint": jump_checkpoint,
                 "enable_online_memory": enable_online_memory,
+                "construction_prior": construction_prior,
             },
         )
         state = snapshot.get("pmo_population")
