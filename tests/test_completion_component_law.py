@@ -435,3 +435,35 @@ def test_the_completion_law_excises_past_the_v1_cap():
     assert largest > MAX_SEGMENT_LENGTH, (
         "the expanded arm never excised past v1's eight-atom ceiling"
     )
+
+
+def test_the_builder_itself_refuses_charged_components():
+    """The committed bank being neutral does not test the FILTER that made it so.
+
+    Asserting neutrality of the shipped artifact leaves the builder's charge
+    guard untested, because a mutated builder does not rebuild the committed
+    file. This drives ``build_component_bank`` on donors that DO carry charge.
+    """
+
+    from compose_v4.control.completion_component_law import (
+        build_component_bank,
+        extract_components,
+    )
+
+    donors = [
+        "CC1CCC(C)(C(=O)N2CCCC(C)(C(=O)[O-])C2)O1",
+        "C[N+](C)(C)CC(=O)[O-]",
+        "CC(=O)Oc1ccccc1C(=O)[O-]",
+    ]
+    charged_available = sum(
+        1
+        for smiles in donors
+        for spec in extract_components(_padded(smiles))
+        if any(spec.charges)
+    )
+    assert charged_available > 0, "fixture no longer offers a charged component"
+    bank, census = build_component_bank(donors, slots=SLOTS)
+    assert census.get("charged_component", 0) >= charged_available, (
+        "the builder did not refuse any charged component"
+    )
+    assert all(not any(spec.charges) for spec in bank.components)

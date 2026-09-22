@@ -1,0 +1,142 @@
+{
+ "payload": {
+  "arms": {
+   "A_deployed_b": {
+    "completion_law": null,
+    "enable_online_memory": true,
+    "role": "control -- the deployed measured winner, v1 completion verbatim"
+   },
+   "B_completion": {
+    "completion_law": "scale_content_v1",
+    "enable_online_memory": true,
+    "role": "treatment -- the same controller plus the frozen completion law"
+   }
+  },
+  "authorization": {
+   "granted_by": "session instruction, 2026-09-22",
+   "text": "AUTHORIZED: a zero-oracle 2x2 FIRST, then a matched 250-call celecoxib A/B (500 charged calls), and only if that qualifies, 250 calls each on perindopril_mpo and jnk3 (500 more). Nothing else.",
+   "total_charged_calls_authorized": 1000
+  },
+  "charged_calls_per_task": 250,
+  "controller": {
+   "calls_per_task": 1000,
+   "continuous_retention": [
+    0.0,
+    1.0
+   ],
+   "early_family_niche_floor": true,
+   "max_rounds": 64,
+   "plateau_escape": true,
+   "program_max_blocks": 8,
+   "program_max_primitives": 32,
+   "proposal_modes": [
+    "global_explore",
+    "jump_from_elite",
+    "refine_elite"
+   ],
+   "queries_per_round": 16,
+   "recursive_archive": true,
+   "seed": 20260920,
+   "task_conditioning_in_proposal_law": false
+  },
+  "derived_from": {
+   "path": "configs/pmo_population_controller_v1.json",
+   "payload_sha256": "ef27a829f39d54f37766299e4ba20048fb2909331631a40b9a0e39d3894e6381"
+  },
+  "development_budget": {
+   "celecoxib_rediscovery": {
+    "arms": 2,
+    "calls_per_arm": 250
+   },
+   "qualification_panel": {
+    "calls_per_task": 250,
+    "conditional_on": "the celecoxib A/B qualifying",
+    "tasks": [
+     "perindopril_mpo",
+     "jnk3"
+    ]
+   }
+  },
+  "implementation_sha256": {
+   "configs/pmo_completion_component_bank_v1.json": "9b9b11d6a83a048ea1c9b2e70c1d6b8e79bccfa47ac45374bddbaa45d9e53675",
+   "src/compose_v4/control/adaptive_program_optimizer.py": "1f1937ca6035f2797235878925a515aff543089d044a8c06cd6197aea6a64a23",
+   "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",
+   "src/compose_v4/control/completion_component_law.py": "9a6a826d74df0741b394cf77d1082f876798ffc5fee8277cb2c981a341fe986e",
+   "src/compose_v4/control/completion_law_contract.py": "242ed42cffe824518b010cf46b76455d6b932f023b5c92500fb6ffb11a9bf126",
+   "src/compose_v4/control/dynamic_program_synthesis.py": "9d9ea6e576fbc9091152c7bfd87f2e4df17d0ff1188ccbd5e6fb47d43700c978",
+   "src/compose_v4/control/dynamic_program_synthesis_v1.py": "0640ba50bcb53ebd8a3f3ab326124975e55737c91758f09ce3e5c4a32bdbd3d9",
+   "src/compose_v4/control/dynamic_program_synthesis_v2.py": "1e41adcfd7b72a2cbe934233102c87872e44796ba67015c4df24f1dba663d278",
+   "src/compose_v4/control/dynamic_program_synthesis_v21.py": "bbe1a1b2d5ffed59929211425060f6347075025ac504990b42437bef0a9bf9f7",
+   "src/compose_v4/control/edit_learning_data.py": "b0e71fdbd54c39727765edfe36253c0588b9882ecf8a52f6b65b7c590d711f71",
+   "src/compose_v4/control/pmo_credit.py": "9c8e32adec82df973d7175215a424df29367af96c8870981a0909fcd2a77a164",
+   "src/compose_v4/control/pmo_online_memory.py": "bbea7d6580e81d1075eec9be3eee7a24afa9fc5276644cb3307d11e2071620c6",
+   "src/compose_v4/control/pmo_population_controller.py": "946fcec3e5b65543cb9b0934311217874f3be4e9464a710e626e524ab6f93413",
+   "src/compose_v4/control/pmo_realization.py": "153d2f49b08186abff6088c1f6c462fe2d96b83ede26587b90a8504c0671b308",
+   "src/compose_v4/control/program_campaign.py": "205f4aef97489ee352df9d8284e9d21ad683c3d542d25ce748c03bd9f8d6644b",
+   "src/compose_v4/experiments/pmo_oracle_assets.py": "5ec0b7c9b9185cd2b8edd14c2529f37e825311a2b39d6ce71c68423ab9f4d558",
+   "src/compose_v4/experiments/pmo_population_live_parent_gate.py": "2b44294b0368b0c7f6f5c90dd7e6ae222b4ff49be1475b83fe5065f707f3e204",
+   "src/compose_v4/experiments/pmo_population_v1.py": "b38c8a7220b05242179331a6ac98e2c4a530867a909906a5727c50e264defbd7"
+  },
+  "initialization": {
+   "all_scores_charged": true,
+   "count": 16,
+   "lock_sha256": "c8032311daa067628048679465fb4397d2a26bf0593143e3ed0a4cbec7195478",
+   "path": "diagnostics/parent_edit_cycles/prepared/init_20260921.json",
+   "sha256": "a1f7840df1f75567565de633c4df3d013c3165df3e43cbf2ac87b156d5f206ff",
+   "source_sha256": "b679b4dc54006acf570fefb80f49d83a46c18c979c9e376fdd4d37b2cec5f860",
+   "task_independent": true
+  },
+  "joint_checkpoint": {
+   "fit_scope": "shared_all_routes",
+   "path": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json",
+   "payload_sha256": "730bc905c128b9feb802262e1f98bdcb6479431b88347a05defb26c2b84fab35",
+   "sha256": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43"
+  },
+  "modal_launch_authorized": false,
+  "oracle": {
+   "adapter": "native PyTDC Oracle(name=task)",
+   "asset_backed": false,
+   "calls_include_initialization": true,
+   "direction": "maximize",
+   "environment": {
+    "numpy": "1.26.4",
+    "pandas": "2.1.4",
+    "pytdc": "1.1.15",
+    "rdkit": "2023.09.6",
+    "requests": "2.32.4",
+    "scikit_learn": "1.2.2",
+    "scipy": "1.15.0",
+    "seaborn": "0.13.2",
+    "setuptools": "75.6.0"
+   },
+   "gsk3b_asset": {
+    "bytes": 27791877,
+    "path": "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets/oracle/gsk3b_current.pkl",
+    "pytdc_dataverse_file_id": 6413412,
+    "sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5"
+   },
+   "prescreen": false,
+   "source_files": {
+    "pytdc_metadata": "0925dc34498dd5502429c6d278be70758f1d536417af9cc95392c28e014fe6e6",
+    "tdc_oracle_py": "211be401ec5f3c06ddca37e72064bbeb4de52437b218bb3f4a4a381eec1de1f5",
+    "tdc_oracles_py": "d2b2194e3573eb620759998e83d8803eacfd5cbd00531e862ebe3283c301cabe"
+   }
+  },
+  "prohibitions": [
+   "no oracle or Modal call under this preflight contract",
+   "no task-to-route or task-to-endpoint lookup",
+   "no frozen-parent restart described as recursive search",
+   "no T4 artifact changes"
+  ],
+  "runtime": "local, pinned PMO kernel; NOT the deployed Modal app",
+  "schema_version": "pmo_completion_ab_local_contract_v1",
+  "scientific_question": "Does repairing the completion half of a generic edit module -- its SCALE and its CONTENT -- improve scored PMO search, holding initialization, memory, allocator, region selector, proposal allocation, oracle, budget and seeds identical?",
+  "scored_launch_authorized": true,
+  "tasks": [
+   "celecoxib_rediscovery",
+   "perindopril_mpo",
+   "jnk3"
+  ]
+ },
+ "payload_sha256": "33acccffcb0b8752de4269328881d965b2cef23622ffe123cc716493fc78d3c9"
+}

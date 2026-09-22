@@ -1,0 +1,197 @@
+{
+ "killed": 16,
+ "negatives": 17,
+ "new_oracle_calls": 0,
+ "positive_controls": 2,
+ "positive_controls_broken": [],
+ "records": [
+  {
+   "failing_tests": [
+    "test_optimizer_call_sites_forward_the_law[src/compose_v4/control/dynamic_program_synthesis.py-synthesize_dynamic_program-_mutate]"
+   ],
+   "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+   "kind": "negative",
+   "mutation": "optimizer_mutate_drops_the_law",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_optimizer_call_sites_forward_the_law[src/compose_v4/control/dynamic_program_synthesis_v21.py-synthesize_structured_program-_channel_proposal]"
+   ],
+   "file": "src/compose_v4/control/dynamic_program_synthesis_v21.py",
+   "kind": "negative",
+   "mutation": "v21_channel_drops_the_law",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_both_production_lanes_consult_the_completion_law"
+   ],
+   "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+   "kind": "negative",
+   "mutation": "synthesis_drops_the_law_at_the_module",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_each_completion_family_consults_the_law_on_its_own[segment_grow]"
+   ],
+   "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+   "kind": "negative",
+   "mutation": "segment_grow_ignores_the_law",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_each_completion_family_consults_the_law_on_its_own[segment_replace]"
+   ],
+   "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+   "kind": "negative",
+   "mutation": "segment_replace_ignores_the_law",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_off_does_not_touch_the_v1_excision_bound"
+   ],
+   "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+   "kind": "negative",
+   "mutation": "excision_bound_stays_at_the_v1_cap",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_region_law_preserves_support_and_reaches_beyond_the_v1_cap"
+   ],
+   "file": "src/compose_v4/control/completion_component_law.py",
+   "kind": "negative",
+   "mutation": "region_law_filters_instead_of_reranking",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_v1_scale_never_exceeds_eight_and_expanded_scale_does"
+   ],
+   "file": "src/compose_v4/control/completion_component_law.py",
+   "kind": "negative",
+   "mutation": "expanded_scale_falls_back_to_the_v1_bound",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_octave_bands_are_capacity_bounded_and_equal_mass"
+   ],
+   "file": "src/compose_v4/control/completion_component_law.py",
+   "kind": "negative",
+   "mutation": "octave_bands_ignore_capacity",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_bank_order_respects_capacity_and_prefers_the_target_size"
+   ],
+   "file": "src/compose_v4/control/completion_component_law.py",
+   "kind": "negative",
+   "mutation": "bank_order_ignores_capacity",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_installed_component_carries_its_ring_and_branching"
+   ],
+   "file": "src/compose_v4/control/completion_component_law.py",
+   "kind": "negative",
+   "mutation": "component_install_skips_ring_closure",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_component_round_trips_through_the_production_executor"
+   ],
+   "file": "src/compose_v4/control/completion_component_law.py",
+   "kind": "negative",
+   "mutation": "no_hydrogen_is_reserved_at_insertion",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [],
+   "file": "src/compose_v4/control/completion_component_law.py",
+   "kind": "negative",
+   "mutation": "bank_keeps_charged_components",
+   "suite_green": true,
+   "verdict": "SURVIVED"
+  },
+  {
+   "failing_tests": [
+    "test_each_registered_arm_resolves_to_its_declared_axes[scale_only_v1-None-False-True]"
+   ],
+   "file": "src/compose_v4/control/completion_law_contract.py",
+   "kind": "negative",
+   "mutation": "registered_arm_resolves_to_off",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_each_registered_arm_resolves_to_its_declared_axes[content_only_v1-8-True-False]"
+   ],
+   "file": "src/compose_v4/control/completion_law_contract.py",
+   "kind": "negative",
+   "mutation": "content_arm_loses_its_bank",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_the_pmo_controller_accepts_the_arm_on_both_construction_and_restore"
+   ],
+   "file": "src/compose_v4/control/pmo_population_controller.py",
+   "kind": "negative",
+   "mutation": "restore_drops_the_arm",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [
+    "test_both_production_lanes_consult_the_completion_law"
+   ],
+   "file": "src/compose_v4/control/completion_law_contract.py",
+   "kind": "negative",
+   "mutation": "consumption_probe_raises_a_swallowed_exception",
+   "suite_green": false,
+   "verdict": "KILLED"
+  },
+  {
+   "failing_tests": [],
+   "file": "src/compose_v4/control/completion_component_law.py",
+   "kind": "positive_control",
+   "mutation": "cosmetic_comment_only",
+   "suite_green": true,
+   "verdict": "PASSED"
+  },
+  {
+   "failing_tests": [],
+   "file": "src/compose_v4/control/completion_law_contract.py",
+   "kind": "positive_control",
+   "mutation": "cosmetic_docstring_whitespace",
+   "suite_green": true,
+   "verdict": "PASSED"
+  }
+ ],
+ "schema_version": "pmo_completion_mutation_battery_v1",
+ "survived": [
+  "bank_keeps_charged_components"
+ ]
+}
