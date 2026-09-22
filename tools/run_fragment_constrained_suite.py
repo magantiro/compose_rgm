@@ -221,6 +221,7 @@ def run_task(
     verbose: bool = True,
     seed_list: list[int] | None = None,
     drugs: list[str] | None = None,
+    linker_bridge_atoms: int = 0,
 ) -> dict:
     task_prompts = [p for p in prompts if p.task is task]
     if drugs:
@@ -234,7 +235,12 @@ def run_task(
         drug_metrics: list[dict[str, float]] = []
         for prompt in task_prompts:
             try:
-                context = build_prompt_context(prompt, config=config, control=control)
+                context = build_prompt_context(
+                    prompt,
+                    config=config,
+                    control=control,
+                    linker_bridge_atoms=linker_bridge_atoms,
+                )
             except FragmentConditioningError as exc:
                 build_failures.append(
                     {"drug": prompt.drug_name, "seed": seed, "error": str(exc)}
@@ -430,7 +436,50 @@ def build_parser() -> argparse.ArgumentParser:
             "Default off, so the frozen-sampler baseline rows reproduce."
         ),
     )
+    parser.add_argument(
+        "--path-program",
+        action="store_true",
+        help=(
+            "drive the core-to-core path length toward a per-trajectory target "
+            "drawn from the declared band. GLOBAL: one band covers every drug "
+            "and every task, and the program is vacuous unless the prompt "
+            "declares two retained regions, which is a property of the "
+            "SPECIFICATION and never of an instance. Default off."
+        ),
+    )
+    parser.add_argument(
+        "--linker-bridge-atoms",
+        type=int,
+        default=0,
+        help=(
+            "seed this many unlocked atoms between the two declared sites of a "
+            "two-core prompt, instead of joining the cores directly. GLOBAL, and "
+            "vacuous for a single-core prompt. Default 0 keeps the direct join "
+            "so every existing row reproduces. The seeded length is not a "
+            "result and is recorded in the artifact so no realized-length "
+            "number can be read without it."
+        ),
+    )
     return parser
+
+
+def protocol_block(args: argparse.Namespace) -> dict:
+    """The protocol the rows were produced under, as the artifact records it.
+
+    The seeded bridge lives here rather than in a config hash because it is a
+    property of the START STATE and belongs to no dataclass. An artifact that
+    omits it cannot be read: a realized core-to-core length means nothing
+    without the length the construction supplied, and a reader with only the
+    former would take an inherited seed for a designed linker.
+    """
+    return {
+        "source": "in_virtuo_gen/evaluation/downstream.py @ b50bb3ae",
+        "samples_per_prompt": args.samples,
+        "seeds": args.seeds,
+        "task_row": "unweighted mean over the task's drugs",
+        "scaffold_morphing": "upstream copies the linker result",
+        "linker_bridge_atoms": args.linker_bridge_atoms,
+    }
 
 
 def sampler_config_from_args(args: argparse.Namespace) -> SamplerConfig:
@@ -460,7 +509,10 @@ def main() -> None:
     config = sampler_config_from_args(args)
     # ONE controller configuration for every drug and every task.  Nothing here
     # reads a drug name, a task label or any other instance identity.
-    control = AttachmentControlConfig(enabled=bool(args.attachment_control))
+    control = AttachmentControlConfig(
+        enabled=bool(args.attachment_control),
+        path_program=bool(args.path_program),
+    )
 
     selected = (
         [FragmentTask(t) for t in args.task]
@@ -482,17 +534,12 @@ def main() -> None:
             control=control,
             seed_list=args.seed_list,
             drugs=args.drug,
+            linker_bridge_atoms=args.linker_bridge_atoms,
         )
 
     payload = {
         "schema": "compose_fragment_official_suite_v1",
-        "protocol": {
-            "source": "in_virtuo_gen/evaluation/downstream.py @ b50bb3ae",
-            "samples_per_prompt": args.samples,
-            "seeds": args.seeds,
-            "task_row": "unweighted mean over the task's drugs",
-            "scaffold_morphing": "upstream copies the linker result",
-        },
+        "protocol": protocol_block(args),
         "kernel": _kernel_provenance(),
         "checkpoint": {
             "path": str(args.checkpoint),

@@ -362,3 +362,141 @@ def test_no_per_task_or_per_drug_sampler_knob_is_expressible():
             assert action.type is not int, (
                 f"{action.option_strings} looks like it carries a numeric knob"
             )
+
+
+# ---- The two-core knobs: parsed is not consumed ----
+
+
+def test_the_path_program_flag_reaches_the_controller_configuration():
+    suite, args = _parsed("--attachment-control", "--path-program")
+    control = suite.AttachmentControlConfig(
+        enabled=bool(args.attachment_control), path_program=bool(args.path_program)
+    )
+    assert control.path_program is True
+    _, off = _parsed("--attachment-control")
+    assert bool(off.path_program) is False
+
+
+def test_the_path_program_flag_moves_the_recorded_controller_identity():
+    """Two arms that differ in the program must not be combinable by accident.
+
+    The aggregator refuses shards whose controller hashes disagree, which only
+    protects the panel if the program is part of the hashed payload.
+    """
+    suite = _suite_module()
+    on = suite.frozen_attachment_identity(
+        suite.AttachmentControlConfig(enabled=True, path_program=True)
+    )
+    off = suite.frozen_attachment_identity(
+        suite.AttachmentControlConfig(enabled=True, path_program=False)
+    )
+    assert on["config_sha256"] != off["config_sha256"]
+    assert on["config"]["path_program"] is True
+    assert off["config"]["path_program"] is False
+
+
+def test_the_bridge_knob_reaches_the_prompt_context_call_site():
+    """A knob that is parsed and never passed on is INERT.
+
+    This drives the production ``run_task`` and observes the argument arriving
+    at the real call site, rather than checking that the parser holds a value.
+    A region-law repair on the T4 path was merged, tested and hash-pinned while
+    no production caller passed its keyword, so it ran as if it did not exist;
+    the tell was available at the CALL site and nowhere else.
+    """
+    suite = _suite_module()
+    seen: dict = {}
+    real = suite.build_prompt_context
+
+    def recorder(prompt, **kwargs):
+        seen.update(kwargs)
+        raise suite.FragmentConditioningError("probe")
+
+    suite.build_prompt_context = recorder
+    try:
+        suite.run_task(
+            None,
+            None,
+            _prompts(),
+            FragmentTask.LINKER_DESIGN,
+            seeds=1,
+            samples=1,
+            config=suite.SamplerConfig(),
+            control=suite.AttachmentControlConfig(enabled=True, path_program=True),
+            verbose=False,
+            seed_list=[0],
+            drugs=["BARICITINIB"],
+            linker_bridge_atoms=3,
+        )
+    finally:
+        suite.build_prompt_context = real
+    assert seen.get("linker_bridge_atoms") == 3, (
+        "run_task must pass the seeded bridge through to build_prompt_context"
+    )
+
+
+def test_the_bridge_knob_defaults_to_the_direct_join_at_the_call_site():
+    """Default 0 keeps every landed row reproducible.
+
+    Checked where it is CONSUMED, not where it is parsed: a default that stops
+    at the parser changes nothing and would leave the landed rows intact by
+    accident rather than by contract.
+    """
+    suite = _suite_module()
+    seen: dict = {}
+    real = suite.build_prompt_context
+
+    def recorder(prompt, **kwargs):
+        seen.update(kwargs)
+        raise suite.FragmentConditioningError("probe")
+
+    suite.build_prompt_context = recorder
+    try:
+        suite.run_task(
+            None,
+            None,
+            _prompts(),
+            FragmentTask.LINKER_DESIGN,
+            seeds=1,
+            samples=1,
+            config=suite.SamplerConfig(),
+            control=suite.AttachmentControlConfig(),
+            verbose=False,
+            seed_list=[0],
+            drugs=["BARICITINIB"],
+        )
+    finally:
+        suite.build_prompt_context = real
+    assert seen.get("linker_bridge_atoms") == 0
+    _, args = _parsed()
+    assert args.linker_bridge_atoms == 0
+
+
+def test_the_seeded_bridge_is_recorded_in_the_protocol_block():
+    """A realized-length number is unreadable without the length it started from.
+
+    The seeded bridge is a property of the START STATE and belongs to no config
+    dataclass, so it appears in no hash; if the artifact does not carry it, a
+    reader cannot tell a designed linker from an inherited seed.
+    """
+    suite, args = _parsed("--linker-bridge-atoms", "2")
+    assert suite.protocol_block(args)["linker_bridge_atoms"] == 2
+    _, default = _parsed()
+    assert suite.protocol_block(default)["linker_bridge_atoms"] == 0
+
+
+def test_no_per_task_or_per_drug_two_core_knob_is_expressible():
+    suite = _suite_module()
+    options = {
+        option
+        for action in suite.build_parser()._actions
+        for option in action.option_strings
+    }
+    for forbidden in (
+        "--path-program-for-drug",
+        "--path-program-for-task",
+        "--linker-bridge-atoms-for-drug",
+        "--per-drug-linker-bridge-atoms",
+        "--path-length-for-drug",
+    ):
+        assert forbidden not in options
