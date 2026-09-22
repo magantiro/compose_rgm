@@ -378,3 +378,74 @@ class RingSystemPlanPrior:
     @classmethod
     def read(cls, path: str | Path) -> RingSystemPlanPrior:
         return cls.from_json(json.loads(Path(path).read_text()))
+
+
+def bootstrap_ring_statistics(
+    signatures: Sequence[MoleculeRingSignature],
+    reference_ring_size_fraction: dict,
+    *,
+    draws: int = 2000,
+    seed: int = 20260922,
+    small_ring_maximum: int = SMALL_RING_MAXIMUM,
+) -> dict:
+    """Percentile intervals for the statistics a ring claim is decided on.
+
+    Resampling is over MOLECULES, which is the independent unit: rings within
+    one molecule are produced by one trajectory and are not exchangeable.  The
+    point estimates returned are recomputed on the observed sample by the same
+    census the intervals resample, so an interval can never belong to a
+    different estimator than the number it brackets.
+
+    Intervals exist because the two statistics that matter here -- a per-ring
+    rate over a few hundred rings and a total variation over a handful of size
+    bins -- have standard errors large enough at realistic ``n`` to swallow a
+    difference that looks decisive in a table.
+    """
+
+    rows = list(signatures)
+    if not rows:
+        raise ValueError("bootstrap needs at least one molecule")
+    if draws < 1:
+        raise ValueError("bootstrap needs at least one draw")
+    rng = np.random.default_rng(seed)
+    observed = ring_signature_census(rows, small_ring_maximum=small_ring_maximum)
+    keys = (
+        "strained_ring_fraction",
+        "fraction_with_strained_ring",
+        "rings_per_molecule",
+        "ring_systems_per_molecule",
+    )
+    samples: dict[str, list[float]] = {key: [] for key in keys}
+    samples["ring_size_total_variation"] = []
+    for _draw in range(draws):
+        picked = [rows[index] for index in rng.integers(0, len(rows), size=len(rows))]
+        census = ring_signature_census(picked, small_ring_maximum=small_ring_maximum)
+        for key in keys:
+            samples[key].append(float(census[key]))
+        samples["ring_size_total_variation"].append(
+            ring_size_total_variation(
+                census["ring_size_fraction"], reference_ring_size_fraction
+            )
+        )
+    point = {key: float(observed[key]) for key in keys}
+    point["ring_size_total_variation"] = ring_size_total_variation(
+        observed["ring_size_fraction"], reference_ring_size_fraction
+    )
+    report: dict = {"draws": draws, "molecules": len(rows)}
+    for key, values in samples.items():
+        report[key] = {
+            "point": point[key],
+            "ci95_low": float(np.percentile(values, 2.5)),
+            "ci95_high": float(np.percentile(values, 97.5)),
+            "stderr": float(np.std(values, ddof=1)) if len(values) > 1 else 0.0,
+        }
+    return report
+
+
+def proportion_stderr(successes: int, trials: int) -> float:
+    """Wald standard error of a proportion, for the published rate metrics."""
+
+    if trials <= 0:
+        return 0.0
+    rate = successes / trials
+    return float(np.sqrt(max(rate * (1.0 - rate), 0.0) / trials))

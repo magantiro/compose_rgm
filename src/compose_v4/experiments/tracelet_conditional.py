@@ -1130,6 +1130,7 @@ def sample_tracelet_ancestral(
     max_rate_cache: int = 4096,
     source_prior: MolecularSourcePrior | None = None,
     initial_state: MolecularGraph | None = None,
+    transition_interceptor: Callable[..., tuple | None] | None = None,
 ) -> TraceletRollout:
     """Ancestral CTMC sampling from a source prior, or from a prepared state.
 
@@ -1139,6 +1140,15 @@ def sample_tracelet_ancestral(
     ``source_prior`` so a prepared state can never be silently discarded in
     favour of a fresh draw, which would read as a working arm producing the
     control's molecules.
+
+    ``transition_interceptor`` lets a caller REPLACE a drawn transition with its
+    own, at the state and conditioning time the process had reached.  It is
+    called as ``(state, sampled, frozen_time, rng)`` and returns ``None`` to
+    accept the model's draw, or ``(successor, rule_names)`` to substitute one.
+    This deliberately changes the realized process -- it is how a globally
+    sampled latent is realized mid-trajectory instead of at ``t = 0``, where a
+    state the model only ever saw late would be off-distribution -- so it is
+    opt-in and absent by default, leaving the shipped process byte-identical.
     """
 
     if initial_state is not None and source_prior is not None:
@@ -1208,6 +1218,17 @@ def sample_tracelet_ancestral(
                     virtual_event_times.append(operational_time)
                     virtual_event_rules.append(sampled.rule_name)
                     continue
+                if transition_interceptor is not None:
+                    replacement = transition_interceptor(
+                        state, sampled, frozen_time, rng
+                    )
+                    if replacement is not None:
+                        state, replacement_rules = replacement
+                        for rule in replacement_rules:
+                            event_times.append(operational_time)
+                            event_rules.append(str(rule))
+                        observations.append(compact_state_observation(state))
+                        continue
                 assert direct_runtime is not None
                 state = direct_runtime.apply(
                     state,

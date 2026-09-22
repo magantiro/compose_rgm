@@ -232,3 +232,55 @@ def test_prior_round_trips_through_json() -> None:
 def test_prior_rejects_a_foreign_payload() -> None:
     with pytest.raises(ValueError, match="not a ring-system plan prior"):
         RingSystemPlanPrior.from_json({"schema": "something.else"})
+
+
+# ---- Uncertainty ----
+
+
+def test_bootstrap_brackets_its_own_point_estimate() -> None:
+    from compose_v4.eval.denovo_ring_marginal import bootstrap_ring_statistics
+
+    rows = [((6,), (6,))] * 40 + [((3,), (6,))] * 10
+    reference = {"6": 1.0}
+    result = bootstrap_ring_statistics(rows, reference, draws=200, seed=7)
+    assert result["molecules"] == 50
+    strained = result["strained_ring_fraction"]
+    # 10 three-rings among 100 rings.
+    assert strained["point"] == pytest.approx(0.1)
+    assert strained["ci95_low"] <= strained["point"] <= strained["ci95_high"]
+    assert strained["stderr"] > 0.0
+    variation = result["ring_size_total_variation"]
+    assert variation["point"] == pytest.approx(0.1)
+    assert variation["ci95_low"] <= variation["point"] <= variation["ci95_high"]
+
+
+def test_bootstrap_of_a_homogeneous_sample_has_a_degenerate_interval() -> None:
+    from compose_v4.eval.denovo_ring_marginal import bootstrap_ring_statistics
+
+    result = bootstrap_ring_statistics([((6,),)] * 30, {"6": 1.0}, draws=50, seed=1)
+    assert result["strained_ring_fraction"]["stderr"] == pytest.approx(0.0)
+    assert result["ring_size_total_variation"]["point"] == pytest.approx(0.0)
+
+
+def test_bootstrap_is_reproducible_under_its_seed() -> None:
+    from compose_v4.eval.denovo_ring_marginal import bootstrap_ring_statistics
+
+    rows = [((6,), (5,))] * 20 + [((4,),)] * 5
+    left = bootstrap_ring_statistics(rows, {"6": 0.5, "5": 0.5}, draws=64, seed=3)
+    right = bootstrap_ring_statistics(rows, {"6": 0.5, "5": 0.5}, draws=64, seed=3)
+    assert left == right
+
+
+def test_bootstrap_refuses_an_empty_sample() -> None:
+    from compose_v4.eval.denovo_ring_marginal import bootstrap_ring_statistics
+
+    with pytest.raises(ValueError, match="at least one molecule"):
+        bootstrap_ring_statistics([], {"6": 1.0})
+
+
+def test_proportion_stderr_matches_the_wald_form() -> None:
+    from compose_v4.eval.denovo_ring_marginal import proportion_stderr
+
+    assert proportion_stderr(14, 50) == pytest.approx(np.sqrt(0.28 * 0.72 / 50))
+    assert proportion_stderr(0, 0) == 0.0
+    assert proportion_stderr(50, 50) == 0.0

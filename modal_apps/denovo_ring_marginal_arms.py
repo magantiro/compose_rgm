@@ -24,17 +24,28 @@ works for the ring skeleton::
 
 The arms
 --------
-``A``  the shipped process, unchanged.
-``B``  the ring-system COUNT drawn from the corpus law and realized at ``t = 0``,
-       each template chosen freely from the model's own support.
-``C``  the full ring-system SIGNATURE drawn from the corpus law and realized at
-       ``t = 0``.
+``A``   the shipped process, unchanged.
+``B0``  the ring-system COUNT drawn from the corpus law, realized at ``t = 0``.
+``C0``  the full ring-system SIGNATURE drawn from the corpus law, at ``t = 0``.
+``B1``  the count, realized at the model's OWN first ring event.
+``C1``  the signature, realized at the model's OWN first ring event.
 
 ``A -> B`` attributes earliness plus the count; ``B -> C`` attributes the pinned
-size law.
+size law; ``0 -> 1`` attributes the realization point.
 
-``B`` IS A SUBSTITUTION and is reported as one.  The brief's arm B was
-``exact_early_ring``, which is a TEACHER-TRACE schedule applied at training time:
+The ``1`` arms exist because of a MEASURED failure of the literal reading.
+``t = 0`` maximizes the host, but a ring-rich state at an early conditioning
+time is off-distribution -- in training, ring-rich states occur only late, where
+the process is winding down -- and the hazard head is a function of
+``(state, time)``.  Matched states, four trajectories: total hazard 21.1 -> 5.2,
+26.7 -> 0.25, 22.6 -> 0.019, 20.0 -> 0.041 after installing the plan, a 4x to
+1200x collapse.  The continuation effectively stops, so ``C0`` is "plan, then
+almost nothing".  ``C1`` realizes the SAME plan at the state and time the model
+itself first decides to commit a ring, which keeps the state on-distribution
+while the host is still largely intact.
+
+The ``B`` arms ARE A SUBSTITUTION and are reported as one.  The brief's arm B
+was ``exact_early_ring``, a TEACHER-TRACE schedule applied at training time:
 Lineage B was trained on ``sequential``, so that arm cannot be obtained from this
 checkpoint by any inference flag -- only by a retrain.  ``B`` here is the
 inference-time analogue of its intent (commit ring transactions at the earliest
@@ -113,7 +124,7 @@ OPERATIONAL_HORIZON = 16.0
 TIME_STEP = 0.1
 MAX_EVENTS = 128
 MODEL_LABEL = "step1000"
-ARMS = ("A", "B", "C")
+ARMS = ("A", "B0", "C0", "B1", "C1")
 
 
 # ---- helpers ----------------------------------------------------------------
@@ -244,6 +255,103 @@ def fit_prior(limit: int | None = None) -> dict:
 @app.local_entrypoint()
 def fit_prior_entry(limit: int = 0) -> None:
     print(json.dumps(fit_prior.remote(limit or None), indent=2, default=str))
+
+
+# ---- design measurement -----------------------------------------------------
+
+
+@app.function(image=image, volumes={str(VOL): volume}, timeout=7200, cpu=4)
+def ring_time_sensitivity(states: int = 40, draws_per_state: int = 16) -> dict:
+    """Does the CONDITIONING TIME change which ring the model installs at t = 0?
+
+    The plan is realized at the start of the trajectory, but the model was
+    trained on traces where ring events sit near the END, so the ring-template
+    law it applies at an early ``frozen_time`` is not obviously the law it was
+    supervised with.  Measured rather than assumed, on the pristine carbon trees
+    the source prior actually produces, with the family restricted to
+    ``ring_system_grow`` so every draw is a ring decision.
+    """
+
+    import collections
+
+    import numpy as np
+    import torch
+
+    sys.path.insert(0, str(REMOTE_ROOT / "scripts"))
+    from evaluate_tracelet_rollouts import load_factorized_rollout_checkpoint
+
+    from compose_v4.eval.ring_calibration import ring_template_cycle_sizes
+    from compose_v4.experiments.denovo_ring_plan import restricted_ring_sampling
+    from compose_v4.rewrite.typed_ring_catalog import ring_system_template
+
+    torch.set_num_threads(1)
+    _assert_pinned_inputs()
+    model, payload = load_factorized_rollout_checkpoint(str(CHECKPOINT))
+    model.eval()
+    source_prior = payload["tree_source_prior"]
+
+    # 0.0488 is the production loop's own frozen_time at operational_time = 0;
+    # 0.99966 is its value at the horizon.
+    times = (0.0488, 0.2, 0.5, 0.9, 0.99, 0.99966)
+    report: dict = {"states": states, "draws_per_state": draws_per_state, "by_time": {}}
+    prepared = [
+        source_prior.sample(np.random.default_rng(1_000_000 + index), n_slots=MAX_ATOMS)
+        for index in range(states)
+    ]
+    for time_value in times:
+        sizes: collections.Counter = collections.Counter()
+        drawn = 0
+        for index, state in enumerate(prepared):
+            rng = np.random.default_rng(2_000_000 + index)
+            for _draw in range(draws_per_state):
+                with restricted_ring_sampling(model, only_ring_grow=True):
+                    sampled = model.sample_rewrite_mark(state, float(time_value), rng)
+                if sampled.action is None:
+                    continue
+                for size in ring_template_cycle_sizes(
+                    ring_system_template(state, sampled.action)
+                ):
+                    sizes[size] += 1
+                drawn += 1
+        total = sum(sizes.values())
+        report["by_time"][str(time_value)] = {
+            "draws": drawn,
+            "rings": total,
+            "ring_size_fraction": {
+                str(key): value / total for key, value in sorted(sizes.items())
+            },
+            "small_ring_fraction": (
+                sum(value for key, value in sizes.items() if key <= 4) / total
+                if total
+                else 0.0
+            ),
+            "small_ring_stderr": (
+                float(
+                    np.sqrt(
+                        max(
+                            (
+                                sum(v for k, v in sizes.items() if k <= 4) / total
+                            )
+                            * (1 - sum(v for k, v in sizes.items() if k <= 4) / total),
+                            0.0,
+                        )
+                        / total
+                    )
+                )
+                if total
+                else 0.0
+            ),
+        }
+        print(json.dumps({"time": time_value, **report["by_time"][str(time_value)]}), flush=True)
+    BASE.mkdir(parents=True, exist_ok=True)
+    (BASE / "ring_time_sensitivity_v1.json").write_text(json.dumps(report, indent=1))
+    volume.commit()
+    return report
+
+
+@app.local_entrypoint()
+def ring_time_sensitivity_entry(states: int = 40, draws_per_state: int = 16) -> None:
+    print(json.dumps(ring_time_sensitivity.remote(states, draws_per_state), indent=1))
 
 
 # ---- sampling ---------------------------------------------------------------
@@ -424,6 +532,8 @@ def score(total: int, prior_sha256: str, horizon: float = OPERATIONAL_HORIZON) -
     )
     from compose_v4.eval.denovo_ring_decomposition import ring_decomposition_report
     from compose_v4.eval.denovo_ring_marginal import (
+        bootstrap_ring_statistics,
+        proportion_stderr,
         ring_signature_census,
         ring_size_total_variation,
         ring_system_signature_of_smiles,
@@ -499,6 +609,21 @@ def score(total: int, prior_sha256: str, horizon: float = OPERATIONAL_HORIZON) -
             row["ring_size_total_variation_vs_corpus"] = ring_size_total_variation(
                 ring_census["ring_size_fraction"], corpus["ring_size_fraction"]
             )
+            # Intervals, because the decisive quantities here are a per-ring
+            # rate over a few hundred rings and a total variation over a handful
+            # of bins: both carry standard errors large enough to swallow a
+            # difference that reads as decisive in a table.
+            row["ring_bootstrap"] = bootstrap_ring_statistics(
+                signatures, corpus["ring_size_fraction"], draws=2000
+            )
+        row["published_metrics_stderr"] = {
+            "quality": proportion_stderr(
+                int(metrics["high_quality"]), int(metrics["attempted"])
+            ),
+            "validity": proportion_stderr(
+                int(metrics["valid"]), int(metrics["attempted"])
+            ),
+        }
         plans = [item.get("ring_plan") for item in records if item.get("ring_plan")]
         if plans:
             requested = sum(len(plan["requested"]) for plan in plans)
@@ -539,7 +664,7 @@ def main(
     shard_size: int = 10,
     seed: int = 20260922,
     horizon: float = OPERATIONAL_HORIZON,
-    arms: str = "A,B,C",
+    arms: str = "A,B0,C0,B1,C1",
 ) -> None:
     """Fan out every arm's shards, then score whatever landed."""
 

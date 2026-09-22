@@ -384,8 +384,8 @@ def test_an_unpinned_plan_realizes_only_the_count() -> None:
 # ---- Arms ----
 
 
-def test_arm_labels_are_the_three_the_experiment_declares() -> None:
-    assert ARMS == ("A", "B", "C")
+def test_arm_labels_cross_the_two_ingredients() -> None:
+    assert ARMS == ("A", "B0", "C0", "B1", "C1")
 
 
 def test_an_unknown_arm_is_refused() -> None:
@@ -394,7 +394,7 @@ def test_an_unknown_arm_is_refused() -> None:
 
 
 def test_a_planned_arm_without_its_prior_is_refused() -> None:
-    for arm in ("B", "C"):
+    for arm in ("B0", "C0", "B1", "C1"):
         with pytest.raises(ValueError, match="catalog index and a plan prior"):
             sample_denovo_arm(
                 _Model(), arm=arm, rng=np.random.default_rng(0), source_prior=object()
@@ -511,11 +511,11 @@ def test_arm_c_pins_the_sizes_and_arm_b_pins_only_the_count() -> None:
 
     index = _index()
     model_c = _PlanThenTerminalModel()
-    record_c = _arm("C", model_c, _FixedPlanPrior(((6,),)))
+    record_c = _arm("C0", model_c, _FixedPlanPrior(((6,),)))
     assert model_c.seen[0][1] == index.excluded_for((6,))
 
     model_b = _PlanThenTerminalModel()
-    record_b = _arm("B", model_b, _FixedPlanPrior(((6,),)))
+    record_b = _arm("B0", model_b, _FixedPlanPrior(((6,),)))
     assert model_b.seen[0][1] == ()
 
     for record in (record_b, record_c):
@@ -536,7 +536,7 @@ def test_a_planned_arm_asks_the_prior_for_the_size_it_actually_has() -> None:
     # Hexane is six heavy atoms; drawing a plan for some other size would
     # decorrelate the ring skeleton from the molecule the tree prior produced.
     plan_prior = _FixedPlanPrior(((6,),))
-    _arm("C", _PlanThenTerminalModel(), plan_prior)
+    _arm("C0", _PlanThenTerminalModel(), plan_prior)
     assert plan_prior.asked == [6]
 
 
@@ -544,7 +544,187 @@ def test_the_continuation_runs_with_ring_growth_disabled() -> None:
     # Otherwise the ordinary process would add rings on top of the plan and the
     # realized marginal would not be p(R).
     model = _PlanThenTerminalModel()
-    _arm("C", model, _FixedPlanPrior(((6,),)))
+    _arm("C0", model, _FixedPlanPrior(((6,),)))
     assert len(model.seen) > 1
     for disabled, _excluded in model.seen[1:]:
         assert disabled == ("ring_system_grow",)
+
+
+# ---- The mid-trajectory realization point ----
+
+
+class _RingThenTerminalModel:
+    """Draws ``ring_system_grow`` for the first ``n`` calls, then terminates."""
+
+    def __init__(self, ring_draws: int = 2) -> None:
+        self._ring_draws = ring_draws
+        self.calls = 0
+        self.seen: list[tuple[tuple[str, ...], tuple[int, ...]]] = []
+
+    def sample_rewrite_mark(self, state, time, rng):
+        self.seen.append(
+            (
+                tuple(getattr(self, "disabled_sampling_rule_names", ())),
+                tuple(getattr(self, "excluded_sampling_ring_template_indices", ())),
+            )
+        )
+        self.calls += 1
+        ring = self.calls <= self._ring_draws
+
+        class _Sampled:
+            # High enough that the exponential waiting time lands inside the
+            # loop's 0.1 interval, so an event really fires.
+            total_hazard = 1000.0 if ring else 0.0
+            rule_name = "ring_system_grow" if ring else "<TERMINAL>"
+            action = _cyclohexane_grow() if ring else None
+
+        return _Sampled()
+
+
+def test_arm_configuration_crosses_pinning_with_the_realization_point() -> None:
+    from compose_v4.experiments.denovo_ring_plan import (
+        REALIZE_AT_FIRST_RING_EVENT,
+        REALIZE_AT_START,
+        arm_configuration,
+    )
+
+    assert arm_configuration("A") is None
+    assert arm_configuration("B0") == (False, REALIZE_AT_START)
+    assert arm_configuration("C0") == (True, REALIZE_AT_START)
+    assert arm_configuration("B1") == (False, REALIZE_AT_FIRST_RING_EVENT)
+    assert arm_configuration("C1") == (True, REALIZE_AT_FIRST_RING_EVENT)
+    with pytest.raises(ValueError, match="unknown arm"):
+        arm_configuration("D")
+
+
+def test_the_interceptor_fires_only_on_a_ring_draw_and_only_once() -> None:
+    from compose_v4.experiments.denovo_ring_plan import FirstRingEventPlanInterceptor
+
+    model = _RingThenTerminalModel()
+    interceptor = FirstRingEventPlanInterceptor(
+        model, ((6,),), index=_index(), pin_signatures=True
+    )
+
+    class _NotARing:
+        rule_name = "atom_insert"
+        action = object()
+
+    assert interceptor(_hexane(), _NotARing(), 0.5, np.random.default_rng(0)) is None
+    assert interceptor.fired is False
+
+    class _ARing:
+        rule_name = "ring_system_grow"
+        action = _cyclohexane_grow()
+
+    successor, rules = interceptor(_hexane(), _ARing(), 0.5, np.random.default_rng(0))
+    assert molecular_graph_to_smiles(successor) == "C1CCCCC1"
+    assert rules == ("ring_system_grow",)
+    assert interceptor.fired is True
+    # A second ring draw must NOT re-realize the plan.
+    assert interceptor(_hexane(), _ARing(), 0.5, np.random.default_rng(0)) is None
+
+
+def test_the_interceptor_disables_ring_growth_for_the_remainder() -> None:
+    # Otherwise the ordinary process would add rings on top of the plan and the
+    # realized marginal would not be p(R).
+    from compose_v4.experiments.denovo_ring_plan import FirstRingEventPlanInterceptor
+
+    model = _RingThenTerminalModel()
+    interceptor = FirstRingEventPlanInterceptor(
+        model, ((6,),), index=_index(), pin_signatures=True
+    )
+
+    class _ARing:
+        rule_name = "ring_system_grow"
+        action = _cyclohexane_grow()
+
+    interceptor(_hexane(), _ARing(), 0.5, np.random.default_rng(0))
+    assert model.disabled_sampling_rule_names == ("ring_system_grow",)
+
+
+def test_arm_c1_realizes_at_the_models_own_first_ring_event() -> None:
+    model = _RingThenTerminalModel()
+    record = sample_denovo_arm(
+        model,
+        arm="C1",
+        rng=np.random.default_rng(0),
+        source_prior=_TerminalPrior(),
+        index=_index(),
+        plan_prior=_FixedPlanPrior(((6,),)),
+        n_slots=40,
+        operational_horizon=0.2,
+        time_step=0.1,
+        max_events=8,
+    )
+    assert record["plan_trigger_fired"] is True
+    assert record["ring_plan"]["realized"] == [[6]]
+    assert record["smiles"] == "C1CCCCC1"
+    # The plan draw carried the pinned exclusion; the TRIGGER draw did not.
+    assert model.seen[0][1] == ()
+    assert model.seen[1][1] == _index().excluded_for((6,))
+
+
+def test_an_arm_that_never_draws_a_ring_records_an_unfired_trigger() -> None:
+    # A silently unrealized plan would read as a planned arm producing the
+    # control's ring distribution.
+    model = _RingThenTerminalModel(ring_draws=0)
+    record = sample_denovo_arm(
+        model,
+        arm="C1",
+        rng=np.random.default_rng(0),
+        source_prior=_TerminalPrior(),
+        index=_index(),
+        plan_prior=_FixedPlanPrior(((6,),)),
+        n_slots=40,
+        operational_horizon=0.2,
+        time_step=0.1,
+        max_events=8,
+    )
+    assert record["plan_trigger_fired"] is False
+    assert record["ring_plan"]["realized"] == []
+    assert record["ring_plan"]["requested"] == [[6]]
+
+
+def test_a_planned_arm_leaves_the_model_unrestricted_afterwards() -> None:
+    model = _RingThenTerminalModel()
+    sample_denovo_arm(
+        model,
+        arm="C1",
+        rng=np.random.default_rng(0),
+        source_prior=_TerminalPrior(),
+        index=_index(),
+        plan_prior=_FixedPlanPrior(((6,),)),
+        n_slots=40,
+        operational_horizon=0.2,
+        time_step=0.1,
+        max_events=8,
+    )
+    assert getattr(model, "disabled_sampling_rule_names", ()) == ()
+    assert getattr(model, "excluded_sampling_ring_template_indices", ()) == ()
+
+
+def test_an_interceptor_that_declines_leaves_the_process_byte_identical() -> None:
+    """The default path must be unchanged by the hook's existence."""
+
+    from compose_v4.experiments.tracelet_conditional import sample_tracelet_ancestral
+
+    def _run(interceptor):
+        return sample_tracelet_ancestral(
+            _RingThenTerminalModel(ring_draws=1),
+            rng=np.random.default_rng(11),
+            n_slots=40,
+            initial_state=_hexane(),
+            operational_horizon=0.3,
+            time_step=0.1,
+            max_events=8,
+            transition_interceptor=interceptor,
+        )
+
+    plain = _run(None)
+    declining = _run(lambda *_arguments: None)
+    # Non-vacuity: a comparison over two empty rollouts proves nothing.
+    assert list(plain.event_rules) == ["ring_system_grow"]
+    assert list(plain.event_rules) == list(declining.event_rules)
+    assert molecular_graph_to_smiles(plain.final_state) == molecular_graph_to_smiles(
+        declining.final_state
+    )

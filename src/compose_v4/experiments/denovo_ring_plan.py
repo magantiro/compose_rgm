@@ -305,13 +305,41 @@ def realize_ring_plan(
     return state, outcome
 
 
-# ---- The three arms ---------------------------------------------------------
+# ---- The arms ---------------------------------------------------------------
 
-#: Arm labels.  ``A`` is the shipped process; ``B`` and ``C`` share the
-#: earliness mechanism and differ only in whether the drawn plan's SIZES are
-#: pinned, so ``A -> B`` attributes earliness-plus-count and ``B -> C``
-#: attributes the size law.
-ARMS = ("A", "B", "C")
+#: Arm labels.  Two ingredients vary independently: WHERE the plan is realized
+#: (``0`` = at ``t = 0``, ``1`` = at the model's own first ring event) and WHAT
+#: is pinned (``B`` = the ring-system COUNT only, ``C`` = the full signature).
+#: ``A`` is the shipped process.  ``A -> B`` attributes earliness plus the
+#: count; ``B -> C`` attributes the size law; ``0 -> 1`` attributes the
+#: realization point.
+ARMS = ("A", "B0", "C0", "B1", "C1")
+
+#: ``t = 0`` is the literal reading of "as early as the support allows": the
+#: host is maximal on the pristine carbon tree.  But a ring-rich state at an
+#: early conditioning time is OFF-DISTRIBUTION -- in training, ring-rich states
+#: occur only late, where the process is winding down -- and the hazard head is
+#: a function of ``(state, time)``, so the continuation reads "nearly done".
+#: MEASURED on matched states: total hazard 21.1 on the bare tree against 5.2
+#: after installing the plan, a ~4x collapse that shows up as ~5x fewer
+#: subsequent events.  ``first_ring_event`` realizes the same plan at the state
+#: and time the model ITSELF first decides to commit a ring, which keeps the
+#: state on-distribution while the host is still largely intact.
+REALIZE_AT_START = "t0"
+REALIZE_AT_FIRST_RING_EVENT = "first_ring_event"
+
+
+def arm_configuration(arm: str) -> tuple[bool, str] | None:
+    """``(pin_signatures, realization_point)`` for a planned arm, else ``None``."""
+
+    if arm not in ARMS:
+        raise ValueError(f"unknown arm {arm!r}; known: {ARMS}")
+    if arm == "A":
+        return None
+    return (
+        arm.startswith("C"),
+        REALIZE_AT_START if arm.endswith("0") else REALIZE_AT_FIRST_RING_EVENT,
+    )
 
 
 def initial_frozen_time(time_step: float) -> float:
@@ -323,6 +351,56 @@ def initial_frozen_time(time_step: float) -> float:
     """
 
     return 1.0 - float(np.exp(-(0.0 + float(time_step)) / 2.0))
+
+
+class FirstRingEventPlanInterceptor:
+    """Realize the whole plan when the model first decides to commit a ring.
+
+    The trigger is the MODEL's own draw, not a clock: whatever state and
+    conditioning time the process has reached when it first chooses
+    ``ring_system_grow`` is where the plan lands.  That keeps the plan at the
+    earliest on-distribution moment rather than the earliest possible one.
+
+    Ring growth is disabled immediately afterwards, so the realized ring
+    marginal is the plan's and not the plan's plus whatever the process adds.
+    """
+
+    def __init__(
+        self,
+        model: Any,
+        plan: MoleculeRingSignature,
+        *,
+        index: CatalogSignatureIndex,
+        pin_signatures: bool,
+        runtime: Any | None = None,
+    ) -> None:
+        self._model = model
+        self._plan = plan
+        self._index = index
+        self._pin = pin_signatures
+        self._runtime = runtime or de_novo_rewrite_system()
+        self.outcome: RingPlanOutcome | None = None
+        self.fired = False
+
+    def __call__(self, state, sampled, frozen_time, rng):
+        if self.fired or sampled.rule_name != RING_GROW_RULE:
+            return None
+        self.fired = True
+        successor, outcome = realize_ring_plan(
+            self._model,
+            state,
+            self._plan,
+            rng=rng,
+            time_value=float(frozen_time),
+            index=self._index,
+            pin_signatures=self._pin,
+            runtime=self._runtime,
+        )
+        outcome.bin_provenance = {"realized_at_frozen_time": float(frozen_time)}
+        self.outcome = outcome
+        # From here the ordinary process continues WITHOUT ring growth.
+        self._model.disabled_sampling_rule_names = (RING_GROW_RULE,)
+        return successor, (RING_GROW_RULE,) * outcome.events
 
 
 def sample_denovo_arm(
@@ -352,8 +430,7 @@ def sample_denovo_arm(
     from compose_v4.chem.state import is_connected_or_null, is_valid_state
     from compose_v4.experiments.tracelet_conditional import sample_tracelet_ancestral
 
-    if arm not in ARMS:
-        raise ValueError(f"unknown arm {arm!r}; known: {ARMS}")
+    configuration = arm_configuration(arm)
     common = {
         "rng": rng,
         "n_slots": n_slots,
@@ -363,37 +440,64 @@ def sample_denovo_arm(
         "fiber_cache": fiber_cache,
         "rate_cache": rate_cache,
     }
-    if arm == "A":
+    plan_json: dict | None = None
+    plan_events = 0
+    trigger_fired: bool | None = None
+    if configuration is None:
         rollout = sample_tracelet_ancestral(model, source_prior=source_prior, **common)
-        plan_json: dict | None = None
-        plan_events = 0
     else:
         if index is None or plan_prior is None:
             raise ValueError(f"arm {arm} needs a catalog index and a plan prior")
+        pin_signatures, realization_point = configuration
         state = source_prior.sample(rng, n_slots=n_slots)
         host_atoms = int(np.count_nonzero(state.atom_types > 0))
         plan, provenance = plan_prior.sample_with_provenance(rng, host_atoms)
-        state, outcome = realize_ring_plan(
-            model,
-            state,
-            plan,
-            rng=rng,
-            time_value=initial_frozen_time(time_step),
-            index=index,
-            pin_signatures=(arm == "C"),
-            runtime=runtime,
-        )
-        outcome.bin_provenance = {**provenance, "host_atoms": host_atoms}
-        with restricted_ring_sampling(model, disable_ring_grow=True):
-            rollout = sample_tracelet_ancestral(model, initial_state=state, **common)
+        provenance = {**provenance, "host_atoms": host_atoms}
+        if realization_point == REALIZE_AT_START:
+            state, outcome = realize_ring_plan(
+                model,
+                state,
+                plan,
+                rng=rng,
+                time_value=initial_frozen_time(time_step),
+                index=index,
+                pin_signatures=pin_signatures,
+                runtime=runtime,
+            )
+            outcome.bin_provenance = provenance
+            with restricted_ring_sampling(model, disable_ring_grow=True):
+                rollout = sample_tracelet_ancestral(
+                    model, initial_state=state, **common
+                )
+        else:
+            interceptor = FirstRingEventPlanInterceptor(
+                model,
+                plan,
+                index=index,
+                pin_signatures=pin_signatures,
+                runtime=runtime,
+            )
+            # The context manager restores whatever the interceptor set, so a
+            # trajectory cannot leave ring growth disabled for the next one.
+            with restricted_ring_sampling(model):
+                rollout = sample_tracelet_ancestral(
+                    model, initial_state=state, transition_interceptor=interceptor, **common
+                )
+            trigger_fired = interceptor.fired
+            outcome = interceptor.outcome or RingPlanOutcome(
+                requested=plan, order=index.order_plan(plan)
+            )
+            outcome.bin_provenance = {**provenance, **outcome.bin_provenance}
         plan_json = outcome.to_json()
         plan_events = outcome.events
-    return {
+    record = {
         "arm": arm,
         "smiles": molecular_graph_to_smiles(rollout.final_state),
-        "events": len(rollout.event_times) + plan_events,
+        "events": len(rollout.event_times),
         "plan_events": plan_events,
-        "process_events": len(rollout.event_times),
+        "process_events": len(rollout.event_times) - (
+            plan_events if configuration and configuration[1] != REALIZE_AT_START else 0
+        ),
         "event_rules": list(rollout.event_rules),
         "valid_state": bool(is_valid_state(rollout.final_state)),
         "connected": bool(is_connected_or_null(rollout.final_state)),
@@ -402,3 +506,11 @@ def sample_denovo_arm(
         ),
         "ring_plan": plan_json,
     }
+    if trigger_fired is not None:
+        record["plan_trigger_fired"] = bool(trigger_fired)
+    if configuration is not None and configuration[1] == REALIZE_AT_START:
+        # Plan events happen before the CTMC starts, so they are not in
+        # ``rollout.event_times``; total work is the sum.
+        record["events"] = len(rollout.event_times) + plan_events
+        record["process_events"] = len(rollout.event_times)
+    return record
