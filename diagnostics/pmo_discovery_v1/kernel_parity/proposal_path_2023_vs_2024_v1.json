@@ -1,0 +1,23 @@
+{
+  "byte_identical": true,
+  "command": "PYTHONPATH=src:scripts <python> scripts/pmo_proposal_scoring_identity_gate.py --out <path>",
+  "committed_artifact": "diagnostics/pmo_discovery_v1/proposal_scoring_identity_gate_v1.json",
+  "committed_rdkit_version": "2024.03.5",
+  "headline": {
+    "candidates_checked": 144,
+    "recovered_fraction_every_row": 1.0,
+    "scored_candidates": 144,
+    "total_mismatches": 0,
+    "verdict": "PASS_PROPOSAL_IS_SCORED"
+  },
+  "oracle_calls": 0,
+  "rerun_interpreter": "~/compose_pmo_atlas_env/bin/python",
+  "rerun_rdkit_version": "2023.09.6",
+  "rerun_wall_seconds": 381.8,
+  "schema_version": "pmo_proposal_path_kernel_parity_v1",
+  "sha256_committed_2024_03_5": "d5a432788a5dcbc470291431d7126ff6523977a6f694d216bbd0c648cc0cf267",
+  "sha256_rerun_2023_09_06": "d5a432788a5dcbc470291431d7126ff6523977a6f694d216bbd0c648cc0cf267",
+  "verdict": "KERNEL_PARITY",
+  "what": "The PMO PROPOSAL PATH itself -- ProgramSearchConfig.program_only_recipe driving the real channels, not the offline transport planner -- re-run under the rdkit the PMO image actually pins.",
+  "why_a_wall_clocked_gate_reproduced_exactly": "The gate sets wall_seconds=20, which would normally make it non-reproducible. It reproduced byte-for-byte because every row stops on CAPACITY at 24 candidates checked, so the wall budget never binds on this machine. That is a property of this configuration, not a general guarantee: a slower host, a larger source or a raised candidate limit could let the clock bind, and the comparison would then need a load-independent work counter rather than a byte diff."
+}
