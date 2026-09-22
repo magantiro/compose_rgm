@@ -3719,3 +3719,42 @@ independently of whether fa7_0 ever closes.**
   probes held **2.14 GB total** -- killing them could not have fixed a 32 GB machine, and the
   pressure was in the compressor (~797k pages stored) and elsewhere. Measure the candidates' actual
   RSS against the shortfall before treating them as the cause.
+
+## 2026-09-21 (the constituent question has TWO answers: action-level and transition-level)
+
+- **CORRECTS the rule I set earlier ("a composite is an acceleration if every constituent is
+  individually rankable") -- that question has a per-PROMPT answer AND two different levels, and I
+  had collapsed them.** The linker v3 composite executes
+  `BondReroute(a=path_atom, b=far_anchor, u=new_atom, v=far_anchor)`, whose moved endpoint `u` is
+  NOT an endpoint of the cut, while the model's graft is a RESTRICTED reroute in which the moved
+  atom IS a cut endpoint. So:
+      as an ACTION      unavailable on **10 of 10** released prompts (universal, explains WHY)
+      as a TRANSITION   compared on the SUCCESSOR MOLECULE, recovered on **2 of 10**,
+                        missing on 8 at a 16,384-draw cap
+  **Report both. The action statement explains the mechanism; the TRANSITION statement decides
+  whether the composite is an acceleration or an extension, and only the second governs.**
+- **VERDICT: v3 is a capability EXTENSION on 8 of 10 prompts and an acceleration on 2**, and must be
+  declared rather than wrapped. That is the same class as de novo's ring-installation host scope: a
+  declared capability boundary, measured rather than assumed.
+- **THE TRADE MUST BE SHOWN, both arms:** the IN-SUPPORT route (close-then-open) reaches a length-2
+  linker on **4 of 10** drugs; the REACHING route (insert-then-reroute) reaches it on **10 of 10** by
+  hand but is outside the model's support on 8. Neither number alone is the result.
+- **Refusing to generalise the one explanation that fits is what separates a finding from a story.**
+  ERLOTINIB recovers because the model offers to move the far-core anchor 100 of 520 times -- the
+  only model-shaped route to that molecule. LIOTHYRONINE recovers with the far anchor moved **zero**
+  times, so a second route exists the census does not identify (most likely two different actions
+  landing on one canonical molecule). Recorded as UNEXPLAINED rather than folded into the first
+  mechanism.
+- **Two independent instruments at different budgets agreeing is what makes a negative safe.** A
+  4,000-draw support census and an escalate-to-16,384 scoring probe agreed on every prompt where
+  both reported; where they could not both be powered (MARIBAVIR drew 11 reroutes in 4,000), the
+  census negative was explicitly marked the WEAK one and the escalating probe was the instrument.
+- **A KNOB CAN BE PLUMBED THROUGH EVERY LAYER A READER CHECKS AND STILL NOT BE RECORDED.** The suite
+  runner accepted `--linker-bridge-atoms` and `--path-program`, passed both correctly, and wrote
+  shards containing **no realized length, no seeded length, no transaction count**. A 60-shard
+  matched arm was launched and stopped 27 minutes in on that. **Wiring a knob and recording what it
+  did are two different jobs, and only the second makes the run answerable.**
+- **`starmap` yields IN ORDER, so a slow first shard makes a healthy 60-container fan-out look
+  dead** -- nothing prints until shard #1 returns, and containers capture subprocess output so
+  `modal app logs` is empty too. Check the TASK COUNT, not the log, and do not restructure a fan-out
+  mid-run on the strength of silence.
