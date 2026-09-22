@@ -40,7 +40,17 @@ def main() -> int:
     sealed_sha = hashlib.sha256(PREDECLARATION.read_bytes()).hexdigest()
     alpha = float(sealed["alpha"])
     minimum_effect = float(sealed["minimum_effect_of_interest"])
+    # The one threshold the seal states in prose rather than as a field. It is NOT added
+    # to the sealed file -- editing a predeclaration after sealing is the thing sealing
+    # exists to prevent -- so the transcription is checked against the prose instead, and
+    # a drift in either direction aborts before any verdict is computed.
     reject_below = 0.20
+    underpowered = sealed["sample_size"]["underpowered_region_declared_in_advance"]
+    if f"below {reject_below:.2f}" not in underpowered:
+        raise ValueError(
+            "the REJECTED threshold transcribed here is not the one the sealed "
+            f"predeclaration states: {underpowered!r}"
+        )
     required_n = int(sealed["sample_size"]["n_declared_options_minimum"])
     required_seeds = int(sealed["sample_size"]["independent_seeds_minimum"])
 
