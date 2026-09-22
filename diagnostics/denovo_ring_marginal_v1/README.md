@@ -23,6 +23,35 @@ downstream of the rates can repair that: on 3 of 12 audited rollout states
 EVERY legal template is a small ring, so the model has no non-small option to
 choose. See `diagnostics/denovo_ring_support_host_v1/FINDING.md`.
 
+## Answer
+
+**Yes for the ring-size law, partly for the ring-system law, and it is free.**
+
+Arm C1 reproduces the corpus per-ring SIZE law (TV 0.030 against arm A's 0.209)
+and the ring-system SIGNATURE law (0.066 against 0.258), with bootstrap
+intervals that contain the corpus values and do not overlap arm A's. Molecules
+carrying a 3- or 4-ring fall 57.9% to 6.0% (z = 9.96).
+
+It does NOT reproduce the ring-system COUNT law: it improves it (0.317 to
+0.201) but under-delivers 2.13 systems per molecule against the corpus 2.61,
+because 18.8% of requested systems find no host and are dropped. Arm B1, which
+pins only the count, is the best arm on count (0.071) for exactly that reason.
+**No single arm wins all three laws, and the gap is the realization defect, not
+the factorization.**
+
+Nothing was paid for it. Published quality is flat (0.121 vs 0.113, z = 0.22),
+as are QED pass (z = 0.72), SA pass (z = 0.88), validity and uniqueness (1.000)
+and diversity (0.8900 vs 0.8897). Mean QED falls 0.522 to 0.457 raw, but that is
+attributable to the ring-system shortfall: adding ring-system count to the
+regression collapses the arm term to -0.024 +- 0.021.
+
+Two further findings worth reading the artifacts for: on a FULL host the model
+already samples the corpus ring law and does so independently of conditioning
+time (`ring_time_sensitivity_v1.json`), which confirms the diagnosis at the
+model's own conditional law; and the realization failures are host exhaustion,
+monotone in plan position, with the most-demanding-first ordering already
+protecting the fused systems.
+
 ## Files
 
 | file | what it is |
