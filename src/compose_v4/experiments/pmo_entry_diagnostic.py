@@ -739,6 +739,49 @@ register_arm(
 )
 
 
+#: The DEPLOYED controller's own proposal pool, read from a completed blind
+#: run rather than regenerated.  It is not a registered generator -- it cannot
+#: be drawn from -- but it is described here so the report has one place to
+#: look up an arm, and its provenance tags are the controller's OWN
+#: ``planner_channel`` strings, never re-derived.
+PRODUCTION_ARM = "arm0_production_blind_run"
+
+OBSERVED_ARMS: dict[str, dict[str, Any]] = {
+    PRODUCTION_ARM: {
+        "role": "observed_production",
+        "label": "the deployed controller's own proposals, from the Test C blind runs",
+        "channels": (
+            "shallow_program_channel",
+            "structured_program_channel",
+            "joint_dependency_region_jump",
+        ),
+        "provenance_class": {
+            "shallow_program_channel": "local_search",
+            "structured_program_channel": "broad_exploration",
+            "joint_dependency_region_jump": "donor_transport",
+        },
+        "source": (
+            "~/compose_pmo_atlas_runs/test_c_blind/<task>__blind_250/campaign/"
+            "round_*/pending.json"
+        ),
+        "why": (
+            "The regenerated arm 1 is a reconstruction of the proposal mechanism "
+            "from stored parents. This arm is the run itself: every attempt the "
+            "controller actually made, in round order, with the charged calls "
+            "marked, so a first CALL index exists here and nowhere else in this "
+            "harness."
+        ),
+        "excluded": (),
+    }
+}
+
+
+def arm_describe(name: str) -> dict[str, Any] | None:
+    if name in ARM_REGISTRY:
+        return ARM_REGISTRY[name]["describe"]
+    return OBSERVED_ARMS.get(name)
+
+
 # ---- Entry curves ----
 
 

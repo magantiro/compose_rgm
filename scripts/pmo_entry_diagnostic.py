@@ -42,12 +42,15 @@ from compose_v4.experiments.pmo_entry_diagnostic import (
     GATE_TASKS,
     INIT_MEDIAN_QED,
     MATCHED_PROPOSALS,
+    OBSERVED_ARMS,
     PASS_CRITERION,
+    PRODUCTION_ARM,
     REGIME,
     REGIME_STATEMENT,
     RUNGS,
     Parent,
     arm,
+    arm_describe,
     assert_predicate_sealed,
     best_rung,
     drug_likeness,
@@ -443,6 +446,172 @@ def phase_measure(args: argparse.Namespace) -> int:
     return 0
 
 
+# ---- production observation ----
+
+
+def phase_production(args: argparse.Namespace) -> int:
+    """Score the DEPLOYED controller's own proposal pool. No draws, no calls.
+
+    Every attempt the blind run made is stored with its endpoint and its
+    ``planner_channel``, so this arm answers the same six questions on the run
+    itself rather than on a reconstruction -- and it is the only arm for which a
+    first CHARGED CALL index exists, because the charged ledger is right there.
+    """
+
+    repo_root = Path(args.repo_root).resolve()
+    predicate = assert_predicate_sealed(repo_root)
+    regions = load_productive_regions(repo_root)
+    task = args.task
+    region = regions[task]
+    folder = _blind_dir(task)
+    rows = read_blind_trajectory(folder)
+    charged = {row.endpoint: row.index for row in rows}
+    describe = OBSERVED_ARMS[PRODUCTION_ARM]
+    began = time.time()
+
+    proposals: list[dict[str, Any]] = []
+    index = 0
+    round_dirs = sorted((folder / "campaign").glob("round_*"))
+    if not round_dirs:
+        raise SystemExit(f"no campaign rounds under {folder}")
+    for round_dir in round_dirs:
+        pending = round_dir / "pending.json"
+        if not pending.is_file():
+            continue
+        batch = json.loads(pending.read_text())["batch"]
+        for attempt in batch["attempts"]:
+            index += 1
+            channel = attempt.get("planner_channel")
+            endpoint = attempt.get("endpoint")
+            size = attempt.get("program_size") or {}
+            row: dict[str, Any] = {
+                "proposal_index": index,
+                "round": int(round_dir.name.split("_")[-1]),
+                "status": "executed" if endpoint else "refused",
+                "attempt_status": attempt.get("status"),
+                "channel": channel,
+                "provenance_class": describe["provenance_class"].get(channel, channel),
+                "endpoint": endpoint,
+                "primitive_count": size.get("primitive_count")
+                or size.get("scheduled_blocks"),
+                "parent_endpoint": None,
+                "parent_stratum": None,
+                "parent_heavy_atoms": size.get("measured_parent_heavy_atoms"),
+                "parent_measured_score": attempt.get("parent_measured_score"),
+                "charged_call_index": charged.get(endpoint) if endpoint else None,
+            }
+            if endpoint is None:
+                row.update(
+                    {
+                        "similarity": None,
+                        "similarity_wide": None,
+                        "nearest_reference": None,
+                        "nearest_reference_wide": None,
+                        "rung": None,
+                        "scaffold": None,
+                        "qed": None,
+                        "heavy_atoms": None,
+                    }
+                )
+            else:
+                primary, nearest = region.approach(endpoint, "primary")
+                wide, nearest_wide = region.approach(endpoint, "wide")
+                row.update(
+                    {
+                        "similarity": round(primary, 6),
+                        "similarity_wide": round(wide, 6),
+                        "nearest_reference": nearest,
+                        "nearest_reference_wide": nearest_wide,
+                        "rung": best_rung(primary),
+                        "scaffold": murcko_scaffold(endpoint),
+                    }
+                )
+                row.update(drug_likeness(endpoint))
+            proposals.append(row)
+
+    entrants = [row for row in proposals if row["rung"] is not None]
+    descendants = []
+    for row in entrants[: args.descendant_entrants]:
+        probe = _descendant_probe(
+            row["endpoint"],
+            region,
+            args.descendant_draws,
+            stable_seed(DIAGNOSTIC_SCHEMA, "descendants", task, row["endpoint"]),
+        )
+        if probe is not None:
+            descendants.append({**probe, "proposal_index": row["proposal_index"]})
+
+    parent_similarity = {
+        row.endpoint: round(region.approach(row.endpoint, "primary")[0], 6) for row in rows
+    }
+    payload = {
+        "schema_version": "pmo_entry_diagnostic_shard_v2",
+        "information_regime": REGIME,
+        "information_regime_statement": REGIME_STATEMENT,
+        "charged_oracle_calls": 0,
+        "new_oracle_calls": 0,
+        "reuses_charged_calls_from": str(folder),
+        "task": task,
+        "arm": PRODUCTION_ARM,
+        "arm_describe": describe,
+        "predicate_sha256": payload_sha256(predicate),
+        "delta": ENTRY_DELTA,
+        "rungs": [list(rung) for rung in RUNGS],
+        "proposal_budget": len(proposals),
+        "proposals_drawn": len(proposals),
+        "parents": len({row["parent_measured_score"] for row in proposals}),
+        "parent_similarity_primary": parent_similarity,
+        "parents_already_in_region": sum(
+            1 for value in parent_similarity.values() if value >= ENTRY_DELTA
+        ),
+        "parent_rows": [
+            {
+                "endpoint": row.endpoint,
+                "blind_score": row.score,
+                "role": row.role,
+                "charged_call_index": row.index,
+                "heavy_atoms": row.heavy_atoms,
+                "score_stratum": "charged_trajectory",
+            }
+            for row in rows
+        ],
+        "parent_qed": {row.endpoint: drug_likeness(row.endpoint)["qed"] for row in rows},
+        "init_median_qed": INIT_MEDIAN_QED,
+        "realized_strata": {
+            "by_score_stratum": {"charged_trajectory": len(rows)},
+            "by_role": {
+                "initialization": sum(1 for r in rows if r.role == "initialization"),
+                "candidate": sum(1 for r in rows if r.role == "candidate"),
+            },
+            "blind_score_min": round(min(r.score for r in rows), 6),
+            "blind_score_max": round(max(r.score for r in rows), 6),
+            "heavy_atoms_min": min(r.heavy_atoms for r in rows if r.heavy_atoms),
+            "heavy_atoms_max": max(r.heavy_atoms for r in rows if r.heavy_atoms),
+            "heavy_atoms_median": statistics.median(
+                [r.heavy_atoms for r in rows if r.heavy_atoms]
+            ),
+        },
+        "region": {
+            "primary": list(region.primary),
+            "wide_count": len(region.wide),
+            "test_b_anchor_top_ten": region.anchor_top_ten,
+        },
+        "descendant_probes": descendants,
+        "descendant_probe_draws": args.descendant_draws,
+        "elapsed_seconds": round(time.time() - began, 2),
+        "software": _software(),
+        "proposals": proposals,
+    }
+    _write(Path(args.output), payload)
+    best = max((r["similarity"] for r in proposals if r["similarity"] is not None), default=0.0)
+    print(
+        f"{task} production attempts={len(proposals)} entrants={len(entrants)} "
+        f"maxsim={best:.4f} rung={best_rung(best)} -> {args.output}",
+        flush=True,
+    )
+    return 0
+
+
 # ---- report ----
 
 
@@ -545,7 +714,10 @@ def _prefix_block(rows, region_wide_count: int, at: int) -> dict[str, Any]:
             "proposals": len(hit),
             "rate": round(len(hit) / len(prefix), 6) if prefix else None,
             "first_proposal_index": hit[0]["proposal_index"] if hit else None,
-            "first_charged_call_index": None,
+            "first_charged_call_index": next(
+                (row["charged_call_index"] for row in hit if row.get("charged_call_index")),
+                None,
+            ),
         }
     provenance: dict[str, int] = {}
     for row in entrants:
@@ -801,8 +973,8 @@ def phase_report(args: argparse.Namespace) -> int:
             for block in per_task.values()
         )
         arms[name] = {
-            "role": ARM_REGISTRY[name]["describe"]["role"] if name in ARM_REGISTRY else "unknown",
-            "describe": ARM_REGISTRY[name]["describe"] if name in ARM_REGISTRY else None,
+            "role": (arm_describe(name) or {}).get("role", "unknown"),
+            "describe": arm_describe(name),
             "tasks": sorted(per_task),
             "total_proposals": total,
             "total_entries": entries,
@@ -898,6 +1070,13 @@ def main(argv: list[str] | None = None) -> int:
     measure.add_argument("--descendant-draws", type=int, default=32)
     measure.add_argument("--output", required=True)
     measure.set_defaults(handler=phase_measure)
+
+    production = sub.add_parser("production")
+    production.add_argument("--task", required=True, choices=sorted(GATE_TASKS))
+    production.add_argument("--descendant-entrants", type=int, default=8)
+    production.add_argument("--descendant-draws", type=int, default=32)
+    production.add_argument("--output", required=True)
+    production.set_defaults(handler=phase_production)
 
     report = sub.add_parser("report")
     report.add_argument("--inputs", nargs="+", required=True)
