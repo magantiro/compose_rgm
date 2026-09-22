@@ -3172,3 +3172,76 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   and note it presented initially as a kernel difference, which it was not, because BOTH
   kernels produced the same fresh file. When a fresh run differs from a committed artifact,
   check the artifact's commit against its producer's commit before blaming the environment.
+
+## 2026-09-21 (PMO discovery: the scaffold-preserving bridge exists, is unwired, and the cut draw is the whole knob)
+
+- **BEFORE BUILDING A GOAL GENERATOR, ASK WHETHER THE MECHANISM IS ALREADY THERE AND
+  UNREACHABLE. It was.** `compose_v4.control.donor_program` does population-derived
+  pendant exchange between two COMPLETE molecules (`pendant_cuts`, `transplant_plan`,
+  `compile_transplant`), has five experiment callers, and is **absent from the scored PMO
+  entry point's 118-module import closure** -- as is `donor_memory`. So is
+  `pmo_transport_correspondence` / `pmo_transport_staging`. `pmo_online_memory` (arm B),
+  `pmo_discovery` (arm C) and `bridge_region_law` ARE in it. Third time this repo has paid
+  for an inert mechanism; `scripts/pmo_production_closure_audit.py` now makes it a command.
+- **AN ABSENCE CLAIM NEEDS BOTH SIGNALS, AND EACH ALONE IS WRONG IN A DIFFERENT
+  DIRECTION.** A module missing from `sys.modules` after importing the entry point may
+  still be imported DEFERRED inside a function body -- `pmo_option_particles.py:320` does
+  exactly that with `donor_memory`. And a source scan for the bare leaf name collides with
+  LOCAL VARIABLES: `adaptive_program_optimizer` binds a local called `donor_program` seven
+  times, which reads as seven hits on a module that is not there. Report the closure
+  membership and the DOTTED source references separately, and keep bare-name hits in their
+  own column labelled as collisions.
+- **"THE GENERIC PAIR COMPILER DEMOLISHES TO NULL" DOES NOT TRANSFER TO THE TRANSPLANT
+  COMPILER, AND THE REASON IS STRUCTURAL.** `compile_source_to_target` is the only
+  compiler accepting an ARBITRARY pair and is `delete_to_null_then_construct_v1`
+  (retained_fraction 0.000 on 4 of 4). `compile_transplant` does not accept an arbitrary
+  pair: it CONSTRUCTS its target from an explicit retained/added split (source minus one
+  pendant, plus one donor pendant) and then RAISES if replay changed a retained slot's
+  element, charge or connectivity. It cannot route through null. The earlier conclusion
+  "a scaffold-preserving bridge does not exist today" is correct for arbitrary pairs and
+  must not be quoted as a statement about donor recombination -- check the pair-acceptance
+  contract of a compiler before transferring a route-shape result onto it.
+- **PRESERVATION IS GUARANTEED; THE RETAINED FRACTION IS NOT, AND IT IS THE CUT DRAW.**
+  `donor_memory.RECIPE` ships `cut_distribution: uniform_oriented_single_bridge`. MEASURED,
+  60 pairs from a completed 250-call charged celecoxib ledger, same pairs / same order /
+  same compiler, differing ONLY in the cut draw (rdkit 2023.9.6, 0 oracle calls):
+        arm                 compiled  novel  retained med  retained>=0.5  steps med
+        uniform (shipped)    142/240   136      0.324           46            36
+        retentive            155/240   139      0.722          121            17
+  **The steps column is the one that decides something.** This branch measured PMO's
+  realization ceiling at **23 primitives**: the shipped uniform draw produces a median
+  36-primitive program, ABOVE the ceiling, and the retentive draw 17, BELOW it. So a
+  uniform cut distribution does not merely waste draws -- it puts the median donor
+  transplant OUTSIDE what the controller can realize. Median QED 0.426 -> 0.434 and SA
+  3.58 -> 3.71, so retention is not bought with worse chemistry.
+  This is the SAME SHAPE as the T4 region-law defect (an unconditioned region draw, not the
+  executor, was the binding constraint) reappearing on the PMO donor path. `pendant_cuts`
+  returns oriented single-bond bridges -- the same object class `BridgeRegionLaw` weights --
+  so the repair is very likely a REUSE of that law rather than a new one. Check before
+  writing.
+- **Report the honest cost of a tilt in the status census, not just its win.** The
+  retentive arm's `self_proposal` rises **1 -> 24 of 240**: a strongly retentive draw
+  sometimes picks a cut that reproduces the source. Its
+  `mapping_violates_charged_center_policy` falls 20 -> 6, and `unsupported_size` 70 -> 54.
+  A single headline ratio hides all three.
+- **The tilt must RE-RANK and never filter, and the floor must be tested WHERE IT BINDS.**
+  `max(0.05, exp(-released/0.25))` keeps every cut the uniform arm can draw strictly
+  positive, so an arm difference cannot be one arm reaching molecules the other cannot. The
+  floor only binds above ~0.75 released, so the guard uses a 34-of-35 cut -- a floor test
+  that never reaches a negative margin passes against a law mutated from re-ranking into
+  filtering (recorded twice before, and the mutation `retentive_filters_instead_of_reranking`
+  is in the battery for exactly that).
+- **Information regime is a TEST, not a comment.** `diagnostics/pmo_banks_all.json` holds
+  100 scored molecules per task -- celecoxib 0.374-0.458, ABOVE the 1k A/B's best of 0.384
+  -- and is inadmissible: `uncounted_calls: 249455` per bank, i.e. a prescreen. The driver
+  reads a COMPLETED charged run's ledger (`pmo_3x250_autopsy_v1.json` ->
+  `celecoxib_distance.all_rows`, 250 rows, `endpoint` + `charged_score`, 235 non-zero) and a
+  mutation that repoints it at the bank is KILLED by a named test.
+  NB the same autopsy's gsk3b arm is all-zero and marked `INVALID_ORACLE_RUNTIME_RELATIVE_PATH`
+  in `pmo_run_status_ledger.json`; the celecoxib and perindopril arms of that run are VALID.
+- **The 1,000-call A/B molecules are NOT on local disk** -- `pmo_ab_1k_result_v1.json` and
+  its checkpoints hold counters only, zero SMILES. The ledger lives on the Modal volume at
+  `pmo_population_controller_v1/<run_id>/<task>/oracle/query_*/result.json` (and the archive
+  snapshot under `campaign/round_*/complete.json`), with `scripts/pmo_ab_1k_checkpoints.py`
+  as the source of truth for those paths. Any "current-run donor pool" larger than 250
+  molecules has to be pulled down first.
