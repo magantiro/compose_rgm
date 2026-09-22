@@ -12,6 +12,22 @@
   "cell": "fa7_0",
   "delta": 0.6,
   "docking_calls": 0,
+  "docking_reproducibility_observation": {
+    "consequence": "cross-run docking comparisons for the same molecule are not reproducible to better than about a kcal/mol on this evidence. That is wider than several reported COMPOSE-vs-IVG margins on the frozen panel (0.2 to 0.7), so it bears on the whole table and not just this cell. It does NOT invalidate a within-run search, where every candidate and the incumbent are scored by the same pipeline",
+    "measured": {
+      "molecule": "the fa7_0 seed itself (the root docking call)",
+      "n": "three observations of ONE molecule; the panel value came from a different arm",
+      "scores_across_runs": {
+        "panel_run": -7.5,
+        "run_4321b8b1": -8.3,
+        "run_727d9db5": -8.8
+      },
+      "spread_kcal_per_mol": 1.3
+    },
+    "mechanism_verified_in_source": "qvina02 IS seeded -- t4_docking_adapter.dock_t4 passes --seed from the contract's docking_seed, and the box is fixed -- but the 3D conformer it docks is built by `obabel --gen3D`, which takes NO seed. So the ligand pose handed to a deterministic docker differs between runs, and the same SMILES scores differently",
+    "not_acted_on_here": "seeding conformer generation would change the docking adapter, which is pinned by every T4 contract including the frozen panel's. That is an owner decision about the benchmark harness, not something to change inside a single-cell run",
+    "status": "INFERRED mechanism, MEASURED spread -- not independently confirmed by a repeated-conformer experiment"
+  },
   "expansion_sizing_rationale": {
     "caveat": "this expectation extrapolates a rate estimated from ONE eligible endpoint in 1440 draws. It is a sizing argument, not a measurement of the event, and the anchored lane's rate is not separately established",
     "expected_eligible_from_the_shallow_lane_alone": 4.67,
