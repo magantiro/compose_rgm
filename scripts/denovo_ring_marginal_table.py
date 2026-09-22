@@ -85,7 +85,7 @@ def render(report: dict) -> str:
 
     lines.append("PRESERVED QUANTITIES (a ring repair bought by regressing these is not one)")
     preserved = (
-        f"{'row':<26}{'validity':>10}{'uniqueness':>12}{'quality':>10}"
+        f"{'row':<26}{'validity':>10}{'uniqueness':>12}{'quality':>16}"
         f"{'diversity':>11}{'mean QED':>10}{'mean SA':>9}{'heavy':>8}{'events':>8}"
     )
     lines.append(preserved)
@@ -101,7 +101,7 @@ def render(report: dict) -> str:
             f"{'arm ' + arm:<26}"
             f"{metrics['validity']:10.3f}"
             f"{metrics['uniqueness']:12.3f}"
-            f"{quality:>10}"
+            f"{quality:>16}"
             f"{metrics['diversity']:11.4f}"
             f"{metrics['mean_qed']:10.3f}"
             f"{metrics['mean_sa']:9.3f}"
