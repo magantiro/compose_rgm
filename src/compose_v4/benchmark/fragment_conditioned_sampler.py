@@ -427,16 +427,30 @@ class RegionLock:
 def _attempt_path_transaction(
     model, system, state, controller, lock, rng, receipt, *, payload_draws: int = 32
 ):
-    """Execute the three-event path-lengthening transaction, or return None.
+    """Execute the two-event path-lengthening transaction, or return None.
 
-    ATOMIC: all three events must execute and the final state must satisfy the
-    region lock and the interface controller, or nothing is committed and the
-    caller keeps the state it had.  Each constituent is a move the proposal law
-    can rank -- measured IN_SUPPORT on every constituent of every drug where the
-    transaction executes -- so this is an ACCELERATION: it performs in sequence
-    what the prior can propose but essentially never proposes in order.  With
-    the program off, 1,440 events across 120 rollouts never once lengthened a
-    path.
+    ATOMIC: both events must execute and the final state must satisfy the region
+    lock and the interface controller, or nothing is committed and the caller
+    keeps the state it had.
+
+    SCOPE OF THE CONSTITUENTS, measured and NOT the claim this docstring used to
+    make.  The earlier version said every constituent was IN_SUPPORT for the
+    proposal law and called the composite an ACCELERATION.  That described the
+    v2 route (insert, ring-close, open), it overstated even that -- the v2 probe
+    left one ring-close UNRESOLVED at 16,384 draws -- and it does not describe
+    this one.  For v3 the ``atom_insert`` constituent is recovered; the
+    ``bond_reroute`` constituent is NOT, at a budget derived from the measured
+    per-draw rate and again at a 16,384-draw cap.  The ``bond_reroute`` FAMILY
+    fires at 1.5-14% of draws at the very same state, so this is not a missing
+    family: v3 removes ``(path_atom, far_anchor)`` and inserts
+    ``(new_atom, far_anchor)``, whose moved endpoint is not an endpoint of the
+    cut, and the only model-shaped action reaching the same molecule would have
+    to relocate the far CORE anchor, which the pendant-graft enumeration never
+    offers.  So this is a capability EXTENSION and has to be declared as one.
+
+    With the program off, 1,440 events across 120 rollouts never once lengthened
+    a path, and 1 of 172 committed baseline endpoints reached a longer path
+    unaided.
 
     The prior chooses WHAT to insert and the constraint chooses WHERE, which is
     the same division the attachment redirection already uses: the inserted
