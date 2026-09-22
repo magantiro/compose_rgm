@@ -212,6 +212,22 @@ def build(status: str) -> dict:
                 "the parent contract"
             ),
         },
+        "authorization": {
+            "scope": "fa7_0 at delta=0.6 only, up to 248 charged docking calls",
+            "sentence": (
+                "Run a support-expanded search on ONE cell -- fa7_0 at delta 0.6 -- and "
+                "keep going until it produces an ELIGIBLE molecule with a docking score, "
+                "or the budget is spent. AUTHORIZED SPEND: up to 248 charged docking "
+                "calls, cell fa7_0 only. Not one more, no other cell."
+            ),
+            "granted_by": "owner, task brief 2026-09-22",
+            "enforced_by": [
+                "charged_calls_per_cell and total_charged_call_ceiling are both 248",
+                "cells carries fa7_0 alone, and the wrapper refuses any other list",
+                "the ledger binds on state.budget, which is initialised from "
+                "charged_calls_per_cell and decremented once per docked query",
+            ],
+        },
         "claim_boundary": (
             "SEPARATE, VERSIONED SUPPORT-EXPANSION ARM for fa7_0 at delta=0.6, under its "
             "own contract identity, app and volume. Its proposal law DIFFERS from the v1 "
