@@ -172,20 +172,50 @@ def _runtime_versions() -> dict[str, str]:
     }
 
 
+#: The modules that decide what a shard contains.  A shard is reused only when
+#: these are byte-identical, because a cache keyed on its INPUTS alone silently
+#: reuses rows produced by different rules -- which is how a defect fixed in the
+#: arm logic would survive into the run that was supposed to have fixed it.
+ARM_IMPLEMENTATION_RELATIVE_PATHS = (
+    "src/compose_v4/experiments/denovo_ring_plan.py",
+    "src/compose_v4/eval/denovo_ring_marginal.py",
+    "src/compose_v4/experiments/tracelet_conditional.py",
+)
+
+
+def _implementation_root() -> Path:
+    """Wherever the copied tree lives -- the image remotely, the repo locally."""
+
+    return REMOTE_ROOT if (REMOTE_ROOT / "src").is_dir() else ROOT
+
+
+def arm_implementation_sha256() -> str:
+    import hashlib
+
+    digest = hashlib.sha256()
+    root = _implementation_root()
+    for relative in ARM_IMPLEMENTATION_RELATIVE_PATHS:
+        digest.update(relative.encode())
+        digest.update((root / relative).read_bytes())
+    return digest.hexdigest()
+
+
 def design_tag(total: int, prior_sha256: str, horizon: float = OPERATIONAL_HORIZON) -> str:
     """The FULL identity of a sampling design, used as the shard directory.
 
     Everything that changes which molecules a shard contains is in the tag:
     the weights, the trajectory-seed family (which depends on ``total``), the
-    horizon and the plan prior.  Keying a shard by its seed alone has already
-    pooled two designs into one headline number in this repository's
-    published-benchmark path.
+    horizon, the plan prior AND the arm implementation.  Keying a shard by its
+    seed alone has already pooled two designs into one headline number in this
+    repository's published-benchmark path, and keying it by inputs alone would
+    let a run reuse rows its own bugfix invalidated.
     """
 
     return (
         f"m{MODEL_LABEL}_n{int(total)}"
         f"_h{float(horizon):.1f}".replace(".", "p")
         + f"_p{prior_sha256[:12]}"
+        + f"_i{arm_implementation_sha256()[:12]}"
     )
 
 
@@ -722,6 +752,29 @@ def score(total: int, prior_sha256: str, horizon: float = OPERATIONAL_HORIZON) -
             for plan in plans:
                 for _system, reason in plan["unrealized"]:
                     reasons[reason] = reasons.get(reason, 0) + 1
+            # Did the ring skeleton the plan installed SURVIVE the
+            # continuation?  Compared per molecule against the endpoint's own
+            # signature, so a planned ring later deleted, or a ring the process
+            # added anyway, shows up instead of being assumed away.
+            survived = 0
+            comparable = 0
+            for item in records:
+                plan = item.get("ring_plan")
+                if not plan or not item.get("smiles"):
+                    continue
+                endpoint = ring_system_signature_of_smiles(str(item["smiles"]))
+                if endpoint is None:
+                    continue
+                comparable += 1
+                installed = tuple(
+                    sorted(tuple(int(size) for size in system) for system in plan["realized"])
+                )
+                survived += int(endpoint == installed)
+            triggers = [
+                item["plan_trigger_fired"]
+                for item in records
+                if "plan_trigger_fired" in item
+            ]
             row["plan_realization"] = {
                 "plans": len(plans),
                 "requested_systems": requested,
@@ -738,6 +791,13 @@ def score(total: int, prior_sha256: str, horizon: float = OPERATIONAL_HORIZON) -
                     if plan.get("bin_provenance", {}).get("bin_fallback")
                 )
                 / len(plans),
+                "endpoint_matches_installed_skeleton": (
+                    survived / comparable if comparable else 0.0
+                ),
+                "endpoint_comparisons": comparable,
+                "plan_trigger_fired_fraction": (
+                    float(np.mean(triggers)) if triggers else None
+                ),
             }
         report["arms"][arm] = row
 
