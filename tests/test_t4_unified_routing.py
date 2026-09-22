@@ -352,3 +352,54 @@ def test_the_mechanisms_own_precondition_does_not_match_the_binary_and_this_is_r
     )
     assert len(with_sites) == 10, sorted(with_sites)
     assert len(state_aware) == 3, sorted(state_aware)
+
+
+# ---- Out-of-panel controls: the binary's one measured counterexample -------------
+
+
+def test_the_routing_tracks_charge_and_not_amine_presence():
+    """A NEUTRAL tertiary amine has protonation sites and still routes `region`.
+
+    This is the control that separates "the rule reads charge" from "the rule reads
+    the same chemistry the protonation kernel needs". It matters because the
+    mechanism's own precondition holds on ten of the fifteen panel sources while the
+    shipped binary holds on three.
+    """
+
+    from compose_v4.control.t4_unified_routing import kernel_allocation_agreement
+
+    applicability = _applicability("CCN(CC)CCc1ccccc1")
+    assert applicability.protonation_sites > 0
+    assert applicability.net_formal_charge == 0
+    assert applicable_kernel_if_exhausted(applicability) == "region"
+    assert kernel_allocation_agreement(applicability)["agree"]
+    assert charge_refused_region_share(applicability) == 0.0
+
+
+def test_a_zwitterion_is_a_measured_counterexample_to_the_binary_rule():
+    """MEASURED, out of panel, and it is the strongest argument for the graded form.
+
+    Phenylalanine-like zwitterion: net formal charge 0, so the shipped binary routes
+    it `region` -- yet the executor's charge policy refuses 9 of its 12 pendant
+    excisions, so the region kernel has lost three quarters of its support and the
+    graded portfolio routes it `state_aware`.
+
+    Net charge is a coarse proxy for "the charge policy will block structural
+    excision". It happens to be exact on the fifteen T4 leads, where every charged
+    source carries a single net charge, and it is WRONG here. Pinned so the
+    brittleness is a recorded fact rather than an opinion, and so a future switch to
+    the graded rule has a concrete reason attached to it.
+    """
+
+    from compose_v4.control.t4_unified_routing import (
+        graded_dominant_kernel,
+        kernel_allocation_agreement,
+    )
+
+    applicability = _applicability("[NH3+]C(Cc1ccccc1)C(=O)[O-]")
+    assert applicability.net_formal_charge == 0
+    assert applicability.charged_centres == 2
+    assert applicable_kernel_if_exhausted(applicability) == "region"
+    assert graded_dominant_kernel(applicability) == "state_aware"
+    assert not kernel_allocation_agreement(applicability)["agree"]
+    assert charge_refused_region_share(applicability) > 0.5

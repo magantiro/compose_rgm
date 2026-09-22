@@ -4,6 +4,7 @@
     {
       "expected": "red",
       "failing_tests": [
+        "test_a_zwitterion_is_a_measured_counterexample_to_the_binary_rule",
         "test_every_historically_fired_cell_agrees_with_its_historical_kernel",
         "test_states_agreeing_on_the_declared_features_agree_on_the_decision",
         "test_the_blind_routing_table_is_reproduced_cell_by_cell",
@@ -11,7 +12,8 @@
         "test_the_graded_signal_does_not_change_any_decision",
         "test_the_mechanisms_own_precondition_does_not_match_the_binary_and_this_is_recorded",
         "test_the_module_source_names_no_target_and_no_objective_value",
-        "test_the_only_disagreement_anywhere_is_an_exact_tie_on_a_cell_that_never_fires"
+        "test_the_only_disagreement_anywhere_is_an_exact_tie_on_a_cell_that_never_fires",
+        "test_the_routing_tracks_charge_and_not_amine_presence"
       ],
       "killed": true,
       "mutation": "identity_branch_on_a_target_name",
@@ -71,13 +73,15 @@
     {
       "expected": "red",
       "failing_tests": [
+        "test_a_zwitterion_is_a_measured_counterexample_to_the_binary_rule",
         "test_every_historically_fired_cell_agrees_with_its_historical_kernel",
         "test_states_agreeing_on_the_declared_features_agree_on_the_decision",
         "test_the_blind_routing_table_is_reproduced_cell_by_cell",
         "test_the_graded_portfolio_agrees_on_every_cell_that_historically_fired",
         "test_the_graded_signal_does_not_change_any_decision",
         "test_the_mechanisms_own_precondition_does_not_match_the_binary_and_this_is_recorded",
-        "test_the_only_disagreement_anywhere_is_an_exact_tie_on_a_cell_that_never_fires"
+        "test_the_only_disagreement_anywhere_is_an_exact_tie_on_a_cell_that_never_fires",
+        "test_the_routing_tracks_charge_and_not_amine_presence"
       ],
       "killed": true,
       "mutation": "kernel_choice_reversed",
@@ -88,6 +92,7 @@
     {
       "expected": "red",
       "failing_tests": [
+        "test_a_zwitterion_is_a_measured_counterexample_to_the_binary_rule",
         "test_the_graded_signal_does_not_change_any_decision"
       ],
       "killed": true,

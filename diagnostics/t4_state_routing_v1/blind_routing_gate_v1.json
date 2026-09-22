@@ -1,0 +1,1485 @@
+{
+  "agreement_on_historically_fired_cells": {
+    "disagreements": [],
+    "fired_cells": [
+      "5ht1b_2",
+      "braf_0",
+      "braf_1",
+      "fa7_0",
+      "fa7_2"
+    ],
+    "scope": "delta 0.6 only: the committed round-one audit and the blind-routing evidence are both delta 0.6 artifacts. The delta 0.4 rows carry a routing DECISION (the molecular feature does not depend on delta) but no exhaustion measurement, and are excluded here rather than assumed. At delta 0.4 two cells were historically rescued (fa7_2 region repair, 5ht1b_2 protonation) and no round-one audit exists for them.",
+    "verdict": "5/5"
+  },
+  "evidence_role": "target_blind_routing_regression_and_out_of_panel_control",
+  "generated_at_utc": "2026-09-22T20:12:58.236363+00:00",
+  "graded_alternative": "the region kernel measurably loses support where the executor's charge policy refuses its excisions; that share is recorded per row as a continuous signal and is deliberately not consulted by the shipped rule",
+  "isolation": "the routing accepts only MolecularApplicability and SearchProgress, whose field sets are pinned by tests/test_t4_unified_routing.py and contain no name and no value; the target label is attached after every decision",
+  "kernel": "rdkit 2024.03.5 (T4 production)",
+  "new_oracle_calls": 0,
+  "out_of_panel_controls": [
+    {
+      "binary_and_graded_agree": true,
+      "charge_refused_regions": 6,
+      "charged_centres": 1,
+      "executable_regions": 4,
+      "graded_kernel": "state_aware",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 0.4,
+        "state_aware": 0.6
+      },
+      "growth_headroom": 29,
+      "heavy_atoms": 11,
+      "kernel_if_exhausted": "state_aware",
+      "large_regions": 3,
+      "name": "anion_carboxylate",
+      "net_formal_charge": -1,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 0,
+      "smiles": "[O-]C(=O)Cc1ccc(Cl)cc1",
+      "total_regions": 10,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 1.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "binary_and_graded_agree": true,
+      "charge_refused_regions": 10,
+      "charged_centres": 1,
+      "executable_regions": 4,
+      "graded_kernel": "state_aware",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 0.2857142857142857,
+        "state_aware": 0.7142857142857143
+      },
+      "growth_headroom": 27,
+      "heavy_atoms": 13,
+      "kernel_if_exhausted": "state_aware",
+      "large_regions": 4,
+      "name": "cation_protonated_amine",
+      "net_formal_charge": 1,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 1,
+      "smiles": "CC[NH+](CC)CCc1ccccc1",
+      "total_regions": 14,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 1.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "binary_and_graded_agree": true,
+      "charge_refused_regions": 10,
+      "charged_centres": 1,
+      "executable_regions": 2,
+      "graded_kernel": "state_aware",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 0.16666666666666666,
+        "state_aware": 0.8333333333333334
+      },
+      "growth_headroom": 28,
+      "heavy_atoms": 12,
+      "kernel_if_exhausted": "state_aware",
+      "large_regions": 3,
+      "name": "cation_quaternary_ammonium",
+      "net_formal_charge": 1,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 0,
+      "smiles": "C[N+](C)(C)CCc1ccccc1",
+      "total_regions": 12,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 1.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "binary_and_graded_agree": true,
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "executable_regions": 4,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 27,
+      "heavy_atoms": 13,
+      "kernel_if_exhausted": "region",
+      "large_regions": 0,
+      "name": "neutral_diphenyl_ether",
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 0,
+      "smiles": "c1ccc(Oc2ccccc2)cc1",
+      "total_regions": 4,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "binary_and_graded_agree": true,
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "executable_regions": 14,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 27,
+      "heavy_atoms": 13,
+      "kernel_if_exhausted": "region",
+      "large_regions": 4,
+      "name": "neutral_tertiary_amine",
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 1,
+      "smiles": "CCN(CC)CCc1ccccc1",
+      "total_regions": 14,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "binary_and_graded_agree": false,
+      "charge_refused_regions": 9,
+      "charged_centres": 2,
+      "executable_regions": 3,
+      "graded_kernel": "state_aware",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 0.25,
+        "state_aware": 0.75
+      },
+      "growth_headroom": 28,
+      "heavy_atoms": 12,
+      "kernel_if_exhausted": "region",
+      "large_regions": 4,
+      "name": "zwitterion_amino_acid",
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 0,
+      "smiles": "[NH3+]C(Cc1ccccc1)C(=O)[O-]",
+      "total_regions": 12,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    }
+  ],
+  "regression_against_committed_table": {
+    "cells": 30,
+    "disagreeing_cells": [],
+    "distinct_molecules": 15,
+    "verdict": "REPRODUCED"
+  },
+  "rows": [
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "5ht1b_0",
+      "charge_refused_regions": 9,
+      "charged_centres": 1,
+      "contract_path": "configs/t4_held_target_distilled_5ht1b_d04_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 7,
+      "exhausted_historically": null,
+      "graded_kernel": "state_aware",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 0.4375,
+        "state_aware": 0.5625
+      },
+      "growth_headroom": 1,
+      "heavy_atoms": 39,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "state_aware",
+      "large_regions": 11,
+      "net_formal_charge": 1,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 2,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "5ht1b",
+      "total_regions": 16,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 1.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": false,
+      "cell": "5ht1b_1",
+      "charge_refused_regions": 5,
+      "charged_centres": 1,
+      "contract_path": "configs/t4_held_target_distilled_5ht1b_d04_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 5,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 0.5,
+        "state_aware": 0.5
+      },
+      "growth_headroom": 24,
+      "heavy_atoms": 16,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "state_aware",
+      "large_regions": 5,
+      "net_formal_charge": 1,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 1,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "5ht1b",
+      "total_regions": 10,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 1.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "5ht1b_2",
+      "charge_refused_regions": 9,
+      "charged_centres": 1,
+      "contract_path": "configs/t4_held_target_distilled_5ht1b_d04_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 7,
+      "exhausted_historically": null,
+      "graded_kernel": "state_aware",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 0.4375,
+        "state_aware": 0.5625
+      },
+      "growth_headroom": 9,
+      "heavy_atoms": 31,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "state_aware",
+      "large_regions": 12,
+      "net_formal_charge": 1,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 3,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "5ht1b",
+      "total_regions": 16,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 1.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "5ht1b_0",
+      "charge_refused_regions": 9,
+      "charged_centres": 1,
+      "contract_path": "configs/t4_held_target_distilled_5ht1b_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 7,
+      "exhausted_historically": false,
+      "graded_kernel": "state_aware",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 0.4375,
+        "state_aware": 0.5625
+      },
+      "growth_headroom": 1,
+      "heavy_atoms": 39,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "state_aware",
+      "large_regions": 11,
+      "net_formal_charge": 1,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 2,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 8,
+      "target_label_attached_after_decision": "5ht1b",
+      "total_regions": 16,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 1.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": false,
+      "cell": "5ht1b_1",
+      "charge_refused_regions": 5,
+      "charged_centres": 1,
+      "contract_path": "configs/t4_held_target_distilled_5ht1b_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 5,
+      "exhausted_historically": false,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 0.5,
+        "state_aware": 0.5
+      },
+      "growth_headroom": 24,
+      "heavy_atoms": 16,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "state_aware",
+      "large_regions": 5,
+      "net_formal_charge": 1,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 1,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 8,
+      "target_label_attached_after_decision": "5ht1b",
+      "total_regions": 10,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 1.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": true,
+      "binary_and_graded_agree": true,
+      "cell": "5ht1b_2",
+      "charge_refused_regions": 9,
+      "charged_centres": 1,
+      "contract_path": "configs/t4_held_target_distilled_5ht1b_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 7,
+      "exhausted_historically": true,
+      "graded_kernel": "state_aware",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 0.4375,
+        "state_aware": 0.5625
+      },
+      "growth_headroom": 9,
+      "heavy_atoms": 31,
+      "historical_kernel": "state_aware",
+      "kernel_if_exhausted": "state_aware",
+      "large_regions": 12,
+      "net_formal_charge": 1,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 3,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 0,
+      "target_label_attached_after_decision": "5ht1b",
+      "total_regions": 16,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 1.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "braf_0",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_braf_d04_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 42,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 0,
+      "heavy_atoms": 40,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 27,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 2,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "braf",
+      "total_regions": 42,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "braf_1",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_braf_d04_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 36,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 1,
+      "heavy_atoms": 39,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 26,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 1,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "braf",
+      "total_regions": 36,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "braf_2",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_braf_d04_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 32,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 3,
+      "heavy_atoms": 37,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 23,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 0,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "braf",
+      "total_regions": 32,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": true,
+      "binary_and_graded_agree": true,
+      "cell": "braf_0",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_braf_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 42,
+      "exhausted_historically": true,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 0,
+      "heavy_atoms": 40,
+      "historical_kernel": "region",
+      "kernel_if_exhausted": "region",
+      "large_regions": 27,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 2,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 0,
+      "target_label_attached_after_decision": "braf",
+      "total_regions": 42,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": true,
+      "binary_and_graded_agree": true,
+      "cell": "braf_1",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_braf_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 36,
+      "exhausted_historically": true,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 1,
+      "heavy_atoms": 39,
+      "historical_kernel": "region",
+      "kernel_if_exhausted": "region",
+      "large_regions": 26,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 1,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 0,
+      "target_label_attached_after_decision": "braf",
+      "total_regions": 36,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "braf_2",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_braf_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 32,
+      "exhausted_historically": false,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 3,
+      "heavy_atoms": 37,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 23,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 0,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 3,
+      "target_label_attached_after_decision": "braf",
+      "total_regions": 32,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "fa7_0",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_fa7_d04_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 26,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 8,
+      "heavy_atoms": 32,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 17,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 1,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "fa7",
+      "total_regions": 26,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "fa7_1",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_fa7_d04_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 38,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 11,
+      "heavy_atoms": 29,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 24,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 1,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "fa7",
+      "total_regions": 38,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "fa7_2",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_fa7_d04_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 38,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 5,
+      "heavy_atoms": 35,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 25,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 1,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "fa7",
+      "total_regions": 38,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": true,
+      "binary_and_graded_agree": true,
+      "cell": "fa7_0",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_fa7_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 26,
+      "exhausted_historically": true,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 8,
+      "heavy_atoms": 32,
+      "historical_kernel": "region",
+      "kernel_if_exhausted": "region",
+      "large_regions": 17,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 1,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 0,
+      "target_label_attached_after_decision": "fa7",
+      "total_regions": 26,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "fa7_1",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_fa7_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 38,
+      "exhausted_historically": false,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 11,
+      "heavy_atoms": 29,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 24,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 1,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 7,
+      "target_label_attached_after_decision": "fa7",
+      "total_regions": 38,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": true,
+      "binary_and_graded_agree": true,
+      "cell": "fa7_2",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_fa7_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 38,
+      "exhausted_historically": true,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 5,
+      "heavy_atoms": 35,
+      "historical_kernel": "region",
+      "kernel_if_exhausted": "region",
+      "large_regions": 25,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 1,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 0,
+      "target_label_attached_after_decision": "fa7",
+      "total_regions": 38,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "jak2_0",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_jak2_d06_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 10,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 18,
+      "heavy_atoms": 22,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 5,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 0,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "jak2",
+      "total_regions": 10,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "jak2_1",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_jak2_d06_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 10,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 18,
+      "heavy_atoms": 22,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 5,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 0,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "jak2",
+      "total_regions": 10,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "jak2_2",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_jak2_d06_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 8,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 13,
+      "heavy_atoms": 27,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 4,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 0,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "jak2",
+      "total_regions": 8,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "jak2_0",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_jak2_true_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 10,
+      "exhausted_historically": false,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 18,
+      "heavy_atoms": 22,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 5,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 0,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 8,
+      "target_label_attached_after_decision": "jak2",
+      "total_regions": 10,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "jak2_1",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_jak2_true_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 10,
+      "exhausted_historically": false,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 18,
+      "heavy_atoms": 22,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 5,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 0,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 8,
+      "target_label_attached_after_decision": "jak2",
+      "total_regions": 10,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "jak2_2",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_jak2_true_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 8,
+      "exhausted_historically": false,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 13,
+      "heavy_atoms": 27,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 4,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 0,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 8,
+      "target_label_attached_after_decision": "jak2",
+      "total_regions": 8,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "parp1_0",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_parp1_d04_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 10,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 21,
+      "heavy_atoms": 19,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 5,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 2,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "parp1",
+      "total_regions": 10,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "parp1_1",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_parp1_d04_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 6,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 24,
+      "heavy_atoms": 16,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 3,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 0,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "parp1",
+      "total_regions": 6,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "parp1_2",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_parp1_d04_250.json",
+      "delta_declared_by_contract": 0.4,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.4,
+      "executable_regions": 8,
+      "exhausted_historically": null,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 23,
+      "heavy_atoms": 17,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 4,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 1,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": false,
+      "round_one_eligible_pool": null,
+      "target_label_attached_after_decision": "parp1",
+      "total_regions": 8,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "parp1_0",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_parp1_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 10,
+      "exhausted_historically": false,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 21,
+      "heavy_atoms": 19,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 5,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 2,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 8,
+      "target_label_attached_after_decision": "parp1",
+      "total_regions": 10,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "parp1_1",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_parp1_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 6,
+      "exhausted_historically": false,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 24,
+      "heavy_atoms": 16,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 3,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": true,
+      "protonation_sites": 0,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 8,
+      "target_label_attached_after_decision": "parp1",
+      "total_regions": 6,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    },
+    {
+      "agrees_with_history": null,
+      "binary_and_graded_agree": true,
+      "cell": "parp1_2",
+      "charge_refused_regions": 0,
+      "charged_centres": 0,
+      "contract_path": "configs/t4_held_target_distilled_parp1_d06_250.json",
+      "delta_declared_by_contract": 0.6,
+      "delta_name_matches_contract": true,
+      "delta_the_file_name_suggests": 0.6,
+      "executable_regions": 8,
+      "exhausted_historically": false,
+      "graded_kernel": "region",
+      "graded_weights": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "growth_headroom": 23,
+      "heavy_atoms": 17,
+      "historical_kernel": null,
+      "kernel_if_exhausted": "region",
+      "large_regions": 4,
+      "net_formal_charge": 0,
+      "protonation_precondition_matches_binary": false,
+      "protonation_sites": 1,
+      "reproduces_committed_table": true,
+      "round_one_audit_available": true,
+      "round_one_eligible_pool": 8,
+      "target_label_attached_after_decision": "parp1",
+      "total_regions": 8,
+      "weights_empty_pool": {
+        "local": 1.0,
+        "region": 1.0,
+        "state_aware": 0.0
+      },
+      "weights_healthy_pool": {
+        "local": 1.0,
+        "region": 0.0,
+        "state_aware": 0.0
+      }
+    }
+  ],
+  "rule": "Q_t empty -> state_aware if formal charge(G) != 0 else region. No target identity, no reward.",
+  "schema_version": "t4_unified_routing_v1",
+  "scope_limit": "n = 5 fired cells, separated by ONE binary feature. That is a weak test which could not have failed in many ways. Do NOT claim formal charge universally determines the correct molecular-search operator. On this panel the feature is perfectly confounded with 'is a 5HT1B lead', which the out-of-panel controls address and the panel alone cannot."
+}
