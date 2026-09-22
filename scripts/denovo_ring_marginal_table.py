@@ -85,7 +85,7 @@ def render(report: dict) -> str:
 
     lines.append("PRESERVED QUANTITIES (a ring repair bought by regressing these is not one)")
     preserved = (
-        f"{'row':<26}{'validity':>10}{'uniqueness':>12}{'quality':>16}"
+        f"{'row':<26}{'n':>6}{'validity':>10}{'uniqueness':>12}{'quality':>16}"
         f"{'diversity':>11}{'mean QED':>10}{'mean SA':>9}{'heavy':>8}{'events':>8}"
     )
     lines.append(preserved)
@@ -99,6 +99,7 @@ def render(report: dict) -> str:
             quality += f"+-{stderr['quality']:.3f}"
         lines.append(
             f"{'arm ' + arm:<26}"
+            f"{row['attempted']:6d}"
             f"{metrics['validity']:10.3f}"
             f"{metrics['uniqueness']:12.3f}"
             f"{quality:>16}"
@@ -110,7 +111,11 @@ def render(report: dict) -> str:
         )
     lines.append("")
 
-    lines.append("PLAN REALIZATION (arms B and C only)")
+    lines.append(
+        "NOTE: ring-size TV is CONDITIONAL on rings existing; compare sys/mol separately."
+    )
+    lines.append("")
+    lines.append("PLAN REALIZATION (planned arms only)")
     for arm, row in sorted(report["arms"].items()):
         plan = row.get("plan_realization")
         if not plan:

@@ -1,0 +1,1688 @@
+{
+ "design": "mstep1000_n200_h16p0_pde2a5f995df7_ie2886d773614",
+ "model": "step1000",
+ "total_per_arm": 200,
+ "horizon": 16.0,
+ "plan_prior_sha256": "de2a5f995df74eab18345c564b8953fd3733f0852ba165edd864b5e8c897fc8d",
+ "versions": {
+  "python": "3.11.12",
+  "torch": "2.4.0+cu121",
+  "numpy": "1.26.4",
+  "scipy": "1.13.1",
+  "networkx": "3.3",
+  "rdkit": "2024.03.5"
+ },
+ "corpus_reference": {
+  "molecules": 500000,
+  "rings_per_molecule": 3.43154,
+  "ring_systems_per_molecule": 2.605932,
+  "ring_size_fraction": {
+   "3": 0.012420662443101348,
+   "4": 0.006257248931966406,
+   "5": 0.24099617081543565,
+   "6": 0.7243144477406646,
+   "7": 0.011928755019612186,
+   "8": 0.0011726513460428845,
+   "9": 0.00021739510540457054,
+   "10": 0.00022147490631028636,
+   "11": 0.00011132028185595971,
+   "12": 0.00036135379450625665,
+   "13": 0.00019874458697844116,
+   "14": 0.00048666196518181343,
+   "15": 0.000271598174580509,
+   "16": 0.00030248809572378584,
+   "17": 6.993944409798516e-05,
+   "18": 0.0002902486930066384,
+   "19": 0.0001422102029992365,
+   "20": 5.7700041380837755e-05,
+   "21": 4.079800905715801e-05,
+   "22": 3.38040646473595e-05,
+   "23": 1.8650518426129377e-05,
+   "24": 3.438689334817604e-05,
+   "25": 4.079800905715801e-06,
+   "26": 1.1073745315514316e-05,
+   "27": 2.914143504082715e-06,
+   "28": 9.325259213064688e-06,
+   "29": 2.914143504082715e-06,
+   "30": 4.662629606532344e-06,
+   "31": 4.079800905715801e-06,
+   "32": 4.662629606532344e-06,
+   "33": 3.496972204899258e-06,
+   "34": 2.331314803266172e-06,
+   "36": 5.82828700816543e-07,
+   "40": 5.82828700816543e-07,
+   "42": 5.82828700816543e-07
+  },
+  "strained_ring_fraction": 0.018677911375067753,
+  "fraction_with_strained_ring": 0.058874,
+  "ring_system_count_fraction": {
+   "0": 0.009818,
+   "1": 0.118676,
+   "2": 0.344254,
+   "3": 0.349338,
+   "4": 0.144052,
+   "5": 0.029456,
+   "6": 0.003678,
+   "7": 0.000652,
+   "8": 7e-05,
+   "9": 6e-06
+  },
+  "source": "guacamol_subset_500000_seed0.smiles",
+  "source_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791"
+ },
+ "arms": {
+  "A": {
+   "arm": "A",
+   "shards": 19,
+   "attempted": 190,
+   "complete": false,
+   "published_metrics": {
+    "attempted": 190,
+    "valid": 190,
+    "unique": 190,
+    "high_quality": 23,
+    "validity": 1.0,
+    "uniqueness": 1.0,
+    "quality": 0.12105263157894737,
+    "quality_given_valid_unique": 0.12105263157894737,
+    "diversity": 0.8899799697605272,
+    "diversity_moses_intdiv1": 0.8852958646565244,
+    "qed_threshold": 0.6,
+    "sa_threshold": 4.0,
+    "mean_qed": 0.5223874440311544,
+    "mean_sa": 4.599570342117883,
+    "fraction_unique_passing_qed": 0.34210526315789475,
+    "fraction_unique_passing_sa": 0.2894736842105263
+   },
+   "strained_ring_census": {
+    "molecules": 190,
+    "ring_size_histogram": {
+     "3": 109,
+     "4": 65,
+     "5": 175,
+     "6": 416,
+     "7": 4,
+     "8": 1,
+     "9": 1,
+     "11": 1,
+     "15": 1
+    },
+    "fraction_with_3_ring": 0.4421052631578947,
+    "fraction_with_4_ring": 0.28421052631578947,
+    "fraction_with_strained_ring": 0.5842105263157895
+   },
+   "decomposition": {
+    "ring_size_distribution": {
+     "molecules": 190,
+     "rings": 773,
+     "ring_size_histogram": {
+      "3": 109,
+      "4": 65,
+      "5": 175,
+      "6": 416,
+      "7": 4,
+      "8": 1,
+      "9": 1,
+      "11": 1,
+      "15": 1
+     },
+     "ring_size_fraction": {
+      "3": 0.1410090556274256,
+      "4": 0.08408796895213454,
+      "5": 0.22639068564036222,
+      "6": 0.538163001293661,
+      "7": 0.00517464424320828,
+      "8": 0.00129366106080207,
+      "9": 0.00129366106080207,
+      "11": 0.00129366106080207,
+      "15": 0.00129366106080207
+     },
+     "strained_ring_fraction": 0.22509702457956016,
+     "rings_per_molecule": 4.068421052631579,
+     "fraction_with_strained_ring": 0.5842105263157895,
+     "mean_heavy_atoms": 28.789473684210527
+    },
+    "strain_size_strata": {
+     "bin_edges": [
+      0,
+      15,
+      20,
+      25,
+      30,
+      35,
+      41
+     ],
+     "strata": {
+      "1-15": {
+       "strained": {
+        "n": 3,
+        "mean_sa": 4.137012518768851,
+        "mean_qed": 0.5936679422817687,
+        "mean_heavy_atoms": 12.333333333333334
+       },
+       "clean": {
+        "n": 3,
+        "mean_sa": 4.25909385041246,
+        "mean_qed": 0.6040767820756897,
+        "mean_heavy_atoms": 14.0
+       },
+       "within_bin_sa_difference": -0.12208133164360824,
+       "within_bin_qed_difference": -0.010408839793921043
+      },
+      "16-20": {
+       "strained": {
+        "n": 3,
+        "mean_sa": 4.051418351189631,
+        "mean_qed": 0.8339788492424538,
+        "mean_heavy_atoms": 18.666666666666668
+       },
+       "clean": {
+        "n": 10,
+        "mean_sa": 3.907080609180416,
+        "mean_qed": 0.706423892154332,
+        "mean_heavy_atoms": 18.8
+       },
+       "within_bin_sa_difference": 0.14433774200921512,
+       "within_bin_qed_difference": 0.1275549570881218
+      },
+      "21-25": {
+       "strained": {
+        "n": 16,
+        "mean_sa": 4.433477260280625,
+        "mean_qed": 0.696414989858162,
+        "mean_heavy_atoms": 23.3125
+       },
+       "clean": {
+        "n": 18,
+        "mean_sa": 4.10945687940156,
+        "mean_qed": 0.6616952294897563,
+        "mean_heavy_atoms": 23.61111111111111
+       },
+       "within_bin_sa_difference": 0.32402038087906515,
+       "within_bin_qed_difference": 0.03471976036840563
+      },
+      "26-30": {
+       "strained": {
+        "n": 33,
+        "mean_sa": 4.809139513096799,
+        "mean_qed": 0.5885136132601273,
+        "mean_heavy_atoms": 28.12121212121212
+       },
+       "clean": {
+        "n": 29,
+        "mean_sa": 4.214437529722198,
+        "mean_qed": 0.5424701428363101,
+        "mean_heavy_atoms": 28.137931034482758
+       },
+       "within_bin_sa_difference": 0.594701983374601,
+       "within_bin_qed_difference": 0.04604347042381718
+      },
+      "31-35": {
+       "strained": {
+        "n": 32,
+        "mean_sa": 4.8678777922303915,
+        "mean_qed": 0.41762327176998737,
+        "mean_heavy_atoms": 32.96875
+       },
+       "clean": {
+        "n": 16,
+        "mean_sa": 4.429027881770352,
+        "mean_qed": 0.4038890592754405,
+        "mean_heavy_atoms": 32.625
+       },
+       "within_bin_sa_difference": 0.4388499104600392,
+       "within_bin_qed_difference": 0.013734212494546871
+      },
+      "36-41": {
+       "strained": {
+        "n": 24,
+        "mean_sa": 5.458806577385367,
+        "mean_qed": 0.2925572254313993,
+        "mean_heavy_atoms": 38.166666666666664
+       },
+       "clean": {
+        "n": 3,
+        "mean_sa": 4.676979714892584,
+        "mean_qed": 0.3469747732642214,
+        "mean_heavy_atoms": 37.333333333333336
+       },
+       "within_bin_sa_difference": 0.7818268624927835,
+       "within_bin_qed_difference": -0.0544175478328221
+      }
+     }
+    },
+    "strain_size_regression": {
+     "n": 190,
+     "strained_count": 111,
+     "terms": [
+      "intercept",
+      "strained",
+      "heavy_atoms"
+     ],
+     "sa": {
+      "intercept": 2.9386101107778337,
+      "strained_coefficient": 0.483715243704618,
+      "strained_stderr": 0.129896905827739,
+      "heavy_atom_coefficient": 0.047877523199889804,
+      "heavy_atom_stderr": 0.010388705843565757,
+      "raw_strained_difference": 0.6594135783576522
+     },
+     "qed": {
+      "intercept": 1.1002856210428904,
+      "strained_coefficient": 0.015137639168769118,
+      "strained_stderr": 0.02154510866837383,
+      "heavy_atom_coefficient": -0.02038042624862218,
+      "heavy_atom_stderr": 0.0017231033710704239,
+      "raw_strained_difference": -0.05965334232064379
+     }
+    },
+    "ring_event_census": {
+     "trajectories": 190,
+     "events": 5270,
+     "event_family_histogram": {
+      "atom_delete": 581,
+      "atom_insert": 885,
+      "atom_restate": 476,
+      "bond_reorder": 110,
+      "bond_reroute": 2544,
+      "ring_system_grow": 674
+     },
+     "ring_forming_events": 674,
+     "ring_removing_events": 0,
+     "ring_forming_events_per_trajectory": 3.5473684210526315,
+     "ring_removing_events_per_trajectory": 0.0,
+     "endpoint_census_tracks_creation": true
+    }
+   },
+   "ring_signature_census": {
+    "molecules": 190,
+    "rings": 767,
+    "ring_systems": 674,
+    "rings_per_molecule": 4.036842105263158,
+    "ring_systems_per_molecule": 3.5473684210526315,
+    "ring_size_histogram": {
+     "3": 109,
+     "4": 63,
+     "5": 175,
+     "6": 412,
+     "7": 4,
+     "8": 1,
+     "9": 1,
+     "11": 1,
+     "15": 1
+    },
+    "ring_size_fraction": {
+     "3": 0.1421121251629726,
+     "4": 0.08213820078226858,
+     "5": 0.22816166883963493,
+     "6": 0.5371577574967406,
+     "7": 0.005215123859191656,
+     "8": 0.001303780964797914,
+     "9": 0.001303780964797914,
+     "11": 0.001303780964797914,
+     "15": 0.001303780964797914
+    },
+    "strained_ring_fraction": 0.2242503259452412,
+    "fraction_with_strained_ring": 0.5842105263157895,
+    "ring_system_count_fraction": {
+     "1": 0.031578947368421054,
+     "2": 0.16842105263157894,
+     "3": 0.30526315789473685,
+     "4": 0.2736842105263158,
+     "5": 0.16842105263157894,
+     "6": 0.042105263157894736,
+     "7": 0.010526315789473684
+    },
+    "system_signature_fraction": {
+     "(6,)": 0.4421364985163205,
+     "(5,)": 0.17655786350148367,
+     "(3,)": 0.15578635014836795,
+     "(4,)": 0.08753709198813056,
+     "(5, 6)": 0.05934718100890208,
+     "(6, 6)": 0.04154302670623145,
+     "(5, 5)": 0.00741839762611276,
+     "(6, 6, 6)": 0.004451038575667656,
+     "(5, 6, 6)": 0.002967359050445104,
+     "(3, 5)": 0.002967359050445104,
+     "(4, 4)": 0.002967359050445104,
+     "(3, 6)": 0.002967359050445104,
+     "(6, 7)": 0.002967359050445104,
+     "(7,)": 0.002967359050445104,
+     "(11,)": 0.001483679525222552,
+     "(8,)": 0.001483679525222552,
+     "(15,)": 0.001483679525222552,
+     "(5, 5, 6)": 0.001483679525222552,
+     "(9,)": 0.001483679525222552
+    },
+    "distinct_system_signatures": 19,
+    "distinct_molecule_multisets": 106
+   },
+   "valid_state_fraction": 1.0,
+   "connected_fraction": 1.0,
+   "exhausted_event_budget_fraction": 0.0,
+   "mean_events": 27.736842105263158,
+   "mean_plan_events": 0.0,
+   "ring_size_total_variation_vs_corpus": 0.2090145735214812,
+   "ring_bootstrap": {
+    "draws": 2000,
+    "molecules": 190,
+    "strained_ring_fraction": {
+     "point": 0.2242503259452412,
+     "ci95_low": 0.1946558481479584,
+     "ci95_high": 0.25263157894736843,
+     "stderr": 0.014927528457116254
+    },
+    "fraction_with_strained_ring": {
+     "point": 0.5842105263157895,
+     "ci95_low": 0.5105263157894737,
+     "ci95_high": 0.6526315789473685,
+     "stderr": 0.03647207953376302
+    },
+    "rings_per_molecule": {
+     "point": 4.036842105263158,
+     "ci95_low": 3.8577631578947367,
+     "ci95_high": 4.21578947368421,
+     "stderr": 0.09245501925688787
+    },
+    "ring_systems_per_molecule": {
+     "point": 3.5473684210526315,
+     "ci95_low": 3.357894736842105,
+     "ci95_high": 3.721052631578947,
+     "stderr": 0.09058924935121036
+    },
+    "ring_size_total_variation": {
+     "point": 0.2090145735214812,
+     "ci95_low": 0.1820118121624289,
+     "ci95_high": 0.23969966108895424,
+     "stderr": 0.014824346885257913
+    }
+   },
+   "published_metrics_stderr": {
+    "quality": 0.02366419591378714,
+    "validity": 0.0
+   }
+  },
+  "B0": {
+   "arm": "B0",
+   "shards": 20,
+   "attempted": 200,
+   "complete": true,
+   "published_metrics": {
+    "attempted": 200,
+    "valid": 200,
+    "unique": 200,
+    "high_quality": 0,
+    "validity": 1.0,
+    "uniqueness": 1.0,
+    "quality": 0.0,
+    "quality_given_valid_unique": 0.0,
+    "diversity": 0.8959850350102347,
+    "diversity_moses_intdiv1": 0.8915051098351836,
+    "qed_threshold": 0.6,
+    "sa_threshold": 4.0,
+    "mean_qed": 0.3765708444909505,
+    "mean_sa": 5.844889941254633,
+    "fraction_unique_passing_qed": 0.195,
+    "fraction_unique_passing_sa": 0.02
+   },
+   "strained_ring_census": {
+    "molecules": 200,
+    "ring_size_histogram": {
+     "3": 43,
+     "4": 8,
+     "5": 154,
+     "6": 294,
+     "7": 5
+    },
+    "fraction_with_3_ring": 0.2,
+    "fraction_with_4_ring": 0.04,
+    "fraction_with_strained_ring": 0.23
+   },
+   "decomposition": {
+    "ring_size_distribution": {
+     "molecules": 200,
+     "rings": 504,
+     "ring_size_histogram": {
+      "3": 43,
+      "4": 8,
+      "5": 154,
+      "6": 294,
+      "7": 5
+     },
+     "ring_size_fraction": {
+      "3": 0.08531746031746032,
+      "4": 0.015873015873015872,
+      "5": 0.3055555555555556,
+      "6": 0.5833333333333334,
+      "7": 0.00992063492063492
+     },
+     "strained_ring_fraction": 0.10119047619047619,
+     "rings_per_molecule": 2.52,
+     "fraction_with_strained_ring": 0.23,
+     "mean_heavy_atoms": 27.275
+    },
+    "strain_size_strata": {
+     "bin_edges": [
+      0,
+      15,
+      20,
+      25,
+      30,
+      35,
+      41
+     ],
+     "strata": {
+      "1-15": {
+       "strained": {
+        "n": 0,
+        "mean_sa": null,
+        "mean_qed": null
+       },
+       "clean": {
+        "n": 6,
+        "mean_sa": 4.844311671303117,
+        "mean_qed": 0.5547774412520098,
+        "mean_heavy_atoms": 12.5
+       },
+       "within_bin_sa_difference": null,
+       "within_bin_qed_difference": null
+      },
+      "16-20": {
+       "strained": {
+        "n": 4,
+        "mean_sa": 5.362406260956463,
+        "mean_qed": 0.5495305517250674,
+        "mean_heavy_atoms": 17.75
+       },
+       "clean": {
+        "n": 15,
+        "mean_sa": 4.9528782832725256,
+        "mean_qed": 0.6665046100841352,
+        "mean_heavy_atoms": 18.6
+       },
+       "within_bin_sa_difference": 0.4095279776839371,
+       "within_bin_qed_difference": -0.11697405835906782
+      },
+      "21-25": {
+       "strained": {
+        "n": 12,
+        "mean_sa": 5.759041653076941,
+        "mean_qed": 0.4821029724810236,
+        "mean_heavy_atoms": 23.666666666666668
+       },
+       "clean": {
+        "n": 44,
+        "mean_sa": 5.4433494735943135,
+        "mean_qed": 0.5078093905590257,
+        "mean_heavy_atoms": 23.295454545454547
+       },
+       "within_bin_sa_difference": 0.3156921794826273,
+       "within_bin_qed_difference": -0.02570641807800217
+      },
+      "26-30": {
+       "strained": {
+        "n": 16,
+        "mean_sa": 5.962773758460456,
+        "mean_qed": 0.28251008220739926,
+        "mean_heavy_atoms": 27.9375
+       },
+       "clean": {
+        "n": 41,
+        "mean_sa": 5.921019943032148,
+        "mean_qed": 0.3837872845225471,
+        "mean_heavy_atoms": 28.048780487804876
+       },
+       "within_bin_sa_difference": 0.04175381542830792,
+       "within_bin_qed_difference": -0.10127720231514786
+      },
+      "31-35": {
+       "strained": {
+        "n": 9,
+        "mean_sa": 6.580029520486061,
+        "mean_qed": 0.31670103105754144,
+        "mean_heavy_atoms": 32.22222222222222
+       },
+       "clean": {
+        "n": 32,
+        "mean_sa": 6.285545138130107,
+        "mean_qed": 0.2062682326418128,
+        "mean_heavy_atoms": 32.6875
+       },
+       "within_bin_sa_difference": 0.29448438235595376,
+       "within_bin_qed_difference": 0.11043279841572864
+      },
+      "36-41": {
+       "strained": {
+        "n": 5,
+        "mean_sa": 6.962664876329461,
+        "mean_qed": 0.09243041350228727,
+        "mean_heavy_atoms": 37.6
+       },
+       "clean": {
+        "n": 16,
+        "mean_sa": 6.388513123078153,
+        "mean_qed": 0.0932799541147621,
+        "mean_heavy_atoms": 37.5
+       },
+       "within_bin_sa_difference": 0.5741517532513081,
+       "within_bin_qed_difference": -0.0008495406124748306
+      }
+     }
+    },
+    "strain_size_regression": {
+     "n": 200,
+     "strained_count": 46,
+     "terms": [
+      "intercept",
+      "strained",
+      "heavy_atoms"
+     ],
+     "sa": {
+      "intercept": 3.6409705411960704,
+      "strained_coefficient": 0.25798799456254135,
+      "strained_stderr": 0.09628539067657986,
+      "heavy_atom_coefficient": 0.07862812690409438,
+      "heavy_atom_stderr": 0.006648939511834883,
+      "raw_strained_difference": 0.31426193631917343
+     },
+     "qed": {
+      "intercept": 1.0645183557995395,
+      "strained_coefficient": -0.024623037154001867,
+      "strained_stderr": 0.03124819217246734,
+      "heavy_atom_coefficient": -0.025015003217714705,
+      "heavy_atom_stderr": 0.002157828286814692,
+      "raw_strained_difference": -0.04252620857039735
+     }
+    },
+    "ring_event_census": {
+     "trajectories": 200,
+     "events": 2204,
+     "event_family_histogram": {
+      "atom_delete": 172,
+      "atom_insert": 181,
+      "atom_restate": 1030,
+      "bond_reorder": 65,
+      "bond_reroute": 188,
+      "ring_system_delete": 49,
+      "ring_system_grow": 519
+     },
+     "ring_forming_events": 519,
+     "ring_removing_events": 49,
+     "ring_forming_events_per_trajectory": 2.595,
+     "ring_removing_events_per_trajectory": 0.245,
+     "endpoint_census_tracks_creation": false
+    }
+   },
+   "ring_signature_census": {
+    "molecules": 200,
+    "rings": 501,
+    "ring_systems": 470,
+    "rings_per_molecule": 2.505,
+    "ring_systems_per_molecule": 2.35,
+    "ring_size_histogram": {
+     "3": 43,
+     "4": 8,
+     "5": 154,
+     "6": 291,
+     "7": 5
+    },
+    "ring_size_fraction": {
+     "3": 0.08582834331337326,
+     "4": 0.015968063872255488,
+     "5": 0.3073852295409182,
+     "6": 0.5808383233532934,
+     "7": 0.00998003992015968
+    },
+    "strained_ring_fraction": 0.10179640718562874,
+    "fraction_with_strained_ring": 0.23,
+    "ring_system_count_fraction": {
+     "0": 0.11,
+     "1": 0.095,
+     "2": 0.28,
+     "3": 0.39,
+     "4": 0.1,
+     "5": 0.025
+    },
+    "system_signature_fraction": {
+     "(6,)": 0.5468085106382978,
+     "(5,)": 0.28085106382978725,
+     "(3,)": 0.09148936170212765,
+     "(5, 6)": 0.036170212765957444,
+     "(4,)": 0.01702127659574468,
+     "(6, 6)": 0.006382978723404255,
+     "(7,)": 0.006382978723404255,
+     "(6, 6, 6)": 0.006382978723404255,
+     "(5, 7)": 0.00425531914893617,
+     "(5, 6, 6)": 0.002127659574468085,
+     "(5, 5)": 0.002127659574468085
+    },
+    "distinct_system_signatures": 11,
+    "distinct_molecule_multisets": 54
+   },
+   "valid_state_fraction": 1.0,
+   "connected_fraction": 1.0,
+   "exhausted_event_budget_fraction": 0.0,
+   "mean_events": 11.02,
+   "mean_plan_events": 2.595,
+   "ring_size_total_variation_vs_corpus": 0.14950755453604353,
+   "ring_bootstrap": {
+    "draws": 2000,
+    "molecules": 200,
+    "strained_ring_fraction": {
+     "point": 0.10179640718562874,
+     "ci95_low": 0.0766126945167969,
+     "ci95_high": 0.12643734066818732,
+     "stderr": 0.012663171583431245
+    },
+    "fraction_with_strained_ring": {
+     "point": 0.23,
+     "ci95_low": 0.175,
+     "ci95_high": 0.29,
+     "stderr": 0.02947357442769323
+    },
+    "rings_per_molecule": {
+     "point": 2.505,
+     "ci95_low": 2.325,
+     "ci95_high": 2.7001249999999994,
+     "stderr": 0.09934195566742138
+    },
+    "ring_systems_per_molecule": {
+     "point": 2.35,
+     "ci95_low": 2.184875,
+     "ci95_high": 2.53,
+     "stderr": 0.08829668242388007
+    },
+    "ring_size_total_variation": {
+     "point": 0.14950755453604353,
+     "ci95_low": 0.1079003850276214,
+     "ci95_high": 0.19227646975550708,
+     "stderr": 0.02126813259107821
+    }
+   },
+   "published_metrics_stderr": {
+    "quality": 0.0,
+    "validity": 0.0
+   },
+   "plan_realization": {
+    "plans": 200,
+    "requested_systems": 522,
+    "realized_systems": 519,
+    "realization_rate": 0.9942528735632183,
+    "fully_realized_fraction": 0.985,
+    "unrealized_reasons": {
+     "no_host_support": 3
+    },
+    "bin_fallback_fraction": 0.0,
+    "endpoint_matches_installed_skeleton": 0.83,
+    "endpoint_comparisons": 200,
+    "plan_trigger_fired_fraction": null
+   }
+  },
+  "C0": {
+   "arm": "C0",
+   "shards": 20,
+   "attempted": 200,
+   "complete": true,
+   "published_metrics": {
+    "attempted": 200,
+    "valid": 200,
+    "unique": 200,
+    "high_quality": 1,
+    "validity": 1.0,
+    "uniqueness": 1.0,
+    "quality": 0.005,
+    "quality_given_valid_unique": 0.005,
+    "diversity": 0.8979907244282299,
+    "diversity_moses_intdiv1": 0.8935007708060888,
+    "qed_threshold": 0.6,
+    "sa_threshold": 4.0,
+    "mean_qed": 0.37556554460746255,
+    "mean_sa": 5.91423513610418,
+    "fraction_unique_passing_qed": 0.25,
+    "fraction_unique_passing_sa": 0.025
+   },
+   "strained_ring_census": {
+    "molecules": 200,
+    "ring_size_histogram": {
+     "3": 8,
+     "4": 2,
+     "5": 107,
+     "6": 366,
+     "7": 5,
+     "8": 1
+    },
+    "fraction_with_3_ring": 0.035,
+    "fraction_with_4_ring": 0.01,
+    "fraction_with_strained_ring": 0.045
+   },
+   "decomposition": {
+    "ring_size_distribution": {
+     "molecules": 200,
+     "rings": 489,
+     "ring_size_histogram": {
+      "3": 8,
+      "4": 2,
+      "5": 107,
+      "6": 366,
+      "7": 5,
+      "8": 1
+     },
+     "ring_size_fraction": {
+      "3": 0.016359918200409,
+      "4": 0.00408997955010225,
+      "5": 0.21881390593047034,
+      "6": 0.7484662576687117,
+      "7": 0.010224948875255624,
+      "8": 0.002044989775051125
+     },
+     "strained_ring_fraction": 0.02044989775051125,
+     "rings_per_molecule": 2.445,
+     "fraction_with_strained_ring": 0.045,
+     "mean_heavy_atoms": 27.4
+    },
+    "strain_size_strata": {
+     "bin_edges": [
+      0,
+      15,
+      20,
+      25,
+      30,
+      35,
+      41
+     ],
+     "strata": {
+      "1-15": {
+       "strained": {
+        "n": 0,
+        "mean_sa": null,
+        "mean_qed": null
+       },
+       "clean": {
+        "n": 6,
+        "mean_sa": 4.785416789513868,
+        "mean_qed": 0.6289132404022784,
+        "mean_heavy_atoms": 12.333333333333334
+       },
+       "within_bin_sa_difference": null,
+       "within_bin_qed_difference": null
+      },
+      "16-20": {
+       "strained": {
+        "n": 0,
+        "mean_sa": null,
+        "mean_qed": null
+       },
+       "clean": {
+        "n": 18,
+        "mean_sa": 5.358702607806278,
+        "mean_qed": 0.578765522468478,
+        "mean_heavy_atoms": 18.055555555555557
+       },
+       "within_bin_sa_difference": null,
+       "within_bin_qed_difference": null
+      },
+      "21-25": {
+       "strained": {
+        "n": 2,
+        "mean_sa": null,
+        "mean_qed": null
+       },
+       "clean": {
+        "n": 53,
+        "mean_sa": 5.487869862906125,
+        "mean_qed": 0.5462971135564935,
+        "mean_heavy_atoms": 23.39622641509434
+       },
+       "within_bin_sa_difference": null,
+       "within_bin_qed_difference": null
+      },
+      "26-30": {
+       "strained": {
+        "n": 4,
+        "mean_sa": 6.233540931015847,
+        "mean_qed": 0.4306486396561705,
+        "mean_heavy_atoms": 27.0
+       },
+       "clean": {
+        "n": 57,
+        "mean_sa": 6.049361478876541,
+        "mean_qed": 0.3081597147538861,
+        "mean_heavy_atoms": 28.31578947368421
+       },
+       "within_bin_sa_difference": 0.18417945213930587,
+       "within_bin_qed_difference": 0.12248892490228441
+      },
+      "31-35": {
+       "strained": {
+        "n": 2,
+        "mean_sa": null,
+        "mean_qed": null
+       },
+       "clean": {
+        "n": 35,
+        "mean_sa": 6.305014803430018,
+        "mean_qed": 0.2332679509534034,
+        "mean_heavy_atoms": 32.65714285714286
+       },
+       "within_bin_sa_difference": null,
+       "within_bin_qed_difference": null
+      },
+      "36-41": {
+       "strained": {
+        "n": 1,
+        "mean_sa": null,
+        "mean_qed": null
+       },
+       "clean": {
+        "n": 22,
+        "mean_sa": 6.592595928513367,
+        "mean_qed": 0.12004718845761603,
+        "mean_heavy_atoms": 37.77272727272727
+       },
+       "within_bin_sa_difference": null,
+       "within_bin_qed_difference": null
+      }
+     }
+    },
+    "strain_size_regression": {
+     "n": 200,
+     "strained_count": 9,
+     "terms": [
+      "intercept",
+      "strained",
+      "heavy_atoms"
+     ],
+     "sa": {
+      "intercept": 3.9071355746895753,
+      "strained_coefficient": 0.30259414964830306,
+      "strained_stderr": 0.2278846299271571,
+      "heavy_atom_coefficient": 0.07275484761607404,
+      "heavy_atom_stderr": 0.00762553804018173,
+      "raw_strained_difference": 0.3567687889435778
+     },
+     "qed": {
+      "intercept": 1.063943239289591,
+      "strained_coefficient": 0.044065748422286576,
+      "strained_stderr": 0.06870695088386543,
+      "heavy_atom_coefficient": -0.025195644283252955,
+      "heavy_atom_stderr": 0.0022990908503012506,
+      "raw_strained_difference": 0.025304593865821456
+     }
+    },
+    "ring_event_census": {
+     "trajectories": 200,
+     "events": 2309,
+     "event_family_histogram": {
+      "atom_delete": 150,
+      "atom_insert": 184,
+      "atom_restate": 1148,
+      "bond_reorder": 66,
+      "bond_reroute": 288,
+      "ring_system_delete": 51,
+      "ring_system_grow": 422
+     },
+     "ring_forming_events": 422,
+     "ring_removing_events": 51,
+     "ring_forming_events_per_trajectory": 2.11,
+     "ring_removing_events_per_trajectory": 0.255,
+     "endpoint_census_tracks_creation": false
+    }
+   },
+   "ring_signature_census": {
+    "molecules": 200,
+    "rings": 483,
+    "ring_systems": 371,
+    "rings_per_molecule": 2.415,
+    "ring_systems_per_molecule": 1.855,
+    "ring_size_histogram": {
+     "3": 8,
+     "4": 2,
+     "5": 107,
+     "6": 361,
+     "7": 4,
+     "8": 1
+    },
+    "ring_size_fraction": {
+     "3": 0.016563146997929608,
+     "4": 0.004140786749482402,
+     "5": 0.22153209109730848,
+     "6": 0.7474120082815735,
+     "7": 0.008281573498964804,
+     "8": 0.002070393374741201
+    },
+    "strained_ring_fraction": 0.020703933747412008,
+    "fraction_with_strained_ring": 0.045,
+    "ring_system_count_fraction": {
+     "0": 0.15,
+     "1": 0.205,
+     "2": 0.325,
+     "3": 0.285,
+     "4": 0.03,
+     "5": 0.005
+    },
+    "system_signature_fraction": {
+     "(6,)": 0.6091644204851752,
+     "(5,)": 0.1320754716981132,
+     "(5, 6)": 0.09703504043126684,
+     "(6, 6)": 0.07008086253369272,
+     "(3,)": 0.018867924528301886,
+     "(5, 6, 6)": 0.013477088948787063,
+     "(5, 5)": 0.01078167115902965,
+     "(6, 6, 6)": 0.01078167115902965,
+     "(5, 6, 6, 6)": 0.008086253369272238,
+     "(6, 7)": 0.005390835579514825,
+     "(5, 6, 7)": 0.005390835579514825,
+     "(3, 5)": 0.0026954177897574125,
+     "(6, 6, 6, 6)": 0.0026954177897574125,
+     "(5, 6, 6, 6, 6)": 0.0026954177897574125,
+     "(4, 6)": 0.0026954177897574125,
+     "(4,)": 0.0026954177897574125,
+     "(5, 5, 6)": 0.0026954177897574125,
+     "(6, 6, 8)": 0.0026954177897574125
+    },
+    "distinct_system_signatures": 18,
+    "distinct_molecule_multisets": 49
+   },
+   "valid_state_fraction": 1.0,
+   "connected_fraction": 1.0,
+   "exhausted_event_budget_fraction": 0.0,
+   "mean_events": 11.545,
+   "mean_plan_events": 2.11,
+   "ring_size_total_variation_vs_corpus": 0.028137787124435525,
+   "ring_bootstrap": {
+    "draws": 2000,
+    "molecules": 200,
+    "strained_ring_fraction": {
+     "point": 0.020703933747412008,
+     "ci95_low": 0.008421052631578947,
+     "ci95_high": 0.035269709543568464,
+     "stderr": 0.006849932048857915
+    },
+    "fraction_with_strained_ring": {
+     "point": 0.045,
+     "ci95_low": 0.02,
+     "ci95_high": 0.075,
+     "stderr": 0.014607863287795292
+    },
+    "rings_per_molecule": {
+     "point": 2.415,
+     "ci95_low": 2.22,
+     "ci95_high": 2.61,
+     "stderr": 0.09926224910331483
+    },
+    "ring_systems_per_molecule": {
+     "point": 1.855,
+     "ci95_low": 1.71,
+     "ci95_high": 2.015,
+     "stderr": 0.07820812585163138
+    },
+    "ring_size_total_variation": {
+     "point": 0.028137787124435525,
+     "ci95_low": 0.010449654991901342,
+     "ci95_high": 0.06528613317768366,
+     "stderr": 0.01505522046660866
+    }
+   },
+   "published_metrics_stderr": {
+    "quality": 0.004987484335815001,
+    "validity": 0.0
+   },
+   "plan_realization": {
+    "plans": 200,
+    "requested_systems": 522,
+    "realized_systems": 422,
+    "realization_rate": 0.8084291187739464,
+    "fully_realized_fraction": 0.59,
+    "unrealized_reasons": {
+     "no_host_support": 98,
+     "signature_absent_from_catalog": 2
+    },
+    "bin_fallback_fraction": 0.0,
+    "endpoint_matches_installed_skeleton": 0.805,
+    "endpoint_comparisons": 200,
+    "plan_trigger_fired_fraction": null
+   }
+  },
+  "B1": {
+   "arm": "B1",
+   "shards": 17,
+   "attempted": 170,
+   "complete": false,
+   "published_metrics": {
+    "attempted": 170,
+    "valid": 170,
+    "unique": 170,
+    "high_quality": 20,
+    "validity": 1.0,
+    "uniqueness": 1.0,
+    "quality": 0.11764705882352941,
+    "quality_given_valid_unique": 0.11764705882352941,
+    "diversity": 0.890221939691783,
+    "diversity_moses_intdiv1": 0.8849853400465372,
+    "qed_threshold": 0.6,
+    "sa_threshold": 4.0,
+    "mean_qed": 0.4578787818618916,
+    "mean_sa": 4.573136310040023,
+    "fraction_unique_passing_qed": 0.3058823529411765,
+    "fraction_unique_passing_sa": 0.22941176470588234
+   },
+   "strained_ring_census": {
+    "molecules": 170,
+    "ring_size_histogram": {
+     "3": 33,
+     "4": 18,
+     "5": 124,
+     "6": 319,
+     "7": 8,
+     "13": 1
+    },
+    "fraction_with_3_ring": 0.18235294117647058,
+    "fraction_with_4_ring": 0.1,
+    "fraction_with_strained_ring": 0.2529411764705882
+   },
+   "decomposition": {
+    "ring_size_distribution": {
+     "molecules": 170,
+     "rings": 503,
+     "ring_size_histogram": {
+      "3": 33,
+      "4": 18,
+      "5": 124,
+      "6": 319,
+      "7": 8,
+      "13": 1
+     },
+     "ring_size_fraction": {
+      "3": 0.06560636182902585,
+      "4": 0.03578528827037773,
+      "5": 0.24652087475149106,
+      "6": 0.6341948310139165,
+      "7": 0.015904572564612324,
+      "13": 0.0019880715705765406
+     },
+     "strained_ring_fraction": 0.10139165009940358,
+     "rings_per_molecule": 2.958823529411765,
+     "fraction_with_strained_ring": 0.2529411764705882,
+     "mean_heavy_atoms": 27.847058823529412
+    },
+    "strain_size_strata": {
+     "bin_edges": [
+      0,
+      15,
+      20,
+      25,
+      30,
+      35,
+      41
+     ],
+     "strata": {
+      "1-15": {
+       "strained": {
+        "n": 2,
+        "mean_sa": null,
+        "mean_qed": null
+       },
+       "clean": {
+        "n": 4,
+        "mean_sa": 3.469120628734949,
+        "mean_qed": 0.6587049267531364,
+        "mean_heavy_atoms": 13.25
+       },
+       "within_bin_sa_difference": null,
+       "within_bin_qed_difference": null
+      },
+      "16-20": {
+       "strained": {
+        "n": 4,
+        "mean_sa": 4.131677137602761,
+        "mean_qed": 0.5128552206345584,
+        "mean_heavy_atoms": 17.75
+       },
+       "clean": {
+        "n": 7,
+        "mean_sa": 3.861303882987983,
+        "mean_qed": 0.5666505653585326,
+        "mean_heavy_atoms": 19.285714285714285
+       },
+       "within_bin_sa_difference": 0.2703732546147779,
+       "within_bin_qed_difference": -0.05379534472397429
+      },
+      "21-25": {
+       "strained": {
+        "n": 9,
+        "mean_sa": 4.616014894367474,
+        "mean_qed": 0.6715733242862567,
+        "mean_heavy_atoms": 23.77777777777778
+       },
+       "clean": {
+        "n": 33,
+        "mean_sa": 4.013476013661771,
+        "mean_qed": 0.5877967440719417,
+        "mean_heavy_atoms": 23.21212121212121
+       },
+       "within_bin_sa_difference": 0.602538880705703,
+       "within_bin_qed_difference": 0.083776580214315
+      },
+      "26-30": {
+       "strained": {
+        "n": 10,
+        "mean_sa": 4.711710975268758,
+        "mean_qed": 0.555109270417353,
+        "mean_heavy_atoms": 27.9
+       },
+       "clean": {
+        "n": 41,
+        "mean_sa": 4.430082543005177,
+        "mean_qed": 0.5138612769778966,
+        "mean_heavy_atoms": 27.829268292682926
+       },
+       "within_bin_sa_difference": 0.2816284322635809,
+       "within_bin_qed_difference": 0.0412479934394564
+      },
+      "31-35": {
+       "strained": {
+        "n": 15,
+        "mean_sa": 4.832606766912005,
+        "mean_qed": 0.3882035396911437,
+        "mean_heavy_atoms": 32.2
+       },
+       "clean": {
+        "n": 25,
+        "mean_sa": 5.202311581767634,
+        "mean_qed": 0.2892431530968621,
+        "mean_heavy_atoms": 32.84
+       },
+       "within_bin_sa_difference": -0.3697048148556288,
+       "within_bin_qed_difference": 0.09896038659428158
+      },
+      "36-41": {
+       "strained": {
+        "n": 3,
+        "mean_sa": 5.537006851258183,
+        "mean_qed": 0.18853547225324815,
+        "mean_heavy_atoms": 37.666666666666664
+       },
+       "clean": {
+        "n": 17,
+        "mean_sa": 5.2704511180998495,
+        "mean_qed": 0.14807681709322373,
+        "mean_heavy_atoms": 37.76470588235294
+       },
+       "within_bin_sa_difference": 0.2665557331583335,
+       "within_bin_qed_difference": 0.04045865516002442
+      }
+     }
+    },
+    "strain_size_regression": {
+     "n": 170,
+     "strained_count": 43,
+     "terms": [
+      "intercept",
+      "strained",
+      "heavy_atoms"
+     ],
+     "sa": {
+      "intercept": 2.387756294460188,
+      "strained_coefficient": 0.2422920642198224,
+      "strained_stderr": 0.13961055307961437,
+      "heavy_atom_coefficient": 0.07627715333483717,
+      "heavy_atom_stderr": 0.009719364161773523,
+      "raw_strained_difference": 0.1914220051746902
+     },
+     "qed": {
+      "intercept": 1.0512176890353826,
+      "strained_coefficient": 0.027191231972963442,
+      "strained_stderr": 0.03165325844494009,
+      "heavy_atom_coefficient": -0.021554042499858685,
+      "heavy_atom_stderr": 0.0022036267241034805,
+      "raw_strained_difference": 0.04156585617814357
+     }
+    },
+    "ring_event_census": {
+     "trajectories": 170,
+     "events": 4887,
+     "event_family_histogram": {
+      "atom_delete": 616,
+      "atom_insert": 731,
+      "atom_restate": 805,
+      "bond_reorder": 122,
+      "bond_reroute": 2179,
+      "ring_system_grow": 434
+     },
+     "ring_forming_events": 434,
+     "ring_removing_events": 0,
+     "ring_forming_events_per_trajectory": 2.552941176470588,
+     "ring_removing_events_per_trajectory": 0.0,
+     "endpoint_census_tracks_creation": true
+    }
+   },
+   "ring_signature_census": {
+    "molecules": 170,
+    "rings": 502,
+    "ring_systems": 434,
+    "rings_per_molecule": 2.9529411764705884,
+    "ring_systems_per_molecule": 2.552941176470588,
+    "ring_size_histogram": {
+     "3": 33,
+     "4": 18,
+     "5": 124,
+     "6": 318,
+     "7": 8,
+     "13": 1
+    },
+    "ring_size_fraction": {
+     "3": 0.06573705179282868,
+     "4": 0.035856573705179286,
+     "5": 0.24701195219123506,
+     "6": 0.6334661354581673,
+     "7": 0.01593625498007968,
+     "13": 0.00199203187250996
+    },
+    "strained_ring_fraction": 0.10159362549800798,
+    "fraction_with_strained_ring": 0.2529411764705882,
+    "ring_system_count_fraction": {
+     "0": 0.0058823529411764705,
+     "1": 0.10588235294117647,
+     "2": 0.36470588235294116,
+     "3": 0.4,
+     "4": 0.1,
+     "5": 0.023529411764705882
+    },
+    "system_signature_fraction": {
+     "(6,)": 0.5161290322580645,
+     "(5,)": 0.20046082949308755,
+     "(3,)": 0.07603686635944701,
+     "(5, 6)": 0.07142857142857142,
+     "(6, 6)": 0.06221198156682028,
+     "(4,)": 0.041474654377880185,
+     "(7,)": 0.013824884792626729,
+     "(5, 5)": 0.0069124423963133645,
+     "(6, 7)": 0.004608294930875576,
+     "(6, 6, 6)": 0.004608294930875576,
+     "(6, 13)": 0.002304147465437788
+    },
+    "distinct_system_signatures": 11,
+    "distinct_molecule_multisets": 61
+   },
+   "valid_state_fraction": 1.0,
+   "connected_fraction": 1.0,
+   "exhausted_event_budget_fraction": 0.0,
+   "mean_events": 28.74705882352941,
+   "mean_plan_events": 2.552941176470588,
+   "ring_size_total_variation_vs_corpus": 0.09473228274473865,
+   "ring_bootstrap": {
+    "draws": 2000,
+    "molecules": 170,
+    "strained_ring_fraction": {
+     "point": 0.10159362549800798,
+     "ci95_low": 0.0749899193548387,
+     "ci95_high": 0.1310483870967742,
+     "stderr": 0.014122692273123934
+    },
+    "fraction_with_strained_ring": {
+     "point": 0.2529411764705882,
+     "ci95_low": 0.18823529411764706,
+     "ci95_high": 0.3236764705882345,
+     "stderr": 0.03427614938740627
+    },
+    "rings_per_molecule": {
+     "point": 2.9529411764705884,
+     "ci95_low": 2.793970588235294,
+     "ci95_high": 3.123529411764706,
+     "stderr": 0.08810164750279594
+    },
+    "ring_systems_per_molecule": {
+     "point": 2.552941176470588,
+     "ci95_low": 2.4233823529411764,
+     "ci95_high": 2.6882352941176473,
+     "stderr": 0.06928268164399917
+    },
+    "ring_size_total_variation": {
+     "point": 0.09473228274473865,
+     "ci95_low": 0.06831470457306198,
+     "ci95_high": 0.13346381204536895,
+     "stderr": 0.01672817687917481
+    }
+   },
+   "published_metrics_stderr": {
+    "quality": 0.024710825012258998,
+    "validity": 0.0
+   },
+   "plan_realization": {
+    "plans": 170,
+    "requested_systems": 446,
+    "realized_systems": 434,
+    "realization_rate": 0.9730941704035875,
+    "fully_realized_fraction": 0.9294117647058824,
+    "unrealized_reasons": {
+     "no_host_support": 12
+    },
+    "bin_fallback_fraction": 0.0,
+    "endpoint_matches_installed_skeleton": 1.0,
+    "endpoint_comparisons": 170,
+    "plan_trigger_fired_fraction": 1.0
+   }
+  },
+  "C1": {
+   "arm": "C1",
+   "shards": 15,
+   "attempted": 150,
+   "complete": false,
+   "published_metrics": {
+    "attempted": 150,
+    "valid": 150,
+    "unique": 150,
+    "high_quality": 17,
+    "validity": 1.0,
+    "uniqueness": 1.0,
+    "quality": 0.11333333333333333,
+    "quality_given_valid_unique": 0.11333333333333333,
+    "diversity": 0.8896577814004568,
+    "diversity_moses_intdiv1": 0.8837267295244537,
+    "qed_threshold": 0.6,
+    "sa_threshold": 4.0,
+    "mean_qed": 0.4569571608192105,
+    "mean_sa": 4.572978955218996,
+    "fraction_unique_passing_qed": 0.3,
+    "fraction_unique_passing_sa": 0.24666666666666667
+   },
+   "strained_ring_census": {
+    "molecules": 150,
+    "ring_size_histogram": {
+     "3": 8,
+     "4": 2,
+     "5": 90,
+     "6": 308,
+     "7": 3,
+     "8": 1
+    },
+    "fraction_with_3_ring": 0.04666666666666667,
+    "fraction_with_4_ring": 0.013333333333333334,
+    "fraction_with_strained_ring": 0.06
+   },
+   "decomposition": {
+    "ring_size_distribution": {
+     "molecules": 150,
+     "rings": 412,
+     "ring_size_histogram": {
+      "3": 8,
+      "4": 2,
+      "5": 90,
+      "6": 308,
+      "7": 3,
+      "8": 1
+     },
+     "ring_size_fraction": {
+      "3": 0.019417475728155338,
+      "4": 0.0048543689320388345,
+      "5": 0.21844660194174756,
+      "6": 0.7475728155339806,
+      "7": 0.007281553398058253,
+      "8": 0.0024271844660194173
+     },
+     "strained_ring_fraction": 0.024271844660194174,
+     "rings_per_molecule": 2.7466666666666666,
+     "fraction_with_strained_ring": 0.06,
+     "mean_heavy_atoms": 27.753333333333334
+    },
+    "strain_size_strata": {
+     "bin_edges": [
+      0,
+      15,
+      20,
+      25,
+      30,
+      35,
+      41
+     ],
+     "strata": {
+      "1-15": {
+       "strained": {
+        "n": 0,
+        "mean_sa": null,
+        "mean_qed": null
+       },
+       "clean": {
+        "n": 6,
+        "mean_sa": 2.905452378293973,
+        "mean_qed": 0.6247372616709291,
+        "mean_heavy_atoms": 11.5
+       },
+       "within_bin_sa_difference": null,
+       "within_bin_qed_difference": null
+      },
+      "16-20": {
+       "strained": {
+        "n": 1,
+        "mean_sa": null,
+        "mean_qed": null
+       },
+       "clean": {
+        "n": 7,
+        "mean_sa": 3.3632945124414815,
+        "mean_qed": 0.6265819007360027,
+        "mean_heavy_atoms": 18.857142857142858
+       },
+       "within_bin_sa_difference": null,
+       "within_bin_qed_difference": null
+      },
+      "21-25": {
+       "strained": {
+        "n": 1,
+        "mean_sa": null,
+        "mean_qed": null
+       },
+       "clean": {
+        "n": 37,
+        "mean_sa": 4.446648500728453,
+        "mean_qed": 0.5944597943773388,
+        "mean_heavy_atoms": 23.216216216216218
+       },
+       "within_bin_sa_difference": null,
+       "within_bin_qed_difference": null
+      },
+      "26-30": {
+       "strained": {
+        "n": 2,
+        "mean_sa": null,
+        "mean_qed": null
+       },
+       "clean": {
+        "n": 44,
+        "mean_sa": 4.771539749512422,
+        "mean_qed": 0.5190617338210313,
+        "mean_heavy_atoms": 27.704545454545453
+       },
+       "within_bin_sa_difference": null,
+       "within_bin_qed_difference": null
+      },
+      "31-35": {
+       "strained": {
+        "n": 4,
+        "mean_sa": 4.867762284705411,
+        "mean_qed": 0.5175415448997699,
+        "mean_heavy_atoms": 31.75
+       },
+       "clean": {
+        "n": 29,
+        "mean_sa": 4.71488946259176,
+        "mean_qed": 0.2977440886072568,
+        "mean_heavy_atoms": 32.41379310344828
+       },
+       "within_bin_sa_difference": 0.15287282211365127,
+       "within_bin_qed_difference": 0.21979745629251307
+      },
+      "36-41": {
+       "strained": {
+        "n": 1,
+        "mean_sa": null,
+        "mean_qed": null
+       },
+       "clean": {
+        "n": 18,
+        "mean_sa": 5.046416739509947,
+        "mean_qed": 0.12833025944498677,
+        "mean_heavy_atoms": 37.72222222222222
+       },
+       "within_bin_sa_difference": null,
+       "within_bin_qed_difference": null
+      }
+     }
+    },
+    "strain_size_regression": {
+     "n": 150,
+     "strained_count": 9,
+     "terms": [
+      "intercept",
+      "strained",
+      "heavy_atoms"
+     ],
+     "sa": {
+      "intercept": 2.5919259733789204,
+      "strained_coefficient": 0.08149937003420585,
+      "strained_stderr": 0.31901900745778117,
+      "heavy_atom_coefficient": 0.07120452869221802,
+      "heavy_atom_stderr": 0.012029508433453281,
+      "raw_strained_difference": 0.20960018879254338
+     },
+     "qed": {
+      "intercept": 1.0911533469534946,
+      "strained_coefficient": 0.10276443158834289,
+      "strained_stderr": 0.061339613120252746,
+      "heavy_atom_coefficient": -0.023073338410866576,
+      "heavy_atom_stderr": 0.0023129825373570992,
+      "raw_strained_difference": 0.0612542412085087
+     }
+    },
+    "ring_event_census": {
+     "trajectories": 150,
+     "events": 4285,
+     "event_family_histogram": {
+      "atom_delete": 557,
+      "atom_insert": 629,
+      "atom_restate": 743,
+      "bond_reorder": 99,
+      "bond_reroute": 1938,
+      "ring_system_grow": 319
+     },
+     "ring_forming_events": 319,
+     "ring_removing_events": 0,
+     "ring_forming_events_per_trajectory": 2.1266666666666665,
+     "ring_removing_events_per_trajectory": 0.0,
+     "endpoint_census_tracks_creation": true
+    }
+   },
+   "ring_signature_census": {
+    "molecules": 150,
+    "rings": 409,
+    "ring_systems": 319,
+    "rings_per_molecule": 2.7266666666666666,
+    "ring_systems_per_molecule": 2.1266666666666665,
+    "ring_size_histogram": {
+     "3": 8,
+     "4": 2,
+     "5": 90,
+     "6": 305,
+     "7": 3,
+     "8": 1
+    },
+    "ring_size_fraction": {
+     "3": 0.019559902200488997,
+     "4": 0.004889975550122249,
+     "5": 0.2200488997555012,
+     "6": 0.7457212713936431,
+     "7": 0.007334963325183374,
+     "8": 0.0024449877750611247
+    },
+    "strained_ring_fraction": 0.02444987775061125,
+    "fraction_with_strained_ring": 0.06,
+    "ring_system_count_fraction": {
+     "0": 0.02666666666666667,
+     "1": 0.18666666666666668,
+     "2": 0.46,
+     "3": 0.3,
+     "4": 0.013333333333333334,
+     "5": 0.013333333333333334
+    },
+    "system_signature_fraction": {
+     "(6,)": 0.5987460815047022,
+     "(5,)": 0.13166144200626959,
+     "(5, 6)": 0.11598746081504702,
+     "(6, 6)": 0.07523510971786834,
+     "(3,)": 0.0219435736677116,
+     "(6, 6, 6)": 0.012539184952978056,
+     "(5, 6, 6)": 0.009404388714733543,
+     "(6, 7)": 0.006269592476489028,
+     "(5, 5)": 0.006269592476489028,
+     "(3, 5)": 0.003134796238244514,
+     "(5, 6, 6, 6, 6)": 0.003134796238244514,
+     "(5, 6, 6, 6)": 0.003134796238244514,
+     "(4, 6)": 0.003134796238244514,
+     "(4,)": 0.003134796238244514,
+     "(5, 6, 7)": 0.003134796238244514,
+     "(8,)": 0.003134796238244514
+    },
+    "distinct_system_signatures": 16,
+    "distinct_molecule_multisets": 40
+   },
+   "valid_state_fraction": 1.0,
+   "connected_fraction": 1.0,
+   "exhausted_event_budget_fraction": 0.0,
+   "mean_events": 28.566666666666666,
+   "mean_plan_events": 2.1266666666666665,
+   "ring_size_total_variation_vs_corpus": 0.029818399839384405,
+   "ring_bootstrap": {
+    "draws": 2000,
+    "molecules": 150,
+    "strained_ring_fraction": {
+     "point": 0.02444987775061125,
+     "ci95_low": 0.009949631495129809,
+     "ci95_high": 0.04126464578461247,
+     "stderr": 0.00812372879144263
+    },
+    "fraction_with_strained_ring": {
+     "point": 0.06,
+     "ci95_low": 0.02666666666666667,
+     "ci95_high": 0.1,
+     "stderr": 0.019625596489644404
+    },
+    "rings_per_molecule": {
+     "point": 2.7266666666666666,
+     "ci95_low": 2.5533333333333332,
+     "ci95_high": 2.9066666666666667,
+     "stderr": 0.08930462382035785
+    },
+    "ring_systems_per_molecule": {
+     "point": 2.1266666666666665,
+     "ci95_low": 1.9866666666666666,
+     "ci95_high": 2.26,
+     "stderr": 0.07155304890983356
+    },
+    "ring_size_total_variation": {
+     "point": 0.029818399839384405,
+     "ci95_low": 0.011718270917804271,
+     "ci95_high": 0.06786256020294376,
+     "stderr": 0.015351668580092008
+    }
+   },
+   "published_metrics_stderr": {
+    "quality": 0.025882927305966107,
+    "validity": 0.0
+   },
+   "plan_realization": {
+    "plans": 150,
+    "requested_systems": 393,
+    "realized_systems": 319,
+    "realization_rate": 0.811704834605598,
+    "fully_realized_fraction": 0.5866666666666667,
+    "unrealized_reasons": {
+     "no_host_support": 74
+    },
+    "bin_fallback_fraction": 0.0,
+    "endpoint_matches_installed_skeleton": 1.0,
+    "endpoint_comparisons": 150,
+    "plan_trigger_fired_fraction": 1.0
+   }
+  }
+ }
+}

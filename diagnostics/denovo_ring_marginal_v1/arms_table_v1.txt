@@ -1,0 +1,91 @@
+design            mstep1000_n200_h16p0_pde2a5f995df7_ie2886d773614
+model             step1000  n/arm 200
+corpus            guacamol_subset_500000_seed0.smiles (500,000 molecules)
+
+RING DISTRIBUTION (per-ring size law; TV against the corpus)
+row                         3-ring  4-ring  5-ring  6-ring  7-ring  8-ring      TV  strain/ring  mols w/ 3-4  sys/mol
+---------------------------------------------------------------------------------------------------------------------
+GuacaMol train              1.2%    0.6%   24.1%   72.4%    1.2%    0.1%         -         1.9%         5.9%     2.61
+arm A                      14.2%    8.2%   22.8%   53.7%    0.5%    0.1%     0.209        22.4%        58.4%     3.55
+  95% CI                                                                              [0.182, 0.240]  strain [0.195, 0.253]  mols [0.511, 0.653]
+arm B0                      8.6%    1.6%   30.7%   58.1%    1.0%    .        0.150        10.2%        23.0%     2.35
+  95% CI                                                                              [0.108, 0.192]  strain [0.077, 0.126]  mols [0.175, 0.290]
+arm B1                      6.6%    3.6%   24.7%   63.3%    1.6%    .        0.095        10.2%        25.3%     2.55
+  95% CI                                                                              [0.068, 0.133]  strain [0.075, 0.131]  mols [0.188, 0.324]
+arm C0                      1.7%    0.4%   22.2%   74.7%    0.8%    0.2%     0.028         2.1%         4.5%     1.85
+  95% CI                                                                              [0.010, 0.065]  strain [0.008, 0.035]  mols [0.020, 0.075]
+arm C1                      2.0%    0.5%   22.0%   74.6%    0.7%    0.2%     0.030         2.4%         6.0%     2.13
+  95% CI                                                                              [0.012, 0.068]  strain [0.010, 0.041]  mols [0.027, 0.100]
+
+PRESERVED QUANTITIES (a ring repair bought by regressing these is not one)
+row                            n  validity  uniqueness         quality  diversity  mean QED  mean SA   heavy  events
+--------------------------------------------------------------------------------------------------------------------
+arm A                        190     1.000       1.000    0.121+-0.024     0.8900     0.522    4.600    28.8    27.7
+arm B0                       200     1.000       1.000    0.000+-0.000     0.8960     0.377    5.845    27.3    11.0
+arm B1                       170     1.000       1.000    0.118+-0.025     0.8902     0.458    4.573    27.8    28.7
+arm C0                       200     1.000       1.000    0.005+-0.005     0.8980     0.376    5.914    27.4    11.5
+arm C1                       150     1.000       1.000    0.113+-0.026     0.8897     0.457    4.573    27.8    28.6
+
+NOTE: ring-size TV is CONDITIONAL on rings existing; compare sys/mol separately.
+
+PLAN REALIZATION (planned arms only)
+  arm B0: 519/522 systems (99.4%), 98.5% of plans complete, reasons {'no_host_support': 3}, bin fallback 0.0%
+          endpoint skeleton == installed skeleton: 83.0%
+  arm B1: 434/446 systems (97.3%), 92.9% of plans complete, reasons {'no_host_support': 12}, bin fallback 0.0%
+          endpoint skeleton == installed skeleton: 100.0%   trigger fired 100.0%
+  arm C0: 422/522 systems (80.8%), 59.0% of plans complete, reasons {'no_host_support': 98, 'signature_absent_from_catalog': 2}, bin fallback 0.0%
+          endpoint skeleton == installed skeleton: 80.5%
+  arm C1: 319/393 systems (81.2%), 58.7% of plans complete, reasons {'no_host_support': 74}, bin fallback 0.0%
+          endpoint skeleton == installed skeleton: 100.0%   trigger fired 100.0%
+
+STRATIFIED SA AND QED (strained vs clean, within heavy-atom bin)
+  arm A
+    bin       n clean  n strained      dSA     dQED
+    1-15            3           3   -0.122   -0.010
+    16-20          10           3    0.144    0.128
+    21-25          18          16    0.324    0.035
+    26-30          29          33    0.595    0.046
+    31-35          16          32    0.439    0.014
+    36-41           3          24    0.782   -0.054
+    SA ~ strain +0.484+-0.130   heavy +0.0479+-0.0104   (raw contrast +0.659)
+    QED ~ strain +0.015+-0.022   heavy -0.0204+-0.0017   (raw contrast -0.060)
+  arm B0
+    bin       n clean  n strained      dSA     dQED
+    1-15            6           0        -        -
+    16-20          15           4    0.410   -0.117
+    21-25          44          12    0.316   -0.026
+    26-30          41          16    0.042   -0.101
+    31-35          32           9    0.294    0.110
+    36-41          16           5    0.574   -0.001
+    SA ~ strain +0.258+-0.096   heavy +0.0786+-0.0066   (raw contrast +0.314)
+    QED ~ strain -0.025+-0.031   heavy -0.0250+-0.0022   (raw contrast -0.043)
+  arm B1
+    bin       n clean  n strained      dSA     dQED
+    1-15            4           2        -        -
+    16-20           7           4    0.270   -0.054
+    21-25          33           9    0.603    0.084
+    26-30          41          10    0.282    0.041
+    31-35          25          15   -0.370    0.099
+    36-41          17           3    0.267    0.040
+    SA ~ strain +0.242+-0.140   heavy +0.0763+-0.0097   (raw contrast +0.191)
+    QED ~ strain +0.027+-0.032   heavy -0.0216+-0.0022   (raw contrast +0.042)
+  arm C0
+    bin       n clean  n strained      dSA     dQED
+    1-15            6           0        -        -
+    16-20          18           0        -        -
+    21-25          53           2        -        -
+    26-30          57           4    0.184    0.122
+    31-35          35           2        -        -
+    36-41          22           1        -        -
+    SA ~ strain +0.303+-0.228   heavy +0.0728+-0.0076   (raw contrast +0.357)
+    QED ~ strain +0.044+-0.069   heavy -0.0252+-0.0023   (raw contrast +0.025)
+  arm C1
+    bin       n clean  n strained      dSA     dQED
+    1-15            6           0        -        -
+    16-20           7           1        -        -
+    21-25          37           1        -        -
+    26-30          44           2        -        -
+    31-35          29           4    0.153    0.220
+    36-41          18           1        -        -
+    SA ~ strain +0.081+-0.319   heavy +0.0712+-0.0120   (raw contrast +0.210)
+    QED ~ strain +0.103+-0.061   heavy -0.0231+-0.0023   (raw contrast +0.061)
