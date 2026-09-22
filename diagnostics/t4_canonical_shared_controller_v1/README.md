@@ -33,6 +33,27 @@ deliberate cancellation is recorded as a sealed `*_cancel_*.json` receipt and
 subtracted. Any other terminal state — returned, raised, retries exhausted — does
 surface through `get`, because the output or the exception is there to be fetched.
 
+## One residual risk, stated rather than discovered later
+
+A cell publishes `round_000_lock.json` BEFORE docking its seed and writes its first
+checkpoint immediately AFTER. If a container is preempted inside that window,
+`_resume_state` finds a lock above the last checkpointed round with no checkpoint at
+all, and correctly refuses it as an ambiguous scored retry — which for round ZERO
+means the cell cannot proceed, because it has no archive to search from. `retries=8`
+would then replay the same refusal eight times and the cell would end as a failure.
+
+This window is as small as the design can make it without changing the app (the root
+checkpoint was moved to immediately after the root docking precisely for this), and
+docking itself is fast — MEASURED median 4 s. It widens only when the `dock_worker`
+pool is saturated and a root call queues.
+
+It has not occurred in this run. The symptom would be a cell with
+`round_000_lock.json`, no `checkpoint.json` and no `result.json` that stays that way
+for longer than a root docking could plausibly take, and a spawned call that has
+terminated. The remedy is NOT to delete the stale lock — never delete an active
+artifact — but to re-run that cell under a FRESH run id, since `run_id` partitions the
+volume and a new one starts a clean folder while preserving the old one as a record.
+
 ## Status
 
     python3 tools/launch_t4_canonical.py --mode status --run-id <id>
