@@ -4431,3 +4431,49 @@ independently of whether fa7_0 ever closes.**
   BOTH_ZERO cells -- the known delta=0.6 exhaustion cells -- and discriminate nothing; one (3
   expected, p=0.050) is WEAK; only three are decisive (p 1.7e-05 to 3.4e-04). An eight-zero headline
   would have been three real results and five artifacts.
+
+## 2026-09-22 (a lane measured DEAD from the root was the top frontier contributor in the campaign)
+
+- **MEASURED, and it is the cleanest vindication of "the preflight measures roots, not the states a
+  campaign visits" I have.** The zero-oracle preflight put `anchored_replacement` at a MEDIAN OF
+  ZERO eligible endpoints over 45 cell roots at 512 draws, empty on 27 of 45 -- every braf, fa7 and
+  5ht1b cell. It was retained anyway, on the argument that a root-state probe does not cover the
+  parents a campaign actually searches from. After ~870 charged calls of the scored run, frontier
+  improvements attributed by the SYNTHESIS-TIME lane tag:
+      anchored_replacement 32   shallow 28   structured 27   unattributed 23
+  **The lane the preflight called dead is the largest single contributor.** Had it been dropped on
+  the preflight -- which looked like a defensible, measured, cell-independent decision -- the
+  controller would have lost its best channel before the first oracle call.
+- **GENERAL RULE: a proposal channel's yield FROM THE ROOT is not its yield IN THE CAMPAIGN.** The
+  root is one state, it is the state furthest from anything the search has learned, and for a
+  similarity-constrained task it is the state where the ball is centred. Judge a lane by what it
+  contributes to the frontier over a real run, and design the artifact so that number exists --
+  here, by tagging every candidate with its lane at synthesis time and carrying the tag into the
+  round lock, so attribution is read rather than reconstructed.
+- **`unattributed` 23 is the zero-support fallback**, which deliberately carries `proposal_experts:
+  []` because the frozen expert vocabulary would raise on its true lane name. It shows up as its own
+  row rather than being silently folded into a lane that did not produce it.
+- **The first terminal cell of the canonical run is a clean SCOPED NEGATIVE, and the instrumentation
+  is what makes it one.** `5ht1b_2` at delta=0.6 ended in `candidate_exhaustion` at ONE charged call
+  -- the root -- with the full adaptive expansion having run to `ladder_exhausted`: the zero-support
+  fallback considered 16 regions, excised 7, executed 56 completions and gated 56 endpoints of which
+  **54 were chemically VALID and 0 eligible**, then all three ladder steps (192/384/768 draws per
+  lane, 1,344 draws) returned nothing. So the cell is not a search failure and not an executor
+  failure: it produces valid chemistry that the delta=0.6 / QED>=0.6 / SA<=4 intersection refuses.
+  Its best molecule is its own docked seed, which by the pre-declared rule is NOT a success.
+- **Counting expansions from round locks UNDER-REPORTS exactly the event a scoped negative rests
+  on.** A round whose expansion finds nothing never writes a lock, because the cell terminates
+  before locking any query -- so the one expansion that ran to its declared end was invisible in the
+  locks and had to be read from `expansion_events` in the terminal result. Any telemetry that only
+  exists on the success path cannot diagnose a failure.
+- **`modal volume listdir` per directory trips `VolumeListFiles rate limit exceeded` at ~60 calls**,
+  and the failure mode is worse than slowness: it aborts a mirror partway, after which a
+  reconciliation still PRINTS a table, computed over whatever happened to land. One recursive
+  listing with backoff instead. Companion to the 2026-09-20 `modal volume get` collapse gotcha.
+- **`FunctionCall.get(timeout=0)` cannot distinguish CANCELLED from RUNNING** -- MEASURED, both
+  raise a bare `TimeoutError`. So "is this cell still alive" cannot be answered from the call alone,
+  and a resume that re-spawns on "no result.json" would start a second container on a merely SLOW
+  cell: two searches writing the same round locks and the same checkpoint from different states.
+  A deliberate cancellation must be recorded as a sealed receipt and subtracted -- an auditable fact
+  rather than an inference. Every OTHER terminal state does surface through `get`, because the
+  output or the exception is there to be fetched.
