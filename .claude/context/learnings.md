@@ -4198,3 +4198,72 @@ independently of whether fa7_0 ever closes.**
 - **BUDGET DISCIPLINE WORTH COPYING:** three launches each charged exactly one root docking
   (cancelled / preempted / live). Rather than treating the dead calls as sunk, the ceiling was
   lowered 248 -> 247 -> 246 so that `charged + ceiling` equals the authorized 248 EXACTLY.
+
+## 2026-09-22 (de novo: pinning the global ring marginal WORKS and is FREE -- and does not improve quality)
+
+- **THE HYPOTHESIS IS CONFIRMED AT THE MODEL'S OWN CONDITIONAL LAW, which is the decisive check.**
+  On pristine carbon trees (maximal host, family restricted to `ring_system_grow`), 12 states x 16
+  draws at six conditioning times: small rings **1.3-3.5% against the corpus 1.87%**, 6-rings 67-72%
+  vs 72.4%, SEs 0.8-1.2 points. **GIVEN A FULL HOST THE MODEL ALREADY SAMPLES THE CORPUS RING LAW.**
+  The shipped 22.4% strained-ring rate is what a SHRUNKEN HOST forces, not a network preference.
+- **"Reproduces the training ring distribution" is THREE questions and no single arm wins all three**
+  (TV against the same 500k corpus; signature keys overlap 16/16 with full mass):
+      arm                                    TV ring-SIZE  TV system-COUNT  TV system-SIGNATURE
+      A shipped                                 0.209          0.317             0.258
+      B1 count pinned, first ring event         0.095          **0.071**         0.155
+      C1 signature pinned, first ring event     0.030          0.201             **0.066**
+  C1 matches SIZE and SIGNATURE and improves COUNT (0.317 -> 0.201) while under-delivering **2.13
+  systems/molecule against the corpus 2.61**. B1 wins count precisely BECAUSE it lets the model pick
+  any template the host can carry.
+- **THE RING-SIZE LAW IS ESSENTIALLY FIXED** (bootstrap CIs for C1 contain the corpus and do not
+  overlap A's): 3-rings 1.2% corpus / 14.2% A / **2.0% C1**; 4-rings 0.6 / 8.2 / **0.5**; 6-rings
+  72.4 / 53.7 / **74.6**; strain per ring 1.87% / 22.4% / **2.4%**; molecules carrying a 3- or
+  4-ring **57.9% -> 6.0%, z = 9.96**.
+- **NOTHING WAS PAID.** validity 1.000, uniqueness 1.000, diversity 0.8900 -> 0.8897, quality
+  z = 0.22, QED pass 33.7 -> 30.0% (z 0.72), SA pass 28.9 -> 24.7% (z 0.88).
+- **BUT "FIX THE RINGS AND THE MOLECULES GET BETTER" IS FALSIFIED ON THIS CHECKPOINT.** Quality does
+  not improve. The size-partialled model on arm A predicted ~0.25 SA improvement from removing strain
+  (SA ~ strain +0.484 +- 0.130) and **it did not appear**: 4.600 -> 4.573. The arm term is consistent
+  with zero in every specification.
+- **AN HONEST NON-IDENTIFICATION, stated rather than buried:** a full model attributes the offset to
+  ring content (systems -0.229 +- 0.082, rings +0.176 +- 0.075), but **systems and rings correlate at
+  r = 0.864** and the systems term collapses to -0.002 +- 0.057 when rings is dropped. Candidate, not
+  decomposition.
+- **A QED SELF-CORRECTION WORTH COPYING, made twice by the agent.** It first wrote "mean QED falls
+  ~5 SE". (a) The RAW z is **2.90**; 5.04 was the SIZE-ADJUSTED coefficient quoted as if raw. (b) It
+  is a MEAN shift that does not cross the benchmark threshold -- the pass RATE is unchanged. And the
+  drop is RING CONTENT, not the pinning: adding ring systems takes it -0.065 -> **-0.024 +- 0.021**,
+  at **+0.0488 +- 0.0098 QED per ring system**, with a shuffled-arm NEGATIVE CONTROL at
+  +0.003 +- 0.017. Size adjustment makes it WORSE (C1's molecules are smaller and QED rises as they
+  shrink, -0.0213 +- 0.0014/atom), so size is not the explanation. Interval still admits a modest
+  real cost ~[-0.065, +0.017]: **"not established", not "proven absent"**.
+- **THE SHORTFALL IS LOCATED AND IS A REALIZATION DEFECT, NOT A FACTORIZATION PROBLEM.** `p(R)` draws
+  **2.620 systems/molecule against the corpus 2.606** -- correct to three digits. Then **81.2% find a
+  host**, and the continuation preserves the installed skeleton **100%**. Every bit of the
+  0.48/molecule gap is HOST REFUSAL, worth ~**+0.023 QED** if closed. Failure is host exhaustion,
+  monotone in plan position (single rings 0.184 -> 0.333 -> 0.546 across slots). The per-size column
+  reading backwards is an artifact of most-demanding-first ordering, which is doing its job.
+- **FALSIFIED EN ROUTE: "an early conditioning time makes it pick different rings."** The template law
+  is FLAT in time. Time matters through the **hazard**: realizing at t=0 collapses median hazard
+  22.77 -> 1.84 (13.5x) and destroys the molecule (11 events vs 28, quality 0.000/0.005) while still
+  fixing the ring law (C0 TV 0.028). **On this path, cheap is the failure signature** -- the t=0 arms
+  are the fastest at 75-82 s/molecule precisely because they die early.
+- **DECLARED SUBSTITUTION:** the brief's arm B was `exact_early_ring`, a TRAINING-TIME teacher-trace
+  schedule. Lineage B trained on `sequential`, so it is unobtainable from this checkpoint by any
+  inference flag. B0/B1 are the declared inference-time analogue and are labelled as such everywhere.
+- **COST CORRECTION: 161 s/molecule for arm A**, so the standing 72.65 s/trajectory figure
+  **understates this capacity 2.2x**. Budget de-novo sweeps against 161.
+
+## 2026-09-22 (THE PUBLISHED N=50 DE-NOVO ROW DOES NOT REPRODUCE -- a surviving shard is not a sample)
+
+- **MEASURED:** `diagnostics/denovo_generation_v1/partial_seed20260920_n50_v1.json` reports quality
+  **0.280** / QED 0.591 / SA 4.112. Arm A at **n=190**, same checkpoint sha and byte-identical sampler
+  constants, reports **0.121** / 0.522 / 4.600 -- **z = 2.77**.
+- **THE CAUSE IS SELECTION, AND IT IS A GENERAL TRAP.** That artifact carries `shards_present: 1` --
+  it is the single shard that committed before the 60-shard preemption cascade. Its molecules average
+  **25.04 heavy atoms against 28.79**, and the repo's own size coefficient predicts 0.602 QED against
+  the 0.591 observed. **Preemption selects on SPEED, speed correlates with molecule SIZE, and size
+  drives every de-novo metric. A SURVIVING SHARD IS NOT A RANDOM SAMPLE.**
+- **CONSEQUENCE: every de-novo number quoted from that artifact is biased toward small molecules and
+  must be restated from the n=190 arm-A baseline.** This includes the "COMPOSE's QED beats its corpus"
+  framing, which rested on mean QED 0.591 -- arm A measures 0.522 against a corpus 0.553.
