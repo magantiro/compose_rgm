@@ -1,0 +1,698 @@
+{
+ "cell": "5ht1b_2",
+ "contract": "configs/t4_held_target_distilled_5ht1b_d06_250.json",
+ "contract_payload_sha256": "6959ae96cc0387f8116c6fa4fe9b531eb726959d33a17df6d8fbc51f1bb0e306",
+ "controller_seed": 1002026091908,
+ "cumulative_by_rung": [
+  {
+   "cumulative_distinct": 12,
+   "draws_per_lane": 0,
+   "elapsed_seconds": 0.0,
+   "fresh_distinct": 12,
+   "returned": 12,
+   "rung": 0,
+   "stage": "zero_support_fallback"
+  }
+ ],
+ "delta_from_contract": 0.6,
+ "distinct_eligible": 12,
+ "docking_calls": 0,
+ "docking_interlock": {
+  "docking_binaries_present": [],
+  "docking_calls": 0,
+  "forbidden_modules_checked": [
+   "compose_v4.experiments.t4_docking_adapter",
+   "compose_v4.experiments.t4_partial_docking"
+  ],
+  "forbidden_modules_resident": [],
+  "oracle_calls": 0
+ },
+ "drug_like_eligible": 12,
+ "elapsed_seconds": 2198.63,
+ "endpoints": [
+  {
+   "added_bit_fraction": 0.20755,
+   "charge_delta": -1,
+   "deleted_atoms": null,
+   "direction": "replace",
+   "has_strained_ring": false,
+   "heavy": 31,
+   "heavy_delta": 0,
+   "inserted_atoms": null,
+   "margin_qed": 0.058849,
+   "margin_sa": 0.387012,
+   "margin_similarity": 0.036364,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.658849,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.76364,
+   "rewrite_families": [
+    "atom_protonation_restate",
+    "shallow_local"
+   ],
+   "ring_delta": 0,
+   "ring_sizes": [
+    5,
+    5,
+    6,
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 3.612988,
+   "scaffold_preserved": false,
+   "similarity": 0.636364,
+   "smiles": "C1=CC2=NC=C(CCCN3CCN(CCc4ccccc4)CC3)C2C=C1n1ccnc1",
+   "support_expansion_stage": "protonation_aware_retained_subgraph"
+  },
+  {
+   "added_bit_fraction": 0.06122,
+   "charge_delta": -1,
+   "deleted_atoms": null,
+   "direction": "replace",
+   "has_strained_ring": false,
+   "heavy": 31,
+   "heavy_delta": 0,
+   "inserted_atoms": null,
+   "margin_qed": 0.0652,
+   "margin_sa": 0.281799,
+   "margin_similarity": 0.193103,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.6652,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.83636,
+   "rewrite_families": [
+    "atom_protonation_restate",
+    "charge_only"
+   ],
+   "ring_delta": 0,
+   "ring_sizes": [
+    5,
+    5,
+    6,
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 3.718201,
+   "scaffold_preserved": false,
+   "similarity": 0.793103,
+   "smiles": "C1=CC2=NC=C(CCCN3CCN(CCc4ccccc4)CC3)C2C=C1n1cnnc1",
+   "support_expansion_stage": "protonation_aware_retained_subgraph"
+  },
+  {
+   "added_bit_fraction": 0.2037,
+   "charge_delta": -1,
+   "deleted_atoms": null,
+   "direction": "replace",
+   "has_strained_ring": false,
+   "heavy": 31,
+   "heavy_delta": 0,
+   "inserted_atoms": null,
+   "margin_qed": 0.063392,
+   "margin_sa": 0.134729,
+   "margin_similarity": 0.051515,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.663392,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.78182,
+   "rewrite_families": [
+    "atom_protonation_restate",
+    "shallow_local"
+   ],
+   "ring_delta": 0,
+   "ring_sizes": [
+    5,
+    5,
+    6,
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 3.865271,
+   "scaffold_preserved": false,
+   "similarity": 0.651515,
+   "smiles": "C1=CC2=NC=C(CCCN3CCN(CCc4cccnc4)CC3)C2C=C1n1cnnc1",
+   "support_expansion_stage": "protonation_aware_retained_subgraph"
+  },
+  {
+   "added_bit_fraction": 0.22642,
+   "charge_delta": -1,
+   "deleted_atoms": null,
+   "direction": "replace",
+   "has_strained_ring": false,
+   "heavy": 31,
+   "heavy_delta": 0,
+   "inserted_atoms": null,
+   "margin_qed": 0.041241,
+   "margin_sa": 0.030765,
+   "margin_similarity": 0.01194,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.641241,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.74545,
+   "rewrite_families": [
+    "atom_protonation_restate",
+    "shallow_local"
+   ],
+   "ring_delta": 0,
+   "ring_sizes": [
+    5,
+    5,
+    6,
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 3.969235,
+   "scaffold_preserved": false,
+   "similarity": 0.61194,
+   "smiles": "C1=CC2=NC=C(CSCN3CCN(CCc4ccccc4)CC3)C2C=C1n1cnnc1",
+   "support_expansion_stage": "protonation_aware_retained_subgraph"
+  },
+  {
+   "added_bit_fraction": 0.13333,
+   "charge_delta": -1,
+   "deleted_atoms": null,
+   "direction": "prune",
+   "has_strained_ring": false,
+   "heavy": 26,
+   "heavy_delta": -5,
+   "inserted_atoms": null,
+   "margin_qed": 0.156301,
+   "margin_sa": 0.040466,
+   "margin_similarity": 0.039344,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.756301,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.70909,
+   "rewrite_families": [
+    "atom_protonation_restate",
+    "shallow_local"
+   ],
+   "ring_delta": -1,
+   "ring_sizes": [
+    5,
+    5,
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 3.959534,
+   "scaffold_preserved": false,
+   "similarity": 0.639344,
+   "smiles": "CCCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+   "support_expansion_stage": "protonation_aware_retained_subgraph"
+  },
+  {
+   "added_bit_fraction": 0.13333,
+   "charge_delta": -1,
+   "deleted_atoms": null,
+   "direction": "prune",
+   "has_strained_ring": false,
+   "heavy": 25,
+   "heavy_delta": -6,
+   "inserted_atoms": null,
+   "margin_qed": 0.196613,
+   "margin_sa": 0.002724,
+   "margin_similarity": 0.039344,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.796613,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.70909,
+   "rewrite_families": [
+    "atom_protonation_restate",
+    "shallow_local"
+   ],
+   "ring_delta": -1,
+   "ring_sizes": [
+    5,
+    5,
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 3.997276,
+   "scaffold_preserved": false,
+   "similarity": 0.639344,
+   "smiles": "CCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+   "support_expansion_stage": "protonation_aware_retained_subgraph"
+  },
+  {
+   "added_bit_fraction": 0.21818,
+   "charge_delta": -1,
+   "deleted_atoms": null,
+   "direction": "grow",
+   "has_strained_ring": false,
+   "heavy": 32,
+   "heavy_delta": 1,
+   "inserted_atoms": null,
+   "margin_qed": 0.044772,
+   "margin_sa": 0.212456,
+   "margin_similarity": 0.041791,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.644772,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.78182,
+   "rewrite_families": [
+    "atom_protonation_restate",
+    "shallow_local"
+   ],
+   "ring_delta": 0,
+   "ring_sizes": [
+    5,
+    5,
+    6,
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 3.787544,
+   "scaffold_preserved": false,
+   "similarity": 0.641791,
+   "smiles": "Cc1cccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)c1",
+   "support_expansion_stage": "protonation_aware_retained_subgraph"
+  },
+  {
+   "added_bit_fraction": 0.21818,
+   "charge_delta": -1,
+   "deleted_atoms": null,
+   "direction": "grow",
+   "has_strained_ring": false,
+   "heavy": 32,
+   "heavy_delta": 1,
+   "inserted_atoms": null,
+   "margin_qed": 0.053322,
+   "margin_sa": 0.137325,
+   "margin_similarity": 0.041791,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.653322,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.78182,
+   "rewrite_families": [
+    "atom_protonation_restate",
+    "shallow_local"
+   ],
+   "ring_delta": 0,
+   "ring_sizes": [
+    5,
+    5,
+    6,
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 3.862675,
+   "scaffold_preserved": false,
+   "similarity": 0.641791,
+   "smiles": "Nc1cccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)c1",
+   "support_expansion_stage": "protonation_aware_retained_subgraph"
+  },
+  {
+   "added_bit_fraction": 0.25,
+   "charge_delta": -1,
+   "deleted_atoms": null,
+   "direction": "grow",
+   "has_strained_ring": false,
+   "heavy": 32,
+   "heavy_delta": 1,
+   "inserted_atoms": null,
+   "margin_qed": 0.080255,
+   "margin_sa": 0.270388,
+   "margin_similarity": 0.008696,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.680255,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.76364,
+   "rewrite_families": [
+    "atom_protonation_restate",
+    "shallow_local"
+   ],
+   "ring_delta": 0,
+   "ring_sizes": [
+    5,
+    5,
+    6,
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 3.729612,
+   "scaffold_preserved": false,
+   "similarity": 0.608696,
+   "smiles": "O=C(CCC1=CN=C2C=CC(n3cnnc3)=CC12)N1CCN(CCc2ccccc2)CC1",
+   "support_expansion_stage": "protonation_aware_retained_subgraph"
+  },
+  {
+   "added_bit_fraction": 0.21053,
+   "charge_delta": -1,
+   "deleted_atoms": null,
+   "direction": "grow",
+   "has_strained_ring": false,
+   "heavy": 32,
+   "heavy_delta": 1,
+   "inserted_atoms": null,
+   "margin_qed": 0.080255,
+   "margin_sa": 0.270945,
+   "margin_similarity": 0.071642,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.680255,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.81818,
+   "rewrite_families": [
+    "atom_protonation_restate",
+    "shallow_local"
+   ],
+   "ring_delta": 0,
+   "ring_sizes": [
+    5,
+    5,
+    6,
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 3.729055,
+   "scaffold_preserved": false,
+   "similarity": 0.671642,
+   "smiles": "O=C(Cc1ccccc1)N1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+   "support_expansion_stage": "protonation_aware_retained_subgraph"
+  },
+  {
+   "added_bit_fraction": 0.22414,
+   "charge_delta": -1,
+   "deleted_atoms": null,
+   "direction": "grow",
+   "has_strained_ring": false,
+   "heavy": 32,
+   "heavy_delta": 1,
+   "inserted_atoms": null,
+   "margin_qed": 0.048558,
+   "margin_sa": 0.116675,
+   "margin_similarity": 0.061765,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.648558,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.81818,
+   "rewrite_families": [
+    "atom_protonation_restate",
+    "shallow_local"
+   ],
+   "ring_delta": 0,
+   "ring_sizes": [
+    5,
+    5,
+    6,
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 3.883325,
+   "scaffold_preserved": false,
+   "similarity": 0.661765,
+   "smiles": "O=C1CN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CCN1CCc1ccccc1",
+   "support_expansion_stage": "protonation_aware_retained_subgraph"
+  },
+  {
+   "added_bit_fraction": 0.24138,
+   "charge_delta": -1,
+   "deleted_atoms": null,
+   "direction": "grow",
+   "has_strained_ring": false,
+   "heavy": 32,
+   "heavy_delta": 1,
+   "inserted_atoms": null,
+   "margin_qed": 0.048558,
+   "margin_sa": 0.112212,
+   "margin_similarity": 0.037681,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.648558,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.8,
+   "rewrite_families": [
+    "atom_protonation_restate",
+    "shallow_local"
+   ],
+   "ring_delta": 0,
+   "ring_sizes": [
+    5,
+    5,
+    6,
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 3.887788,
+   "scaffold_preserved": false,
+   "similarity": 0.637681,
+   "smiles": "O=C1CN(CCc2ccccc2)CCN1CCCC1=CN=C2C=CC(n3cnnc3)=CC12",
+   "support_expansion_stage": "protonation_aware_retained_subgraph"
+  }
+ ],
+ "execution": {
+  "app": "compose-t4-support-restoration-gate",
+  "mode": "modal_fanout"
+ },
+ "expansion": {
+  "attempt_log": [
+   {
+    "cumulative_distinct": 12,
+    "elapsed_seconds": 0.0,
+    "fresh_distinct": 12,
+    "returned": 12,
+    "stage": "zero_support_fallback"
+   }
+  ],
+  "attempts": 0,
+  "distinct_eligible": 12,
+  "draws_spent": 0,
+  "fallback_eligible": 12,
+  "fallback_ran": true,
+  "fallback_work": {
+   "distinct_eligible_endpoints": 12,
+   "exact_execution_precision_denominator": 1078,
+   "exact_execution_precision_numerator": 1078,
+   "lane_exact_programs": {
+    "charge_only": 3,
+    "retained_core_prune": 45,
+    "route_complete_region": 262,
+    "shallow_local": 768
+   },
+   "proposal_seed": 1002027991918,
+   "protonation_actions_enumerated": 3,
+   "unique_exact_endpoints": 825
+  },
+  "schema_version": "t4_support_expansion_v1",
+  "stop_reason": "reached_target"
+ },
+ "historical_reference": "UNAVAILABLE",
+ "ladder": {
+  "draw_ladder": [
+   960,
+   1920,
+   3840
+  ],
+  "lanes": [
+   "shallow",
+   "anchored_replacement"
+  ],
+  "max_extra_draws_per_event": 6720,
+  "policy": "t4_frozen_escalation_v1",
+  "policy_sha256": "c5cf6ab3e3a516b6aca3c9cc410c17d2f712bf60ccac224363ba57343c256a62",
+  "schema_version": "t4_support_expansion_v1",
+  "stop_at_distinct_eligible": 4,
+  "wall_seconds": 7200.0,
+  "zero_support_fallback": true
+ },
+ "ladder_fired_without_trigger": false,
+ "oracle_calls": 0,
+ "production_controller_seed": 2026091908,
+ "protein": "5ht1b",
+ "role": "trigger",
+ "round_one": {
+  "agrees_with_committed_audit": true,
+  "audit_delta_mislabelled": false,
+  "decision": {
+   "featured_candidates": 0,
+   "fresh": 0,
+   "merged_pool": 0,
+   "parents_round_one": [
+    "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1"
+   ],
+   "pool_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 0,
+    "shallow": 0,
+    "unique_endpoints": 0
+   },
+   "reproduces_candidate_exhaustion": true,
+   "selected": 0,
+   "selected_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 0,
+    "shallow": 0,
+    "unique_endpoints": 0
+   }
+  },
+  "expected_selected": 0,
+  "lanes": {
+   "anchored_replacement": {
+    "cell": "5ht1b_2",
+    "elapsed_seconds": 373.87,
+    "eligible_records_returned": 0,
+    "expert": "anchored_replacement",
+    "kind": "round_one_expert",
+    "proposal_seed": 1002027092012,
+    "seed_index": 1,
+    "telemetry": {
+     "raw_draws": 512
+    },
+    "unit_seconds": 373.87
+   },
+   "route_complete_region": {
+    "cell": "5ht1b_2",
+    "elapsed_seconds": 15.1,
+    "eligible_records_returned": 0,
+    "expert": "route_complete_region",
+    "kind": "round_one_expert",
+    "proposal_seed": 1002027092113,
+    "seed_index": 1,
+    "telemetry": {
+     "available_large_rewrite_proposals": 17,
+     "available_local_rewrite_proposals": 6,
+     "available_medium_rewrite_proposals": 42,
+     "binding_truncations": 10,
+     "binding_visits": 868,
+     "candidate_shortfall": 0,
+     "complete_programs_committed": 64,
+     "composition_aliases": 79,
+     "composition_attempts": 693,
+     "composition_rejections": 424,
+     "composition_repeated_constituent": 136,
+     "exact_realization_precision_denominator": 64,
+     "exact_realization_precision_numerator": 64,
+     "materialization_attempts": 43,
+     "materialization_rejections": 25,
+     "realization_limit": 64,
+     "realization_status_counts": {
+      "committed": 64
+     },
+     "realized_primitive_band_counts": {
+      "large": 10,
+      "medium": 34,
+      "small": 20
+     },
+     "scale_balanced": 0,
+     "selected_large_rewrite_proposals": 16,
+     "selected_local_rewrite_proposals": 6,
+     "selected_medium_rewrite_proposals": 42,
+     "single_aliases": 7,
+     "templates_with_bindings": 13,
+     "unique_ranked_endpoints": 64,
+     "valid_depth_2": 31,
+     "valid_depth_3": 21,
+     "valid_depth_4": 2,
+     "valid_unique_single_goals": 11
+    },
+    "unit_seconds": 15.11
+   },
+   "shallow": {
+    "cell": "5ht1b_2",
+    "elapsed_seconds": 1288.28,
+    "eligible_records_returned": 0,
+    "expert": "shallow",
+    "kind": "round_one_expert",
+    "proposal_seed": 1002027091911,
+    "seed_index": 1,
+    "telemetry": {
+     "raw_draws": 480
+    },
+    "unit_seconds": 1288.28
+   }
+  }
+ },
+ "routing": {
+  "agrees": true,
+  "applicability": {
+   "charge_refused_regions": 9,
+   "charged_centres": 1,
+   "executable_regions": 7,
+   "growth_headroom": 9,
+   "heavy_atoms": 31,
+   "large_regions": 12,
+   "net_formal_charge": 1,
+   "protonation_sites": 3,
+   "total_regions": 16
+  },
+  "historical_kernel": "state_aware",
+  "routed_kernel": "state_aware"
+ },
+ "rung_zero": {
+  "elapsed_seconds": 909.65,
+  "eligible_returned": 12,
+  "kernel": "state_aware",
+  "work": {
+   "distinct_eligible_endpoints": 12,
+   "exact_execution_precision_denominator": 1078,
+   "exact_execution_precision_numerator": 1078,
+   "lane_exact_programs": {
+    "charge_only": 3,
+    "retained_core_prune": 45,
+    "route_complete_region": 262,
+    "shallow_local": 768
+   },
+   "proposal_seed": 1002027991918,
+   "protonation_actions_enumerated": 3,
+   "unique_exact_endpoints": 825
+  }
+ },
+ "rung_zero_fresh_distinct": 12,
+ "schema_version": "t4_support_restoration_gate_v1",
+ "seed_index": 1,
+ "seed_role": "variance_probe",
+ "slot_semantics_preflight": {
+  "endpoint_heavy_ceiling": 40,
+  "free_slots_in_production_source": 17,
+  "heavy_atoms": 31,
+  "padded_graph_slots": 48,
+  "passed": true,
+  "smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1",
+  "tight_graph_slots": 31,
+  "tight_graph_would_forbid_atom_birth": true
+ },
+ "support": "compose_valid",
+ "verdict": {
+  "detail": "12 distinct eligible endpoints recovered (12 at rung 0)",
+  "failure_kind": null,
+  "historical_kernel": "state_aware",
+  "routed_kernel": "state_aware",
+  "routing_agrees_with_historical_arm": true,
+  "verdict": "PASS"
+ }
+}

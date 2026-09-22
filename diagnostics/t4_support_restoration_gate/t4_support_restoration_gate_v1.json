@@ -4,6 +4,7 @@
   "5ht1b_2": {
    "agrees_with_committed_audit": {
     "0": true,
+    "1": true,
     "2": true
    },
    "cumulative_by_rung": {
@@ -15,6 +16,18 @@
       "fresh_distinct": 14,
       "kernel": "state_aware",
       "returned": 14,
+      "rung": 0,
+      "stage": "rung0_state_aware"
+     }
+    ],
+    "1": [
+     {
+      "cumulative_distinct": 12,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 12,
+      "kernel": "state_aware",
+      "returned": 12,
       "rung": 0,
       "stage": "rung0_state_aware"
      }
@@ -34,26 +47,33 @@
    },
    "distinct_eligible_by_seed": {
     "0": 14,
+    "1": 12,
     "2": 19
    },
    "draws_spent_by_seed": {
     "0": 0,
+    "1": 0,
     "2": 0
    },
-   "drug_like_eligible_total": 33,
+   "drug_like_eligible_total": 45,
    "elapsed_seconds_by_seed": {
     "0": 1786.02,
+    "1": 2198.63,
     "2": 1719.33
    },
-   "eligible_endpoints_total": 33,
+   "eligible_endpoints_total": 45,
    "endpoint_smiles": [
     "C1=CC2=NC=C(CCCN3CCC(CCc4ccccc4)CC3)C2C=C1n1cnnc1",
+    "C1=CC2=NC=C(CCCN3CCN(CCc4ccccc4)CC3)C2C=C1n1ccnc1",
     "C1=CC2=NC=C(CCCN3CCN(CCc4ccccc4)CC3)C2C=C1n1cnnc1",
     "C1=CC2=NC=C(CCCN3CCN(CCc4ccccn4)CC3)C2C=C1n1cnnc1",
+    "C1=CC2=NC=C(CCCN3CCN(CCc4cccnc4)CC3)C2C=C1n1cnnc1",
     "C1=CC2=NC=C(CCCN3CCN(CCc4ccncc4)CC3)C2C=C1n1cnnc1",
     "C1=CC2=NC=C(CCCN3CCN(CNc4ccccc4)CC3)C2C=C1n1cnnc1",
     "C1=CC2=NC=C(COCN3CCN(CCc4ccccc4)CC3)C2C=C1n1cnnc1",
+    "C1=CC2=NC=C(CSCN3CCN(CCc4ccccc4)CC3)C2C=C1n1cnnc1",
     "CCCCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+    "CCCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
     "CCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
     "Cc1cccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)c1",
     "Fc1cccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)c1",
@@ -61,6 +81,7 @@
     "NCCCCCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
     "NCc1ccccc1CCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
     "Nc1ccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)cc1",
+    "Nc1cccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)c1",
     "Nc1ccccc1CCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
     "O=C(CCC1=CN=C2C=CC(n3cnnc3)=CC12)N1CCN(CCc2ccccc2)CC1",
     "O=C(CN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1)c1ccccc1",
@@ -73,6 +94,12 @@
    ],
    "expansion_consumed_by_seed": {
     "0": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 0,
+     "stop_reason": "reached_target"
+    },
+    "1": {
      "consumed": true,
      "fallback_ran": true,
      "ladder_attempts": 0,
@@ -97,24 +124,25 @@
      "max": 0.196613,
      "median": 0.059911,
      "min": 0.005095,
-     "n": 33
+     "n": 45
     },
     "sa": {
-     "max": 0.281799,
-     "median": 0.137831,
+     "max": 0.387012,
+     "median": 0.137325,
      "min": 0.002724,
-     "n": 33
+     "n": 45
     },
     "similarity": {
      "max": 0.193103,
      "median": 0.041791,
      "min": 0.008696,
-     "n": 33
+     "n": 45
     }
    },
    "p_any_eligible": 1.0,
    "round_one_selected_by_seed": {
     "0": 0,
+    "1": 0,
     "2": 0
    },
    "routed_kernel": [
@@ -123,28 +151,31 @@
    "routing_agrees": true,
    "rung_zero_yield_by_seed": {
     "0": 14,
+    "1": 12,
     "2": 19
    },
    "seeds_run": [
     0,
+    1,
     2
    ],
    "status": "RUN",
    "stop_reason_by_seed": {
     "0": "reached_target",
+    "1": "reached_target",
     "2": "reached_target"
    },
    "structural_character": {
     "direction_counts": {
-     "grow": 21,
-     "prune": 5,
-     "replace": 7
+     "grow": 27,
+     "prune": 7,
+     "replace": 11
     },
     "heavy_delta": {
      "max": 2.0,
      "median": 1.0,
      "min": -6.0,
-     "n": 33
+     "n": 45
     },
     "rewrite_families": [
      "atom_protonation_restate",
@@ -155,7 +186,7 @@
      "max": 0.0,
      "median": 0.0,
      "min": -1.0,
-     "n": 33
+     "n": 45
     },
     "rungs_producing": [
      0
@@ -780,25 +811,24 @@
  },
  "controls_all_searched": true,
  "coverage": {
-  "addendum": "this block supersedes an earlier one written at 16 shards; a second 5ht1b_2 seed landed afterwards (19 eligible at rung 0, trigger reproduced). No verdict changed.",
+  "addendum": "supersedes earlier coverage blocks written at 16 and 17 shards; the fan-out committed 18 before ending. No verdict changed at any point.",
   "control_events_landed": 10,
   "control_events_planned": 10,
   "covered": {
-   "5ht1b_2": "seeds 0 and 2, rung 0 only (both reached_target, trigger reproduced on both)",
-   "braf_0": "seeds 0 and 2, rung 0 only (both reached_target)",
-   "braf_1": "seeds 0, 1, 2, rung 0 only (all reached_target)"
+   "5ht1b_2": "COMPLETE - seeds 0, 1, 2, rung 0 only, all reached_target, trigger reproduced on all three",
+   "braf_0": "seeds 0 and 2, rung 0 only, both reached_target",
+   "braf_1": "seeds 0, 1, 2, rung 0 only, all reached_target"
   },
   "ladder_rungs_1_to_3_exercised": false,
   "missing": {
-   "5ht1b_2": "seed 1 missing",
    "braf_0": "seed 1 missing",
-   "fa7_0": "ALL THREE SEEDS MISSING. Rung 0 yields 0-1, so this is the cell that must escalate; its ladder behaviour under the unified controller is UNMEASURED.",
+   "fa7_0": "ALL THREE SEEDS MISSING. Rung 0 yields 0-1, so this is the cell that MUST escalate; its ladder behaviour under the unified controller is UNMEASURED.",
    "fa7_2": "ALL THREE SEEDS MISSING. Rung 0 yields 1-3, below the stop target of 4, so it escalates; UNMEASURED."
   },
   "status": "PARTIAL",
-  "trigger_events_landed": 7,
+  "trigger_events_landed": 8,
   "trigger_events_planned": 15,
-  "what_this_does_and_does_not_establish": "ESTABLISHED: on braf_0, braf_1 and 5ht1b_2 the automatically routed kernel recovers useful support at rung 0 alone, at margins and structural scale comparable to the historical arms, and that support survives the production selection path. NOT ESTABLISHED: that the ladder's escalation rungs work, and that fa7_0 and fa7_2 clear their bar. No zero was observed on any landed cell, so no WIRING failure was seen -- but absence of a failure on cells that never escalated is not evidence about escalation.",
+  "what_this_does_and_does_not_establish": "ESTABLISHED: on braf_0, braf_1 and 5ht1b_2 the automatically routed kernel recovers useful support at rung 0 alone, at margins and structural scale comparable to the historical arms, and that support survives the production selection path. 5ht1b_2 is complete at all three seeds. NOT ESTABLISHED: that the ladder's escalation rungs work, and that fa7_0 and fa7_2 clear their bar. No zero was observed on any landed cell, so no WIRING failure was seen -- but absence of a failure on cells that never escalated is not evidence about escalation.",
   "why": "every landed trigger event reached stop_at_distinct_eligible=4 at RUNG 0 and never escalated. The two cells that would have escalated, fa7_0 and fa7_2, committed no shard."
  },
  "docking_calls": 0,
@@ -838,6 +868,7 @@
  },
  "shards": [
   "5ht1b_2_seed0",
+  "5ht1b_2_seed1",
   "5ht1b_2_seed2",
   "braf_0_seed0",
   "braf_0_seed2",
