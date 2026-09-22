@@ -4129,3 +4129,29 @@ independently of whether fa7_0 ever closes.**
   on controller proposals), and the MCS agrees with production's own `actual_changes` exactly on 75%
   of charged rows, r=0.85, with residual bias toward OVER-reporting controller change -- so the
   measured gap is CONSERVATIVE.
+
+## 2026-09-22 (a PMO-path measurement extended to a T4 cell without checking it bound there -- mine)
+
+- **I took the global-delta census's completion-content finding, measured on the PMO proposal path,
+  and told a T4 agent it plausibly explained fa7_0's `0 eligible in 2,048 draws`.** The agent
+  measured instead of accepting it and committed the refutation: **`fa7_0 is EXPRESSIBLE -- the zero
+  is rarity, not incapability`**, proven through the production path at zero oracle calls under the
+  pinned T4 kernel, with law consumption demonstrated (completion law 14 consumption attempts over 16
+  candidates per `segment_replace`; region law 2).
+- **THE PRECISE FACT I MISSED, and it is more informative than either label I offered:** both the
+  region and completion laws are **SHALLOW-ONLY BY CONTRACT**, and the anchored replacement lane
+  correctly resolves NEITHER. So the lane yielding zero is a lane those laws do not reach -- which is
+  neither "structurally incapable" nor "merely rare", and neither of my framings would have found it.
+- **SAME SHAPE AS THE 5ht1b_2 CORRECTION ALREADY ON RECORD:** verifying a mechanism on one code path
+  is not evidence it is the binding constraint on a different one. There the error was generalizing
+  the EDITING vocabulary's charge guard to the T4 proposal path; here it was generalizing the PMO
+  completion draw to a T4 cell. **A measurement's scope is the path it was taken on.**
+- **CONSEQUENCE for the pending decision:** the completion-content repair is a PMO-scoped improvement,
+  NOT a shared unblock for T4 and PMO. Its PMO case is unchanged and stands on its own (scale carries
+  46.7% of lost mass; the controller reaches the required 13-atom scale on 0.4% of proposals against a
+  58.3% requirement; 80.6% of productive transitions install ring content a linear CNO chain cannot
+  build) -- but the "it fixes both benchmarks" argument was mine and is withdrawn.
+- **METHOD THAT WORKED, worth copying:** when handed a cross-path hypothesis, the agent's first move
+  was an EXPRESSIBILITY PROBE -- can any enabled lane produce the required transformation at all --
+  before spending 248 authorized docking calls. It cost ~20 minutes and zero budget, and a negative
+  would have been a complete answer. Ask that question before funding a run, not after.
