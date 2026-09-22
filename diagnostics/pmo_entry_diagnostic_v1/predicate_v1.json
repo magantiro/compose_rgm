@@ -1,0 +1,278 @@
+{
+ "payload": {
+  "calibration": {
+   "chance_reference": {
+    "fraction_at_or_above_delta": 0.0,
+    "max": 0.2159,
+    "median": 0.0924,
+    "p90": 0.1471,
+    "p99": 0.1846,
+    "pairs": 1100,
+    "per_task_max": {
+     "albuterol_similarity": 0.1579,
+     "celecoxib_rediscovery": 0.1486,
+     "gsk3b": 0.2027,
+     "isomers_c7h8n2o2": 0.1875,
+     "jnk3": 0.12,
+     "median1": 0.1846,
+     "mestranol_similarity": 0.15,
+     "perindopril_mpo": 0.2159,
+     "qed": 0.1842,
+     "thiothixene_rediscovery": 0.2025,
+     "troglitazone_rediscovery": 0.1739
+    },
+    "source": "docs/PMO_INIT_BANK.json -- objective-blind, fixed before any PMO task"
+   },
+   "cross_answer_reference": {
+    "fraction_at_or_above_delta": 0.0,
+    "max": 0.1964,
+    "median": 0.0896,
+    "pairs": 55
+   },
+   "region_rule": {
+    "per_task_reference_counts": {
+     "albuterol_similarity": {
+      "primary": 1,
+      "wide": 15
+     },
+     "celecoxib_rediscovery": {
+      "primary": 1,
+      "wide": 15
+     },
+     "gsk3b": {
+      "primary": 1,
+      "wide": 24
+     },
+     "isomers_c7h8n2o2": {
+      "primary": 1,
+      "wide": 10
+     },
+     "jnk3": {
+      "primary": 1,
+      "wide": 24
+     },
+     "median1": {
+      "primary": 1,
+      "wide": 10
+     },
+     "mestranol_similarity": {
+      "primary": 1,
+      "wide": 15
+     },
+     "perindopril_mpo": {
+      "primary": 1,
+      "wide": 11
+     },
+     "qed": {
+      "primary": 2,
+      "wide": 24
+     },
+     "thiothixene_rediscovery": {
+      "primary": 1,
+      "wide": 15
+     },
+     "troglitazone_rediscovery": {
+      "primary": 1,
+      "wide": 15
+     }
+    },
+    "primary": "the spine anchor, identical to the declared destination and to the Test B anchor seed",
+    "wide": "every recorded route endpoint of the task (productivity NOT measured)"
+   },
+   "spine_ladder_summary": {
+    "early_median": 0.1122,
+    "midway_median": 0.119,
+    "near_anchor_max": 0.4906,
+    "near_anchor_median": 0.33,
+    "near_anchor_min": 0.1364,
+    "tasks_whose_near_anchor_clears_delta": [
+     "gsk3b",
+     "jnk3",
+     "median1",
+     "mestranol_similarity",
+     "perindopril_mpo",
+     "qed",
+     "troglitazone_rediscovery"
+    ]
+   },
+   "spine_ladder_to_anchor": {
+    "albuterol_similarity": {
+     "early": 0.1077,
+     "midway": 0.0667,
+     "near_anchor": 0.2857
+    },
+    "celecoxib_rediscovery": {
+     "early": 0.1286,
+     "midway": 0.1286,
+     "near_anchor": 0.2879
+    },
+    "gsk3b": {
+     "early": 0.0986,
+     "midway": 0.0488,
+     "near_anchor": 0.4483
+    },
+    "isomers_c7h8n2o2": {
+     "early": 0.0952,
+     "midway": 0.119,
+     "near_anchor": 0.2143
+    },
+    "jnk3": {
+     "early": 0.1176,
+     "midway": 0.0635,
+     "near_anchor": 0.3093
+    },
+    "median1": {
+     "early": 0.3913,
+     "midway": 0.3585,
+     "near_anchor": 0.4906
+    },
+    "mestranol_similarity": {
+     "early": 0.0682,
+     "midway": 0.0568,
+     "near_anchor": 0.3433
+    },
+    "perindopril_mpo": {
+     "early": 0.156,
+     "midway": 0.1765,
+     "near_anchor": 0.33
+    },
+    "qed": {
+     "early": 0.093,
+     "midway": 0.0549,
+     "near_anchor": 0.3913
+    },
+    "thiothixene_rediscovery": {
+     "early": 0.1781,
+     "midway": 0.1538,
+     "near_anchor": 0.1364
+    },
+    "troglitazone_rediscovery": {
+     "early": 0.1122,
+     "midway": 0.1515,
+     "near_anchor": 0.4177
+    }
+   },
+   "test_b_anchor_top_ten": {
+    "albuterol_similarity": null,
+    "celecoxib_rediscovery": null,
+    "gsk3b": null,
+    "isomers_c7h8n2o2": null,
+    "jnk3": null,
+    "median1": null,
+    "mestranol_similarity": null,
+    "perindopril_mpo": null,
+    "qed": null,
+    "thiothixene_rediscovery": null,
+    "troglitazone_rediscovery": null
+   }
+  },
+  "delta": 0.3,
+  "delta_sweep": [
+   0.2,
+   0.25,
+   0.3,
+   0.35,
+   0.4,
+   0.5,
+   0.6,
+   0.7,
+   0.85
+  ],
+  "descendant_rule": "For every entering proposal, the shallow local channel is drawn from that entrant and the best rung its descendants reach is compared with the entrant's own. With no entrant the field is reported as not evaluable, never as a zero.",
+  "disclosure": "A 20-draw, single-parent smoke test of both registered sources ran before this seal, to size the measurement. Its maximum similarity was 0.086 (arm 1) and 0.1205 (the control), both far below every rung, and delta was already fixed at 0.30 in the module source before it ran. No entry number existed when the ladder was set.",
+  "diversity_rule": "Distinct productive BASINS entered is the number of distinct nearest references, under the WIDE region, among entering proposals; distinct entrant Murcko scaffolds is reported beside it.",
+  "fingerprint": {
+   "kind": "morgan",
+   "n_bits": 2048,
+   "radius": 2,
+   "use_chirality": false
+  },
+  "gate_tasks": [
+   "celecoxib_rediscovery",
+   "albuterol_similarity",
+   "jnk3",
+   "perindopril_mpo",
+   "qed"
+  ],
+  "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
+  "information_regime_statement": "Offline structural evaluator. The atlas destinations are published task answers; they are read only to SCORE proposals after the fact and are never passed to the proposal mechanism, an initialization, a library or a prior. Zero charged oracle calls.",
+  "matched_proposals": [
+   100,
+   500,
+   1000
+  ],
+  "pass_criterion": {
+   "control_task": "qed",
+   "decides": "whether the global-search work (arms 2-4, collectively C) is scored. A null here is decisive and cheap: it says the mechanism does not do the thing it was built to do.",
+   "matched_proposals": [
+    100,
+    500,
+    1000
+   ],
+   "primary_tasks": [
+    "celecoxib_rediscovery",
+    "albuterol_similarity",
+    "jnk3"
+   ],
+   "qed_not_degraded": "C's best rung on qed at 1,000 proposals is not below B's, and C's entry rate on qed at 1,000 proposals is at least B's.",
+   "rule": "C PASSES when, on at least 2 of the 3 primary tasks, C's best rung at 1,000 matched proposals is at least ONE named rung above B's best rung at 1,000 matched proposals, AND qed is not degraded.",
+   "rungs": [
+    [
+     "above_chance",
+     0.25
+    ],
+    [
+     "entry",
+     0.3
+    ],
+    [
+     "near_anchor_band",
+     0.4
+    ],
+    [
+     "anchor_band",
+     0.6
+    ],
+    [
+     "anchor",
+     0.85
+    ]
+   ],
+   "why_not_narrow_versus_broad": "Test C measured the discovery gap as UNIVERSAL: jnk3 reached 38.2% of anchor and perindopril_mpo 38.4%, both broad-objective, sitting with narrow celecoxib at 37.2%. The primary set therefore mixes two rediscovery tasks with one broad-objective task, and no task other than qed is treated as expected-easy. qed is the control precisely because it was already 0.9016 at INITIALIZATION."
+  },
+  "rungs": [
+   [
+    "above_chance",
+    0.25
+   ],
+   [
+    "entry",
+    0.3
+   ],
+   [
+    "near_anchor_band",
+    0.4
+   ],
+   [
+    "anchor_band",
+    0.6
+   ],
+   [
+    "anchor",
+    0.85
+   ]
+  ],
+  "schema_version": "pmo_entry_predicate_v1",
+  "sealed_at_utc": "2026-09-22T02:22:33Z",
+  "sealed_before_any_arm_or_control_measurement": true,
+  "secondary_predicate": "Bemis-Murcko scaffold identity with a region reference",
+  "software": {
+   "numpy": "1.26.4",
+   "platform": "macOS-26.5.2-arm64-arm-64bit",
+   "python": "3.11.13",
+   "rdkit": "2023.09.6"
+  },
+  "statement": "A proposal ENTERS the productive region of task T when the maximum Tanimoto similarity of its Morgan(radius 2, 2048 bits, no chirality) fingerprint to the region's reference molecules is at least delta. The primary region is the SPINE ANCHOR -- the single molecule Test B seeded and measured productive, identical to the task's declared destination. The wide region adds sibling route endpoints whose productivity was never measured and is a sensitivity only."
+ },
+ "payload_sha256": "84077b8bde3a7a85778d5be0aadd1971ba8d6cf90db78129e2afaf4120682a3b"
+}
