@@ -2881,3 +2881,16 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   false`; it is what the deployed Modal app validates against. The local A/B got its OWN contract
   with its own hashes, its own authorization record naming the session instruction, and
   `modal_launch_authorized: false`, and the deployed contract stayed byte-identical.
+- **A PMO campaign folder is 190 MB PER ARM and I committed two of them (382 MB).**
+  `run_program_campaign` writes `round_*/complete.json` containing the WHOLE cumulative
+  optimizer snapshot every round, so fifteen rounds are fifteen copies of an ever-growing
+  archive, and `execute_task` then embeds that same campaign dict inside `result.json`
+  (54-59 MB each, over GitHub's 50 MB warning). The scientifically load-bearing records are
+  tiny: the per-query oracle receipts, `result.json`'s top-level fields, the positive
+  control, and the FINAL snapshot. Commit those and keep the per-round snapshots out of
+  git, or the repository pays for the redundancy forever. NOT rewritten here, because the
+  branch was already pushed and destructive cleanup is not authorized -- flagged for the
+  owner instead.
+- **`result.json` embedding `campaign` also makes every consumer load ~60 MB to read four
+  numbers.** The A/B report reads `charged_oracle_calls`, `best_score`, `auc_top10_at_budget`
+  and `auc_budget`; nothing reads the embedded campaign. Keep a pointer, not a copy.
