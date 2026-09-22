@@ -195,6 +195,52 @@ def main() -> int:
             add(f"| {arm} | {lane} | {count} |")
     add("")
 
+    # ---- The built-in replicate control ----
+    # Arms B and C declare the SAME expert vocabulary and the SAME seed, and differ only
+    # by the adaptive rule. On a delta=0.6 cell where that rule never fired, they
+    # therefore ran an identical algorithm from an identical stream -- VERIFIED on the
+    # locks: identical parents, identical candidate pools, identical query batches in
+    # identical order. Any difference in their result is produced entirely by the
+    # oracle, because `obabel --gen3D` is unseeded.
+    #
+    # So the run contains free replicate pairs, and their spread is the noise floor
+    # below which NO per-cell margin in this table is interpretable.
+    add("## Built-in replicate control: the noise floor of this pipeline\n")
+    add("Arms B and C share a vocabulary and a seed and differ only by the adaptive "
+        "rule. On a cell where that rule NEVER FIRED they ran an identical algorithm "
+        "from an identical stream, so any difference between them is produced by the "
+        "oracle alone (`obabel --gen3D` is unseeded). These pairs are a free replicate "
+        "experiment, and their spread bounds what a per-cell margin can mean.\n")
+    add("| cell | B best | C best | \\|B-C\\| | C expansions |")
+    add("|---|---|---|---|---|")
+    spreads = []
+    for cell in cells06:
+        b_row, c_row = by_key.get(("B", cell)) or {}, by_key.get(("C", cell)) or {}
+        if c_row.get("expansion_triggered_rounds"):
+            continue
+        b_best, c_best = b_row.get("final_best"), c_row.get("final_best")
+        if b_best is None or c_best is None:
+            continue
+        gap = abs(b_best - c_best)
+        spreads.append(gap)
+        add(f"| `{cell}` | {b_best:.1f} | {c_best:.1f} | {gap:.1f} | "
+            f"{c_row.get('expansion_triggered_rounds', 0)} |")
+    if spreads:
+        spreads_sorted = sorted(spreads)
+        median = spreads_sorted[len(spreads_sorted) // 2]
+        add(f"| **n={len(spreads)}** | | | **median {median:.1f}, max "
+            f"{max(spreads):.1f}** | |")
+        add("")
+        add(f"**Read every per-cell margin in this table against a noise floor of about "
+            f"{median:.1f} kcal/mol.** Differences below it are not evidence of anything. "
+            "The comparisons that ARE sound are the structural ones -- whether a cell "
+            "completed its budget or exhausted, and how many calls it spent -- and the "
+            "aggregate over cells.\n")
+    else:
+        add("")
+        add("*No replicate pair is available yet: every completed B/C delta=0.6 pair "
+            "either has not finished in both arms or had the expansion fire in C.*\n")
+
     add("## Expansion trigger census (arm C)\n")
     stops: dict[str, int] = {}
     triggered = added = 0
