@@ -4430,19 +4430,59 @@ independently of whether fa7_0 ever closes.**
   (TV [0.012, 0.068], strain [0.010, 0.041] vs 1.87%, molecules [0.027, 0.100] vs 5.89%) and
   do not overlap arm A's. Validity 1.000, uniqueness 1.000, diversity 0.890 vs 0.890 --
   unchanged.
-- **SAY THE COST FIRST: the ring repair does NOT buy quality, and it COSTS QED.** Published
-  quality is flat (0.121+-0.024 -> 0.113+-0.026) and mean QED FALLS 0.522 -> 0.457, about 5
-  standard errors. So "fix the rings and the molecules get better" is FALSIFIED on this
-  checkpoint. The ring marginal and the drug-likeness of the molecule are separable, and
-  only the first was repaired.
-- **The bigger surprise: removing the strained rings did NOT improve SA.** Mean SA 4.600 ->
-  4.573 while the strained-molecule fraction fell 58.4% -> 6.0%. Arm A's own size-partialled
-  regression reproduces the earlier finding at n = 190 (SA ~ strain **+0.484+-0.130**, heavy
-  +0.0479+-0.0104; QED ~ strain +0.015+-0.022, i.e. NO QED effect), which predicts roughly a
-  0.25 SA improvement -- and it did not appear. Something in the planned arm cancels it, and
-  what that is remains UNIDENTIFIED. Do not quote the strain->SA coefficient as a forecast of
-  what removing strain will deliver; it was measured as an association within one arm and it
-  did not transfer across arms.
+- **SAY THE COST FIRST: the ring repair does NOT buy quality.** Published quality is flat
+  (0.121 vs 0.113, two-proportion **z = 0.22**), and so is every threshold metric the
+  benchmark actually uses: QED pass 33.7% -> 30.0% (z = 0.72), SA pass 28.9% -> 24.7%
+  (z = 0.88), validity and uniqueness 1.000, diversity 0.8900 -> 0.8897. Meanwhile molecules
+  carrying a 3- or 4-ring fall 57.9% -> 6.0% at **z = 9.96**. So "fix the rings and the
+  molecules get better" is FALSIFIED on this checkpoint -- the ring marginal and the
+  drug-likeness of the molecule are separable, and only the first was repaired. **But the
+  repair is also not PAID for**: it is free on every published axis.
+- **CORRECTION to my own first reading of the QED cost, twice over.** I wrote "mean QED falls
+  0.522 -> 0.457, about 5 standard errors". (a) The RAW mean difference is **z = 2.90**, not
+  5; the 5.04 was the SIZE-ADJUSTED coefficient, quoted as if it were the raw one. (b) The
+  drop is a MEAN effect that does not reach the benchmark's threshold: the fraction above
+  QED 0.6 is statistically unchanged. A mean shift and a pass-rate shift are different claims
+  and only the second moves the metric.
+- **AND THE RAW MEAN DROP IS RING CONTENT, NOT THE PINNING.** Arm C1 carries 1.42 fewer ring
+  SYSTEMS and 1.31 fewer rings than arm A, and rings carry QED. Pooled OLS over both arms'
+  endpoints (`scripts/denovo_ring_marginal_qed_attribution.py`,
+  `diagnostics/denovo_ring_marginal_v1/qed_attribution_v1.json`):
+
+      specification                        arm C1 term        arm B1 term
+      raw                                -0.065 +- 0.023    -0.065 +- 0.022
+      + heavy atoms                      -0.088 +- 0.017    -0.084 +- 0.017
+      + heavy + ring systems             -0.024 +- 0.021    -0.042 +- 0.019
+      + heavy + systems + rings + strain -0.016 +- 0.021           -
+      NEGATIVE CONTROL (arm shuffled)    +0.003 +- 0.017    -0.014 +- 0.016
+
+  Size adjustment makes the gap WORSE (C1's molecules are smaller and QED rises as molecules
+  shrink, -0.0213+-0.0014 per heavy atom), so size is not the explanation. Ring-system count
+  is: **+0.0488+-0.0098 QED per system**, and once it is in the model C1's arm term is
+  indistinguishable from zero under both ring specifications. The interval still admits a
+  modest real cost (about [-0.065, +0.017]) -- record "not established", never "proven
+  absent". The shuffled-label control returns +0.003+-0.017, so the instrument can say "it was
+  ring content".
+- **THE UNDER-DELIVERY IS LOCATED EXACTLY, AND IT IS A REALIZATION DEFECT, NOT THE
+  FACTORIZATION.** The plan prior draws **2.620 ring systems per molecule against the corpus
+  2.606** -- correct to three digits, so `p(R)` is right. Then 81.2% find a host, giving 2.127
+  installed, and the continuation preserves the installed skeleton 100%, so the endpoint
+  carries 2.127. Every bit of the 0.48 systems/molecule shortfall is host refusal. At the
+  measured +0.0488 QED per system, closing it is worth about **+0.023 QED**. The route forward
+  is more host, not a different factorization.
+- **The bigger surprise: removing the strained rings did NOT improve SA, and the cancellation
+  is NARROWED but NOT IDENTIFIED.** Mean SA 4.600 -> 4.573 while strained molecules fell
+  58.4% -> 6.0%. Arm A's own size-partialled regression reproduces the earlier finding at
+  n = 190 (SA ~ strain **+0.484+-0.130**, heavy +0.0479+-0.0104; QED ~ strain +0.015+-0.022,
+  i.e. NO QED effect), predicting roughly a 0.25 SA gain that did not appear. The arm term is
+  consistent with zero in every specification (raw -0.027+-0.107, +heavy +0.041+-0.098,
+  +heavy+systems +0.038+-0.124). A full model attributes the offset to ring content
+  (systems -0.229+-0.082, rings +0.176+-0.075, strained +0.469+-0.137) -- losing 1.42 systems
+  would RAISE SA by about +0.33 and cancel the strain gain -- **but systems and rings correlate
+  at r = 0.864 and the `systems` term collapses to -0.002+-0.057 when `rings` is dropped**, so
+  that apportionment is not identified. Report it as a candidate, not a decomposition. And do
+  not quote the strain->SA coefficient as a forecast of what removing strain will deliver: it
+  was an association measured within one arm and it did not transfer across arms.
 - **The realization POINT decides the molecule; the pinned SIZES decide the ring law.** Two
   clean separations. (a) `t = 0` versus the model's own first ring event changes the ring law
   hardly at all (C0 0.028 vs C1 0.030) and changes the MOLECULE completely: 11 events against
