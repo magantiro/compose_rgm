@@ -107,6 +107,11 @@ def main(argv: list[str] | None = None) -> int:
                 "similarity_to_atlas": probe["similarity_to_atlas"],
                 "blind_run_top_ten_mean": run.get("top_ten_mean"),
                 "blind_run_best_score": run.get("best_score"),
+                "calls_remaining_after_the_seed_appeared": (
+                    None
+                    if run.get("charged_calls") is None
+                    else run["charged_calls"] - probe["seed_charged_call"]
+                ),
                 "probe_beats_the_run_it_came_from": (
                     None
                     if measured is None or run.get("top_ten_mean") is None
@@ -179,8 +184,21 @@ def main(argv: list[str] | None = None) -> int:
                 "probe top_ten_new_mean from the blind run's own best molecule, minus the "
                 "blind run's own top ten over its whole budget"
             ),
+            "caveat": (
+                "The probe spends 64 EXTRA calls starting at a molecule the blind run "
+                "had already found and scored, so it measures what the region yields, "
+                "not a better 250-call optimizer. Read it against "
+                "calls_remaining_after_the_seed_appeared: a best molecule that arrives "
+                "at call 235 of 250 leaves no budget to exploit, and no allocation "
+                "claim can rest on it."
+            ),
             "per_task": {
-                task: row["probe_beats_the_run_it_came_from"]
+                task: {
+                    "probe_minus_run": row["probe_beats_the_run_it_came_from"],
+                    "calls_remaining_after_the_seed_appeared": row[
+                        "calls_remaining_after_the_seed_appeared"
+                    ],
+                }
                 for task, row in sorted(best_per_task.items())
             },
         },
