@@ -180,6 +180,22 @@ def test_restore_refuses_a_window_lengthened_in_the_payload():
         MacroOptionRegistry.restore(payload)
 
 
+def test_restore_refuses_a_window_lengthened_on_a_partly_walked_chain():
+    # The horizon moves with the frontier, so the guard must validate against the round
+    # the CURRENT window opened -- not against the first crossing.
+    option = _chain(["B1", "B2", "DEST"])
+    registry = _registry(option)
+    registry.advance_round(1)
+    registry.note_charged("B1", 1)
+    registry.advance_round(2)
+    registry.note_charged("B2", 2)
+    payload = registry.payload()
+    assert MacroOptionRegistry.restore(payload).next_stage_index(option.option_id) == 2
+    payload["records"][0]["protected_through_round"] += 1
+    with pytest.raises(ValueError, match="exceeds its declaration"):
+        MacroOptionRegistry.restore(payload)
+
+
 def test_restore_refuses_a_foreign_schema():
     registry = _registry(_option())
     payload = registry.payload()
@@ -284,3 +300,81 @@ def test_no_reservation_leaves_the_ordinary_choice_identical():
     chosen = [_row("c0"), _row("c1")]
     merged, detail = reserve_continuation_slots(chosen, chosen, set(), limit=2)
     assert merged == chosen and detail["reserved_added"] == 0
+
+
+# ---- Multi-leg chains ----
+
+
+def _chain(endpoints, *, protection_rounds=1, primitives=12, ceiling=23, origin="CCO"):
+    stages, parent = [], origin
+    for index, endpoint in enumerate(endpoints):
+        stages.append(MacroOptionStage(index, parent, endpoint, primitives))
+        parent = endpoint
+    return MacroOption(
+        option_id=option_identity(origin, list(endpoints)),
+        origin_endpoint=origin,
+        stages=tuple(stages),
+        protection_rounds=protection_rounds,
+        declared_at_round=1,
+        realization_ceiling=ceiling,
+    )
+
+
+def test_a_chain_costs_one_bounded_window_per_crossing():
+    option = _chain(["B1", "B2", "DEST"])
+    assert option.bridge_endpoints == ("B1", "B2")
+    assert option.total_protected_rounds_budget == 2
+    registry = _registry(option)
+    registry.advance_round(1)
+    registry.note_charged("B1", 1)
+    registry.advance_round(2)
+    assert registry.protected_bridges() == {"B1": option.option_id}
+    registry.note_charged("B2", 2)
+    registry.advance_round(3)
+    # The window moved with the frontier; exactly one state is protected at a time.
+    assert registry.protected_bridges() == {"B2": option.option_id}
+    registry.note_charged("DEST", 3)
+    assert registry.status(option.option_id) == REACHED
+    assert not registry.protected_bridges()
+
+
+def test_the_frontier_only_moves_forward():
+    option = _chain(["B1", "B2", "DEST"])
+    registry = _registry(option)
+    registry.advance_round(1)
+    # Charging a later stage before its predecessor must not skip ahead.
+    registry.note_charged("DEST", 1)
+    assert registry.status(option.option_id) == DECLARED
+    registry.note_charged("B1", 1)
+    registry.note_charged("B1", 1)
+    assert registry.next_stage_index(option.option_id) == 1
+
+
+def test_a_chain_longer_than_the_declared_maximum_is_refused():
+    with pytest.raises(ValueError, match="2 to 4 stages"):
+        _chain([f"S{i}" for i in range(5)])
+
+
+def test_a_chain_that_expires_mid_way_is_terminal():
+    option = _chain(["B1", "B2", "DEST"])
+    registry = _registry(option)
+    registry.advance_round(1)
+    registry.note_charged("B1", 1)
+    registry.advance_round(3)
+    assert registry.status(option.option_id) == EXPIRED
+    registry.note_charged("B2", 3)
+    assert registry.status(option.option_id) == EXPIRED
+    assert not registry.protected_bridges()
+
+
+def test_restore_preserves_the_frontier_of_a_partly_walked_chain():
+    option = _chain(["B1", "B2", "DEST"])
+    registry = _registry(option)
+    registry.advance_round(1)
+    registry.note_charged("B1", 1)
+    registry.advance_round(2)
+    registry.note_charged("B2", 2)
+    resumed = MacroOptionRegistry.restore(registry.payload())
+    assert resumed.next_stage_index(option.option_id) == 2
+    resumed.advance_round(3)
+    assert resumed.protected_bridges() == {"B2": option.option_id}

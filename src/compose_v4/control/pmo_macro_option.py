@@ -66,6 +66,19 @@ SCHEMA = "pmo_macro_option_registry_v1"
 PROTECTION_ROUNDS_CEILING = 4
 DEFAULT_PROTECTION_ROUNDS = 1
 
+# A macro option is a SHORT chain by design. The measured transport scale on real
+# declared targets is 19 / 36 / 56 primitives against a measured realization ceiling of
+# median 16 and max 23, so two to four legs covers the range; a longer chain would be a
+# planner, which this is deliberately not.
+MAX_STAGES = 4
+
+# The MEASURED single-program realization ceiling, not the executor's configured
+# `max_primitives`. Bound-program lengths observed on the live PMO path are {14, 16, 17,
+# 23}: a macro longer than 23 is beyond what this controller has been measured to
+# realize in one program. It is NOT a hard executor bound, and this module does not
+# claim one.
+MEASURED_REALIZATION_CEILING = 23
+
 # Total parent mass guaranteed to the protected bridges as a group.  It is a FLOOR, so
 # a bridge that is already winning on its own score keeps its larger share.
 DEFAULT_PARENT_MASS_FLOOR = 0.25
@@ -117,8 +130,10 @@ class MacroOption:
     realization_ceiling: int
 
     def __post_init__(self) -> None:
-        if len(self.stages) < 2:
-            raise ValueError("a macro option needs at least a bridge and a destination")
+        if not 2 <= len(self.stages) <= MAX_STAGES:
+            raise ValueError(
+                f"a macro option needs 2 to {MAX_STAGES} stages -- a bridge and a destination"
+            )
         if not isinstance(self.protection_rounds, int) or not (
             1 <= self.protection_rounds <= PROTECTION_ROUNDS_CEILING
         ):
@@ -146,12 +161,23 @@ class MacroOption:
         return sum(stage.primitives for stage in self.stages)
 
     @property
+    def bridge_endpoints(self) -> tuple[str, ...]:
+        """Every intermediate the macro must pass through, in order."""
+        return tuple(stage.endpoint for stage in self.stages[:-1])
+
+    @property
     def bridge_endpoint(self) -> str:
+        """The FIRST bridge -- the canonical `G0 -> G_bridge -> G_destination` case."""
         return self.stages[0].endpoint
 
     @property
     def destination_endpoint(self) -> str:
         return self.stages[-1].endpoint
+
+    @property
+    def total_protected_rounds_budget(self) -> int:
+        """Bounded by construction: one window per crossing, no crossing extendable."""
+        return (len(self.stages) - 1) * self.protection_rounds
 
     def payload(self) -> dict[str, Any]:
         return {
@@ -162,6 +188,7 @@ class MacroOption:
             "declared_at_round": self.declared_at_round,
             "realization_ceiling": self.realization_ceiling,
             "total_primitives": self.total_primitives,
+            "total_protected_rounds_budget": self.total_protected_rounds_budget,
         }
 
     @classmethod
@@ -207,6 +234,15 @@ class _OptionRecord:
     # the bridge is charged DURING round r, so the first round that can continue it is
     # r + 1, and a window of W covers r + 1 .. r + W.
     protected_through_round: int | None = None
+    # Index of the last stage endpoint the LEDGER has charged; -1 before any. The
+    # protected state is always `stages[frontier].endpoint`, so exactly one window is
+    # open per option at a time and a chain costs one bounded window PER CROSSING.
+    frontier: int = -1
+    # The round the CURRENT window opened. Distinct from `bridge_charged_at_round`,
+    # which stays pinned to the first crossing: on a chain the horizon moves with the
+    # frontier, so validating it against the first crossing would reject a legitimate
+    # resume of a partly walked option.
+    window_opened_at_round: int | None = None
     bridge_charged_at_round: int | None = None
     resolved_at_round: int | None = None
     stage_charges: dict[str, int] = field(default_factory=dict)
@@ -282,28 +318,37 @@ class MacroOptionRegistry:
     # ---- Observation of charged endpoints ----
 
     def note_charged(self, endpoint: str, round_index: int) -> list[str]:
-        """Record that the LEDGER charged `endpoint`. Never charges anything itself."""
+        """Record that the LEDGER charged `endpoint`. Never charges anything itself.
+
+        The frontier only ever moves FORWARD along the declared chain, so charging an
+        already-passed intermediate cannot reopen a window, and charging a later stage
+        out of order cannot skip the ones before it.
+        """
         touched = []
         for option_id, record in self._records.items():
+            if record.status in TERMINAL_STATUSES:
+                continue
             option = record.option
-            if endpoint == option.bridge_endpoint and record.status == DECLARED:
-                record.status = BRIDGE_CHARGED
-                record.bridge_charged_at_round = round_index
-                # The window opens when the bridge is actually in the population, not
-                # when the option was declared: protecting a state that was never
-                # charged would spend the window on nothing.
-                record.protected_through_round = round_index + option.protection_rounds
-                record.stage_charges[endpoint] = round_index
-                touched.append(option_id)
-            elif endpoint == option.destination_endpoint and record.status in (
-                DECLARED,
-                BRIDGE_CHARGED,
-            ):
+            nxt = record.frontier + 1
+            if nxt >= len(option.stages) or endpoint != option.stages[nxt].endpoint:
+                continue
+            record.frontier = nxt
+            record.stage_charges[endpoint] = round_index
+            touched.append(option_id)
+            if nxt == len(option.stages) - 1:
                 record.status = REACHED
                 record.resolved_at_round = round_index
                 record.protected_through_round = None
-                record.stage_charges[endpoint] = round_index
-                touched.append(option_id)
+                record.window_opened_at_round = None
+                continue
+            record.status = BRIDGE_CHARGED
+            if record.bridge_charged_at_round is None:
+                record.bridge_charged_at_round = round_index
+            record.window_opened_at_round = round_index
+            # The window opens when the intermediate is actually in the population, not
+            # when the option was declared: protecting a state that was never charged
+            # would spend the window on nothing.
+            record.protected_through_round = round_index + option.protection_rounds
         return touched
 
     # ---- Protection surface ----
@@ -311,10 +356,14 @@ class MacroOptionRegistry:
     def protected_bridges(self) -> dict[str, str]:
         """Endpoint -> option id, for every option with an OPEN protection window."""
         return {
-            record.option.bridge_endpoint: option_id
+            record.option.stages[record.frontier].endpoint: option_id
             for option_id, record in self._records.items()
-            if record.status == BRIDGE_CHARGED
+            if record.status == BRIDGE_CHARGED and record.frontier >= 0
         }
+
+    def next_stage_index(self, option_id: str) -> int:
+        """Which declared stage this option is waiting to have executed and charged."""
+        return self._records[option_id].frontier + 1
 
     def open_options(self) -> dict[str, MacroOption]:
         return {
@@ -324,6 +373,7 @@ class MacroOptionRegistry:
         }
 
     def awaiting_bridge(self) -> dict[str, MacroOption]:
+        """Options whose first leg has not been charged yet."""
         return {
             option_id: record.option
             for option_id, record in self._records.items()
@@ -360,6 +410,9 @@ class MacroOptionRegistry:
                     "status": record.status,
                     "rounds_remaining": self._rounds_remaining(record),
                     "protected_through_round": record.protected_through_round,
+                    "window_opened_at_round": record.window_opened_at_round,
+                    "frontier": record.frontier,
+                    "stages_charged": record.frontier + 1,
                     "bridge_charged_at_round": record.bridge_charged_at_round,
                     "resolved_at_round": record.resolved_at_round,
                     "stage_charges": dict(sorted(record.stage_charges.items())),
@@ -388,6 +441,8 @@ class MacroOptionRegistry:
                             "construction": record.construction,
                             "status": record.status,
                             "protected_through_round": record.protected_through_round,
+                            "window_opened_at_round": record.window_opened_at_round,
+                            "frontier": record.frontier,
                             "bridge_charged_at_round": record.bridge_charged_at_round,
                             "resolved_at_round": record.resolved_at_round,
                             "stage_charges": record.stage_charges,
@@ -412,12 +467,13 @@ class MacroOptionRegistry:
             if status not in (DECLARED, BRIDGE_CHARGED, REACHED, EXPIRED):
                 raise ValueError("macro option payload carries an unknown status")
             horizon = row["protected_through_round"]
+            opened = row["window_opened_at_round"]
             charged = row["bridge_charged_at_round"]
             # A restored window may never reach FURTHER than the declared one; that is
             # the one way a resume could silently convert a bounded protection into an
             # open-ended allowance.
             if horizon is not None and (
-                charged is None or int(horizon) > int(charged) + option.protection_rounds
+                opened is None or int(horizon) > int(opened) + option.protection_rounds
             ):
                 raise ValueError("restored macro option window exceeds its declaration")
             registry._records[option.option_id] = _OptionRecord(
@@ -425,6 +481,8 @@ class MacroOptionRegistry:
                 construction=row.get("construction") or {},
                 status=status,
                 protected_through_round=None if horizon is None else int(horizon),
+                frontier=int(row["frontier"]),
+                window_opened_at_round=None if opened is None else int(opened),
                 bridge_charged_at_round=charged,
                 resolved_at_round=row["resolved_at_round"],
                 stage_charges=dict(row["stage_charges"]),
@@ -535,6 +593,8 @@ __all__ = [
     "DEFAULT_PARENT_MASS_FLOOR",
     "DEFAULT_PROTECTION_ROUNDS",
     "EXPIRED",
+    "MAX_STAGES",
+    "MEASURED_REALIZATION_CEILING",
     "PROTECTION_ROUNDS_CEILING",
     "REACHED",
     "SCHEMA",
