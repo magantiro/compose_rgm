@@ -64,20 +64,36 @@
       "verified_by": "canonical SMILES identity: seed minus the naphthalenyl pendant, plus a linear O-C chain on the carbonyl carbon, equals the witness exactly",
       "what": "the witness decomposes exactly into one excision plus one completion"
     },
+    "decisive_evidence_3_support_census": {
+      "binding_constraint": "not expressibility. 300 large excisions are offered and 0 are eligible at this seed, and the fallback funnel shows why: the similarity AND QED INTERSECTION is what refuses them, with max QED 0.4103 among similarity-passing there",
+      "distinct_eligible": 0,
+      "distinct_offered": 3271,
+      "gate_disagreements": 0,
+      "max_excision_heavy_atoms": 22,
+      "max_rings_installed": 4,
+      "offered_with_excision_ge_7": 300,
+      "offered_with_ring_installed": 836,
+      "offered_with_ring_installed_and_excision_ge_7": 9,
+      "offered_with_ring_removed": 1056,
+      "reading": "the required move class is abundantly present: 300 of 3,271 offers excise 7 or more heavy atoms and the largest reaches 22, against witnesses needing 7-15. RING INSTALLATION IS ALSO PRESENT -- 836 offers ADD ring content, up to +4 rings, and 9 offers both add ring content and excise 7 or more atoms. So the support is not excision-only and is not ring-free",
+      "what": "the reachable support measured AT THE GATE, by wrapping the production Fiber.check rather than transcribing it, on one seed at only 200 draws",
+      "why_this_differs_from_reading_the_module": "_grow_actions builds a linear single-bonded C/N/O chain and genuinely cannot install a ring. But expand does not gate what the module builds -- it abstracts the program to a structural goal, re-binds it and gates what instantiate_goal CONSTRUCTS, and on this cell the module's own endpoint reaches the gate with frequency 0.0000. Ring-installing content therefore appears at the gate even though the completion chain is linear. A statement about _grow_actions is a statement about an object the campaign never scores"
+    },
     "measured_rate": {
-      "consequence": "one expansion event runs 6,720 shallow draws, so roughly 5.6 expected eligible endpoints, i.e. P(at least one) near 0.996. The budget is worth spending",
-      "pooled_approximate": "about 1 eligible endpoint per 1,200 shallow draws",
+      "consequence": "one expansion event runs 6,720 shallow draws, so roughly 4.7 expected eligible endpoints, i.e. P(at least one) near 0.991. The budget is worth spending",
+      "pooled_approximate": "about 1 eligible endpoint per 1,440 shallow draws, over 2,880 pooled measured draws",
       "prior_branch": {
         "draws": 1440,
         "eligible": 1,
         "seeds": 3
       },
       "this_tree": {
-        "draws": 960,
+        "draws": 1440,
         "eligible": 1,
         "seeds": [
           0,
-          1
+          1,
+          2
         ]
       }
     },

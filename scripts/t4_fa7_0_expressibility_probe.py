@@ -168,7 +168,16 @@ def main() -> int:
         "max_excision_heavy_atoms": -min(deltas) if deltas else 0,
         "offered_with_excision_ge_7": len(big),
         "offered_with_excision_ge_7_eligible": sum(1 for r in big.values() if r["eligible"]),
+        # SIGN MATTERS. Excising a ring-bearing pendant REMOVES rings; installing ring
+        # content is a different capability and the concern is about the latter. A bare
+        # "ring-count change" count conflates them.
         "offered_with_ring_count_change": len(ring_bearing),
+        "offered_with_ring_removed": sum(1 for r in offered.values() if r["ring_delta"] < 0),
+        "offered_with_ring_installed": sum(1 for r in offered.values() if r["ring_delta"] > 0),
+        "offered_with_ring_installed_and_excision_ge_7": sum(
+            1 for r in big.values() if r["ring_delta"] > 0
+        ),
+        "max_rings_installed": max((r["ring_delta"] for r in offered.values()), default=0),
         "offered_with_ring_change_and_excision_ge_7": sum(
             1 for r in big.values() if r["ring_delta"] != 0
         ),
@@ -192,6 +201,10 @@ def main() -> int:
         "offered_with_excision_ge_7_eligible",
         "offered_with_ring_count_change",
         "offered_with_ring_change_and_excision_ge_7",
+        "offered_with_ring_removed",
+        "offered_with_ring_installed",
+        "offered_with_ring_installed_and_excision_ge_7",
+        "max_rings_installed",
         "elapsed_seconds",
     ):
         print(f"  {key}: {payload[key]}", flush=True)
