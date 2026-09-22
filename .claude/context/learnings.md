@@ -4267,3 +4267,41 @@ independently of whether fa7_0 ever closes.**
 - **CONSEQUENCE: every de-novo number quoted from that artifact is biased toward small molecules and
   must be restated from the n=190 arm-A baseline.** This includes the "COMPOSE's QED beats its corpus"
   framing, which rested on mean QED 0.591 -- arm A measures 0.522 against a corpus 0.553.
+
+## 2026-09-22 (T4 support expansion VALIDATED on the production path: empty pool -> 4 eligible)
+
+- **MEASURED, from the arm's own logs on the production path:**
+      [fa7_0] SUPPORT EXPANSION round=1 stop=reached_target eligible=4 fallback=0 attempts=2
+              draws=2880 3608s
+  An **EMPTY candidate pool** -- the exact state in which the shipped loop publishes
+  `candidate_exhaustion` at 1 charged call and ends the cell -- produced **FOUR eligible endpoints**
+  from two ladder steps, and stopped on **reaching its target** rather than on a bound. `fallback=0`
+  matches the offline measurement that the zero-support stage yields nothing on this parent, so the
+  LADDER did the work, not the fallback. **This validates the mechanism independently of whether a
+  docked molecule ever lands.**
+- **THE DEFECT THAT DISCARDED ALL FOUR is a difference between two paths, not a missing field.** A
+  normal round's pool goes through `merge_expert_pools`, which ATTACHES `proposal_experts` as part of
+  merging; the expansion path deduplicates by endpoint itself and so never passes through it, while
+  `expand`'s own records carry only `proposal_lane`. Fix: `normalize_expansion_records` restores that
+  one key from the lane that produced the record, leaving the fallback's deliberately empty list
+  alone. **When a new path bypasses a merge step, it also bypasses everything that step ATTACHED --
+  look for enrichment, not just for data.**
+- **THE DRY PASS IS THE REUSABLE IDEA, and it is not a tautology.** It drives the whole expansion
+  round body locally -- both stages, normalize, attach_features, select_batch, query rows, lock,
+  serialization -- and checks the selected rows against **every key `run_cell` subscripts off `row`,
+  DERIVED FROM `run_cell`'S OWN SOURCE BY AST** and scoped to the loops that actually walk
+  `selected`. The source supplies the QUESTION and a real pipeline run supplies the ANSWER, so it
+  cannot drift with the code and cannot agree with itself. Scoping proved necessary: it first found
+  `row["cell"]` and `row["score"]`, which are other loops' bindings. It would have caught
+  `proposal_experts`. 13/13 mutations killed including one that removes the app's call to the fix and
+  one that makes the fix a no-op.
+- **FOUR SEQUENTIAL LAUNCH FAILURES, EACH A DISTINCT LATENT DEFECT ON A PATH NOTHING HAD EVER RUN:**
+  expert-vocabulary rejection of the fallback lane label; `root_answer` unbound on resume;
+  the root-lock-before-checkpoint preemption window; and `proposal_experts`. Each cost one root
+  docking to discover. **When a new arm exercises virgin code, drive the whole path in one dry pass
+  before relaunching per fix** -- four sequential rediscoveries is the signature that the class is
+  not exhausted.
+- **BUDGET DISCIPLINE WORTH COPYING: make the ceiling DERIVED, not written.** The builder computes it
+  as the authorized total minus every call the dead launches charged, and a test asserts that
+  invariant rather than a literal someone must remember to edit after each failure. Lifetime stayed
+  at exactly 248 across four launches (3 charged + ceiling 245).
