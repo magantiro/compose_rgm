@@ -354,6 +354,96 @@ def ring_time_sensitivity_entry(states: int = 40, draws_per_state: int = 16) -> 
     print(json.dumps(ring_time_sensitivity.remote(states, draws_per_state), indent=1))
 
 
+@app.function(image=image, volumes={str(VOL): volume}, timeout=7200, cpu=4)
+def plan_hazard_collapse(trajectories: int = 40) -> dict:
+    """What installing the plan at ``t = 0`` does to the model's total hazard.
+
+    This is the measurement that decides WHERE a global ring plan may be
+    realized.  ``t = 0`` maximizes the host, but a ring-rich state at an early
+    conditioning time is off-distribution: in training, ring-rich states occur
+    only late, where the process is winding down, and the hazard head is a
+    function of ``(state, time)``.  If the hazard collapses, the continuation
+    stops and the arm produces a bare ring assembly rather than a molecule --
+    which is a property of the PLACEMENT, not of the idea, so it is measured
+    rather than argued.
+    """
+
+    import numpy as np
+    import torch
+
+    sys.path.insert(0, str(REMOTE_ROOT / "scripts"))
+    from evaluate_tracelet_rollouts import load_factorized_rollout_checkpoint
+
+    from compose_v4.eval.denovo_ring_marginal import RingSystemPlanPrior
+    from compose_v4.experiments.denovo_ring_plan import (
+        CatalogSignatureIndex,
+        initial_frozen_time,
+        realize_ring_plan,
+    )
+
+    torch.set_num_threads(1)
+    volume.reload()
+    _assert_pinned_inputs()
+    model, payload = load_factorized_rollout_checkpoint(str(CHECKPOINT))
+    model.eval()
+    source_prior = payload["tree_source_prior"]
+    plan_prior = RingSystemPlanPrior.read(PRIOR_PATH)
+    index = CatalogSignatureIndex.build(model.ring_system_templates)
+    start_time = initial_frozen_time(TIME_STEP)
+
+    rows = []
+    for trajectory in range(trajectories):
+        rng = np.random.default_rng(5_000_000 + trajectory)
+        state = source_prior.sample(rng, n_slots=MAX_ATOMS)
+        host_atoms = int(np.count_nonzero(state.atom_types > 0))
+        before = float(
+            model.sample_rewrite_mark(
+                state, start_time, np.random.default_rng(1)
+            ).total_hazard
+        )
+        plan, _provenance = plan_prior.sample_with_provenance(rng, host_atoms)
+        ringed, outcome = realize_ring_plan(
+            model, state, plan, rng=rng, time_value=start_time, index=index
+        )
+        after = float(
+            model.sample_rewrite_mark(
+                ringed, start_time, np.random.default_rng(1)
+            ).total_hazard
+        )
+        rows.append(
+            {
+                "trajectory": trajectory,
+                "host_atoms": host_atoms,
+                "requested_systems": len(plan),
+                "realized_systems": len(outcome.realized),
+                "hazard_before": before,
+                "hazard_after": after,
+                "ratio": (before / after) if after > 0 else float("inf"),
+            }
+        )
+        print(json.dumps(rows[-1]), flush=True)
+    finite = [row["ratio"] for row in rows if row["ratio"] != float("inf")]
+    report = {
+        "trajectories": trajectories,
+        "median_hazard_before": float(np.median([r["hazard_before"] for r in rows])),
+        "median_hazard_after": float(np.median([r["hazard_after"] for r in rows])),
+        "median_ratio": float(np.median(finite)) if finite else float("inf"),
+        "fraction_collapsed_below_one": float(
+            np.mean([r["hazard_after"] < 1.0 for r in rows])
+        ),
+        "rows": rows,
+    }
+    BASE.mkdir(parents=True, exist_ok=True)
+    (BASE / "plan_hazard_collapse_v1.json").write_text(json.dumps(report, indent=1))
+    volume.commit()
+    return {key: value for key, value in report.items() if key != "rows"}
+
+
+@app.local_entrypoint()
+def plan_hazard_collapse_entry(trajectories: int = 40) -> None:
+    print(json.dumps(plan_hazard_collapse.remote(trajectories), indent=1))
+
+
 # ---- sampling ---------------------------------------------------------------
 
 
