@@ -13,7 +13,7 @@
       "genmol": 96.6,
       "verdict": "behind"
     },
-    "linker": "NO NUMBER REPORTED. v1 falsified by its own predeclared criterion; the close-then-open transaction never occurs under the prior (0 of 1,440 unconstrained events lengthened the path).",
+    "linker": "NO NUMBER. v1 and v2 both falsified as predeclared. v3 (insert-then-reroute) is a DECLARED CAPABILITY EXTENSION on 8 of 10 prompts, not an acceleration: as an ACTION the reroute form is unavailable 10/10; as a TRANSITION it is recovered 2/10, missing on 8 at a 16,384-draw cap. Trade: in-support route (close-then-open) reaches 4/10 drugs; reaching route reaches 10/10 by hand but is outside support on 8. Both arms must be shown.",
     "motif": {
       "compose": 98.8,
       "genmol": 82.9,
@@ -29,12 +29,23 @@
     }
   },
   "OPEN_OWNER_DECISIONS": [
-    "de novo: scope the claim to atomic ring installation on acyclic carbon, or extend to fused/heteroatom hosts (would reach ~9-10%, but invalidates the forest DP)",
+    "de novo: scope the claim to atomic ring installation on acyclic carbon, or extend to fused/heteroatom hosts (~9-10% small-ring mass, but invalidates the forest DP)",
     "A/perindopril: clean single-revision rerun at 250 (~250 calls) to remove the last asymmetric caveat",
     "19 GB of regenerable .uv-cache inside the repo"
   ],
   "PMO": {
+    "donor_recombination": {
+      "binding_constraint": "The cut draw, not the executor. Shipped uniform_oriented_single_bridge gives median 36 primitives, ABOVE the 23-primitive realization ceiling; a retentive draw gives 17, below it. QED 0.426->0.434, SA 3.58->3.71, so retention is not bought with worse chemistry.",
+      "confidence": "medium -- one task, one ledger, 60 pairs, offline compilation, NOT a scored result",
+      "finding": "compile_transplant -- a scaffold-preserving bridge -- EXISTS but donor_program is ABSENT from the scored entry point's 118-module import closure. Third inert mechanism.",
+      "status": "wiring authorized with a CALL-SITE consumption check as a hard gate"
+    },
     "headline": "Online structural memory is TASK-DEPENDENT: 1 clean win, 1 exploitation win, 1 loss.",
+    "kernel": {
+      "finding": "TWO production kernels: PMO is rdkit 2023.9.6 (PyTDC 1.1.15 requires <2024.3.1), T4/editing is 2024.3.5.",
+      "hazard": "Against the laptop .venv (2026.03.6), 1,472/37,784 (3.90%) off-path intermediates are a DIFFERENT MOLECULE by InChI. Artifacts survive only because the splitter never lands there -- a coincidence, not a property.",
+      "parity": "PASS -- all transport artifacts sha256-identical across both; full 37,784-intermediate lattice shows 0 SMILES and 0 sanitize-verdict disagreements; live scoring-identity gate reproduces byte-for-byte 144/144. Nothing re-based."
+    },
     "matched_1000_celecoxib": {
       "A_auc": 0.2489,
       "A_best": 0.3364,
@@ -63,7 +74,31 @@
     },
     "mechanism_located": "Staged transport paths to declared targets EXIST (44/44, median 2 stages, under the 23-primitive ceiling) but 39% dip below their own starting score, so score-greedy selection abandons the required intermediate. That is the plateau mechanism.",
     "source": "durable query ledgers, matched A/B, arm flag folded into optimizer_kwargs_sha256",
-    "state": "Controller redirected to goal-conditioned transport. Step 1 (correspondence) VALIDATED, stage splitter VALIDATED, alternative-alignment check running. Nothing scored pending."
+    "state": "Controller redirected to goal-conditioned transport. Step 1 (correspondence) VALIDATED, stage splitter VALIDATED, alternative-alignment check running. Nothing scored pending.",
+    "three_test_decomposition": {
+      "A_can_we_CONSTRUCT_it": {
+        "dominant_refusal": "84/192 (43.8%) unreachable_charge_change -- 7 of 16 transfer sources carry net formal charge and every destination is neutral. The July charge-preserving scope surfacing as a PMO ceiling, as it did on T4's 5ht1b_2.",
+        "measured": "204 attempts, winner_paths.find_path recomputing its own MCS per pair. Recorded source 12/12. Transfer to NEUTRAL sources 102/108 = 94.4% with 102/102 EXACT destination recovery re-replayed through the production executor. Search failures 6/192 = 3.1%.",
+        "verdict": "YES -- construction is NOT the gap"
+      },
+      "B_can_we_EXPLOIT_it": {
+        "context": "Blind search reached top-10 0.3714 on celecoxib in 1,000 charged calls; from the anchor it reaches 0.7362 in 64. IVG no-prescreen celecoxib AUC@10k is 0.798.",
+        "measured": "2,101 diagnostic oracle calls, 33 runs (11 tasks x 3 checkpoints), 64-call budget. From the teacher anchor the frozen local controller yields a top-ten of NEW molecules at 0.7362-0.9859. Mean gap vs seed +0.0776 early, +0.0677 near-anchor.",
+        "metric_warning": "distinct_new_above_seed is DEGENERATE at a 1.0000 seed -- nothing can exceed it. Use top_ten_new_mean.",
+        "verdict": "YES -- exploitation is NOT the gap"
+      },
+      "C_can_we_DISCOVER_it": {
+        "broad_objective_half_MEASURED": {
+          "isomers_c7h8n2o2": "1/3 clear (best 0.7779, near_anchor)",
+          "median1": "0/3, all below_early -- and median1 was the exception in Test B too",
+          "qed": "3/3 probes clear a rung (best 0.9232 vs anchor rung 0.9331)"
+        },
+        "caveat": "3 probes per task is thin",
+        "rediscovery_half": "entry probes g1/g2 still running; the falsifier turns on the CONTRAST between the halves, so no verdict yet",
+        "verdict": "IN PROGRESS -- sealed two-sided falsifier, broad half complete"
+      },
+      "note": "Answer-known DEVELOPMENT_INFORMED_DIAGNOSTIC evidence. Not benchmark results."
+    }
   },
   "T4": {
     "banked_mechanism": "replace-completion law: fa7_1 +86%, braf_2 +50%, 5ht1b_0 +75% eligible-per-draw, no control regressed.",
@@ -85,7 +120,7 @@
     "source": "diagnostics/t4_final_ivg_table_v1.json (round locks; both rescues terminated)",
     "state": "COMPLETE. One unsolved cell (fa7_0 d0.6) -- reachable not infeasible; barrier located at the goal-abstraction layer (recovered_fraction=0.0000)."
   },
-  "generated_at_utc": "2026-09-21T21:32:03.517950+00:00",
+  "generated_at_utc": "2026-09-22T00:50:16.509944+00:00",
   "note": "Built from authoritative artifacts only: T4 from round locks via t4_final_ivg_table_v1, PMO from durable ledgers. Not from checkpoints, not from agent prose.",
   "schema_version": "compose_progress_scoreboard_v1"
 }
