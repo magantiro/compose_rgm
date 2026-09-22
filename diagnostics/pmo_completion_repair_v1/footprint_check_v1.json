@@ -1,0 +1,71 @@
+{
+ "arms": {
+  "A_deployed_b": {
+   "allocator_discard_rate": 0.3636,
+   "allocator_discard_rate_for_completions": null,
+   "hop_1_attempts_total": 325,
+   "hop_1b_FOOTPRINT": 0.0,
+   "hop_1b_eligible_using_a_completion_family": 24,
+   "hop_1b_of_those_carrying_the_law": 0,
+   "hop_2_eligible_attempts": 193,
+   "hop_3_eligible_pool": 176,
+   "hop_4_selected_by_credit_allocate": 112,
+   "hop_4_selected_with_completion": 0,
+   "rounds": 6
+  },
+  "B_completion": {
+   "allocator_discard_rate": 0.3636,
+   "allocator_discard_rate_for_completions": 0.3182,
+   "hop_1_attempts_total": 332,
+   "hop_1b_FOOTPRINT": 0.7857,
+   "hop_1b_eligible_using_a_completion_family": 28,
+   "hop_1b_of_those_carrying_the_law": 22,
+   "hop_2_eligible_attempts": 193,
+   "hop_3_eligible_pool": 176,
+   "hop_4_selected_by_credit_allocate": 112,
+   "hop_4_selected_with_completion": 15,
+   "rounds": 6
+  }
+ },
+ "diagnosis_of_the_residual": {
+  "measured": "all 6 of the 6 uncarried attempts are in ROUND 0",
+  "round_0_footprint": "0 of 6",
+  "rounds_1_and_later_footprint": "22 of 22 = 1.000",
+  "so_the_0_786_is": "an artifact of the DENOMINATOR I chose when writing the check: it counts attempts from a route I had already and publicly excluded. On every live proposal route the law now reaches 100% of the proposals it governs.",
+  "the_exclusion_predates_this_measurement": {
+   "checkable": "git show eec75cf1:tests/test_completion_component_law.py names both initialization sites",
+   "commit": "eec75cf1",
+   "why_this_matters": "it means the exclusion is not a retrofit invented to explain away a failed gate; it was declared before the gate was ever run"
+  },
+  "what_round_0_is": "initial_dynamic_program_batch_v21 -> _cold_channel_pool, the bootstrap batch. It is one of the two sites DELIBERATELY left unthreaded, with the reason recorded in DELIBERATELY_UNTHREADED."
+ },
+ "floor": 0.9,
+ "gate_result_as_written": {
+  "floor": 0.9,
+  "note": "This is the number the gate produced against the floor I wrote before running it. It is recorded unchanged.",
+  "treatment_footprint": 0.7857,
+  "verdict": "STILL_THROTTLED"
+ },
+ "new_oracle_calls": 0,
+ "pre_fix_treatment_footprint_measured_on_the_scored_run": 0.175,
+ "problems": [
+  "treatment footprint 0.7857 is below the 0.9 floor; the law still does not reach the proposals it governs"
+ ],
+ "schema_version": "pmo_completion_footprint_check_v1",
+ "scorer": "synthetic, deterministic, structure-dependent -- no oracle constructed",
+ "synthetic_calls_per_arm": 112,
+ "the_open_question_for_the_owner": {
+  "case_for_leaving_it_excluded": "matched arms share an identical starting archive; the 16 charged initialization MOLECULES are identical either way, but threading round 0 makes the treatment's first-round proposal population differ from the control's",
+  "case_for_threading_it": "round 0's proposals are SEARCH, not initialization -- the initialization is the 16 molecules from the lock. Excluding it under-treats arm B in 1 of 15 rounds.",
+  "materiality": "1 round of 15 in a 250-call run. In this 112-call synthetic check it was 6 of 28 completion-family attempts because the run is short and round 0 is a larger share of it.",
+  "my_recommendation": "launch as-is. The mechanism is unthrottled on every live route (22/22), the residual is a declared design choice rather than a defect, and threading round 0 now would change the mechanism's scope AFTER seeing a result.",
+  "question": "should the BOOTSTRAP round carry the completion law?",
+  "status": "NOT DECIDED BY ME -- reported for the owner, no calls spent"
+ },
+ "verdict": "STILL_THROTTLED",
+ "what_I_did_NOT_do": [
+  "I did not redefine the denominator and declare PASS. Re-deriving a metric after seeing it fail is the move the gate exists to prevent; allowing it once means the gate was never real.",
+  "I did not launch the 500 charged calls.",
+  "I did not re-tune the frozen mechanism."
+ ]
+}

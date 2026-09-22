@@ -37,6 +37,7 @@ EXTRA_IMPLEMENTATION = (
     "src/compose_v4/control/dynamic_program_synthesis_v1.py",
     "src/compose_v4/control/dynamic_program_synthesis_v2.py",
     "src/compose_v4/control/dynamic_program_synthesis_v21.py",
+    "src/compose_v4/control/pmo_online_memory.py",
     "src/compose_v4/experiments/pmo_population_v1.py",
     "configs/pmo_completion_component_bank_v1.json",
 )

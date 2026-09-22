@@ -28,6 +28,13 @@ OUT = ROOT / "diagnostics/pmo_completion_repair_v1"
 RUNS = OUT / "scored_ab/celecoxib_rediscovery"
 ARMS = ("A_deployed_b", "B_completion")
 
+
+def configure(runs: Path, arms: tuple[str, ...]) -> None:
+    """Point the analysis at another run root; the hop logic is unchanged."""
+
+    global RUNS, ARMS
+    RUNS, ARMS = Path(runs), tuple(arms)
+
 #: Signatures of a failure inside a component install, so a rejection can be
 #: attributed to the repaired path rather than guessed at.
 COMPONENT_SIGNATURES = (
@@ -108,6 +115,7 @@ def analyse(arm: str) -> dict:
         "selected_with_completion": 0,
     }
     rejections = collections.Counter()
+    eligible_completion_family = 0
     family_counts = collections.Counter()
     eligible_families = collections.Counter()
     sizes_eligible, sizes_selected = [], []
@@ -133,6 +141,10 @@ def analyse(arm: str) -> dict:
                 hops["attempts_with_completion"][status] += 1
             if status == "eligible":
                 hops["eligible_attempts"] += 1
+                if {"segment_grow", "segment_replace"} & set(
+                    completion_families(metadata)
+                ):
+                    eligible_completion_family += 1
                 if has:
                     hops["eligible_attempts_with_completion"] += 1
                     sizes_eligible.append(size)
@@ -201,6 +213,13 @@ def analyse(arm: str) -> dict:
         "execution_rejection_reasons": dict(rejections.most_common()),
         "family_counts_over_attempts_with_metadata": dict(family_counts.most_common()),
         "eligible_family_counts": dict(eligible_families.most_common()),
+        "hop_1b_eligible_using_a_completion_family": eligible_completion_family,
+        "hop_1b_of_those_carrying_the_law": hops["eligible_attempts_with_completion"],
+        "hop_1b_FOOTPRINT": (
+            round(hops["eligible_attempts_with_completion"] / eligible_completion_family, 4)
+            if eligible_completion_family
+            else None
+        ),
         "requested_size_eligible": sorted(sizes_eligible),
         "requested_size_selected": sorted(sizes_selected),
     }
@@ -225,6 +244,9 @@ def main() -> None:
         print(f"  hop 1 synthesis attempts      {a['hop_1_attempts_total']:5d}  "
               f"{a['hop_1_synthesis_attempts']}")
         print(f"        with a completion       {a['hop_1_with_completion_by_status']}")
+        print(f"  hop 1b using a completion fam {a['hop_1b_eligible_using_a_completion_family']:5d}  "
+              f"carrying the law {a['hop_1b_of_those_carrying_the_law']:4d}  "
+              f"FOOTPRINT {a['hop_1b_FOOTPRINT']}")
         print(f"  hop 2 eligible attempts       {a['hop_2_eligible_attempts']:5d}  "
               f"with completion {a['hop_2_eligible_with_completion']:4d} "
               f"({a['hop_2_completion_share_of_eligible']:.1%})")
@@ -243,4 +265,5 @@ def main() -> None:
     print("\nwrote", OUT / "funnel_v1.json")
 
 
-main()
+if __name__ == "__main__":
+    main()
