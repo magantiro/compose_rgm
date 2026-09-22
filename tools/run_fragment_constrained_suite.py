@@ -463,6 +463,37 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def control_from_args(args: argparse.Namespace) -> AttachmentControlConfig:
+    """ONE controller configuration for every drug and every task.
+
+    Built here rather than inline in ``main`` so the command-line-to-controller
+    mapping is a thing a test can drive. A test that reconstructs the config
+    itself is recomputing its expectation from the code under test and cannot
+    fail when the real call site stops reading the flag.
+    """
+    return AttachmentControlConfig(
+        enabled=bool(args.attachment_control),
+        path_program=bool(args.path_program),
+    )
+
+
+def run_task_settings(args: argparse.Namespace) -> dict:
+    """Everything ``run_task`` takes from the command line, in one place.
+
+    The args-to-run_task hop is a second place a knob can be dropped, and the
+    call-site test for the run_task-to-build_prompt_context hop does not cover
+    it -- two hops sharing one sink is exactly how a wiring mutation survives a
+    single consultation test.
+    """
+    return {
+        "seeds": args.seeds,
+        "samples": args.samples,
+        "seed_list": args.seed_list,
+        "drugs": args.drug,
+        "linker_bridge_atoms": args.linker_bridge_atoms,
+    }
+
+
 def protocol_block(args: argparse.Namespace) -> dict:
     """The protocol the rows were produced under, as the artifact records it.
 
@@ -509,10 +540,7 @@ def main() -> None:
     config = sampler_config_from_args(args)
     # ONE controller configuration for every drug and every task.  Nothing here
     # reads a drug name, a task label or any other instance identity.
-    control = AttachmentControlConfig(
-        enabled=bool(args.attachment_control),
-        path_program=bool(args.path_program),
-    )
+    control = control_from_args(args)
 
     selected = (
         [FragmentTask(t) for t in args.task]
@@ -528,13 +556,9 @@ def main() -> None:
             system,
             prompts,
             task,
-            seeds=args.seeds,
-            samples=args.samples,
             config=config,
             control=control,
-            seed_list=args.seed_list,
-            drugs=args.drug,
-            linker_bridge_atoms=args.linker_bridge_atoms,
+            **run_task_settings(args),
         )
 
     payload = {

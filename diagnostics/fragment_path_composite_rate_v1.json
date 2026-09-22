@@ -1,0 +1,313 @@
+{
+  "schema": "compose_fragment_path_composite_scoring_v1",
+  "question": "is each constituent of the v3 atom_insert + bond_reroute composite rankable by the proposal law, at a budget derived from a measured per-draw rate rather than a guessed ladder",
+  "environment": {
+    "python": "3.11.13",
+    "rdkit": "2024.03.5",
+    "numpy": "1.26.4"
+  },
+  "mode": "rate-only",
+  "rate_draws": 400,
+  "cap": 16384,
+  "budget_rule": "N* = ceil(log(0.05)/log(1-r)) with r = measured family rate divided by the number of distinct successors that family produced; the uniform-within-family step is an APPROXIMATION and is conservative where the family law concentrates on the target",
+  "comparison": "on the successor molecule, never on the action object",
+  "rows": [
+    {
+      "drug": "BARICITINIB",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "measured_family_rate": 0.07,
+          "family_draws": 28,
+          "rate_draws": 400,
+          "distinct_family_successors": 18,
+          "hit_in_rate_phase": false,
+          "family_census": {
+            "atom_delete": 345,
+            "atom_insert": 28,
+            "atom_restate": 11,
+            "ring_system_restate": 7,
+            "bond_reorder": 5,
+            "bond_reroute": 3,
+            "bond_insert": 1
+          }
+        },
+        {
+          "rule": "bond_reroute",
+          "measured_family_rate": 0.015,
+          "family_draws": 6,
+          "rate_draws": 400,
+          "distinct_family_successors": 6,
+          "hit_in_rate_phase": false,
+          "family_census": {
+            "atom_delete": 323,
+            "atom_restate": 23,
+            "atom_insert": 21,
+            "bond_reorder": 13,
+            "ring_system_restate": 11,
+            "bond_reroute": 6,
+            "bond_delete": 3
+          }
+        }
+      ]
+    },
+    {
+      "drug": "CYCLOTHIAZIDE",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "measured_family_rate": 0.12,
+          "family_draws": 48,
+          "rate_draws": 400,
+          "distinct_family_successors": 27,
+          "hit_in_rate_phase": true,
+          "family_census": {
+            "atom_delete": 143,
+            "atom_restate": 87,
+            "atom_insert": 48,
+            "ring_system_restate": 46,
+            "bond_reroute": 41,
+            "bond_reorder": 33,
+            "bond_delete": 2
+          }
+        },
+        {
+          "rule": "bond_reroute",
+          "measured_family_rate": 0.1,
+          "family_draws": 40,
+          "rate_draws": 400,
+          "distinct_family_successors": 23,
+          "hit_in_rate_phase": false,
+          "family_census": {
+            "atom_delete": 140,
+            "atom_restate": 91,
+            "bond_reorder": 45,
+            "atom_insert": 42,
+            "bond_reroute": 40,
+            "ring_system_restate": 36,
+            "bond_delete": 5,
+            "bond_insert": 1
+          }
+        }
+      ]
+    },
+    {
+      "drug": "ELIGLUSTAT",
+      "transactions_captured": 3,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "measured_family_rate": 0.47,
+          "family_draws": 188,
+          "rate_draws": 400,
+          "distinct_family_successors": 44,
+          "hit_in_rate_phase": true,
+          "family_census": {
+            "atom_insert": 188,
+            "atom_restate": 118,
+            "ring_system_restate": 61,
+            "bond_delete": 32,
+            "bond_insert": 1
+          }
+        },
+        {
+          "rule": "bond_reroute",
+          "measured_family_rate": 0.055,
+          "family_draws": 22,
+          "rate_draws": 400,
+          "distinct_family_successors": 7,
+          "hit_in_rate_phase": false,
+          "family_census": {
+            "atom_delete": 209,
+            "atom_restate": 48,
+            "atom_insert": 47,
+            "bond_reorder": 30,
+            "bond_reroute": 22,
+            "ring_system_restate": 22,
+            "bond_delete": 21,
+            "bond_insert": 1
+          }
+        }
+      ]
+    },
+    {
+      "drug": "ERLOTINIB",
+      "transactions_captured": 2,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "measured_family_rate": 0.1,
+          "family_draws": 40,
+          "rate_draws": 400,
+          "distinct_family_successors": 13,
+          "hit_in_rate_phase": false,
+          "family_census": {
+            "atom_delete": 120,
+            "atom_restate": 78,
+            "bond_insert": 66,
+            "bond_reorder": 55,
+            "bond_reroute": 41,
+            "atom_insert": 40
+          }
+        },
+        {
+          "rule": "bond_reroute",
+          "measured_family_rate": 0.1425,
+          "family_draws": 57,
+          "rate_draws": 400,
+          "distinct_family_successors": 15,
+          "hit_in_rate_phase": true,
+          "family_census": {
+            "atom_restate": 156,
+            "atom_insert": 94,
+            "bond_reorder": 59,
+            "bond_reroute": 57,
+            "atom_delete": 31,
+            "bond_insert": 3
+          }
+        }
+      ]
+    },
+    {
+      "drug": "FUTIBATINIB",
+      "transactions_captured": 0
+    },
+    {
+      "drug": "LESINURAD",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "measured_family_rate": 0.0225,
+          "family_draws": 9,
+          "rate_draws": 400,
+          "distinct_family_successors": 5,
+          "hit_in_rate_phase": false,
+          "family_census": {
+            "atom_delete": 307,
+            "atom_restate": 28,
+            "ring_system_restate": 15,
+            "bond_reroute": 15,
+            "bond_delete": 12,
+            "bond_reorder": 9,
+            "atom_insert": 9,
+            "bond_insert": 5
+          }
+        },
+        {
+          "rule": "bond_reroute",
+          "measured_family_rate": 0.0575,
+          "family_draws": 23,
+          "rate_draws": 400,
+          "distinct_family_successors": 14,
+          "hit_in_rate_phase": false,
+          "family_census": {
+            "atom_delete": 271,
+            "atom_restate": 38,
+            "bond_reroute": 23,
+            "ring_system_restate": 18,
+            "bond_reorder": 16,
+            "atom_insert": 14,
+            "bond_delete": 11,
+            "bond_insert": 9
+          }
+        }
+      ]
+    },
+    {
+      "drug": "LIOTHYRONINE",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "measured_family_rate": 0.015,
+          "family_draws": 6,
+          "rate_draws": 400,
+          "distinct_family_successors": 4,
+          "hit_in_rate_phase": false,
+          "family_census": {
+            "atom_delete": 377,
+            "atom_insert": 6,
+            "bond_reorder": 5,
+            "ring_system_restate": 4,
+            "atom_restate": 3,
+            "ring_system_delete": 2,
+            "bond_reroute": 2,
+            "bond_delete": 1
+          }
+        },
+        {
+          "rule": "bond_reroute",
+          "measured_family_rate": 0.055,
+          "family_draws": 22,
+          "rate_draws": 400,
+          "distinct_family_successors": 21,
+          "hit_in_rate_phase": true,
+          "family_census": {
+            "atom_delete": 301,
+            "atom_restate": 25,
+            "bond_reroute": 22,
+            "ring_system_restate": 14,
+            "atom_insert": 11,
+            "bond_reorder": 9,
+            "bond_delete": 8,
+            "bond_insert": 6
+          }
+        }
+      ]
+    },
+    {
+      "drug": "LOVASTATIN",
+      "transactions_captured": 0
+    },
+    {
+      "drug": "MARIBAVIR",
+      "transactions_captured": 0
+    },
+    {
+      "drug": "SPIRAPRIL",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "measured_family_rate": 0.1175,
+          "family_draws": 47,
+          "rate_draws": 400,
+          "distinct_family_successors": 19,
+          "hit_in_rate_phase": true,
+          "family_census": {
+            "atom_delete": 166,
+            "atom_restate": 62,
+            "atom_insert": 47,
+            "ring_system_restate": 34,
+            "ring_system_delete": 29,
+            "bond_reorder": 26,
+            "bond_reroute": 24,
+            "bond_delete": 10
+          }
+        },
+        {
+          "rule": "bond_reroute",
+          "measured_family_rate": 0.095,
+          "family_draws": 38,
+          "rate_draws": 400,
+          "distinct_family_successors": 19,
+          "hit_in_rate_phase": false,
+          "family_census": {
+            "atom_delete": 137,
+            "atom_restate": 84,
+            "bond_reroute": 38,
+            "ring_system_restate": 35,
+            "bond_reorder": 30,
+            "ring_system_delete": 29,
+            "atom_insert": 29,
+            "bond_delete": 16
+          }
+        }
+      ]
+    }
+  ],
+  "elapsed_seconds": 223.7
+}

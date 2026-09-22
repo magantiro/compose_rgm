@@ -368,13 +368,17 @@ def test_no_per_task_or_per_drug_sampler_knob_is_expressible():
 
 
 def test_the_path_program_flag_reaches_the_controller_configuration():
+    """Driven through the runner's OWN mapping, never reconstructed here.
+
+    A test that builds the config itself recomputes its expectation from the
+    code under test and stays green when the real call site stops reading the
+    flag.
+    """
     suite, args = _parsed("--attachment-control", "--path-program")
-    control = suite.AttachmentControlConfig(
-        enabled=bool(args.attachment_control), path_program=bool(args.path_program)
-    )
-    assert control.path_program is True
+    assert suite.control_from_args(args).path_program is True
     _, off = _parsed("--attachment-control")
-    assert bool(off.path_program) is False
+    assert suite.control_from_args(off).path_program is False
+    assert suite.control_from_args(off).enabled is True
 
 
 def test_the_path_program_flag_moves_the_recorded_controller_identity():
@@ -483,6 +487,20 @@ def test_the_seeded_bridge_is_recorded_in_the_protocol_block():
     assert suite.protocol_block(args)["linker_bridge_atoms"] == 2
     _, default = _parsed()
     assert suite.protocol_block(default)["linker_bridge_atoms"] == 0
+
+
+def test_the_bridge_knob_survives_the_args_to_run_task_hop():
+    """The second hop, which the call-site test does not cover.
+
+    ``run_task`` is tested by being called directly with the keyword, so a
+    mutation that drops it where MAIN calls ``run_task`` leaves that test green.
+    Two hops sharing one sink is exactly how a wiring mutation survives a single
+    consultation test.
+    """
+    suite, args = _parsed("--linker-bridge-atoms", "4")
+    assert suite.run_task_settings(args)["linker_bridge_atoms"] == 4
+    _, default = _parsed()
+    assert suite.run_task_settings(default)["linker_bridge_atoms"] == 0
 
 
 def test_no_per_task_or_per_drug_two_core_knob_is_expressible():

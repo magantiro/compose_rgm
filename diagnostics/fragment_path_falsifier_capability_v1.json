@@ -1,0 +1,279 @@
+{
+  "schema": "compose_fragment_path_falsifier_capability_v1",
+  "question": "can the v3 predeclared falsifier return FAIL, or does the per-event gate remove its failure mode from its own denominator",
+  "environment": {
+    "python": "3.11.13",
+    "rdkit": "2024.03.5",
+    "numpy": "1.26.4",
+    "platform": "macOS-26.5.2-arm64-arm-64bit"
+  },
+  "seed": 20260921,
+  "mark_attempts_per_event": 24,
+  "arms": {
+    "v3": {
+      "arm": "v3",
+      "attempts": 400,
+      "committed": 43,
+      "commit_rate": 0.1075,
+      "above_seed": 43,
+      "metric_percent": 100.0,
+      "length_histogram": {
+        "2": 36,
+        "3": 5,
+        "4": 2
+      },
+      "committed_without_transaction": 0,
+      "committed_without_transaction_lengths": {},
+      "total_transactions": 52,
+      "rows": [
+        {
+          "drug": "BARICITINIB",
+          "attempts": 40,
+          "committed": 2,
+          "above_seed": 2,
+          "transactions": 2
+        },
+        {
+          "drug": "CYCLOTHIAZIDE",
+          "attempts": 40,
+          "committed": 10,
+          "above_seed": 10,
+          "transactions": 10
+        },
+        {
+          "drug": "ELIGLUSTAT",
+          "attempts": 40,
+          "committed": 17,
+          "above_seed": 17,
+          "transactions": 25
+        },
+        {
+          "drug": "ERLOTINIB",
+          "attempts": 40,
+          "committed": 1,
+          "above_seed": 1,
+          "transactions": 2
+        },
+        {
+          "drug": "FUTIBATINIB",
+          "attempts": 40,
+          "committed": 2,
+          "above_seed": 2,
+          "transactions": 2
+        },
+        {
+          "drug": "LESINURAD",
+          "attempts": 40,
+          "committed": 2,
+          "above_seed": 2,
+          "transactions": 2
+        },
+        {
+          "drug": "LIOTHYRONINE",
+          "attempts": 40,
+          "committed": 1,
+          "above_seed": 1,
+          "transactions": 1
+        },
+        {
+          "drug": "LOVASTATIN",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "MARIBAVIR",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "SPIRAPRIL",
+          "attempts": 40,
+          "committed": 8,
+          "above_seed": 8,
+          "transactions": 8
+        }
+      ]
+    },
+    "no_transaction": {
+      "arm": "no_transaction",
+      "attempts": 400,
+      "committed": 0,
+      "commit_rate": 0.0,
+      "above_seed": 0,
+      "metric_percent": null,
+      "length_histogram": {},
+      "committed_without_transaction": 0,
+      "committed_without_transaction_lengths": {},
+      "total_transactions": 0,
+      "rows": [
+        {
+          "drug": "BARICITINIB",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "CYCLOTHIAZIDE",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "ELIGLUSTAT",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "ERLOTINIB",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "FUTIBATINIB",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "LESINURAD",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "LIOTHYRONINE",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "LOVASTATIN",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "MARIBAVIR",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "SPIRAPRIL",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        }
+      ]
+    },
+    "gate_off": {
+      "arm": "gate_off",
+      "attempts": 400,
+      "committed": 172,
+      "commit_rate": 0.43,
+      "above_seed": 1,
+      "metric_percent": 0.5813953488372093,
+      "length_histogram": {
+        "1": 171,
+        "3": 1
+      },
+      "committed_without_transaction": 172,
+      "committed_without_transaction_lengths": {
+        "1": 171,
+        "3": 1
+      },
+      "total_transactions": 0,
+      "rows": [
+        {
+          "drug": "BARICITINIB",
+          "attempts": 40,
+          "committed": 5,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "CYCLOTHIAZIDE",
+          "attempts": 40,
+          "committed": 33,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "ELIGLUSTAT",
+          "attempts": 40,
+          "committed": 38,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "ERLOTINIB",
+          "attempts": 40,
+          "committed": 22,
+          "above_seed": 1,
+          "transactions": 0
+        },
+        {
+          "drug": "FUTIBATINIB",
+          "attempts": 40,
+          "committed": 22,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "LESINURAD",
+          "attempts": 40,
+          "committed": 24,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "LIOTHYRONINE",
+          "attempts": 40,
+          "committed": 9,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "LOVASTATIN",
+          "attempts": 40,
+          "committed": 7,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "MARIBAVIR",
+          "attempts": 40,
+          "committed": 0,
+          "above_seed": 0,
+          "transactions": 0
+        },
+        {
+          "drug": "SPIRAPRIL",
+          "attempts": 40,
+          "committed": 12,
+          "above_seed": 0,
+          "transactions": 0
+        }
+      ]
+    }
+  },
+  "denominator_is_conditioned_on_the_mechanism_succeeding": true,
+  "reading": "A committed endpoint in the v3 arm with zero fired transactions is the only way the metric can fall below 100%. The broken-mechanism arms differ ONLY in whether the per-event gate is active, so any difference in commit rate between them is the gate converting seed-length COMMITS into NON-commits.",
+  "elapsed_seconds": 679.9
+}

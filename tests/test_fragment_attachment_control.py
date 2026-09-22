@@ -1172,3 +1172,200 @@ def test_an_unsatisfiable_path_predicate_does_not_block():
     assert controller.path_unsatisfied(full, 4)
     ok, reason = controller.path_permits(full, full, 4)
     assert ok, f"an unsatisfiable predicate must release, got {reason!r}"
+
+
+# ---- The composite transaction itself ----
+#
+# The mechanism that does the work had no direct test: every v3 test above
+# checks a PRECONDITION of the transaction (are the sites offered, does the
+# predicate release) and none of them runs it. A mutation that drops the bridge
+# exchange, or reroutes the wrong atom, or invents the payload, survived all of
+# them. These drive the production ``_attempt_path_transaction`` against the
+# real executor with a stub model, so the production function is the only thing
+# that decides.
+
+
+class _StubMark:
+    def __init__(self, rule_name, action):
+        self.rule_name = rule_name
+        self.action = action
+        self.total_hazard = 1.0
+
+
+class _StubModel:
+    """Offers one fixed mark. The prior's role here is to supply a PAYLOAD."""
+
+    def __init__(self, mark):
+        self._mark = mark
+
+    def sample_rewrite_mark(self, state, time, rng):
+        return self._mark
+
+
+def _monovalent_payload(state, slot_hint: int):
+    """An ``AtomInsert`` copying a real monovalent atom of ``state``.
+
+    Copying an existing atom's (type, charge, hydrogens) is what keeps this
+    valid in whatever vocabulary the state uses: ``atom_type`` is a VOCABULARY
+    INDEX, not an atomic number, and a probe that wrote 6 for carbon was
+    writing phosphorus.
+    """
+    from compose_v4.chem.molecular_graph import is_element
+    from compose_v4.rewrite.operators import AtomInsert
+
+    real = is_element(state.atom_types)
+    for i in range(state.n_atoms):
+        if not bool(real[i]):
+            continue
+        degree = sum(
+            1 for j in range(state.n_atoms)
+            if j != i and bool(real[j]) and int(state.bonds[i][j]) > 0
+        )
+        if degree == 1:
+            return AtomInsert(
+                slot=slot_hint,
+                atom_type=int(state.atom_types[i]),
+                formal_charge=int(state.formal_charges[i]),
+                implicit_h_count=int(state.implicit_h_counts[i]),
+                neighbors=((slot_hint, 1),),
+            )
+    return None
+
+
+def _transaction_fixture(prompt, *, config=None):
+    from compose_v4.benchmark.fragment_conditioned_sampler import build_prompt_context
+
+    config = config or AttachmentControlConfig(enabled=True, path_program=True)
+    context = build_prompt_context(prompt, control=config, linker_bridge_atoms=1)
+    controller = AttachmentController(context.attachment, context.locked_slots, config)
+    lock = RegionLock(
+        context.start_state,
+        context.locked_slots,
+        released_pairs=context.attachment.released_pairs,
+    )
+    return context, controller, lock
+
+
+def test_the_transaction_lengthens_the_core_to_core_path():
+    """The property the whole program exists for, on every released prompt."""
+    from compose_v4.benchmark.fragment_conditioned_sampler import (
+        SamplingReceipt,
+        _attempt_path_transaction,
+    )
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+
+    system = de_novo_rewrite_system()
+    exercised = 0
+    for prompt in _linker_prompts():
+        context, controller, lock = _transaction_fixture(prompt)
+        sites = controller.path_transaction_sites(context.start_state)
+        assert sites is not None
+        path_atom, _anchor, _free = sites
+        payload = _monovalent_payload(context.start_state, path_atom)
+        if payload is None:
+            continue
+        before = controller.realized_linker_length(context.start_state)
+        out = _attempt_path_transaction(
+            _StubModel(_StubMark("atom_insert", payload)),
+            system,
+            context.start_state,
+            controller,
+            lock,
+            np.random.default_rng(0),
+            SamplingReceipt(),
+        )
+        if out is None:
+            continue
+        exercised += 1
+        after = controller.realized_linker_length(out)
+        assert after is not None and after > before, (
+            f"{prompt.drug_name}: the transaction must lengthen the path, "
+            f"{before} -> {after}"
+        )
+        assert controller.cores_are_separated(out)
+        assert lock.permits(out)
+    assert exercised >= 5, (
+        f"only {exercised} released prompts exercised the transaction; the test "
+        "must actually run the mechanism, not skip past it"
+    )
+
+
+def test_the_transaction_payload_comes_from_the_prior():
+    """The prior chooses WHAT to insert; the constraint chooses WHERE.
+
+    Both directions: the proposed atom's identity survives into the endpoint,
+    and a prior offering nothing usable makes the transaction ABANDON rather
+    than invent a payload of its own.
+    """
+    from compose_v4.benchmark.fragment_conditioned_sampler import (
+        SamplingReceipt,
+        _attempt_path_transaction,
+    )
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+
+    system = de_novo_rewrite_system()
+    carried = 0
+    for prompt in _linker_prompts():
+        context, controller, lock = _transaction_fixture(prompt)
+        sites = controller.path_transaction_sites(context.start_state)
+        path_atom, _anchor, free_slot = sites
+        payload = _monovalent_payload(context.start_state, path_atom)
+        if payload is None:
+            continue
+        out = _attempt_path_transaction(
+            _StubModel(_StubMark("atom_insert", payload)),
+            system, context.start_state, controller, lock,
+            np.random.default_rng(0), SamplingReceipt(),
+        )
+        if out is not None:
+            assert int(out.atom_types[free_slot]) == payload.atom_type, (
+                f"{prompt.drug_name}: the endpoint must carry the atom the prior "
+                "proposed, not one the module chose"
+            )
+            carried += 1
+
+        # A prior that never offers an atom_insert must not be overridden.
+        nothing = _attempt_path_transaction(
+            _StubModel(_StubMark("bond_reorder", None)),
+            system, context.start_state, controller, lock,
+            np.random.default_rng(0), SamplingReceipt(),
+        )
+        assert nothing is None, (
+            f"{prompt.drug_name}: with no payload from the prior the transaction "
+            "must be abandoned, never invented"
+        )
+    assert carried >= 5
+
+
+def test_the_transaction_commits_nothing_when_the_exchange_cannot_execute():
+    """ATOMIC: a refused constituent leaves the caller the state it had.
+
+    The refusal is counted, so a transaction that never fires is visible in the
+    artifact instead of looking like a state that was never reached.
+    """
+    from compose_v4.benchmark.fragment_conditioned_sampler import (
+        SamplingReceipt,
+        _attempt_path_transaction,
+    )
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+
+    system = de_novo_rewrite_system()
+    prompt = _linker_prompts()[0]
+    context, controller, lock = _transaction_fixture(prompt)
+    sites = controller.path_transaction_sites(context.start_state)
+    path_atom, _anchor, _free = sites
+    payload = _monovalent_payload(context.start_state, path_atom)
+    assert payload is not None
+    # An unsatisfiable payload: a bond order the site cannot take.
+    impossible = dataclasses.replace(payload, implicit_h_count=99)
+    receipt = SamplingReceipt()
+    before = copy.deepcopy(context.start_state)
+    out = _attempt_path_transaction(
+        _StubModel(_StubMark("atom_insert", impossible)),
+        system, context.start_state, controller, lock,
+        np.random.default_rng(0), receipt,
+    )
+    assert out is None
+    assert receipt.path_transactions == 0
+    assert np.array_equal(before.atom_types, context.start_state.atom_types)
+    assert np.array_equal(before.bonds, context.start_state.bonds)
