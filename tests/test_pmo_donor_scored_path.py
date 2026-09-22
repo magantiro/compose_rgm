@@ -32,6 +32,7 @@ from compose_v4.control.pmo_donor_channel import (
     CUT_LAWS,
     DEFAULT_CUT_LAW,
     DONOR_CHANNEL,
+    DONOR_TAG,
     RETENTIVE_RELEASED_FRACTION,
     UNIFORM_ORIENTED_SINGLE_BRIDGE_ARM,
     donor_region_law,
@@ -257,3 +258,109 @@ def test_a_resume_cannot_swap_the_cut_law_under_a_running_arm(tmp_path) -> None:
     swapped = dict(kwargs, donor_cut_law=UNIFORM_ORIENTED_SINGLE_BRIDGE_ARM)
     with pytest.raises(ValueError, match="donor cut law changed across resume"):
         PmoPopulationController.restore(snapshot, hierarchy=None, **swapped)
+
+
+# ---- The launch hop: the worker selects the arm from the sealed payload ---
+
+
+def test_the_worker_selects_the_donor_arm_from_the_sealed_payload() -> None:
+    """Derived from the CALL SITE, not from a name written twice in two files.
+
+    The Modal worker is the only thing that turns a sealed authorization into a runtime
+    arm, and it is not importable here (it lives inside a Modal decorator and imports at
+    call time). So the check parses the app, finds its ONE ``execute_task`` call, and
+    requires the donor keyword to be present AND to be computed from the contract
+    envelope's ``arm`` block -- never from the spawn spec, which a caller controls.
+    """
+    import ast
+
+    tree = ast.parse((ROOT / "modal_apps/pmo_population_v1_app.py").read_text())
+    calls = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "execute_task"
+    ]
+    assert len(calls) == 1, f"expected one execute_task call site, found {len(calls)}"
+    call = calls[0]
+    text = ast.unparse(call)
+    assert "enable_donor_channel" in text, (
+        "the worker never selects the donor arm, so no sealed payload can turn it on "
+        "and the lane is unreachable from a real launch"
+    )
+    donor = [
+        segment
+        for segment in text.splitlines()
+        if "enable_donor_channel" in segment or "donor_cut_law" in segment
+    ]
+    assert donor, "donor keys vanished from the call site"
+    assert '"arm"' in text or "'arm'" in text, (
+        "the donor arm is not read from the contract envelope's arm block"
+    )
+    assert "spec" not in "".join(donor), (
+        "the donor arm is selected from the spawn spec; a caller could then run a "
+        "runtime the owner never authorized"
+    )
+
+
+# ---- Attribution: a donor proposal must be identifiable by a downstream ablation ----
+
+
+def test_a_donor_candidate_is_tagged_at_synthesis_and_survives_to_the_snapshot(
+    tmp_path,
+) -> None:
+    """The ablation reads `entry["provenance"]["metadata"]`; the tag must BE there.
+
+    Two hops, and the second is the one that gets dropped: the lane writes the tag when it
+    builds the candidate, and the archive entry the snapshot publishes has to still carry
+    it. `pmo_ab_1k_checkpoints` attributes a frontier improvement by exactly
+    `MEMORY_TAG in (entry["provenance"] or {}).get("metadata")`, so this channel is read
+    the same way or it is invisible to the B-vs-C comparison.
+
+    The tag also has to DISCRIMINATE: a key every entry carries attributes nothing.
+    """
+    kwargs = scored_gate.capture_scored_optimizer_kwargs(
+        ROOT, tmp_path / "on", enable_donor_channel=True
+    )["optimizer_kwargs"]
+    controller = scored_gate._seeded_controller(
+        kwargs, scored_gate._initialization_source(ROOT), seed=11
+    )
+    schedule = [controller._parent() for _ in range(6)]
+    _, candidates, _ = controller._generate_donor_pool(
+        scored_gate._eligibility, set(), schedule
+    )
+    assert candidates, "the donor lane produced nothing to attribute"
+
+    tag = candidates[0]["provenance"]["metadata"][DONOR_TAG]
+    assert set(tag) >= {
+        "donor",
+        "endpoint",
+        "retained_fraction",
+        "removed_atoms",
+        "added_atoms",
+        "primitive_steps",
+    }, f"the attribution payload lost fields: {sorted(tag)}"
+    assert tag["donor"], "the tag must name the scored donor molecule"
+    assert candidates[0]["provenance"]["planner_channel"] == DONOR_CHANNEL
+
+    controller.add_measured_program(candidates[0], receipt_id="attribution", score=0.9)
+    entries = controller.snapshot(include_history=True)["entries"]
+    tagged = [
+        entry_id
+        for entry_id, entry in entries.items()
+        if DONOR_TAG in ((entry.get("provenance") or {}).get("metadata") or {})
+    ]
+    assert len(tagged) == 1, (
+        f"{len(tagged)} of {len(entries)} archive entries carry the donor tag; it must "
+        "mark exactly the donor-derived one, or the ablation cannot separate this "
+        "mechanism from broad exploration"
+    )
+
+
+def test_the_donor_tag_is_read_the_same_way_the_memory_tag_is() -> None:
+    """Same key shape, same place, so one reader serves both channels."""
+    from compose_v4.control.pmo_online_memory import SCHEMA  # noqa: F401
+
+    assert DONOR_TAG == DONOR_CHANNEL
+    assert isinstance(DONOR_TAG, str) and DONOR_TAG

@@ -1,10 +1,10 @@
 {
   "schema_version": "pmo_discovery_mutation_battery_v1",
   "suite": "tests/test_pmo_discovery.py",
-  "mutations": 44,
-  "killed": 44,
+  "mutations": 55,
+  "killed": 53,
   "positive_controls_green": true,
-  "all_guards_load_bearing": true,
+  "all_guards_load_bearing": false,
   "rows": [
     {
       "mutation": "floor_reverts_to_uniform_over_cells",
@@ -14,6 +14,7 @@
         "test_every_basin_keeps_its_floor_under_an_arbitrarily_attractive_exploit",
         "test_the_exploration_floor_is_captured_by_whoever_opens_more_cells"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_every_basin_keeps_its_floor_under_an_arbitrarily_attractive_exploit",
         "test_the_exploration_floor_is_captured_by_whoever_opens_more_cells",
@@ -28,6 +29,7 @@
       "expected_red": [
         "test_every_basin_keeps_its_floor_under_an_arbitrarily_attractive_exploit"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_every_basin_keeps_its_floor_under_an_arbitrarily_attractive_exploit",
         "test_the_exploration_floor_is_captured_by_whoever_opens_more_cells",
@@ -42,6 +44,7 @@
       "expected_red": [
         "test_frontier_evidence_sits_beside_parent_relative_and_raises_the_value"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_frontier_evidence_sits_beside_parent_relative_and_raises_the_value"
       ],
@@ -54,6 +57,7 @@
       "expected_red": [
         "test_a_basin_cannot_look_thin_by_opening_fresh_cells"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_a_basin_cannot_look_thin_by_opening_fresh_cells"
       ],
@@ -66,6 +70,7 @@
       "expected_red": [
         "test_discovery_quota_rounds_up_and_never_exceeds_room"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_discovery_quota_rounds_up_and_never_exceeds_room"
       ],
@@ -78,6 +83,7 @@
       "expected_red": [
         "test_a_frontier_gain_must_be_finite_and_non_negative"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_a_frontier_gain_must_be_finite_and_non_negative"
       ],
@@ -91,6 +97,7 @@
         "test_restore_refuses_to_change_the_arm_in_either_direction",
         "test_snapshot_round_trips_and_refuses_a_plain_credit_payload"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_restore_refuses_to_change_the_arm_in_either_direction",
         "test_snapshot_round_trips_and_refuses_a_plain_credit_payload"
@@ -104,6 +111,7 @@
       "expected_red": [
         "test_observe_batch_writes_frontier_credit_on_the_production_path"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_observe_batch_writes_frontier_credit_on_the_production_path"
       ],
@@ -116,6 +124,7 @@
       "expected_red": [
         "test_the_discovery_reservation_is_consumed_and_reaches_a_thin_basin"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_the_discovery_reservation_is_consumed_and_reaches_a_thin_basin"
       ],
@@ -128,6 +137,7 @@
       "expected_red": [
         "test_the_discovery_reservation_is_consumed_and_reaches_a_thin_basin"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_the_discovery_reservation_is_consumed_and_reaches_a_thin_basin"
       ],
@@ -140,6 +150,7 @@
       "expected_red": [
         "test_arm_c_requires_arm_b"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_arm_c_requires_arm_b"
       ],
@@ -152,6 +163,7 @@
       "expected_red": [
         "test_the_controller_actually_constructs_the_discovery_allocator"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_observe_batch_writes_frontier_credit_on_the_production_path",
         "test_the_controller_actually_constructs_the_discovery_allocator",
@@ -167,6 +179,7 @@
         "test_every_proposal_endpoint_is_its_own_executed_program_endpoint",
         "test_the_scored_archive_records_the_produced_molecule"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_every_proposal_endpoint_is_its_own_executed_program_endpoint",
         "test_the_scored_archive_records_the_produced_molecule"
@@ -181,6 +194,7 @@
         "test_a_lone_ring_atom_is_pruned_out_of_the_core",
         "test_the_core_is_ring_complete_in_both_endpoints"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_a_disconnected_core_is_declared_as_requiring_reattachment",
         "test_a_lone_ring_atom_is_pruned_out_of_the_core",
@@ -197,6 +211,7 @@
       "expected_red": [
         "test_pruning_reaches_a_fixed_point_not_just_one_pass"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_pruning_reaches_a_fixed_point_not_just_one_pass"
       ],
@@ -210,6 +225,7 @@
         "test_a_bond_order_only_difference_is_counted_as_transport",
         "test_zero_scale_is_reserved_for_genuinely_identical_molecules"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_a_bond_order_only_difference_is_counted_as_transport",
         "test_zero_scale_is_reserved_for_genuinely_identical_molecules"
@@ -223,6 +239,7 @@
       "expected_red": [
         "test_attachment_interfaces_are_enumerated_on_both_sides"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_attachment_interfaces_are_enumerated_on_both_sides"
       ],
@@ -235,6 +252,7 @@
       "expected_red": [
         "test_deleting_in_the_recorded_order_keeps_every_intermediate_connected"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_deleting_in_the_recorded_order_keeps_every_intermediate_connected",
         "test_every_offline_check_passes_on_real_pairs"
@@ -248,6 +266,7 @@
       "expected_red": [
         "test_install_order_grows_outward_from_what_already_exists"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_install_order_grows_outward_from_what_already_exists"
       ],
@@ -260,6 +279,7 @@
       "expected_red": [
         "test_no_stage_exceeds_the_ceiling"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_a_dip_free_ordering_is_preferred_over_a_dipping_one",
         "test_a_staged_transport_can_dip_below_its_own_starting_similarity",
@@ -278,6 +298,7 @@
       "expected_red": [
         "test_unparseable_input_raises_rather_than_returning_no_core"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_unparseable_input_raises_rather_than_returning_no_core"
       ],
@@ -290,6 +311,7 @@
       "expected_red": [
         "test_a_disconnected_core_is_declared_as_requiring_reattachment"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_a_disconnected_core_is_declared_as_requiring_reattachment"
       ],
@@ -302,6 +324,7 @@
       "expected_red": [
         "test_a_connected_core_is_not_flagged_for_reattachment"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_a_connected_core_is_not_flagged_for_reattachment"
       ],
@@ -314,6 +337,7 @@
       "expected_red": [
         "test_a_staged_transport_can_dip_below_its_own_starting_similarity"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_a_dip_free_ordering_is_preferred_over_a_dipping_one",
         "test_a_staged_transport_can_dip_below_its_own_starting_similarity",
@@ -332,6 +356,7 @@
       "expected_red": [
         "test_interleaving_removes_the_dip_on_a_dipping_transport"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_a_dip_free_ordering_is_preferred_over_a_dipping_one",
         "test_interleaving_removes_the_dip_on_a_dipping_transport"
@@ -345,6 +370,7 @@
       "expected_red": [
         "test_dip_depth_and_width_are_reported_not_just_a_boolean"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_dip_depth_and_width_are_reported_not_just_a_boolean"
       ],
@@ -357,6 +383,7 @@
       "expected_red": [
         "test_admissibility_is_a_hard_filter_not_a_term_in_the_score"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_admissibility_is_a_hard_filter_not_a_term_in_the_score",
         "test_protected_rounds_is_the_trough_width_not_an_open_allowance",
@@ -371,6 +398,7 @@
       "expected_red": [
         "test_among_dipping_orderings_the_SHALLOWER_is_preferred_over_the_narrower"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_among_dipping_orderings_the_SHALLOWER_is_preferred_over_the_narrower"
       ],
@@ -383,6 +411,7 @@
       "expected_red": [
         "test_protected_rounds_is_the_trough_width_not_an_open_allowance"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_protected_rounds_is_the_trough_width_not_an_open_allowance"
       ],
@@ -395,6 +424,7 @@
       "expected_red": [
         "test_retentive_prefers_small_releases_and_uniform_does_not"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_retentive_prefers_small_releases_and_uniform_does_not"
       ],
@@ -407,6 +437,7 @@
       "expected_red": [
         "test_the_floor_actually_binds_on_a_large_release"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_the_floor_actually_binds_on_a_large_release"
       ],
@@ -419,6 +450,7 @@
       "expected_red": [
         "test_retentive_shares_the_uniform_support_and_never_filters"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_retentive_shares_the_uniform_support_and_never_filters",
         "test_the_floor_actually_binds_on_a_large_release"
@@ -432,6 +464,7 @@
       "expected_red": [
         "test_the_ledger_is_a_charged_run_and_not_the_prescreen_bank"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_ledger_rows_are_charged_scored_and_ranked",
         "test_the_ledger_is_a_charged_run_and_not_the_prescreen_bank"
@@ -445,6 +478,7 @@
       "expected_red": [
         "test_the_ledger_is_a_charged_run_and_not_the_prescreen_bank"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_ledger_rows_are_charged_scored_and_ranked",
         "test_the_ledger_is_a_charged_run_and_not_the_prescreen_bank"
@@ -458,6 +492,7 @@
       "expected_red": [
         "test_ledger_rows_are_charged_scored_and_ranked"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_ledger_rows_are_charged_scored_and_ranked"
       ],
@@ -470,6 +505,7 @@
       "expected_red": [
         "test_summarize_counts_retention_over_the_right_threshold"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_summarize_counts_retention_over_the_right_threshold"
       ],
@@ -480,6 +516,7 @@
       "file": "pmo_donor_transplant_feasibility.py",
       "is_positive_control": true,
       "expected_red": [],
+      "expected_green": [],
       "observed_red": [],
       "status": "GREEN (correct)"
     },
@@ -490,6 +527,7 @@
       "expected_red": [
         "test_the_donor_law_is_consumed_by_the_production_propose_batch"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_the_donor_law_is_consumed_by_the_production_propose_batch"
       ],
@@ -502,6 +540,7 @@
       "expected_red": [
         "test_the_donor_law_is_consumed_by_the_production_propose_batch"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_off_is_byte_identical_and_draws_no_extra_parents",
         "test_the_donor_law_is_consumed_by_the_production_propose_batch"
@@ -515,6 +554,7 @@
       "expected_red": [
         "test_off_is_byte_identical_and_draws_no_extra_parents"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_off_is_byte_identical_and_draws_no_extra_parents",
         "test_the_donor_law_is_consumed_by_the_production_propose_batch"
@@ -528,6 +568,7 @@
       "expected_red": [
         "test_off_is_byte_identical_and_draws_no_extra_parents"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_off_is_byte_identical_and_draws_no_extra_parents"
       ],
@@ -540,6 +581,7 @@
       "expected_red": [
         "test_the_conversion_recovers_root_and_refuses_a_multi_bond_bridge"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_the_conversion_recovers_root_and_refuses_a_multi_bond_bridge"
       ],
@@ -552,6 +594,7 @@
       "expected_red": [
         "test_the_retentive_law_reranks_and_never_filters"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_the_margin_reads_nothing_but_atom_counts",
         "test_the_retentive_law_reranks_and_never_filters"
@@ -565,6 +608,7 @@
       "expected_red": [
         "test_the_probe_exception_survives_the_lane_s_own_handler"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_the_donor_law_is_consumed_by_the_production_propose_batch",
         "test_the_probe_exception_survives_the_lane_s_own_handler"
@@ -578,6 +622,7 @@
       "expected_red": [
         "test_the_donor_lane_has_its_own_rng_stream"
       ],
+      "expected_green": [],
       "observed_red": [
         "test_the_donor_lane_has_its_own_rng_stream"
       ],
@@ -588,14 +633,178 @@
       "file": "pmo_donor_channel.py",
       "is_positive_control": true,
       "expected_red": [],
+      "expected_green": [],
       "observed_red": [],
       "status": "GREEN (correct)"
+    },
+    {
+      "mutation": "scored_entry_point_never_forwards_the_donor_arm",
+      "file": "pmo_population_v1.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_full_scored_chain_reaches_the_law_and_restores",
+        "test_the_scored_entry_point_passes_the_donor_arm_to_the_campaign"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_a_donor_candidate_is_tagged_at_synthesis_and_survives_to_the_snapshot",
+        "test_a_resume_cannot_swap_the_cut_law_under_a_running_arm",
+        "test_the_full_scored_chain_reaches_the_law_and_restores",
+        "test_the_scored_entry_point_passes_the_donor_arm_to_the_campaign"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "scored_entry_point_forwards_the_donor_arm_unconditionally",
+      "file": "pmo_population_v1.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_off_arm_carries_no_donor_key_at_all"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_the_full_scored_chain_reaches_the_law_and_restores",
+        "test_the_off_arm_carries_no_donor_key_at_all"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "restore_drops_the_donor_arm_before_the_constructor",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_full_scored_chain_reaches_the_law_and_restores"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_a_resume_cannot_swap_the_cut_law_under_a_running_arm",
+        "test_the_full_scored_chain_reaches_the_law_and_restores"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "restore_signature_loses_the_donor_arm",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_restore_accepts_the_donor_arm_like_the_constructor"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_a_resume_cannot_swap_the_cut_law_under_a_running_arm",
+        "test_restore_accepts_the_donor_arm_like_the_constructor",
+        "test_the_full_scored_chain_reaches_the_law_and_restores"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "snapshot_stops_recording_the_cut_law",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_a_resume_cannot_swap_the_cut_law_under_a_running_arm"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_a_resume_cannot_swap_the_cut_law_under_a_running_arm"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "production_default_reverts_to_the_shipped_uniform_cut",
+      "file": "pmo_donor_channel.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_production_default_is_the_retentive_cut_law"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_a_resume_cannot_swap_the_cut_law_under_a_running_arm",
+        "test_the_production_default_is_the_retentive_cut_law"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "unknown_arm_falls_back_instead_of_raising",
+      "file": "pmo_donor_channel.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_an_unknown_cut_law_is_refused_rather_than_defaulted",
+        "test_the_controller_refuses_an_unknown_arm_at_construction"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_an_unknown_cut_law_is_refused_rather_than_defaulted",
+        "test_the_controller_refuses_an_unknown_arm_at_construction"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "uniform_arm_becomes_a_lookalike_that_consumes_rng_random",
+      "file": "pmo_donor_channel.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_uniform_arm_is_the_shipped_recipe_draw_by_name_and_by_behaviour"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_the_uniform_arm_is_the_shipped_recipe_draw_by_name_and_by_behaviour"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "donor_side_cut_silently_reverts_to_uniform",
+      "file": "pmo_donor_channel.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_law_is_consulted_for_the_DONOR_as_well_as_the_source",
+        "test_the_retentive_law_takes_a_smaller_graft_from_the_donor"
+      ],
+      "expected_green": [
+        "test_the_full_scored_chain_reaches_the_law_and_restores"
+      ],
+      "observed_red": [],
+      "status": "SURVIVED"
+    },
+    {
+      "mutation": "worker_stops_selecting_the_donor_arm",
+      "file": "pmo_population_v1_app.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_worker_selects_the_donor_arm_from_the_sealed_payload"
+      ],
+      "expected_green": [],
+      "observed_red": [],
+      "status": "SURVIVED"
+    },
+    {
+      "mutation": "POSITIVE_CONTROL_scored_path_cosmetic",
+      "file": "pmo_population_v1.py",
+      "is_positive_control": true,
+      "expected_red": [],
+      "expected_green": [],
+      "observed_red": [],
+      "status": "GREEN (correct)"
+    },
+    {
+      "mutation": "donor_candidate_loses_its_synthesis_time_tag",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_a_donor_candidate_is_tagged_at_synthesis_and_survives_to_the_snapshot"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_a_donor_candidate_is_tagged_at_synthesis_and_survives_to_the_snapshot"
+      ],
+      "status": "KILLED"
     },
     {
       "mutation": "POSITIVE_CONTROL_cosmetic_comment",
       "file": "pmo_discovery.py",
       "is_positive_control": true,
       "expected_red": [],
+      "expected_green": [],
       "observed_red": [],
       "status": "GREEN (correct)"
     }

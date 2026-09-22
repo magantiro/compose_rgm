@@ -84,6 +84,19 @@ from compose_v4.control.donor_program import PendantCut, compile_transplant
 #: The channel's name in provenance and in the controller's per-channel counters.
 DONOR_CHANNEL = "donor_transplant"
 
+#: The attribution key a donor-derived candidate carries in
+#: ``provenance["metadata"]``, written at SYNTHESIS time by
+#: :meth:`PmoPopulationController._generate_donor_pool` and carried onto the archive entry
+#: the snapshot publishes. It is the same shape and the same place the online-memory
+#: channel uses (``pmo_online_memory``), so an ablation attributing frontier entrants to a
+#: channel reads both the same way: ``TAG in entry["provenance"]["metadata"]``.
+#:
+#: It is not reconstructible after the fact. The payload names the DONOR molecule, and a
+#: transplant endpoint does not determine which scored molecule the graft came from -- so
+#: an ablation that tried to infer this channel from the endpoint alone would be guessing,
+#: and could not separate the mechanism from broad exploration.
+DONOR_TAG = DONOR_CHANNEL
+
 #: Boltzmann scale for the released-fraction margin. NOT `bridge_region_law`'s 0.1,
 #: which is denominated in free-gate slack; see the module docstring.
 DONOR_MARGIN_TEMPERATURE = 0.25

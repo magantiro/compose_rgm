@@ -43,6 +43,9 @@ DONOR = ROOT / "scripts/pmo_donor_transplant_feasibility.py"
 DONOR_SUITE = "tests/test_pmo_donor_transplant_feasibility.py"
 DONOR_CHANNEL_MODULE = ROOT / "src/compose_v4/control/pmo_donor_channel.py"
 WIRING_SUITE = "tests/test_pmo_donor_channel_wiring.py"
+SCORED_ENTRY = ROOT / "src/compose_v4/experiments/pmo_population_v1.py"
+SCORED_SUITE = "tests/test_pmo_donor_scored_path.py"
+WORKER_APP = ROOT / "modal_apps/pmo_population_v1_app.py"
 
 
 @dataclass(frozen=True)
@@ -54,6 +57,13 @@ class Mutation:
     #: Tests expected to go red. Empty means this is a positive control that must stay
     #: green -- the harness check, not a guard check.
     expect_red: tuple[str, ...]
+    #: Tests that must SURVIVE this mutation. This is how the two-hops-one-sink near-miss
+    #: is recorded rather than remembered: when a law is consulted at two call sites, a
+    #: probe that raises fires at the FIRST one, so dropping the SECOND leaves the
+    #: consumption gate fully green while half the mechanism is gone. Naming the gate here
+    #: asserts that blind spot exists, and so asserts that the behavioural test beside it
+    #: is the thing actually doing the work.
+    expect_green: tuple[str, ...] = ()
     #: The suite to run. The proposal/scoring identity guards drive the real proposal
     #: path and cost ~70 s a run, so only they pay that.
     suite: str = SUITE
@@ -501,6 +511,152 @@ MUTATIONS = (
         expect_red=(),
         suite=WIRING_SUITE,
     ),
+    # ---- The SCORED path: three hops, each able to fail on its own ----
+    # Every inert mechanism this repository has shipped was inert at a hop ABOVE the
+    # object that was tested, so each hop is broken separately here.
+    Mutation(
+        name="scored_entry_point_never_forwards_the_donor_arm",
+        path=SCORED_ENTRY,
+        old="""            **(
+                {
+                    "enable_donor_channel": True,
+                    "donor_cut_law": str(donor_cut_law),
+                }
+                if enable_donor_channel
+                else {}
+            ),""",
+        new="",
+        expect_red=(
+            "test_the_scored_entry_point_passes_the_donor_arm_to_the_campaign",
+            "test_the_full_scored_chain_reaches_the_law_and_restores",
+        ),
+        suite=SCORED_SUITE,
+    ),
+    Mutation(
+        name="scored_entry_point_forwards_the_donor_arm_unconditionally",
+        path=SCORED_ENTRY,
+        old="""                if enable_donor_channel
+                else {}""",
+        new="""                if True
+                else {}""",
+        expect_red=("test_the_off_arm_carries_no_donor_key_at_all",),
+        suite=SCORED_SUITE,
+    ),
+    Mutation(
+        name="restore_drops_the_donor_arm_before_the_constructor",
+        path=CONTROLLER,
+        old="""                "enable_donor_channel": enable_donor_channel,""",
+        new="""                "enable_donor_channel": False,""",
+        expect_red=("test_the_full_scored_chain_reaches_the_law_and_restores",),
+        suite=SCORED_SUITE,
+    ),
+    Mutation(
+        name="restore_signature_loses_the_donor_arm",
+        path=CONTROLLER,
+        old="""        enable_donor_channel: bool = False,
+        donor_cut_law: str = DEFAULT_CUT_LAW,
+    ):""",
+        new="""        **_unused,
+    ):""",
+        expect_red=("test_restore_accepts_the_donor_arm_like_the_constructor",),
+        suite=SCORED_SUITE,
+    ),
+    Mutation(
+        name="snapshot_stops_recording_the_cut_law",
+        path=CONTROLLER,
+        old="""                    "donor_cut_law": self.donor_cut_law,""",
+        new="",
+        expect_red=("test_a_resume_cannot_swap_the_cut_law_under_a_running_arm",),
+        suite=SCORED_SUITE,
+    ),
+    # ---- The named arms: the DEFAULT is the finding ----
+    Mutation(
+        name="production_default_reverts_to_the_shipped_uniform_cut",
+        path=DONOR_CHANNEL_MODULE,
+        old="DEFAULT_CUT_LAW = RETENTIVE_RELEASED_FRACTION",
+        new="DEFAULT_CUT_LAW = UNIFORM_ORIENTED_SINGLE_BRIDGE_ARM",
+        expect_red=("test_the_production_default_is_the_retentive_cut_law",),
+        suite=SCORED_SUITE,
+    ),
+    Mutation(
+        name="unknown_arm_falls_back_instead_of_raising",
+        path=DONOR_CHANNEL_MODULE,
+        old="""    if name not in CUT_LAWS:
+        raise ValueError(
+            f"unknown donor cut law {name!r}; the named arms are {sorted(CUT_LAWS)}"
+        )
+    return CUT_LAWS[name]""",
+        new="    return CUT_LAWS.get(name, donor_region_law)",
+        expect_red=(
+            "test_an_unknown_cut_law_is_refused_rather_than_defaulted",
+            "test_the_controller_refuses_an_unknown_arm_at_construction",
+        ),
+        suite=SCORED_SUITE,
+    ),
+    Mutation(
+        name="uniform_arm_becomes_a_lookalike_that_consumes_rng_random",
+        path=DONOR_CHANNEL_MODULE,
+        old="    UNIFORM_ORIENTED_SINGLE_BRIDGE_ARM: None,",
+        new="    UNIFORM_ORIENTED_SINGLE_BRIDGE_ARM: lambda _g: UNIFORM_ORIENTED_SINGLE_BRIDGE,",
+        expect_red=(
+            "test_the_uniform_arm_is_the_shipped_recipe_draw_by_name_and_by_behaviour",
+        ),
+        suite=SCORED_SUITE,
+    ),
+    # ---- THE SHARED SINK. Two call sites, one probe, and a green gate. ----
+    # `donor_transplant_draw` consults the law once for the parent and once per donor. A
+    # raising probe fires on the FIRST, so dropping the DONOR side leaves the consumption
+    # gate green -- named in `expect_green` so that blind spot is ASSERTED rather than
+    # assumed, and so the behavioural test beside it is shown to be the thing doing the
+    # work. This is the exact near-miss the region-law wiring hit, where `segment_replace`
+    # kept threading the law after `substituent_delete` stopped.
+    Mutation(
+        name="donor_side_cut_silently_reverts_to_uniform",
+        path=DONOR_CHANNEL_MODULE,
+        old="        donor_law = law(donor) if law is not None else None",
+        new="        donor_law = None",
+        expect_red=(
+            "test_the_law_is_consulted_for_the_DONOR_as_well_as_the_source",
+            "test_the_retentive_law_takes_a_smaller_graft_from_the_donor",
+        ),
+        expect_green=("test_the_full_scored_chain_reaches_the_law_and_restores",),
+        suite=SCORED_SUITE,
+    ),
+    # ---- The launch hop: a sealed payload must be able to turn the lane on ----
+    Mutation(
+        name="worker_stops_selecting_the_donor_arm",
+        path=WORKER_APP,
+        old="""                if (contract_envelope["payload"].get("arm") or {}).get(
+                    "enable_donor_channel", False
+                )
+                else {}""",
+        new="""                if False
+                else {}""",
+        expect_red=("test_the_worker_selects_the_donor_arm_from_the_sealed_payload",),
+        suite=SCORED_SUITE,
+    ),
+    Mutation(
+        name="POSITIVE_CONTROL_scored_path_cosmetic",
+        path=SCORED_ENTRY,
+        old='SCHEMA = "pmo_population_controller_v1"',
+        new='SCHEMA = "pmo_population_controller_v1"  # cosmetic: behaviour unchanged',
+        expect_red=(),
+        suite=SCORED_SUITE,
+    ),
+    # ---- Attribution: without the tag the B-vs-C ablation cannot see this channel ----
+    Mutation(
+        name="donor_candidate_loses_its_synthesis_time_tag",
+        path=CONTROLLER,
+        old="""            metadata = {
+                DONOR_CHANNEL: proposal.payload(),
+                **self._continuation_lineage(entry),
+            }""",
+        new="""            metadata = {**self._continuation_lineage(entry)}""",
+        expect_red=(
+            "test_a_donor_candidate_is_tagged_at_synthesis_and_survives_to_the_snapshot",
+        ),
+        suite=SCORED_SUITE,
+    ),
     # ---- Positive control: bytes change, behaviour does not ----
     Mutation(
         name="POSITIVE_CONTROL_cosmetic_comment",
@@ -567,7 +723,12 @@ def main() -> int:
             else:
                 # Property 2: a kill is a NON-EMPTY failing list that contains every
                 # test named for it.
-                killed = bool(failed) and expected.issubset(failed)
+                survived = set(mutation.expect_green)
+                killed = (
+                    bool(failed)
+                    and expected.issubset(failed)
+                    and survived.isdisjoint(failed)
+                )
                 status = "KILLED" if killed else "SURVIVED"
             verdict_ok &= killed
             rows.append(
@@ -576,6 +737,7 @@ def main() -> int:
                     "file": mutation.path.name,
                     "is_positive_control": mutation.is_control,
                     "expected_red": sorted(expected),
+                    "expected_green": sorted(mutation.expect_green),
                     "observed_red": sorted(failed),
                     "status": status,
                 }
