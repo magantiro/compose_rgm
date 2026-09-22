@@ -900,6 +900,14 @@ def memory_channel_proposal(
     ``synthesize_dynamic_program`` the production path runs, with the learned
     law supplied through the existing ``region_law=`` keyword.  Nothing about
     the executor, the eligibility gate or the candidate record changes.
+
+    It must also forward whatever ``completion_law`` the optimizer carries.  This
+    call site REPLACES the production shallow lane whenever the memory is warm,
+    so a law it drops is a law the shallow lane never sees: measured on the
+    completion A/B, this route performed 196 of the run's fresh syntheses and the
+    completion law reached only 20% of the proposals it was meant to govern.
+    ``getattr`` with a ``None`` default keeps an optimizer that has no such
+    attribute byte-identical.
     """
 
     if memory is None or not memory.warm or channel != shallow_channel:
@@ -919,6 +927,7 @@ def memory_channel_proposal(
         max_primitives=optimizer.config.max_primitives,
         max_blocks=optimizer.config.max_blocks,
         region_law=law,
+        completion_law=getattr(optimizer, "completion_law", None),
     )
     return (
         source,

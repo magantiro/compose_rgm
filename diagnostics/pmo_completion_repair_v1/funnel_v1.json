@@ -1,0 +1,231 @@
+{
+ "arms": {
+  "A_deployed_b": {
+   "allocator_discard_rate": 0.3956,
+   "allocator_discard_rate_for_completions": null,
+   "arm": "A_deployed_b",
+   "bootstrap_batches_without_a_merged_pool": 2,
+   "eligible_family_counts": {
+    "append_ring": 37,
+    "bond_reroute": 32,
+    "carbonyl_insert": 40,
+    "construct_substituted_ring": 68,
+    "cycle_close": 41,
+    "cycle_open": 46,
+    "functionalize": 62,
+    "fuse_ring": 45,
+    "heteroatom_substitute": 50,
+    "ring_path_remodel": 40,
+    "ring_system_restate": 41,
+    "segment_grow": 35,
+    "segment_replace": 34,
+    "segment_shrink": 40,
+    "substituent_delete": 93
+   },
+   "execution_rejection_reasons": {
+    "cycle_close": 2,
+    "other": 384,
+    "other_invalid_primitive": 10
+   },
+   "family_counts_over_attempts_with_metadata": {
+    "append_ring": 37,
+    "bond_reroute": 32,
+    "carbonyl_insert": 40,
+    "construct_substituted_ring": 68,
+    "cycle_close": 41,
+    "cycle_open": 46,
+    "functionalize": 63,
+    "fuse_ring": 45,
+    "heteroatom_substitute": 50,
+    "ring_path_remodel": 40,
+    "ring_system_restate": 42,
+    "segment_grow": 35,
+    "segment_replace": 34,
+    "segment_shrink": 41,
+    "substituent_delete": 94
+   },
+   "hop_1_attempts_total": 891,
+   "hop_1_synthesis_attempts": {
+    "cross_channel_duplicate": 1,
+    "duplicate": 11,
+    "eligible": 483,
+    "execution_rejected": 396
+   },
+   "hop_1_with_completion_by_status": {},
+   "hop_2_completion_share_of_eligible": 0.0,
+   "hop_2_eligible_attempts": 483,
+   "hop_2_eligible_with_completion": 0,
+   "hop_3_completion_share_of_pool": 0.0,
+   "hop_3_eligible_pool": 450,
+   "hop_3_pool_with_completion": 0,
+   "hop_4_completion_share_of_selected": 0.0,
+   "hop_4_selected_by_credit_allocate": 272,
+   "hop_4_selected_with_completion": 0,
+   "hop_5_charged_distinct_endpoints": 234,
+   "hop_5_charged_non_initialization": 234,
+   "hop_5_charged_with_completion": 0,
+   "requested_size_eligible": [],
+   "requested_size_selected": [],
+   "rounds": 15
+  },
+  "B_completion": {
+   "allocator_discard_rate": 0.3942,
+   "allocator_discard_rate_for_completions": 0.3571,
+   "arm": "B_completion",
+   "bootstrap_batches_without_a_merged_pool": 2,
+   "eligible_family_counts": {
+    "append_ring": 38,
+    "bond_reroute": 39,
+    "carbonyl_insert": 36,
+    "construct_substituted_ring": 66,
+    "cycle_close": 40,
+    "cycle_open": 45,
+    "functionalize": 50,
+    "fuse_ring": 35,
+    "heteroatom_substitute": 42,
+    "ring_path_remodel": 46,
+    "ring_system_restate": 42,
+    "segment_grow": 34,
+    "segment_replace": 49,
+    "segment_shrink": 31,
+    "substituent_delete": 102
+   },
+   "execution_rejection_reasons": {
+    "cycle_close": 8,
+    "other": 380,
+    "other_invalid_primitive": 25
+   },
+   "family_counts_over_attempts_with_metadata": {
+    "append_ring": 38,
+    "bond_reroute": 39,
+    "carbonyl_insert": 37,
+    "construct_substituted_ring": 66,
+    "cycle_close": 40,
+    "cycle_open": 45,
+    "functionalize": 52,
+    "fuse_ring": 35,
+    "heteroatom_substitute": 42,
+    "ring_path_remodel": 46,
+    "ring_system_restate": 45,
+    "segment_grow": 34,
+    "segment_replace": 49,
+    "segment_shrink": 34,
+    "substituent_delete": 106
+   },
+   "hop_1_attempts_total": 919,
+   "hop_1_synthesis_attempts": {
+    "duplicate": 25,
+    "eligible": 481,
+    "execution_rejected": 413
+   },
+   "hop_1_with_completion_by_status": {
+    "eligible": 14
+   },
+   "hop_2_completion_share_of_eligible": 0.0291,
+   "hop_2_eligible_attempts": 481,
+   "hop_2_eligible_with_completion": 14,
+   "hop_3_completion_share_of_pool": 0.0312,
+   "hop_3_eligible_pool": 449,
+   "hop_3_pool_with_completion": 14,
+   "hop_4_completion_share_of_selected": 0.0331,
+   "hop_4_selected_by_credit_allocate": 272,
+   "hop_4_selected_with_completion": 9,
+   "hop_5_charged_distinct_endpoints": 234,
+   "hop_5_charged_non_initialization": 234,
+   "hop_5_charged_with_completion": 9,
+   "requested_size_eligible": [
+    1,
+    1,
+    2,
+    3,
+    4,
+    4,
+    5,
+    6,
+    6,
+    6,
+    9,
+    14,
+    21,
+    33
+   ],
+   "requested_size_selected": [
+    1,
+    1,
+    2,
+    4,
+    4,
+    6,
+    6,
+    9,
+    21
+   ],
+   "rounds": 15
+  }
+ },
+ "artifact_size_cost": {
+  "cause_1": "execute_task embeds the entire campaign dict inside result.json, giving 54-59 MB result files that no consumer reads past four top-level fields",
+  "cause_2": "run_program_campaign writes round_*/complete.json containing the WHOLE cumulative optimizer snapshot every round, so fifteen rounds are fifteen copies of an ever-growing archive",
+  "measured": "382 MB committed under scored_ab/; .git is now 285 MB",
+  "not_done_here": "history was not rewritten; destructive cleanup is not authorized",
+  "remedy": "keep the per-query oracle receipts, result.json's top-level fields, the positive control and the FINAL snapshot; write the per-round snapshots outside git, and store a pointer in result.json instead of a second copy"
+ },
+ "consequence_for_the_REJECT": {
+  "reason": "the treatment arm ran the completion law on roughly a fifth of the proposals it was designed to govern, so what was compared was a throttled mechanism. The predeclared rule's arithmetic still returns REJECT on the numbers that were produced, and those numbers stand as a record of what ran -- but they do not answer the scientific question the arm was built to ask.",
+  "recommendation": "RECORD THE CELECOXIB A/B AS INCONCLUSIVE, NOT AS EVIDENCE AGAINST LARGE STRUCTURED COMPLETIONS",
+  "what_is_INFERRED_not_measured": [
+   "that the repaired call site would lift the footprint to near-total coverage of completion-family proposals. The memory counter says 196 syntheses take that route, so the projection is well founded, but it is a PROJECTION -- no run has been executed with the fix and none is authorized.",
+   "whether a full-footprint arm would beat, match or lose to the control. That is exactly what is now untested."
+  ],
+  "what_is_MEASURED": [
+   "AUC ratio 0.776, B behind at all four checkpoints",
+   "the law reached 20% of completion-family proposals and 3.8% of charged candidates",
+   "the allocator, the lock, the work limit and throughput are all exonerated"
+  ]
+ },
+ "exonerated_by_measurement": {
+  "lock_query_subset": "every one of the 9 selected completion-carrying endpoints was charged; the lock discards nothing.",
+  "the_allocator": "_credit_allocate discarded 39.4% of the merged pool overall and 35.7% of the completion-carrying candidates -- completions were selected slightly MORE often than average, not less. The census's scale-neutrality finding holds for the widened size distribution too, re-measured here specifically for repaired completions as asked.",
+  "the_work_limit": "max_primitives 32 / max_blocks 8 refused only 4 completion-family modules across 370 recorded syntheses in arm B (2 in arm A). It is real but it is not the throttle -- it eats roughly 1% of the footprint, not 80%.",
+  "throughput": "mean pool size 18.1 in both arms; B was never starved of candidates."
+ },
+ "fix": {
+  "byte_identical_when_absent": "getattr defaults to None, and None is v1 verbatim",
+  "change": "memory_channel_proposal now forwards completion_law=getattr(optimizer, 'completion_law', None)",
+  "guards_added": [
+   "test_every_production_synthesis_call_site_forwards_the_completion_law -- derived from the call sites by AST over the PMO entry closure, with an explicit reasoned exclusion list for the initialization batch builders, so an omission has to be argued for rather than happen",
+   "test_the_memory_channel_forwards_the_law_it_is_given -- drives the real adapter and requires the law to reach the synthesis call"
+  ],
+  "mutation_proven": "reverting the one-line fix turns BOTH new guards red",
+  "two_further_unthreaded_sites_found_by_the_guard": [
+   "dynamic_program_synthesis.py::initial_dynamic_program_batch",
+   "dynamic_program_synthesis_v21.py::_cold_channel_pool (single caller: initial_dynamic_program_batch_v21)"
+  ],
+  "why_those_two_stay_unthreaded": "both are initialization batch builders, and initialization is held FIXED across matched arms by design. Excluded with the reason recorded in the test."
+ },
+ "new_oracle_calls": 0,
+ "question": "Why does a repaired completion reach only 3.8% of charged candidates when roughly a fifth of synthesized proposals carry a completion module?",
+ "root_cause": {
+  "class_of_defect": "the inert-repair failure mode one hop further out than the usual one: the module was threaded correctly and a CALLER dropped it. A per-module consultation check cannot see this, which is why the new guard is derived from the CALL SITES.",
+  "measured_scale": {
+   "eligible_attempts_using_a_completion_family": {
+    "B_completion": 70
+   },
+   "memory_channel_syntheses_recorded_by_the_memorys_own_counter": {
+    "A_deployed_b": 194,
+    "B_completion": 196
+   },
+   "of_those_carrying_the_completion_law": {
+    "B_completion": 14
+   },
+   "share_of_completion_family_proposals_the_law_reached": 0.2
+  },
+  "site": "compose_v4/control/pmo_online_memory.py :: memory_channel_proposal",
+  "what_it_did": "called synthesize_dynamic_program(..., region_law=law) and never passed completion_law. It is a DROP-IN REPLACEMENT for the shallow lane's _channel_proposal whenever the online memory is warm, so on that lane it is not one route among several -- it IS the route.",
+  "why_both_arms_look_normal": "arm A is the deployed winner and also runs with the memory ON, so the control was unaffected -- the gap is invisible from the arms' aggregate counters and only shows up when completion PROVENANCE is traced."
+ },
+ "schema_version": "pmo_completion_funnel_v1",
+ "source": "each run's own per-round pending.json batches and oracle receipts",
+ "verdict": "THE_AB_TESTED_A_THROTTLE",
+ "where_the_drop_happens": "HOP 1, SYNTHESIS -- a missed call site, not selection and not the work limit"
+}

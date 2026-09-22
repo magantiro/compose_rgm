@@ -467,3 +467,133 @@ def test_the_builder_itself_refuses_charged_components():
         "the builder did not refuse any charged component"
     )
     assert all(not any(spec.charges) for spec in bank.components)
+
+
+# ---- Every production synthesis call site must forward the law -------------
+
+
+PMO_ENTRY_CLOSURE_ROOTS = (
+    "src/compose_v4/experiments/pmo_population_v1.py",
+    "src/compose_v4/control/pmo_population_controller.py",
+    "src/compose_v4/control/pmo_online_memory.py",
+    "src/compose_v4/control/dynamic_program_synthesis.py",
+    "src/compose_v4/control/dynamic_program_synthesis_v1.py",
+    "src/compose_v4/control/dynamic_program_synthesis_v2.py",
+    "src/compose_v4/control/dynamic_program_synthesis_v21.py",
+)
+
+#: Sites deliberately NOT threaded, each with the reason it is excluded. A site
+#: may only be added here with a stated reason -- the point of the guard is that
+#: an omission has to be argued for rather than happen.
+DELIBERATELY_UNTHREADED = {
+    # Initialization is held FIXED across matched arms by design: the bootstrap
+    # batch must be byte-identical in the control and the treatment.
+    ("dynamic_program_synthesis_v21.py", "initial_dynamic_program_batch_v21"),
+    ("dynamic_program_synthesis_v2.py", "initial_dynamic_program_batch_v2"),
+    ("dynamic_program_synthesis.py", "initial_dynamic_program_batch"),
+    # `_cold_channel_pool` has exactly one caller, `initial_dynamic_program_batch_v21`,
+    # so it is part of the same bootstrap batch rather than a live proposal route.
+    ("dynamic_program_synthesis_v21.py", "_cold_channel_pool"),
+}
+
+
+def _enclosing_function(tree: ast.AST, node: ast.AST) -> str:
+    best = "<module>"
+    for candidate in ast.walk(tree):
+        if not isinstance(candidate, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        if candidate.lineno <= node.lineno <= (candidate.end_lineno or node.lineno):
+            best = candidate.name
+    return best
+
+
+def test_every_production_synthesis_call_site_forwards_the_completion_law():
+    """The defect this catches cost the scored A/B its footprint.
+
+    ``memory_channel_proposal`` REPLACES the shallow lane whenever the online
+    memory is warm, and it forwarded ``region_law`` but not ``completion_law``.
+    Measured on the A/B: that route ran 196 of the fresh syntheses and the law
+    reached only 20% of the proposals it was meant to govern, so the comparison
+    tested a throttle. A per-module consultation test cannot see this, because
+    the module is threaded correctly and a CALLER drops it one hop up.
+
+    The guard is derived from the call sites themselves, so it cannot agree with
+    a stale list of names.
+    """
+
+    callees = {"synthesize_dynamic_program", "synthesize_structured_program"}
+    missing = []
+    checked = 0
+    for relative in PMO_ENTRY_CLOSURE_ROOTS:
+        path = REPO / relative
+        tree = ast.parse(path.read_text())
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            name = getattr(node.func, "id", None) or getattr(node.func, "attr", None)
+            if name not in callees:
+                continue
+            function = _enclosing_function(tree, node)
+            if (path.name, function) in DELIBERATELY_UNTHREADED:
+                continue
+            checked += 1
+            if not any(k.arg == "completion_law" for k in node.keywords):
+                missing.append(f"{path.name}:{function}:line {node.lineno}")
+    assert checked >= 6, f"the guard found only {checked} call sites; it has gone blind"
+    assert not missing, (
+        "these production synthesis call sites drop completion_law, so the law "
+        f"cannot reach the proposals they make: {missing}"
+    )
+
+
+def test_the_memory_channel_forwards_the_law_it_is_given():
+    """Drive the real adapter and require the law to reach the draw site."""
+
+    from compose_v4.control import pmo_online_memory as memory_module
+
+    seen = {}
+    original = memory_module.__dict__.get("synthesize_dynamic_program")
+
+    class _Optimizer:
+        completion_law = "SENTINEL"
+        config = type("C", (), {"max_primitives": 32, "max_blocks": 8})()
+        shallow_rng = np.random.default_rng(0)
+
+    class _Memory:
+        warm = True
+        cost = {"syntheses": 0}
+        edits = type("E", (), {"counts": {}})()
+        frontier = type("F", (), {"scores": {}})()
+
+        def region_law(self):
+            return object()
+
+    import compose_v4.control.dynamic_program_synthesis as dps
+
+    def spy(source, rng, **kwargs):
+        seen.update(kwargs)
+        raise RuntimeError("probe reached the synthesis call")
+
+    real = dps.synthesize_dynamic_program
+    dps.synthesize_dynamic_program = spy
+    try:
+        entry = {"trace": {"states": [encode_state_of(_parents()[0])]}}
+        try:
+            memory_module.memory_channel_proposal(
+                _Optimizer(), "shallow_program_channel", entry,
+                lambda *a, **k: None, _Memory(),
+            )
+        except RuntimeError:
+            pass
+    finally:
+        dps.synthesize_dynamic_program = real
+    assert seen.get("completion_law") == "SENTINEL", (
+        "the online-memory channel did not forward completion_law; it replaces the "
+        f"shallow lane, so a law it drops never reaches a proposal. saw: {sorted(seen)}"
+    )
+
+
+def encode_state_of(graph):
+    from compose_v4.rewrite.trace_shard import encode_state
+
+    return encode_state(graph)

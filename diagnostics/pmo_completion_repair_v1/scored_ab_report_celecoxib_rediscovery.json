@@ -177,6 +177,12 @@
  "footprint_note": "The raw completion_provenance count (538) is an OVER-COUNT: each round's complete.json carries the whole cumulative optimizer snapshot, so an entry is counted once per round it survives in. The deduped figure, taken from the FINAL snapshot's archive entries keyed by endpoint, is 9.",
  "relative_auc_b_over_a": 0.7756,
  "schema_version": "pmo_completion_scored_ab_report_v1",
+ "superseded_reading": {
+  "see": "diagnostics/pmo_completion_repair_v1/funnel_v1.json",
+  "status": "INCONCLUSIVE rather than evidence against large structured completions",
+  "the_interpretation_changes": "the funnel measurement (funnel_v1.json) shows the completion law reached only 20% of the proposals it governs, because memory_channel_proposal -- the shallow lane's synthesis route whenever the online memory is warm -- dropped the keyword. This comparison therefore tested a THROTTLED mechanism.",
+  "the_numbers_stand": "AUC 0.1456 vs 0.1878, ratio 0.776, B behind at all four checkpoints"
+ },
  "task": "celecoxib_rediscovery",
  "validity_check": {
   "control_is_clean": true,

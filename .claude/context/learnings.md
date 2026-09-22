@@ -2894,3 +2894,53 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **`result.json` embedding `campaign` also makes every consumer load ~60 MB to read four
   numbers.** The A/B report reads `charged_oracle_calls`, `best_score`, `auc_top10_at_budget`
   and `auc_budget`; nothing reads the embedded campaign. Keep a pointer, not a copy.
+
+## 2026-09-22 (the completion A/B tested a THROTTLE: a caller dropped the keyword one hop above the module)
+
+- **THE INERT-REPAIR FAILURE MODE, ONE HOP FURTHER OUT THAN THE USUAL ONE.** The completion law
+  was threaded correctly through `compile_generic_module`, `synthesize_dynamic_program`, both
+  planner lanes, the controller constructor and `restore`, with a per-family consultation check
+  and a seventeen-mutation battery. It was still inert on most of the scored run, because
+  **`pmo_online_memory.memory_channel_proposal` called `synthesize_dynamic_program(...,
+  region_law=law)` and never passed `completion_law`.** That adapter is a DROP-IN REPLACEMENT for
+  the shallow lane's `_channel_proposal` whenever the memory is warm, so on that lane it is not
+  one route among several -- it IS the route. A per-module consultation test cannot see this by
+  construction: the module is correct and a CALLER drops it.
+- **MEASURED FUNNEL, arm B, 15 rounds, from the run's own `pending.json` batches (zero oracle
+  calls):**
+      hop 1  synthesis attempts        919   (eligible 481 / rejected 413 / duplicate 25)
+             using a completion family  70   of which CARRYING THE LAW  14  (20%)
+      hop 3  merged eligible pool      449   with a completion  14   (3.1%)
+      hop 4  _credit_allocate picks    272   with a completion   9   (3.3%)
+      hop 5  charged                   234   with a completion   9
+  The memory's OWN counter records **196 syntheses** through the unthreaded route (194 in the
+  control), which is what makes the 20% figure a measurement rather than an inference.
+- **EVERY DOWNSTREAM SUSPECT IS EXONERATED BY MEASUREMENT, so the funnel had to be walked rather
+  than guessed.** The allocator discarded 39.4% of the pool overall and **35.7% of the
+  completion-carrying candidates** -- completions were selected slightly MORE often than average,
+  so the census's scale-neutrality result survives the widened size distribution. `lock_query_
+  subset` discarded 0 of 9. The work limit (`max_primitives 32` / `max_blocks 8`) refused **4**
+  completion-family modules across 370 recorded syntheses, about 1% of the footprint, not 80%.
+  Throughput was identical (mean pool 18.1 in both arms).
+- **CONSEQUENCE: a REJECT verdict on a throttled mechanism is not evidence against the
+  mechanism.** The arithmetic still returns REJECT on the numbers produced and those numbers
+  stand as a record of what ran, but the arm answered a different question than the one it was
+  built to ask. Recorded as INCONCLUSIVE. **The tell was available before the funnel: the
+  measured footprint (3.8% of charged candidates) was far too small to produce the measured
+  effect (a 22% AUC gap). When the effect is larger than the mechanism's footprint, suspect the
+  wiring before the chemistry.**
+- **BOTH ARMS LOOKED NORMAL, which is why nothing caught it earlier.** The control also runs with
+  the memory ON, so the gap is invisible in every aggregate counter -- proposal counts, pool
+  sizes, eligibility rates and rejection mixes all match. It only appears when completion
+  PROVENANCE is traced through the funnel.
+- **THE GUARD THAT REPLACES IT IS DERIVED FROM THE CALL SITES, NOT FROM A LIST OF NAMES.** An AST
+  sweep over the PMO entry closure requires every call to `synthesize_dynamic_program` /
+  `synthesize_structured_program` to forward `completion_law`, with an explicit exclusion list
+  carrying a REASON per entry -- so an omission has to be argued for rather than happen. It
+  immediately found two more unthreaded sites (`initial_dynamic_program_batch` and
+  `_cold_channel_pool`), both legitimately excluded because initialization is held fixed across
+  matched arms. It also asserts a minimum number of inspected sites, so it cannot go blind.
+  Mutation-proven: reverting the one-line fix turns it and the adapter test red.
+- **GENERAL RULE, now paid for twice in this repo: after threading a new keyword, grep its
+  CALLERS for adapters that REPLACE the path rather than extend it.** A drop-in replacement is
+  the one shape that both looks like production and silently isn't.
