@@ -18,5 +18,23 @@
   "large_proposals_generated": 291,
   "exact_witness_hits": 0
  },
- "do_not_touch_fibercontrol": "The bottleneck is upstream of the controller: FiberControl cannot select a coherent macro the proposal process never exposes.  No controller work until coherent proposals exist."
+ "do_not_touch_fibercontrol": "The bottleneck is upstream of the controller: FiberControl cannot select a coherent macro the proposal process never exposes.  No controller work until coherent proposals exist.",
+ "PRIMARY_METRICS_SUPERSEDE_SIMILARITY": {
+  "note": "The structural census changed what to measure.  The generic large proposals already match the required macro on heavy-atom delta, ring delta and region COUNT.  They miss on region SIZE and retention.  So judge a repaired jump lane on those two, not on total primitive count and not primarily on witness similarity.",
+  "primary": [
+   "largest_changed_region",
+   "retained_source_fraction"
+  ],
+  "generic_baseline_to_beat": {
+   "largest_changed_region": 7,
+   "retained_fraction": 0.64
+  },
+  "useful_regime_observed_in_witnesses": {
+   "largest_changed_region": "15-20",
+   "retained_fraction": "0.3-0.4"
+  },
+  "what_counts_as_a_major_positive": "largest changed region moving from ~7 toward ~15-20 and retention from ~0.64 toward ~0.3-0.4, WHILE staying executable and valid -- even if it never reproduces the exact witness molecule."
+ },
+ "INFORMATION_BOUNDARY_CAUTION": "DO NOT hard-code '19 atoms' or 'retain 30%' into the production generator.  Those values come from the ANSWER-KNOWN witness set and are diagnostic evidence about the missing structural scale, NOT privileged task information to encode.  The production mechanism must sample LARGER CONNECTED REPLACEMENT REGIONS GENERICALLY.  Design target: increase connected-region scale, not arbitrary program length.",
+ "T4_correspondence": "T4's clean eligible witnesses are all 7-15 heavy-atom excisions that MAX_SEGMENT_LENGTH=8 could not express in one draw -- the same small-region bias, found independently from the other direction.  Record this as SUPPORTING EVIDENCE of a shared architectural limitation, NOT as proof that the root cause is identical.  They are different code paths and that inference has been wrong here before."
 }
