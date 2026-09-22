@@ -27,10 +27,12 @@ import statistics
 from pathlib import Path
 from typing import Any
 
+from compose_v4.experiments.pmo_atlas_discovery import atlas_molecules
 from compose_v4.experiments.pmo_atlas_routes import (
     DEVELOPMENT_INFORMED_LABEL,
     REGIME_STATEMENT,
     file_sha256,
+    load_atlas,
     payload_sha256,
 )
 
@@ -124,6 +126,19 @@ def main(argv: list[str] | None = None) -> int:
     for task, row in best_per_task.items():
         reached[task] = row["rung_reached"]
 
+    # The dossier is three source molecules and nine of eleven task sections
+    # compile from one of them, so per-task reference sets overlap heavily and a
+    # similarity to "this task's atlas" is largely a similarity to a shared
+    # molecule. That is measured here rather than left as a caveat.
+    dossier = load_atlas(repo_root)
+    reference_sets = {task: atlas_molecules(dossier, task=task) for task in sorted(blind)}
+    union = set().union(*reference_sets.values()) if reference_sets else set()
+    shared = (
+        set.intersection(*(set(value) for value in reference_sets.values()))
+        if reference_sets
+        else set()
+    )
+
     similarity = [row["similarity_to_atlas"] for row in rows if row["measured_top_ten_new_mean"]]
     productivity = [row["measured_top_ten_new_mean"] for row in rows if row["measured_top_ten_new_mean"]]
 
@@ -180,6 +195,18 @@ def main(argv: list[str] | None = None) -> int:
                 "Structural proximity selects what to verify and never decides. A weak "
                 "correlation here is the expected outcome, not a defect."
             ),
+        },
+        "reference_set_overlap": {
+            "note": (
+                "Per-task atlas reference sets, as molecule counts. A high shared "
+                "count means the structural diagnostic is largely measuring distance "
+                "to one molecule that most task sections compile from."
+            ),
+            "per_task_molecules": {
+                task: len(value) for task, value in sorted(reference_sets.items())
+            },
+            "union_molecules": len(union),
+            "molecules_shared_by_every_task": len(shared),
         },
         "nearest_approach": {
             task: {
