@@ -1,0 +1,112 @@
+{
+  "cell": "5ht1b_2",
+  "companion_measurement": {
+    "artifact": "diagnostics/t4_support_restoration_gate/local_kernel_evidence_v1.json",
+    "distinct_eligible": 14,
+    "proposed_unique_exact_endpoints": 832,
+    "seconds": 450.8,
+    "seed": 2027991918
+  },
+  "distinct_eligible": 12,
+  "endpoints": [
+    {
+      "heavy": 25,
+      "qed_margin": 0.1966,
+      "sa_margin": 0.0027,
+      "sim_margin": 0.0393,
+      "smiles": "CCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1"
+    },
+    {
+      "heavy": 32,
+      "qed_margin": 0.0973,
+      "sa_margin": 0.1889,
+      "sim_margin": 0.0563,
+      "smiles": "Oc1ccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)cc1"
+    },
+    {
+      "heavy": 32,
+      "qed_margin": 0.0803,
+      "sa_margin": 0.2704,
+      "sim_margin": 0.0087,
+      "smiles": "O=C(CCC1=CN=C2C=CC(n3cnnc3)=CC12)N1CCN(CCc2ccccc2)CC1"
+    },
+    {
+      "heavy": 32,
+      "qed_margin": 0.0803,
+      "sa_margin": 0.2709,
+      "sim_margin": 0.0716,
+      "smiles": "O=C(Cc1ccccc1)N1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1"
+    },
+    {
+      "heavy": 31,
+      "qed_margin": 0.0652,
+      "sa_margin": 0.2818,
+      "sim_margin": 0.1931,
+      "smiles": "C1=CC2=NC=C(CCCN3CCN(CCc4ccccc4)CC3)C2C=C1n1cnnc1"
+    },
+    {
+      "heavy": 32,
+      "qed_margin": 0.0533,
+      "sa_margin": 0.1373,
+      "sim_margin": 0.0418,
+      "smiles": "Nc1cccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)c1"
+    },
+    {
+      "heavy": 32,
+      "qed_margin": 0.0486,
+      "sa_margin": 0.1167,
+      "sim_margin": 0.0618,
+      "smiles": "O=C1CN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CCN1CCc1ccccc1"
+    },
+    {
+      "heavy": 32,
+      "qed_margin": 0.0486,
+      "sa_margin": 0.1122,
+      "sim_margin": 0.0377,
+      "smiles": "O=C1CN(CCc2ccccc2)CCN1CCCC1=CN=C2C=CC(n3cnnc3)=CC12"
+    },
+    {
+      "heavy": 32,
+      "qed_margin": 0.0448,
+      "sa_margin": 0.2125,
+      "sim_margin": 0.0418,
+      "smiles": "Cc1cccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)c1"
+    },
+    {
+      "heavy": 32,
+      "qed_margin": 0.0448,
+      "sa_margin": 0.1982,
+      "sim_margin": 0.0364,
+      "smiles": "Cc1ccccc1CCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1"
+    },
+    {
+      "heavy": 32,
+      "qed_margin": 0.0415,
+      "sa_margin": 0.237,
+      "sim_margin": 0.0563,
+      "smiles": "Fc1ccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)cc1"
+    },
+    {
+      "heavy": 32,
+      "qed_margin": 0.0051,
+      "sa_margin": 0.246,
+      "sim_margin": 0.0418,
+      "smiles": "O=C(CN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1)c1ccccc1"
+    }
+  ],
+  "evidence_role": "an ADDITIONAL SEED for the 5ht1b_2 state-aware rung-0 measurement",
+  "generated_at_utc": "2026-09-22T20:44:45.271251+00:00",
+  "is_production_seed": false,
+  "kernel": "rdkit 2024.03.5 (T4 production), local pinned env",
+  "new_oracle_calls": 0,
+  "payload_sha256": "651605decd367cf2a7621f00583c0a5eb850c8842a7ea5fa377e39a567f9fde6",
+  "production_rung_zero_seed": 2027991918,
+  "proposed": 830,
+  "reading": "Across two seeds the state-aware kernel yields 12 and 14 distinct eligible endpoints on 5ht1b_2 at rung 0, against the frozen ladder's stop_at_distinct_eligible = 4. The cell therefore stops at rung 0 and never escalates on either seed. n = 2 is a variance hint, not a distribution.",
+  "routed_kernel": "state_aware",
+  "schema_version": "t4_state_kernel_second_seed_v1",
+  "seconds": 431.6,
+  "seed_used": 2026091908,
+  "settings_source": "configs/t4_5ht1b2_protonation_rescue_d06_v1.json",
+  "what_this_is_NOT": "This is NOT a replication of the support-restoration gate's 14-eligible figure. That run used the PRODUCTION rung-0 derivation fallback_seed(controller_seed, round_index=1) = 2026091908 + 900_007 + 1_000_003 = 2027991918. This run passed the bare controller_seed 2026091908 to the proposal config, so it is a DIFFERENT DRAW. Two seeds, not one seed measured twice. The intent when it was launched WAS replication; the seed arithmetic was checked afterwards and did not support that reading, so the claim is stated as it is rather than as it was meant."
+}
