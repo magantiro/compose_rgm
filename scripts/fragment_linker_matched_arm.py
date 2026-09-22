@@ -189,6 +189,27 @@ def main() -> None:
             "question of whether the composite is a capability EXTENSION, which "
             "the constituent scoring probe answers and this file does not."
         ),
+        "predeclaration_discipline": (
+            "NO THRESHOLD IS PREDECLARED HERE, because no pass/fail decision is "
+            "taken from this arm. It is DESCRIPTIVE: it reports a comparison. "
+            "Its size was fixed by the benchmark protocol before launch (10 "
+            "drugs x 3 seeds x 100 samples = 3,000 attempts per arm), not "
+            "chosen after seeing data, and the arms were launched together. If "
+            "a DECISION is later taken from a linker comparison -- promoting a "
+            "row, choosing between routes -- that decision needs its own "
+            "predeclared threshold, n from a power calculation, and denominator, "
+            "committed before its first sample. Reading a threshold off this "
+            "artifact afterwards would be exactly the move the v3 "
+            "predeclaration exists to prevent."
+        ),
+        "support_statement_that_must_accompany_any_linker_row": (
+            "The composite is a capability EXTENSION on 8 of 10 released prompts "
+            "and an ACCELERATION on 2 (see "
+            "diagnostics/fragment_path_v3_classification_v1.json). On 8 prompts "
+            "it performs a transition the proposal law does not propose, so a "
+            "linker number from this arm is not a number the prior could have "
+            "reached by sampling."
+        ),
         "matched_on": {
             k: base[k] for k in
             ("sampler_sha256", "checkpoint", "linker_bridge_atoms", "samples_per_prompt")
