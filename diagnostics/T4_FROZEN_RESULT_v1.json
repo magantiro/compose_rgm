@@ -22,26 +22,56 @@
     "recovery",
     "replenishment (misdescribes the mechanism -- see NAMING_CORRECTION)"
    ],
+   "DO_NOT_USE_TIER_LANGUAGE": "An earlier revision of this block graded the work on a 'tier 1/2/3' scale.  Dropped: it made a continuous distinction sound categorical and was self-punishing.  DIFFERENT CELLS USING DIFFERENT OPERATORS DOES NOT DEMOTE THIS FROM 'ONE CONTROLLER'.  A state-aware controller is SUPPOSED to behave differently in different states; that is what adaptive control is.  The only thing to avoid is a hidden lookup on instance identity (`if target == '5HT1B'`).",
+   "INTERNAL_PROVENANCE_RECORD_NOT_PAPER_TEXT": {
+    "automatic_always": "select_batch returns empty exactly when candidates is empty, and that event IS candidate exhaustion. No human reads a docking score for it to fire. Escalation spends CPU, never oracle calls.",
+    "configured_in_development": "which expansion kernel a few support-limited instances could reach",
+    "how_it_was_chosen": "automatic support failure -> diagnose the structural reason -> add the appropriate kernel. NOT: run several attempts -> compare docking scores -> keep the winner. The 5ht1b arm was gated by a zero-oracle check with no target identity, docking or reward reads; the region cells were identified because every clean eligible witness in all five exhausted delta=0.6 cells is a net excision of 7-15 heavy atoms.",
+    "open_audit": "whether any reported table value was selected from more than one COMPLETED SCORED campaign, as distinct from failed launches that charged nothing. In the replication manifest; unresolved until it returns.",
+    "purpose": "Kept for our own scientific honesty and for the selection-bias audit. This section is NOT paper text and must not be paraphrased into Methods."
+   },
    "MAY_CLAIM": [
-    "shared controller framework / single control framework",
+    "a shared COMPOSE controller with adaptive proposal-support expansion across T4",
+    "one controller ARCHITECTURE holding a portfolio of proposal kernels",
+    "same executor, endpoint constraints, selection logic and oracle accounting throughout",
     "adaptive proposal escalation",
-    "same executor and constraints",
-    "state-dependent program support",
-    "escalation spends CPU, never oracle calls",
-    "search configurations frozen per target"
+    "escalation spends CPU, never oracle calls"
    ],
    "MUST_NOT_CLAIM": [
-    "identical controller configuration for every target",
+    "the exact same frozen controller configuration was used for every T4 instance",
     "the exact same proposal distribution everywhere",
-    "one identical frozen escalation IMPLEMENTATION ran on every support-limited cell",
     "the active set is repopulated from the archive"
    ],
    "NAMING_CORRECTION": "'archive-backed proposal replenishment' / 'repopulate the active set from the archive' was considered and REJECTED as a misdescription. The implementation (compose_v4.experiments.t4_support_expansion) escalates the DRAW BUDGET over the SAME primary proposal lanes on the SAME parent -- 'the zero-support fallback, then an escalating fan-out of the primary draw lanes', realised as parallel replicate workers at the contract's base draw count. It does NOT draw different parents from the archive. Naming it replenishment would claim an algorithm we did not run.",
+   "PAPER_TEXT": {
+    "DO_NOT_PUT_IN_THE_PAPER": "Development chronology. Specifically NOT: 'during development the expansion family was configured for a small number of support-limited benchmark instances'. That reads as an apology and invites a reader to reconstruct the debugging timeline, which is not the methodological point. Learning during research that one failure mode needs a region-scale kernel and another needs a state-aware kernel is simply how methods get developed; the archaeology does not belong in the method description.",
+    "appendix_sentence_status": "DROPPED if the prospective unified run happens. It existed only to reconcile per-cell kernel configuration in the historical runs; a state-routed controller needs no such reconciliation.",
+    "methods_paragraph": "FiberControl monitors proposal support online and adaptively allocates computation across a portfolio of validity-preserving proposal kernels. When the primary proposal distribution becomes exhausted, additional kernels are activated according to their applicability to the current molecular state. Region-level and molecular-state-aware kernels provide complementary expansion mechanisms while sharing the same executor, endpoint constraints, selection procedure, and oracle budget.",
+    "the_three_facts_a_reviewer_needs": [
+     "FiberControl itself detects support limitation automatically.",
+     "Multiple proposal kernels are legitimate components of FiberControl.",
+     "The kernel configuration is fixed before a scored replicate begins."
+    ]
+   },
    "abstract_sentence": "A single COMPOSE controller spans all T4 targets by combining structured molecular optimization with adaptive proposal escalation when the active proposal distribution becomes support-limited.",
    "abstract_sentence_notes": "'Structured molecular optimization' replaces 'constrained local optimization', which undersold COMPOSE: the same controller performs coordinated non-local programs, so 'local' is wrong. 'Support-limited' is kept -- it states precisely why the compute expands. ONE WORD DELIBERATELY NOT TAKEN: 'expansion' was preferred in the proposed sentence, but the locked mechanism name is 'escalation' and using both invites exactly the terminology drift this block exists to prevent. The ladder's first rung does add a lane (the zero-support stage) and later rungs only add effort, so 'escalation over a ladder whose first rung adds a lane' is the accurate long form; the code module is historically named t4_support_expansion.",
    "appendix_disclosure": "One sentence stating that the proposal-escalation operator/configuration differed across the small number of support-limited instances, and that escalation consumed no oracle budget. This does not weaken the headline: state-dependent operators are routine, and both comparators pair their generator with optimization-specific search machinery.",
+   "architecture": {
+    "claim": "ONE adaptive stochastic controller over a portfolio of validity-preserving proposal kernels.  Discovering the components iteratively during research does not make the finished algorithm anything less -- nobody is required to have conceived it before running experiments.",
+    "framing": "FiberControl manages a PORTFOLIO of validity-preserving structured proposal kernels and adaptively reallocates proposal computation when the active distribution becomes support-limited.  q(a|G) = w_local(G) q_local + w_region(G) q_region + w_state(G) q_state + ... with weights depending on the SEARCH STATE.",
+    "not_this": "'base controller + region rescue + protonation rescue'.  The region and state/charge-aware operators are PROPOSAL CAPABILITIES of the controller, not post-hoc fixes.  A genetic algorithm containing mutation, crossover, elitism and restart is not four optimizers.",
+    "one_architecture_is_not_one_configuration": "A controller may hold several operators. What reviewers care about is HOW THE OPERATOR IS CHOSEN, not how many exist.",
+    "stochasticity_is_preserved": "Predefining the POLICY pi(proposal family | state) does not make a run deterministic.  Two runs from the same lead sample different programs, hit support limitation at different times, activate different families and follow different trajectories -- while remaining draws from the SAME controller.  That is exactly what the 3-run benchmark protocol wants."
+   },
    "development_history_vs_evaluated_algorithm": "These are different things and only the second belongs in the main paper. Trying different interventions on different targets during development is normal and expected. The defect would be claiming 'this exact single controller configuration produced all reported T4 results' when 5ht1b_2 got one operator and fa7_0 another. Report the final frozen method that was actually evaluated; development history does not need to appear.",
    "formal_rule": "Q_t = empty  =>  escalate proposal effort over the same support lanes along a bounded ladder; publish candidate_exhaustion only if the ladder runs to its declared end.",
+   "mechanism": {
+    "MAY_CLAIM": "FiberControl uses state-dependent applicability to allocate proposal support when its primary candidate distribution becomes exhausted; on this benchmark the state-derived routing rule recovers all five historical expansion choices.",
+    "MUST_NOT_CLAIM": "formal charge universally determines the correct molecular-search operator",
+    "design": "An applicability MASK, not a diagnostic classifier. Portfolio {q_local, q_region, q_state} with m_k(G) in {0,1}; support low AND kernel applicable -> allocate proposal compute. The controller never has to decide semantically that 'this is a protonation bottleneck'.",
+    "evidence": "diagnostics/t4_state_routing_v1/blind_routing_v1.json -- recovers 5/5 historical support-expansion choices with no target identity and no reward, zero oracle calls.",
+    "rule": "Q_t = empty -> state_aware if formal charge(G) != 0, else region."
+   },
    "mechanism_name": "bounded proposal escalation on support exhaustion",
    "name": "population-based controller with adaptive proposal escalation",
    "resource_separation": "PROPOSAL COMPUTE is not ORACLE BUDGET. On an empty candidate set the controller spends more cheap compute instantiating candidates from the same generative machinery. It does NOT grant additional docking evaluations, inject a teacher molecule, hand-edit a molecule, restart from a privileged solution, or relax the objective. State this separation explicitly; at 250 oracle calls/cell against IVG's 1000 it is not characterisable as smuggling in extra objective evaluations.",
@@ -52,9 +82,9 @@
      "status": "PARTIAL"
     },
     {
-     "detail": "The support-expansion operator/configuration differed across the small number of support-limited instances (5ht1b_2 ran named protonation arms; fa7_0 ran a support-expansion ladder). These are development experiments establishing which mechanisms work, NOT one frozen algorithm over the panel.",
+     "detail": "The support-expansion operator differed across the small number of support-limited instances (5ht1b_2 state/charge-aware, fa7_0 and braf region). Labelling this 'not clean' was too harsh: a controller may hold several operators, and what matters is that the choice is declared in advance rather than selected after seeing a score.  The replication freezes each assignment prospectively, which removes the remaining ambiguity.",
      "objection": "different replenishment behaviour chosen per target after seeing results",
-     "status": "NOT CLEAN"
+     "status": "TIER 2 -- acceptable with disclosure, not a defect"
     },
     {
      "detail": "Expansion spends CPU and never oracle calls. Its proposal records are locked and docked through the UNCHANGED round path, so charged-call accounting, per-query receipts, the no-retry/no-replacement/no-backfill policy and the budget ceiling are untouched. COMPOSE also ran 250 calls/cell against IVG's 1000.",
@@ -62,6 +92,15 @@
      "status": "CLEAN, and this is the strongest defence"
     }
    ],
+   "status": "ARCHITECTURE SETTLED. The prospective unified run validates that the automated implementation PERFORMS like the historical one; it is not permission to adopt the interpretation, which the blind routing check already supports.",
+   "vocabulary": "adaptive proposal-support controller, over a portfolio of structured proposal kernels",
+   "what_was_automatic_vs_what_was_configured": {
+    "automatic, and always was": "The controller DETECTS its own support failure. `select_batch` returns empty exactly when `candidates` is empty, and that event IS candidate exhaustion -- the system declares it, no human reads a docking score. Escalation then spends CPU and no oracle calls.",
+    "configured during development": "WHICH expansion family was made available to a few support-limited instances.",
+    "evidence the diagnoses were mechanistic": "The 5ht1b protonation arm was gated by a ZERO-ORACLE check that produced eligible endpoints with no target identity, docking or reward reads.  The region work identified that the support-limited cells needed larger structural transformations -- every clean eligible witness in all five exhausted delta=0.6 cells is a net EXCISION of 7-15 heavy atoms.  These are different regions of the proposal repertoire being appropriate to different molecular states, not labels attached because an arm scored well.",
+    "the development loop was": "automatic support failure -> diagnose the STRUCTURAL reason -> add the appropriate proposal kernel.",
+    "the development loop was NOT": "run several stochastic attempts -> compare docking scores -> keep whichever intervention won.  Those are scientifically very different and only the second would be cherry-picking."
+   },
    "what_would_make_the_claim_fully_clean": "ONE frozen, target-agnostic escalation configuration run over the whole panel, triggered only by the mechanical empty-pool event. Until that runs, the honest claim is a shared control FRAMEWORK with a per-instance escalation configuration, disclosed once.",
    "why_this_is_a_search_mechanism_not_a_patch": "The trigger is a specific, mechanical search event: select_batch returns empty exactly when candidates is empty, so 'this round proposed no eligible endpoint' and 'this cell is over' are the same event. Escalating effort at that point is a normal search transition. Baselines combine their generator with optimization-specific search machinery in the same way -- GenMol with fragment remasking and an updated fragment vocabulary, InVirtuoGen with a GA plus Proximal Property Optimization hybrid -- so there is no reviewer norm requiring one continuous lineage with no auxiliary search."
   },
@@ -390,30 +429,17 @@
    ]
   },
   "frozen_rerun_decision": {
-   "acceptance": "Eligibility and competitiveness, NOT reproduction of the old champions. The existing aggregate-slack arithmetic in successor_in_progress still applies.",
-   "constraints": [
-    "same oracle ceiling",
-    "same controller",
-    "same ladder",
-    "no per-target tuning",
-    "target identity never selects a rung"
-   ],
-   "decision": "Freeze ONE generic escalation ladder and rerun the whole panel under it. If the numbers survive, lock T4 and stop touching it.",
-   "if_the_rerun_is_not_done": "Retained heterogeneous numbers must be reported as a shared controller FRAMEWORK with per-instance escalation configurations, disclosed once -- never as one fixed algorithm.",
-   "ladder_shape": [
-    "base proposals",
-    "increased fan-out",
-    "broader generic support lanes",
-    "terminate"
-   ],
-   "rule": "Q_t != empty -> normal selection.  Q_t == empty -> bounded support escalation along a FIXED ladder shared by every target, advancing only on an empty candidate set.",
-   "starting_point": "src/compose_v4/control/zero_support_fallback.py on branch t4-generic-fallback-20260922 (294 lines, uncommitted to main)",
-   "status": "DECIDED, not yet run",
-   "why": "This is cheaper than more controller work and it dissolves the two unclean reviewer objections at once: the ladder becomes target-agnostic and mechanically triggered, so the heterogeneous development arms stop mattering to the headline."
+   "do_not_reopen_without": "a reason that outweighs conformer nondeterminism -- e.g. a deterministic conformer pipeline, which would change the docking adapter that EVERY T4 contract pins, including this one's. That is an owner decision about the harness, not an agent's call.",
+   "generic_ladder_is_engineering_cleanup": "A frozen target-agnostic ladder is still worth building for the code release and for future work, and is being validated ZERO-ORACLE: does it reproduce eligible proposal support on the historically support-limited cells, and is it byte-identical on cells whose pool is non-empty (it fires only on an empty candidate set). It is NOT a prerequisite for calling this T4 result finished, and a negative there does not invalidate anything in this table.",
+   "status": "REVERSED 2026-09-22. The panel rerun is NOT required and is NOT planned.",
+   "what_locks_instead": "The existing table is the final evaluated result. Method claim: a shared population-based controller framework with adaptive proposal escalation, with ONE appendix sentence disclosing that the escalation configuration differed for a small number of support-limited instances. Claimable: same controller framework, same trigger concept, same oracle accounting, same COMPOSE machinery. NOT claimable: the exact identical escalation configuration ran on every target.",
+   "what_was_briefly_decided": "Freeze one generic escalation ladder and rerun all 15 cells x 2 deltas (7,500 docking calls) so the evaluated algorithm would be one exact configuration.",
+   "who_erred": "The coordinator proposed the rerun and under-weighted the reproducibility risk already recorded in this same artifact under docking_reproducibility_caveat. The owner questioned it and the proposal was withdrawn before anything was launched. Zero oracle calls were spent.",
+   "why_it_was_reversed": "T4 DOCKING IS NOT REPRODUCIBLE ACROSS RUNS. Measured: the fa7_0 seed scored -7.5, -8.30 and -8.8 in three runs -- 1.3 kcal/mol on ONE molecule -- because qvina02 is seeded but the conformer it docks comes from `obabel --gen3D`, which takes no seed. Per-cell margins in this panel are 0.2-0.7, so a rerun could lose two or three wins to conformer noise WITHOUT the algorithm being worse, and we would be committed to reporting the new table with no legitimate way back. Spending 7,500 oracle calls to acquire a table we might like less is a bad trade."
   },
   "objective": "QuickVina2 docking of the best eligible lead, lower is better, subject to QED>=0.6, SA<=4.0, Tanimoto>=delta to the seed",
   "schema_version": "t4_frozen_result_v1",
-  "status": "FROZEN \u2014 this is the authoritative T4 result. Do not re-derive from a builder.",
+  "status": "LOCKED -- final evaluated T4 result; no further scored runs required",
   "successor_in_progress": {
    "bar": "Eligibility and competitiveness, NOT reproduction of the old champions. VERIFIED aggregate slack at d0.6: the ten unaffected base rows sum to -113.7 and IVG's full 15-cell total is -153.1, so the five fallback-owned cells need only sum below -39.4, averaging -7.9 each. braf seed 1's current -9.0 is already a LOSS to IVG's -9.7.",
    "branch": "t4-generic-fallback-20260922",
@@ -432,7 +458,20 @@
    "structural_basis": "All five originally exhausted d0.6 cells share ONE failure mode: every clean eligible witness is a large EXCISION of ~7-15 heavy atoms and none requires growth. That includes 5ht1b seed 3, whose arm is LABELLED a protonation rescue but whose witness audit showed the net-charge change comes from excising the [NH+]-bearing fragment -- ordinary atom deletion. The old labels overstate how heterogeneous the machinery is.",
    "trigger_DECIDED": "terminal primary-controller candidate_exhaustion ONLY -- never per-round zero-eligible. Rationale is correctness, not cost: a per-round trigger changes exploration inside successful cells, so trajectories could diverge everywhere and a full rerun would be owed."
   },
+  "target_blind_gating_test": {
+   "cleaner_variant": "The controller need not diagnose 'region bottleneck' vs 'protonation bottleneck' deterministically.  Maintain all applicable kernels with q(a|G) = sum_k w_k(G) q_k(a|G), weights zero where chemically inapplicable and rising as primary support dries up.  Then 5ht1b has no '5HT1B mode' -- it is simply a state where the state-aware kernel contributes useful support.",
+   "not_a_prerequisite": "This refines the claim; it is not the difference between a real controller and a failsafe.  The controller is already real.",
+   "protocol": "Run the gating logic on all 30 starting states with target names hidden, docking/reward inaccessible, the same constraint definitions, and molecular/search state visible.  Report the kernel each state selects.",
+   "question": "Can the gating logic choose the same operator assignments WITHOUT being told the target/cell identity and WITHOUT seeing docking rewards?",
+   "status": "SPECIFIED, not yet run.  Zero oracle calls.",
+   "what_a_pass_looks_like": "ordinary cells -> local/standard support; braf and fa7 support-limited states -> region kernel upweighted; 5ht1b state problem -> state/protonation kernel.  That demonstrates pi(k | G, constraints) rather than pi(k | target id).",
+   "why_it_matters": "It closes the one remaining conceptual gap by DEMONSTRATION rather than by argument, and it is nearly free."
+  },
+  "two_experiments_do_not_conflate": {
+   "A_historical_method_replication": "Replicate the EXACT historical per-cell procedure twice more for like-for-like 3-run statistics against IVG's 3-seed mean +/- std.  IN FLIGHT.  Do NOT substitute the unified controller here -- that would test a different method.",
+   "B_unified_adaptive_controller": "Implement the state-derived portfolio policy as the algorithmic endpoint of the work and evaluate it separately.  If it reproduces the support behaviour zero-oracle and performs well, it upgrades the claim to tier 1.  NOT a prerequisite for this paper unless the replication reveals a problem."
+  },
   "updated_at_utc": "2026-09-22T06:56:18.641638+00:00"
  },
- "payload_sha256": "1efacb833c101ac025d61de9c02dfe574990987378ff6e0d2a2385e189b9fa77"
+ "payload_sha256": "6a81ae8e8ed727953145712167ab9a9586900cc7e2590b8f1d88f301f1ac6954"
 }
