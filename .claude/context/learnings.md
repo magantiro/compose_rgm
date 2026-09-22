@@ -2348,3 +2348,30 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **The Modal sweep app's argv is the configuration authority for every pinned row and had no
   test.** `shard_argv` is now a plain function; the test compiles it out of the app source and
   runs it in an isolated namespace, so it exercises shipping bytes without importing modal.
+- **The constituent question has a per-PROMPT answer, and the action-level and transition-level
+  answers differ.** v3 executes `BondReroute(a=path_atom, b=far_anchor, u=new_atom, v=far_anchor)`,
+  whose moved endpoint `u` is not an endpoint of the cut, and the model's graft is a RESTRICTED
+  reroute in which the moved atom IS a cut endpoint -- so as an ACTION it is unavailable on **10 of
+  10** released prompts. As a TRANSITION, compared on the successor molecule, it is recovered on
+  **2 of 10** and missing on 8 at a 16,384-draw cap. Report both: the action statement is universal
+  and the transition statement is what decides whether the composite is an acceleration or an
+  extension, and only the second is the one that matters downstream.
+- **One explanation covered one of the two positives and I nearly generalised it.** ERLOTINIB is
+  the only prompt where the model ever offers to move the far-core anchor (100 of 520 reroutes),
+  which is the only model-shaped route to that molecule -- and it recovers. LIOTHYRONINE recovers
+  with the far anchor moved **zero** times, so a second route exists that the census does not
+  identify (most likely two different actions landing on one canonical molecule). Recorded as
+  unexplained instead of folded into the first mechanism.
+- **Two independent instruments at different budgets agreeing is what makes a negative safe.** The
+  4,000-draw support census and the escalate-to-16,384 scoring probe agree on every prompt where
+  both have reported. Where they cannot both be powered -- MARIBAVIR drew 11 reroutes in 4,000 --
+  the census negative is explicitly the weak one and the escalating probe is the instrument.
+- **`starmap` yields IN ORDER, so a slow first shard makes a healthy 60-container fan-out look
+  dead.** Nothing prints until shard #1 returns, and the containers capture their subprocess
+  output, so `modal app logs` is empty too. Check the task count, not the log, before concluding a
+  run is wedged -- and do not restructure a fan-out mid-run on the strength of silence.
+- **A knob can be plumbed through every layer a reader checks and still not be recorded.** The
+  suite runner took `--linker-bridge-atoms` and `--path-program`, passed both correctly, and wrote
+  shards containing not one path field: no realized length, no seeded length, no transaction count.
+  A 60-shard matched arm was launched and stopped 27 minutes in on that. Wiring a knob and
+  recording what it did are two different jobs, and only the second makes the run answerable.
