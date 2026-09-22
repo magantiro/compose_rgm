@@ -3109,3 +3109,66 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   arm B reached 0.3138 at 1,000. Matching 0.798 would need an average top-ten level near
   0.852 across the remaining 9,000 calls. Not a forecast and not an impossibility claim --
   it means the objective is a strong top-ten CURVE, not a single perfect molecule.
+
+## 2026-09-21 (PMO runs on rdkit 2023.9.6, and the transport numbers survive it -- but the laptop kernel does not)
+
+- **THERE ARE THREE KERNELS IN PLAY, NOT TWO, AND THE PMO ONE IS THE ODD ONE OUT.**
+  `modal_apps/pmo_population_v1_app.py` pins **rdkit 2023.9.6** (plus `PyTDC==1.1.15
+  --no-deps`, setuptools 75.6.0 and an `_rdkit_six_shim()`); T4 and the editing corpus pin
+  **2024.3.5**; this laptop's `.venv` is **2026.03.6**. The PMO pin is FORCED, not a choice:
+  PyTDC 1.1.15 requires `rdkit>=2023.9.5,<2024.3.1`, so 2024.3.5 is flatly unsatisfiable
+  there, and the image holds ONE rdkit -- so the oracle AND the COMPOSE executor in a PMO
+  run are both on 2023.9.6. A working local mirror already exists at
+  `~/compose_pmo_atlas_env` (python 3.11, rdkit 2023.9.6, PyTDC 1.1.15 --no-deps,
+  setuptools 75.6.0, torch 2.4.0, numpy 1.26.4, networkx 3.3, scipy 1.15.0). Check
+  `rdkit.__version__` against the app's pin before calling any local PMO number production-
+  relevant -- "the pinned env" is ambiguous in this repo and names at least three things.
+- **MEASURED: 2023.9.6 and 2024.3.5 are in full parity on the transport path**, so every
+  correspondence / stage-splitter / ordering-selector number stands unchanged. Three
+  deterministic `--out` artifacts re-derived under each kernel are BYTE-IDENTICAL
+  (correspondence validation 108 correspondences / 0 failures / scale 19-36-56; staging 44
+  transports / 27 monotone / 17 dips / stages 2-3; ordering residual 5/35 = 14.3%, 1
+  protected round), 428 stage endpoints identical, **37,784 off-path intermediates
+  identical**, 0 of 15 canary strings moving, 82 tests passing under both.
+- **ENDPOINT PARITY IS NOT INTERMEDIATE PARITY -- so walk the PREFIX LATTICE, not the
+  molecules that already exist.** `scripts/pmo_transport_kernel_parity.py` enumerates every
+  `(deleted, changed, installed)` prefix of `build_intermediate`, which is where the
+  partially-installed rings and unkekulizable fragments live: **14,312 of 37,784 (37.9%) do
+  not sanitize**, and that verdict is compared too, because whether a half-built ring is a
+  molecule is itself kernel-sensitive. Comparing only endpoints would have exercised none
+  of it.
+- **THE LAPTOP KERNEL DIVERGES, AND NOT COSMETICALLY: 1,472 of 37,784 (3.90%) off-path
+  intermediates are a GENUINELY DIFFERENT MOLECULE under 2026.03.6 -- 0 spelling
+  differences, 1,472 differing by InChI.** 33 of 108 alignments, 11 of 15 tasks. Example:
+  `C=CC(=C)NCCOc1ccccc1` (2023/2024) vs `CC=C(C)NCCOc1ccccc1` (2026). This SHARPENS the
+  standing "two kernels write different canonical SMILES" note -- here the strings differ
+  because the MOLECULES differ, so it is not only a cache-key hazard.
+- **The planner is NOT implicated, which is what makes the attribution safe.**
+  `retain_core`, `core_map`, `delete_order`, `install_order`, `core_bond_changes` and
+  `core_smarts` hash IDENTICALLY across all three kernels (`ea4ca004...`). The divergence is
+  downstream, in `Kekulize` + `SetBondType` + `SanitizeMol` on a partially built molecule:
+  the Kekule assignment of the ENDPOINTS themselves moves between 2024.3.5 and 2026.03.6, so
+  a ring that is only partly present inherits a different double-bond placement. Dumping the
+  planner's own tuples was the cheapest discriminator and it separated "rdkit changed" from
+  "our code is index-order dependent" in one command.
+- **All 1,472 sit at lattice points the stage splitter never lands on**, which is why every
+  reported artifact survives 2026.03.6 as well. That is a measured coincidence of where the
+  ring-system group boundaries fall, NOT a property to rely on: anything that walks a
+  different prefix schedule must be re-run pinned. Report it as "the staged path is
+  kernel-invariant, the lattice around it is not", never as "2026 is fine".
+- **A parity probe needs three controls or its PASS is vacuous.** Same-kernel comparison is
+  REFUSED (a check against itself cannot fail); cross-mode comparison is REFUSED (stage
+  endpoints vs off-path lattice are different populations); and a deliberately mutated dump
+  must be REPORTED, which was verified to surface one spelling flip, one sanitize-verdict
+  flip and one canary flip. The first positive-control attempt did not apply its mutation
+  (an unexported shell variable) and ABORTED with a traceback rather than printing a
+  verdict -- which is the behaviour to design for, since a mutation battery whose mutation
+  silently no-ops reads as a weak guard.
+- **A committed artifact can go stale WITHOUT any code being wrong.**
+  `transport_staging_validation_v1.json` was written at `be1208ec`; `a19f37e3` later added
+  `dip_depth_absolute` / `dip_depth_relative` / `dip_width_stages` to the same script and
+  never regenerated it, so the committed file was missing three fields on all 44 rows while
+  every other value stayed byte-identical. Re-deriving each artifact was how it surfaced --
+  and note it presented initially as a kernel difference, which it was not, because BOTH
+  kernels produced the same fresh file. When a fresh run differs from a committed artifact,
+  check the artifact's commit against its producer's commit before blaming the environment.
