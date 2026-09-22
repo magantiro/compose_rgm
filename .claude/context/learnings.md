@@ -4017,3 +4017,47 @@ independently of whether fa7_0 ever closes.**
 - **STILL EXPOSED, owner decision pending: ~35 branches dated 2026-09-08..19 exist on NO remote.**
   None are from the current work and none were touched by the sweep, but they are single-copy on one
   disk, which the standing rule calls the failure mode already paid for.
+
+## 2026-09-22 (PMO design decision: macro-options over a global-delta vocabulary, and the reward split)
+
+- **THE ABSTRACTION CHANGED, and the earlier framing was too local.** Asking "where does probability
+  disappear along the route" decomposes a transformation into primitives. COMPOSE executes compound
+  edits as ONE program, so the controller never has to reproduce a teacher route step by step. The
+  right question is **what GLOBAL structural transformation separates a blind molecule from a
+  productive basin, and does the controller have a generic macro family covering that TYPE?**
+  Represent the move as `omega = (retain region, edit regions, operation family, scale, completion
+  constraints)`, execute it atomically, and score only the endpoint.
+- **THE REWARD SPLIT, and this is the fundamental part.** Two regimes were being conflated:
+      local refinement    r_t = f(G_{t+1}) - f(G_t)      -- measured to work well once in a basin
+      global transport    R(omega) = f(G_{t+k}) - f(G_t) -- ENDPOINT return, no internal pruning
+  A useful route can run 0.36 -> 0.10 -> 0.02 -> 0.81, and a greedy controller kills it at step one.
+  Intermediate states must stay chemically VALID; they need not monotonically improve the oracle.
+  **Using a local reward to judge a global move is the classic error, and the whole advantage of an
+  exact executable program is that the intermediates need never be exposed to selection.**
+- **DONOR LOGIC REVERSED.** Donor transport consumed 42% of B's proposals and contributed 0 of its 25
+  nearest approaches. The likely defect is not the idea but the ORDER of the questions. Today it asks
+  "which donor + cut + transplant should I make?" It should ask "I need a global transformation of
+  type X at scale Y -- can a donor supply a compatible completion?" **Donor becomes a CONTENT
+  PROVIDER for a macro move, not the global strategy itself**, competing with the learned chemical
+  prior, the recombination bank and a de-novo fragment generator to fill the same declared slot.
+- **THE FA7 FINDING IS THE TEMPLATE OF WHAT TO LOOK FOR.** `segment_replace` drew completion size
+  uniformly over 1..8 while EVERY eligible completion inserted 1 or 2 atoms -- ~75% of the draw mass
+  where nothing could be eligible -- and fixing that one conditional lifted eligible endpoints
+  +86%/+50%/+75% on three cells with no control regressing. Nobody could see it until the NEEDED
+  transformation was measured against the PROPOSED distribution. The PMO analogue to test (MEASURE,
+  do not assume) is whether productive transitions need coherent 6-12 atom replacements while B
+  overwhelmingly proposes tiny edits or mismatched donor programs.
+- **Rank bottlenecks by LOST PROBABILITY MASS**, so the output reads "X% of the failure is region
+  selection, Y% scale, Z% completion content" rather than "discovery seems hard".
+- **FAIRNESS BOUNDARY, explicit.** Development diagnostics MAY use answer-known material -- exact
+  anchors, compiled routes, teacher structures, V_local. The product must be a GENERIC EDIT GRAMMAR
+  ("large replacement", "coherent excision", "two-region edit"), never a task-specific runtime cheat.
+  A prior fitted on teacher routes is already a measured decisive negative here (lower
+  complete-program yield on both populations, p=0.0001, attributed to the region law); the atlas
+  teaches which generic CAPABILITY is missing, it does not become the capability.
+- **SCOPE CAVEAT ON THE RUNNING A/B, declared by its own agent before measuring:** the construction
+  prior reaches only the shallow lane (`DynamicProgramOptimizer._mutate` fresh synthesis and the
+  warm-memory lane). `structured_program_channel`, `joint_dependency_region_jump` and `recombination`
+  are NOT prior-aware. **So a null there is a null about the shallow construction lane, not about
+  chemical priors in PMO** -- which is exactly why the global-delta census is the more fundamental
+  experiment and runs in parallel rather than after.
