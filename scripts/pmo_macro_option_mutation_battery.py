@@ -280,12 +280,21 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--only", default=None, help="substring filter on mutation name")
+    parser.add_argument(
+        "--suite",
+        choices=("all", "library", "wiring"),
+        default="all",
+        help="library mutations run in under a second; wiring mutations run a campaign",
+    )
     arguments = parser.parse_args()
     root = Path.cwd()
 
     rows, killed, survived = [], 0, 0
+    wanted = {"library": FAST, "wiring": WIRING}.get(arguments.suite)
     for name, relative, old, new, test_file, named in NEGATIVES:
         if arguments.only and arguments.only not in name:
+            continue
+        if wanted and test_file != wanted:
             continue
         tree = _tree(root)
         try:
@@ -308,7 +317,7 @@ def main() -> int:
         print(f"{'KILLED ' if dead else 'SURVIVED'} {name} ({result['seconds']}s)", flush=True)
 
     control = None
-    if not arguments.only:
+    if not arguments.only and arguments.suite in ("all", "library"):
         name, relative, old, new, test_file = POSITIVE
         tree = _tree(root)
         try:
@@ -321,6 +330,7 @@ def main() -> int:
 
     payload = {
         "schema_version": "pmo_macro_option_mutation_battery_v1",
+        "suite": arguments.suite,
         "negatives": len(rows),
         "killed": killed,
         "survived": survived,
