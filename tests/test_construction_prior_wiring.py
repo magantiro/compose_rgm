@@ -237,7 +237,10 @@ def test_segment_shrink_deletes_the_terminal_atom_its_prior_ranks_first():
         if int(np.count_nonzero(source.bonds[i])) == 1
     ]
     assert stage["parameters"]["path"][0] == max(terminal)
-    assert ("atom_delete", len(terminal)) in prior.seen
+    # The lane must offer EVERY terminal candidate, not a pre-filtered subset:
+    # asserting only that the prior returns a permutation of what it was handed
+    # cannot catch a filter applied before the hand-off.
+    assert prior.seen[0] == ("atom_delete", len(terminal))
 
 
 def test_carbonyl_insert_attaches_where_its_prior_ranks_first():
@@ -383,6 +386,53 @@ def test_absent_prior_leaves_no_construction_law_tag():
     assert "construction_law" not in metadata
     for module in metadata["modules"]:
         assert "construction_law" not in module["parameters"]
+
+
+@pytest.mark.parametrize(
+    "family",
+    ["segment_grow", "functionalize", "segment_replace", "segment_shrink",
+     "carbonyl_insert"],
+)
+def test_each_construction_family_is_untagged_without_a_prior(family):
+    """The guard is only tested where it binds: a whole-program test can select
+    modules that never call ``_construction_parameters`` at all, and then a
+    tag-everything defect survives it.  Bind every construction family here."""
+
+    source = _source()
+    for seed in range(40):
+        try:
+            _product, stage = compile_generic_module(
+                source,
+                np.random.default_rng(np.random.SeedSequence([seed, 53])),
+                family,
+            )
+        except ValueError:
+            continue
+        assert "construction_law" not in stage["parameters"]
+        return
+    pytest.fail(f"{family} never compiled without a prior")
+
+
+@pytest.mark.parametrize(
+    "family",
+    ["segment_grow", "functionalize", "segment_replace", "segment_shrink",
+     "carbonyl_insert"],
+)
+def test_each_construction_family_is_tagged_with_a_prior(family):
+    source = _source()
+    for seed in range(40):
+        try:
+            _product, stage = compile_generic_module(
+                source,
+                np.random.default_rng(np.random.SeedSequence([seed, 53])),
+                family,
+                successor_prior=_ForcedPrior(),
+            )
+        except ValueError:
+            continue
+        assert stage["parameters"]["construction_law"] == CONSTRUCTION_LAW_TAG
+        return
+    pytest.fail(f"{family} never compiled with a prior")
 
 
 def test_a_prior_shaped_proposal_is_tagged_at_synthesis_time():

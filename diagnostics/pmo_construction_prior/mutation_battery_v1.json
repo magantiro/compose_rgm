@@ -1,0 +1,109 @@
+{
+  "baseline_green": true,
+  "controls_passed": 1,
+  "killed": 15,
+  "mutations": [
+    {
+      "expected": "red",
+      "mutation": "drop_prior_at_grow_sink",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "drop_prior_at_segment_grow_call",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "drop_prior_at_functionalize_call",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "drop_prior_at_segment_replace_call",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "drop_prior_at_terminal_shrink_call",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "drop_prior_at_carbonyl_branch",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "drop_prior_at_local_module_call",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "drop_prior_at_compile_generic_module_call",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "drop_prior_at_named_sequence_call",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "drop_prior_at_optimizer_mutate",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "filter_the_growth_candidates_before_ranking",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "filter_the_shrink_candidates_before_ranking",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "weight_the_family_choice_with_the_prior",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "tag_every_module_regardless_of_the_law",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "red",
+      "mutation": "break_the_off_rng_stream_in_growth",
+      "observed": "red",
+      "verdict": "ok"
+    },
+    {
+      "expected": "green",
+      "mutation": "CONTROL_cosmetic_comment",
+      "observed": "green",
+      "verdict": "ok"
+    }
+  ],
+  "oracle_calls_spent": 0,
+  "root": "/private/tmp/claude-502/-Users-rmaganti-compose-rgm-git--worktrees-t4-objective-dynamic-reset-20260916/bb0c2749-8879-4944-95f7-4b5f1d1086ea/scratchpad/mutation_tree",
+  "schema_version": "pmo_construction_prior_mutations_v1",
+  "suite": "tests/test_construction_prior_wiring.py",
+  "survivors": [],
+  "target": "src/compose_v4/control/dynamic_program_synthesis.py"
+}
