@@ -187,6 +187,45 @@ def reconcile_cell(folder: Path) -> dict:
         "ring_family_candidates": ring_touching,
     }
 
+    # Expansion telemetry, from the most complete source available.
+    #
+    # Counting expansions from round locks alone UNDER-REPORTS them, and it under-reports
+    # exactly the case that matters: a round whose expansion found nothing never writes a
+    # lock, because the cell terminates before locking any query. So the one expansion
+    # event that ran to its declared end without producing an eligible endpoint -- the
+    # event a scoped negative rests on -- is invisible in the locks. `run_cell` appends
+    # every event to `expansion_events` BEFORE the terminal check, and carries that list
+    # in both the checkpoint and the terminal result, so those are the authority.
+    events = None
+    if result_path.exists():
+        events = _payload(result_path).get("expansion_events")
+    elif checkpoint_path.exists():
+        events = _payload(checkpoint_path).get("expansion_events")
+    if events is not None:
+        expansion_stops = {}
+        expansion_added = 0
+        for event in events:
+            stop = str((event.get("expansion") or {}).get("stop_reason"))
+            expansion_stops[stop] = expansion_stops.get(stop, 0) + 1
+            expansion_added += int(event.get("endpoints_added") or 0)
+        record["expansion_triggered_rounds"] = len(events)
+        record["expansion_stop_reasons"] = expansion_stops
+        record["expansion_endpoints_added"] = expansion_added
+        record["expansion_events_detail"] = [
+            {
+                "round": event.get("round"),
+                "ordinary_eligible": event.get("ordinary_eligible"),
+                "endpoints_added": event.get("endpoints_added"),
+                "stop_reason": (event.get("expansion") or {}).get("stop_reason"),
+                "attempts": (event.get("expansion") or {}).get("attempts"),
+                "draws_spent": (event.get("expansion") or {}).get("draws_spent"),
+                "fallback_ran": (event.get("expansion") or {}).get("fallback_ran"),
+                "fallback_eligible": (event.get("expansion") or {}).get("fallback_eligible"),
+                "fallback_work": (event.get("expansion") or {}).get("fallback_work"),
+            }
+            for event in events
+        ]
+
     if checkpoint_path.exists():
         checkpoint = _payload(checkpoint_path)
         record["checkpoint_charged_calls"] = checkpoint["charged_calls"]
