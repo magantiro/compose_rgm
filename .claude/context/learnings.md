@@ -3977,3 +3977,43 @@ independently of whether fa7_0 ever closes.**
 - **Killing them would have freed 40 MB against a supposed 0.34 GB shortfall.** Re-proves the
   standing rule: measure the candidates' actual RSS against the claimed shortfall before treating
   them as the cause. If the arithmetic does not close, the diagnosis is wrong.
+
+## 2026-09-22 (fa7_0 final: a general completion-law win, and four claims of MINE it falsified)
+
+- **SHIPPED AND STANDS ALONE, independent of whether fa7_0 ever closes:**
+  `src/compose_v4/control/replace_completion_law.py` + `completion_law_contract.py`, field
+  `proposal.shallow.completion_law`. The completion half of `segment_replace` drew BLIND --
+  `rng.integers(1, capacity+1)` over 1..8 plus a uniform C/N/O chain -- while **every** eligible
+  completion inserts ONE or TWO atoms, so ~75% of the draw mass landed where nothing is eligible.
+  480 draws/arm, arms differing ONLY in the contract field:
+      fa7_1     7 -> 13  (+86%)
+      braf_2    4 ->  6  (+50%)
+      5ht1b_0  20 -> 35  (+75%)
+  No control regressed. 6/6 mutations killed with both shared-sink hops killed separately; absent
+  field = byte-identical OFF; the margin is taken from the PRODUCTION region-law factory so both
+  halves share byte-identical chemistry. **T4 is frozen so this is not in the panel -- it is banked
+  for whatever runs next.**
+- **FOUR CLAIMS IN MY OWN BRIEF, FALSIFIED BY THE AGENT.** Worth recording because I stated all four
+  as fact: (a) "5 witnesses, all replace/-9" -- actually replace -9, replace -9, grow -8, prune -8,
+  replace -8; (b) "constrained Pareto max QED 0.633" -- a witness sits at QED **0.7728** / sim
+  0.6102, so that figure bounded a RESTRICTED SUPPORT, not the cell; (c) "the witnesses relieve the
+  alerts" -- only ONE does, and witness2 passes with **ALERTS=2 UNCHANGED**, its QED coming from the
+  excision cutting MW 423.6->311.4 and ALOGP 5.97->3.52, i.e. SIZE not alert relief; (d) a redirect
+  I sent (rank the gated endpoints) would have been INERT, caught by reading the consuming loop
+  before building. A coordinator's brief is not evidence; an agent that checks it is doing its job.
+- **`for-each-ref refs/remotes` CANNOT TELL YOU WHETHER A BRANCH IS ON THE REMOTE.** It enumerates
+  LOCAL TRACKING refs, which exist only after a fetch created them, so a pushed branch nobody has
+  fetched reads as ZERO and looks like unreplicated single-copy work. **`git ls-remote --heads
+  origin <branch>` queries the remote.** Companion errors I made the same night: comparing
+  `rev-parse --short` (8 chars) against `cut -c1-7` (7) and reading eight matching branches as
+  DIFFER, and reading `vm_stat`'s `Pages free` as free memory when `memory_pressure` reported 84%
+  free. **Three instrument errors in one session, all the same shape: a measurement that cannot
+  answer the question, believed because it returned a number.**
+- **A worktree sweep is safe only with a per-branch remote check.** Removing 26 checkouts freed
+  8.7 -> 28 GB; the guard required each branch present on origin at a MATCHING FULL SHA, which is
+  why `pmo-realization-repair-20260920` was correctly kept back. Worktree removal never deletes a
+  branch -- objects live in the parent repo -- so the check is about REPLICATION, not about loss.
+  Recover any checkout with `git worktree add <durable-path> <branch>`.
+- **STILL EXPOSED, owner decision pending: ~35 branches dated 2026-09-08..19 exist on NO remote.**
+  None are from the current work and none were touched by the sweep, but they are single-copy on one
+  disk, which the standing rule calls the failure mode already paid for.
