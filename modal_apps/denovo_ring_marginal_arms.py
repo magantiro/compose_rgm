@@ -373,6 +373,34 @@ def ring_time_sensitivity(states: int = 40, draws_per_state: int = 16) -> dict:
             ),
         }
         print(json.dumps({"time": time_value, **report["by_time"][str(time_value)]}), flush=True)
+    # What share of the corpus a plan drawn from it could even be EXPRESSED
+    # with.  Computed against the committed census rather than a second corpus
+    # pass, so it cannot disagree with the law the plan is drawn from.  If this
+    # were low, the arm's ceiling would be the catalog and not p_train, so it
+    # belongs beside every ring-marginal claim.
+    import ast
+
+    from compose_v4.eval.denovo_ring_marginal import ring_system_signature  # noqa: F401
+    from compose_v4.experiments.denovo_ring_plan import CatalogSignatureIndex
+
+    index = CatalogSignatureIndex.build(model.ring_system_templates)
+    census = json.loads(CENSUS_PATH.read_text())
+    expressible = 0.0
+    missing: dict[str, float] = {}
+    for key, share in census["system_signature_fraction"].items():
+        signature = tuple(int(size) for size in ast.literal_eval(key))
+        if signature in index.indices:
+            expressible += float(share)
+        else:
+            missing[key] = float(share)
+    report["catalog_coverage"] = {
+        "templates": index.template_count,
+        "distinct_template_signatures": len(index.indices),
+        "corpus_ring_systems_expressible": expressible,
+        "largest_missing_signatures": dict(
+            sorted(missing.items(), key=lambda item: -item[1])[:10]
+        ),
+    }
     BASE.mkdir(parents=True, exist_ok=True)
     (BASE / "ring_time_sensitivity_v1.json").write_text(json.dumps(report, indent=1))
     volume.commit()
