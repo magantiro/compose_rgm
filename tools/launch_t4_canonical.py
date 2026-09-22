@@ -155,32 +155,92 @@ def _function(name: str):
 
 
 def _completed(run_id: str) -> set[tuple[str, str]]:
-    """Every (arm, cell) whose result.json already exists, read off the volume."""
+    """Every (arm, cell) whose result.json already exists, read off the volume.
+
+    ONE recursive listing, with backoff. A per-directory walk is ~60 calls and trips
+    `VolumeListFiles rate limit exceeded`, which would abort a resume rather than
+    merely slow it -- and a resume that aborts halfway is worse than one that waits.
+    """
+
+    import time
 
     import modal
 
     volume = modal.Volume.from_name(APP_NAME)
-    done: set[tuple[str, str]] = set()
-    try:
-        arms = [entry.path.split("/")[-1] for entry in volume.listdir(run_id)]
-    except (FileNotFoundError, GeneratorExit):
-        return done
-    for arm in arms:
+    for attempt in range(6):
         try:
-            cells = [entry.path.split("/")[-1] for entry in volume.listdir(f"{run_id}/{arm}")]
+            entries = list(volume.listdir(run_id, recursive=True))
+            break
         except FileNotFoundError:
-            continue
-        for cell in cells:
-            try:
-                files = [
-                    entry.path.split("/")[-1]
-                    for entry in volume.listdir(f"{run_id}/{arm}/{cell}")
-                ]
-            except FileNotFoundError:
-                continue
-            if "result.json" in files:
-                done.add((arm, cell))
+            return set()
+        except Exception as error:  # noqa: BLE001 - rate limit or transient
+            if attempt == 5:
+                raise SystemExit(f"could not list the run volume: {error!r}") from error
+            time.sleep(15 * (attempt + 1))
+    done: set[tuple[str, str]] = set()
+    for entry in entries:
+        parts = entry.path.split("/")
+        if len(parts) >= 4 and parts[-1] == "result.json":
+            done.add((parts[-3], parts[-2]))
     return done
+
+
+def _live(run_id: str) -> set[tuple[str, str]]:
+    """Every (arm, cell) whose most recent spawned call has NOT terminated.
+
+    Without this, `--mode resume` would re-spawn a cell that is merely SLOW, because a
+    running cell has no `result.json`. Two containers on one cell would write the same
+    round locks and the same checkpoint from two different search states -- the exact
+    "never resolve a conflict by blind min/max" corruption the round-lock design exists
+    to prevent, and it would be invisible until reconciliation.
+
+    Liveness is established by GETTING the call, not by reading a task count: a listing
+    showing zero tasks has misled a diagnosis in this repository before. A call that has
+    terminated -- returned, raised, or been cancelled -- is re-spawnable; one that is
+    still pending or running is not.
+    """
+
+    import modal
+
+    latest: dict[tuple[str, str], str] = {}
+    for path in sorted(RECEIPTS.glob("*.json")) if RECEIPTS.exists() else []:
+        try:
+            payload = unseal(path)
+        except Exception:  # noqa: BLE001 - a malformed receipt must not block a resume
+            continue
+        if payload.get("run_id") != run_id:
+            continue
+        for row in payload.get("spawned") or []:
+            latest[(row["arm"], row["cell"])] = row["function_call_id"]
+
+    # MEASURED: `get(timeout=0)` raises `TimeoutError` for a CANCELLED call exactly as it
+    # does for a running one, so liveness cannot be read from the call alone. A deliberate
+    # cancellation is therefore recorded as a sealed receipt and subtracted here -- an
+    # auditable fact rather than an inference. Any other terminal state (returned, raised,
+    # retries exhausted) does surface through `get`, because the output or the exception
+    # is there to be fetched.
+    cancelled: set[str] = set()
+    for path in sorted(RECEIPTS.glob("*_cancel_*.json")) if RECEIPTS.exists() else []:
+        try:
+            payload = unseal(path)
+        except Exception:  # noqa: BLE001
+            continue
+        if payload.get("run_id") != run_id:
+            continue
+        for row in payload.get("cancelled") or []:
+            cancelled.add(row["function_call_id"])
+
+    live: set[tuple[str, str]] = set()
+    for key, call_id in latest.items():
+        if call_id in cancelled:
+            continue
+        try:
+            modal.FunctionCall.from_id(call_id).get(timeout=0)
+        except TimeoutError:
+            live.add(key)
+        except Exception:  # noqa: BLE001 - terminated one way or another; re-spawnable
+            continue
+    return live
 
 
 def main() -> int:
@@ -192,6 +252,8 @@ def main() -> int:
     parser.add_argument("--arms", default="A,B,C")
     parser.add_argument("--allow-draft", action="store_true",
                         help="preflight only: run against draft contracts")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="resume only: print what would be re-spawned and exit")
     args = parser.parse_args()
     arms = [value.strip().upper() for value in args.arms.split(",") if value.strip()]
     contracts = _contracts()
@@ -269,9 +331,22 @@ def main() -> int:
     tasks = _tasks(contracts, run_id, arms)
     if args.mode == "resume":
         done = _completed(run_id)
+        live = _live(run_id) - done
         before = len(tasks)
-        tasks = [task for task in tasks if (task["arm"], task["cell"]) not in done]
-        print(f"resume: {before - len(tasks)} cells already final, re-spawning {len(tasks)}")
+        tasks = [
+            task
+            for task in tasks
+            if (task["arm"], task["cell"]) not in done
+            and (task["arm"], task["cell"]) not in live
+        ]
+        print(
+            f"resume: {len(done)} cells already final, {len(live)} still live and left "
+            f"alone, re-spawning {len(tasks)} of {before}"
+        )
+        if args.dry_run:
+            for task in tasks:
+                print(f"  would spawn {task['arm']}/{task['cell']}")
+            return 0
 
     run_cell = _function("run_cell")
     receipts = []
