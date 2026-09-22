@@ -149,8 +149,53 @@ def main() -> int:
     if verdict == "MECHANISM_NOT_INERT" and cost_regression:
         verdict = "MECHANISM_WORKS_COST_UNACCEPTABLE"
 
+    # ---- NOT PREDECLARED. Reported beside the sealed verdict, never in place of it ----
+    #
+    # The sealed power table was computed at an assumed base reach rate p0 = 0.40. If the
+    # landscape delivers far less, the predeclared MAGNITUDE test can be structurally
+    # incapable of returning MECHANISM_NOT_INERT: an effect of 0.25 is unreachable when
+    # the protected arm's own reach rate is below it. Reporting only "REJECTED" in that
+    # situation would let a threshold calibrated against an assumption that did not hold
+    # read as evidence about the mechanism.
+    #
+    # The DIRECTION test does not depend on the base rate at all. Exact McNemar conditions
+    # on the discordant pairs, so `b` against `c` answers "when the arms disagree, does
+    # protection win more often than it loses" whatever the common reach rate is. It is a
+    # weaker claim than the sealed one and is labelled as such.
+    attainable = reach_protected >= minimum_effect
+    direction = {
+        "predeclared": False,
+        "why": (
+            "the sealed magnitude threshold is calibrated against an assumed base reach "
+            "rate; this statistic conditions on discordant pairs and is base-rate free"
+        ),
+        "discordant_pairs": b + c,
+        "protected_only": b,
+        "unprotected_only": c,
+        "p_value_one_sided_exact_mcnemar": round(p_value, 6),
+        "direction": (
+            "protection_wins_more_often"
+            if b > c
+            else "protection_loses_more_often"
+            if c > b
+            else "tied"
+        ),
+        "sealed_effect_threshold_was_attainable": bool(attainable),
+        "sealed_effect_threshold_attainability_note": (
+            "the protected arm's own reach rate is below the sealed minimum effect, so no "
+            "outcome of this run could have cleared the magnitude threshold"
+            if not attainable
+            else "the protected arm's reach rate leaves the sealed threshold reachable"
+        ),
+        "assumed_base_reach_rate_in_the_sealed_power_table": float(
+            sealed["sample_size"]["declared_alternative"].split("p0 = ")[1].split(",")[0]
+        ),
+        "observed_base_reach_rate": round(reach_unprotected, 4),
+    }
+
     payload = {
         "schema_version": "pmo_macro_option_verdict_v1",
+        "direction_test_not_predeclared": direction,
         "predeclaration": str(PREDECLARATION),
         "predeclaration_sha256": sealed_sha,
         "information_regime": sealed["information_regime"],
