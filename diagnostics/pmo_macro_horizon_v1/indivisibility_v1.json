@@ -1,0 +1,211 @@
+{
+ "schema_version": "pmo_macro_indivisibility_v1",
+ "evidence_role": "answer_known_offline_diagnostic",
+ "new_oracle_calls": 0,
+ "question": "Are the large macros INDIVISIBLE?  A route that still stages monotonically at a small cap does not need a large ATOMIC option -- chaining coherent medium options reaches it.  A route that stages only once the cap is large genuinely needs one.",
+ "routes_with_a_monotone_staging_by_cap": {
+  "4": 0,
+  "6": 2,
+  "8": 2,
+  "10": 5,
+  "12": 6,
+  "14": 7,
+  "16": 8,
+  "18": 9,
+  "20": 9,
+  "23": 9
+ },
+ "n_routes": 11,
+ "finding": "Monotonicity collapses below C ~ 12-16, NOT at 18-23.  At C=8 only 2 of 11 routes stage; C=12 gives 6, C=16 gives 8, C=20 gives 9.  Most routes do not require a 23-primitive atomic option -- they require roughly 16.  One route (blindmid_2) needs C >= 20.",
+ "design_target": "~16 primitives per coherent macro, not ~23.  The blind generator's REALIZED median program is ~4, below even C=6 where only 2 of 11 stage, so the gap is about 4x rather than the 5-6x implied by quoting 23.",
+ "two_routes_never_stage": "init_06 and init_08 stage at no finite cap; they are the pair needing a source-relative tolerance of 0.009-0.012.",
+ "routes": [
+  {
+   "route": "init_02",
+   "n_primitives": 32,
+   "min_segments_by_cap": {
+    "4": null,
+    "6": null,
+    "8": null,
+    "10": 4,
+    "12": 3,
+    "14": 3,
+    "16": 2,
+    "18": 2,
+    "20": 2,
+    "23": 2
+   },
+   "min_segments_unbounded": 1
+  },
+  {
+   "route": "init_03",
+   "n_primitives": 25,
+   "min_segments_by_cap": {
+    "4": null,
+    "6": null,
+    "8": null,
+    "10": null,
+    "12": null,
+    "14": 2,
+    "16": 2,
+    "18": 2,
+    "20": 2,
+    "23": 2
+   },
+   "min_segments_unbounded": 1
+  },
+  {
+   "route": "init_04",
+   "n_primitives": 31,
+   "min_segments_by_cap": {
+    "4": null,
+    "6": null,
+    "8": null,
+    "10": 4,
+    "12": 3,
+    "14": 3,
+    "16": 2,
+    "18": 2,
+    "20": 2,
+    "23": 2
+   },
+   "min_segments_unbounded": 1
+  },
+  {
+   "route": "init_06",
+   "n_primitives": 35,
+   "min_segments_by_cap": {
+    "4": null,
+    "6": null,
+    "8": null,
+    "10": null,
+    "12": null,
+    "14": null,
+    "16": null,
+    "18": null,
+    "20": null,
+    "23": null
+   },
+   "min_segments_unbounded": 1
+  },
+  {
+   "route": "init_08",
+   "n_primitives": 28,
+   "min_segments_by_cap": {
+    "4": null,
+    "6": null,
+    "8": null,
+    "10": null,
+    "12": null,
+    "14": null,
+    "16": null,
+    "18": null,
+    "20": null,
+    "23": null
+   },
+   "min_segments_unbounded": 1
+  },
+  {
+   "route": "init_11",
+   "n_primitives": 31,
+   "min_segments_by_cap": {
+    "4": null,
+    "6": 6,
+    "8": 4,
+    "10": 4,
+    "12": 3,
+    "14": 3,
+    "16": 2,
+    "18": 2,
+    "20": 2,
+    "23": 2
+   },
+   "min_segments_unbounded": 1
+  },
+  {
+   "route": "init_13",
+   "n_primitives": 32,
+   "min_segments_by_cap": {
+    "4": null,
+    "6": null,
+    "8": null,
+    "10": 4,
+    "12": 3,
+    "14": 3,
+    "16": 2,
+    "18": 2,
+    "20": 2,
+    "23": 2
+   },
+   "min_segments_unbounded": 1
+  },
+  {
+   "route": "blindtop_1_0.3366",
+   "n_primitives": 18,
+   "min_segments_by_cap": {
+    "4": null,
+    "6": null,
+    "8": null,
+    "10": null,
+    "12": null,
+    "14": null,
+    "16": 2,
+    "18": 1,
+    "20": 1,
+    "23": 1
+   },
+   "min_segments_unbounded": 1
+  },
+  {
+   "route": "blindmid_1_0.1364",
+   "n_primitives": 21,
+   "min_segments_by_cap": {
+    "4": null,
+    "6": 4,
+    "8": 3,
+    "10": 3,
+    "12": 2,
+    "14": 2,
+    "16": 2,
+    "18": 2,
+    "20": 2,
+    "23": 1
+   },
+   "min_segments_unbounded": 1
+  },
+  {
+   "route": "blindmid_2_0.1356",
+   "n_primitives": 23,
+   "min_segments_by_cap": {
+    "4": null,
+    "6": null,
+    "8": null,
+    "10": null,
+    "12": null,
+    "14": null,
+    "16": null,
+    "18": 2,
+    "20": 2,
+    "23": 1
+   },
+   "min_segments_unbounded": 1
+  },
+  {
+   "route": "blindmid_3_0.1351",
+   "n_primitives": 21,
+   "min_segments_by_cap": {
+    "4": null,
+    "6": null,
+    "8": null,
+    "10": null,
+    "12": 3,
+    "14": 2,
+    "16": 2,
+    "18": 2,
+    "20": 2,
+    "23": 1
+   },
+   "min_segments_unbounded": 1
+  }
+ ]
+}
