@@ -112,10 +112,18 @@ def test_the_support_operator_roster_covers_exactly_the_frozen_non_panel_rows():
         for row in _frozen_rows()
         if row.get("source") not in (None, "panel") and row.get("compose") is not None
     }
-    assert non_panel == set(REQUIRED_SUPPORT_OPERATORS), (
+    # The blank cell is the one deliberate addition: it produced no value, so the
+    # frozen table cannot attribute it, and the roster records the method it was last
+    # run under instead. Everything else must match the table exactly.
+    expected = non_panel | {BLANK_CELL}
+    assert expected == set(REQUIRED_SUPPORT_OPERATORS), (
         "the manifest's support-operator roster and the frozen table's non-panel rows "
-        f"disagree: table-only {sorted(non_panel - set(REQUIRED_SUPPORT_OPERATORS))}, "
-        f"roster-only {sorted(set(REQUIRED_SUPPORT_OPERATORS) - non_panel)}"
+        f"disagree: table-only {sorted(expected - set(REQUIRED_SUPPORT_OPERATORS))}, "
+        f"roster-only {sorted(set(REQUIRED_SUPPORT_OPERATORS) - expected)}"
+    )
+    assert BLANK_CELL not in non_panel, (
+        "the blank cell now carries a produced value; its roster entry was a decision "
+        "made because it did not, and must be re-taken"
     )
 
 

@@ -105,6 +105,15 @@ REQUIRED_SUPPORT_OPERATORS: dict[tuple[str, int, float], str] = {
     ("5ht1b", 3, 0.6): "protonation",
     ("braf", 1, 0.6): "region_repair",
     ("braf", 2, 0.6): "region_repair",
+    # THE BLANK CELL, and this entry is a DECISION rather than an observation.
+    # The frozen table prints `source: "panel"` here with a null value, which is not an
+    # attribution: no value was produced, so no arm produced it. What was actually
+    # DEPLOYED for this cell is the region-repair rescue at a 248-call ceiling, which
+    # charged nothing and returned no dockable endpoint. A replicate has to pick some
+    # method, and cloning the last method the cell was run under is the only choice
+    # that is not an invention. Recorded here so the choice is visible; the audit fires
+    # if anyone quietly assigns it something else.
+    ("fa7", 1, 0.6): "region_repair",
 }
 
 #: The one cell the frozen table leaves blank. It is carried in the manifest so the

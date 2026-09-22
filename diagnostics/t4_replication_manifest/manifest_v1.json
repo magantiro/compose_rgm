@@ -1,0 +1,1790 @@
+{
+  "audit": {
+    "blank_cell": [
+      "fa7",
+      1,
+      0.6
+    ],
+    "inherited_cross_cell_seed_sharing": 165,
+    "rows_audited": 30,
+    "schema_version": "t4_replication_manifest_v1",
+    "support_operators_pinned": {
+      "5ht1b/3/0.4": "protonation",
+      "5ht1b/3/0.6": "protonation",
+      "braf/1/0.6": "region_repair",
+      "braf/2/0.6": "region_repair",
+      "fa7/1/0.6": "region_repair",
+      "fa7/3/0.4": "region_repair",
+      "fa7/3/0.6": "region_repair"
+    },
+    "verdict": "AUDIT_GREEN_REPLICATES_MAY_BE_LAUNCHED",
+    "within_cell_seed_stream_collisions": 0
+  },
+  "broken_links": [
+    {
+      "arm": "parp1_d04",
+      "detail": {
+        "all_pins_reproducible_from_tree": false,
+        "drifted": [
+          {
+            "path": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
+            "pinned_bytes_recoverable_at_commit": "8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+            "pinned_sha256": "aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3",
+            "tree_sha256": "256e8c2ef94a794fedc8e90237a764812a0f2e36d8a983b79c183e57ff17b975"
+          },
+          {
+            "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+            "pinned_bytes_recoverable_at_commit": "8ddd48ccab456364e1552da2384a346ad5911b6a",
+            "pinned_sha256": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+            "tree_sha256": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897"
+          },
+          {
+            "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
+            "pinned_bytes_recoverable_at_commit": "1a74071bb99ff61f316d2a126886b1906d8c49e1",
+            "pinned_sha256": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+            "tree_sha256": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864"
+          }
+        ],
+        "matching": 10,
+        "missing": []
+      },
+      "kind": "runtime_input_pin_drift",
+      "severity": "MEDIUM-recoverable-from-git"
+    },
+    {
+      "arm": "parp1_d04",
+      "detail": "modal_apps/t4_integrated_route_fiber_held_parp1_d04_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "parp1_d06",
+      "detail": {
+        "all_pins_reproducible_from_tree": false,
+        "drifted": [
+          {
+            "path": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
+            "pinned_bytes_recoverable_at_commit": "8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+            "pinned_sha256": "aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3",
+            "tree_sha256": "256e8c2ef94a794fedc8e90237a764812a0f2e36d8a983b79c183e57ff17b975"
+          },
+          {
+            "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+            "pinned_bytes_recoverable_at_commit": "8ddd48ccab456364e1552da2384a346ad5911b6a",
+            "pinned_sha256": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+            "tree_sha256": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897"
+          },
+          {
+            "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
+            "pinned_bytes_recoverable_at_commit": "1a74071bb99ff61f316d2a126886b1906d8c49e1",
+            "pinned_sha256": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+            "tree_sha256": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864"
+          }
+        ],
+        "matching": 10,
+        "missing": []
+      },
+      "kind": "runtime_input_pin_drift",
+      "severity": "MEDIUM-recoverable-from-git"
+    },
+    {
+      "arm": "parp1_d06",
+      "detail": "modal_apps/t4_integrated_route_fiber_held_parp1_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "braf_d04",
+      "detail": {
+        "all_pins_reproducible_from_tree": false,
+        "drifted": [
+          {
+            "path": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
+            "pinned_bytes_recoverable_at_commit": "8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+            "pinned_sha256": "aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3",
+            "tree_sha256": "256e8c2ef94a794fedc8e90237a764812a0f2e36d8a983b79c183e57ff17b975"
+          },
+          {
+            "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+            "pinned_bytes_recoverable_at_commit": "8ddd48ccab456364e1552da2384a346ad5911b6a",
+            "pinned_sha256": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+            "tree_sha256": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897"
+          },
+          {
+            "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
+            "pinned_bytes_recoverable_at_commit": "1a74071bb99ff61f316d2a126886b1906d8c49e1",
+            "pinned_sha256": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+            "tree_sha256": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864"
+          }
+        ],
+        "matching": 10,
+        "missing": []
+      },
+      "kind": "runtime_input_pin_drift",
+      "severity": "MEDIUM-recoverable-from-git"
+    },
+    {
+      "arm": "braf_d04",
+      "detail": "modal_apps/t4_integrated_route_fiber_held_braf_d04_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "braf_d06",
+      "detail": {
+        "all_pins_reproducible_from_tree": false,
+        "drifted": [
+          {
+            "path": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
+            "pinned_bytes_recoverable_at_commit": "8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+            "pinned_sha256": "aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3",
+            "tree_sha256": "256e8c2ef94a794fedc8e90237a764812a0f2e36d8a983b79c183e57ff17b975"
+          },
+          {
+            "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+            "pinned_bytes_recoverable_at_commit": "8ddd48ccab456364e1552da2384a346ad5911b6a",
+            "pinned_sha256": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+            "tree_sha256": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897"
+          },
+          {
+            "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
+            "pinned_bytes_recoverable_at_commit": "1a74071bb99ff61f316d2a126886b1906d8c49e1",
+            "pinned_sha256": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+            "tree_sha256": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864"
+          }
+        ],
+        "matching": 10,
+        "missing": []
+      },
+      "kind": "runtime_input_pin_drift",
+      "severity": "MEDIUM-recoverable-from-git"
+    },
+    {
+      "arm": "braf_d06",
+      "detail": "modal_apps/t4_integrated_route_fiber_held_braf_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "fa7_d04",
+      "detail": {
+        "all_pins_reproducible_from_tree": false,
+        "drifted": [
+          {
+            "path": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
+            "pinned_bytes_recoverable_at_commit": "8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+            "pinned_sha256": "aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3",
+            "tree_sha256": "256e8c2ef94a794fedc8e90237a764812a0f2e36d8a983b79c183e57ff17b975"
+          },
+          {
+            "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+            "pinned_bytes_recoverable_at_commit": "8ddd48ccab456364e1552da2384a346ad5911b6a",
+            "pinned_sha256": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+            "tree_sha256": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897"
+          },
+          {
+            "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
+            "pinned_bytes_recoverable_at_commit": "1a74071bb99ff61f316d2a126886b1906d8c49e1",
+            "pinned_sha256": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+            "tree_sha256": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864"
+          }
+        ],
+        "matching": 11,
+        "missing": []
+      },
+      "kind": "runtime_input_pin_drift",
+      "severity": "MEDIUM-recoverable-from-git"
+    },
+    {
+      "arm": "fa7_d04",
+      "detail": "modal_apps/t4_integrated_route_fiber_held_fa7_d04_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "fa7_d06",
+      "detail": {
+        "all_pins_reproducible_from_tree": false,
+        "drifted": [
+          {
+            "path": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
+            "pinned_bytes_recoverable_at_commit": "8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+            "pinned_sha256": "aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3",
+            "tree_sha256": "256e8c2ef94a794fedc8e90237a764812a0f2e36d8a983b79c183e57ff17b975"
+          },
+          {
+            "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+            "pinned_bytes_recoverable_at_commit": "8ddd48ccab456364e1552da2384a346ad5911b6a",
+            "pinned_sha256": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+            "tree_sha256": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897"
+          },
+          {
+            "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
+            "pinned_bytes_recoverable_at_commit": "1a74071bb99ff61f316d2a126886b1906d8c49e1",
+            "pinned_sha256": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+            "tree_sha256": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864"
+          }
+        ],
+        "matching": 11,
+        "missing": []
+      },
+      "kind": "runtime_input_pin_drift",
+      "severity": "MEDIUM-recoverable-from-git"
+    },
+    {
+      "arm": "fa7_d06",
+      "detail": "modal_apps/t4_integrated_route_fiber_held_fa7_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "5ht1b_d04",
+      "detail": {
+        "all_pins_reproducible_from_tree": false,
+        "drifted": [
+          {
+            "path": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
+            "pinned_bytes_recoverable_at_commit": "8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+            "pinned_sha256": "aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3",
+            "tree_sha256": "256e8c2ef94a794fedc8e90237a764812a0f2e36d8a983b79c183e57ff17b975"
+          },
+          {
+            "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+            "pinned_bytes_recoverable_at_commit": "8ddd48ccab456364e1552da2384a346ad5911b6a",
+            "pinned_sha256": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+            "tree_sha256": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897"
+          },
+          {
+            "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
+            "pinned_bytes_recoverable_at_commit": "1a74071bb99ff61f316d2a126886b1906d8c49e1",
+            "pinned_sha256": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+            "tree_sha256": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864"
+          }
+        ],
+        "matching": 11,
+        "missing": []
+      },
+      "kind": "runtime_input_pin_drift",
+      "severity": "MEDIUM-recoverable-from-git"
+    },
+    {
+      "arm": "5ht1b_d04",
+      "detail": "modal_apps/t4_integrated_route_fiber_held_5ht1b_d04_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "5ht1b_d06",
+      "detail": {
+        "all_pins_reproducible_from_tree": false,
+        "drifted": [
+          {
+            "path": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
+            "pinned_bytes_recoverable_at_commit": "8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+            "pinned_sha256": "aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3",
+            "tree_sha256": "256e8c2ef94a794fedc8e90237a764812a0f2e36d8a983b79c183e57ff17b975"
+          },
+          {
+            "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+            "pinned_bytes_recoverable_at_commit": "8ddd48ccab456364e1552da2384a346ad5911b6a",
+            "pinned_sha256": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+            "tree_sha256": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897"
+          },
+          {
+            "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
+            "pinned_bytes_recoverable_at_commit": "1a74071bb99ff61f316d2a126886b1906d8c49e1",
+            "pinned_sha256": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+            "tree_sha256": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864"
+          }
+        ],
+        "matching": 11,
+        "missing": []
+      },
+      "kind": "runtime_input_pin_drift",
+      "severity": "MEDIUM-recoverable-from-git"
+    },
+    {
+      "arm": "5ht1b_d06",
+      "detail": "modal_apps/t4_integrated_route_fiber_held_5ht1b_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "jak2_named_d06",
+      "detail": {
+        "all_pins_reproducible_from_tree": false,
+        "drifted": [
+          {
+            "path": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
+            "pinned_bytes_recoverable_at_commit": "8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+            "pinned_sha256": "aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3",
+            "tree_sha256": "256e8c2ef94a794fedc8e90237a764812a0f2e36d8a983b79c183e57ff17b975"
+          },
+          {
+            "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+            "pinned_bytes_recoverable_at_commit": "8ddd48ccab456364e1552da2384a346ad5911b6a",
+            "pinned_sha256": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+            "tree_sha256": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897"
+          },
+          {
+            "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
+            "pinned_bytes_recoverable_at_commit": "1a74071bb99ff61f316d2a126886b1906d8c49e1",
+            "pinned_sha256": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+            "tree_sha256": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864"
+          }
+        ],
+        "matching": 11,
+        "missing": []
+      },
+      "kind": "runtime_input_pin_drift",
+      "severity": "MEDIUM-recoverable-from-git"
+    },
+    {
+      "arm": "jak2_named_d06",
+      "detail": "modal_apps/t4_integrated_route_fiber_held_jak2_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "jak2_true_d06",
+      "detail": {
+        "all_pins_reproducible_from_tree": false,
+        "drifted": [
+          {
+            "path": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
+            "pinned_bytes_recoverable_at_commit": "8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+            "pinned_sha256": "aea3400e21e5a61a686e5d308a7f6cd225cec5f9aca72e63281a241d531242f3",
+            "tree_sha256": "256e8c2ef94a794fedc8e90237a764812a0f2e36d8a983b79c183e57ff17b975"
+          },
+          {
+            "path": "src/compose_v4/control/dynamic_program_synthesis.py",
+            "pinned_bytes_recoverable_at_commit": "8ddd48ccab456364e1552da2384a346ad5911b6a",
+            "pinned_sha256": "4f254eb6b0a18cddb43181dadcc7e02ce4a3bd84c47f62506a93b9a38a8f8f8e",
+            "tree_sha256": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897"
+          },
+          {
+            "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
+            "pinned_bytes_recoverable_at_commit": "1a74071bb99ff61f316d2a126886b1906d8c49e1",
+            "pinned_sha256": "ed5338a8953aa9e69b7d1ac32321e28045199166e78cabf55e87bd3fb442a57f",
+            "tree_sha256": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864"
+          }
+        ],
+        "matching": 11,
+        "missing": []
+      },
+      "kind": "runtime_input_pin_drift",
+      "severity": "MEDIUM-recoverable-from-git"
+    },
+    {
+      "arm": "jak2_true_d06",
+      "detail": "modal_apps/t4_integrated_route_fiber_held_jak2_d06_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "braf_d06_region_repair",
+      "detail": "modal_apps/t4_region_repair_rescue_braf_d06_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "fa7_d06_region_repair",
+      "detail": "modal_apps/t4_region_repair_rescue_fa7_d06_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "fa7_d04_region_repair",
+      "detail": "modal_apps/t4_region_repair_rescue_fa7_d04_app.py selects the contract, route checkpoint, volume, output namespace and receptor, but is absent from runtime_inputs_sha256, so it is free to drift unnoticed.",
+      "kind": "launch_wrapper_not_pinned",
+      "severity": "MEDIUM"
+    },
+    {
+      "arm": "5ht1b_d04_protonation",
+      "detail": "No launch receipt exists under diagnostics/**/launches/ in any readable checkout for volume compose-t4-5ht1b2-protonation-rescue-d04. RESOLVED: the volume-side run census supplies run_id, code_revision, bound contract payload and ceiling.",
+      "kind": "no_launch_receipt_in_repo",
+      "severity": "LOW-resolved-by-run-census"
+    },
+    {
+      "arm": "5ht1b_d04_protonation",
+      "detail": "The contract file in THIS CHECKOUT is a SUPERSEDED payload (4486c376e1c37867...). The run was bound to c51c61441535e839..., which exists only at a commit that is not an ancestor of this checkout's HEAD. Replicating from the tree file would clone a contract that never ran. Recover it from the identity chain below.",
+      "kind": "tree_contract_is_superseded",
+      "severity": "HIGH"
+    },
+    {
+      "arm": "5ht1b_d06_protonation",
+      "detail": "No launch receipt exists under diagnostics/**/launches/ in any readable checkout for volume compose-t4-5ht1b2-protonation-rescue-d06. RESOLVED: the volume-side run census supplies run_id, code_revision, bound contract payload and ceiling.",
+      "kind": "no_launch_receipt_in_repo",
+      "severity": "LOW-resolved-by-run-census"
+    },
+    {
+      "arm": "5ht1b_d06_protonation",
+      "detail": "The contract file in THIS CHECKOUT is a SUPERSEDED payload (d7d2fbc2982086fd...). The run was bound to d95fb5a190b3569b..., which exists only at a commit that is not an ancestor of this checkout's HEAD. Replicating from the tree file would clone a contract that never ran. Recover it from the identity chain below.",
+      "kind": "tree_contract_is_superseded",
+      "severity": "HIGH"
+    }
+  ],
+  "budget_rule": "clone the CEILING and the STOPPING RULE, never the realized call count. 7 rows carry a sub-250 ceiling because the historical rescue contract debited measured prior spend on that cell; an independent replicate starting fresh has no such prior and the owner must decide deliberately whether to inherit the debit or use the full 250.",
+  "built_from": {
+    "provenance": "diagnostics/t4_replication_manifest/provenance_v1.json",
+    "run_census": "diagnostics/t4_replication_manifest/run_census_v1.json"
+  },
+  "configuration_families": {
+    "count": 10,
+    "count_note": "delta is a benchmark INPUT, not a controller setting, so the primary grouping deliberately EXCLUDES it: two rows at different thresholds running the same controller are one method. Splitting additionally by delta gives 15 (configuration, threshold) combinations.",
+    "count_split_by_delta": 15,
+    "families": [
+      {
+        "anchored_replacement": {
+          "draws": 512,
+          "horizon": 3
+        },
+        "arms": [
+          "parp1_d04",
+          "parp1_d06"
+        ],
+        "cell_count": 6,
+        "cells": [
+          "PARP1/s1/d0.4",
+          "PARP1/s2/d0.4",
+          "PARP1/s3/d0.4",
+          "PARP1/s1/d0.6",
+          "PARP1/s2/d0.6",
+          "PARP1/s3/d0.6"
+        ],
+        "charged_calls_per_cell": 250,
+        "cold_start_floor_rounds": "ABSENT",
+        "docking_seed": 20260918,
+        "expert_floor_rounds": 2,
+        "fingerprint": "1bc539a4131d7aec",
+        "route_complete_region": {
+          "beam_width": 32,
+          "expansion_width": 24,
+          "max_bindings_per_template": 4,
+          "maximum_expansions": 4000,
+          "pool_size": 64,
+          "realization_limit": 32,
+          "training_split": "leave-parp1-out"
+        },
+        "route_expert_checkpoint": "diagnostics/t4_held_target_distillation_quality_v1/parp1_checkpoint.json",
+        "route_scale_floor_rounds": "ABSENT",
+        "shallow": {
+          "draws": 480,
+          "horizon": 3
+        },
+        "support_operator": "none"
+      },
+      {
+        "anchored_replacement": {
+          "draws": 512,
+          "horizon": 3
+        },
+        "arms": [
+          "jak2_named_d06",
+          "jak2_true_d06"
+        ],
+        "cell_count": 6,
+        "cells": [
+          "JAK2/s1/d0.4",
+          "JAK2/s2/d0.4",
+          "JAK2/s3/d0.4",
+          "JAK2/s1/d0.6",
+          "JAK2/s2/d0.6",
+          "JAK2/s3/d0.6"
+        ],
+        "charged_calls_per_cell": 250,
+        "cold_start_floor_rounds": "ABSENT",
+        "docking_seed": 20260919,
+        "expert_floor_rounds": 2,
+        "fingerprint": "8042ce11187cfb03",
+        "route_complete_region": {
+          "beam_width": 48,
+          "expansion_width": 48,
+          "max_bindings_per_template": 4,
+          "maximum_expansions": 4000,
+          "pool_size": 64,
+          "realization_limit": 64,
+          "scale_balanced": true,
+          "training_scope": "one shared task-independent expert fit on all 77 locked routes",
+          "training_split": "leave-jak2-out"
+        },
+        "route_expert_checkpoint": "diagnostics/t4_held_target_distillation_quality_v1/jak2_checkpoint.json",
+        "route_scale_floor_rounds": 2,
+        "shallow": {
+          "draws": 480,
+          "horizon": 3
+        },
+        "support_operator": "none"
+      },
+      {
+        "anchored_replacement": {
+          "draws": 512,
+          "horizon": 3
+        },
+        "arms": [
+          "5ht1b_d04",
+          "5ht1b_d06"
+        ],
+        "cell_count": 4,
+        "cells": [
+          "5HT1B/s1/d0.4",
+          "5HT1B/s2/d0.4",
+          "5HT1B/s1/d0.6",
+          "5HT1B/s2/d0.6"
+        ],
+        "charged_calls_per_cell": 250,
+        "cold_start_floor_rounds": "ABSENT",
+        "docking_seed": 20260919,
+        "expert_floor_rounds": 2,
+        "fingerprint": "d9de5da7529b7e1a",
+        "route_complete_region": {
+          "beam_width": 48,
+          "expansion_width": 48,
+          "max_bindings_per_template": 4,
+          "maximum_expansions": 4000,
+          "pool_size": 64,
+          "realization_limit": 64,
+          "scale_balanced": true,
+          "training_scope": "one shared task-independent expert fit on all 77 locked routes",
+          "training_split": "leave-5ht1b-out"
+        },
+        "route_expert_checkpoint": "diagnostics/t4_held_target_distillation_quality_v1/5ht1b_checkpoint.json",
+        "route_scale_floor_rounds": 2,
+        "shallow": {
+          "draws": 480,
+          "horizon": 3
+        },
+        "support_operator": "none"
+      },
+      {
+        "anchored_replacement": {
+          "draws": 512,
+          "horizon": 3
+        },
+        "arms": [
+          "braf_d04",
+          "braf_d06"
+        ],
+        "cell_count": 4,
+        "cells": [
+          "BRAF/s1/d0.4",
+          "BRAF/s2/d0.4",
+          "BRAF/s3/d0.4",
+          "BRAF/s3/d0.6"
+        ],
+        "charged_calls_per_cell": 250,
+        "cold_start_floor_rounds": "ABSENT",
+        "docking_seed": 20260918,
+        "expert_floor_rounds": 2,
+        "fingerprint": "e10a643d146ffd38",
+        "route_complete_region": {
+          "beam_width": 32,
+          "expansion_width": 24,
+          "max_bindings_per_template": 4,
+          "maximum_expansions": 4000,
+          "pool_size": 64,
+          "realization_limit": 32,
+          "training_split": "leave-braf-out"
+        },
+        "route_expert_checkpoint": "diagnostics/t4_held_target_distillation_quality_v1/braf_checkpoint.json",
+        "route_scale_floor_rounds": "ABSENT",
+        "shallow": {
+          "draws": 480,
+          "horizon": 3
+        },
+        "support_operator": "none"
+      },
+      {
+        "anchored_replacement": {
+          "draws": 512,
+          "horizon": 3
+        },
+        "arms": [
+          "fa7_d04",
+          "fa7_d06"
+        ],
+        "cell_count": 3,
+        "cells": [
+          "FA7/s1/d0.4",
+          "FA7/s2/d0.4",
+          "FA7/s2/d0.6"
+        ],
+        "charged_calls_per_cell": 250,
+        "cold_start_floor_rounds": "ABSENT",
+        "docking_seed": 20260919,
+        "expert_floor_rounds": 2,
+        "fingerprint": "67c88b37bc68cf41",
+        "route_complete_region": {
+          "beam_width": 48,
+          "expansion_width": 48,
+          "max_bindings_per_template": 4,
+          "maximum_expansions": 4000,
+          "pool_size": 64,
+          "realization_limit": 64,
+          "scale_balanced": true,
+          "training_scope": "one shared task-independent expert fit on all 77 locked routes",
+          "training_split": "leave-fa7-out"
+        },
+        "route_expert_checkpoint": "diagnostics/t4_held_target_distillation_quality_v1/fa7_checkpoint.json",
+        "route_scale_floor_rounds": 2,
+        "shallow": {
+          "draws": 480,
+          "horizon": 3
+        },
+        "support_operator": "none"
+      },
+      {
+        "anchored_replacement": {
+          "draws": 512,
+          "horizon": 3
+        },
+        "arms": [
+          "fa7_d06_region_repair"
+        ],
+        "cell_count": 2,
+        "cells": [
+          "FA7/s1/d0.6",
+          "FA7/s3/d0.6"
+        ],
+        "charged_calls_per_cell": 248,
+        "cold_start_floor_rounds": "ABSENT",
+        "docking_seed": 20260919,
+        "expert_floor_rounds": 2,
+        "fingerprint": "b83430962be4d4c3",
+        "route_complete_region": {
+          "beam_width": 48,
+          "expansion_width": 48,
+          "max_bindings_per_template": 4,
+          "maximum_expansions": 4000,
+          "pool_size": 64,
+          "realization_limit": 64,
+          "scale_balanced": true,
+          "training_scope": "one shared task-independent expert fit on all 77 locked routes",
+          "training_split": "leave-fa7-out"
+        },
+        "route_expert_checkpoint": "diagnostics/t4_held_target_distillation_quality_v1/fa7_checkpoint.json",
+        "route_scale_floor_rounds": 2,
+        "shallow": {
+          "draws": 480,
+          "horizon": 3,
+          "region_law": "free_gate_margin_v1"
+        },
+        "support_operator": "region_repair"
+      },
+      {
+        "anchored_replacement": {
+          "draws": 512,
+          "horizon": 3
+        },
+        "arms": [
+          "braf_d06_region_repair"
+        ],
+        "cell_count": 2,
+        "cells": [
+          "BRAF/s1/d0.6",
+          "BRAF/s2/d0.6"
+        ],
+        "charged_calls_per_cell": 248,
+        "cold_start_floor_rounds": "ABSENT",
+        "docking_seed": 20260918,
+        "expert_floor_rounds": 2,
+        "fingerprint": "891eaed0672472ba",
+        "route_complete_region": {
+          "beam_width": 32,
+          "expansion_width": 24,
+          "max_bindings_per_template": 4,
+          "maximum_expansions": 4000,
+          "pool_size": 64,
+          "realization_limit": 32,
+          "training_split": "leave-braf-out"
+        },
+        "route_expert_checkpoint": "diagnostics/t4_held_target_distillation_quality_v1/braf_checkpoint.json",
+        "route_scale_floor_rounds": "ABSENT",
+        "shallow": {
+          "draws": 480,
+          "horizon": 3,
+          "region_law": "free_gate_margin_v1"
+        },
+        "support_operator": "region_repair"
+      },
+      {
+        "anchored_replacement": {
+          "draws": 512,
+          "horizon": 3
+        },
+        "arms": [
+          "fa7_d04_region_repair"
+        ],
+        "cell_count": 1,
+        "cells": [
+          "FA7/s3/d0.4"
+        ],
+        "charged_calls_per_cell": 249,
+        "cold_start_floor_rounds": "ABSENT",
+        "docking_seed": 20260919,
+        "expert_floor_rounds": 2,
+        "fingerprint": "a490d9a546b38e26",
+        "route_complete_region": {
+          "beam_width": 48,
+          "expansion_width": 48,
+          "max_bindings_per_template": 4,
+          "maximum_expansions": 4000,
+          "pool_size": 64,
+          "realization_limit": 64,
+          "scale_balanced": true,
+          "training_scope": "one shared task-independent expert fit on all 77 locked routes",
+          "training_split": "leave-fa7-out"
+        },
+        "route_expert_checkpoint": "diagnostics/t4_held_target_distillation_quality_v1/fa7_checkpoint.json",
+        "route_scale_floor_rounds": 2,
+        "shallow": {
+          "draws": 480,
+          "horizon": 3,
+          "region_law": "free_gate_margin_v1"
+        },
+        "support_operator": "region_repair"
+      },
+      {
+        "anchored_replacement": {
+          "draws": 512,
+          "horizon": 3
+        },
+        "arms": [
+          "5ht1b_d04_protonation"
+        ],
+        "cell_count": 1,
+        "cells": [
+          "5HT1B/s3/d0.4"
+        ],
+        "charged_calls_per_cell": 249,
+        "cold_start_floor_rounds": 1,
+        "docking_seed": 20260919,
+        "expert_floor_rounds": "ABSENT",
+        "fingerprint": "244782b1298602f5",
+        "route_complete_region": {
+          "beam_width": 48,
+          "expansion_width": 48,
+          "max_bindings_per_template": 4,
+          "maximum_expansions": 4000,
+          "pool_size": 192,
+          "realization_limit": 96,
+          "scale_balanced": true,
+          "training_scope": "one shared task-independent expert fit on all 77 locked routes"
+        },
+        "route_expert_checkpoint": "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json",
+        "route_scale_floor_rounds": "ABSENT",
+        "shallow": {
+          "draws": 480,
+          "horizon": 3
+        },
+        "support_operator": "protonation"
+      },
+      {
+        "anchored_replacement": {
+          "draws": 512,
+          "horizon": 3
+        },
+        "arms": [
+          "5ht1b_d06_protonation"
+        ],
+        "cell_count": 1,
+        "cells": [
+          "5HT1B/s3/d0.6"
+        ],
+        "charged_calls_per_cell": 248,
+        "cold_start_floor_rounds": 1,
+        "docking_seed": 20260919,
+        "expert_floor_rounds": "ABSENT",
+        "fingerprint": "5c1f96ea61e02ecb",
+        "route_complete_region": {
+          "beam_width": 48,
+          "expansion_width": 48,
+          "max_bindings_per_template": 4,
+          "maximum_expansions": 4000,
+          "pool_size": 192,
+          "realization_limit": 96,
+          "scale_balanced": true,
+          "training_scope": "one shared task-independent expert fit on all 77 locked routes"
+        },
+        "route_expert_checkpoint": "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json",
+        "route_scale_floor_rounds": "ABSENT",
+        "shallow": {
+          "draws": 480,
+          "horizon": 3
+        },
+        "support_operator": "protonation"
+      }
+    ],
+    "note": "Two rows share a family only if their whole executable controller configuration agrees, INCLUDING docking seed, route-expert checkpoint, floor schedule, operator and ceiling."
+  },
+  "generated_at_utc": "2026-09-22T20:15:50.897331+00:00",
+  "label_audit": {
+    "detail": "The frozen table's source='support_expansion' covers BOTH the region-repair operator (proposal.shallow.region_law='free_gate_margin_v1', an extra key on the EXISTING shallow lane) and the protonation operator (an entirely NEW fourth proposal lane 'protonation_aware_retained_subgraph' with 17 settings, plus expert_floor_rounds REPLACED by cold_start_floor_rounds=1, a different route checkpoint, and route_complete_region pool_size 64->192 / realization_limit 64->96 with training_split REMOVED). The protonation contract itself asserts 'THIS ARM USES THE PROTONATION-AWARE PROPOSAL, NOT THE REGION-REPAIR LAW ... the two mechanisms must never be mixed in one arm or the mechanism becomes unattributable'. The shared label defeats that separation at reporting time.",
+    "frozen_source_label_to_executable_operator": {
+      "panel": [
+        "none",
+        "region_repair"
+      ],
+      "support_expansion": [
+        "protonation",
+        "region_repair"
+      ]
+    },
+    "labels_covering_more_than_one_operator": {
+      "panel": [
+        "none",
+        "region_repair"
+      ],
+      "support_expansion": [
+        "protonation",
+        "region_repair"
+      ]
+    },
+    "third_meaning_of_the_same_string": "'support_expansion' is ALSO the name of an unrelated module, compose_v4.experiments.t4_support_expansion, used in the fa7_0 escalation run. That module contributed NO row to this table -- FA7 seed 1 at delta 0.6 is blank. So the string denotes three different things across the record.",
+    "verdict": "CONFLATED"
+  },
+  "new_oracle_calls": 0,
+  "payload_sha256": "e323c34ee77acef4696a12c3f2b2fb861ca67ea96ece88d4747378f04fa1dfc6",
+  "rows": [
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_parp1_d04_app.py",
+      "arm": "parp1_d04",
+      "cell": "parp1_0",
+      "charged_calls_per_cell": 250,
+      "code_revision": "b51d6e975b0c778a32404c0f4bf7401466ec6f86",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "136335e66de65c4b9b373c2c660b339b09ddc02d1a387c0d2c13377ac01325c4",
+      "contract_path": "configs/t4_held_target_distilled_parp1_d04_250.json",
+      "contract_payload_sha256": "b7cf9e740698f5afe44bfba5a6a8aabe2f0d019686a9714ef5b04055a7fb13d1",
+      "controller_family": "1bc539a4131d7aec",
+      "controller_seed": 2026091800,
+      "delta": 0.4,
+      "historical_best": -11.9,
+      "historical_charged_calls": 73,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091800,
+        "2": 10026091829,
+        "3": 18026091858
+      },
+      "seed": 1,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "parp1",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_parp1_d04_app.py",
+      "arm": "parp1_d04",
+      "cell": "parp1_1",
+      "charged_calls_per_cell": 250,
+      "code_revision": "b51d6e975b0c778a32404c0f4bf7401466ec6f86",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "136335e66de65c4b9b373c2c660b339b09ddc02d1a387c0d2c13377ac01325c4",
+      "contract_path": "configs/t4_held_target_distilled_parp1_d04_250.json",
+      "contract_payload_sha256": "b7cf9e740698f5afe44bfba5a6a8aabe2f0d019686a9714ef5b04055a7fb13d1",
+      "controller_family": "1bc539a4131d7aec",
+      "controller_seed": 2026091801,
+      "delta": 0.4,
+      "historical_best": -12.3,
+      "historical_charged_calls": 81,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091801,
+        "2": 10026091830,
+        "3": 18026091859
+      },
+      "seed": 2,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "parp1",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_parp1_d04_app.py",
+      "arm": "parp1_d04",
+      "cell": "parp1_2",
+      "charged_calls_per_cell": 250,
+      "code_revision": "b51d6e975b0c778a32404c0f4bf7401466ec6f86",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "136335e66de65c4b9b373c2c660b339b09ddc02d1a387c0d2c13377ac01325c4",
+      "contract_path": "configs/t4_held_target_distilled_parp1_d04_250.json",
+      "contract_payload_sha256": "b7cf9e740698f5afe44bfba5a6a8aabe2f0d019686a9714ef5b04055a7fb13d1",
+      "controller_family": "1bc539a4131d7aec",
+      "controller_seed": 2026091802,
+      "delta": 0.4,
+      "historical_best": -14.1,
+      "historical_charged_calls": 129,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091802,
+        "2": 10026091831,
+        "3": 18026091860
+      },
+      "seed": 3,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "parp1",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_fa7_d04_app.py",
+      "arm": "fa7_d04",
+      "cell": "fa7_0",
+      "charged_calls_per_cell": 250,
+      "code_revision": "b51d6e975b0c778a32404c0f4bf7401466ec6f86",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "57f40f1e7bbb76b5411f700b6dcd3b4771acbabbb7b78faa5087bde6eef0695e",
+      "contract_path": "configs/t4_held_target_distilled_fa7_d04_250.json",
+      "contract_payload_sha256": "d2276882179afb134ea53ec44665864fff56a6febed248a30039e0233c3687a0",
+      "controller_family": "67c88b37bc68cf41",
+      "controller_seed": 2026091903,
+      "delta": 0.4,
+      "historical_best": -9.3,
+      "historical_charged_calls": 89,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091903,
+        "2": 10026091932,
+        "3": 18026091961
+      },
+      "seed": 1,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "fa7",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_fa7_d04_app.py",
+      "arm": "fa7_d04",
+      "cell": "fa7_1",
+      "charged_calls_per_cell": 250,
+      "code_revision": "b51d6e975b0c778a32404c0f4bf7401466ec6f86",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "57f40f1e7bbb76b5411f700b6dcd3b4771acbabbb7b78faa5087bde6eef0695e",
+      "contract_path": "configs/t4_held_target_distilled_fa7_d04_250.json",
+      "contract_payload_sha256": "d2276882179afb134ea53ec44665864fff56a6febed248a30039e0233c3687a0",
+      "controller_family": "67c88b37bc68cf41",
+      "controller_seed": 2026091904,
+      "delta": 0.4,
+      "historical_best": -9.4,
+      "historical_charged_calls": 217,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091904,
+        "2": 10026091933,
+        "3": 18026091962
+      },
+      "seed": 2,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "fa7",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_region_repair_rescue_fa7_d04_app.py",
+      "arm": "fa7_d04_region_repair",
+      "cell": "fa7_2",
+      "charged_calls_per_cell": 249,
+      "code_revision": "d24526d91d2ef1aba47d96aa421950ee63c340c6",
+      "completed_runs_today": 1,
+      "contract_file_sha256": "c7518fff2fa72b0717d3e469b9dcd5d2050ebbc55986927fa20098b3b7f22ca4",
+      "contract_path": "configs/t4_region_repair_rescue_fa7_d04_v1.json",
+      "contract_payload_sha256": "4d7dc75f4531ed7825bac5c40f5b56d6fe8393d2f7d7d67caca161680b54e39d",
+      "controller_family": "a490d9a546b38e26",
+      "controller_seed": 2026091905,
+      "delta": 0.4,
+      "historical_best": -9.6,
+      "historical_charged_calls": 105,
+      "notes": [
+        "the campaign spanned 2 contract identities; it FINISHED under 4d7dc75f4531"
+      ],
+      "replicate_seeds": {
+        "1": 2026091905,
+        "2": 10026091934,
+        "3": 18026091963
+      },
+      "seed": 3,
+      "selection_verdict": "single_run",
+      "source_label": "support_expansion",
+      "support_operator": "region_repair",
+      "target": "fa7",
+      "total_charged_call_ceiling": 249
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_5ht1b_d04_app.py",
+      "arm": "5ht1b_d04",
+      "cell": "5ht1b_0",
+      "charged_calls_per_cell": 250,
+      "code_revision": "b51d6e975b0c778a32404c0f4bf7401466ec6f86",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "e7607c7689fd6203de063883b5a25cd07405e3886c5f56285c67548904c169a9",
+      "contract_path": "configs/t4_held_target_distilled_5ht1b_d04_250.json",
+      "contract_payload_sha256": "cdb3c46f46c7b19fb439fda3960c75ebff52b064b68a5025e6ea6f8565050c91",
+      "controller_family": "d9de5da7529b7e1a",
+      "controller_seed": 2026091906,
+      "delta": 0.4,
+      "historical_best": -12.4,
+      "historical_charged_calls": 130,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091906,
+        "2": 10026091935,
+        "3": 18026091964
+      },
+      "seed": 1,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "5ht1b",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_5ht1b_d04_app.py",
+      "arm": "5ht1b_d04",
+      "cell": "5ht1b_1",
+      "charged_calls_per_cell": 250,
+      "code_revision": "b51d6e975b0c778a32404c0f4bf7401466ec6f86",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "e7607c7689fd6203de063883b5a25cd07405e3886c5f56285c67548904c169a9",
+      "contract_path": "configs/t4_held_target_distilled_5ht1b_d04_250.json",
+      "contract_payload_sha256": "cdb3c46f46c7b19fb439fda3960c75ebff52b064b68a5025e6ea6f8565050c91",
+      "controller_family": "d9de5da7529b7e1a",
+      "controller_seed": 2026091907,
+      "delta": 0.4,
+      "historical_best": -11.9,
+      "historical_charged_calls": 161,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091907,
+        "2": 10026091936,
+        "3": 18026091965
+      },
+      "seed": 2,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "5ht1b",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py",
+      "arm": "5ht1b_d04_protonation",
+      "cell": "5ht1b_2",
+      "charged_calls_per_cell": 249,
+      "code_revision": "e86a2181e26ad905464dd68f237d5a9e74eb81c1",
+      "completed_runs_today": 1,
+      "contract_file_sha256": "7558942f16047f746360d974e307143bc8e0060ab27c27c615658e80321dc02c",
+      "contract_path": "configs/t4_5ht1b2_protonation_rescue_d04_v1.json",
+      "contract_payload_sha256": "4486c376e1c378670d4aa9d6c07c3343366035cf67b6821547e2edefdc890a5c",
+      "controller_family": "244782b1298602f5",
+      "controller_seed": 2026091908,
+      "delta": 0.4,
+      "historical_best": -12.5,
+      "historical_charged_calls": 249,
+      "notes": [
+        "the campaign spanned 5 contract identities; it FINISHED under c51c61441535"
+      ],
+      "replicate_seeds": {
+        "1": 2026091908,
+        "2": 10026091937,
+        "3": 18026091966
+      },
+      "seed": 3,
+      "selection_verdict": "single_run",
+      "source_label": "support_expansion",
+      "support_operator": "protonation",
+      "target": "5ht1b",
+      "total_charged_call_ceiling": 249
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_braf_d04_app.py",
+      "arm": "braf_d04",
+      "cell": "braf_0",
+      "charged_calls_per_cell": 250,
+      "code_revision": "b51d6e975b0c778a32404c0f4bf7401466ec6f86",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "20c79ca8eae839110fd1ae835aaeffdc23b04cf3d2ddd081520459257f9e49c2",
+      "contract_path": "configs/t4_held_target_distilled_braf_d04_250.json",
+      "contract_payload_sha256": "cd37ecb0b51045fccd4689f4762f862ba65cb9088a0393b2c2d20707ff9926de",
+      "controller_family": "e10a643d146ffd38",
+      "controller_seed": 2026091800,
+      "delta": 0.4,
+      "historical_best": -12.2,
+      "historical_charged_calls": 77,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091800,
+        "2": 10026091829,
+        "3": 18026091858
+      },
+      "seed": 1,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "braf",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_braf_d04_app.py",
+      "arm": "braf_d04",
+      "cell": "braf_1",
+      "charged_calls_per_cell": 250,
+      "code_revision": "b51d6e975b0c778a32404c0f4bf7401466ec6f86",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "20c79ca8eae839110fd1ae835aaeffdc23b04cf3d2ddd081520459257f9e49c2",
+      "contract_path": "configs/t4_held_target_distilled_braf_d04_250.json",
+      "contract_payload_sha256": "cd37ecb0b51045fccd4689f4762f862ba65cb9088a0393b2c2d20707ff9926de",
+      "controller_family": "e10a643d146ffd38",
+      "controller_seed": 2026091801,
+      "delta": 0.4,
+      "historical_best": -10.5,
+      "historical_charged_calls": 113,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091801,
+        "2": 10026091830,
+        "3": 18026091859
+      },
+      "seed": 2,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "braf",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_braf_d04_app.py",
+      "arm": "braf_d04",
+      "cell": "braf_2",
+      "charged_calls_per_cell": 250,
+      "code_revision": "b51d6e975b0c778a32404c0f4bf7401466ec6f86",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "20c79ca8eae839110fd1ae835aaeffdc23b04cf3d2ddd081520459257f9e49c2",
+      "contract_path": "configs/t4_held_target_distilled_braf_d04_250.json",
+      "contract_payload_sha256": "cd37ecb0b51045fccd4689f4762f862ba65cb9088a0393b2c2d20707ff9926de",
+      "controller_family": "e10a643d146ffd38",
+      "controller_seed": 2026091802,
+      "delta": 0.4,
+      "historical_best": -10.9,
+      "historical_charged_calls": 73,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091802,
+        "2": 10026091831,
+        "3": 18026091860
+      },
+      "seed": 3,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "braf",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_jak2_app.py",
+      "arm": "jak2_named_d06",
+      "cell": "jak2_0",
+      "charged_calls_per_cell": 250,
+      "code_revision": "69659b96b0c7f3c950305404dee964d458a754a7,8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "b54059ccd9d9d5f5bebf90e731b8dd1ffdf977de58b852f2c7319797b4137abf",
+      "contract_path": "configs/t4_held_target_distilled_jak2_d06_250.json",
+      "contract_payload_sha256": "3a43ac863683ccfb1a15d69520107fb26f8af54dce9ff0e2ecbab02cc7ed9a02",
+      "controller_family": "8042ce11187cfb03",
+      "controller_seed": 2026091912,
+      "delta": 0.4,
+      "historical_best": -10.4,
+      "historical_charged_calls": 225,
+      "notes": [
+        "the campaign spanned 3 contract identities; it FINISHED under 3a43ac863683",
+        "2 runs on the volume; "
+      ],
+      "replicate_seeds": {
+        "1": 2026091912,
+        "2": 10026091941,
+        "3": 18026091970
+      },
+      "seed": 1,
+      "selection_verdict": "multiple_runs_progress_selected",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "jak2",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_jak2_app.py",
+      "arm": "jak2_named_d06",
+      "cell": "jak2_1",
+      "charged_calls_per_cell": 250,
+      "code_revision": "69659b96b0c7f3c950305404dee964d458a754a7,8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "b54059ccd9d9d5f5bebf90e731b8dd1ffdf977de58b852f2c7319797b4137abf",
+      "contract_path": "configs/t4_held_target_distilled_jak2_d06_250.json",
+      "contract_payload_sha256": "3a43ac863683ccfb1a15d69520107fb26f8af54dce9ff0e2ecbab02cc7ed9a02",
+      "controller_family": "8042ce11187cfb03",
+      "controller_seed": 2026091913,
+      "delta": 0.4,
+      "historical_best": -11.3,
+      "historical_charged_calls": 145,
+      "notes": [
+        "the campaign spanned 3 contract identities; it FINISHED under 3a43ac863683",
+        "2 runs on the volume; "
+      ],
+      "replicate_seeds": {
+        "1": 2026091913,
+        "2": 10026091942,
+        "3": 18026091971
+      },
+      "seed": 2,
+      "selection_verdict": "multiple_runs_progress_selected",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "jak2",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_jak2_app.py",
+      "arm": "jak2_named_d06",
+      "cell": "jak2_2",
+      "charged_calls_per_cell": 250,
+      "code_revision": "69659b96b0c7f3c950305404dee964d458a754a7,8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+      "completed_runs_today": 1,
+      "contract_file_sha256": "b54059ccd9d9d5f5bebf90e731b8dd1ffdf977de58b852f2c7319797b4137abf",
+      "contract_path": "configs/t4_held_target_distilled_jak2_d06_250.json",
+      "contract_payload_sha256": "3a43ac863683ccfb1a15d69520107fb26f8af54dce9ff0e2ecbab02cc7ed9a02",
+      "controller_family": "8042ce11187cfb03",
+      "controller_seed": 2026091914,
+      "delta": 0.4,
+      "historical_best": -10.7,
+      "historical_charged_calls": 129,
+      "notes": [
+        "the campaign spanned 3 contract identities; it FINISHED under 3a43ac863683",
+        "2 runs on the volume; "
+      ],
+      "replicate_seeds": {
+        "1": 2026091914,
+        "2": 10026091943,
+        "3": 18026091972
+      },
+      "seed": 3,
+      "selection_verdict": "multiple_runs_progress_selected",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "jak2",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_parp1_app.py",
+      "arm": "parp1_d06",
+      "cell": "parp1_0",
+      "charged_calls_per_cell": 250,
+      "code_revision": "69659b96b0c7f3c950305404dee964d458a754a7,8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+      "completed_runs_today": 1,
+      "contract_file_sha256": "13833a454918a944c11ba70ba09ba16459c1065b5810d792e5847fc78affdfe5",
+      "contract_path": "configs/t4_held_target_distilled_parp1_d06_250.json",
+      "contract_payload_sha256": "bd68d29c335bc443c87f661480c465236f4f8464bab5005a0e5345f15e2f0b3f",
+      "controller_family": "1bc539a4131d7aec",
+      "controller_seed": 2026091800,
+      "delta": 0.6,
+      "historical_best": -13.6,
+      "historical_charged_calls": 246,
+      "notes": [
+        "the campaign spanned 2 contract identities; it FINISHED under 8f48cadbb5d2",
+        "3 runs on the volume; "
+      ],
+      "replicate_seeds": {
+        "1": 2026091800,
+        "2": 10026091829,
+        "3": 18026091858
+      },
+      "seed": 1,
+      "selection_verdict": "multiple_runs_progress_selected",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "parp1",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_parp1_app.py",
+      "arm": "parp1_d06",
+      "cell": "parp1_1",
+      "charged_calls_per_cell": 250,
+      "code_revision": "69659b96b0c7f3c950305404dee964d458a754a7,8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+      "completed_runs_today": 1,
+      "contract_file_sha256": "13833a454918a944c11ba70ba09ba16459c1065b5810d792e5847fc78affdfe5",
+      "contract_path": "configs/t4_held_target_distilled_parp1_d06_250.json",
+      "contract_payload_sha256": "bd68d29c335bc443c87f661480c465236f4f8464bab5005a0e5345f15e2f0b3f",
+      "controller_family": "1bc539a4131d7aec",
+      "controller_seed": 2026091801,
+      "delta": 0.6,
+      "historical_best": -12.7,
+      "historical_charged_calls": 244,
+      "notes": [
+        "the campaign spanned 2 contract identities; it FINISHED under 8f48cadbb5d2",
+        "3 runs on the volume; "
+      ],
+      "replicate_seeds": {
+        "1": 2026091801,
+        "2": 10026091830,
+        "3": 18026091859
+      },
+      "seed": 2,
+      "selection_verdict": "multiple_runs_progress_selected",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "parp1",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_parp1_app.py",
+      "arm": "parp1_d06",
+      "cell": "parp1_2",
+      "charged_calls_per_cell": 250,
+      "code_revision": "69659b96b0c7f3c950305404dee964d458a754a7,8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+      "completed_runs_today": 1,
+      "contract_file_sha256": "13833a454918a944c11ba70ba09ba16459c1065b5810d792e5847fc78affdfe5",
+      "contract_path": "configs/t4_held_target_distilled_parp1_d06_250.json",
+      "contract_payload_sha256": "bd68d29c335bc443c87f661480c465236f4f8464bab5005a0e5345f15e2f0b3f",
+      "controller_family": "1bc539a4131d7aec",
+      "controller_seed": 2026091802,
+      "delta": 0.6,
+      "historical_best": -11.3,
+      "historical_charged_calls": 249,
+      "notes": [
+        "the campaign spanned 2 contract identities; it FINISHED under 8f48cadbb5d2",
+        "3 runs on the volume; "
+      ],
+      "replicate_seeds": {
+        "1": 2026091802,
+        "2": 10026091831,
+        "3": 18026091860
+      },
+      "seed": 3,
+      "selection_verdict": "multiple_runs_progress_selected",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "parp1",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_region_repair_rescue_fa7_d06_app.py",
+      "arm": "fa7_d06_region_repair",
+      "cell": "fa7_0",
+      "charged_calls_per_cell": 248,
+      "code_revision": "d24526d91d2ef1aba47d96aa421950ee63c340c6",
+      "completed_runs_today": 2,
+      "contract_file_sha256": "7f47f69280039b34b2e664e233131745867e9d7758cc0658f160306520319a77",
+      "contract_path": "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+      "contract_payload_sha256": "91101214587acb98ef39ba5511a21df379f33ac3d5f8d6f2c7f035219159bc1e",
+      "controller_family": "b83430962be4d4c3",
+      "controller_seed": 2026091903,
+      "delta": 0.6,
+      "historical_best": null,
+      "historical_charged_calls": 0,
+      "notes": [
+        "The table's source='panel' on this row is NOT an attribution of a produced value -- there is none. A replicate must decide deliberately which arm it is replicating for this cell.",
+        "the campaign spanned 3 contract identities; it FINISHED under 91101214587a",
+        "7 runs on the volume; no run performed a search; 4 aborted after the root docking; 3 unreadable"
+      ],
+      "replicate_seeds": {
+        "1": 2026091903,
+        "2": 10026091932,
+        "3": 18026091961
+      },
+      "seed": 1,
+      "selection_verdict": "unresolved",
+      "source_label": "panel",
+      "support_operator": "region_repair",
+      "target": "fa7",
+      "total_charged_call_ceiling": 496
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_fa7_app.py",
+      "arm": "fa7_d06",
+      "cell": "fa7_1",
+      "charged_calls_per_cell": 250,
+      "code_revision": "69659b96b0c7f3c950305404dee964d458a754a7,8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "935bb794540b6632520675d4a09dbed167313a12b5e3e7eda693bbca93450de0",
+      "contract_path": "configs/t4_held_target_distilled_fa7_d06_250.json",
+      "contract_payload_sha256": "cb34d1d1ecfec41d683dbfe18b082aeb4dc65b0f0dbf8baae9d7186d097cc5ef",
+      "controller_family": "67c88b37bc68cf41",
+      "controller_seed": 2026091904,
+      "delta": 0.6,
+      "historical_best": -7.8,
+      "historical_charged_calls": 249,
+      "notes": [
+        "the campaign spanned 3 contract identities; it FINISHED under 935e577fcc91",
+        "2 runs on the volume; "
+      ],
+      "replicate_seeds": {
+        "1": 2026091904,
+        "2": 10026091933,
+        "3": 18026091962
+      },
+      "seed": 2,
+      "selection_verdict": "multiple_runs_progress_selected",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "fa7",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_region_repair_rescue_fa7_d06_app.py",
+      "arm": "fa7_d06_region_repair",
+      "cell": "fa7_2",
+      "charged_calls_per_cell": 248,
+      "code_revision": "d24526d91d2ef1aba47d96aa421950ee63c340c6",
+      "completed_runs_today": 2,
+      "contract_file_sha256": "7f47f69280039b34b2e664e233131745867e9d7758cc0658f160306520319a77",
+      "contract_path": "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+      "contract_payload_sha256": "91101214587acb98ef39ba5511a21df379f33ac3d5f8d6f2c7f035219159bc1e",
+      "controller_family": "b83430962be4d4c3",
+      "controller_seed": 2026091905,
+      "delta": 0.6,
+      "historical_best": -8.5,
+      "historical_charged_calls": 40,
+      "notes": [
+        "the campaign spanned 3 contract identities; it FINISHED under 91101214587a"
+      ],
+      "replicate_seeds": {
+        "1": 2026091905,
+        "2": 10026091934,
+        "3": 18026091963
+      },
+      "seed": 3,
+      "selection_verdict": "single_run",
+      "source_label": "support_expansion",
+      "support_operator": "region_repair",
+      "target": "fa7",
+      "total_charged_call_ceiling": 496
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_5ht1b_app.py",
+      "arm": "5ht1b_d06",
+      "cell": "5ht1b_0",
+      "charged_calls_per_cell": 250,
+      "code_revision": "69659b96b0c7f3c950305404dee964d458a754a7,8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "9ffd0598575575e71f07f543ec9fbc327b8ba4958ff93c7086d373de9034e81b",
+      "contract_path": "configs/t4_held_target_distilled_5ht1b_d06_250.json",
+      "contract_payload_sha256": "6959ae96cc0387f8116c6fa4fe9b531eb726959d33a17df6d8fbc51f1bb0e306",
+      "controller_family": "d9de5da7529b7e1a",
+      "controller_seed": 2026091906,
+      "delta": 0.6,
+      "historical_best": -13.3,
+      "historical_charged_calls": 217,
+      "notes": [
+        "the campaign spanned 3 contract identities; it FINISHED under 4eb6019e0b36"
+      ],
+      "replicate_seeds": {
+        "1": 2026091906,
+        "2": 10026091935,
+        "3": 18026091964
+      },
+      "seed": 1,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "5ht1b",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_5ht1b_app.py",
+      "arm": "5ht1b_d06",
+      "cell": "5ht1b_1",
+      "charged_calls_per_cell": 250,
+      "code_revision": "69659b96b0c7f3c950305404dee964d458a754a7,8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "9ffd0598575575e71f07f543ec9fbc327b8ba4958ff93c7086d373de9034e81b",
+      "contract_path": "configs/t4_held_target_distilled_5ht1b_d06_250.json",
+      "contract_payload_sha256": "6959ae96cc0387f8116c6fa4fe9b531eb726959d33a17df6d8fbc51f1bb0e306",
+      "controller_family": "d9de5da7529b7e1a",
+      "controller_seed": 2026091907,
+      "delta": 0.6,
+      "historical_best": -11.3,
+      "historical_charged_calls": 222,
+      "notes": [
+        "the campaign spanned 3 contract identities; it FINISHED under 4eb6019e0b36",
+        "2 runs on the volume; "
+      ],
+      "replicate_seeds": {
+        "1": 2026091907,
+        "2": 10026091936,
+        "3": 18026091965
+      },
+      "seed": 2,
+      "selection_verdict": "multiple_runs_progress_selected",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "5ht1b",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py",
+      "arm": "5ht1b_d06_protonation",
+      "cell": "5ht1b_2",
+      "charged_calls_per_cell": 248,
+      "code_revision": "e86a2181e26ad905464dd68f237d5a9e74eb81c1",
+      "completed_runs_today": 3,
+      "contract_file_sha256": "2ae3b9ccd31f2b81157927dac973f0f6857d4a0b2041842c10fb402dce173b19",
+      "contract_path": "configs/t4_5ht1b2_protonation_rescue_d06_v1.json",
+      "contract_payload_sha256": "d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb",
+      "controller_family": "5c1f96ea61e02ecb",
+      "controller_seed": 2026091908,
+      "delta": 0.6,
+      "historical_best": -10.8,
+      "historical_charged_calls": 126,
+      "notes": [
+        "the campaign spanned 5 contract identities; it FINISHED under d95fb5a190b3"
+      ],
+      "replicate_seeds": {
+        "1": 2026091908,
+        "2": 10026091937,
+        "3": 18026091966
+      },
+      "seed": 3,
+      "selection_verdict": "single_run",
+      "source_label": "support_expansion",
+      "support_operator": "protonation",
+      "target": "5ht1b",
+      "total_charged_call_ceiling": 248
+    },
+    {
+      "app_module": "modal_apps/t4_region_repair_rescue_braf_d06_app.py",
+      "arm": "braf_d06_region_repair",
+      "cell": "braf_0",
+      "charged_calls_per_cell": 248,
+      "code_revision": "d24526d91d2ef1aba47d96aa421950ee63c340c6",
+      "completed_runs_today": 2,
+      "contract_file_sha256": "cec541b90e3bdec2049607ea73c424a0a3165469ac9097305cef86e18041e3a7",
+      "contract_path": "configs/t4_region_repair_rescue_braf_d06_v1.json",
+      "contract_payload_sha256": "eb6c0cfb8f461d8e3535320d0aa2631180853fa358ede4c42c4c3a0f7aa6e9fe",
+      "controller_family": "891eaed0672472ba",
+      "controller_seed": 2026091800,
+      "delta": 0.6,
+      "historical_best": -9.0,
+      "historical_charged_calls": 33,
+      "notes": [
+        "the campaign spanned 2 contract identities; it FINISHED under eb6c0cfb8f46"
+      ],
+      "replicate_seeds": {
+        "1": 2026091800,
+        "2": 10026091829,
+        "3": 18026091858
+      },
+      "seed": 1,
+      "selection_verdict": "single_run",
+      "source_label": "support_expansion",
+      "support_operator": "region_repair",
+      "target": "braf",
+      "total_charged_call_ceiling": 496
+    },
+    {
+      "app_module": "modal_apps/t4_region_repair_rescue_braf_d06_app.py",
+      "arm": "braf_d06_region_repair",
+      "cell": "braf_1",
+      "charged_calls_per_cell": 248,
+      "code_revision": "d24526d91d2ef1aba47d96aa421950ee63c340c6",
+      "completed_runs_today": 1,
+      "contract_file_sha256": "cec541b90e3bdec2049607ea73c424a0a3165469ac9097305cef86e18041e3a7",
+      "contract_path": "configs/t4_region_repair_rescue_braf_d06_v1.json",
+      "contract_payload_sha256": "eb6c0cfb8f461d8e3535320d0aa2631180853fa358ede4c42c4c3a0f7aa6e9fe",
+      "controller_family": "891eaed0672472ba",
+      "controller_seed": 2026091801,
+      "delta": 0.6,
+      "historical_best": -11.0,
+      "historical_charged_calls": 89,
+      "notes": [
+        "the campaign spanned 2 contract identities; it FINISHED under eb6c0cfb8f46"
+      ],
+      "replicate_seeds": {
+        "1": 2026091801,
+        "2": 10026091830,
+        "3": 18026091859
+      },
+      "seed": 2,
+      "selection_verdict": "single_run",
+      "source_label": "support_expansion",
+      "support_operator": "region_repair",
+      "target": "braf",
+      "total_charged_call_ceiling": 496
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_braf_app.py",
+      "arm": "braf_d06",
+      "cell": "braf_2",
+      "charged_calls_per_cell": 250,
+      "code_revision": "69659b96b0c7f3c950305404dee964d458a754a7,8ab529cc46a98fc6bab17857fa3f52a4190f5563",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "fc2bd52288ecb0f8d258fcf1839ecae25d5a8b5ea4b121047371c964099796be",
+      "contract_path": "configs/t4_held_target_distilled_braf_d06_250.json",
+      "contract_payload_sha256": "0df84d667ece4c07363493b36d512a66616fa2faf6dacbe66cd5d3b88e1a9f32",
+      "controller_family": "e10a643d146ffd38",
+      "controller_seed": 2026091802,
+      "delta": 0.6,
+      "historical_best": -11.5,
+      "historical_charged_calls": 104,
+      "notes": [
+        "the campaign spanned 2 contract identities; it FINISHED under 0df84d667ece",
+        "2 runs on the volume; "
+      ],
+      "replicate_seeds": {
+        "1": 2026091802,
+        "2": 10026091831,
+        "3": 18026091860
+      },
+      "seed": 3,
+      "selection_verdict": "multiple_runs_progress_selected",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "braf",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_jak2_d06_app.py",
+      "arm": "jak2_true_d06",
+      "cell": "jak2_0",
+      "charged_calls_per_cell": 250,
+      "code_revision": "ed2a7d9a528b328995d79d2a9cdacbc8c8dd1cd1",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "d79d276f15bc4e7c22d6b65f3984156364d193e51ac7f5636dd7ca5f2e79d649",
+      "contract_path": "configs/t4_held_target_distilled_jak2_true_d06_250.json",
+      "contract_payload_sha256": "df3c113215e84588c86ad9d690e03cdc091d7cf88696165d8a069d0039acba93",
+      "controller_family": "8042ce11187cfb03",
+      "controller_seed": 2026091912,
+      "delta": 0.6,
+      "historical_best": -10.6,
+      "historical_charged_calls": 97,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091912,
+        "2": 10026091941,
+        "3": 18026091970
+      },
+      "seed": 1,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "jak2",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_jak2_d06_app.py",
+      "arm": "jak2_true_d06",
+      "cell": "jak2_1",
+      "charged_calls_per_cell": 250,
+      "code_revision": "ed2a7d9a528b328995d79d2a9cdacbc8c8dd1cd1",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "d79d276f15bc4e7c22d6b65f3984156364d193e51ac7f5636dd7ca5f2e79d649",
+      "contract_path": "configs/t4_held_target_distilled_jak2_true_d06_250.json",
+      "contract_payload_sha256": "df3c113215e84588c86ad9d690e03cdc091d7cf88696165d8a069d0039acba93",
+      "controller_family": "8042ce11187cfb03",
+      "controller_seed": 2026091913,
+      "delta": 0.6,
+      "historical_best": -10.8,
+      "historical_charged_calls": 89,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091913,
+        "2": 10026091942,
+        "3": 18026091971
+      },
+      "seed": 2,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "jak2",
+      "total_charged_call_ceiling": 750
+    },
+    {
+      "app_module": "modal_apps/t4_integrated_route_fiber_held_jak2_d06_app.py",
+      "arm": "jak2_true_d06",
+      "cell": "jak2_2",
+      "charged_calls_per_cell": 250,
+      "code_revision": "ed2a7d9a528b328995d79d2a9cdacbc8c8dd1cd1",
+      "completed_runs_today": 0,
+      "contract_file_sha256": "d79d276f15bc4e7c22d6b65f3984156364d193e51ac7f5636dd7ca5f2e79d649",
+      "contract_path": "configs/t4_held_target_distilled_jak2_true_d06_250.json",
+      "contract_payload_sha256": "df3c113215e84588c86ad9d690e03cdc091d7cf88696165d8a069d0039acba93",
+      "controller_family": "8042ce11187cfb03",
+      "controller_seed": 2026091914,
+      "delta": 0.6,
+      "historical_best": -10.8,
+      "historical_charged_calls": 113,
+      "notes": [],
+      "replicate_seeds": {
+        "1": 2026091914,
+        "2": 10026091943,
+        "3": 18026091972
+      },
+      "seed": 3,
+      "selection_verdict": "single_run",
+      "source_label": "panel",
+      "support_operator": "none",
+      "target": "jak2",
+      "total_charged_call_ceiling": 750
+    }
+  ],
+  "rows_with_debited_ceiling": [
+    {
+      "ceiling": 249,
+      "cell": "fa7_2",
+      "delta": 0.4
+    },
+    {
+      "ceiling": 249,
+      "cell": "5ht1b_2",
+      "delta": 0.4
+    },
+    {
+      "ceiling": 248,
+      "cell": "fa7_0",
+      "delta": 0.6
+    },
+    {
+      "ceiling": 248,
+      "cell": "fa7_2",
+      "delta": 0.6
+    },
+    {
+      "ceiling": 248,
+      "cell": "5ht1b_2",
+      "delta": 0.6
+    },
+    {
+      "ceiling": 248,
+      "cell": "braf_0",
+      "delta": 0.6
+    },
+    {
+      "ceiling": 248,
+      "cell": "braf_1",
+      "delta": 0.6
+    }
+  ],
+  "schema_version": "t4_replication_manifest_v1",
+  "seed_derivation": {
+    "inherited_cross_cell_seed_sharing": 165,
+    "inherited_sharing_note": "the two delta arms of one cell carry the SAME controller_seed in the historical contracts; a replicate clones the historical method, so that sharing is preserved and recorded rather than treated as a defect",
+    "replicate_1": "the historical controller_seed, unchanged; never re-run",
+    "replicate_n": "controller_seed + 8_000_000_029 * (n - 1)",
+    "within_cell_stream_collisions": 0
+  },
+  "selection_bias_answer": {
+    "answer": "NO cell's published value was selected on score from several searching runs",
+    "cells_with_score_selection": [],
+    "verdict_counts": {
+      "multiple_runs_progress_selected": 9,
+      "single_run": 20,
+      "unresolved": 1
+    }
+  },
+  "why_replicates_exist": "Both comparators report a MULTI-RUN MEAN per cell (docs/genmol_t4_all_methods.json: 'mean docking score of the most optimized lead over 3 runs'; configs/t4_published_invirtuogen_baseline.json: 'value is InVirtuoGen mean, stderr in parentheses in the source', with per-cell stderrs of 0.1-0.9 kcal/mol). The frozen COMPOSE table reports a SINGLE-RUN best, which is not like-for-like."
+}
