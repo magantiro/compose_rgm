@@ -4484,8 +4484,8 @@ independently of whether fa7_0 ever closes.**
       specification                        arm C1 term        arm B1 term
       raw                                -0.065 +- 0.023    -0.065 +- 0.022
       + heavy atoms                      -0.088 +- 0.017    -0.084 +- 0.017
-      + heavy + ring systems             -0.024 +- 0.021    -0.042 +- 0.019
-      + heavy + systems + rings + strain -0.016 +- 0.021           -
+      + heavy + ring systems             -0.024 +- 0.021    -0.041 +- 0.019
+      + heavy + systems + rings + strain -0.015 +- 0.021    -0.033 +- 0.019
       NEGATIVE CONTROL (arm shuffled)    +0.003 +- 0.017    -0.014 +- 0.016
 
   Size adjustment makes the gap WORSE (C1's molecules are smaller and QED rises as molecules
