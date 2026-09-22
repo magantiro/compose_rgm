@@ -1,0 +1,52 @@
+{
+  "configs_mentioning_the_file_at_all": 53,
+  "configs_pinning_the_superseded_hash": [
+    {
+      "config": "configs/t4_region_repair_rescue_braf_d06_v1.json",
+      "pinning_fields": [
+        "payload/runtime_inputs_sha256/src/compose_v4/control/dynamic_program_synthesis.py",
+        "payload/runtime_pin_changes/moved/src/compose_v4/control/dynamic_program_synthesis.py/to"
+      ]
+    },
+    {
+      "config": "configs/t4_region_repair_rescue_fa7_d04_v1.json",
+      "pinning_fields": [
+        "payload/runtime_inputs_sha256/src/compose_v4/control/dynamic_program_synthesis.py",
+        "payload/runtime_pin_changes/moved/src/compose_v4/control/dynamic_program_synthesis.py/to"
+      ]
+    },
+    {
+      "config": "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+      "pinning_fields": [
+        "payload/runtime_inputs_sha256/src/compose_v4/control/dynamic_program_synthesis.py",
+        "payload/runtime_pin_changes/moved/src/compose_v4/control/dynamic_program_synthesis.py/to"
+      ]
+    },
+    {
+      "config": "configs/t4_region_repair_rescue_plan_v1.json",
+      "pinning_fields": [
+        "payload/mechanism/post_repair_file_sha256/src/compose_v4/control/dynamic_program_synthesis.py"
+      ]
+    }
+  ],
+  "decision": "NOT re-pinned here.  Re-pointing a launch authorization to a hash the owner has not named manufactures consent; these are T4 rescue contracts and this is a PMO branch.  The guard is working as designed -- it is reporting that the runtime a T4 authorization covers has changed.",
+  "file": "src/compose_v4/control/dynamic_program_synthesis.py",
+  "hash_after": "9f8bb2ba0b54fe91004ab5a1ba27ead2e14082680e085bc494d89522f9f933a4",
+  "hash_before": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897",
+  "options_for_the_owner": [
+    "Re-pin the four contracts and re-run their matched confirmation, if the construction prior is intended to be in the T4 runtime too.",
+    "Merge the PMO wiring only after those rescues have run, so no authorized T4 launch straddles the change.",
+    "Rejected: duplicating the lane into a second module to avoid the pin. Two copies of the construction draw would drift apart, which is a worse failure than a re-pin."
+  ],
+  "oracle_calls_spent": 0,
+  "regression_check": {
+    "baseline_f19fa83b": "14 failed, 67 passed (the 8 failing files only)",
+    "baseline_only_failures": 0,
+    "branch": "14 failed, 305 passed, 3 xfailed",
+    "branch_only_failures": 0,
+    "impacted_test_closure": "25 test files importing dynamic_program_synthesis, pmo_population_controller or learned_successor_prior",
+    "reading": "The failure sets are identical, so no test that was green went red. The 14 are pre-existing: two are `max_modules` guards that were never updated when MAX_GENERIC_MODULES moved from 3 to 8, and the rest are contract/hash-pin and recovery tests already red at the branch base."
+  },
+  "schema_version": "pmo_construction_prior_pin_impact_v1",
+  "what": "Wiring the chemical prior into the PMO construction lane edits `src/compose_v4/control/dynamic_program_synthesis.py`, which several T4 launch contracts pin by file hash in their runtime inputs.  Those contracts will refuse to launch with an input-identity mismatch until they are explicitly re-pinned."
+}
