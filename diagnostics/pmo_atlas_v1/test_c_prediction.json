@@ -1,0 +1,255 @@
+{
+ "payload": {
+  "blind_seed_score_required_per_rung": {
+   "albuterol_similarity": [
+    {
+     "blind_seed_score_required": 0.1836,
+     "position": "early",
+     "teacher_seed_score": 0.21455938697318006,
+     "teacher_top_ten_new_mean": 0.27960586461892895
+    },
+    {
+     "blind_seed_score_required": 0.3786,
+     "position": "near_anchor",
+     "teacher_seed_score": 0.4117647058823529,
+     "teacher_top_ten_new_mean": 0.42369051827354126
+    },
+    {
+     "blind_seed_score_required": 1.1395,
+     "position": "anchor",
+     "teacher_seed_score": 1.0,
+     "teacher_top_ten_new_mean": 0.9858543865259568
+    }
+   ],
+   "celecoxib_rediscovery": [
+    {
+     "blind_seed_score_required": 0.0294,
+     "position": "early",
+     "teacher_seed_score": 0.10434782608695652,
+     "teacher_top_ten_new_mean": 0.16564300895641818
+    },
+    {
+     "blind_seed_score_required": 0.1515,
+     "position": "near_anchor",
+     "teacher_seed_score": 0.24074074074074073,
+     "teacher_top_ten_new_mean": 0.2558755903669736
+    },
+    {
+     "blind_seed_score_required": 0.8016,
+     "position": "anchor",
+     "teacher_seed_score": 1.0,
+     "teacher_top_ten_new_mean": 0.7362308971601335
+    }
+   ],
+   "gsk3b": [
+    {
+     "blind_seed_score_required": 0.1043,
+     "position": "early",
+     "teacher_seed_score": 0.0,
+     "teacher_top_ten_new_mean": 0.221
+    },
+    {
+     "blind_seed_score_required": 0.578,
+     "position": "near_anchor",
+     "teacher_seed_score": 0.59,
+     "teacher_top_ten_new_mean": 0.571
+    },
+    {
+     "blind_seed_score_required": 0.8906,
+     "position": "anchor",
+     "teacher_seed_score": 1.0,
+     "teacher_top_ten_new_mean": 0.8019999999999999
+    }
+   ],
+   "isomers_c7h8n2o2": [
+    {
+     "blind_seed_score_required": 0.576,
+     "position": "early",
+     "teacher_seed_score": 0.6065306597126334,
+     "teacher_top_ten_new_mean": 0.5694807288138513
+    },
+    {
+     "blind_seed_score_required": 0.6752,
+     "position": "near_anchor",
+     "teacher_seed_score": 0.1353352832366127,
+     "teacher_top_ten_new_mean": 0.6428102751708425
+    },
+    {
+     "blind_seed_score_required": 0.9751,
+     "position": "anchor",
+     "teacher_seed_score": 1.0,
+     "teacher_top_ten_new_mean": 0.8644102570089716
+    }
+   ],
+   "jnk3": [
+    {
+     "blind_seed_score_required": -0.031,
+     "position": "early",
+     "teacher_seed_score": 0.05,
+     "teacher_top_ten_new_mean": 0.12100000000000002
+    },
+    {
+     "blind_seed_score_required": 0.3425,
+     "position": "near_anchor",
+     "teacher_seed_score": 0.35,
+     "teacher_top_ten_new_mean": 0.39699999999999996
+    },
+    {
+     "blind_seed_score_required": 1.0558,
+     "position": "anchor",
+     "teacher_seed_score": 0.98,
+     "teacher_top_ten_new_mean": 0.924
+    }
+   ],
+   "median1": [
+    {
+     "blind_seed_score_required": 0.1663,
+     "position": "near_anchor",
+     "teacher_seed_score": 0.30542361089076303,
+     "teacher_top_ten_new_mean": 0.2667915038667381
+    },
+    {
+     "blind_seed_score_required": 0.1835,
+     "position": "early",
+     "teacher_seed_score": 0.3237619541190881,
+     "teacher_top_ten_new_mean": 0.2795322929099998
+    },
+    {
+     "blind_seed_score_required": 0.2448,
+     "position": "anchor",
+     "teacher_seed_score": 0.40648479068406884,
+     "teacher_top_ten_new_mean": 0.3247990471120078
+    }
+   ],
+   "mestranol_similarity": [
+    {
+     "blind_seed_score_required": 0.16,
+     "position": "early",
+     "teacher_seed_score": 0.13915857605177992,
+     "teacher_top_ten_new_mean": 0.2621327157650394
+    },
+    {
+     "blind_seed_score_required": 0.5086,
+     "position": "near_anchor",
+     "teacher_seed_score": 0.5258215962441314,
+     "teacher_top_ten_new_mean": 0.5197126687859492
+    },
+    {
+     "blind_seed_score_required": 1.1004,
+     "position": "anchor",
+     "teacher_seed_score": 1.0,
+     "teacher_top_ten_new_mean": 0.9569803107998606
+    }
+   ],
+   "perindopril_mpo": [
+    {
+     "blind_seed_score_required": 0.0951,
+     "position": "near_anchor",
+     "teacher_seed_score": 0.19813521412477222,
+     "teacher_top_ten_new_mean": 0.21414347428325514
+    },
+    {
+     "blind_seed_score_required": 0.3003,
+     "position": "early",
+     "teacher_seed_score": 0.14010275349947504,
+     "teacher_top_ten_new_mean": 0.36581134884446764
+    },
+    {
+     "blind_seed_score_required": 0.8405,
+     "position": "anchor",
+     "teacher_seed_score": 0.8088297765764039,
+     "teacher_top_ten_new_mean": 0.7649159621222326
+    }
+   ],
+   "qed": [
+    {
+     "blind_seed_score_required": 0.9565,
+     "position": "early",
+     "teacher_seed_score": 0.7537435018813315,
+     "teacher_top_ten_new_mean": 0.8506951044533404
+    },
+    {
+     "blind_seed_score_required": 0.9875,
+     "position": "near_anchor",
+     "teacher_seed_score": 0.8199790490198158,
+     "teacher_top_ten_new_mean": 0.8735500032679923
+    },
+    {
+     "blind_seed_score_required": 1.068,
+     "position": "anchor",
+     "teacher_seed_score": 0.948442042791664,
+     "teacher_top_ten_new_mean": 0.9330602530535852
+    }
+   ],
+   "thiothixene_rediscovery": [
+    {
+     "blind_seed_score_required": 0.0651,
+     "position": "early",
+     "teacher_seed_score": 0.15254237288135594,
+     "teacher_top_ten_new_mean": 0.19198398263275088
+    },
+    {
+     "blind_seed_score_required": 0.0732,
+     "position": "near_anchor",
+     "teacher_seed_score": 0.11188811188811189,
+     "teacher_top_ten_new_mean": 0.1979930404233931
+    },
+    {
+     "blind_seed_score_required": 0.9102,
+     "position": "anchor",
+     "teacher_seed_score": 1.0,
+     "teacher_top_ten_new_mean": 0.8164814228129028
+    }
+   ],
+   "troglitazone_rediscovery": [
+    {
+     "blind_seed_score_required": 0.0404,
+     "position": "early",
+     "teacher_seed_score": 0.14184397163120568,
+     "teacher_top_ten_new_mean": 0.17378387937882886
+    },
+    {
+     "blind_seed_score_required": 0.4846,
+     "position": "near_anchor",
+     "teacher_seed_score": 0.43103448275862066,
+     "teacher_top_ten_new_mean": 0.5019621249874222
+    },
+    {
+     "blind_seed_score_required": 0.8546,
+     "position": "anchor",
+     "teacher_seed_score": 1.0,
+     "teacher_top_ten_new_mean": 0.775378086484114
+    }
+   ]
+  },
+  "decision_rule": "A blind molecule ENTERS a productive region when the frozen local controller, started there with 64 calls, reaches a top_ten_new_mean at or above a Test B rung for the same task. The rung named is the highest one cleared; a measurement below the lowest rung is reported as below_early, never rounded up.",
+  "falsifier": "If blind search reaches the ANCHOR rung on tasks where Test A showed the destination is constructible, then discovery is not the gap and the remaining explanation is exploitation or allocation, both of which Test B already measured as adequate. If instead blind search tops out near the EARLY rung on the rediscovery tasks while clearing ANCHOR on the broad-objective tasks, the gap is task-shaped: narrow targets are not found, broad objectives are.",
+  "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
+  "information_regime_statement": "Answer-known, panel-informed and winner-informed PMO development evidence. Destinations are published task answers or transcribed competitor winners. This is a challenge set and a diagnostic instrument, never a training distribution, prior, library or initialization for a scored no-prescreen run.",
+  "predictor": {
+   "fitted_on": "the 33 Test B teacher-region runs, all complete before Test C began",
+   "form": "top_ten_new_mean = slope * seed_score + intercept",
+   "intercept": 0.1439097172573964,
+   "largest_residual_run": {
+    "observed": 0.6428102751708425,
+    "position": "near_anchor",
+    "predicted": 0.2439083129939989,
+    "seed_score": 0.1353352832366127,
+    "task": "isomers_c7h8n2o2"
+   },
+   "max_abs_residual": 0.39890196217684365,
+   "n": 33,
+   "r_squared": 0.8661594292670403,
+   "residual_sd": 0.10707679607585668,
+   "role": "power instrument; every reported rung is MEASURED, never predicted",
+   "slope": 0.738895233712043
+  },
+  "schema_version": "pmo_atlas_test_c_prediction_v1",
+  "sealed_before": "any Test C blind result was read",
+  "source": {
+   "artifact": "diagnostics/pmo_atlas_v1/test_b_local_lift.json",
+   "file_sha256": "c89c3d6061efabf678ec338ab7b1a0ff7e0f8210cb1b75c1f95ff91d6ce93bf5"
+  }
+ },
+ "payload_sha256": "fe6b89fc2dfae4a83cf5706205e3994d5ec7950c871b76295f7f02c229c1838b"
+}
