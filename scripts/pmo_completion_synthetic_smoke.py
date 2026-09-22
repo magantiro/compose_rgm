@@ -111,8 +111,16 @@ def main() -> None:
             "the TREATMENT arm carries NO component completion: the law is INERT "
             "on the production campaign path"
         )
+    # NOT a pass criterion: the predeclared validity check is component OR
+    # size>8, and a 40-call smoke sees few completions. Recorded so the scored
+    # run can be read against it.
+    notes = []
     if not treatment.get("requested_size_gt_8"):
-        problems.append("the treatment arm never requested a size past the v1 ceiling")
+        notes.append(
+            "no completion in this short smoke requested a size past the v1 "
+            "ceiling; the downstream work limit (max_primitives 32 / max_blocks "
+            "8) is the candidate explanation and is measured separately"
+        )
     verdict = "CHAIN_READY" if not problems else "CHAIN_NOT_READY"
     report = {
         "schema_version": "pmo_completion_synthetic_smoke_v1",
@@ -121,6 +129,7 @@ def main() -> None:
         "budget_per_arm": BUDGET,
         "arms": out,
         "problems": problems,
+        "notes": notes,
         "verdict": verdict,
     }
     target = ROOT / "diagnostics/pmo_completion_repair_v1/synthetic_smoke_v1.json"
@@ -129,6 +138,8 @@ def main() -> None:
     print("\nVERDICT:", verdict)
     for problem in problems:
         print("  -", problem)
+    for note in notes:
+        print("  note:", note)
     sys.exit(0 if verdict == "CHAIN_READY" else 1)
 
 

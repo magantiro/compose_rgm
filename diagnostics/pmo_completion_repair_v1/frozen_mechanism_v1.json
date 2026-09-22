@@ -1,0 +1,169 @@
+{
+ "commit": "c18f9c74476b2c68511883a511b817c22b67c0bd",
+ "frozen_arm": "scale_content_v1",
+ "implementation_sha256": {
+  "configs/pmo_completion_component_bank_v1.json": "9b9b11d6a83a048ea1c9b2e70c1d6b8e79bccfa47ac45374bddbaa45d9e53675",
+  "src/compose_v4/control/completion_component_law.py": "9a6a826d74df0741b394cf77d1082f876798ffc5fee8277cb2c981a341fe986e",
+  "src/compose_v4/control/completion_law_contract.py": "242ed42cffe824518b010cf46b76455d6b932f023b5c92500fb6ffb11a9bf126",
+  "src/compose_v4/control/dynamic_program_synthesis.py": "9d9ea6e576fbc9091152c7bfd87f2e4df17d0ff1188ccbd5e6fb47d43700c978",
+  "src/compose_v4/control/dynamic_program_synthesis_v1.py": "0640ba50bcb53ebd8a3f3ab326124975e55737c91758f09ce3e5c4a32bdbd3d9",
+  "src/compose_v4/control/dynamic_program_synthesis_v2.py": "1e41adcfd7b72a2cbe934233102c87872e44796ba67015c4df24f1dba663d278",
+  "src/compose_v4/control/dynamic_program_synthesis_v21.py": "bbe1a1b2d5ffed59929211425060f6347075025ac504990b42437bef0a9bf9f7",
+  "src/compose_v4/control/pmo_population_controller.py": "946fcec3e5b65543cb9b0934311217874f3be4e9464a710e626e524ab6f93413",
+  "src/compose_v4/experiments/pmo_population_v1.py": "b38c8a7220b05242179331a6ac98e2c4a530867a909906a5727c50e264defbd7"
+ },
+ "law_identity": {
+  "arm": "scale_content_v1",
+  "bank_components": 634,
+  "bank_identity_sha256": "b6e869a820c2b74b2d42fe23684222ecfea907e3a4e01e399b39ea4ab6d13949",
+  "expand_excision": true,
+  "scale_maximum": null
+ },
+ "mean_gap_closure": 0.0817,
+ "measured_2x2": {
+  "content_only": {
+   "attempts": 768,
+   "conditional": {
+    "frac_installed_expressible_as_grow_chain": 0.2278,
+    "frac_installs_branch": 0.3544,
+    "frac_installs_ring": 0.5127,
+    "frac_largest_region_ge_13": 0.0063,
+    "frac_largest_region_ge_6": 0.4114,
+    "median_excised_atoms": 1.0,
+    "median_installed_atoms": 5.0,
+    "median_largest_changed_region": 5.0,
+    "median_retained_fraction_source": 0.9583,
+    "n": 158,
+    "share_of_executed": 0.2057
+   },
+   "diversity": 0.9648,
+   "executed_yield": 1.0,
+   "frac_installed_expressible_as_grow_chain": 0.2005,
+   "frac_installs_branch": 0.1615,
+   "frac_installs_ring": 0.4922,
+   "frac_largest_region_ge_13": 0.0026,
+   "frac_largest_region_ge_6": 0.2409,
+   "median_installed_atoms": 3.0,
+   "median_largest_changed_region": 3.0,
+   "median_retained_fraction_source": 0.9583,
+   "seconds": 434.9
+  },
+  "scale_content": {
+   "attempts": 768,
+   "conditional": {
+    "frac_installed_expressible_as_grow_chain": 0.1711,
+    "frac_installs_branch": 0.4539,
+    "frac_installs_ring": 0.6053,
+    "frac_largest_region_ge_13": 0.1908,
+    "frac_largest_region_ge_6": 0.6184,
+    "median_excised_atoms": 1.0,
+    "median_installed_atoms": 7.0,
+    "median_largest_changed_region": 7.0,
+    "median_retained_fraction_source": 0.9599,
+    "n": 152,
+    "share_of_executed": 0.1979
+   },
+   "diversity": 0.9635,
+   "executed_yield": 1.0,
+   "frac_installed_expressible_as_grow_chain": 0.1888,
+   "frac_installs_branch": 0.1797,
+   "frac_installs_ring": 0.5104,
+   "frac_largest_region_ge_13": 0.0391,
+   "frac_largest_region_ge_6": 0.2799,
+   "median_installed_atoms": 3.0,
+   "median_largest_changed_region": 3.0,
+   "median_retained_fraction_source": 0.9583,
+   "seconds": 461.6
+  },
+  "scale_only": {
+   "attempts": 768,
+   "conditional": {
+    "frac_installed_expressible_as_grow_chain": 0.5132,
+    "frac_installs_branch": 0.0789,
+    "frac_installs_ring": 0.2105,
+    "frac_largest_region_ge_13": 0.25,
+    "frac_largest_region_ge_6": 0.6447,
+    "median_excised_atoms": 1.0,
+    "median_installed_atoms": 7.0,
+    "median_largest_changed_region": 7.0,
+    "median_retained_fraction_source": 0.9615,
+    "n": 152,
+    "share_of_executed": 0.1979
+   },
+   "diversity": 0.9648,
+   "executed_yield": 1.0,
+   "frac_installed_expressible_as_grow_chain": 0.2565,
+   "frac_installs_branch": 0.1042,
+   "frac_installs_ring": 0.4336,
+   "frac_largest_region_ge_13": 0.0508,
+   "frac_largest_region_ge_6": 0.2865,
+   "median_installed_atoms": 3.0,
+   "median_largest_changed_region": 3.0,
+   "median_retained_fraction_source": 0.9583,
+   "seconds": 459.0
+  },
+  "v1_current": {
+   "attempts": 768,
+   "conditional": {
+    "frac_installed_expressible_as_grow_chain": 0.7152,
+    "frac_installs_branch": 0.0633,
+    "frac_installs_ring": 0.2722,
+    "frac_largest_region_ge_13": 0.019,
+    "frac_largest_region_ge_6": 0.462,
+    "median_excised_atoms": 1.0,
+    "median_installed_atoms": 6.0,
+    "median_largest_changed_region": 5.0,
+    "median_retained_fraction_source": 0.95,
+    "n": 158,
+    "share_of_executed": 0.2057
+   },
+   "diversity": 0.9635,
+   "executed_yield": 1.0,
+   "frac_installed_expressible_as_grow_chain": 0.3008,
+   "frac_installs_branch": 0.1016,
+   "frac_installs_ring": 0.4427,
+   "frac_largest_region_ge_13": 0.0052,
+   "frac_largest_region_ge_6": 0.2513,
+   "median_installed_atoms": 3.0,
+   "median_largest_changed_region": 3.0,
+   "median_retained_fraction_source": 0.9583,
+   "seconds": 441.8
+  }
+ },
+ "measured_delivery_into_accepted_programs": {
+  "accepted_completions": {
+   "off": 147,
+   "scale_content_v1": 136
+  },
+  "frac_accepted_requesting_size_gt_8": {
+   "off": 0.0,
+   "scale_content_v1": 0.316
+  },
+  "max_primitives_in_a_program": {
+   "limit": 32,
+   "off": 29,
+   "scale_content_v1": 31
+  },
+  "note": "480 synthesize_dynamic_program draws per arm at the production max_primitives 32 / max_blocks 8",
+  "segment_replace_work_limit_refusals": {
+   "off": 1,
+   "scale_content_v1": 12
+  }
+ },
+ "new_oracle_calls": 0,
+ "off_is_byte_identical": {
+  "differing": 0,
+  "draws": 640,
+  "identical": 640,
+  "method": "the pre-repair module loaded from git, not transcribed"
+ },
+ "schema_version": "pmo_completion_frozen_mechanism_v1",
+ "selected_by": "the predeclared freeze rule in decision_rule_v1.json, applied verbatim",
+ "what_it_is": {
+  "content": "an objective-blind component drawn from the committed bank, installed by a breadth-first spanning tree of atom_insert plus one cycle_close per non-tree edge, with hydrogen reserved at insertion so every intermediate is executable",
+  "declared_refusals": "a valence-six centre reached through a single bond cannot reserve five hydrogens (MAX_H_COUNT is 4) and is refused offline; charged components are excluded so net formal charge is preserved",
+  "excision": "the same octave-balanced law over the state's bridge-separated regions, uniform WITHIN a size band so region selection stays v1's; a re-ranking with a positive floor, never a filter",
+  "scale": "octave-balanced size draw over 1..capacity, capacity = 40 - heavy atoms; equal probability per octave band, uniform within a band; no tuned parameter and no task input",
+  "scope_it_governs": "segment_grow and both halves of segment_replace; every other generic family is v1 verbatim"
+ }
+}
