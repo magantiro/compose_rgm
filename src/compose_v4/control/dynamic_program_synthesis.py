@@ -116,7 +116,46 @@ def _execute_actions(source: MolecularGraph, name: str, actions, parameters):
     return product, _stage(name, receipt, parameters)
 
 
-def _grow_actions(source, rng, *, length, elements, anchor=None):
+def _single_bond_insert(current, at, element):
+    """The one ``AtomInsert`` this lane emits for (attachment point, element).
+
+    Shared by the uniform draw and the prior-ranked draw so the two can never
+    describe different candidate sets: a prior that ranked a different object
+    from the one the lane executes would be measuring nothing.
+    """
+
+    valences = ALLOWED_VALENCES[element]
+    if len(valences) != 1:
+        raise ValueError("dynamic growth requires an unambiguous neutral valence")
+    return AtomInsert(
+        fresh_slot(current),
+        ELEMENT_TO_IDX[element],
+        0,
+        valences[0] - 1,
+        ((at, 1),),
+    )
+
+
+def _grow_actions(source, rng, *, length, elements, anchor=None, successor_prior=None):
+    """Extend the molecule by a linear chain of ``length`` single-bonded atoms.
+
+    This is THE construction site of the PMO proposal stream: `atom_insert` is
+    the largest family in the production per-edit census and every one of its
+    draws passes through here.  v1 chooses the attachment point uniformly over
+    hydrogen-bearing atoms and then each element uniformly over ``elements``,
+    which is why the branch emits polyperoxides and N-O chains -- valid,
+    executable, and not molecules.
+
+    ``successor_prior is None`` is v1 and is preserved BYTE-IDENTICALLY, down to
+    the number of RNG values consumed.  Passing a
+    :class:`~compose_v4.control.learned_successor_prior.LearnedSuccessorPrior`
+    re-ranks the SAME candidate set -- the first step over every
+    (attachment point, element) pair, each later step over the elements at the
+    forced chain tip -- by the trained editing law.  Nothing is added and
+    nothing is removed: every candidate keeps at least the prior's support
+    floor, so the reachable set is identical in both arms.
+    """
+
     current, actions = source, []
     anchors = [
         int(i)
@@ -127,29 +166,54 @@ def _grow_actions(source, rng, *, length, elements, anchor=None):
         anchors = [anchor] if anchor in anchors else []
     if not anchors:
         raise ValueError("segment growth has no hydrogen-bearing anchor")
-    at = anchors[int(rng.integers(len(anchors)))]
     chosen = []
+    if successor_prior is None:
+        at = anchors[int(rng.integers(len(anchors)))]
+        for _ in range(length):
+            element = elements[int(rng.integers(len(elements)))]
+            action = _single_bond_insert(current, at, element)
+            record = encode_action("atom_insert", action)
+            current, _ = execute_program(current, [record])
+            actions.append(record)
+            at = action.slot
+            chosen.append(element)
+        return actions, at, chosen
+
+    # The first step chooses placement AND element jointly, because the measured
+    # signal in this model is a PLACEMENT signal: heteroatom-onto-heteroatom
+    # insertion is suppressed ~15-18x relative to carbon-onto-carbon, and that is
+    # invisible to any rule that fixes the attachment point before scoring.
+    sites, at = list(anchors), int(anchors[0])
     for _ in range(length):
-        element = elements[int(rng.integers(len(elements)))]
-        valences = ALLOWED_VALENCES[element]
-        if len(valences) != 1:
-            raise ValueError("dynamic growth requires an unambiguous neutral valence")
-        action = AtomInsert(
-            fresh_slot(current),
-            ELEMENT_TO_IDX[element],
-            0,
-            valences[0] - 1,
-            ((at, 1),),
-        )
+        candidates = [
+            _single_bond_insert(current, site, element)
+            for site in sites
+            for element in elements
+        ]
+        action = successor_prior.order(
+            current, rng, family="atom_insert", actions=candidates
+        )[0]
         record = encode_action("atom_insert", action)
         current, _ = execute_program(current, [record])
         actions.append(record)
-        at = action.slot
-        chosen.append(element)
+        chosen.append(IDX_TO_ELEMENT[int(action.atom_type)])
+        # The chain is linear: after the first atom the attachment point is
+        # forced, exactly as in v1.  Only the element remains to be chosen.
+        at = int(action.slot)
+        sites = [at]
     return actions, at, chosen
 
 
-def _terminal_shrink(source, rng, *, requested_length):
+def _terminal_shrink(source, rng, *, requested_length, successor_prior=None):
+    """Eat back a terminal chain, one degree-one atom at a time.
+
+    ``atom_delete`` is the second-largest family in the production per-edit
+    census.  v1 picks the terminal atom uniformly, so which branch the lane
+    starts eating carries no chemistry.  ``successor_prior is None`` preserves
+    that draw byte-identically; a prior re-ranks the SAME terminal candidates
+    under the trained editing law without removing any of them.
+    """
+
     current, actions, path, anchor = source, [], [], None
     preferred = None
     for _ in range(requested_length):
@@ -161,7 +225,17 @@ def _terminal_shrink(source, rng, *, requested_length):
             candidates = terminal
         if not candidates or len(real) <= 1:
             break
-        slot = candidates[int(rng.integers(len(candidates)))]
+        if successor_prior is None:
+            slot = candidates[int(rng.integers(len(candidates)))]
+        else:
+            slot = int(
+                successor_prior.order(
+                    current,
+                    rng,
+                    family="atom_delete",
+                    actions=[AtomDelete(int(v)) for v in candidates],
+                )[0].v
+            )
         neighbors = [int(i) for i in np.flatnonzero(current.bonds[slot])]
         next_slot = neighbors[0]
         record = encode_action("atom_delete", AtomDelete(slot))
@@ -357,8 +431,10 @@ def _weighted_module_order(rng, *, near_capacity):
     return order
 
 
-def _local_module(source, rng, *, family, label):
-    program, binding, detail = current_state_program(source, rng, family=family)
+def _local_module(source, rng, *, family, label, successor_prior=None):
+    program, binding, detail = current_state_program(
+        source, rng, family=family, successor_prior=successor_prior
+    )
     detail = {
         key: value
         for key, value in detail.items()
@@ -383,14 +459,44 @@ def _local_module(source, rng, *, family, label):
     )
 
 
+#: Recorded in a module's own parameters when the construction draw was ranked by
+#: the learned chemical prior rather than drawn uniformly.  A concurrent
+#: basin-entry gate attributes entrants to channels, so a prior-shaped proposal
+#: has to be identifiable at synthesis time and not reconstructed afterwards.
+CONSTRUCTION_LAW_TAG = "learned_successor_prior_v1"
+
+
+def _construction_parameters(parameters: dict, successor_prior) -> dict:
+    """Tag a module's parameters with the law its construction draw came from.
+
+    ABSENT means the uniform v1 draw: a run whose artifacts carry no
+    ``construction_law`` key is byte-identically v1, so the tag can never be
+    mistaken for a default.
+    """
+
+    if successor_prior is None:
+        return parameters
+    return {**parameters, "construction_law": CONSTRUCTION_LAW_TAG}
+
+
 def compile_generic_module(
-    source: MolecularGraph, rng, family: str, *, region_law=None
+    source: MolecularGraph, rng, family: str, *, region_law=None, successor_prior=None
 ):
     """Bind one generic module to the supplied exact state and execute it.
 
     ``region_law`` is threaded to the two modules that excise a bridge-separated
     substituent (``substituent_delete`` and the delete half of
     ``segment_replace``).  ``None`` keeps v1's uniform bounded law.
+
+    ``successor_prior`` is threaded to every module that CHANGES THE ATOM SET --
+    the growth modules (``segment_grow``, ``functionalize``, the grow half of
+    ``segment_replace``, ``carbonyl_insert``) and the terminal shrink -- plus the
+    five local families, which already accept it at
+    ``current_state_edits.current_state_program``.  ``None`` keeps v1's uniform
+    draws byte-identically.  The MODULE choice is never weighted by it: the
+    model puts 0.38 on ``atom_restate`` against 0.063 on ``cycle_close``, and
+    ``cycle_close`` is the one family whose edits GAIN drug-likeness, so family
+    selection stays uniform in ``_weighted_module_order``.
     """
     if family not in GENERIC_MODULES:
         raise ValueError(f"unknown dynamic generic module: {family}")
@@ -400,28 +506,54 @@ def compile_generic_module(
             raise ValueError("segment growth has no remaining heavy-atom capacity")
         length = int(rng.integers(1, capacity + 1))
         actions, _, elements = _grow_actions(
-            source, rng, length=length, elements=("C", "N", "O")
+            source,
+            rng,
+            length=length,
+            elements=("C", "N", "O"),
+            successor_prior=successor_prior,
         )
-        return _execute_actions(
-            source, family, actions, {"length": length, "elements": elements}
-        )
-    if family == "functionalize":
-        actions, _, elements = _grow_actions(
-            source, rng, length=1, elements=("C", "N", "O", "F")
-        )
-        return _execute_actions(source, family, actions, {"element": elements[0]})
-    if family == "segment_shrink":
-        requested = int(rng.integers(1, MAX_SEGMENT_LENGTH + 1))
-        actions, _, _, path = _terminal_shrink(source, rng, requested_length=requested)
         return _execute_actions(
             source,
             family,
             actions,
-            {
-                "requested_length": requested,
-                "actual_length": len(actions),
-                "path": path,
-            },
+            _construction_parameters(
+                {"length": length, "elements": elements}, successor_prior
+            ),
+        )
+    if family == "functionalize":
+        actions, _, elements = _grow_actions(
+            source,
+            rng,
+            length=1,
+            elements=("C", "N", "O", "F"),
+            successor_prior=successor_prior,
+        )
+        return _execute_actions(
+            source,
+            family,
+            actions,
+            _construction_parameters({"element": elements[0]}, successor_prior),
+        )
+    if family == "segment_shrink":
+        requested = int(rng.integers(1, MAX_SEGMENT_LENGTH + 1))
+        actions, _, _, path = _terminal_shrink(
+            source,
+            rng,
+            requested_length=requested,
+            successor_prior=successor_prior,
+        )
+        return _execute_actions(
+            source,
+            family,
+            actions,
+            _construction_parameters(
+                {
+                    "requested_length": requested,
+                    "actual_length": len(actions),
+                    "path": path,
+                },
+                successor_prior,
+            ),
         )
     if family == "segment_replace":
         delete_actions, contracted, anchor, path = _delete_pendant_fragment(
@@ -437,19 +569,23 @@ def compile_generic_module(
             length=growth,
             elements=("C", "N", "O"),
             anchor=anchor,
+            successor_prior=successor_prior,
         )
         return _execute_actions(
             source,
             family,
             [*delete_actions, *grow_actions],
-            {
-                "deleted_path": path,
-                "deleted_atoms": len(path),
-                "cycle_openings": len(delete_actions) - len(path),
-                "inserted_atoms": growth,
-                "elements": elements,
-                "retained_anchor": anchor,
-            },
+            _construction_parameters(
+                {
+                    "deleted_path": path,
+                    "deleted_atoms": len(path),
+                    "cycle_openings": len(delete_actions) - len(path),
+                    "inserted_atoms": growth,
+                    "elements": elements,
+                    "retained_anchor": anchor,
+                },
+                successor_prior,
+            ),
         )
     if family == "substituent_delete":
         actions, _, anchor, path = _delete_pendant_fragment(
@@ -479,15 +615,22 @@ def compile_generic_module(
         ]
         if not anchors:
             raise ValueError("carbonyl insertion has no compatible carbon anchor")
-        anchor = anchors[int(rng.integers(len(anchors)))]
-        action = AtomInsert(
-            fresh_slot(source), ELEMENT_TO_IDX["O"], 0, 0, ((anchor, 2),)
-        )
+        carbonyls = [
+            AtomInsert(fresh_slot(source), ELEMENT_TO_IDX["O"], 0, 0, ((a, 2),))
+            for a in anchors
+        ]
+        if successor_prior is None:
+            action = carbonyls[int(rng.integers(len(anchors)))]
+        else:
+            action = successor_prior.order(
+                source, rng, family="atom_insert", actions=carbonyls
+            )[0]
+        anchor = int(action.neighbors[0][0])
         return _execute_actions(
             source,
             family,
             [encode_action("atom_insert", action)],
-            {"anchor": anchor},
+            _construction_parameters({"anchor": anchor}, successor_prior),
         )
     families = {
         "heteroatom_substitute": "atom_restate_semantic",
@@ -496,7 +639,13 @@ def compile_generic_module(
         "cycle_close": "cycle_close",
         "ring_system_restate": "ring_system_restate",
     }
-    return _local_module(source, rng, family=families[family], label=family)
+    return _local_module(
+        source,
+        rng,
+        family=families[family],
+        label=family,
+        successor_prior=successor_prior,
+    )
 
 
 def synthesize_dynamic_program(
@@ -507,6 +656,7 @@ def synthesize_dynamic_program(
     max_primitives: int = 32,
     max_blocks: int = 8,
     region_law=None,
+    successor_prior=None,
 ):
     """Construct one complete K-module program without any task evaluation."""
     if not 1 <= max_modules <= MAX_GENERIC_MODULES:
@@ -529,7 +679,11 @@ def synthesize_dynamic_program(
         for family in _weighted_module_order(rng, near_capacity=near_capacity):
             try:
                 product, stage = compile_generic_module(
-                    current, rng, family, region_law=region_law
+                    current,
+                    rng,
+                    family,
+                    region_law=region_law,
+                    successor_prior=successor_prior,
                 )
             except ValueError as error:
                 failures[f"{family}:{error!s}"] += 1
@@ -581,6 +735,11 @@ def synthesize_dynamic_program(
         "modules": selected,
         "intermediate_task_evaluations": 0,
         "module_failure_counts": dict(failures),
+        **(
+            {}
+            if successor_prior is None
+            else {"construction_law": CONSTRUCTION_LAW_TAG}
+        ),
     }
     return source, program, assignment, trace, metadata
 
@@ -593,6 +752,7 @@ def synthesize_named_module_sequence(
     max_primitives=32,
     max_blocks=8,
     region_law=None,
+    successor_prior=None,
 ):
     """Compile a prospectively chosen generic module sequence on exact states."""
     if not 1 <= len(families) <= 3 or any(
@@ -602,7 +762,11 @@ def synthesize_named_module_sequence(
     current, stages, selected = source, [], []
     for index, family in enumerate(families):
         current, stage = compile_generic_module(
-            current, rng, family, region_law=region_law
+            current,
+            rng,
+            family,
+            region_law=region_law,
+            successor_prior=successor_prior,
         )
         stages.append(stage)
         selected.append(
@@ -645,6 +809,11 @@ def synthesize_named_module_sequence(
                 if tuple(families) == ("substituent_delete", "substituent_delete")
                 else "declared_generic_sequence"
             ),
+            **(
+                {}
+                if successor_prior is None
+                else {"construction_law": CONSTRUCTION_LAW_TAG}
+            ),
         },
     )
 
@@ -658,6 +827,7 @@ def initial_dynamic_program_batch(
     oracle_protocol,
     eligibility,
     broad_sampler=None,
+    successor_prior=None,
 ):
     """Cold-start a unit from an empty route archive via dynamic synthesis."""
     if entries:
@@ -696,6 +866,7 @@ def initial_dynamic_program_batch(
                     families,
                     max_primitives=config.max_primitives,
                     max_blocks=config.max_blocks,
+                    successor_prior=successor_prior,
                 )
             else:
                 _, program, binding, trace, metadata = synthesize_dynamic_program(
@@ -704,6 +875,7 @@ def initial_dynamic_program_batch(
                     max_modules=3,
                     max_primitives=config.max_primitives,
                     max_blocks=config.max_blocks,
+                    successor_prior=successor_prior,
                 )
         except ValueError as error:
             attempts.append(
@@ -767,6 +939,12 @@ def initial_dynamic_program_batch(
 class DynamicProgramOptimizer(ProgramOptimizer):
     """Reuse only measured self-discovered routes, mixed with fresh synthesis."""
 
+    #: The optional learned chemical prior over construction draws.  Declared on
+    #: the class rather than read with ``getattr`` so the seam is greppable and
+    #: an optimizer that never sets it is v1 by construction, not by accident.
+    #: ``None`` is the only byte-identical OFF.
+    construction_prior = None
+
     def _mutate(self, entry):
         if self.rng.random() >= FRESH_SYNTHESIS_PROBABILITY:
             return super()._mutate(entry)
@@ -777,6 +955,7 @@ class DynamicProgramOptimizer(ProgramOptimizer):
             max_modules=3,
             max_primitives=self.config.max_primitives,
             max_blocks=self.config.max_blocks,
+            successor_prior=self.construction_prior,
         )
         return (
             source,
