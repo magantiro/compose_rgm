@@ -1,0 +1,327 @@
+{
+  "artifact_repair_note": "An earlier write of this file lost one word: it was produced from an UNQUOTED shell heredoc, in which a backticked identifier is command substitution, so the shell executed it and substituted its empty output. The numeric content was unaffected and was re-verified against the raw probe log; only this prose field and the payload hash moved. Quote the heredoc delimiter when a payload contains backticks.",
+  "caveats": [
+    "Rung 0 only. A cell that yields little here is not a failure of the ladder; fa7_0 historically needed rungs 1 and 2, which produced 4 eligible after rung 0 produced 0.",
+    "Benchmark eligibility and chemical plausibility are two numbers. The braf endpoints are pyrazolo[1,5-a]pyrimidine carboxamides with ordinary substituents, which a chemist would defend; that is a qualitative reading of the SMILES recorded here, not a metric.",
+    "Similarity margins are small by construction: every endpoint sits just inside a delta=0.6 Tanimoto ball, so a margin of +0.015 is ordinary, not marginal.",
+    "3 seeds per cell. P(any eligible) at n=3 has a wide interval; treat 3/3 as directional."
+  ],
+  "cells": {
+    "braf_0": {
+      "attempts_per_seed": 336,
+      "distinct_eligible_across_seeds": 6,
+      "eligible_per_seed": [
+        4,
+        2,
+        5
+      ],
+      "endpoints": [
+        {
+          "dheavy": -15,
+          "qed_margin": 0.1193,
+          "sa_margin": 1.7786,
+          "sim_margin": 0.0164,
+          "smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3ccccc3)ccnc12"
+        },
+        {
+          "dheavy": -14,
+          "qed_margin": 0.0802,
+          "sa_margin": 1.5994,
+          "sim_margin": 0.04,
+          "smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(O)c3)ccnc12"
+        },
+        {
+          "dheavy": -13,
+          "qed_margin": 0.0407,
+          "sa_margin": 1.5559,
+          "sim_margin": 0.0892,
+          "smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC)c3)ccnc12"
+        },
+        {
+          "dheavy": -14,
+          "qed_margin": 0.0355,
+          "sa_margin": 1.5864,
+          "sim_margin": 0.0316,
+          "smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(N)c3)ccnc12"
+        },
+        {
+          "dheavy": -12,
+          "qed_margin": 0.0188,
+          "sa_margin": 1.6159,
+          "sim_margin": 0.0154,
+          "smiles": "CCCc1cccc(-c2ccnc3c(C(=O)NCCN(CC)CC)cnn23)c1"
+        },
+        {
+          "dheavy": -11,
+          "qed_margin": 0.0122,
+          "sa_margin": 1.6189,
+          "sim_margin": 0.1162,
+          "smiles": "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC(C)=O)c3)ccnc12"
+        }
+      ],
+      "heavy_delta": {
+        "max": -11,
+        "min": -15
+      },
+      "margins": {
+        "qed_margin": {
+          "max": 0.1193,
+          "median": 0.0355,
+          "min": 0.0122
+        },
+        "sa_margin": {
+          "max": 1.7786,
+          "median": 1.6159,
+          "min": 1.5559
+        },
+        "sim_margin": {
+          "max": 0.1162,
+          "median": 0.0316,
+          "min": 0.0154
+        }
+      },
+      "p_any_eligible": "3/3",
+      "regions_considered": 42,
+      "regions_excised": 42
+    },
+    "braf_1": {
+      "attempts_per_seed": 288,
+      "distinct_eligible_across_seeds": 12,
+      "eligible_per_seed": [
+        6,
+        7,
+        8
+      ],
+      "endpoints": [
+        {
+          "dheavy": -15,
+          "qed_margin": 0.2783,
+          "sa_margin": 2.0028,
+          "sim_margin": 0.0232,
+          "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccccc2)ccn1"
+        },
+        {
+          "dheavy": -13,
+          "qed_margin": 0.1901,
+          "sa_margin": 1.8271,
+          "sim_margin": 0.0571,
+          "smiles": "CNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+        },
+        {
+          "dheavy": -13,
+          "qed_margin": 0.1793,
+          "sa_margin": 1.8408,
+          "sim_margin": 0.0111,
+          "smiles": "NCc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+        },
+        {
+          "dheavy": -14,
+          "qed_margin": 0.1738,
+          "sa_margin": 1.859,
+          "sim_margin": 0.0286,
+          "smiles": "Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+        },
+        {
+          "dheavy": -11,
+          "qed_margin": 0.1574,
+          "sa_margin": 1.8745,
+          "sim_margin": 0.0857,
+          "smiles": "CC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+        },
+        {
+          "dheavy": -12,
+          "qed_margin": 0.0848,
+          "sa_margin": 1.6523,
+          "sim_margin": 0.0479,
+          "smiles": "CONc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+        },
+        {
+          "dheavy": -12,
+          "qed_margin": 0.0844,
+          "sa_margin": 1.696,
+          "sim_margin": 0.0389,
+          "smiles": "O=CNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+        },
+        {
+          "dheavy": -9,
+          "qed_margin": 0.0842,
+          "sa_margin": 1.7865,
+          "sim_margin": 0.0486,
+          "smiles": "CCOC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+        },
+        {
+          "dheavy": -12,
+          "qed_margin": 0.0726,
+          "sa_margin": 1.7126,
+          "sim_margin": 0.0197,
+          "smiles": "NCOc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+        },
+        {
+          "dheavy": -11,
+          "qed_margin": 0.0634,
+          "sa_margin": 1.8066,
+          "sim_margin": 0.0857,
+          "smiles": "NC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+        },
+        {
+          "dheavy": -10,
+          "qed_margin": 0.0016,
+          "sa_margin": 1.7679,
+          "sim_margin": 0.0667,
+          "smiles": "NCC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+        },
+        {
+          "dheavy": -12,
+          "qed_margin": 0.0012,
+          "sa_margin": 1.6732,
+          "sim_margin": 0.0479,
+          "smiles": "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(NCO)cc2)ccn1"
+        }
+      ],
+      "heavy_delta": {
+        "max": -9,
+        "min": -15
+      },
+      "margins": {
+        "qed_margin": {
+          "max": 0.2783,
+          "median": 0.0844,
+          "min": 0.0012
+        },
+        "sa_margin": {
+          "max": 2.0028,
+          "median": 1.8066,
+          "min": 1.6523
+        },
+        "sim_margin": {
+          "max": 0.0857,
+          "median": 0.0389,
+          "min": 0.0111
+        }
+      },
+      "p_any_eligible": "3/3",
+      "regions_considered": 36,
+      "regions_excised": 36
+    },
+    "fa7_0": {
+      "attempts_per_seed": 208,
+      "distinct_eligible_across_seeds": 1,
+      "eligible_per_seed": [
+        0,
+        1,
+        0
+      ],
+      "endpoints": [
+        {
+          "dheavy": -9,
+          "qed_margin": 0.0328,
+          "sa_margin": 1.7342,
+          "sim_margin": 0.0964,
+          "smiles": "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+        }
+      ],
+      "heavy_delta": {
+        "max": -9,
+        "min": -9
+      },
+      "margins": {
+        "qed_margin": {
+          "max": 0.0328,
+          "median": 0.0328,
+          "min": 0.0328
+        },
+        "sa_margin": {
+          "max": 1.7342,
+          "median": 1.7342,
+          "min": 1.7342
+        },
+        "sim_margin": {
+          "max": 0.0964,
+          "median": 0.0964,
+          "min": 0.0964
+        }
+      },
+      "p_any_eligible": "1/3",
+      "regions_considered": 26,
+      "regions_excised": 26
+    },
+    "fa7_2": {
+      "attempts_per_seed": 304,
+      "distinct_eligible_across_seeds": 4,
+      "eligible_per_seed": [
+        2,
+        1,
+        3
+      ],
+      "endpoints": [
+        {
+          "dheavy": -12,
+          "qed_margin": 0.1369,
+          "sa_margin": 1.4661,
+          "sim_margin": 0.0406,
+          "smiles": "CCn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O"
+        },
+        {
+          "dheavy": -10,
+          "qed_margin": 0.0929,
+          "sa_margin": 1.4013,
+          "sim_margin": 0.0719,
+          "smiles": "CC(=O)Cn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O"
+        },
+        {
+          "dheavy": -12,
+          "qed_margin": 0.0217,
+          "sa_margin": 1.3279,
+          "sim_margin": 0.0406,
+          "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CO)c1=O"
+        },
+        {
+          "dheavy": -12,
+          "qed_margin": 0.0203,
+          "sa_margin": 1.2722,
+          "sim_margin": 0.0406,
+          "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CN)c1=O"
+        }
+      ],
+      "heavy_delta": {
+        "max": -10,
+        "min": -12
+      },
+      "margins": {
+        "qed_margin": {
+          "max": 0.1369,
+          "median": 0.0217,
+          "min": 0.0203
+        },
+        "sa_margin": {
+          "max": 1.4661,
+          "median": 1.3279,
+          "min": 1.2722
+        },
+        "sim_margin": {
+          "max": 0.0719,
+          "median": 0.0406,
+          "min": 0.0406
+        }
+      },
+      "p_any_eligible": "3/3",
+      "regions_considered": 38,
+      "regions_excised": 38
+    }
+  },
+  "evidence_role": "zero_oracle_rung0_support_measurement_for_the_routed_region_kernel",
+  "generated_at_utc": "2026-09-22T20:32:12.683306+00:00",
+  "harness_self_check": {
+    "claim": "fa7_0 at seed index 0 must reproduce the historical support-expansion arm's logged , because it is the same kernel at the same production seed.",
+    "historical_log": "[fa7_0] SUPPORT EXPANSION round=1 stop=reached_target eligible=4 fallback=0 attempts=2 draws=2880",
+    "measured": 0,
+    "reproduced": true,
+    "why_it_matters": "It is the only hard reference point available for rung 0, and it is what licenses reading the braf numbers as support rather than as a harness that over-admits."
+  },
+  "kernel": "rdkit 2024.03.5 (T4 production), local pinned env",
+  "new_oracle_calls": 0,
+  "payload_sha256": "858502c7506c2f0b96812102443958dad75d758b53bfe5f6bc9b47ad517230c8",
+  "schema_version": "t4_rung0_region_kernel_v1",
+  "seed_derivation": "seed index 0 is the production derivation fallback_seed(controller_seed, round_index=1, parent_index=0), unchanged. Indices 1 and 2 add a declared constant 97_000_003*index and are a VARIANCE PROBE, not the production algorithm.",
+  "what_ran": "compose_v4.control.zero_support_fallback.fallback_candidates -- the REGION kernel, rung 0 of the escalation ladder -- on the four cells the target-blind routing rule sends to the region kernel, at three fixed seeds each. Endpoints are gated by the unmodified production t4_fiber_campaign.Fiber.check. The state/protonation cell 5ht1b_2 and ladder rungs 1-3 are NOT covered here."
+}
