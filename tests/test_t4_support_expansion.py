@@ -579,3 +579,63 @@ def test_the_app_clears_the_fallback_lane_label():
     source = BASE_APP.read_text()
     assert '"proposal_lane": None' in source
     assert '"support_expansion_stage": "zero_support_fallback"' in source
+
+
+def test_a_real_fallback_candidate_serializes_into_a_round_lock():
+    """`attach_features` attaches a SET fingerprint and numpy features.
+
+    The round lock is published as canonical JSON, so an expansion record that
+    cannot serialize would fail AFTER the expansion succeeded and before anything
+    was docked -- the same fires-only-on-success shape as the lane-label defect.
+    """
+
+    import numpy as np
+
+    from compose_v4.control.fiber_control import SearchState
+    from compose_v4.control.zero_support_fallback import fallback_candidates
+    from compose_v4.experiments.t4_fiber_campaign import Fiber
+    from compose_v4.experiments.t4_integrated_route_fiber import attach_features
+
+    def _jsonable(value):
+        """The app's own helper, reproduced so a drift in it fails this test."""
+
+        if isinstance(value, np.ndarray):
+            return value.tolist()
+        if isinstance(value, set):
+            return sorted(value)
+        if isinstance(value, dict):
+            return {str(key): _jsonable(item) for key, item in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [_jsonable(item) for item in value]
+        if isinstance(value, np.generic):
+            return value.item()
+        return value
+
+    parent = "CC(C)CCN(C)C(=O)c1ccccc1"
+    fiber = Fiber(parent, 0.2, support="compose_valid")
+    produced, _ = fallback_candidates(
+        parent,
+        np.random.default_rng(20260922),
+        check=fiber.check,
+        reference_smiles=parent,
+        delta=0.2,
+    )
+    rows = [
+        {
+            **row,
+            "proposal_lane": None,
+            "proposal_experts": [],
+            "support_expansion_stage": "zero_support_fallback",
+            "parent_score": -7.5,
+            "families": ("atom_delete",),
+            "program_families": ("atom_delete",),
+            "regions": 1,
+            "created": int(row.get("inserted_atoms", 0)),
+            "deleted": int(row.get("deleted_atoms", 0)),
+        }
+        for row in produced
+    ]
+    state = SearchState(archive={parent: -7.5}, budget=8, rounds=0)
+    candidates = attach_features(rows, state, fiber)
+    assert candidates
+    json.dumps(_jsonable(candidates), sort_keys=True, separators=(",", ":"))
