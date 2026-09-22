@@ -4440,3 +4440,132 @@ independently of whether fa7_0 ever closes.**
   Not a result to build on, but the first positive evidence the repair does anything, and it points
   at a specific cheap question -- whether the crossover widens at 1,000 calls -- rather than at more
   mechanism work.
+
+## 2026-09-22 (T4 selection bias is CLEAN, the panel is TEN configurations, and one row is under-reported)
+
+- **THE COMPARATORS AVERAGE AND WE DO NOT -- measured from two committed artifacts, and it reframes
+  the whole per-row reproducibility worry.** `docs/genmol_t4_all_methods.json` states its metric as
+  "mean docking score of the most optimized lead over **3 runs**"; `configs/t4_published_invirtuogen_
+  baseline.json` states "value is InVirtuoGen **mean**, stderr in parentheses in the source" and
+  carries per-cell stderrs of **0.1-0.9** (implied per-cell run-to-run SD = stderr*sqrt(3), median
+  **0.52**, max 1.56). The frozen COMPOSE table reports a **single-run best**. So docking
+  nondeterminism is not an argument against rerunning -- it is why the benchmark averages, and the
+  single-run table is not like-for-like. Context for reading the panel: at d0.6, **8 of 14 paired
+  rows sit within |gap| <= 0.7**, i.e. inside one comparator SD, while the aggregate (-7.6 over 14)
+  is far less exposed.
+- **SELECTION BIAS: CLEAN, and the evidence is a metric that COULD have gone the other way.**
+  Census of 28 `compose-t4-*` volumes on profile `nitya`, 65 run rows, 278 Modal reads, zero fetch
+  failures: **0 of 30 cells were score-selected** (20 `single_run`, 9 `multiple_runs_progress_
+  selected`, 1 unresolved = the blank cell). The decisive cell is **parp1_2 d0.6**, where a 49-call
+  run reached **-11.4** and the table published **-11.3** from the 250-call run -- *the worse value*.
+  A rule that ignores score is the only one consistent with that. On the other 8 multi-run cells the
+  deepest run is also the best, so they cannot discriminate; the verdict rests on that one cell plus
+  `_pick_authoritative` ranking on (calls, evidence, locks) and never on score. **8 cells carry
+  root-only aborted attempts (1 charged call = the root docking); excluding them changes NO verdict.**
+- **A BEST-SO-FAR THAT WORSENS AS CALLS INCREASE IS ARITHMETICALLY IMPOSSIBLE, and it is the cheapest
+  audit of a published table.** Diffing `diagnostics/t4_ledger_reconciliation_v1.json` (a committed
+  2026-09-21 snapshot) against `T4_FROZEN_RESULT_v1.json` finds exactly one such row: **5HT1B seed 2
+  d0.6, -12.2 at 199 calls in the ledger vs -11.3 at 222 calls in the table**, same arm, same run
+  `5f08e547828d`. The published number is the LOCKS LOWER BOUND, not the `min(locks u archive)` the
+  table's own rule specifies -- the identical mechanism `correction_applied` already documents and
+  fixed for 5HT1B seed 3 d0.4. Costs zero Modal reads and independently reproduced a subagent's
+  35-lock reconstruction. IVG is -12.0 there, so the row flips loss(+0.7) -> win(-0.2).
+- **THE SAME DIFF THREW UP A SECOND APPARENT DEFECT THAT IS A SEED SCORE, AND CONFLATING THEM WOULD
+  HAVE BEEN THE CLASSIC ERROR.** `braf_0 d0.6` reads ledger **-9.6 @ 1 call** against frozen -9.0 @ 33.
+  One charged call with `maturity: aborted_no_search` IS THE SEED MOLECULE'S OWN DOCKING, not a
+  generated lead. **Seed-only rows are not generated COMPOSE successes.** Always check
+  `reconciled_calls == 1` before treating a better committed value as a recoverable result.
+- **THE PANEL IS TEN GENUINELY DISTINCT CONFIGURATIONS, not one controller.** Measured across the ten
+  panel contracts plus five rescue arms: `docking_seed` is **20260918 for PARP1/BRAF** and
+  **20260919 for FA7/5HT1B/JAK2**; `proposal.route_complete_region` is **beam 32 / expansion 24 /
+  realization 32** for PARP1/BRAF against **48 / 48 / 64 with `scale_balanced`** for the other three;
+  and PARP1/BRAF contracts carry no `route_scale_floor_rounds`, `phase_poll_seconds`,
+  `proposal_wait_seconds`, `query_wait_seconds` or `prior_operational_waste` at all. Everything a
+  quick survey checks -- `batch 8`, `parents 4`, `exploration 2`, `expert_floor_rounds 2`,
+  `parent_explore 0.3`, `value_penalty 1.0`, `charged_calls_per_cell 250`, `shallow {480, 3}`,
+  `anchored_replacement {512, 3}` -- IS identical, which is exactly why the survey has to go further
+  than the obvious fields before anyone says "the same controller ran everywhere".
+- **THE FROZEN TABLE'S `source: "support_expansion"` LABEL COVERS TWO DIFFERENT OPERATORS, and the
+  protonation contract itself forbids the conflation** ("the two mechanisms must never be mixed in
+  one arm or the mechanism becomes unattributable"). Region repair = ONE added key on the existing
+  shallow lane (`proposal.shallow.region_law = "free_gate_margin_v1"`), otherwise byte-identical to
+  its panel parent. Protonation = an entirely new FOURTH proposal lane (17 settings), no
+  `region_law`, `expert_floor_rounds` REPLACED by `cold_start_floor_rounds: 1`,
+  `route_complete_region` pool 64->192 and realization 64->96 with `training_split` REMOVED, a
+  DIFFERENT route checkpoint, and a different runtime stack. The same string means a THIRD thing in
+  `compose_v4.experiments.t4_support_expansion` (the fa7_0 escalation ladder), which contributed no
+  row at all.
+- **THREE d0.6 CAMPAIGNS STRADDLED A PROPOSAL-WIDTH CHANGE MID-RUN.** Commit `cdf3e1a0` ("Fix route
+  realization limits in 250-call contracts") moved `route_complete_region.realization_limit`
+  **96 -> 64** in the fa7/5ht1b/jak2 d0.6 contracts; those campaigns LAUNCHED under 96 (rev
+  `69659b96b`) and RESUMED/finished under 64 (rev `8ab529cc4`). `realization_limit` is a proposal
+  width, which those contracts' own `forbidden_changes` list prohibits. **No replicate can reproduce
+  that mixture by accident** -- 96, 64 or split-as-run is a decision someone has to take. Corollary:
+  `resume_predecessor.contract_payload_sha256` records the IMMEDIATELY PRECEDING identity, not the
+  launch identity, wherever a third identity exists.
+- **THE CONTRACTS ON DISK FOR THE PROTONATION ARMS ARE SUPERSEDED PAYLOADS.** Tree holds `4486c376`
+  (d04) / `d7d2fbc2` (d06); the runs were bound to **`c51c6144` / `d95fb5a1`** at commit
+  **`e86a2181`**, which is NOT an ancestor of HEAD and lives only on branch
+  `t4-5ht1b2-launchable-20260921` (verified present on the remote at that SHA, so nothing is
+  single-copy). Deltas and ceilings agree between the two, so a careless diff of just those fields
+  would have read "same contract". Replicating from the tree file would clone a contract that never
+  ran.
+- **DOCKING IRREPRODUCIBILITY IS WIDER AND FAR LESS UNIFORM THAN THE 1.3 FIGURE.** Repeat launches
+  docked the same root molecule several times for free: fa7_0 **-7.5 / -8.6 / -8.8 / -9.1 (spread
+  1.6)**, fa7_2 0.7, 5ht1b_2 **0.1**, braf_0 **0.1** -- byte-identical SMILES, same target, same
+  fixed box. So 1.3 is neither the worst case nor a constant, and the spread is strongly
+  molecule-dependent. Quote the aggregate and the win COUNT; do not bold a per-row margin.
+
+## 2026-09-22 (a target-blind kernel router, and the one out-of-panel molecule that breaks its rule)
+
+- **THE ROUTING RULE REPRODUCES ALL FIVE HISTORICAL KERNEL CHOICES AND THE PANEL CANNOT TELL YOU WHY.**
+  `Q_t empty -> state_aware if formal_charge(G) != 0 else region` agrees 5/5 on the cells where a
+  kernel actually fired, and my implementation reproduces the committed table on all 30 rows / 15
+  distinct molecules with **0 disagreements**. But on these fifteen leads **"carries a formal charge"
+  is perfectly confounded with "is a 5HT1B lead"** -- all three 5HT1B sources are cations and no other
+  source is charged. The panel alone therefore cannot distinguish routing on charge from routing on
+  identity, and saying so is part of the result.
+- **THE MECHANISM'S OWN PRECONDITION DISAGREES WITH THE SHIPPED BINARY ON 8 OF 15 CELLS.** The
+  protonation contract defines applicability as "a real nitrogen carrying exactly three single bonds
+  ... whose (formal_charge, implicit_h) is (+1,1) or (0,0)". Running the PRODUCTION enumerator
+  `enumerate_atom_protonation_restates` over the fifteen sources finds admissible sites on **TEN**,
+  including eight neutral ones (parp1_0 2, parp1_2 1, braf_0 2, braf_1 1, fa7_0 1, fa7_1 1, fa7_2 1),
+  against **three** cells the charge flag admits. So the binary is NOT a restatement of the
+  mechanism's applicability -- it is a coarser feature that happens to agree with the historical
+  choices here. Anyone reading the mask as "zero where chemically inapplicable" is wrong.
+- **THE GRADED SIGNAL IS THE MECHANISTIC ONE, and it is measurable in 26 seconds.** Running the
+  production excision path over every bridge-separated region of all fifteen sources: the executor's
+  charge policy refuses **9/16 (5ht1b_0), 5/10 (5ht1b_1), 9/16 (5ht1b_2) and 0 on every neutral
+  cell**, with every refusal attributable to `charge_policy_preserved`. The region kernel measurably
+  LOSES SUPPORT exactly where a charge-aware kernel becomes necessary -- the two kernels partition
+  one measured quantity rather than competing for an arbitrary split.
+- **A ZWITTERION BREAKS THE BINARY AND THE GRADED FORM GETS IT RIGHT.** Out-of-panel control
+  `[NH3+]C(Cc1ccccc1)C(=O)[O-]`: **net formal charge 0**, so the shipped rule routes it `region` --
+  yet **9 of 12** of its pendant excisions are charge-policy refused, so the region kernel has lost
+  three quarters of its support and the graded portfolio routes it `state_aware`. Net charge is a
+  coarse proxy for "the charge policy will block structural excision"; it is exact on the fifteen T4
+  leads, where every charged source carries a single net charge, and WRONG here. Pinned as a test so
+  the brittleness is a recorded fact rather than an opinion.
+- **A NEUTRAL TERTIARY AMINE IS THE CONTROL THAT SEPARATES THE TWO STORIES.** `CCN(CC)CCc1ccccc1` has
+  protonation sites, zero charge, **0/14** charge-policy refusals, and routes `region`. Without it,
+  "the rule reads charge" and "the rule reads the chemistry the protonation kernel needs" are
+  indistinguishable.
+- **ISOLATION IS ENFORCED STRUCTURALLY, NOT BY A NAME SCAN, and the mutation that proves it names no
+  protein at all.** The routing accepts two frozen dataclasses whose field sets are pinned by test;
+  neither can carry a name or a score. The load-bearing mutation is
+  `net_formal_charge != 0 and heavy_atoms == 31` -- it singles out 5ht1b_2 (the only charged cell
+  that historically exhausted) through a LEGITIMATE state feature, and a textual sweep cannot see it.
+  Only the behavioural guard "states agreeing on the declared features must decide alike" catches it.
+  9/9 mutations killed, both cosmetic positive controls green, and the runner ABORTS if a substitution
+  did not change the file.
+- **A NAMED-GUARD EXPECTATION MUST MATCH PARAMETRIZED TEST IDs.** `must_fail` compared exactly against
+  pytest's `name[1]` form and silently scored a fired guard as not fired; and the mutation
+  `eligible_pool_size > 4` does NOT fail the "healthy pool" test (which probes a pool of 8) -- only
+  the parametrized pools of 1 and 2 bind. A guard is only tested where it binds, at the fixture level
+  too.
+- **A COLLISION CHECK SCOPED TOO WIDE REPORTS A CORRECT DESIGN AS BROKEN.** My first replicate-seed
+  audit compared every derived seed stream against every other and returned 96 "collisions" -- all of
+  them either the same cell at its two delta thresholds (which share a `controller_seed` in the
+  HISTORICAL contracts and must keep sharing it) or two unrelated proteins whose base seeds differ by
+  a representable ladder offset. The property that matters is that a cell's own replicates do not
+  share a stream; scoped to that it is 0. Test the property you need, and RECORD the inherited one.
