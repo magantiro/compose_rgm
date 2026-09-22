@@ -128,38 +128,66 @@ ARMS = {
 # ---- The frozen shared controller configuration ------------------------------------
 # Every field below is the SAME on every cell of every arm. `experts` and
 # `support_expansion` are the only per-arm fields and they live in ARMS.
+# Draw counts and batch size are set from the MEASURED preflight
+# (`diagnostics/t4_canonical_shared_controller_v1/preflight_v1.json`, 150 lanes over
+# all 30 cells, zero oracle calls), not from the predecessor arm's values:
+#
+#   lane                  s/draw (median)   eligible @480 draws (median)   empty lanes
+#   shallow                     1.800                 42                    3 / 60
+#   anchored_replacement        0.657                  0                   27 / 45
+#   structured                  2.071                 21                    8 / 45
+#
+# The predecessor's 480/512/480 costs ~2,190 core-seconds per parent per round, which
+# over 60 cells is several thousand core-hours against a measured ceiling of ~100
+# concurrent CPUs -- days of wall clock for one table. 96 draws on every lane is an
+# EQUAL-DRAW allocation (one number, identical for every lane and every cell) costing
+# ~434 core-seconds per parent per round, and at the measured yields it still returns
+# tens of eligible endpoints per round on a healthy cell.
+#
+# `anchored_replacement` is retained despite a median root yield of ZERO. It is one of
+# the existing coordinated program families, it is the cheapest lane per draw, and the
+# preflight measured it only from each cell's ROOT -- not from the parents a campaign
+# actually visits. Dropping a declared family on a root-state probe would be selecting
+# the vocabulary on evidence that does not cover the states it runs in. What it
+# contributes is reported by the frontier-attribution table instead.
 SHARED_CONTROLLER = {
     "support": "compose_valid",
     "charged_calls_per_cell": 250,
-    "batch": 8,
+    "batch": 12,
     "parents": 4,
     "parent_explore": 0.3,
-    "exploration": 2,
+    "exploration": 3,
     "expert_floor_rounds": 2,
     "value_penalty": 1.0,
     "docking_seed": 20260922,
     "proposal": {
         "shallow": {
-            "draws": 480,
+            "draws": 96,
             "horizon": 3,
             "region_law": "free_gate_margin_v1",
             "completion_law": "free_gate_margin_v1",
         },
-        "anchored_replacement": {"draws": 512, "horizon": 3},
-        "structured": {"draws": 480, "horizon": 3},
+        "anchored_replacement": {"draws": 96, "horizon": 3},
+        "structured": {"draws": 96, "horizon": 3},
     },
 }
 
 # The adaptive rule, arm C only. Every field is a BOUND; the trigger reads only
 # generic search statistics (this round's distinct eligible-candidate count) and
 # never a cell identity.
+# The ladder is expressed RELATIVE to the base draw count: a step of `d` is realised
+# as `ceil(d / base)` parallel replicates per lane per parent, so at base 96 the three
+# steps are 2, 4 and 8 replicates -- 16, 32 and 64 workers. Sized this way rather than
+# copied from the predecessor arm, whose 960/1920/3840 against a base of 96 would have
+# demanded 40, 80 and 160 replicates and swamped the whole container pool on one round
+# of one cell.
 ADAPTIVE_SUPPORT_EXPANSION = {
-    "draw_ladder": [960, 1920, 3840],
+    "draw_ladder": [192, 384, 768],
     "lanes": ["shallow", "anchored_replacement"],
     "zero_support_fallback": True,
     "stop_at_distinct_eligible": 4,
-    "max_extra_draws_per_event": 6720,
-    "wall_seconds": 5400.0,
+    "max_extra_draws_per_event": 1344,
+    "wall_seconds": 1500.0,
 }
 
 #: Arm C expands whenever a round's own eligible yield is below this many distinct
