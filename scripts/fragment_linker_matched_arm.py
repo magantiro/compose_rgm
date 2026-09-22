@@ -2,10 +2,13 @@
 """Read the matched linker arm: same everything, one difference.
 
 This is a DIAGNOSTIC, not a benchmark row.  ``linker_design`` is withheld by
-``tools/aggregate_fragment_suite.py`` and stays withheld: the withholding is a
-correctness guard, and the question of whether the composite transaction is a
-capability EXTENSION rather than an acceleration is open at the time of writing.
-Nothing here lifts it, and nothing here produces a number formatted as a row.
+``tools/aggregate_fragment_suite.py`` and stays withheld.  The withholding is a
+correctness guard, and the composite transaction has been RULED a capability
+EXTENSION on 8 of 10 released prompts and an acceleration on 2
+(``diagnostics/fragment_path_v3_classification_v1.json``), so on most of the
+panel these endpoints are reached by a transition the proposal law does not
+propose.  Nothing here lifts the withholding, and nothing here produces a number
+formatted as a row.
 
 What it does produce is the comparison the v3 predeclaration says a PASS
 licenses, with the realized-length distribution beside it, because a linker
