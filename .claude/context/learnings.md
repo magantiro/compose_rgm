@@ -4395,3 +4395,48 @@ independently of whether fa7_0 ever closes.**
   **INFERRED, NOT MEASURED:** that the fix lifts the footprint to near-total coverage. The
   196-synthesis counter makes the projection well founded, but no run has executed with the fix --
   whether a full-footprint arm beats, matches or loses the control is **untested**.
+
+## 2026-09-22 (the corrected PMO A/B: INCONCLUSIVE, and the finding is a CROSSOVER)
+
+- **MEASURED, matched 250-call celecoxib arms run CONCURRENTLY for symmetric load:**
+      arm                    best      AUC     t10@100  t10@150  t10@200  t10@250
+      A  deployed B         0.2824   0.1878    0.2155   0.2324   0.2485   0.2704
+      B  + completion law   0.2883   0.1744    0.1763   0.2090   0.2538   0.2774
+  AUC ratio **0.929** -- between the predeclared 0.90 reject and 1.10 qualify thresholds; B leads
+  the top-ten mean at **2 of 4** checkpoints, short of the 3 required. **INCONCLUSIVE: not
+  qualified, not rejected.** The panel was correctly NOT run.
+- **THE FINDING IS THE CROSSOVER, and it is the reason the metric and the mechanism disagree.**
+  B trails through the first half, **overtakes at 200 calls**, and finishes ahead on BOTH the
+  top-ten mean (0.2774 vs 0.2704) AND the best score (0.2883 vs 0.2824) -- while LOSING on AUC,
+  because AUC integrates the whole curve and charges the early deficit more than it credits the
+  late gain. **At a fixed 250-call budget AUC is the right primary metric AND the crossover is a
+  real property of the mechanism; both can be true.** What that licenses is a QUESTION -- does the
+  crossover hold and widen at 1,000 calls -- not a re-reading of this run against a friendlier
+  metric.
+- **THE CONTROL REPRODUCED ITS FIRST RUN TO THE DIGIT** -- best 0.2824427480916031, AUC 0.1878,
+  identical. That is the strongest available validation that the matched design is sound and that
+  the wiring fix touched ONLY the treatment: arm A passes `completion_law=None` and the repaired
+  adapter forwards `getattr(..., None)`, and a real concurrent run PROVES the byte-identity rather
+  than asserting it. **A control that reproduces exactly is worth more than any argument that a
+  change was inert.**
+- **REMOVING THE THROTTLE MATTERED, which retroactively validates calling the first A/B
+  INCONCLUSIVE.** Arm B against its own throttled version: AUC 0.1456 -> **0.1744 (+19.8%)**, best
+  0.25 -> **0.2883 (+15.3%)**, final top-ten 0.2405 -> 0.2774, charged endpoints carrying a repaired
+  completion **9 -> 28 (3.1x)**.
+- **THE NAMED LIMITATION CUTS CONSERVATIVE HERE, and the direction matters.** Arm B ran WITHOUT the
+  law in round 0 (the authorized bootstrap exclusion), so B finished ahead on top-ten mean and best
+  score while carrying LESS of the mechanism than a fully-threaded arm would. **Had the result come
+  out negative, round-0 exclusion would instead have been a live alternative explanation.** State
+  which way a limitation cuts, not merely that it exists.
+- **DIRECTIONAL, NOT MEASURED (n = 4 and 6 per cell):** charged arm-B endpoints stratified by the
+  largest size their completion requested suggest MID-RANGE completions are the productive ones --
+  5-8 atoms mean 0.171 and 9-16 mean 0.153, both above the no-completion baseline of 0.134, while
+  1-4 sits BELOW at 0.121. A direction to test, not an effect.
+- **CAVEATS THAT BELONG WITH THE NUMBER:** one task, one seed, 250 calls; the crossover rests on two
+  checkpoints and needs a second seed before it is established; `top_auc` trapezoids from (0,0) so a
+  250-call AUC is structurally depressed ~20% and must NEVER be compared to a published 10k figure;
+  run locally on the pinned kernel, not the deployed Modal image.
+- **THE HONEST SUMMARY: "a mechanism that is behind at 150 calls and ahead at 250, on one seed."**
+  Not a result to build on, but the first positive evidence the repair does anything, and it points
+  at a specific cheap question -- whether the crossover widens at 1,000 calls -- rather than at more
+  mechanism work.
