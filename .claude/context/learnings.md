@@ -4483,3 +4483,35 @@ independently of whether fa7_0 ever closes.**
   A deliberate cancellation must be recorded as a sealed receipt and subtracted -- an auditable fact
   rather than an inference. Every OTHER terminal state does surface through `get`, because the
   output or the exception is there to be fetched.
+
+## 2026-09-22 (the canonical T4 run contains a FREE replicate control, and it sets the noise floor at ~1.2)
+
+- **Arms B and C of the canonical panel are EXACT ALGORITHMIC REPLICATES on any delta=0.6 cell
+  where the adaptive rule never fires**, and that is verifiable rather than assumed. They declare
+  the same expert vocabulary and the same per-cell seed (the seed is a pure function of the seed
+  index and delta, deliberately NOT of the arm) and differ only by the presence of the expansion.
+  VERIFIED on the round locks for `parp1_0_d06` and `parp1_1_d06`: identical parents, identical
+  candidate pools (66 and 34 endpoints, census identical lane by lane), and identical 12-query
+  batches IN IDENTICAL ORDER.
+- **Their only divergence source is the ORACLE**, because `qvina02` is seeded and `obabel --gen3D`
+  is not: the same root molecule scored **-7.7 in arm B and -7.8 in arm C**. So the difference in
+  their final results is pipeline noise propagated through an adaptive search, measured for free.
+      parp1_0_d06   B -12.2   C -11.0   |diff| 1.2
+      parp1_1_d06   B -12.2   C -11.0   |diff| 1.2
+- **CONSEQUENCE, and it governs how the whole table may be read: a best-of-250 per-cell margin of
+  ~1.2 kcal/mol can arise from docking noise ALONE.** The 2026-09-21 caveat said cross-RUN per-cell
+  margins are unsound and within-run arm comparisons are sound. That is too generous. Within one
+  run, two arms scoring different molecules -- or the same molecules on different calls -- inherit
+  the same unseeded conformer generation. What is sound within a run is (a) STRUCTURAL outcomes
+  (did the cell complete its budget or exhaust, how many calls did it spend) and (b) AGGREGATES
+  over cells. A single cell's 1-kcal difference is not evidence of anything.
+- **Design lesson worth reusing: make the ablation's control arm fall out of the design.** Nobody
+  planned a replicate experiment here; it exists because the seed was made a function of the
+  benchmark INPUTS rather than of the arm, and because the adaptive rule is genuinely inert on
+  healthy rounds. Both were chosen for other reasons -- matched initialization, and not perturbing
+  a working search -- and together they produced a free noise estimate on real cells at real
+  budget. A seed derived per-arm would have destroyed it.
+- **Report the noise floor IN the table, computed from the run itself**, not as prose recalled from
+  a different experiment. `scripts/t4_canonical_table.py` now finds every B/C pair whose expansion
+  count is zero and prints their spread beside the results, so a reader cannot pick up a margin
+  without meeting its floor.
