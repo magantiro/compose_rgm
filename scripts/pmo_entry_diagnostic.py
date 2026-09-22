@@ -1002,6 +1002,10 @@ def _ladder_table(arms: dict[str, Any], predicate: dict[str, Any]) -> dict[str, 
         for task, block in arms[name]["per_task"].items():
             for at, prefix in block["prefixes"].items():
                 manifold = prefix["manifold"]
+                # Arms start from different populations, so an absolute maximum
+                # is not comparable across rows. The LIFT over the best parent
+                # already in the pool is: it asks what the proposals ADDED.
+                parent_best = block["parent_similarity_max"]
                 tasks.setdefault(task, {}).setdefault(at, []).append(
                     {
                         "arm": name,
@@ -1013,6 +1017,10 @@ def _ladder_table(arms: dict[str, Any], predicate: dict[str, Any]) -> dict[str, 
                         "median_qed": manifold["median_qed"],
                         "best_basin_rung": prefix["best_rung"],
                         "best_similarity": prefix["best_similarity"],
+                        "best_parent_similarity": parent_best,
+                        "best_lift_over_best_parent": round(
+                            prefix["best_similarity"] - parent_best, 4
+                        ),
                         "task_own_chance_ceiling": per_task_chance.get(task),
                         "best_over_task_own_chance_ceiling": (
                             round(prefix["best_similarity"] / per_task_chance[task], 3)
@@ -1049,6 +1057,13 @@ def _ladder_table(arms: dict[str, Any], predicate: dict[str, Any]) -> dict[str, 
             "rung (0.25). first_entry_proposal_index is None when nothing reached "
             "the committed 0.30 entry threshold. Neither is a zero and neither "
             "may be reported as one."
+        ),
+        "lift_reading": (
+            "best_lift_over_best_parent is the headline comparison across rows. "
+            "Each arm starts from its own population, so best_similarity alone "
+            "compares starting points as much as mechanisms; the lift asks what "
+            "the proposals themselves added to the best approach already in the "
+            "pool."
         ),
         "chance_ceiling_reading": (
             "task_own_chance_ceiling is the maximum similarity any of 100 "
