@@ -2268,3 +2268,83 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   analysis on n=31 where one endpoint moves the number three points. Re-running larger to see
   whether it lands the other side is measuring until the answer changes. The criticism belongs to
   the test; the verdict still stands.
+
+## 2026-09-21 (fragment v3: the gate ate its own denominator, and the metric read 100%)
+
+- **A per-event gate can REMOVE a falsifier's failure mode from its own denominator, and the
+  result is a metric that reads 100.0% and cannot read anything else.** The v3 linker path
+  program predeclared "share of COMMITTED two-core endpoints whose realized path length exceeds
+  the seeded length of 1", threshold 50%, Wilson lower bound, n>=150, denominator declared
+  IMMUTABLE. Measured: **185 of 185 = 100.0%, Wilson [97.97, 100.0], PASS**. Three matched-budget
+  arms (400 attempts each, pinned kernel 3.11.13/rdkit 2024.03.5, per-TRAJECTORY receipts) show
+  why that number could not have come out differently:
+      arm                       committed   rate     metric    committed with NO transaction
+      v3 as shipped                 43     10.75%   100.00%                0
+      transaction stubbed OFF        0      0.00%   no verdict possible
+      gate removed as well         172     43.00%     0.58%              172
+  `path_permits` refuses every event that does not lengthen the path while the path is short and
+  a transaction site exists; a test already pins that sites ARE offered at the start state on all
+  ten released prompts; and a trajectory that admits zero events returns before the commit path.
+  So a trajectory whose composite transaction never fires does not commit AT THE SEEDED LENGTH --
+  **it does not commit at all**. The v2 failure mode (endpoints piling up at the seed) was not
+  refuted, it was converted into non-commits. The SAME broken mechanism therefore yields
+  UNDERPOWERED with the gate on and a clean FAIL with it off.
+- **The predeclaration was honoured and the denominator was never moved; the test was simply
+  un-failable.** That is not an argument for editing it after the fact -- it is an argument for
+  writing the falsifier over ATTEMPTS whenever the mechanism under test also decides what
+  commits. **Ask, before sampling: can the mechanism I am testing change my denominator?**
+- **The informative quantity was the one beside the metric: yield 43.00% -> 10.75%, a 4.0x
+  reduction.** And the honest comparator for what the program ADDS is the baseline's own rate of
+  producing a longer path unaided: **1 of 172 committed endpoints, 0.58%**. Neither number is in
+  the falsifier.
+- **The modal v3 outcome is exactly one successful transaction and then a stall.** Pooled bench:
+  185 committed, 231 transactions, length histogram {2:152, 3:23, 4:7, 5:3} against a target band
+  drawn uniformly on [2,5]. A target of 3-5 that reaches 2 and then fails the transaction cannot
+  take ordinary events either -- the gate refuses them until the rejection budget is exhausted --
+  so it commits at 2. The release condition is STRUCTURAL (`sites is None`) and never fires on a
+  state where the transaction merely keeps failing. "A predicate with no way to make progress must
+  release" needs a MEASURED reading, not only a structural one.
+- **Deriving the probe budget from a measured per-draw rate beat the guessed ladder outright.**
+  Measured family rates at the real states: `atom_insert` 1.5-47%, `bond_reroute` 1.5-14.25%.
+  Decisive budgets N* = ceil(log(0.05)/log(1-r)), r = p_family / distinct successors, came out
+  **279 to 1,197 draws** -- so the v2-era ladder's first rung (256) was UNDERPOWERED for every
+  single constituent, and its third (16,384) was 14-60x more than needed. A ladder is a guess at
+  both ends.
+- **A family that fires is not a boundary -- go and look at what it proposes.** `bond_reroute`
+  draws at the post-insert state and still never produces v3's successor. Census of the moved
+  atom over the model's own draws (BARICITINIB, 4,000 draws, 100 reroutes, 40 distinct
+  successors): **other_core_atom 82, inserted_atom 18, far_core_anchor 0, path_atom 0.** v3
+  executes `BondReroute(a=path_atom, b=far_anchor, u=new_atom, v=far_anchor)`, in which the moved
+  endpoint `u` is NOT an endpoint of the cut, and the only model-shaped action reaching the same
+  molecule would have to MOVE THE FAR CORE ANCHOR -- which the pendant-graft enumeration never
+  offers. So the absence is structural in the prior's support, not rarity. Do not restate this as
+  "the vocabulary lacks bond_reroute": the family is there, the coordinate class is not.
+- **A production docstring claimed a measurement it did not have.** `_attempt_path_transaction`
+  still says "three-event" (v3 is two) and "Each constituent is a move the proposal law can rank
+  -- measured IN_SUPPORT on every constituent of every drug where the transaction executes". The
+  v2-era probe it refers to recorded CYCLOTHIAZIDE's ring-close as NO_HIT up to 16,384 draws and
+  labelled it UNRESOLVED. A docstring is a claim surface; re-read it when the mechanism changes.
+- **A mutation SURVIVED because the test satisfied a DIFFERENT guard.** The payload-provenance
+  test passed an `atom_insert` already anchored at the path atom, which satisfies the site filter
+  whether or not the filter exists, and separately checked a no-payload case that is caught by
+  the rule-name guard. Deleting the site filter broke nothing. The fix passes a payload the prior
+  proposed SOMEWHERE ELSE and requires abandonment -- because the module rewrites the payload's
+  slot and neighbours unconditionally, so without the filter the prior chooses the atom while the
+  module chooses the position. Battery then 12 of 12, cosmetic control green.
+- **The mutation battery's ABORT fired twice for real** -- once on an anchor occurring twice in
+  the file. An ambiguous or no-op anchor must abort, never be scored: a replace that changes no
+  bytes reads as a surviving mutation and indicts the tests for nothing.
+- **The suite runner could not express the linker arm at all.** It never passed
+  `linker_bridge_atoms`, so every linker row it could produce used the direct join the harness is
+  known to be unable to express the task with, and it had no `--path-program`. Both are now GLOBAL
+  knobs; `path_program` is a controller dataclass field so it is already inside the frozen hash,
+  while `linker_bridge_atoms` belongs to no dataclass -- it is a property of the START STATE -- so
+  it is recorded in the protocol block or a realized-length number is unreadable.
+- **Two hops share one sink here too.** `main -> run_task` and `run_task -> build_prompt_context`
+  both carry the bridge knob, and a call-site test for the second leaves the first green. Both
+  are separately killed only because `run_task_settings(args)` was extracted as a testable seam.
+  Likewise `control_from_args`: the first version of that test RECONSTRUCTED the config inside
+  the test, which cannot fail when `main` stops reading the flag.
+- **The Modal sweep app's argv is the configuration authority for every pinned row and had no
+  test.** `shard_argv` is now a plain function; the test compiles it out of the app source and
+  runs it in an isolated namespace, so it exercises shipping bytes without importing modal.
