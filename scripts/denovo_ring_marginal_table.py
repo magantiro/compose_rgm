@@ -33,7 +33,47 @@ def _interval(block: dict | None, key: str) -> str:
     return f" [{row['ci95_low']:.3f}, {row['ci95_high']:.3f}]"
 
 
-def render(report: dict) -> str:
+def _total_variation(left: dict, right: dict) -> float:
+    """TV between two categorical laws given as {label: fraction}."""
+
+    return 0.5 * sum(
+        abs(float(left.get(key, 0.0)) - float(right.get(key, 0.0)))
+        for key in set(left) | set(right)
+    )
+
+
+def _system_level_block(report: dict, corpus_census: dict | None) -> list[str]:
+    """Ring SIZE, ring-system COUNT and ring-system SIGNATURE are three laws.
+
+    An arm can match the size law and still deliver the wrong number of ring
+    systems, which is exactly what a plan whose systems the host refuses does.
+    The signature fractions live only in the corpus census, so this block is
+    printed when that file is supplied and skipped otherwise rather than
+    silently comparing against a missing key.
+    """
+
+    if corpus_census is None:
+        return []
+    lines = [
+        "RING-SYSTEM LAWS (a per-ring size match is NOT a ring-system match)",
+        f"{'row':<26}{'TV ring-SIZE':>15}{'TV system-COUNT':>18}{'TV system-SIGNATURE':>22}",
+    ]
+    lines.append("-" * len(lines[-1]))
+    for arm, row in sorted(report["arms"].items()):
+        census = row.get("ring_signature_census")
+        if census is None:
+            continue
+        lines.append(
+            f"{'arm ' + arm:<26}"
+            f"{row.get('ring_size_total_variation_vs_corpus', float('nan')):15.3f}"
+            + f"{_total_variation(census['ring_system_count_fraction'], corpus_census['ring_system_count_fraction']):18.3f}"
+            + f"{_total_variation(census['system_signature_fraction'], corpus_census['system_signature_fraction']):22.3f}"
+        )
+    lines.append("")
+    return lines
+
+
+def render(report: dict, corpus_census: dict | None = None) -> str:
     lines: list[str] = []
     corpus = report["corpus_reference"]
     lines.append(f"design            {report['design']}")
@@ -115,6 +155,7 @@ def render(report: dict) -> str:
         "NOTE: ring-size TV is CONDITIONAL on rings existing; compare sys/mol separately."
     )
     lines.append("")
+    lines.extend(_system_level_block(report, corpus_census))
     lines.append("PLAN REALIZATION (planned arms only)")
     for arm, row in sorted(report["arms"].items()):
         plan = row.get("plan_realization")
@@ -176,8 +217,17 @@ def render(report: dict) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("report")
+    parser.add_argument(
+        "--corpus-census",
+        help="corpus_ring_census_v1.json; adds the system-COUNT and SIGNATURE comparisons",
+    )
     arguments = parser.parse_args()
-    print(render(json.loads(Path(arguments.report).read_text())))
+    census = (
+        json.loads(Path(arguments.corpus_census).read_text())
+        if arguments.corpus_census
+        else None
+    )
+    print(render(json.loads(Path(arguments.report).read_text()), census))
 
 
 if __name__ == "__main__":

@@ -28,6 +28,15 @@ arm C1                       150     1.000       1.000    0.113+-0.026     0.889
 
 NOTE: ring-size TV is CONDITIONAL on rings existing; compare sys/mol separately.
 
+RING-SYSTEM LAWS (a per-ring size match is NOT a ring-system match)
+row                          TV ring-SIZE   TV system-COUNT   TV system-SIGNATURE
+---------------------------------------------------------------------------------
+arm A                               0.209             0.317                 0.258
+arm B0                              0.150             0.141                 0.219
+arm B1                              0.095             0.071                 0.155
+arm C0                              0.028             0.227                 0.055
+arm C1                              0.030             0.201                 0.066
+
 PLAN REALIZATION (planned arms only)
   arm B0: 519/522 systems (99.4%), 98.5% of plans complete, reasons {'no_host_support': 3}, bin fallback 0.0%
           endpoint skeleton == installed skeleton: 83.0%
