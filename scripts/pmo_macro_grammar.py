@@ -231,7 +231,7 @@ def main() -> None:
             line += f"{value * 100:17.1f}%  "
         print(line)
 
-    joint_predicate = lambda d: all(REQUIREMENTS[k](d) for k in JOINT)  # noqa: E731
+    joint_predicate = lambda d: all(REQUIREMENTS[k](d) for k in JOINT)
     print(f"\nJOINT ({' AND '.join(JOINT)}):")
     for name in sorted(populations):
         value, hits, total = rate(populations[name], joint_predicate)

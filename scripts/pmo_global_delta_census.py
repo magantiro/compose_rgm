@@ -30,7 +30,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from compose_v4.experiments.global_delta_census import (  # noqa: E402
+from compose_v4.experiments.global_delta_census import (
     TEMPLATES,
     assign_template,
     compute_global_delta,

@@ -35,9 +35,9 @@ from rdkit import Chem, RDLogger
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 RDLogger.DisableLog("rdApp.*")
 
-from compose_v4.chem.molecular_graph import smiles_to_molecular_graph  # noqa: E402
-from compose_v4.chem.state import is_element, pad_molecular_graph  # noqa: E402
-from compose_v4.control.donor_program import pendant_cuts  # noqa: E402
+from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+from compose_v4.chem.state import is_element, pad_molecular_graph
+from compose_v4.control.donor_program import pendant_cuts
 
 OUT = "diagnostics/pmo_global_delta_census_v1"
 PMO_SLOTS = 48  # PMO states are 48 slots; see the region-law / capacity note

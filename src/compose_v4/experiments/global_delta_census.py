@@ -42,8 +42,8 @@ record what happened to the cycles over those same atoms.
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Iterable, Sequence
 from dataclasses import asdict, dataclass, field
-from typing import Iterable, Sequence
 
 import networkx as nx
 from rdkit import Chem, RDLogger
