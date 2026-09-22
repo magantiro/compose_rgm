@@ -755,10 +755,41 @@ def _prefix_block(rows, region_wide_count: int, at: int) -> dict[str, Any]:
     }
 
 
+DEFAULT_PARENT_SOURCE = "blind_visited_stratified"
+
+
+def _arm_key(shard: dict[str, Any]) -> str:
+    """One report row per (mechanism, round-0 population).
+
+    Two runs of ONE mechanism over different initializations are different arms
+    of the ladder and must not be pooled. Shards written before the population
+    became an explicit axis carry no field and keep their original key, so the
+    numbers already committed are still addressed by the name they were filed
+    under.
+    """
+
+    source = shard.get("parent_source")
+    if source in (None, DEFAULT_PARENT_SOURCE):
+        return shard["arm"]
+    return f"{shard['arm']}@{source}"
+
+
 def _chain(shard: dict[str, Any], block: dict[str, Any]) -> str:
     parents = shard["parent_rows"]
-    start = max(parents, key=lambda row: row["blind_score"])
-    arm_label = shard["arm"]
+    scored = [row for row in parents if row.get("blind_score") is not None]
+    # An objective-blind round-0 population carries no score by construction --
+    # this harness charges nothing -- so the chain opens on the parent nearest
+    # the region instead of inventing a best-scoring one.
+    if scored:
+        start = max(scored, key=lambda row: row["blind_score"])
+        opening = f"start blind_best={start['blind_score']:.4f}"
+    else:
+        start = max(
+            parents,
+            key=lambda row: shard["parent_similarity_primary"].get(row["endpoint"], 0.0),
+        )
+        opening = f"start objective_blind (n={len(parents)})"
+    arm_label = _arm_key(shard)
     reached = block["best_rung"] or "below_ladder"
     provenance = (
         "+".join(sorted(block["entrant_provenance"])) if block["entrant_provenance"] else "-"
@@ -770,7 +801,7 @@ def _chain(shard: dict[str, Any], block: dict[str, Any]) -> str:
         else "no entrant, local refinement not evaluable"
     )
     return (
-        f"{arm_label}: start blind_best={start['blind_score']:.4f} "
+        f"{arm_label}: {opening} "
         f"(sim {shard['parent_similarity_primary'][start['endpoint']]:.3f}) "
         f"-> {block['proposals']} proposals via [{provenance}] "
         f"-> best rung {reached} (sim {block['best_similarity']:.4f}) -> {refined}"
@@ -917,6 +948,75 @@ def _manifold_context(repo_root: Path) -> dict[str, Any]:
     }
 
 
+#: Ladder row order. A row is added when its arm is measured; an arm that has
+#: not run is ABSENT rather than reported as a zero.
+LADDER_ORDER = (
+    "nc1_uniform_legal_edits",
+    "arm0_production_blind_run",
+    "arm1_baseline_b",
+    "arm1_baseline_b@init_bank_16",
+    "arm1_baseline_b@init_bank_100",
+)
+
+
+def _ladder_table(arms: dict[str, Any]) -> dict[str, Any]:
+    """The ladder as one table per task, at each matched proposal count.
+
+    Every cell is a lookup into a block already computed above; nothing here is
+    a second measurement. ``first_entry_proposal_index`` is the committed delta
+    rung, so a task with no entrant reports ``None`` and never a zero.
+    """
+
+    tasks: dict[str, Any] = {}
+    for name in [n for n in LADDER_ORDER if n in arms] + [
+        n for n in sorted(arms) if n not in LADDER_ORDER
+    ]:
+        for task, block in arms[name]["per_task"].items():
+            for at, prefix in block["prefixes"].items():
+                manifold = prefix["manifold"]
+                tasks.setdefault(task, {}).setdefault(at, []).append(
+                    {
+                        "arm": name,
+                        "role": arms[name]["role"],
+                        "parent_source": arms[name]["parent_source"],
+                        "parents": block["parents"],
+                        "proposals": prefix["proposals"],
+                        "qed_drift_q1_to_q4": manifold["qed_drift_q1_to_q4"],
+                        "median_qed": manifold["median_qed"],
+                        "best_basin_rung": prefix["best_rung"],
+                        "best_similarity": prefix["best_similarity"],
+                        "first_entry_proposal_index": prefix["by_rung"]["entry"][
+                            "first_proposal_index"
+                        ],
+                        "distinct_basins": prefix["diversity_distinct_basins"],
+                        "distinct_entrant_scaffolds": prefix[
+                            "diversity_distinct_entrant_scaffolds"
+                        ],
+                        "entrant_median_qed": manifold["entrant_median_qed"],
+                        "entries": prefix["entries"],
+                        "entry_rate": prefix["entry_rate"],
+                        "entry_rate_upper_bound_95": prefix[
+                            "per_draw_rate_upper_bound_95"
+                        ],
+                        "entrant_provenance": prefix["entrant_provenance"],
+                    }
+                )
+    return {
+        "columns": (
+            "arm | qed_drift_q1_to_q4 | best_basin_rung | first_entry_proposal_index "
+            "| distinct_basins | entrant_median_qed | entry_rate | entrant_provenance"
+        ),
+        "entry_threshold": ENTRY_DELTA,
+        "reading": (
+            "best_basin_rung is None when no proposal reached the lowest named "
+            "rung (0.25). first_entry_proposal_index is None when nothing reached "
+            "the committed 0.30 entry threshold. Neither is a zero and neither "
+            "may be reported as one."
+        ),
+        "by_task": tasks,
+    }
+
+
 def phase_report(args: argparse.Namespace) -> int:
     repo_root = Path(args.repo_root).resolve()
     predicate = assert_predicate_sealed(repo_root)
@@ -924,7 +1024,7 @@ def phase_report(args: argparse.Namespace) -> int:
     shards = _load_shards(args.inputs)
     by_arm: dict[str, list[dict[str, Any]]] = {}
     for shard in shards:
-        by_arm.setdefault(shard["arm"], []).append(shard)
+        by_arm.setdefault(_arm_key(shard), []).append(shard)
     arms: dict[str, Any] = {}
     chains: dict[str, list[str]] = {}
     for name, group in sorted(by_arm.items()):
@@ -981,9 +1081,14 @@ def phase_report(args: argparse.Namespace) -> int:
             block["prefixes"][str(block["proposals_drawn"])]["entries"]
             for block in per_task.values()
         )
+        mechanism = name.split("@", 1)[0]
+        population = group[0].get("parent_source", DEFAULT_PARENT_SOURCE)
         arms[name] = {
-            "role": (arm_describe(name) or {}).get("role", "unknown"),
-            "describe": arm_describe(name),
+            "role": (arm_describe(mechanism) or {}).get("role", "unknown"),
+            "describe": arm_describe(mechanism),
+            "mechanism": mechanism,
+            "parent_source": population,
+            "parent_source_describe": group[0].get("parent_source_describe"),
             "tasks": sorted(per_task),
             "total_proposals": total,
             "total_entries": entries,
@@ -1023,6 +1128,7 @@ def phase_report(args: argparse.Namespace) -> int:
         "manifold_context": _manifold_context(repo_root),
         "permutation_control": _permutation(shards, regions, ENTRY_DELTA),
         "pass_criterion": _pass_criterion(arms, args.challenger),
+        "ladder_table": _ladder_table(arms),
         "software": _software(),
     }
     _write(Path(args.output), payload)
