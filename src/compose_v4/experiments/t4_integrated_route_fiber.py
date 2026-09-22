@@ -24,8 +24,21 @@ EXPERTS = ("shallow", "anchored_replacement", "route_complete_region")
 PROTONATION_AWARE_EXPERT = "protonation_aware_retained_subgraph"
 GENERIC_TOPOLOGY_MACRO_EXPERT = "generic_topology_macro_v2"
 FEASIBILITY_HEADROOM_V4_EXPERT = "generic_feasibility_headroom_v4"
+#: The canonical shared-controller arms (`experiments/t4_canonical_controller`).
+#: `CANONICAL_LOCAL_EXPERTS` is arm A -- the local executable lane alone, which no
+#: earlier vocabulary admitted because every earlier arm carried at least three
+#: experts. `CANONICAL_COORDINATED_EXPERTS` is arms B and C: the same local lane plus
+#: the two EXISTING coordinated structural program families. `structured` is
+#: `synthesize_progressive_program`, already an accepted `expand` lane; it enters the
+#: expert vocabulary here so that a coordinated arm can be assembled without the
+#: route-distilled expert, whose only available checkpoints are leave-one-target-out.
+CANONICAL_LOCAL_EXPERTS = ("shallow",)
+CANONICAL_COORDINATED_EXPERTS = ("shallow", "anchored_replacement", "structured")
+
 SUPPORTED_EXPERT_VOCABULARIES = (
     EXPERTS,
+    CANONICAL_LOCAL_EXPERTS,
+    CANONICAL_COORDINATED_EXPERTS,
     (*EXPERTS, PROTONATION_AWARE_EXPERT),
     (*EXPERTS, GENERIC_TOPOLOGY_MACRO_EXPERT),
     (*EXPERTS, PROTONATION_AWARE_EXPERT, GENERIC_TOPOLOGY_MACRO_EXPERT),
