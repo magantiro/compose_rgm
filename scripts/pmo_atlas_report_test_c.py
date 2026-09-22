@@ -90,6 +90,28 @@ def main(argv: list[str] | None = None) -> int:
         probes["diagnostic_oracle_calls"] += part["diagnostic_oracle_calls"]
     approaches = {row["task"]: row for row in probes["structural_approach"]}
 
+    # Whether 250 calls was the decisive budget is answered by the run's own
+    # curve, not by assertion: a top ten still rising at the budget's edge means
+    # the budget binds, and a flat tail means the search, not the budget, binds.
+    progress: dict[str, Any] = {}
+    for task, run in sorted(blind.items()):
+        scores = [row["score"] for row in run["trajectory"]]
+        points = {}
+        for cut in (50, 100, 150, 200, len(scores)):
+            if cut <= len(scores):
+                window = sorted(scores[:cut], reverse=True)[:10]
+                points[str(cut)] = round(sum(window) / len(window), 4)
+        best_at = max(
+            run["trajectory"], key=lambda item: (item["score"], -item["index"])
+        )["index"]
+        progress[task] = {
+            "top_ten_mean_by_charged_calls": points,
+            "best_score_first_seen_at_charged_call": best_at,
+            "gain_over_the_last_fifth": round(
+                points[str(len(scores))] - points.get("200", points[str(len(scores))]), 4
+            ),
+        }
+
     rows: list[dict[str, Any]] = []
     for probe in probes["probes"]:
         task = probe["task"]
@@ -209,6 +231,14 @@ def main(argv: list[str] | None = None) -> int:
             ),
             "tasks_reaching_early": sorted(t for t, r in reached.items() if r == "early"),
             "tasks_below_the_ladder": sorted(t for t, r in reached.items() if r.startswith("below")),
+        },
+        "budget_sufficiency": {
+            "note": (
+                "A top ten still rising in the final fifth means the 250-call budget "
+                "binds, so a failure to reach a rung is a budget statement as much as "
+                "a search statement."
+            ),
+            "per_task": progress,
         },
         "exploitation": {
             "definition": (
