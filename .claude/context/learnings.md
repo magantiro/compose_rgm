@@ -3839,3 +3839,119 @@ independently of whether fa7_0 ever closes.**
   `modal volume ls`, which silently returns the PARENT listing -- the 2026-09-20 gotcha, now
   producing a false STALL rather than a false OK. Use `modal.Volume.listdir` (exact) before acting on
   a watchdog verdict.
+
+## 2026-09-21 (basin-entry gate: NOTHING enters, and the gate itself is partly blind)
+
+- **MEASURED, celecoxib, 3,211 proposals, ZERO charged oracle calls, entry threshold 0.30:**
+      arm                              best sim  entries  QED drift  1-step QED drop
+      nc1 uniform random legal edits     0.2133     0      +0.0295      -0.2121
+      arm 0  deployed B, real run 911    0.2083     0      -0.0993      -0.0231
+      arm 1  B regenerated               0.2125     0      -0.0172      -0.0852
+      arm 1 @ init_bank_16 (control)     0.1831     0      -0.0187      -0.0553
+      arm 2 @ init_bank_100              0.1912     0      +0.0294      -0.1124
+  Best anywhere is **71% of the entry threshold**; closing it needs +0.087 absolute / +41%
+  relative. NOT under-powered: every arm reports `still_climbing = False`, the maximum stopped
+  moving between 500 and 1,000 draws at 10x the initial budget, and B's final step extrapolates
+  to ~15,700 further proposals to reach entry (an optimistic bound, since sample maxima grow
+  sub-linearly).
+- **FALSIFIED -- "100-init is a cheap entry win."** I relayed it as cheap and it is not: zero
+  entry, ZERO novel-and-nearer molecules, and a WORSE one-step manifold drop (-0.1124 vs -0.0553)
+  precisely because it starts from a better pool (parent median QED 0.7627 vs 0.7155) and falls
+  further. Its best molecule toward the region is already inside the 16 (both 0.1486). It buys
+  parent diversity and lift, nothing else. Recorded as PROTOCOL-VALID at any budget with all 100
+  evaluations counted, allocation cost reported separately (40/20/10/1% at 250/500/1k/10k).
+- **FALSIFIED -- "B never moves toward the productive region." It MOVES, then SATURATES.**
+  0.1486 (16 init) -> 0.1791 (call 50) -> 0.2029 (call 100) -> 0.2059 (call 200); the last charged
+  call that improved it was **156**, and nothing in the final 94 calls. 911 further proposals from
+  those parents add **+0.0024**. Say saturation, not failure to move -- they imply different fixes.
+- **B'S STRUCTURAL SEARCH IS NOT BETTER THAN RANDOM.** On IDENTICAL parents at a matched 300
+  draws: uniform-random 0.2133 vs B 0.2093; at 1,000 draws B reaches 0.2125, still below the
+  control's 300-draw value. A negative control that BEATS the production arm is the strongest
+  single statement in the PMO diagnosis.
+- **DONOR TRANSPORT IS 42% OF B'S BUDGET AND 0 OF THE NEAREST 25 APPROACHES** (384 of 911
+  proposals); `broad_exploration` is 31% and 20 of 25; `local_search` 245 and 5 of 25. Provenance
+  read from the synthesis-time tag, not re-derived.
+- **NOVELTY ALONE IS WORTHLESS AS A SIGNAL.** Every arm is ~99.5% novel against B's 475 distinct
+  molecules, because a legal edit almost always invents a new molecule. Only "novel AND nearer
+  than B ever got" discriminates, and it reads 3 / 0 / 0 / 1 across the arms. Report the qualified
+  column or a 99.9% novelty rate will read as discovery.
+- **THE V_LOCAL PROXY VALIDATES ONLY PARTIALLY, AND THE LIMIT IS STRUCTURAL RATHER THAN
+  STATISTICAL.** Test B had already paid 64 charged calls at each of 33 points (11 tasks x 3 route
+  positions), which IS `V_local`, so reading it was free. Within task, Kendall tau:
+      structural similarity to anchor  +0.818   (excl. anchors +0.455)  wrong on 3 tasks
+      the molecule's own oracle score  +0.818   -- NOT offline for a new proposal
+      heavy atoms                      +0.692
+      QED                              +0.212   (excl. anchors -0.091)  wrong on 6 tasks
+  The similarity agreement rests on the anchor points where it is 1.0 BY CONSTRUCTION. **Every
+  proxy that validates is teacher-referenced, so it scores a high-value molecule in an unrelated
+  basin as ZERO -- exactly the case the future-value definition exists to credit.** Verdict
+  `PARTIAL_PROXY_ONLY_AND_IT_CANNOT_SEE_A_NOVEL_BASIN`: the structural ladder is sound as a
+  POSITIVE-CONTROL detector ("did the arm re-find the known region") and cannot answer "did the arm
+  find a different one".
+- **The owner's future-value refinement is MEASURED-correct, not merely better-argued.** Three
+  tasks rank WRONG under similarity: `median1` (similarity 0.39 -> 0.49 -> 1.00 while V_local stays
+  0.280/0.267/0.325, so the teacher anchor has LOW future value) and **`perindopril_mpo`, where
+  early (sim 0.156) has V_local 0.366 and BEATS near-anchor (sim 0.330, V_local 0.214)** -- fully
+  inverted -- plus thiothixene.
+- **CONSEQUENCE: we cannot yet distinguish "COMPOSE cannot enter productive basins" from "our gate
+  only sees the teacher's basin."** The costed resolution is 192 calls (3 x 64) of OFF-ROUTE
+  `V_local` at the blind run's own highest-scoring molecules: low off-route value means the null
+  holds under both definitions; high means B already occupies a basin the gate cannot see and the
+  GATE is what needs replacing. Arm candidates at similarity ~0.21 are explicitly NOT worth their
+  192 calls.
+- **A permutation control is what licenses "no task-specific approach":** the same proposals scored
+  against all 11 regions put celecoxib's own region **7th of 11**, with zero entries in 41,844
+  (proposal, region) pairings so the predicate never fires spuriously. CAVEAT the agent stated and
+  I am keeping: regions differ in accessibility to generic molecules, so the ranking conflates
+  proposal signal with region accessibility; the narrow reading is only that celecoxib's region is
+  not preferentially approached.
+- **METHOD, MINE, AND IT IS THE SECOND TIME TODAY: I asserted a precondition I had not measured.**
+  I authorised superseding a sealed predicate "ONLY because no arm number has been read yet".
+  **Twelve had been**, across all five gate tasks. The agent reconstructed them from the committed
+  shards and their commit hashes rather than taking my word, and recorded `precondition_holds:
+  false`. The supersession still stands, but on the WEAKER argument -- all twelve returned the
+  identical result (zero entrants), so no arm could have been favoured -- and the artifact keeps
+  the false precondition visible rather than tidying it away. **Never state the condition that
+  licenses changing a sealed artifact without checking it; the check is cheap and the seal is the
+  whole point.**
+
+## 2026-09-21 (construction-lane prior: the drift fix works, and the arm that cannot show it)
+
+- **MEASURED on celecoxib, zero charged oracle calls, PMO kernel rdkit 2023.9.6:**
+      arm         design                                              OFF drift   ON drift
+      closed loop score-free lineage, 15 generations x 16 proposals,    -0.2393    -0.1017
+                  parents drawn UNIFORMLY (no objective read anywhere)
+      open loop   the same 702 decisions at the real run's OWN parents  -0.1717    -0.1628
+  Median QED 0.661 -> 0.422 (OFF) against 0.661 -> 0.560 (ON): a **57% drift reduction**. Final
+  %QED>=0.6 0.273 -> 0.410, %SA<=4 0.199 -> 0.312, and the ON arm's median SA is FLAT across all
+  fifteen generations while OFF climbs 4.40 -> 4.87. Yield control: both arms produced exactly 16
+  children in every generation, 240 each, so it is chemistry and not attrition.
+- **THE OPEN-LOOP ARM IS STRUCTURALLY INCAPABLE OF SHOWING THE EFFECT, and reporting its flat
+  Q1->Q4 as a null would have been reading the wrong arm.** It replays both selection rules at
+  parents an ALREADY-DRIFTED run chose, so it inherits that drift by construction and can only show
+  whether the chemistry at each decision is better. Drift is a property of a TRAJECTORY; measure it
+  on a closed loop the mechanism actually steers.
+- **Paired, n=702, 80.5% disagreement: dQED +0.0367 +- 0.0058 (sigma +6.3), dSA -0.3671 +- 0.0485
+  (sigma -7.6)**, permutation p = 5e-5 for both; %SA<=4 42.7% -> 58.3%.
+- **CORRECTS the standing line "the chemical prior fixes SA, not QED" -- that was a statement about
+  a CALL SITE, not about the prior.** At the construction draw QED improves at sigma +6.3. The
+  earlier entry's own caveat ("a QED null measured there is not a result about the proposal
+  stream") was right and I propagated the headline instead of the caveat.
+- **These families CHANGE molecular size, so the QED claim needs size controls the old site did not
+  (its paired dHeavy was exactly 0.000000).** Two, both given: regression intercept at zero size
+  change +0.0379 +- 0.0058 (sigma 6.5), and the 401 decisions where both arms produced the same
+  heavy-atom count +0.0330 +- 0.0056 (sigma 5.9). The fitted size slope is NEGATIVE
+  (-0.0053 QED/atom) and the prior adds +0.24 atoms, so its size effect works AGAINST the gain
+  rather than explaining it.
+- **Placement census, 1,152 realized insertions per arm: heteroatom-onto-heteroatom 34.6% -> 5.5%
+  (6.3x)**, C-onto-C 19.2% -> 47.0%. NB the uniform lane's element OUTCOME is not uniform even
+  though its DRAW is -- an oxygen tip cannot extend, so completed chains are hydrazine-biased, and
+  its most common insertion is N-onto-N at 24.6%.
+- **Rank placement and element JOINTLY at the first growth step.** The measured signal is a
+  PLACEMENT signal, so no rule that fixes the anchor first can see it.
+- **A tautological guard survived a 10-guard battery by recomputing the seed rule locally**, so its
+  expectation moved with the code; rewritten to drive the real `phase_measure` and then killed.
+  Same shape as every other tautology on this record, now at fixture level in a mutation battery.
+- **A BASELINE THAT COLLECTED NOTHING IS NOT A BASELINE.** A baseline attribution run aborted on
+  `ModuleNotFoundError: No module named 'tools'` and reported ZERO failures, which made the branch
+  diff read as 14 regressions. Check the collection summary line before differencing failure sets.
