@@ -4440,3 +4440,111 @@ independently of whether fa7_0 ever closes.**
   Not a result to build on, but the first positive evidence the repair does anything, and it points
   at a specific cheap question -- whether the crossover widens at 1,000 calls -- rather than at more
   mechanism work.
+
+## 2026-09-22 (the PMO jump lane: ONE descriptor field carries the failure, and removing it is still not the repair)
+
+- **All 357 jump attempts of the arm-B celecoxib run reproduce offline at ZERO oracle calls**
+  (`diagnostics/pmo_jump_rebinding_v1/`, `src/compose_v4/experiments/pmo_jump_binding_autopsy.py`,
+  rdkit 2023.09.6, jump checkpoint identity verified against the run's own
+  `jump_checkpoint_id`). Controls: the recorder changed **0 of 40** production decisions,
+  and `SPEC_V1_EXACT` agreed with the all-fields descriptor predicate at step 0 on
+  **357/357**.
+- **THE REFUSAL IS CONCENTRATED IN ONE FIELD.** Mechanism distribution over 357:
+      no_atom_carries_a_required_operand_descriptor   272  (169 root / 103 depth)  76.2%
+      insufficient_preexisting_atoms_of_a_required_identity  65  (all root)        18.2%
+      no_role_consistent_successor                     14                           3.9%
+      region size / declared completion / budget / bound   6
+  Per-field step-0 projection: **`neighbor_element_histogram` is the ONLY descriptor
+  component whose single removal changes step-0 feasibility at all** -- it alone unblocks
+  **196 of the 228 step-0 failures (86.0%)**, i.e. 54.9% of all pairs. Every other field
+  projected out on its own -- `atom_type`, `formal_charge`, `degree`, `implicit_hydrogens`,
+  `bond_class_histogram`, `origin`, `created_ordinal`, `creation_lag` -- leaves the count
+  at exactly the baseline 129. The remaining 32 failures need two or more dropped.
+- **CORRECTION to the brief I was given: the lane does NOT bind 0 of 357.** At the full
+  per-plan budget **2 pairs bind**, and both sit in rounds the lane's own 45 s wall
+  truncated (one had 15.76 s available against a 20.70 s need). A zero at the margin is a
+  different finding from a structural zero, and the repo's own standard -- a zero surviving
+  one budget increase is not a hard zero -- applies to a brief's premise as much as to a
+  probe's.
+- **THE LANE'S 45 s WALL TRUNCATED 4 OF 13 ROUNDS, costing 59 attempts never made.**
+  `plan_attempts = min(attempts_per_batch=128, 32, len(plans)=95) = 32`, and 9 rounds ran
+  all 32 while rounds 1/4/10/12 ran 5/28/12/24. A successful binding costs ~20 s against a
+  45 s lane budget shared by up to 32 attempts, so at most two attempts per round can ever
+  be funded to completion.
+- **ROLE-BASED REBINDING LIFTS STEP-0 ALMOST COMPLETELY AND BINDING TENFOLD, AND IS STILL
+  NOT THE REPAIR.** Dropping the five neighbourhood/schedule components while holding the
+  semantic core (`atom_type`, `formal_charge`) and the dataflow edge (`origin`,
+  `created_ordinal`) -- content-identical to the pre-existing `SPEC_R2`:
+      step-0 feasibility   36.1%  ->  99.7%
+      pairs bound          2/357 (0.56%)  ->  20/357 (5.6%)
+  But it binds **0 of 286** attempts whose plan exceeds 20 primitives, and **229 of those
+  are PROVEN incompatible rather than budget-limited**, so no further loosening reaches
+  them. All 85 realizations come from **7 of the 95 plans** and 13 parents.
+- **THE TWO PLAN SCALES FAIL FOR DIFFERENT REASONS, and only a stratified probe separates
+  them.** Under the role-based descriptor (45 sampled per band, shuffled within band --
+  attempts are emitted in round and plan order, so first-N samples one corner):
+      above 20 primitives   0/45 bound, max depth reached MEDIAN 1, full depth 0/45;
+                            31 refuse on operand identity, 13 on element supply
+      12-18 primitives      7/45 bound, **39 of 45 hit NO constraint and 32 stop on a cap**
+  So above 20 the binding constraint is element supply plus the dataflow ordinal -- what
+  survives after every neighbourhood and schedule component is projected away -- while in
+  the 12-18 band the limit is COMPUTE, and that band's rate is a LOWER BOUND.
+- **`_retained_fraction` IS ATOM SURVIVAL, NOT STRUCTURAL RETENTION, AND THE JUMP LANE
+  RANKS ON IT.** The controller's metric reads **1.000 on every one of the 89 realizations
+  in both arms** while MCS structural retention on the same molecules is **0.25-0.38**.
+  Inspected: `CC[PH2](CC#N)Nc1c(Cl)cc(Br)cc1C1CCCO1` ->
+  `N#CC1[PH3]N(CC(N)=O)C(=CC2CCCO2)C(Cl)=C1CBr` is a scaffold-scale rewiring -- the
+  benzene ring is gone, one connected changed region of 16 atoms, +1 heavy atom -- and
+  every original slot is still occupied, so slot-based retention reads 1.000.
+  CONSEQUENCES: (a) `_generate_jump_pool` ranks bindings by
+  `abs(retention - retention_target)` with `retention_target ~ U(0,1)`, which is DEGENERATE
+  when the metric saturates -- selection falls through to the `endpoint_key` tiebreak;
+  (b) "retained 1.000 on every program, therefore purely additive, removing nothing from
+  the parent" does not follow, and that inference appears in `pmo_realization`'s own
+  docstring. Report slot-based and structural retention as two named quantities; never
+  quote one for the other. Whether the saturation here is pure rewiring or
+  delete-then-reuse-the-freed-slot is NOT separated by this measurement.
+- **ON THE STRUCTURAL AXES THAT WERE MADE PRIMARY, role-based realizations beat the generic
+  sampler on retention and roughly tie on region size** (measure byte-equivalent to
+  `scripts/pmo_large_proposal_structure.py`, verified 0 disagreements on 5 real pairs):
+      arm                      largest_changed_region      MCS retention
+      generic sampler mods=8        7  (baseline)              0.64
+      role-based bindings           8 median, max 19, 10/85 >= 15     **0.381**
+      answer-known required        19                          0.30
+  65.9% of realizations land in the 12-18 band; ring delta is non-zero on 67%.
+- **METHOD: instrument a gate by WRAPPING it, and then check the wrapper on COST, not only
+  on outcome.** A mutation that made the recorder discard `propagate`'s verdict SURVIVED an
+  outcome-and-bindings comparison, because propagate's checks are necessary conditions --
+  removing them cannot change whether a realization exists, only how long it takes to find
+  out. Comparing `nodes_expanded` and `successors_enumerated` against an independent
+  unwrapped run kills it. A guard that watches only the answer cannot see a change that
+  only moves the work.
+- **A SECOND SURVIVOR WAS THE TAUTOLOGY AGAIN, one level up from the usual place.**
+  `assert set(projection) == set(PROJECTABLE_FIELDS)` cannot fail, because the projection
+  is BUILT from that constant -- both sides move together. Re-derived from the PRODUCTION
+  constants (`RELAXABLE_COMPONENTS | SEMANTIC_OPERAND_FIELDS | DATAFLOW_OPERAND_FIELDS`) it
+  turns red. Final battery: **16/16 negatives killed, 2/2 irrelevant positive controls
+  pass**; the runner ABORTS when a mutation's target text is absent.
+- **A 20-PAIR PILOT SAID 25% AND THE FULL 357 SAID 5.6%** -- the pilot took the FIRST 20
+  attempts, which are all round 0. Restates the standing rule for this corpus: attempts are
+  emitted in round and plan order, so never sample by taking the first N.
+- **THE 12-18 BAND IS COMPUTE-LIMITED, AND THE CLOCK IS THE CAP THAT BINDS.** 16 sampled
+  pairs, role-based, production (64 nodes / 20 s) against raised (512 / 180 s):
+      pairs bound      4/16 (25%)  ->  12/16 (75%)
+      budget_reason    seconds_cap 12/16  ->  seconds_cap 3/16   (node budget never bound)
+  **Decompose the shape rather than summarise it.** Median MCS retention moves 0.263 ->
+  0.917, which reads as a degradation and is not one: the four pairs binding under BOTH
+  budgets keep their shape (0.263 -> 0.317, largest region 9 -> 7, max 15 either way). The
+  move is entirely the eight newly bound pairs -- three replace substantial structure at
+  retention 0.24-0.45, five are purely additive ten-atom decorations at retention exactly
+  1.000. Quoting the pooled median would have reported a trade-off that does not exist.
+- **THE LANE COSTS 41.5% OF THE PROPOSAL BUDGET AND CONTRIBUTES 0% OF THE ELIGIBLE POOL.**
+  357 of 860 attempts in the run, against `structured_program_channel` 291 and
+  `shallow_program_channel` 212, which together produced all 416 eligible candidates.
+- **VERDICT: repairing the binder is NECESSARY AND NOT SUFFICIENT.** It converts a dead
+  lane into a narrow one -- 7 of 95 plans, bounded above by a fixed library whose plans are
+  82% larger than 20 primitives, i.e. above the scale productive transitions need and in
+  the range that is PROVABLY unbindable on an arbitrary parent. A fixed library of
+  teacher-derived role sequences cannot cover the regions an arbitrary parent offers; the
+  region has to be chosen ON the parent. Reuse the binder for REALIZATION, not for
+  proposal.
