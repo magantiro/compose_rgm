@@ -980,6 +980,67 @@ def test_the_controller_names_no_benchmark_instance():
     )
 
 
+def test_the_sampler_names_no_benchmark_instance_either():
+    """The guard has to cover the module the MECHANISM lives in.
+
+    The two genericity checks scanned the controller only, and v3's composite
+    transaction lives in the sampler, so a drug-shaped branch there would have
+    passed both. The mechanism module is exactly where a per-instance rule is
+    most tempting and least visible.
+    """
+    import compose_v4.benchmark.fragment_conditioned_sampler as module
+
+    source = Path(module.__file__).read_text()
+    lowered = source.lower()
+    offenders = sorted(
+        {
+            prompt.drug_name
+            for prompt in _prompts()
+            if prompt.drug_name.lower() in lowered
+        }
+    )
+    assert not offenders, (
+        f"the sampler names benchmark instances {offenders}; a mechanism must "
+        "activate from the declared constraint and structural state, never from "
+        "an instance identity"
+    )
+
+    assert "drug_name" not in source, (
+        "the sampler reads a drug name; routing on the instance is benchmark "
+        "engineering, not a general capability"
+    )
+
+    # ``prompt.task`` is legitimate in ONE place and illegitimate everywhere
+    # else, so a blanket ban would be wrong and a blanket allowance useless.
+    # ``build_prompt_context`` is the ADAPTER: it turns the benchmark's own
+    # declared prompt into a start state, and a two-fragment prompt genuinely
+    # needs a different construction from a one-fragment prompt. The MECHANISM
+    # -- the sampler loop and the composite transaction -- must read structural
+    # state only. This locates the branch instead of counting it.
+    import ast
+
+    # Matched on the ATTRIBUTE NAME and on the FragmentTask symbol, never on the
+    # base expression. A first version required the base to be a bare ``prompt``
+    # and a mutation reading ``context.prompt.task`` inside ``sample_completion``
+    # walked straight past it -- the mechanism could route on the task label and
+    # the guard stayed green. One spelling is not a guard.
+    tree = ast.parse(source)
+    readers = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.FunctionDef):
+            continue
+        for inner in ast.walk(node):
+            reads_task = isinstance(inner, ast.Attribute) and inner.attr == "task"
+            names_enum = isinstance(inner, ast.Name) and inner.id == "FragmentTask"
+            if reads_task or names_enum:
+                readers.add(node.name)
+    assert readers <= {"build_prompt_context"}, (
+        f"these functions route on the task label: {sorted(readers)}. Only the "
+        "prompt adapter may read it; the sampler loop and the composite "
+        "transaction must activate from structural state alone"
+    )
+
+
 def test_the_controller_does_not_branch_on_the_task_label():
     """A task-shaped branch is per-task tuning wearing a general name.
 
