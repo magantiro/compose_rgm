@@ -32,7 +32,8 @@ choose. See `diagnostics/denovo_ring_support_host_v1/FINDING.md`.
 | `arms_report_v1.json` | the scored arms |
 | `arms_table_v1.txt` | the rendered comparison |
 | `plan_hazard_collapse_v1.json` | why the plan cannot be realized at `t = 0` |
-| `ring_time_sensitivity_v1.json` | how the ring-template law moves with conditioning time |
+| `ring_time_sensitivity_v1.json` | how the ring-template law moves with conditioning time (it does not) |
+| `qed_attribution_v1.json` | whether the planned arms' QED gap survives controlling for size and ring count (it does not) |
 
 ## Arms
 
