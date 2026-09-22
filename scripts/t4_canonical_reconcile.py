@@ -55,7 +55,10 @@ def _download(run_id: str, destination: Path) -> Path:
             return
         for entry in entries:
             name = entry.path
-            if getattr(entry, "type", None) is not None and str(entry.type).endswith("DIRECTORY"):
+            # `str(FileEntryType.DIRECTORY)` is "2", not the member name, so compare
+            # on `.name`. Getting this wrong silently treats every directory as a file
+            # and downloads nothing.
+            if getattr(getattr(entry, "type", None), "name", "") == "DIRECTORY":
                 _walk(name)
                 continue
             local = destination / name
