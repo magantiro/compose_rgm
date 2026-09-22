@@ -1,0 +1,37 @@
+{
+  "channel_candidate_limit": 16,
+  "combined_with_cost_probe": "The measured construction-draw cost ratio is 1.91x (lane_cost_probe_v1.json). Even if the shallow lane's ENTIRE 15.71 s worst round were construction draws -- it is not, it also pays for executor replay, program compilation and the eligibility gate -- 1.91x puts it at 30.0 s, still inside 45 s. So the wall clock is not expected to bind in either arm and the channel mix should not shift. This is a PREDICTION from two measurements, not a guarantee: the realized per-round shallow-lane seconds and queried_candidates of BOTH arms are reported after the run and the prediction is checked against them.",
+  "finding": "The shallow_program_channel -- the ONLY lane the construction prior touches -- uses a median 10.97 s and a MAXIMUM 15.71 s of its 45 s per-lane budget in the real deployed-B run, and every round had a full 16-candidate pool. It terminates on CHANNEL_CANDIDATE_LIMIT, not on the clock, with at least 29 s of headroom in its worst round.",
+  "lane_at_risk_is_not_the_treated_one": "joint_dependency_region_jump runs at a median 39.45 s and a max 47.67 s -- it is the lane that actually presses its budget. It is NOT prior-aware, so the prior cannot slow it.",
+  "lane_wall_seconds": 45.0,
+  "oracle_calls_spent": 0,
+  "proposal_seconds_by_channel": {
+    "joint_dependency_region_jump": {
+      "headroom_at_max_seconds": -2.67,
+      "max": 47.67,
+      "median": 39.45,
+      "rounds": 13
+    },
+    "shallow_program_channel": {
+      "headroom_at_max_seconds": 29.29,
+      "max": 15.71,
+      "median": 10.97,
+      "rounds": 13
+    },
+    "structured_program_channel": {
+      "headroom_at_max_seconds": 17.14,
+      "max": 27.86,
+      "median": 17.99,
+      "rounds": 13
+    }
+  },
+  "queried_candidates_per_round": {
+    "note": "Round 14 issues 10 because 16 initialization calls plus 14 full rounds already charged 240 of the 250-call budget -- ledger truncation, NOT a starved proposal pool. Every round's pool held at least 16 candidates.",
+    "round_14": 10,
+    "rounds_0_to_13": 16
+  },
+  "rounds": 15,
+  "schema_version": "pmo_construction_prior_lane_headroom_v1",
+  "source_artifact": "compose-v4-artifacts:pmo_population_controller_v1/37bb856e.../celecoxib_rediscovery/result_at_250_calls.json",
+  "source_run": "B_memory / celecoxib_rediscovery / 250 charged calls (the deployed arm this A/B controls against)"
+}

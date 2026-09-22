@@ -1,0 +1,47 @@
+{
+  "attempts_per_parent": 6,
+  "channel_candidate_limit": 16,
+  "checkpoint": {
+    "load_seconds": 1.23,
+    "path": "/Users/rmaganti/compose_ckpt_backup/ringcore_a7546e2_best.pt",
+    "sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+    "status": "DEVELOPMENT_ONLY_CONSTRUCTION_PRIOR_QUALIFICATION"
+  },
+  "lane_wall_seconds": 45.0,
+  "off": {
+    "completed": 48,
+    "completions_per_45s_lane": 186.9,
+    "construction_law_tagged": 0,
+    "draws": 48,
+    "draws_per_45s_lane": 186.9,
+    "elapsed_seconds": 11.558,
+    "execution_rejected": 0,
+    "median_seconds_per_draw": 0.1108,
+    "seconds_per_draw": 0.2408
+  },
+  "on": {
+    "completed": 48,
+    "completions_per_45s_lane": 98.0,
+    "construction_law_tagged": 48,
+    "draws": 48,
+    "draws_per_45s_lane": 98.0,
+    "elapsed_seconds": 22.031,
+    "execution_rejected": 0,
+    "median_seconds_per_draw": 0.3196,
+    "seconds_per_draw": 0.459
+  },
+  "on_over_off_seconds_ratio": 1.91,
+  "oracle_calls_spent": 0,
+  "parents": 8,
+  "prior_statistics": {
+    "candidates_joined": 2499,
+    "candidates_scored": 2551,
+    "model_forwards": 109,
+    "orders_drawn": 140,
+    "successor_executions": 58
+  },
+  "schema_version": "pmo_construction_prior_cost_probe_v1",
+  "seed": 20260922,
+  "verdict": "NO_LANE_ATTRITION",
+  "verdict_note": "NO_LANE_ATTRITION means the ON arm still completes at least CHANNEL_CANDIDATE_LIMIT=16 constructions inside one 45 s lane budget, so the lane stops on the candidate cap in BOTH arms and the wall clock is not the binding constraint. It does NOT mean the prior is free."
+}
