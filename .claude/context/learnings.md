@@ -4430,6 +4430,38 @@ independently of whether fa7_0 ever closes.**
   (TV [0.012, 0.068], strain [0.010, 0.041] vs 1.87%, molecules [0.027, 0.100] vs 5.89%) and
   do not overlap arm A's. Validity 1.000, uniqueness 1.000, diversity 0.890 vs 0.890 --
   unchanged.
+- **"REPRODUCES THE TRAINING RING DISTRIBUTION" IS THREE QUESTIONS AND THE ARMS SPLIT ON
+  THEM.** A per-ring SIZE law is not the ring-system distribution. Measured against the same
+  500k corpus (total variation; signature keys overlap 16/16 with full mass):
+
+      arm    TV ring-SIZE   TV system-COUNT   TV system-SIGNATURE
+      A          0.209           0.317              0.258
+      B0         0.150           0.141              0.219
+      B1         0.095           0.071              0.155
+      C0         0.028           0.227              0.055
+      C1         0.030           0.201              0.066
+
+  **Arm C1 matches the SIZE law and the SIGNATURE law and does NOT match the system-COUNT
+  law** -- it improves it (0.317 -> 0.201) but under-delivers, because a pinned signature the
+  host refuses is simply dropped. **Arm B1, which pins only the COUNT, is the BEST arm on
+  count (0.071) and realizes 97.3% of its requests**, precisely because it lets the model pick
+  any template the host can carry. No single arm wins all three, and the trade is the
+  realization defect, not the factorization. The obvious next move -- pin the signature but
+  fall back to a size-compatible alternative rather than dropping the system -- is NOT built
+  here, per the brief's stop rule.
+- **THE SIGNATURE TABLE IS THE CLEAREST VIEW OF THE DEFECT.** Share of ring SYSTEMS:
+
+      signature   corpus    arm A    arm C1
+      (6,)        58.4%     44.2%    59.9%
+      (5,)        15.7%     17.7%    13.2%
+      (5, 6)       9.5%      5.9%    11.6%
+      (6, 6)       6.7%        -      7.5%
+      (3,)          -       15.6%     2.2%
+      (4,)          -        8.8%       -
+
+  The shipped process spends **24.4% of its ring systems on bare 3- and 4-rings**, which do
+  not appear in the corpus top five at all, and correspondingly under-produces benzene. Arm C1
+  reproduces the corpus's four leading signatures to within a couple of points each.
 - **SAY THE COST FIRST: the ring repair does NOT buy quality.** Published quality is flat
   (0.121 vs 0.113, two-proportion **z = 0.22**), and so is every threshold metric the
   benchmark actually uses: QED pass 33.7% -> 30.0% (z = 0.72), SA pass 28.9% -> 24.7%
