@@ -1,6 +1,6 @@
 {
   "baseline_green": true,
-  "baseline_line": "40 passed in 4.34s",
+  "baseline_line": "43 passed in 7.50s",
   "controls_green": true,
   "killed": 11,
   "mutations": 11,
@@ -9,7 +9,7 @@
       "file": "modal_apps/t4_fa7_0_support_expansion_base_app.py",
       "killed": true,
       "mutation": "run_cell_never_expands",
-      "pytest": "1 failed in 0.07s",
+      "pytest": "1 failed in 0.08s",
       "target_test": "test_run_cell_expands_support_before_it_can_terminate"
     },
     {
@@ -86,7 +86,7 @@
       "file": "scripts/t4_fa7_0_support_expansion_yield.py",
       "mutation": "comment_only_edit_outside_the_pin_block",
       "positive_control": true,
-      "pytest": "1 passed in 0.05s",
+      "pytest": "1 passed in 0.06s",
       "stayed_green": true,
       "target_test": "test_run_cell_expands_support_before_it_can_terminate"
     }

@@ -104,15 +104,13 @@ def build(status: str) -> dict:
         **inherited,
         "cells": cells,
         "proposal": proposal,
-        # 247, not 248. The owner authorized 248 charged docking calls for this cell
-        # IN TOTAL, and the first launch of this arm charged 1 -- the root docking of
-        # the seed -- before it was cancelled to repair a latent defect that would have
-        # killed the cell the moment the fallback stage first succeeded. Spending 248
-        # here would put the arm at 249 against an authorization that says "not one
-        # more", so the cancelled attempt is subtracted rather than forgiven.
-        "charged_calls_per_cell": 247,
-        "total_charged_call_ceiling": 247,
-        "total_new_charged_call_ceiling": 247,
+        # 246, not 248. The owner authorized 248 charged docking calls for this cell
+        # IN TOTAL, and two prior launches of this arm have each charged exactly one --
+        # the root docking of the seed. Both are subtracted rather than forgiven,
+        # because the authorization says "not one more".
+        "charged_calls_per_cell": 246,
+        "total_charged_call_ceiling": 246,
+        "total_new_charged_call_ceiling": 246,
         # ---- The expansion ----
         # A ladder step is DRAWS PER LANE and is realised as parallel replicate
         # workers at the lane's own base draw count, never as one deeper worker.
@@ -229,6 +227,40 @@ def build(status: str) -> dict:
                 ),
                 "subtracted_from_this_arms_ceiling": True,
             },
+            "preempted_second_launch_of_this_arm": {
+                "run_id": "4321b8b1edc8e73d6e99c04dfe557703e5e1ba30f2c187902229efb90880f82a",
+                "contract_payload_sha256": (
+                    "e3482c17c9966f01fefb32ea03ab8b6cf09db273fc8bfefeedb0188ecc91bea9"
+                ),
+                "charged_calls": 1,
+                "what_it_charged": "the root docking of the seed, round 0, score -8.30",
+                "how_it_died": (
+                    "MEASURED from the app's own logs: 'Container terminated due to "
+                    "preemption. Your Function will be restarted with the same input.' "
+                    "The restart met its own round_000 lock with no checkpoint -- the "
+                    "root lock is published BEFORE the root docking and the first "
+                    "checkpoint was only written at the END of round one -- and "
+                    "_resume_state correctly refused it as an ambiguous scored retry. "
+                    "This arm's support expansion widened that window from minutes to "
+                    "tens of minutes, turning a pre-existing hazard into the likely "
+                    "outcome. Modal restarts a preempted container with the same input "
+                    "EVEN AT retries=0"
+                ),
+                "what_it_reached_before_dying": (
+                    "the logs show the normal round map, then the fallback map, then "
+                    "the ladder map TWICE -- so the support expansion fired on the "
+                    "empty pool and escalated to its second ladder step, which is the "
+                    "behaviour this arm exists to produce"
+                ),
+                "repair": (
+                    "the completed root call is now checkpointed before the round loop. "
+                    "Round 0 is a completed round -- its one call is charged, scored and "
+                    "recorded -- so checkpointing it admits no ambiguity: nothing is "
+                    "re-docked and no uncertain call becomes free. The fail-closed guard "
+                    "is unchanged"
+                ),
+                "subtracted_from_this_arms_ceiling": True,
+            },
             "note": (
                 "the panel run charged 1 (the seed's own docking score, best -7.5) and "
                 "the predecessor support-expansion arm charged 0; the 248 ceiling is "
@@ -246,9 +278,9 @@ def build(status: str) -> dict:
             ),
             "granted_by": "owner, task brief 2026-09-22",
             "enforced_by": [
-                "charged_calls_per_cell and total_charged_call_ceiling are both 247, "
-                "which is the authorized 248 less the 1 call the cancelled first launch "
-                "of this arm charged, so the arm's lifetime spend cannot exceed 248",
+                "charged_calls_per_cell and total_charged_call_ceiling are both 246, "
+                "which is the authorized 248 less the 2 calls the two prior launches of "
+                "this arm charged, so the arm's lifetime spend cannot exceed 248",
                 "cells carries fa7_0 alone, and the wrapper refuses any other list",
                 "the ledger binds on state.budget, which is initialised from "
                 "charged_calls_per_cell and decremented once per docked query",

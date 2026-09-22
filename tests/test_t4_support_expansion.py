@@ -294,12 +294,17 @@ def test_the_contract_declares_one_cell_and_both_mechanisms():
     payload = _contract_payload()
     assert [row["cell"] for row in payload["cells"]] == ["fa7_0"]
     assert payload["delta"] == 0.6
-    # 247 = the authorized 248 less the 1 call the cancelled first launch charged.
-    assert payload["charged_calls_per_cell"] == 247
-    assert payload["total_charged_call_ceiling"] == 247
-    prior = payload["prior_charged_calls"]["cancelled_first_launch_of_this_arm"]
-    assert prior["charged_calls"] == 1
-    assert payload["charged_calls_per_cell"] + prior["charged_calls"] == 248
+    # 246 = the authorized 248 less the 2 calls the two prior launches each charged.
+    assert payload["charged_calls_per_cell"] == 246
+    assert payload["total_charged_call_ceiling"] == 246
+    prior = payload["prior_charged_calls"]
+    spent = sum(
+        block["charged_calls"]
+        for key, block in prior.items()
+        if isinstance(block, dict) and "charged_calls" in block
+    )
+    assert spent == 2, prior
+    assert payload["charged_calls_per_cell"] + spent == 248
     assert payload["proposal"]["shallow"]["region_law"] == "free_gate_margin_v1"
     assert payload["proposal"]["shallow"]["completion_law"] == "free_gate_margin_v1"
     SupportExpansionPolicy.from_contract(payload["support_expansion"])
@@ -639,3 +644,100 @@ def test_a_real_fallback_candidate_serializes_into_a_round_lock():
     candidates = attach_features(rows, state, fiber)
     assert candidates
     json.dumps(_jsonable(candidates), sort_keys=True, separators=(",", ":"))
+
+
+# ---- The root checkpoint that makes a round-one preemption survivable -------
+
+
+def test_the_root_call_is_checkpointed_before_round_one():
+    """MEASURED FAILURE run 4321b8b1: preemption in round one killed the cell.
+
+    The root lock is published BEFORE the root docking and the first checkpoint was
+    only written at the END of round one, so a preemption in between left a lock
+    with no checkpoint -- which `_resume_state` correctly refuses. Modal restarts a
+    preempted container with the same input even at `retries=0`, so the restart met
+    its own root lock and the cell died having charged one call for nothing. The
+    support expansion widened that window from minutes to tens of minutes.
+    """
+
+    source = _run_cell_source()
+    root_at = source.index('_publish(folder / "round_000_lock.json"')
+    loop_at = source.index("while state.budget > 0:")
+    between = source[root_at:loop_at]
+    assert 'folder / "checkpoint.json"' in between, (
+        "the completed root call is not checkpointed before the round loop, so a "
+        "preemption during round one leaves a lock with no checkpoint and the cell "
+        "cannot resume"
+    )
+    # It must carry the contract identity, or `_resume_state` refuses it outright.
+    checkpoint_at = between.index('folder / "checkpoint.json"')
+    tail = between[checkpoint_at:]
+    for field in ("contract_payload_sha256", "charged_calls", "budget_remaining", "rng_state"):
+        assert field in tail, field
+
+
+def test_the_root_lock_is_not_forfeited_by_its_own_checkpoint():
+    """Round 0 must read as COMPLETE on resume, never as an interrupted round.
+
+    `_resume_state` skips locks whose index is at or below the last checkpointed
+    round. A root checkpoint carries `rounds: []`, so `completed` is 0 and the
+    round-0 lock is skipped rather than debited -- exercised here against the real
+    function so a change to that arithmetic fails.
+    """
+
+    import importlib.util
+    import json as _json
+    import tempfile
+
+    spec = importlib.util.spec_from_file_location("_base_probe", BASE_APP)
+    assert spec is not None
+    source = BASE_APP.read_text()
+    head = source[: source.index("def _jsonable(")]
+    # Execute only the pure helpers: stop before the Modal function definitions.
+    namespace: dict = {"__file__": str(BASE_APP)}
+    marker = "def _resume_state("
+    helpers = head[head.index("def _publish(") :]
+    exec(  # noqa: S102
+        compile(
+            "from pathlib import Path\nimport json\n"
+            + helpers[helpers.index(marker) :],
+            str(BASE_APP),
+            "exec",
+        ),
+        namespace,
+    )
+    resume = namespace["_resume_state"]
+
+    payload = {
+        "schema_version": "t4_integrated_route_fiber_checkpoint_v1",
+        "status": "running",
+        "cell": "fa7_0",
+        "contract_payload_sha256": "deadbeef",
+        "charged_calls": 1,
+        "budget_remaining": 246,
+        "archive": {"CCO": -8.3},
+        "features": [],
+        "improvements": [],
+        "history": [],
+        "rounds": [],
+        "rng_state": {"state": 1},
+    }
+    with tempfile.TemporaryDirectory() as directory:
+        folder = Path(directory)
+        from compose_v4.control.docking_value import identity
+
+        (folder / "checkpoint.json").write_text(
+            _json.dumps({"payload": payload, "payload_sha256": identity(payload)})
+        )
+        (folder / "round_000_lock.json").write_text(
+            _json.dumps({"payload": {"round": 0, "queries": [{"smiles": "CCO"}]}})
+        )
+        restored = resume(folder, {"contract_payload_sha256": "deadbeef"}, {})
+
+    assert restored is not None, "a root checkpoint must be resumable"
+    assert restored["forfeited_calls"] == 0, (
+        "the round-0 lock was debited as an interrupted round; its call is already "
+        "counted in the checkpoint and would be charged twice"
+    )
+    assert restored["charged_calls"] == 1
+    assert restored["budget_remaining"] == 246

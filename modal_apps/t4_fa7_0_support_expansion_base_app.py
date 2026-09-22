@@ -632,6 +632,41 @@ def run_cell(task: dict) -> dict:
             f"[{cell['cell']}] root call=1 score={previous:.2f} budget={state.budget}",
             flush=True,
         )
+        # ---- Checkpoint the completed root ----
+        # MEASURED FAILURE, run 4321b8b1: the root lock is published BEFORE the root
+        # docking, and the first checkpoint was only written at the END of round one.
+        # A preemption anywhere in between therefore left a lock with no checkpoint,
+        # which `_resume_state` correctly refuses as an ambiguous scored retry -- and
+        # Modal DOES restart a preempted container with the same input even at
+        # `retries=0` ("Container terminated due to preemption. Your Function will be
+        # restarted with the same input"), so the restart met its own root lock and
+        # the cell died having charged one call and produced nothing.
+        #
+        # The support expansion widened that window from minutes to tens of minutes,
+        # so this arm made a pre-existing hazard into the likely outcome.
+        #
+        # Round 0 IS a completed round: its one call is charged, scored and recorded,
+        # so checkpointing it admits no ambiguity -- nothing is re-docked and no
+        # uncertain call becomes free. `_resume_state` skips locks whose index is at
+        # or below the last checkpointed round, so the root lock is then correctly
+        # read as complete rather than forfeited.
+        _publish(
+            folder / "checkpoint.json",
+            {
+                "schema_version": "t4_integrated_route_fiber_checkpoint_v1",
+                "status": "running",
+                "cell": cell["cell"],
+                "contract_payload_sha256": task["contract_payload_sha256"],
+                "charged_calls": charged,
+                "budget_remaining": state.budget,
+                "archive": dict(sorted(state.archive.items())),
+                "features": features,
+                "improvements": improvements,
+                "history": state.history,
+                "rounds": rounds,
+                "rng_state": _jsonable(rng.bit_generator.state),
+            },
+        )
 
 
     while state.budget > 0:
