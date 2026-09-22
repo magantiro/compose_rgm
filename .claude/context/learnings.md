@@ -4349,3 +4349,49 @@ independently of whether fa7_0 ever closes.**
   `round_*/complete.json` is a cumulative per-round snapshot). Already pushed; history was correctly
   NOT rewritten, since destructive cleanup is not authorized. The load-bearing records are tiny --
   oracle receipts, `result.json` top-level fields, the final snapshot.
+
+## 2026-09-22 (THE A/B TESTED A THROTTLE: a DROP-IN REPLACEMENT caller silently dropped the keyword)
+
+- **THE DROP IS AT HOP 1, SYNTHESIS, FROM A MISSED CALL SITE.**
+  `pmo_online_memory.memory_channel_proposal` called `synthesize_dynamic_program(..., region_law=law)`
+  and **never passed `completion_law`**. That adapter is a **DROP-IN REPLACEMENT** for the shallow
+  lane's `_channel_proposal` whenever the online memory is warm -- so on that lane it is not one route
+  among several, **it IS the route** (196 syntheses in arm B, 194 in arm A).
+- **THE FUNNEL, arm B, 15 rounds, from the run's own `pending.json` batches:**
+      hop 1   synthesis attempts                      919  (eligible 481 / rejected 413 / dup 25)
+      hop 1b  eligible attempts USING a completion family  70, **of which CARRYING THE LAW 14 = 20%**
+      hop 3   merged eligible pool                    449  with a completion 14  (3.1%)
+      hop 4   `_credit_allocate` picks                272  with a completion  9  (3.3%)
+      hop 5   charged                                 234  with a completion  9  (3.8%)
+  **The 20% at hop 1b is the whole story; every hop after it is proportionate.**
+- **EVERY DOWNSTREAM SUSPECT EXONERATED BY MEASUREMENT, which is what makes the diagnosis safe:**
+  the allocator discarded 39.4% of the pool overall but only **35.7%** of completion-carrying
+  candidates -- selected slightly MORE often than average, so the census's scale-neutrality result
+  SURVIVES the widened size distribution; `lock_query_subset` discarded **0 of 9**; the work limit
+  (`max_primitives=32` / `max_blocks=8`) refused **4 of 370** recorded syntheses (~1%, real but not
+  the ceiling); throughput identical at pool size 18.1.
+- **THE TELL WAS AVAILABLE BEFORE THE FUNNEL: the measured FOOTPRINT (3.8%) was far too small to
+  produce the measured EFFECT (22% AUC gap). WHEN THE EFFECT EXCEEDS THE MECHANISM'S FOOTPRINT,
+  SUSPECT THE WIRING BEFORE THE CHEMISTRY.** Both arms looked normal in every aggregate counter
+  because the CONTROL also runs with memory ON; it surfaced only by tracing completion provenance.
+- **THE GENERAL RULE THIS EARNED, and it is one hop beyond the standing inert-repair lesson:**
+  **after threading a new keyword, grep its CALLERS for adapters that REPLACE the path rather than
+  EXTEND it. A drop-in replacement is the one shape that both looks like production and silently
+  is not.** The module was threaded correctly, the per-family consultation tests passed, and a
+  17-mutation battery passed -- **a per-module check cannot see a replacing caller by construction.**
+  This is the FIFTH built-but-inert mechanism found in this repo (region law, `exact_early_ring`,
+  `allocation_priority`, `donor_program`/`zero_support_fallback`, now this).
+- **THE GUARD IS DERIVED FROM CALL SITES, NOT FROM A LIST.** An AST sweep over the PMO entry closure
+  requires every `synthesize_dynamic_program` / `synthesize_structured_program` call to forward the
+  keyword, with an explicit REASON per exclusion and a FLOOR on inspected sites so it cannot go
+  blind. It immediately found two more unthreaded sites (`initial_dynamic_program_batch`,
+  `_cold_channel_pool`), both legitimately excluded because initialization is held fixed across
+  matched arms. Reverting the one-line fix turns both guards red.
+- **VERDICT ON THE SCORED A/B: `THE_AB_TESTED_A_THROTTLE`.** The arithmetic still returns REJECT on
+  the numbers produced and those numbers stand as a record of what ran, but the treatment arm
+  executed the law on ~20% of the proposals it was designed to govern, **so it answered a different
+  question than the one it was built to ask. Record it as INCONCLUSIVE, not as evidence against
+  large structured completions.**
+  **INFERRED, NOT MEASURED:** that the fix lifts the footprint to near-total coverage. The
+  196-synthesis counter makes the projection well founded, but no run has executed with the fix --
+  whether a full-footprint arm beats, matches or loses the control is **untested**.
