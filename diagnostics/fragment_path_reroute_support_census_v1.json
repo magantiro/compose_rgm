@@ -1,0 +1,305 @@
+{
+  "schema": "compose_fragment_path_reroute_support_census_v1",
+  "question": "at the state where v3 exchanges the bridge, what bond_reroute transitions does the prior actually propose",
+  "environment": {
+    "python": "3.11.13",
+    "rdkit": "2024.03.5",
+    "numpy": "1.26.4"
+  },
+  "draws_per_state": 4000,
+  "rows": [
+    {
+      "drug": "BARICITINIB",
+      "captured": true,
+      "draws": 4000,
+      "bond_reroute_draws": 100,
+      "bond_reroute_family_rate": 0.025,
+      "distinct_bond_reroute_successors": 40,
+      "target_successor_reached": false,
+      "v3_coordinate": [
+        22,
+        12
+      ],
+      "v3_removed_edge": [
+        11,
+        12
+      ],
+      "v3_moved_atom_is_a_cut_endpoint": false,
+      "exact_v3_coordinate_drawn": 0,
+      "moved_atom_roles": {
+        "other_core_atom": 82,
+        "inserted_atom": 18
+      },
+      "new_partner_roles": {
+        "other_core_atom": 83,
+        "path_atom": 10,
+        "inserted_atom": 7
+      },
+      "distinct_coordinates": 43
+    },
+    {
+      "drug": "CYCLOTHIAZIDE",
+      "captured": true,
+      "draws": 4000,
+      "bond_reroute_draws": 376,
+      "bond_reroute_family_rate": 0.094,
+      "distinct_bond_reroute_successors": 55,
+      "target_successor_reached": false,
+      "v3_coordinate": [
+        25,
+        14
+      ],
+      "v3_removed_edge": [
+        13,
+        14
+      ],
+      "v3_moved_atom_is_a_cut_endpoint": false,
+      "exact_v3_coordinate_drawn": 7,
+      "moved_atom_roles": {
+        "other_core_atom": 254,
+        "inserted_atom": 122
+      },
+      "new_partner_roles": {
+        "other_core_atom": 312,
+        "path_atom": 30,
+        "far_core_anchor": 21,
+        "inserted_atom": 13
+      },
+      "distinct_coordinates": 55
+    },
+    {
+      "drug": "ELIGLUSTAT",
+      "captured": true,
+      "draws": 4000,
+      "bond_reroute_draws": 228,
+      "bond_reroute_family_rate": 0.057,
+      "distinct_bond_reroute_successors": 7,
+      "target_successor_reached": false,
+      "v3_coordinate": [
+        16,
+        5
+      ],
+      "v3_removed_edge": [
+        6,
+        5
+      ],
+      "v3_moved_atom_is_a_cut_endpoint": false,
+      "exact_v3_coordinate_drawn": 0,
+      "moved_atom_roles": {
+        "inserted_atom": 228
+      },
+      "new_partner_roles": {
+        "other_core_atom": 228
+      },
+      "distinct_coordinates": 9
+    },
+    {
+      "drug": "ERLOTINIB",
+      "captured": true,
+      "draws": 4000,
+      "bond_reroute_draws": 520,
+      "bond_reroute_family_rate": 0.13,
+      "distinct_bond_reroute_successors": 28,
+      "target_successor_reached": true,
+      "v3_coordinate": [
+        8,
+        3
+      ],
+      "v3_removed_edge": [
+        2,
+        3
+      ],
+      "v3_moved_atom_is_a_cut_endpoint": false,
+      "exact_v3_coordinate_drawn": 0,
+      "moved_atom_roles": {
+        "inserted_atom": 175,
+        "other_core_atom": 175,
+        "far_core_anchor": 100,
+        "path_atom": 70
+      },
+      "new_partner_roles": {
+        "other_core_atom": 496,
+        "inserted_atom": 17,
+        "path_atom": 7
+      },
+      "distinct_coordinates": 30
+    },
+    {
+      "drug": "FUTIBATINIB",
+      "captured": true,
+      "draws": 4000,
+      "bond_reroute_draws": 254,
+      "bond_reroute_family_rate": 0.0635,
+      "distinct_bond_reroute_successors": 50,
+      "target_successor_reached": false,
+      "v3_coordinate": [
+        20,
+        9
+      ],
+      "v3_removed_edge": [
+        8,
+        9
+      ],
+      "v3_moved_atom_is_a_cut_endpoint": false,
+      "exact_v3_coordinate_drawn": 0,
+      "moved_atom_roles": {
+        "other_core_atom": 201,
+        "inserted_atom": 53
+      },
+      "new_partner_roles": {
+        "other_core_atom": 217,
+        "path_atom": 22,
+        "inserted_atom": 15
+      },
+      "distinct_coordinates": 75
+    },
+    {
+      "drug": "LESINURAD",
+      "captured": true,
+      "draws": 4000,
+      "bond_reroute_draws": 180,
+      "bond_reroute_family_rate": 0.045,
+      "distinct_bond_reroute_successors": 27,
+      "target_successor_reached": false,
+      "v3_coordinate": [
+        15,
+        12
+      ],
+      "v3_removed_edge": [
+        11,
+        12
+      ],
+      "v3_moved_atom_is_a_cut_endpoint": false,
+      "exact_v3_coordinate_drawn": 9,
+      "moved_atom_roles": {
+        "other_core_atom": 146,
+        "inserted_atom": 34
+      },
+      "new_partner_roles": {
+        "other_core_atom": 84,
+        "far_core_anchor": 47,
+        "inserted_atom": 25,
+        "path_atom": 24
+      },
+      "distinct_coordinates": 33
+    },
+    {
+      "drug": "LIOTHYRONINE",
+      "captured": true,
+      "draws": 4000,
+      "bond_reroute_draws": 141,
+      "bond_reroute_family_rate": 0.03525,
+      "distinct_bond_reroute_successors": 54,
+      "target_successor_reached": true,
+      "v3_coordinate": [
+        15,
+        4
+      ],
+      "v3_removed_edge": [
+        3,
+        4
+      ],
+      "v3_moved_atom_is_a_cut_endpoint": false,
+      "exact_v3_coordinate_drawn": 0,
+      "moved_atom_roles": {
+        "other_core_atom": 107,
+        "inserted_atom": 22,
+        "path_atom": 12
+      },
+      "new_partner_roles": {
+        "other_core_atom": 110,
+        "path_atom": 22,
+        "inserted_atom": 9
+      },
+      "distinct_coordinates": 55
+    },
+    {
+      "drug": "LOVASTATIN",
+      "captured": true,
+      "draws": 4000,
+      "bond_reroute_draws": 99,
+      "bond_reroute_family_rate": 0.02475,
+      "distinct_bond_reroute_successors": 64,
+      "target_successor_reached": false,
+      "v3_coordinate": [
+        28,
+        19
+      ],
+      "v3_removed_edge": [
+        18,
+        19
+      ],
+      "v3_moved_atom_is_a_cut_endpoint": false,
+      "exact_v3_coordinate_drawn": 1,
+      "moved_atom_roles": {
+        "other_core_atom": 89,
+        "inserted_atom": 10
+      },
+      "new_partner_roles": {
+        "other_core_atom": 87,
+        "path_atom": 5,
+        "far_core_anchor": 5,
+        "inserted_atom": 2
+      },
+      "distinct_coordinates": 64
+    },
+    {
+      "drug": "MARIBAVIR",
+      "captured": true,
+      "draws": 4000,
+      "bond_reroute_draws": 11,
+      "bond_reroute_family_rate": 0.00275,
+      "distinct_bond_reroute_successors": 8,
+      "target_successor_reached": false,
+      "v3_coordinate": [
+        25,
+        16
+      ],
+      "v3_removed_edge": [
+        15,
+        16
+      ],
+      "v3_moved_atom_is_a_cut_endpoint": false,
+      "exact_v3_coordinate_drawn": 0,
+      "moved_atom_roles": {
+        "other_core_atom": 6,
+        "inserted_atom": 5
+      },
+      "new_partner_roles": {
+        "other_core_atom": 10,
+        "far_core_anchor": 1
+      },
+      "distinct_coordinates": 8
+    },
+    {
+      "drug": "SPIRAPRIL",
+      "captured": true,
+      "draws": 4000,
+      "bond_reroute_draws": 323,
+      "bond_reroute_family_rate": 0.08075,
+      "distinct_bond_reroute_successors": 25,
+      "target_successor_reached": false,
+      "v3_coordinate": [
+        19,
+        7
+      ],
+      "v3_removed_edge": [
+        8,
+        7
+      ],
+      "v3_moved_atom_is_a_cut_endpoint": false,
+      "exact_v3_coordinate_drawn": 0,
+      "moved_atom_roles": {
+        "other_core_atom": 164,
+        "inserted_atom": 159
+      },
+      "new_partner_roles": {
+        "other_core_atom": 288,
+        "path_atom": 18,
+        "inserted_atom": 17
+      },
+      "distinct_coordinates": 34
+    }
+  ],
+  "elapsed_seconds": 842.9
+}
