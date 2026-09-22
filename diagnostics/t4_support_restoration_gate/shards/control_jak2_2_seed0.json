@@ -1,0 +1,160 @@
+{
+ "cell": "jak2_2",
+ "contract": "configs/t4_held_target_distilled_jak2_true_d06_250.json",
+ "contract_payload_sha256": "df3c113215e84588c86ad9d690e03cdc091d7cf88696165d8a069d0039acba93",
+ "controller_seed": 2026091914,
+ "delta_from_contract": 0.6,
+ "docking_calls": 0,
+ "docking_interlock": {
+  "docking_binaries_present": [],
+  "docking_calls": 0,
+  "forbidden_modules_checked": [
+   "compose_v4.experiments.t4_docking_adapter",
+   "compose_v4.experiments.t4_partial_docking"
+  ],
+  "forbidden_modules_resident": [],
+  "oracle_calls": 0
+ },
+ "elapsed_seconds": 911.49,
+ "execution": {
+  "app": "compose-t4-support-restoration-gate",
+  "mode": "modal_fanout"
+ },
+ "ladder_unreachable": true,
+ "oracle_calls": 0,
+ "protein": "jak2",
+ "role": "control",
+ "round_one": {
+  "agrees_with_committed_audit": true,
+  "audit_delta_mislabelled": true,
+  "decision": {
+   "featured_candidates": 27,
+   "fresh": 27,
+   "merged_pool": 27,
+   "parents_round_one": [
+    "Oc5ccc(C2NC(=O)c1ccccc1c3ccnc4[nH]cc2c34)c(F)c5"
+   ],
+   "pool_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 1,
+    "shallow": 26,
+    "unique_endpoints": 27
+   },
+   "reproduces_candidate_exhaustion": false,
+   "selected": 8,
+   "selected_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 1,
+    "shallow": 7,
+    "unique_endpoints": 8
+   }
+  },
+  "expected_selected": 8,
+  "lanes": {
+   "anchored_replacement": {
+    "cell": "jak2_2",
+    "elapsed_seconds": 462.75,
+    "eligible_records_returned": 0,
+    "expert": "anchored_replacement",
+    "kind": "round_one_expert",
+    "proposal_seed": 2027092018,
+    "seed_index": 0,
+    "telemetry": {
+     "raw_draws": 512
+    },
+    "unit_seconds": 462.75
+   },
+   "route_complete_region": {
+    "cell": "jak2_2",
+    "elapsed_seconds": 304.17,
+    "eligible_records_returned": 1,
+    "expert": "route_complete_region",
+    "kind": "round_one_expert",
+    "proposal_seed": 2027092119,
+    "seed_index": 0,
+    "telemetry": {
+     "available_large_rewrite_proposals": 131,
+     "available_local_rewrite_proposals": 11,
+     "available_medium_rewrite_proposals": 23,
+     "binding_truncations": 8,
+     "binding_visits": 27580,
+     "candidate_shortfall": 0,
+     "complete_programs_committed": 61,
+     "composition_aliases": 576,
+     "composition_attempts": 2457,
+     "composition_rejections": 1016,
+     "composition_repeated_constituent": 261,
+     "exact_realization_precision_denominator": 61,
+     "exact_realization_precision_numerator": 61,
+     "materialization_attempts": 41,
+     "materialization_rejections": 17,
+     "realization_limit": 64,
+     "realization_status_counts": {
+      "committed": 61,
+      "realizer_frontier_exhausted_abstention": 2,
+      "realizer_search_limit_abstention": 1
+     },
+     "realized_primitive_band_counts": {
+      "large": 28,
+      "medium": 14,
+      "small": 19
+     },
+     "scale_balanced": 0,
+     "selected_large_rewrite_proposals": 35,
+     "selected_local_rewrite_proposals": 11,
+     "selected_medium_rewrite_proposals": 18,
+     "single_aliases": 3,
+     "templates_with_bindings": 17,
+     "unique_ranked_endpoints": 64,
+     "valid_depth_2": 158,
+     "valid_depth_3": 311,
+     "valid_depth_4": 135,
+     "valid_unique_single_goals": 21
+    },
+    "unit_seconds": 304.18
+   },
+   "shallow": {
+    "cell": "jak2_2",
+    "elapsed_seconds": 897.53,
+    "eligible_records_returned": 26,
+    "expert": "shallow",
+    "kind": "round_one_expert",
+    "proposal_seed": 2027091917,
+    "seed_index": 0,
+    "telemetry": {
+     "raw_draws": 480
+    },
+    "unit_seconds": 897.53
+   }
+  }
+ },
+ "routing": {
+  "applicability": {
+   "charge_refused_regions": 0,
+   "charged_centres": 0,
+   "executable_regions": 8,
+   "growth_headroom": 13,
+   "heavy_atoms": 27,
+   "large_regions": 4,
+   "net_formal_charge": 0,
+   "protonation_sites": 0,
+   "total_regions": 8
+  },
+  "routed_kernel_if_it_had_exhausted": "region"
+ },
+ "schema_version": "t4_support_restoration_gate_v1",
+ "seed_index": 0,
+ "seed_role": "production",
+ "slot_semantics_preflight": {
+  "endpoint_heavy_ceiling": 40,
+  "free_slots_in_production_source": 21,
+  "heavy_atoms": 27,
+  "padded_graph_slots": 48,
+  "passed": true,
+  "smiles": "Oc5ccc(C2NC(=O)c1ccccc1c3ccnc4[nH]cc2c34)c(F)c5",
+  "tight_graph_slots": 27,
+  "tight_graph_would_forbid_atom_birth": true
+ }
+}

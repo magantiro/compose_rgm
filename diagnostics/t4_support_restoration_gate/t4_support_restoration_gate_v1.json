@@ -1,0 +1,863 @@
+{
+ "any_wall_clock_stop": false,
+ "cells": {
+  "5ht1b_2": {
+   "agrees_with_committed_audit": {
+    "0": true,
+    "2": true
+   },
+   "cumulative_by_rung": {
+    "0": [
+     {
+      "cumulative_distinct": 14,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 14,
+      "kernel": "state_aware",
+      "returned": 14,
+      "rung": 0,
+      "stage": "rung0_state_aware"
+     }
+    ],
+    "2": [
+     {
+      "cumulative_distinct": 19,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 19,
+      "kernel": "state_aware",
+      "returned": 19,
+      "rung": 0,
+      "stage": "rung0_state_aware"
+     }
+    ]
+   },
+   "distinct_eligible_by_seed": {
+    "0": 14,
+    "2": 19
+   },
+   "draws_spent_by_seed": {
+    "0": 0,
+    "2": 0
+   },
+   "drug_like_eligible_total": 33,
+   "elapsed_seconds_by_seed": {
+    "0": 1786.02,
+    "2": 1719.33
+   },
+   "eligible_endpoints_total": 33,
+   "endpoint_smiles": [
+    "C1=CC2=NC=C(CCCN3CCC(CCc4ccccc4)CC3)C2C=C1n1cnnc1",
+    "C1=CC2=NC=C(CCCN3CCN(CCc4ccccc4)CC3)C2C=C1n1cnnc1",
+    "C1=CC2=NC=C(CCCN3CCN(CCc4ccccn4)CC3)C2C=C1n1cnnc1",
+    "C1=CC2=NC=C(CCCN3CCN(CCc4ccncc4)CC3)C2C=C1n1cnnc1",
+    "C1=CC2=NC=C(CCCN3CCN(CNc4ccccc4)CC3)C2C=C1n1cnnc1",
+    "C1=CC2=NC=C(COCN3CCN(CCc4ccccc4)CC3)C2C=C1n1cnnc1",
+    "CCCCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+    "CCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+    "Cc1cccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)c1",
+    "Fc1cccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)c1",
+    "Fc1ccccc1CCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+    "NCCCCCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+    "NCc1ccccc1CCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+    "Nc1ccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)cc1",
+    "Nc1ccccc1CCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+    "O=C(CCC1=CN=C2C=CC(n3cnnc3)=CC12)N1CCN(CCc2ccccc2)CC1",
+    "O=C(CN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1)c1ccccc1",
+    "O=C(Cc1ccccc1)N1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+    "O=C1CN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CCN1CCc1ccccc1",
+    "O=C1CN(CCc2ccccc2)CCN1CCCC1=CN=C2C=CC(n3cnnc3)=CC12",
+    "OCCCCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+    "Oc1cccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)c1",
+    "Oc1ccccc1CCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1"
+   ],
+   "expansion_consumed_by_seed": {
+    "0": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 0,
+     "stop_reason": "reached_target"
+    },
+    "2": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 0,
+     "stop_reason": "reached_target"
+    }
+   },
+   "historical_comparison": {
+    "note": null,
+    "reason": "no historical eligible pool recorded for 5ht1b_2",
+    "status": "UNAVAILABLE"
+   },
+   "historical_kernel": "state_aware",
+   "historical_reference": "UNAVAILABLE",
+   "margins": {
+    "qed": {
+     "max": 0.196613,
+     "median": 0.059911,
+     "min": 0.005095,
+     "n": 33
+    },
+    "sa": {
+     "max": 0.281799,
+     "median": 0.137831,
+     "min": 0.002724,
+     "n": 33
+    },
+    "similarity": {
+     "max": 0.193103,
+     "median": 0.041791,
+     "min": 0.008696,
+     "n": 33
+    }
+   },
+   "p_any_eligible": 1.0,
+   "round_one_selected_by_seed": {
+    "0": 0,
+    "2": 0
+   },
+   "routed_kernel": [
+    "state_aware"
+   ],
+   "routing_agrees": true,
+   "rung_zero_yield_by_seed": {
+    "0": 14,
+    "2": 19
+   },
+   "seeds_run": [
+    0,
+    2
+   ],
+   "status": "RUN",
+   "stop_reason_by_seed": {
+    "0": "reached_target",
+    "2": "reached_target"
+   },
+   "structural_character": {
+    "direction_counts": {
+     "grow": 21,
+     "prune": 5,
+     "replace": 7
+    },
+    "heavy_delta": {
+     "max": 2.0,
+     "median": 1.0,
+     "min": -6.0,
+     "n": 33
+    },
+    "rewrite_families": [
+     "atom_protonation_restate",
+     "charge_only",
+     "shallow_local"
+    ],
+    "ring_delta": {
+     "max": 0.0,
+     "median": 0.0,
+     "min": -1.0,
+     "n": 33
+    },
+    "rungs_producing": [
+     0
+    ]
+   },
+   "trigger_confirmed_all_seeds": true,
+   "verdict": {
+    "detail": "14 distinct eligible endpoints recovered (14 at rung 0)",
+    "failure_kind": null,
+    "historical_kernel": "state_aware",
+    "routed_kernel": "state_aware",
+    "routing_agrees_with_historical_arm": true,
+    "verdict": "PASS"
+   },
+   "wall_clock_stops": []
+  },
+  "braf_0": {
+   "agrees_with_committed_audit": {
+    "0": true,
+    "2": true
+   },
+   "cumulative_by_rung": {
+    "0": [
+     {
+      "cumulative_distinct": 4,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 4,
+      "kernel": "region",
+      "returned": 4,
+      "rung": 0,
+      "stage": "rung0_region"
+     }
+    ],
+    "2": [
+     {
+      "cumulative_distinct": 4,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 4,
+      "kernel": "region",
+      "returned": 4,
+      "rung": 0,
+      "stage": "rung0_region"
+     }
+    ]
+   },
+   "distinct_eligible_by_seed": {
+    "0": 4,
+    "2": 4
+   },
+   "draws_spent_by_seed": {
+    "0": 0,
+    "2": 0
+   },
+   "drug_like_eligible_total": 8,
+   "elapsed_seconds_by_seed": {
+    "0": 1409.37,
+    "2": 1078.87
+   },
+   "eligible_endpoints_total": 8,
+   "endpoint_smiles": [
+    "CCCc1cccc(-c2ccnc3c(C(=O)NCCN(CC)CC)cnn23)c1",
+    "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(C)c3)ccnc12",
+    "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(N)c3)ccnc12",
+    "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC)c3)ccnc12",
+    "CCN(CC)CCNC(=O)c1cnn2c(-c3ccccc3)ccnc12"
+   ],
+   "expansion_consumed_by_seed": {
+    "0": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 0,
+     "stop_reason": "reached_target"
+    },
+    "2": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 0,
+     "stop_reason": "reached_target"
+    }
+   },
+   "historical_comparison": {
+    "comparison_rule": "scored on SUPPORT, never on molecular identity: comparable margins and comparable structural scale count as recovery even at zero exact overlap",
+    "exact_smiles_overlap": 4,
+    "historical_arm_lanes": [
+     {
+      "elapsed_seconds": 1352.2,
+      "eligible_unique": 9,
+      "expert": "shallow",
+      "region_law": "free_gate_margin_v1",
+      "region_law_consumption_attempts": 1
+     },
+     {
+      "elapsed_seconds": 458.3,
+      "eligible_unique": 0,
+      "expert": "anchored_replacement",
+      "region_law": null,
+      "region_law_consumption_attempts": null
+     },
+     {
+      "elapsed_seconds": 12.9,
+      "eligible_unique": 0,
+      "expert": "route_complete_region",
+      "region_law": null,
+      "region_law_consumption_attempts": null
+     }
+    ],
+    "historical_eligible": 9,
+    "historical_margins": {
+     "qed": {
+      "max": 0.11932,
+      "median": 0.035865,
+      "min": 0.012246,
+      "n": 9
+     },
+     "sa": {
+      "max": 1.778558,
+      "median": 1.586395,
+      "min": 1.279233,
+      "n": 9
+     },
+     "similarity": {
+      "max": 0.116216,
+      "median": 0.031579,
+      "min": 0.002564,
+      "n": 9
+     }
+    },
+    "historical_structural_character": {
+     "created_atoms": {
+      "max": 1.0,
+      "median": 0.0,
+      "min": 0.0,
+      "n": 9
+     },
+     "deleted_atoms": {
+      "max": 15.0,
+      "median": 14.0,
+      "min": 11.0,
+      "n": 9
+     },
+     "lanes": [
+      "shallow"
+     ]
+    },
+    "overlapping_smiles": [
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(C)c3)ccnc12",
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(N)c3)ccnc12",
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC)c3)ccnc12",
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3ccccc3)ccnc12"
+    ],
+    "status": "OK",
+    "unified_eligible": 5
+   },
+   "historical_kernel": "region",
+   "historical_reference": "UNAVAILABLE",
+   "margins": {
+    "qed": {
+     "max": 0.11932,
+     "median": 0.040726,
+     "min": 0.018754,
+     "n": 8
+    },
+    "sa": {
+     "max": 1.778558,
+     "median": 1.60117,
+     "min": 1.555924,
+     "n": 8
+    },
+    "similarity": {
+     "max": 0.089189,
+     "median": 0.031579,
+     "min": 0.015385,
+     "n": 8
+    }
+   },
+   "p_any_eligible": 1.0,
+   "round_one_selected_by_seed": {
+    "0": 0,
+    "2": 0
+   },
+   "routed_kernel": [
+    "region"
+   ],
+   "routing_agrees": true,
+   "rung_zero_yield_by_seed": {
+    "0": 4,
+    "2": 4
+   },
+   "seeds_run": [
+    0,
+    2
+   ],
+   "status": "RUN",
+   "stop_reason_by_seed": {
+    "0": "reached_target",
+    "2": "reached_target"
+   },
+   "structural_character": {
+    "direction_counts": {
+     "grow": 0,
+     "prune": 8,
+     "replace": 0
+    },
+    "heavy_delta": {
+     "max": -12.0,
+     "median": -14.0,
+     "min": -15.0,
+     "n": 8
+    },
+    "rewrite_families": [
+     "atom_delete"
+    ],
+    "ring_delta": {
+     "max": -1.0,
+     "median": -1.0,
+     "min": -1.0,
+     "n": 8
+    },
+    "rungs_producing": [
+     0
+    ]
+   },
+   "trigger_confirmed_all_seeds": true,
+   "verdict": {
+    "detail": "4 distinct eligible endpoints recovered (4 at rung 0)",
+    "failure_kind": null,
+    "historical_kernel": "region",
+    "routed_kernel": "region",
+    "routing_agrees_with_historical_arm": true,
+    "verdict": "PASS"
+   },
+   "wall_clock_stops": []
+  },
+  "braf_1": {
+   "agrees_with_committed_audit": {
+    "0": true,
+    "1": false,
+    "2": false
+   },
+   "cumulative_by_rung": {
+    "0": [
+     {
+      "cumulative_distinct": 6,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 6,
+      "kernel": "region",
+      "returned": 6,
+      "rung": 0,
+      "stage": "rung0_region"
+     }
+    ],
+    "1": [
+     {
+      "cumulative_distinct": 8,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 8,
+      "kernel": "region",
+      "returned": 8,
+      "rung": 0,
+      "stage": "rung0_region"
+     }
+    ],
+    "2": [
+     {
+      "cumulative_distinct": 8,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 8,
+      "kernel": "region",
+      "returned": 8,
+      "rung": 0,
+      "stage": "rung0_region"
+     }
+    ]
+   },
+   "distinct_eligible_by_seed": {
+    "0": 6,
+    "1": 8,
+    "2": 8
+   },
+   "draws_spent_by_seed": {
+    "0": 0,
+    "1": 0,
+    "2": 0
+   },
+   "drug_like_eligible_total": 22,
+   "elapsed_seconds_by_seed": {
+    "0": 979.52,
+    "1": 1386.3,
+    "2": 1593.95
+   },
+   "eligible_endpoints_total": 22,
+   "endpoint_smiles": [
+    "CC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+    "CCCOC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+    "CNC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+    "CNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+    "CONc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+    "NC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+    "NCNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+    "Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+    "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(NO)cc2)ccn1",
+    "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(O)cc2)ccn1",
+    "O=C(NCCN1CCOCC1)c1cc(Oc2ccccc2)ccn1",
+    "O=CNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+   ],
+   "expansion_consumed_by_seed": {
+    "0": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 0,
+     "stop_reason": "reached_target"
+    },
+    "1": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 0,
+     "stop_reason": "reached_target"
+    },
+    "2": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 0,
+     "stop_reason": "reached_target"
+    }
+   },
+   "historical_comparison": {
+    "comparison_rule": "scored on SUPPORT, never on molecular identity: comparable margins and comparable structural scale count as recovery even at zero exact overlap",
+    "exact_smiles_overlap": 10,
+    "historical_arm_lanes": [
+     {
+      "elapsed_seconds": 1131.6,
+      "eligible_unique": 24,
+      "expert": "shallow",
+      "region_law": "free_gate_margin_v1",
+      "region_law_consumption_attempts": 2
+     },
+     {
+      "elapsed_seconds": 477.9,
+      "eligible_unique": 0,
+      "expert": "anchored_replacement",
+      "region_law": null,
+      "region_law_consumption_attempts": null
+     },
+     {
+      "elapsed_seconds": 9.9,
+      "eligible_unique": 0,
+      "expert": "route_complete_region",
+      "region_law": null,
+      "region_law_consumption_attempts": null
+     }
+    ],
+    "historical_eligible": 24,
+    "historical_margins": {
+     "qed": {
+      "max": 0.278295,
+      "median": 0.084635,
+      "min": 0.000629,
+      "n": 24
+     },
+     "sa": {
+      "max": 2.002845,
+      "median": 1.700256,
+      "min": 1.495755,
+      "n": 24
+     },
+     "similarity": {
+      "max": 0.114286,
+      "median": 0.043388,
+      "min": 0.00274,
+      "n": 24
+     }
+    },
+    "historical_structural_character": {
+     "created_atoms": {
+      "max": 3.0,
+      "median": 0.0,
+      "min": 0.0,
+      "n": 24
+     },
+     "deleted_atoms": {
+      "max": 15.0,
+      "median": 11.5,
+      "min": 0.0,
+      "n": 24
+     },
+     "lanes": [
+      "shallow"
+     ]
+    },
+    "overlapping_smiles": [
+     "CC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "CNC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "CNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "CONc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "NC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "NCNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(O)cc2)ccn1",
+     "O=C(NCCN1CCOCC1)c1cc(Oc2ccccc2)ccn1",
+     "O=CNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+    ],
+    "status": "OK",
+    "unified_eligible": 12
+   },
+   "historical_kernel": "region",
+   "historical_reference": "UNAVAILABLE",
+   "margins": {
+    "qed": {
+     "max": 0.278295,
+     "median": 0.121126,
+     "min": 0.000629,
+     "n": 22
+    },
+    "sa": {
+     "max": 2.002845,
+     "median": 1.81683,
+     "min": 1.65227,
+     "n": 22
+    },
+    "similarity": {
+     "max": 0.114286,
+     "median": 0.039445,
+     "min": 0.023188,
+     "n": 22
+    }
+   },
+   "p_any_eligible": 1.0,
+   "round_one_selected_by_seed": {
+    "0": 0,
+    "1": 4,
+    "2": 8
+   },
+   "routed_kernel": [
+    "region"
+   ],
+   "routing_agrees": true,
+   "rung_zero_yield_by_seed": {
+    "0": 6,
+    "1": 8,
+    "2": 8
+   },
+   "seeds_run": [
+    0,
+    1,
+    2
+   ],
+   "status": "RUN",
+   "stop_reason_by_seed": {
+    "0": "reached_target",
+    "1": "reached_target",
+    "2": "reached_target"
+   },
+   "structural_character": {
+    "direction_counts": {
+     "grow": 0,
+     "prune": 22,
+     "replace": 0
+    },
+    "heavy_delta": {
+     "max": -8.0,
+     "median": -12.0,
+     "min": -15.0,
+     "n": 22
+    },
+    "rewrite_families": [
+     "atom_delete"
+    ],
+    "ring_delta": {
+     "max": -1.0,
+     "median": -1.0,
+     "min": -1.0,
+     "n": 22
+    },
+    "rungs_producing": [
+     0
+    ]
+   },
+   "trigger_confirmed_all_seeds": false,
+   "verdict": {
+    "detail": "6 distinct eligible endpoints recovered (6 at rung 0)",
+    "failure_kind": null,
+    "historical_kernel": "region",
+    "routed_kernel": "region",
+    "routing_agrees_with_historical_arm": true,
+    "verdict": "PASS"
+   },
+   "wall_clock_stops": []
+  },
+  "fa7_0": {
+   "status": "NOT_RUN"
+  },
+  "fa7_2": {
+   "status": "NOT_RUN"
+  }
+ },
+ "controls": {
+  "5ht1b_0": {
+   "agrees_with_committed_audit": true,
+   "audit_delta_mislabelled": false,
+   "contract": "configs/t4_held_target_distilled_5ht1b_d06_250.json",
+   "delta_from_contract": 0.6,
+   "elapsed_seconds": 913.66,
+   "expected": 8,
+   "ladder_unreachable": true,
+   "merged_pool": 38,
+   "routed_kernel_if_it_had_exhausted": "state_aware",
+   "selected": 8
+  },
+  "5ht1b_1": {
+   "agrees_with_committed_audit": true,
+   "audit_delta_mislabelled": false,
+   "contract": "configs/t4_held_target_distilled_5ht1b_d06_250.json",
+   "delta_from_contract": 0.6,
+   "elapsed_seconds": 325.62,
+   "expected": 8,
+   "ladder_unreachable": true,
+   "merged_pool": 28,
+   "routed_kernel_if_it_had_exhausted": "state_aware",
+   "selected": 8
+  },
+  "braf_2": {
+   "agrees_with_committed_audit": true,
+   "audit_delta_mislabelled": false,
+   "contract": "configs/t4_held_target_distilled_braf_d06_250.json",
+   "delta_from_contract": 0.6,
+   "elapsed_seconds": 1060.51,
+   "expected": 3,
+   "ladder_unreachable": true,
+   "merged_pool": 3,
+   "routed_kernel_if_it_had_exhausted": "region",
+   "selected": 3
+  },
+  "fa7_1": {
+   "agrees_with_committed_audit": true,
+   "audit_delta_mislabelled": false,
+   "contract": "configs/t4_held_target_distilled_fa7_d06_250.json",
+   "delta_from_contract": 0.6,
+   "elapsed_seconds": 577.34,
+   "expected": 7,
+   "ladder_unreachable": true,
+   "merged_pool": 7,
+   "routed_kernel_if_it_had_exhausted": "region",
+   "selected": 7
+  },
+  "jak2_0": {
+   "agrees_with_committed_audit": true,
+   "audit_delta_mislabelled": true,
+   "contract": "configs/t4_held_target_distilled_jak2_true_d06_250.json",
+   "delta_from_contract": 0.6,
+   "elapsed_seconds": 1587.98,
+   "expected": 8,
+   "ladder_unreachable": true,
+   "merged_pool": 398,
+   "routed_kernel_if_it_had_exhausted": "region",
+   "selected": 8
+  },
+  "jak2_1": {
+   "agrees_with_committed_audit": true,
+   "audit_delta_mislabelled": true,
+   "contract": "configs/t4_held_target_distilled_jak2_true_d06_250.json",
+   "delta_from_contract": 0.6,
+   "elapsed_seconds": 643.09,
+   "expected": 8,
+   "ladder_unreachable": true,
+   "merged_pool": 200,
+   "routed_kernel_if_it_had_exhausted": "region",
+   "selected": 8
+  },
+  "jak2_2": {
+   "agrees_with_committed_audit": true,
+   "audit_delta_mislabelled": true,
+   "contract": "configs/t4_held_target_distilled_jak2_true_d06_250.json",
+   "delta_from_contract": 0.6,
+   "elapsed_seconds": 911.49,
+   "expected": 8,
+   "ladder_unreachable": true,
+   "merged_pool": 27,
+   "routed_kernel_if_it_had_exhausted": "region",
+   "selected": 8
+  },
+  "parp1_0": {
+   "agrees_with_committed_audit": true,
+   "audit_delta_mislabelled": false,
+   "contract": "configs/t4_held_target_distilled_parp1_d06_250.json",
+   "delta_from_contract": 0.6,
+   "elapsed_seconds": 405.57,
+   "expected": 8,
+   "ladder_unreachable": true,
+   "merged_pool": 150,
+   "routed_kernel_if_it_had_exhausted": "region",
+   "selected": 8
+  },
+  "parp1_1": {
+   "agrees_with_committed_audit": true,
+   "audit_delta_mislabelled": false,
+   "contract": "configs/t4_held_target_distilled_parp1_d06_250.json",
+   "delta_from_contract": 0.6,
+   "elapsed_seconds": 304.93,
+   "expected": 8,
+   "ladder_unreachable": true,
+   "merged_pool": 98,
+   "routed_kernel_if_it_had_exhausted": "region",
+   "selected": 8
+  },
+  "parp1_2": {
+   "agrees_with_committed_audit": true,
+   "audit_delta_mislabelled": false,
+   "contract": "configs/t4_held_target_distilled_parp1_d06_250.json",
+   "delta_from_contract": 0.6,
+   "elapsed_seconds": 325.92,
+   "expected": 8,
+   "ladder_unreachable": true,
+   "merged_pool": 83,
+   "routed_kernel_if_it_had_exhausted": "region",
+   "selected": 8
+  }
+ },
+ "controls_all_searched": true,
+ "coverage": {
+  "addendum": "this block supersedes an earlier one written at 16 shards; a second 5ht1b_2 seed landed afterwards (19 eligible at rung 0, trigger reproduced). No verdict changed.",
+  "control_events_landed": 10,
+  "control_events_planned": 10,
+  "covered": {
+   "5ht1b_2": "seeds 0 and 2, rung 0 only (both reached_target, trigger reproduced on both)",
+   "braf_0": "seeds 0 and 2, rung 0 only (both reached_target)",
+   "braf_1": "seeds 0, 1, 2, rung 0 only (all reached_target)"
+  },
+  "ladder_rungs_1_to_3_exercised": false,
+  "missing": {
+   "5ht1b_2": "seed 1 missing",
+   "braf_0": "seed 1 missing",
+   "fa7_0": "ALL THREE SEEDS MISSING. Rung 0 yields 0-1, so this is the cell that must escalate; its ladder behaviour under the unified controller is UNMEASURED.",
+   "fa7_2": "ALL THREE SEEDS MISSING. Rung 0 yields 1-3, below the stop target of 4, so it escalates; UNMEASURED."
+  },
+  "status": "PARTIAL",
+  "trigger_events_landed": 7,
+  "trigger_events_planned": 15,
+  "what_this_does_and_does_not_establish": "ESTABLISHED: on braf_0, braf_1 and 5ht1b_2 the automatically routed kernel recovers useful support at rung 0 alone, at margins and structural scale comparable to the historical arms, and that support survives the production selection path. NOT ESTABLISHED: that the ladder's escalation rungs work, and that fa7_0 and fa7_2 clear their bar. No zero was observed on any landed cell, so no WIRING failure was seen -- but absence of a failure on cells that never escalated is not evidence about escalation.",
+  "why": "every landed trigger event reached stop_at_distinct_eligible=4 at RUNG 0 and never escalated. The two cells that would have escalated, fa7_0 and fa7_2, committed no shard."
+ },
+ "docking_calls": 0,
+ "failure_kinds": {},
+ "kernel": "rdkit 2024.03.5 (T4 production)",
+ "ladder": {
+  "draw_ladder": [
+   960,
+   1920,
+   3840
+  ],
+  "lanes": [
+   "shallow",
+   "anchored_replacement"
+  ],
+  "max_extra_draws_per_event": 6720,
+  "policy": "t4_frozen_escalation_v1",
+  "policy_sha256": "c5cf6ab3e3a516b6aca3c9cc410c17d2f712bf60ccac224363ba57343c256a62",
+  "schema_version": "t4_support_expansion_v1",
+  "stop_at_distinct_eligible": 4,
+  "wall_seconds": 7200.0,
+  "zero_support_fallback": true
+ },
+ "oracle_calls": 0,
+ "question": "Does the automatic unified controller recover the useful proposal SUPPORT the historical per-cell arms produced? Scored on SUPPORT, never on molecular identity.",
+ "routing_agrees_on_every_fired_cell": true,
+ "schema_version": "t4_support_restoration_gate_v1",
+ "seed_policy": {
+  "index_0": "production derivation, unchanged",
+  "indices": [
+   0,
+   1,
+   2
+  ],
+  "indices_1_2": "VARIANCE PROBE, not the production algorithm",
+  "variance_offset": 1000000000000
+ },
+ "shards": [
+  "5ht1b_2_seed0",
+  "5ht1b_2_seed2",
+  "braf_0_seed0",
+  "braf_0_seed2",
+  "braf_1_seed0",
+  "braf_1_seed1",
+  "braf_1_seed2",
+  "control_5ht1b_0",
+  "control_5ht1b_1",
+  "control_braf_2",
+  "control_fa7_1",
+  "control_jak2_0",
+  "control_jak2_1",
+  "control_jak2_2",
+  "control_parp1_0",
+  "control_parp1_1",
+  "control_parp1_2"
+ ],
+ "trigger_cells_run": 3,
+ "verdict_counts": {
+  "FAIL": 0,
+  "PASS": 3
+ }
+}

@@ -728,5 +728,77 @@
  },
  "oracle_calls": 0,
  "role": "local measurements and historical reference for the support-restoration gate",
- "schema_version": "t4_support_restoration_gate_local_evidence_v1"
+ "schema_version": "t4_support_restoration_gate_local_evidence_v1",
+ "support_is_usable_not_merely_generated": {
+  "method": "normalize_expansion_records -> attach_features -> select_batch, the production functions, on the real rung-0 output at the production seed. Zero oracle calls; select_batch chooses which molecules WOULD be docked and nothing is docked.",
+  "required_query_row_keys": [
+   "smiles",
+   "parent",
+   "parent_score",
+   "proposal_lane",
+   "proposal_experts"
+  ],
+  "results": {
+   "5ht1b_2": {
+    "featured": 14,
+    "kernel": "state_aware",
+    "missing_query_row_keys": [],
+    "pool_census": {
+     "anchored_replacement": 0,
+     "multi_expert": 0,
+     "route_complete_region": 0,
+     "shallow": 0,
+     "unique_endpoints": 14
+    },
+    "rung0_eligible": 14,
+    "selected": 8,
+    "selected_census": {
+     "anchored_replacement": 0,
+     "multi_expert": 0,
+     "route_complete_region": 0,
+     "shallow": 0,
+     "unique_endpoints": 8
+    },
+    "selected_smiles": [
+     "CCCCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+     "Fc1cccc(CCN2CCN(CCCC3=CN=C4C=CC(n5cnnc5)=CC34)CC2)c1",
+     "Nc1ccccc1CCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+     "O=C(CCC1=CN=C2C=CC(n3cnnc3)=CC12)N1CCN(CCc2ccccc2)CC1",
+     "O=C(Cc1ccccc1)N1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1",
+     "O=C1CN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CCN1CCc1ccccc1",
+     "O=C1CN(CCc2ccccc2)CCN1CCCC1=CN=C2C=CC(n3cnnc3)=CC12",
+     "OCCCCN1CCN(CCCC2=CN=C3C=CC(n4cnnc4)=CC23)CC1"
+    ]
+   },
+   "braf_0": {
+    "featured": 4,
+    "kernel": "region",
+    "missing_query_row_keys": [],
+    "pool_census": {
+     "anchored_replacement": 0,
+     "multi_expert": 0,
+     "route_complete_region": 0,
+     "shallow": 0,
+     "unique_endpoints": 4
+    },
+    "rung0_eligible": 4,
+    "selected": 4,
+    "selected_census": {
+     "anchored_replacement": 0,
+     "multi_expert": 0,
+     "route_complete_region": 0,
+     "shallow": 0,
+     "unique_endpoints": 4
+    },
+    "selected_smiles": [
+     "CCCc1cccc(-c2ccnc3c(C(=O)NCCN(CC)CC)cnn23)c1",
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(N)c3)ccnc12",
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC)c3)ccnc12",
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3ccccc3)ccnc12"
+    ]
+   }
+  },
+  "verdict": "PASS on both kernels: braf_0 region 4 eligible -> 4 featured -> 4 selected, 5ht1b_2 state_aware 14 eligible -> 14 featured -> 8 selected (the contract batch cap), zero missing query-row keys in either.",
+  "why_this_is_a_separate_question": "Run 727d9db5 reached its expansion target with FOUR eligible endpoints and then died with KeyError('proposal_experts') while building its query rows, discarding all four. Generating support and being able to USE it are different claims, so the routed kernels' own output was pushed through the production normalize / attach_features / select_batch path and then checked against the keys run_cell subscripts when it builds a query row."
+ }
 }

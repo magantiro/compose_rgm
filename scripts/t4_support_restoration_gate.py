@@ -132,6 +132,9 @@ from compose_v4.experiments.t4_integrated_route_fiber import (
 )
 from compose_v4.experiments.t4_support_expansion import (
     ESCALATABLE_LANES,
+    ExpansionOutcome,
+    SupportExpansionNotConsumed,
+    assert_support_expansion_is_consumed,
     normalize_expansion_records,
     run_support_expansion,
 )
@@ -1070,6 +1073,120 @@ def _distribution(values: list[float]) -> dict | None:
     }
 
 
+#: The historical arms' own round-one output, read read-only from their volumes.
+HISTORICAL_REFERENCE = "diagnostics/t4_support_restoration_gate/historical_reference_v1.json"
+
+
+def _assert_expansion_consumed(shard: dict) -> dict:
+    """Prove the routed ladder ACTUALLY RAN for this event, from the shard's own record.
+
+    A mechanism that is wired, tested and never reached by a caller is the failure this
+    repository has paid for repeatedly, and a gate that reported support without the
+    expansion having run would be an instance of it. `assert_support_expansion_is_consumed`
+    is the production guard for exactly this, so it is driven here on an outcome rebuilt
+    from the shard rather than re-implemented.
+    """
+
+    record = shard["expansion"]
+    outcome = ExpansionOutcome(
+        attempts=int(record["attempts"]),
+        draws_spent=int(record["draws_spent"]),
+        distinct_eligible=int(record["distinct_eligible"]),
+        fallback_ran=bool(record["fallback_ran"]),
+        stop_reason=str(record["stop_reason"]),
+    )
+    try:
+        assert_support_expansion_is_consumed(outcome)
+    except SupportExpansionNotConsumed as error:
+        return {"consumed": False, "reason": str(error)}
+    return {
+        "consumed": True,
+        "stop_reason": outcome.stop_reason,
+        "fallback_ran": outcome.fallback_ran,
+        "ladder_attempts": outcome.attempts,
+    }
+
+
+def _historical_comparison(cell: str, endpoints: list[dict], *, root: Path = ROOT) -> dict:
+    """Unified support vs the historical arm's, compared as SUPPORT not as identity.
+
+    Exact SMILES overlap is reported because it is a fact, NOT because the gate turns on
+    it: two searches may cover the same useful support with different molecules, and the
+    interpretation rule says so explicitly. What the verdict actually rests on is whether
+    the unified controller produces eligible endpoints of comparable constraint margin
+    and comparable structural scale, so those distributions are put side by side.
+    """
+
+    path = root / HISTORICAL_REFERENCE
+    if not path.exists():
+        return {"status": "UNAVAILABLE", "reason": f"{HISTORICAL_REFERENCE} absent"}
+    reference = json.loads(path.read_text())
+    block = reference.get(f"{cell}_region_repair_rescue")
+    if not block or "eligible_descriptors" not in block:
+        return {
+            "status": "UNAVAILABLE",
+            "reason": f"no historical eligible pool recorded for {cell}",
+            "note": reference.get(f"{cell}_region_repair_rescue", {}).get("note"),
+        }
+    historical = block["eligible_descriptors"]
+    delta = None
+    for point in endpoints:
+        delta = round(point["similarity"] - point["margin_similarity"], 6)
+        break
+    ours = {point["smiles"] for point in endpoints}
+    theirs = {row["smiles"] for row in historical}
+    return {
+        "status": "OK",
+        "historical_arm_lanes": block["lane_telemetry"],
+        "historical_eligible": len(theirs),
+        "unified_eligible": len(ours),
+        "exact_smiles_overlap": len(ours & theirs),
+        "overlapping_smiles": sorted(ours & theirs),
+        "historical_margins": {
+            "similarity": _distribution(
+                [row["similarity"] - delta for row in historical if delta is not None]
+            ),
+            "qed": _distribution([row["qed"] - QED_MIN for row in historical]),
+            "sa": _distribution([SA_MAX - row["sa"] for row in historical]),
+        },
+        "historical_structural_character": {
+            "deleted_atoms": _distribution(
+                [float(row["deleted"]) for row in historical if row.get("deleted") is not None]
+            ),
+            "created_atoms": _distribution(
+                [float(row["created"]) for row in historical if row.get("created") is not None]
+            ),
+            "lanes": sorted({row["proposal_lane"] for row in historical}),
+        },
+        "comparison_rule": (
+            "scored on SUPPORT, never on molecular identity: comparable margins and "
+            "comparable structural scale count as recovery even at zero exact overlap"
+        ),
+    }
+
+
+def _relabelled_rungs(shard: dict) -> list[dict]:
+    """Name rung 0 by the kernel that actually ran it.
+
+    `run_support_expansion` labels its first stage `zero_support_fallback` because that
+    is the only rung-0 stage IT knows about. Under routing, rung 0 is whichever kernel
+    the state selected, and on a charged parent that is the protonation-aware expert,
+    not the region fallback. Carrying the generic label into the artifact would claim
+    the wrong mechanism ran, so the label is corrected from the shard's own record of
+    the routed kernel.
+    """
+
+    kernel = shard["rung_zero"]["kernel"]
+    out = []
+    for entry in shard["cumulative_by_rung"]:
+        row = dict(entry)
+        if row["stage"] != "draw_ladder":
+            row["stage"] = f"rung0_{kernel}"
+            row["kernel"] = kernel
+        out.append(row)
+    return out
+
+
 def reduce_shards(shard_dir: Path, destination: Path) -> dict:
     """Merge shards into the per-cell gate table.
 
@@ -1125,7 +1242,7 @@ def reduce_shards(shard_dir: Path, destination: Path) -> dict:
                 row["seed_index"]: row["rung_zero_fresh_distinct"] for row in rows
             },
             "cumulative_by_rung": {
-                row["seed_index"]: row["cumulative_by_rung"] for row in rows
+                row["seed_index"]: _relabelled_rungs(row) for row in rows
             },
             "stop_reason_by_seed": {
                 row["seed_index"]: row["expansion"]["stop_reason"] for row in rows
@@ -1159,6 +1276,10 @@ def reduce_shards(shard_dir: Path, destination: Path) -> dict:
             ),
             "endpoint_smiles": sorted({p["smiles"] for p in endpoints}),
             "historical_reference": HISTORICAL_EXPANSION.get(cell, "UNAVAILABLE"),
+            "historical_comparison": _historical_comparison(cell, endpoints),
+            "expansion_consumed_by_seed": {
+                row["seed_index"]: _assert_expansion_consumed(row) for row in rows
+            },
             "verdict": production["verdict"],
             "elapsed_seconds_by_seed": {
                 row["seed_index"]: row["elapsed_seconds"] for row in rows

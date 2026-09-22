@@ -1,0 +1,159 @@
+{
+ "cell": "5ht1b_1",
+ "contract": "configs/t4_held_target_distilled_5ht1b_d06_250.json",
+ "contract_payload_sha256": "6959ae96cc0387f8116c6fa4fe9b531eb726959d33a17df6d8fbc51f1bb0e306",
+ "controller_seed": 2026091907,
+ "delta_from_contract": 0.6,
+ "docking_calls": 0,
+ "docking_interlock": {
+  "docking_binaries_present": [],
+  "docking_calls": 0,
+  "forbidden_modules_checked": [
+   "compose_v4.experiments.t4_docking_adapter",
+   "compose_v4.experiments.t4_partial_docking"
+  ],
+  "forbidden_modules_resident": [],
+  "oracle_calls": 0
+ },
+ "elapsed_seconds": 325.62,
+ "execution": {
+  "app": "compose-t4-support-restoration-gate",
+  "mode": "modal_fanout"
+ },
+ "ladder_unreachable": true,
+ "oracle_calls": 0,
+ "protein": "5ht1b",
+ "role": "control",
+ "round_one": {
+  "agrees_with_committed_audit": true,
+  "audit_delta_mislabelled": false,
+  "decision": {
+   "featured_candidates": 28,
+   "fresh": 28,
+   "merged_pool": 28,
+   "parents_round_one": [
+    "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1"
+   ],
+   "pool_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 1,
+    "shallow": 27,
+    "unique_endpoints": 28
+   },
+   "reproduces_candidate_exhaustion": false,
+   "selected": 8,
+   "selected_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 1,
+    "shallow": 7,
+    "unique_endpoints": 8
+   }
+  },
+  "expected_selected": 8,
+  "lanes": {
+   "anchored_replacement": {
+    "cell": "5ht1b_1",
+    "elapsed_seconds": 161.15,
+    "eligible_records_returned": 0,
+    "expert": "anchored_replacement",
+    "kind": "round_one_expert",
+    "proposal_seed": 2027092011,
+    "seed_index": 0,
+    "telemetry": {
+     "raw_draws": 512
+    },
+    "unit_seconds": 161.15
+   },
+   "route_complete_region": {
+    "cell": "5ht1b_1",
+    "elapsed_seconds": 2.04,
+    "eligible_records_returned": 1,
+    "expert": "route_complete_region",
+    "kind": "round_one_expert",
+    "proposal_seed": 2027092112,
+    "seed_index": 0,
+    "telemetry": {
+     "available_large_rewrite_proposals": 7,
+     "available_local_rewrite_proposals": 3,
+     "available_medium_rewrite_proposals": 4,
+     "binding_truncations": 3,
+     "binding_visits": 219,
+     "candidate_shortfall": 50,
+     "complete_programs_committed": 7,
+     "composition_aliases": 10,
+     "composition_attempts": 84,
+     "composition_rejections": 42,
+     "composition_repeated_constituent": 24,
+     "exact_realization_precision_denominator": 7,
+     "exact_realization_precision_numerator": 7,
+     "materialization_attempts": 20,
+     "materialization_rejections": 10,
+     "realization_limit": 64,
+     "realization_status_counts": {
+      "committed": 7,
+      "realizer_charge_policy_abstention": 7
+     },
+     "realized_primitive_band_counts": {
+      "large": 0,
+      "medium": 2,
+      "small": 5
+     },
+     "scale_balanced": 0,
+     "selected_large_rewrite_proposals": 7,
+     "selected_local_rewrite_proposals": 3,
+     "selected_medium_rewrite_proposals": 4,
+     "single_aliases": 4,
+     "templates_with_bindings": 7,
+     "unique_ranked_endpoints": 14,
+     "valid_depth_2": 6,
+     "valid_depth_3": 2,
+     "valid_depth_4": 0,
+     "valid_unique_single_goals": 6
+    },
+    "unit_seconds": 2.05
+   },
+   "shallow": {
+    "cell": "5ht1b_1",
+    "elapsed_seconds": 316.51,
+    "eligible_records_returned": 27,
+    "expert": "shallow",
+    "kind": "round_one_expert",
+    "proposal_seed": 2027091910,
+    "seed_index": 0,
+    "telemetry": {
+     "raw_draws": 480
+    },
+    "unit_seconds": 316.51
+   }
+  }
+ },
+ "routing": {
+  "applicability": {
+   "charge_refused_regions": 5,
+   "charged_centres": 1,
+   "executable_regions": 5,
+   "growth_headroom": 24,
+   "heavy_atoms": 16,
+   "large_regions": 5,
+   "net_formal_charge": 1,
+   "protonation_sites": 1,
+   "total_regions": 10
+  },
+  "routed_kernel_if_it_had_exhausted": "state_aware"
+ },
+ "schema_version": "t4_support_restoration_gate_v1",
+ "seed_index": 0,
+ "seed_role": "production",
+ "slot_semantics_preflight": {
+  "endpoint_heavy_ceiling": 40,
+  "free_slots_in_production_source": 32,
+  "heavy_atoms": 16,
+  "padded_graph_slots": 48,
+  "passed": true,
+  "smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+  "tight_graph_slots": 16,
+  "tight_graph_would_forbid_atom_birth": true
+ }
+}

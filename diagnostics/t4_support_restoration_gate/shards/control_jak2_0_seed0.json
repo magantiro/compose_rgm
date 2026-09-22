@@ -1,0 +1,158 @@
+{
+ "cell": "jak2_0",
+ "contract": "configs/t4_held_target_distilled_jak2_true_d06_250.json",
+ "contract_payload_sha256": "df3c113215e84588c86ad9d690e03cdc091d7cf88696165d8a069d0039acba93",
+ "controller_seed": 2026091912,
+ "delta_from_contract": 0.6,
+ "docking_calls": 0,
+ "docking_interlock": {
+  "docking_binaries_present": [],
+  "docking_calls": 0,
+  "forbidden_modules_checked": [
+   "compose_v4.experiments.t4_docking_adapter",
+   "compose_v4.experiments.t4_partial_docking"
+  ],
+  "forbidden_modules_resident": [],
+  "oracle_calls": 0
+ },
+ "elapsed_seconds": 1587.98,
+ "execution": {
+  "app": "compose-t4-support-restoration-gate",
+  "mode": "modal_fanout"
+ },
+ "ladder_unreachable": true,
+ "oracle_calls": 0,
+ "protein": "jak2",
+ "role": "control",
+ "round_one": {
+  "agrees_with_committed_audit": true,
+  "audit_delta_mislabelled": true,
+  "decision": {
+   "featured_candidates": 398,
+   "fresh": 398,
+   "merged_pool": 398,
+   "parents_round_one": [
+    "OCCCCc2nc1ccccc1c4ncnc3[nH]cc2c34"
+   ],
+   "pool_census": {
+    "anchored_replacement": 227,
+    "multi_expert": 6,
+    "route_complete_region": 11,
+    "shallow": 166,
+    "unique_endpoints": 398
+   },
+   "reproduces_candidate_exhaustion": false,
+   "selected": 8,
+   "selected_census": {
+    "anchored_replacement": 3,
+    "multi_expert": 0,
+    "route_complete_region": 1,
+    "shallow": 4,
+    "unique_endpoints": 8
+   }
+  },
+  "expected_selected": 8,
+  "lanes": {
+   "anchored_replacement": {
+    "cell": "jak2_0",
+    "elapsed_seconds": 290.46,
+    "eligible_records_returned": 227,
+    "expert": "anchored_replacement",
+    "kind": "round_one_expert",
+    "proposal_seed": 2027092016,
+    "seed_index": 0,
+    "telemetry": {
+     "raw_draws": 512
+    },
+    "unit_seconds": 290.46
+   },
+   "route_complete_region": {
+    "cell": "jak2_0",
+    "elapsed_seconds": 21.73,
+    "eligible_records_returned": 11,
+    "expert": "route_complete_region",
+    "kind": "round_one_expert",
+    "proposal_seed": 2027092117,
+    "seed_index": 0,
+    "telemetry": {
+     "available_large_rewrite_proposals": 88,
+     "available_local_rewrite_proposals": 11,
+     "available_medium_rewrite_proposals": 60,
+     "binding_truncations": 6,
+     "binding_visits": 1417,
+     "candidate_shortfall": 0,
+     "complete_programs_committed": 64,
+     "composition_aliases": 508,
+     "composition_attempts": 1665,
+     "composition_rejections": 422,
+     "composition_repeated_constituent": 255,
+     "exact_realization_precision_denominator": 64,
+     "exact_realization_precision_numerator": 64,
+     "materialization_attempts": 31,
+     "materialization_rejections": 12,
+     "realization_limit": 64,
+     "realization_status_counts": {
+      "committed": 64
+     },
+     "realized_primitive_band_counts": {
+      "large": 10,
+      "medium": 16,
+      "small": 38
+     },
+     "scale_balanced": 0,
+     "selected_large_rewrite_proposals": 11,
+     "selected_local_rewrite_proposals": 11,
+     "selected_medium_rewrite_proposals": 42,
+     "single_aliases": 4,
+     "templates_with_bindings": 12,
+     "unique_ranked_endpoints": 64,
+     "valid_depth_2": 85,
+     "valid_depth_3": 192,
+     "valid_depth_4": 203,
+     "valid_unique_single_goals": 15
+    },
+    "unit_seconds": 21.73
+   },
+   "shallow": {
+    "cell": "jak2_0",
+    "elapsed_seconds": 744.15,
+    "eligible_records_returned": 166,
+    "expert": "shallow",
+    "kind": "round_one_expert",
+    "proposal_seed": 2027091915,
+    "seed_index": 0,
+    "telemetry": {
+     "raw_draws": 480
+    },
+    "unit_seconds": 744.15
+   }
+  }
+ },
+ "routing": {
+  "applicability": {
+   "charge_refused_regions": 0,
+   "charged_centres": 0,
+   "executable_regions": 10,
+   "growth_headroom": 18,
+   "heavy_atoms": 22,
+   "large_regions": 5,
+   "net_formal_charge": 0,
+   "protonation_sites": 0,
+   "total_regions": 10
+  },
+  "routed_kernel_if_it_had_exhausted": "region"
+ },
+ "schema_version": "t4_support_restoration_gate_v1",
+ "seed_index": 0,
+ "seed_role": "production",
+ "slot_semantics_preflight": {
+  "endpoint_heavy_ceiling": 40,
+  "free_slots_in_production_source": 26,
+  "heavy_atoms": 22,
+  "padded_graph_slots": 48,
+  "passed": true,
+  "smiles": "OCCCCc2nc1ccccc1c4ncnc3[nH]cc2c34",
+  "tight_graph_slots": 22,
+  "tight_graph_would_forbid_atom_birth": true
+ }
+}

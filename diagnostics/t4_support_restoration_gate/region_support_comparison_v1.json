@@ -1,0 +1,314 @@
+{
+ "THE_CONFIGURATION_DIFFERENCE": "The region-repair arms produced their round-one support from the SHALLOW lane running with region_law='free_gate_margin_v1'. The five held-target d06 contracts declare NO region_law (absent is byte-identical OFF) and no support_expansion block, so the unified controller as specified escalates UNCONDITIONED shallow and anchored lanes and reaches the region mechanism only through the rung-0 zero_support_fallback. Arm and replacement are not the same configuration, and that is the first place to look if a region-routed cell yields nothing.",
+ "cells": {
+  "braf_0": {
+   "exact_smiles_overlap": 5,
+   "historical_arm": {
+    "eligible": 9,
+    "heavy_delta": {
+     "max": -11.0,
+     "median": -14.0,
+     "min": -15.0,
+     "n": 9
+    },
+    "lanes": [
+     "shallow"
+    ],
+    "margins": {
+     "qed": {
+      "max": 0.11932,
+      "median": 0.035865,
+      "min": 0.012246,
+      "n": 9
+     },
+     "sa": {
+      "max": 1.778558,
+      "median": 1.586395,
+      "min": 1.279233,
+      "n": 9
+     },
+     "similarity": {
+      "max": 0.116216,
+      "median": 0.031579,
+      "min": 0.002564,
+      "n": 9
+     }
+    },
+    "region_law": [
+     "free_gate_margin_v1"
+    ]
+   },
+   "support_comparison": "comparable",
+   "unified_rung0": {
+    "distinct_endpoints": 6,
+    "eligible_per_seed": [
+     4,
+     2,
+     5
+    ],
+    "heavy_delta": {
+     "max": -11.0,
+     "median": -13.5,
+     "min": -15.0,
+     "n": 6
+    },
+    "margins": {
+     "qed": {
+      "max": 0.1193,
+      "median": 0.0381,
+      "min": 0.0122,
+      "n": 6
+     },
+     "sa": {
+      "max": 1.7786,
+      "median": 1.60765,
+      "min": 1.5559,
+      "n": 6
+     },
+     "similarity": {
+      "max": 0.1162,
+      "median": 0.0358,
+      "min": 0.0154,
+      "n": 6
+     }
+    },
+    "p_any_eligible": "3/3",
+    "smiles": [
+     "CCCc1cccc(-c2ccnc3c(C(=O)NCCN(CC)CC)cnn23)c1",
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(N)c3)ccnc12",
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC(C)=O)c3)ccnc12",
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC)c3)ccnc12",
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(O)c3)ccnc12",
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3ccccc3)ccnc12"
+    ]
+   }
+  },
+  "braf_1": {
+   "exact_smiles_overlap": 8,
+   "historical_arm": {
+    "eligible": 24,
+    "heavy_delta": {
+     "max": -10.0,
+     "median": -11.5,
+     "min": -15.0,
+     "n": 24
+    },
+    "lanes": [
+     "shallow"
+    ],
+    "margins": {
+     "qed": {
+      "max": 0.278295,
+      "median": 0.084635,
+      "min": 0.000629,
+      "n": 24
+     },
+     "sa": {
+      "max": 2.002845,
+      "median": 1.700256,
+      "min": 1.495755,
+      "n": 24
+     },
+     "similarity": {
+      "max": 0.114286,
+      "median": 0.043388,
+      "min": 0.00274,
+      "n": 24
+     }
+    },
+    "region_law": [
+     "free_gate_margin_v1"
+    ]
+   },
+   "support_comparison": "comparable",
+   "unified_rung0": {
+    "distinct_endpoints": 12,
+    "eligible_per_seed": [
+     6,
+     7,
+     8
+    ],
+    "heavy_delta": {
+     "max": -9.0,
+     "median": -12.0,
+     "min": -15.0,
+     "n": 12
+    },
+    "margins": {
+     "qed": {
+      "max": 0.2783,
+      "median": 0.0846,
+      "min": 0.0012,
+      "n": 12
+     },
+     "sa": {
+      "max": 2.0028,
+      "median": 1.79655,
+      "min": 1.6523,
+      "n": 12
+     },
+     "similarity": {
+      "max": 0.0857,
+      "median": 0.0479,
+      "min": 0.0111,
+      "n": 12
+     }
+    },
+    "p_any_eligible": "3/3",
+    "smiles": [
+     "CC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "CCOC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "CNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "CONc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "NC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "NCC(=O)Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "NCOc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "NCc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "Nc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1",
+     "O=C(NCCN1CCOCC1)c1cc(Oc2ccc(NCO)cc2)ccn1",
+     "O=C(NCCN1CCOCC1)c1cc(Oc2ccccc2)ccn1",
+     "O=CNc1ccc(Oc2ccnc(C(=O)NCCN3CCOCC3)c2)cc1"
+    ]
+   }
+  },
+  "fa7_0": {
+   "historical_arm": {
+    "detail": {
+     "charged_calls": 1,
+     "final_best": -8.6,
+     "note": "the REGION-REPAIR arm FAILED on fa7_0, terminating at candidate_exhaustion after the root docking. For fa7_0 the historical bar is the LADDER arm below, not the region arm.",
+     "path": "b9161be0d130d27cc0146ccc44b2673c62d6ffcefe9d674e463e250637942e57/fa7_0/result.json",
+     "status": "candidate_exhaustion",
+     "volume": "compose-t4-region-repair-rescue-fa7-d06"
+    },
+    "status": "the region-repair arm FAILED on this cell"
+   },
+   "unified_rung0": {
+    "distinct_endpoints": 1,
+    "eligible_per_seed": [
+     0,
+     1,
+     0
+    ],
+    "heavy_delta": {
+     "max": -9.0,
+     "median": -9.0,
+     "min": -9.0,
+     "n": 1
+    },
+    "margins": {
+     "qed": {
+      "max": 0.0328,
+      "median": 0.0328,
+      "min": 0.0328,
+      "n": 1
+     },
+     "sa": {
+      "max": 1.7342,
+      "median": 1.7342,
+      "min": 1.7342,
+      "n": 1
+     },
+     "similarity": {
+      "max": 0.0964,
+      "median": 0.0964,
+      "min": 0.0964,
+      "n": 1
+     }
+    },
+    "p_any_eligible": "1/3",
+    "smiles": [
+     "CC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1"
+    ]
+   }
+  },
+  "fa7_2": {
+   "exact_smiles_overlap": 2,
+   "historical_arm": {
+    "eligible": 3,
+    "heavy_delta": {
+     "max": -8.0,
+     "median": -10.0,
+     "min": -12.0,
+     "n": 3
+    },
+    "lanes": [
+     "shallow"
+    ],
+    "margins": {
+     "qed": {
+      "max": 0.136922,
+      "median": 0.092855,
+      "min": 0.014694,
+      "n": 3
+     },
+     "sa": {
+      "max": 1.466136,
+      "median": 1.401272,
+      "min": 1.327352,
+      "n": 3
+     },
+     "similarity": {
+      "max": 0.071875,
+      "median": 0.040625,
+      "min": 0.032353,
+      "n": 3
+     }
+    },
+    "region_law": [
+     "free_gate_margin_v1"
+    ]
+   },
+   "support_comparison": "comparable",
+   "unified_rung0": {
+    "distinct_endpoints": 4,
+    "eligible_per_seed": [
+     2,
+     1,
+     3
+    ],
+    "heavy_delta": {
+     "max": -10.0,
+     "median": -12.0,
+     "min": -12.0,
+     "n": 4
+    },
+    "margins": {
+     "qed": {
+      "max": 0.1369,
+      "median": 0.0573,
+      "min": 0.0203,
+      "n": 4
+     },
+     "sa": {
+      "max": 1.4661,
+      "median": 1.3646,
+      "min": 1.2722,
+      "n": 4
+     },
+     "similarity": {
+      "max": 0.0719,
+      "median": 0.0406,
+      "min": 0.0406,
+      "n": 4
+     }
+    },
+    "p_any_eligible": "3/3",
+    "smiles": [
+     "CC(=O)Cn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O",
+     "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CN)c1=O",
+     "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CO)c1=O",
+     "CCn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O"
+    ]
+   }
+  }
+ },
+ "interpretation_rule": "scored on SUPPORT, not molecular identity: comparable constraint margins and comparable structural scale count as recovery at zero exact overlap",
+ "new_oracle_calls": 0,
+ "role": "compares two EXISTING artifacts -- the unified controller's routed rung-0 region kernel and the historical region-repair arms' round-one output. No new measurement.",
+ "schema_version": "t4_support_restoration_gate_region_comparison_v1",
+ "sources": [
+  "diagnostics/t4_state_routing_v1/rung0_region_kernel_v1.json",
+  "diagnostics/t4_support_restoration_gate/historical_reference_v1.json"
+ ]
+}

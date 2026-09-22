@@ -1,0 +1,159 @@
+{
+ "cell": "5ht1b_0",
+ "contract": "configs/t4_held_target_distilled_5ht1b_d06_250.json",
+ "contract_payload_sha256": "6959ae96cc0387f8116c6fa4fe9b531eb726959d33a17df6d8fbc51f1bb0e306",
+ "controller_seed": 2026091906,
+ "delta_from_contract": 0.6,
+ "docking_calls": 0,
+ "docking_interlock": {
+  "docking_binaries_present": [],
+  "docking_calls": 0,
+  "forbidden_modules_checked": [
+   "compose_v4.experiments.t4_docking_adapter",
+   "compose_v4.experiments.t4_partial_docking"
+  ],
+  "forbidden_modules_resident": [],
+  "oracle_calls": 0
+ },
+ "elapsed_seconds": 913.66,
+ "execution": {
+  "app": "compose-t4-support-restoration-gate",
+  "mode": "modal_fanout"
+ },
+ "ladder_unreachable": true,
+ "oracle_calls": 0,
+ "protein": "5ht1b",
+ "role": "control",
+ "round_one": {
+  "agrees_with_committed_audit": true,
+  "audit_delta_mislabelled": false,
+  "decision": {
+   "featured_candidates": 38,
+   "fresh": 38,
+   "merged_pool": 38,
+   "parents_round_one": [
+    "Cc1nc(-c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)[C@]4(CC[N@H+](C)CC4)CO6)cc3)c(C)c2)no1"
+   ],
+   "pool_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 0,
+    "shallow": 38,
+    "unique_endpoints": 38
+   },
+   "reproduces_candidate_exhaustion": false,
+   "selected": 8,
+   "selected_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 0,
+    "shallow": 8,
+    "unique_endpoints": 8
+   }
+  },
+  "expected_selected": 8,
+  "lanes": {
+   "anchored_replacement": {
+    "cell": "5ht1b_0",
+    "elapsed_seconds": 390.02,
+    "eligible_records_returned": 0,
+    "expert": "anchored_replacement",
+    "kind": "round_one_expert",
+    "proposal_seed": 2027092010,
+    "seed_index": 0,
+    "telemetry": {
+     "raw_draws": 512
+    },
+    "unit_seconds": 390.02
+   },
+   "route_complete_region": {
+    "cell": "5ht1b_0",
+    "elapsed_seconds": 113.88,
+    "eligible_records_returned": 0,
+    "expert": "route_complete_region",
+    "kind": "round_one_expert",
+    "proposal_seed": 2027092111,
+    "seed_index": 0,
+    "telemetry": {
+     "available_large_rewrite_proposals": 94,
+     "available_local_rewrite_proposals": 7,
+     "available_medium_rewrite_proposals": 59,
+     "binding_truncations": 11,
+     "binding_visits": 2222,
+     "candidate_shortfall": 0,
+     "complete_programs_committed": 30,
+     "composition_aliases": 240,
+     "composition_attempts": 1792,
+     "composition_rejections": 1086,
+     "composition_repeated_constituent": 256,
+     "exact_realization_precision_denominator": 30,
+     "exact_realization_precision_numerator": 30,
+     "materialization_attempts": 53,
+     "materialization_rejections": 33,
+     "realization_limit": 64,
+     "realization_status_counts": {
+      "committed": 30,
+      "realizer_frontier_exhausted_abstention": 34
+     },
+     "realized_primitive_band_counts": {
+      "large": 0,
+      "medium": 19,
+      "small": 11
+     },
+     "scale_balanced": 0,
+     "selected_large_rewrite_proposals": 13,
+     "selected_local_rewrite_proposals": 7,
+     "selected_medium_rewrite_proposals": 44,
+     "single_aliases": 4,
+     "templates_with_bindings": 16,
+     "unique_ranked_endpoints": 64,
+     "valid_depth_2": 67,
+     "valid_depth_3": 90,
+     "valid_depth_4": 53,
+     "valid_unique_single_goals": 16
+    },
+    "unit_seconds": 113.88
+   },
+   "shallow": {
+    "cell": "5ht1b_0",
+    "elapsed_seconds": 902.33,
+    "eligible_records_returned": 38,
+    "expert": "shallow",
+    "kind": "round_one_expert",
+    "proposal_seed": 2027091909,
+    "seed_index": 0,
+    "telemetry": {
+     "raw_draws": 480
+    },
+    "unit_seconds": 902.33
+   }
+  }
+ },
+ "routing": {
+  "applicability": {
+   "charge_refused_regions": 9,
+   "charged_centres": 1,
+   "executable_regions": 7,
+   "growth_headroom": 1,
+   "heavy_atoms": 39,
+   "large_regions": 11,
+   "net_formal_charge": 1,
+   "protonation_sites": 2,
+   "total_regions": 16
+  },
+  "routed_kernel_if_it_had_exhausted": "state_aware"
+ },
+ "schema_version": "t4_support_restoration_gate_v1",
+ "seed_index": 0,
+ "seed_role": "production",
+ "slot_semantics_preflight": {
+  "endpoint_heavy_ceiling": 40,
+  "free_slots_in_production_source": 9,
+  "heavy_atoms": 39,
+  "padded_graph_slots": 48,
+  "passed": true,
+  "smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)[C@]4(CC[N@H+](C)CC4)CO6)cc3)c(C)c2)no1",
+  "tight_graph_slots": 39,
+  "tight_graph_would_forbid_atom_birth": true
+ }
+}
