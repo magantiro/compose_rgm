@@ -536,3 +536,49 @@ def summarize_lift(
             ranked[0] - seed_score if ranked and seed_score is not None else None
         ),
     }
+
+
+# ---- Route reconstruction ----
+
+
+def ancestry(
+    trajectory: Sequence[TrajectoryRow],
+    endpoint: str,
+    *,
+    max_depth: int = 64,
+) -> tuple[dict[str, Any], ...]:
+    """Walk a molecule's parent chain back to an initialization molecule.
+
+    "By what route did it get there" is answered from the parents the executor
+    actually replayed, so a chain that leaves the trajectory stops rather than
+    being completed by guesswork.  A cycle terminates the walk instead of
+    looping: a parent that is its own ancestor is a defect worth seeing, not
+    worth hiding behind a visited-set that silently truncates.
+    """
+
+    by_endpoint = {row.endpoint: row for row in trajectory}
+    chain: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    current = by_endpoint.get(endpoint)
+    while current is not None and len(chain) < max_depth:
+        chain.append(
+            {
+                "charged_call": current.index,
+                "endpoint": current.endpoint,
+                "score": current.score,
+                "role": current.role,
+                "planner_channel": current.planner_channel,
+                "program_primitives": current.program_primitives,
+                "heavy_atoms": current.heavy_atoms,
+                "round_index": current.round_index,
+            }
+        )
+        seen.add(current.endpoint)
+        parent = current.parent_endpoint
+        if parent is None or parent in seen:
+            break
+        current = by_endpoint.get(parent)
+        if current is None:
+            chain.append({"endpoint": parent, "note": "parent is outside the charged trajectory"})
+            break
+    return tuple(reversed(chain))

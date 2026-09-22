@@ -83,14 +83,46 @@ def test_the_blind_initialization_is_the_pinned_task_independent_bank():
     assert all("score" not in row and "task" not in row for row in payload["candidates"])
 
 
-def test_an_initialization_whose_bytes_moved_is_refused(tmp_path):
+def _tamper(tmp_path, *, relock: bool):
+    """Write a modified initialization, optionally with a CONSISTENT lock.
+
+    Relocking matters: an inconsistent tamper is caught by the lock guard AND
+    by the file-hash guard, so it cannot show which one is load-bearing.
+    """
+
+    from compose_v4.control.docking_value import identity
+
     source = REPO_ROOT / discovery.BLIND_INITIALIZATION_PATH
     target = tmp_path / discovery.BLIND_INITIALIZATION_PATH
-    target.parent.mkdir(parents=True)
+    target.parent.mkdir(parents=True, exist_ok=True)
     payload = json.loads(source.read_text())
     payload["candidates"][0]["endpoint"] = "CCO"
+    if relock:
+        body = {key: value for key, value in payload.items() if key != "lock_sha256"}
+        payload["lock_sha256"] = identity(body)
     target.write_text(json.dumps(payload))
-    with pytest.raises(discovery.OptimizerBlindnessError):
+    return target
+
+
+def test_an_initialization_whose_bytes_moved_is_refused(tmp_path):
+    # The lock is recomputed, so ONLY the file-hash guard can refuse this.
+    _tamper(tmp_path, relock=True)
+    with pytest.raises(discovery.OptimizerBlindnessError, match="moved"):
+        discovery.load_blind_initialization(tmp_path)
+
+
+def test_an_initialization_whose_lock_disagrees_with_its_content_is_refused(
+    tmp_path, monkeypatch
+):
+    # The pinned digest is pointed at the tampered bytes, so ONLY the lock guard
+    # can refuse this. Without both tests one guard hides behind the other.
+    from compose_v4.experiments.pmo_atlas_routes import file_sha256
+
+    target = _tamper(tmp_path, relock=False)
+    monkeypatch.setattr(
+        discovery, "BLIND_INITIALIZATION_SHA256", file_sha256(target)
+    )
+    with pytest.raises(discovery.OptimizerBlindnessError, match="lock"):
         discovery.load_blind_initialization(tmp_path)
 
 
@@ -402,3 +434,41 @@ def test_the_parent_comes_from_the_executed_trace_not_the_label(tmp_path):
     assert rows[0].parent_endpoint == parent_smiles
     assert rows[0].parent_label_disagrees is True
     assert rows[0].program_primitives == 2
+
+
+# ---- Route reconstruction ----
+
+
+def _chain_row(index, endpoint, parent, score=0.5, role="candidate"):
+    return discovery.TrajectoryRow(
+        index=index,
+        endpoint=endpoint,
+        score=score,
+        role=role,
+        parent_endpoint=parent,
+        state={"slots": 48},
+    )
+
+
+def test_ancestry_walks_back_to_an_initialization_molecule():
+    rows = (
+        _chain_row(1, "A", None, role="initialization"),
+        _chain_row(2, "B", "A"),
+        _chain_row(3, "C", "B"),
+    )
+    chain = discovery.ancestry(rows, "C")
+    assert [step["endpoint"] for step in chain] == ["A", "B", "C"]
+    assert chain[0]["role"] == "initialization"
+
+
+def test_ancestry_stops_at_a_parent_outside_the_trajectory_rather_than_inventing_one():
+    rows = (_chain_row(2, "B", "GHOST"),)
+    chain = discovery.ancestry(rows, "B")
+    assert chain[0]["note"].startswith("parent is outside")
+    assert chain[-1]["endpoint"] == "B"
+
+
+def test_ancestry_terminates_on_a_cycle():
+    rows = (_chain_row(1, "A", "B"), _chain_row(2, "B", "A"))
+    chain = discovery.ancestry(rows, "B")
+    assert len(chain) == 2

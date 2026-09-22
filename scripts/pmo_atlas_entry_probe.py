@@ -37,6 +37,7 @@ from compose_v4.control.program_campaign import ProgramQueryLedger, run_program_
 from compose_v4.control.program_task import ProgramTask
 from compose_v4.experiments.pmo_atlas_discovery import (
     TrajectoryRow,
+    ancestry,
     atlas_molecules,
     classify_rung,
     load_ladder,
@@ -332,6 +333,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.seed,
             )
             record["similarity_to_atlas"] = round(similarity[row.index - 1], 4)
+            record["route_to_seed"] = ancestry(trajectory, row.endpoint)
             record["rung"] = classify_rung(
                 record["top_ten_new_mean"] or 0.0, ladder[task_name]
             )

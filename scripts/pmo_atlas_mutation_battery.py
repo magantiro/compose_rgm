@@ -37,6 +37,11 @@ from typing import Any
 MODULE = "src/compose_v4/experiments/pmo_atlas_routes.py"
 SUITE = "tests/test_pmo_atlas_routes.py"
 
+DISCOVERY = "src/compose_v4/experiments/pmo_atlas_discovery.py"
+BLIND_DRIVER = "scripts/pmo_atlas_blind_search.py"
+PROBE_DRIVER = "scripts/pmo_atlas_entry_probe.py"
+DISCOVERY_SUITE = "tests/test_pmo_atlas_discovery.py"
+
 
 @dataclass(frozen=True)
 class Mutation:
@@ -48,7 +53,7 @@ class Mutation:
     expect_tests: tuple[str, ...] = ()
 
 
-MUTATIONS: tuple[Mutation, ...] = (
+ROUTE_MUTATIONS: tuple[Mutation, ...] = (
     Mutation(
         "bypass_input_hash_check",
         MODULE,
@@ -145,19 +150,145 @@ MUTATIONS: tuple[Mutation, ...] = (
     ),
 )
 
+#: TEST C guards.  Every negative names the test it must turn red, and the two
+#: driver mutations live at CALL SITES: a guard that is only tested at its
+#: definition cannot show that production reaches it.
+DISCOVERY_MUTATIONS: tuple[Mutation, ...] = (
+    Mutation(
+        "bypass_blind_initialization_file_hash",
+        DISCOVERY,
+        "    if digest != BLIND_INITIALIZATION_SHA256:",
+        "    if False:",
+        "negative",
+        ("test_an_initialization_whose_bytes_moved_is_refused",),
+    ),
+    Mutation(
+        "bypass_blind_initialization_lock",
+        DISCOVERY,
+        '    if identity(body) != payload.get("lock_sha256"):',
+        "    if False:",
+        "negative",
+        ("test_an_initialization_whose_lock_disagrees_with_its_content_is_refused",),
+    ),
+    Mutation(
+        "bypass_the_atlas_leak_check",
+        DISCOVERY,
+        "    leaked = sorted(set(seen) & atlas)",
+        "    leaked = []",
+        "negative",
+        ("test_an_atlas_molecule_in_the_initialization_is_refused",),
+    ),
+    Mutation(
+        "allow_a_program_library_in_a_blind_run",
+        DISCOVERY,
+        "    if library:",
+        "    if False:",
+        "negative",
+        ("test_a_program_library_is_refused_in_a_blind_run",),
+    ),
+    Mutation(
+        "drop_the_blindness_guard_from_the_blind_driver",
+        BLIND_DRIVER,
+        "    blindness = assert_optimizer_blind(\n"
+        "        initialization=initialization,\n"
+        "        optimizer_kwargs=optimizer_kwargs,\n"
+        "        library=(),\n"
+        "        atlas=atlas,\n"
+        "    )",
+        '    blindness = {"leaked": []}\n    del atlas',
+        "negative",
+        ("test_the_blind_run_driver_calls_the_blindness_guard_before_any_charged_call",),
+    ),
+    Mutation(
+        "let_a_probe_seed_come_from_the_atlas",
+        PROBE_DRIVER,
+        "    if row.endpoint in atlas:",
+        "    if False:",
+        "negative",
+        ("test_a_probe_seed_from_the_atlas_is_refused",),
+    ),
+    Mutation(
+        "let_a_probe_seed_arrive_without_its_state",
+        PROBE_DRIVER,
+        "    if row.state is None:",
+        "    if False:",
+        "negative",
+        ("test_a_probe_seed_without_a_state_is_refused_rather_than_reparsed",),
+    ),
+    Mutation(
+        "report_the_mean_approach_instead_of_the_nearest",
+        DISCOVERY,
+        "        value = max(similarities)",
+        "        value = sum(similarities) / len(similarities)",
+        "negative",
+        ("test_nearest_approach_reports_the_maximum_not_an_average",),
+    ),
+    Mutation(
+        "round_a_measurement_up_to_the_lowest_rung",
+        DISCOVERY,
+        '    label = reached[-1].label if reached else "below_" + ordered[0].label',
+        "    label = reached[-1].label if reached else ordered[0].label",
+        "negative",
+        ("test_a_measurement_below_the_lowest_rung_is_not_rounded_up",),
+    ),
+    Mutation(
+        "let_the_probe_geometry_drift_from_test_b",
+        DISCOVERY,
+        '        "initial_parent_fraction": 0.2,',
+        '        "initial_parent_fraction": 0.5,',
+        "negative",
+        (
+            "test_the_probe_runs_the_same_campaign_geometry_as_the_test_b_driver",
+            "test_the_shared_geometry_helper_reproduces_the_test_b_driver",
+        ),
+    ),
+    Mutation(
+        "trust_the_parent_label_over_the_executed_trace",
+        DISCOVERY,
+        '                "parent_endpoint": executed or labelled,',
+        '                "parent_endpoint": labelled or executed,',
+        "negative",
+        ("test_the_parent_comes_from_the_executed_trace_not_the_label",),
+    ),
+    Mutation(
+        "count_the_seed_inside_the_probe_top_ten",
+        DISCOVERY,
+        "    new = {smiles: value for smiles, value in scores.items() if smiles != seed_smiles}",
+        "    new = dict(scores)",
+        "negative",
+        ("test_a_run_that_only_preserves_its_seed_scores_no_lift",),
+    ),
+    Mutation(
+        "cosmetic_comment_only",
+        DISCOVERY,
+        "# ---- Structural diagnostic ----",
+        "# ---- Structural diagnostic ----\n"
+        "# (cosmetic positive control: bytes change, behaviour does not)",
+        "positive_control",
+        (),
+    ),
+)
+
+MUTATION_SETS: dict[str, tuple[str, tuple[Mutation, ...]]] = {
+    "routes": (SUITE, ROUTE_MUTATIONS),
+    "discovery": (DISCOVERY_SUITE, DISCOVERY_MUTATIONS),
+}
+
 _FAILED = re.compile(r"^(FAILED|ERROR) (\S+)", re.MULTILINE)
 
 
-def _run_suite(root: Path, python: str, timeout: int) -> tuple[int, tuple[str, ...], str]:
+def _run_suite(
+    root: Path, python: str, timeout: int, suite: str = SUITE
+) -> tuple[int, tuple[str, ...], str]:
     env = {
         "KMP_DUPLICATE_LIB_OK": "TRUE",
         "OMP_NUM_THREADS": "1",
-        "PYTHONPATH": "src",
+        "PYTHONPATH": "src:scripts",
         "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
         "HOME": str(Path.home()),
     }
     proc = subprocess.run(
-        [python, "-m", "pytest", SUITE, "-q", "--no-header", "-p", "no:cacheprovider", "-rf"],
+        [python, "-m", "pytest", suite, "-q", "--no-header", "-p", "no:cacheprovider", "-rf"],
         cwd=root,
         env=env,
         capture_output=True,
@@ -176,9 +307,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--python", default=sys.executable)
     parser.add_argument("--output", default="diagnostics/pmo_atlas_v1/mutation_battery.json")
     parser.add_argument("--timeout", type=int, default=900)
+    parser.add_argument("--set", dest="mutation_set", default="routes",
+                        choices=sorted(MUTATION_SETS))
     args = parser.parse_args(argv)
 
     repo_root = Path(args.repo_root).resolve()
+    suite, mutations = MUTATION_SETS[args.mutation_set]
     started = time.time()
     workspace = Path(tempfile.mkdtemp(prefix="pmo-atlas-mutation-"))
     tree = workspace / "tree"
@@ -189,15 +323,20 @@ def main(argv: list[str] | None = None) -> int:
         ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc", ".pytest_cache"),
     )
 
-    pristine = (tree / MODULE).read_text()
-    baseline_code, baseline_failed, baseline_tail = _run_suite(tree, args.python, args.timeout)
+    pristine = {
+        mutation.relative_path: (tree / mutation.relative_path).read_text()
+        for mutation in mutations
+    }
+    baseline_code, baseline_failed, baseline_tail = _run_suite(
+        tree, args.python, args.timeout, suite
+    )
     if baseline_code != 0:
         print("ABORT: the unmutated suite is not green; a battery on a red suite proves nothing")
         print(baseline_tail)
         return 2
 
     records: list[dict[str, Any]] = []
-    for mutation in MUTATIONS:
+    for mutation in mutations:
         target = tree / mutation.relative_path
         original = target.read_text()
         mutated = original.replace(mutation.old, mutation.new, 1)
@@ -206,7 +345,7 @@ def main(argv: list[str] | None = None) -> int:
             shutil.rmtree(workspace, ignore_errors=True)
             return 3
         target.write_text(mutated)
-        code, failed, tail = _run_suite(tree, args.python, args.timeout)
+        code, failed, tail = _run_suite(tree, args.python, args.timeout, suite)
         target.write_text(original)
 
         if mutation.kind == "positive_control":
@@ -232,13 +371,15 @@ def main(argv: list[str] | None = None) -> int:
         )
         print(f"{mutation.name:48s} {verdict:26s} failing={list(failed)}")
 
-    (tree / MODULE).write_text(pristine)
+    for path, text in pristine.items():
+        (tree / path).write_text(text)
     negatives = [r for r in records if r["kind"] == "negative"]
     controls = [r for r in records if r["kind"] == "positive_control"]
     payload = {
         "schema_version": "pmo_atlas_mutation_battery_v1",
         "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
-        "suite": SUITE,
+        "suite": suite,
+        "mutation_set": args.mutation_set,
         "python": args.python,
         "baseline_green": baseline_code == 0,
         "baseline_failing_tests": list(baseline_failed),
