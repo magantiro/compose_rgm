@@ -1,0 +1,53 @@
+{
+  "answer_known_offline_diagnostic": true,
+  "arms": {
+    "production": {
+      "budget_reason": {
+        "None": 4,
+        "seconds_cap": 12
+      },
+      "largest_changed_region_max": 15,
+      "largest_changed_region_median": 9,
+      "outcomes": {
+        "completed_realization": 4,
+        "proven_incompatible": 1,
+        "search_budget_exhausted": 11
+      },
+      "pairs": 16,
+      "pairs_bound": 4,
+      "pairs_bound_fraction": 0.25,
+      "realizations": 13,
+      "retained_fraction_mcs_median": 0.2631578947368421,
+      "seconds_total": 308.28971529297996
+    },
+    "raised": {
+      "budget_reason": {
+        "None": 11,
+        "seconds_cap": 5
+      },
+      "largest_changed_region_max": 15,
+      "largest_changed_region_median": 10,
+      "outcomes": {
+        "completed_realization": 12,
+        "proven_incompatible": 1,
+        "search_budget_exhausted": 3
+      },
+      "pairs": 16,
+      "pairs_bound": 12,
+      "pairs_bound_fraction": 0.75,
+      "realizations": 42,
+      "retained_fraction_mcs_median": 0.9166666666666666,
+      "seconds_total": 1548.9960052520037
+    }
+  },
+  "available": 61,
+  "band": "12_to_18_primitives",
+  "new_oracle_calls": 0,
+  "raised_budget": {
+    "node_budget": 512,
+    "seconds_cap": 180.0
+  },
+  "rdkit_version": "2023.09.6",
+  "sampled": 16,
+  "schema_version": "pmo_jump_target_band_budget_v1"
+}
