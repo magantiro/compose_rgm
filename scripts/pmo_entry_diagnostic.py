@@ -501,8 +501,17 @@ def phase_production(args: argparse.Namespace) -> int:
                 "channel": channel,
                 "provenance_class": describe["provenance_class"].get(channel, channel),
                 "endpoint": endpoint,
-                "primitive_count": size.get("primitive_count")
-                or size.get("scheduled_blocks"),
+                # The run records no primitive count -- ``program_size`` carries
+                # ``scheduled_blocks``, a list of block INDICES -- so the column
+                # stays None here rather than silently holding a different
+                # quantity from the one the regenerated arms put in it. The
+                # block count is published beside it under its own name.
+                "primitive_count": size.get("primitive_count"),
+                "scheduled_block_count": (
+                    len(size["scheduled_blocks"])
+                    if isinstance(size.get("scheduled_blocks"), list)
+                    else None
+                ),
                 "parent_endpoint": None,
                 "parent_stratum": None,
                 "parent_heavy_atoms": size.get("measured_parent_heavy_atoms"),
@@ -1069,7 +1078,14 @@ def phase_report(args: argparse.Namespace) -> int:
                     [
                         row["primitive_count"]
                         for row in shard["proposals"]
-                        if row["primitive_count"] is not None
+                        if row.get("primitive_count") is not None
+                    ]
+                ),
+                "scheduled_block_count_histogram": _histogram(
+                    [
+                        row["scheduled_block_count"]
+                        for row in shard["proposals"]
+                        if row.get("scheduled_block_count") is not None
                     ]
                 ),
                 "heavy_delta_summary": _heavy_delta(shard),
@@ -1144,10 +1160,21 @@ def phase_report(args: argparse.Namespace) -> int:
 
 
 def _histogram(values) -> dict[str, int]:
+    """Count by value, sorted numerically when every key is a number.
+
+    A non-numeric key is not forced through ``int`` -- that raised on the
+    production arm, whose column held a list -- it falls back to a lexical sort
+    so a malformed column is visible in the output instead of crashing the whole
+    report.
+    """
+
     out: dict[str, int] = {}
     for value in values:
         out[str(value)] = out.get(str(value), 0) + 1
-    return dict(sorted(out.items(), key=lambda kv: int(kv[0])))
+    try:
+        return dict(sorted(out.items(), key=lambda kv: int(kv[0])))
+    except ValueError:
+        return dict(sorted(out.items()))
 
 
 def _heavy_delta(shard: dict[str, Any]) -> dict[str, Any]:
