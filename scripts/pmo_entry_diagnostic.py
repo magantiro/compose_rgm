@@ -1242,6 +1242,15 @@ def phase_report(args: argparse.Namespace) -> int:
     predicate = assert_predicate_sealed(repo_root)
     regions = load_productive_regions(repo_root)
     shards = _load_shards(args.inputs)
+    # Arms can end at different draw counts -- a control measured at 300 against
+    # an arm measured at 1,000 is not a comparison. Every arm therefore also
+    # reports a prefix at every OTHER arm's full count that it can reach, so
+    # every pair has a matched point. These are reductions of stored
+    # per-proposal similarities, never a second measurement, and the sealed
+    # MATCHED_PROPOSALS points are unchanged.
+    matched_points = sorted(
+        {int(shard["proposals_drawn"]) for shard in shards} | set(MATCHED_PROPOSALS)
+    )
     by_arm: dict[str, list[dict[str, Any]]] = {}
     for shard in shards:
         by_arm.setdefault(_arm_key(shard), []).append(shard)
@@ -1251,7 +1260,7 @@ def phase_report(args: argparse.Namespace) -> int:
         per_task = {}
         for shard in sorted(group, key=lambda s: s["task"]):
             prefixes = {}
-            for at in MATCHED_PROPOSALS:
+            for at in matched_points:
                 if at > shard["proposals_drawn"]:
                     continue
                 prefixes[str(at)] = _prefix_block(
@@ -1345,6 +1354,15 @@ def phase_report(args: argparse.Namespace) -> int:
         "delta": ENTRY_DELTA,
         "rungs": [list(rung) for rung in RUNGS],
         "matched_proposals": list(MATCHED_PROPOSALS),
+        "matched_points_reported": matched_points,
+        "matched_points_note": (
+            "The sealed points are "
+            f"{list(MATCHED_PROPOSALS)}. Every arm's own full draw count is also "
+            "reported for every arm that can reach it, so a control measured at "
+            "one budget and an arm measured at another still have a matched "
+            "comparison. All of it is a reduction of stored per-proposal "
+            "similarities."
+        ),
         "negative_control": {
             "arm": "nc1_uniform_legal_edits",
             "reported_before_any_arm_number": True,
