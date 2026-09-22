@@ -231,8 +231,6 @@ def main() -> None:
         p for p in load_genmol_prompts(MANIFEST) if p.task is FragmentTask.LINKER_DESIGN
     ]
 
-    import rdkit
-
     rows = []
     started = time.time()
     original = sampler_module._attempt_path_transaction
@@ -270,6 +268,7 @@ def main() -> None:
 
         if not captured:
             rows.append({"drug": prompt.drug_name, "transactions_captured": 0})
+            _write(args.output, rows, args, started, partial=True)
             print(f"{prompt.drug_name:14s} no transaction captured", flush=True)
             continue
 
@@ -307,6 +306,13 @@ def main() -> None:
             "transactions_captured": len(captured),
             "constituents": constituents,
         })
+        # Write after EVERY drug, not once at the end. A constituent escalation
+        # runs to a 16,384-draw cap, so a whole-panel run is hours long and a
+        # single artifact written last is an artifact that does not survive an
+        # interruption -- which is how a fragment sweep lost its secondary
+        # metrics permanently. The file is complete-as-far-as-it-goes at all
+        # times and says how far that is.
+        _write(args.output, rows, args, started, partial=True)
         summary = " | ".join(
             f"{c['rule']}:{c.get('verdict', 'rate-only')}"
             f" p={c['measured_family_rate']:.4f}"
@@ -314,8 +320,17 @@ def main() -> None:
         )
         print(f"{prompt.drug_name:14s} {summary}", flush=True)
 
+    _write(args.output, rows, args, started, partial=False)
+    print(f"wrote {args.output}")
+
+
+def _write(output: Path, rows, args, started, *, partial: bool) -> None:
+    import rdkit
+
     payload = {
         "schema": "compose_fragment_path_composite_scoring_v1",
+        "complete": not partial,
+        "drugs_scored_so_far": len(rows),
         "question": (
             "is each constituent of the v3 atom_insert + bond_reroute composite "
             "rankable by the proposal law, at a budget derived from a measured "
@@ -339,9 +354,8 @@ def main() -> None:
         "rows": rows,
         "elapsed_seconds": round(time.time() - started, 1),
     }
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(payload, indent=2))
-    print(f"wrote {args.output}")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(payload, indent=2))
 
 
 if __name__ == "__main__":
