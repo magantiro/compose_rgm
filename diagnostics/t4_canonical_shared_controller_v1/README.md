@@ -20,7 +20,18 @@ anything, and a cell mid-flight is resumed from its last completed round.
 
 `--mode resume` re-runs the full `verify` gate first and REFUSES if any pinned
 runtime input has moved, so a resume cannot silently run different code than the
-launch did.
+launch did. Use `--dry-run` to see what it would re-spawn without spawning it.
+
+**Why it is safe to run while cells are still going.** A running cell has no
+`result.json`, so "no result" alone is NOT a licence to re-spawn: two containers on
+one cell would write the same round locks and the same checkpoint from two different
+search states. Resume therefore skips a cell whose most recent spawned call has not
+terminated, established by GETTING the call rather than by reading a task count.
+MEASURED caveat that the implementation has to handle: `get(timeout=0)` raises
+`TimeoutError` for a CANCELLED call exactly as it does for a running one, so a
+deliberate cancellation is recorded as a sealed `*_cancel_*.json` receipt and
+subtracted. Any other terminal state — returned, raised, retries exhausted — does
+surface through `get`, because the output or the exception is there to be fetched.
 
 ## Status
 
