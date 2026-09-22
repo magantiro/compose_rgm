@@ -4458,6 +4458,22 @@ independently of whether fa7_0 ever closes.**
   mechanism is still binding -- the plan does not abolish it, it only stops the model from
   being forced to choose a small ring when the host has shrunk. Report sys/mol beside any
   ring-size TV or the shortfall is invisible.
+- **THE SHORTFALL IS HOST EXHAUSTION, MONOTONE IN PLAN POSITION -- and the size column that
+  looks like a finding is an ARTIFACT OF THE ORDERING.** Raw failure rate by total ring atoms
+  reads backwards: 11-atom systems 0/37 and 12-atom 1/25 never fail, while 6-atom single rings
+  fail 97/243. That is because `order_plan` installs the most host-demanding system FIRST, so
+  the fused systems are placed on an intact host and the single rings inherit whatever is left.
+  Cross-tabulated, the confound disappears and the real effect is position:
+
+      system          slot 0        slot 1       slot 2+
+      fused (>=11)    6/73  0.082   1/7            -
+      single (<=7)   14/76  0.184  43/129 0.333  59/108 0.546
+
+  Every committed ring permanently removes its atoms from `_eligible_grow_host_graph`
+  (acyclic + carbon + neutral + single-bonded, asserted a forest), so each successive request
+  is answered against a smaller scaffold. **The existing ordering is already doing its job**
+  -- 8.2% failure for fused systems on an intact host -- and the remaining gap is not an
+  ordering problem. Never read a per-size rate from a size-ordered sequence.
 - **`endpoint skeleton == installed skeleton` is 100% for both first-ring-event arms and only
   80-83% for the t = 0 arms.** So in the `1` arms nothing the continuation does adds or
   removes a ring system, which is what makes the realized marginal equal to the plan's. In the
