@@ -53,7 +53,46 @@
     "on_median_heavy_final": 19.0,
     "on_median_qed_final": 0.5596,
     "on_median_sa_final": 4.4746,
-    "what": "Score-free lineage from the real run's own 16 initialization entries, 15 generations x 16 proposals, parents drawn uniformly so no objective is read anywhere."
+    "what": "Score-free lineage from the real run's own 16 initialization entries, 15 generations x 16 proposals, parents drawn uniformly so no objective is read anywhere.",
+    "yield_control": {
+      "off_produced_per_generation": [
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "off_produced_total": 240,
+      "on_produced_per_generation": [
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "on_produced_total": 240,
+      "why": "If one arm produced fewer children it would dilute its own seeds less and read as higher quality for a reason that is attrition rather than chemistry."
+    }
   },
   "outcome_open_loop": {
     "off_drift_Q1_to_Q4": -0.1717,

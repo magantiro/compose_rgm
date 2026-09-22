@@ -106,6 +106,25 @@ def main() -> None:
             "on_median_sa_final": lineage["on"][-1]["median_sa"],
             "off_median_heavy_final": lineage["off"][-1]["median_heavy"],
             "on_median_heavy_final": lineage["on"][-1]["median_heavy"],
+            "yield_control": {
+                "why": (
+                    "If one arm produced fewer children it would dilute its own "
+                    "seeds less and read as higher quality for a reason that is "
+                    "attrition rather than chemistry."
+                ),
+                "off_produced_total": sum(
+                    row.get("produced", 0) for row in lineage["off"][1:]
+                ),
+                "on_produced_total": sum(
+                    row.get("produced", 0) for row in lineage["on"][1:]
+                ),
+                "off_produced_per_generation": [
+                    row.get("produced") for row in lineage["off"][1:]
+                ],
+                "on_produced_per_generation": [
+                    row.get("produced") for row in lineage["on"][1:]
+                ],
+            },
         },
         "outcome_open_loop": {
             "what": (
