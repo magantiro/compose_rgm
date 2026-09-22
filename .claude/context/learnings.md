@@ -4510,3 +4510,28 @@ independently of whether fa7_0 ever closes.**
   `successors_enumerated` against an independent unwrapped run. (2)
   `assert set(projection) == set(PROJECTABLE_FIELDS)` is a tautology re-derived from the
   production constants, the same shape as every other tautological guard on this record.
+
+## 2026-09-22 (`modal app list` TRUNCATES the description column, and two of us grepped it)
+
+- **`modal app list` renders the description column truncated to a fixed width** -- a
+  `compose-t4-support-restoration-gate` app prints as `compose-t4…`. So
+  `modal app list | grep -ci "support-restoration"` returns 0 WHATEVER THE TRUE STATE, and
+  `grep -Ei "support-restoration|t4-support|escalation"` returns nothing for the same reason.
+  **Both the coordinator and the T4 agent ran that check independently, both concluded "no app
+  is running", and both were wrong while an ephemeral app held live tasks.** The coordinator
+  then messaged the agent to stop waiting on work that was in fact still landing; only the gate
+  agent going to the VOLUME instead recovered the result, which changed the verdict from
+  3 PASS / 2 UNMEASURED to 4 PASS / 1 FAIL and flipped `ladder_rungs_1_to_3_exercised` to true.
+- **This is the instrument-that-cannot-vary failure, and it was cited earlier in the same
+  session before both of us committed it.** A grep whose pattern is longer than the rendered
+  field can only ever return absence. Before drawing an inference from a negative grep, check
+  that the string you are grepping for is capable of appearing in the text you are grepping.
+- **WHAT TO DO INSTEAD.** Read the TASK COUNT column, which is not truncated:
+  `modal app list | awk -F'│' 'NF>4 {gsub(/ /,"",$5); if ($5 ~ /^[0-9]+$/ && $5+0 > 0) print}'`.
+  Better still, **check the ARTIFACT, not the listing** -- a fan-out's shards are durable on the
+  volume whether or not its app is alive, and the volume is the thing that actually answers
+  "did the work happen". Companion to the standing `modal volume ls` gotcha (silently returns
+  the PARENT listing) and the `modal volume get` gotcha (collapses a directory onto one path).
+- **A listing is evidence about a listing.** This repo already recorded "a task count in a
+  listing is not proof of live capacity" after a phantom-run diagnosis; the converse now has a
+  measured instance too -- an EMPTY grep of a listing is not proof of absence.
