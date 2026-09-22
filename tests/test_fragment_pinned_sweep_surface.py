@@ -118,3 +118,66 @@ def test_no_per_drug_or_per_task_knob_is_expressible_in_a_shard():
     argv = _argv("path_program")
     for flag in ("--mark-attempts-per-event", "--linker-bridge-atoms"):
         assert argv.count(flag) == 1
+
+
+def test_the_driver_writes_each_shard_as_it_lands():
+    """An ordered fan-out holds every completed sibling hostage to the slowest.
+
+    Measured: a 60-container run printed nothing for over an hour because shard
+    one had not returned, while the rest had. A driver that dies in that window
+    discards all of them -- the failure that cost a 60-shard de-novo run 59
+    healthy shards. The identity must therefore travel with the PAYLOAD, since
+    unordered output has no input position to pair a result with.
+    """
+    source = APP_PATH.read_text()
+    tree = ast.parse(source)
+    main = next(
+        node for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "main"
+    )
+    starmaps = [
+        node for node in ast.walk(main)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "starmap"
+    ]
+    assert len(starmaps) == 1, "the driver must fan out exactly once"
+    keywords = {k.arg: k.value for k in starmaps[0].keywords}
+    assert "order_outputs" in keywords, (
+        "the fan-out must declare its output ordering rather than inherit it"
+    )
+    assert keywords["order_outputs"].value is False
+    assert keywords["return_exceptions"].value is True
+    # And the driver must not pair results with inputs by position any more.
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "zip"
+        for node in ast.walk(main)
+    ), "unordered output cannot be zipped against the input list"
+
+
+def test_a_shard_carries_its_own_identity_home():
+    """The payload names the shard, so an unordered result is still placeable."""
+    source = APP_PATH.read_text()
+    tree = ast.parse(source)
+    run_shard = next(
+        node for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "run_shard"
+    )
+    assigned = [
+        node for node in ast.walk(run_shard)
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(t, ast.Subscript)
+            and isinstance(t.slice, ast.Constant)
+            and t.slice.value == "_shard"
+            for t in node.targets
+        )
+    ]
+    assert assigned, "run_shard must stamp its payload with the shard identity"
+    keys = {
+        k.value for k in ast.walk(assigned[0].value)
+        if isinstance(k, ast.Constant) and isinstance(k.value, str)
+    }
+    assert {"arm", "task", "drug", "seed"} <= keys

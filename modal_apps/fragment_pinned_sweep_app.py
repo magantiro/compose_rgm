@@ -232,18 +232,36 @@ def main(
         return
 
     written = failed = 0
-    for item, result in zip(
-        pending, run_shard.starmap(pending, return_exceptions=True)
+    # UNORDERED, and the identity travels with the payload rather than with the
+    # input position.  An ordered starmap yields nothing until shard ONE
+    # returns, so a single slow shard makes a healthy 60-container fan-out look
+    # dead for an hour and, worse, leaves every completed sibling unwritten
+    # until it finishes -- a driver that dies in that window discards all of
+    # them.  Writing each shard the moment it lands is the same discipline that
+    # let one surviving shard of a 60-shard de-novo run still be scorable.
+    #
+    # The cost is that a raised shard can no longer be named: with unordered
+    # output there is no input to pair the exception with.  That is the right
+    # trade here because the resume skip re-runs whatever is missing, and losing
+    # the NAME of a failure is much cheaper than losing the DATA of its healthy
+    # siblings.
+    for result in run_shard.starmap(
+        pending, return_exceptions=True, order_outputs=False
     ):
-        arm, task, drug, seed, _attempts, _bridge = item
-        label = f"{arm}/{task}/{drug}/seed{seed}"
         if isinstance(result, Exception):
             failed += 1
-            print(f"FAILED {label}: {result}", flush=True)
+            print(f"FAILED (unnamed, unordered output): {result}", flush=True)
             continue
+        shard = result.pop("_shard", None)
+        if not shard:
+            failed += 1
+            print("FAILED: a shard returned without its identity", flush=True)
+            continue
+        arm, task = shard["arm"], shard["task"]
+        drug, seed = shard["drug"], shard["seed"]
+        label = f"{arm}/{task}/{drug}/seed{seed}"
         destination = root / arm / f"{task}__{drug}__seed{seed}.json"
         destination.parent.mkdir(parents=True, exist_ok=True)
-        result.pop("_shard", None)
         destination.write_text(json.dumps(result, indent=2))
         written += 1
         print(f"wrote {label}", flush=True)
