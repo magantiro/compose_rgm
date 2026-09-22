@@ -1,0 +1,733 @@
+{
+  "schema": "compose_fragment_path_composite_scoring_v1",
+  "question": "is each constituent of the v3 atom_insert + bond_reroute composite rankable by the proposal law, at a budget derived from a measured per-draw rate rather than a guessed ladder",
+  "environment": {
+    "python": "3.11.13",
+    "rdkit": "2024.03.5",
+    "numpy": "1.26.4"
+  },
+  "mode": "scored",
+  "rate_draws": 400,
+  "cap": 16384,
+  "budget_rule": "N* = ceil(log(0.05)/log(1-r)) with r = measured family rate divided by the number of distinct successors that family produced; the uniform-within-family step is an APPROXIMATION and is conservative where the family law concentrates on the target",
+  "comparison": "on the successor molecule, never on the action object",
+  "rows": [
+    {
+      "drug": "BARICITINIB",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "target_successor": "CCS(=O)(=O)N1CC(CC#N)(C(C)c2ncnc3[nH]ccc23)C1",
+          "measured_family_rate": 0.07,
+          "family_rate_wilson_95": [
+            0.048871304519740505,
+            0.0993095663959849
+          ],
+          "family_draws": 28,
+          "distinct_family_successors": 18,
+          "estimated_per_successor_rate": 0.003888888888888889,
+          "decisive_budget_for_95_percent_detection": 769,
+          "budget_spent": 16384,
+          "spent_at_decisive_budget": 1169,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": true,
+          "budget_was_capped": false,
+          "realized_detection_power": 1.0,
+          "hit_in_rate_phase": false,
+          "recovered": true,
+          "verdict": "IN_SUPPORT_ONLY_AFTER_ESCALATION",
+          "family_census": {
+            "atom_delete": 14435,
+            "atom_insert": 1045,
+            "atom_restate": 306,
+            "bond_reorder": 232,
+            "bond_reroute": 178,
+            "ring_system_restate": 135,
+            "bond_delete": 38,
+            "bond_insert": 15
+          },
+          "seconds": 236.3
+        },
+        {
+          "rule": "bond_reroute",
+          "target_successor": "CCS(=O)(=O)N1CC(CC#N)(CCc2ncnc3[nH]ccc23)C1",
+          "measured_family_rate": 0.015,
+          "family_rate_wilson_95": [
+            0.006892197870136998,
+            0.03233506351155325
+          ],
+          "family_draws": 6,
+          "distinct_family_successors": 5,
+          "estimated_per_successor_rate": 0.003,
+          "decisive_budget_for_95_percent_detection": 998,
+          "budget_spent": 16384,
+          "spent_at_decisive_budget": 1398,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": true,
+          "budget_was_capped": false,
+          "realized_detection_power": 1.0,
+          "hit_in_rate_phase": false,
+          "recovered": false,
+          "verdict": "NO_HIT_AT_DECISIVE_BUDGET_AND_AT_THE_CAP",
+          "family_census": {
+            "atom_delete": 13144,
+            "atom_insert": 1021,
+            "atom_restate": 709,
+            "bond_reorder": 459,
+            "bond_reroute": 457,
+            "ring_system_restate": 390,
+            "bond_delete": 157,
+            "bond_insert": 47
+          },
+          "seconds": 223.8
+        }
+      ]
+    },
+    {
+      "drug": "CYCLOTHIAZIDE",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "target_successor": "CC(C1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1)C1CC2C=CC1C2",
+          "measured_family_rate": 0.12,
+          "family_rate_wilson_95": [
+            0.09171493428788872,
+            0.1555146725678686
+          ],
+          "family_draws": 48,
+          "distinct_family_successors": 27,
+          "estimated_per_successor_rate": 0.0044444444444444444,
+          "decisive_budget_for_95_percent_detection": 673,
+          "budget_spent": 400,
+          "spent_at_decisive_budget": 400,
+          "recovered_at_decisive_budget": true,
+          "escalated_to_cap_after_a_miss": false,
+          "budget_was_capped": false,
+          "realized_detection_power": 0.8316550514977907,
+          "hit_in_rate_phase": true,
+          "recovered": true,
+          "verdict": "IN_SUPPORT_AT_DECISIVE_BUDGET",
+          "family_census": {
+            "atom_delete": 143,
+            "atom_restate": 87,
+            "atom_insert": 48,
+            "ring_system_restate": 46,
+            "bond_reroute": 41,
+            "bond_reorder": 33,
+            "bond_delete": 2
+          },
+          "seconds": 5.9
+        },
+        {
+          "rule": "bond_reroute",
+          "target_successor": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CCC1CC3C=CC1C3)NS2(=O)=O",
+          "measured_family_rate": 0.1,
+          "family_rate_wilson_95": [
+            0.07429885168964503,
+            0.13331126079009953
+          ],
+          "family_draws": 40,
+          "distinct_family_successors": 23,
+          "estimated_per_successor_rate": 0.004347826086956522,
+          "decisive_budget_for_95_percent_detection": 688,
+          "budget_spent": 16384,
+          "spent_at_decisive_budget": 1088,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": true,
+          "budget_was_capped": false,
+          "realized_detection_power": 1.0,
+          "hit_in_rate_phase": false,
+          "recovered": false,
+          "verdict": "NO_HIT_AT_DECISIVE_BUDGET_AND_AT_THE_CAP",
+          "family_census": {
+            "atom_delete": 6244,
+            "atom_restate": 3207,
+            "atom_insert": 1907,
+            "bond_reorder": 1688,
+            "bond_reroute": 1588,
+            "ring_system_restate": 1518,
+            "bond_delete": 194,
+            "bond_insert": 38
+          },
+          "seconds": 232.7
+        }
+      ]
+    },
+    {
+      "drug": "ELIGLUSTAT",
+      "transactions_captured": 3,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "target_successor": "CC(c1ccc2c(c1)OCCO2)N1CCCC1",
+          "measured_family_rate": 0.47,
+          "family_rate_wilson_95": [
+            0.42160601793747937,
+            0.5189647404985014
+          ],
+          "family_draws": 188,
+          "distinct_family_successors": 44,
+          "estimated_per_successor_rate": 0.010681818181818181,
+          "decisive_budget_for_95_percent_detection": 279,
+          "budget_spent": 400,
+          "spent_at_decisive_budget": 400,
+          "recovered_at_decisive_budget": true,
+          "escalated_to_cap_after_a_miss": false,
+          "budget_was_capped": false,
+          "realized_detection_power": 0.9863731251144665,
+          "hit_in_rate_phase": true,
+          "recovered": true,
+          "verdict": "IN_SUPPORT_AT_DECISIVE_BUDGET",
+          "family_census": {
+            "atom_insert": 188,
+            "atom_restate": 118,
+            "ring_system_restate": 61,
+            "bond_delete": 32,
+            "bond_insert": 1
+          },
+          "seconds": 5.7
+        },
+        {
+          "rule": "bond_reroute",
+          "target_successor": "c1cc2c(cc1CCN1CCCC1)OCCO2",
+          "measured_family_rate": 0.055,
+          "family_rate_wilson_95": [
+            0.036598221864059276,
+            0.08186802826965653
+          ],
+          "family_draws": 22,
+          "distinct_family_successors": 7,
+          "estimated_per_successor_rate": 0.007857142857142858,
+          "decisive_budget_for_95_percent_detection": 380,
+          "budget_spent": 16384,
+          "spent_at_decisive_budget": 780,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": true,
+          "budget_was_capped": false,
+          "realized_detection_power": 1.0,
+          "hit_in_rate_phase": false,
+          "recovered": false,
+          "verdict": "NO_HIT_AT_DECISIVE_BUDGET_AND_AT_THE_CAP",
+          "family_census": {
+            "atom_delete": 8424,
+            "atom_insert": 2071,
+            "atom_restate": 1978,
+            "ring_system_restate": 1123,
+            "bond_reorder": 1084,
+            "bond_reroute": 1031,
+            "bond_delete": 647,
+            "bond_insert": 26
+          },
+          "seconds": 253.9
+        }
+      ]
+    },
+    {
+      "drug": "ERLOTINIB",
+      "transactions_captured": 2,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "target_successor": "C#CC([IH2])OCCOC",
+          "measured_family_rate": 0.1,
+          "family_rate_wilson_95": [
+            0.07429885168964503,
+            0.13331126079009953
+          ],
+          "family_draws": 40,
+          "distinct_family_successors": 13,
+          "estimated_per_successor_rate": 0.007692307692307693,
+          "decisive_budget_for_95_percent_detection": 388,
+          "budget_spent": 16384,
+          "spent_at_decisive_budget": 788,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": true,
+          "budget_was_capped": false,
+          "realized_detection_power": 1.0,
+          "hit_in_rate_phase": false,
+          "recovered": true,
+          "verdict": "IN_SUPPORT_ONLY_AFTER_ESCALATION",
+          "family_census": {
+            "atom_delete": 5484,
+            "atom_restate": 3142,
+            "bond_insert": 2384,
+            "bond_reorder": 2060,
+            "bond_reroute": 1821,
+            "atom_insert": 1493
+          },
+          "seconds": 260.6
+        },
+        {
+          "rule": "bond_reroute",
+          "target_successor": "C#CC[IH]OCCOC",
+          "measured_family_rate": 0.1125,
+          "family_rate_wilson_95": [
+            0.0851480200886654,
+            0.14722427637608715
+          ],
+          "family_draws": 45,
+          "distinct_family_successors": 14,
+          "estimated_per_successor_rate": 0.008035714285714287,
+          "decisive_budget_for_95_percent_detection": 372,
+          "budget_spent": 400,
+          "spent_at_decisive_budget": 400,
+          "recovered_at_decisive_budget": true,
+          "escalated_to_cap_after_a_miss": false,
+          "budget_was_capped": false,
+          "realized_detection_power": 0.9603343561356728,
+          "hit_in_rate_phase": true,
+          "recovered": true,
+          "verdict": "IN_SUPPORT_AT_DECISIVE_BUDGET",
+          "family_census": {
+            "atom_restate": 166,
+            "atom_insert": 90,
+            "bond_reorder": 55,
+            "bond_reroute": 45,
+            "atom_delete": 41,
+            "bond_insert": 3
+          },
+          "seconds": 6.4
+        }
+      ]
+    },
+    {
+      "drug": "FUTIBATINIB",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "target_successor": "C=CC(=O)N1CCC(C(C)c2cc(OC)cc(OC)c2)C1",
+          "measured_family_rate": 0.0275,
+          "family_rate_wilson_95": [
+            0.015423476078524151,
+            0.04856596928817408
+          ],
+          "family_draws": 11,
+          "distinct_family_successors": 7,
+          "estimated_per_successor_rate": 0.003928571428571429,
+          "decisive_budget_for_95_percent_detection": 762,
+          "budget_spent": 16384,
+          "spent_at_decisive_budget": 1162,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": true,
+          "budget_was_capped": false,
+          "realized_detection_power": 1.0,
+          "hit_in_rate_phase": false,
+          "recovered": true,
+          "verdict": "IN_SUPPORT_ONLY_AFTER_ESCALATION",
+          "family_census": {
+            "atom_delete": 8700,
+            "atom_restate": 1581,
+            "ring_system_restate": 1174,
+            "bond_reorder": 1106,
+            "bond_reroute": 1026,
+            "bond_delete": 1007,
+            "ring_system_delete": 864,
+            "atom_insert": 595,
+            "bond_insert": 331
+          },
+          "seconds": 291.8
+        },
+        {
+          "rule": "bond_reroute",
+          "target_successor": "C=CC(=O)N1CCC(CCc2cc(OC)cc(OC)c2)C1",
+          "measured_family_rate": 0.0775,
+          "family_rate_wilson_95": [
+            0.05513258958646752,
+            0.10790559172026265
+          ],
+          "family_draws": 31,
+          "distinct_family_successors": 27,
+          "estimated_per_successor_rate": 0.0028703703703703703,
+          "decisive_budget_for_95_percent_detection": 1043,
+          "budget_spent": 16384,
+          "spent_at_decisive_budget": 1443,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": true,
+          "budget_was_capped": false,
+          "realized_detection_power": 1.0,
+          "hit_in_rate_phase": false,
+          "recovered": false,
+          "verdict": "NO_HIT_AT_DECISIVE_BUDGET_AND_AT_THE_CAP",
+          "family_census": {
+            "atom_delete": 8255,
+            "atom_restate": 1636,
+            "ring_system_restate": 1265,
+            "bond_reorder": 1186,
+            "bond_reroute": 1128,
+            "bond_delete": 954,
+            "ring_system_delete": 871,
+            "atom_insert": 604,
+            "bond_insert": 485
+          },
+          "seconds": 253.2
+        }
+      ]
+    },
+    {
+      "drug": "LESINURAD",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "target_successor": "CC(C1CC1)n1c(Br)nnc1SCC(=O)O",
+          "measured_family_rate": 0.0225,
+          "family_rate_wilson_95": [
+            0.011881448169963291,
+            0.04220312360273175
+          ],
+          "family_draws": 9,
+          "distinct_family_successors": 5,
+          "estimated_per_successor_rate": 0.0045,
+          "decisive_budget_for_95_percent_detection": 665,
+          "budget_spent": 1065,
+          "spent_at_decisive_budget": 1065,
+          "recovered_at_decisive_budget": true,
+          "escalated_to_cap_after_a_miss": false,
+          "budget_was_capped": false,
+          "realized_detection_power": 0.9917974941829456,
+          "hit_in_rate_phase": false,
+          "recovered": true,
+          "verdict": "IN_SUPPORT_AT_DECISIVE_BUDGET",
+          "family_census": {
+            "atom_delete": 820,
+            "atom_restate": 63,
+            "bond_reroute": 43,
+            "ring_system_restate": 39,
+            "bond_reorder": 39,
+            "atom_insert": 27,
+            "bond_delete": 24,
+            "bond_insert": 10
+          },
+          "seconds": 13.4
+        },
+        {
+          "rule": "bond_reroute",
+          "target_successor": "O=C(O)CSc1nnc(Br)n1CCC1CC1",
+          "measured_family_rate": 0.06,
+          "family_rate_wilson_95": [
+            0.0406476805246611,
+            0.0877234432030579
+          ],
+          "family_draws": 24,
+          "distinct_family_successors": 16,
+          "estimated_per_successor_rate": 0.00375,
+          "decisive_budget_for_95_percent_detection": 798,
+          "budget_spent": 16384,
+          "spent_at_decisive_budget": 1198,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": true,
+          "budget_was_capped": false,
+          "realized_detection_power": 1.0,
+          "hit_in_rate_phase": false,
+          "recovered": false,
+          "verdict": "NO_HIT_AT_DECISIVE_BUDGET_AND_AT_THE_CAP",
+          "family_census": {
+            "atom_delete": 11393,
+            "atom_restate": 1248,
+            "bond_reroute": 812,
+            "ring_system_restate": 802,
+            "bond_reorder": 779,
+            "atom_insert": 575,
+            "bond_delete": 485,
+            "bond_insert": 290
+          },
+          "seconds": 216.2
+        }
+      ]
+    },
+    {
+      "drug": "LIOTHYRONINE",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "target_successor": "CC(CC(N)C(=O)O)c1ccc(O)c(I)c1",
+          "measured_family_rate": 0.015,
+          "family_rate_wilson_95": [
+            0.006892197870136998,
+            0.03233506351155325
+          ],
+          "family_draws": 6,
+          "distinct_family_successors": 4,
+          "estimated_per_successor_rate": 0.00375,
+          "decisive_budget_for_95_percent_detection": 798,
+          "budget_spent": 1198,
+          "spent_at_decisive_budget": 1198,
+          "recovered_at_decisive_budget": true,
+          "escalated_to_cap_after_a_miss": false,
+          "budget_was_capped": false,
+          "realized_detection_power": 0.9889014915714492,
+          "hit_in_rate_phase": false,
+          "recovered": true,
+          "verdict": "IN_SUPPORT_AT_DECISIVE_BUDGET",
+          "family_census": {
+            "atom_delete": 1128,
+            "atom_insert": 21,
+            "atom_restate": 15,
+            "bond_reroute": 9,
+            "ring_system_restate": 9,
+            "bond_reorder": 9,
+            "bond_delete": 4,
+            "ring_system_delete": 3
+          },
+          "seconds": 15.9
+        },
+        {
+          "rule": "bond_reroute",
+          "target_successor": "NC(CCCc1ccc(O)c(I)c1)C(=O)O",
+          "measured_family_rate": 0.05,
+          "family_rate_wilson_95": [
+            0.0325971756266401,
+            0.07596420091307252
+          ],
+          "family_draws": 20,
+          "distinct_family_successors": 16,
+          "estimated_per_successor_rate": 0.003125,
+          "decisive_budget_for_95_percent_detection": 958,
+          "budget_spent": 16384,
+          "spent_at_decisive_budget": 1358,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": true,
+          "budget_was_capped": false,
+          "realized_detection_power": 1.0,
+          "hit_in_rate_phase": false,
+          "recovered": true,
+          "verdict": "IN_SUPPORT_ONLY_AFTER_ESCALATION",
+          "family_census": {
+            "atom_delete": 12385,
+            "atom_restate": 977,
+            "bond_reroute": 602,
+            "bond_reorder": 590,
+            "ring_system_restate": 559,
+            "atom_insert": 383,
+            "bond_delete": 361,
+            "ring_system_delete": 289,
+            "bond_insert": 238
+          },
+          "seconds": 221.2
+        }
+      ]
+    },
+    {
+      "drug": "LOVASTATIN",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "target_successor": "CCC(C)C(=O)OC1CC(C)C=C2C=CC(C)C(C(C)C3CC(O)CC(=O)O3)C21",
+          "measured_family_rate": 0.045,
+          "family_rate_wilson_95": [
+            0.028651223384090457,
+            0.07000527956161895
+          ],
+          "family_draws": 18,
+          "distinct_family_successors": 15,
+          "estimated_per_successor_rate": 0.003,
+          "decisive_budget_for_95_percent_detection": 998,
+          "budget_spent": 16384,
+          "spent_at_decisive_budget": 1398,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": true,
+          "budget_was_capped": false,
+          "realized_detection_power": 1.0,
+          "hit_in_rate_phase": false,
+          "recovered": true,
+          "verdict": "IN_SUPPORT_ONLY_AFTER_ESCALATION",
+          "family_census": {
+            "atom_delete": 13586,
+            "atom_insert": 818,
+            "atom_restate": 558,
+            "bond_reroute": 437,
+            "bond_reorder": 381,
+            "ring_system_restate": 353,
+            "ring_system_delete": 148,
+            "bond_insert": 76,
+            "bond_delete": 27
+          },
+          "seconds": 222.4
+        },
+        {
+          "rule": "bond_reroute",
+          "target_successor": "CCC(C)C(=O)OC1CC(C)C=C2C=CC(C)C(CCC3CC(O)CC(=O)O3)C21",
+          "measured_family_rate": 0.015,
+          "family_rate_wilson_95": [
+            0.006892197870136998,
+            0.03233506351155325
+          ],
+          "family_draws": 6,
+          "distinct_family_successors": 5,
+          "estimated_per_successor_rate": 0.003,
+          "decisive_budget_for_95_percent_detection": 998,
+          "budget_spent": 16384,
+          "spent_at_decisive_budget": 1398,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": true,
+          "budget_was_capped": false,
+          "realized_detection_power": 1.0,
+          "hit_in_rate_phase": false,
+          "recovered": false,
+          "verdict": "NO_HIT_AT_DECISIVE_BUDGET_AND_AT_THE_CAP",
+          "family_census": {
+            "atom_delete": 13419,
+            "atom_insert": 900,
+            "atom_restate": 585,
+            "bond_reroute": 438,
+            "bond_reorder": 427,
+            "ring_system_restate": 389,
+            "ring_system_delete": 119,
+            "bond_insert": 82,
+            "bond_delete": 25
+          },
+          "seconds": 219.3
+        }
+      ]
+    },
+    {
+      "drug": "MARIBAVIR",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "target_successor": "CC(C)Nc1nc2cc(Cl)c(Cl)cc2n1C(C)C1OC(CO)C(O)C1O",
+          "measured_family_rate": 0.015,
+          "family_rate_wilson_95": [
+            0.006892197870136998,
+            0.03233506351155325
+          ],
+          "family_draws": 6,
+          "distinct_family_successors": 6,
+          "estimated_per_successor_rate": 0.0025,
+          "decisive_budget_for_95_percent_detection": 1197,
+          "budget_spent": 400,
+          "spent_at_decisive_budget": 400,
+          "recovered_at_decisive_budget": true,
+          "escalated_to_cap_after_a_miss": false,
+          "budget_was_capped": false,
+          "realized_detection_power": 0.6325808877393073,
+          "hit_in_rate_phase": true,
+          "recovered": true,
+          "verdict": "IN_SUPPORT_AT_DECISIVE_BUDGET",
+          "family_census": {
+            "atom_delete": 389,
+            "atom_insert": 6,
+            "atom_restate": 3,
+            "bond_reroute": 1,
+            "bond_reorder": 1
+          },
+          "seconds": 5.1
+        },
+        {
+          "rule": "bond_reroute",
+          "target_successor": "CC(C)Nc1nc2cc(Cl)c(Cl)cc2n1CCC1OC(CO)C(O)C1O",
+          "measured_family_rate": 0.0,
+          "family_rate_wilson_95": [
+            0.0,
+            0.009512640599680667
+          ],
+          "family_draws": 0,
+          "distinct_family_successors": 0,
+          "estimated_per_successor_rate": null,
+          "decisive_budget_for_95_percent_detection": null,
+          "budget_spent": 16784,
+          "spent_at_decisive_budget": 16784,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": false,
+          "budget_was_capped": false,
+          "realized_detection_power": null,
+          "hit_in_rate_phase": false,
+          "recovered": false,
+          "verdict": "NO_HIT_AT_DECISIVE_BUDGET_AND_AT_THE_CAP",
+          "family_census": {
+            "atom_delete": 16188,
+            "atom_insert": 353,
+            "atom_restate": 69,
+            "bond_reorder": 64,
+            "bond_reroute": 52,
+            "ring_system_restate": 31,
+            "bond_insert": 16,
+            "bond_delete": 11
+          },
+          "seconds": 214.1
+        }
+      ]
+    },
+    {
+      "drug": "SPIRAPRIL",
+      "transactions_captured": 1,
+      "constituents": [
+        {
+          "rule": "atom_insert",
+          "target_successor": "CC(c1ccccc1)N1CC2(CC1C(=O)O)SCCS2",
+          "measured_family_rate": 0.1175,
+          "family_rate_wilson_95": [
+            0.08952149033047882,
+            0.1527556797282769
+          ],
+          "family_draws": 47,
+          "distinct_family_successors": 19,
+          "estimated_per_successor_rate": 0.0061842105263157894,
+          "decisive_budget_for_95_percent_detection": 483,
+          "budget_spent": 400,
+          "spent_at_decisive_budget": 400,
+          "recovered_at_decisive_budget": true,
+          "escalated_to_cap_after_a_miss": false,
+          "budget_was_capped": false,
+          "realized_detection_power": 0.9163709878987203,
+          "hit_in_rate_phase": true,
+          "recovered": true,
+          "verdict": "IN_SUPPORT_AT_DECISIVE_BUDGET",
+          "family_census": {
+            "atom_delete": 166,
+            "atom_restate": 62,
+            "atom_insert": 47,
+            "ring_system_restate": 34,
+            "ring_system_delete": 29,
+            "bond_reorder": 26,
+            "bond_reroute": 24,
+            "bond_delete": 10,
+            "bond_insert": 2
+          },
+          "seconds": 5.7
+        },
+        {
+          "rule": "bond_reroute",
+          "target_successor": "O=C(O)C1CC2(CN1CCc1ccccc1)SCCS2",
+          "measured_family_rate": 0.095,
+          "family_rate_wilson_95": [
+            0.0699962171700798,
+            0.12770902171566156
+          ],
+          "family_draws": 38,
+          "distinct_family_successors": 19,
+          "estimated_per_successor_rate": 0.005,
+          "decisive_budget_for_95_percent_detection": 598,
+          "budget_spent": 16384,
+          "spent_at_decisive_budget": 998,
+          "recovered_at_decisive_budget": false,
+          "escalated_to_cap_after_a_miss": true,
+          "budget_was_capped": false,
+          "realized_detection_power": 1.0,
+          "hit_in_rate_phase": false,
+          "recovered": false,
+          "verdict": "NO_HIT_AT_DECISIVE_BUDGET_AND_AT_THE_CAP",
+          "family_census": {
+            "atom_delete": 6256,
+            "atom_restate": 2690,
+            "ring_system_restate": 1499,
+            "bond_reorder": 1413,
+            "atom_insert": 1360,
+            "bond_reroute": 1357,
+            "ring_system_delete": 1246,
+            "bond_delete": 531,
+            "bond_insert": 32
+          },
+          "seconds": 238.5
+        }
+      ]
+    }
+  ],
+  "elapsed_seconds": 3333.4
+}

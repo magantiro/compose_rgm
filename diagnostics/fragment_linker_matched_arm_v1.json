@@ -1,0 +1,255 @@
+{
+  "schema": "compose_fragment_linker_matched_arm_v1",
+  "status": "DIAGNOSTIC, NOT A BENCHMARK ROW. linker_design remains withheld by the aggregator. This reports the matched comparison the v3 predeclaration licenses, with the realized-length distribution beside it; whether a row may be published depends on the open question of whether the composite is a capability EXTENSION, which the constituent scoring probe answers and this file does not.",
+  "predeclaration_discipline": "NO THRESHOLD IS PREDECLARED HERE, because no pass/fail decision is taken from this arm. It is DESCRIPTIVE: it reports a comparison. Its size was fixed by the benchmark protocol before launch (10 drugs x 3 seeds x 100 samples = 3,000 attempts per arm), not chosen after seeing data, and the arms were launched together. If a DECISION is later taken from a linker comparison -- promoting a row, choosing between routes -- that decision needs its own predeclared threshold, n from a power calculation, and denominator, committed before its first sample. Reading a threshold off this artifact afterwards would be exactly the move the v3 predeclaration exists to prevent.",
+  "support_statement_that_must_accompany_any_linker_row": "The composite is a capability EXTENSION on 8 of 10 released prompts and an ACCELERATION on 2 (see diagnostics/fragment_path_v3_classification_v1.json). On 8 prompts it performs a transition the proposal law does not propose, so a linker number from this arm is not a number the prior could have reached by sampling.",
+  "matched_on": {
+    "sampler_sha256": "7a7268a2f6cd5ca8d42c9f7560fe2b7ea4f1875cf827668e224914d68fbc1125",
+    "checkpoint": "/root/checkpoint/ringcore_a7546e2_best.pt",
+    "linker_bridge_atoms": 1,
+    "samples_per_prompt": 100
+  },
+  "differs_only_in": [
+    "path_program"
+  ],
+  "identities": {
+    "attachment": {
+      "sampler_sha256": "7a7268a2f6cd5ca8d42c9f7560fe2b7ea4f1875cf827668e224914d68fbc1125",
+      "controller": {
+        "attachment_first": true,
+        "enabled": true,
+        "path_length_max": 5,
+        "path_length_min": 2,
+        "path_program": false,
+        "realize_redirected_order": true,
+        "redirect_attachment": true,
+        "release_linker_join": true,
+        "require_separated_cores": true,
+        "restrict_interfaces": true
+      },
+      "controller_sha256": "80a40b905adf84eae5d55be274aba4fbc1af9f088170028fc7452bdcbbdc44c6",
+      "checkpoint": "/root/checkpoint/ringcore_a7546e2_best.pt",
+      "linker_bridge_atoms": 1,
+      "samples_per_prompt": 100,
+      "shards": 30
+    },
+    "path_program": {
+      "sampler_sha256": "7a7268a2f6cd5ca8d42c9f7560fe2b7ea4f1875cf827668e224914d68fbc1125",
+      "controller": {
+        "attachment_first": true,
+        "enabled": true,
+        "path_length_max": 5,
+        "path_length_min": 2,
+        "path_program": true,
+        "realize_redirected_order": true,
+        "redirect_attachment": true,
+        "release_linker_join": true,
+        "require_separated_cores": true,
+        "restrict_interfaces": true
+      },
+      "controller_sha256": "4b549c2f62a9042f370d2bdc4bda45549df3acbfdcd7cfad93af68d435220353",
+      "checkpoint": "/root/checkpoint/ringcore_a7546e2_best.pt",
+      "linker_bridge_atoms": 1,
+      "samples_per_prompt": 100,
+      "shards": 30
+    }
+  },
+  "arms": {
+    "attachment": {
+      "drugs": 10,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "attempts": 3000,
+      "task_success_pct_of_attempts": {
+        "mean": 73.89999999999999,
+        "std": 0.37416573867739694,
+        "per_seed": [
+          73.8,
+          74.4,
+          73.5
+        ]
+      },
+      "commit_rate_pct_of_attempts": {
+        "mean": 73.89999999999999,
+        "std": 0.37416573867739694,
+        "per_seed": [
+          73.8,
+          74.4,
+          73.5
+        ]
+      },
+      "chemical_validity_pct_of_attempts": {
+        "mean": 73.89999999999999,
+        "std": 0.37416573867739694,
+        "per_seed": [
+          73.8,
+          74.4,
+          73.5
+        ]
+      },
+      "fragment_containment_pct_of_attempts": {
+        "mean": 73.89999999999999,
+        "std": 0.37416573867739694,
+        "per_seed": [
+          73.8,
+          74.4,
+          73.5
+        ]
+      },
+      "official_uniqueness": {
+        "mean": 59.92801331434554,
+        "std": 3.4289502570331263,
+        "per_seed": [
+          62.06376852571806,
+          55.08979592879425,
+          62.630475488524304
+        ]
+      },
+      "official_quality": {
+        "mean": 17.166666666666668,
+        "std": 0.6649979114420003,
+        "per_seed": [
+          18.1,
+          16.6,
+          16.8
+        ]
+      },
+      "official_diversity": {
+        "mean": 0.5209550532580892,
+        "std": 0.002754270957932646,
+        "per_seed": [
+          0.5243682852472926,
+          0.5208736751862164,
+          0.5176231993407587
+        ]
+      },
+      "mean_events": {
+        "mean": 6.890333333333334,
+        "std": 0.04549236810230423,
+        "per_seed": [
+          6.896000000000001,
+          6.832000000000001,
+          6.9430000000000005
+        ]
+      },
+      "seeded_linker_length": 1,
+      "realized_length_histogram": {
+        "1": 2202,
+        "2": 14,
+        "4": 1
+      },
+      "committed_two_core_endpoints": 2217,
+      "above_seed": 15,
+      "above_seed_pct_of_committed": 0.6765899864682002,
+      "path_transactions": 0,
+      "path_transaction_refusals": 0,
+      "path_rejections": 0
+    },
+    "path_program": {
+      "drugs": 10,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "attempts": 3000,
+      "task_success_pct_of_attempts": {
+        "mean": 14.066666666666668,
+        "std": 0.49216076867444636,
+        "per_seed": [
+          14.0,
+          13.5,
+          14.7
+        ]
+      },
+      "commit_rate_pct_of_attempts": {
+        "mean": 14.066666666666668,
+        "std": 0.49216076867444636,
+        "per_seed": [
+          14.0,
+          13.5,
+          14.7
+        ]
+      },
+      "chemical_validity_pct_of_attempts": {
+        "mean": 14.066666666666668,
+        "std": 0.49216076867444636,
+        "per_seed": [
+          14.0,
+          13.5,
+          14.7
+        ]
+      },
+      "fragment_containment_pct_of_attempts": {
+        "mean": 14.066666666666668,
+        "std": 0.49216076867444636,
+        "per_seed": [
+          14.0,
+          13.5,
+          14.7
+        ]
+      },
+      "official_uniqueness": {
+        "mean": 61.088022170820246,
+        "std": 5.443756047045182,
+        "per_seed": [
+          68.61499493414388,
+          55.92445342917041,
+          58.72461814914645
+        ]
+      },
+      "official_quality": {
+        "mean": 4.066666666666666,
+        "std": 0.5312459150169744,
+        "per_seed": [
+          4.7,
+          3.4,
+          4.1
+        ]
+      },
+      "official_diversity": {
+        "mean": 0.442705513029033,
+        "std": 0.016528019718783184,
+        "per_seed": [
+          0.4422561193708253,
+          0.4226913440860215,
+          0.4631690756302521
+        ]
+      },
+      "mean_events": {
+        "mean": 0.6819999999999999,
+        "std": 0.01392838827718412,
+        "per_seed": [
+          0.677,
+          0.701,
+          0.6679999999999999
+        ]
+      },
+      "seeded_linker_length": 1,
+      "realized_length_histogram": {
+        "1": 1,
+        "2": 353,
+        "3": 46,
+        "4": 19,
+        "5": 3
+      },
+      "committed_two_core_endpoints": 422,
+      "above_seed": 421,
+      "above_seed_pct_of_committed": 99.76303317535545,
+      "path_transactions": 516,
+      "path_transaction_refusals": 426,
+      "path_rejections": 11117
+    }
+  },
+  "deltas": {
+    "task_success_pct_of_attempts": -59.83333333333332,
+    "commit_rate_pct_of_attempts": -59.83333333333332,
+    "official_uniqueness": 1.160008856474704,
+    "official_quality": -13.100000000000001,
+    "official_diversity": -0.07824954022905622
+  },
+  "reading": "The share above the seeded length is over COMMITTED two-core endpoints. The per-event gate is measured to convert seed-length COMMITS into non-commits, so that share is not comparable across arms on its own and is reported beside the commit rate, which is over attempts and is not filtered by the gate."
+}
