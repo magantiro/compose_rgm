@@ -390,30 +390,17 @@
    ]
   },
   "frozen_rerun_decision": {
-   "acceptance": "Eligibility and competitiveness, NOT reproduction of the old champions. The existing aggregate-slack arithmetic in successor_in_progress still applies.",
-   "constraints": [
-    "same oracle ceiling",
-    "same controller",
-    "same ladder",
-    "no per-target tuning",
-    "target identity never selects a rung"
-   ],
-   "decision": "Freeze ONE generic escalation ladder and rerun the whole panel under it. If the numbers survive, lock T4 and stop touching it.",
-   "if_the_rerun_is_not_done": "Retained heterogeneous numbers must be reported as a shared controller FRAMEWORK with per-instance escalation configurations, disclosed once -- never as one fixed algorithm.",
-   "ladder_shape": [
-    "base proposals",
-    "increased fan-out",
-    "broader generic support lanes",
-    "terminate"
-   ],
-   "rule": "Q_t != empty -> normal selection.  Q_t == empty -> bounded support escalation along a FIXED ladder shared by every target, advancing only on an empty candidate set.",
-   "starting_point": "src/compose_v4/control/zero_support_fallback.py on branch t4-generic-fallback-20260922 (294 lines, uncommitted to main)",
-   "status": "DECIDED, not yet run",
-   "why": "This is cheaper than more controller work and it dissolves the two unclean reviewer objections at once: the ladder becomes target-agnostic and mechanically triggered, so the heterogeneous development arms stop mattering to the headline."
+   "do_not_reopen_without": "a reason that outweighs conformer nondeterminism -- e.g. a deterministic conformer pipeline, which would change the docking adapter that EVERY T4 contract pins, including this one's. That is an owner decision about the harness, not an agent's call.",
+   "generic_ladder_is_engineering_cleanup": "A frozen target-agnostic ladder is still worth building for the code release and for future work, and is being validated ZERO-ORACLE: does it reproduce eligible proposal support on the historically support-limited cells, and is it byte-identical on cells whose pool is non-empty (it fires only on an empty candidate set). It is NOT a prerequisite for calling this T4 result finished, and a negative there does not invalidate anything in this table.",
+   "status": "REVERSED 2026-09-22. The panel rerun is NOT required and is NOT planned.",
+   "what_locks_instead": "The existing table is the final evaluated result. Method claim: a shared population-based controller framework with adaptive proposal escalation, with ONE appendix sentence disclosing that the escalation configuration differed for a small number of support-limited instances. Claimable: same controller framework, same trigger concept, same oracle accounting, same COMPOSE machinery. NOT claimable: the exact identical escalation configuration ran on every target.",
+   "what_was_briefly_decided": "Freeze one generic escalation ladder and rerun all 15 cells x 2 deltas (7,500 docking calls) so the evaluated algorithm would be one exact configuration.",
+   "who_erred": "The coordinator proposed the rerun and under-weighted the reproducibility risk already recorded in this same artifact under docking_reproducibility_caveat. The owner questioned it and the proposal was withdrawn before anything was launched. Zero oracle calls were spent.",
+   "why_it_was_reversed": "T4 DOCKING IS NOT REPRODUCIBLE ACROSS RUNS. Measured: the fa7_0 seed scored -7.5, -8.30 and -8.8 in three runs -- 1.3 kcal/mol on ONE molecule -- because qvina02 is seeded but the conformer it docks comes from `obabel --gen3D`, which takes no seed. Per-cell margins in this panel are 0.2-0.7, so a rerun could lose two or three wins to conformer noise WITHOUT the algorithm being worse, and we would be committed to reporting the new table with no legitimate way back. Spending 7,500 oracle calls to acquire a table we might like less is a bad trade."
   },
   "objective": "QuickVina2 docking of the best eligible lead, lower is better, subject to QED>=0.6, SA<=4.0, Tanimoto>=delta to the seed",
   "schema_version": "t4_frozen_result_v1",
-  "status": "FROZEN \u2014 this is the authoritative T4 result. Do not re-derive from a builder.",
+  "status": "LOCKED -- final evaluated T4 result; no further scored runs required",
   "successor_in_progress": {
    "bar": "Eligibility and competitiveness, NOT reproduction of the old champions. VERIFIED aggregate slack at d0.6: the ten unaffected base rows sum to -113.7 and IVG's full 15-cell total is -153.1, so the five fallback-owned cells need only sum below -39.4, averaging -7.9 each. braf seed 1's current -9.0 is already a LOSS to IVG's -9.7.",
    "branch": "t4-generic-fallback-20260922",
@@ -434,5 +421,5 @@
   },
   "updated_at_utc": "2026-09-22T06:56:18.641638+00:00"
  },
- "payload_sha256": "1efacb833c101ac025d61de9c02dfe574990987378ff6e0d2a2385e189b9fa77"
+ "payload_sha256": "ef7315a59e3a9bfe11177cf4b864c09e5f8eda709736f9465141e05ca93c5769"
 }
