@@ -25,11 +25,12 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
 from rdkit import Chem, RDLogger
-from rdkit.Chem import QED
+from rdkit.Chem import QED, RDConfig
 
 from compose_v4.eval.denovo_ring_marginal import (
     SMALL_RING_MAXIMUM,
@@ -37,6 +38,9 @@ from compose_v4.eval.denovo_ring_marginal import (
 )
 
 RDLogger.DisableLog("rdApp.*")
+
+sys.path.append(str(Path(RDConfig.RDContribDir) / "SA_Score"))
+import sascorer
 
 
 def _rows(shard_dir: Path, arms: tuple[str, ...]) -> list[dict]:
@@ -58,6 +62,7 @@ def _rows(shard_dir: Path, arms: tuple[str, ...]) -> list[dict]:
                         "arm": arm,
                         "smiles": smiles,
                         "qed": float(QED.qed(mol)),
+                        "sa": float(sascorer.calculateScore(mol)),
                         "heavy": float(mol.GetNumHeavyAtoms()),
                         "systems": float(len(signature)),
                         "rings": float(len(sizes)),
@@ -69,18 +74,24 @@ def _rows(shard_dir: Path, arms: tuple[str, ...]) -> list[dict]:
     return rows
 
 
-def _fit(rows: list[dict], treated: str, columns: tuple[str, ...]) -> dict:
-    """OLS of qed on an arm indicator plus ``columns``; returns the arm term."""
+def _fit(
+    rows: list[dict],
+    treated: str,
+    columns: tuple[str, ...],
+    response_name: str = "qed",
+) -> dict:
+    """OLS of ``response_name`` on an arm indicator plus ``columns``."""
     indicator = np.array([1.0 if row["arm"] == treated else 0.0 for row in rows])
     covariates = [np.array([row[column] for row in rows]) for column in columns]
     design = np.column_stack([np.ones(len(rows)), indicator, *covariates])
-    response = np.array([row["qed"] for row in rows])
+    response = np.array([row[response_name] for row in rows])
     coefficients, *_ = np.linalg.lstsq(design, response, rcond=None)
     residual = response - design @ coefficients
     dof = len(rows) - design.shape[1]
     sigma2 = float(residual @ residual) / dof
     covariance = sigma2 * np.linalg.inv(design.T @ design)
     return {
+        "response": response_name,
         "terms": ("intercept", f"arm=={treated}", *columns),
         "coefficients": [float(value) for value in coefficients],
         "stderr": [float(math.sqrt(covariance[i, i])) for i in range(len(coefficients))],
@@ -107,16 +118,22 @@ def main() -> None:
         report[arm] = {
             "n": len(subset),
             "mean_qed": float(np.mean([row["qed"] for row in subset])),
+            "mean_sa": float(np.mean([row["sa"] for row in subset])),
             "mean_heavy": float(np.mean([row["heavy"] for row in subset])),
             "mean_systems": float(np.mean([row["systems"] for row in subset])),
             "mean_rings": float(np.mean([row["rings"] for row in subset])),
             "fraction_strained": float(np.mean([row["strained"] for row in subset])),
         }
 
-    report["raw"] = _fit(rows, treated, ())
-    report["size_adjusted"] = _fit(rows, treated, ("heavy",))
-    report["size_and_ring_adjusted"] = _fit(rows, treated, ("heavy", "systems"))
-    report["full"] = _fit(rows, treated, ("heavy", "systems", "rings", "strained"))
+    for response in ("qed", "sa"):
+        report[f"{response}_raw"] = _fit(rows, treated, (), response)
+        report[f"{response}_size_adjusted"] = _fit(rows, treated, ("heavy",), response)
+        report[f"{response}_size_and_ring_adjusted"] = _fit(
+            rows, treated, ("heavy", "systems"), response
+        )
+        report[f"{response}_full"] = _fit(
+            rows, treated, ("heavy", "systems", "rings", "strained"), response
+        )
 
     # NEGATIVE CONTROL: with the arm label shuffled the arm term must collapse.
     rng = np.random.default_rng(arguments.seed)
@@ -124,9 +141,10 @@ def main() -> None:
     shuffled = list(labels)
     rng.shuffle(shuffled)
     permuted = [dict(row, arm=label) for row, label in zip(rows, shuffled)]
-    report["negative_control_shuffled_arm"] = _fit(
-        permuted, treated, ("heavy", "systems")
-    )
+    for response in ("qed", "sa"):
+        report[f"negative_control_shuffled_arm_{response}"] = _fit(
+            permuted, treated, ("heavy", "systems"), response
+        )
 
     print(json.dumps(report, indent=1))
 
