@@ -1197,10 +1197,40 @@ def _ladder_table(arms: dict[str, Any], predicate: dict[str, Any]) -> dict[str, 
                         "nearest_approaches": prefix["nearest_approaches"],
                     }
                 )
+    # Is a zero RARE or OUT OF REACH? A zero whose best approach is still
+    # climbing with budget is under-powered and a larger budget may settle it; a
+    # zero whose best approach stopped climbing is a reach statement about the
+    # mechanism. This repository has been wrong in both directions -- a fragment
+    # probe read 0.0000 at 2,048 draws and lifted to 0.80 at 8,192 -- so the
+    # growth curve is published rather than the verdict being asserted.
+    growth: dict[str, Any] = {}
+    for task, byat in tasks.items():
+        per_arm: dict[str, list] = {}
+        for at, rows in byat.items():
+            for row in rows:
+                per_arm.setdefault(row["arm"], []).append((int(at), row["best_similarity"]))
+        for name, points in per_arm.items():
+            points.sort()
+            if len(points) < 2:
+                continue
+            first, last = points[0], points[-1]
+            growth.setdefault(task, {})[name] = {
+                "best_by_prefix": {str(at): value for at, value in points},
+                "budget_multiple": round(last[0] / first[0], 2),
+                "best_gained_over_that_multiple": round(last[1] - first[1], 4),
+                "gained_in_the_final_doubling": round(last[1] - points[-2][1], 4),
+                "still_climbing": last[1] > points[-2][1],
+            }
     return {
         "columns": (
             "arm | qed_drift_q1_to_q4 | best_basin_rung | first_entry_proposal_index "
             "| distinct_basins | entrant_median_qed | entry_rate | entrant_provenance"
+        ),
+        "best_similarity_growth_with_budget": growth,
+        "growth_reading": (
+            "still_climbing distinguishes an under-powered zero from a reach "
+            "statement. An arm whose best approach stopped moving while its "
+            "budget grew several fold is not short of draws."
         ),
         "entry_threshold": ENTRY_DELTA,
         "reading": (
