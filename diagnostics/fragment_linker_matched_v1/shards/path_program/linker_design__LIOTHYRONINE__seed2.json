@@ -1,0 +1,413 @@
+{
+  "schema": "compose_fragment_official_suite_v1",
+  "protocol": {
+    "source": "in_virtuo_gen/evaluation/downstream.py @ b50bb3ae",
+    "samples_per_prompt": 100,
+    "seeds": 3,
+    "task_row": "unweighted mean over the task's drugs",
+    "scaffold_morphing": "upstream copies the linker result",
+    "linker_bridge_atoms": 1
+  },
+  "kernel": {
+    "rdkit": "2024.03.5",
+    "numpy": "1.26.4",
+    "torch": "2.4.0+cu121",
+    "python": "3.11.12",
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36"
+  },
+  "checkpoint": {
+    "path": "/root/checkpoint/ringcore_a7546e2_best.pt",
+    "completed_steps": 16000,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "atom_vocabulary": "ORGANIC"
+  },
+  "sampler": {
+    "config": {
+      "mark_attempts_per_event": 96,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "config_sha256": "7a7268a2f6cd5ca8d42c9f7560fe2b7ea4f1875cf827668e224914d68fbc1125"
+  },
+  "attachment_control": {
+    "config": {
+      "attachment_first": true,
+      "enabled": true,
+      "path_length_max": 5,
+      "path_length_min": 2,
+      "path_program": true,
+      "realize_redirected_order": true,
+      "redirect_attachment": true,
+      "release_linker_join": true,
+      "require_separated_cores": true,
+      "restrict_interfaces": true
+    },
+    "config_sha256": "4b549c2f62a9042f370d2bdc4bda45549df3acbfdcd7cfad93af68d435220353",
+    "arm": "attachment_control"
+  },
+  "metric_provenance": {
+    "validity_uniqueness_quality_diversity": "official in_virtuo_gen.train_utils.metrics.evaluate_smiles @ b50bb3ae, already_smiles=True",
+    "distance": "NOT in the released evaluator: evaluate_smiles returns no distance key. Estimator is the official in_virtuo_gen.utils.mol.calculate_average_tanimoto(prompt=...); reference = the dummy-stripped prompt fragment(s)",
+    "fragment_preservation": "independent audit, atom-level non-overlapping substructure match, run over COMMITTED endpoints as well as emitted samples"
+  },
+  "results": {
+    "linker_design": {
+      "task": "linker_design",
+      "prompts_declared": 1,
+      "prompts_scored": 1,
+      "samples_per_prompt": 100,
+      "seeds": 3,
+      "per_seed": [
+        {
+          "validity": 10.0,
+          "uniqueness": 40.0,
+          "quality": 2.0,
+          "diversity": 0.53,
+          "distance": 0.6161442378219787,
+          "distance_to_original_drug": 0.5244464965033976
+        }
+      ],
+      "summary": {
+        "validity": {
+          "mean": 10.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 40.0,
+          "std": 0.0
+        },
+        "quality": {
+          "mean": 2.0,
+          "std": 0.0
+        },
+        "diversity": {
+          "mean": 0.53,
+          "std": 0.0
+        },
+        "distance": {
+          "mean": 0.6161442378219787,
+          "std": 0.0
+        },
+        "distance_to_original_drug": {
+          "mean": 0.5244464965033976,
+          "std": 0.0
+        }
+      },
+      "build_failures": [],
+      "per_drug": {
+        "LIOTHYRONINE": [
+          {
+            "seed": 2,
+            "rng_seed": 1089063802,
+            "official": {
+              "validity": 10.0,
+              "uniqueness": 40.0,
+              "diversity": 0.53,
+              "quality": 2.0,
+              "distance": 0.6161442378219787,
+              "distance_to_original_drug": 0.5244464965033976
+            },
+            "attempts": 100,
+            "validity_denominator": 100,
+            "emitted_nonempty": 10,
+            "distance_reference_prompt": "C[C@H](N)C(=O)O.Oc1ccccc1I",
+            "unique_valid_count": 4,
+            "committed_endpoints": 10,
+            "committed_chemically_valid": 10,
+            "committed_fragment_preserving": 10,
+            "emitted_fragment_preserving": 10,
+            "constraint_failures": 0,
+            "lock_rejections": 9409,
+            "budget_exhausted": 99,
+            "executor_refusals": 0,
+            "mean_events": 0.25,
+            "families": {
+              "atom_insert": 7,
+              "atom_delete": 2,
+              "bond_reorder": 6
+            },
+            "seconds": 596.15,
+            "committed_endpoint_smiles": [
+              "NC(CCNc1ccc(O)c(I)c1)C(=O)O",
+              "NC(CCOc1ccc(O)c(I)c1)C(=O)O",
+              "NC(CCCc1ccc(O)c(I)c1)C(=O)O",
+              "NC(CCNc1ccc(O)c(I)c1)C(=O)O",
+              "NC(CCCc1ccc(O)c(I)c1)C(=O)O",
+              "NC(CCCc1ccc(O)c(I)c1)C(=O)O",
+              "COC(=O)C(=CC(=O)c1ccc(O)c(I)c1)C(N)C(=O)O",
+              "NC(CCNc1ccc(O)c(I)c1)C(=O)O",
+              "NC(CCOc1ccc(O)c(I)c1)C(=O)O",
+              "NC(CCNc1ccc(O)c(I)c1)C(=O)O"
+            ],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "NC(CCNc1ccc(O)c(I)c1)C(=O)O",
+              "NC(CCOc1ccc(O)c(I)c1)C(=O)O",
+              "",
+              "",
+              "",
+              "NC(CCCc1ccc(O)c(I)c1)C(=O)O",
+              "",
+              "",
+              "",
+              "NC(CCNc1ccc(O)c(I)c1)C(=O)O",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "NC(CCCc1ccc(O)c(I)c1)C(=O)O",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "NC(CCCc1ccc(O)c(I)c1)C(=O)O",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "COC(=O)C(=CC(=O)c1ccc(O)c(I)c1)C(N)C(=O)O",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "NC(CCNc1ccc(O)c(I)c1)C(=O)O",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "NC(CCOc1ccc(O)c(I)c1)C(=O)O",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "NC(CCNc1ccc(O)c(I)c1)C(=O)O"
+            ],
+            "seeded_linker_length": 1,
+            "realized_linker_lengths": [
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "path_targets": [
+              2,
+              3,
+              3,
+              3,
+              5,
+              5,
+              5,
+              3,
+              3,
+              5,
+              3,
+              3,
+              2,
+              4,
+              3,
+              3,
+              5,
+              5,
+              2,
+              2,
+              2,
+              4,
+              5,
+              5,
+              4,
+              3,
+              3,
+              4,
+              2,
+              4,
+              2,
+              3,
+              3,
+              5,
+              4,
+              4,
+              5,
+              5,
+              4,
+              3,
+              2,
+              2,
+              2,
+              4,
+              4,
+              2,
+              4,
+              5,
+              3,
+              4,
+              2,
+              2,
+              2,
+              4,
+              3,
+              5,
+              2,
+              2,
+              2,
+              4,
+              2,
+              2,
+              2,
+              5,
+              5,
+              2,
+              4,
+              4,
+              4,
+              5,
+              3,
+              4,
+              2,
+              3,
+              4,
+              3,
+              3,
+              3,
+              2,
+              4,
+              2,
+              4,
+              4,
+              5,
+              5,
+              5,
+              2,
+              2,
+              3,
+              4,
+              3,
+              5,
+              2,
+              3,
+              5,
+              2,
+              5,
+              3,
+              4,
+              4
+            ],
+            "path_transactions": 10,
+            "path_transaction_refusals": 4,
+            "path_rejections": 113,
+            "interface_rejections": 197,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 10,
+            "declared_interfaces": [
+              2,
+              4
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                2,
+                4
+              ],
+              "requirements": [
+                [
+                  2,
+                  1
+                ],
+                [
+                  4,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                6,
+                8
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                2,
+                4
+              ],
+              "required": {
+                "2": 1,
+                "4": 1
+              },
+              "covered": {
+                "2": 1,
+                "4": 1
+              },
+              "satisfied": true
+            }
+          }
+        ]
+      }
+    }
+  }
+}

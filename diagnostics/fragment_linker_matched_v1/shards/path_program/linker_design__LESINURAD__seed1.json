@@ -1,0 +1,407 @@
+{
+  "schema": "compose_fragment_official_suite_v1",
+  "protocol": {
+    "source": "in_virtuo_gen/evaluation/downstream.py @ b50bb3ae",
+    "samples_per_prompt": 100,
+    "seeds": 3,
+    "task_row": "unweighted mean over the task's drugs",
+    "scaffold_morphing": "upstream copies the linker result",
+    "linker_bridge_atoms": 1
+  },
+  "kernel": {
+    "rdkit": "2024.03.5",
+    "numpy": "1.26.4",
+    "torch": "2.4.0+cu121",
+    "python": "3.11.12",
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36"
+  },
+  "checkpoint": {
+    "path": "/root/checkpoint/ringcore_a7546e2_best.pt",
+    "completed_steps": 16000,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "atom_vocabulary": "ORGANIC"
+  },
+  "sampler": {
+    "config": {
+      "mark_attempts_per_event": 96,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "config_sha256": "7a7268a2f6cd5ca8d42c9f7560fe2b7ea4f1875cf827668e224914d68fbc1125"
+  },
+  "attachment_control": {
+    "config": {
+      "attachment_first": true,
+      "enabled": true,
+      "path_length_max": 5,
+      "path_length_min": 2,
+      "path_program": true,
+      "realize_redirected_order": true,
+      "redirect_attachment": true,
+      "release_linker_join": true,
+      "require_separated_cores": true,
+      "restrict_interfaces": true
+    },
+    "config_sha256": "4b549c2f62a9042f370d2bdc4bda45549df3acbfdcd7cfad93af68d435220353",
+    "arm": "attachment_control"
+  },
+  "metric_provenance": {
+    "validity_uniqueness_quality_diversity": "official in_virtuo_gen.train_utils.metrics.evaluate_smiles @ b50bb3ae, already_smiles=True",
+    "distance": "NOT in the released evaluator: evaluate_smiles returns no distance key. Estimator is the official in_virtuo_gen.utils.mol.calculate_average_tanimoto(prompt=...); reference = the dummy-stripped prompt fragment(s)",
+    "fragment_preservation": "independent audit, atom-level non-overlapping substructure match, run over COMMITTED endpoints as well as emitted samples"
+  },
+  "results": {
+    "linker_design": {
+      "task": "linker_design",
+      "prompts_declared": 1,
+      "prompts_scored": 1,
+      "samples_per_prompt": 100,
+      "seeds": 3,
+      "per_seed": [
+        {
+          "validity": 7.000000000000001,
+          "uniqueness": 57.14285714285714,
+          "quality": 3.0,
+          "diversity": 0.46725,
+          "distance": 0.6557136524822694,
+          "distance_to_original_drug": 0.5949084398850233
+        }
+      ],
+      "summary": {
+        "validity": {
+          "mean": 7.000000000000001,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 57.14285714285714,
+          "std": 0.0
+        },
+        "quality": {
+          "mean": 3.0,
+          "std": 0.0
+        },
+        "diversity": {
+          "mean": 0.46725,
+          "std": 0.0
+        },
+        "distance": {
+          "mean": 0.6557136524822694,
+          "std": 0.0
+        },
+        "distance_to_original_drug": {
+          "mean": 0.5949084398850233,
+          "std": 0.0
+        }
+      },
+      "build_failures": [],
+      "per_drug": {
+        "LESINURAD": [
+          {
+            "seed": 1,
+            "rng_seed": 345340731,
+            "official": {
+              "validity": 7.000000000000001,
+              "uniqueness": 57.14285714285714,
+              "diversity": 0.46725,
+              "quality": 3.0,
+              "distance": 0.6557136524822694,
+              "distance_to_original_drug": 0.5949084398850233
+            },
+            "attempts": 100,
+            "validity_denominator": 100,
+            "emitted_nonempty": 7,
+            "distance_reference_prompt": "O=C(O)CSc1nnc(Br)[nH]1.C1CC1",
+            "unique_valid_count": 4,
+            "committed_endpoints": 7,
+            "committed_chemically_valid": 7,
+            "committed_fragment_preserving": 7,
+            "emitted_fragment_preserving": 7,
+            "constraint_failures": 0,
+            "lock_rejections": 8953,
+            "budget_exhausted": 99,
+            "executor_refusals": 0,
+            "mean_events": 0.19,
+            "families": {
+              "atom_insert": 7,
+              "atom_restate": 2,
+              "bond_reorder": 2
+            },
+            "seconds": 741.32,
+            "committed_endpoint_smiles": [
+              "O=C(O)CSc1nnc(Br)n1COC1CC1",
+              "O=C(O)CSc1nnc(Br)n1COC1CC1",
+              "O=C(O)CSc1nnc(Br)n1CCC1CC1",
+              "O=C(O)CSc1nnc(Br)n1CCC1CC1",
+              "O=C(O)CSc1nnc(Br)n1CCCC1CC1",
+              "CC1(C=C(CC(N)C(O)O)n2c(Br)nnc2SCC(=O)O)CC1",
+              "O=C(O)CSc1nnc(Br)n1CCC1CC1"
+            ],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "O=C(O)CSc1nnc(Br)n1COC1CC1",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "O=C(O)CSc1nnc(Br)n1COC1CC1",
+              "",
+              "",
+              "",
+              "O=C(O)CSc1nnc(Br)n1CCC1CC1",
+              "",
+              "",
+              "O=C(O)CSc1nnc(Br)n1CCC1CC1",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "O=C(O)CSc1nnc(Br)n1CCCC1CC1",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "CC1(C=C(CC(N)C(O)O)n2c(Br)nnc2SCC(=O)O)CC1",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "O=C(O)CSc1nnc(Br)n1CCC1CC1",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "seeded_linker_length": 1,
+            "realized_linker_lengths": [
+              2,
+              2,
+              2,
+              2,
+              3,
+              2,
+              2
+            ],
+            "path_targets": [
+              5,
+              2,
+              5,
+              3,
+              5,
+              5,
+              2,
+              5,
+              5,
+              3,
+              5,
+              4,
+              4,
+              3,
+              5,
+              4,
+              5,
+              4,
+              4,
+              3,
+              3,
+              5,
+              5,
+              4,
+              3,
+              4,
+              3,
+              2,
+              3,
+              2,
+              5,
+              2,
+              5,
+              5,
+              4,
+              3,
+              2,
+              2,
+              4,
+              2,
+              5,
+              4,
+              4,
+              2,
+              3,
+              4,
+              3,
+              4,
+              5,
+              4,
+              3,
+              4,
+              4,
+              5,
+              2,
+              4,
+              3,
+              5,
+              2,
+              2,
+              5,
+              4,
+              2,
+              4,
+              2,
+              2,
+              3,
+              5,
+              5,
+              5,
+              5,
+              3,
+              4,
+              2,
+              2,
+              2,
+              5,
+              4,
+              5,
+              3,
+              2,
+              5,
+              3,
+              4,
+              2,
+              3,
+              5,
+              4,
+              2,
+              2,
+              4,
+              3,
+              4,
+              2,
+              4,
+              4,
+              2,
+              4,
+              3,
+              3
+            ],
+            "path_transactions": 8,
+            "path_transaction_refusals": 10,
+            "path_rejections": 321,
+            "interface_rejections": 293,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 7,
+            "declared_interfaces": [
+              10,
+              12
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                10,
+                12
+              ],
+              "requirements": [
+                [
+                  10,
+                  1
+                ],
+                [
+                  12,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                11,
+                3
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                10,
+                12
+              ],
+              "required": {
+                "10": 1,
+                "12": 1
+              },
+              "covered": {
+                "10": 1,
+                "12": 1
+              },
+              "satisfied": true
+            }
+          }
+        ]
+      }
+    }
+  }
+}
