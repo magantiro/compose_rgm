@@ -58,6 +58,18 @@ def main() -> int:
             for query in queries[:3]:
                 print(f"      {query.get('smiles')}")
 
+    # A driver-level failure publishes summary.json with status=failed and never
+    # writes a cell result, so watching only the cell folder would read a crash as
+    # "still running" -- silence is not success.
+    try:
+        top = {entry.path for entry in volume.listdir(args.run_id)}
+    except Exception:  # noqa: BLE001
+        top = set()
+    if f"{args.run_id}/summary.json" in top:
+        summary = _read(f"{args.run_id}/summary.json")
+        for record in summary.get("records") or []:
+            print(f"  summary: {record}")
+
     for name in ("checkpoint.json", "result.json"):
         if f"{prefix}/{name}" in entries:
             payload = _read(f"{prefix}/{name}")

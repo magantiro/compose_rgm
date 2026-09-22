@@ -1,7 +1,13 @@
 {
   "anchored_lane_cost": {
-    "note": "no laws resolve on this lane, so it is ~3.5x cheaper per draw",
-    "seconds_per_512_draws": 201.8
+    "note": "no laws resolve on this lane, so it is ~3.5x cheaper per draw than shallow",
+    "seconds_per_512_draws": 201.8,
+    "yield_measured": {
+      "draws_total": 2048,
+      "eligible": 0,
+      "interpretation": "a real negative for this lane on fa7_0. With 0 events in 2048 draws the one-sided 95% upper bound on its rate is about 1 per 683 draws, so it is not ruled out and it is certainly not demonstrated. The expansion's expected yield should be read off the SHALLOW lane alone",
+      "seeds": 4
+    }
   },
   "cell": "fa7_0",
   "delta": 0.6,
@@ -18,6 +24,7 @@
       "shallow",
       "anchored_replacement"
     ],
+    "revision": "the anchored lane's contribution is now measured at 0 in 2048 draws, so the sizing rests on the shallow lane alone: 6720 shallow draws per event against a rate of about 1 per 1920 measured draws gives roughly 3.5 expected eligible endpoints, i.e. P(at least one) near 0.97. A round that still exhausts after that full ladder is a bounded, documented exhaustion rather than the coin flip the unexpanded loop would have been",
     "total_shallow_draws_per_event": 6720
   },
   "kernel": "python 3.11.13 / rdkit 2024.03.5 / numpy 1.26.4 / torch 2.4.0 (T4 pinned)",
