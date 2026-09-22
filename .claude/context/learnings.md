@@ -3633,3 +3633,67 @@ independently of whether fa7_0 ever closes.**
   consistent (re-hash the payload) so only the target check can catch it.
 - **Budget a tree-copying mutation battery as a SERIAL job**: a 780 MB worktree copy per mutation,
   11 pytest runs taking >20 minutes under contention against ~35 s each unloaded.
+
+## 2026-09-21 (kernel parity PASSES for PMO transport -- and the laptop kernel changes MOLECULES)
+
+- **PARITY PASS, and it closes the two-kernel worry: every transport artifact is byte-identical
+  (sha256) between rdkit 2023.9.6 (PMO production) and 2024.3.5 (T4/editing).** Correspondences
+  108/0 with scale 19-36-56; stage splits 44 transports / 27 monotone / 17 dips / median 2 stages;
+  ordering residual 5/35 = 14.3% with median 1 protected round. **Nothing needed re-basing.** The
+  three deterministic scripts were re-derived IN FULL at ~1.3 s each rather than sampled -- cheaper
+  AND stronger than the sample that was asked for.
+- **Endpoint parity is not enough and the full lattice was walked: 37,784 intermediates, of which
+  14,312 (37.9%) do not sanitize.** Comparing BOTH the canonical SMILES and the sanitize-or-not
+  verdict: **0 SMILES disagreements, 0 verdict disagreements, 0 of 15 canaries moving.** The live
+  proposal path too -- the scoring-identity gate re-run under 2023.9.6 reproduces the committed
+  2024.3.5 artifact byte-for-byte, 144/144, `recovered_fraction` 1.0000 on all six rows.
+- **THREE kernels, not two, and the laptop one is genuinely different.** Against `.venv`'s rdkit
+  **2026.03.6**: **1,472 of 37,784 off-path intermediates (3.90%) are a DIFFERENT MOLECULE** --
+  0 spelling differences, 1,472 differing by **InChI** (`C=CC(=C)NCCOc1ccccc1` vs
+  `CC=C(C)NCCOc1ccccc1`). The planner is NOT implicated: `retain_core`/`core_map`/`delete_order`/
+  `install_order`/`core_bond_changes` hash identically on all three kernels. Cause is kekulization
+  of the ENDPOINTS moving, so a partly-built ring inherits a different double-bond placement.
+  **Our artifacts survive 2026 only because those lattice points are ones the stage splitter never
+  lands on -- a measured coincidence of where ring-system group boundaries fall, NOT a property to
+  rely on.** Anything walking a different prefix schedule must be re-run pinned.
+- **A parity PASS needs probe controls or it is vacuous**: same-kernel comparison must be REFUSED,
+  cross-mode comparison REFUSED, and a deliberately mutated dump must be REQUIRED to report one
+  spelling flip, one verdict flip and one canary flip. A positive control whose mutation fails to
+  apply must ABORT with a traceback rather than print a verdict.
+
+## 2026-09-21 (the THIRD inert mechanism, and a too-broad claim of mine corrected)
+
+- **`donor_program` -- molecular pendant exchange between two complete molecules -- is ABSENT from
+  the scored entry point's 118-module import closure**, as is `donor_memory`. Third instance of a
+  built, tested mechanism that no production caller reaches, after the region law behind an opt-in
+  keyword and `allocation_priority` with zero call sites. Now a COMMAND
+  (`scripts/pmo_production_closure_audit.py`) rather than a rule to remember.
+  **TWO SUBTLETIES THE AUDIT HAD TO HANDLE:** absence must be established two ways because a
+  DEFERRED import would not appear in `sys.modules`; and it must separate DOTTED from BARE-NAME
+  references, because `adaptive_program_optimizer` binds a LOCAL VARIABLE called `donor_program`
+  seven times -- a source scan alone reads as seven hits on a module that is not there.
+- **CORRECTS a coordinator claim that was too broad.** I generalised `compile_source_to_target`'s
+  `retained_fraction = 0.000` into "a scaffold-preserving bridge does not exist today." That is
+  right for ARBITRARY pairs and WRONG about donor recombination: **`compile_transplant` does not
+  take an arbitrary pair** -- it builds its target from an explicit retained/added split and RAISES
+  if replay changed a retained slot, so it cannot route through null. Preservation is guaranteed by
+  construction there. Do not quote the demolish-to-null number outside its scope.
+- **THE BINDING CONSTRAINT IS THE CUT DISTRIBUTION, and the STEPS column is what decides it.**
+  Matched arms, 60 pairs replayed from a completed 250-call charged celecoxib ledger, same pairs,
+  same order, same compiler, differing ONLY in the cut draw:
+      arm                     compiled  novel  retained med  retained>=0.5  **steps med**
+      uniform (SHIPPED)       142/240    136      0.324           46          **36**
+      retentive               155/240    139      0.722          121          **17**
+  PMO's measured realization ceiling is **23 primitives**. So the shipped
+  `cut_distribution: uniform_oriented_single_bridge` puts the **MEDIAN donor transplant OUTSIDE what
+  the controller can realize**, not merely wasting draws. Chemistry is not the cost: QED
+  0.426 -> 0.434, SA 3.58 -> 3.71. Honest cost: `self_proposal` rises 1 -> 24 of 240.
+  **Same shape as the T4 region-law defect: an unconditioned region draw, not the executor, is the
+  binding constraint.** INFERRED and worth checking first -- `pendant_cuts` returns oriented
+  single-bond bridges, the same object class `BridgeRegionLaw` weights, so the repair is likely a
+  REUSE of a law already built and measured on T4 rather than a new mechanism.
+  LABEL: one task, one ledger, 60 pairs, offline compilation only -- **not a scored result.**
+- **Exclude a contaminated bank by a TEST, not a comment.** `pmo_banks_all.json` (celecoxib
+  0.374-0.458, above the A/B's best) carries `uncounted_calls: 249455`. Also worth knowing: the 1k
+  A/B molecules are NOT on local disk (counters only) -- they live on the Modal volume at
+  `pmo_population_controller_v1/<run_id>/<task>/oracle/query_*/result.json`.
