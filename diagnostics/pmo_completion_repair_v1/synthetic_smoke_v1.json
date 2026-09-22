@@ -5,8 +5,8 @@
     "completion_law": null,
     "enable_online_memory": true
    },
-   "best": 0.8400000000000001,
-   "charged": 40,
+   "best": 1.0,
+   "charged": 60,
    "completion_census": {
     "counts": {},
     "inserted_atoms_ge_9": 0,
@@ -18,24 +18,24 @@
     "completion_law": "scale_content_v1",
     "enable_online_memory": true
    },
-   "best": 0.8400000000000001,
-   "charged": 40,
+   "best": 1.0,
+   "charged": 60,
    "completion_census": {
     "counts": {
-     "component": 14,
-     "total": 14
+     "component": 32,
+     "requested_size_gt_8": 6,
+     "total": 32
     },
-    "inserted_atoms_ge_9": 0,
-    "max_inserted_atoms": 3
+    "inserted_atoms_ge_9": 6,
+    "max_inserted_atoms": 17
    }
   }
  },
- "budget_per_arm": 40,
+ "budget_per_arm": 60,
  "new_oracle_calls": 0,
- "problems": [
-  "the treatment arm never requested a size past the v1 ceiling"
- ],
+ "notes": [],
+ "problems": [],
  "schema_version": "pmo_completion_synthetic_smoke_v1",
  "scorer": "synthetic, deterministic, structure-dependent",
- "verdict": "CHAIN_NOT_READY"
+ "verdict": "CHAIN_READY"
 }
