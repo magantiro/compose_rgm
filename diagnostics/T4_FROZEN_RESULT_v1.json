@@ -37,11 +37,14 @@
     "the active set is repopulated from the archive"
    ],
    "NAMING_CORRECTION": "'archive-backed proposal replenishment' / 'repopulate the active set from the archive' was considered and REJECTED as a misdescription. The implementation (compose_v4.experiments.t4_support_expansion) escalates the DRAW BUDGET over the SAME primary proposal lanes on the SAME parent -- 'the zero-support fallback, then an escalating fan-out of the primary draw lanes', realised as parallel replicate workers at the contract's base draw count. It does NOT draw different parents from the archive. Naming it replenishment would claim an algorithm we did not run.",
-   "abstract_sentence": "A single COMPOSE controller spans all T4 targets by combining constrained local optimization with adaptive proposal escalation for states where the primary proposal distribution becomes support-limited.",
+   "abstract_sentence": "A single COMPOSE controller spans all T4 targets by combining structured molecular optimization with adaptive proposal escalation when the active proposal distribution becomes support-limited.",
+   "abstract_sentence_notes": "'Structured molecular optimization' replaces 'constrained local optimization', which undersold COMPOSE: the same controller performs coordinated non-local programs, so 'local' is wrong. 'Support-limited' is kept -- it states precisely why the compute expands. ONE WORD DELIBERATELY NOT TAKEN: 'expansion' was preferred in the proposed sentence, but the locked mechanism name is 'escalation' and using both invites exactly the terminology drift this block exists to prevent. The ladder's first rung does add a lane (the zero-support stage) and later rungs only add effort, so 'escalation over a ladder whose first rung adds a lane' is the accurate long form; the code module is historically named t4_support_expansion.",
    "appendix_disclosure": "One sentence stating that the proposal-escalation operator/configuration differed across the small number of support-limited instances, and that escalation consumed no oracle budget. This does not weaken the headline: state-dependent operators are routine, and both comparators pair their generator with optimization-specific search machinery.",
+   "development_history_vs_evaluated_algorithm": "These are different things and only the second belongs in the main paper. Trying different interventions on different targets during development is normal and expected. The defect would be claiming 'this exact single controller configuration produced all reported T4 results' when 5ht1b_2 got one operator and fa7_0 another. Report the final frozen method that was actually evaluated; development history does not need to appear.",
    "formal_rule": "Q_t = empty  =>  escalate proposal effort over the same support lanes along a bounded ladder; publish candidate_exhaustion only if the ladder runs to its declared end.",
    "mechanism_name": "bounded proposal escalation on support exhaustion",
    "name": "population-based controller with adaptive proposal escalation",
+   "resource_separation": "PROPOSAL COMPUTE is not ORACLE BUDGET. On an empty candidate set the controller spends more cheap compute instantiating candidates from the same generative machinery. It does NOT grant additional docking evaluations, inject a teacher molecule, hand-edit a molecule, restart from a privileged solution, or relax the objective. State this separation explicitly; at 250 oracle calls/cell against IVG's 1000 it is not characterisable as smuggling in extra objective evaluations.",
    "reviewer_objections_and_status": [
     {
      "detail": "The mechanism is automatic WITHIN a run: it fires on an empty candidate pool with no human input. But the DECISION to deploy an escalation arm was made per cell by a human launch, and the arms were not run uniformly across the panel. This is the real gap and Methods must state it.",
@@ -386,6 +389,28 @@
     "the aggregate sums, which are far less exposed than any single row: delta 0.4 is -9.0 over 15 cells and delta 0.6 is -7.6 over 14, both much larger than a per-molecule spread"
    ]
   },
+  "frozen_rerun_decision": {
+   "acceptance": "Eligibility and competitiveness, NOT reproduction of the old champions. The existing aggregate-slack arithmetic in successor_in_progress still applies.",
+   "constraints": [
+    "same oracle ceiling",
+    "same controller",
+    "same ladder",
+    "no per-target tuning",
+    "target identity never selects a rung"
+   ],
+   "decision": "Freeze ONE generic escalation ladder and rerun the whole panel under it. If the numbers survive, lock T4 and stop touching it.",
+   "if_the_rerun_is_not_done": "Retained heterogeneous numbers must be reported as a shared controller FRAMEWORK with per-instance escalation configurations, disclosed once -- never as one fixed algorithm.",
+   "ladder_shape": [
+    "base proposals",
+    "increased fan-out",
+    "broader generic support lanes",
+    "terminate"
+   ],
+   "rule": "Q_t != empty -> normal selection.  Q_t == empty -> bounded support escalation along a FIXED ladder shared by every target, advancing only on an empty candidate set.",
+   "starting_point": "src/compose_v4/control/zero_support_fallback.py on branch t4-generic-fallback-20260922 (294 lines, uncommitted to main)",
+   "status": "DECIDED, not yet run",
+   "why": "This is cheaper than more controller work and it dissolves the two unclean reviewer objections at once: the ladder becomes target-agnostic and mechanically triggered, so the heterogeneous development arms stop mattering to the headline."
+  },
   "objective": "QuickVina2 docking of the best eligible lead, lower is better, subject to QED>=0.6, SA<=4.0, Tanimoto>=delta to the seed",
   "schema_version": "t4_frozen_result_v1",
   "status": "FROZEN \u2014 this is the authoritative T4 result. Do not re-derive from a builder.",
@@ -409,5 +434,5 @@
   },
   "updated_at_utc": "2026-09-22T06:56:18.641638+00:00"
  },
- "payload_sha256": "e2b0b3e018a5c0bee8a72076db0a1d392a01470564c2ca4b0d445657a9b72ce9"
+ "payload_sha256": "1efacb833c101ac025d61de9c02dfe574990987378ff6e0d2a2385e189b9fa77"
 }
