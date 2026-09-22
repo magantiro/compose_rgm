@@ -100,6 +100,15 @@ DEFAULT_SETTINGS: dict[str, Any] = {
     "parent_mass_floor": DEFAULT_PARENT_MASS_FLOOR,
     "synthesis_attempts_per_origin": 6,
     "declaration_wall_seconds": 120.0,
+    # A macro option must PRUNE before it installs. MEASURED, and the reason this is a
+    # requirement rather than a preference: `synthesize_structured_program` is additive
+    # (atom_insert:atom_delete 2.42:1, mean +1.16 heavy atoms), so an unconstrained chain
+    # grows monotonically -- 6 of 6 declared chains did, 20 -> 25 -> 26 -> 31 -> 36 -- and
+    # never passes through a state smaller than its own source. The dip this mechanism
+    # exists to protect is prune-then-install, so without this the harness declares
+    # options that cannot dip and the measurement is VOID by its own instrument check.
+    "require_prune_first": True,
+    "prune_attempts_per_leg": 12,
 }
 
 
@@ -170,32 +179,49 @@ class MacroOptionController(PmoPopulationController):
         """
         ceiling = int(self.macro_option_settings["realization_ceiling"])
         max_stages = int(self.macro_option_settings["max_stages"])
+        prune_first = bool(self.macro_option_settings.get("require_prune_first", True))
+        prune_attempts = int(self.macro_option_settings.get("prune_attempts_per_leg", 12))
         current = decode_state(origin_entry["trace"]["states"][-1])
+        origin_atoms = current.n_real_atoms
         origin_endpoint = origin_entry["endpoint"]
         stages: list[MacroOptionStage] = []
         construction: list[dict[str, Any]] = []
         parent_endpoint, total = origin_endpoint, 0
         seen = {origin_endpoint}
+        heavy_chain = [origin_atoms]
         for index in range(max_stages):
-            try:
-                source, program, binding, _, _ = synthesize_structured_program(
-                    current,
-                    self.option_rng,
-                    max_modules=3,
-                    max_primitives=self.config.max_primitives,
-                    max_blocks=self.config.max_blocks,
-                    panel_cache=self._v21_panel_cache,
-                )
-                graph = compile_program_graph(program)
-                _, trace = execute_program_graph(
-                    source,
-                    graph,
-                    binding,
-                    max_primitives=self.config.max_primitives,
-                    max_blocks=self.config.max_blocks,
-                )
-            except (ValueError, RuntimeError):
+            # The first leg must EXCISE. Read from the executed state, not a SMILES
+            # re-parse, so the count is the one the proposal path itself carries.
+            attempts = prune_attempts if (prune_first and index == 0) else 1
+            leg = None
+            for _ in range(attempts):
+                try:
+                    source, program, binding, _, _ = synthesize_structured_program(
+                        current,
+                        self.option_rng,
+                        max_modules=3,
+                        max_primitives=self.config.max_primitives,
+                        max_blocks=self.config.max_blocks,
+                        panel_cache=self._v21_panel_cache,
+                    )
+                    graph = compile_program_graph(program)
+                    _, trace = execute_program_graph(
+                        source,
+                        graph,
+                        binding,
+                        max_primitives=self.config.max_primitives,
+                        max_blocks=self.config.max_blocks,
+                    )
+                except (ValueError, RuntimeError):
+                    continue
+                produced = decode_state(trace["states"][-1]).n_real_atoms
+                if prune_first and index == 0 and produced >= origin_atoms:
+                    continue
+                leg = (source, program, binding, trace, produced)
+                break
+            if leg is None:
                 return None
+            source, program, binding, trace, produced = leg
             endpoint = trace["endpoint"]
             primitives = len(trace["actions"])
             if not primitives or endpoint in seen:
@@ -203,6 +229,7 @@ class MacroOptionController(PmoPopulationController):
                 # already passed through, is not a transport.
                 return None
             seen.add(endpoint)
+            heavy_chain.append(produced)
             stages.append(MacroOptionStage(index, parent_endpoint, endpoint, primitives))
             construction.append(
                 {
@@ -222,6 +249,10 @@ class MacroOptionController(PmoPopulationController):
                     "stages": stages,
                     "construction": {"stages": construction},
                     "total_primitives": total,
+                    # Recorded so a reader can check the option really prunes before it
+                    # installs, instead of trusting the flag that asked for it.
+                    "heavy_atom_chain": heavy_chain,
+                    "prunes_before_installing": heavy_chain[1] < heavy_chain[0],
                 }
         return None
 
@@ -234,7 +265,9 @@ class MacroOptionController(PmoPopulationController):
         protection = int(self.macro_option_settings["trough_width"])
         ceiling = int(self.macro_option_settings["realization_ceiling"])
         origins = [entry for _, entry in sorted(self.entries.items())]
+        prune_first = bool(self.macro_option_settings.get("require_prune_first", True))
         declared, refused = [], {"no_chain_over_ceiling": 0, "duplicate_identity": 0}
+        heavy_chains: list[list[int]] = []
         for origin in origins:
             if len(declared) >= limit or perf_counter() - began >= wall:
                 break
@@ -260,7 +293,14 @@ class MacroOptionController(PmoPopulationController):
                     refused["duplicate_identity"] += 1
                     continue
                 self.option_registry.declare(option, chain["construction"])
-                declared.append(option.payload())
+                declared.append(
+                    {
+                        **option.payload(),
+                        "heavy_atom_chain": chain["heavy_atom_chain"],
+                        "prunes_before_installing": chain["prunes_before_installing"],
+                    }
+                )
+                heavy_chains.append(chain["heavy_atom_chain"])
                 break
         self.options_declared = True
         report = {
@@ -275,6 +315,11 @@ class MacroOptionController(PmoPopulationController):
             "trough_width_rounds": protection,
             "protection_source": "chosen_ordering_trough_width",
             "channel_tag": MACRO_OPTION_CHANNEL_TAG,
+            "require_prune_first": prune_first,
+            "heavy_atom_chains": heavy_chains,
+            "options_that_prune_before_installing": sum(
+                1 for row in declared if row["prunes_before_installing"]
+            ),
         }
         self.macro_option_diagnostics["declaration"] = report
         return report

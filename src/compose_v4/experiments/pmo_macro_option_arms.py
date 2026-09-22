@@ -115,6 +115,74 @@ class ValleySimilarityScorer:
         }
 
 
+def window_decomposition(folder: Path) -> dict[str, Any]:
+    """Why each declared option ended where it did, from the rounds already published.
+
+    The outcome metric -- destination reached -- cannot separate a floor that was applied
+    and still lost from a floor that was never large enough to matter. The mechanism has
+    three consecutive requirements per crossing and each fails alone:
+
+      1. the window OPENS    -- the bridge is charged, so `note_charged` opens a window
+      2. the bridge is DRAWN -- the next leg is offered only from a parent the round's
+                                schedule drew, which is what makes the floor load-bearing
+      3. the leg is CHARGED  -- the reserved slot survives into the locked batch
+
+    Computed here rather than in a post-hoc reducer because the matched-arm driver deletes
+    each seed's campaign directory once its artifact lands, so a later pass has nothing to
+    read. Zero additional chemistry and zero oracle calls.
+    """
+    from compose_v4.control.pmo_macro_option_controller import MACRO_OPTION_CHANNEL_TAG
+
+    rounds = sorted((folder / "campaign").glob("round_*/complete.json"))
+    if not rounds:
+        return {}
+    offered: dict[str, int] = {}
+    locked: dict[str, int] = {}
+    reservation = {"reserved_added": 0, "reserved_already_chosen": 0, "displaced": 0}
+    for path in sorted((folder / "campaign").glob("round_*/pending.json")):
+        batch = json.loads(path.read_text())["batch"]
+        # `proposal_pool` is the full generated pool; `candidates` is the LOCKED subset
+        # the ledger charges. Offered-but-not-charged is a different failure from never
+        # offered at all, so both are counted.
+        for row in batch.get("proposal_pool", batch)["candidates"]:
+            if row["provenance"].get("entry_channel") == MACRO_OPTION_CHANNEL_TAG:
+                key = row["provenance"]["macro_option_id"]
+                offered[key] = offered.get(key, 0) + 1
+        for row in batch["candidates"]:
+            if row["provenance"].get("entry_channel") == MACRO_OPTION_CHANNEL_TAG:
+                key = row["provenance"]["macro_option_id"]
+                locked[key] = locked.get(key, 0) + 1
+        detail = (batch.get("allocation") or {}).get("macro_option_reservation") or {}
+        for key in reservation:
+            reservation[key] += int(detail.get(key, 0) or 0)
+
+    final = json.loads(rounds[-1].read_text())["snapshot"]["macro_options"]
+    options = {}
+    for record in final["registry"]["records"]:
+        option_id = record["option"]["option_id"]
+        status, frontier = record["status"], record["frontier"]
+        if status == "reached":
+            failure = None
+        elif status == "declared":
+            failure = "bridge_never_charged"
+        elif offered.get(option_id, 0) > locked.get(option_id, 0):
+            failure = "offered_but_not_charged"
+        else:
+            # The window opened and the next leg was never offered, which means the
+            # bridge was not in the round's drawn parent schedule: the floor was applied
+            # and was not enough to get it drawn.
+            failure = "bridge_not_drawn_in_window"
+        options[option_id] = {
+            "status": status,
+            "legs_charged": frontier + 1,
+            "legs_required": len(record["option"]["stages"]),
+            "legs_offered": offered.get(option_id, 0),
+            "legs_locked": locked.get(option_id, 0),
+            "failure": failure,
+        }
+    return {"options": options, "reservation": reservation}
+
+
 def configuration(seed: int) -> ProgramSearchConfig:
     """The PMO-v1 search geometry, with only the seed varying across replicates."""
     return replace(
@@ -271,6 +339,7 @@ def run_arm(
     values = sorted((row["score"] for row in ledger.rows), reverse=True)
     return {
         "proposal_work": proposal_work,
+        "window_decomposition": window_decomposition(output),
         "schema_version": SCHEMA,
         "seed": seed,
         "arm": "protected" if protection else "declared_unprotected",
@@ -303,4 +372,5 @@ __all__ = [
     "load_initialization",
     "load_jump_checkpoint",
     "run_arm",
+    "window_decomposition",
 ]

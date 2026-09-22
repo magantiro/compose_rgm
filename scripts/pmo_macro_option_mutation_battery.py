@@ -209,6 +209,14 @@ NEGATIVES: list[tuple[str, str, str, str, str, str]] = [
         WIRING,
         "test_the_harness_refuses_a_geometry_where_the_reservation_is_not_the_binding_gate",
     ),
+    (
+        "options_may_grow_instead_of_pruning_first",
+        CONTROLLER,
+        "                if prune_first and index == 0 and produced >= origin_atoms:",
+        "                if False:",
+        WIRING,
+        "test_a_declared_option_prunes_before_it_installs",
+    ),
 ]
 
 # Changes bytes and nothing semantic. It MUST stay green, or the harness is broken and

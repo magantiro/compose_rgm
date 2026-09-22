@@ -44,7 +44,10 @@ def main() -> int:
     parser.add_argument("--initialization-count", type=int, default=4)
     parser.add_argument("--max-options", type=int, default=4)
     parser.add_argument("--synthesis-attempts", type=int, default=5)
-    parser.add_argument("--declaration-wall-seconds", type=float, default=180.0)
+    # MEASURED: declaration costs ~135s once options must prune before installing. A wall
+    # that binds would truncate the two arms differently under load and give them
+    # different option sets, which VOIDs the pairing outright, so it is set well clear.
+    parser.add_argument("--declaration-wall-seconds", type=float, default=600.0)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--work", type=Path, default=None)
     parser.add_argument("--start", type=int, default=0)

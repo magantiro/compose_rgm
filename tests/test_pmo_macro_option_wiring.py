@@ -433,3 +433,25 @@ def test_every_stored_leg_is_a_48_slot_production_state(bootstrapped):
             assert 1 <= state.n_real_atoms <= 40
             checked += 1
     assert checked, "no stored leg was available to check"
+
+
+def test_a_declared_option_prunes_before_it_installs(bootstrapped):
+    """The landscape can only exercise the mechanism if the options actually dip.
+
+    MEASURED: chaining `synthesize_structured_program` unconstrained produced 6 of 6
+    monotonically GROWING chains (20 -> 25 -> 26 -> 31 -> 36 heavy atoms), so no
+    intermediate was ever smaller than its own source, the valley predicate could never
+    fire, and the whole measurement VOIDed on its own instrument check. The requirement
+    is checked on the realized heavy-atom chain, not on the flag that asked for it.
+    """
+    _folder, campaign, _kwargs, _, _ = bootstrapped
+    report = campaign["snapshot"]["macro_options"]["diagnostics"]["declaration"]
+    assert report["require_prune_first"] is True
+    assert report["heavy_atom_chains"], "the campaign declared no macro option"
+    for chain in report["heavy_atom_chains"]:
+        assert len(chain) >= 3, "a chain must carry its origin and at least two legs"
+        assert chain[1] < chain[0], (
+            f"declared chain {chain} does not prune before installing, so it cannot pass "
+            "through a state smaller than its own source and cannot dip"
+        )
+    assert report["options_that_prune_before_installing"] == len(report["options"])
