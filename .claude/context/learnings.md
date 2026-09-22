@@ -4440,3 +4440,73 @@ independently of whether fa7_0 ever closes.**
   Not a result to build on, but the first positive evidence the repair does anything, and it points
   at a specific cheap question -- whether the crossover widens at 1,000 calls -- rather than at more
   mechanism work.
+
+## 2026-09-22 (PMO jump lane: one descriptor field, and a retention metric that reads 1.000 on molecules it destroyed)
+
+- **CORRECTS TWO NUMBERS I PROPAGATED ALL SESSION, both mine.** (a) "the jump lane binds on 0 of
+  357" -- **2 pairs bind**, both in rounds the lane's own 45 s wall truncated (one had 15.76 s
+  available against a 20.70 s need). A zero at the margin, not a structural zero. (b) "346 are
+  `proven_incompatible` BEFORE any search" -- **236 of 357 (66.1%) expand zero nodes**; 121
+  survive root forward-checking, max depth reached 23, 3 reach full depth. The conclusion the
+  numbers were used for is unchanged; the mechanism attribution was wrong, and a wrong
+  mechanism is what a repair gets designed against.
+- **THE FAILURE ATTRIBUTES TO ONE FIELD.** Per-field step-0 projection over all 357 pairs:
+  `neighbor_element_histogram` alone unblocks **196 of 228 step-0 failures (86.0%) = 54.9% of
+  all pairs**. `atom_type`, `formal_charge`, `degree`, `implicit_hydrogens`,
+  `bond_class_histogram`, `origin`, `created_ordinal` and `creation_lag`, each projected out
+  SINGLY, every one leaves the count at exactly the baseline 129. 32 failures (9.0%) need two
+  or more dropped. Ranked by lost mass: 55% region-selection-by-neighbourhood, 18% element
+  supply, 9% multi-field residual, 4% role-match, 2% everything else.
+- **Step-0 feasibility collapses with plan length: 100% (<12 primitives) / 77.0% (12-18) /
+  25.2% (>20).** Over-specification compounds per operand, so a longer plan is not merely
+  harder to bind, it is exponentially more over-specified.
+- **ROLE-BASED REBINDING IS EXPRESSIBLE WITH NO NEW PRIMITIVE and is NECESSARY BUT NOT
+  SUFFICIENT.** All 7 executor rules used are inside the frozen Active8 surface; `bond_insert`
+  appears 0 times; `cycle_close` already carries 248 roles, so only the ACCEPTANCE PREDICATE
+  changes. Measured on the same 357: step-0 feasibility **36.1% -> 99.7%**, pairs bound
+  **2 -> 20 (10x)**. BUT it binds **0 of 286** attempts whose plan exceeds 20 primitives, and
+  **229 of those are PROVEN incompatible rather than budget-limited** -- above 20 the search
+  dies at median depth 1 on element supply and the dataflow ordinal, which no further
+  loosening reaches. All 85 realizations come from **7 of 95 plans**.
+- **CONSEQUENCE: a fixed library of teacher-derived role sequences cannot cover the regions an
+  arbitrary parent offers.** The library is 82% above 20 primitives -- above the scale
+  productive transitions need AND inside the provably unbindable range. Reuse the binder for
+  REALIZATION; the region must be chosen ON THE PARENT.
+- **The 12-18 band inverts and is COMPUTE-limited, not constraint-limited.** 39 of 45 hit no
+  constraint; raising 64 nodes / 20 s to 512 / 180 s takes binding **4/16 -> 12/16**, and the
+  binding cap is the **clock**, never the node budget. Separately the 45 s lane wall truncated
+  4 of 13 rounds, costing 59 attempts never made; at ~20 s per successful binding at most two
+  attempts per round can ever be funded to completion.
+- **`_retained_fraction` IS ATOM SURVIVAL, NOT STRUCTURAL RETENTION -- AND THE JUMP LANE RANKS
+  ON IT.** It reads **1.000 on every one of the 89 realizations in both arms** while MCS
+  retention on the same molecules is **0.25-0.38**. Witness:
+  `CC[PH2](CC#N)Nc1c(Cl)cc(Br)cc1C1CCCO1 -> N#CC1[PH3]N(CC(N)=O)C(=CC2CCCO2)C(Cl)=C1CBr` --
+  the benzene is GONE, one connected changed region of 16 atoms, +1 heavy, and every slot is
+  still occupied. Two consequences: `_generate_jump_pool` ranks by
+  `abs(retention - retention_target)` with `retention_target ~ U(0,1)`, which is DEGENERATE
+  when the metric saturates, so selection falls through to the `endpoint_key` tiebreak; and
+  **the inference "retained 1.000, therefore purely additive, removing nothing" DOES NOT
+  FOLLOW.** That inference is written into `pmo_realization`'s own docstring and into the
+  2026-09-20 entry above, which is hereby corrected -- those arms may have been replacing
+  substantial structure while the metric reported none. Measure structural retention by MCS
+  against the source, never by counting surviving slots.
+- **THE SIXTH BUILT-BUT-INERT MECHANISM, and it sits on the critical path.**
+  `dynamic_program_synthesis.MAX_SEGMENT_LENGTH = 8` bounds the pendant-excision draw on the
+  PMO shallow lane, and the structural census measures that lane's realized
+  `largest_changed_region` at exactly **7**. `BridgeRegionLaw` -- whose own docstring says it
+  "imposes no size bound, which is the axis v1's `MAX_SEGMENT_LENGTH` closes" -- is accepted by
+  `synthesize_dynamic_program(region_law=...)`, is tested, and was measured on T4. **The only
+  caller that passes it is `t4_fiber_campaign.py`; PMO passes `None`.** NB the T4 variant
+  consumes `free_gate_margin_v1`, which needs a similarity reference and delta PMO does not
+  have; the PMO-admissible construction is `BridgeRegionLaw(maximum=None)` with `margin=None`,
+  an uncapped UNIFORM draw carrying no task information at all.
+- **METHOD, paid for again: never sample by taking the first N.** A 20-pair pilot of the
+  binding rate said 25% and the full 357 said 5.6%, because attempts are emitted in round and
+  plan order and the first 20 are all round 0. Same lesson as the 2026-08-08 slice-iteration
+  entry, now on a different artifact.
+- **Two mutations SURVIVED a 16-negative battery and both were real defects in the guards.**
+  (1) A recorder that DISCARDS `propagate`'s verdict is invisible to an outcome comparison,
+  because those checks are necessary conditions -- killed only by comparing `nodes_expanded` /
+  `successors_enumerated` against an independent unwrapped run. (2)
+  `assert set(projection) == set(PROJECTABLE_FIELDS)` is a tautology re-derived from the
+  production constants, the same shape as every other tautological guard on this record.
