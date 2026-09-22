@@ -1129,10 +1129,27 @@ def sample_tracelet_ancestral(
     max_fiber_cache: int = 1024,
     max_rate_cache: int = 4096,
     source_prior: MolecularSourcePrior | None = None,
+    initial_state: MolecularGraph | None = None,
 ) -> TraceletRollout:
+    """Ancestral CTMC sampling from a source prior, or from a prepared state.
+
+    ``initial_state`` exists so a caller may prepare the ``t = 0`` state itself
+    -- realizing a globally sampled ring plan, for instance -- and then hand the
+    ORDINARY process the continuation.  It is mutually exclusive with
+    ``source_prior`` so a prepared state can never be silently discarded in
+    favour of a fresh draw, which would read as a working arm producing the
+    control's molecules.
+    """
+
+    if initial_state is not None and source_prior is not None:
+        raise ValueError("pass either a source prior or a prepared initial state")
     cached_fibers = fiber_cache if fiber_cache is not None else {}
     cached_rates = rate_cache if rate_cache is not None else {}
-    state = (source_prior or NullSourcePrior()).sample(rng, n_slots=n_slots)
+    state = (
+        initial_state
+        if initial_state is not None
+        else (source_prior or NullSourcePrior()).sample(rng, n_slots=n_slots)
+    )
     begin_rollout_audit = getattr(model, "begin_rollout_audit", None)
     if callable(begin_rollout_audit):
         begin_rollout_audit()
