@@ -1,0 +1,49 @@
+{
+ "payload": {
+  "allocator_used_by_these_runs": "niche_evidence (the REPAIRED allocator, confirmed in each campaign manifest)",
+  "consequence_for_the_controller": "Donor recombination draws donors from the run's OWN scored population. If that population has drifted to median QED 0.3, recombining it yields more of the same. The construction-lane chemical prior is therefore not an independent nice-to-have -- it is what keeps the donor mechanism's inputs on the manifold. Measured earlier: the prior cuts mean dSA 0.519 -> 0.331 (sigma -6.3) and suppresses heteroatom-onto-heteroatom placement ~15-18x, but was wired at a call site reaching only 8.8% of proposals whose five families all preserve heavy-atom count -- so atom_insert and atom_delete, the two largest net-negative families, never routed through it.",
+  "created_at_utc": "2026-09-22T02:22:51.763282+00:00",
+  "inferred_not_established": {
+   "approx_p": 0.14,
+   "claim": "manifold retention predicts basin entry",
+   "n": 11,
+   "r_anchor_vs_drift": 0.475,
+   "status": "NOT ESTABLISHED at n=11; the qed mechanism is the solid part, the cross-task correlation is indicative"
+  },
+  "kernel": "rdkit 2023.09.6 (PMO production)",
+  "measured": {
+   "init_median_qed": 0.716,
+   "isomers_is_the_predicted_exception": "the ONLY task whose heavy-atom median FALLS (21.5 -> 14.5), drifting TOWARD its small C7H8N2O2 target, and the only non-qed task above 90% of anchor",
+   "qed_is_the_only_task_that_does_not_drift": {
+    "others": {
+     "albuterol": -0.151,
+     "celecoxib": -0.13,
+     "gsk3b": -0.359,
+     "isomers": -0.155,
+     "jnk3": -0.311,
+     "median1": -0.166,
+     "mestranol": -0.096,
+     "perindopril": -0.348,
+     "thiothixene": -0.151,
+     "troglitazone": -0.263
+    },
+    "qed_drift_Q1_to_Q4": 0.033
+   },
+   "r_score_qed_within_run": {
+    "albuterol": 0.183,
+    "celecoxib": -0.021,
+    "jnk3": -0.28,
+    "perindopril": -0.097,
+    "qed": 1.0
+   },
+   "reward_hacking_signature": "gsk3b/jnk3/perindopril grow to 31-36 heavy atoms while losing 0.31-0.36 QED"
+  },
+  "mechanism": "qed is the one task whose OBJECTIVE is drug-likeness, so the objective itself pins the search to the drug-like manifold. Every other task's objective does not, the search leaves the manifold, and the productive regions are ON it. This explains the Test C pattern WITHOUT the narrow-vs-broad taxonomy, which the complete data already refuted.",
+  "note": "recomputed from the committed Test C blind ledgers; no new scoring",
+  "oracle_calls": 0,
+  "question": "Why does blind PMO search fail to discover productive regions on 10 of 11 tasks?",
+  "schema_version": "pmo_manifold_drift_v1",
+  "what_this_rules_out": "The parent allocator is NOT the remaining cause. These runs used niche_evidence -- the repair that replaced fragment niche centres -- and the drift persists at 0.10-0.36 QED. The allocator fix was necessary and is not sufficient."
+ },
+ "payload_sha256": "c1cbfa2c4c99ba75c8cfd048297917b37025300c5045578af58effb7b498b7eb"
+}
