@@ -1,0 +1,47 @@
+{
+  "attempted": 50,
+  "valid": 50,
+  "unique": 50,
+  "high_quality": 14,
+  "validity": 1.0,
+  "uniqueness": 1.0,
+  "quality": 0.28,
+  "quality_given_valid_unique": 0.28,
+  "diversity": 0.8924777301154271,
+  "diversity_moses_intdiv1": 0.8746281755131186,
+  "qed_threshold": 0.6,
+  "sa_threshold": 4.0,
+  "mean_qed": 0.5905367107046646,
+  "mean_sa": 4.111853324027786,
+  "fraction_unique_passing_qed": 0.5,
+  "fraction_unique_passing_sa": 0.46,
+  "strained_ring_census": {
+    "molecules": 50,
+    "ring_size_histogram": {
+      "3": 25,
+      "4": 7,
+      "5": 31,
+      "6": 97
+    },
+    "fraction_with_3_ring": 0.4,
+    "fraction_with_4_ring": 0.14,
+    "fraction_with_strained_ring": 0.5
+  },
+  "seed": 20260920,
+  "horizon": 16.0,
+  "shards_present": 1,
+  "target_total": 1000,
+  "complete": false,
+  "mean_events": 26.28,
+  "connected_fraction": 1.0,
+  "valid_state_fraction": 1.0,
+  "mean_heavy_atoms": 25.04,
+  "versions": {
+    "python": "3.11.12",
+    "torch": "2.4.0+cu121",
+    "numpy": "1.26.4",
+    "scipy": "1.13.1",
+    "networkx": "3.3",
+    "rdkit": "2024.03.5"
+  }
+}

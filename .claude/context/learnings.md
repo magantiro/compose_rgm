@@ -4061,3 +4061,317 @@ independently of whether fa7_0 ever closes.**
   are NOT prior-aware. **So a null there is a null about the shallow construction lane, not about
   chemical priors in PMO** -- which is exactly why the global-delta census is the more fundamental
   experiment and runs in parallel rather than after.
+## 2026-09-21 (the July de-novo artifacts were never lost -- they are on a DIFFERENT PROFILE'S volume)
+
+- **CORRECTS the 2026-09-21 entry "A STRONGER DE-NOVO GENERATOR CANNOT BE PROMOTED, ONLY TRAINED".**
+  That entry recorded a full recursive scan of `compose-v4-artifacts` finding ZERO de-novo training
+  artifacts, and correctly noted the volume was created **2026-08-09, AFTER the July runs**. It then
+  drew the wrong conclusion. There are FOUR Modal profiles here (`nitya`, `rahul` -> workspace
+  kosha-labs, `rarospec2`, `rahul-94866`) and **each has its own `compose-v4-artifacts`**. The
+  `rahul` profile's copy was created **2026-07-17** -- the Lineage B window -- and holds 191 run
+  directories including every `tree_fcd_transfer` / `stage3` de-novo run. **A volume name is not a
+  volume identity; check `modal volume list` on EVERY profile before concluding an artifact is gone.**
+  The same reasoning error would have justified a multi-day retrain that reproduced work already
+  sitting on disk.
+- **`checkpoint.best_so_far.pt` and `checkpoint.recovery.pt` are DIFFERENT ARTIFACTS with different
+  contracts, and reading resume-capability off the wrong one inverts the conclusion.**
+  `best_so_far` is `checkpoint_kind = 'interim_best_evaluation_model'`: weights plus
+  `selected_validation`, and **no optimizer, scheduler or RNG state** -- so it genuinely cannot be
+  resumed. `checkpoint.recovery.pt` (written by `recovery_every: 500`) is
+  `checkpoint_kind = 'exact_training_recovery'` and carries `current_state_dict`,
+  **`optimizer_state_dict`, `torch_rng_state`, `cuda_rng_states`**, `best_state_dict`,
+  `best_metrics`, `history` and `completed_steps`. Sizes differ 3x (38 MB vs 113 MB) because AdamW
+  keeps two moments per parameter -- **the size ratio is the cheap tell.** "The run cannot be
+  resumed" was measured on `best_so_far` and was false of the run.
+- **A checkpoint's `provenance_sha256` IS the producing run's `run_identity_sha256`, so the exact run
+  is FINDABLE by scanning volume manifests.** `modal_apps/train_tracelet_gm.py:1117` sets
+  `recipe["arguments"]["provenance_sha256"] = run_identity_sha256`, and each run writes
+  `manifest.training.json` carrying that value. Downloading every candidate run's
+  `manifest.training.json` and matching the hash identified Lineage B as
+  **`compose-v4-stage3-flexible-graft-3k-1ac6f19-v1`** by EXACT HASH rather than by inference from a
+  recipe match. Do this before reconstructing anything: the identification is minutes of work and it
+  is proof, not a guess. Note `run_identity` also folds in `run_label` and the data manifest, so the
+  value cannot be recomputed from source alone -- the manifest is the only route.
+- **The from-scratch reproduction gate was ALREADY RUN, in July, and it PASSED -- by two runs with
+  DIFFERENT code identities.** `compose-v4-stage3-flexible-graft-3k-fullcache-c39520c-v2`
+  (`run_identity af57588e...`, a later source revision) shares Lineage B's recipe and seed 20260717,
+  and its stored validation `history` is **byte-identical to Lineage B's at every evaluation through
+  step 1000**: 56.655693 / 19.152582 / 18.760945 / 15.715200 / **14.545557**, the last matching the
+  step-1000 checkpoint's `early_stopping_reference_loss` exactly. It then continued to step 2500.
+  So the de-novo training path is empirically invariant across those revisions, and the trajectory
+  extension the retrain was meant to produce **already exists on disk**. A stored `history` list is a
+  reproduction reference; look for one before spending GPU to regenerate it.
+- **Only `best_so_far` and `recovery` survive per run, so intermediate steps are NOT recoverable.**
+  `best_so_far` is overwritten whenever evaluation improves and `recovery` every 500 steps, so the
+  surviving Lineage B trajectory is exactly TWO measurable states: step 1000 and step 2500. The
+  sibling runs (`-cert-cdac478-v1/v2`, `-fullcache-c39520c-v1`) kept manifests only. Plan a
+  checkpoint sweep around the states that EXIST rather than around a desired grid.
+- **The current code still samples the July checkpoint identically, measured two ways.** The archived
+  July step-1000 ring histogram (`results/diagnostics/step1000_ring_topology_comparison.json`,
+  n=100) is `{3:54, 4:23, 5:107, 6:202, 7:4, 9:1}` -> **19.69% of RINGS strained**; an independent
+  n=50 sample drawn under current code three months later gives 32/160 = **20.0%** (two-proportion
+  z = 0.08, p = 0.93). Ring-size composition is reproduced. This is evidence about SAMPLING, not
+  about training.
+- **Report the per-RING strained fraction beside the per-MOLECULE prevalence.** Prevalence (share of
+  molecules carrying any 3/4-ring) moves when molecules get bigger or smaller even if the closure
+  policy is unchanged; the per-ring fraction `P(size | a ring exists)` is invariant to both molecule
+  size and ring count, so it is the size-independent read of the learned closure policy. Measured
+  `ring_removing_events == 0` over 50 trajectories (the de-novo model has zero
+  `ring_system_delete` validation examples and fires none at sampling), which is what licenses the
+  ENDPOINT ring census to stand in for ring CREATION -- check that, do not assume it.
+- **The n=50 strained-vs-clean gap is PARTLY confounded with molecule size, and the two axes behave
+  differently.** OLS with size partialled out (`scripts/denovo_checkpoint_sweep.py`,
+  `compose_v4.eval.denovo_ring_decomposition`): **SA** raw strained difference +0.946 falls to a
+  strain coefficient of **+0.614 (SE 0.280)** with heavy atoms at +0.083 (SE 0.021) -- a genuine
+  strain effect survives, about 65% of the raw gap. **QED** raw difference -0.120 falls to
+  **-0.054 (SE 0.039)**, i.e. NOT distinguishable from zero, while heavy atoms carry -0.0165
+  (SE 0.0029). So the QED half of the association is essentially all size. Quoting the raw
+  conditional split alone would have attributed both to ring strain.
+
+## 2026-09-21 (the de-novo small-ring defect is a SUPPORT defect, and its fix was built and never wired)
+
+- **The model is NOT biased toward small rings; the legal SUPPORT at ring-formation time is.**
+  Measured, from the committed `diagnostics/ring_calibration/step2500_exact_support_audit_12.json`
+  (265 ring events over 100 rollouts at step 2500): the typed ring catalog's own unconditional
+  small-ring mass is **0.0302** (285 small of 3,092 templates = 9.2% by count), but uniform over the
+  legal support AT THE STATES WHERE RING EVENTS ACTUALLY FIRE is **0.4431**. The model's prior given
+  that support is **0.2837** and it produced **0.2804** (observed small-event fraction 0.25). So the
+  learned policy sits well BELOW uniform-over-support -- it is already pushing away from small rings
+  -- while the support it is conditioned on is ~15x enriched in small rings relative to the catalog.
+  **CONSEQUENCE: an SA penalty or a small-ring rate penalty is the wrong instrument.** It would push
+  a policy that is already anti-small-ring against a support that leaves it no alternative. The
+  defect is upstream, in WHICH STATES the ring decision is taken at.
+- **Why the support is degenerate: ring growth is supervised LATE, on crowded states.** The de-novo
+  transport compiler emits one sequential program in which cardinality events (`atom_insert`/
+  `atom_delete`) and ring events interleave in compiler order. By the time `ring_system_grow` fires,
+  the molecule is near the 40-atom cap with few free slots, and large-ring templates are no longer
+  executable -- so conditioning on "a ring grows" renormalises onto whatever remains, which is
+  mostly small. The 2026-07-19 audit independently localised **every newly created small ring to
+  `ring_system_grow`, not to Graft**, which is consistent.
+- **THE FIX ALREADY EXISTS, IS TESTED, AND IS UNREACHABLE.** `src/compose_v4/rewrite/
+  commuting_schedule.py` (added `50880537`, **2026-07-20 -- one day AFTER the step-1000 checkpoint**)
+  detects commuting adjacent events BY EXECUTION and moves whole ring transactions to the earliest
+  state at which they are actually executable, with `atom_insert`/`atom_delete` as phase barriers and
+  a swap accepted only when both orders are legal and array-exact after the pair -- so slot gauge and
+  the corpus endpoint are unchanged. `compile_carbon_tree_to_target` exposes it as
+  `event_schedule="exact_early_ring"` (default `"sequential"`), and `tests/test_commuting_schedule.py`
+  passes 6/6. **But `exact_early_ring` appears NOWHERE outside `tree_transport.py`**: no trainer flag,
+  no recipe key, no Modal passthrough, and `build_tree_transport_path_records` has no
+  `event_schedule` parameter at all, so neither of its two `compile_carbon_tree_to_target` call sites
+  (`experiments/tracelet_conditional.py:192`, `:454`) can forward one. Lineage B therefore trained on
+  `"sequential"`. This is the 2026-09-20 region-law lesson again, in a second place: **a validated
+  repair behind an opt-in keyword is INERT until a caller passes it, and "the module has tests" hides
+  that completely.** Grep for the keyword at CALL sites, not definition sites.
+- **The plumbing gap is exactly five hops**, all additive and default-preserving: recipe argument ->
+  gate CLI flag -> `build_tree_transport_path_records(..., event_schedule=...)` -> its two
+  `compile_carbon_tree_to_target` call sites -> Modal `build_tracelet_recipe_argv` passthrough. Any
+  wiring must be mutation-tested at the CALL sites (drop the keyword at each hop and require a named
+  test to go red), because two hops share one sink and a single consultation test would stay green.
+- **This is a training-DISTRIBUTION correction, not an objective.** It changes which states the ring
+  decision is supervised at; it adds no SA term, no QED term and no reward, and the compiled endpoint
+  is provably unchanged. That is what makes it admissible where a benchmark-chasing penalty is not.
+
+## 2026-09-21 (CORRECTION: the identical validation curve was INHERITED BY RESUME, not reproduced)
+
+- **CORRECTS the entry above ("The from-scratch reproduction gate was ALREADY RUN ... and it PASSED
+  -- by two runs with DIFFERENT code identities"). That claim was WRONG and I am withdrawing it.**
+  The continuation run `compose-v4-stage3-flexible-graft-3k-fullcache-c39520c-v2` did not train from
+  scratch. Its own `manifest.training.json` -> `run_identity.recipe.arguments` carries
+  `resume_checkpoint = /artifacts/compose-v4-stage3-flexible-graft-3k-1ac6f19-v1/
+  checkpoint.recovery.pt` together with `allow_resume_provenance_mismatch: true`. So it RESUMED from
+  Lineage B's exact recovery state -- weights, optimizer moments and RNG -- and the step 1..1000
+  `history` entries are byte-identical because `history` is a LIST CARRIED INSIDE THE RECOVERY
+  CHECKPOINT and restored on resume. They are the same numbers, not two independent measurements of
+  the same number. **A matching stored history proves shared ancestry, not reproducibility.** Before
+  reading any agreement between two runs as an equivalence result, diff their recipe arguments for
+  `resume_checkpoint` / `initialize_*`; ancestry is recorded there and nowhere in the metrics.
+- **What survives, and it is the more useful fact:** step 2500 IS the genuine continuation of the
+  Lineage B trajectory, resumed from its exact optimizer and RNG state rather than restarted. So
+  "Lineage B trained 1,500 steps longer" already exists as an artifact and answers the continued-
+  training question directly -- better than a from-scratch rerun would, since a rerun could only
+  approximate the trajectory it is resuming.
+- **The standing caveat that replaces the withdrawn claim:** steps 0->1000 and steps 1000->2500 ran
+  under DIFFERENT source revisions (`source_sha256` 98ca9b28... vs 99354484...), which is why the
+  launcher needed `allow_resume_provenance_mismatch`. The corpus is identical across both
+  (train sha256 70526d92..., reference 1f8e92f7..., same byte counts), and the recipes differ only in
+  run-scoped paths plus the resume flags. So a step-1000 vs step-2500 comparison is a comparison
+  across a code-revision boundary as well as a training-step boundary, and must be reported that way.
+  Whether the de-novo path is invariant across those revisions remains **UNMEASURED**; the cheap test
+  that would settle it is the gate's `--load-checkpoint` mode, whose report emits the recomputed
+  `initial_validation` beside the stored `selected_validation` for the same weights.
+
+## 2026-09-21 (continued training does NOT fix the small-ring defect; quality rose by SHRINKING molecules)
+
+- **MEASURED, matched n=70 per arm on identical trajectory seeds, pinned production kernel**
+  (`diagnostics/denovo_checkpoint_sweep_v1/`), step 1000 vs step 2500 of the SAME Lineage B
+  trajectory (step 2500 resumed from step 1000's recovery state; ring catalog byte-identical,
+  fingerprint `50337de077f374db`; corpus identical):
+      validity/attempts     1.0000 -> 1.0000     uniqueness   1.0000 -> 1.0000
+      diversity             0.8906 -> 0.8856     quality      0.1714 -> 0.3000  (z=+1.79)
+      molecules w/ 3-4 ring 0.4429 -> 0.5143  (z=+0.85)
+      per-RING strained     0.1679 -> 0.1948  (z=+0.77)     <- the closure-policy shape
+      rings/molecule          3.74 -> 3.30      heavy atoms  28.70 -> 26.87
+      ring-forming events/traj 3.31 -> 2.86
+      ring sizes  {3:26,4:18,5:63,6:152,7:3} -> {3:38,4:7,5:73,6:111,7:2}
+  **The defect did not improve on either axis; both edged UP.** No endpoint difference reaches 95%
+  significance at n=70, so read directions rather than verdicts -- but there is no hint of the
+  improvement continued training was supposed to deliver.
+- **The quality gain is attributable to SHRINKING, not to better ring chemistry, and only the
+  per-RING metric shows it.** Quality rose 0.171 -> 0.300 while molecules lost 1.83 heavy atoms and
+  0.44 rings each and the model fired 0.46 fewer ring-forming events per trajectory. The per-molecule
+  prevalence cannot separate those; the per-ring fraction `P(size | a ring exists)` is invariant to
+  molecule size and ring count, and it went the WRONG way. Chemically the histogram is worse too:
+  6-membered rings 152 -> 111 while 3-membered rings 26 -> 38. **Always report the per-ring shape
+  beside any aggregate quality gain, or "quality improved" will be read as "chemistry improved".**
+- **QED strain effect is ZERO once size is held fixed, REPLICATED at both checkpoints**
+  (+0.033+-0.039 at step 1000, -0.037+-0.037 at step 2500), while heavy-atom count carries it
+  (-0.024 per atom, |z|~8 in both). The SA strain penalty is real at both (+0.791+-0.217 and
+  +0.496+-0.218). So of the original n=50 conditional split, the SA half was a genuine strain effect
+  and the QED half was molecule size -- and that decomposition now replicates across two checkpoints.
+- **This converges with the support audit and settles the mechanism.** The model already sits below
+  uniform-over-support on small rings (0.284 vs 0.443), so it is not the policy that is broken; more
+  gradient steps cannot repair a support that is ~15x enriched in small rings relative to the
+  catalog. Two independent lines -- a longitudinal checkpoint comparison and a static support census
+  -- agree that the defect is upstream of the learned rates. **Do not spend further training on it.**
+
+## 2026-09-21 (de novo ring schedule: the support defect is real, localized, and the repair plateaus)
+
+- **The n=800 three-arm probe's OWN predeclared rule returns FIX_COMPILER_ORDERING**, and reducing it
+  settles two things the earlier n=24 probe could not. Arm A (sequential, what Lineage B trained on)
+  **0.2919 +- 0.0038**, arm B (shipped `exact_early_ring`) **0.1894 +- 0.0027**, arm C (same, phase
+  barriers removed) **identical to arm B to sixteen digits** -- which proves the barrier is never
+  reached and relaxing it is a provable no-op.
+- **CORRECTS the standing slot-scarcity framing at TRAINING time, with the right metric.** Free slots
+  are IDENTICAL across all three arms (11.883) while the support mass moves 0.29 -> 0.19, so slots
+  cannot be the mechanism. What the mass actually tracks is support SIZE:
+  `r(mass, log legal_template_count) = -0.87` (A) and **-0.92** (B), against
+  `r(mass, free_slots) = +0.13` with the WRONG SIGN -- smaller molecules have MORE small-ring mass,
+  not less. Anyone proposing "commit the ring when only its minimum atoms exist" is proposing to move
+  along the +0.13 axis in the damaging direction.
+- **The collapse is ONE STEP, and it is decoration.** Full support curve along a real 32-step trace
+  (pinned kernel): indices 0-28 sit at legal 300-1600 and mass 0.10-0.16; the LAST `atom_restate`
+  before the ring cuts legal **1034 -> 295** and lifts mass **0.1199 -> 0.2237**; the first ring grow
+  then leaves only **28** legal templates at mass 0.3571 for the second ring system. So decoration
+  constricts the support, and each ring commitment constricts it further for the next.
+- **Post-hoc adjacent-transposition scheduling is EXHAUSTED where it stops.** Blocker census over
+  2,017 ring events: after bubbling as far left as it can, **82.2% are blocked by a `bond_reroute`**
+  and **95.3% have no exact commutation available at all**. The shipped scheduler cannot cross the
+  graft phase, so it can only ever park a ring event immediately after the last graft.
+- **The repair is an EMISSION-ORDER change, `event_schedule="ring_dependency_block"`.** Each ring
+  system is committed at the earliest graft prefix the executor accepts it at, which also places it
+  ahead of all decoration. Feasibility is decided BY EXECUTION; the tree-edge test beside it is a
+  cheap pre-filter, MEASURED to leave every compiled trace byte-identical when removed.
+- **A per-item fallback cannot protect a corpus; you need a TRACE-level one.** Committing a ring
+  early can invalidate a LATER graft that touches one of its atoms -- 3 of 150 real training
+  molecules compiled under `sequential` and raised under the block. The per-system fallback cannot
+  see this because the commitment it would have to undo already succeeded. Without abandoning the
+  whole reordering as a unit the schedule silently shrinks the corpus by ~2%, and that loss is
+  INVISIBLE in any per-arm mean computed over whatever survived.
+- **Reach is bounded and must be reported with the win:** 30% of real molecules defer at least one
+  ring system to the legacy end-of-route position, and ~2% fall back entirely. Both are flagged per
+  trace (`ring_dependency_block_deferred`, `ring_dependency_block_fell_back_to_sequential`).
+- **Compile cost 1.087x**, measured in executor applications per compiled trace (50.2 -> 54.6, n=150)
+  -- a load-independent counter, because this machine is shared with three other agents.
+- **A knob measured INERT was removed rather than shipped.** A graft-gap spreader between consecutive
+  ring commits produced byte-identical output at gap 0, 3, 6 and 20 across 116 molecules, because
+  ring dependencies complete too late in the graft phase for the gap to ever bind. Shipping it would
+  have implied a tuning lever that does nothing.
+- **`sequential` is byte-identical after the refactor**, fingerprinted over 113 real molecules
+  against the branch base: 0 differing traces, same 13 pre-existing compile failures.
+- **ACCEPTANCE: the schedule repair FAILS the <0.15 gate on the mean and passes on the median, and
+  it does NOT beat the scheduler that already ships.** Matched three-arm run, pinned kernel,
+  molecules drawn uniformly at random from the recipe's own train partition, 250 molecules / 590
+  ring decision points, zero oracle calls:
+      arm                     mean              median   legal templates
+      sequential              0.3089 +- 0.0069  0.2716   349
+      exact_early_ring        0.1921 +- 0.0051  0.1381   743
+      ring_dependency_block   0.1957 +- 0.0051  0.1394   720
+  Paired per ring event: repair minus sequential **-0.1132 +- 0.0071** (462 improved / 96 worsened),
+  repair minus shipped scheduler **+0.0037 +- 0.0017 with 515 of 590 events UNCHANGED** -- which is
+  marginally and DETECTABLY WORSE, about two standard errors; state the sign rather than rounding it
+  to "equivalent". Endpoint exactness holds **250 of 250 in every arm**, by array identity AND
+  canonical key.
+- **So the deliverable is PLUMBING, not an algorithm.** The support gain worth having is already
+  available from `exact_early_ring`, which shipped 2026-07-20 and was never wired into the training
+  recipe. The dependency block reproduces it at 1.087x compile cost instead of 14,897 verified
+  adjacent swaps per 800 traces, and places rings INSIDE the graft phase, but it adds no support
+  quality on top. Do not present it as a further gain.
+- **The residual is a ring-system ORDINAL effect and no schedule can fix it.** Block arm by ordinal
+  within a molecule: **0.1403 / 0.1977 / 0.3026 / 0.2982 / 0.5320** on n = 156 / 125 / 67 / 23 / 2.
+  The FIRST ring system passes the gate; each commitment constricts the legal support the next is
+  decided against, which is unavoidable in a sequential trace carrying more than one ring system
+  (mean 2.5 systems per molecule). Closing it needs a support-level change or a scoped claim.
+- **The pooled size histogram and the per-event mean disagree, and the gate is the per-event mean.**
+  Pooled 3+4-ring share moves only 17.44% -> 13.80% while the per-event mean moves 0.310 -> 0.201,
+  because pooling weights each event by its support SIZE and the per-event mean does not -- and the
+  events that matter are exactly the ones whose support has collapsed to a handful of templates.
+  Report both and say which one the gate is stated over.
+- **Modal `.map()` ordered output can deliver ZERO rows from a run that did most of its work.** An
+  n=2000 fan-out processed 536 molecules across 62 containers and handed the driver nothing, because
+  shard 0 had stalled on one expensive molecule and ordered output queues every finished shard
+  behind it. Pass `order_outputs=False` whenever results are reduced as a set. Separately: killing
+  the LOCAL driver does not stop the app -- it held 99 containers afterwards and starved the next
+  launch until `modal app stop`.
+
+## 2026-09-21 (the ring-support collapse is the HOST, and it is a documented v1 scope)
+
+- **ANSWERED: committing one ring system drops the legal template count 1034 -> 28 because
+  `_eligible_grow_host_graph` (`ring_system_fiber.py:2160`) admits only ACYCLIC, CARBON, NEUTRAL,
+  SINGLE-BONDED atoms and asserts the result is a FOREST.** Its docstring says so in one line:
+  *"Carbon, neutral, acyclic single-bond support for v1 ring installation."* So committing a ring
+  system permanently removes its atoms from the scaffold every later ring decision is made against,
+  and installing a heteroatom removes one more while raising a bond order SPLITS the host without
+  removing any atom at all. A molecule's ring systems compete for one shrinking carbon forest.
+- **This is a SCOPE restriction, not a catalog gap, and the catalog proves it by itself: 0 of 3,092
+  templates require a cyclic host.** Every template's `source_bonds` pattern is a forest, so ring
+  systems are installed ATOMICALLY onto acyclic carbon -- fused systems are single templates, never
+  a ring grown onto an existing ring. Nothing in the catalog can reuse a ring the molecule already
+  built. MEASURED, needs no molecules, so no sample of states can explain it away.
+- **The small-ring share of the catalog is a steep function of remaining host, and that single table
+  is the whole mechanism:**
+      host atoms  3      4      5      6      7      8      9     10     12     14     18    30+
+      templates   2      5     13     34     77    154    324    564    955  1,883  2,965  3,092
+      3/4-ring  100%   100%  46.2%  47.1%  57.1%  42.9%  25.0%  17.0%  15.3%  10.5%   9.4%   9.2%
+  A large ring needs a large contiguous carbon tree; a three-ring needs three atoms. A support
+  measured on a small host is small-ring-enriched BY CONSTRUCTION. The knee is host ~7-9.
+- **This retro-explains the correlation that looked backwards.** The acceptance run measured
+  `r(mass, free_slots) = +0.13` -- smaller molecules showing MORE small-ring mass, which read as
+  nonsense. Smaller molecule -> smaller host -> the survivors are the small rings. The sign was
+  right; the mediator was the host, not the slots.
+- **MEASURED on real traces (90 ring decisions, 34 molecules, block schedule):** host atoms
+  26.9 -> 20.1 -> 14.2 -> 13.3 by ring-system ordinal, carried almost entirely by committed cycles
+  (0.0 -> 17.2) and NOT heteroatoms (0.4 -> 1.2) under a schedule that commits rings first --
+  which is what it should be. `r(small mass, largest_host_tree) = -0.673`,
+  `r(log legal, largest_host_tree) = +0.772`.
+- **The catalog table is a LOWER BOUND; observed mass runs 1.4x-2x above it** (ordinal 2: predicted
+  ~15.3%, observed 29.8%). Two further mechanisms the atom count alone misses: fitting needs the
+  right branching SHAPE, not just enough atoms; and **host COMPONENTS rise 1.21 -> 1.83 -> 2.35**
+  with ordinal, because a committed ring can SPLIT the remaining forest and a template needs one
+  contiguous piece. Report `largest_host_tree`, never `host_atoms` alone.
+- **CONSEQUENCE, and it closes the de-novo small-ring line: no schedule, reward, or catalog addition
+  can fix this.** Scheduling moves WHEN a ring is committed and cannot stop it consuming its atoms;
+  the model already sits below uniform on small rings and cannot pick a template outside the
+  support; and 2,965 of 3,092 templates already fit an 18-atom host, so adding templates changes
+  nothing while the host is small. Exactly two doors remain: extend `_eligible_grow_host_graph` to
+  cyclic/heteroatom scaffolds (a real capability change that invalidates the forest assertion its
+  DP relies on), or scope the claim to atomic ring installation on acyclic carbon.
+- **SEPARATE, still open, and cheap: `exact_early_ring` reaches no training path.** Lineage B
+  trained on `sequential` while a scheduler worth 0.3049 -> 0.1926 has sat unwired since
+  2026-07-20. **CORRECTS the recorded "five additive hops": it is five hops but NINE call sites** --
+  `train_tracelet_cnof_gate.py` calls `build_tree_transport_path_records` at FOUR sites (1226, 2885,
+  2897, 2909) and that builder has TWO `compile_carbon_tree_to_target` sinks
+  (`tracelet_conditional.py` 192, 454). The two sinks share one parameter, so a consultation test
+  exercising only one stays green -- the exact near-miss the region-law wiring hit. Mutation-test at
+  the CALL sites, not the definition.
+- **THE ROLLOUT 44.3% IS THE SAME MECHANISM, AND IT IS BIMODAL, NOT ENRICHED.** The committed
+  reference audit stores both the statistic and the rollout state it was measured on, so this is
+  directly attributable (`scripts/denovo_rollout_host_attribution.py`, which reproduces the audit's
+  own stored mean before reporting anything). Over its 12 states:
+  `r(small mass, largest_host_tree) = **-0.890**`, `r(log legal, largest_host_tree) = **+0.962**`,
+  mean largest host tree 11.4. States with an intact host score **0.116-0.192**; states whose host
+  has been eaten score **0.417-1.000**. Quoting the 0.4431 mean alone describes NEITHER population.
+- **On 3 of 12 audited rollout states EVERY legal template is a small ring** -- 2 to 5 legal
+  templates on a host cut to a 3-5 atom fragment by 20-23 atoms already locked into committed rings.
+  **The model has no non-small option to choose.** No amount of training, reward shaping or better
+  sampling can fix a state whose support contains no alternative. This closes the loop on why ~50%
+  of generated molecules carry a 3/4-ring: at their later ring decisions there was nothing else.

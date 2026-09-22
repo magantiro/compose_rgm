@@ -1,0 +1,56 @@
+{
+  "probe": "denovo_ring_schedule_probe_v1",
+  "written_before_any_measurement": true,
+  "question": "Does moving ring transactions earlier in a de-novo training trace, by exact commutation only, repair the degenerate ring-formation SUPPORT that causes small-ring overproduction -- and is that worth a retrain?",
+  "trains_nothing": true,
+  "oracle_calls": 0,
+  "established_diagnosis_not_re_derived": {
+    "catalog_unconditional_small_mass": 0.030172288417816162,
+    "uniform_over_legal_support_at_ring_events": 0.44307839688899203,
+    "model_prior_given_support": 0.2837177940333883,
+    "produced": 0.280359064694494,
+    "source": "diagnostics/ring_calibration/step2500_exact_support_audit_12.json",
+    "reference_caveats": [
+      "The reference mean is over 12 AUDITED states (summary.audited_state_count = 12), not the 265 ring events in its population.",
+      "Its per-row spread is wide: row 0 small_mass_uniform_support = 0.1485 against a mean of 0.4431.",
+      "It measured ROLLOUT states at sampling time under the step-2500 checkpoint. This probe measures TRAINING-TRACE states. These are different populations, so a difference between them is not by itself an enumeration error."
+    ]
+  },
+  "arms": {
+    "A": "sequential -- the schedule Lineage B actually trained on (baseline)",
+    "B": "exact_early_ring with the shipped default phase barriers (atom_insert, atom_delete)",
+    "C": "exact_early_ring with the phase-barrier set EMPTY; the swapped_adjacent_midpoint exactness test is unchanged, and every reordered trace must still re-execute to an array-exact endpoint or be dropped and counted"
+  },
+  "measurements": [
+    "M1 ring-event movement: attempted/accepted swaps, and ring-event POSITION before vs after, recomputed independently from the returned trace rather than read from the scheduler's own report fields",
+    "M2 free slots at the ring decision: n_atoms - count(is_element(atom_types)) at the state immediately preceding each ring event, full distribution",
+    "M3 legal ring support: uniform mass on 3/4-ring templates over the exact executable support at each ring-grow state"
+  ],
+  "instrument_check": {
+    "primary": "Recompute legal_template_count, legal_small_template_count and small_mass_uniform_support on the 12 'before' states stored in the reference audit and require EXACT agreement row by row. This isolates enumeration agreement from population difference.",
+    "secondary": "Report arm A's own training-trace mean beside the reference 0.443. A difference here is a population fact, reportable, and NOT grounds to adjust the enumeration.",
+    "abort_condition": "If the primary row-by-row replication disagrees, reconcile before reporting any arm result."
+  },
+  "decision_rule": {
+    "RETRAIN": "Arm B moves ring events materially AND raises free slots AND crashes the support mass toward 0.10-0.20 or better. The shipped repair is live; recommend wiring it and retraining.",
+    "RELAX_BARRIER": "Arm B is inert or near-inert but arm C achieves it. The shipped atom_insert/atom_delete barrier is the blocker; the fix is the compiler's phase structure or a relaxed-but-still-exact barrier.",
+    "FIX_COMPILER_ORDERING": "Neither arm achieves it. The defect is in how the compiler ORDERS the route at generation time, not in a post-hoc reordering of it. The next move is to emit a different valid dependency ordering directly rather than bubble-sort a poor trace. A clean negative here saves a retrain and is worth more than a hopeful positive."
+  },
+  "materiality_thresholds_declared_in_advance": {
+    "ring_events_move_materially": "median ring-event fraction-of-trace decreases by at least 0.10 absolute",
+    "free_slots_rise_materially": "mean free slots at the ring decision increases by at least 1.0 slot",
+    "support_mass_crashes": "mean uniform small-ring support mass falls to 0.20 or below",
+    "note": "An arm is called INERT if accepted_swaps is 0 or the median ring-event position is unchanged. Inertness is reported plainly; it is a result, not a failure of the probe."
+  },
+  "kernel": "python 3.11 / rdkit 2024.3.5 / numpy 1.26.4 / scipy 1.13.1 / networkx 3.3 / torch 2.4.0 (production pin)",
+  "trace_configuration_taken_from_the_training_recipe": {
+    "recipe_family": "recipes/tree_fcd_transfer_stage3_flexible_graft.json and siblings",
+    "transport_mode": "flexible_size_graft",
+    "n_slots": 40,
+    "typed_ring_payloads": true,
+    "couplings_per_target": 2,
+    "ring_catalog": "deserialized from the pinned checkpoint payload, never rebuilt",
+    "source_prior": "tree_source_prior from the pinned checkpoint payload"
+  },
+  "cost_reporting": "A load-independent counter (support evaluations, executor applications, compile calls, swap attempts) is reported alongside wall clock, because other jobs share this machine."
+}

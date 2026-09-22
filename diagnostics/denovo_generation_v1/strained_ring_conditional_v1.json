@@ -1,0 +1,59 @@
+{
+  "CONFOUND": "Strained molecules are +4.0 heavy atoms larger (p=0.0402). SA rises with size independently of ring strain, so the SA effect is NOT cleanly attributable to strain alone at n=25/group. The N=200 checkpoint sweep must report SA conditional on BOTH strain and heavy-atom count, or the attribution stays ambiguous.",
+  "COUNTERFACTUAL": "The strained-free subgroup scores quality 0.40 against the GuacaMol corpus reference 0.4236, i.e. near corpus parity. This is an ASSOCIATION within one sample of 50, NOT a proven causal counterfactual: it assumes removing the defect leaves the rest of the generative process unchanged. It motivates the checkpoint sweep; it does not substitute for it.",
+  "POWER": "n=25 per group. Adequate for the SA effect; QED and heavy-atom effects are weaker and need the N=200 sweep.",
+  "READING": "Strained-ring molecules are worse on BOTH axes, not SA alone. SA is the larger effect (+0.946 mean, permutation p=0.0034); QED is also worse (-0.120, p=0.0173); strained molecules are also larger (+4.0 heavy atoms, p=0.0402). The earlier claim that 'the ENTIRE gap is SA' is therefore TOO STRONG and is corrected here: the small-ring defect degrades SA primarily and QED secondarily, and is confounded with molecule size.",
+  "conditional": {
+    "heavy": {
+      "clean_mean": 23.04,
+      "clean_se": 1.0464,
+      "difference": 4.0,
+      "strained_mean": 27.04,
+      "strained_se": 1.5508,
+      "two_sided_permutation_p": 0.0402
+    },
+    "qed": {
+      "clean_mean": 0.6506,
+      "clean_se": 0.034,
+      "difference": -0.12,
+      "strained_mean": 0.5305,
+      "strained_se": 0.0344,
+      "two_sided_permutation_p": 0.01725
+    },
+    "sa": {
+      "clean_mean": 3.6388,
+      "clean_se": 0.2071,
+      "difference": 0.9461,
+      "strained_mean": 4.5849,
+      "strained_se": 0.2268,
+      "two_sided_permutation_p": 0.003415
+    }
+  },
+  "corpus_reference": {
+    "mean_qed": 0.553,
+    "qed_pass": 0.447,
+    "quality": 0.4236,
+    "sa_pass": 0.9
+  },
+  "kernel": "rdkit 2024.03.5 (pinned production)",
+  "n": 50,
+  "n_clean": 25,
+  "n_strained": 25,
+  "pass_rates": {
+    "all": {
+      "quality": 0.28
+    },
+    "clean": {
+      "qed_pass": 0.64,
+      "quality": 0.4,
+      "sa_pass": 0.64
+    },
+    "strained": {
+      "qed_pass": 0.36,
+      "quality": 0.16,
+      "sa_pass": 0.28
+    }
+  },
+  "schema_version": "denovo_strained_ring_conditional_v1",
+  "source_shard": "compose-denovo-eval-v1:shards/h16p0/seed20260920_000400_000450.json"
+}

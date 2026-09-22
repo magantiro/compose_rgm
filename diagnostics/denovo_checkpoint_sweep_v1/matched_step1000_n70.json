@@ -1,0 +1,227 @@
+{
+  "attempted": 70,
+  "committed": 70,
+  "connected_fraction": 1.0,
+  "decomposition": {
+    "ring_event_census": {
+      "endpoint_census_tracks_creation": true,
+      "event_family_histogram": {
+        "atom_delete": 234,
+        "atom_insert": 276,
+        "atom_restate": 210,
+        "bond_reorder": 57,
+        "bond_reroute": 928,
+        "ring_system_grow": 232
+      },
+      "events": 1937,
+      "ring_forming_events": 232,
+      "ring_forming_events_per_trajectory": 3.3142857142857145,
+      "ring_removing_events": 0,
+      "ring_removing_events_per_trajectory": 0.0,
+      "trajectories": 70
+    },
+    "ring_size_distribution": {
+      "fraction_with_strained_ring": 0.44285714285714284,
+      "mean_heavy_atoms": 28.7,
+      "molecules": 70,
+      "ring_size_fraction": {
+        "3": 0.09923664122137404,
+        "4": 0.06870229007633588,
+        "5": 0.24045801526717558,
+        "6": 0.5801526717557252,
+        "7": 0.011450381679389313
+      },
+      "ring_size_histogram": {
+        "3": 26,
+        "4": 18,
+        "5": 63,
+        "6": 152,
+        "7": 3
+      },
+      "rings": 262,
+      "rings_per_molecule": 3.742857142857143,
+      "strained_ring_fraction": 0.16793893129770993
+    },
+    "strain_size_regression": {
+      "n": 70,
+      "qed": {
+        "heavy_atom_coefficient": -0.024122099700720042,
+        "heavy_atom_stderr": 0.0031356973616433396,
+        "intercept": 1.2004011962537031,
+        "raw_strained_difference": -0.13317639063800207,
+        "strained_coefficient": 0.0334436710664753,
+        "strained_stderr": 0.03872893868452414
+      },
+      "sa": {
+        "heavy_atom_coefficient": 0.0235930118219929,
+        "heavy_atom_stderr": 0.017563380268457024,
+        "intercept": 3.3616562409117,
+        "raw_strained_difference": 0.9542612227505809,
+        "strained_coefficient": 0.7912957622663248,
+        "strained_stderr": 0.2169249768267088
+      },
+      "strained_count": 31,
+      "terms": [
+        "intercept",
+        "strained",
+        "heavy_atoms"
+      ]
+    },
+    "strain_size_strata": {
+      "bin_edges": [
+        0,
+        15,
+        20,
+        25,
+        30,
+        35,
+        41
+      ],
+      "strata": {
+        "1-15": {
+          "clean": {
+            "mean_qed": null,
+            "mean_sa": null,
+            "n": 2
+          },
+          "strained": {
+            "mean_qed": null,
+            "mean_sa": null,
+            "n": 0
+          },
+          "within_bin_qed_difference": null,
+          "within_bin_sa_difference": null
+        },
+        "16-20": {
+          "clean": {
+            "mean_heavy_atoms": 19.0,
+            "mean_qed": 0.7689146533863148,
+            "mean_sa": 3.7419456346146966,
+            "n": 5
+          },
+          "strained": {
+            "mean_qed": null,
+            "mean_sa": null,
+            "n": 0
+          },
+          "within_bin_qed_difference": null,
+          "within_bin_sa_difference": null
+        },
+        "21-25": {
+          "clean": {
+            "mean_heavy_atoms": 23.0,
+            "mean_qed": 0.6479883277091694,
+            "mean_sa": 3.973768326696678,
+            "n": 13
+          },
+          "strained": {
+            "mean_qed": null,
+            "mean_sa": null,
+            "n": 2
+          },
+          "within_bin_qed_difference": null,
+          "within_bin_sa_difference": null
+        },
+        "26-30": {
+          "clean": {
+            "mean_heavy_atoms": 28.0,
+            "mean_qed": 0.5666523674449733,
+            "mean_sa": 3.9356801041847156,
+            "n": 12
+          },
+          "strained": {
+            "mean_heavy_atoms": 27.6,
+            "mean_qed": 0.5136276501850585,
+            "mean_sa": 4.986897264072885,
+            "n": 5
+          },
+          "within_bin_qed_difference": -0.053024717259914755,
+          "within_bin_sa_difference": 1.0512171598881697
+        },
+        "31-35": {
+          "clean": {
+            "mean_heavy_atoms": 33.0,
+            "mean_qed": 0.34996381465212617,
+            "mean_sa": 3.7978464435979853,
+            "n": 5
+          },
+          "strained": {
+            "mean_heavy_atoms": 33.27777777777778,
+            "mean_qed": 0.45485897168618855,
+            "mean_sa": 4.776092162453076,
+            "n": 18
+          },
+          "within_bin_qed_difference": 0.10489515703406238,
+          "within_bin_sa_difference": 0.9782457188550908
+        },
+        "36-41": {
+          "clean": {
+            "mean_qed": null,
+            "mean_sa": null,
+            "n": 2
+          },
+          "strained": {
+            "mean_heavy_atoms": 37.333333333333336,
+            "mean_qed": 0.2636504905644126,
+            "mean_sa": 5.2944127673104235,
+            "n": 6
+          },
+          "within_bin_qed_difference": null,
+          "within_bin_sa_difference": null
+        }
+      }
+    }
+  },
+  "exhausted_event_budget_fraction": 0.0,
+  "label": "matched_step1000",
+  "provenance": {
+    "numpy": "1.26.4",
+    "python": "3.11.13",
+    "rdkit": "2024.03.5",
+    "schema_version": 1,
+    "shard_count": 7,
+    "shard_dir": "/Users/rmaganti/compose_denovo_work/m1000",
+    "shards": [
+      "seed20260920_000020_000030.json",
+      "seed20260920_000030_000040.json",
+      "seed20260920_000050_000060.json",
+      "seed20260920_000060_000070.json",
+      "seed20260920_000080_000090.json",
+      "seed20260920_000140_000150.json",
+      "seed20260920_000150_000160.json"
+    ]
+  },
+  "published_metrics": {
+    "attempted": 70,
+    "diversity": 0.8905720448692285,
+    "diversity_moses_intdiv1": 0.8778495870853823,
+    "fraction_unique_passing_qed": 0.35714285714285715,
+    "fraction_unique_passing_sa": 0.35714285714285715,
+    "high_quality": 12,
+    "mean_qed": 0.5229077034581916,
+    "mean_sa": 4.3892066606351205,
+    "qed_threshold": 0.6,
+    "quality": 0.17142857142857143,
+    "quality_given_valid_unique": 0.17142857142857143,
+    "sa_threshold": 4.0,
+    "unique": 70,
+    "uniqueness": 1.0,
+    "valid": 70,
+    "validity": 1.0
+  },
+  "strained_ring_census": {
+    "fraction_with_3_ring": 0.3142857142857143,
+    "fraction_with_4_ring": 0.22857142857142856,
+    "fraction_with_strained_ring": 0.44285714285714284,
+    "molecules": 70,
+    "ring_size_histogram": {
+      "3": 26,
+      "4": 18,
+      "5": 63,
+      "6": 152,
+      "7": 3
+    }
+  },
+  "valid_state_fraction": 1.0,
+  "validity_over_attempts": 1.0
+}
