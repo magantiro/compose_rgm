@@ -968,7 +968,7 @@ LADDER_ORDER = (
 )
 
 
-def _ladder_table(arms: dict[str, Any]) -> dict[str, Any]:
+def _ladder_table(arms: dict[str, Any], predicate: dict[str, Any]) -> dict[str, Any]:
     """The ladder as one table per task, at each matched proposal count.
 
     Every cell is a lookup into a block already computed above; nothing here is
@@ -976,6 +976,15 @@ def _ladder_table(arms: dict[str, Any]) -> dict[str, Any]:
     rung, so a task with no entrant reports ``None`` and never a zero.
     """
 
+    # A SEALED calibration value, looked up and reported beside the ladder. The
+    # rungs themselves are untouched: ``above_chance`` is deliberately the
+    # GLOBAL maximum over every task's objective-blind pairs, which is a
+    # conservative task-agnostic bar, and a task whose own chance ceiling is far
+    # below it can sit above its own ceiling while below the named rung. Both
+    # readings are published so neither can be quoted alone.
+    per_task_chance = (
+        predicate.get("calibration", {}).get("chance_reference", {}).get("per_task_max", {})
+    )
     tasks: dict[str, Any] = {}
     for name in [n for n in LADDER_ORDER if n in arms] + [
         n for n in sorted(arms) if n not in LADDER_ORDER
@@ -994,6 +1003,15 @@ def _ladder_table(arms: dict[str, Any]) -> dict[str, Any]:
                         "median_qed": manifold["median_qed"],
                         "best_basin_rung": prefix["best_rung"],
                         "best_similarity": prefix["best_similarity"],
+                        "task_own_chance_ceiling": per_task_chance.get(task),
+                        "best_over_task_own_chance_ceiling": (
+                            round(prefix["best_similarity"] / per_task_chance[task], 3)
+                            if per_task_chance.get(task)
+                            else None
+                        ),
+                        "best_over_entry_threshold": round(
+                            prefix["best_similarity"] / ENTRY_DELTA, 3
+                        ),
                         "first_entry_proposal_index": prefix["by_rung"]["entry"][
                             "first_proposal_index"
                         ],
@@ -1021,6 +1039,14 @@ def _ladder_table(arms: dict[str, Any]) -> dict[str, Any]:
             "rung (0.25). first_entry_proposal_index is None when nothing reached "
             "the committed 0.30 entry threshold. Neither is a zero and neither "
             "may be reported as one."
+        ),
+        "chance_ceiling_reading": (
+            "task_own_chance_ceiling is the maximum similarity any of 100 "
+            "objective-blind init-bank molecules reaches to THIS task's region, "
+            "from the sealed calibration. The above_chance RUNG is the global "
+            "maximum across all tasks and is deliberately more conservative, so "
+            "an arm can exceed its task's own ceiling while sitting below the "
+            "named rung. Report both; the rungs are sealed and unchanged."
         ),
         "by_task": tasks,
     }
@@ -1144,7 +1170,7 @@ def phase_report(args: argparse.Namespace) -> int:
         "manifold_context": _manifold_context(repo_root),
         "permutation_control": _permutation(shards, regions, ENTRY_DELTA),
         "pass_criterion": _pass_criterion(arms, args.challenger),
-        "ladder_table": _ladder_table(arms),
+        "ladder_table": _ladder_table(arms, predicate),
         "software": _software(),
     }
     _write(Path(args.output), payload)
