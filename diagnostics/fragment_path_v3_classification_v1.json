@@ -1,0 +1,130 @@
+{
+  "schema": "compose_fragment_path_v3_classification_v1",
+  "ruling": "v3 is a capability EXTENSION on 8 of 10 released linker prompts and an ACCELERATION on 2. The rule -- a composite is an acceleration if every constituent is individually rankable -- has two different answers here, and the TRANSITION-level one governs. Both are reported: the action-level result is universal and explains why, the transition-level result decides the classification. Neither alone is the finding.",
+  "action_level": {
+    "statement": "v3 executes BondReroute(a=path_atom, b=far_anchor, u=new_atom, v=far_anchor), whose moved endpoint u is NOT an endpoint of the cut. The model's graft is a restricted reroute in which the moved atom IS a cut endpoint, so this exact ACTION is unavailable.",
+    "prompts_where_unavailable": 10,
+    "prompts_total": 10
+  },
+  "transition_level": {
+    "statement": "Compared on the successor MOLECULE -- two actions reaching the same molecule are the same transition to everything downstream -- the exchange is recovered on 2 of 10 and missing on 8, at a budget derived from the measured per-draw rate and again at a 16,384-draw cap.",
+    "recovered": [
+      "ERLOTINIB",
+      "LIOTHYRONINE"
+    ],
+    "not_recovered": [
+      "BARICITINIB",
+      "CYCLOTHIAZIDE",
+      "ELIGLUSTAT",
+      "FUTIBATINIB",
+      "LESINURAD",
+      "LOVASTATIN",
+      "MARIBAVIR",
+      "SPIRAPRIL"
+    ]
+  },
+  "not_a_missing_family": "bond_reroute fires at 0.3 to 13% of draws at these very states and reaches 7 to 64 distinct successors. What is missing is a COORDINATE CLASS, not a family.",
+  "the_trade": {
+    "in_support_route": "v2 close-then-open: ring-close the new atom to the far core, then open the original bond. Reaches a length-2 linker on 4 of 10 drugs by hand; needs the far anchor to carry two external bonds at once, which a declared site offering one free valence cannot.",
+    "reaching_route": "v3 insert-then-reroute: atomic bridge exchange, no transient valence, two events instead of three. Reaches a length-2 linker on 10 of 10 drugs by hand, and is outside the proposal law's support on 8.",
+    "neither_route_is_both": true
+  },
+  "unexplained": "ERLOTINIB recovers because the model offers to move the far-core anchor (100 of 520 reroutes), the only model-shaped route to that molecule. LIOTHYRONINE recovers with the far anchor moved ZERO times, so a second route exists that this evidence does not identify. Recorded as unexplained rather than folded into the first mechanism.",
+  "evidence": {
+    "support_census": "diagnostics/fragment_path_reroute_support_census_v1.json",
+    "constituent_scoring": "diagnostics/fragment_path_composite_scoring_partial_v1.json",
+    "weakest_negative": "MARIBAVIR drew 11 bond_reroutes in 4,000 census draws, so its census negative is the weakly powered one; the escalating scoring probe is the instrument for it and has not yet reported."
+  },
+  "rows": [
+    {
+      "drug": "BARICITINIB",
+      "action_level_moved_atom_is_a_cut_endpoint": false,
+      "transition_level_recovered_census_4000_draws": false,
+      "transition_level_recovered_scoring_escalating": "NO_HIT_AT_DECISIVE_BUDGET_AND_AT_THE_CAP",
+      "bond_reroute_family_rate": 0.025,
+      "far_core_anchor_moved": 0,
+      "classification": "CAPABILITY_EXTENSION"
+    },
+    {
+      "drug": "CYCLOTHIAZIDE",
+      "action_level_moved_atom_is_a_cut_endpoint": false,
+      "transition_level_recovered_census_4000_draws": false,
+      "transition_level_recovered_scoring_escalating": "NO_HIT_AT_DECISIVE_BUDGET_AND_AT_THE_CAP",
+      "bond_reroute_family_rate": 0.094,
+      "far_core_anchor_moved": 0,
+      "classification": "CAPABILITY_EXTENSION"
+    },
+    {
+      "drug": "ELIGLUSTAT",
+      "action_level_moved_atom_is_a_cut_endpoint": false,
+      "transition_level_recovered_census_4000_draws": false,
+      "transition_level_recovered_scoring_escalating": "NO_HIT_AT_DECISIVE_BUDGET_AND_AT_THE_CAP",
+      "bond_reroute_family_rate": 0.057,
+      "far_core_anchor_moved": 0,
+      "classification": "CAPABILITY_EXTENSION"
+    },
+    {
+      "drug": "ERLOTINIB",
+      "action_level_moved_atom_is_a_cut_endpoint": false,
+      "transition_level_recovered_census_4000_draws": true,
+      "transition_level_recovered_scoring_escalating": "IN_SUPPORT_AT_DECISIVE_BUDGET",
+      "bond_reroute_family_rate": 0.13,
+      "far_core_anchor_moved": 100,
+      "classification": "ACCELERATION"
+    },
+    {
+      "drug": "FUTIBATINIB",
+      "action_level_moved_atom_is_a_cut_endpoint": false,
+      "transition_level_recovered_census_4000_draws": false,
+      "transition_level_recovered_scoring_escalating": null,
+      "bond_reroute_family_rate": 0.0635,
+      "far_core_anchor_moved": 0,
+      "classification": "CAPABILITY_EXTENSION"
+    },
+    {
+      "drug": "LESINURAD",
+      "action_level_moved_atom_is_a_cut_endpoint": false,
+      "transition_level_recovered_census_4000_draws": false,
+      "transition_level_recovered_scoring_escalating": null,
+      "bond_reroute_family_rate": 0.045,
+      "far_core_anchor_moved": 0,
+      "classification": "CAPABILITY_EXTENSION"
+    },
+    {
+      "drug": "LIOTHYRONINE",
+      "action_level_moved_atom_is_a_cut_endpoint": false,
+      "transition_level_recovered_census_4000_draws": true,
+      "transition_level_recovered_scoring_escalating": null,
+      "bond_reroute_family_rate": 0.03525,
+      "far_core_anchor_moved": 0,
+      "classification": "ACCELERATION"
+    },
+    {
+      "drug": "LOVASTATIN",
+      "action_level_moved_atom_is_a_cut_endpoint": false,
+      "transition_level_recovered_census_4000_draws": false,
+      "transition_level_recovered_scoring_escalating": null,
+      "bond_reroute_family_rate": 0.02475,
+      "far_core_anchor_moved": 0,
+      "classification": "CAPABILITY_EXTENSION"
+    },
+    {
+      "drug": "MARIBAVIR",
+      "action_level_moved_atom_is_a_cut_endpoint": false,
+      "transition_level_recovered_census_4000_draws": false,
+      "transition_level_recovered_scoring_escalating": null,
+      "bond_reroute_family_rate": 0.00275,
+      "far_core_anchor_moved": 0,
+      "classification": "CAPABILITY_EXTENSION"
+    },
+    {
+      "drug": "SPIRAPRIL",
+      "action_level_moved_atom_is_a_cut_endpoint": false,
+      "transition_level_recovered_census_4000_draws": false,
+      "transition_level_recovered_scoring_escalating": null,
+      "bond_reroute_family_rate": 0.08075,
+      "far_core_anchor_moved": 0,
+      "classification": "CAPABILITY_EXTENSION"
+    }
+  ]
+}

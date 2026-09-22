@@ -433,20 +433,33 @@ def _attempt_path_transaction(
     lock and the interface controller, or nothing is committed and the caller
     keeps the state it had.
 
-    SCOPE OF THE CONSTITUENTS, measured and NOT the claim this docstring used to
-    make.  The earlier version said every constituent was IN_SUPPORT for the
+    CLASSIFICATION, measured, per PROMPT, and NOT the claim this docstring used
+    to make.  The earlier version said every constituent was IN_SUPPORT for the
     proposal law and called the composite an ACCELERATION.  That described the
     v2 route (insert, ring-close, open), it overstated even that -- the v2 probe
     left one ring-close UNRESOLVED at 16,384 draws -- and it does not describe
-    this one.  For v3 the ``atom_insert`` constituent is recovered; the
-    ``bond_reroute`` constituent is NOT, at a budget derived from the measured
-    per-draw rate and again at a 16,384-draw cap.  The ``bond_reroute`` FAMILY
-    fires at 1.5-14% of draws at the very same state, so this is not a missing
-    family: v3 removes ``(path_atom, far_anchor)`` and inserts
-    ``(new_atom, far_anchor)``, whose moved endpoint is not an endpoint of the
-    cut, and the only model-shaped action reaching the same molecule would have
-    to relocate the far CORE anchor, which the pendant-graft enumeration never
-    offers.  So this is a capability EXTENSION and has to be declared as one.
+    this one.  There are two different answers here and they must both be given:
+
+    * ACTION level, universal: v3 executes ``BondReroute(a=path_atom,
+      b=far_anchor, u=new_atom, v=far_anchor)``, whose moved endpoint ``u`` is
+      not an endpoint of the cut.  The model's graft is a RESTRICTED reroute in
+      which the moved atom IS a cut endpoint, so this exact action is
+      unavailable on 10 of 10 released prompts.  This explains WHY.
+    * TRANSITION level, which is what classifies it: compared on the successor
+      molecule, the exchange is recovered on 2 of 10 prompts and missing on 8 at
+      a budget derived from the measured per-draw rate and again at a
+      16,384-draw cap.
+
+    So the composite is a capability EXTENSION on 8 prompts and an ACCELERATION
+    on 2, and it is declared as one rather than wrapped.  It is not a missing
+    FAMILY: ``bond_reroute`` fires at 0.3-13% of draws at these very states.
+    What is missing is a coordinate class.
+
+    THE TRADE, so both arms are visible.  The in-support route is v2's
+    close-then-open, which reaches a length-2 linker on 4 of 10 drugs by hand
+    and needs transient valence the declared site usually lacks.  The reaching
+    route is this one, which reaches it on 10 of 10 by hand and is outside the
+    proposal law's support on 8.  Neither route is both.
 
     With the program off, 1,440 events across 120 rollouts never once lengthened
     a path, and 1 of 172 committed baseline endpoints reached a longer path

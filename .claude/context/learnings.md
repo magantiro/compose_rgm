@@ -2375,3 +2375,22 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   shards containing not one path field: no realized length, no seeded length, no transaction count.
   A 60-shard matched arm was launched and stopped 27 minutes in on that. Wiring a knob and
   recording what it did are two different jobs, and only the second makes the run answerable.
+- **RULING (coordinator, 2026-09-21): v3 is a capability EXTENSION on 8 of 10 released linker
+  prompts and an ACCELERATION on 2, and both the action-level and transition-level statements have
+  to be given.** The standing rule -- a composite is an acceleration if every constituent is
+  individually rankable -- turned out to have two different answers, and the TRANSITION-level one
+  governs. Action level is universal and explains why (`u` is not a cut endpoint, so the exact
+  action is unavailable 10 of 10); transition level decides the classification (recovered 2 of 10,
+  missing on 8 at a 16,384-draw cap). Neither alone is the finding.
+- **State the TRADE so a reader sees both arms.** The in-support route is v2's close-then-open,
+  which reaches a length-2 linker on 4 of 10 drugs by hand and needs transient valence a declared
+  site usually lacks. The reaching route is v3's insert-then-reroute, which reaches it on 10 of 10
+  by hand and is outside support on 8. **Neither route is both.** The paper statement is therefore
+  not "better scheduling lets COMPOSE build linkers" but "COMPOSE's current vocabulary cannot
+  express the linker exchange on most prompts, here is the measurement, and here is the primitive
+  that would" -- the same shape as de novo's ring-installation host scope: a declared capability
+  boundary, measured rather than assumed.
+- **Wiring a knob and recording what it did are two different jobs, and only the second makes the
+  run answerable.** A knob can be plumbed through every layer a reader checks -- parser, arg
+  mapping, call site, Modal argv -- and still leave the artifact unable to answer the question the
+  run existed for.
