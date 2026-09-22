@@ -1,0 +1,42 @@
+{
+ "schema_version": "pmo_completion_decision_rule_v1",
+ "written_before": "any 2x2 arm result or any scored oracle call was read",
+ "why_predeclared": "A threshold chosen after seeing the numbers is not a threshold. Both rules below are fixed here and the freeze/promote decision quotes them verbatim.",
+
+ "step_1_zero_oracle_2x2": {
+  "question": "Which of the four scale x content arms is the mechanism to freeze?",
+  "eligibility_gates_both_required": {
+   "executable_yield": "arm executed/attempts >= 0.90 * v1_current executed/attempts",
+   "diversity": "arm distinct_endpoints/executed >= 0.90 * v1_current distinct_endpoints/executed"
+  },
+  "selection_among_eligible_arms": "the arm that closes the most of the census gap, scored as the mean of the three normalised axis closures: frac_largest_region_ge_13 toward 0.583, median_largest_changed_region toward 14, frac_installs_ring toward 0.806. Ties break toward the SIMPLER arm (fewer axes changed).",
+  "abort": "If no arm passes both eligibility gates, freeze nothing and report that the completion repair costs more yield or diversity than it buys."
+ },
+
+ "step_2_scored_ab": {
+  "task": "celecoxib_rediscovery",
+  "budget_per_arm": 250,
+  "arms": "A = deployed B (online memory ON, completion law ABSENT); B = identical plus the frozen completion law",
+  "primary_metric": "auc_top10_at_budget, denominator 250, the production pmo_top_ten_auc",
+  "secondary_metric": "top-10 mean of the charged sequence at checkpoints 100, 150, 200, 250",
+  "QUALIFY": "B_auc >= 1.10 * A_auc AND B leads A on the top-10 mean at >= 3 of the 4 checkpoints",
+  "REJECT": "B_auc <= 0.90 * A_auc",
+  "INCONCLUSIVE": "anything else -- report it, and do NOT spend the qualification-panel budget",
+  "validity_check_not_an_outcome_gate": "Arm B must contain at least one charged proposal whose module parameters carry completion == 'component' or requested_size > 8. Zero means the law was INERT and the comparison is VOID rather than negative.",
+  "caveats_to_state_with_any_result": [
+   "one task, one seed, 250 calls: this justifies or refuses the next scaling step, it is not a benchmark claim",
+   "top_auc trapezoids from (0,0), so a 250-call AUC is structurally depressed ~20% at a constant level and must never be compared to a published 10k figure",
+   "both arms run locally on the pinned PMO kernel, not in the deployed Modal image"
+  ]
+ },
+
+ "step_3_qualification_panel": {
+  "runs_only_if": "step 2 returns QUALIFY",
+  "tasks": ["perindopril_mpo", "jnk3"],
+  "budget_per_task": 250,
+  "frozen": "the SAME controller, byte-identical; no tuning between tasks",
+  "jnk3_precondition": "jnk3 is asset-backed with an EAGER relative-path load at construction. Its asset must resolve for the oracle's whole lifetime and a positive control must CALL it on known actives before the first charged call."
+ },
+
+ "new_oracle_calls_at_time_of_writing": 0
+}

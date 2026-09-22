@@ -191,6 +191,7 @@ def execute_task(
     charged_calls_per_task: int,
     progress=None,
     enable_online_memory: bool = False,
+    completion_law: str | None = None,
 ) -> dict:
     """Run one PMO-v1 task after a separately authorized scored launch.
 
@@ -238,6 +239,10 @@ def execute_task(
             # run_program_campaign folds it into `optimizer_kwargs_sha256` and the two
             # arms cannot share a run identity even if every other input matches.
             "enable_online_memory": bool(enable_online_memory),
+            # Second arm selector, same mechanism: it rides in optimizer_kwargs so
+            # run_program_campaign folds it into `optimizer_kwargs_sha256` and two
+            # completion arms cannot share a run identity. None is v1 verbatim.
+            "completion_law": completion_law,
         },
         initial_batch_fn=initial_dynamic_program_batch_v21,
     )
@@ -257,6 +262,10 @@ def execute_task(
             values, budget=charged_calls_per_task, finish=True
         ),
         "auc_budget": charged_calls_per_task,
+        "arm": {
+            "enable_online_memory": bool(enable_online_memory),
+            "completion_law": completion_law,
+        },
         "campaign": campaign,
     }
 
