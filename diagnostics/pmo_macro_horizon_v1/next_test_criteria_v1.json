@@ -1,0 +1,22 @@
+{
+ "schema_version": "pmo_coherence_test_criteria_v1",
+ "evidence_role": "predeclared_criteria_before_the_comparison_runs",
+ "test": "zero-oracle, same witness-source states: q_generic(max_modules=8) vs the REPAIRED q_region_jump.  Run only after the jump lane binds.",
+ "engineering_target": "coherent options of 12-18 primitives, capacity to ~20.  NOT 23.  Derived from the cap sweep: C<=8 stages only 2 of 11 routes, C=12 gives 6, C=16 gives 8, C=18-20 gives 9, and the remaining two are the known tiny-valley cases rather than evidence for larger actions.",
+ "current_regime": "blind generator realizes a median program of ~4 primitives",
+ "DO_NOT_USE_AS_A_HARD_CRITERION": "'witness similarity reaches 0.4-0.7'.  That is an illustrative outcome, not a definition of success.  The witness is ONE valid route; a good region jump may produce a DIFFERENT useful structural transformation and would be scored as a failure by a similarity threshold.  Same rule as T4's support-restoration gate: never score a mechanism on reproducing one specific answer.",
+ "coherence_is_a_BUNDLE_measure_all_five": [
+  "similarity to the witness macro endpoint",
+  "heavy-atom / ring / changed-region deltas against the REQUIRED macro (witness needs +13 heavy, +2 rings; generic delivers +5, +0 at both module budgets)",
+  "target/answer similarity after the proposal",
+  "percentage of proposals landing in the useful 12-18 primitive band",
+  "exact or near-exact witness hits -- a strong BONUS, never the sole definition"
+ ],
+ "what_counts_as_strong_evidence": "sim_max_large moving from ~0.12 to 0.3+ WHILE also producing the correct region/ring scale and improving target progress.  Any one of those alone is weak.",
+ "baseline_to_beat": {
+  "generic_max_modules_8_sim_max_large": "0.11-0.16 across five matched segments",
+  "large_proposals_generated": 291,
+  "exact_witness_hits": 0
+ },
+ "do_not_touch_fibercontrol": "The bottleneck is upstream of the controller: FiberControl cannot select a coherent macro the proposal process never exposes.  No controller work until coherent proposals exist."
+}
