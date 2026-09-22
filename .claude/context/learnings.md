@@ -4305,3 +4305,47 @@ independently of whether fa7_0 ever closes.**
   as the authorized total minus every call the dead launches charged, and a test asserts that
   invariant rather than a literal someone must remember to edit after each failure. Lifetime stayed
   at exactly 248 across four launches (3 charged + ceiling 245).
+
+## 2026-09-22 (PMO scale/content repair REJECTED on the scored A/B -- and it reached only 3.8% of charged candidates)
+
+- **MEASURED, celecoxib, 250 charged calls per arm, identical initialization / checkpoint / seed /
+  allocator / memory / budget / oracle / code, arms differing in exactly one `optimizer_kwargs`
+  entry folded into the run identity:**
+      arm                                  charged  best     AUC@250   t10@100  t10@250
+      A  deployed B, law ABSENT              250    0.2824   **0.1878**  0.2155   0.2704
+      B  deployed B + frozen completion law  250    0.2500   **0.1456**  0.1553   0.2405
+  **B/A AUC ratio 0.776; B leads at ZERO of four checkpoints; predeclared REJECT threshold 0.90 ->
+  VERDICT REJECT.** The qualification panel was correctly NOT run -- the predeclared rule conditions
+  it on QUALIFY, so 500 of the 1,000 authorized calls were left unspent.
+- **TWO OBVIOUS ESCAPES CLOSED:** the law WAS live (9 distinct charged endpoints in B trace to a
+  repaired completion, **0 in A** -- a clean control; max requested completion 33 atoms), and
+  THROUGHPUT is not the explanation (mean pool size **18.1 in both arms**, attempts 59.4 vs 61.3).
+- **BUT THE REPAIR WAS ARGUABLY NEVER TESTED, and the agent said so rather than banking the win.**
+  The mechanism reached only **3.8% of charged candidates (9 of 234)**. Nine molecules cannot
+  arithmetically account for a 22% AUC gap, and the arms diverge in RNG stream from the first
+  completion draw, so at ONE seed the gap is not separable from trajectory variance. **The honest
+  next question is not "is large-scale structured completion bad chemistry" -- it is "why does a
+  repaired proposal reach only 3.8% of charged candidates", which is measurable with ZERO oracle
+  calls.** ~20% of proposals carry a completion module; something between synthesis and the charged
+  batch drops them.
+- **THE 2x2 IS CLEAN AND SAYS SCALE AND CONTENT ARE ORTHOGONAL**, each repairing only its own axis,
+  with only the joint arm moving both, and no arm losing executable yield (1.000) or diversity
+  (~0.965). Conditional on a completion module firing: region median 5 -> **7**, fraction >=13 atoms
+  0.019 -> **0.250** (scale), ring-bearing 0.272 -> **0.605** and branched 0.063 -> **0.454**
+  (content). The v1 arm reproduces the census's controller row closely (median 3, 0.5% >=13,
+  retention 0.958 against the census's 3 / 0.004 / 0.968), which is what licenses reading the others
+  against it.
+- **A SUBPOPULATION RESTRICTION WAS NEEDED TO SEE RETENTION AT ALL.** It read flat at 0.958 in every
+  arm because `segment_grow` is two-thirds of completion modules and excises nothing. Restricted to
+  `segment_replace`, where the excision law can act: excision median **3 -> 5-6**, p90 **8 -> 13**,
+  max **13 -> 17**, retention **0.842 -> 0.750/0.792**. **An effect averaged over a population where
+  most members cannot express it reads as no effect.**
+- **A MUTATION SURVIVED FOR A REASON WORTH KEEPING:** removing the component bank's CHARGE FILTER
+  survived, because the only charge assertion read the SHIPPED ARTIFACT, which a mutated builder
+  never rebuilds. Killed by a test that drives `build_component_bank` on charged donors. **An
+  assertion against a prebuilt artifact cannot test the builder that produced it.**
+- **REPO HYGIENE, flagged not fixed: 382 MB of campaign artifacts were committed** (190 MB/arm;
+  `result.json` is 54-59 MB because `execute_task` embeds the whole campaign a SECOND time, and
+  `round_*/complete.json` is a cumulative per-round snapshot). Already pushed; history was correctly
+  NOT rewritten, since destructive cleanup is not authorized. The load-bearing records are tiny --
+  oracle receipts, `result.json` top-level fields, the final snapshot.
