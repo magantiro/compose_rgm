@@ -4570,6 +4570,12 @@ independently of whether fa7_0 ever closes.**
   disconnect, not a SIGTERM to the client. Use `nohup ... &` with no `timeout`, and be ready
   to call `score` yourself from the shards already on the volume -- which worked, because the
   scorer reports `attempted` and `complete` per arm rather than assuming the design is full.
+- **COST, measured on committed work only (910 molecules, 30.15 core-hours):** arm A
+  **161.4 s/molecule**, B1 155.5, C1 133.5, B0 81.9, C0 75.2. Two things to carry forward.
+  (a) The 72.65 s/trajectory figure from the earlier de-novo run **understates this capacity
+  by 2.2x** -- budget ~160 s/trajectory for the unplanned arm, not 73. (b) The `t = 0` arms
+  are the CHEAPEST, at half the control, purely because the hazard collapse leaves them 11
+  events instead of 28 -- so on this path *cheap is the failure signature*, not a saving.
 - **The planned arms are ~4x the wall clock of the control** (C1 shards 45 min against arm A's
   8-12 at the same 10 trajectories), because each plan realization is several restricted
   ring-grow draws and each of those enumerates the full support. Budget a planned arm
