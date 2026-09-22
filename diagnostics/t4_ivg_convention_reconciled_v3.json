@@ -1,0 +1,333 @@
+{
+ "payload": {
+  "blocked_cells_note": "All five remaining blanks have a region-repair rescue that FAILED at launch with ZERO oracle calls. None is a search failure.",
+  "created_at_utc": "2026-09-22T03:43:48.987712+00:00",
+  "deltas": {
+   "0.4": {
+    "compose_sum": -159.8,
+    "compose_wins": 9,
+    "coverage": "14/15",
+    "diff_sum": -7.4,
+    "ivg_sum": -152.4,
+    "mean_diff": -0.529,
+    "paired_cells": 14,
+    "rows": [
+     {
+      "blocked": null,
+      "charged_calls": 73,
+      "compose": -11.9,
+      "diff": 2.2,
+      "ivg": -14.1,
+      "phase": null,
+      "seed": 1,
+      "target": "PARP1"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 81,
+      "compose": -12.3,
+      "diff": 1.1,
+      "ivg": -13.4,
+      "phase": null,
+      "seed": 2,
+      "target": "PARP1"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 129,
+      "compose": -14.1,
+      "diff": -5.1,
+      "ivg": -9.0,
+      "phase": null,
+      "seed": 3,
+      "target": "PARP1"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 89,
+      "compose": -9.3,
+      "diff": -0.9,
+      "ivg": -8.4,
+      "phase": null,
+      "seed": 1,
+      "target": "FA7"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 217,
+      "compose": -9.4,
+      "diff": -0.5,
+      "ivg": -8.9,
+      "phase": null,
+      "seed": 2,
+      "target": "FA7"
+     },
+     {
+      "blocked": "region-repair rescue FAILED: FunctionTimeoutError at 21600s",
+      "charged_calls": 0,
+      "compose": null,
+      "diff": null,
+      "ivg": null,
+      "phase": null,
+      "seed": 3,
+      "target": "FA7"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 130,
+      "compose": -12.4,
+      "diff": 0.9,
+      "ivg": -13.3,
+      "phase": null,
+      "seed": 1,
+      "target": "5HT1B"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 161,
+      "compose": -11.9,
+      "diff": 0.1,
+      "ivg": -12.0,
+      "phase": null,
+      "seed": 2,
+      "target": "5HT1B"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 249,
+      "compose": -12.5,
+      "diff": -1.6,
+      "ivg": -10.9,
+      "phase": "protonation_rescue",
+      "seed": 3,
+      "target": "5HT1B"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 77,
+      "compose": -12.2,
+      "diff": -2.1,
+      "ivg": -10.1,
+      "phase": null,
+      "seed": 1,
+      "target": "BRAF"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 113,
+      "compose": -10.5,
+      "diff": 0.3,
+      "ivg": -10.8,
+      "phase": null,
+      "seed": 2,
+      "target": "BRAF"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 73,
+      "compose": -10.9,
+      "diff": -0.3,
+      "ivg": -10.6,
+      "phase": null,
+      "seed": 3,
+      "target": "BRAF"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 225,
+      "compose": -10.4,
+      "diff": -0.2,
+      "ivg": -10.2,
+      "phase": null,
+      "seed": 1,
+      "target": "JAK2"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 145,
+      "compose": -11.3,
+      "diff": -0.8,
+      "ivg": -10.5,
+      "phase": null,
+      "seed": 2,
+      "target": "JAK2"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 129,
+      "compose": -10.7,
+      "diff": -0.5,
+      "ivg": -10.2,
+      "phase": null,
+      "seed": 3,
+      "target": "JAK2"
+     }
+    ]
+   },
+   "0.6": {
+    "compose_sum": -124.5,
+    "compose_wins": 10,
+    "coverage": "11/15",
+    "diff_sum": -6.6,
+    "ivg_sum": -117.9,
+    "mean_diff": -0.6,
+    "paired_cells": 11,
+    "rows": [
+     {
+      "blocked": null,
+      "charged_calls": 246,
+      "compose": -13.6,
+      "diff": -1.3,
+      "ivg": -12.3,
+      "phase": null,
+      "seed": 1,
+      "target": "PARP1"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 244,
+      "compose": -12.7,
+      "diff": -1.0,
+      "ivg": -11.7,
+      "phase": null,
+      "seed": 2,
+      "target": "PARP1"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 249,
+      "compose": -11.3,
+      "diff": -0.6,
+      "ivg": -10.7,
+      "phase": null,
+      "seed": 3,
+      "target": "PARP1"
+     },
+     {
+      "blocked": "region-repair rescue FAILED: unfinished query lock, no recoverable checkpoint",
+      "charged_calls": 0,
+      "compose": null,
+      "diff": null,
+      "ivg": -7.7,
+      "phase": null,
+      "seed": 1,
+      "target": "FA7"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 249,
+      "compose": -7.8,
+      "diff": -0.3,
+      "ivg": -7.5,
+      "phase": null,
+      "seed": 2,
+      "target": "FA7"
+     },
+     {
+      "blocked": "region-repair rescue FAILED: unfinished query lock, no recoverable checkpoint",
+      "charged_calls": 0,
+      "compose": null,
+      "diff": null,
+      "ivg": null,
+      "phase": null,
+      "seed": 3,
+      "target": "FA7"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 217,
+      "compose": -13.3,
+      "diff": -0.9,
+      "ivg": -12.4,
+      "phase": null,
+      "seed": 1,
+      "target": "5HT1B"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 222,
+      "compose": -11.3,
+      "diff": 0.7,
+      "ivg": -12.0,
+      "phase": null,
+      "seed": 2,
+      "target": "5HT1B"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 126,
+      "compose": -10.8,
+      "diff": -0.2,
+      "ivg": -10.6,
+      "phase": "protonation_rescue",
+      "seed": 3,
+      "target": "5HT1B"
+     },
+     {
+      "blocked": "region-repair rescue FAILED: UnboundLocalError 'root_answer' (code bug)",
+      "charged_calls": 0,
+      "compose": null,
+      "diff": null,
+      "ivg": -9.7,
+      "phase": null,
+      "seed": 1,
+      "target": "BRAF"
+     },
+     {
+      "blocked": "region-repair rescue FAILED: FunctionTimeoutError at 21600s",
+      "charged_calls": 0,
+      "compose": null,
+      "diff": null,
+      "ivg": -10.4,
+      "phase": null,
+      "seed": 2,
+      "target": "BRAF"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 104,
+      "compose": -11.5,
+      "diff": -1.2,
+      "ivg": -10.3,
+      "phase": null,
+      "seed": 3,
+      "target": "BRAF"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 97,
+      "compose": -10.6,
+      "diff": -0.9,
+      "ivg": -9.7,
+      "phase": null,
+      "seed": 1,
+      "target": "JAK2"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 89,
+      "compose": -10.8,
+      "diff": -0.4,
+      "ivg": -10.4,
+      "phase": null,
+      "seed": 2,
+      "target": "JAK2"
+     },
+     {
+      "blocked": null,
+      "charged_calls": 113,
+      "compose": -10.8,
+      "diff": -0.5,
+      "ivg": -10.3,
+      "phase": null,
+      "seed": 3,
+      "target": "JAK2"
+     }
+    ]
+   }
+  },
+  "rescue_phase_note": "5ht1b seed 3 at both deltas is a NAMED protonation-rescue phase under its own contract, never unchanged-v1.",
+  "schema_version": "t4_ivg_convention_reconciled_v3"
+ },
+ "payload_sha256": "9932e37b4b41370e6d5294f605b23e5c4b3a4219e9a59dead3955b1e5dbce258"
+}
