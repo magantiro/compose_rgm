@@ -1,0 +1,122 @@
+{
+  "arms": {
+    "0.05:0.25": {
+      "by_family": {
+        "atom_restate_semantic": {
+          "disagreement_rate_pct": 97.33333333333333,
+          "n": 300,
+          "paired_mean_delta_dQED": -0.005834456945308337,
+          "paired_se_delta_dQED": 0.007061964356669551
+        },
+        "bond_reroute": {
+          "disagreement_rate_pct": 93.96984924623115,
+          "n": 199,
+          "paired_mean_delta_dQED": 0.024684690982517306,
+          "paired_se_delta_dQED": 0.00644869701262864
+        },
+        "cycle_close": {
+          "disagreement_rate_pct": 92.6470588235294,
+          "n": 204,
+          "paired_mean_delta_dQED": -0.010456130410548874,
+          "paired_se_delta_dQED": 0.006807931929185897
+        },
+        "cycle_open": {
+          "disagreement_rate_pct": 88.38383838383838,
+          "n": 198,
+          "paired_mean_delta_dQED": -0.012909426793318026,
+          "paired_se_delta_dQED": 0.007369450565613578
+        },
+        "ring_system_restate": {
+          "disagreement_rate_pct": 41.666666666666664,
+          "n": 12,
+          "paired_mean_delta_dQED": -0.014765969386677699,
+          "paired_se_delta_dQED": 0.005134639501201689
+        }
+      },
+      "disagreement_rate_pct": 92.88061336254107,
+      "mean_dQED_A": -0.03830976319465704,
+      "mean_dQED_B": -0.04017656748769168,
+      "mean_dSA_A": 0.5191998746872479,
+      "mean_dSA_B": 0.33869521539534003,
+      "n_paired_decisions": 913,
+      "on_disagreements_only": {
+        "n": 848,
+        "paired_mean_delta_dQED": -0.002009896603231873,
+        "paired_mean_delta_dSA": -0.1943405117140471,
+        "paired_se_delta_dQED": 0.0037998334364867953
+      },
+      "paired_mean_delta_dQED": -0.0018668042930346422,
+      "paired_mean_delta_dSA": -0.18050465929190793,
+      "paired_se_delta_dQED": 0.0035293500523341514,
+      "paired_se_delta_dSA": 0.029163117568276237,
+      "pct_losing_QED_A": 64.18400876232201,
+      "pct_losing_QED_B": 60.67907995618839
+    },
+    "0.05:1.0": {
+      "by_family": {
+        "atom_restate_semantic": {
+          "disagreement_rate_pct": 97.33333333333333,
+          "n": 300,
+          "paired_mean_delta_dQED": -0.0043303525428886784,
+          "paired_se_delta_dQED": 0.0068084359715397755
+        },
+        "bond_reroute": {
+          "disagreement_rate_pct": 94.47236180904522,
+          "n": 199,
+          "paired_mean_delta_dQED": 0.020958618281426093,
+          "paired_se_delta_dQED": 0.007191986662417451
+        },
+        "cycle_close": {
+          "disagreement_rate_pct": 93.62745098039215,
+          "n": 204,
+          "paired_mean_delta_dQED": -0.008539763025090085,
+          "paired_se_delta_dQED": 0.007008272920395762
+        },
+        "cycle_open": {
+          "disagreement_rate_pct": 88.38383838383838,
+          "n": 198,
+          "paired_mean_delta_dQED": -0.013839467212395984,
+          "paired_se_delta_dQED": 0.006769228631929632
+        },
+        "ring_system_restate": {
+          "disagreement_rate_pct": 50.0,
+          "n": 12,
+          "paired_mean_delta_dQED": -0.006337024511655909,
+          "paired_se_delta_dQED": 0.006750085281156096
+        }
+      },
+      "disagreement_rate_pct": 93.31872946330778,
+      "mean_dQED_A": -0.03830976319465704,
+      "mean_dQED_B": -0.0401572015124834,
+      "mean_dSA_A": 0.5191998746872479,
+      "mean_dSA_B": 0.33127599896573023,
+      "n_paired_decisions": 913,
+      "on_disagreements_only": {
+        "n": 852,
+        "paired_mean_delta_dQED": -0.0019797079626472577,
+        "paired_mean_delta_dSA": -0.20137851940580484,
+        "paired_se_delta_dQED": 0.0037504094816572416
+      },
+      "paired_mean_delta_dQED": -0.0018474383178263567,
+      "paired_mean_delta_dSA": -0.18792387572151778,
+      "paired_se_delta_dQED": 0.003499872714572967,
+      "paired_se_delta_dSA": 0.029704374727827717,
+      "pct_losing_QED_A": 64.18400876232201,
+      "pct_losing_QED_B": 62.869660460021905
+    }
+  },
+  "oracle_calls_spent": 0,
+  "prior_statistics": {
+    "candidates_joined": 246376,
+    "candidates_scored": 248784,
+    "model_forwards": 41,
+    "orders_drawn": 1828,
+    "successor_executions": 8856
+  },
+  "schema_version": "pmo_prior_paired_probe_v1",
+  "settings": {
+    "draws": 6,
+    "sample": 50,
+    "seed": 20260921
+  }
+}

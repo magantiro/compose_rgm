@@ -1,0 +1,157 @@
+{
+  "A": {
+    "heavy_min_max": [
+      1,
+      32
+    ],
+    "heavy_quartiles_p25_p50_p75": [
+      12.0,
+      20.0,
+      26.0
+    ],
+    "mean_dqed": -0.0503,
+    "mean_dsa": 0.5385,
+    "pct_losing_qed": 67.3,
+    "pct_qed_ge_0_6": 44.4,
+    "pct_sa_le_4": 31.3,
+    "qed_min_max": [
+      0.145,
+      0.914
+    ],
+    "qed_quartiles_p25_p50_p75": [
+      0.425,
+      0.577,
+      0.726
+    ],
+    "sa_min_max": [
+      2.467,
+      8.48
+    ],
+    "sa_quartiles_p25_p50_p75": [
+      3.809,
+      4.418,
+      5.158
+    ]
+  },
+  "A_by_family": {
+    "atom_restate_semantic": {
+      "mean_dqed": -0.0558,
+      "n": 112,
+      "pct_losing_qed": 75.0
+    },
+    "bond_reroute": {
+      "mean_dqed": -0.0532,
+      "n": 74,
+      "pct_losing_qed": 67.6
+    },
+    "cycle_close": {
+      "mean_dqed": 0.0133,
+      "n": 76,
+      "pct_losing_qed": 47.4
+    },
+    "cycle_open": {
+      "mean_dqed": -0.0941,
+      "n": 88,
+      "pct_losing_qed": 71.6
+    },
+    "ring_system_restate": {
+      "mean_dqed": -0.0693,
+      "n": 8,
+      "pct_losing_qed": 100.0
+    }
+  },
+  "B": {
+    "heavy_min_max": [
+      1,
+      32
+    ],
+    "heavy_quartiles_p25_p50_p75": [
+      12.0,
+      20.0,
+      26.0
+    ],
+    "mean_dqed": -0.0449,
+    "mean_dsa": 0.3767,
+    "pct_losing_qed": 64.2,
+    "pct_qed_ge_0_6": 42.5,
+    "pct_sa_le_4": 38.3,
+    "qed_min_max": [
+      0.196,
+      0.918
+    ],
+    "qed_quartiles_p25_p50_p75": [
+      0.43,
+      0.577,
+      0.725
+    ],
+    "sa_min_max": [
+      1.883,
+      8.48
+    ],
+    "sa_quartiles_p25_p50_p75": [
+      3.577,
+      4.373,
+      5.067
+    ]
+  },
+  "B_by_family": {
+    "atom_restate_semantic": {
+      "mean_dqed": -0.0635,
+      "n": 112,
+      "pct_losing_qed": 73.2
+    },
+    "bond_reroute": {
+      "mean_dqed": -0.0179,
+      "n": 76,
+      "pct_losing_qed": 53.9
+    },
+    "cycle_close": {
+      "mean_dqed": 0.0188,
+      "n": 76,
+      "pct_losing_qed": 44.7
+    },
+    "cycle_open": {
+      "mean_dqed": -0.0964,
+      "n": 88,
+      "pct_losing_qed": 75.0
+    },
+    "ring_system_restate": {
+      "mean_dqed": -0.0788,
+      "n": 8,
+      "pct_losing_qed": 100.0
+    }
+  },
+  "attempts": {
+    "A": 360,
+    "B": 360
+  },
+  "cost": {
+    "candidates_joined": 5200,
+    "candidates_scored": 5247,
+    "model_forwards": 21,
+    "orders_drawn": 450,
+    "successor_executions": 190
+  },
+  "distinct_endpoints": {
+    "A": 261,
+    "B": 246
+  },
+  "elapsed_s": 319.8,
+  "executed": {
+    "A": 358,
+    "B": 360
+  },
+  "legal_execution_rate_pct": {
+    "A": 99.4,
+    "B": 100.0
+  },
+  "parents_covered": {
+    "A": 21,
+    "B": 21
+  },
+  "permutation_checks": 90,
+  "realized_n": {
+    "A": 358,
+    "B": 360
+  }
+}

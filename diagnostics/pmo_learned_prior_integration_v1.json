@@ -1,0 +1,55 @@
+{
+  "schema_version": "pmo_learned_prior_integration_v1",
+  "oracle_calls_spent": 0,
+  "branch": "pmo-chemical-prior-20260921",
+  "module": "src/compose_v4/control/learned_successor_prior.py",
+  "checkpoint": {
+    "path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "backup": "~/compose_ckpt_backup/ringcore_a7546e2_best.pt",
+    "sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+    "run_label": "compose-v4-ringcore-v1-scientific-a7546e2-v1",
+    "completed_steps": 16000,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "corpus_scope": "broad_organic_v1",
+    "ring_catalog_fingerprint": "639ff6078c32d43c",
+    "parameters": 6171899,
+    "load": "load_factorized_rollout_checkpoint(path, expected_scope_hash='3721d69851110fdd')",
+    "WARNING_single_copy": "Its Modal run directory no longer exists on either profile. The local file plus diagnostics/coherence/ringcore_v1_scientific_a7546e2_frozen_inventory.json are the only surviving record. Copy, never move.",
+    "WARNING_provisional": "configs/ringcore_v1_checkpoint_selection.json forbids selecting by hazard-inclusive GM loss, which is how this best_so_far was chosen. Treat as PROVISIONAL_EDITING_CHECKPOINT: fine for wiring and preliminary experiments, not for a frozen final comparison."
+  },
+  "CALL_SITE_ALREADY_WIRED_ON_THIS_BRANCH": {
+    "file": "src/compose_v4/control/current_state_edits.py",
+    "function": "current_state_program",
+    "change": "added keyword `successor_prior=None`; when present, line 53's uniform `rng.integers` draw becomes `successor_prior.order(...)[0]`, and `conditional_action_probability` reports the prior's own probability instead of 1/len(actions).",
+    "off_switch": "ABSENT prior is the only byte-identical off. A uniform law OBJECT would reproduce the support but not the draws, because it consumes a different number of RNG values. Mutation-proven.",
+    "what_the_coordinator_must_still_thread": "PmoPopulationController.__init__ -> self._successor_prior (mirroring jump_checkpoint), then down through DynamicV21ProgramOptimizer._channel_proposal -> DynamicProgramOptimizer._mutate -> ProgramOptimizer._mutate -> current_state_program(..., successor_prior=self._successor_prior). Use assert_prior_is_consumed(draw) to prove the keyword survives every hop; inspect.signature does NOT prove it."
+  },
+  "MEASURED_SCOPE_OF_THAT_SITE": {
+    "reach_pct_of_production_proposals": 8.76,
+    "source": "diagnostics/pmo_call_site_reach_v1.json, 503 of 5742 archived entries of the completed 3x250 run",
+    "families_at_the_site": ["atom_restate_semantic", "bond_reroute", "cycle_close", "cycle_open", "ring_system_restate"],
+    "STRUCTURAL_FACT": "All five PRESERVE the heavy-atom count; measured paired dHeavy is exactly 0.000000 with zero variance, and a test pins it. atom_insert and atom_delete -- the two largest families in the per-edit census and both net negative on QED -- do NOT route through this site.",
+    "consequence": "A QED result measured at this site is not a result about the proposal stream. Wiring this site alone cannot address the QED collapse."
+  },
+  "RECOMMENDED_NEXT_WIRING": {
+    "target": "the construction / generic-composition lane, where atom_insert happens",
+    "why": "The model's strongest measured capability is element PLACEMENT (atom_insert marks carry `neighbors` as well as `atom_type`). That capability is entirely unused at the current_state site because the site cannot insert atoms.",
+    "already_prepared": "FAMILY_TO_EXECUTOR_RULE and the coordinate join now cover atom_insert, atom_delete, atom_restate and bond_reorder, and path_log_likelihood scores a whole constructed path.",
+    "sites_to_consider": [
+      "src/compose_v4/control/dynamic_program_synthesis.py compile_generic_module (segment_grow / segment_shrink)",
+      "src/compose_v4/control/dynamic_program_synthesis_v1.py _choose_bound_candidate (already a rank-softmax; a weights hook fits naturally)"
+    ]
+  },
+  "INTERFACES": {
+    "draw_weighting": "LearnedSuccessorPrior.order(source, rng, family=..., actions=...) -> permutation; .weights(...) -> normalized positive weights; .probability_of(...) for artifact accounting.",
+    "path_ranking": "LearnedSuccessorPrior.path_log_likelihood(states, actions) -> {total_log_likelihood, per_step_log_likelihood, per_step_probability, scored_steps, unjoined_steps, ...}. Rank DIFFERENT-length paths by per_step (total falls monotonically with length); rank SAME-length paths by total. Always report unjoined_steps -- a path with unjoined steps is scored on less evidence.",
+    "settings": "floor=0.05 (support floor, caps the spread at 20x so nothing is ever excluded), temperature=1.0, time=0.5.",
+    "cost_counters": ".statistics -> model_forwards / candidates_scored / candidates_joined / successor_executions / orders_drawn. Load-independent; wall clock on this machine is contaminated."
+  },
+  "PRECEDENT_THAT_IS_NOT_THIS": {
+    "module": "src/compose_v4/control/learned_proposal.py",
+    "what_it_is": "return_weighted_proposal_nce_v1 -- a 4096-dim linear model over Morgan fingerprints, trained by noise-contrastive estimation on campaign RETURN (return_beta 10.0), consumed by lazy exact rejection sampling at 4.2 attempts per primitive.",
+    "its_result": "best-score NULL; its own README says 'Do not extend this recipe unchanged.'",
+    "why_it_does_not_bear_on_this_work": "It is TASK-TRAINED on the campaign's own oracle returns, so it carries objective information and is exactly not a task-independent chemistry prior. Its null is evidence that a RETURN-weighted proposal did not help, which is consistent with the diagnosis that the missing thing is chemistry. Different object, different mechanism (rejection sampling vs floored re-ranking)."
+  }
+}

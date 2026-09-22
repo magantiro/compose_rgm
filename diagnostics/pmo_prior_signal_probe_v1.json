@@ -1,0 +1,63 @@
+{
+  "by_family": {
+    "atom_restate_semantic": {
+      "mean_best_possible_dqed": 0.0915823023185104,
+      "mean_family_dqed": -0.07613653695993898,
+      "mean_family_dsa": 0.5535552943867209,
+      "mean_rho_weight_dqed": 0.14052252352877667,
+      "mean_rho_weight_dsa": -0.3940224945118088,
+      "mean_top_pick_dqed": -0.03442463424958617,
+      "mean_top_pick_dsa": -0.2139664567317343,
+      "pct_states_rho_positive": 80.0,
+      "se_rho_weight_dqed": 0.046433409030826905,
+      "states": 15
+    },
+    "bond_reroute": {
+      "mean_best_possible_dqed": 0.04103826303373421,
+      "mean_family_dqed": -0.0334659790893662,
+      "mean_family_dsa": 0.07070697513106462,
+      "mean_rho_weight_dqed": -0.03929239040824801,
+      "mean_rho_weight_dsa": -0.34647923423354055,
+      "mean_top_pick_dqed": -0.06536215558748129,
+      "mean_top_pick_dsa": -0.18314792539166969,
+      "pct_states_rho_positive": 25.0,
+      "se_rho_weight_dqed": 0.06912055032061497,
+      "states": 12
+    },
+    "cycle_close": {
+      "mean_best_possible_dqed": 0.11055194835792319,
+      "mean_family_dqed": 0.00835580936994331,
+      "mean_family_dsa": 1.0571069927915513,
+      "mean_rho_weight_dqed": 0.16651270781132826,
+      "mean_rho_weight_dsa": -0.2632945687280533,
+      "mean_top_pick_dqed": 0.06860442222801631,
+      "mean_top_pick_dsa": 0.2374507568605928,
+      "pct_states_rho_positive": 91.66666666666667,
+      "se_rho_weight_dqed": 0.047259123458164305,
+      "states": 12
+    },
+    "cycle_open": {
+      "mean_best_possible_dqed": -0.024233356964497174,
+      "mean_family_dqed": -0.11696901032371121,
+      "mean_family_dsa": 0.6856560366445025,
+      "mean_rho_weight_dqed": -0.06137160958967455,
+      "mean_rho_weight_dsa": -0.27950976458661936,
+      "mean_top_pick_dqed": -0.1801060745918275,
+      "mean_top_pick_dsa": 0.34953183534724336,
+      "pct_states_rho_positive": 22.22222222222222,
+      "se_rho_weight_dqed": 0.13784457091967225,
+      "states": 9
+    }
+  },
+  "oracle_calls_spent": 0,
+  "parents_sampled": 15,
+  "prior_statistics": {
+    "candidates_joined": 3623,
+    "candidates_scored": 3672,
+    "model_forwards": 10,
+    "orders_drawn": 0,
+    "successor_executions": 137
+  },
+  "reading": "rho_weight_dqed > 0 means the learned law puts more mass on edits that preserve QED. rho ~ 0 means the checkpoint carries no chemistry-preservation signal at this call site, and no guidance strength can create one.",
+  "schema_version": "pmo_prior_signal_probe_v1"
+}

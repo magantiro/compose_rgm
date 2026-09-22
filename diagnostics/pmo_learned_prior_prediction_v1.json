@@ -1,0 +1,49 @@
+{
+  "schema_version": "pmo_learned_prior_prediction_v1",
+  "status": "PREDECLARED_BEFORE_ANY_MEASUREMENT",
+  "written_before_running": true,
+  "oracle_calls_authorized": 0,
+  "what_is_being_tested": "Arm A (production uniform draw over the legal fiber at current_state_edits.py line 53) vs Arm B (the same draw re-weighted by a trained RingCore-V1 editing model, floored at 0.05 so every legal successor keeps positive probability). Identical parents, identical candidate lists, identical seeds, matched draw counts. Nothing but the draw weighting differs.",
+  "checkpoint": {
+    "path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+    "completed_steps": 16000,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "ring_catalog_fingerprint": "639ff6078c32d43c"
+  },
+  "PREDICTIONS": {
+    "P1_primary_from_brief": {
+      "claim": "Under B, median QED of PROPOSED ENDPOINTS stays near its parent's QED rather than degrading, and does not collapse toward the 0.41 the scored population reached.",
+      "interpretation_declared_up_front": "The brief's 0.763 is the INITIALIZATION median. A single edit from a parent already at QED 0.41 cannot reach 0.763, so a literal 'median proposal QED == 0.763' is not attainable by any proposal law at this call site. The testable form is the one measured here: the CHANGE in QED from parent to proposed endpoint. Absolute medians are reported alongside so the raw comparison remains visible.",
+      "falsified_if": "B's mean per-edit dQED is not materially better than A's (difference within +/- 1 standard error)."
+    },
+    "P2_per_edit_gate": {
+      "claim": "Mean per-edit dQED under B moves materially toward 0 relative to A, and the percentage of edits LOSING QED falls below A's rate.",
+      "reference_from_completed_run": {"mean_dQED": -0.0837, "mean_dSA": 0.3505, "pct_edits_losing_qed": 66.1},
+      "source": "diagnostics/pmo_per_edit_chemistry_cost_v1.json, 702 real parent->child edits",
+      "why_this_is_sharper": "It is attributable per edit and per family, and it does not confound the proposal law with parent quality the way a population median does."
+    },
+    "P3_stratification_declared_now_not_post_hoc": {
+      "claim": "Results are reported stratified by parent heavy-atom count.",
+      "reason": "The parent allocator correction measured that drawn parents are median 9-15 heavy atoms with 30-40 percent under 10, several of them degenerate 1-3 atom fragments. A chemistry prior cannot make a good drug out of a one-atom parent in one edit, so an unstratified aggregate cannot separate 'the prior does not work' from 'the parents are fragments'. Both readings are reported.",
+      "bins": ["<10 heavy", "10-19", "20-29", ">=30"]
+    },
+    "P4_diversity_trade": {
+      "claim": "B produces fewer distinct endpoints than A at matched draw counts, because a floored re-ranking concentrates mass.",
+      "direction_predicted": "DOWN",
+      "acceptance": "A diversity loss is acceptable only if reported as a number beside the chemistry gain. If B holds chemistry up but collapses distinct endpoints by more than half, that is a real trade and the owner decides, not this agent.",
+      "floor_rationale": "floor=0.05 caps the most-favoured candidate at 20x the least, so the support is identical to A's and no legal successor is ever excluded."
+    },
+    "P5_support_identity": {
+      "claim": "The set of endpoints REACHABLE under B is exactly the set reachable under A. The prior re-ranks; it never filters.",
+      "test": "assert the ordered candidate list under B is a permutation of A's candidate list, on every call."
+    }
+  },
+  "DECISIVE_NEGATIVE_IS_A_VALID_OUTCOME": "If B does not hold chemistry up, that is reported plainly as the answer: the available checkpoint is too weak or mis-scoped for this path. No pass will be manufactured, and no threshold in this file will be relaxed after seeing a number.",
+  "cost_metric_declared": "Load-independent work counters only (model forwards, candidates scored, candidates joined, successor executions, orders drawn). Wall clock is contaminated: other jobs run on this machine.",
+  "environment": {
+    "interpreter": "~/compose_region_pinned_env/bin/python",
+    "python": "3.11.13", "rdkit": "2024.03.5", "numpy": "1.26.4", "torch": "2.4.0",
+    "note": "The pinned production kernel HAS torch, so model inference and chemistry are both computed under the pinned kernel. No mixed-environment caveat applies."
+  }
+}
