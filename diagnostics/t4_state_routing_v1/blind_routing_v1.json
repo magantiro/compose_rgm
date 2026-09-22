@@ -1,0 +1,148 @@
+{
+ "schema_version": "t4_state_routing_v1",
+ "evidence_role": "zero_oracle_target_blind_routing_check",
+ "new_oracle_calls": 0,
+ "kernel": "rdkit 2024.03.5 (T4 production)",
+ "rule": "Q_t empty -> state_aware if formal charge(G) != 0 else region.  No target identity, no reward.",
+ "agreement_on_fired_cells": "5/5",
+ "why_healthy_charged_cells_are_not_counterexamples": "5ht1b_0 and 5ht1b_1 are also +1 and never exhausted.  The kernel is APPLICABLE for all three and ACTIVATES only where support runs out.  charge does NOT imply activate; support exhaustion AND applicable chemistry does.",
+ "scope_limit": "n = 5 fired cells.  A single binary feature separating five points is a weak test that could not have failed in many ways.  DO NOT claim formal charge universally determines the correct molecular-search operator.",
+ "graded_alternative_if_the_binary_proves_brittle": "5ht1b_2 had 9 of 16 pendant regions refused by the executor's charge policy, against ZERO refusals on every neutral cell -- a continuous mechanistic signal rather than a flag.",
+ "cells": [
+  {
+   "cell": "5ht1b_0",
+   "net_formal_charge": 1,
+   "heavy_atoms": 39,
+   "applicable_kernel_if_exhausted": "state_aware",
+   "exhausted_historically": false,
+   "historical_kernel": null,
+   "agrees": null
+  },
+  {
+   "cell": "5ht1b_1",
+   "net_formal_charge": 1,
+   "heavy_atoms": 16,
+   "applicable_kernel_if_exhausted": "state_aware",
+   "exhausted_historically": false,
+   "historical_kernel": null,
+   "agrees": null
+  },
+  {
+   "cell": "5ht1b_2",
+   "net_formal_charge": 1,
+   "heavy_atoms": 31,
+   "applicable_kernel_if_exhausted": "state_aware",
+   "exhausted_historically": true,
+   "historical_kernel": "state_aware",
+   "agrees": true
+  },
+  {
+   "cell": "braf_0",
+   "net_formal_charge": 0,
+   "heavy_atoms": 40,
+   "applicable_kernel_if_exhausted": "region",
+   "exhausted_historically": true,
+   "historical_kernel": "region",
+   "agrees": true
+  },
+  {
+   "cell": "braf_1",
+   "net_formal_charge": 0,
+   "heavy_atoms": 39,
+   "applicable_kernel_if_exhausted": "region",
+   "exhausted_historically": true,
+   "historical_kernel": "region",
+   "agrees": true
+  },
+  {
+   "cell": "braf_2",
+   "net_formal_charge": 0,
+   "heavy_atoms": 37,
+   "applicable_kernel_if_exhausted": "region",
+   "exhausted_historically": false,
+   "historical_kernel": null,
+   "agrees": null
+  },
+  {
+   "cell": "fa7_0",
+   "net_formal_charge": 0,
+   "heavy_atoms": 32,
+   "applicable_kernel_if_exhausted": "region",
+   "exhausted_historically": true,
+   "historical_kernel": "region",
+   "agrees": true
+  },
+  {
+   "cell": "fa7_1",
+   "net_formal_charge": 0,
+   "heavy_atoms": 29,
+   "applicable_kernel_if_exhausted": "region",
+   "exhausted_historically": false,
+   "historical_kernel": null,
+   "agrees": null
+  },
+  {
+   "cell": "fa7_2",
+   "net_formal_charge": 0,
+   "heavy_atoms": 35,
+   "applicable_kernel_if_exhausted": "region",
+   "exhausted_historically": true,
+   "historical_kernel": "region",
+   "agrees": true
+  },
+  {
+   "cell": "jak2_0",
+   "net_formal_charge": 0,
+   "heavy_atoms": 22,
+   "applicable_kernel_if_exhausted": "region",
+   "exhausted_historically": false,
+   "historical_kernel": null,
+   "agrees": null
+  },
+  {
+   "cell": "jak2_1",
+   "net_formal_charge": 0,
+   "heavy_atoms": 22,
+   "applicable_kernel_if_exhausted": "region",
+   "exhausted_historically": false,
+   "historical_kernel": null,
+   "agrees": null
+  },
+  {
+   "cell": "jak2_2",
+   "net_formal_charge": 0,
+   "heavy_atoms": 27,
+   "applicable_kernel_if_exhausted": "region",
+   "exhausted_historically": false,
+   "historical_kernel": null,
+   "agrees": null
+  },
+  {
+   "cell": "parp1_0",
+   "net_formal_charge": 0,
+   "heavy_atoms": 19,
+   "applicable_kernel_if_exhausted": "region",
+   "exhausted_historically": false,
+   "historical_kernel": null,
+   "agrees": null
+  },
+  {
+   "cell": "parp1_1",
+   "net_formal_charge": 0,
+   "heavy_atoms": 16,
+   "applicable_kernel_if_exhausted": "region",
+   "exhausted_historically": false,
+   "historical_kernel": null,
+   "agrees": null
+  },
+  {
+   "cell": "parp1_2",
+   "net_formal_charge": 0,
+   "heavy_atoms": 17,
+   "applicable_kernel_if_exhausted": "region",
+   "exhausted_historically": false,
+   "historical_kernel": null,
+   "agrees": null
+  }
+ ]
+}

@@ -45,8 +45,8 @@
    "NAMING_CORRECTION": "'archive-backed proposal replenishment' / 'repopulate the active set from the archive' was considered and REJECTED as a misdescription. The implementation (compose_v4.experiments.t4_support_expansion) escalates the DRAW BUDGET over the SAME primary proposal lanes on the SAME parent -- 'the zero-support fallback, then an escalating fan-out of the primary draw lanes', realised as parallel replicate workers at the contract's base draw count. It does NOT draw different parents from the archive. Naming it replenishment would claim an algorithm we did not run.",
    "PAPER_TEXT": {
     "DO_NOT_PUT_IN_THE_PAPER": "Development chronology. Specifically NOT: 'during development the expansion family was configured for a small number of support-limited benchmark instances'. That reads as an apology and invites a reader to reconstruct the debugging timeline, which is not the methodological point. Learning during research that one failure mode needs a region-scale kernel and another needs a state-aware kernel is simply how methods get developed; the archaeology does not belong in the method description.",
-    "appendix_sentence": "For the reported T4 experiments, the available support-expansion kernels were specified before each scored run and remained fixed throughout optimization.",
-    "methods_paragraph": "FiberControl is an adaptive stochastic controller over a portfolio of validity-preserving proposal kernels. The controller monitors the support of its active proposal distribution and, when that support becomes limiting, expands the set of structural transformations available to the search. Region-level and molecular-state-aware proposal kernels provide complementary expansion mechanisms while sharing the same executor, endpoint constraints, selection procedure, and oracle budget.",
+    "appendix_sentence_status": "DROPPED if the prospective unified run happens. It existed only to reconcile per-cell kernel configuration in the historical runs; a state-routed controller needs no such reconciliation.",
+    "methods_paragraph": "FiberControl monitors proposal support online and adaptively allocates computation across a portfolio of validity-preserving proposal kernels. When the primary proposal distribution becomes exhausted, additional kernels are activated according to their applicability to the current molecular state. Region-level and molecular-state-aware kernels provide complementary expansion mechanisms while sharing the same executor, endpoint constraints, selection procedure, and oracle budget.",
     "the_three_facts_a_reviewer_needs": [
      "FiberControl itself detects support limitation automatically.",
      "Multiple proposal kernels are legitimate components of FiberControl.",
@@ -65,6 +65,13 @@
    },
    "development_history_vs_evaluated_algorithm": "These are different things and only the second belongs in the main paper. Trying different interventions on different targets during development is normal and expected. The defect would be claiming 'this exact single controller configuration produced all reported T4 results' when 5ht1b_2 got one operator and fa7_0 another. Report the final frozen method that was actually evaluated; development history does not need to appear.",
    "formal_rule": "Q_t = empty  =>  escalate proposal effort over the same support lanes along a bounded ladder; publish candidate_exhaustion only if the ladder runs to its declared end.",
+   "mechanism": {
+    "MAY_CLAIM": "FiberControl uses state-dependent applicability to allocate proposal support when its primary candidate distribution becomes exhausted; on this benchmark the state-derived routing rule recovers all five historical expansion choices.",
+    "MUST_NOT_CLAIM": "formal charge universally determines the correct molecular-search operator",
+    "design": "An applicability MASK, not a diagnostic classifier. Portfolio {q_local, q_region, q_state} with m_k(G) in {0,1}; support low AND kernel applicable -> allocate proposal compute. The controller never has to decide semantically that 'this is a protonation bottleneck'.",
+    "evidence": "diagnostics/t4_state_routing_v1/blind_routing_v1.json -- recovers 5/5 historical support-expansion choices with no target identity and no reward, zero oracle calls.",
+    "rule": "Q_t = empty -> state_aware if formal charge(G) != 0, else region."
+   },
    "mechanism_name": "bounded proposal escalation on support exhaustion",
    "name": "population-based controller with adaptive proposal escalation",
    "resource_separation": "PROPOSAL COMPUTE is not ORACLE BUDGET. On an empty candidate set the controller spends more cheap compute instantiating candidates from the same generative machinery. It does NOT grant additional docking evaluations, inject a teacher molecule, hand-edit a molecule, restart from a privileged solution, or relax the objective. State this separation explicitly; at 250 oracle calls/cell against IVG's 1000 it is not characterisable as smuggling in extra objective evaluations.",
@@ -85,6 +92,7 @@
      "status": "CLEAN, and this is the strongest defence"
     }
    ],
+   "status": "ARCHITECTURE SETTLED. The prospective unified run validates that the automated implementation PERFORMS like the historical one; it is not permission to adopt the interpretation, which the blind routing check already supports.",
    "vocabulary": "adaptive proposal-support controller, over a portfolio of structured proposal kernels",
    "what_was_automatic_vs_what_was_configured": {
     "automatic, and always was": "The controller DETECTS its own support failure. `select_batch` returns empty exactly when `candidates` is empty, and that event IS candidate exhaustion -- the system declares it, no human reads a docking score. Escalation then spends CPU and no oracle calls.",
@@ -465,5 +473,5 @@
   },
   "updated_at_utc": "2026-09-22T06:56:18.641638+00:00"
  },
- "payload_sha256": "fbbf15eac6e21f4d99fc74a427c7ad44d1732abf511627889d4f26e7137415b2"
+ "payload_sha256": "6a81ae8e8ed727953145712167ab9a9586900cc7e2590b8f1d88f301f1ac6954"
 }
