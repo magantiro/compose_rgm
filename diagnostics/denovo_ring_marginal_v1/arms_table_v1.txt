@@ -1,5 +1,5 @@
 design            mstep1000_n200_h16p0_pde2a5f995df7_ie2886d773614
-model             step1000  n/arm 200
+model             step1000  design target n/arm 200  (realized n per arm below)
 corpus            guacamol_subset_500000_seed0.smiles (500,000 molecules)
 
 RING DISTRIBUTION (per-ring size law; TV against the corpus)

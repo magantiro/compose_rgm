@@ -77,7 +77,12 @@ def render(report: dict, corpus_census: dict | None = None) -> str:
     lines: list[str] = []
     corpus = report["corpus_reference"]
     lines.append(f"design            {report['design']}")
-    lines.append(f"model             {report['model']}  n/arm {report['total_per_arm']}")
+    # `total_per_arm` is the DESIGN target; the realized n differs per arm whenever a
+    # shard was lost, so print it as a target and let the `n` column carry the truth.
+    lines.append(
+        f"model             {report['model']}  design target n/arm {report['total_per_arm']}"
+        "  (realized n per arm below)"
+    )
     lines.append(
         f"corpus            {corpus['source']} ({corpus['molecules']:,} molecules)"
     )
