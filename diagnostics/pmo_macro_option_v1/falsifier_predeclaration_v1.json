@@ -1,0 +1,95 @@
+{
+  "schema_version": "pmo_macro_option_falsifier_v1",
+  "sealed_before_any_mechanism_code": true,
+  "sealed_before_any_measurement": true,
+  "information_regime": "SYNTHETIC_SCORER_MECHANISM_CHECK",
+  "information_regime_statement": "Zero charged benchmark oracle calls. The scorer is a declared synthetic function of the molecule alone (Tanimoto to a fixed synthetic reference, times a declared valley penalty). It is not a PMO oracle, carries no benchmark answer, and no number produced under it is a PMO result.",
+
+  "question": "Does bounded, explicit protection of a declared macro-option bridge state raise the rate at which the controller reaches a declared destination, relative to the identical controller that declares the identical options and does NOT protect them?",
+
+  "what_is_being_tested": "The SELECTION policy only. Both arms declare the same options, commit to the same complete end-to-end validated macros, and charge the same bridge states. The arms differ in exactly one bit: whether a declared in-flight bridge is guaranteed parent mass and a reserved allocation slot for a bounded window.",
+
+  "correction_to_the_mandate_language": {
+    "claim": "MEASURED: `ProgramOptimizer.entries` in src/compose_v4/control/adaptive_program_optimizer.py has NO eviction, pruning, capacity bound or removal path. The only write site is insert-if-absent at line 302-303; there is no `del`, `.pop`, `.clear` or reassignment after initialization at line 230.",
+    "consequence": "A bridge state is therefore never EVICTED. The two real pruning mechanisms are (1) EXPANSION STARVATION -- `selection()` weights an endpoint by 1/score_rank, so a bridge that scored worse than its own parent receives near-zero parent mass and is never drawn for expansion; and (2) ALLOCATION DISCARD -- `_allocate` selects 16 of a 32-33 candidate pool, so a continuation proposed from the bridge can be generated and then dropped before it is ever charged. The mechanism under test addresses exactly these two, and the artifact must not describe itself as preventing eviction."
+  },
+
+  "arms": {
+    "protected": "MacroOptionController with protection ON. Declared bridges receive a floor of parent mass and a reserved allocation slot for their declared continuation, for a bounded window.",
+    "declared_unprotected": "MacroOptionController with protection OFF. Identical option declaration, identical commitment, identical bridge charging, ordinary selection and allocation thereafter."
+  },
+  "matched_on": ["seed", "synthetic task", "initialization", "declared option set", "round count", "queries per round", "budget"],
+  "differs_in": ["protection enabled"],
+
+  "unit_of_observation": "one declared macro option",
+  "primary_outcome": "destination_reached: the option's declared destination endpoint appears in the charged query ledger before the run ends",
+
+  "statistic": "one-sided exact McNemar on discordant pairs (paired by option identity across the two arms); b = destinations reached only under protection, c = reached only without it; p = P(Binomial(b+c, 0.5) >= b)",
+  "alpha": 0.05,
+  "minimum_effect_of_interest": 0.25,
+  "minimum_effect_definition": "protected reach rate minus unprotected reach rate, over the same declared options",
+
+  "sample_size": {
+    "n_declared_options_minimum": 80,
+    "independent_seeds_minimum": 12,
+    "power_method": "simulation, 40000 draws per cell, monotone core effect plus 5% symmetric non-monotone noise, threshold min_diff=0.25",
+    "power_table": {
+      "n=40": {"p0=0.40,effect=0.35": 0.861, "p0=0.40,effect=0.40": 0.954, "p0=0.30,effect=0.45": 0.990, "p0=0.40,effect=0.30": 0.681},
+      "n=60": {"p0=0.40,effect=0.35": 0.892, "p0=0.40,effect=0.40": 0.976, "p0=0.30,effect=0.45": 0.998, "p0=0.40,effect=0.30": 0.687},
+      "n=80": {"p0=0.40,effect=0.35": 0.929, "p0=0.40,effect=0.40": 0.989, "p0=0.30,effect=0.45": 1.000, "p0=0.40,effect=0.30": 0.731},
+      "n=100": {"p0=0.40,effect=0.35": 0.947, "p0=0.40,effect=0.40": 0.994, "p0=0.30,effect=0.45": 1.000, "p0=0.40,effect=0.30": 0.741},
+      "n=120": {"p0=0.40,effect=0.35": 0.963, "p0=0.40,effect=0.40": 0.998, "p0=0.30,effect=0.45": 1.000, "p0=0.40,effect=0.30": 0.760}
+    },
+    "declared_alternative": "p0 = 0.40, true effect = 0.35",
+    "power_at_declared_alternative_at_n80": 0.929,
+    "underpowered_region_declared_in_advance": "At a true effect of 0.30 the design has power 0.731 at n=80. A null observed with an estimated effect in [0.20, 0.30) is therefore INCONCLUSIVE and must be reported as such, not as a rejection. Only an estimated effect below 0.20 licenses the REJECTED verdict at this n."
+  },
+
+  "synthetic_scorer": {
+    "name": "valley_similarity_v1",
+    "base": "Tanimoto (Morgan r=2, 2048 bits) to a fixed synthetic reference SMILES declared in the harness; no benchmark target, no TDC oracle, no asset file",
+    "valley_predicate": "DECLARED STRUCTURALLY AND INDEPENDENTLY OF ANY OPTION: a molecule is in the valley when its heavy-atom count is at least VALLEY_DROP below the heavy-atom count of the run's initialization molecule. This is faithful to the MEASURED cause of the real dip -- prune-then-install passes through a molecule smaller than both endpoints.",
+    "penalty": "score = base * (1 - VALLEY_DEPTH) inside the valley, base outside",
+    "VALLEY_DEPTH": 0.66,
+    "VALLEY_DEPTH_justification": "the measured median relative dip depth on real transports is 0.659455 (diagnostics/pmo_discovery_v1/transport_alignment_selection_v1.json, sibling branch pmo-discovery-controller-20260921)",
+    "VALLEY_DROP": 2,
+    "range": "[0, 1], maximize -- matching the PMO convention pmo_top_ten_auc enforces"
+  },
+
+  "instrument_checks_that_can_VOID_the_measurement": [
+    "bridges_in_valley_fraction must be > 0 in BOTH arms. If declared bridges never land in the valley, the landscape does not exercise the mechanism and the run is VOID, not a null. A metric that cannot vary is not a measurement.",
+    "unprotected reach rate must be strictly between 0 and 1. A floor of 0 makes the comparison tautological; a ceiling of 1 leaves nothing to improve. Either one VOIDS the run and forces a landscape recalibration BEFORE any verdict is read.",
+    "declared options must be identical across the two arms, compared by option_id set equality. Any mismatch VOIDS the pairing."
+  ],
+
+  "verdicts": {
+    "MECHANISM_NOT_INERT": "estimated effect >= 0.25 AND one-sided exact p < 0.05 AND all instrument checks pass",
+    "REJECTED": "estimated effect < 0.20 AND all instrument checks pass",
+    "INCONCLUSIVE_UNDERPOWERED": "estimated effect in [0.20, 0.25) or (effect >= 0.25 with p >= 0.05)",
+    "VOID": "any instrument check fails",
+    "MECHANISM_WORKS_COST_UNACCEPTABLE": "the effect clears the threshold, but at matched charged budget the protected arm's final top-10 is WORSE than the unprotected arm's. Reported as its own verdict; it is NOT a pass."
+  },
+
+  "what_a_pass_does_and_does_not_license": {
+    "licenses": "The mechanism is wired, reachable, consumed on the production path, and does what it claims: it keeps a declared bridge expandable and chargeable across a bounded window, on a landscape built to require exactly that.",
+    "does_not_license": "Any claim that macro options improve PMO benchmark scores. The landscape was built to need the mechanism, so this test can only REJECT the mechanism or show it is not inert. It cannot confirm benefit. A benefit claim requires a matched scored run against a real oracle, under a separate explicit budget authorization."
+  },
+
+  "cost_reporting_required_regardless_of_verdict": [
+    "charged calls spent on bridge states, absolute and as a fraction of budget",
+    "charged calls spent on destination states",
+    "final best and final top-10 under the synthetic scorer, per arm",
+    "options declared, reached, expired unreached, abandoned"
+  ],
+
+  "protection_bound": {
+    "default_protection_rounds": 1,
+    "justification": "MEASURED on the sibling branch: protected_rounds_median = 1, protected_rounds_max = 1, residual_needing_protection = 5/35 = 14.3% (diagnostics/pmo_discovery_v1/transport_ordering_policy_v1.json). A single-crossing guarantee is what the data supports; an arbitrary-round allowance is not.",
+    "hard_ceiling": 4,
+    "hard_ceiling_rationale": "A ceiling the configuration cannot exceed, so no future caller can turn a bounded window into a blanket exemption."
+  },
+
+  "predeclared_control_mutation": "Re-ordering the diagnostic keys of the option registry payload (a change that alters bytes and nothing semantic) MUST leave the mutation battery GREEN. Without a control that must pass, 'everything refused' is indistinguishable from a broken harness.",
+
+  "created_at_utc": "2026-09-22T00:00:00+00:00"
+}
