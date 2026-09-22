@@ -184,8 +184,10 @@ def main() -> None:
         "scope": [
             "ONE task (celecoxib_rediscovery), ONE seed schedule, ZERO oracle calls.",
             "The checkpoint is PROVISIONAL and forbidden for frozen results.",
-            "The closed-loop arm has no objective at all, so it measures the "
-            "proposal law's own ratchet and not a scored campaign.",
+            (
+                "The closed-loop arm has no objective at all, so it measures "
+                "the proposal law's own ratchet and not a scored campaign."
+            ),
             "No scored PMO entry point sets `construction_prior` yet.",
         ],
     }

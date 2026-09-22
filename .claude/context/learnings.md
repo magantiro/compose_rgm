@@ -2803,3 +2803,79 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **A 780 MB worktree copy per mutation is the real cost of a tree-copying battery**, and it competes
   for CPU with whatever else is running: 11 pytest runs took over 20 minutes under contention against
   ~35 s each unloaded. Budget a battery as a serial job, not as background noise.
+
+## 2026-09-22 (the chemical prior at the CONSTRUCTION draw: closed-loop drift halves, open-loop does not move)
+
+- **CORRECTS the scope of the 2026-09-21 entry "the chemical prior fixes SA, not QED".** That
+  result stands where it was measured -- `current_state_program`, five heavy-atom-PRESERVING
+  families, paired dHeavy exactly 0.000000, QED null at sigma -0.5. At the CONSTRUCTION draw the
+  same prior, same checkpoint, same kernel, **improves QED too**: 702 identical decisions on the
+  real celecoxib run's own parents, 80.5% disagreement,
+      dQED  **+0.0367 +- 0.0058 (sigma +6.3)**   permutation p = 5e-5
+      dSA   **-0.3671 +- 0.0485 (sigma -7.6)**   permutation p = 5e-5
+      %SA<=4 42.7% -> 58.3%      %QED>=0.6 23.5% -> 26.2%
+  So "the prior fixes SA and not QED" was a statement about a call site, not about the prior. The
+  earlier entry said exactly that ("a QED null measured there is not a result about the proposal
+  stream") and it was right to.
+- **A QED claim on THIS lane needs a size control that the old one did not.** These families change
+  the atom count, and QED falls with size, so an unpartialled gain is confounded. Two independent
+  controls, because an adjustment that can only ever say "it was not size" is not a control:
+  regression intercept at zero size change **+0.0379 +- 0.0058 (sigma 6.5)**, and the 401 decisions
+  where both arms produced the SAME heavy-atom count **+0.0330 +- 0.0056 (sigma 5.9)**. The fitted
+  size slope is **negative** (-0.0053 QED per added atom), and the prior adds +0.24 atoms, so its
+  size effect works AGAINST the observed gain rather than explaining it.
+- **THE OUTCOME SPLITS, AND BOTH HALVES MUST BE STATED. Open-loop drift does NOT move; closed-loop
+  drift more than halves.** Same lane, same prior, same task, zero oracle calls:
+      arm                                   drift (median QED, start -> end)
+      OPEN LOOP  at the real run's parents   OFF -0.172   ON -0.163   (unchanged)
+      CLOSED LOOP score-free lineage         OFF -0.239   ON -0.102   (**-57%**)
+  The open-loop arm re-runs both selection rules at the parents the drifted 250-call run actually
+  used, so it inherits that run's drift BY CONSTRUCTION and can only show whether the chemistry
+  produced at each point is better. It cannot show prevention, and reporting its flat Q1-to-Q4 as
+  "the prior does not reduce drift" would be reading the wrong arm. The closed-loop arm iterates the
+  proposal law from the run's own 16 initialization entries for 15 generations with parents drawn
+  UNIFORMLY -- no score anywhere -- which is what makes it a clean test of the ratchet.
+      final median QED   0.422 -> 0.560      final %QED>=0.6  0.273 -> 0.410
+      final median SA    4.868 -> 4.475      final %SA<=4     0.199 -> 0.312
+  The ON arm's median SA is FLAT across all fifteen generations while OFF climbs 4.40 -> 4.87.
+- **Design a drift experiment so that at least one arm CAN show the effect.** The paired arm is the
+  high-power one (702 decisions, sigma 6-8) and is structurally incapable of answering the outcome
+  question; the lineage arm answers it and has one seed schedule and no significance. Running only
+  the first would have produced a confident "no drift reduction" from a measurement that could not
+  have found one -- the same shape as measuring FREE SLOTS to test a ring scheduler that provably
+  cannot move them.
+- **The join is not the risk it looks like: 99.2% of construction candidates reach a model mark
+  (37,111 of 37,398 on the real path), and an unjoined one keeps the support FLOOR rather than
+  being dropped, so the reachable set is identical in both arms whatever the join rate.** The model
+  decodes `atom_insert` into `null_slots[0]` and the lane builds it with `fresh_slot`, which is
+  `empty[0]` -- the same slot -- and the h-count both sides derive is `valence - order`. Check this
+  BEFORE wiring: had the slots disagreed, every weight would have fallen to the floor and the prior
+  would have been a uniform law wearing a model's clothes.
+- **Rank PLACEMENT and ELEMENT jointly or the measured signal is invisible.** The model's
+  `atom_insert` mark carries `neighbors`, and the suppression that matters -- heteroatom-onto-
+  heteroatom ~15-18x below carbon-onto-carbon -- is a property of WHERE the atom goes. v1 drew the
+  attachment point once and then each element independently; the wiring scores the full
+  (attachment point x element) product at the first step and the elements alone thereafter, because
+  a linear chain's later attachment points are forced.
+- **A mutation that does not APPLY, and a mutation that is semantically a NO-OP, both score as
+  killed.** Two survivors in the first battery were my own fault, not weak guards: a "turn the
+  re-ranking into a filter" mutation rebuilt the candidate list on the next loop iteration and
+  changed nothing, and a "tag everything" mutation survived because a whole-program test can select
+  modules that never call the tagging helper at all. Written as a real truncation before ranking and
+  bound per construction family, both die. **Final battery: 21 severed hops across two files, 21
+  named failures, zero survivors, cosmetic control green.**
+- **ACCEPTING an arm parameter is not PASSING it, and that survivor was a real gap.** A `restore`
+  that takes `construction_prior` and drops it out of `constructor_kwargs` rebuilds the UNIFORM arm
+  from a snapshot the prior-ranked arm produced, with nothing in the artifact to show the swap --
+  strictly worse than the `TypeError` an unaccepted keyword raises. The signature-parity test the
+  2026-09-21 resume entry prescribes does NOT catch it; a test that walks `restore`'s AST for the
+  forwarded keys does.
+- **Derive the seam's attribute name from the CALL SITE.** The controller supplies
+  `self.construction_prior` and `DynamicProgramOptimizer._mutate` reads it; a test that writes that
+  name twice agrees with itself. Parsing `_mutate` for the `self.<attr>` passed as
+  `successor_prior=` and then requiring the controller to assign that attr is a check that can fail.
+- **STILL ONE HOP SHORT, and it is the hop this repository has been burned by three times.** The
+  library seam is complete and consumption-tested, but **no scored PMO entry point sets
+  `construction_prior`**: `pmo_population_v1.execute_task`, the Modal app and the contracts would
+  each have to carry it, and that is an authorization change, not an integration one. Until then the
+  wiring is exactly as inert in production as the region law was behind its keyword. Say so first.
