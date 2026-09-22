@@ -448,3 +448,14 @@ directory until their hashes and a durable replacement location are verified.
 8. `docs/CONTROLLER_LIVE.md` only as a chronological evidence ledger.
 9. `docs/MACRO_INVENTORY.md` and `docs/CAMPAIGN_LESSONS.md` before changing
    option support or launching expensive work.
+
+## T4 — FROZEN RESULT
+
+The authoritative T4 panel is **`diagnostics/T4_FROZEN_RESULT_v1.md`** (machine: `T4_FROZEN_RESULT_v1.json`). Read that file.
+
+- δ=0.4: **15/15**, COMPOSE −169.4 vs IVG −160.4 (**−9.0**), 10 wins, mean **−0.600**
+- δ=0.6: **14/15**, COMPOSE −153.0 vs IVG −145.4 (**−7.6**), 12 wins, mean **−0.543**
+- Budget: COMPOSE **250** charged calls/cell vs InVirtuoGen **1000**
+- One blank: FA7 seed 1 at δ=0.6, a deliberate scoped negative (IVG −7.7)
+
+Do **not** re-derive the panel from `scripts/t4_ivg_convention_table.py` — it resolves one run per volume and has reported an empty run as a cell's result.

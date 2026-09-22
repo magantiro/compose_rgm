@@ -164,5 +164,29 @@
   "verdict": "NEITHER_SEALED_BRANCH"
  },
  "schema_version": "compose_progress_scoreboard_v1",
- "updated_at_utc": "2026-09-22T01:58:56.088063+00:00"
+ "t4": {
+  "authoritative_artifact": "diagnostics/T4_FROZEN_RESULT_v1.json",
+  "budget": "COMPOSE 250 calls/cell vs IVG 1000",
+  "delta_0.4": {
+   "compose": -169.4,
+   "coverage": "15/15",
+   "gap": -9.0,
+   "ivg": -160.4,
+   "mean": -0.6,
+   "wins": "10/15"
+  },
+  "delta_0.6": {
+   "compose": -153.0,
+   "coverage": "14/15",
+   "gap": -7.6,
+   "ivg": -145.4,
+   "mean": -0.543,
+   "wins": "12/14"
+  },
+  "do_not": "re-derive from scripts/t4_ivg_convention_table.py; it resolves one run per volume",
+  "human_readable": "diagnostics/T4_FROZEN_RESULT_v1.md",
+  "one_blank": "FA7 seed 1 delta 0.6 \u2014 deliberate scoped negative, IVG -7.7",
+  "status": "FROZEN"
+ },
+ "updated_at_utc": "2026-09-22T04:00:41.499539+00:00"
 }
