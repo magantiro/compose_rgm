@@ -1,15 +1,15 @@
 {
   "baseline_green": true,
-  "baseline_line": "43 passed in 7.50s",
+  "baseline_line": "45 passed in 20.48s",
   "controls_green": true,
-  "killed": 11,
-  "mutations": 11,
+  "killed": 13,
+  "mutations": 13,
   "rows": [
     {
       "file": "modal_apps/t4_fa7_0_support_expansion_base_app.py",
       "killed": true,
       "mutation": "run_cell_never_expands",
-      "pytest": "1 failed in 0.08s",
+      "pytest": "1 failed in 0.07s",
       "target_test": "test_run_cell_expands_support_before_it_can_terminate"
     },
     {
@@ -23,35 +23,35 @@
       "file": "modal_apps/t4_fa7_0_support_expansion_base_app.py",
       "killed": true,
       "mutation": "image_bakes_the_parent_app",
-      "pytest": "1 failed in 0.05s",
+      "pytest": "1 failed in 0.06s",
       "target_test": "test_the_base_app_bakes_its_own_source_into_the_image"
     },
     {
       "file": "modal_apps/t4_fa7_0_support_expansion_base_app.py",
       "killed": true,
       "mutation": "completion_law_not_threaded",
-      "pytest": "1 failed in 0.05s",
+      "pytest": "1 failed in 0.06s",
       "target_test": "test_the_proposal_worker_threads_both_laws_and_the_fallback"
     },
     {
       "file": "modal_apps/t4_fa7_0_support_expansion_base_app.py",
       "killed": true,
       "mutation": "lock_drops_expansion_telemetry",
-      "pytest": "1 failed in 0.07s",
+      "pytest": "1 failed in 0.08s",
       "target_test": "test_the_round_lock_carries_the_expansion_telemetry"
     },
     {
       "file": "modal_apps/t4_fa7_0_support_expansion_base_app.py",
       "killed": true,
       "mutation": "missing_block_terminates_quietly",
-      "pytest": "1 failed in 0.07s",
+      "pytest": "1 failed in 0.08s",
       "target_test": "test_a_missing_contract_block_raises_rather_than_terminating_quietly"
     },
     {
       "file": "src/compose_v4/experiments/t4_support_expansion.py",
       "killed": true,
       "mutation": "draw_cap_ignored",
-      "pytest": "1 failed in 0.06s",
+      "pytest": "1 failed in 0.07s",
       "target_test": "test_the_draw_cap_binds_before_the_ladder_ends"
     },
     {
@@ -72,8 +72,22 @@
       "file": "src/compose_v4/experiments/t4_support_expansion.py",
       "killed": true,
       "mutation": "consumption_gate_accepts_a_no_op_event",
-      "pytest": "1 failed in 0.06s",
+      "pytest": "1 failed in 0.05s",
       "target_test": "test_publishing_exhaustion_without_an_expansion_is_refused"
+    },
+    {
+      "file": "modal_apps/t4_fa7_0_support_expansion_base_app.py",
+      "killed": true,
+      "mutation": "app_skips_record_normalization",
+      "pytest": "1 failed in 0.07s",
+      "target_test": "test_the_app_normalizes_expansion_records_before_selection"
+    },
+    {
+      "file": "src/compose_v4/experiments/t4_support_expansion.py",
+      "killed": true,
+      "mutation": "normalization_drops_proposal_experts",
+      "pytest": "1 failed in 14.41s",
+      "target_test": "test_dry_pass_expansion_round_body_end_to_end"
     },
     {
       "file": "src/compose_v4/experiments/t4_support_expansion.py",

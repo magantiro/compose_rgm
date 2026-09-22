@@ -106,6 +106,20 @@ MUTATIONS = [
         "test_publishing_exhaustion_without_an_expansion_is_refused",
     ),
     (
+        "app_skips_record_normalization",
+        BASE_APP,
+        "            fresh = normalize_expansion_records(",
+        "            fresh = list(",
+        "test_the_app_normalizes_expansion_records_before_selection",
+    ),
+    (
+        "normalization_drops_proposal_experts",
+        LIBRARY,
+        '        if "proposal_experts" not in row:',
+        "        if False:",
+        "test_dry_pass_expansion_round_body_end_to_end",
+    ),
+    (
         "already_seen_ignored",
         LIBRARY,
         "            if key in seen or key in found:",

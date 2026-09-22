@@ -366,6 +366,39 @@ def run_support_expansion(
     return outcome
 
 
+def normalize_expansion_records(
+    records: Iterable[dict], *, experts: Sequence[str] = ESCALATABLE_LANES
+) -> list[dict]:
+    """Give expansion records the provenance the round path requires.
+
+    MEASURED FAILURE, run 727d9db5: the expansion reached its target with FOUR
+    eligible endpoints and then died with `KeyError('proposal_experts')` while
+    building the query rows, discarding all four.
+
+    The cause is a difference between the two paths, not a missing field in
+    `expand`. On a normal round the pool goes through
+    `t4_integrated_route_fiber.merge_expert_pools`, which ATTACHES
+    `proposal_experts` as part of merging; the expansion path deduplicates by
+    endpoint itself and so never passes through that function, and `expand`'s own
+    records carry only `proposal_lane`. This restores the one key the merge would
+    have supplied, from the lane that actually produced the record.
+
+    Records that already carry `proposal_experts` -- the zero-support fallback
+    sets it to `[]` deliberately, because its lane is not in the frozen expert
+    vocabulary -- are left exactly as they are.
+    """
+
+    known = set(experts)
+    out: list[dict] = []
+    for record in records:
+        row = dict(record)
+        if "proposal_experts" not in row:
+            lane = row.get("proposal_lane")
+            row["proposal_experts"] = [lane] if lane in known else []
+        out.append(row)
+    return out
+
+
 def assert_support_expansion_is_consumed(outcome: ExpansionOutcome) -> None:
     """Refuse a terminal result produced without the declared expansion running.
 

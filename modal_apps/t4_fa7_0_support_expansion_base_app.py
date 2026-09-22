@@ -540,6 +540,7 @@ def run_cell(task: dict) -> dict:
     )
     from compose_v4.experiments.t4_support_expansion import (
         assert_support_expansion_is_consumed,
+        normalize_expansion_records,
         resolve_support_expansion,
         run_support_expansion,
     )
@@ -864,9 +865,14 @@ def run_cell(task: dict) -> dict:
                 f"{time.time() - expansion_started:.0f}s",
                 flush=True,
             )
-            fresh = [
+            # The normal path gets `proposal_experts` from `merge_expert_pools`, which
+            # the expansion path does not use because it deduplicates by endpoint
+            # itself. Without this the round dies building its query rows AFTER the
+            # expansion has already found its endpoints -- measured, run 727d9db5,
+            # which reached its target with four eligible and discarded all four.
+            fresh = normalize_expansion_records(
                 row for row in expansion.records if row["smiles"] not in state.archive
-            ]
+            )
             candidates = attach_features(fresh, state, fiber)
             selected = select_batch(
                 candidates,

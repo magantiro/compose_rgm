@@ -294,17 +294,21 @@ def test_the_contract_declares_one_cell_and_both_mechanisms():
     payload = _contract_payload()
     assert [row["cell"] for row in payload["cells"]] == ["fa7_0"]
     assert payload["delta"] == 0.6
-    # 246 = the authorized 248 less the 2 calls the two prior launches each charged.
-    assert payload["charged_calls_per_cell"] == 246
-    assert payload["total_charged_call_ceiling"] == 246
+    # The ceiling is DERIVED, so assert the INVARIANT rather than a literal that
+    # has to be edited after every dead launch: ceiling plus everything already
+    # charged must equal the owner's authorized total, exactly.
+    assert payload["charged_calls_per_cell"] == payload["total_charged_call_ceiling"]
     prior = payload["prior_charged_calls"]
     spent = sum(
         block["charged_calls"]
         for key, block in prior.items()
         if isinstance(block, dict) and "charged_calls" in block
     )
-    assert spent == 2, prior
-    assert payload["charged_calls_per_cell"] + spent == 248
+    assert spent >= 1, prior
+    assert payload["charged_calls_per_cell"] + spent == 248, (
+        "ceiling plus already-charged calls must equal the authorized 248 exactly; "
+        "a dead launch's calls are subtracted, never forgiven"
+    )
     assert payload["proposal"]["shallow"]["region_law"] == "free_gate_margin_v1"
     assert payload["proposal"]["shallow"]["completion_law"] == "free_gate_margin_v1"
     SupportExpansionPolicy.from_contract(payload["support_expansion"])
@@ -741,3 +745,190 @@ def test_the_root_lock_is_not_forfeited_by_its_own_checkpoint():
     )
     assert restored["charged_calls"] == 1
     assert restored["budget_remaining"] == 246
+
+
+# ---- The dry pass: drive the whole expansion round body end to end ---------
+
+
+def _row_keys_run_cell_requires() -> set[str]:
+    """Every `row["..."]` subscript `run_cell` performs, read from its own source.
+
+    Derived from the code under test rather than hand-listed, so it cannot drift
+    out of date -- but the VALUES it is checked against come from a real pipeline
+    run, so this is not a tautology: the source supplies the question and the
+    production path supplies the answer.
+    """
+
+    tree = ast.parse(_run_cell_source())
+
+    def _subscripts(node) -> set[str]:
+        found = set()
+        for child in ast.walk(node):
+            if (
+                isinstance(child, ast.Subscript)
+                and isinstance(child.value, ast.Name)
+                and child.value.id == "row"
+                and isinstance(child.slice, ast.Constant)
+                and isinstance(child.slice.value, str)
+            ):
+                found.add(child.slice.value)
+        return found
+
+    # Scope to loops that iterate the SELECTED batch. `run_cell` binds the name
+    # `row` in several unrelated loops -- over contract["cells"], over the docked
+    # observations -- and folding those in would demand keys a proposal record is
+    # not supposed to carry. The scoping is still derived from the source, not
+    # hand-listed: it is "whichever loops walk `selected`".
+    keys: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.For, ast.comprehension)):
+            continue
+        iterable = node.iter
+        target = node.target
+        names = {
+            child.id for child in ast.walk(iterable) if isinstance(child, ast.Name)
+        }
+        binds_row = any(
+            isinstance(child, ast.Name) and child.id == "row"
+            for child in ast.walk(target)
+        )
+        if "selected" in names and binds_row:
+            body = node.body if isinstance(node, ast.For) else [iterable]
+            for statement in body:
+                keys |= _subscripts(statement)
+    assert keys, "no loop over `selected` binding `row` was found in run_cell"
+    return keys
+
+
+def test_dry_pass_expansion_round_body_end_to_end():
+    """Four launches, four defects, each found only by launching. This runs the
+    whole expansion round body locally so the remaining ones surface at once.
+
+    It drives the REAL stages -- `fallback_candidates` and `expand` for records,
+    `normalize_expansion_records`, `attach_features`, `select_batch` -- and then
+    checks the resulting selected rows against every key `run_cell` subscripts off
+    `row`, including the query rows and the post-docking bookkeeping.
+    """
+
+    import numpy as np
+
+    from compose_v4.control.fiber_control import ProgramValue, SearchState
+    from compose_v4.control.zero_support_fallback import fallback_candidates
+    from compose_v4.experiments.t4_fiber_campaign import Fiber, expand
+    from compose_v4.experiments.t4_integrated_route_fiber import (
+        attach_features,
+        expert_census,
+        select_batch,
+    )
+    from compose_v4.experiments.t4_support_expansion import normalize_expansion_records
+
+    parent = "CC(C)CCN(C)C(=O)c1ccccc1"
+    fiber = Fiber(parent, 0.2, support="compose_valid")
+
+    # Stage 1: the fallback, exactly as the worker relabels it.
+    produced, _ = fallback_candidates(
+        parent,
+        np.random.default_rng(20260922),
+        check=fiber.check,
+        reference_smiles=parent,
+        delta=0.2,
+    )
+    records = [
+        {
+            **row,
+            "proposal_lane": None,
+            "proposal_experts": [],
+            "support_expansion_stage": "zero_support_fallback",
+            "parent_score": -7.5,
+            "families": ("atom_delete",),
+            "program_families": ("atom_delete",),
+            "regions": 1,
+            "created": int(row.get("inserted_atoms", 0)),
+            "deleted": int(row.get("deleted_atoms", 0)),
+        }
+        for row in produced
+    ]
+    # Stage 2: the draw ladder -- raw `expand` output, which carries NO
+    # `proposal_experts`. This is the record shape that killed run 727d9db5.
+    ladder = expand(
+        parent,
+        -7.5,
+        fiber,
+        np.random.default_rng(7),
+        draws=40,
+        multi_region=True,
+        horizon=3,
+        proposal_lane="shallow",
+    )
+    assert ladder, "the ladder stage produced nothing, so this test proves little"
+    assert "proposal_experts" not in ladder[0], (
+        "expand now supplies proposal_experts itself; this test's premise has moved"
+    )
+    records.extend(ladder)
+
+    state = SearchState(archive={parent: -7.5}, budget=8, rounds=0)
+    fresh = normalize_expansion_records(
+        row for row in records if row["smiles"] not in state.archive
+    )
+    candidates = attach_features(fresh, state, fiber)
+    assert candidates
+    expert_census(candidates)
+    selected = select_batch(
+        candidates,
+        ProgramValue(penalty=1.0),
+        state,
+        np.random.default_rng(1),
+        round_index=1,
+        batch=8,
+        exploration=2,
+        expert_floor_rounds=2,
+    )
+    assert selected, "select_batch returned nothing from a real expansion pool"
+
+    # Every key run_cell subscripts off a row must be present on every selected row.
+    required = _row_keys_run_cell_requires()
+    assert "proposal_experts" in required, (
+        "the key that killed run 727d9db5 is no longer required by run_cell; "
+        "this guard would no longer catch it"
+    )
+    for row in selected:
+        missing = sorted(required - set(row))
+        assert not missing, f"selected expansion row is missing {missing}"
+
+    # And the query rows and round lock must build and serialize.
+    queries = [
+        {
+            "query_id": f"run_fa7_0_r001_q{index:02d}",
+            "smiles": row["smiles"],
+            "selection_kind": row["selection_kind"],
+            "proposal_experts": row["proposal_experts"],
+            "parent": row["parent"],
+            "parent_score": row["parent_score"],
+        }
+        for index, row in enumerate(selected)
+    ]
+    assert queries
+    json.dumps(queries, sort_keys=True)
+
+
+def test_the_app_normalizes_expansion_records_before_selection():
+    """The library fix is inert unless run_cell calls it on the expansion pool."""
+
+    tree = ast.parse(_run_cell_source())
+    bound = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "fresh"
+            for target in node.targets
+        )
+        and isinstance(node.value, ast.Call)
+        and isinstance(node.value.func, ast.Name)
+        and node.value.func.id == "normalize_expansion_records"
+    ]
+    assert bound, (
+        "run_cell does not bind `fresh` to normalize_expansion_records(...); the "
+        "expansion pool would reach select_batch without proposal_experts and the "
+        "round would die building its query rows, discarding what it just found"
+    )
