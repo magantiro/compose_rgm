@@ -92,7 +92,7 @@
      "status": "CLEAN, and this is the strongest defence"
     }
    ],
-   "status": "ARCHITECTURE SETTLED. The prospective unified run validates that the automated implementation PERFORMS like the historical one; it is not permission to adopt the interpretation, which the blind routing check already supports.",
+   "status": "LOCKED -- do not re-open the framing; the remaining questions are empirical",
    "vocabulary": "adaptive proposal-support controller, over a portfolio of structured proposal kernels",
    "what_was_automatic_vs_what_was_configured": {
     "automatic, and always was": "The controller DETECTS its own support failure. `select_batch` returns empty exactly when `candidates` is empty, and that event IS candidate exhaustion -- the system declares it, no human reads a docking score. Escalation then spends CPU and no oracle calls.",
@@ -458,6 +458,29 @@
    "structural_basis": "All five originally exhausted d0.6 cells share ONE failure mode: every clean eligible witness is a large EXCISION of ~7-15 heavy atoms and none requires growth. That includes 5ht1b seed 3, whose arm is LABELLED a protonation rescue but whose witness audit showed the net-charge change comes from excising the [NH+]-bearing fragment -- ordinary atom deletion. The old labels overstate how heterogeneous the machinery is.",
    "trigger_DECIDED": "terminal primary-controller candidate_exhaustion ONLY -- never per-round zero-eligible. Rationale is correctness, not cost: a per-round trigger changes exploration inside successful cells, so trajectories could diverge everywhere and a full rerun would be owed."
   },
+  "support_restoration_gate": {
+   "cells": [
+    "5ht1b_2",
+    "braf_0",
+    "braf_1",
+    "fa7_0",
+    "fa7_2"
+   ],
+   "decision_rule": "routing correct AND support restoration comparable => freeze and run the scored 3-seed T4. Anything else -> stop. A clean negative costs nothing; finding it after 15,000 calls is the expensive version.",
+   "failure_mode_to_name_explicitly": "routing lands on the correct kernel but the lane produces essentially zero useful endpoints -- the wiring is not behaviourally equivalent even though the routing logic is right. A different defect from a routing error, needing a different fix.",
+   "if_it_passes_and_the_scores_reproduce": "one state-adaptive FiberControl policy -> multiple stochastic runs -> T4 performance. No rescue narrative, no historical caveat.",
+   "interpretation_rule": "It does NOT need to reproduce the same molecules. 12 historical eligible candidates vs 9 DIFFERENT ones with similar margins and structural character is a PASS. The mechanism is support restoration, not deterministic replay. Never score this on molecular identity.",
+   "matched_on": "proposal-compute budget",
+   "question": "Does automatic unified FiberControl recover the useful proposal SUPPORT the historical arms produced?",
+   "report": [
+    "distinct eligible endpoints",
+    "probability of obtaining any eligible endpoint across fixed seeds",
+    "constraint-margin distribution (similarity / QED / SA headroom, not pass-fail)",
+    "structural scale and family of the generated proposals",
+    "overlap or similarity to the historical expansion outputs where obtainable"
+   ],
+   "status": "the ONLY genuinely open zero-oracle gate; routing is now a regression check"
+  },
   "target_blind_gating_test": {
    "cleaner_variant": "The controller need not diagnose 'region bottleneck' vs 'protonation bottleneck' deterministically.  Maintain all applicable kernels with q(a|G) = sum_k w_k(G) q_k(a|G), weights zero where chemically inapplicable and rising as primary support dries up.  Then 5ht1b has no '5HT1B mode' -- it is simply a state where the state-aware kernel contributes useful support.",
    "not_a_prerequisite": "This refines the claim; it is not the difference between a real controller and a failsafe.  The controller is already real.",
@@ -492,5 +515,5 @@
    ]
   }
  },
- "payload_sha256": "68fd02cce78b024da463340bb08a4a229953a00ee196e68624a53bd745fd4a1a"
+ "payload_sha256": "01f58709fb3a9c4369ecc5efc974c68b8ffd9ed40d76ea10b4c2496e6d791ad9"
 }
