@@ -178,6 +178,7 @@
  "relative_auc_b_over_a": 0.7756,
  "schema_version": "pmo_completion_scored_ab_report_v1",
  "superseded_reading": {
+  "replaced_by": "scored_ab_report_celecoxib_rediscovery_v2.json",
   "see": "diagnostics/pmo_completion_repair_v1/funnel_v1.json",
   "status": "INCONCLUSIVE rather than evidence against large structured completions",
   "the_interpretation_changes": "the funnel measurement (funnel_v1.json) shows the completion law reached only 20% of the proposals it governs, because memory_channel_proposal -- the shallow lane's synthesis route whenever the online memory is warm -- dropped the keyword. This comparison therefore tested a THROTTLED mechanism.",

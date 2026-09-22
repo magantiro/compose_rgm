@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from compose_v4.control.program_task import pmo_top_ten_auc  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
+LABELS = {"v1": "scored_ab", "v2": "scored_ab_v2_footprint_restored"}
 OUT = ROOT / "diagnostics/pmo_completion_repair_v1/scored_ab"
 CHECKPOINTS = (100, 150, 200, 250)
 
@@ -114,7 +115,10 @@ def completion_provenance(folder: Path) -> dict:
 
 
 def main() -> None:
+    global OUT
     task = sys.argv[1] if len(sys.argv) > 1 else "celecoxib_rediscovery"
+    label = sys.argv[2] if len(sys.argv) > 2 else "v2"
+    OUT = ROOT / "diagnostics/pmo_completion_repair_v1" / LABELS[label]
     arms = {}
     for arm in ("A_deployed_b", "B_completion"):
         folder = OUT / task / arm
@@ -222,7 +226,10 @@ def main() -> None:
             "run locally on the pinned PMO kernel, not in the deployed Modal image",
         ],
     }
-    path = ROOT / f"diagnostics/pmo_completion_repair_v1/scored_ab_report_{task}.json"
+    report["run_label"] = label
+    path = ROOT / (
+        f"diagnostics/pmo_completion_repair_v1/scored_ab_report_{task}_{label}.json"
+    )
     path.write_text(json.dumps(report, sort_keys=True, indent=1))
     print(f"{'arm':14s}{'charged':>9}{'best':>10}{'auc':>10}"
           + "".join(f"{'t10@'+str(n):>11}" for n in CHECKPOINTS))

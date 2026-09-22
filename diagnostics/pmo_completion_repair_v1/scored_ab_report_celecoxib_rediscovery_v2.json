@@ -1,0 +1,262 @@
+{
+ "arm_B_against_its_own_throttled_version": {
+  "footprint_restored": {
+   "auc": 0.17437215649174648,
+   "best": 0.2882882882882883,
+   "t10_at_250": 0.277415
+  },
+  "reading": "restoring the footprint moved arm B substantially in its own right -- AUC +19.8%, best +15.3%, final top-ten +15.3%. The throttle was real and removing it mattered.",
+  "throttled": {
+   "auc": 0.1456,
+   "best": 0.25,
+   "t10_at_250": 0.2405
+  }
+ },
+ "arms": {
+  "A_deployed_b": {
+   "arm_spec": {
+    "completion_law": null,
+    "enable_online_memory": true
+   },
+   "auc": 0.187785272719495,
+   "auc_at": {
+    "100": 0.107738,
+    "150": 0.146468,
+    "200": 0.16987,
+    "250": 0.187785
+   },
+   "auc_budget": 250,
+   "best": 0.2824427480916031,
+   "charged": 250,
+   "completion_provenance": {
+    "counts": {},
+    "max_requested_size": 0,
+    "requested_size_gt_8": 0
+   },
+   "n_scored_values": 250,
+   "score_by_completion_provenance": {
+    "with_a_repaired_completion": {
+     "max": null,
+     "mean": null,
+     "n": 0
+    },
+    "without": {
+     "max": 0.282443,
+     "mean": 0.135862,
+     "n": 234
+    }
+   },
+   "score_by_requested_size": {
+    "none": {
+     "max": 0.282443,
+     "mean": 0.135862,
+     "n": 234
+    }
+   },
+   "throughput": {
+    "mean_pool_size": 18.1,
+    "mean_proposal_attempts": 59.4,
+    "rounds": 15
+   },
+   "top10_at": {
+    "100": 0.215477,
+    "150": 0.23238,
+    "200": 0.248527,
+    "250": 0.270365
+   },
+   "wall_seconds": 612.5
+  },
+  "B_completion": {
+   "arm_spec": {
+    "completion_law": "scale_content_v1",
+    "enable_online_memory": true
+   },
+   "auc": 0.17437215649174648,
+   "auc_at": {
+    "100": 0.08813,
+    "150": 0.122961,
+    "200": 0.151569,
+    "250": 0.174372
+   },
+   "auc_budget": 250,
+   "best": 0.2882882882882883,
+   "charged": 250,
+   "completion_provenance": {
+    "counts": {
+     "component": 1998
+    },
+    "max_requested_size": 33,
+    "requested_size_gt_8": 701
+   },
+   "n_scored_values": 250,
+   "score_by_completion_provenance": {
+    "with_a_repaired_completion": {
+     "max": 0.263158,
+     "mean": 0.136666,
+     "n": 28
+    },
+    "without": {
+     "max": 0.288288,
+     "mean": 0.134408,
+     "n": 206
+    }
+   },
+   "score_by_requested_size": {
+    "1-4": {
+     "max": 0.263158,
+     "mean": 0.121495,
+     "n": 15
+    },
+    "17+": {
+     "max": 0.217687,
+     "mean": 0.132835,
+     "n": 3
+    },
+    "5-8": {
+     "max": 0.252033,
+     "mean": 0.171192,
+     "n": 4
+    },
+    "9-16": {
+     "max": 0.213235,
+     "mean": 0.153494,
+     "n": 6
+    },
+    "none": {
+     "max": 0.288288,
+     "mean": 0.134408,
+     "n": 206
+    }
+   },
+   "throughput": {
+    "mean_pool_size": 18.1,
+    "mean_proposal_attempts": 58.5,
+    "rounds": 15
+   },
+   "top10_at": {
+    "100": 0.17626,
+    "150": 0.208985,
+    "200": 0.253755,
+    "250": 0.277415
+   },
+   "wall_seconds": 747.7
+  }
+ },
+ "budget": {
+  "authorized": 1000,
+  "cumulative_PMO_spend": 1000,
+  "qualification_panel": "NOT run -- the rule conditions it on QUALIFY and its budget was consumed by this re-run",
+  "this_run": 500
+ },
+ "caveats": [
+  "one task, one seed, 250 charged calls per arm: this justifies or refuses the next scaling step, it is not a benchmark claim",
+  "top_auc trapezoids from (0,0), so a 250-call AUC is structurally depressed ~20% at a constant level and must never be compared to a published 10k figure",
+  "run locally on the pinned PMO kernel (rdkit 2023.9.6), not in the deployed Modal image",
+  "the crossover rests on two checkpoints; a second seed would be needed before treating it as established"
+ ],
+ "checkpoints_where_b_leads": [
+  200,
+  250
+ ],
+ "control_reproduced_its_first_run_exactly": {
+  "first_run": {
+   "auc": 0.187785272719495,
+   "best": 0.2824427480916031
+  },
+  "this_run": {
+   "auc": 0.187785272719495,
+   "best": 0.2824427480916031
+  },
+  "why_this_matters": "arm A passes completion_law=None and the repaired adapter forwards getattr(..., None), so its code path is byte-identical. Reproducing its AUC and best score to the digit under concurrent load VALIDATES the matched design and shows the fix touched only the treatment."
+ },
+ "decision_rule": "diagnostics/pmo_completion_repair_v1/decision_rule_v2.json",
+ "footprint_restored": {
+  "charged_endpoints_carrying_a_repaired_completion": {
+   "this_run": 28,
+   "throttled_run": 9
+  },
+  "live_route_footprint_measured_before_launch": "22 of 22 = 1.000 on rounds 1 and later",
+  "multiple": 3.1
+ },
+ "named_limitation": {
+  "authorized": "owner decision recorded in footprint_check_v1.json :: owner_review_and_launch_authorization",
+  "effect_on_this_result": "CONSERVATIVE. B finished ahead on top-ten mean and best score despite carrying less of the mechanism than a fully-threaded arm would.",
+  "statement": "arm B is UNDER-TREATED in round 0: the bootstrap batch is deliberately unthreaded"
+ },
+ "relative_auc_b_over_a": 0.9286,
+ "run_label": "v2",
+ "schema_version": "pmo_completion_scored_ab_report_v1",
+ "score_by_completion_size_arm_B": {
+  "note": "charged endpoints, mean score, by the largest size the program's completion requested",
+  "reading": "mid-range completions are the productive ones: 5-8 atoms mean 0.171 and 9-16 mean 0.153, both ABOVE the no-completion baseline of 0.134, while 1-4 sits below at 0.121. Small n per cell (4 and 6), so this is a direction to test, not a measured effect.",
+  "table": {
+   "1-4": {
+    "max": 0.263158,
+    "mean": 0.121495,
+    "n": 15
+   },
+   "17+": {
+    "max": 0.217687,
+    "mean": 0.132835,
+    "n": 3
+   },
+   "5-8": {
+    "max": 0.252033,
+    "mean": 0.171192,
+    "n": 4
+   },
+   "9-16": {
+    "max": 0.213235,
+    "mean": 0.153494,
+    "n": 6
+   },
+   "none": {
+    "max": 0.288288,
+    "mean": 0.134408,
+    "n": 206
+   }
+  }
+ },
+ "task": "celecoxib_rediscovery",
+ "the_finding_is_the_CROSSOVER": {
+  "auc": {
+   "A": 0.187785272719495,
+   "B": 0.17437215649174648,
+   "leader": "A"
+  },
+  "best_score": {
+   "A": 0.2824427480916031,
+   "B": 0.2882882882882883,
+   "leader": "B"
+  },
+  "mechanism": "the completion mechanism COSTS EARLY AND PAYS LATE. B trails through the first half, overtakes at 200 calls, and finishes ahead on both the top-ten mean and the best score. AUC integrates the whole curve, so at a 250-call budget it charges B for the early deficit more than it credits the late gain.",
+  "top_ten_mean": {
+   "at_100": {
+    "A": 0.215477,
+    "B": 0.17626,
+    "leader": "A"
+   },
+   "at_150": {
+    "A": 0.23238,
+    "B": 0.208985,
+    "leader": "A"
+   },
+   "at_200": {
+    "A": 0.248527,
+    "B": 0.253755,
+    "leader": "B"
+   },
+   "at_250": {
+    "A": 0.270365,
+    "B": 0.277415,
+    "leader": "B"
+   }
+  },
+  "why_this_is_NOT_a_reason_to_change_the_metric": "AUC at the run's own budget is the predeclared primary metric and it is the right one for a fixed-budget comparison. The crossover is a finding ABOUT the mechanism, not a defect of the metric. What it licenses is a question -- does the crossover hold and widen at 1000 calls -- not a re-scoring of this run."
+ },
+ "validity_check": {
+  "control_is_clean": true,
+  "treatment_carries_the_law": true
+ },
+ "verdict": "INCONCLUSIVE"
+}

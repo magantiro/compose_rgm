@@ -2944,3 +2944,51 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **GENERAL RULE, now paid for twice in this repo: after threading a new keyword, grep its
   CALLERS for adapters that REPLACE the path rather than extend it.** A drop-in replacement is
   the one shape that both looks like production and silently isn't.
+
+## 2026-09-22 (the corrected completion A/B: INCONCLUSIVE, and the finding is a CROSSOVER)
+
+- **The re-run with the footprint restored is INCONCLUSIVE by the predeclared rule, and that is
+  the honest answer.** Matched 250-call celecoxib arms, both concurrent for symmetric load:
+      arm                     best      AUC     t10@100  t10@150  t10@200  t10@250
+      A  deployed B          0.2824   0.1878    0.2155   0.2324   0.2485   0.2704
+      B  + completion law    0.2883   0.1744    0.1763   0.2090   0.2538   0.2774
+  AUC ratio **0.929** -- between the 0.90 reject and 1.10 qualify thresholds -- and B leads on
+  the top-ten mean at 2 of the 4 checkpoints, short of the 3 required.
+- **THE CONTROL REPRODUCED ITS FIRST RUN TO THE DIGIT** (best 0.2824427480916031, AUC 0.1878),
+  which is the strongest validation available that the matched design is sound and that the
+  wiring fix touched only the treatment. Arm A passes `completion_law=None` and the repaired
+  adapter forwards `getattr(..., None)`, so its path is byte-identical -- and the run proves it
+  under real concurrent load rather than by argument.
+- **THE MECHANISM COSTS EARLY AND PAYS LATE.** B trails through the first half, **overtakes at
+  200 calls**, and finishes ahead on BOTH the top-ten mean (0.2774 vs 0.2704) and the best score
+  (0.2883 vs 0.2824) -- while losing on AUC, because AUC integrates the whole curve and charges
+  the early deficit more than it credits the late gain. A metric and a mechanism can disagree
+  without either being wrong: at a fixed 250-call budget, AUC is the right primary metric AND
+  the crossover is a real property of the mechanism. **That licenses a question -- does the
+  crossover hold and widen at 1,000 calls -- not a re-scoring of this run.**
+- **REMOVING THE THROTTLE MATTERED, measured against arm B's own throttled version:** AUC
+  0.1456 -> 0.1744 (+19.8%), best 0.25 -> 0.2883 (+15.3%), final top-ten 0.2405 -> 0.2774, and
+  charged endpoints carrying a repaired completion 9 -> 28 (3.1x). The first A/B's INCONCLUSIVE
+  label was correct: it was measuring a throttle.
+- **A GATE MAY FAIL AND THE LAUNCH STILL BE RIGHT -- but the verdict must not be rewritten.**
+  The zero-oracle footprint gate returned **0.786 against its own 0.90 floor**. The entire
+  residual was round 0, the deliberately-unthreaded bootstrap; rounds 1+ were **22 of 22**. The
+  record says "the gate failed on a denominator that counted a declared exclusion, the owner
+  reviewed the residual and authorized the launch" -- NOT "the gate passed". **The decisive
+  argument for not rescoping: threading round 0 after seeing 0.786 would move the mechanism's
+  SCOPE in response to a gate result, which is the same hazard as re-tuning the mechanism. If
+  scope can move once a gate reads 0.786, the gate was never real.** What made the residual
+  acceptable is that the exclusion PREDATES the gate and is readable from git (`git show
+  eec75cf1:tests/...`) -- a declared design choice, checkable rather than trusted.
+- **Carry the under-treatment as a named limitation, and note which way it cuts.** Arm B ran
+  without the law in round 0, so a positive result is CONSERVATIVE and a negative one leaves
+  round-0 exclusion as a live alternative explanation. Here B finished ahead despite carrying
+  less of the mechanism than a fully-threaded arm would.
+- **Predeclaring a SECOND time, after seeing the first result, means carrying the FIRST rule's
+  thresholds over unchanged and saying so.** Re-deriving thresholds once numbers are visible is
+  fitting even when it feels like judgement. `decision_rule_v2.json` states that explicitly;
+  the only additions were the footprint precondition and the supersession record.
+- **Directional, not measured: mid-range completions are the productive ones.** Charged arm-B
+  endpoints by the largest size their completion requested -- 5-8 atoms mean 0.171 and 9-16 mean
+  0.153, both above the no-completion baseline of 0.134, while 1-4 sits below at 0.121. n is 4
+  and 6 per cell, so this is a direction to test, not an effect.
