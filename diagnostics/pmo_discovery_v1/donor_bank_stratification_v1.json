@@ -1,0 +1,306 @@
+{
+  "arms": {
+    "stratified": {
+      "arm": "stratified",
+      "attempts": 240,
+      "by_donor_stratum": {
+        "diverse": {
+          "compiled": 114,
+          "distinct_product_basins": 67,
+          "product_basins_absent_from_the_counted_population": 25,
+          "qed": {
+            "max": 0.9085485929323303,
+            "mean": 0.5168938644015005,
+            "median": 0.5258191666569636,
+            "min": 0.023128849999363536
+          },
+          "retained_fraction": {
+            "max": 0.9736842105263158,
+            "mean": 0.7490066542447711,
+            "median": 0.8571428571428572,
+            "min": 0.040000000000000036
+          },
+          "steps": {
+            "max": 29.0,
+            "mean": 7.087719298245614,
+            "median": 4.0,
+            "min": 1.0
+          }
+        },
+        "elite": {
+          "compiled": 101,
+          "distinct_product_basins": 74,
+          "product_basins_absent_from_the_counted_population": 37,
+          "qed": {
+            "max": 0.8713829396136823,
+            "mean": 0.49454951666076796,
+            "median": 0.4719983679006756,
+            "min": 0.06798312462256381
+          },
+          "retained_fraction": {
+            "max": 0.9722222222222222,
+            "mean": 0.7214023564772654,
+            "median": 0.8333333333333334,
+            "min": 0.02631578947368418
+          },
+          "steps": {
+            "max": 49.0,
+            "mean": 9.752475247524753,
+            "median": 7.0,
+            "min": 1.0
+          }
+        }
+      },
+      "compiled": 215,
+      "compiled_rate": 0.8958333333333334,
+      "descriptor_note": "descriptive chemistry sanity, NOT an objective and not used for selection",
+      "distinct_donors_used": 108,
+      "distinct_product_basins": 113,
+      "distinct_products": 205,
+      "novel_vs_counted_population": 202,
+      "product_basins_absent_from_the_counted_population": 62,
+      "product_qed_at_least_0.6": 65,
+      "qed": {
+        "max": 0.9085485929323303,
+        "mean": 0.5063972173232959,
+        "median": 0.4955361151789214,
+        "min": 0.023128849999363536
+      },
+      "realized_strata": {
+        "diverse": 114,
+        "elite": 101
+      },
+      "retained_fraction": {
+        "max": 0.9736842105263158,
+        "mean": 0.7360390538981753,
+        "median": 0.8571428571428572,
+        "min": 0.02631578947368418
+      },
+      "sa": {
+        "max": 7.455355894216386,
+        "mean": 4.136671797220866,
+        "median": 4.12005686592464,
+        "min": 1.313192314917865
+      },
+      "statuses": {
+        "compiled": 215,
+        "donor_has_no_region": 21,
+        "donor_region_not_single_bond": 87,
+        "mapping_violates_charged_center_policy": 11,
+        "search_unresolved": 1,
+        "self_proposal": 19,
+        "source_region_not_single_bond": 106,
+        "source_support_exhausted": 9,
+        "unsupported_size": 10
+      },
+      "steps": {
+        "max": 49.0,
+        "mean": 8.33953488372093,
+        "median": 5.0,
+        "min": 1.0
+      }
+    },
+    "top_n": {
+      "arm": "top_n",
+      "attempts": 240,
+      "by_donor_stratum": {
+        "top_n": {
+          "compiled": 207,
+          "distinct_product_basins": 154,
+          "product_basins_absent_from_the_counted_population": 114,
+          "qed": {
+            "max": 0.9272222056929637,
+            "mean": 0.49015343800069944,
+            "median": 0.485080376358481,
+            "min": 0.029448937657942077
+          },
+          "retained_fraction": {
+            "max": 0.9722222222222222,
+            "mean": 0.740588703460405,
+            "median": 0.8421052631578947,
+            "min": 0.02777777777777779
+          },
+          "steps": {
+            "max": 46.0,
+            "mean": 12.753623188405797,
+            "median": 11.0,
+            "min": 1.0
+          }
+        }
+      },
+      "compiled": 207,
+      "compiled_rate": 0.8625,
+      "descriptor_note": "descriptive chemistry sanity, NOT an objective and not used for selection",
+      "distinct_donors_used": 24,
+      "distinct_product_basins": 154,
+      "distinct_products": 205,
+      "novel_vs_counted_population": 202,
+      "product_basins_absent_from_the_counted_population": 114,
+      "product_qed_at_least_0.6": 61,
+      "qed": {
+        "max": 0.9272222056929637,
+        "mean": 0.49015343800069944,
+        "median": 0.485080376358481,
+        "min": 0.029448937657942077
+      },
+      "realized_strata": {
+        "top_n": 207
+      },
+      "retained_fraction": {
+        "max": 0.9722222222222222,
+        "mean": 0.740588703460405,
+        "median": 0.8421052631578947,
+        "min": 0.02777777777777779
+      },
+      "sa": {
+        "max": 6.796137149718623,
+        "mean": 3.959212153236227,
+        "median": 4.0323861647850165,
+        "min": 1.3011135383843353
+      },
+      "statuses": {
+        "compiled": 207,
+        "donor_region_not_single_bond": 119,
+        "mapping_violates_charged_center_policy": 11,
+        "self_proposal": 9,
+        "source_region_not_single_bond": 108,
+        "source_support_exhausted": 11,
+        "unsupported_size": 20
+      },
+      "steps": {
+        "max": 46.0,
+        "mean": 12.753623188405797,
+        "median": 11.0,
+        "min": 1.0
+      }
+    }
+  },
+  "capacity": 300,
+  "counted_molecules": 250,
+  "counted_population_basins": 121,
+  "draws_per_parent": 4,
+  "elapsed_seconds": 47.98,
+  "information_regime": "molecules, scores and parent->child edges REPLAYED from a completed charged run's ledger; no new scoring, no prescreen bank, no declared target",
+  "kernel": {
+    "rdkit": "2023.09.6"
+  },
+  "ledger": "pmo_3x250_autopsy_v1.json",
+  "oracle_calls": 0,
+  "parents": 60,
+  "pools": {
+    "stratified": {
+      "diverse": {
+        "distinct_basins": 55,
+        "heavy_atoms": {
+          "max": 36.0,
+          "mean": 12.327272727272728,
+          "median": 10.0,
+          "min": 4.0
+        },
+        "molecules": 55,
+        "qed": {
+          "max": 0.9015782757697655,
+          "mean": 0.5008010999979247,
+          "median": 0.46647799787641353,
+          "min": 0.15596413908547302
+        },
+        "qed_at_least_0.6": 16,
+        "sa": {
+          "max": 7.142748464094183,
+          "mean": 4.872852015278096,
+          "median": 4.861210186295212,
+          "min": 2.3215076618525963
+        }
+      },
+      "elite": {
+        "distinct_basins": 66,
+        "heavy_atoms": {
+          "max": 38.0,
+          "mean": 24.49,
+          "median": 25.5,
+          "min": 6.0
+        },
+        "molecules": 100,
+        "qed": {
+          "max": 0.912191284746457,
+          "mean": 0.5349460753012221,
+          "median": 0.53776993017141,
+          "min": 0.021016298100079007
+        },
+        "qed_at_least_0.6": 42,
+        "sa": {
+          "max": 5.930346785949823,
+          "mean": 3.734595143911449,
+          "median": 3.8495955296625173,
+          "min": 1.5213859526925404
+        }
+      },
+      "promising": {
+        "distinct_basins": 0,
+        "heavy_atoms": null,
+        "molecules": 0,
+        "qed": null,
+        "qed_at_least_0.6": 0,
+        "sa": null
+      },
+      "total": {
+        "distinct_basins": 121,
+        "heavy_atoms": {
+          "max": 38.0,
+          "mean": 20.174193548387098,
+          "median": 20.0,
+          "min": 4.0
+        },
+        "molecules": 155,
+        "qed": {
+          "max": 0.912191284746457,
+          "mean": 0.5228301163226327,
+          "median": 0.5075823325643732,
+          "min": 0.021016298100079007
+        },
+        "qed_at_least_0.6": 58,
+        "sa": {
+          "max": 7.142748464094183,
+          "mean": 4.138492743428647,
+          "median": 4.035024534151252,
+          "min": 1.5213859526925404
+        }
+      },
+      "weights": {
+        "diverse": 0.5,
+        "elite": 0.5
+      }
+    },
+    "top_n": {
+      "distinct_basins": 21,
+      "heavy_atoms": {
+        "max": 37.0,
+        "mean": 31.791666666666668,
+        "median": 33.0,
+        "min": 23.0
+      },
+      "molecules": 24,
+      "qed": {
+        "max": 0.7234858148020531,
+        "mean": 0.3973615592135615,
+        "median": 0.32262798241462415,
+        "min": 0.18763244076419974
+      },
+      "qed_at_least_0.6": 4,
+      "sa": {
+        "max": 4.9757975670394,
+        "mean": 3.552222952500531,
+        "median": 3.3960117841862916,
+        "min": 2.441050961785022
+      }
+    }
+  },
+  "promising_note": "the ledger artifact records only the best-so-far improvement chain, so the promising stratum rests on the few real counted edges it contains; its selection logic is exercised in tests/test_pmo_donor_scored_bank.py",
+  "promising_stratum_is_thinly_exercised": true,
+  "real_counted_lineage_edges": 1,
+  "schema_version": "pmo_donor_bank_stratification_v1",
+  "seed": 20260921,
+  "task": "celecoxib_rediscovery",
+  "top_n_is_contained_in_the_stratified_bank": true,
+  "unbuildable_states": []
+}

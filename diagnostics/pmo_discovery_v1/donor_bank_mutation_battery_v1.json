@@ -1,0 +1,242 @@
+{
+  "schema_version": "pmo_discovery_mutation_battery_v1",
+  "suite": "tests/test_pmo_discovery.py",
+  "mutations": 16,
+  "mutations_are_a_subset": true,
+  "only_filter": null,
+  "suite_filter": "scored_bank",
+  "killed": 16,
+  "positive_controls_green": true,
+  "all_guards_load_bearing": true,
+  "rows": [
+    {
+      "mutation": "elite_capacity_falls_below_the_superseded_pool",
+      "file": "pmo_online_memory.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_bank_is_a_widening_and_never_a_narrowing"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_an_empty_stratum_yields_its_mass_rather_than_shrinking_the_draw",
+        "test_the_bank_is_a_widening_and_never_a_narrowing",
+        "test_the_diverse_stratum_covers_a_basin_the_higher_strata_do_not",
+        "test_the_strata_are_disjoint_and_precedence_decides_ties"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "the_strata_stop_being_disjoint",
+      "file": "pmo_online_memory.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_strata_are_disjoint_and_precedence_decides_ties"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_an_empty_stratum_yields_its_mass_rather_than_shrinking_the_draw",
+        "test_the_diverse_stratum_covers_a_basin_the_higher_strata_do_not",
+        "test_the_strata_are_disjoint_and_precedence_decides_ties"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "the_diverse_stratum_ignores_the_basins_already_occupied",
+      "file": "pmo_online_memory.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_diverse_stratum_covers_a_basin_the_higher_strata_do_not"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_the_diverse_stratum_covers_a_basin_the_higher_strata_do_not",
+        "test_the_donor_pool_IS_the_bank_selection_and_not_a_score_ranking"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "promising_admits_a_parent_whose_child_did_not_improve",
+      "file": "pmo_online_memory.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_promising_stratum_is_evidence_about_a_molecule_as_a_SOURCE"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_the_diverse_stratum_covers_a_basin_the_higher_strata_do_not",
+        "test_the_donor_pool_IS_the_bank_selection_and_not_a_score_ranking",
+        "test_the_promising_stratum_is_evidence_about_a_molecule_as_a_SOURCE"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "observe_lineage_invents_a_row_for_a_parent_the_ledger_never_charged",
+      "file": "pmo_online_memory.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_a_parent_the_ledger_never_charged_cannot_enter_the_bank"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_a_parent_the_ledger_never_charged_cannot_enter_the_bank"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "the_lineage_is_banked_BELOW_the_attribution_early_return",
+      "file": "pmo_online_memory.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_lineage_is_banked_even_when_the_edit_cannot_be_attributed"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_the_lineage_is_banked_even_when_the_edit_cannot_be_attributed",
+        "test_the_promising_stratum_is_reachable_from_a_REAL_propose_observe_cycle"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "restore_rebuilds_the_bank_from_the_frontier",
+      "file": "pmo_online_memory.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_bank_rides_the_resume_and_an_old_payload_restores_EMPTY"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_the_bank_rides_the_resume_and_an_old_payload_restores_EMPTY"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "the_draw_flattens_the_strata_into_one_uniform_pool",
+      "file": "pmo_donor_channel.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_draw_gives_each_stratum_its_DECLARED_mass_not_its_size_share"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_the_draw_gives_each_stratum_its_DECLARED_mass_not_its_size_share"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "the_donor_tag_stops_naming_the_stratum_its_donor_came_from",
+      "file": "pmo_donor_channel.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_a_donor_candidate_names_the_stratum_its_donor_came_from"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_a_donor_candidate_names_the_stratum_its_donor_came_from"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "add_measured_program_stops_banking_the_bootstrap_molecule",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_a_bootstrap_scored_molecule_reaches_the_bank_AND_NOTHING_ELSE"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_a_bootstrap_scored_molecule_reaches_the_bank_AND_NOTHING_ELSE",
+        "test_a_donor_candidate_names_the_stratum_its_donor_came_from",
+        "test_the_donor_pool_IS_the_bank_selection_and_not_a_score_ranking",
+        "test_the_promising_stratum_is_reachable_from_a_REAL_propose_observe_cycle"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "add_measured_program_also_feeds_the_frontier_and_moves_arm_B",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_a_bootstrap_scored_molecule_reaches_the_bank_AND_NOTHING_ELSE"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_a_bootstrap_scored_molecule_reaches_the_bank_AND_NOTHING_ELSE"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "the_donor_pool_reverts_to_a_score_ranking",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_donor_pool_IS_the_bank_selection_and_not_a_score_ranking"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_the_donor_pool_IS_the_bank_selection_and_not_a_score_ranking"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "arm_D_stops_requiring_arm_B_at_the_controller",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_arm_D_without_arm_B_is_REFUSED_at_the_controller"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_arm_D_without_arm_B_is_REFUSED_at_the_controller"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "arm_D_stops_requiring_arm_B_before_the_ledger_is_built",
+      "file": "pmo_population_v1.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_arm_D_without_arm_B_is_REFUSED_before_the_ledger_is_built"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_arm_D_without_arm_B_is_REFUSED_before_the_ledger_is_built"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "the_parent_endpoint_is_read_straight_off_a_provenance_key_that_is_never_written",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_promising_stratum_is_reachable_from_a_REAL_propose_observe_cycle"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_the_promising_stratum_is_reachable_from_a_REAL_propose_observe_cycle"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "the_donor_strata_are_rebuilt_per_attempt_instead_of_per_round",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_a_donor_candidate_names_the_stratum_its_donor_came_from"
+      ],
+      "expected_green": [],
+      "observed_red": [
+        "test_a_donor_candidate_names_the_stratum_its_donor_came_from"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "POSITIVE_CONTROL_bank_cosmetic_comment",
+      "file": "pmo_online_memory.py",
+      "is_positive_control": true,
+      "expected_red": [],
+      "expected_green": [],
+      "observed_red": [],
+      "status": "GREEN (correct)"
+    }
+  ]
+}
