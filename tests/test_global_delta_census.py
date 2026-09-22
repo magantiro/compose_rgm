@@ -134,3 +134,38 @@ def test_stable_seed_is_stable_across_processes() -> None:
         env={"PYTHONHASHSEED": "random", "PATH": "/usr/bin:/bin"},
     )
     assert int(out.stdout.strip()) == expected
+
+
+def test_installed_content_axes_separate_a_chain_from_a_ring() -> None:
+    """``_grow_actions`` can only build a linear single-bonded C/N/O chain."""
+    chain = compute_global_delta(_BENZENE, "CCCc1ccccc1")
+    assert chain.installed_atoms == 3
+    assert chain.installed_region_has_ring is False
+    assert chain.largest_installed_is_linear_chain is True
+    assert chain.installed_expressible_as_grow_chain is True
+
+    ring = compute_global_delta(_BENZENE, "c1ccc(-c2ccccc2)cc1")
+    assert ring.installed_atoms == 6
+    assert ring.installed_region_has_ring is True
+    assert ring.largest_installed_is_linear_chain is False
+    assert ring.installed_expressible_as_grow_chain is False
+
+
+def test_a_branched_installed_region_is_not_a_grow_chain() -> None:
+    branched = compute_global_delta(_BENZENE, "CC(C)Cc1ccccc1")
+    assert branched.installed_branch_points >= 1
+    assert branched.installed_expressible_as_grow_chain is False
+
+
+def test_an_installed_chain_longer_than_the_cap_is_not_expressible() -> None:
+    long_chain = compute_global_delta(_BENZENE, "CCCCCCCCCc1ccccc1")
+    assert long_chain.installed_atoms == 9
+    assert long_chain.largest_installed_is_linear_chain is True
+    assert long_chain.installed_expressible_as_grow_chain is False
+
+
+def test_anchor_groups_counts_merged_sites_not_raw_regions() -> None:
+    both = compute_global_delta(_BENZENE, _PARA_XYLENE)
+    assert both.n_anchor_groups == 2
+    single = compute_global_delta(_BENZENE, _TOLUENE)
+    assert single.n_anchor_groups == 1

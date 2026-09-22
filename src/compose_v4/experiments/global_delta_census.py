@@ -92,6 +92,7 @@ class GlobalDelta:
 
     n_attachment_boundaries: int = 0
     n_anchor_atoms: int = 0
+    n_anchor_groups: int = 0
     n_replacement_sites: int = 0
     attachment_moved: bool = False
     substituent_replaced: bool = False
@@ -109,6 +110,15 @@ class GlobalDelta:
     ring_topology_changed: bool = False
     ring_sizes_source: list[int] = field(default_factory=list)
     ring_sizes_target: list[int] = field(default_factory=list)
+
+    installed_ring_atoms: int = 0
+    installed_region_has_ring: bool = False
+    installed_heteroatoms: int = 0
+    installed_branch_points: int = 0
+    largest_installed_is_linear_chain: bool = False
+    installed_expressible_as_grow_chain: bool = False
+    excised_ring_atoms: int = 0
+    excised_region_has_ring: bool = False
 
     heteroatom_changes: int = 0
     element_delta: dict[str, int] = field(default_factory=dict)
@@ -371,6 +381,7 @@ def compute_global_delta(
         for part in merged:
             combined |= part
         anchor_groups = remaining + [combined]
+    delta.n_anchor_groups = len(anchor_groups)
     delta.multi_region = len(anchor_groups) >= 2
 
     if len(anchor_groups) >= 2 and core_source:
@@ -390,6 +401,51 @@ def compute_global_delta(
                     worst = max(worst, best)
         delta.max_anchor_separation = worst
         delta.distant_coupled_edits = worst >= distant_hops
+
+    # What the installed region CONTAINS.  ``_grow_actions`` in the production
+    # proposal path can only build a linear single-bonded C/N/O chain, so
+    # ring content, branching and non-CNO elements are the axes on which an
+    # installed region can be outside that channel's reach.
+    target_rings = target.GetRingInfo()
+    source_rings_info = source.GetRingInfo()
+    delta.installed_ring_atoms = sum(
+        1 for node in installed_nodes if target_rings.NumAtomRings(node) > 0
+    )
+    delta.installed_region_has_ring = delta.installed_ring_atoms > 0
+    delta.installed_heteroatoms = sum(
+        1 for node in installed_nodes if target.GetAtomWithIdx(node).GetSymbol() != "C"
+    )
+    delta.excised_ring_atoms = sum(
+        1 for node in excised_nodes if source_rings_info.NumAtomRings(node) > 0
+    )
+    delta.excised_region_has_ring = delta.excised_ring_atoms > 0
+
+    if installed_regions:
+        largest = max(installed_regions, key=len)
+        sub = target_graph.subgraph(largest)
+        delta.installed_branch_points = sum(1 for n in sub.nodes if sub.degree(n) >= 3)
+        is_path = (
+            sub.number_of_edges() == sub.number_of_nodes() - 1
+            and all(sub.degree(n) <= 2 for n in sub.nodes)
+        )
+        all_single = all(
+            target.GetBondBetweenAtoms(u, v).GetBondType() == Chem.BondType.SINGLE
+            for u, v in sub.edges
+        )
+        only_cno = all(
+            target.GetAtomWithIdx(n).GetSymbol() in ("C", "N", "O") for n in largest
+        )
+        # One anchor bond only: ``_grow_actions`` grows a chain off a single anchor.
+        anchor_bonds = sum(
+            1
+            for node in largest
+            for neighbour in target_graph.neighbors(node)
+            if neighbour in core_target
+        )
+        delta.largest_installed_is_linear_chain = bool(is_path and all_single)
+        delta.installed_expressible_as_grow_chain = bool(
+            is_path and all_single and only_cno and anchor_bonds == 1 and len(largest) <= 8
+        )
 
     # Bond-order changes strictly inside the retained core.
     changes = 0
