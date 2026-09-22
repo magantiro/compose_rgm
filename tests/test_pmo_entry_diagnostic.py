@@ -595,3 +595,107 @@ def test_a_histogram_of_non_numeric_values_does_not_raise():
 
     assert driver._histogram([[0, 1], [0], [0, 1]]) == {"[0, 1]": 2, "[0]": 1}
     assert driver._histogram([3, 1, 2]) == {"1": 1, "2": 1, "3": 1}
+
+
+# ---- the future-value supersession and its free resolution ----
+
+
+def _vlocal():
+    import pmo_entry_diagnostic_vlocal as vlocal
+
+    return vlocal
+
+
+def test_the_supersession_does_not_claim_a_precondition_it_does_not_meet():
+    """The owner's condition was that no arm number had been read. Several had.
+
+    A supersession that misstates its own preconditions is the goalpost-move it
+    exists to rule out, so the record must carry the false verdict and the
+    evidence, not a paraphrase that reads as though the condition held.
+    """
+
+    payload = json.loads(
+        (REPO_ROOT / "diagnostics/pmo_entry_diagnostic_v1/predicate_supersession_v1.json").read_text()
+    )["payload"]
+    assert payload["precondition_holds"] is False
+    observed = payload["arm_results_observed_before_supersession"]
+    assert len(observed) >= 5, "the record must name the results that were read"
+    # The weaker argument offered in its place must rest on a real property.
+    assert payload["every_observed_arm_returned_the_same_result"] is True
+    assert payload["distinct_outcomes_across_arms"] == [0]
+    assert all(row["entries_at_sealed_delta"] == 0 for row in observed)
+
+
+def test_off_route_probes_are_not_filtered_down_to_the_roomiest_basins():
+    """A probe stopping early EXHAUSTED its basin; excluding it biases the result.
+
+    Seven of the 33 paid probes spent 57-63 of 64 calls because the local search
+    ran out of distinct new molecules. A strict equality filter dropped three
+    tasks' best-scoring seed -- including the lowest-scoring task -- and moved
+    the reported range from 32-99% to 37-99% with nothing in the output to show
+    it. What the statistic needs is a complete top ten, which all of them have.
+    """
+
+    vlocal = _vlocal()
+    probes = vlocal.off_route_points(REPO_ROOT)
+    assert len({probe["task"] for probe in probes}) == 11
+    assert all(probe["top_ten_new_count"] == 10 for probe in probes)
+    short = [p for p in probes if p["charged_calls"] < vlocal.VLOCAL_BUDGET]
+    assert short, "the short probes must be RETAINED, not filtered away"
+    for probe in short:
+        # The reason they are admissible: they ran out of molecules, and said so.
+        assert probe["distinct_new_molecules"] >= probe["charged_calls"] - 1
+    # Every task must keep its best-scoring seed, which is what the strict
+    # filter silently removed.
+    for task in {probe["task"] for probe in probes}:
+        rows = [p for p in probes if p["task"] == task]
+        assert any("blind_best_score" in p["selectors"] for p in rows), task
+
+
+def test_every_off_route_probe_is_seeded_at_a_blind_molecule():
+    """It answers the request only if it seeded where the BLIND run went."""
+
+    probes = _vlocal().off_route_points(REPO_ROOT)
+    assert probes
+    for probe in probes:
+        assert any(selector.startswith("blind_") for selector in probe["selectors"])
+        assert probe["budget"] == _vlocal().VLOCAL_BUDGET
+
+
+def test_the_resolution_names_the_reference_it_rejected():
+    """A threshold invented after seeing numbers must show its working.
+
+    The request predeclared LOW versus HIGH and fixed no number. The resolution
+    therefore has to state which reference it used, why, and which one it tried
+    and threw away -- otherwise the verdict is unfalsifiable.
+    """
+
+    payload = json.loads(
+        (
+            REPO_ROOT
+            / "diagnostics/pmo_entry_diagnostic_v1/vlocal_request_resolution_celecoxib_rediscovery.json"
+        ).read_text()
+    )["payload"]
+    block = payload["threshold_was_not_predeclared"]
+    assert "tautological" in block["rejected_reference"]
+    assert "anchor" in block["reference_used"]
+    assert payload["new_charged_calls_spent"] == 0
+    assert payload["charged_calls_reused"] > 0
+    # The limit must be stated, not waved off.
+    assert "unscored basin remains untested" in payload[
+        "limit_that_must_be_written_not_waved_off"
+    ]
+
+
+def test_the_proxy_validation_refuses_to_claim_it_can_see_a_novel_basin():
+    payload = json.loads(
+        (REPO_ROOT / "diagnostics/pmo_entry_diagnostic_v1/vlocal_proxy_validation_v1.json").read_text()
+    )["payload"]
+    assert payload["verdict"]["label"] == "PARTIAL_PROXY_ONLY_AND_IT_CANNOT_SEE_A_NOVEL_BASIN"
+    # The counterexamples are the owner's refinement measured rather than argued.
+    assert set(payload["verdict"]["counterexample_tasks"]) >= {"median1", "perindopril_mpo"}
+    # And the verdict text must be derived from the table beside it: an earlier
+    # version asserted size carries no signal while measuring tau +0.692.
+    heavy = payload["proxies"]["heavy_atoms"]["within_task_kendall_tau"]
+    claims_signal = any("heavy_atoms" in row for row in payload["verdict"]["offline_proxies_with_signal"])
+    assert claims_signal == (heavy > 0)

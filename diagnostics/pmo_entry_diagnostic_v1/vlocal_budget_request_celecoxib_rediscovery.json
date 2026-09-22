@@ -54,6 +54,11 @@
     "what": "V_local at the novel molecules an arm produced that are nearer a productive region than anything B produced."
    }
   ],
+  "resolution": {
+   "charged_calls_actually_spent_on_this_request": 0,
+   "priority_1": "ANSWERED FREE. Test C entry probes ARE this measurement -- the frozen local controller seeded at blind-found molecules for 64 charged calls. 2,081 already-paid calls reused, 0 spent. Verdict LOW: off-route V_local is 37.2% of anchor on celecoxib and 32-99% across 11 tasks. See vlocal_request_resolution_celecoxib_rediscovery.json.",
+   "priority_2": "DECLINED, as recommended. The available candidates sit at similarity ~0.21 with nothing but novelty to recommend them."
+  },
   "schema_version": "pmo_entry_vlocal_budget_request_v1",
   "software": {
    "numpy": "1.26.4",
@@ -61,9 +66,10 @@
    "python": "3.11.13",
    "rdkit": "2023.09.6"
   },
+  "status": "PRIORITY_1_ANSWERED_FROM_CALLS_ALREADY_PAID; PRIORITY_2_DECLINED",
   "task": "celecoxib_rediscovery",
   "total_if_both_approved": 384,
   "why_a_proxy_is_not_enough": "Every offline proxy that validates against Test B is teacher-referenced or a route-position artifact, so it scores a high-value molecule in an unrelated basin as zero. That is the case the superseding definition exists to credit."
  },
- "payload_sha256": "8cc88bbb0e6b75dadc4cdb638055cc39e150bf2627566787ae2460f493af24c3"
+ "payload_sha256": "b924336e8ce59b5fd48ab91f284aef9a9de4b9d53f5de58b8c3789ab4a920a59"
 }

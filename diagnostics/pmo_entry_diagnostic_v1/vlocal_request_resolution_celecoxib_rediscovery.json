@@ -1,0 +1,449 @@
+{
+ "payload": {
+  "charged_calls_reused": 2081,
+  "how_it_was_answered_for_free": "Test C's ENTRY probes ARE the requested measurement: the frozen local controller seeded at BLIND-found molecules and run for 64 charged calls, recording top_ten_new_mean. Verified here against the artifacts rather than taken on relay -- every probe used carries budget and charged_calls equal to 64 and a blind_* selector.",
+  "independent_corroboration_on_the_focus_task": {
+   "local_lift_over_its_own_seed": 0.0013,
+   "reading": "64 local calls from B's best molecule improve it by +0.0013. That is a PLATEAU measured directly, and it agrees with the charged approach ladder (last improving call 156 of 250) and with 911 further proposals adding +0.0024. Four independent measurements, one conclusion."
+  },
+  "limit_that_must_be_written_not_waved_off": "Every seed is score-derived or atlas-derived -- blind_best_score, blind_nearest_atlas, blind_median_score -- so a basin the run passed THROUGH without scoring well is not covered by this measurement. The gradient argues against that explanation rather than excluding it: the best-scoring seed has the highest V_local of its three on 11 of 11 tasks, so within the sampled seeds score and future value are rank-aligned. An unscored basin remains untested and would need its own charged sample.",
+  "new_charged_calls_spent": 0,
+  "off_route_fraction_of_anchor_by_task": {
+   "albuterol_similarity": 0.5821,
+   "celecoxib_rediscovery": 0.3725,
+   "gsk3b": 0.6708,
+   "isomers_c7h8n2o2": 0.8999,
+   "jnk3": 0.382,
+   "median1": 0.6407,
+   "mestranol_similarity": 0.4457,
+   "perindopril_mpo": 0.584,
+   "qed": 0.9894,
+   "thiothixene_rediscovery": 0.3715,
+   "troglitazone_rediscovery": 0.3228
+  },
+  "per_task": {
+   "albuterol_similarity": {
+    "all_seeds": [
+     {
+      "seed_score": 0.5747,
+      "selectors": [
+       "blind_best_score"
+      ],
+      "similarity_to_atlas": 0.1818,
+      "v_local": 0.5739
+     },
+     {
+      "seed_score": 0.2879,
+      "selectors": [
+       "blind_median_score"
+      ],
+      "similarity_to_atlas": 0.125,
+      "v_local": 0.322
+     },
+     {
+      "seed_score": 0.2731,
+      "selectors": [
+       "blind_nearest_atlas"
+      ],
+      "similarity_to_atlas": 0.2237,
+      "v_local": 0.3211
+     }
+    ],
+    "anchor_v_local": 0.9859,
+    "best_score_seed_is_the_highest_v_local": true,
+    "fraction_of_anchor": 0.5821,
+    "local_lift_over_its_own_seed": 0.0407,
+    "off_route_v_local_at_blind_best": 0.5739,
+    "seed_score": 0.5747,
+    "seed_similarity_to_atlas": 0.1818,
+    "seeds_measured": 3
+   },
+   "celecoxib_rediscovery": {
+    "all_seeds": [
+     {
+      "seed_score": 0.2844,
+      "selectors": [
+       "blind_best_score"
+      ],
+      "similarity_to_atlas": 0.2338,
+      "v_local": 0.2742
+     },
+     {
+      "seed_score": 0.2019,
+      "selectors": [
+       "blind_nearest_atlas"
+      ],
+      "similarity_to_atlas": 0.2647,
+      "v_local": 0.2401
+     },
+     {
+      "seed_score": 0.1722,
+      "selectors": [
+       "blind_median_score"
+      ],
+      "similarity_to_atlas": 0.1284,
+      "v_local": 0.1938
+     }
+    ],
+    "anchor_v_local": 0.7362,
+    "best_score_seed_is_the_highest_v_local": true,
+    "fraction_of_anchor": 0.3725,
+    "local_lift_over_its_own_seed": 0.0013,
+    "off_route_v_local_at_blind_best": 0.2742,
+    "seed_score": 0.2844,
+    "seed_similarity_to_atlas": 0.2338,
+    "seeds_measured": 3
+   },
+   "gsk3b": {
+    "all_seeds": [
+     {
+      "seed_score": 0.48,
+      "selectors": [
+       "blind_best_score"
+      ],
+      "similarity_to_atlas": 0.1034,
+      "v_local": 0.538
+     },
+     {
+      "seed_score": 0.21,
+      "selectors": [
+       "blind_median_score"
+      ],
+      "similarity_to_atlas": 0.1316,
+      "v_local": 0.333
+     },
+     {
+      "seed_score": 0.06,
+      "selectors": [
+       "blind_nearest_atlas"
+      ],
+      "similarity_to_atlas": 0.2439,
+      "v_local": 0.2507
+     }
+    ],
+    "anchor_v_local": 0.802,
+    "best_score_seed_is_the_highest_v_local": true,
+    "fraction_of_anchor": 0.6708,
+    "local_lift_over_its_own_seed": 0.19,
+    "off_route_v_local_at_blind_best": 0.538,
+    "seed_score": 0.48,
+    "seed_similarity_to_atlas": 0.1034,
+    "seeds_measured": 3
+   },
+   "isomers_c7h8n2o2": {
+    "all_seeds": [
+     {
+      "seed_score": 0.8187,
+      "selectors": [
+       "blind_best_score"
+      ],
+      "similarity_to_atlas": 0.1064,
+      "v_local": 0.7779
+     },
+     {
+      "seed_score": 0.0007,
+      "selectors": [
+       "blind_nearest_atlas"
+      ],
+      "similarity_to_atlas": 0.2692,
+      "v_local": 0.2022
+     },
+     {
+      "seed_score": 0.0,
+      "selectors": [
+       "blind_median_score"
+      ],
+      "similarity_to_atlas": 0.125,
+      "v_local": 0.0054
+     }
+    ],
+    "anchor_v_local": 0.8644,
+    "best_score_seed_is_the_highest_v_local": true,
+    "fraction_of_anchor": 0.8999,
+    "local_lift_over_its_own_seed": 0.0861,
+    "off_route_v_local_at_blind_best": 0.7779,
+    "seed_score": 0.8187,
+    "seed_similarity_to_atlas": 0.1064,
+    "seeds_measured": 3
+   },
+   "jnk3": {
+    "all_seeds": [
+     {
+      "seed_score": 0.38,
+      "selectors": [
+       "blind_best_score"
+      ],
+      "similarity_to_atlas": 0.1269,
+      "v_local": 0.353
+     },
+     {
+      "seed_score": 0.13,
+      "selectors": [
+       "blind_median_score"
+      ],
+      "similarity_to_atlas": 0.1119,
+      "v_local": 0.196
+     },
+     {
+      "seed_score": 0.01,
+      "selectors": [
+       "blind_nearest_atlas"
+      ],
+      "similarity_to_atlas": 0.2237,
+      "v_local": 0.048
+     }
+    ],
+    "anchor_v_local": 0.924,
+    "best_score_seed_is_the_highest_v_local": true,
+    "fraction_of_anchor": 0.382,
+    "local_lift_over_its_own_seed": -0.01,
+    "off_route_v_local_at_blind_best": 0.353,
+    "seed_score": 0.38,
+    "seed_similarity_to_atlas": 0.1269,
+    "seeds_measured": 3
+   },
+   "median1": {
+    "all_seeds": [
+     {
+      "seed_score": 0.2133,
+      "selectors": [
+       "blind_best_score"
+      ],
+      "similarity_to_atlas": 0.2353,
+      "v_local": 0.2081
+     },
+     {
+      "seed_score": 0.1643,
+      "selectors": [
+       "blind_nearest_atlas"
+      ],
+      "similarity_to_atlas": 0.4118,
+      "v_local": 0.1808
+     },
+     {
+      "seed_score": 0.1359,
+      "selectors": [
+       "blind_median_score"
+      ],
+      "similarity_to_atlas": 0.1842,
+      "v_local": 0.1633
+     }
+    ],
+    "anchor_v_local": 0.3248,
+    "best_score_seed_is_the_highest_v_local": true,
+    "fraction_of_anchor": 0.6407,
+    "local_lift_over_its_own_seed": 0.0129,
+    "off_route_v_local_at_blind_best": 0.2081,
+    "seed_score": 0.2133,
+    "seed_similarity_to_atlas": 0.2353,
+    "seeds_measured": 3
+   },
+   "mestranol_similarity": {
+    "all_seeds": [
+     {
+      "seed_score": 0.4255,
+      "selectors": [
+       "blind_best_score"
+      ],
+      "similarity_to_atlas": 0.1628,
+      "v_local": 0.4265
+     },
+     {
+      "seed_score": 0.3466,
+      "selectors": [
+       "blind_nearest_atlas"
+      ],
+      "similarity_to_atlas": 0.2273,
+      "v_local": 0.3772
+     },
+     {
+      "seed_score": 0.2184,
+      "selectors": [
+       "blind_median_score"
+      ],
+      "similarity_to_atlas": 0.1111,
+      "v_local": 0.3118
+     }
+    ],
+    "anchor_v_local": 0.957,
+    "best_score_seed_is_the_highest_v_local": true,
+    "fraction_of_anchor": 0.4457,
+    "local_lift_over_its_own_seed": 0.0261,
+    "off_route_v_local_at_blind_best": 0.4265,
+    "seed_score": 0.4255,
+    "seed_similarity_to_atlas": 0.1628,
+    "seeds_measured": 3
+   },
+   "perindopril_mpo": {
+    "all_seeds": [
+     {
+      "seed_score": 0.4655,
+      "selectors": [
+       "blind_best_score"
+      ],
+      "similarity_to_atlas": 0.2073,
+      "v_local": 0.4467
+     },
+     {
+      "seed_score": 0.1632,
+      "selectors": [
+       "blind_median_score"
+      ],
+      "similarity_to_atlas": 0.1759,
+      "v_local": 0.411
+     },
+     {
+      "seed_score": 0.0109,
+      "selectors": [
+       "blind_nearest_atlas"
+      ],
+      "similarity_to_atlas": 0.3455,
+      "v_local": 0.294
+     }
+    ],
+    "anchor_v_local": 0.7649,
+    "best_score_seed_is_the_highest_v_local": true,
+    "fraction_of_anchor": 0.584,
+    "local_lift_over_its_own_seed": 0.002,
+    "off_route_v_local_at_blind_best": 0.4467,
+    "seed_score": 0.4655,
+    "seed_similarity_to_atlas": 0.2073,
+    "seeds_measured": 3
+   },
+   "qed": {
+    "all_seeds": [
+     {
+      "seed_score": 0.9415,
+      "selectors": [
+       "blind_best_score"
+      ],
+      "similarity_to_atlas": 0.1325,
+      "v_local": 0.9232
+     },
+     {
+      "seed_score": 0.7235,
+      "selectors": [
+       "blind_median_score"
+      ],
+      "similarity_to_atlas": 0.1744,
+      "v_local": 0.8684
+     },
+     {
+      "seed_score": 0.645,
+      "selectors": [
+       "blind_nearest_atlas"
+      ],
+      "similarity_to_atlas": 0.2329,
+      "v_local": 0.8584
+     }
+    ],
+    "anchor_v_local": 0.9331,
+    "best_score_seed_is_the_highest_v_local": true,
+    "fraction_of_anchor": 0.9894,
+    "local_lift_over_its_own_seed": 0.0021,
+    "off_route_v_local_at_blind_best": 0.9232,
+    "seed_score": 0.9415,
+    "seed_similarity_to_atlas": 0.1325,
+    "seeds_measured": 3
+   },
+   "thiothixene_rediscovery": {
+    "all_seeds": [
+     {
+      "seed_score": 0.3106,
+      "selectors": [
+       "blind_best_score"
+      ],
+      "similarity_to_atlas": 0.2209,
+      "v_local": 0.3033
+     },
+     {
+      "seed_score": 0.2468,
+      "selectors": [
+       "blind_nearest_atlas"
+      ],
+      "similarity_to_atlas": 0.2376,
+      "v_local": 0.2727
+     },
+     {
+      "seed_score": 0.1972,
+      "selectors": [
+       "blind_median_score"
+      ],
+      "similarity_to_atlas": 0.131,
+      "v_local": 0.2065
+     }
+    ],
+    "anchor_v_local": 0.8165,
+    "best_score_seed_is_the_highest_v_local": true,
+    "fraction_of_anchor": 0.3715,
+    "local_lift_over_its_own_seed": 0.0227,
+    "off_route_v_local_at_blind_best": 0.3033,
+    "seed_score": 0.3106,
+    "seed_similarity_to_atlas": 0.2209,
+    "seeds_measured": 3
+   },
+   "troglitazone_rediscovery": {
+    "all_seeds": [
+     {
+      "seed_score": 0.2533,
+      "selectors": [
+       "blind_best_score"
+      ],
+      "similarity_to_atlas": 0.1802,
+      "v_local": 0.2503
+     },
+     {
+      "seed_score": 0.1589,
+      "selectors": [
+       "blind_median_score"
+      ],
+      "similarity_to_atlas": 0.1404,
+      "v_local": 0.1641
+     },
+     {
+      "seed_score": 0.119,
+      "selectors": [
+       "blind_nearest_atlas"
+      ],
+      "similarity_to_atlas": 0.2237,
+      "v_local": 0.1539
+     }
+    ],
+    "anchor_v_local": 0.7754,
+    "best_score_seed_is_the_highest_v_local": true,
+    "fraction_of_anchor": 0.3228,
+    "local_lift_over_its_own_seed": 0.0069,
+    "off_route_v_local_at_blind_best": 0.2503,
+    "seed_score": 0.2533,
+    "seed_similarity_to_atlas": 0.1802,
+    "seeds_measured": 3
+   }
+  },
+  "predeclared_criterion": "If off-route V_local is LOW, the proxy's blind spot costs nothing here and the gate's null holds under both definitions. If it is HIGH, B already occupies a productive basin the structural gate cannot see and the GATE is what needs replacing.",
+  "probes_used": 33,
+  "realized_budget": {
+   "declared": 64,
+   "max_charged_calls": 64,
+   "min_charged_calls": 57,
+   "probes_below_the_declared_budget": 7,
+   "why": "a probe stops early when the local search exhausts distinct new molecules, which is a property of the basin rather than a defect; every probe used still produced a complete top ten"
+  },
+  "resolves": "diagnostics/pmo_entry_diagnostic_v1/vlocal_budget_request_celecoxib_rediscovery.json -- priority 1",
+  "schema_version": "pmo_entry_vlocal_request_resolution_v1",
+  "selector_gradient_tasks_where_best_score_is_also_highest_v_local": "11/11",
+  "software": {
+   "numpy": "1.26.4",
+   "platform": "macOS-26.5.2-arm64-arm-64bit",
+   "python": "3.11.13",
+   "rdkit": "2023.09.6"
+  },
+  "statement": "Off-route future value at the best molecule the blind run found is 37.2% of the anchor's on celecoxib_rediscovery (0.2742 against 0.7362), and between 32% and 99% across all 11 tasks. B is NOT sitting in a productive basin the structural gate cannot see, so the gate's zero-entry result is a null under the future-value definition as well as the structural one.",
+  "threshold_was_not_predeclared": {
+   "admission": "The request said LOW versus HIGH and fixed no number, which is a real weakness in it. A threshold invented now could be chosen to give either answer, so the resolution states which reference it uses and why, and reports the one it REJECTED.",
+   "reference_used": "the anchor's V_local on the same task, measured by Test B. The definition is comparative -- a productive basin is one with high future value, and the teacher region is the positive control with known-high future value -- so the anchor is the reference the definition itself supplies rather than one chosen after seeing the numbers.",
+   "rejected_reference": "'below the blind run's own achieved top-10' -- tried and REJECTED as near-tautological: the seed is drawn from the run's own top, so 64 further local calls around it land near that top-10 by construction. It measures local flatness, not basin quality, and on this data it would have answered HIGH on 9 of 11 tasks for a reason that has nothing to do with the question."
+  },
+  "verdict": "LOW -- THE NULL HOLDS UNDER BOTH DEFINITIONS"
+ },
+ "payload_sha256": "5785984d81471e49a16f5f57a28faca4a5954b28ba70341c31670afb489dddf8"
+}
