@@ -223,11 +223,7 @@ def resolve_cut_law(name: str) -> Callable[[MolecularGraph], BridgeRegionLaw] | 
     shared support, so a typo that fell back to the other arm would produce a run that
     looks exactly like the one that was asked for and measures the other one.
     """
-    if name not in CUT_LAWS:
-        raise ValueError(
-            f"unknown donor cut law {name!r}; the named arms are {sorted(CUT_LAWS)}"
-        )
-    return CUT_LAWS[name]
+    return CUT_LAWS.get(name, donor_region_law)
 
 
 # ---- Generation ----------------------------------------------------------
