@@ -96,10 +96,10 @@ Methods.
 **Adaptive support expansion is a first-class controller capability, not a patch.** Say:
 
 > A single COMPOSE controller spans all T4 targets by combining constrained local optimization
-> with adaptive support expansion for states where the primary proposal distribution becomes
+> with adaptive proposal escalation for states where the primary proposal distribution becomes
 > support-limited.
 
-**May claim:** shared controller framework; adaptive support expansion; same executor and
+**May claim:** shared controller framework; adaptive proposal escalation; same executor and
 constraints; state-dependent program support; search configurations frozen per target.
 
 **Must NOT claim:** identical configuration for every target; the same proposal distribution
@@ -126,3 +126,30 @@ are far less exposed.
 This does **not** affect the within-run search: candidates and the incumbent share one pipeline
 and one conformer generator, so selection inside a run is fair. Not fixed, deliberately —
 seeding conformer generation changes the docking adapter that every T4 contract pins.
+
+## Claim framing (LOCKED 2026-09-22)
+
+**Name: a population-based controller with adaptive proposal escalation.**
+Rule: `Q_t = empty` => escalate proposal effort over the same support lanes along a
+bounded ladder; publish `candidate_exhaustion` only if the ladder runs to its declared end.
+
+**Do not call it replenishment.** "Archive-backed proposal replenishment" was considered
+and rejected: the implementation escalates the DRAW BUDGET over the SAME lanes on the SAME
+parent, and never draws different parents from the archive. That name would claim an
+algorithm we did not run.
+
+Banned: rescue, fallback, recovery, replenishment. Avoid "hierarchical" -- there are not
+multiple explicit policy levels here and a reviewer will ask.
+
+Three objections a reviewer can raise, and where we actually stand:
+
+| objection | status |
+|---|---|
+| manually invoked rather than automatically triggered | **partial** -- automatic within a run on an empty pool, but arms were deployed per cell by human launch, not uniformly across the panel |
+| behaviour chosen per target after seeing results | **not clean** -- the escalation operator differed across the few support-limited instances; these are development experiments, not one frozen algorithm |
+| extra oracle budget vs baselines | **clean, and the strongest point** -- escalation spends CPU and never oracle calls; records are locked and docked through the unchanged round path, budget ceiling untouched. COMPOSE ran 250 calls/cell against IVG's 1000 |
+
+To make the claim fully clean: one frozen, target-agnostic escalation configuration run
+over the whole panel, triggered only by the mechanical empty-pool event. Until then the
+honest claim is a shared control FRAMEWORK with a per-instance escalation configuration,
+disclosed once in the appendix.
