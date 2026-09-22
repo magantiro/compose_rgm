@@ -1,8 +1,8 @@
 {
  "payload": {
   "blind_budget": 250,
-  "diagnostic_oracle_calls": 256,
-  "elapsed_seconds": 379.96,
+  "diagnostic_oracle_calls": 447,
+  "elapsed_seconds": 853.49,
   "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
   "information_regime_statement": "Answer-known, panel-informed and winner-informed PMO development evidence. Destinations are published task answers or transcribed competitor winners. This is a challenge set and a diagnostic instrument, never a training distribution, prior, library or initialization for a scored no-prescreen run.",
   "partial": true,
@@ -421,6 +421,339 @@
     "task": "median1",
     "top_ten_new_count": 10,
     "top_ten_new_mean": 0.20810325500557947
+   },
+   {
+    "already_scored_by_the_blind_run": 0,
+    "best_new": 0.19982631347136334,
+    "best_overall": 0.19982631347136334,
+    "budget": 64,
+    "charged_calls": 63,
+    "distinct_new_above_seed": 14,
+    "distinct_new_molecules": 62,
+    "lift_best_new_minus_seed": 0.03553259767347444,
+    "produced_distinct": 62,
+    "route_to_seed": [
+     {
+      "charged_call": 6,
+      "endpoint": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2ncnn2C)cn1",
+      "heavy_atoms": 24,
+      "planner_channel": null,
+      "program_primitives": null,
+      "role": "initialization",
+      "round_index": null,
+      "score": 0.06052275326688024
+     },
+     {
+      "charged_call": 17,
+      "endpoint": "CC(C)n1cc(S(=O)(=O)[N-]C2CCCCC2c2ncnn2C)cn1",
+      "heavy_atoms": 24,
+      "planner_channel": "shallow_program_channel",
+      "program_primitives": 1,
+      "role": "candidate",
+      "round_index": 0,
+      "score": 0.13495326754623826
+     },
+     {
+      "charged_call": 38,
+      "endpoint": "CC(C)n1cc(S(=O)(=O)[N-]C2(F)CCCCC2C)cn1",
+      "heavy_atoms": 20,
+      "planner_channel": "structured_program_channel",
+      "program_primitives": 6,
+      "role": "candidate",
+      "round_index": 1,
+      "score": 0.16901408450704225
+     },
+     {
+      "charged_call": 123,
+      "endpoint": "CC(C)n1cc(S(=O)(=O)[N-]C2(F)C(C)CC(C34CCC(CC3=O)C4(C)C)C(N)C2C)cn1",
+      "heavy_atoms": 32,
+      "planner_channel": "joint_dependency_region_jump",
+      "program_primitives": 16,
+      "role": "candidate",
+      "round_index": 6,
+      "score": 0.19569118093322013
+     },
+     {
+      "charged_call": 217,
+      "endpoint": "CCCC(C(N)C(C)C(F)[N-]S(=O)(=O)c1cnn(C(C)C)c1)C12CCC(CC1=O)C2(C)C",
+      "heavy_atoms": 32,
+      "planner_channel": "shallow_program_channel",
+      "program_primitives": 1,
+      "role": "candidate",
+      "round_index": 12,
+      "score": 0.1642937157978889
+     }
+    ],
+    "rung": {
+     "anchor_productivity": 0.3248,
+     "fraction_of_anchor": 0.5565,
+     "ladder": [
+      {
+       "label": "near_anchor",
+       "top_ten_new_mean": 0.2668
+      },
+      {
+       "label": "early",
+       "top_ten_new_mean": 0.2795
+      },
+      {
+       "label": "anchor",
+       "top_ten_new_mean": 0.3248
+      }
+     ],
+     "measured": 0.1808,
+     "rung_reached": "below_near_anchor",
+     "rungs_reached": 0,
+     "rungs_total": 3
+    },
+    "seconds": 171.29,
+    "seed_charged_call": 217,
+    "seed_heavy_atoms": 32,
+    "seed_parent_endpoint": "CC(C)n1cc(S(=O)(=O)[N-]C2(F)C(C)CC(C34CCC(CC3=O)C4(C)C)C(N)C2C)cn1",
+    "seed_parent_score": 0.19569118093322013,
+    "seed_planner_channel": "shallow_program_channel",
+    "seed_role": "candidate",
+    "seed_score": 0.1642937157978889,
+    "seed_smiles": "CCCC(C(N)C(C)C(F)[N-]S(=O)(=O)c1cnn(C(C)C)c1)C12CCC(CC1=O)C2(C)C",
+    "selectors": [
+     "blind_nearest_atlas"
+    ],
+    "similarity_to_atlas": 0.4118,
+    "task": "median1",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.18076094973237217
+   },
+   {
+    "already_scored_by_the_blind_run": 0,
+    "best_new": 0.18024774584042436,
+    "best_overall": 0.18024774584042436,
+    "budget": 64,
+    "charged_calls": 64,
+    "distinct_new_above_seed": 31,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.044349644518455245,
+    "produced_distinct": 63,
+    "route_to_seed": [
+     {
+      "charged_call": 3,
+      "endpoint": "CCCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+      "heavy_atoms": 21,
+      "planner_channel": null,
+      "program_primitives": null,
+      "role": "initialization",
+      "round_index": null,
+      "score": 0.13952230791235878
+     },
+     {
+      "charged_call": 55,
+      "endpoint": "CC1=C2CCCCC2S(=O)(=O)C(C(C)C)C(=O)OC(C)C1",
+      "heavy_atoms": 21,
+      "planner_channel": "shallow_program_channel",
+      "program_primitives": 1,
+      "role": "candidate",
+      "round_index": 2,
+      "score": 0.18768337412695632
+     },
+     {
+      "charged_call": 84,
+      "endpoint": "CC1=C2C3CCC(O)CC3C2S(=O)(=O)C(C(C)C)C(=O)OC(C)C1",
+      "heavy_atoms": 24,
+      "planner_channel": "structured_program_channel",
+      "program_primitives": 9,
+      "role": "candidate",
+      "round_index": 4,
+      "score": 0.19503342800155576
+     },
+     {
+      "charged_call": 203,
+      "endpoint": "CC1=C2C3CCC(O)CC3C2(C)[SH2](=O)C(C(C)C)C(=O)OC(C)C1",
+      "heavy_atoms": 24,
+      "planner_channel": "structured_program_channel",
+      "program_primitives": 2,
+      "role": "candidate",
+      "round_index": 11,
+      "score": 0.21331009680728097
+     },
+     {
+      "charged_call": 219,
+      "endpoint": "CC(O)CC1C(C)C2=C(NONO)CC(C)OC(=O)C(C(C)C)[SH2](=O)C21C",
+      "heavy_atoms": 27,
+      "planner_channel": "shallow_program_channel",
+      "program_primitives": 6,
+      "role": "candidate",
+      "round_index": 12,
+      "score": 0.1358981013219691
+     }
+    ],
+    "rung": {
+     "anchor_productivity": 0.3248,
+     "fraction_of_anchor": 0.5029,
+     "ladder": [
+      {
+       "label": "near_anchor",
+       "top_ten_new_mean": 0.2668
+      },
+      {
+       "label": "early",
+       "top_ten_new_mean": 0.2795
+      },
+      {
+       "label": "anchor",
+       "top_ten_new_mean": 0.3248
+      }
+     ],
+     "measured": 0.1633,
+     "rung_reached": "below_near_anchor",
+     "rungs_reached": 0,
+     "rungs_total": 3
+    },
+    "seconds": 155.29,
+    "seed_charged_call": 219,
+    "seed_heavy_atoms": 27,
+    "seed_parent_endpoint": "CC1=C2C3CCC(O)CC3C2(C)[SH2](=O)C(C(C)C)C(=O)OC(C)C1",
+    "seed_parent_score": 0.21331009680728097,
+    "seed_planner_channel": "shallow_program_channel",
+    "seed_role": "candidate",
+    "seed_score": 0.1358981013219691,
+    "seed_smiles": "CC(O)CC1C(C)C2=C(NONO)CC(C)OC(=O)C(C(C)C)[SH2](=O)C21C",
+    "selectors": [
+     "blind_median_score"
+    ],
+    "similarity_to_atlas": 0.1842,
+    "task": "median1",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.16333527941484238
+   },
+   {
+    "already_scored_by_the_blind_run": 1,
+    "best_new": 0.9435895991057754,
+    "best_overall": 0.9435895991057754,
+    "budget": 64,
+    "charged_calls": 64,
+    "distinct_new_above_seed": 1,
+    "distinct_new_molecules": 63,
+    "lift_best_new_minus_seed": 0.002088991321187228,
+    "produced_distinct": 63,
+    "route_to_seed": [
+     {
+      "charged_call": 6,
+      "endpoint": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2ncnn2C)cn1",
+      "heavy_atoms": 24,
+      "planner_channel": null,
+      "program_primitives": null,
+      "role": "initialization",
+      "round_index": null,
+      "score": 0.7079585234362048
+     },
+     {
+      "charged_call": 23,
+      "endpoint": "C1=C([SH4][N-]c2ccccc2-c2ncn[nH]2)CN=N1",
+      "heavy_atoms": 18,
+      "planner_channel": "shallow_program_channel",
+      "program_primitives": 7,
+      "role": "candidate",
+      "round_index": 0,
+      "score": 0.9162628047249032
+     },
+     {
+      "charged_call": 36,
+      "endpoint": "C1=CC(c2ncn[nH]2)C([N-][SH4]Cc2ccncc2)=C1",
+      "heavy_atoms": 19,
+      "planner_channel": "structured_program_channel",
+      "program_primitives": 13,
+      "role": "candidate",
+      "round_index": 1,
+      "score": 0.9048892625782456
+     },
+     {
+      "charged_call": 77,
+      "endpoint": "b1ccc(C[SH4][N-]C2=CC=CC2c2ncn[nH]2)cc1",
+      "heavy_atoms": 19,
+      "planner_channel": "structured_program_channel",
+      "program_primitives": 1,
+      "role": "candidate",
+      "round_index": 3,
+      "score": 0.9015527031372508
+     },
+     {
+      "charged_call": 123,
+      "endpoint": "O=C([SH4][N-]C1=CC=CC1c1ncn[nH]1)c1ccbcc1",
+      "heavy_atoms": 20,
+      "planner_channel": "shallow_program_channel",
+      "program_primitives": 1,
+      "role": "candidate",
+      "round_index": 6,
+      "score": 0.9241513406618275
+     },
+     {
+      "charged_call": 134,
+      "endpoint": "CC1=CC=C([N-][SH4]C(=O)c2ccbcc2)C1c1ncn[nH]1",
+      "heavy_atoms": 21,
+      "planner_channel": "shallow_program_channel",
+      "program_primitives": 1,
+      "role": "candidate",
+      "round_index": 7,
+      "score": 0.936237374154196
+     },
+     {
+      "charged_call": 159,
+      "endpoint": "CC1=CC=C([N-][SH4]C(=O)c2ccpcc2)C1c1ncn[nH]1",
+      "heavy_atoms": 21,
+      "planner_channel": "structured_program_channel",
+      "program_primitives": 1,
+      "role": "candidate",
+      "round_index": 8,
+      "score": 0.9408392378263851
+     },
+     {
+      "charged_call": 175,
+      "endpoint": "CC1(c2ncn[nH]2)C=CC=C1[N-][SH4]C(=O)c1ccpcc1",
+      "heavy_atoms": 21,
+      "planner_channel": "shallow_program_channel",
+      "program_primitives": 1,
+      "role": "candidate",
+      "round_index": 9,
+      "score": 0.9415006077845882
+     }
+    ],
+    "rung": {
+     "anchor_productivity": 0.9331,
+     "fraction_of_anchor": 0.9894,
+     "ladder": [
+      {
+       "label": "early",
+       "top_ten_new_mean": 0.8507
+      },
+      {
+       "label": "near_anchor",
+       "top_ten_new_mean": 0.8736
+      },
+      {
+       "label": "anchor",
+       "top_ten_new_mean": 0.9331
+      }
+     ],
+     "measured": 0.9232,
+     "rung_reached": "near_anchor",
+     "rungs_reached": 2,
+     "rungs_total": 3
+    },
+    "seconds": 145.98,
+    "seed_charged_call": 175,
+    "seed_heavy_atoms": 21,
+    "seed_parent_endpoint": "CC1=CC=C([N-][SH4]C(=O)c2ccpcc2)C1c1ncn[nH]1",
+    "seed_parent_score": 0.9408392378263851,
+    "seed_planner_channel": "shallow_program_channel",
+    "seed_role": "candidate",
+    "seed_score": 0.9415006077845882,
+    "seed_smiles": "CC1(c2ncn[nH]2)C=CC=C1[N-][SH4]C(=O)c1ccpcc1",
+    "selectors": [
+     "blind_best_score"
+    ],
+    "similarity_to_atlas": 0.1325,
+    "task": "qed",
+    "top_ten_new_count": 10,
+    "top_ten_new_mean": 0.923213849075716
    }
   ],
   "productive_region_definition": "A region is productive when the frozen local controller, started there with a 64-call budget, produces a top ten of DISTINCT new molecules at the level Test B measured from the teacher spine. Structural proximity selects what to verify and never decides.",
@@ -482,6 +815,34 @@
       }
      ],
      "task": "median1",
+     "tolerance": 1e-09
+    },
+    "qed": {
+     "charged_to_diagnostic_budget": false,
+     "checks": 3,
+     "max_abs_delta": 0.0,
+     "note": "Reference-panel calls bypass the counted ledger deliberately: they are an instrument check, and they are reported separately from the diagnostic budget.",
+     "observations": [
+      {
+       "delta": 0.0,
+       "expected": 0.7960834588871699,
+       "label": "shared_source",
+       "observed": 0.7960834588871699
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.948442042791664,
+       "label": "recorded_destination",
+       "observed": 0.948442042791664
+      },
+      {
+       "delta": 0.0,
+       "expected": 0.2505671844979284,
+       "label": "route_midpoint",
+       "observed": 0.2505671844979284
+      }
+     ],
+     "task": "qed",
      "tolerance": 1e-09
     }
    },
@@ -576,6 +937,44 @@
      }
     ],
     "task": "median1"
+   },
+   {
+    "at_charged_call": 21,
+    "blind_best_score": 0.9415006077845882,
+    "blind_median_score": 0.7232821434463462,
+    "blind_top_ten_mean": 0.9305965459263493,
+    "charged_calls": 250,
+    "max_similarity": 0.2329,
+    "nearest_blind_molecule": "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2C2=IC=NN2C)cn1",
+    "nearest_reference": "CC(C)N1N=CC2=NC(c3ccccc3-c3ccncc3)NC21",
+    "references": 143,
+    "running_max_curve": [
+     {
+      "charged_calls": 1,
+      "max_similarity": 0.1299
+     },
+     {
+      "charged_calls": 2,
+      "max_similarity": 0.1316
+     },
+     {
+      "charged_calls": 3,
+      "max_similarity": 0.1757
+     },
+     {
+      "charged_calls": 6,
+      "max_similarity": 0.2055
+     },
+     {
+      "charged_calls": 11,
+      "max_similarity": 0.2237
+     },
+     {
+      "charged_calls": 21,
+      "max_similarity": 0.2329
+     }
+    ],
+    "task": "qed"
    }
   ],
   "tasks_probed": [
@@ -588,5 +987,5 @@
    "path": "diagnostics/pmo_atlas_v1/test_b_local_lift.json"
   }
  },
- "payload_sha256": "e602d444fc7c213a1834456c4d847eaa752572206e176bd03d6c46a03e875fa7"
+ "payload_sha256": "10d3ed121d1881864c1244e3e0cc58e28fdcc7a27966f37d92f8d8090a7837c9"
 }
