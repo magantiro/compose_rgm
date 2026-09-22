@@ -57,6 +57,15 @@ OUTPUT = Path(os.environ.get("COMPOSE_HELD_OUTPUT", "/integrated_parp1"))
 MOOD = "https://raw.githubusercontent.com/SeulLee05/MOOD/main/scorer"
 RECEPTOR_NAME = os.environ.get("COMPOSE_HELD_RECEPTOR_NAME", "parp1")
 RECEPTOR_PATH = f"/opt/dock/receptors/{RECEPTOR_NAME}.pdbqt"
+# The arm wrapper that set the COMPOSE_HELD_* environment above. It is PINNED in
+# `runtime_inputs_sha256` -- it carries the launch guard that refuses an arm whose
+# contract has lost a mechanism -- and `_validate_task` re-hashes every pinned entry
+# inside the container, so the wrapper has to be in the image too. The parent arm
+# left its wrapper unpinned and therefore unbaked; pinning it is the stronger choice
+# and baking it is what makes that choice runnable.
+WRAPPER = os.environ.get(
+    "COMPOSE_HELD_WRAPPER", "modal_apps/t4_fa7_0_support_expansion_base_app.py"
+)
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -90,6 +99,7 @@ image = (
         str(REMOTE / "modal_apps/t4_fa7_0_support_expansion_base_app.py"),
         copy=True,
     )
+    .add_local_file(ROOT / WRAPPER, str(REMOTE / WRAPPER), copy=True)
     .env(
         {
             "PYTHONPATH": str(REMOTE / "src"),
@@ -98,6 +108,7 @@ image = (
             "COMPOSE_HELD_VOLUME": VOLUME_NAME,
             "COMPOSE_HELD_OUTPUT": str(OUTPUT),
             "COMPOSE_HELD_RECEPTOR_NAME": RECEPTOR_NAME,
+            "COMPOSE_HELD_WRAPPER": WRAPPER,
             "OMP_NUM_THREADS": "1",
             "OPENBLAS_NUM_THREADS": "1",
         }

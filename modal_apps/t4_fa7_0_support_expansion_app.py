@@ -100,5 +100,10 @@ os.environ.setdefault("COMPOSE_HELD_VOLUME", "compose-t4-fa7-0-support-expansion
 os.environ.setdefault("COMPOSE_HELD_OUTPUT", "/fa7_0_support_expansion")
 os.environ.setdefault("COMPOSE_HELD_APP", "compose-t4-fa7-0-support-expansion")
 os.environ.setdefault("COMPOSE_HELD_RECEPTOR_NAME", "fa7")
+# This file is pinned in runtime_inputs_sha256 and re-hashed inside the container,
+# so the image has to carry it; the base app bakes whatever this names.
+os.environ.setdefault(
+    "COMPOSE_HELD_WRAPPER", "modal_apps/t4_fa7_0_support_expansion_app.py"
+)
 
 from modal_apps.t4_fa7_0_support_expansion_base_app import app, main  # noqa: F401
