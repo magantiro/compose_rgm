@@ -249,8 +249,28 @@ def run_arm(
                 "destination_score": charged.get(option["stages"][-1]["endpoint"]),
             }
         )
+    # MEASURED on this harness: the jump lane spends its full `wall_seconds` every round
+    # (20.1s against a 20.0s budget) while the structured lane finishes inside it. So the
+    # size of the pool a declared leg competes against is LOAD-DEPENDENT, and on a busy
+    # machine the two arms of a pair can face different competition. The lane is kept --
+    # removing the main competitor would make the mechanism look better for free, and
+    # competition for allocation slots is exactly what "allocation discard" means -- so
+    # the confound is recorded per arm instead, as a load-independent work counter beside
+    # the seconds. A reader can check the two arms of a pair faced comparable work.
+    proposal_work = {"attempts": 0, "pool_candidates": 0, "seconds": 0.0, "rounds": 0}
+    for path in sorted((output / "campaign").glob("round_*/pending.json")):
+        published = json.loads(path.read_text())["batch"]
+        proposal_work["rounds"] += 1
+        proposal_work["attempts"] += len(published.get("attempts", []))
+        proposal_work["pool_candidates"] += len(
+            published.get("proposal_pool", published)["candidates"]
+        )
+        proposal_work["seconds"] += float(published.get("proposal_seconds") or 0.0)
+    proposal_work["seconds"] = round(proposal_work["seconds"], 2)
+
     values = sorted((row["score"] for row in ledger.rows), reverse=True)
     return {
+        "proposal_work": proposal_work,
         "schema_version": SCHEMA,
         "seed": seed,
         "arm": "protected" if protection else "declared_unprotected",

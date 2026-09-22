@@ -65,6 +65,10 @@ def main() -> int:
     charged = {"protected": {"bridge": 0, "destination": 0, "total": 0},
                "declared_unprotected": {"bridge": 0, "destination": 0, "total": 0}}
     finals = {"protected": [], "declared_unprotected": []}
+    proposal_work: dict[str, dict[str, float]] = {
+        "protected": {},
+        "declared_unprotected": {},
+    }
     for row in seeds:
         arms = row["arms"]
         by_arm = {
@@ -77,6 +81,8 @@ def main() -> int:
             )
         for name in ("protected", "declared_unprotected"):
             charged[name]["total"] += arms[name]["charged_calls"]
+            for key, value in (arms[name].get("proposal_work") or {}).items():
+                proposal_work[name][key] = proposal_work[name].get(key, 0) + value
             finals[name].append(
                 {"best": arms[name]["best"], "top10": arms[name]["top10"]}
             )
@@ -174,6 +180,11 @@ def main() -> int:
         "void_reasons": void_reasons,
         "cost": {
             "charged_calls": charged,
+            # Load-independent work counters beside the seconds: the jump lane is
+            # wall-bounded, so a busy machine changes how large a pool a declared leg
+            # competes against. Comparable attempt and pool totals across the two arms
+            # are what licenses reading the pairing as matched.
+            "proposal_work": proposal_work,
             "mean_best": {k: round(mean(v, "best"), 4) for k, v in finals.items()},
             "mean_top10": {k: round(mean(v, "top10"), 4) for k, v in finals.items()},
             "protected_arm_top10_worse": bool(cost_regression),
