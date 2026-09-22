@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import inspect
 import json
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -383,6 +384,7 @@ def test_measure_interleaves_parents_and_seals_its_shard(tmp_path):
         parents_per_stratum=2,
         descendant_entrants=0,
         descendant_draws=1,
+        parent_source="blind_visited_stratified",
         output=str(out),
     )
     assert driver.phase_measure(args) == 0
@@ -401,3 +403,188 @@ def test_measure_interleaves_parents_and_seals_its_shard(tmp_path):
         assert row["provenance_class"] in {"local_search", "broad_exploration"}
         if row["status"] == "executed":
             assert row["qed"] is not None or row["endpoint"] is not None
+
+
+# ---- the round-zero population axis ----
+
+
+def test_every_parent_source_has_the_registration_signature():
+    assert entry.PARENT_SOURCES, "no parent source is registered"
+    for name, record in entry.PARENT_SOURCES.items():
+        assert record["name"] == name
+        assert callable(record["function"])
+        describe = record["describe"]
+        assert describe["role"] and describe["label"]
+        assert isinstance(describe["initialization_count"], int)
+        assert isinstance(describe["carries_scores"], bool)
+
+
+def test_registering_a_duplicate_parent_source_is_refused():
+    name = next(iter(entry.PARENT_SOURCES))
+    with pytest.raises(ValueError):
+        entry.register_parent_source(
+            name, lambda *a, **k: (), describe={"role": "x", "label": "x"}
+        )
+
+
+def test_an_unknown_parent_source_is_refused_by_name():
+    with pytest.raises(KeyError):
+        entry.parent_source("no_such_population")
+
+
+def test_the_sixteen_molecule_source_reproduces_the_sealed_production_file():
+    """Arm 2 is a COUNT change, so its control must be production's own draw.
+
+    If this ever diverges, the 100-molecule arm is no longer the same bank, the
+    same selector and the same seed with one value changed, and the comparison
+    stops isolating the initialization.
+    """
+
+    sealed = json.loads(
+        (
+            REPO_ROOT / "diagnostics/parent_edit_cycles/prepared/init_20260921.json"
+        ).read_text()
+    )
+    parents = entry.parent_source("init_bank_16")["function"](
+        REPO_ROOT, "celecoxib_rediscovery"
+    )
+    assert len(parents) == sealed["count"] == 16
+    assert {parent.endpoint for parent in parents} == {
+        candidate["endpoint"] for candidate in sealed["candidates"]
+    }
+
+
+def test_the_hundred_molecule_source_is_a_superset_at_48_slots():
+    small = entry.parent_source("init_bank_16")["function"](
+        REPO_ROOT, "celecoxib_rediscovery"
+    )
+    large = entry.parent_source("init_bank_100")["function"](
+        REPO_ROOT, "celecoxib_rediscovery"
+    )
+    assert len(large) == 100
+    assert {parent.endpoint for parent in small} <= {parent.endpoint for parent in large}
+    for parent in large:
+        # PMO states are 48 slots and the path hard-refuses 40. A SMILES round
+        # trip yields a TIGHT graph and silently deletes the whole atom_insert
+        # family, so this is the load-bearing check on the construction path.
+        assert len(parent.state["atom_types"]) == 48
+        assert parent.graph().n_real_atoms <= 40
+        assert parent.score is None
+        assert parent.score_stratum == "objective_blind"
+
+
+def test_the_hundred_molecule_arm_declares_its_budget_limit():
+    """100 initialization molecules are 40% of a 250-call budget.
+
+    The arm must carry that where a reader of the shard sees it, not only in a
+    handback, or the number gets quoted against a budget it is inadmissible at.
+    """
+
+    describe = entry.parent_source("init_bank_100")["describe"]
+    assert "250" in describe["budget_caveat"]
+    assert "NOT admissible" in describe["budget_caveat"]
+
+
+def test_the_default_population_keeps_the_original_seed_stream():
+    """Shards measured before the population axis existed must stay re-derivable.
+
+    The two negative controls cost roughly ten seconds a draw; silently moving
+    their seeds would have invalidated them with nothing to show it.
+    """
+
+    import pmo_entry_diagnostic as driver
+
+    if not (Path.home() / "compose_pmo_atlas_runs" / "test_c_blind").is_dir():
+        pytest.skip("the blind run artifacts are not present in this checkout")
+
+    # Drive the PRODUCTION path. Recomputing the seed from a transcription of
+    # the rule here would be a comparison whose expectation moves with the code
+    # under test -- it cannot fail, and a mutation battery proved exactly that
+    # against the first version of this test.
+    drawn = {}
+
+    def capture(source, rng, draws):
+        drawn.setdefault(len(drawn), rng.bit_generator.state)
+        return iter(())
+
+    entry.register_arm(
+        "seedprobe_arm",
+        capture,
+        describe={"role": "probe", "label": "seed capture", "provenance_class": {}},
+    )
+    try:
+        states = {}
+        for population in ("blind_visited_stratified", "init_bank_16"):
+            drawn.clear()
+            args = driver.argparse.Namespace(
+                repo_root=str(REPO_ROOT),
+                arm="seedprobe_arm",
+                task="celecoxib_rediscovery",
+                draws=0,
+                parents_per_stratum=2,
+                descendant_entrants=0,
+                descendant_draws=1,
+                parent_source=population,
+                output=str(Path(tempfile.mkdtemp()) / "shard.json"),
+            )
+            driver.phase_measure(args)
+            states[population] = drawn[0]
+
+        default_parent = entry.parent_source("blind_visited_stratified")["function"](
+            REPO_ROOT, "celecoxib_rediscovery", per_stratum=2
+        )[0]
+        expected = np.random.default_rng(
+            entry.stable_seed(
+                entry.DIAGNOSTIC_SCHEMA,
+                "seedprobe_arm",
+                "celecoxib_rediscovery",
+                default_parent.endpoint,
+                "r0",
+            )
+        ).bit_generator.state
+        # The pre-axis rule, written out in full, must still be what the default
+        # population produces.
+        assert states["blind_visited_stratified"]["state"] == expected["state"]
+        # A different population must not collide with it.
+        assert states["init_bank_16"]["state"] != expected["state"]
+    finally:
+        entry.ARM_REGISTRY.pop("seedprobe_arm", None)
+
+
+def test_a_ladder_row_is_a_mechanism_and_a_population():
+    import pmo_entry_diagnostic as driver
+
+    assert driver._arm_key({"arm": "a", "parent_source": "init_bank_100"}) == (
+        "a@init_bank_100"
+    )
+    # Absent or default must keep the original key so committed shards stay
+    # addressed by the name they were filed under.
+    assert driver._arm_key({"arm": "a"}) == "a"
+    assert driver._arm_key({"arm": "a", "parent_source": "blind_visited_stratified"}) == "a"
+
+
+def test_the_sealed_criterion_refuses_a_subset_verdict():
+    """The criterion spans three tasks plus a control; a one-task run cannot fire it."""
+
+    import pmo_entry_diagnostic as driver
+
+    arms = {
+        "base": {"per_task": {"celecoxib_rediscovery": {"prefixes": {}}}},
+        "chal": {"per_task": {"celecoxib_rediscovery": {"prefixes": {}}}},
+    }
+    verdict = driver._pass_criterion(arms, "chal", "base")
+    assert verdict["verdict"] == "UNEVALUATED_CRITERION_SPANS_TASKS_NOT_MEASURED"
+    assert set(verdict["tasks_missing_from_this_run"]) == {
+        "albuterol_similarity",
+        "jnk3",
+        "qed",
+    }
+
+
+def test_a_histogram_of_non_numeric_values_does_not_raise():
+    """The production arm once filed a LIST under a count column and crashed the report."""
+
+    import pmo_entry_diagnostic as driver
+
+    assert driver._histogram([[0, 1], [0], [0, 1]]) == {"[0, 1]": 2, "[0]": 1}
+    assert driver._histogram([3, 1, 2]) == {"1": 1, "2": 1, "3": 1}
