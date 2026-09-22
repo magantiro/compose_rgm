@@ -32,7 +32,7 @@ from compose_v4.experiments.pmo_dynamic_v21 import (
     _score_curve,
 )
 
-SCHEMA = "pmo_population_controller_v1"  # cosmetic: behaviour unchanged
+SCHEMA = "pmo_population_controller_v1"
 CONTRACT = "configs/pmo_population_controller_v1.json"
 CHECKPOINTS = "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json"
 INIT_COUNT = 16

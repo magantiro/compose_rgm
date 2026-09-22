@@ -195,15 +195,20 @@ def test_the_law_is_consulted_for_the_DONOR_as_well_as_the_source() -> None:
     seen: list[int] = []
 
     def counting(graph):
-        seen.append(int(graph.n_real_atoms))
+        # IDENTITY, not a heavy-atom count. `PARENT` and `DONOR` both have 16 heavy
+        # atoms, so a count-based witness is satisfied by the SOURCE alone and this
+        # assertion was vacuous -- the mutation that drops the donor-side law survived it
+        # while the behavioural test beside it caught the mutation. A guard that cannot
+        # distinguish the two molecules it is about is not a guard.
+        seen.append(id(graph))
         return donor_region_law(graph)
 
     donor_transplant_draw(
         source, _one_stratum(DONOR, donor), np.random.default_rng(7),
         law=counting, max_attempts=4,
     )
-    assert int(source.n_real_atoms) in seen, "the law was never asked about the parent"
-    assert int(donor.n_real_atoms) in seen, (
+    assert id(source) in seen, "the law was never asked about the parent"
+    assert id(donor) in seen, (
         "the law was asked about the parent but NOT about the donor; the donor cut is "
         "still drawn uniformly and the consumption gate cannot tell"
     )
@@ -309,6 +314,24 @@ def test_the_worker_selects_the_donor_arm_from_the_sealed_payload() -> None:
     assert "spec" not in "".join(donor), (
         "the donor arm is selected from the spawn spec; a caller could then run a "
         "runtime the owner never authorized"
+    )
+    # STRUCTURAL, because a textual check cannot see this: the donor keys stay in the
+    # source when the CONDITION that gates them is disabled, so `"enable_donor_channel"
+    # in text` is still true for a worker that can never turn the lane on. Find the
+    # conditional whose body carries the donor keys and require its TEST to read the
+    # payload's own arm block.
+    gated = [
+        node
+        for node in ast.walk(call)
+        if isinstance(node, ast.IfExp) and "donor_cut_law" in ast.unparse(node.body)
+    ]
+    assert len(gated) == 1, (
+        f"expected exactly one conditional gating the donor keys, found {len(gated)}"
+    )
+    condition = ast.unparse(gated[0].test)
+    assert "enable_donor_channel" in condition and "arm" in condition, (
+        f"the donor keys are gated by {condition!r}, which does not read the sealed "
+        "payload's arm block -- the worker cannot select the arm the owner authorized"
     )
 
 
