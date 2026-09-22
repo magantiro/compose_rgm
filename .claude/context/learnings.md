@@ -4375,3 +4375,79 @@ independently of whether fa7_0 ever closes.**
   **The model has no non-small option to choose.** No amount of training, reward shaping or better
   sampling can fix a state whose support contains no alternative. This closes the loop on why ~50%
   of generated molecules carry a 3/4-ring: at their later ring decisions there was nothing else.
+
+## 2026-09-22 (de novo: a GLOBAL ring marginal reproduces the corpus ring law -- and does not buy quality)
+
+- **THE DISTORTION HAS A CLEAN SHAPE, and naming it is half the finding.** Corpus reference,
+  measured on ALL 500,000 GuacaMol training molecules
+  (`diagnostics/denovo_ring_marginal_v1/corpus_ring_census_v1.json`): 2.606 ring SYSTEMS and
+  3.432 rings per molecule; per-ring size law 3: 1.24%, 4: 0.63%, 5: 24.10%, 6: 72.43%,
+  7: 1.19%; 1.87% of rings strained; 5.89% of molecules carry one. Against the shipped
+  de-novo process the **5-ring and 7-ring fractions MATCH almost exactly** (22.8% vs 24.1%,
+  0.5% vs 1.2%) while **6-rings fall 72.4% -> 53.7% and 3+4-rings rise 1.9% -> 22.4%**. The
+  defect is not "too many rings" or "wrong sizes" -- it is *six-rings converted into
+  three- and four-rings*, exactly what a shrinking acyclic-carbon host predicts.
+- **The catalog is NOT the limit: 99.78% of corpus ring SYSTEMS and 99.43% of corpus
+  MOLECULES have a signature the checkpoint's 3,092 templates can express.** So a plan drawn
+  from the corpus law is realizable in principle and the arm's ceiling is p_train, not the
+  vocabulary. Check this before blaming or crediting a catalog.
+- **RESULT (5 matched arms, n = 150-200 each, pinned kernel, zero oracle calls).** `p(G) =
+  p(R) p_theta(G|R)` with `R` a ring-system multiset drawn once from the corpus law
+  conditioned on a heavy-atom bin, realized with the EXISTING macro through the production
+  sampler's own restriction attributes:
+
+      arm                              TV vs corpus   strain/ring   mols w/3-4   sys/mol   quality      QED     SA   events
+      GuacaMol train                          -           1.87%        5.89%      2.61        -       0.553   2.92     -
+      A  shipped process                    0.209         22.4%        58.4%      3.55     0.121      0.522   4.60    27.7
+      B0 count pinned,  t = 0               0.150         10.2%        23.0%      2.35     0.000      0.377   5.85    11.0
+      C0 signature pinned, t = 0            0.028          2.1%         4.5%      1.85     0.005      0.376   5.91    11.5
+      B1 count pinned,  first ring event    0.095         10.2%        25.3%      2.55     0.118      0.458   4.57    28.7
+      C1 signature pinned, first ring event 0.030          2.4%         6.0%      2.13     0.113      0.457   4.57    28.6
+
+  Arm C1's bootstrap intervals CONTAIN the corpus values on every ring statistic
+  (TV [0.012, 0.068], strain [0.010, 0.041] vs 1.87%, molecules [0.027, 0.100] vs 5.89%) and
+  do not overlap arm A's. Validity 1.000, uniqueness 1.000, diversity 0.890 vs 0.890 --
+  unchanged.
+- **SAY THE COST FIRST: the ring repair does NOT buy quality, and it COSTS QED.** Published
+  quality is flat (0.121+-0.024 -> 0.113+-0.026) and mean QED FALLS 0.522 -> 0.457, about 5
+  standard errors. So "fix the rings and the molecules get better" is FALSIFIED on this
+  checkpoint. The ring marginal and the drug-likeness of the molecule are separable, and
+  only the first was repaired.
+- **The bigger surprise: removing the strained rings did NOT improve SA.** Mean SA 4.600 ->
+  4.573 while the strained-molecule fraction fell 58.4% -> 6.0%. Arm A's own size-partialled
+  regression reproduces the earlier finding at n = 190 (SA ~ strain **+0.484+-0.130**, heavy
+  +0.0479+-0.0104; QED ~ strain +0.015+-0.022, i.e. NO QED effect), which predicts roughly a
+  0.25 SA improvement -- and it did not appear. Something in the planned arm cancels it, and
+  what that is remains UNIDENTIFIED. Do not quote the strain->SA coefficient as a forecast of
+  what removing strain will deliver; it was measured as an association within one arm and it
+  did not transfer across arms.
+- **The realization POINT decides the molecule; the pinned SIZES decide the ring law.** Two
+  clean separations. (a) `t = 0` versus the model's own first ring event changes the ring law
+  hardly at all (C0 0.028 vs C1 0.030) and changes the MOLECULE completely: 11 events against
+  28, quality 0.005 against 0.113, QED 0.376 against 0.457, SA 5.91 against 4.57. That is the
+  predicted consequence of the measured hazard collapse (median 13.5x, 22.77 -> 1.84 over 40
+  trajectories; 35% of trajectories fall below hazard 1.0) -- a ring-rich state at an early
+  conditioning time is off-distribution and the continuation reads "nearly done". (b) Pinning
+  the COUNT alone gets only halfway (B1 TV 0.095, strain 10.2%); the size law is what carries
+  the repair.
+- **A conditional TV is not the whole distribution.** Arm C1's per-ring SIZE law matches the
+  corpus, but it UNDER-produces ring SYSTEMS: 2.13 per molecule against 2.61, because only
+  **81.2%** of requested systems find a host (74 `no_host_support` refusals of 393). The host
+  mechanism is still binding -- the plan does not abolish it, it only stops the model from
+  being forced to choose a small ring when the host has shrunk. Report sys/mol beside any
+  ring-size TV or the shortfall is invisible.
+- **`endpoint skeleton == installed skeleton` is 100% for both first-ring-event arms and only
+  80-83% for the t = 0 arms.** So in the `1` arms nothing the continuation does adds or
+  removes a ring system, which is what makes the realized marginal equal to the plan's. In the
+  `0` arms it does, on a fifth of molecules, by a mechanism not identified. Compare the
+  endpoint's own signature against what was installed -- never assume the plan survived.
+- **A `timeout`-killed `modal run --detach` client STOPS the detached app.** The 90-minute
+  client timeout fired at 91 of 100 shards; `modal app list` then showed no running app and
+  the last 9 never landed, so the final `score` never ran either. `--detach` survives a
+  disconnect, not a SIGTERM to the client. Use `nohup ... &` with no `timeout`, and be ready
+  to call `score` yourself from the shards already on the volume -- which worked, because the
+  scorer reports `attempted` and `complete` per arm rather than assuming the design is full.
+- **The planned arms are ~4x the wall clock of the control** (C1 shards 45 min against arm A's
+  8-12 at the same 10 trajectories), because each plan realization is several restricted
+  ring-grow draws and each of those enumerates the full support. Budget a planned arm
+  separately; a fan-out sized on the control's rate will look stalled for an hour.
