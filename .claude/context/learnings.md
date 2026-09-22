@@ -4061,3 +4061,71 @@ independently of whether fa7_0 ever closes.**
   are NOT prior-aware. **So a null there is a null about the shallow construction lane, not about
   chemical priors in PMO** -- which is exactly why the global-delta census is the more fundamental
   experiment and runs in parallel rather than after.
+
+## 2026-09-22 (PMO global-delta census: the controller proposes the right TYPE and never the right SCALE)
+
+- **THE TRANSITIONS ARE NOT HETEROGENEOUS -- the macro-vocabulary design survives.** ONE generic
+  family covers **88.9%** of the productive census and TWO cover **100%** (POOL_3: 86.3 / 97.1 / 100).
+  Significantly above a random drug-like pair (top-1 0.667, permutation p=0.0014) and far above the
+  controller's own proposals (0.353, p<0.0001). You do not need ten transformation classes.
+- **BUT THE FAMILY LABEL IS NOT WHERE THE INFORMATION IS -- THE SCALE PARAMETER IS.** The NULL also
+  lands 66.8% in the same family, so "multi-site scaffold replacement" describes any large
+  transformation. What separates productive from random, and productive from the controller, is SIZE:
+      median largest coherent changed region
+        productive POOL_1 (both ends carry a measured 64-call V_local)   **14**
+        productive POOL_4 (NO answer-known material on either side)       10.5
+        random init-bank pair (null)                                       8
+        **controller's charged proposals                                   3**
+  The controller reaches the 13-atom scale that **58.3%** of productive transitions need on **0.4%**
+  of proposals -- **22x below even the random-pair null** -- and retains a median **0.968** of the
+  parent against the **0.40** productive transitions require.
+- **LOST MASS, order-independent (Shapley over all 6 orders): scale 46.7% | completion content 27.5%
+  | region selection 25.8%.** Report it this way; "discovery seems hard" is not a finding.
+- **MECHANISM, VERIFIED IN SOURCE.** `MAX_SEGMENT_LENGTH = 8`; `segment_replace` draws
+  `growth = rng.integers(1, min(8, 40-n)+1)` and then `_grow_actions(..., elements=("C","N","O"))`
+  builds a **LINEAR SINGLE-BONDED CHAIN OFF ONE ANCHOR** -- it can never install a ring, a branch, or
+  a non-CNO element. Module count is capped at 3 with probabilities (0.4, 0.4, 0.2), so 80% of
+  programs are 1-2 modules. **This is the T4/fa7 defect one level worse: not only is the SIZE drawn
+  where nothing productive is, the CONTENT is structurally incapable of matching.** Requirement:
+  80.6% of productive transitions install ring content and only 22.2% install something a linear
+  C/N/O chain could build.
+- **THE ACCUMULATION OBJECTION IS REFUTED, and it was the strongest objection to the whole analysis.**
+  Over a full 250-call budget the lineage producing each run's best molecule is only **7 edits deep**
+  (median; max 9), accumulating to a median largest region of **7** against the 14 required, retaining
+  79% of the root; only **9%** of runs accumulate to >=13. `perindopril_mpo` has lineage depth **0** --
+  after 250 charged calls its best molecule is an INITIALIZATION molecule. So small edits do not
+  compose into the required transformation in practice.
+- **THE ENDPOINT-REWARD HYPOTHESIS IS REFUTED FOR PMO -- compound programs are NOT killed mid-flight.**
+  I and the owner both expected greedy pruning of valid intermediates to be a live cause. Three
+  independent checks say no: `intermediate_task_evaluations` is a hard-coded 0 across all 2,064
+  composed programs (no intermediate is EVER oracle-scored); **0 of 2,064** programs truncated; and
+  the 51.3% of eligible programs the allocator discards are **scale-neutral** (largest touched region
+  3.24 discarded vs 3.12 charged). One real but tiny asymmetry: >=13-atom regions are 2.3x more likely
+  discarded (Fisher p=0.012), but charging ALL of them adds 0.9% of proposals and cannot close a
+  0.4%-vs-58.3% gap. **The macro-option reward split remains right in principle and is not the PMO
+  bottleneck.**
+- **CORRECTION, MINE: "donor transport is 42% of B's budget" was WRONG about the lane.**
+  `donor_program`/`donor_memory` are absent from the scored entry point's import closure entirely
+  (reproduced by an AST walk covering deferred imports). The 42% is
+  **`joint_dependency_region_jump`**: 3,599 of 9,608 attempts, 29 eligible (0.81%), 10 charged
+  (0.39%), and **3,463 of its 3,570 rejections are `proven_incompatible` BEFORE any search**. Same
+  numerator, different lane -- I propagated the budget share onto the wrong mechanism.
+- **DONOR AS COMPLETION CONTENT: the marginal match is CLOSE, and this is the actionable half.**
+  Init-bank pendant components (task-independent, objective-blind, via production `pendant_cuts`)
+  supply median size **11**, 64.3% ring-bearing, 40.9% >=13 atoms -- against a requirement of median
+  11, 80.6% ring-bearing, 36.1% >=13. The CURRENT channel supplies <=8 atoms, **0% ring, 0% branched**.
+  MARGINAL match only: necessary, not sufficient, and it does not establish that the SPECIFIC region a
+  given transformation needs is available.
+- **THE IRONY WORTH ACTING ON:** the jump lane is the only channel whose proposals have the right
+  SHAPE (80% joint-requirement, median largest region 10, 100% multi-region) -- and it charges 10 of
+  3,599 attempts. It is also **purely ADDITIVE** (retained fraction 1.00, both-excise-and-install
+  0.1), so its DIRECTION is wrong too: productive transitions excise AND install at 100%.
+- **LIMITS, stated by the agent and kept:** POOL_4 is n=10 and POOL_1 n=36 over 10 tasks (1-3 pairs
+  each), so no per-task claim is supported; the productive target set is only the points whose
+  V_local was actually probed, making the measured requirement an **UPPER BOUND**; `qed` contributes
+  zero productive transitions because its blind search already reaches 92-99% of anchor -- correctly
+  excluded and worth remembering as the one task with no discovery gap.
+- **Instrument validation that licenses the gap:** zero MCS timeouts in every productive pool (0.43%
+  on controller proposals), and the MCS agrees with production's own `actual_changes` exactly on 75%
+  of charged rows, r=0.85, with residual bias toward OVER-reporting controller change -- so the
+  measured gap is CONSERVATIVE.
