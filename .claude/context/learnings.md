@@ -3955,3 +3955,25 @@ independently of whether fa7_0 ever closes.**
 - **A BASELINE THAT COLLECTED NOTHING IS NOT A BASELINE.** A baseline attribution run aborted on
   `ModuleNotFoundError: No module named 'tools'` and reported ZERO failures, which made the branch
   diff read as 14 regressions. Check the collection summary line before differencing failure sets.
+
+## 2026-09-22 (`Pages free` is NOT free memory on macOS, and a mutation battery looks exactly like an orphan)
+
+- **I nearly raised a memory alarm and swept live work on a metric that cannot answer the question.**
+  `vm_stat`'s `Pages free` read 0.34 GB and looked like the 65 MB crisis from the day before. But
+  `memory_pressure` reported **System-wide memory free percentage: 85%**: `Pages free` EXCLUDES the
+  860,691 INACTIVE pages (~13 GB) that macOS reclaims on demand. **Use `memory_pressure`, not
+  `Pages free`.** Same error class as the container census whose value could not vary -- an
+  instrument that cannot report the true state reports a false one confidently.
+- **The actual consumers were ordinary desktop apps** -- Chrome ~3 GB across its processes, the
+  Claude process 0.87 GB, Outlook 0.56, Messages 0.35 -- against 1.7 GB for ALL 19 python processes
+  combined, largest single 0.40 GB. Check the top-RSS list before attributing pressure to your own
+  work.
+- **A MUTATION BATTERY AT 0% CPU WITH `ppid=1` IS INDISTINGUISHABLE FROM AN ORPHAN AND IS NOT ONE.**
+  Two such processes were `pmo_discovery_mutation_battery.py` and `pmo_macro_option_mutation_battery.py`
+  -- commissioned work, idle because a battery spends its time blocked on SUBPROCESS pytest runs
+  while the parent waits. Sharpens the 2026-09-21 correction: the discriminator is CPU **plus a
+  growing artifact**, and a parent that DELEGATES its work to subprocesses shows 0% CPU while being
+  perfectly healthy. Read the command line every time.
+- **Killing them would have freed 40 MB against a supposed 0.34 GB shortfall.** Re-proves the
+  standing rule: measure the candidates' actual RSS against the claimed shortfall before treating
+  them as the cause. If the arithmetic does not close, the diagnosis is wrong.
