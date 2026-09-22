@@ -85,6 +85,27 @@ analogue of its intent (commit ring transactions at the earliest state that can
 carry them) and is the right ablation for separating earliness from the pinned
 marginal, but it is not the same object.
 
+## Realized n, and how to refresh
+
+The design target is 200 per arm (100 shards of 10). 91 shards committed;
+the remaining 9 were repeatedly preempted and restart from zero, since a shard
+has no intra-shard checkpoint. Realized: **A 190, B0 200, B1 170, C0 200,
+C1 150** — `arms_report_v1.json` carries `complete: false` for the three short
+arms rather than presenting them as full.
+
+None of the conclusions depend on the missing shards: the ring contrasts run at
+z ~ 10 and every preserved-quantity contrast at |z| < 1. To refresh once they
+land:
+
+    modal run --detach modal_apps/denovo_ring_marginal_arms.py::main \
+        --samples 200 --shard-size 10
+    python3 scripts/denovo_ring_marginal_table.py \
+        diagnostics/denovo_ring_marginal_v1/arms_report_v1.json \
+        --corpus-census diagnostics/denovo_ring_marginal_v1/corpus_ring_census_v1.json
+
+Do **not** wrap that in `timeout` — a SIGTERM to the client stops the detached
+app, which is how the first attempt lost its last 9 shards.
+
 ## Discipline
 
 * The latent is drawn **before** generation. No endpoint is ever rejected on how
