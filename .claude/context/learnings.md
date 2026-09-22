@@ -2874,6 +2874,27 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   `self.construction_prior` and `DynamicProgramOptimizer._mutate` reads it; a test that writes that
   name twice agrees with itself. Parsing `_mutate` for the `self.<attr>` passed as
   `successor_prior=` and then requiring the controller to assign that attr is a check that can fail.
+- **MECHANISM, and the v1 draw is not uniform even though its DRAW is.** 1,152 realized insertions
+  per arm on the same parents and seeds: heteroatom-onto-heteroatom placement **34.6% -> 5.5%
+  (6.3x suppression)**, carbon-onto-carbon 19.2% -> 47.0%, element mix C/N/O 36/53/11% -> 72/18/10%.
+  The uniform lane's single most common insertion is **nitrogen onto nitrogen at 24.6%** -- because
+  an oxygen tip has one free hydrogen after a single bond and cannot extend, so the chains that
+  COMPLETE are nitrogen-enriched. A uniform element draw therefore produces a hydrazine-biased
+  outcome distribution, which no reading of the draw itself would predict.
+- **Wiring the construction lane necessarily moves a hash that four T4 region-repair rescue
+  contracts pin** (`dynamic_program_synthesis.py`, `a1370685 -> 9f8bb2ba`, in
+  `runtime_inputs_sha256`). The draw lives inside `_grow_actions` / `_terminal_shrink` /
+  `compile_generic_module`, so there is no seam that avoids it, and duplicating the lane into a
+  second module would leave two copies of the construction draw to drift apart. Left un-re-pinned
+  deliberately: re-pointing a launch authorization to a hash the owner has not named manufactures
+  consent, and these are T4 contracts reached from a PMO branch.
+- **Attribution, measured in a sparse baseline worktree** (`git worktree add --no-checkout` plus
+  `sparse-checkout set src tests configs modal_apps diagnostics scripts tools`, 566 MB): the
+  impacted closure is 14 failed / 305 passed on the branch and the SAME 14 at the base -- zero
+  branch-only, zero baseline-only. GOTCHA: the first baseline run aborted on
+  `ModuleNotFoundError: No module named 'tools'` and reported zero failures, which made the diff
+  read as 14 regressions. **A baseline that collected nothing is not a baseline**; check the
+  summary line before differencing failure sets.
 - **STILL ONE HOP SHORT, and it is the hop this repository has been burned by three times.** The
   library seam is complete and consumption-tested, but **no scored PMO entry point sets
   `construction_prior`**: `pmo_population_v1.execute_task`, the Modal app and the contracts would
