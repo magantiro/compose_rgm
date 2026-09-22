@@ -143,8 +143,11 @@ def test_the_production_path_reaches_both_protection_hooks(bootstrapped):
     # something real to lift.
     assert controller._archive_entry_for(option.bridge_endpoint) is not None
     eligibility = _eligibility(task)
+    snapshot = json.loads(json.dumps(controller.snapshot()))
+    # A fresh controller per probe: the check calls its closure once for each hook, so a
+    # closure that leaves a pending batch behind would refuse on the second call.
     consumed = assert_macro_option_protection_is_consumed(
-        lambda: controller.propose_batch(eligibility)
+        lambda: MacroOptionController.restore(snapshot, **kwargs).propose_batch(eligibility)
     )
     assert consumed["consumed"] == {"parent_mass_floor": True, "reserved_slot": True}
     assert option_id in controller.option_registry.options
@@ -152,14 +155,38 @@ def test_the_production_path_reaches_both_protection_hooks(bootstrapped):
 
 
 def test_the_consumption_check_fails_when_protection_is_off(bootstrapped):
-    # The check must be capable of reporting NOT consumed, or a pass proves nothing.
+    """The check must be capable of reporting NOT consumed, or a pass proves nothing.
+
+    The unprotected arm is built by flipping the flag in the published snapshot and
+    re-deriving its identity, NOT by resuming a protected run as an unprotected one --
+    `restore` refuses that outright, and it is right to, because it is the silent arm
+    change the whole matched comparison exists to prevent.
+
+    The flipped snapshot is one a genuinely unprotected run could have produced. Both
+    arms declare the same options, reserve stage 0 identically and open the window on the
+    same `note_charged`; protection changes only `selection` and the CONTINUATION
+    reservation, both of which come after the state this snapshot records.
+    """
     folder, _campaign, kwargs, _, task = bootstrapped
-    controller, _, _ = _restore_with_open_window(
-        folder, kwargs, macro_option_protection=False
+    protected, _, _ = _restore_with_open_window(folder, kwargs)
+    snapshot = json.loads(json.dumps(protected.snapshot()))
+    snapshot["macro_options"]["protection_enabled"] = False
+    snapshot["snapshot_id"] = identity(
+        {k: v for k, v in snapshot.items() if k != "snapshot_id"}
     )
+    controller = MacroOptionController.restore(
+        snapshot, **{**kwargs, "macro_option_protection": False}
+    )
+    assert controller.option_registry.protected_bridges(), (
+        "the negative control must hold the same open window as the positive one, or it "
+        "reports NOT consumed for the wrong reason"
+    )
+    unprotected = {**kwargs, "macro_option_protection": False}
     with pytest.raises(ValueError, match="NOT consumed"):
         assert_macro_option_protection_is_consumed(
-            lambda: controller.propose_batch(_eligibility(task))
+            lambda: MacroOptionController.restore(snapshot, **unprotected).propose_batch(
+                _eligibility(task)
+            )
         )
 
 

@@ -626,6 +626,7 @@ def assert_macro_option_protection_is_consumed(run) -> dict[str, Any]:
     """
     module = globals()
     reached: dict[str, bool] = {"parent_mass_floor": False, "reserved_slot": False}
+    refused: dict[str, str] = {}
 
     def probe_floor(*args, **kwargs):
         reached["parent_mass_floor"] = True
@@ -645,6 +646,15 @@ def assert_macro_option_protection_is_consumed(run) -> dict[str, Any]:
             run()
         except MacroOptionProbe:
             pass
+        except Exception as error:  # noqa: BLE001
+            # Recorded, never swallowed silently, and it can only push the verdict
+            # TOWARDS "not consumed": a flag is set only by the probe being entered, so
+            # an unraised closure cannot manufacture a pass. `run` is called once per
+            # probe, so a closure that mutates shared state across calls -- a controller
+            # whose `propose_batch` completes and leaves a pending batch, say -- must
+            # build it fresh. That is why this is reported rather than raised: the
+            # diagnosis belongs in the report, not in a traceback from the wrong layer.
+            refused[name] = repr(error)
         finally:
             module["protected_parent_weights"], module["reserve_continuation_slots"] = original
     if not all(reached.values()):
@@ -652,8 +662,9 @@ def assert_macro_option_protection_is_consumed(run) -> dict[str, Any]:
         raise ValueError(
             "macro option protection is NOT consumed by the production path: "
             f"{unreached}"
+            + (f" (closure refused: {refused})" if refused else "")
         )
-    return {"consumed": reached, "schema_version": SCHEMA}
+    return {"consumed": reached, "closure_refusals": refused, "schema_version": SCHEMA}
 
 
 __all__ = [

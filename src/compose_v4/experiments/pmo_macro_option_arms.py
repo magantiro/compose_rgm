@@ -272,13 +272,13 @@ def run_arm(
 
 __all__ = [
     "INITIALIZATION",
-    "assert_production_batch_geometry",
     "JUMP_CHECKPOINT",
     "SCHEMA",
     "SYNTHETIC_REFERENCE",
     "VALLEY_DEPTH",
     "VALLEY_DROP",
     "ValleySimilarityScorer",
+    "assert_production_batch_geometry",
     "configuration",
     "load_initialization",
     "load_jump_checkpoint",
