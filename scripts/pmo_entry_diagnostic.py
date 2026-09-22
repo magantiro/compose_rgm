@@ -222,6 +222,10 @@ def phase_seal(args: argparse.Namespace) -> int:
 
 # ---- measure ----
 
+#: The round-0 population every shard used before the population became an
+#: explicit axis. Runs over it keep their original seed stream.
+DEFAULT_PARENT_SOURCE = "blind_visited_stratified"
+
 
 def _parent_row(parent: Parent) -> dict[str, Any]:
     return {
@@ -330,8 +334,17 @@ def phase_measure(args: argparse.Namespace) -> int:
     # the first N has produced at least three bad measurements.
     streams = []
     for parent in parents:
+        # The population joins the seed only when it is NOT the default, so a
+        # run over the deployed population reproduces the seeds every shard
+        # written before the population became an explicit axis used. A new
+        # population gets its own stream; an old shard stays re-derivable.
+        label = (
+            ()
+            if args.parent_source == DEFAULT_PARENT_SOURCE
+            else (args.parent_source,)
+        )
         seed = stable_seed(
-            DIAGNOSTIC_SCHEMA, args.arm, args.parent_source, task, parent.endpoint, "r0"
+            DIAGNOSTIC_SCHEMA, args.arm, *label, task, parent.endpoint, "r0"
         )
         rng = np.random.default_rng(seed)
         streams.append(
@@ -762,9 +775,6 @@ def _prefix_block(rows, region_wide_count: int, at: int) -> dict[str, Any]:
         "diversity_distinct_entrant_scaffolds": len(scaffolds),
         "entrant_provenance": provenance,
     }
-
-
-DEFAULT_PARENT_SOURCE = "blind_visited_stratified"
 
 
 def _arm_key(shard: dict[str, Any]) -> str:
@@ -1236,7 +1246,7 @@ def main(argv: list[str] | None = None) -> int:
     measure.add_argument("--parents-per-stratum", type=int, default=2)
     measure.add_argument(
         "--parent-source",
-        default="blind_visited_stratified",
+        default=DEFAULT_PARENT_SOURCE,
         choices=sorted(PARENT_SOURCES),
         help=(
             "round-0 parent population. The default is the deployed run's own "
