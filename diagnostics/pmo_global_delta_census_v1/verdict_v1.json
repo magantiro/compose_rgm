@@ -1,5 +1,21 @@
 {
+ "accumulation_objection": {
+  "measured": {
+   "accumulated_frac_largest_region_ge_13": 0.0909,
+   "accumulated_frac_largest_region_ge_6": 0.7273,
+   "accumulated_largest_changed_region_median": 7,
+   "accumulated_retained_fraction_median": 0.7917,
+   "accumulated_total_changed_atoms_median": 15,
+   "lineage_depth_max": 9,
+   "lineage_depth_median": 7,
+   "n_runs": 11,
+   "runs_whose_best_is_an_initialization_molecule": 1
+  },
+  "objection": "A proposal is one macro option and a productive delta is the whole remaining transport, so comparing them directly is unfair unless small steps fail to accumulate.",
+  "verdict": "REFUTED as a rescue. Over the full 250-call budget the lineage producing each run's best molecule is only 7 edits deep (median, max 9), and the ACCUMULATED transformation reaches a median largest coherent changed region of 7 against the 14 required, retaining 79% of the root against the 40% productive transitions retain. Only 9% of runs accumulate to the 13-atom scale that 58% of productive transitions need. One run (perindopril_mpo) has lineage depth 0: its best molecule after 250 charged calls is an initialization molecule."
+ },
  "artifact_hashes": {
+  "diagnostics/pmo_global_delta_census_v1/accumulation_check_v1.json": "43a6d2f8ffad7a894c9c42e5cd4b06427b3ad653af6b361fa6fca945fa217f02",
   "diagnostics/pmo_global_delta_census_v1/donor_completion_content_v1.json": "bc06d9b9f7d004eea23c8df8c6b99cb1e3273d7405be9a40fc24f7faa08a47be",
   "diagnostics/pmo_global_delta_census_v1/lost_mass_decomposition_v1.json": "372a13f5a34bf60266897da1f7d6bb78a084c95cfb74a094be6ea74a282a5be2",
   "diagnostics/pmo_global_delta_census_v1/macro_grammar_v1.json": "c418b1753b142eeab63a0576d3bac90941b352e7c0f5dfc7906272a97b202fec",
@@ -7,9 +23,52 @@
   "diagnostics/pmo_global_delta_census_v1/proposal_delta_census_v1.json": "960eef51fe401adb4baa4198546242eefea747c4f90a7ba9b22dd02a13ef3bdb"
  },
  "created_at_utc": "2026-09-22T05:18:10.486437+00:00",
+ "donor_completion_content": {
+  "current_completion_channel": {
+   "description": "dynamic_program_synthesis._grow_actions builds a linear single-bonded chain of elements drawn uniformly from ('C','N','O'); segment_replace draws its length uniformly from 1..min(MAX_SEGMENT_LENGTH=8, 40-n). It can never install a ring, a branch, or an element outside C/N/O.",
+   "frac_branched": 0.0,
+   "frac_expressible_as_grow_chain": 1.0,
+   "frac_has_ring": 0.0,
+   "size_max": 8
+  },
+  "question": "Can donor chemistry SUPPLY the completion content a required macro edit needs -- not whether donor transport works as a search strategy.",
+  "required_installed_region_POOL_1": {
+   "frac_branched": 0.6944,
+   "frac_expressible_as_grow_chain": 0.2222,
+   "frac_has_ring": 0.8056,
+   "frac_size_ge_13": 0.3611,
+   "frac_size_ge_6": 0.6667,
+   "heteroatoms_median": 4,
+   "n": 36,
+   "size_max": 29,
+   "size_median": 11,
+   "size_p25": 3,
+   "size_p75": 14
+  },
+  "supplied_init_bank_pendant_components": {
+   "frac_branched": 0.6763,
+   "frac_expressible_as_grow_chain": 0.1917,
+   "frac_has_ring": 0.6432,
+   "frac_size_ge_13": 0.4089,
+   "frac_size_ge_6": 0.6994,
+   "heteroatoms_median": 3,
+   "n": 1690,
+   "size_max": 27,
+   "size_median": 11,
+   "size_p25": 3,
+   "size_p75": 17
+  },
+  "verdict": "YES as completion content, and the marginal match is close: the task-independent objective-blind init bank supplies pendant components at median size 11 with 64.3% ring-bearing and 40.9% at or above 13 atoms, against a requirement of median 11, 80.6% ring-bearing and 36.1% at or above 13. The CURRENT completion channel can install none of it: _grow_actions builds a linear single-bonded C/N/O chain of at most 8 atoms, 0% ring, 0% branched. This is a marginal distribution match and is NECESSARY, NOT SUFFICIENT: it does not establish that the specific region a given transformation needs is available."
+ },
  "excluded_sources": {
   "diagnostics/ivg_winner_paths": "competitor-derived (InVirtuoGen), target-informed, non-commercially licensed, and T4 DOCKING cells rather than PMO tasks. Read its audit file; NOT used anywhere in this census."
  },
+ "falsified": [
+  "Point 6 mechanism -- \"useful compound programs are rejected because intermediate states are scored or pruned before the complete structural option is realized\" -- is REFUTED three ways: intermediate_task_evaluations is a hard-coded 0 on every composed program (2064/2064, and the constant is asserted across the codebase, so no intermediate is ever oracle-scored); 0 of 2064 programs were truncated (completed_module_count < requested_module_count); and the 51.3% of eligible programs the allocator discards are statistically indistinguishable in scale from the charged ones (largest touched region mean 3.24 vs 3.12, frac>=6 20.8% vs 21.1%).",
+  "The hypothesis that productive transitions are merely \"two different drug-like molecules\" is REFUTED by the null: random init-bank pairs reach the 13-atom scale 9.0% of the time against 58.3% for productive transitions.",
+  "The hypothesis that the large requirement is an artifact of aiming at a published answer is REFUTED by POOL_4, which uses no answer-known material on either side and reproduces the shape (median largest region 10.5, 100% multi-region, 80% not buildable as a grow chain) -- though at n=10.",
+  "The donor lane is NOT a contributor to these runs and cannot be: donor_program and donor_memory are absent from the scored entry point's import closure (independently reproduced by AST walk). The 42% figure is the joint_dependency_region_jump lane, not donor."
+ ],
  "headline": "The transitions are NOT heterogeneous: one generic family covers 88.9% of the productive census and two cover 100%, significantly more concentrated than a random drug-like pair (p=0.0014). The controller proposes the right TYPE occasionally and the right SCALE almost never: median largest coherent changed region is 14 atoms in productive transitions, 8 in a random pair, and 3 in the controller. Only 0.4% of its proposals reach the 13-atom scale that 58% of productive transitions need -- 22x below even the random-pair null.",
  "information_regime": "DEVELOPMENT_INFORMED_DIAGNOSTIC",
  "information_regime_statement": "Answer-known, panel-informed development evidence. POOL_1/2/3 targets are published task answers or teacher-spine checkpoints with measured V_local. NOTHING in this directory may become a prior, library, initialization or runtime policy for a scored no-prescreen run. The product is a TASK-INDEPENDENT structural grammar: every family and requirement is a predicate over the global graph delta alone, with no task identity, target structure or fragment content in any definition, so the vocabulary could be frozen before the official benchmark. POOL_4 additionally uses NO answer-known material on either side.",
@@ -22,6 +81,27 @@
   "mcs_timeout_rate_productive_pools": 0.0
  },
  "kernel": "rdkit 2023.09.6 / numpy 1.26.4 (PMO production image pin)",
+ "known_limitations": [
+  "POOL_4 (the only fairness-clean pool) is n=10 and POOL_1 is n=36 over 10 tasks; the per-task counts are 1-3, so no per-task claim is supported.",
+  "The productive target set is the set of points whose V_local was actually probed. A nearer productive point may exist that was never probed, so the measured requirement is an UPPER BOUND on the transformation scale needed to enter a productive region.",
+  "POOL_1 sources are off-manifold blind states (the manifold-drift finding), so part of the measured delta is the cost of returning to the drug-like manifold. POOL_3 controls for this by starting from on-manifold init-bank molecules and gives the same median (15 vs 14).",
+  "The MCS instrument and production actual_changes agree exactly on only 75% of charged rows (r=0.85); the residual bias is toward over-reporting controller change, so the gap is conservative.",
+  "One generic family covers 88.9% of the productive census, but that family label does not by itself separate productive transitions from random pairs (the null also lands 66.8% there). The discriminating content is in the SCALE parameter, not the family name."
+ ],
+ "lost_mass_attribution": {
+  "completion_content": {
+   "mean_removed": 0.254,
+   "share": 0.2751
+  },
+  "region_selection": {
+   "mean_removed": 0.238,
+   "share": 0.2577
+  },
+  "scale": {
+   "mean_removed": 0.4313,
+   "share": 0.4672
+  }
+ },
  "new_docking_calls": 0,
  "new_oracle_calls": 0,
  "populations": {
