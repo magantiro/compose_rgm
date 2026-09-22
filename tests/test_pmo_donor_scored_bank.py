@@ -113,11 +113,16 @@ def test_the_diverse_stratum_covers_a_basin_the_higher_strata_do_not() -> None:
     The fixture is the case the motivation describes -- a run whose high scorers have
     converged on one scaffold while a lower-scoring molecule holds a different one.
     """
+    # The converged basin must have a member left OVER after the elite fills, or the
+    # "already occupied" test is vacuous: with every member of that basin taken, any
+    # implementation returns the same answer. `drifted_d` is that leftover, and it
+    # OUTSCORES the molecule the stratum is supposed to pick.
     bank = _bank(
         [
             ("drifted_a", 0.90, "converged"),
             ("drifted_b", 0.89, "converged"),
-            ("drifted_c", 0.50, "converged"),  # same basin, would win on score
+            ("drifted_c", 0.88, "converged"),
+            ("drifted_d", 0.50, "converged"),  # left over, and outscores `other_basin`
             ("other_basin", 0.05, "elsewhere"),  # the only molecule of its scaffold
         ]
     )
@@ -136,18 +141,26 @@ def test_the_promising_stratum_is_evidence_about_a_molecule_as_a_SOURCE() -> Non
     improved on it.  The other must not be selected, or the stratum is measuring reuse
     rather than productivity.
     """
+    # The stratum must have ROOM to spare, or an admit-everything predicate is
+    # invisible: with one slot the positive-improvement molecule still ranks first and
+    # the extra admissions never appear in the answer. Three slots and two unproductive
+    # molecules make the difference observable.
     bank = _bank(
         [
-            ("elite", 0.95, "top"),
+            ("elite_a", 0.95, "top"),
+            ("elite_b", 0.94, "top"),
+            ("elite_c", 0.93, "top"),
             ("productive", 0.10, "shared"),
-            ("barren", 0.10, "shared"),
+            ("barren", 0.20, "shared"),  # outscores `productive`
+            ("barren_too", 0.15, "shared"),
         ]
     )
     bank.observe_lineage(parent_endpoint="productive", parent_score=0.10, child_score=0.40)
-    # Used as a parent just as often, and its child was WORSE.
-    bank.observe_lineage(parent_endpoint="barren", parent_score=0.10, child_score=0.02)
+    # Used as parents just as often, and their children were WORSE.
+    bank.observe_lineage(parent_endpoint="barren", parent_score=0.20, child_score=0.02)
+    bank.observe_lineage(parent_endpoint="barren_too", parent_score=0.15, child_score=0.01)
 
-    strata = bank.strata(capacity=3)
+    strata = bank.strata(capacity=9)  # 3 slots per stratum, so two go spare
     assert strata[PROMISING] == ["productive"], (
         f"promising selected {strata[PROMISING]}; a parent whose child did not improve "
         "carries no evidence that its structural material is productive"
@@ -421,3 +434,54 @@ def test_arm_D_without_arm_B_is_REFUSED_before_the_ledger_is_built(tmp_path) -> 
             enable_online_memory=False,
             enable_donor_channel=True,
         )
+
+
+def test_the_promising_stratum_is_reachable_from_a_REAL_propose_observe_cycle(
+    tmp_path,
+) -> None:
+    """The stratum is fed by the PRODUCTION loop, not only by a hand-seeded lineage.
+
+    This is the guard that matters most here, and it caught a real defect.  Every other
+    promising test constructs its lineage by calling `observe_lineage` directly, and all
+    of them passed while the production path banked NOTHING: `_parent` writes provenance
+    `{entry_id, parent_probability, parent_measured_score}` and no `parent_endpoint` --
+    only the v22 optimizer writes that, and this controller descends from v21 -- so the
+    lookup resolved to the empty string on every counted transition and the stratum was
+    permanently empty in production.
+
+    So the cycle is driven for real: propose a batch through the production
+    `propose_batch`, charge every candidate a score that beats its parent, and require the
+    bank to have learned that those parents are productive.
+    """
+    kwargs = scored_gate.capture_scored_optimizer_kwargs(
+        ROOT, tmp_path / "on", enable_online_memory=True, enable_donor_channel=True
+    )["optimizer_kwargs"]
+    controller = scored_gate._seeded_controller(
+        kwargs, scored_gate._initialization_source(ROOT), seed=11
+    )
+    batch = controller.propose_batch(scored_gate._eligibility)
+    assert batch["candidates"], "the production proposal produced nothing to charge"
+    controller.observe_batch(
+        batch["batch_id"],
+        [
+            {
+                "candidate_id": row["candidate_id"],
+                "receipt_id": f"promising{index}",
+                "endpoint": row["endpoint"],
+                "score": 0.99,  # every child beats its 0.5 parent
+                "oracle_protocol": controller.oracle_protocol,
+            }
+            for index, row in enumerate(batch["candidates"])
+        ],
+    )
+    bank = controller.online_memory.bank
+    productive = {e: r for e, r in bank.rows.items() if r["improvement"] > 0.0}
+    assert productive, (
+        "a full production propose/observe cycle in which EVERY child improved on its "
+        "parent left the bank with no productive parent at all; the promising stratum "
+        "is unreachable from the scored loop and is inert however well it is tested"
+    )
+    # And the parents it learned are real archived molecules, not a placeholder key.
+    assert set(productive) <= {
+        entry["endpoint"] for entry in controller.entries.values()
+    }, f"the bank credited improvement to endpoints outside the archive: {set(productive)}"

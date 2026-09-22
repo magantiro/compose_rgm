@@ -46,6 +46,8 @@ WIRING_SUITE = "tests/test_pmo_donor_channel_wiring.py"
 SCORED_ENTRY = ROOT / "src/compose_v4/experiments/pmo_population_v1.py"
 SCORED_SUITE = "tests/test_pmo_donor_scored_path.py"
 WORKER_APP = ROOT / "modal_apps/pmo_population_v1_app.py"
+MEMORY = ROOT / "src/compose_v4/control/pmo_online_memory.py"
+BANK_SUITE = "tests/test_pmo_donor_scored_bank.py"
 
 
 @dataclass(frozen=True)
@@ -658,6 +660,221 @@ MUTATIONS = (
         suite=SCORED_SUITE,
     ),
     # ---- Positive control: bytes change, behaviour does not ----
+    # ---- The stratified scored bank: selection, draw, update hops, join ----
+    Mutation(
+        name="elite_capacity_falls_below_the_superseded_pool",
+        path=MEMORY,
+        old="ELITE_CAPACITY = 100",
+        new="ELITE_CAPACITY = 16",
+        expect_red=("test_the_bank_is_a_widening_and_never_a_narrowing",),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="the_strata_stop_being_disjoint",
+        path=MEMORY,
+        old="""        ][: room(ELITE)]
+        taken.update(elite)""",
+        new="""        ][: room(ELITE)]""",
+        expect_red=("test_the_strata_are_disjoint_and_precedence_decides_ties",),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="the_diverse_stratum_ignores_the_basins_already_occupied",
+        path=MEMORY,
+        old="""        occupied = {
+            self.rows[endpoint]["basin"]
+            for endpoint in taken
+            if self.rows[endpoint]["basin"] is not None
+        }""",
+        new="""        occupied = set()""",
+        expect_red=(
+            "test_the_diverse_stratum_covers_a_basin_the_higher_strata_do_not",
+        ),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="promising_admits_a_parent_whose_child_did_not_improve",
+        path=MEMORY,
+        old='if endpoint not in taken and row["improvement"] > 0.0',
+        new='if endpoint not in taken and row["improvement"] >= 0.0',
+        expect_red=(
+            "test_the_promising_stratum_is_evidence_about_a_molecule_as_a_SOURCE",
+        ),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="observe_lineage_invents_a_row_for_a_parent_the_ledger_never_charged",
+        path=MEMORY,
+        old="""        row = self.rows.get(parent_endpoint)
+        if row is None:
+            return False""",
+        new="""        row = self.rows.get(parent_endpoint)
+        if row is None:
+            self.rows[parent_endpoint] = row = {
+                "score": 0.0,
+                "basin": None,
+                "children": 0,
+                "improvement": 0.0,
+            }""",
+        expect_red=("test_a_parent_the_ledger_never_charged_cannot_enter_the_bank",),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="the_lineage_is_banked_BELOW_the_attribution_early_return",
+        path=MEMORY,
+        old="""        self.bank.observe_lineage(
+            parent_endpoint=parent_endpoint,
+            parent_score=parent_score,
+            child_score=child_score,
+        )
+        delta_heavy = int(child_heavy) - int(parent_graph.n_real_atoms)""",
+        new="""        delta_heavy = int(child_heavy) - int(parent_graph.n_real_atoms)""",
+        expect_red=(
+            "test_the_lineage_is_banked_even_when_the_edit_cannot_be_attributed",
+        ),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="restore_rebuilds_the_bank_from_the_frontier",
+        path=MEMORY,
+        old="""        self.bank.rows = {
+            endpoint: dict(row)
+            for endpoint, row in (payload.get("bank") or {}).get("rows", {}).items()
+        }""",
+        new="""        self.bank.rows = {
+            endpoint: {
+                "score": float(score),
+                "basin": None,
+                "children": 0,
+                "improvement": 0.0,
+            }
+            for endpoint, score in self.frontier.scores.items()
+        }""",
+        expect_red=("test_the_bank_rides_the_resume_and_an_old_payload_restores_EMPTY",),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="the_draw_flattens_the_strata_into_one_uniform_pool",
+        path=DONOR_CHANNEL_MODULE,
+        old="""    chosen = live[int(rng.choice(len(live), p=weights / total))]
+    smiles, graph = chosen.members[int(rng.integers(len(chosen.members)))]
+    return chosen.name, smiles, graph""",
+        new="""    flat = [(s.name, *member) for s in live for member in s.members]
+    return flat[int(rng.integers(len(flat)))]""",
+        expect_red=(
+            "test_the_draw_gives_each_stratum_its_DECLARED_mass_not_its_size_share",
+        ),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="the_donor_tag_stops_naming_the_stratum_its_donor_came_from",
+        path=DONOR_CHANNEL_MODULE,
+        old="""            "donor": self.donor,
+            "donor_stratum": self.donor_stratum,""",
+        new="""            "donor": self.donor,""",
+        expect_red=("test_a_donor_candidate_names_the_stratum_its_donor_came_from",),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="add_measured_program_stops_banking_the_bootstrap_molecule",
+        path=CONTROLLER,
+        old="""        self._bank_measured_program(record, score)
+        return ProgramOptimizer.add_measured_program(""",
+        new="""        return ProgramOptimizer.add_measured_program(""",
+        expect_red=(
+            "test_a_bootstrap_scored_molecule_reaches_the_bank_AND_NOTHING_ELSE",
+        ),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="add_measured_program_also_feeds_the_frontier_and_moves_arm_B",
+        path=CONTROLLER,
+        old="""            self.online_memory.bank.observe(
+                endpoint=endpoint, score=float(score), basin=basin
+            )""",
+        new="""            self.online_memory.observe_scored_molecule(
+                endpoint=endpoint, score=float(score), basin=basin
+            )""",
+        expect_red=(
+            "test_a_bootstrap_scored_molecule_reaches_the_bank_AND_NOTHING_ELSE",
+        ),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="the_donor_pool_reverts_to_a_score_ranking",
+        path=CONTROLLER,
+        old="""        bank = self.online_memory.bank
+        selection = bank.strata(capacity=DONOR_POOL_SIZE)
+        weights = bank.weights(selection)""",
+        new="""        bank = self.online_memory.bank
+        ranked = sorted(bank.rows.items(), key=lambda kv: (-kv[1]["score"], kv[0]))
+        selection = {
+            STRATA[0]: [e for e, _ in ranked[:DONOR_POOL_SIZE]],
+            STRATA[1]: [],
+            STRATA[2]: [],
+        }
+        weights = {STRATA[0]: 1.0}""",
+        expect_red=(
+            "test_the_donor_pool_IS_the_bank_selection_and_not_a_score_ranking",
+        ),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="arm_D_stops_requiring_arm_B_at_the_controller",
+        path=CONTROLLER,
+        old="""        if enable_donor_channel and not enable_online_memory:
+            raise ValueError(
+                "the donor recombination lane requires the online memory: arm D is arm "
+                "B plus donor recombination, and its donors are the memory's stratified "
+                "scored bank"
+            )""",
+        new="""        if False:
+            raise ValueError("unreachable")""",
+        expect_red=("test_arm_D_without_arm_B_is_REFUSED_at_the_controller",),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="arm_D_stops_requiring_arm_B_before_the_ledger_is_built",
+        path=SCORED_ENTRY,
+        old="""    if enable_donor_channel and not enable_online_memory:""",
+        new="""    if False:""",
+        expect_red=(
+            "test_arm_D_without_arm_B_is_REFUSED_before_the_ledger_is_built",
+        ),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="the_parent_endpoint_is_read_straight_off_a_provenance_key_that_is_never_written",
+        path=CONTROLLER,
+        old="""        endpoint = provenance.get("parent_endpoint")
+        if endpoint:
+            return str(endpoint)
+        entry = self.entries.get(provenance.get("entry_id"))
+        return str((entry or {}).get("endpoint") or "")""",
+        new="""        return str(provenance.get("parent_endpoint") or "")""",
+        expect_red=(
+            "test_the_promising_stratum_is_reachable_from_a_REAL_propose_observe_cycle",
+        ),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="the_donor_strata_are_rebuilt_per_attempt_instead_of_per_round",
+        path=CONTROLLER,
+        old="""        banked = self._donor_strata()""",
+        new="""        banked = []  # rebuilt per attempt below""",
+        expect_red=(
+            "test_a_donor_candidate_names_the_stratum_its_donor_came_from",
+        ),
+        suite=BANK_SUITE,
+    ),
+    Mutation(
+        name="POSITIVE_CONTROL_bank_cosmetic_comment",
+        path=MEMORY,
+        old="SCHEMA = \"pmo_online_memory_v1\"",
+        new="SCHEMA = \"pmo_online_memory_v1\"  # cosmetic; must stay green",
+        expect_red=(),
+        suite=BANK_SUITE,
+    ),
     Mutation(
         name="POSITIVE_CONTROL_cosmetic_comment",
         path=CREDIT,
@@ -687,18 +904,46 @@ def run_suite(suite: str = SUITE) -> tuple[int, set[str]]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument(
+        "--only",
+        default=None,
+        help=(
+            "run only mutations whose name contains this substring. A SUBSET run is a "
+            "development convenience and its report says so: `mutations_are_a_subset` is "
+            "True, so a partial verdict can never be read as the whole battery."
+        ),
+    )
+    parser.add_argument(
+        "--suite",
+        default=None,
+        help="run only mutations whose target suite path contains this substring",
+    )
     args = parser.parse_args()
-
-    baseline_code, baseline_failed = run_suite()
-    if baseline_code != 0:
-        print(f"ABORT: the unmutated suite is not green ({sorted(baseline_failed)})")
+    selected = tuple(
+        m
+        for m in MUTATIONS
+        if (args.only is None or args.only in m.name)
+        and (args.suite is None or args.suite in m.suite)
+    )
+    if not selected:
+        print("ABORT: the filters selected no mutations")
         return 2
-    print(f"baseline: {SUITE} green\n")
+
+    # Baseline EVERY suite the selected mutations will run. A mutation verdict is
+    # meaningless against a suite that was already red, and with `--only` the suite under
+    # test is often not the default one.
+    for suite in sorted({m.suite for m in selected}):
+        baseline_code, baseline_failed = run_suite(suite)
+        if baseline_code != 0:
+            print(f"ABORT: {suite} is not green unmutated ({sorted(baseline_failed)})")
+            return 2
+        print(f"baseline: {suite} green")
+    print()
 
     rows, verdict_ok = [], True
-    originals = {path: path.read_text() for path in {m.path for m in MUTATIONS}}
+    originals = {path: path.read_text() for path in {m.path for m in selected}}
     try:
-        for mutation in MUTATIONS:
+        for mutation in selected:
             source = originals[mutation.path]
             occurrences = source.count(mutation.old)
             if occurrences != 1:
@@ -752,6 +997,9 @@ def main() -> int:
         "schema_version": "pmo_discovery_mutation_battery_v1",
         "suite": SUITE,
         "mutations": len(guards),
+        "mutations_are_a_subset": args.only is not None or args.suite is not None,
+        "only_filter": args.only,
+        "suite_filter": args.suite,
         "killed": sum(r["status"] == "KILLED" for r in guards),
         "positive_controls_green": all(
             r["status"].startswith("GREEN") for r in rows if r["is_positive_control"]

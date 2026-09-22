@@ -588,6 +588,17 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         return attempts, candidates, perf_counter() - began
 
     def _donor_pool(self, exclude: str | None) -> list[DonorStratum]:
+        """One parent's view of the bank: :meth:`_donor_strata` minus that parent."""
+        return [
+            DonorStratum(
+                name=stratum.name,
+                weight=stratum.weight,
+                members=tuple(m for m in stratum.members if m[0] != exclude),
+            )
+            for stratum in self._donor_strata()
+        ]
+
+    def _donor_strata(self) -> list[DonorStratum]:
         """The run's own STRATIFIED scored bank, as executable donor states.
 
         The information regime is the whole point of this method.  Every member is a
@@ -611,6 +622,15 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         molecules than the whole superseded pool, so every donor that pool could have
         offered is still offered.  What changes is the PROBABILITY, because the draw is
         stratum-first: the elite slice no longer takes mass in proportion to its size.
+
+        COST.  Building this decodes one 48-slot state per selected molecule, and the
+        selection is up to `DONOR_POOL_SIZE` rather than the superseded 24.  The bank
+        cannot change inside one proposal round -- it is fed only from counted outcomes,
+        which arrive in `observe_batch` -- so `_generate_donor_pool` builds it ONCE per
+        round and filters per attempt.  Built per attempt instead it would decode the
+        whole bank `attempts_per_batch` times, which is proposal compute spent for
+        nothing.  Deliberately not a memo keyed on a bank fingerprint: a derived cache
+        needs the derivation's version in its key, and an explicit hoist needs no key.
         """
         bank = self.online_memory.bank
         selection = bank.strata(capacity=DONOR_POOL_SIZE)
@@ -620,12 +640,12 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             endpoint = entry.get("endpoint")
             if endpoint is not None and endpoint not in by_endpoint:
                 by_endpoint[endpoint] = entry
-        strata = []
+        strata: list[DonorStratum] = []
         for name in STRATA:
             members = []
             for endpoint in selection.get(name, ()):  # bank order, deterministic
                 entry = by_endpoint.get(endpoint)
-                if endpoint == exclude or entry is None:
+                if entry is None:
                     continue
                 try:
                     members.append((endpoint, decode_state(entry["trace"]["states"][-1])))
@@ -640,6 +660,10 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
     def _generate_donor_pool(self, eligibility, archive_seen, parent_schedule):
         """Arm D: one pendant exchange per attempt, parent and donor cuts from the law."""
         began, attempts, candidates = perf_counter(), [], []
+        # Hoisted: the bank is fed only from counted outcomes, which arrive between
+        # rounds, so it cannot move inside this loop. Per attempt it would re-decode one
+        # 48-slot state per banked molecule.
+        banked = self._donor_strata()
         seen = set(archive_seen)
         lane_attempts = min(self.config.attempts_per_batch, CHANNEL_CANDIDATE_LIMIT * 4)
         for attempt in range(lane_attempts):
@@ -650,7 +674,15 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
                 break
             entry, parent = parent_schedule[attempt % len(parent_schedule)]
             source = decode_state(entry["trace"]["states"][-1])
-            donors = self._donor_pool(entry.get("endpoint"))
+            exclude = entry.get("endpoint")
+            donors = [
+                DonorStratum(
+                    name=stratum.name,
+                    weight=stratum.weight,
+                    members=tuple(m for m in stratum.members if m[0] != exclude),
+                )
+                for stratum in banked
+            ]
             try:
                 proposal, census = donor_transplant_draw(
                     source, donors, self.donor_rng, law=self.donor_law
@@ -1232,6 +1264,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         )
         provenance = candidate.get("provenance") or {}
         parent_score = provenance.get("parent_measured_score")
+        parent_endpoint = self._resolve_parent_endpoint(provenance)
         source = candidate.get("source_state")
         if source is None or not trace.get("actions"):
             return
@@ -1244,7 +1277,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         )
         self.online_memory.observe_transition(
             parent_graph=parent_graph,
-            parent_endpoint=provenance.get("parent_endpoint") or "",
+            parent_endpoint=parent_endpoint,
             parent_score=None if parent_score is None else float(parent_score),
             child_endpoint=endpoint,
             child_score=score,
@@ -1252,6 +1285,30 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             family=families[0] if families else "unknown",
             touched_slots=touched,
         )
+
+    def _resolve_parent_endpoint(self, provenance: dict[str, Any]) -> str:
+        """The SMILES of the parent this candidate was proposed from.
+
+        MEASURED, and it is why this method exists rather than a `.get`:
+        `AdaptiveProgramOptimizer._parent` returns provenance
+        `{entry_id, parent_probability, parent_measured_score}` and writes NO
+        `parent_endpoint` -- only the v22 optimizer does, and the PMO controller descends
+        from v21. So `provenance.get("parent_endpoint")` is ALWAYS absent here. Reading it
+        directly would have left the bank's promising stratum permanently empty in
+        production while every test that seeded a lineage by hand passed: the exact
+        inert-mechanism shape this workstream exists to close.
+
+        `entry_id` IS present -- the controller already keys `parent_outcomes` by it --
+        and the archive entry it names carries the endpoint. Resolving through the archive
+        also means the value is the parent the candidate was actually built from, rather
+        than a provenance string that could drift from it.
+        """
+
+        endpoint = provenance.get("parent_endpoint")
+        if endpoint:
+            return str(endpoint)
+        entry = self.entries.get(provenance.get("entry_id"))
+        return str((entry or {}).get("endpoint") or "")
 
     def _reconstruct_online_memory(self) -> dict[str, Any]:
         """Rebuild the online memory from the archive's own counted observations.
