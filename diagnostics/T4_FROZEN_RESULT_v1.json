@@ -471,7 +471,26 @@
    "A_historical_method_replication": "Replicate the EXACT historical per-cell procedure twice more for like-for-like 3-run statistics against IVG's 3-seed mean +/- std.  IN FLIGHT.  Do NOT substitute the unified controller here -- that would test a different method.",
    "B_unified_adaptive_controller": "Implement the state-derived portfolio policy as the algorithmic endpoint of the work and evaluate it separately.  If it reproduces the support behaviour zero-oracle and performs well, it upgrades the claim to tier 1.  NOT a prerequisite for this paper unless the replication reveals a problem."
   },
-  "updated_at_utc": "2026-09-22T06:56:18.641638+00:00"
+  "updated_at_utc": "2026-09-22T06:56:18.641638+00:00",
+  "what_the_unified_run_is_and_is_not": {
+   "correct_wording": "the same validated proposal mechanisms, now composed into a single state-adaptive controller",
+   "if_it_reproduces": "one FiberControl policy x all T4 cells x multiple stochastic runs, with different cells naturally taking different routes through the controller.",
+   "incorrect_wording": "'rerun the same pipeline'. False in the software sense -- the orchestration code is new. What is preserved is the MECHANISMS, not the code path.",
+   "preserved_unchanged": [
+    "local proposal machinery",
+    "region-expansion machinery",
+    "state/protonation-aware machinery",
+    "COMPOSE executor",
+    "similarity / QED / SA constraints",
+    "selection logic",
+    "docking oracle and budget"
+   ],
+   "the_only_real_change": "a human-written launch choice ('use the protonation arm here') is replaced by a routing rule inside the controller. No new molecular search method is being invented.",
+   "the_two_questions_in_order": [
+    "ZERO-ORACLE: does unified FiberControl recreate the same candidate SUPPORT -- not just choose the same label, but produce the same kind of eligible molecules?",
+    "SCORED: rerun T4 under that one automatic controller and see whether the wins reproduce."
+   ]
+  }
  },
- "payload_sha256": "6a81ae8e8ed727953145712167ab9a9586900cc7e2590b8f1d88f301f1ac6954"
+ "payload_sha256": "68fd02cce78b024da463340bb08a4a229953a00ee196e68624a53bd745fd4a1a"
 }
