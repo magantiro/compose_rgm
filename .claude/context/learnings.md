@@ -4155,3 +4155,46 @@ independently of whether fa7_0 ever closes.**
   was an EXPRESSIBILITY PROBE -- can any enabled lane produce the required transformation at all --
   before spending 248 authorized docking calls. It cost ~20 minutes and zero budget, and a negative
   would have been a complete answer. Ask that question before funding a run, not after.
+
+## 2026-09-22 (T4 DOCKING IS NOT REPRODUCIBLE ACROSS RUNS -- 1.3 kcal/mol on one molecule)
+
+- **MEASURED: the fa7_0 SEED molecule scored -7.5 (panel run), -8.30 and -8.8 across three runs.**
+  One molecule, one target, one box, three pipelines' worth of spread: **1.3 kcal/mol**.
+- **MECHANISM (verified in source, but INFERRED as the cause -- no repeated-conformer experiment has
+  been run): `qvina02` IS seeded** -- `dock_t4` passes the contract's `docking_seed` and the box is
+  fixed -- **but the conformer it docks is built by `obabel --gen3D`, which takes NO seed.**
+- **THIS IS WIDER THAN SEVERAL REPORTED COMPOSE-vs-IVG MARGINS ON THE FROZEN PANEL.** Per-cell gaps
+  of 0.2-0.7 appear throughout `diagnostics/T4_FROZEN_RESULT_v1.json`. A 1.3 spread on a single
+  molecule means those individual margins cannot be read as reproducible differences. **The
+  aggregate sums (delta 0.4: -9.0 over 15 cells; delta 0.6: -7.6 over 14) are far less exposed than
+  any single row**, but the per-row bolding is.
+- **IT DOES NOT AFFECT A WITHIN-RUN SEARCH**, where candidates and the incumbent share one pipeline
+  and one conformer generator -- so the SEARCH is sound and the selection inside a run is fair.
+- **NOT ACTED ON, and correctly so:** seeding conformer generation changes the docking adapter, which
+  EVERY T4 contract pins -- including the frozen panel's. That is an owner decision about the
+  harness, not an agent's call. Flagged, not fixed.
+- **It also splits the comparison bar in two:** IVG is -7.7 on fa7_0, but this run's own seed scored
+  -8.8, so "beats IVG" and "beats its own incumbent" are now DIFFERENT questions on the same cell.
+
+## 2026-09-22 (CORRECTION: a preempted Modal container DOES restart at retries=0)
+
+- **CORRECTS the 2026-09-20 entry "`retries: 0` means a preempted container STOPS and waits for a
+  human -- it does not silently restart from its baked image."** Read from the app's own logs:
+  `Container terminated due to preemption. Your Function will be restarted with the same input.`
+  at `retries=0`. The earlier entry is wrong, or at least not general. Preemption restart is NOT
+  governed by the retry budget.
+- **THE FATAL WINDOW, pre-existing in EVERY T4 arm:** the round lock is published BEFORE the root
+  docking, and the first checkpoint is only written at the END of round one. Any preemption in that
+  window leaves an unfinished query lock with no recoverable checkpoint, and the fail-closed guard
+  then correctly refuses to retry -- "uncertain calls must not become free calls". The cell is dead
+  and needs a human.
+- **A SUPPORT-EXPANSION ARM MAKES THAT WINDOW THE LIKELY OUTCOME rather than a rare one**, because
+  expansion widens round one from minutes to TENS OF MINUTES. The hazard was inherited; the exposure
+  was introduced.
+- **FIX, and it admits no ambiguity: checkpoint the completed root call BEFORE the round loop.**
+  Round 0 IS a completed round -- its single call is charged, scored and recorded -- so nothing is
+  re-docked, no uncertain call becomes free, and the guard is untouched. Verified live:
+  `checkpoint.json status=running charged=1 best=-8.8`.
+- **BUDGET DISCIPLINE WORTH COPYING:** three launches each charged exactly one root docking
+  (cancelled / preempted / live). Rather than treating the dead calls as sunk, the ceiling was
+  lowered 248 -> 247 -> 246 so that `charged + ceiling` equals the authorized 248 EXACTLY.
