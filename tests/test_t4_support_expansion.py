@@ -1,0 +1,497 @@
+"""The bounded support expansion: its stopping rule, its bounds, and its wiring.
+
+The invariant under test is the one that decides whether `fa7_0` spends its budget
+or repeats its blank: an empty candidate pool must EXPAND before it may terminate.
+
+Every behavioural test drives the real `run_support_expansion` with stub stages
+whose yield depends on the draw budget, which is exactly the situation the
+mechanism exists for.  The wiring tests read the app's own source rather than a
+transcription of it, and each one is paired with a mutation in
+`test_wiring_mutations` that must turn it red -- a structural check whose
+expectation is recomputed from the code under test cannot fail.
+"""
+
+from __future__ import annotations
+
+import ast
+import json
+from pathlib import Path
+
+import pytest
+
+from compose_v4.experiments.t4_support_expansion import (
+    ESCALATABLE_LANES,
+    ExpansionOutcome,
+    SupportExpansionContractError,
+    SupportExpansionNotConsumed,
+    SupportExpansionPolicy,
+    assert_support_expansion_is_consumed,
+    resolve_support_expansion,
+    run_support_expansion,
+)
+
+ROOT = Path(__file__).resolve().parents[1]
+BASE_APP = ROOT / "modal_apps/t4_fa7_0_support_expansion_base_app.py"
+WRAPPER_APP = ROOT / "modal_apps/t4_fa7_0_support_expansion_app.py"
+CONTRACT = ROOT / "configs/t4_fa7_0_support_expansion_v1.json"
+
+_GOOD_BLOCK = {
+    "draw_ladder": [960, 1920, 3840],
+    "lanes": ["shallow", "anchored_replacement"],
+    "zero_support_fallback": True,
+    "stop_at_distinct_eligible": 4,
+    "max_extra_draws_per_event": 6720,
+    "wall_seconds": 7200.0,
+}
+
+
+def _policy(**overrides) -> SupportExpansionPolicy:
+    block = {**_GOOD_BLOCK, **overrides}
+    return SupportExpansionPolicy.from_contract(block)
+
+
+def _records(count: int, *, prefix: str = "C") -> list[dict]:
+    return [{"smiles": prefix + "C" * index} for index in range(count)]
+
+
+# ---- Contract surface ----------------------------------------------------
+
+
+def test_policy_reads_a_well_formed_block():
+    policy = _policy()
+    assert policy.draw_ladder == (960, 1920, 3840)
+    assert policy.lanes == ("shallow", "anchored_replacement")
+    assert policy.zero_support_fallback is True
+    assert policy.as_record()["draw_ladder"] == [960, 1920, 3840]
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"draw_ladder": []},
+        {"draw_ladder": [960, 0]},
+        {"draw_ladder": [960, -1]},
+        {"lanes": []},
+        {"lanes": ["route_complete_region"]},
+        {"stop_at_distinct_eligible": 0},
+        {"max_extra_draws_per_event": 100},
+        {"wall_seconds": 0.0},
+        {"wall_seconds": -1.0},
+    ],
+)
+def test_policy_refuses_an_unbounded_or_malformed_block(overrides):
+    with pytest.raises(SupportExpansionContractError):
+        _policy(**overrides)
+
+
+def test_policy_refuses_an_unknown_key():
+    block = {**_GOOD_BLOCK, "max_rounds": 3}
+    with pytest.raises(SupportExpansionContractError):
+        SupportExpansionPolicy.from_contract(block)
+
+
+def test_fallback_flag_must_be_an_explicit_boolean():
+    """A coerced or absent value would leave it unclear whether the stage ran."""
+
+    for value in (None, 1, "true", ""):
+        block = {**_GOOD_BLOCK, "zero_support_fallback": value}
+        with pytest.raises(SupportExpansionContractError):
+            SupportExpansionPolicy.from_contract(block)
+
+
+def test_route_lane_is_not_escalatable():
+    assert "route_complete_region" not in ESCALATABLE_LANES
+
+
+def test_absent_field_is_the_only_none():
+    assert resolve_support_expansion({}) is None
+    assert resolve_support_expansion({"support_expansion": _GOOD_BLOCK}) is not None
+    with pytest.raises(SupportExpansionContractError):
+        resolve_support_expansion({"support_expansion": {"draw_ladder": []}})
+
+
+# ---- The stopping rule ---------------------------------------------------
+
+
+def test_a_budget_dependent_yield_is_recovered_by_escalation():
+    """The mechanism's whole point: empty at the base budget, non-empty above it.
+
+    This is the `fa7_0` situation in miniature -- the normal round found nothing,
+    and a larger draw budget over the same lanes does.
+    """
+
+    seen = []
+
+    def escalate(draws, attempt):
+        seen.append((draws, attempt))
+        return _records(4) if draws >= 1920 else []
+
+    outcome = run_support_expansion(_policy(zero_support_fallback=False), escalate=escalate)
+    assert seen == [(960, 0), (1920, 1)]
+    assert outcome.stop_reason == "reached_target"
+    assert outcome.distinct_eligible == 4
+    assert outcome.found_any
+    assert outcome.draws_spent == 2880
+
+
+def test_a_ladder_that_never_yields_is_exhaustion_with_the_bound_named():
+    outcome = run_support_expansion(
+        _policy(zero_support_fallback=False), escalate=lambda draws, attempt: []
+    )
+    assert outcome.stop_reason == "ladder_exhausted"
+    assert outcome.attempts == 3
+    assert outcome.draws_spent == 6720
+    assert not outcome.found_any
+
+
+def test_the_draw_cap_binds_before_the_ladder_ends():
+    outcome = run_support_expansion(
+        _policy(
+            zero_support_fallback=False,
+            draw_ladder=[960, 1920],
+            max_extra_draws_per_event=2000,
+        ),
+        escalate=lambda draws, attempt: [],
+    )
+    assert outcome.stop_reason == "draw_cap"
+    assert outcome.attempts == 1
+    assert outcome.draws_spent == 960
+
+
+def test_the_wall_clock_binds_and_is_checked_before_a_step_is_spent():
+    ticks = iter([0.0, 0.0, 100.0, 100.0, 100.0])
+
+    outcome = run_support_expansion(
+        _policy(zero_support_fallback=False, wall_seconds=10.0),
+        escalate=lambda draws, attempt: [],
+        clock=lambda: next(ticks),
+    )
+    assert outcome.stop_reason == "wall_clock"
+    assert outcome.attempts == 1
+
+
+def test_already_seen_endpoints_are_not_counted_as_found():
+    """An expansion that only re-finds archived molecules has found nothing new."""
+
+    outcome = run_support_expansion(
+        _policy(zero_support_fallback=False, stop_at_distinct_eligible=2),
+        escalate=lambda draws, attempt: _records(3),
+        already_seen=[row["smiles"] for row in _records(3)],
+    )
+    assert outcome.distinct_eligible == 0
+    assert outcome.stop_reason == "ladder_exhausted"
+
+
+def test_duplicate_endpoints_across_steps_are_counted_once():
+    outcome = run_support_expansion(
+        _policy(zero_support_fallback=False, stop_at_distinct_eligible=99),
+        escalate=lambda draws, attempt: _records(2),
+    )
+    assert outcome.distinct_eligible == 2
+    assert outcome.attempts == 3
+
+
+def test_a_record_without_an_endpoint_is_refused_rather_than_silently_dropped():
+    with pytest.raises(SupportExpansionContractError):
+        run_support_expansion(
+            _policy(zero_support_fallback=False),
+            escalate=lambda draws, attempt: [{"quality": 0.9}],
+        )
+
+
+# ---- The fallback stage --------------------------------------------------
+
+
+def test_the_fallback_runs_first_and_can_satisfy_the_target_alone():
+    """It is the cheap, structurally different stage, so no ladder step is spent."""
+
+    calls = []
+
+    def escalate(draws, attempt):
+        calls.append(draws)
+        return []
+
+    outcome = run_support_expansion(
+        _policy(stop_at_distinct_eligible=2),
+        escalate=escalate,
+        fallback=lambda: (_records(3), {"regions_considered": 26}),
+    )
+    assert calls == []
+    assert outcome.fallback_ran is True
+    assert outcome.fallback_eligible == 3
+    assert outcome.fallback_work == {"regions_considered": 26}
+    assert outcome.stop_reason == "reached_target"
+    assert outcome.attempt_log[0]["stage"] == "zero_support_fallback"
+
+
+def test_a_zero_yield_fallback_still_hands_over_to_the_ladder():
+    """The measured fa7_0 case: the fallback finds nothing and the ladder must run."""
+
+    outcome = run_support_expansion(
+        _policy(stop_at_distinct_eligible=1),
+        escalate=lambda draws, attempt: _records(1) if attempt >= 1 else [],
+        fallback=lambda: ([], {"regions_considered": 26, "distinct_eligible_endpoints": 0}),
+    )
+    assert outcome.fallback_ran is True
+    assert outcome.fallback_eligible == 0
+    assert outcome.attempts == 2
+    assert outcome.stop_reason == "reached_target"
+    assert outcome.found_any
+
+
+def test_the_fallback_is_skipped_when_the_contract_disables_it():
+    outcome = run_support_expansion(
+        _policy(zero_support_fallback=False),
+        escalate=lambda draws, attempt: [],
+        fallback=lambda: (_records(9), {}),
+    )
+    assert outcome.fallback_ran is False
+    assert outcome.distinct_eligible == 0
+
+
+# ---- The consumption gate ------------------------------------------------
+
+
+def test_publishing_exhaustion_without_an_expansion_is_refused():
+    """The `not_run` clause, on a fixture the second clause cannot also catch.
+
+    A plain `ExpansionOutcome()` trips BOTH clauses, so disabling either one left
+    the other to raise and a mutation survived. `fallback_ran=True` satisfies the
+    second clause, leaving only the stop-reason check able to refuse.
+    """
+
+    with pytest.raises(SupportExpansionNotConsumed):
+        assert_support_expansion_is_consumed(
+            ExpansionOutcome(stop_reason="not_run", fallback_ran=True)
+        )
+    with pytest.raises(SupportExpansionNotConsumed):
+        assert_support_expansion_is_consumed(ExpansionOutcome())
+
+
+def test_an_event_that_ran_no_stage_at_all_is_refused():
+    """A misconfigured bound that spends nothing must not end the cell."""
+
+    outcome = ExpansionOutcome(stop_reason="draw_cap")
+    with pytest.raises(SupportExpansionNotConsumed):
+        assert_support_expansion_is_consumed(outcome)
+
+
+def test_a_real_exhausted_ladder_is_accepted():
+    outcome = run_support_expansion(
+        _policy(zero_support_fallback=False), escalate=lambda draws, attempt: []
+    )
+    assert_support_expansion_is_consumed(outcome)
+
+
+# ---- The contract this arm launches under --------------------------------
+
+
+def _contract_payload() -> dict:
+    return json.loads(CONTRACT.read_text())["payload"]
+
+
+def test_the_contract_declares_one_cell_and_both_mechanisms():
+    payload = _contract_payload()
+    assert [row["cell"] for row in payload["cells"]] == ["fa7_0"]
+    assert payload["delta"] == 0.6
+    assert payload["charged_calls_per_cell"] == 248
+    assert payload["total_charged_call_ceiling"] == 248
+    assert payload["proposal"]["shallow"]["region_law"] == "free_gate_margin_v1"
+    assert payload["proposal"]["shallow"]["completion_law"] == "free_gate_margin_v1"
+    SupportExpansionPolicy.from_contract(payload["support_expansion"])
+
+
+def test_the_contract_pins_every_module_the_mechanisms_live_in():
+    """A mechanism absent from the pin block is free to drift under this contract."""
+
+    pinned = set(_contract_payload()["runtime_inputs_sha256"])
+    for relative in (
+        "src/compose_v4/control/replace_completion_law.py",
+        "src/compose_v4/control/completion_law_contract.py",
+        "src/compose_v4/control/zero_support_fallback.py",
+        "src/compose_v4/experiments/t4_support_expansion.py",
+        "src/compose_v4/control/bridge_region_law.py",
+        "src/compose_v4/control/region_law_contract.py",
+        "modal_apps/t4_fa7_0_support_expansion_app.py",
+        "modal_apps/t4_fa7_0_support_expansion_base_app.py",
+    ):
+        assert relative in pinned, relative
+
+
+def test_every_pinned_runtime_input_matches_the_tree():
+    from compose_v4.experiments.continuation_profile import sha256_file
+
+    for relative, expected in _contract_payload()["runtime_inputs_sha256"].items():
+        assert sha256_file(ROOT / relative) == expected, relative
+
+
+# ---- The app wiring ------------------------------------------------------
+
+
+def _run_cell_source() -> str:
+    tree = ast.parse(BASE_APP.read_text())
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == "run_cell":
+            return ast.get_source_segment(BASE_APP.read_text(), node) or ""
+    raise AssertionError("run_cell not found in the base app")
+
+
+def _terminal_block() -> ast.If:
+    """The `if not selected:` block that publishes candidate exhaustion."""
+
+    source = _run_cell_source()
+    tree = ast.parse(ast.unparse(ast.parse(source)))
+    blocks = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.If) and "candidate_exhaustion" in ast.unparse(node)
+    ]
+    assert blocks, "no candidate_exhaustion branch found in run_cell"
+    return min(blocks, key=lambda node: len(ast.unparse(node)))
+
+
+def _calls(node: ast.AST) -> set[str]:
+    names = set()
+    for child in ast.walk(node):
+        if isinstance(child, ast.Call):
+            func = child.func
+            if isinstance(func, ast.Name):
+                names.add(func.id)
+            elif isinstance(func, ast.Attribute):
+                names.add(func.attr)
+    return names
+
+
+def test_run_cell_expands_support_before_it_can_terminate():
+    """The invariant: exhaustion is publishable only after an expansion event."""
+
+    source = _run_cell_source()
+    assert "run_support_expansion" in source, (
+        "run_cell never runs a support expansion; an empty candidate pool would "
+        "terminate the cell on the first unlucky draw, which is how fa7_0 went blank"
+    )
+    expansion_at = source.index("run_support_expansion(")
+    terminal_at = source.index('"status": "candidate_exhaustion"')
+    assert expansion_at < terminal_at, (
+        "the expansion must run BEFORE the terminal publish, not after it"
+    )
+
+
+def test_the_terminal_publish_is_gated_on_the_expansion_having_run():
+    assert "assert_support_expansion_is_consumed" in _calls(_terminal_block()), (
+        "the candidate_exhaustion branch does not assert the expansion was consumed, "
+        "so a declared-but-inert expansion could still end the cell"
+    )
+
+
+def test_the_terminal_result_records_the_expansion_and_its_bound():
+    block = ast.unparse(_terminal_block())
+    assert "support_expansion" in block
+    assert "as_record" in block
+
+
+def test_a_missing_contract_block_raises_rather_than_terminating_quietly():
+    """`policy` must be BOUND to the resolver's result, not merely import it.
+
+    The first version of this test looked for the string, which the import line
+    inside `run_cell` supplies even after the call is deleted -- a mutation
+    survived on exactly that.
+    """
+
+    tree = ast.parse(_run_cell_source())
+    bound = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "policy"
+            for target in node.targets
+        )
+        and isinstance(node.value, ast.Call)
+        and isinstance(node.value.func, ast.Name)
+        and node.value.func.id == "resolve_support_expansion"
+    ]
+    assert bound, (
+        "run_cell never binds `policy` to resolve_support_expansion(contract); the "
+        "contract's expansion block would go unread"
+    )
+    tail = _run_cell_source()
+    assert "raise ValueError" in tail[tail.index("resolve_support_expansion(contract)") :]
+
+
+def test_the_round_lock_carries_the_expansion_telemetry():
+    """Otherwise a terminal result could not be audited after the fact."""
+
+    source = _run_cell_source()
+    assert "support_expansion_telemetry" in source
+
+
+def test_the_base_app_bakes_its_own_source_into_the_image():
+    """A stale bake would ship the parent arm's loop under this contract's name."""
+
+    source = BASE_APP.read_text()
+    assert "t4_fa7_0_support_expansion_base_app.py" in source
+    assert "t4_integrated_route_fiber_parp1_app.py" not in source
+
+
+def test_the_proposal_worker_threads_both_laws_and_the_fallback():
+    source = BASE_APP.read_text()
+    for needle in (
+        "completion_law_for_proposal_lane",
+        "completion_law=completion_law",
+        "fallback_candidates",
+        "zero_support_fallback",
+    ):
+        assert needle in source, needle
+
+
+def test_the_wrapper_refuses_a_contract_missing_any_mechanism():
+    """Drives the real `_assert_authorized`, not a transcription of it."""
+
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("_wrapper_probe", WRAPPER_APP)
+    source = WRAPPER_APP.read_text()
+    assert spec is not None
+    # Import only the guard, not the Modal app: execute the module body up to the
+    # point the guard is defined, which is everything before the `_assert_authorized()`
+    # call at module scope.
+    head = source[: source.index("_assert_authorized()\n")]
+    namespace: dict = {"__file__": str(WRAPPER_APP)}
+    exec(compile(head, str(WRAPPER_APP), "exec"), namespace)  # noqa: S102
+    guard = namespace["_assert_authorized"]
+    payload = _contract_payload()
+    authorized = payload["status"] == namespace["AUTHORIZED_STATUS"]
+    if authorized:
+        guard()
+    else:
+        # A draft contract must refuse, which is itself one of the guard's clauses.
+        with pytest.raises(RuntimeError):
+            guard()
+
+    target = Path(namespace["__file__"]).resolve().parents[1] / namespace["CONTRACT"]
+    # Each mutation removes ONE mechanism from an otherwise authorized contract, so a
+    # surviving mutation means that clause is decorative.
+    authorized_payload = {**payload, "status": namespace["AUTHORIZED_STATUS"]}
+    shallow = authorized_payload["proposal"]["shallow"]
+    mutations = [
+        {"proposal": {**authorized_payload["proposal"],
+                      "shallow": {k: v for k, v in shallow.items() if k != "completion_law"}}},
+        {"proposal": {**authorized_payload["proposal"],
+                      "shallow": {k: v for k, v in shallow.items() if k != "region_law"}}},
+        {"support_expansion": {}},
+        {"cells": [{"cell": "fa7_2"}]},
+        {"status": "DRAFT_PENDING_OWNER_AUTHORIZATION"},
+    ]
+    original = target.read_text()
+    try:
+        # Positive control: an authorized contract with nothing removed must PASS, so
+        # a guard that refuses everything cannot masquerade as five killed mutations.
+        target.write_text(json.dumps({"payload": authorized_payload}))
+        guard()
+        for mutation in mutations:
+            target.write_text(json.dumps({"payload": {**authorized_payload, **mutation}}))
+            with pytest.raises(RuntimeError):
+                guard()
+    finally:
+        target.write_text(original)
