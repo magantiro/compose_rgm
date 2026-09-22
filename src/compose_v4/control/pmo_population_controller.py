@@ -59,6 +59,7 @@ from compose_v4.control.pmo_discovery import (
 from compose_v4.control.pmo_donor_channel import (
     DEFAULT_CUT_LAW,
     DONOR_CHANNEL,
+    DonorStratum,
     donor_transplant_draw,
     resolve_cut_law,
 )
@@ -66,6 +67,8 @@ from compose_v4.control.pmo_joint_dependency_jump import (
     CHECKPOINT_SCHEMA,
 )
 from compose_v4.control.pmo_online_memory import (
+    BANK_CAPACITY,
+    STRATA,
     OnlineProposalMemory,
     memory_channel_proposal,
 )
@@ -84,8 +87,12 @@ JUMP_CHANNEL = "joint_dependency_region_jump"
 #: channel draws `attempts_per_batch` extra parents in `propose_batch`, which consumes
 #: RNG, so membership in this tuple is the only byte-identical OFF.
 CHANNELS = (SHALLOW_CHANNEL, STRUCTURED_CHANNEL, JUMP_CHANNEL)
-#: How many of this run's best scored molecules are offered as donors.
-DONOR_POOL_SIZE = 24
+#: How many of this run's scored molecules are offered as donors, across all strata.
+#: The SELECTION size, not a buffer bound -- `ScoredMoleculeBank` retains every counted
+#: row, because whether a molecule is `promising` is decided by observations that arrive
+#: after it. Superseded `DONOR_POOL_SIZE = 24`, which was the top of the score ranking and
+#: therefore the top of whatever the population had drifted toward.
+DONOR_POOL_SIZE = BANK_CAPACITY
 
 # Plateau excursion. `PLATEAU_ROUNDS` non-improving rounds arm a bounded
 # `ESCAPE_ROUNDS` excursion, and arming restarts the counter so the excursion drains
@@ -288,6 +295,19 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         # RNG exists to consume. An 'off' that merely passed a uniform law would NOT
         # be byte-identical -- `BridgeRegionLaw.order` consumes `rng.random` where an
         # unlawed permutation does not.
+        # Arm D is arm B PLUS a donor lane, never a donor lane alone: its donors are
+        # the run's own stratified scored bank, which lives in the online memory and is
+        # fed by the memory's counted-observation hook. A donor lane without a memory
+        # would have no bank to draw from, and the only ways out of that are both worse
+        # than refusing: an empty pool makes the lane silently inert, and a private
+        # top-N fallback would run the superseded score-ranked pool under the
+        # stratified arm's name. Same shape, same reason, as the arm C guard above.
+        if enable_donor_channel and not enable_online_memory:
+            raise ValueError(
+                "the donor recombination lane requires the online memory: arm D is arm "
+                "B plus donor recombination, and its donors are the memory's stratified "
+                "scored bank"
+            )
         self.enable_donor_channel = bool(enable_donor_channel)
         self.channels = CHANNELS + (DONOR_CHANNEL,) if self.enable_donor_channel else CHANNELS
         # Resolved through an ATTRIBUTE so the consumption gate can replace it and
@@ -567,37 +587,55 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             )
         return attempts, candidates, perf_counter() - began
 
-    def _donor_pool(self, exclude: str | None) -> list[tuple[str, Any]]:
-        """Molecules THIS RUN has scored, best first, as executable states.
+    def _donor_pool(self, exclude: str | None) -> list[DonorStratum]:
+        """The run's own STRATIFIED scored bank, as executable donor states.
 
-        The information regime is the whole point of this method. Donors come from
-        `self.observations` -- COUNTED oracle outcomes of this run -- joined to the
-        archive entry that produced them, and the state is taken from that entry's own
-        trace, never re-parsed from SMILES. A SMILES round trip would return a TIGHT
-        graph, and this path requires exactly 48 slots.
+        The information regime is the whole point of this method.  Every member is a
+        molecule THIS RUN charged its own ledger for -- the bank is fed only from
+        `observe_scored_molecule`, at the moment `observe_batch` records a counted
+        outcome -- and the state is taken from that molecule's own archived trace,
+        never re-parsed from SMILES.  A SMILES round trip returns a TIGHT graph and
+        this path requires exactly 48 slots.  No declared target, no prescreened bank
+        and no cross-run history enters here.
 
-        No declared target, no prescreened bank and no cross-run history enters here.
+        WHY IT IS STRATIFIED AND NOT TOP-N.  The superseded pool was the 24
+        best-scoring molecules.  On this repository's own measured PMO runs the
+        population leaves the drug-like manifold on almost every task, so the top of
+        the score ranking is the top of the drift, and recombining it recombines the
+        drift.  The bank adds two strata score alone discards: molecules whose own
+        children improved on them -- the only evidence here about a molecule as a
+        SOURCE of edits, which is the role a donor plays -- and the best representative
+        of each structural basin the higher strata do not already occupy.
+
+        THIS IS A WIDENING, NEVER A NARROWING.  The elite stratum alone holds more
+        molecules than the whole superseded pool, so every donor that pool could have
+        offered is still offered.  What changes is the PROBABILITY, because the draw is
+        stratum-first: the elite slice no longer takes mass in proportion to its size.
         """
-        scores: dict[str, float] = {}
-        for observation in self.observations.values():
-            endpoint, score = observation.get("endpoint"), observation.get("score")
-            if endpoint and score is not None:
-                scores[endpoint] = max(scores.get(endpoint, float("-inf")), float(score))
-        ranked = []
-        for entry_id, entry in sorted(self.entries.items()):
+        bank = self.online_memory.bank
+        selection = bank.strata(capacity=DONOR_POOL_SIZE)
+        weights = bank.weights(selection)
+        by_endpoint: dict[str, Any] = {}
+        for _, entry in sorted(self.entries.items()):
             endpoint = entry.get("endpoint")
-            if endpoint is None or endpoint == exclude or endpoint not in scores:
-                continue
-            ranked.append((-scores[endpoint], entry_id, endpoint, entry))
-        ranked.sort()
-        pool = []
-        for _, _, endpoint, entry in ranked[:DONOR_POOL_SIZE]:
-            try:
-                pool.append((endpoint, decode_state(entry["trace"]["states"][-1])))
-            except (KeyError, ValueError, TypeError):
-                # A malformed archive entry is skipped, never guessed at.
-                continue
-        return pool
+            if endpoint is not None and endpoint not in by_endpoint:
+                by_endpoint[endpoint] = entry
+        strata = []
+        for name in STRATA:
+            members = []
+            for endpoint in selection.get(name, ()):  # bank order, deterministic
+                entry = by_endpoint.get(endpoint)
+                if endpoint == exclude or entry is None:
+                    continue
+                try:
+                    members.append((endpoint, decode_state(entry["trace"]["states"][-1])))
+                except (KeyError, ValueError, TypeError):
+                    # A malformed archive entry is skipped, never guessed at.
+                    continue
+            strata.append(
+                DonorStratum(name=name, weight=weights.get(name, 0.0), members=tuple(members))
+            )
+        return strata
 
     def _generate_donor_pool(self, eligibility, archive_seen, parent_schedule):
         """Arm D: one pendant exchange per attempt, parent and donor cuts from the law."""
@@ -1117,6 +1155,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             self.shallow_rng.bit_generator.state = bootstrap["shallow_rng"]
             self.structured_rng.bit_generator.state = bootstrap["structured_rng"]
         self._population_bootstrap_pool_id = self._pool_continuity.continuity_pool_id
+        self._bank_measured_program(record, score)
         return ProgramOptimizer.add_measured_program(
             self,
             record,
@@ -1124,6 +1163,46 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             score=score,
             static_score=static_score,
         )
+
+    def _bank_measured_program(self, record: dict[str, Any], score: float) -> None:
+        """Bank a bootstrap-scored molecule, and feed NOTHING ELSE in the memory.
+
+        MEASURED GAP THIS CLOSES, read off two call sites in `program_campaign`: the
+        campaign charges bootstrap candidates through `add_measured_program` (:347) and
+        calls `observe_batch` only when the round is NOT a bootstrap (:360), while the
+        memory hook lives in `observe_batch`. Under the cold-start PMO recipe that is
+        every initialization molecule plus roughly a fifth of all later rounds
+        (`initial_parent_fraction = 0.2`), so those counted molecules reach the archive
+        and never reach the memory. The initialization molecules are exactly the
+        on-manifold material the diverse stratum exists to keep available, so a bank
+        that could not see them would miss the population it was built to protect.
+
+        ONLY THE BANK IS FED, deliberately. Touching `frontier`, `edits`, `donors` or
+        `size` here would change what arm B's region law and arm C's frontier credit
+        compute, in a scored arm that is already running -- so arms A, B and C stay
+        byte-identical and this is additive material for arm D alone. That the wider
+        gap is a defect in arm B's own frontier is a separate, parked finding; it is
+        not repaired here, because repairing it silently would move a live comparison.
+        """
+
+        if self.online_memory is None:
+            return
+        endpoint = record.get("endpoint") or (record.get("trace") or {}).get("endpoint")
+        if not endpoint:
+            return
+        try:
+            basin = basin_label(endpoint)
+        except (ValueError, TypeError):
+            basin = None
+        try:
+            self.online_memory.bank.observe(
+                endpoint=endpoint, score=float(score), basin=basin
+            )
+        except ValueError:
+            # A changed counted score for one endpoint means the ledger join is wrong.
+            # Counted like every other memory attribution failure rather than raised:
+            # a bank row must never kill a scored run, and it must never pass silently.
+            self.online_memory_attribution_failures += 1
 
     def _observe_into_online_memory(self, candidate: dict[str, Any], score: float) -> None:
         """Record one counted oracle observation and its transition into the memory.
@@ -1138,8 +1217,18 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         if not endpoint:
             return
         child = decode_state(trace["states"][-1]) if trace.get("states") else None
+        # The bank's structural axis is the allocator's OWN basin definition, computed
+        # here rather than inside the memory so that module still performs no chemistry
+        # and the two cannot drift to different notions of "structurally distinct".
+        # `basin_label` raises on an unparseable endpoint; caught locally so a scaffold
+        # failure costs a diverse-stratum candidacy and never the frontier observation
+        # that the outer handler would otherwise lose with it.
+        try:
+            basin = basin_label(endpoint)
+        except (ValueError, TypeError):
+            basin = None
         self.online_memory.observe_scored_molecule(
-            endpoint=endpoint, score=score, graph=child
+            endpoint=endpoint, score=score, graph=child, basin=basin
         )
         provenance = candidate.get("provenance") or {}
         parent_score = provenance.get("parent_measured_score")

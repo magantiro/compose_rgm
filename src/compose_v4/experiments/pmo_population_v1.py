@@ -207,6 +207,16 @@ def execute_task(
     if not isinstance(charged_calls_per_task, int) or charged_calls_per_task <= 0:
         raise ValueError("charged_calls_per_task must be a positive integer")
 
+    if enable_donor_channel and not enable_online_memory:
+        # Refused HERE, before the ledger is constructed and before any charged call,
+        # rather than deeper in the controller. The controller raises for the same
+        # reason, but by then a misconfigured launch has already built its ledger; the
+        # discipline this repository paid for is that a positive check runs before the
+        # first charged call, so a failure leaves the task re-runnable.
+        raise ValueError(
+            "arm D requires the online memory: the donor lane recombines the run's own "
+            "stratified scored bank, which the memory holds"
+        )
     if task_name not in TASKS:
         raise ValueError("task is outside the PMO-v1 three-task lock")
     if not contract.get("scored_launch_authorized"):

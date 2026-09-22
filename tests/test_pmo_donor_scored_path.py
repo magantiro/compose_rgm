@@ -35,10 +35,12 @@ from compose_v4.control.pmo_donor_channel import (
     DONOR_TAG,
     RETENTIVE_RELEASED_FRACTION,
     UNIFORM_ORIENTED_SINGLE_BRIDGE_ARM,
+    DonorStratum,
     donor_region_law,
     donor_transplant_draw,
     resolve_cut_law,
 )
+from compose_v4.control.pmo_online_memory import ELITE
 from compose_v4.control.pmo_population_controller import PmoPopulationController
 from compose_v4.experiments import pmo_donor_scored_gate as scored_gate
 from compose_v4.experiments.editing_v2_evaluation_semantics import (
@@ -63,7 +65,7 @@ def _state(smiles: str):
 def test_the_scored_entry_point_passes_the_donor_arm_to_the_campaign(tmp_path) -> None:
     """Drives the REAL `execute_task`; only `run_program_campaign` is replaced."""
     captured = scored_gate.capture_scored_optimizer_kwargs(
-        ROOT, tmp_path / "on", enable_donor_channel=True
+        ROOT, tmp_path / "on", enable_online_memory=True, enable_donor_channel=True
     )
     kwargs = captured["optimizer_kwargs"]
     assert kwargs.get("enable_donor_channel") is True, (
@@ -161,7 +163,7 @@ def test_an_unknown_cut_law_is_refused_rather_than_defaulted() -> None:
 def test_the_controller_refuses_an_unknown_arm_at_construction(tmp_path) -> None:
     """At CONSTRUCTION, not at the first draw: a scored run must not get that far."""
     kwargs = scored_gate.capture_scored_optimizer_kwargs(
-        ROOT, tmp_path / "on", enable_donor_channel=True
+        ROOT, tmp_path / "on", enable_online_memory=True, enable_donor_channel=True
     )["optimizer_kwargs"]
     with pytest.raises(ValueError, match="unknown donor cut law"):
         scored_gate._seeded_controller(
@@ -169,6 +171,11 @@ def test_the_controller_refuses_an_unknown_arm_at_construction(tmp_path) -> None
             scored_gate._initialization_source(ROOT),
             seed=11,
         )
+
+
+def _one_stratum(smiles: str, graph) -> list[DonorStratum]:
+    """A single-member elite stratum: the smallest bank a draw can be made from."""
+    return [DonorStratum(name=ELITE, weight=1.0, members=((smiles, graph),))]
 
 
 # ---- THE SHARED SINK: the law is used TWICE and one use can be dropped ----
@@ -192,7 +199,8 @@ def test_the_law_is_consulted_for_the_DONOR_as_well_as_the_source() -> None:
         return donor_region_law(graph)
 
     donor_transplant_draw(
-        source, [(DONOR, donor)], np.random.default_rng(7), law=counting, max_attempts=4
+        source, _one_stratum(DONOR, donor), np.random.default_rng(7),
+        law=counting, max_attempts=4,
     )
     assert int(source.n_real_atoms) in seen, "the law was never asked about the parent"
     assert int(donor.n_real_atoms) in seen, (
@@ -208,7 +216,7 @@ def test_the_retentive_law_takes_a_smaller_graft_from_the_donor() -> None:
     support and differ only in probability -- one draw cannot separate them.
     """
     source, donor = _state(PARENT), _state(DONOR)
-    pool = [(DONOR, donor)]
+    pool = _one_stratum(DONOR, donor)
 
     def added(law):
         sizes = []
@@ -248,7 +256,7 @@ def test_a_resume_cannot_swap_the_cut_law_under_a_running_arm(tmp_path) -> None:
     and measure the other one, with nothing in the artifact to show it.
     """
     kwargs = scored_gate.capture_scored_optimizer_kwargs(
-        ROOT, tmp_path / "on", enable_donor_channel=True
+        ROOT, tmp_path / "on", enable_online_memory=True, enable_donor_channel=True
     )["optimizer_kwargs"]
     controller = scored_gate._seeded_controller(
         kwargs, scored_gate._initialization_source(ROOT), seed=11
@@ -321,7 +329,7 @@ def test_a_donor_candidate_is_tagged_at_synthesis_and_survives_to_the_snapshot(
     The tag also has to DISCRIMINATE: a key every entry carries attributes nothing.
     """
     kwargs = scored_gate.capture_scored_optimizer_kwargs(
-        ROOT, tmp_path / "on", enable_donor_channel=True
+        ROOT, tmp_path / "on", enable_online_memory=True, enable_donor_channel=True
     )["optimizer_kwargs"]
     controller = scored_gate._seeded_controller(
         kwargs, scored_gate._initialization_source(ROOT), seed=11

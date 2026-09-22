@@ -183,6 +183,54 @@ TEMPERATURE = 0.05
 DONOR_CEILING = 0.25
 
 
+# ---- The stratified scored bank ------------------------------------------
+#
+# The bank is the run's own counted population, offered as structural MATERIAL
+# rather than as a ranking.  It exists because a top-N-by-score pool is a pool
+# of whatever the search has drifted toward: on this repository's own measured
+# PMO runs the population leaves the drug-like manifold on almost every task,
+# so recombining the top of that population recombines the drift.  Stratifying
+# for structural coverage and for demonstrated productivity, beside score,
+# keeps material in the bank that score alone would have discarded.
+
+#: Total selection size.  Matched to InVirtuoGen's no-prescreen replay buffer
+#: (300) so the donor lane draws from a population of comparable size to the
+#: comparator's, rather than from a number chosen here.
+BANK_CAPACITY = 300
+
+#: Per-stratum capacities.  They SUM to :data:`BANK_CAPACITY` and are equal: this
+#: is a DECLARED split, not a calibrated one, and it is named so that changing it
+#: is a one-line, greppable edit rather than a tuned constant hidden in a method.
+ELITE_CAPACITY = 100
+PROMISING_CAPACITY = 100
+DIVERSE_CAPACITY = 100
+
+ELITE = "elite"
+PROMISING = "promising"
+DIVERSE = "diverse"
+
+#: Stratum order is also PRECEDENCE: a molecule that qualifies for more than one
+#: stratum occupies exactly one slot, in this order.  Disjointness matters because
+#: the draw picks a stratum first and then a member, so a molecule appearing in two
+#: strata would receive two shares of the mass.
+STRATA = (ELITE, PROMISING, DIVERSE)
+STRATUM_CAPACITY = {
+    ELITE: ELITE_CAPACITY,
+    PROMISING: PROMISING_CAPACITY,
+    DIVERSE: DIVERSE_CAPACITY,
+}
+
+#: Draw mass per stratum, BEFORE redistribution over the strata that are non-empty.
+#:
+#: Uniform, and the uniformity is the point: the shares are declared rather than
+#: fitted, so no stratum's weight encodes a result.  It is also why the draw must be
+#: STRATUM-FIRST.  Drawing uniformly over the union would give the elite stratum its
+#: share by size instead of by declaration -- the same defect as the 2026-07-24
+#: corruption-selection finding, where a weighted permutation over all instances
+#: over-picked whichever family had the most of them.
+STRATUM_WEIGHT = {ELITE: 1.0 / 3.0, PROMISING: 1.0 / 3.0, DIVERSE: 1.0 / 3.0}
+
+
 # ---- Structural context --------------------------------------------------
 
 
@@ -299,6 +347,195 @@ class FrontierLedger:
             self.top_k_mean(score, exclude=exclude)
             - self.top_k_mean(exclude=exclude),
         )
+
+
+@dataclass
+class ScoredMoleculeBank:
+    """Every molecule this run has COUNTED, with the evidence each stratum needs.
+
+    THE BANK RETAINS, THE SELECTION BOUNDS
+    --------------------------------------
+    Rows are kept for every counted observation; :data:`BANK_CAPACITY` bounds the
+    SELECTION, not the buffer.  That is a deliberate divergence from a fixed-size
+    replay buffer, and it is not a size saving: eviction would be irreversible and
+    wrong here, because whether a molecule belongs in the *promising* stratum is
+    decided by observations that arrive AFTER it -- a molecule evicted at call 200
+    for a low score can become the best donor in the run at call 600 when its child
+    improves.  The frontier ledger beside this one already retains unboundedly for
+    the same reason, so this costs nothing new.
+
+    WHAT EACH STRATUM IS EVIDENCE OF, AND WHAT IT IS NOT
+    ----------------------------------------------------
+    ``elite``      counted score.  The strongest evidence available and the most
+                   drifted: on a predictor-backed oracle the top scorers are the
+                   off-manifold molecules.
+    ``promising``  counted PARENT-RELATIVE improvement delivered by this molecule's
+                   own children.  This is the only stratum whose evidence is about
+                   the molecule as a SOURCE of edits rather than as a product, which
+                   is exactly the role a donor plays.
+    ``diverse``    structural coverage: the best-scoring representative of a basin
+                   the higher strata do not already occupy.  A coverage backstop, and
+                   an ASSOCIATION at most -- occupying a distinct scaffold is not
+                   evidence that the scaffold is good.
+
+    Precedence is ``elite -> promising -> diverse`` and the strata are DISJOINT.
+
+    INFORMATION REGIME
+    ------------------
+    Score comes from the run's own charged ledger; improvement is the difference of
+    two charged scores; the basin is the Bemis-Murcko scaffold of a molecule the run
+    has already produced.  The basin is supplied BY THE CALLER, using the same
+    :func:`compose_v4.control.pmo_credit.basin_label` the allocator already groups by,
+    so this module still computes no chemistry and the bank's notion of "structurally
+    distinct" is the controller's existing one rather than a second definition.
+    """
+
+    rows: dict[str, dict[str, Any]] = field(default_factory=dict)
+
+    # -- updates ----------------------------------------------------------
+
+    def observe(self, *, endpoint: str, score: float, basin: str | None = None) -> None:
+        """Bank one counted observation.
+
+        Refuses a changed score for the same molecule, exactly as
+        :class:`FrontierLedger` does: two different counted values for one endpoint
+        means the ledger join is wrong, and silently keeping either one would put a
+        number in the bank that no charged call produced.
+        """
+
+        row = self.rows.get(endpoint)
+        if row is None:
+            self.rows[endpoint] = {
+                "score": float(score),
+                "basin": basin,
+                "children": 0,
+                "improvement": 0.0,
+            }
+            return
+        if row["score"] != float(score):
+            raise ValueError(f"counted score for {endpoint!r} changed")
+        if row["basin"] is None and basin is not None:
+            row["basin"] = basin
+
+    def observe_lineage(
+        self, *, parent_endpoint: str, parent_score: float | None, child_score: float
+    ) -> bool:
+        """Credit a parent with one counted child and its positive improvement.
+
+        Returns whether the parent was known.  A parent the bank has never seen is
+        NOT created here: a bank row must be a molecule the ledger charged for, and
+        inventing one from a provenance field would put an unscored molecule into a
+        pool whose whole claim is that every member was counted.
+
+        ``parent_score is None`` means the transition carries no parent baseline, so
+        there is no improvement to measure; the child is still counted, because "this
+        molecule has been used as a parent" is itself evidence the promising stratum
+        needs in order to rank by improvement PER USE rather than by luck of reuse.
+        """
+
+        row = self.rows.get(parent_endpoint)
+        if row is None:
+            return False
+        row["children"] += 1
+        if parent_score is not None:
+            row["improvement"] += max(0.0, float(child_score) - float(parent_score))
+        return True
+
+    # -- selection --------------------------------------------------------
+
+    def strata(self, *, capacity: int = BANK_CAPACITY) -> dict[str, list[str]]:
+        """The stratified selection: disjoint, deterministic, ordered within stratum.
+
+        ``capacity`` scales the three declared per-stratum capacities together, so a
+        caller asking for a smaller bank gets the same MIX rather than a truncated
+        elite.  Every order is fully tie-broken on the endpoint string: a selection
+        whose order depended on dict insertion would not survive a resume.
+        """
+
+        if capacity < 0:
+            raise ValueError("bank capacity cannot be negative")
+        scale = capacity / BANK_CAPACITY if BANK_CAPACITY else 0.0
+        taken: set[str] = set()
+
+        def room(name: str) -> int:
+            return round(STRATUM_CAPACITY[name] * scale)
+
+        elite = [
+            endpoint
+            for endpoint, _ in sorted(
+                self.rows.items(), key=lambda kv: (-kv[1]["score"], kv[0])
+            )
+        ][: room(ELITE)]
+        taken.update(elite)
+
+        promising = [
+            endpoint
+            for endpoint, _ in sorted(
+                (
+                    (endpoint, row)
+                    for endpoint, row in self.rows.items()
+                    if endpoint not in taken and row["improvement"] > 0.0
+                ),
+                key=lambda kv: (-kv[1]["improvement"], -kv[1]["score"], kv[0]),
+            )
+        ][: room(PROMISING)]
+        taken.update(promising)
+
+        # One representative per basin the higher strata do not already occupy, and
+        # the basin's own best scorer represents it: the stratum buys COVERAGE, so
+        # spending its slots on several members of one scaffold would buy nothing.
+        occupied = {
+            self.rows[endpoint]["basin"]
+            for endpoint in taken
+            if self.rows[endpoint]["basin"] is not None
+        }
+        best_of_basin: dict[str, tuple[float, str]] = {}
+        for endpoint, row in self.rows.items():
+            basin = row["basin"]
+            if endpoint in taken or basin is None or basin in occupied:
+                continue
+            current = best_of_basin.get(basin)
+            if current is None or (-row["score"], endpoint) < (-current[0], current[1]):
+                best_of_basin[basin] = (row["score"], endpoint)
+        diverse = [
+            endpoint
+            for _, endpoint in sorted(
+                best_of_basin.values(), key=lambda pair: (-pair[0], pair[1])
+            )
+        ][: room(DIVERSE)]
+
+        return {ELITE: elite, PROMISING: promising, DIVERSE: diverse}
+
+    def weights(self, strata: dict[str, list[str]]) -> dict[str, float]:
+        """Declared stratum mass, renormalized over the strata that have members.
+
+        An empty stratum yields its share rather than wasting it; it does not silently
+        shrink the others' relative proportions.
+        """
+
+        live = {name: STRATUM_WEIGHT[name] for name in STRATA if strata.get(name)}
+        total = sum(live.values())
+        if not total:
+            return {}
+        return {name: weight / total for name, weight in live.items()}
+
+    # -- reporting --------------------------------------------------------
+
+    def report(self, *, capacity: int = BANK_CAPACITY) -> dict[str, Any]:
+        selection = self.strata(capacity=capacity)
+        return {
+            "counted_molecules": len(self.rows),
+            "basins": len(
+                {r["basin"] for r in self.rows.values() if r["basin"] is not None}
+            ),
+            "rows_without_basin": sum(1 for r in self.rows.values() if r["basin"] is None),
+            "parents_with_an_improving_child": sum(
+                1 for r in self.rows.values() if r["improvement"] > 0.0
+            ),
+            "capacity": int(capacity),
+            "selected": {name: len(members) for name, members in selection.items()},
+            "weights": self.weights(selection),
+        }
 
 
 # ---- Size-confound control ----------------------------------------------
@@ -546,6 +783,10 @@ class OnlineProposalMemory:
     size: SizeResidual = field(default_factory=SizeResidual)
     edits: EditOutcomeMemory = field(default_factory=EditOutcomeMemory)
     donors: DonorRegionMemory = field(default_factory=DonorRegionMemory)
+    #: The run's stratified scored population, offered as structural MATERIAL to the
+    #: donor recombination lane.  Distinct from `donors` above, which holds region
+    #: CONTEXTS for the proposal law; this holds whole counted molecules.
+    bank: ScoredMoleculeBank = field(default_factory=ScoredMoleculeBank)
     ordinal: int = 0
     donor_ceiling: float = DONOR_CEILING
     #: Proposal compute, counted SEPARATELY from oracle calls and in
@@ -604,6 +845,10 @@ class OnlineProposalMemory:
                 "totals": pairs(self.donors.totals),
                 "counts": pairs(self.donors.counts),
             },
+            # Serialised for the same reason as everything else here: a resumed arm
+            # whose bank restarted empty would draw its donors from the last few
+            # rounds only, and report itself as the arm that ran the whole way.
+            "bank": {"rows": dict(self.bank.rows)},
         }
 
     def restore_payload(self, payload: dict[str, Any]) -> None:
@@ -633,20 +878,43 @@ class OnlineProposalMemory:
         self.donors.rows = list(payload["donors"]["rows"])
         self.donors.totals = defaultdict(float, unpair(payload["donors"]["totals"], float))
         self.donors.counts = defaultdict(int, unpair(payload["donors"]["counts"], int))
+        # A payload written before the bank existed carries none. Rebuilding it from
+        # `frontier` would be silently WRONG, not merely partial: the frontier has no
+        # basin and no lineage, so every row would land in the elite stratum and the
+        # resumed arm would run a top-N pool under the stratified arm's name. An empty
+        # bank refills from the rounds that follow and is visible as such in `report`.
+        self.bank.rows = {
+            endpoint: dict(row)
+            for endpoint, row in (payload.get("bank") or {}).get("rows", {}).items()
+        }
 
     # -- updates ----------------------------------------------------------
 
     def observe_scored_molecule(
-        self, *, endpoint: str, score: float, graph: MolecularGraph | None = None
+        self,
+        *,
+        endpoint: str,
+        score: float,
+        graph: MolecularGraph | None = None,
+        basin: str | None = None,
     ) -> None:
         """Record one counted oracle observation.
 
         ``graph`` is optional; when supplied its regions are entered in the
         donor memory.  The frontier is updated either way, because the frontier
         is what the run is graded on and every counted call moves it.
+
+        ``basin`` is the caller's structural label for this molecule -- the same
+        Bemis-Murcko basin the credit allocator groups by.  It is passed IN rather
+        than computed here so this module still performs no chemistry, and so the
+        bank's notion of "structurally distinct" is the controller's existing one
+        rather than a second definition that could drift from it.  ``None`` banks the
+        molecule but leaves it ineligible to REPRESENT a basin in the diverse
+        stratum, and :meth:`ScoredMoleculeBank.report` counts those rows.
         """
 
         self.frontier.observe(endpoint, score)
+        self.bank.observe(endpoint=endpoint, score=score, basin=basin)
         self.ordinal += 1
         if graph is None:
             return
@@ -682,6 +950,17 @@ class OnlineProposalMemory:
         Returns whether the transition could be attributed to a region.
         """
 
+        # Banked FIRST, and deliberately above the attribution below: `_attribute`
+        # returns None whenever no region overlaps the slots the edit touched, and the
+        # lineage evidence is valid regardless of whether the edit can be localized to
+        # a region. Recording it after the early return would silently drop the
+        # promising stratum's evidence for exactly the transitions that are hardest to
+        # attribute.
+        self.bank.observe_lineage(
+            parent_endpoint=parent_endpoint,
+            parent_score=parent_score,
+            child_score=child_score,
+        )
         delta_heavy = int(child_heavy) - int(parent_graph.n_real_atoms)
         gain = self.frontier.frontier_gain(child_score, exclude=child_endpoint)
         relative = 0.0 if parent_score is None else float(child_score) - float(parent_score)
@@ -872,6 +1151,7 @@ class OnlineProposalMemory:
             "donor_contexts": len(self.donors.counts),
             "donor_rows": len(self.donors.rows),
             "size_model": self.size.report(),
+            "scored_bank": self.bank.report(),
             "proposal_cost": dict(self.cost),
             "certification": self.certification(),
         }

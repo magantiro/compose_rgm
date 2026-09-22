@@ -58,7 +58,10 @@ from compose_v4.control.pmo_donor_channel import (
     DONOR_CHANNEL,
     DonorLawProbe,
 )
-from compose_v4.control.pmo_population_controller import PmoPopulationController
+from compose_v4.control.pmo_population_controller import (
+    DONOR_POOL_SIZE,
+    PmoPopulationController,
+)
 from compose_v4.experiments import pmo_population_v1
 from compose_v4.experiments.editing_v2_evaluation_semantics import (
     production_state_from_smiles,
@@ -206,8 +209,14 @@ def gate(
     seeds the verdict is deterministic: for a given code state this always passes or
     always fails.
     """
-    off = capture_scored_optimizer_kwargs(root, folder / "off")
-    on = capture_scored_optimizer_kwargs(root, folder / "on", enable_donor_channel=True)
+    # Arm D is arm B PLUS the donor lane, so the ON arm carries the memory flag: the
+    # lane's donors ARE the memory's stratified scored bank. The OFF arm carries the
+    # memory flag too, so the only difference between the two captures is the donor keys
+    # -- an OFF arm without it would be arm A and the comparison would move two things.
+    off = capture_scored_optimizer_kwargs(root, folder / "off", enable_online_memory=True)
+    on = capture_scored_optimizer_kwargs(
+        root, folder / "on", enable_online_memory=True, enable_donor_channel=True
+    )
 
     present = [key for key in DONOR_KWARGS if key in off["optimizer_kwargs"]]
     if present:
@@ -234,6 +243,20 @@ def gate(
             "lane -- the flag reached the constructor and was dropped inside it"
         )
 
+    bank = controller.online_memory.bank.report(capacity=DONOR_POOL_SIZE)
+    if not bank["counted_molecules"]:
+        raise AssertionError(
+            "the controller built from the scored kwargs holds an EMPTY scored bank, so "
+            "the donor lane has nothing to recombine and is inert however well it is "
+            "wired -- the bank must be fed by the same path that records counted scores"
+        )
+    strata = controller._donor_pool(exclude=None)
+    if not any(stratum.members for stratum in strata):
+        raise AssertionError(
+            "the scored bank holds molecules but the donor pool offers none, so the "
+            "join from banked endpoint to archived 48-slot state is broken"
+        )
+
     consumed = _consume(on["optimizer_kwargs"], source, seeds=seeds)
     restored = _restore_accepts(controller, on["optimizer_kwargs"])
     return {
@@ -241,11 +264,18 @@ def gate(
         "oracle_calls": 0,
         "entry_point": "compose_v4.experiments.pmo_population_v1.execute_task",
         "source_smiles": source,
+        "arm_off": "B (online memory, no donor lane)",
+        "arm_on": "D (online memory + donor recombination)",
         "off_arm_optimizer_kwargs": sorted(off["optimizer_kwargs"]),
         "on_arm_optimizer_kwargs": sorted(on["optimizer_kwargs"]),
         "donor_cut_law": on["optimizer_kwargs"]["donor_cut_law"],
         "default_cut_law": DEFAULT_CUT_LAW,
         "live_channels": list(controller.channels),
+        "scored_bank": bank,
+        "donor_strata_offered": {
+            stratum.name: {"members": len(stratum.members), "weight": stratum.weight}
+            for stratum in strata
+        },
         "law_consumed": consumed,
         "restore_accepts_scored_kwargs": restored,
         "verdict": "SCORED_ENTRY_POINT_REACHES_THE_DONOR_CUT_LAW",

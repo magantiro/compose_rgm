@@ -234,10 +234,53 @@ def resolve_cut_law(name: str) -> Callable[[MolecularGraph], BridgeRegionLaw] | 
 
 
 @dataclass(frozen=True)
+class DonorStratum:
+    """One named slice of the run's scored bank, with its declared draw mass.
+
+    The draw is STRATUM-FIRST -- pick a stratum by its declared weight, then a member
+    uniformly inside it -- and that is the whole reason this type exists instead of a
+    flat list.  A uniform draw over the union would hand each stratum a share
+    proportional to its SIZE, so the elite slice (the largest, and on a
+    predictor-backed oracle the most drifted) would take mass that was never declared
+    to it.  This repository has the same finding from the other end: corruption
+    selection had to be family-first because a weighted permutation over all instances
+    over-picked whichever family had the most instances.
+    """
+
+    name: str
+    weight: float
+    members: tuple[tuple[str, MolecularGraph], ...]
+
+
+def draw_stratified_donor(strata, rng) -> tuple[str, str, MolecularGraph] | None:
+    """``(stratum name, donor smiles, donor graph)``, or ``None`` when nothing is offered.
+
+    A stratum is chosen by its declared weight and then a member uniformly inside it.
+    Strata with no members are dropped and their mass is renormalized over the rest, so
+    an empty stratum yields its share rather than silently shrinking the draw.
+    """
+
+    live = [stratum for stratum in strata if stratum.members]
+    if not live:
+        return None
+    weights = np.asarray([stratum.weight for stratum in live], dtype=float)
+    total = float(weights.sum())
+    if total <= 0.0:
+        raise ValueError("donor strata carry no draw mass")
+    chosen = live[int(rng.choice(len(live), p=weights / total))]
+    smiles, graph = chosen.members[int(rng.integers(len(chosen.members)))]
+    return chosen.name, smiles, graph
+
+
+@dataclass(frozen=True)
 class DonorProposal:
     """One compiled transplant, with the evidence needed to judge it offline."""
 
     donor: str
+    #: Which stratum of the run's scored bank the donor came from. Carried into the
+    #: provenance tag so an ablation can ask whether elite, promising and diverse
+    #: donors behave differently -- a question the endpoint alone cannot answer.
+    donor_stratum: str
     endpoint: str
     actions: tuple
     states: tuple
@@ -249,6 +292,7 @@ class DonorProposal:
     def payload(self) -> dict:
         return {
             "donor": self.donor,
+            "donor_stratum": self.donor_stratum,
             "endpoint": self.endpoint,
             "retained_fraction": self.retained_fraction,
             "removed_atoms": self.removed_atoms,
@@ -259,13 +303,19 @@ class DonorProposal:
 
 def donor_transplant_draw(
     source: MolecularGraph,
-    donors: list[tuple[str, MolecularGraph]],
+    donors: list[DonorStratum],
     rng,
     *,
     law: Callable[[MolecularGraph], BridgeRegionLaw] | None = None,
     max_attempts: int = 8,
 ) -> tuple[DonorProposal | None, dict]:
     """One transplant draw: a parent cut and a donor cut, both from ``law``.
+
+    ``donors`` is the run's own scored bank as a sequence of :class:`DonorStratum`, and
+    the donor is drawn stratum-first.  It is NOT a flat top-N-by-score list, and the
+    difference is the point of the stratification: this repository measured blind PMO
+    search leaving the drug-like manifold on almost every task, so a pool that is the
+    top of a drifted population recombines the drift.
 
     ``law`` is a FACTORY, because the retentive law is closed over the molecule it cuts
     and the parent and donor are different molecules.  ``None`` means the shipped uniform
@@ -283,7 +333,7 @@ def donor_transplant_draw(
     def note(status: str) -> None:
         census[status] = census.get(status, 0) + 1
 
-    if not donors:
+    if not any(stratum.members for stratum in donors):
         note("no_donor_available")
         return None, census
 
@@ -301,7 +351,11 @@ def donor_transplant_draw(
         if source_cut is None:
             note("source_region_not_single_bond")
             continue
-        donor_smiles, donor = donors[int(rng.integers(len(donors)))]
+        picked = draw_stratified_donor(donors, rng)
+        if picked is None:
+            note("no_donor_available")
+            break
+        stratum_name, donor_smiles, donor = picked
         donor_law = law(donor) if law is not None else None
         donor_regions = (
             donor_law.order(donor, rng)
@@ -323,6 +377,7 @@ def donor_transplant_draw(
         return (
             DonorProposal(
                 donor=donor_smiles,
+                donor_stratum=stratum_name,
                 endpoint=result["smiles"],
                 actions=tuple(result["actions"]),
                 states=tuple(result["states"]),
