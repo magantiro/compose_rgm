@@ -1,0 +1,142 @@
+{
+  "answer_known_offline_diagnostic": true,
+  "controls": {
+    "disagreement_rows": [],
+    "step0_exact_vs_fields_disagreements": 0,
+    "wrapper_changed_a_decision": 0,
+    "wrapper_control_sample": 40
+  },
+  "distinct_parents": 93,
+  "distinct_plans": 95,
+  "field_projection": {
+    "atom_type": {
+      "fraction_of_step0_failures_unblocked_alone": 0.0,
+      "lost_mass_share_of_all_pairs": 0.0,
+      "pairs_unblocked_alone": 0,
+      "step0_feasible_when_dropped": 129
+    },
+    "bond_class_histogram": {
+      "fraction_of_step0_failures_unblocked_alone": 0.0,
+      "lost_mass_share_of_all_pairs": 0.0,
+      "pairs_unblocked_alone": 0,
+      "step0_feasible_when_dropped": 129
+    },
+    "created_ordinal": {
+      "fraction_of_step0_failures_unblocked_alone": 0.0,
+      "lost_mass_share_of_all_pairs": 0.0,
+      "pairs_unblocked_alone": 0,
+      "step0_feasible_when_dropped": 129
+    },
+    "creation_lag": {
+      "fraction_of_step0_failures_unblocked_alone": 0.0,
+      "lost_mass_share_of_all_pairs": 0.0,
+      "pairs_unblocked_alone": 0,
+      "step0_feasible_when_dropped": 129
+    },
+    "degree": {
+      "fraction_of_step0_failures_unblocked_alone": 0.0,
+      "lost_mass_share_of_all_pairs": 0.0,
+      "pairs_unblocked_alone": 0,
+      "step0_feasible_when_dropped": 129
+    },
+    "formal_charge": {
+      "fraction_of_step0_failures_unblocked_alone": 0.0,
+      "lost_mass_share_of_all_pairs": 0.0,
+      "pairs_unblocked_alone": 0,
+      "step0_feasible_when_dropped": 129
+    },
+    "implicit_hydrogens": {
+      "fraction_of_step0_failures_unblocked_alone": 0.0,
+      "lost_mass_share_of_all_pairs": 0.0,
+      "pairs_unblocked_alone": 0,
+      "step0_feasible_when_dropped": 129
+    },
+    "neighbor_element_histogram": {
+      "fraction_of_step0_failures_unblocked_alone": 0.8596491228070176,
+      "lost_mass_share_of_all_pairs": 0.5490196078431373,
+      "pairs_unblocked_alone": 196,
+      "step0_feasible_when_dropped": 325
+    },
+    "origin": {
+      "fraction_of_step0_failures_unblocked_alone": 0.0,
+      "lost_mass_share_of_all_pairs": 0.0,
+      "pairs_unblocked_alone": 0,
+      "step0_feasible_when_dropped": 129
+    }
+  },
+  "first_refusal_distribution": {
+    "None": 17,
+    "insufficient_preexisting_atoms_for_remaining_deletions": 2,
+    "insufficient_preexisting_atoms_of_a_required_identity": 65,
+    "no_atom_carries_a_required_operand_descriptor": 273
+  },
+  "first_refusal_step_distribution": {
+    "0": 236,
+    "1": 62,
+    "15": 3,
+    "2": 38,
+    "6": 1,
+    "None": 17
+  },
+  "jump_checkpoint_identity": "730bc905c128b9feb802262e1f98bdcb6479431b88347a05defb26c2b84fab35",
+  "max_depth_reached": {
+    "max": 23,
+    "median": 0,
+    "reached_full_depth": 3
+  },
+  "mechanism_distribution": {
+    "bound": 2,
+    "declared_completion_conditions": 1,
+    "no_role_consistent_successor": 14,
+    "operand_descriptor_overspecified@depth": 103,
+    "operand_descriptor_overspecified@root": 169,
+    "operand_state_incompatible@root": 65,
+    "region_size_mismatch@root": 2,
+    "search_budget_exhausted": 1
+  },
+  "new_oracle_calls": 0,
+  "nodes_expanded": {
+    "max": 49,
+    "median": 0,
+    "zero": 236
+  },
+  "outcome_reproduction_exact": false,
+  "pairs": 357,
+  "production_budget": {
+    "max_realizations": 4,
+    "node_budget": 64,
+    "seconds_cap": 20.0,
+    "specification": "v1_exact"
+  },
+  "rdkit_version": "2023.09.6",
+  "recorded_outcome_in_artifact": {
+    "proven_incompatible": 346,
+    "search_budget_exhausted": 11
+  },
+  "reproduced_outcome": {
+    "completed_realization": 2,
+    "proven_incompatible": 354,
+    "search_budget_exhausted": 1
+  },
+  "root_refusal_distribution": {
+    "None": 121,
+    "insufficient_preexisting_atoms_for_remaining_deletions": 2,
+    "insufficient_preexisting_atoms_of_a_required_identity": 65,
+    "no_atom_carries_a_required_operand_descriptor": 169
+  },
+  "run_id": "10e69dbbf87afe2da93c0addf57ee79b1d546bff38ba4d39bfebf4057fee669a",
+  "schema_version": "pmo_jump_binding_autopsy_v1",
+  "seconds": 349.20843841700116,
+  "step0_failures": 228,
+  "step0_failures_unblocked_by_exactly_one_field": {
+    "neighbor_element_histogram": 196
+  },
+  "step0_failures_unblocked_by_some_single_field": 196,
+  "step0_feasibility": {
+    "note": "NECESSARY, NOT SUFFICIENT -- a step-0 number is not a binding rate",
+    "role_based": 356,
+    "role_based_fraction": 0.9971988795518207,
+    "v1_production": 129,
+    "v1_production_fraction": 0.36134453781512604
+  }
+}

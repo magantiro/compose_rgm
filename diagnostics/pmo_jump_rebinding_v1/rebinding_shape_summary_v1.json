@@ -1,0 +1,89 @@
+{
+  "answer_known_offline_diagnostic": true,
+  "arms": {
+    "role_based": {
+      "PRIMARY_largest_changed_region_max": 19,
+      "PRIMARY_largest_changed_region_median": 8,
+      "PRIMARY_retained_fraction_mcs_median": 0.38095238095238093,
+      "both_excises_and_installs_fraction": 0.0,
+      "d_heavy_median": 1,
+      "distinct_endpoints": 85,
+      "distinct_pairs": 22,
+      "exact_replay_all": true,
+      "heavy_atom_delta_max": 12,
+      "heavy_atom_delta_median": 1,
+      "heavy_atom_delta_min": 1,
+      "in_target_band_fraction": 0.6588235294117647,
+      "n_changed_regions_median": 3,
+      "purely_additive_fraction": 1.0,
+      "reaches_region_15_or_more": 10,
+      "realizations": 85,
+      "realized_band": {
+        "above_20": 1,
+        "below_12": 28,
+        "in_12_to_18_target": 56
+      },
+      "realized_primitive_count_median": 13,
+      "retained_fraction_median": 1.0,
+      "retained_fraction_min": 1.0,
+      "ring_delta_distribution": {
+        "-1": 40,
+        "0": 28,
+        "1": 5,
+        "2": 12
+      },
+      "ring_delta_nonzero_fraction": 0.6705882352941176
+    },
+    "v1_exact_production": {
+      "PRIMARY_largest_changed_region_max": 10,
+      "PRIMARY_largest_changed_region_median": 5.5,
+      "PRIMARY_retained_fraction_mcs_median": 1.0,
+      "both_excises_and_installs_fraction": 0.0,
+      "d_heavy_median": 7.5,
+      "distinct_endpoints": 4,
+      "distinct_pairs": 2,
+      "exact_replay_all": true,
+      "heavy_atom_delta_max": 12,
+      "heavy_atom_delta_median": 7.5,
+      "heavy_atom_delta_min": 3,
+      "in_target_band_fraction": 0.5,
+      "n_changed_regions_median": 3.0,
+      "purely_additive_fraction": 1.0,
+      "reaches_region_15_or_more": 0,
+      "realizations": 4,
+      "realized_band": {
+        "above_20": 2,
+        "in_12_to_18_target": 2
+      },
+      "realized_primitive_count_median": 19.5,
+      "retained_fraction_median": 1.0,
+      "retained_fraction_min": 1.0,
+      "ring_delta_distribution": {
+        "0": 2,
+        "2": 2
+      },
+      "ring_delta_nonzero_fraction": 0.5
+    }
+  },
+  "new_oracle_calls": 0,
+  "node_budget": 64,
+  "pairs_examined": 22,
+  "rdkit_version": "2023.09.6",
+  "reference_values_are_diagnostic_not_encoded": {
+    "answer_known_required_macro": {
+      "largest_changed_region": 19,
+      "retained_fraction": 0.3
+    },
+    "generic_sampler_baseline": {
+      "largest_changed_region": 7,
+      "retained_fraction": 0.64
+    },
+    "note": "answer-known offline diagnostic evidence about the missing structural scale; never a value a production mechanism may encode"
+  },
+  "schema_version": "pmo_jump_rebinding_shape_v1",
+  "seconds_cap": 600.0,
+  "target_band": [
+    12,
+    18
+  ]
+}

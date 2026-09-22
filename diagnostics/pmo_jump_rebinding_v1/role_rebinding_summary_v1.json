@@ -1,0 +1,85 @@
+{
+  "answer_known_offline_diagnostic": true,
+  "arms": {
+    "role_based": {
+      "distinct_endpoints": 67,
+      "outcomes": {
+        "completed_realization": 20,
+        "proven_incompatible": 235,
+        "search_budget_exhausted": 102
+      },
+      "pairs": 357,
+      "pairs_bound": 20,
+      "pairs_bound_fraction": 0.056022408963585436,
+      "realizations": 67,
+      "seconds_total": 1843.4419253713568,
+      "shape": {
+        "exact_replay_all": true,
+        "heavy_atom_delta_max": 12,
+        "heavy_atom_delta_median": 1,
+        "heavy_atom_delta_min": 1,
+        "primitive_count_max": 16,
+        "primitive_count_median": 13,
+        "primitive_count_min": 6,
+        "purely_additive_fraction": 1.0,
+        "retained_fraction_max": 1.0,
+        "retained_fraction_median": 1.0,
+        "retained_fraction_min": 1.0
+      }
+    },
+    "v1_exact_production": {
+      "distinct_endpoints": 4,
+      "outcomes": {
+        "completed_realization": 2,
+        "proven_incompatible": 354,
+        "search_budget_exhausted": 1
+      },
+      "pairs": 357,
+      "pairs_bound": 2,
+      "pairs_bound_fraction": 0.0056022408963585435,
+      "realizations": 4,
+      "seconds_total": 281.2351997953956,
+      "shape": {
+        "exact_replay_all": true,
+        "heavy_atom_delta_max": 12,
+        "heavy_atom_delta_median": 7.5,
+        "heavy_atom_delta_min": 3,
+        "primitive_count_max": 23,
+        "primitive_count_median": 19.5,
+        "primitive_count_min": 16,
+        "purely_additive_fraction": 1.0,
+        "retained_fraction_max": 1.0,
+        "retained_fraction_median": 1.0,
+        "retained_fraction_min": 1.0
+      }
+    }
+  },
+  "budget": {
+    "max_realizations": 4,
+    "node_budget": 64,
+    "seconds_cap": 20.0
+  },
+  "jump_checkpoint_identity": "730bc905c128b9feb802262e1f98bdcb6479431b88347a05defb26c2b84fab35",
+  "new_oracle_calls": 0,
+  "pairs": 357,
+  "rdkit_version": "2023.09.6",
+  "role_based_specification": {
+    "compared_fields": [
+      "atom_type",
+      "formal_charge",
+      "origin",
+      "created_ordinal"
+    ],
+    "content_identical_to_SPEC_R2": true,
+    "name": "role_based_v1",
+    "relaxed": [
+      "bond_class_histogram",
+      "creation_lag",
+      "degree",
+      "implicit_hydrogens",
+      "neighbor_element_histogram"
+    ]
+  },
+  "schema_version": "pmo_jump_role_rebinding_probe_v1",
+  "seconds": 2124.696828833956
+}

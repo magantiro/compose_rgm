@@ -1,0 +1,137 @@
+{
+  "controls_failed": [],
+  "negatives": 16,
+  "negatives_killed": 16,
+  "positive_controls": 2,
+  "positive_controls_passed": 2,
+  "results": [
+    {
+      "kind": "negative",
+      "mutation": "recorder_decides_instead_of_observing",
+      "test": "test_the_recorder_never_changes_the_production_decision",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "recorder_discards_the_reason",
+      "test": "test_root_and_depth_refusals_are_distinguished_on_real_pairs",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "recorder_does_not_restore_the_production_function",
+      "test": "test_recording_propagate_restores_the_production_function_after_an_exception",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "budget_hit_reported_as_incompatibility",
+      "test": "test_a_budget_hit_is_never_classified_as_incompatibility",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "invalid_plan_reported_as_incompatibility",
+      "test": "test_an_invalid_plan_is_never_classified_as_incompatibility",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "root_and_depth_refusals_collapsed",
+      "test": "test_root_and_depth_refusals_are_distinguished_on_real_pairs",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "role_view_relaxes_the_semantic_core",
+      "test": "test_role_based_specification_keeps_the_semantic_core_and_the_dataflow_edge",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "role_view_relaxes_the_dataflow_edge",
+      "test": "test_role_based_specification_keeps_the_semantic_core_and_the_dataflow_edge",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "projection_baseline_is_not_the_production_predicate",
+      "test": "test_production_identity_and_all_fields_specifications_agree_at_step_zero",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "projection_drops_a_field_from_the_sweep",
+      "test": "test_field_projection_sweeps_every_descriptor_component_production_defines",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "a_production_refusal_string_loses_its_mechanism_name",
+      "test": "test_every_refusal_string_the_production_search_can_return_has_a_mechanism_name",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "root_refusal_returns_any_step",
+      "test": "test_first_and_root_refusal_readers_agree_with_the_log",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "region_structure_collapsed_to_a_total_count",
+      "test": "test_structural_delta_separates_one_large_region_from_scattered_small_ones",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "changed_atoms_never_joined_into_regions",
+      "test": "test_structural_delta_separates_one_large_region_from_scattered_small_ones",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "retention_measured_against_the_endpoint_not_the_source",
+      "test": "test_structural_delta_reports_the_region_shape_on_hand_checkable_pairs",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "negative",
+      "mutation": "unparseable_input_is_scored_instead_of_refused",
+      "test": "test_structural_delta_reports_the_region_shape_on_hand_checkable_pairs",
+      "test_passed": false,
+      "verdict": "KILLED"
+    },
+    {
+      "kind": "positive",
+      "mutation": "cosmetic_comment",
+      "test": "test_fixture_covers_both_step_zero_verdicts_and_several_mechanisms",
+      "test_passed": true,
+      "verdict": "OK"
+    },
+    {
+      "kind": "positive",
+      "mutation": "rename_a_local_variable",
+      "test": "test_recording_propagate_restores_the_production_function",
+      "test_passed": true,
+      "verdict": "OK"
+    }
+  ],
+  "schema_version": "pmo_jump_autopsy_mutation_battery_v1",
+  "survived": []
+}
