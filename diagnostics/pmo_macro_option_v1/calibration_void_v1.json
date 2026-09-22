@@ -1,0 +1,184 @@
+{
+ "a_shallow_dip_does_exist": {
+  "note": "A dip exists but it is a SIMILARITY dip of a few thousandths (0.132 -> 0.111), not the size valley the predeclaration models, and nothing like the MEASURED median relative depth of 0.659 on real transports.",
+  "options_with_a_bridge_below_its_own_origin": 3,
+  "options_with_a_scored_bridge": 6
+ },
+ "arms": {
+  "declared_unprotected": {
+   "best": 0.2361111111111111,
+   "bridges_charged": 8,
+   "bridges_in_valley": 0,
+   "bridges_total": 21,
+   "charged_calls": 84,
+   "destinations_reached": 0,
+   "options": 8,
+   "top10": 0.16234804882039142
+  },
+  "protected": {
+   "best": 0.208955223880597,
+   "bridges_charged": 9,
+   "bridges_in_valley": 0,
+   "bridges_total": 21,
+   "charged_calls": 84,
+   "destinations_reached": 1,
+   "options": 8,
+   "top10": 0.16821743322954386
+  }
+ },
+ "benchmark_oracle_calls": 0,
+ "chains": [
+  {
+   "a_bridge_scores_below_its_origin": false,
+   "heavy_atom_chain": [
+    20,
+    25,
+    26,
+    31,
+    36
+   ],
+   "monotone_growth": true,
+   "option_id": "172e62d6c1d5",
+   "scores": [
+    0.10526315789473684,
+    0.11842105263157894,
+    0.1111111111111111,
+    null,
+    null
+   ]
+  },
+  {
+   "a_bridge_scores_below_its_origin": null,
+   "heavy_atom_chain": [
+    19,
+    25,
+    24,
+    29,
+    30
+   ],
+   "monotone_growth": false,
+   "option_id": "5bfc29938533",
+   "scores": [
+    0.125,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "a_bridge_scores_below_its_origin": null,
+   "heavy_atom_chain": [
+    20,
+    21,
+    28,
+    37
+   ],
+   "monotone_growth": true,
+   "option_id": "983842509c4a",
+   "scores": [
+    0.10526315789473684,
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "a_bridge_scores_below_its_origin": true,
+   "heavy_atom_chain": [
+    18,
+    20,
+    20,
+    24
+   ],
+   "monotone_growth": true,
+   "option_id": "985911f3ddc0",
+   "scores": [
+    0.13846153846153847,
+    0.1267605633802817,
+    0.15492957746478872,
+    0.13580246913580246
+   ]
+  },
+  {
+   "a_bridge_scores_below_its_origin": true,
+   "heavy_atom_chain": [
+    20,
+    22,
+    27,
+    32,
+    37
+   ],
+   "monotone_growth": true,
+   "option_id": "a4f2cae0c398",
+   "scores": [
+    0.09333333333333334,
+    0.09090909090909091,
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "a_bridge_scores_below_its_origin": false,
+   "heavy_atom_chain": [
+    23,
+    27,
+    28,
+    38,
+    39
+   ],
+   "monotone_growth": true,
+   "option_id": "c074425eace9",
+   "scores": [
+    0.10126582278481013,
+    0.11235955056179775,
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "a_bridge_scores_below_its_origin": false,
+   "heavy_atom_chain": [
+    24,
+    30,
+    36,
+    35
+   ],
+   "monotone_growth": false,
+   "option_id": "e657d33fa8a7",
+   "scores": [
+    0.08974358974358974,
+    0.13253012048192772,
+    0.12244897959183673,
+    null
+   ]
+  },
+  {
+   "a_bridge_scores_below_its_origin": true,
+   "heavy_atom_chain": [
+    18,
+    25,
+    29,
+    29,
+    31
+   ],
+   "monotone_growth": true,
+   "option_id": "fd53ae27d588",
+   "scores": [
+    0.1323529411764706,
+    0.1111111111111111,
+    null,
+    null,
+    null
+   ]
+  }
+ ],
+ "consequence": "The predeclaration instructs a landscape recalibration BEFORE any verdict is read. The correct recalibration is to the GENERATOR, not the scorer: a macro option must PRUNE before it installs, which is the measured transport shape, and then the faithful valley predicate fires on its own. Loosening the valley to fire on growth would manufacture a dip the measurement does not describe.",
+ "heavy_atom_chains_are_monotone_growth": 6,
+ "predeclared_condition_that_fired": "bridges_in_valley_fraction must be > 0 in BOTH arms; it is 0/21 in both",
+ "root_cause": "NOT the scorer calibration. `_synthesize_chain` chains `synthesize_structured_program`, which this repository has MEASURED to be additive (atom_insert:atom_delete = 2.42:1, mean +1.16 heavy atoms per realized edit). Every declared chain therefore GROWS monotonically, so no intermediate is ever smaller than its own source and the valley predicate -- which is faithful to the measured prune-then-install cause of the real dip -- can never fire. The option GENERATOR cannot produce the transformation class the mechanism exists to protect.",
+ "schema_version": "pmo_macro_option_calibration_void_v1",
+ "verdict": "VOID_LANDSCAPE_DOES_NOT_EXERCISE_THE_MECHANISM"
+}

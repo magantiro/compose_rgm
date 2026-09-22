@@ -48,6 +48,17 @@ def _arm_rows(folder: Path) -> dict:
             if row["provenance"].get("entry_channel") == MACRO_OPTION_CHANNEL_TAG:
                 charged_by_option[row["provenance"]["macro_option_id"]] += 1
 
+    # How often protection actually CHANGED the batch, rather than agreeing with a
+    # choice the ordinary allocator had already made. `reserved_already_chosen` is the
+    # ordinary policy picking the leg on its own -- protection was inert that round --
+    # while `reserved_added` and `displaced` are the reservation doing real work.
+    reservation = {"reserved_added": 0, "reserved_already_chosen": 0, "displaced": 0}
+    for path in sorted((folder / "campaign").glob("round_*/pending.json")):
+        batch = json.loads(path.read_text())["batch"]
+        detail = (batch.get("allocation") or {}).get("macro_option_reservation") or {}
+        for key in reservation:
+            reservation[key] += int(detail.get(key, 0) or 0)
+
     final = json.loads(rounds[-1].read_text())["snapshot"]["macro_options"]
     out = {}
     for record in final["registry"]["records"]:
@@ -78,7 +89,7 @@ def _arm_rows(folder: Path) -> dict:
             "legs_locked": charged_by_option[option_id],
             "failure": failure,
         }
-    return out
+    return {"options": out, "reservation": reservation}
 
 
 def main() -> int:
@@ -98,15 +109,28 @@ def main() -> int:
             seeds[seed_dir.name] = arms
 
     summary = {}
+    reservation_totals: dict[str, dict[str, int]] = {
+        "protected": {},
+        "declared_unprotected": {},
+    }
     for name in ("protected", "declared_unprotected"):
         failures: Counter = Counter()
         legs = {"charged": 0, "required": 0}
         for arms in seeds.values():
-            for row in (arms.get(name) or {}).values():
+            block = arms.get(name) or {}
+            for key, value in (block.get("reservation") or {}).items():
+                reservation_totals[name][key] = (
+                    reservation_totals[name].get(key, 0) + value
+                )
+            for row in (block.get("options") or {}).values():
                 failures[row["failure"] or "reached"] += 1
                 legs["charged"] += row["legs_charged"]
                 legs["required"] += row["legs_required"]
-        summary[name] = {"failures": dict(sorted(failures.items())), "legs": legs}
+        summary[name] = {
+            "failures": dict(sorted(failures.items())),
+            "legs": legs,
+            "reservation": reservation_totals[name],
+        }
 
     payload = {
         "schema_version": "pmo_macro_option_window_diagnostic_v1",

@@ -1,0 +1,1048 @@
+{
+ "arms": {
+  "declared_unprotected": {
+   "arm": "declared_unprotected",
+   "benchmark_oracle_calls": 0,
+   "best": 0.2361111111111111,
+   "budget": 96,
+   "charged_calls": 84,
+   "declaration": {
+    "channel_tag": "macro_option_staged_v1",
+    "declared_at_round": 0,
+    "options": [
+     {
+      "crossings": 3,
+      "declared_at_round": 0,
+      "option_id": "5bfc29938533d84733972630ea164e220673df5743efda24f6e1ee9f11c9c465",
+      "origin_endpoint": "CC1(C(=O)[O-])CN(C(=O)C2CCCO2)CCC1(N)F",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "CC1(C([O-])C2CCCCC2N)CN(C(=O)C2CCCO2)CCC1(N)F",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CN(C(=O)C2CCCO2)CCC1(N)F",
+        "primitives": 12
+       },
+       {
+        "endpoint": "NC1(F)CC2NC3CCCCC3C([O-])C1CN2C(=O)C1CCCO1",
+        "index": 1,
+        "parent_endpoint": "CC1(C([O-])C2CCCCC2N)CN(C(=O)C2CCCO2)CCC1(N)F",
+        "primitives": 2
+       },
+       {
+        "endpoint": "NC1CC2NC3CCCCC3C([O-])(F)C1CN2C(=O)C1CC(C2CCOC2)CO1",
+        "index": 2,
+        "parent_endpoint": "NC1(F)CC2NC3CCCCC3C([O-])C1CN2C(=O)C1CCCO1",
+        "primitives": 7
+       },
+       {
+        "endpoint": "NC1CC2N(C(=O)C3CC(C4CCOC4)CO3)CC1C([O-])C1CCCC3COCC312",
+        "index": 3,
+        "parent_endpoint": "NC1CC2NC3CCCCC3C([O-])(F)C1CN2C(=O)C1CC(C2CCOC2)CO1",
+        "primitives": 7
+       }
+      ],
+      "total_primitives": 28,
+      "total_protected_rounds_budget": 3,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 3,
+      "declared_at_round": 0,
+      "option_id": "c074425eace94a3a980b2a766ba01698258f67e41856c15e6b0bbec02dcaedf6",
+      "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC(C3CCCCN3)CO2)C1",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC(C3CCC4=C(N)CC=C4N3)CO2)C1",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC(C3CCCCN3)CO2)C1",
+        "primitives": 8
+       },
+       {
+        "endpoint": "CC1(C(=O)[O-])CN(C(=O)C2CC(C3CCC4=C(N)CC=C4N3)CO2)CCC1=O",
+        "index": 1,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC(C3CCC4=C(N)CC=C4N3)CO2)C1",
+        "primitives": 1
+       },
+       {
+        "endpoint": "CC1(C(=O)[O-])CN(C(=O)C2OCC3(C4CCC5=C(N)CC=C5N4)CCCOC23)CC(C2CCCNC2)C1=O",
+        "index": 2,
+        "parent_endpoint": "CC1(C(=O)[O-])CN(C(=O)C2CC(C3CCC4=C(N)CC=C4N3)CO2)CCC1=O",
+        "primitives": 12
+       },
+       {
+        "endpoint": "CCCC(CN)C1CN(C(=O)C2OCC3(C4NC5=CCC(N)=C5CC4=O)CCCOC23)[SH4]C(C)(C(=O)[O-])C1=O",
+        "index": 3,
+        "parent_endpoint": "CC1(C(=O)[O-])CN(C(=O)C2OCC3(C4CCC5=C(N)CC=C5N4)CCCOC23)CC(C2CCCNC2)C1=O",
+        "primitives": 3
+       }
+      ],
+      "total_primitives": 24,
+      "total_protected_rounds_budget": 3,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 3,
+      "declared_at_round": 0,
+      "option_id": "fd53ae27d5883753c3e2840e7b3fc81c27e5520a08ae1b31bfd9ef3f4a9ff73d",
+      "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CCCO2)C1=O",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CCC(C3CCCC(N)N3)O2)C1=O",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CCCO2)C1=O",
+        "primitives": 8
+       },
+       {
+        "endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2OC(C3CCCC(N)N3)c3ccccc32)C1=O",
+        "index": 1,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CCC(C3CCCC(N)N3)O2)C1=O",
+        "primitives": 5
+       },
+       {
+        "endpoint": "NCC1(C[O-])CCCN(C(=O)C2OC(C3CCCC(N)N3)c3ccccc32)C1=O",
+        "index": 2,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2OC(C3CCCC(N)N3)c3ccccc32)C1=O",
+        "primitives": 2
+       },
+       {
+        "endpoint": "NC1CCCC(C2OC(C(=O)N3CC(C[O-])(C(N)C4CNCN4)C3)c3ccccc32)N1",
+        "index": 3,
+        "parent_endpoint": "NCC1(C[O-])CCCN(C(=O)C2OC(C3CCCC(N)N3)c3ccccc32)C1=O",
+        "primitives": 10
+       }
+      ],
+      "total_primitives": 25,
+      "total_protected_rounds_budget": 3,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 3,
+      "declared_at_round": 0,
+      "option_id": "a4f2cae0c3981ffa066cbe5579be7404641a5ee2ad49c92a87a3ec0f4337ce22",
+      "origin_endpoint": "CC(C)(CN(C(=O)C1CCCO1)C1(C)CCN1)C(=O)[O-]",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "CC(C)(CN(C(=O)COCC1CCC1)C1(C)CCN1)C(=O)[O-]",
+        "index": 0,
+        "parent_endpoint": "CC(C)(CN(C(=O)C1CCCO1)C1(C)CCN1)C(=O)[O-]",
+        "primitives": 6
+       },
+       {
+        "endpoint": "CC(C)(CN(C(=O)COCC12CCC1(N)NCNC2)C1(C)CCN1)C(=O)[O-]",
+        "index": 1,
+        "parent_endpoint": "CC(C)(CN(C(=O)COCC1CCC1)C1(C)CCN1)C(=O)[O-]",
+        "primitives": 9
+       },
+       {
+        "endpoint": "CC(C)(CN(C(=O)COC(c1ccco1)C12CCC1(N)NCNC2)C1(C)CCN1)C(=O)[O-]",
+        "index": 2,
+        "parent_endpoint": "CC(C)(CN(C(=O)COCC12CCC1(N)NCNC2)C1(C)CCN1)C(=O)[O-]",
+        "primitives": 6
+       },
+       {
+        "endpoint": "CC(CN(C(=O)COC(c1ccco1)C12CCC1(N)C1C(C(=O)O)CCCN1C2)C1(C)CCN1)C(=O)[O-]",
+        "index": 3,
+        "parent_endpoint": "CC(C)(CN(C(=O)COC(c1ccco1)C12CCC1(N)NCNC2)C1(C)CCN1)C(=O)[O-]",
+        "primitives": 11
+       }
+      ],
+      "total_primitives": 32,
+      "total_protected_rounds_budget": 3,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 2,
+      "declared_at_round": 0,
+      "option_id": "985911f3ddc03b1d1e9d40eeaf8948b504e3739179d05dd4b7f343a50cf8c0c6",
+      "origin_endpoint": "CC1(C(=O)[O-])CN(C=O)CCC1C1CCCCC1",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "CC1(C(=O)[O-])CN(C=O)CCC1C1CCCCC1OO",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CN(C=O)CCC1C1CCCCC1",
+        "primitives": 2
+       },
+       {
+        "endpoint": "CCNCC1(O)CC1C1CCN(C=O)CC1(C)C(=O)[O-]",
+        "index": 1,
+        "parent_endpoint": "CC1(C(=O)[O-])CN(C=O)CCC1C1CCCCC1OO",
+        "primitives": 10
+       },
+       {
+        "endpoint": "CONCOOC(CONNN)C1CCN(C=O)CC1(C)C(=O)[O-]",
+        "index": 2,
+        "parent_endpoint": "CCNCC1(O)CC1C1CCN(C=O)CC1(C)C(=O)[O-]",
+        "primitives": 21
+       }
+      ],
+      "total_primitives": 33,
+      "total_protected_rounds_budget": 2,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 3,
+      "declared_at_round": 0,
+      "option_id": "172e62d6c1d592c000cbe6924b23aeaad68916a8e7b89a8e459ad7c9e0913516",
+      "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3CCNC3O2)C1",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3CCN(C4CCCC4)C3O2)C1",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3CCNC3O2)C1",
+        "primitives": 6
+       },
+       {
+        "endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3C(=O)CN(C4CCCC4)C3O2)C1",
+        "index": 1,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3CCN(C4CCCC4)C3O2)C1",
+        "primitives": 1
+       },
+       {
+        "endpoint": "NC1CCCC(C2C(C(=O)[O-])CCCN2C(=O)C2CC(C(=O)CNC3CCCC3)O2)C1",
+        "index": 2,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3C(=O)CN(C4CCCC4)C3O2)C1",
+        "primitives": 11
+       },
+       {
+        "endpoint": "CC1CCCN1C(CC1CC(C(=O)N2CCCC(C(=O)[O-])C2C2CCCC(N)C2)O1)NC1CCCC1",
+        "index": 3,
+        "parent_endpoint": "NC1CCCC(C2C(C(=O)[O-])CCCN2C(=O)C2CC(C(=O)CNC3CCCC3)O2)C1",
+        "primitives": 8
+       }
+      ],
+      "total_primitives": 26,
+      "total_protected_rounds_budget": 3,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 2,
+      "declared_at_round": 0,
+      "option_id": "983842509c4a1b0ab340f70d37d1123258175414a3425f08a8d6d10e1103a15c",
+      "origin_endpoint": "CC1(C(=O)[O-])CN2CC(CNO)(C1)C1(CCCO1)C2=O",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "NC(CO)CC1C(=O)N2CC(O)(C(=O)[O-])CC1(CNO)C2",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CN2CC(CNO)(C1)C1(CCCO1)C2=O",
+        "primitives": 5
+       },
+       {
+        "endpoint": "CC1CCC(C(N)(CO)CC2C(=O)N3CC(O)(C(=O)[O-])OC2(CNO)C3)OC1",
+        "index": 1,
+        "parent_endpoint": "NC(CO)CC1C(=O)N2CC(O)(C(=O)[O-])CC1(CNO)C2",
+        "primitives": 11
+       },
+       {
+        "endpoint": "CC1CCC(C(N)(CO)CC2C(=O)N3CC(O)(C(=O)[O-])OC2(C(N)C2CC(C)CC(C(=O)O)C2)C3)OC1",
+        "index": 2,
+        "parent_endpoint": "CC1CCC(C(N)(CO)CC2C(=O)N3CC(O)(C(=O)[O-])OC2(CNO)C3)OC1",
+        "primitives": 12
+       }
+      ],
+      "total_primitives": 28,
+      "total_protected_rounds_budget": 2,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 2,
+      "declared_at_round": 0,
+      "option_id": "e657d33fa8a77713d02819aa043a5aaad861212a7a202c64e03a6457eb0c6b38",
+      "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C23NNCCC2(C(=O)O)CCO3)C1",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "O=C([O-])C12CCCN(C1)C(=O)C13NNCCC1(C(=O)O)C(C1CCCCC1)C(C2)O3",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C23NNCCC2(C(=O)O)CCO3)C1",
+        "primitives": 8
+       },
+       {
+        "endpoint": "O=C(O)c1cc2c(cn1)CN1CC2(C[O-])CC2OC3(NNCCC3(C(=O)O)C2C2CCCCC2)C1=O",
+        "index": 1,
+        "parent_endpoint": "O=C([O-])C12CCCN(C1)C(=O)C13NNCCC1(C(=O)O)C(C1CCCCC1)C(C2)O3",
+        "primitives": 9
+       },
+       {
+        "endpoint": "O=C(O)c1cc2c(cn1)CN1CC2(C[O-])CC2CC3(C(=O)O)C4CNNC(O)C4NNC3(O2)C1=O",
+        "index": 2,
+        "parent_endpoint": "O=C(O)c1cc2c(cn1)CN1CC2(C[O-])CC2OC3(NNCCC3(C(=O)O)C2C2CCCCC2)C1=O",
+        "primitives": 12
+       }
+      ],
+      "total_primitives": 29,
+      "total_protected_rounds_budget": 2,
+      "trough_width_rounds": 1
+     }
+    ],
+    "oracle_calls": 0,
+    "origins_available": 8,
+    "protection_source": "chosen_ordering_trough_width",
+    "realization_ceiling": 23,
+    "refusals": {
+     "duplicate_identity": 0,
+     "no_chain_over_ceiling": 2
+    },
+    "schema_version": "pmo_macro_option_controller_v1",
+    "seconds": 38.35350720799761,
+    "trough_width_rounds": 1
+   },
+   "macro_options_enabled": true,
+   "options": [
+    {
+     "bridge_endpoints": [
+      "CC1(C(=O)[O-])CCCN(C(=O)C2CC3CCN(C4CCCC4)C3O2)C1",
+      "CC1(C(=O)[O-])CCCN(C(=O)C2CC3C(=O)CN(C4CCCC4)C3O2)C1",
+      "NC1CCCC(C2C(C(=O)[O-])CCCN2C(=O)C2CC(C(=O)CNC3CCCC3)O2)C1"
+     ],
+     "bridge_scores": [
+      0.11842105263157894,
+      null,
+      null
+     ],
+     "bridges_charged": 1,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "CC1CCCN1C(CC1CC(C(=O)N2CCCC(C(=O)[O-])C2C2CCCC(N)C2)O1)NC1CCCC1",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "172e62d6c1d592c000cbe6924b23aeaad68916a8e7b89a8e459ad7c9e0913516",
+     "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3CCNC3O2)C1",
+     "origin_score": 0.10526315789473684,
+     "stages": 4,
+     "status": "expired",
+     "total_primitives": 26
+    },
+    {
+     "bridge_endpoints": [
+      "CC1(C([O-])C2CCCCC2N)CN(C(=O)C2CCCO2)CCC1(N)F",
+      "NC1(F)CC2NC3CCCCC3C([O-])C1CN2C(=O)C1CCCO1",
+      "NC1CC2NC3CCCCC3C([O-])(F)C1CN2C(=O)C1CC(C2CCOC2)CO1"
+     ],
+     "bridge_scores": [
+      0.1111111111111111,
+      null,
+      null
+     ],
+     "bridges_charged": 1,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "NC1CC2N(C(=O)C3CC(C4CCOC4)CO3)CC1C([O-])C1CCCC3COCC312",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "5bfc29938533d84733972630ea164e220673df5743efda24f6e1ee9f11c9c465",
+     "origin_endpoint": "CC1(C(=O)[O-])CN(C(=O)C2CCCO2)CCC1(N)F",
+     "origin_score": 0.125,
+     "stages": 4,
+     "status": "expired",
+     "total_primitives": 28
+    },
+    {
+     "bridge_endpoints": [
+      "NC(CO)CC1C(=O)N2CC(O)(C(=O)[O-])CC1(CNO)C2",
+      "CC1CCC(C(N)(CO)CC2C(=O)N3CC(O)(C(=O)[O-])OC2(CNO)C3)OC1"
+     ],
+     "bridge_scores": [
+      null,
+      null
+     ],
+     "bridges_charged": 0,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "CC1CCC(C(N)(CO)CC2C(=O)N3CC(O)(C(=O)[O-])OC2(C(N)C2CC(C)CC(C(=O)O)C2)C3)OC1",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "983842509c4a1b0ab340f70d37d1123258175414a3425f08a8d6d10e1103a15c",
+     "origin_endpoint": "CC1(C(=O)[O-])CN2CC(CNO)(C1)C1(CCCO1)C2=O",
+     "origin_score": 0.10526315789473684,
+     "stages": 3,
+     "status": "declared",
+     "total_primitives": 28
+    },
+    {
+     "bridge_endpoints": [
+      "CC1(C(=O)[O-])CN(C=O)CCC1C1CCCCC1OO",
+      "CCNCC1(O)CC1C1CCN(C=O)CC1(C)C(=O)[O-]"
+     ],
+     "bridge_scores": [
+      0.1267605633802817,
+      null
+     ],
+     "bridges_charged": 1,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "CONCOOC(CONNN)C1CCN(C=O)CC1(C)C(=O)[O-]",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "985911f3ddc03b1d1e9d40eeaf8948b504e3739179d05dd4b7f343a50cf8c0c6",
+     "origin_endpoint": "CC1(C(=O)[O-])CN(C=O)CCC1C1CCCCC1",
+     "origin_score": 0.13846153846153847,
+     "stages": 3,
+     "status": "expired",
+     "total_primitives": 33
+    },
+    {
+     "bridge_endpoints": [
+      "CC(C)(CN(C(=O)COCC1CCC1)C1(C)CCN1)C(=O)[O-]",
+      "CC(C)(CN(C(=O)COCC12CCC1(N)NCNC2)C1(C)CCN1)C(=O)[O-]",
+      "CC(C)(CN(C(=O)COC(c1ccco1)C12CCC1(N)NCNC2)C1(C)CCN1)C(=O)[O-]"
+     ],
+     "bridge_scores": [
+      0.09090909090909091,
+      null,
+      null
+     ],
+     "bridges_charged": 1,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "CC(CN(C(=O)COC(c1ccco1)C12CCC1(N)C1C(C(=O)O)CCCN1C2)C1(C)CCN1)C(=O)[O-]",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "a4f2cae0c3981ffa066cbe5579be7404641a5ee2ad49c92a87a3ec0f4337ce22",
+     "origin_endpoint": "CC(C)(CN(C(=O)C1CCCO1)C1(C)CCN1)C(=O)[O-]",
+     "origin_score": 0.09333333333333334,
+     "stages": 4,
+     "status": "expired",
+     "total_primitives": 32
+    },
+    {
+     "bridge_endpoints": [
+      "CC1(C(=O)[O-])CCCN(C(=O)C2CC(C3CCC4=C(N)CC=C4N3)CO2)C1",
+      "CC1(C(=O)[O-])CN(C(=O)C2CC(C3CCC4=C(N)CC=C4N3)CO2)CCC1=O",
+      "CC1(C(=O)[O-])CN(C(=O)C2OCC3(C4CCC5=C(N)CC=C5N4)CCCOC23)CC(C2CCCNC2)C1=O"
+     ],
+     "bridge_scores": [
+      0.11235955056179775,
+      0.1111111111111111,
+      null
+     ],
+     "bridges_charged": 2,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "CCCC(CN)C1CN(C(=O)C2OCC3(C4NC5=CCC(N)=C5CC4=O)CCCOC23)[SH4]C(C)(C(=O)[O-])C1=O",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "c074425eace94a3a980b2a766ba01698258f67e41856c15e6b0bbec02dcaedf6",
+     "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC(C3CCCCN3)CO2)C1",
+     "origin_score": 0.10126582278481013,
+     "stages": 4,
+     "status": "expired",
+     "total_primitives": 24
+    },
+    {
+     "bridge_endpoints": [
+      "O=C([O-])C12CCCN(C1)C(=O)C13NNCCC1(C(=O)O)C(C1CCCCC1)C(C2)O3",
+      "O=C(O)c1cc2c(cn1)CN1CC2(C[O-])CC2OC3(NNCCC3(C(=O)O)C2C2CCCCC2)C1=O"
+     ],
+     "bridge_scores": [
+      0.13253012048192772,
+      null
+     ],
+     "bridges_charged": 1,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "O=C(O)c1cc2c(cn1)CN1CC2(C[O-])CC2CC3(C(=O)O)C4CNNC(O)C4NNC3(O2)C1=O",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "e657d33fa8a77713d02819aa043a5aaad861212a7a202c64e03a6457eb0c6b38",
+     "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C23NNCCC2(C(=O)O)CCO3)C1",
+     "origin_score": 0.08974358974358974,
+     "stages": 3,
+     "status": "expired",
+     "total_primitives": 29
+    },
+    {
+     "bridge_endpoints": [
+      "CC1(C(=O)[O-])CCCN(C(=O)C2CCC(C3CCCC(N)N3)O2)C1=O",
+      "CC1(C(=O)[O-])CCCN(C(=O)C2OC(C3CCCC(N)N3)c3ccccc32)C1=O",
+      "NCC1(C[O-])CCCN(C(=O)C2OC(C3CCCC(N)N3)c3ccccc32)C1=O"
+     ],
+     "bridge_scores": [
+      0.1111111111111111,
+      null,
+      null
+     ],
+     "bridges_charged": 1,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "NC1CCCC(C2OC(C(=O)N3CC(C[O-])(C(N)C4CNCN4)C3)c3ccccc32)N1",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "fd53ae27d5883753c3e2840e7b3fc81c27e5520a08ae1b31bfd9ef3f4a9ff73d",
+     "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CCCO2)C1=O",
+     "origin_score": 0.1323529411764706,
+     "stages": 4,
+     "status": "expired",
+     "total_primitives": 25
+    }
+   ],
+   "protection_enabled": false,
+   "rounds_completed": 10,
+   "run_identity": "aab8deef500788975145197d1cc0409a09b440efdf2987e5931b84e628b2205c",
+   "schema_version": "pmo_macro_option_arms_v1",
+   "scorer": {
+    "benchmark_oracle": false,
+    "name": "valley_similarity_v1",
+    "origin_heavy_atoms": 19,
+    "reference": "O=C(Nc1ccc(F)cc1)C1CCN(Cc2ccccc2)CC1",
+    "valley_depth": 0.66,
+    "valley_drop": 2
+   },
+   "seed": 20260922,
+   "synthetic_scorer_calls": 84,
+   "top10": 0.16234804882039142
+  },
+  "protected": {
+   "arm": "protected",
+   "benchmark_oracle_calls": 0,
+   "best": 0.208955223880597,
+   "budget": 96,
+   "charged_calls": 84,
+   "declaration": {
+    "channel_tag": "macro_option_staged_v1",
+    "declared_at_round": 0,
+    "options": [
+     {
+      "crossings": 3,
+      "declared_at_round": 0,
+      "option_id": "5bfc29938533d84733972630ea164e220673df5743efda24f6e1ee9f11c9c465",
+      "origin_endpoint": "CC1(C(=O)[O-])CN(C(=O)C2CCCO2)CCC1(N)F",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "CC1(C([O-])C2CCCCC2N)CN(C(=O)C2CCCO2)CCC1(N)F",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CN(C(=O)C2CCCO2)CCC1(N)F",
+        "primitives": 12
+       },
+       {
+        "endpoint": "NC1(F)CC2NC3CCCCC3C([O-])C1CN2C(=O)C1CCCO1",
+        "index": 1,
+        "parent_endpoint": "CC1(C([O-])C2CCCCC2N)CN(C(=O)C2CCCO2)CCC1(N)F",
+        "primitives": 2
+       },
+       {
+        "endpoint": "NC1CC2NC3CCCCC3C([O-])(F)C1CN2C(=O)C1CC(C2CCOC2)CO1",
+        "index": 2,
+        "parent_endpoint": "NC1(F)CC2NC3CCCCC3C([O-])C1CN2C(=O)C1CCCO1",
+        "primitives": 7
+       },
+       {
+        "endpoint": "NC1CC2N(C(=O)C3CC(C4CCOC4)CO3)CC1C([O-])C1CCCC3COCC312",
+        "index": 3,
+        "parent_endpoint": "NC1CC2NC3CCCCC3C([O-])(F)C1CN2C(=O)C1CC(C2CCOC2)CO1",
+        "primitives": 7
+       }
+      ],
+      "total_primitives": 28,
+      "total_protected_rounds_budget": 3,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 3,
+      "declared_at_round": 0,
+      "option_id": "c074425eace94a3a980b2a766ba01698258f67e41856c15e6b0bbec02dcaedf6",
+      "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC(C3CCCCN3)CO2)C1",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC(C3CCC4=C(N)CC=C4N3)CO2)C1",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC(C3CCCCN3)CO2)C1",
+        "primitives": 8
+       },
+       {
+        "endpoint": "CC1(C(=O)[O-])CN(C(=O)C2CC(C3CCC4=C(N)CC=C4N3)CO2)CCC1=O",
+        "index": 1,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC(C3CCC4=C(N)CC=C4N3)CO2)C1",
+        "primitives": 1
+       },
+       {
+        "endpoint": "CC1(C(=O)[O-])CN(C(=O)C2OCC3(C4CCC5=C(N)CC=C5N4)CCCOC23)CC(C2CCCNC2)C1=O",
+        "index": 2,
+        "parent_endpoint": "CC1(C(=O)[O-])CN(C(=O)C2CC(C3CCC4=C(N)CC=C4N3)CO2)CCC1=O",
+        "primitives": 12
+       },
+       {
+        "endpoint": "CCCC(CN)C1CN(C(=O)C2OCC3(C4NC5=CCC(N)=C5CC4=O)CCCOC23)[SH4]C(C)(C(=O)[O-])C1=O",
+        "index": 3,
+        "parent_endpoint": "CC1(C(=O)[O-])CN(C(=O)C2OCC3(C4CCC5=C(N)CC=C5N4)CCCOC23)CC(C2CCCNC2)C1=O",
+        "primitives": 3
+       }
+      ],
+      "total_primitives": 24,
+      "total_protected_rounds_budget": 3,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 3,
+      "declared_at_round": 0,
+      "option_id": "fd53ae27d5883753c3e2840e7b3fc81c27e5520a08ae1b31bfd9ef3f4a9ff73d",
+      "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CCCO2)C1=O",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CCC(C3CCCC(N)N3)O2)C1=O",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CCCO2)C1=O",
+        "primitives": 8
+       },
+       {
+        "endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2OC(C3CCCC(N)N3)c3ccccc32)C1=O",
+        "index": 1,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CCC(C3CCCC(N)N3)O2)C1=O",
+        "primitives": 5
+       },
+       {
+        "endpoint": "NCC1(C[O-])CCCN(C(=O)C2OC(C3CCCC(N)N3)c3ccccc32)C1=O",
+        "index": 2,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2OC(C3CCCC(N)N3)c3ccccc32)C1=O",
+        "primitives": 2
+       },
+       {
+        "endpoint": "NC1CCCC(C2OC(C(=O)N3CC(C[O-])(C(N)C4CNCN4)C3)c3ccccc32)N1",
+        "index": 3,
+        "parent_endpoint": "NCC1(C[O-])CCCN(C(=O)C2OC(C3CCCC(N)N3)c3ccccc32)C1=O",
+        "primitives": 10
+       }
+      ],
+      "total_primitives": 25,
+      "total_protected_rounds_budget": 3,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 3,
+      "declared_at_round": 0,
+      "option_id": "a4f2cae0c3981ffa066cbe5579be7404641a5ee2ad49c92a87a3ec0f4337ce22",
+      "origin_endpoint": "CC(C)(CN(C(=O)C1CCCO1)C1(C)CCN1)C(=O)[O-]",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "CC(C)(CN(C(=O)COCC1CCC1)C1(C)CCN1)C(=O)[O-]",
+        "index": 0,
+        "parent_endpoint": "CC(C)(CN(C(=O)C1CCCO1)C1(C)CCN1)C(=O)[O-]",
+        "primitives": 6
+       },
+       {
+        "endpoint": "CC(C)(CN(C(=O)COCC12CCC1(N)NCNC2)C1(C)CCN1)C(=O)[O-]",
+        "index": 1,
+        "parent_endpoint": "CC(C)(CN(C(=O)COCC1CCC1)C1(C)CCN1)C(=O)[O-]",
+        "primitives": 9
+       },
+       {
+        "endpoint": "CC(C)(CN(C(=O)COC(c1ccco1)C12CCC1(N)NCNC2)C1(C)CCN1)C(=O)[O-]",
+        "index": 2,
+        "parent_endpoint": "CC(C)(CN(C(=O)COCC12CCC1(N)NCNC2)C1(C)CCN1)C(=O)[O-]",
+        "primitives": 6
+       },
+       {
+        "endpoint": "CC(CN(C(=O)COC(c1ccco1)C12CCC1(N)C1C(C(=O)O)CCCN1C2)C1(C)CCN1)C(=O)[O-]",
+        "index": 3,
+        "parent_endpoint": "CC(C)(CN(C(=O)COC(c1ccco1)C12CCC1(N)NCNC2)C1(C)CCN1)C(=O)[O-]",
+        "primitives": 11
+       }
+      ],
+      "total_primitives": 32,
+      "total_protected_rounds_budget": 3,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 2,
+      "declared_at_round": 0,
+      "option_id": "985911f3ddc03b1d1e9d40eeaf8948b504e3739179d05dd4b7f343a50cf8c0c6",
+      "origin_endpoint": "CC1(C(=O)[O-])CN(C=O)CCC1C1CCCCC1",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "CC1(C(=O)[O-])CN(C=O)CCC1C1CCCCC1OO",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CN(C=O)CCC1C1CCCCC1",
+        "primitives": 2
+       },
+       {
+        "endpoint": "CCNCC1(O)CC1C1CCN(C=O)CC1(C)C(=O)[O-]",
+        "index": 1,
+        "parent_endpoint": "CC1(C(=O)[O-])CN(C=O)CCC1C1CCCCC1OO",
+        "primitives": 10
+       },
+       {
+        "endpoint": "CONCOOC(CONNN)C1CCN(C=O)CC1(C)C(=O)[O-]",
+        "index": 2,
+        "parent_endpoint": "CCNCC1(O)CC1C1CCN(C=O)CC1(C)C(=O)[O-]",
+        "primitives": 21
+       }
+      ],
+      "total_primitives": 33,
+      "total_protected_rounds_budget": 2,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 3,
+      "declared_at_round": 0,
+      "option_id": "172e62d6c1d592c000cbe6924b23aeaad68916a8e7b89a8e459ad7c9e0913516",
+      "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3CCNC3O2)C1",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3CCN(C4CCCC4)C3O2)C1",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3CCNC3O2)C1",
+        "primitives": 6
+       },
+       {
+        "endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3C(=O)CN(C4CCCC4)C3O2)C1",
+        "index": 1,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3CCN(C4CCCC4)C3O2)C1",
+        "primitives": 1
+       },
+       {
+        "endpoint": "NC1CCCC(C2C(C(=O)[O-])CCCN2C(=O)C2CC(C(=O)CNC3CCCC3)O2)C1",
+        "index": 2,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3C(=O)CN(C4CCCC4)C3O2)C1",
+        "primitives": 11
+       },
+       {
+        "endpoint": "CC1CCCN1C(CC1CC(C(=O)N2CCCC(C(=O)[O-])C2C2CCCC(N)C2)O1)NC1CCCC1",
+        "index": 3,
+        "parent_endpoint": "NC1CCCC(C2C(C(=O)[O-])CCCN2C(=O)C2CC(C(=O)CNC3CCCC3)O2)C1",
+        "primitives": 8
+       }
+      ],
+      "total_primitives": 26,
+      "total_protected_rounds_budget": 3,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 2,
+      "declared_at_round": 0,
+      "option_id": "983842509c4a1b0ab340f70d37d1123258175414a3425f08a8d6d10e1103a15c",
+      "origin_endpoint": "CC1(C(=O)[O-])CN2CC(CNO)(C1)C1(CCCO1)C2=O",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "NC(CO)CC1C(=O)N2CC(O)(C(=O)[O-])CC1(CNO)C2",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CN2CC(CNO)(C1)C1(CCCO1)C2=O",
+        "primitives": 5
+       },
+       {
+        "endpoint": "CC1CCC(C(N)(CO)CC2C(=O)N3CC(O)(C(=O)[O-])OC2(CNO)C3)OC1",
+        "index": 1,
+        "parent_endpoint": "NC(CO)CC1C(=O)N2CC(O)(C(=O)[O-])CC1(CNO)C2",
+        "primitives": 11
+       },
+       {
+        "endpoint": "CC1CCC(C(N)(CO)CC2C(=O)N3CC(O)(C(=O)[O-])OC2(C(N)C2CC(C)CC(C(=O)O)C2)C3)OC1",
+        "index": 2,
+        "parent_endpoint": "CC1CCC(C(N)(CO)CC2C(=O)N3CC(O)(C(=O)[O-])OC2(CNO)C3)OC1",
+        "primitives": 12
+       }
+      ],
+      "total_primitives": 28,
+      "total_protected_rounds_budget": 2,
+      "trough_width_rounds": 1
+     },
+     {
+      "crossings": 2,
+      "declared_at_round": 0,
+      "option_id": "e657d33fa8a77713d02819aa043a5aaad861212a7a202c64e03a6457eb0c6b38",
+      "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C23NNCCC2(C(=O)O)CCO3)C1",
+      "protection_rounds": 1,
+      "protection_source": "chosen_ordering_trough_width",
+      "protects_a_single_crossing": true,
+      "realization_ceiling": 23,
+      "stages": [
+       {
+        "endpoint": "O=C([O-])C12CCCN(C1)C(=O)C13NNCCC1(C(=O)O)C(C1CCCCC1)C(C2)O3",
+        "index": 0,
+        "parent_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C23NNCCC2(C(=O)O)CCO3)C1",
+        "primitives": 8
+       },
+       {
+        "endpoint": "O=C(O)c1cc2c(cn1)CN1CC2(C[O-])CC2OC3(NNCCC3(C(=O)O)C2C2CCCCC2)C1=O",
+        "index": 1,
+        "parent_endpoint": "O=C([O-])C12CCCN(C1)C(=O)C13NNCCC1(C(=O)O)C(C1CCCCC1)C(C2)O3",
+        "primitives": 9
+       },
+       {
+        "endpoint": "O=C(O)c1cc2c(cn1)CN1CC2(C[O-])CC2CC3(C(=O)O)C4CNNC(O)C4NNC3(O2)C1=O",
+        "index": 2,
+        "parent_endpoint": "O=C(O)c1cc2c(cn1)CN1CC2(C[O-])CC2OC3(NNCCC3(C(=O)O)C2C2CCCCC2)C1=O",
+        "primitives": 12
+       }
+      ],
+      "total_primitives": 29,
+      "total_protected_rounds_budget": 2,
+      "trough_width_rounds": 1
+     }
+    ],
+    "oracle_calls": 0,
+    "origins_available": 8,
+    "protection_source": "chosen_ordering_trough_width",
+    "realization_ceiling": 23,
+    "refusals": {
+     "duplicate_identity": 0,
+     "no_chain_over_ceiling": 2
+    },
+    "schema_version": "pmo_macro_option_controller_v1",
+    "seconds": 39.2143082919647,
+    "trough_width_rounds": 1
+   },
+   "macro_options_enabled": true,
+   "options": [
+    {
+     "bridge_endpoints": [
+      "CC1(C(=O)[O-])CCCN(C(=O)C2CC3CCN(C4CCCC4)C3O2)C1",
+      "CC1(C(=O)[O-])CCCN(C(=O)C2CC3C(=O)CN(C4CCCC4)C3O2)C1",
+      "NC1CCCC(C2C(C(=O)[O-])CCCN2C(=O)C2CC(C(=O)CNC3CCCC3)O2)C1"
+     ],
+     "bridge_scores": [
+      0.11842105263157894,
+      0.1111111111111111,
+      null
+     ],
+     "bridges_charged": 2,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "CC1CCCN1C(CC1CC(C(=O)N2CCCC(C(=O)[O-])C2C2CCCC(N)C2)O1)NC1CCCC1",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "172e62d6c1d592c000cbe6924b23aeaad68916a8e7b89a8e459ad7c9e0913516",
+     "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC3CCNC3O2)C1",
+     "origin_score": 0.10526315789473684,
+     "stages": 4,
+     "status": "expired",
+     "total_primitives": 26
+    },
+    {
+     "bridge_endpoints": [
+      "CC1(C([O-])C2CCCCC2N)CN(C(=O)C2CCCO2)CCC1(N)F",
+      "NC1(F)CC2NC3CCCCC3C([O-])C1CN2C(=O)C1CCCO1",
+      "NC1CC2NC3CCCCC3C([O-])(F)C1CN2C(=O)C1CC(C2CCOC2)CO1"
+     ],
+     "bridge_scores": [
+      null,
+      null,
+      null
+     ],
+     "bridges_charged": 0,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "NC1CC2N(C(=O)C3CC(C4CCOC4)CO3)CC1C([O-])C1CCCC3COCC312",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "5bfc29938533d84733972630ea164e220673df5743efda24f6e1ee9f11c9c465",
+     "origin_endpoint": "CC1(C(=O)[O-])CN(C(=O)C2CCCO2)CCC1(N)F",
+     "origin_score": 0.125,
+     "stages": 4,
+     "status": "declared",
+     "total_primitives": 28
+    },
+    {
+     "bridge_endpoints": [
+      "NC(CO)CC1C(=O)N2CC(O)(C(=O)[O-])CC1(CNO)C2",
+      "CC1CCC(C(N)(CO)CC2C(=O)N3CC(O)(C(=O)[O-])OC2(CNO)C3)OC1"
+     ],
+     "bridge_scores": [
+      null,
+      null
+     ],
+     "bridges_charged": 0,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "CC1CCC(C(N)(CO)CC2C(=O)N3CC(O)(C(=O)[O-])OC2(C(N)C2CC(C)CC(C(=O)O)C2)C3)OC1",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "983842509c4a1b0ab340f70d37d1123258175414a3425f08a8d6d10e1103a15c",
+     "origin_endpoint": "CC1(C(=O)[O-])CN2CC(CNO)(C1)C1(CCCO1)C2=O",
+     "origin_score": 0.10526315789473684,
+     "stages": 3,
+     "status": "declared",
+     "total_primitives": 28
+    },
+    {
+     "bridge_endpoints": [
+      "CC1(C(=O)[O-])CN(C=O)CCC1C1CCCCC1OO",
+      "CCNCC1(O)CC1C1CCN(C=O)CC1(C)C(=O)[O-]"
+     ],
+     "bridge_scores": [
+      0.1267605633802817,
+      0.15492957746478872
+     ],
+     "bridges_charged": 2,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "CONCOOC(CONNN)C1CCN(C=O)CC1(C)C(=O)[O-]",
+     "destination_reached": true,
+     "destination_score": 0.13580246913580246,
+     "option_id": "985911f3ddc03b1d1e9d40eeaf8948b504e3739179d05dd4b7f343a50cf8c0c6",
+     "origin_endpoint": "CC1(C(=O)[O-])CN(C=O)CCC1C1CCCCC1",
+     "origin_score": 0.13846153846153847,
+     "stages": 3,
+     "status": "reached",
+     "total_primitives": 33
+    },
+    {
+     "bridge_endpoints": [
+      "CC(C)(CN(C(=O)COCC1CCC1)C1(C)CCN1)C(=O)[O-]",
+      "CC(C)(CN(C(=O)COCC12CCC1(N)NCNC2)C1(C)CCN1)C(=O)[O-]",
+      "CC(C)(CN(C(=O)COC(c1ccco1)C12CCC1(N)NCNC2)C1(C)CCN1)C(=O)[O-]"
+     ],
+     "bridge_scores": [
+      0.09090909090909091,
+      null,
+      null
+     ],
+     "bridges_charged": 1,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "CC(CN(C(=O)COC(c1ccco1)C12CCC1(N)C1C(C(=O)O)CCCN1C2)C1(C)CCN1)C(=O)[O-]",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "a4f2cae0c3981ffa066cbe5579be7404641a5ee2ad49c92a87a3ec0f4337ce22",
+     "origin_endpoint": "CC(C)(CN(C(=O)C1CCCO1)C1(C)CCN1)C(=O)[O-]",
+     "origin_score": 0.09333333333333334,
+     "stages": 4,
+     "status": "expired",
+     "total_primitives": 32
+    },
+    {
+     "bridge_endpoints": [
+      "CC1(C(=O)[O-])CCCN(C(=O)C2CC(C3CCC4=C(N)CC=C4N3)CO2)C1",
+      "CC1(C(=O)[O-])CN(C(=O)C2CC(C3CCC4=C(N)CC=C4N3)CO2)CCC1=O",
+      "CC1(C(=O)[O-])CN(C(=O)C2OCC3(C4CCC5=C(N)CC=C5N4)CCCOC23)CC(C2CCCNC2)C1=O"
+     ],
+     "bridge_scores": [
+      0.11235955056179775,
+      null,
+      null
+     ],
+     "bridges_charged": 1,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "CCCC(CN)C1CN(C(=O)C2OCC3(C4NC5=CCC(N)=C5CC4=O)CCCOC23)[SH4]C(C)(C(=O)[O-])C1=O",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "c074425eace94a3a980b2a766ba01698258f67e41856c15e6b0bbec02dcaedf6",
+     "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CC(C3CCCCN3)CO2)C1",
+     "origin_score": 0.10126582278481013,
+     "stages": 4,
+     "status": "expired",
+     "total_primitives": 24
+    },
+    {
+     "bridge_endpoints": [
+      "O=C([O-])C12CCCN(C1)C(=O)C13NNCCC1(C(=O)O)C(C1CCCCC1)C(C2)O3",
+      "O=C(O)c1cc2c(cn1)CN1CC2(C[O-])CC2OC3(NNCCC3(C(=O)O)C2C2CCCCC2)C1=O"
+     ],
+     "bridge_scores": [
+      0.13253012048192772,
+      0.12244897959183673
+     ],
+     "bridges_charged": 2,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "O=C(O)c1cc2c(cn1)CN1CC2(C[O-])CC2CC3(C(=O)O)C4CNNC(O)C4NNC3(O2)C1=O",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "e657d33fa8a77713d02819aa043a5aaad861212a7a202c64e03a6457eb0c6b38",
+     "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C23NNCCC2(C(=O)O)CCO3)C1",
+     "origin_score": 0.08974358974358974,
+     "stages": 3,
+     "status": "expired",
+     "total_primitives": 29
+    },
+    {
+     "bridge_endpoints": [
+      "CC1(C(=O)[O-])CCCN(C(=O)C2CCC(C3CCCC(N)N3)O2)C1=O",
+      "CC1(C(=O)[O-])CCCN(C(=O)C2OC(C3CCCC(N)N3)c3ccccc32)C1=O",
+      "NCC1(C[O-])CCCN(C(=O)C2OC(C3CCCC(N)N3)c3ccccc32)C1=O"
+     ],
+     "bridge_scores": [
+      0.1111111111111111,
+      null,
+      null
+     ],
+     "bridges_charged": 1,
+     "bridges_in_valley": 0,
+     "destination_endpoint": "NC1CCCC(C2OC(C(=O)N3CC(C[O-])(C(N)C4CNCN4)C3)c3ccccc32)N1",
+     "destination_reached": false,
+     "destination_score": null,
+     "option_id": "fd53ae27d5883753c3e2840e7b3fc81c27e5520a08ae1b31bfd9ef3f4a9ff73d",
+     "origin_endpoint": "CC1(C(=O)[O-])CCCN(C(=O)C2CCCO2)C1=O",
+     "origin_score": 0.1323529411764706,
+     "stages": 4,
+     "status": "expired",
+     "total_primitives": 25
+    }
+   ],
+   "protection_enabled": true,
+   "rounds_completed": 10,
+   "run_identity": "61f97b97ccc819dbad467c87e727c12663ae43f4760c232ca18c9c1fc26476aa",
+   "schema_version": "pmo_macro_option_arms_v1",
+   "scorer": {
+    "benchmark_oracle": false,
+    "name": "valley_similarity_v1",
+    "origin_heavy_atoms": 19,
+    "reference": "O=C(Nc1ccc(F)cc1)C1CCN(Cc2ccccc2)CC1",
+    "valley_depth": 0.66,
+    "valley_drop": 2
+   },
+   "seed": 20260922,
+   "synthetic_scorer_calls": 84,
+   "top10": 0.16821743322954386
+  }
+ },
+ "benchmark_oracle_calls": 0,
+ "budget": 96,
+ "index": 0,
+ "initialization_count": 4,
+ "macro_option_settings": {
+  "declaration_wall_seconds": 180.0,
+  "max_options": 8,
+  "synthesis_attempts_per_origin": 5
+ },
+ "queries_per_round": 8,
+ "rounds": 10,
+ "row_sha256": "0c6d085dc785d08ba8bf052b6dfece7e77e3372a3f2b85d46b74efe1863611c5",
+ "schema_version": "pmo_macro_option_matched_seed_v1",
+ "seconds": 634.947304249974,
+ "seed": 20260922,
+ "status": "complete"
+}
