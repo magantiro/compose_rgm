@@ -456,3 +456,83 @@ def classify_rung(
             for rung in ordered
         ],
     }
+
+
+# ---- Verified productivity ----
+
+#: The campaign geometry a productivity probe shares with Test B.  Test C is
+#: only comparable to the teacher ladder if the probe runs the SAME controller
+#: with the SAME budget from a different seed molecule, so these kwargs are
+#: asserted equal to the Test-B driver's by ``tests/test_pmo_atlas_discovery.py``
+#: rather than transcribed and hoped for.
+def local_lift_kwargs(
+    *,
+    repo_root: Path,
+    config,
+    rounds: int,
+    queries_per_round: int,
+    optimizer_kwargs: dict[str, Any],
+) -> dict[str, Any]:
+    from compose_v4.control.dynamic_program_synthesis_v21 import (
+        initial_dynamic_program_batch_v21,
+    )
+    from compose_v4.control.pmo_population_controller import PmoPopulationController
+
+    del repo_root
+    return {
+        "config": config,
+        "library": (),
+        "rounds": rounds,
+        "queries_per_round": queries_per_round,
+        "hierarchy": None,
+        "fit_model": None,
+        "stagnation_rounds": None,
+        "bootstrap_rounds": 1,
+        "initialization_mode": "all_scored_pool",
+        "initial_parent_fraction": 0.2,
+        "optimizer_type": PmoPopulationController,
+        "optimizer_kwargs": optimizer_kwargs,
+        "initial_batch_fn": initial_dynamic_program_batch_v21,
+    }
+
+
+def single_seed_initialization(smiles: str, state: dict[str, Any], origin: str) -> dict[str, Any]:
+    """One measured molecule as the whole starting population."""
+
+    from compose_v4.control.docking_value import identity
+
+    body = {
+        "candidates": [{"endpoint": smiles, "source_id": origin, "state": state}],
+        "count": 1,
+        "task_independent": False,
+        "provenance": origin,
+        "information_regime": DEVELOPMENT_INFORMED_LABEL,
+    }
+    return {**body, "lock_sha256": identity(body)}
+
+
+def summarize_lift(
+    rows: Sequence[dict[str, Any]],
+    seed_smiles: str,
+) -> dict[str, Any]:
+    """Test B's reduction: a run that only preserves its seed is not a lift."""
+
+    scores = {row["endpoint"]: float(row["score"]) for row in rows}
+    seed_score = scores.get(seed_smiles)
+    new = {smiles: value for smiles, value in scores.items() if smiles != seed_smiles}
+    ranked = sorted(new.values(), reverse=True)
+    top_ten_new = ranked[:10]
+    above = [v for v in new.values() if seed_score is not None and v > seed_score]
+    return {
+        "seed_score": seed_score,
+        "charged_calls": len(rows),
+        "distinct_new_molecules": len(new),
+        "best_overall": max(scores.values()) if scores else None,
+        "best_new": ranked[0] if ranked else None,
+        "top_ten_new_mean": (sum(top_ten_new) / len(top_ten_new)) if top_ten_new else None,
+        "top_ten_new_count": len(top_ten_new),
+        "distinct_new_above_seed": len(above),
+        "lift_best_new_minus_seed": (
+            ranked[0] - seed_score if ranked and seed_score is not None else None
+        ),
+    }
