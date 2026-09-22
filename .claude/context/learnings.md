@@ -4376,3 +4376,58 @@ independently of whether fa7_0 ever closes.**
   proposal path imports and never executes, and pinning all of them would let any unrelated edit
   invalidate a run hours into its budget that cannot resume under a different contract. Pin the
   CONTROL PATH and say so.
+
+## 2026-09-22 (validity closure is the EXECUTOR's, not the draw law's -- and the metric that shows it)
+
+- **MEASURED, 7,680 draws over all 15 T4 seeds at delta=0.6, zero oracle calls
+  (`diagnostics/t4_validity_fiber_diagnostic_v1.json`): the three obvious metrics for "what does
+  fiber conditioning buy" are SATURATED BY CONSTRUCTION and cannot discriminate.**
+      metric                        fiber-conditioned    unconditioned + reject
+      executable_fraction               1.0000                0.9997
+      valid_intermediate_fraction       1.0000                1.0000
+      wasted_proposals                       0                     1
+  **0 invalid intermediates in 39,909 committed states**, each decoded and re-parsed through RDKit.
+  The reason is architectural: `synthesize_dynamic_program` does not draw a program and then execute
+  it -- the program IS the record of what executed. `compile_generic_module` calls `execute_program`
+  INSIDE the draw and every action passes `editing_v2_semantic_rewrite_system()`
+  (`whole_ring_plan.py:70-90`), which raises on any invalid state. **Both arms inherit validity
+  closure from the EXECUTOR.** So the validity-closure claim is confirmed at scale AND is not what
+  the draw-time conditioning buys. Do not attribute it to the fiber.
+- **What conditioning actually buys: a 9.8x lower executor refusal rate (0.0502 vs 0.4915, 1.05 vs
+  1.94 compile attempts per accepted module) and COVERAGE -- 11 of 15 cells yielding an eligible
+  endpoint against 7.** The aggregate (409 vs 369 unique eligible) UNDERSTATES it, being dominated
+  by a few high-yield cells; the decisive asymmetry is **4 cells where conditioned yields >0 and
+  unconditioned yields exactly 0, and 0 cells the other way** -- and all four are 29-39 heavy atoms.
+  On the small permissive seeds unconditioned sampling WINS (87 vs 81, 93 vs 68). Conditioning earns
+  its keep only where the admissible set is thin, which is exactly the crowded drug-like states.
+- **CONDITIONING IS THE MORE EXPENSIVE PATH PER DRAW, not the cheaper one: 0.839 s vs 0.527 s,
+  1.59x.** Enumerating the admitted fiber -- notably the semantic cycle-close and atom-restate
+  admission masks -- costs more than executing a bad draw and discarding it. It buys HIT RATE and
+  pays in ENUMERATION. Consequence for the comparison: this is matched-DRAW, not matched-COMPUTE, so
+  at equal wall clock the unconditioned arm would get 1.59x more draws. State which one you ran.
+- **HOW TO SPLIT "space" FROM "conditioning" WITHOUT INVENTING A SAMPLER.** The production
+  enumerators are all written `tuple(action for <coords> in <DECLARED RANGE> if <ADMISSION
+  PREDICATE>)`. The `for` clause IS the space; every `if` that consults graph structure to decide
+  executability IS the conditioning. Keep the `for`, drop the `if`, hand the coordinates to the same
+  executor. That rule is read off the code rather than argued, and it makes each removal checkable
+  (10 of 13 families; each recorded with its production file:line).
+- **ONE CONDITIONING POINT IS PROVABLY INSEPARABLE, and it is a real architectural finding rather
+  than a gap.** `rewrite/tracelet_fiber.py:353-387 _ring_system_restate_candidates`:
+  `RingSystemRestate` carries an ARBITRARY-LENGTH tuple of `BondOrderChange`, so there is no bounded
+  coordinate range to draw from. The candidate set is CONSTRUCTED -- perceive bridges, take ring-only
+  connected components, enumerate maximum-cardinality matchings (`:371-386`) for coherent Kekule
+  alternations. The matching MANUFACTURES the parameter; it does not filter a declared space. An
+  "unconditioned" draw over all subsets of bond pairs x orders is a combinatorially different and
+  astronomically larger space, so removing it would violate the same-space requirement.
+- **Because 3 of 13 families could not be unconditioned, every measured gap is a LOWER BOUND.** Say
+  so; a partially-treated arm quoted as fully treated overstates the effect.
+- **Two controls are what make this safe to believe.** (a) The families whose conditioning could NOT
+  be removed barely move (`append_ring` 0.189 vs 0.170, `fuse_ring` 0.154 vs 0.095) while the
+  patched ones move to 0.64-1.00 -- an internal control that the effect tracks the patches. (b) The
+  harness's refusal counter was cross-checked against production's OWN `module_failure_counts`:
+  **382 = 382 exactly** on the conditioned arm. Two independent instruments agreeing is what
+  licenses the number.
+- **Never report a zero without the count expected behind it.** Four of the eight arm-U zeros are
+  BOTH_ZERO cells -- the known delta=0.6 exhaustion cells -- and discriminate nothing; one (3
+  expected, p=0.050) is WEAK; only three are decisive (p 1.7e-05 to 3.4e-04). An eight-zero headline
+  would have been three real results and five artifacts.
