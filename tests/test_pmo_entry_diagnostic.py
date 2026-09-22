@@ -325,3 +325,79 @@ def test_a_baseline_only_report_cannot_declare_the_gate_passed():
     verdict = driver._pass_criterion({"arm1_baseline_b": {"per_task": {}}}, None)
     assert verdict["verdict"] == "UNEVALUATED_NO_CHALLENGER_ARM"
     assert "not a verdict on C" in verdict["statement"]
+
+
+# ---- Manifold column ----
+
+
+def test_drug_likeness_reads_qed_and_heavy_atoms():
+    aspirin = entry.drug_likeness("CC(=O)Oc1ccccc1C(=O)O")
+    assert 0.0 <= aspirin["qed"] <= 1.0
+    assert aspirin["heavy_atoms"] == 13
+    assert entry.drug_likeness("not a molecule") == {"qed": None, "heavy_atoms": None}
+
+
+def test_manifold_quartiles_report_drift_in_the_right_direction():
+    import pmo_entry_diagnostic as driver
+
+    rows = [
+        {
+            "proposal_index": at,
+            "status": "executed",
+            "qed": 0.8 - 0.006 * at,
+            "heavy_atoms": 20,
+            "rung": None,
+        }
+        for at in range(1, 41)
+    ]
+    block = driver._manifold(rows, [])
+    assert len(block["qed_by_proposal_quartile"]) == 4
+    assert block["qed_drift_q1_to_q4"] < 0, "a falling QED series must report negative drift"
+    assert block["entrant_descriptors"] == []
+    assert block["entrant_median_qed"] is None
+    assert block["init_median_qed"] == entry.INIT_MEDIAN_QED
+
+
+def test_manifold_block_is_empty_rather_than_zero_without_data():
+    import pmo_entry_diagnostic as driver
+
+    block = driver._manifold([], [])
+    assert block["median_qed"] is None
+    assert block["qed_drift_q1_to_q4"] is None
+
+
+# ---- End to end ----
+
+
+def test_measure_interleaves_parents_and_seals_its_shard(tmp_path):
+    import pmo_entry_diagnostic as driver
+
+    if not (Path.home() / "compose_pmo_atlas_runs" / "test_c_blind").is_dir():
+        pytest.skip("the blind run artifacts are not present in this checkout")
+    out = tmp_path / "shard.json"
+    args = driver.argparse.Namespace(
+        repo_root=str(REPO_ROOT),
+        arm="arm1_baseline_b",
+        task="celecoxib_rediscovery",
+        draws=12,
+        parents_per_stratum=2,
+        descendant_entrants=0,
+        descendant_draws=1,
+        output=str(out),
+    )
+    assert driver.phase_measure(args) == 0
+    document = json.loads(out.read_text())
+    payload = document["payload"]
+    assert entry.payload_sha256(payload) == document["payload_sha256"]
+    assert payload["charged_oracle_calls"] == 0
+    assert payload["proposals_drawn"] == 12
+    assert [row["proposal_index"] for row in payload["proposals"]] == list(range(1, 13))
+    # Round robin: the first proposals must come from DIFFERENT parents, not one
+    # parent's whole run. Slice order in this repository is lane- and
+    # family-sorted and taking the first N has produced bad measurements before.
+    first = [row["parent_endpoint"] for row in payload["proposals"][: payload["parents"]]]
+    assert len(set(first)) == payload["parents"]
+    for row in payload["proposals"]:
+        assert row["provenance_class"] in {"local_search", "broad_exploration"}
+        if row["status"] == "executed":
+            assert row["qed"] is not None or row["endpoint"] is not None

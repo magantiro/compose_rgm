@@ -1,0 +1,19 @@
+{
+ "payload": {
+  "canonical_smiles_disagreements": 0,
+  "charged_oracle_calls": 0,
+  "heavy_atom_disagreements": 0,
+  "kernels": {
+   "atlas_build": "2024.03.5",
+   "harness_and_pmo_production": "2023.09.6"
+  },
+  "morgan_bit_disagreements": 0,
+  "qed_disagreements": 0,
+  "question": "The atlas was BUILT under rdkit 2024.03.5; the PMO production kernel and this harness are 2023.09.6. Does the scoring side of the entry instrument move between them?",
+  "reference_molecules": 302,
+  "schema_version": "pmo_entry_kernel_parity_v1",
+  "scope": "Covers every atlas reference molecule the entry predicate scores against -- route checkpoints, recorded endpoints and declared destinations. It is a statement about the SCORING side. It says nothing about parity on the exotic intermediates a search constructs, which is a separate question and has bitten this repository before.",
+  "unreadable_under_either_kernel": 0
+ },
+ "payload_sha256": "e24170ef32d5e11eec664f41a0979fbe2aa79b6c4991f6c424d0c862e06c5b35"
+}
