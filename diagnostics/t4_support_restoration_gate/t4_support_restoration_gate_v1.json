@@ -206,6 +206,7 @@
   "braf_0": {
    "agrees_with_committed_audit": {
     "0": true,
+    "1": false,
     "2": true
    },
    "cumulative_by_rung": {
@@ -219,6 +220,45 @@
       "returned": 4,
       "rung": 0,
       "stage": "rung0_region"
+     }
+    ],
+    "1": [
+     {
+      "cumulative_distinct": 2,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 2,
+      "kernel": "region",
+      "returned": 2,
+      "rung": 0,
+      "stage": "rung0_region"
+     },
+     {
+      "cumulative_distinct": 3,
+      "draws_per_lane": 960,
+      "elapsed_seconds": 1049.266,
+      "fresh_distinct": 1,
+      "returned": 2,
+      "rung": 1,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 3,
+      "draws_per_lane": 1920,
+      "elapsed_seconds": 2054.427,
+      "fresh_distinct": 0,
+      "returned": 1,
+      "rung": 2,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 5,
+      "draws_per_lane": 3840,
+      "elapsed_seconds": 2984.165,
+      "fresh_distinct": 2,
+      "returned": 8,
+      "rung": 3,
+      "stage": "draw_ladder"
      }
     ],
     "2": [
@@ -236,30 +276,41 @@
    },
    "distinct_eligible_by_seed": {
     "0": 4,
+    "1": 5,
     "2": 4
    },
    "draws_spent_by_seed": {
     "0": 0,
+    "1": 6720,
     "2": 0
    },
-   "drug_like_eligible_total": 8,
+   "drug_like_eligible_total": 13,
    "elapsed_seconds_by_seed": {
     "0": 1409.37,
+    "1": 3880.79,
     "2": 1078.87
    },
-   "eligible_endpoints_total": 8,
+   "eligible_endpoints_total": 13,
    "endpoint_smiles": [
     "CCCc1cccc(-c2ccnc3c(C(=O)NCCN(CC)CC)cnn23)c1",
     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(C)c3)ccnc12",
     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(N)c3)ccnc12",
+    "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC(C)=O)c3)ccnc12",
     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC)c3)ccnc12",
-    "CCN(CC)CCNC(=O)c1cnn2c(-c3ccccc3)ccnc12"
+    "CCN(CC)CCNC(=O)c1cnn2c(-c3ccccc3)ccnc12",
+    "CCN(CCNC(=O)c1cnn2c(-c3cccc(NC(C)=O)c3)ccnc12)C(C)=O"
    ],
    "expansion_consumed_by_seed": {
     "0": {
      "consumed": true,
      "fallback_ran": true,
      "ladder_attempts": 0,
+     "stop_reason": "reached_target"
+    },
+    "1": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 3,
      "stop_reason": "reached_target"
     },
     "2": {
@@ -271,7 +322,7 @@
    },
    "historical_comparison": {
     "comparison_rule": "scored on SUPPORT, never on molecular identity: comparable margins and comparable structural scale count as recovery even at zero exact overlap",
-    "exact_smiles_overlap": 4,
+    "exact_smiles_overlap": 5,
     "historical_arm_lanes": [
      {
       "elapsed_seconds": 1352.2,
@@ -336,11 +387,12 @@
     "overlapping_smiles": [
      "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(C)c3)ccnc12",
      "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(N)c3)ccnc12",
+     "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC(C)=O)c3)ccnc12",
      "CCN(CC)CCNC(=O)c1cnn2c(-c3cccc(NC)c3)ccnc12",
      "CCN(CC)CCNC(=O)c1cnn2c(-c3ccccc3)ccnc12"
     ],
     "status": "OK",
-    "unified_eligible": 5
+    "unified_eligible": 7
    },
    "historical_kernel": "region",
    "historical_reference": "UNAVAILABLE",
@@ -348,25 +400,26 @@
     "qed": {
      "max": 0.11932,
      "median": 0.040726,
-     "min": 0.018754,
-     "n": 8
+     "min": 0.012246,
+     "n": 13
     },
     "sa": {
      "max": 1.778558,
-     "median": 1.60117,
-     "min": 1.555924,
-     "n": 8
+     "median": 1.586395,
+     "min": 1.514693,
+     "n": 13
     },
     "similarity": {
-     "max": 0.089189,
+     "max": 0.116216,
      "median": 0.031579,
-     "min": 0.015385,
-     "n": 8
+     "min": 0.0125,
+     "n": 13
     }
    },
    "p_any_eligible": 1.0,
    "round_one_selected_by_seed": {
     "0": 0,
+    "1": 1,
     "2": 0
    },
    "routed_kernel": [
@@ -375,43 +428,50 @@
    "routing_agrees": true,
    "rung_zero_yield_by_seed": {
     "0": 4,
+    "1": 2,
     "2": 4
    },
    "seeds_run": [
     0,
+    1,
     2
    ],
    "status": "RUN",
    "stop_reason_by_seed": {
     "0": "reached_target",
+    "1": "reached_target",
     "2": "reached_target"
    },
    "structural_character": {
     "direction_counts": {
      "grow": 0,
-     "prune": 8,
+     "prune": 13,
      "replace": 0
     },
     "heavy_delta": {
-     "max": -12.0,
+     "max": -10.0,
      "median": -14.0,
      "min": -15.0,
-     "n": 8
+     "n": 13
     },
     "rewrite_families": [
-     "atom_delete"
+     "atom_delete",
+     "retained_deletion",
+     "retained_element"
     ],
     "ring_delta": {
      "max": -1.0,
      "median": -1.0,
      "min": -1.0,
-     "n": 8
+     "n": 13
     },
     "rungs_producing": [
-     0
+     0,
+     1,
+     3
     ]
    },
-   "trigger_confirmed_all_seeds": true,
+   "trigger_confirmed_all_seeds": false,
    "verdict": {
     "detail": "4 distinct eligible endpoints recovered (4 at rung 0)",
     "failure_kind": null,
@@ -681,10 +741,456 @@
    "wall_clock_stops": []
   },
   "fa7_0": {
-   "status": "NOT_RUN"
+   "agrees_with_committed_audit": {
+    "1": true
+   },
+   "cumulative_by_rung": {
+    "1": [
+     {
+      "cumulative_distinct": 0,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 0,
+      "kernel": "region",
+      "returned": 0,
+      "rung": 0,
+      "stage": "rung0_region"
+     },
+     {
+      "cumulative_distinct": 0,
+      "draws_per_lane": 960,
+      "elapsed_seconds": 1082.408,
+      "fresh_distinct": 0,
+      "returned": 0,
+      "rung": 1,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 0,
+      "draws_per_lane": 1920,
+      "elapsed_seconds": 2523.296,
+      "fresh_distinct": 0,
+      "returned": 0,
+      "rung": 2,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 0,
+      "draws_per_lane": 3840,
+      "elapsed_seconds": 4742.692,
+      "fresh_distinct": 0,
+      "returned": 0,
+      "rung": 3,
+      "stage": "draw_ladder"
+     }
+    ]
+   },
+   "distinct_eligible_by_seed": {
+    "1": 0
+   },
+   "draws_spent_by_seed": {
+    "1": 6720
+   },
+   "drug_like_eligible_total": 0,
+   "elapsed_seconds_by_seed": {
+    "1": 5802.48
+   },
+   "eligible_endpoints_total": 0,
+   "endpoint_smiles": [],
+   "expansion_consumed_by_seed": {
+    "1": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 3,
+     "stop_reason": "ladder_exhausted"
+    }
+   },
+   "historical_comparison": {
+    "note": "the REGION-REPAIR arm FAILED on fa7_0, terminating at candidate_exhaustion after the root docking. For fa7_0 the historical bar is the LADDER arm below, not the region arm.",
+    "reason": "no historical eligible pool recorded for fa7_0",
+    "status": "UNAVAILABLE"
+   },
+   "historical_kernel": "region",
+   "historical_reference": {
+    "attempts": 2,
+    "distinct_eligible": 4,
+    "draws_spent": 2880,
+    "fallback_eligible": 0,
+    "source": "t4_fa7_0_support_expansion arm log",
+    "stop_reason": "reached_target"
+   },
+   "margins": {
+    "qed": null,
+    "sa": null,
+    "similarity": null
+   },
+   "p_any_eligible": 0.0,
+   "round_one_selected_by_seed": {
+    "1": 0
+   },
+   "routed_kernel": [
+    "region"
+   ],
+   "routing_agrees": true,
+   "rung_zero_yield_by_seed": {
+    "1": 0
+   },
+   "seeds_run": [
+    1
+   ],
+   "status": "RUN",
+   "stop_reason_by_seed": {
+    "1": "ladder_exhausted"
+   },
+   "structural_character": {
+    "direction_counts": {
+     "grow": 0,
+     "prune": 0,
+     "replace": 0
+    },
+    "heavy_delta": null,
+    "rewrite_families": [],
+    "ring_delta": null,
+    "rungs_producing": []
+   },
+   "trigger_confirmed_all_seeds": true,
+   "verdict": {
+    "detail": "routing landed on 'region', which matches the historical arm, and that lane ran to its declared bound and produced zero eligible endpoints; the routing logic is right and the wiring is not yet behaviourally equivalent",
+    "failure_kind": "WIRING",
+    "historical_kernel": "region",
+    "routed_kernel": "region",
+    "routing_agrees_with_historical_arm": true,
+    "verdict": "FAIL"
+   },
+   "wall_clock_stops": []
   },
   "fa7_2": {
-   "status": "NOT_RUN"
+   "agrees_with_committed_audit": {
+    "0": true,
+    "1": true,
+    "2": true
+   },
+   "cumulative_by_rung": {
+    "0": [
+     {
+      "cumulative_distinct": 2,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 2,
+      "kernel": "region",
+      "returned": 2,
+      "rung": 0,
+      "stage": "rung0_region"
+     },
+     {
+      "cumulative_distinct": 2,
+      "draws_per_lane": 960,
+      "elapsed_seconds": 1085.052,
+      "fresh_distinct": 0,
+      "returned": 0,
+      "rung": 1,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 3,
+      "draws_per_lane": 1920,
+      "elapsed_seconds": 2166.741,
+      "fresh_distinct": 1,
+      "returned": 1,
+      "rung": 2,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 3,
+      "draws_per_lane": 3840,
+      "elapsed_seconds": 3281.016,
+      "fresh_distinct": 0,
+      "returned": 0,
+      "rung": 3,
+      "stage": "draw_ladder"
+     }
+    ],
+    "1": [
+     {
+      "cumulative_distinct": 3,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 3,
+      "kernel": "region",
+      "returned": 3,
+      "rung": 0,
+      "stage": "rung0_region"
+     },
+     {
+      "cumulative_distinct": 3,
+      "draws_per_lane": 960,
+      "elapsed_seconds": 1335.494,
+      "fresh_distinct": 0,
+      "returned": 0,
+      "rung": 1,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 3,
+      "draws_per_lane": 1920,
+      "elapsed_seconds": 2468.359,
+      "fresh_distinct": 0,
+      "returned": 0,
+      "rung": 2,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 3,
+      "draws_per_lane": 3840,
+      "elapsed_seconds": 3691.797,
+      "fresh_distinct": 0,
+      "returned": 0,
+      "rung": 3,
+      "stage": "draw_ladder"
+     }
+    ],
+    "2": [
+     {
+      "cumulative_distinct": 1,
+      "draws_per_lane": 0,
+      "elapsed_seconds": 0.0,
+      "fresh_distinct": 1,
+      "kernel": "region",
+      "returned": 1,
+      "rung": 0,
+      "stage": "rung0_region"
+     },
+     {
+      "cumulative_distinct": 2,
+      "draws_per_lane": 960,
+      "elapsed_seconds": 1172.468,
+      "fresh_distinct": 1,
+      "returned": 1,
+      "rung": 1,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 2,
+      "draws_per_lane": 1920,
+      "elapsed_seconds": 2583.929,
+      "fresh_distinct": 0,
+      "returned": 0,
+      "rung": 2,
+      "stage": "draw_ladder"
+     },
+     {
+      "cumulative_distinct": 2,
+      "draws_per_lane": 3840,
+      "elapsed_seconds": 4060.805,
+      "fresh_distinct": 0,
+      "returned": 1,
+      "rung": 3,
+      "stage": "draw_ladder"
+     }
+    ]
+   },
+   "distinct_eligible_by_seed": {
+    "0": 3,
+    "1": 3,
+    "2": 2
+   },
+   "draws_spent_by_seed": {
+    "0": 6720,
+    "1": 6720,
+    "2": 6720
+   },
+   "drug_like_eligible_total": 8,
+   "elapsed_seconds_by_seed": {
+    "0": 5238.17,
+    "1": 6107.17,
+    "2": 4875.51
+   },
+   "eligible_endpoints_total": 8,
+   "endpoint_smiles": [
+    "CC(=O)Cn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O",
+    "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CN)c1=O",
+    "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CO)c1=O",
+    "CC(C)Nc1ccc(-c2ccccc2)n(CC(=O)NCc2ccccc2)c1=O",
+    "CCn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O"
+   ],
+   "expansion_consumed_by_seed": {
+    "0": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 3,
+     "stop_reason": "ladder_exhausted"
+    },
+    "1": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 3,
+     "stop_reason": "ladder_exhausted"
+    },
+    "2": {
+     "consumed": true,
+     "fallback_ran": true,
+     "ladder_attempts": 3,
+     "stop_reason": "ladder_exhausted"
+    }
+   },
+   "historical_comparison": {
+    "comparison_rule": "scored on SUPPORT, never on molecular identity: comparable margins and comparable structural scale count as recovery even at zero exact overlap",
+    "exact_smiles_overlap": 2,
+    "historical_arm_lanes": [
+     {
+      "elapsed_seconds": 1054.9,
+      "eligible_unique": 3,
+      "expert": "shallow",
+      "region_law": "free_gate_margin_v1",
+      "region_law_consumption_attempts": 4
+     },
+     {
+      "elapsed_seconds": 469.4,
+      "eligible_unique": 0,
+      "expert": "anchored_replacement",
+      "region_law": null,
+      "region_law_consumption_attempts": null
+     },
+     {
+      "elapsed_seconds": 16.8,
+      "eligible_unique": 0,
+      "expert": "route_complete_region",
+      "region_law": null,
+      "region_law_consumption_attempts": null
+     }
+    ],
+    "historical_eligible": 3,
+    "historical_margins": {
+     "qed": {
+      "max": 0.136922,
+      "median": 0.092855,
+      "min": 0.014694,
+      "n": 3
+     },
+     "sa": {
+      "max": 1.466136,
+      "median": 1.401272,
+      "min": 1.327352,
+      "n": 3
+     },
+     "similarity": {
+      "max": 0.071875,
+      "median": 0.040625,
+      "min": 0.032353,
+      "n": 3
+     }
+    },
+    "historical_structural_character": {
+     "created_atoms": {
+      "max": 3.0,
+      "median": 0.0,
+      "min": 0.0,
+      "n": 3
+     },
+     "deleted_atoms": {
+      "max": 12.0,
+      "median": 11.0,
+      "min": 10.0,
+      "n": 3
+     },
+     "lanes": [
+      "shallow"
+     ]
+    },
+    "overlapping_smiles": [
+     "CC(=O)Cn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O",
+     "CCn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O"
+    ],
+    "status": "OK",
+    "unified_eligible": 5
+   },
+   "historical_kernel": "region",
+   "historical_reference": "UNAVAILABLE",
+   "margins": {
+    "qed": {
+     "max": 0.136922,
+     "median": 0.04213,
+     "min": 0.020277,
+     "n": 8
+    },
+    "sa": {
+     "max": 1.921386,
+     "median": 1.364562,
+     "min": 1.272163,
+     "n": 8
+    },
+    "similarity": {
+     "max": 0.071875,
+     "median": 0.040625,
+     "min": 0.0,
+     "n": 8
+    }
+   },
+   "p_any_eligible": 1.0,
+   "round_one_selected_by_seed": {
+    "0": 0,
+    "1": 0,
+    "2": 0
+   },
+   "routed_kernel": [
+    "region"
+   ],
+   "routing_agrees": true,
+   "rung_zero_yield_by_seed": {
+    "0": 2,
+    "1": 3,
+    "2": 1
+   },
+   "seeds_run": [
+    0,
+    1,
+    2
+   ],
+   "status": "RUN",
+   "stop_reason_by_seed": {
+    "0": "ladder_exhausted",
+    "1": "ladder_exhausted",
+    "2": "ladder_exhausted"
+   },
+   "structural_character": {
+    "direction_counts": {
+     "grow": 0,
+     "prune": 8,
+     "replace": 0
+    },
+    "heavy_delta": {
+     "max": -7.0,
+     "median": -12.0,
+     "min": -12.0,
+     "n": 8
+    },
+    "rewrite_families": [
+     "atom_delete",
+     "base",
+     "retained_deletion"
+    ],
+    "ring_delta": {
+     "max": 0.0,
+     "median": -1.0,
+     "min": -1.0,
+     "n": 8
+    },
+    "rungs_producing": [
+     0,
+     1,
+     2
+    ]
+   },
+   "trigger_confirmed_all_seeds": true,
+   "verdict": {
+    "detail": "3 distinct eligible endpoints recovered (2 at rung 0)",
+    "failure_kind": null,
+    "historical_kernel": "region",
+    "routed_kernel": "region",
+    "routing_agrees_with_historical_arm": true,
+    "verdict": "PASS"
+   },
+   "wall_clock_stops": []
   }
  },
  "controls": {
@@ -811,28 +1317,27 @@
  },
  "controls_all_searched": true,
  "coverage": {
-  "addendum": "supersedes earlier coverage blocks written at 16 and 17 shards; the fan-out committed 18 before ending. No verdict changed at any point.",
   "control_events_landed": 10,
-  "control_events_planned": 10,
   "covered": {
-   "5ht1b_2": "COMPLETE - seeds 0, 1, 2, rung 0 only, all reached_target, trigger reproduced on all three",
-   "braf_0": "seeds 0 and 2, rung 0 only, both reached_target",
-   "braf_1": "seeds 0, 1, 2, rung 0 only, all reached_target"
+   "5ht1b_2": "seeds 0,1,2 COMPLETE",
+   "braf_0": "seeds 0,1,2 COMPLETE",
+   "braf_1": "seeds 0,1,2 COMPLETE",
+   "fa7_0": "SEED 1 ONLY. Seeds 0 and 2 were still in flight when this was written and may land in diagnostics/t4_support_restoration_gate/shards later; re-reduce if so.",
+   "fa7_2": "seeds 0,1,2 COMPLETE - all three ran the FULL ladder to ladder_exhausted"
   },
-  "ladder_rungs_1_to_3_exercised": false,
-  "missing": {
-   "braf_0": "seed 1 missing",
-   "fa7_0": "ALL THREE SEEDS MISSING. Rung 0 yields 0-1, so this is the cell that MUST escalate; its ladder behaviour under the unified controller is UNMEASURED.",
-   "fa7_2": "ALL THREE SEEDS MISSING. Rung 0 yields 1-3, below the stop target of 4, so it escalates; UNMEASURED."
-  },
-  "status": "PARTIAL",
-  "trigger_events_landed": 8,
+  "fa7_0_caveat": "the FAIL rests on ONE seed (index 1, a VARIANCE PROBE, not the production derivation), so P(any eligible) = 0/1 and not 0/3. Seeds 0 and 2 were in flight. Do not quote 0/3.",
+  "ladder_demonstrably_works": "escalation is NOT broken and this is measured, not assumed: braf_0 seed 1 produced eligible endpoints at rungs 1 AND 3, and fa7_2 produced at rungs 1 and 2, across all three of its seeds. So rungs 1, 2 and 3 have each yielded eligible endpoints on some cell. fa7_0's zero is therefore a CELL-SPECIFIC result, not a broken ladder.",
+  "ladder_rungs_1_to_3_exercised": true,
+  "status": "NEARLY COMPLETE",
+  "the_configuration_difference_this_points_at": "the historical fa7_0 ladder arm found 4 eligible in 2880 draws; the unified controller found 0 in 6720. The arms escalated lanes carrying region_law='free_gate_margin_v1' (measured in their own round-one worker telemetry), while the five held-target d06 contracts declare no region_law, so the unified controller escalates UNCONDITIONED lanes. More draws against an unconditioned distribution is exactly the thing the repo's own notes say does not fix a distribution that misses the transformation. INFERRED, not measured: no arm has been run with the law wired into the escalated lanes to confirm it recovers fa7_0.",
+  "trigger_events_landed": 13,
   "trigger_events_planned": 15,
-  "what_this_does_and_does_not_establish": "ESTABLISHED: on braf_0, braf_1 and 5ht1b_2 the automatically routed kernel recovers useful support at rung 0 alone, at margins and structural scale comparable to the historical arms, and that support survives the production selection path. 5ht1b_2 is complete at all three seeds. NOT ESTABLISHED: that the ladder's escalation rungs work, and that fa7_0 and fa7_2 clear their bar. No zero was observed on any landed cell, so no WIRING failure was seen -- but absence of a failure on cells that never escalated is not evidence about escalation.",
-  "why": "every landed trigger event reached stop_at_distinct_eligible=4 at RUNG 0 and never escalated. The two cells that would have escalated, fa7_0 and fa7_2, committed no shard."
+  "what_this_establishes": "4 of 5 trigger cells PASS. The automatically routed kernel recovers useful support on braf_0, braf_1, fa7_2 and 5ht1b_2, at margins and structural scale comparable to the historical arms, and that support survives the production selection path. fa7_0 FAILS, and the failure is WIRING not ROUTING: routing correctly selected `region`, matching its historical arm, and the routed kernel plus the full escalation ladder ran to the declared bound (6720 draws, ladder_exhausted, 5802 s) producing ZERO eligible endpoints."
  },
  "docking_calls": 0,
- "failure_kinds": {},
+ "failure_kinds": {
+  "fa7_0": "WIRING"
+ },
  "kernel": "rdkit 2024.03.5 (T4 production)",
  "ladder": {
   "draw_ladder": [
@@ -871,10 +1376,15 @@
   "5ht1b_2_seed1",
   "5ht1b_2_seed2",
   "braf_0_seed0",
+  "braf_0_seed1",
   "braf_0_seed2",
   "braf_1_seed0",
   "braf_1_seed1",
   "braf_1_seed2",
+  "fa7_0_seed1",
+  "fa7_2_seed0",
+  "fa7_2_seed1",
+  "fa7_2_seed2",
   "control_5ht1b_0",
   "control_5ht1b_1",
   "control_braf_2",
@@ -886,9 +1396,9 @@
   "control_parp1_1",
   "control_parp1_2"
  ],
- "trigger_cells_run": 3,
+ "trigger_cells_run": 5,
  "verdict_counts": {
-  "FAIL": 0,
-  "PASS": 3
+  "FAIL": 1,
+  "PASS": 4
  }
 }

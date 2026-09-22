@@ -1,0 +1,368 @@
+{
+ "cell": "fa7_2",
+ "contract": "configs/t4_held_target_distilled_fa7_d06_250.json",
+ "contract_payload_sha256": "cb34d1d1ecfec41d683dbfe18b082aeb4dc65b0f0dbf8baae9d7186d097cc5ef",
+ "controller_seed": 2002026091905,
+ "cumulative_by_rung": [
+  {
+   "cumulative_distinct": 1,
+   "draws_per_lane": 0,
+   "elapsed_seconds": 0.0,
+   "fresh_distinct": 1,
+   "returned": 1,
+   "rung": 0,
+   "stage": "zero_support_fallback"
+  },
+  {
+   "cumulative_distinct": 2,
+   "draws_per_lane": 960,
+   "elapsed_seconds": 1172.468,
+   "fresh_distinct": 1,
+   "returned": 1,
+   "rung": 1,
+   "stage": "draw_ladder"
+  },
+  {
+   "cumulative_distinct": 2,
+   "draws_per_lane": 1920,
+   "elapsed_seconds": 2583.929,
+   "fresh_distinct": 0,
+   "returned": 0,
+   "rung": 2,
+   "stage": "draw_ladder"
+  },
+  {
+   "cumulative_distinct": 2,
+   "draws_per_lane": 3840,
+   "elapsed_seconds": 4060.805,
+   "fresh_distinct": 0,
+   "returned": 1,
+   "rung": 3,
+   "stage": "draw_ladder"
+  }
+ ],
+ "delta_from_contract": 0.6,
+ "distinct_eligible": 2,
+ "docking_calls": 0,
+ "docking_interlock": {
+  "docking_binaries_present": [],
+  "docking_calls": 0,
+  "forbidden_modules_checked": [
+   "compose_v4.experiments.t4_docking_adapter",
+   "compose_v4.experiments.t4_partial_docking"
+  ],
+  "forbidden_modules_resident": [],
+  "oracle_calls": 0
+ },
+ "drug_like_eligible": 2,
+ "elapsed_seconds": 4875.51,
+ "endpoints": [
+  {
+   "added_bit_fraction": 0.08889,
+   "charge_delta": 0,
+   "deleted_atoms": 13,
+   "direction": "prune",
+   "has_strained_ring": false,
+   "heavy": 23,
+   "heavy_delta": -12,
+   "inserted_atoms": 1,
+   "margin_qed": 0.020277,
+   "margin_sa": 1.272163,
+   "margin_similarity": 0.040625,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.620277,
+   "region_size": 13,
+   "retained_source_bit_fraction": 0.68333,
+   "rewrite_families": [
+    "atom_delete"
+   ],
+   "ring_delta": -1,
+   "ring_sizes": [
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 2.727837,
+   "scaffold_preserved": false,
+   "similarity": 0.640625,
+   "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CN)c1=O",
+   "support_expansion_stage": "zero_support_fallback"
+  },
+  {
+   "added_bit_fraction": 0.11364,
+   "charge_delta": 0,
+   "deleted_atoms": null,
+   "direction": "prune",
+   "has_strained_ring": false,
+   "heavy": 28,
+   "heavy_delta": -7,
+   "inserted_atoms": null,
+   "margin_qed": 0.062526,
+   "margin_sa": 1.921386,
+   "margin_similarity": 0.0,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": "shallow",
+   "qed": 0.662526,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.65,
+   "rewrite_families": [
+    "retained_deletion"
+   ],
+   "ring_delta": 0,
+   "ring_sizes": [
+    6,
+    6,
+    6
+   ],
+   "rung": 1,
+   "sa": 2.078614,
+   "scaffold_preserved": true,
+   "similarity": 0.6,
+   "smiles": "CC(C)Nc1ccc(-c2ccccc2)n(CC(=O)NCc2ccccc2)c1=O",
+   "support_expansion_stage": null
+  }
+ ],
+ "execution": {
+  "app": "compose-t4-support-restoration-gate",
+  "mode": "modal_fanout"
+ },
+ "expansion": {
+  "attempt_log": [
+   {
+    "cumulative_distinct": 1,
+    "elapsed_seconds": 0.0,
+    "fresh_distinct": 1,
+    "returned": 1,
+    "stage": "zero_support_fallback"
+   },
+   {
+    "attempt": 0,
+    "cumulative_distinct": 2,
+    "draws_per_lane": 960,
+    "elapsed_seconds": 1172.468,
+    "fresh_distinct": 1,
+    "returned": 1,
+    "stage": "draw_ladder"
+   },
+   {
+    "attempt": 1,
+    "cumulative_distinct": 2,
+    "draws_per_lane": 1920,
+    "elapsed_seconds": 2583.929,
+    "fresh_distinct": 0,
+    "returned": 0,
+    "stage": "draw_ladder"
+   },
+   {
+    "attempt": 2,
+    "cumulative_distinct": 2,
+    "draws_per_lane": 3840,
+    "elapsed_seconds": 4060.805,
+    "fresh_distinct": 0,
+    "returned": 1,
+    "stage": "draw_ladder"
+   }
+  ],
+  "attempts": 3,
+  "distinct_eligible": 2,
+  "draws_spent": 6720,
+  "fallback_eligible": 1,
+  "fallback_ran": true,
+  "fallback_work": {
+   "attempts": 304,
+   "completions_executed": 304,
+   "distinct_eligible_endpoints": 1,
+   "distinct_valid_endpoints": 280,
+   "endpoints_gated": 304,
+   "regions_considered": 38,
+   "regions_excised": 38
+  },
+  "schema_version": "t4_support_expansion_v1",
+  "stop_reason": "ladder_exhausted"
+ },
+ "historical_reference": "UNAVAILABLE",
+ "ladder": {
+  "draw_ladder": [
+   960,
+   1920,
+   3840
+  ],
+  "lanes": [
+   "shallow",
+   "anchored_replacement"
+  ],
+  "max_extra_draws_per_event": 6720,
+  "policy": "t4_frozen_escalation_v1",
+  "policy_sha256": "c5cf6ab3e3a516b6aca3c9cc410c17d2f712bf60ccac224363ba57343c256a62",
+  "schema_version": "t4_support_expansion_v1",
+  "stop_at_distinct_eligible": 4,
+  "wall_seconds": 7200.0,
+  "zero_support_fallback": true
+ },
+ "ladder_fired_without_trigger": false,
+ "oracle_calls": 0,
+ "production_controller_seed": 2026091905,
+ "protein": "fa7",
+ "role": "trigger",
+ "round_one": {
+  "agrees_with_committed_audit": true,
+  "audit_delta_mislabelled": false,
+  "decision": {
+   "featured_candidates": 0,
+   "fresh": 0,
+   "merged_pool": 0,
+   "parents_round_one": [
+    "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O"
+   ],
+   "pool_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 0,
+    "shallow": 0,
+    "unique_endpoints": 0
+   },
+   "reproduces_candidate_exhaustion": true,
+   "selected": 0,
+   "selected_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 0,
+    "shallow": 0,
+    "unique_endpoints": 0
+   }
+  },
+  "expected_selected": 0,
+  "lanes": {
+   "anchored_replacement": {
+    "cell": "fa7_2",
+    "elapsed_seconds": 352.03,
+    "eligible_records_returned": 0,
+    "expert": "anchored_replacement",
+    "kind": "round_one_expert",
+    "proposal_seed": 2002027092009,
+    "seed_index": 2,
+    "telemetry": {
+     "raw_draws": 512
+    },
+    "unit_seconds": 352.03
+   },
+   "route_complete_region": {
+    "cell": "fa7_2",
+    "elapsed_seconds": 18.68,
+    "eligible_records_returned": 0,
+    "expert": "route_complete_region",
+    "kind": "round_one_expert",
+    "proposal_seed": 2002027092110,
+    "seed_index": 2,
+    "telemetry": {
+     "available_large_rewrite_proposals": 69,
+     "available_local_rewrite_proposals": 11,
+     "available_medium_rewrite_proposals": 84,
+     "binding_truncations": 8,
+     "binding_visits": 20986,
+     "candidate_shortfall": 0,
+     "complete_programs_committed": 41,
+     "composition_aliases": 688,
+     "composition_attempts": 2320,
+     "composition_rejections": 682,
+     "composition_repeated_constituent": 260,
+     "exact_realization_precision_denominator": 41,
+     "exact_realization_precision_numerator": 41,
+     "materialization_attempts": 44,
+     "materialization_rejections": 22,
+     "realization_limit": 64,
+     "realization_status_counts": {
+      "committed": 41,
+      "realizer_frontier_exhausted_abstention": 23
+     },
+     "realized_primitive_band_counts": {
+      "large": 0,
+      "medium": 17,
+      "small": 24
+     },
+     "scale_balanced": 0,
+     "selected_large_rewrite_proposals": 8,
+     "selected_local_rewrite_proposals": 11,
+     "selected_medium_rewrite_proposals": 45,
+     "single_aliases": 2,
+     "templates_with_bindings": 16,
+     "unique_ranked_endpoints": 64,
+     "valid_depth_2": 154,
+     "valid_depth_3": 311,
+     "valid_depth_4": 225,
+     "valid_unique_single_goals": 20
+    },
+    "unit_seconds": 18.71
+   },
+   "shallow": {
+    "cell": "fa7_2",
+    "elapsed_seconds": 756.14,
+    "eligible_records_returned": 0,
+    "expert": "shallow",
+    "kind": "round_one_expert",
+    "proposal_seed": 2002027091908,
+    "seed_index": 2,
+    "telemetry": {
+     "raw_draws": 480
+    },
+    "unit_seconds": 756.17
+   }
+  }
+ },
+ "routing": {
+  "agrees": true,
+  "applicability": {
+   "charge_refused_regions": 0,
+   "charged_centres": 0,
+   "executable_regions": 38,
+   "growth_headroom": 5,
+   "heavy_atoms": 35,
+   "large_regions": 25,
+   "net_formal_charge": 0,
+   "protonation_sites": 1,
+   "total_regions": 38
+  },
+  "historical_kernel": "region",
+  "routed_kernel": "region"
+ },
+ "rung_zero": {
+  "elapsed_seconds": 40.08,
+  "eligible_returned": 1,
+  "kernel": "region",
+  "work": {
+   "attempts": 304,
+   "completions_executed": 304,
+   "distinct_eligible_endpoints": 1,
+   "distinct_valid_endpoints": 280,
+   "endpoints_gated": 304,
+   "regions_considered": 38,
+   "regions_excised": 38
+  }
+ },
+ "rung_zero_fresh_distinct": 1,
+ "schema_version": "t4_support_restoration_gate_v1",
+ "seed_index": 2,
+ "seed_role": "variance_probe",
+ "slot_semantics_preflight": {
+  "endpoint_heavy_ceiling": 40,
+  "free_slots_in_production_source": 13,
+  "heavy_atoms": 35,
+  "padded_graph_slots": 48,
+  "passed": true,
+  "smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+  "tight_graph_slots": 35,
+  "tight_graph_would_forbid_atom_birth": true
+ },
+ "support": "compose_valid",
+ "verdict": {
+  "detail": "2 distinct eligible endpoints recovered (1 at rung 0)",
+  "failure_kind": null,
+  "historical_kernel": "region",
+  "routed_kernel": "region",
+  "routing_agrees_with_historical_arm": true,
+  "verdict": "PASS"
+ }
+}
