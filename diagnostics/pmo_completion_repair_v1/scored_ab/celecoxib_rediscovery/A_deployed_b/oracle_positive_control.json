@@ -1,0 +1,24 @@
+{
+ "oracle_called": true,
+ "panel": [
+  {
+   "abs_delta": 0.0,
+   "expected": 1.0,
+   "observed": 1.0,
+   "smiles": "CC1=CC=C(C=C1)C1=CC(=NN1C1=CC=C(C=C1)S(N)(=O)=O)C(F)(F)F"
+  },
+  {
+   "abs_delta": 0.0,
+   "expected": 0.07228915662650602,
+   "observed": 0.07228915662650602,
+   "smiles": "c1ccccc1"
+  },
+  {
+   "abs_delta": 0.0,
+   "expected": 0.11578947368421053,
+   "observed": 0.11578947368421053,
+   "smiles": "CC(=O)Oc1ccccc1C(=O)O"
+  }
+ ],
+ "task": "celecoxib_rediscovery"
+}

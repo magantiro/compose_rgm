@@ -23,9 +23,64 @@ def charged_sequence(folder: Path) -> list[dict]:
     rows = []
     for path in sorted((folder / "oracle").rglob("result.json")):
         payload = json.loads(path.read_text())
+        payload["index"] = int(payload["index"])
+        payload["score"] = float(payload["score"])
         rows.append(payload)
-    rows.sort(key=lambda row: row.get("ordinal", row.get("index", 0)))
+    rows.sort(key=lambda row: row["index"])
     return rows
+
+
+def endpoint_completions(folder: Path) -> dict[str, dict]:
+    """Map each proposed endpoint to the completion provenance of its program."""
+
+    out: dict[str, dict] = {}
+    for path in (folder / "campaign").rglob("*.json"):
+        try:
+            payload = json.loads(path.read_text())
+        except Exception:  # noqa: BLE001
+            continue
+        stack = [payload]
+        while stack:
+            node = stack.pop()
+            if isinstance(node, dict):
+                endpoint = node.get("endpoint")
+                if isinstance(endpoint, str) and "trace" not in node:
+                    found, sizes = [], []
+                    inner = [node]
+                    while inner:
+                        item = inner.pop()
+                        if isinstance(item, dict):
+                            if "completion" in item and "requested_size" in item:
+                                found.append(str(item["completion"]))
+                                sizes.append(int(item.get("requested_size") or 0))
+                            inner.extend(item.values())
+                        elif isinstance(item, list):
+                            inner.extend(item)
+                    if found:
+                        prior = out.setdefault(
+                            endpoint, {"completions": [], "max_requested_size": 0}
+                        )
+                        prior["completions"].extend(found)
+                        prior["max_requested_size"] = max(
+                            prior["max_requested_size"], max(sizes)
+                        )
+                stack.extend(node.values())
+            elif isinstance(node, list):
+                stack.extend(node)
+    return out
+
+
+def throughput(result: dict) -> dict:
+    rounds = result.get("round_progress") or []
+    if not rounds:
+        return {}
+    attempts = [r["proposal_attempts"] for r in rounds if r.get("proposal_attempts")]
+    pools = [r["pool_size"] for r in rounds if r.get("pool_size")]
+    return {
+        "rounds": len(rounds),
+        "mean_proposal_attempts": round(sum(attempts) / max(1, len(attempts)), 1),
+        "mean_pool_size": round(sum(pools) / max(1, len(pools)), 1),
+    }
 
 
 def top_ten_mean(values: list[float]) -> float:
@@ -85,7 +140,52 @@ def main() -> None:
                 if len(values) >= n
             },
             "completion_provenance": completion_provenance(folder),
+            "throughput": throughput(result),
             "n_scored_values": len(values),
+        }
+        joined = endpoint_completions(folder)
+        with_law, without_law = [], []
+        for row in charged_sequence(folder):
+            if row.get("role") == "initialization":
+                continue
+            target = with_law if row["endpoint"] in joined else without_law
+            target.append(row["score"])
+        buckets: dict[str, list[float]] = {}
+        for row in charged_sequence(folder):
+            if row.get("role") == "initialization":
+                continue
+            info = joined.get(row["endpoint"])
+            size = info["max_requested_size"] if info else 0
+            key = (
+                "none" if not info else
+                "1-4" if size <= 4 else
+                "5-8" if size <= 8 else
+                "9-16" if size <= 16 else "17+"
+            )
+            buckets.setdefault(key, []).append(row["score"])
+        arms[arm]["score_by_requested_size"] = {
+            key: {
+                "n": len(values),
+                "mean": round(sum(values) / len(values), 6),
+                "max": round(max(values), 6),
+            }
+            for key, values in sorted(buckets.items())
+        }
+        arms[arm]["score_by_completion_provenance"] = {
+            "with_a_repaired_completion": {
+                "n": len(with_law),
+                "mean": round(sum(with_law) / len(with_law), 6) if with_law else None,
+                "max": round(max(with_law), 6) if with_law else None,
+            },
+            "without": {
+                "n": len(without_law),
+                "mean": (
+                    round(sum(without_law) / len(without_law), 6)
+                    if without_law
+                    else None
+                ),
+                "max": round(max(without_law), 6) if without_law else None,
+            },
         }
 
     a, b = arms["A_deployed_b"], arms["B_completion"]
@@ -133,6 +233,10 @@ def main() -> None:
                         for n in CHECKPOINTS))
     print(f"\nB/A AUC ratio {report['relative_auc_b_over_a']}  "
           f"B leads at {leads}")
+    for name in ("A_deployed_b", "B_completion"):
+        print(f"  {name:14s} throughput={arms[name]['throughput']}  "
+              f"score_split={arms[name]['score_by_completion_provenance']}")
+        print(f"  {name:14s} by_size={arms[name]['score_by_requested_size']}")
     print("treatment provenance:", treatment)
     print("control provenance  :", a["completion_provenance"])
     print("\nVERDICT:", verdict)

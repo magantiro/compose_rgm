@@ -1,0 +1,186 @@
+{
+ "arms": {
+  "A_deployed_b": {
+   "arm_spec": {
+    "completion_law": null,
+    "enable_online_memory": true
+   },
+   "auc": 0.187785272719495,
+   "auc_at": {
+    "100": 0.107738,
+    "150": 0.146468,
+    "200": 0.16987,
+    "250": 0.187785
+   },
+   "auc_budget": 250,
+   "best": 0.2824427480916031,
+   "charged": 250,
+   "completion_provenance": {
+    "counts": {},
+    "max_requested_size": 0,
+    "requested_size_gt_8": 0
+   },
+   "n_scored_values": 250,
+   "score_by_completion_provenance": {
+    "with_a_repaired_completion": {
+     "max": null,
+     "mean": null,
+     "n": 0
+    },
+    "without": {
+     "max": 0.282443,
+     "mean": 0.135862,
+     "n": 234
+    }
+   },
+   "score_by_requested_size": {
+    "none": {
+     "max": 0.282443,
+     "mean": 0.135862,
+     "n": 234
+    }
+   },
+   "throughput": {
+    "mean_pool_size": 18.1,
+    "mean_proposal_attempts": 59.4,
+    "rounds": 15
+   },
+   "top10_at": {
+    "100": 0.215477,
+    "150": 0.23238,
+    "200": 0.248527,
+    "250": 0.270365
+   },
+   "wall_seconds": 614.8
+  },
+  "B_completion": {
+   "arm_spec": {
+    "completion_law": "scale_content_v1",
+    "enable_online_memory": true
+   },
+   "auc": 0.14564402846978028,
+   "auc_at": {
+    "100": 0.077671,
+    "150": 0.107866,
+    "200": 0.127215,
+    "250": 0.145644
+   },
+   "auc_budget": 250,
+   "best": 0.25,
+   "charged": 250,
+   "completion_provenance": {
+    "counts": {
+     "component": 538
+    },
+    "max_requested_size": 33,
+    "requested_size_gt_8": 168
+   },
+   "n_scored_values": 250,
+   "score_by_completion_provenance": {
+    "with_a_repaired_completion": {
+     "max": 0.181818,
+     "mean": 0.113324,
+     "n": 9
+    },
+    "without": {
+     "max": 0.25,
+     "mean": 0.12017,
+     "n": 225
+    }
+   },
+   "score_by_requested_size": {
+    "1-4": {
+     "max": 0.171429,
+     "mean": 0.10825,
+     "n": 5
+    },
+    "17+": {
+     "max": 0.144828,
+     "mean": 0.144828,
+     "n": 1
+    },
+    "5-8": {
+     "max": 0.181818,
+     "mean": 0.113345,
+     "n": 2
+    },
+    "9-16": {
+     "max": 0.107143,
+     "mean": 0.107143,
+     "n": 1
+    },
+    "none": {
+     "max": 0.25,
+     "mean": 0.12017,
+     "n": 225
+    }
+   },
+   "throughput": {
+    "mean_pool_size": 18.1,
+    "mean_proposal_attempts": 61.3,
+    "rounds": 15
+   },
+   "top10_at": {
+    "100": 0.155342,
+    "150": 0.181171,
+    "200": 0.198176,
+    "250": 0.240544
+   },
+   "wall_seconds": 749.2
+  }
+ },
+ "attribution": {
+  "the_honest_reading": "The scale/content completion repair does NOT improve scored PMO search on celecoxib_rediscovery at 250 calls, and by the predeclared rule it is rejected. But the measured footprint of the mechanism is far smaller than the measured effect, so the correct next question is not 'is large-scale structured completion bad chemistry' -- it is 'why does a repaired proposal reach only 3.8% of charged candidates', plus a multi-seed replication.",
+  "verdict_by_the_predeclared_rule": "REJECT",
+  "what_is_MEASURED": [
+   "arm B's AUC at 250 is 0.1456 against arm A's 0.1878, a ratio of 0.776",
+   "arm B trails on the top-ten mean at all four checkpoints (100/150/200/250)",
+   "the law was LIVE: 9 distinct charged endpoints in B trace to a repaired completion and 0 in A; the control is clean",
+   "throughput is NOT the explanation: mean pool size 18.1 in both arms, mean proposal attempts 59.4 (A) against 61.3 (B)"
+  ],
+  "what_is_NOT_established": [
+   "that the mechanism's CHEMISTRY caused the loss. It reached only 3.8% of charged candidates (9 of 234), so those nine molecules cannot account for a 22% AUC gap arithmetically.",
+   "The arms diverge in RNG stream from the first completion draw onward, so with ONE seed a gap of this size is not separable from trajectory variance."
+  ]
+ },
+ "caveats": [
+  "one task, one seed, 250 charged calls per arm",
+  "top_auc trapezoids from (0,0), so a 250-call AUC is structurally depressed ~20% at a constant level; never compare it to a 10k figure",
+  "run locally on the pinned PMO kernel, not in the deployed Modal image"
+ ],
+ "checkpoints_where_b_leads": [],
+ "decision_rule": "diagnostics/pmo_completion_repair_v1/decision_rule_v1.json",
+ "deduped_completion_footprint": {
+  "A_deployed_b": {
+   "archive_entries": 234,
+   "charged_non_initialization": 234,
+   "max_score_traced": null,
+   "max_score_untraced": 0.282443,
+   "mean_score_traced": null,
+   "mean_score_untraced": 0.135862,
+   "of_which_size_gt_8": 0,
+   "traced_share": 0.0,
+   "traced_to_a_repaired_completion": 0
+  },
+  "B_completion": {
+   "archive_entries": 234,
+   "charged_non_initialization": 234,
+   "max_score_traced": 0.181818,
+   "max_score_untraced": 0.25,
+   "mean_score_traced": 0.113324,
+   "mean_score_untraced": 0.12017,
+   "of_which_size_gt_8": 2,
+   "traced_share": 0.0385,
+   "traced_to_a_repaired_completion": 9
+  }
+ },
+ "footprint_note": "The raw completion_provenance count (538) is an OVER-COUNT: each round's complete.json carries the whole cumulative optimizer snapshot, so an entry is counted once per round it survives in. The deduped figure, taken from the FINAL snapshot's archive entries keyed by endpoint, is 9.",
+ "relative_auc_b_over_a": 0.7756,
+ "schema_version": "pmo_completion_scored_ab_report_v1",
+ "task": "celecoxib_rediscovery",
+ "validity_check": {
+  "control_is_clean": true,
+  "treatment_carries_the_law": true
+ },
+ "verdict": "REJECT"
+}
