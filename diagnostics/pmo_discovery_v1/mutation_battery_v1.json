@@ -1,8 +1,8 @@
 {
   "schema_version": "pmo_discovery_mutation_battery_v1",
   "suite": "tests/test_pmo_discovery.py",
-  "mutations": 36,
-  "killed": 36,
+  "mutations": 44,
+  "killed": 44,
   "positive_controls_green": true,
   "all_guards_load_bearing": true,
   "rows": [
@@ -478,6 +478,114 @@
     {
       "mutation": "POSITIVE_CONTROL_donor_cosmetic_comment",
       "file": "pmo_donor_transplant_feasibility.py",
+      "is_positive_control": true,
+      "expected_red": [],
+      "observed_red": [],
+      "status": "GREEN (correct)"
+    },
+    {
+      "mutation": "lane_stops_forwarding_the_law_to_the_draw",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_donor_law_is_consumed_by_the_production_propose_batch"
+      ],
+      "observed_red": [
+        "test_the_donor_law_is_consumed_by_the_production_propose_batch"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "propose_batch_never_calls_the_donor_lane",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_donor_law_is_consumed_by_the_production_propose_batch"
+      ],
+      "observed_red": [
+        "test_off_is_byte_identical_and_draws_no_extra_parents",
+        "test_the_donor_law_is_consumed_by_the_production_propose_batch"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "enabled_lane_does_not_join_the_live_channel_set",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_off_is_byte_identical_and_draws_no_extra_parents"
+      ],
+      "observed_red": [
+        "test_off_is_byte_identical_and_draws_no_extra_parents",
+        "test_the_donor_law_is_consumed_by_the_production_propose_batch"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "off_lane_leaks_into_the_channel_set",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_off_is_byte_identical_and_draws_no_extra_parents"
+      ],
+      "observed_red": [
+        "test_off_is_byte_identical_and_draws_no_extra_parents"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "conversion_admits_a_multi_bond_bridge",
+      "file": "pmo_donor_channel.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_conversion_recovers_root_and_refuses_a_multi_bond_bridge"
+      ],
+      "observed_red": [
+        "test_the_conversion_recovers_root_and_refuses_a_multi_bond_bridge"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "retentive_margin_goes_flat",
+      "file": "pmo_donor_channel.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_retentive_law_reranks_and_never_filters"
+      ],
+      "observed_red": [
+        "test_the_margin_reads_nothing_but_atom_counts",
+        "test_the_retentive_law_reranks_and_never_filters"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "probe_exception_becomes_catchable_by_the_lane",
+      "file": "pmo_donor_channel.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_probe_exception_survives_the_lane_s_own_handler"
+      ],
+      "observed_red": [
+        "test_the_donor_law_is_consumed_by_the_production_propose_batch",
+        "test_the_probe_exception_survives_the_lane_s_own_handler"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "donor_lane_shares_the_jump_rng_stream",
+      "file": "pmo_population_controller.py",
+      "is_positive_control": false,
+      "expected_red": [
+        "test_the_donor_lane_has_its_own_rng_stream"
+      ],
+      "observed_red": [
+        "test_the_donor_lane_has_its_own_rng_stream"
+      ],
+      "status": "KILLED"
+    },
+    {
+      "mutation": "POSITIVE_CONTROL_donor_channel_cosmetic",
+      "file": "pmo_donor_channel.py",
       "is_positive_control": true,
       "expected_red": [],
       "observed_red": [],

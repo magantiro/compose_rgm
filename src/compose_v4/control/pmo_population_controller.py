@@ -56,6 +56,11 @@ from compose_v4.control.pmo_discovery import (
     DiscoveryCredit,
     discovery_quota,
 )
+from compose_v4.control.pmo_donor_channel import (
+    DONOR_CHANNEL,
+    donor_region_law,
+    donor_transplant_draw,
+)
 from compose_v4.control.pmo_joint_dependency_jump import (
     CHECKPOINT_SCHEMA,
 )
@@ -74,7 +79,12 @@ from compose_v4.rewrite.trace_shard import decode_state
 
 SCHEMA = "pmo_population_controller_v1"
 JUMP_CHANNEL = "joint_dependency_region_jump"
+#: The three lanes an unflagged controller runs. The donor lane is NOT here: adding a
+#: channel draws `attempts_per_batch` extra parents in `propose_batch`, which consumes
+#: RNG, so membership in this tuple is the only byte-identical OFF.
 CHANNELS = (SHALLOW_CHANNEL, STRUCTURED_CHANNEL, JUMP_CHANNEL)
+#: How many of this run's best scored molecules are offered as donors.
+DONOR_POOL_SIZE = 24
 
 # Plateau excursion. `PLATEAU_ROUNDS` non-improving rounds arm a bounded
 # `ESCAPE_ROUNDS` excursion, and arming restarts the counter so the excursion drains
@@ -90,6 +100,7 @@ MODE_BY_CHANNEL = {
     SHALLOW_CHANNEL: "refine_elite",
     STRUCTURED_CHANNEL: "global_explore",
     JUMP_CHANNEL: "jump_from_elite",
+    DONOR_CHANNEL: "donor_recombination",
 }
 FINGERPRINT = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
 
@@ -110,10 +121,10 @@ def _blank_channel() -> dict[str, int | float]:
     }
 
 
-def initial_population_state() -> dict[str, Any]:
+def initial_population_state(channels: tuple[str, ...] = CHANNELS) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA,
-        "channels": {channel: _blank_channel() for channel in CHANNELS},
+        "channels": {channel: _blank_channel() for channel in channels},
         "best_score": None,
         "rounds_without_improvement": 0,
         "escape_rounds_remaining": 0,
@@ -237,6 +248,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         enable_online_memory: bool = False,
         enable_discovery: bool = False,
         discovery_fraction: float | None = None,
+        enable_donor_channel: bool = False,
         **kwargs,
     ):
         if jump_checkpoint.get("schema_version") != CHECKPOINT_SCHEMA:
@@ -269,6 +281,25 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         # is byte-identical to arm A: a cold or absent memory makes `region_law()`
         # return None, and an unlawed draw consumes `rng.permutation` while ANY law
         # object consumes `rng.random` -- so a 'uniform law' would not be a no-op.
+        # Arm D. OFF by default and byte-identical when off: `self.channels` is the
+        # module tuple itself, so `propose_batch` draws no extra parents and no donor
+        # RNG exists to consume. An 'off' that merely passed a uniform law would NOT
+        # be byte-identical -- `BridgeRegionLaw.order` consumes `rng.random` where an
+        # unlawed permutation does not.
+        self.enable_donor_channel = bool(enable_donor_channel)
+        self.channels = CHANNELS + (DONOR_CHANNEL,) if self.enable_donor_channel else CHANNELS
+        # Resolved through an ATTRIBUTE so the consumption gate can replace it and
+        # require the production path to reach it. A signature check cannot do this:
+        # in both recorded inert-mechanism cases the argument existed and was dropped
+        # one hop later.
+        self.donor_law = donor_region_law
+        self.donor_rng = (
+            np.random.default_rng(np.random.SeedSequence([self.config.seed, 311, 3]))
+            if self.enable_donor_channel
+            else None
+        )
+        if self.enable_donor_channel:
+            self.population_state = initial_population_state(self.channels)
         self.online_memory = OnlineProposalMemory() if enable_online_memory else None
         self.online_memory_attribution_failures = 0
         self.online_memory_reconstruction: dict[str, Any] | None = None
@@ -529,6 +560,165 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             )
         return attempts, candidates, perf_counter() - began
 
+    def _donor_pool(self, exclude: str | None) -> list[tuple[str, Any]]:
+        """Molecules THIS RUN has scored, best first, as executable states.
+
+        The information regime is the whole point of this method. Donors come from
+        `self.observations` -- COUNTED oracle outcomes of this run -- joined to the
+        archive entry that produced them, and the state is taken from that entry's own
+        trace, never re-parsed from SMILES. A SMILES round trip would return a TIGHT
+        graph, and this path requires exactly 48 slots.
+
+        No declared target, no prescreened bank and no cross-run history enters here.
+        """
+        scores: dict[str, float] = {}
+        for observation in self.observations.values():
+            endpoint, score = observation.get("endpoint"), observation.get("score")
+            if endpoint and score is not None:
+                scores[endpoint] = max(scores.get(endpoint, float("-inf")), float(score))
+        ranked = []
+        for entry_id, entry in sorted(self.entries.items()):
+            endpoint = entry.get("endpoint")
+            if endpoint is None or endpoint == exclude or endpoint not in scores:
+                continue
+            ranked.append((-scores[endpoint], entry_id, endpoint, entry))
+        ranked.sort()
+        pool = []
+        for _, _, endpoint, entry in ranked[:DONOR_POOL_SIZE]:
+            try:
+                pool.append((endpoint, decode_state(entry["trace"]["states"][-1])))
+            except (KeyError, ValueError, TypeError):
+                # A malformed archive entry is skipped, never guessed at.
+                continue
+        return pool
+
+    def _generate_donor_pool(self, eligibility, archive_seen, parent_schedule):
+        """Arm D: one pendant exchange per attempt, parent and donor cuts from the law."""
+        began, attempts, candidates = perf_counter(), [], []
+        seen = set(archive_seen)
+        lane_attempts = min(self.config.attempts_per_batch, CHANNEL_CANDIDATE_LIMIT * 4)
+        for attempt in range(lane_attempts):
+            if (
+                len(candidates) >= CHANNEL_CANDIDATE_LIMIT
+                or perf_counter() - began >= self.config.wall_seconds
+            ):
+                break
+            entry, parent = parent_schedule[attempt % len(parent_schedule)]
+            source = decode_state(entry["trace"]["states"][-1])
+            donors = self._donor_pool(entry.get("endpoint"))
+            try:
+                proposal, census = donor_transplant_draw(
+                    source, donors, self.donor_rng, law=self.donor_law
+                )
+                if proposal is None:
+                    raise ValueError(f"no transplant compiled on this parent ({census})")
+                stage = {
+                    "name": DONOR_CHANNEL,
+                    "actions": list(proposal.actions),
+                    "states": list(proposal.states),
+                    "endpoint": proposal.endpoint,
+                }
+                program, binding = extract_program(source, [stage])
+                # `max_primitives` is PathConfig.max_steps, the same bound that limited
+                # what the compiler could emit. Re-execution must not be able to refuse a
+                # route the compiler already validated and replayed.
+                _, trace = execute_program_graph(
+                    source,
+                    compile_program_graph(program),
+                    binding,
+                    max_primitives=64,
+                    max_blocks=16,
+                )
+                if trace["endpoint"] != proposal.endpoint:
+                    raise RuntimeError("donor transplant changed during program extraction")
+                size = program_size_profile(
+                    compile_program_graph(program), source.n_real_atoms
+                )
+                size["measured_parent_heavy_atoms"] = source.n_real_atoms
+                size["delta_from_measured_parent"] = (
+                    size["final_heavy_atoms"] - source.n_real_atoms
+                )
+            except (ValueError, RuntimeError) as error:
+                counts = self.population_state["channels"][DONOR_CHANNEL]
+                counts["proposals"] += 1
+                counts["execution_rejections"] += 1
+                attempts.append(
+                    {
+                        "attempt": attempt,
+                        **parent,
+                        "planner_channel": DONOR_CHANNEL,
+                        "mode": MODE_BY_CHANNEL[DONOR_CHANNEL],
+                        "status": "execution_rejected",
+                        "reason": str(error),
+                    }
+                )
+                continue
+            endpoint = trace["endpoint"]
+            properties = eligibility({"smiles": endpoint})
+            if type(properties.get("oracle_eligible")) is not bool:
+                raise ValueError("endpoint evaluator must return explicit eligibility")
+            status = (
+                "duplicate"
+                if endpoint in seen
+                else "eligible"
+                if properties["oracle_eligible"]
+                else "ineligible"
+            )
+            counts = self.population_state["channels"][DONOR_CHANNEL]
+            counts["proposals"] += 1
+            counts["exact_executions"] += 1
+            counts[
+                {
+                    "eligible": "eligible_novel",
+                    "duplicate": "duplicates",
+                    "ineligible": "ineligible",
+                }[status]
+            ] += 1
+            metadata = {
+                DONOR_CHANNEL: proposal.payload(),
+                **self._continuation_lineage(entry),
+            }
+            attempts.append(
+                {
+                    "attempt": attempt,
+                    **parent,
+                    "planner_channel": DONOR_CHANNEL,
+                    "mode": MODE_BY_CHANNEL[DONOR_CHANNEL],
+                    "planner_context": _context_key(source),
+                    "status": status,
+                    "endpoint": endpoint,
+                    "metadata": metadata,
+                    "program_size": size,
+                    "properties": properties,
+                    "actual_changes": trace["actual_changes"],
+                }
+            )
+            if status == "duplicate":
+                self.duplicate_counts[entry["entry_id"]] = (
+                    self.duplicate_counts.get(entry["entry_id"], 0) + 1
+                )
+            if status != "eligible":
+                continue
+            seen.add(endpoint)
+            candidates.append(
+                _candidate(
+                    optimizer=self,
+                    entry=entry,
+                    parent=parent,
+                    channel=DONOR_CHANNEL,
+                    attempt=attempt,
+                    source=source,
+                    program=program,
+                    binding=binding,
+                    trace=trace,
+                    metadata=metadata,
+                    size=size,
+                    properties=properties,
+                )
+            )
+            candidates[-1]["provenance"]["mode"] = MODE_BY_CHANNEL[DONOR_CHANNEL]
+        return attempts, candidates, perf_counter() - began
+
     def _augment(self, candidate: dict[str, Any]) -> dict[str, Any]:
         candidate = json.loads(json.dumps(candidate))
         channel = str(candidate["provenance"].get("planner_channel", SHALLOW_CHANNEL))
@@ -579,7 +769,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             return [], {"selected_ids": [], "mode": "empty_pool"}
         by_channel = {
             channel: [row for row in candidates if row["provenance"]["planner_channel"] == channel]
-            for channel in CHANNELS
+            for channel in self.channels
         }
         escape = self.population_state["escape_rounds_remaining"] > 0
         early = self.batches < 4
@@ -594,9 +784,13 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             if early
             else {SHALLOW_CHANNEL: 1, STRUCTURED_CHANNEL: 1, JUMP_CHANNEL: 0}
         )
+        # The donor lane holds NO reserved floor either. `PopulationCredit.allocate`
+        # already guarantees every live cell `eps / n` of the budget, so a new lane
+        # earns its share on measured evidence rather than by being named here.
+        quota = {channel: quota.get(channel, 0) for channel in self.channels}
         chosen: list[dict[str, Any]] = []
         allocation_roles: dict[str, str] = {}
-        for channel_index, channel in enumerate(CHANNELS):
+        for channel_index, channel in enumerate(self.channels):
             rows = by_channel[channel]
             order = _niche_order(
                 rows,
@@ -673,7 +867,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             "quota_by_channel": quota,
             "selected_by_channel": {
                 channel: sum(row["provenance"]["planner_channel"] == channel for row in chosen)
-                for channel in CHANNELS
+                for channel in self.channels
             },
             "selected_ids": [row["candidate_id"] for row in chosen],
             "selection_role_by_candidate": {
@@ -817,7 +1011,7 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         } | self.failed_endpoints
         schedules = {
             channel: [self._parent() for _ in range(self.config.attempts_per_batch)]
-            for channel in CHANNELS
+            for channel in self.channels
         }
         attempts, pools, seconds = [], {}, {}
         for channel in (SHALLOW_CHANNEL, STRUCTURED_CHANNEL):
@@ -846,8 +1040,14 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         )
         attempts.extend(jump_attempts)
         pools[JUMP_CHANNEL], seconds[JUMP_CHANNEL] = jump_rows, jump_seconds
+        if self.enable_donor_channel:
+            donor_attempts, donor_rows, donor_seconds = self._generate_donor_pool(
+                eligibility, archive_seen, schedules[DONOR_CHANNEL]
+            )
+            attempts.extend(donor_attempts)
+            pools[DONOR_CHANNEL], seconds[DONOR_CHANNEL] = donor_rows, donor_seconds
         merged, seen = [], set()
-        for channel in CHANNELS:
+        for channel in self.channels:
             for candidate in pools[channel]:
                 if candidate["endpoint"] in seen:
                     attempts.append(
@@ -1088,6 +1288,11 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         body["pmo_population"] = {
             "jump_checkpoint_id": self.jump_checkpoint_id,
             "jump_rng": self.jump_rng.bit_generator.state,
+            **(
+                {"donor_rng": self.donor_rng.bit_generator.state}
+                if self.donor_rng is not None
+                else {}
+            ),
             "shallow_rng": self.shallow_rng.bit_generator.state,
             "structured_rng": self.structured_rng.bit_generator.state,
             "population_state": self.population_state,
@@ -1146,6 +1351,9 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         ):
             raise ValueError("PMO population snapshot/checkpoint identity changed")
         result.jump_rng.bit_generator.state = state["jump_rng"]
+        # Absent for a snapshot taken with the lane off, which must still restore.
+        if result.donor_rng is not None and "donor_rng" in state:
+            result.donor_rng.bit_generator.state = state["donor_rng"]
         result.shallow_rng.bit_generator.state = state["shallow_rng"]
         result.structured_rng.bit_generator.state = state["structured_rng"]
         result.population_state = json.loads(json.dumps(state["population_state"]))

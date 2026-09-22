@@ -41,6 +41,8 @@ TRANSPORT = ROOT / "src/compose_v4/control/pmo_transport_correspondence.py"
 TRANSPORT_SUITE = "tests/test_pmo_transport_correspondence.py"
 DONOR = ROOT / "scripts/pmo_donor_transplant_feasibility.py"
 DONOR_SUITE = "tests/test_pmo_donor_transplant_feasibility.py"
+DONOR_CHANNEL_MODULE = ROOT / "src/compose_v4/control/pmo_donor_channel.py"
+WIRING_SUITE = "tests/test_pmo_donor_channel_wiring.py"
 
 
 @dataclass(frozen=True)
@@ -423,6 +425,81 @@ MUTATIONS = (
         new='LEDGER_PATH = ("celecoxib_distance", "all_rows")  # cosmetic: behaviour unchanged',
         expect_red=(),
         suite=DONOR_SUITE,
+    ),
+    # ---- Donor CHANNEL wiring: the mechanism must stay reachable ----
+    Mutation(
+        name="lane_stops_forwarding_the_law_to_the_draw",
+        path=CONTROLLER,
+        old="                    source, donors, self.donor_rng, law=self.donor_law",
+        new="                    source, donors, self.donor_rng, law=None",
+        expect_red=("test_the_donor_law_is_consumed_by_the_production_propose_batch",),
+        suite=WIRING_SUITE,
+    ),
+    Mutation(
+        name="propose_batch_never_calls_the_donor_lane",
+        path=CONTROLLER,
+        old="        if self.enable_donor_channel:\n"
+            "            donor_attempts, donor_rows, donor_seconds = self._generate_donor_pool(",
+        new="        if False:\n"
+            "            donor_attempts, donor_rows, donor_seconds = self._generate_donor_pool(",
+        expect_red=("test_the_donor_law_is_consumed_by_the_production_propose_batch",),
+        suite=WIRING_SUITE,
+    ),
+    Mutation(
+        name="enabled_lane_does_not_join_the_live_channel_set",
+        path=CONTROLLER,
+        old="        self.channels = CHANNELS + (DONOR_CHANNEL,) if self.enable_donor_channel else CHANNELS",
+        new="        self.channels = CHANNELS",
+        expect_red=("test_off_is_byte_identical_and_draws_no_extra_parents",),
+        suite=WIRING_SUITE,
+    ),
+    Mutation(
+        name="off_lane_leaks_into_the_channel_set",
+        path=CONTROLLER,
+        old="        self.channels = CHANNELS + (DONOR_CHANNEL,) if self.enable_donor_channel else CHANNELS",
+        new="        self.channels = CHANNELS + (DONOR_CHANNEL,)",
+        expect_red=("test_off_is_byte_identical_and_draws_no_extra_parents",),
+        suite=WIRING_SUITE,
+    ),
+    Mutation(
+        name="conversion_admits_a_multi_bond_bridge",
+        path=DONOR_CHANNEL_MODULE,
+        old="    if region.bond_order != 1:\n        return None",
+        new="    if region.bond_order < 1:\n        return None",
+        expect_red=("test_the_conversion_recovers_root_and_refuses_a_multi_bond_bridge",),
+        suite=WIRING_SUITE,
+    ),
+    Mutation(
+        name="retentive_margin_goes_flat",
+        path=DONOR_CHANNEL_MODULE,
+        old="        return (kept / total) - 1.0",
+        new="        return 0.0",
+        expect_red=("test_the_retentive_law_reranks_and_never_filters",),
+        suite=WIRING_SUITE,
+    ),
+    Mutation(
+        name="probe_exception_becomes_catchable_by_the_lane",
+        path=DONOR_CHANNEL_MODULE,
+        old="class DonorLawProbe(BaseException):",
+        new="class DonorLawProbe(RuntimeError):",
+        expect_red=("test_the_probe_exception_survives_the_lane_s_own_handler",),
+        suite=WIRING_SUITE,
+    ),
+    Mutation(
+        name="donor_lane_shares_the_jump_rng_stream",
+        path=CONTROLLER,
+        old="            np.random.default_rng(np.random.SeedSequence([self.config.seed, 311, 3]))",
+        new="            np.random.default_rng(np.random.SeedSequence([self.config.seed, 311, 2]))",
+        expect_red=("test_the_donor_lane_has_its_own_rng_stream",),
+        suite=WIRING_SUITE,
+    ),
+    Mutation(
+        name="POSITIVE_CONTROL_donor_channel_cosmetic",
+        path=DONOR_CHANNEL_MODULE,
+        old='DONOR_CHANNEL = "donor_transplant"',
+        new='DONOR_CHANNEL = "donor_transplant"  # cosmetic: behaviour unchanged',
+        expect_red=(),
+        suite=WIRING_SUITE,
     ),
     # ---- Positive control: bytes change, behaviour does not ----
     Mutation(
