@@ -29,14 +29,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from compose_v4.control.docking_value import identity  # noqa: E402
-from compose_v4.experiments.continuation_profile import sha256_file  # noqa: E402
-from compose_v4.experiments.t4_canonical_controller import (  # noqa: E402
+from compose_v4.control.docking_value import identity
+from compose_v4.experiments.continuation_profile import sha256_file
+from compose_v4.experiments.t4_canonical_controller import (
     ARMS,
     assert_no_target_name_routing,
     controller_identity,
 )
-from compose_v4.experiments.t4_matched_pilot import seal, unseal  # noqa: E402
+from compose_v4.experiments.t4_matched_pilot import seal, unseal
 
 APP_NAME = "compose-t4-canonical-shared-controller"
 CONTRACTS = {arm: f"configs/t4_canonical_shared_controller_{arm.lower()}_v1.json" for arm in ARMS}
@@ -71,7 +71,7 @@ def verify(*, require_authorized: bool) -> dict:
     paths = sorted(pinned | set(CONTRACTS.values()))
     dirty = subprocess.run(
         ["git", "diff", "--name-only", "HEAD", "--", *paths], cwd=ROOT, text=True,
-        capture_output=True,
+        capture_output=True, check=False,
     ).stdout.strip()
     if dirty:
         findings.append(f"pinned runtime inputs are dirty: {dirty.splitlines()}")
@@ -173,7 +173,7 @@ def _completed(run_id: str) -> set[tuple[str, str]]:
             break
         except FileNotFoundError:
             return set()
-        except Exception as error:  # noqa: BLE001 - rate limit or transient
+        except Exception as error:
             if attempt == 5:
                 raise SystemExit(f"could not list the run volume: {error!r}") from error
             time.sleep(15 * (attempt + 1))
@@ -206,7 +206,8 @@ def _live(run_id: str) -> set[tuple[str, str]]:
     for path in sorted(RECEIPTS.glob("*.json")) if RECEIPTS.exists() else []:
         try:
             payload = unseal(path)
-        except Exception:  # noqa: BLE001 - a malformed receipt must not block a resume
+        except Exception as error:  # noqa: BLE001
+            print(f"skipping unreadable receipt {path.name}: {error!r}")
             continue
         if payload.get("run_id") != run_id:
             continue
@@ -223,7 +224,8 @@ def _live(run_id: str) -> set[tuple[str, str]]:
     for path in sorted(RECEIPTS.glob("*_cancel_*.json")) if RECEIPTS.exists() else []:
         try:
             payload = unseal(path)
-        except Exception:  # noqa: BLE001
+        except Exception as error:  # noqa: BLE001
+            print(f"skipping unreadable cancellation receipt {path.name}: {error!r}")
             continue
         if payload.get("run_id") != run_id:
             continue
@@ -238,7 +240,7 @@ def _live(run_id: str) -> set[tuple[str, str]]:
             modal.FunctionCall.from_id(call_id).get(timeout=0)
         except TimeoutError:
             live.add(key)
-        except Exception:  # noqa: BLE001 - terminated one way or another; re-spawnable
+        except Exception:  # noqa: BLE001, S112 - terminated somehow; re-spawnable
             continue
     return live
 

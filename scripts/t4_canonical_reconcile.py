@@ -143,7 +143,8 @@ def reconcile_cell(folder: Path) -> dict:
                 family_counts[str(family)] = family_counts.get(str(family), 0) + 1
                 if str(family) in RING_FAMILIES:
                     ring_touching += 1
-            for lane in row.get("proposal_experts") or ([row.get("proposal_lane")] or []):
+            lanes = row.get("proposal_experts") or [row.get("proposal_lane")]
+            for lane in lanes:
                 if lane:
                     lane_counts[str(lane)] = lane_counts.get(str(lane), 0) + 1
             depths.append(len(row.get("program_families") or []))

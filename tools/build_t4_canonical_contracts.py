@@ -31,9 +31,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from compose_v4.control.docking_value import identity  # noqa: E402
-from compose_v4.experiments.continuation_profile import sha256_file  # noqa: E402
-from compose_v4.experiments.t4_canonical_controller import (  # noqa: E402
+from compose_v4.control.docking_value import identity
+from compose_v4.experiments.continuation_profile import sha256_file
+from compose_v4.experiments.t4_canonical_controller import (
     ADAPTIVE_SUPPORT_EXPANSION,
     ARMS,
     EXPANSION_TRIGGER_MIN_ELIGIBLE,
@@ -44,7 +44,7 @@ from compose_v4.experiments.t4_canonical_controller import (  # noqa: E402
     controller_identity,
     load_seeds,
 )
-from compose_v4.experiments.t4_matched_pilot import seal  # noqa: E402
+from compose_v4.experiments.t4_matched_pilot import seal
 
 SEEDS = "docs/GENMOL_T4_SEEDS.json"
 APP = "modal_apps/t4_canonical_shared_controller_app.py"
