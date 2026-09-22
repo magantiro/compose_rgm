@@ -4305,3 +4305,74 @@ independently of whether fa7_0 ever closes.**
   as the authorized total minus every call the dead launches charged, and a test asserts that
   invariant rather than a literal someone must remember to edit after each failure. Lifetime stayed
   at exactly 248 across four launches (3 charged + ceiling 245).
+
+## 2026-09-22 (the canonical T4 panel: the Modal ceiling is CPUs, and a predecessor's authorization pin must not be re-sealed)
+
+- **MEASURED, and it decides the architecture of any T4 fan-out: the `rahul-94866` ceiling is
+  ~100 CONCURRENT CPUs, not ~100 containers.** Two probes, chemistry-free and volume-free, minutes
+  apart: 300 tasks x 25 busy-seconds at `cpu=1` gave implied parallelism **72.8** over **100
+  distinct containers**; the same probe at `cpu=4` gave **26.7 containers = ~107 CPUs**. So wide
+  containers buy NOTHING here, and the 2026-09-20 note ("40 containers") was a floor set by that
+  probe having only 40 tasks. Corollary that is easy to get wrong: **a `run_cell` container idles
+  while its `.map()` children run but still RESERVES its CPU**, so the three `max_containers`
+  limits must SUM to the ceiling (20 cells in flight + 56 proposal + 24 dock = 100). Setting each
+  generously on its own starves the workers the cells are waiting on.
+- **The predecessor T4 arm's draw counts were sized for ONE cell and are unusable for a panel.**
+  Zero-oracle preflight, 150 lanes over all 30 cells through the production proposal worker
+  (`diagnostics/t4_canonical_shared_controller_v1/preflight_v1.json`, 3,569 s, 150/150 ok):
+      lane                   s/draw (median)   eligible @480 draws (median)   empty lanes
+      shallow                      1.800                42                     3 / 60
+      anchored_replacement         0.657                 0                    27 / 45
+      structured                   2.071                21                     8 / 45
+  At 480/512/480 one parent-round costs ~2,190 core-seconds; over 60 cells x ~21 rounds x 4 parents
+  that is several THOUSAND core-hours against a 100-CPU ceiling -- days of wall clock for one
+  table. Equal-draw 96 per lane costs ~434 core-seconds per parent-round and still returns tens of
+  eligible endpoints per round on a healthy cell.
+- **`anchored_replacement` returns ZERO eligible endpoints from 27 of 45 cell roots** -- every
+  braf, fa7 and 5ht1b cell -- and is productive only on jak2/parp1. It was RETAINED anyway, and the
+  reason is the general rule: **the preflight measures each cell's ROOT, not the parents a campaign
+  actually visits**, so dropping a declared program family on a root-state probe would be selecting
+  the vocabulary on evidence that does not cover the states it runs in. Report what a lane
+  contributes (frontier attribution); do not assume it from one state.
+- **Only ONE of the 15 delta=0.6 cells now has zero eligible endpoints at its root** (5ht1b_2),
+  against FIVE that hit `candidate_exhaustion` on the old panel (braf_0, braf_1, fa7_0, fa7_2,
+  5ht1b_2). braf_0 now yields 14, braf_1 32, fa7_2 9, fa7_0 1. The difference is the merged
+  completion law plus the `structured` lane. INFERRED, not yet a scored result -- root yield is not
+  campaign outcome -- but it says the "exhausted cells" framing was a property of the proposal law,
+  not of those cells.
+- **An expansion ladder must be expressed RELATIVE to the base draw count, or it silently becomes a
+  fan-out bomb.** `_escalate` realises a step of `d` draws as `ceil(d / base)` parallel replicates
+  per lane per parent. The predecessor's `[960, 1920, 3840]` against ITS base of 480 is 2/4/8
+  replicates; carried onto a base of 96 it becomes **10/20/40 replicates = 80/160/320 workers for
+  ONE expansion event on ONE round of ONE cell**. Re-derive the ladder whenever the base moves.
+- **Do NOT re-seal a predecessor arm's authorization contract to match a successor's edit.** Adding
+  two entries to `SUPPORTED_EXPERT_VOCABULARIES` moved `t4_integrated_route_fiber.py`, which the
+  authorized fa7_0 support-expansion contract pins, and its "every pin matches the tree" test went
+  red. Re-sealing would manufacture a NEW authorization identity for an arm nobody is launching
+  (distinct from the 2026-08-02 re-pin sweep, where the contracts were non-authorizing bindings).
+  The honest invariant, and a STRONGER test: **every pin must ADDRESS REAL BYTES** -- in the working
+  tree, or in the blob at the commit that last sealed the contract. A pin matching neither is the
+  unresolvable case that reads as verified and is not. The superseded files are printed, so the
+  supersession is visible rather than silent.
+- **The route-distilled `route_complete_region` expert cannot appear in a whole-panel T4
+  controller.** Every checkpoint of it in this repo is `split_audit.split == "leave_one_target_out"`
+  over the 77 locked T4 routes. One checkpoint across the panel trains on the benchmark's own
+  answers for four targets of five; a different checkpoint per target IS target-name routing; and
+  there is no leave-ALL-out checkpoint because removing five targets removes the corpus. The
+  coordinated role goes to `structured` (`synthesize_progressive_program`), which reads only the
+  parent state -- and the preflight shows it is genuinely productive (median 21 eligible).
+- **"No target-name routing" is checkable, and the check needs an irrelevant-perturbation control.**
+  `assert_no_target_name_routing` parses every runtime module and fails if a target token reaches
+  the test of an `if`, `while`, `IfExp`, `assert`, `Compare`, `BoolOp` or comprehension guard, while
+  PERMITTING target names as data (a receptor table, an f-string cell label, a comment recording a
+  measurement). Without the permitting control, "everything refused" would be indistinguishable
+  from a scanner that refuses everything -- the same shape as the 2026-09-21 mutation battery that
+  refused 20 of 20 for the wrong reason.
+- **`sys.settrace` is unusable for deriving this path's closure.** One shallow draw on a
+  32-heavy-atom parent explodes into thousands of variant instantiations and RDKit gate calls; two
+  attempts ran over ten minutes each with no output. The closure was taken from `sys.modules` after
+  a real untraced run instead -- still execution-derived, and erring toward OVER-pinning, which is
+  the safe direction. But the full closure is ~100 modules, most of them training-side code the
+  proposal path imports and never executes, and pinning all of them would let any unrelated edit
+  invalidate a run hours into its budget that cannot resume under a different contract. Pin the
+  CONTROL PATH and say so.
