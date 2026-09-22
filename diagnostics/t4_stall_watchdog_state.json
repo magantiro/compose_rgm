@@ -5,16 +5,16 @@
       "cell": "5ht1b_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 11,
-      "newest_lock": "round_010_lock.json"
+      "lock_count": 19,
+      "newest_lock": "round_018_lock.json"
     },
     "5ht1b_d04/8cb564a63b09/5ht1b_1": {
       "arm": "5ht1b_d04",
       "cell": "5ht1b_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 7,
-      "newest_lock": "round_006_lock.json"
+      "lock_count": 22,
+      "newest_lock": "round_021_lock.json"
     },
     "5ht1b_d04/8cb564a63b09/5ht1b_2": {
       "arm": "5ht1b_d04",
@@ -24,21 +24,29 @@
       "lock_count": 1,
       "newest_lock": "round_000_lock.json"
     },
+    "5ht1b_d04_protonation/116a14cf0c6f/5ht1b_2": {
+      "arm": "5ht1b_d04_protonation",
+      "cell": "5ht1b_2",
+      "has_checkpoint": true,
+      "has_result": true,
+      "lock_count": 32,
+      "newest_lock": "round_031_lock.json"
+    },
     "5ht1b_d06/5f08e547828d/5ht1b_0": {
       "arm": "5ht1b_d06",
       "cell": "5ht1b_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 18,
-      "newest_lock": "round_017_lock.json"
+      "lock_count": 29,
+      "newest_lock": "round_028_lock.json"
     },
     "5ht1b_d06/5f08e547828d/5ht1b_1": {
       "arm": "5ht1b_d06",
       "cell": "5ht1b_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 34,
-      "newest_lock": "round_033_lock.json"
+      "lock_count": 35,
+      "newest_lock": "round_034_lock.json"
     },
     "5ht1b_d06/5f08e547828d/5ht1b_2": {
       "arm": "5ht1b_d06",
@@ -72,6 +80,14 @@
       "lock_count": 1,
       "newest_lock": "round_000_lock.json"
     },
+    "5ht1b_d06_protonation/87e66f4f463f/5ht1b_2": {
+      "arm": "5ht1b_d06_protonation",
+      "cell": "5ht1b_2",
+      "has_checkpoint": true,
+      "has_result": true,
+      "lock_count": 21,
+      "newest_lock": "round_020_lock.json"
+    },
     "braf_d04/ce0ef61b78fa/braf_0": {
       "arm": "braf_d04",
       "cell": "braf_0",
@@ -85,8 +101,8 @@
       "cell": "braf_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 13,
-      "newest_lock": "round_012_lock.json"
+      "lock_count": 16,
+      "newest_lock": "round_015_lock.json"
     },
     "braf_d04/ce0ef61b78fa/braf_2": {
       "arm": "braf_d04",
@@ -149,32 +165,32 @@
       "cell": "braf_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 4,
-      "newest_lock": "round_003_lock.json"
+      "lock_count": 6,
+      "newest_lock": "round_005_lock.json"
     },
     "braf_d06_region_repair/028ca867173f/braf_1": {
       "arm": "braf_d06_region_repair",
       "cell": "braf_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 4,
-      "newest_lock": "round_003_lock.json"
+      "lock_count": 13,
+      "newest_lock": "round_012_lock.json"
     },
     "fa7_d04/b710c7c68a35/fa7_0": {
       "arm": "fa7_d04",
       "cell": "fa7_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 12,
-      "newest_lock": "round_011_lock.json"
+      "lock_count": 13,
+      "newest_lock": "round_012_lock.json"
     },
     "fa7_d04/b710c7c68a35/fa7_1": {
       "arm": "fa7_d04",
       "cell": "fa7_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 14,
-      "newest_lock": "round_013_lock.json"
+      "lock_count": 29,
+      "newest_lock": "round_028_lock.json"
     },
     "fa7_d04/b710c7c68a35/fa7_2": {
       "arm": "fa7_d04",
@@ -189,8 +205,8 @@
       "cell": "fa7_2",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 3,
-      "newest_lock": "round_002_lock.json"
+      "lock_count": 15,
+      "newest_lock": "round_014_lock.json"
     },
     "fa7_d06/71d3b6d96ecd/fa7_0": {
       "arm": "fa7_d06",
@@ -229,8 +245,8 @@
       "cell": "fa7_1",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 29,
-      "newest_lock": "round_028_lock.json"
+      "lock_count": 42,
+      "newest_lock": "round_041_lock.json"
     },
     "fa7_d06/d907ab0b7a82/fa7_2": {
       "arm": "fa7_d06",
@@ -253,8 +269,8 @@
       "cell": "fa7_2",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 3,
-      "newest_lock": "round_002_lock.json"
+      "lock_count": 9,
+      "newest_lock": "round_008_lock.json"
     },
     "jak2_named_d06/3d89d15013d5/jak2_0": {
       "arm": "jak2_named_d06",
@@ -285,8 +301,8 @@
       "cell": "jak2_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 26,
-      "newest_lock": "round_025_lock.json"
+      "lock_count": 30,
+      "newest_lock": "round_029_lock.json"
     },
     "jak2_named_d06/74e0021606af/jak2_1": {
       "arm": "jak2_named_d06",
@@ -309,8 +325,8 @@
       "cell": "jak2_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 13,
-      "newest_lock": "round_012_lock.json"
+      "lock_count": 14,
+      "newest_lock": "round_013_lock.json"
     },
     "jak2_true_d06/161b94ce44a1/jak2_1": {
       "arm": "jak2_true_d06",
@@ -325,8 +341,8 @@
       "cell": "jak2_2",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 15,
-      "newest_lock": "round_014_lock.json"
+      "lock_count": 16,
+      "newest_lock": "round_015_lock.json"
     },
     "parp1_d04/180ae8a46186/parp1_0": {
       "arm": "parp1_d04",
@@ -349,16 +365,16 @@
       "cell": "parp1_2",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 14,
-      "newest_lock": "round_013_lock.json"
+      "lock_count": 18,
+      "newest_lock": "round_017_lock.json"
     },
     "parp1_d06/99d2a7c155c0/parp1_0": {
       "arm": "parp1_d06",
       "cell": "parp1_0",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 25,
-      "newest_lock": "round_024_lock.json"
+      "lock_count": 33,
+      "newest_lock": "round_032_lock.json"
     },
     "parp1_d06/99d2a7c155c0/parp1_1": {
       "arm": "parp1_d06",
@@ -373,8 +389,8 @@
       "cell": "parp1_2",
       "has_checkpoint": true,
       "has_result": false,
-      "lock_count": 24,
-      "newest_lock": "round_023_lock.json"
+      "lock_count": 33,
+      "newest_lock": "round_032_lock.json"
     },
     "parp1_d06/fa246d80862d/parp1_0": {
       "arm": "parp1_d06",
@@ -401,5 +417,5 @@
       "newest_lock": "round_001_lock.json"
     }
   },
-  "taken_at_utc": "2026-09-21T04:59:10.772145+00:00"
+  "taken_at_utc": "2026-09-22T03:59:22.993004+00:00"
 }

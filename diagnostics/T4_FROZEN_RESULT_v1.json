@@ -1,0 +1,331 @@
+{
+ "payload": {
+  "authority": "Per-cell values reconstructed from round locks, except 5ht1b seed 3 at delta 0.4 (see correction_applied). Rescue cells are a NAMED separate phase.",
+  "blank_cells": [
+   {
+    "cell": "FA7 seed 1, delta 0.6",
+    "ivg_value": -7.7,
+    "open_option": "Dock the one credible eligible endpoint (COC(=O)N(CCC(C)C)Cc1ccc2ccc(C(=N)N)cc2c1, sim 0.6610 / QED 0.6264 / SA 2.331, retains the amidine pharmacophore) and mark it a single-witness rescue.",
+    "record": "diagnostics/t4_fa7_0_scoped_negative.md (commit 01baa8a6)",
+    "status": "SCOPED NEGATIVE, deliberate",
+    "why": "Reachable but not reached. All five stored witnesses pass the production Fiber.check and a production configuration generated one eligible endpoint, but only ONE across 3 seeds x 480 draws at a single seed -- not reproducible seed-to-seed, so docking calls were declined. The barrier is architectural: expand does not gate the molecule a proposal law conditions (recovered_fraction = 0.0000 over 150 draws)."
+   }
+  ],
+  "budget": "COMPOSE 250 charged docking calls per cell vs InVirtuoGen 1000",
+  "comparator": "InVirtuoGen (IVG), no-prescreen",
+  "correction_applied": {
+   "cell": "5HT1B seed 3, delta 0.4",
+   "locks_lower_bound": -12.3,
+   "now": -12.5,
+   "smiles": "Nc1nncn1C1=CC2C(CCCN3CCN(C(=O)Oc4ccc5c(c4)CCC5)CC3)=CN=C2C=C1",
+   "verified": {
+    "heavy_atoms": 36,
+    "note": "similarity sits EXACTLY on the 0.4 bound; it is eligible only because the shipped comparator is non-strict",
+    "qed": 0.6736,
+    "sa": 3.9776,
+    "similarity": 0.4
+   },
+   "was": -12.3,
+   "why": "Round locks record a molecule only once it becomes a PARENT, so the winner scored in the final round never appears in a lock. The completed run archive (249 scored molecules, status complete_budget) holds -12.5 as its best, and that molecule was independently re-scored under the pinned T4 kernel and passes every gate."
+  },
+  "created_at_utc": "2026-09-22T03:59:40.736075+00:00",
+  "deltas": {
+   "0.4": {
+    "compose_sum": -169.4,
+    "compose_wins": 10,
+    "coverage": "15/15",
+    "ivg_sum": -160.4,
+    "mean_gap": -0.6,
+    "paired_cells": 15,
+    "rows": [
+     {
+      "charged_calls": 73,
+      "compose": -11.9,
+      "gap": 2.2,
+      "ivg": -14.1,
+      "seed": 1,
+      "source": "panel",
+      "target": "PARP1"
+     },
+     {
+      "charged_calls": 81,
+      "compose": -12.3,
+      "gap": 1.1,
+      "ivg": -13.4,
+      "seed": 2,
+      "source": "panel",
+      "target": "PARP1"
+     },
+     {
+      "charged_calls": 129,
+      "compose": -14.1,
+      "gap": -5.1,
+      "ivg": -9.0,
+      "seed": 3,
+      "source": "panel",
+      "target": "PARP1"
+     },
+     {
+      "charged_calls": 89,
+      "compose": -9.3,
+      "gap": -0.9,
+      "ivg": -8.4,
+      "seed": 1,
+      "source": "panel",
+      "target": "FA7"
+     },
+     {
+      "charged_calls": 217,
+      "compose": -9.4,
+      "gap": -0.5,
+      "ivg": -8.9,
+      "seed": 2,
+      "source": "panel",
+      "target": "FA7"
+     },
+     {
+      "charged_calls": 105,
+      "compose": -9.6,
+      "gap": -1.6,
+      "ivg": -8.0,
+      "seed": 3,
+      "source": "RESCUE",
+      "target": "FA7"
+     },
+     {
+      "charged_calls": 130,
+      "compose": -12.4,
+      "gap": 0.9,
+      "ivg": -13.3,
+      "seed": 1,
+      "source": "panel",
+      "target": "5HT1B"
+     },
+     {
+      "charged_calls": 161,
+      "compose": -11.9,
+      "gap": 0.1,
+      "ivg": -12.0,
+      "seed": 2,
+      "source": "panel",
+      "target": "5HT1B"
+     },
+     {
+      "charged_calls": 249,
+      "compose": -12.5,
+      "gap": -1.6,
+      "ivg": -10.9,
+      "seed": 3,
+      "source": "RESCUE",
+      "target": "5HT1B"
+     },
+     {
+      "charged_calls": 77,
+      "compose": -12.2,
+      "gap": -2.1,
+      "ivg": -10.1,
+      "seed": 1,
+      "source": "panel",
+      "target": "BRAF"
+     },
+     {
+      "charged_calls": 113,
+      "compose": -10.5,
+      "gap": 0.3,
+      "ivg": -10.8,
+      "seed": 2,
+      "source": "panel",
+      "target": "BRAF"
+     },
+     {
+      "charged_calls": 73,
+      "compose": -10.9,
+      "gap": -0.3,
+      "ivg": -10.6,
+      "seed": 3,
+      "source": "panel",
+      "target": "BRAF"
+     },
+     {
+      "charged_calls": 225,
+      "compose": -10.4,
+      "gap": -0.2,
+      "ivg": -10.2,
+      "seed": 1,
+      "source": "panel",
+      "target": "JAK2"
+     },
+     {
+      "charged_calls": 145,
+      "compose": -11.3,
+      "gap": -0.8,
+      "ivg": -10.5,
+      "seed": 2,
+      "source": "panel",
+      "target": "JAK2"
+     },
+     {
+      "charged_calls": 129,
+      "compose": -10.7,
+      "gap": -0.5,
+      "ivg": -10.2,
+      "seed": 3,
+      "source": "panel",
+      "target": "JAK2"
+     }
+    ],
+    "sum_gap": -9.0
+   },
+   "0.6": {
+    "compose_sum": -153.0,
+    "compose_wins": 12,
+    "coverage": "14/15",
+    "ivg_sum": -145.4,
+    "mean_gap": -0.543,
+    "paired_cells": 14,
+    "rows": [
+     {
+      "charged_calls": 246,
+      "compose": -13.6,
+      "gap": -1.3,
+      "ivg": -12.3,
+      "seed": 1,
+      "source": "panel",
+      "target": "PARP1"
+     },
+     {
+      "charged_calls": 244,
+      "compose": -12.7,
+      "gap": -1.0,
+      "ivg": -11.7,
+      "seed": 2,
+      "source": "panel",
+      "target": "PARP1"
+     },
+     {
+      "charged_calls": 249,
+      "compose": -11.3,
+      "gap": -0.6,
+      "ivg": -10.7,
+      "seed": 3,
+      "source": "panel",
+      "target": "PARP1"
+     },
+     {
+      "charged_calls": 0,
+      "compose": null,
+      "gap": null,
+      "ivg": -7.7,
+      "seed": 1,
+      "source": "panel",
+      "target": "FA7"
+     },
+     {
+      "charged_calls": 249,
+      "compose": -7.8,
+      "gap": -0.3,
+      "ivg": -7.5,
+      "seed": 2,
+      "source": "panel",
+      "target": "FA7"
+     },
+     {
+      "charged_calls": 40,
+      "compose": -8.5,
+      "gap": -1.1,
+      "ivg": -7.4,
+      "seed": 3,
+      "source": "RESCUE",
+      "target": "FA7"
+     },
+     {
+      "charged_calls": 217,
+      "compose": -13.3,
+      "gap": -0.9,
+      "ivg": -12.4,
+      "seed": 1,
+      "source": "panel",
+      "target": "5HT1B"
+     },
+     {
+      "charged_calls": 222,
+      "compose": -11.3,
+      "gap": 0.7,
+      "ivg": -12.0,
+      "seed": 2,
+      "source": "panel",
+      "target": "5HT1B"
+     },
+     {
+      "charged_calls": 126,
+      "compose": -10.8,
+      "gap": -0.2,
+      "ivg": -10.6,
+      "seed": 3,
+      "source": "RESCUE",
+      "target": "5HT1B"
+     },
+     {
+      "charged_calls": 33,
+      "compose": -9.0,
+      "gap": 0.7,
+      "ivg": -9.7,
+      "seed": 1,
+      "source": "RESCUE",
+      "target": "BRAF"
+     },
+     {
+      "charged_calls": 89,
+      "compose": -11.0,
+      "gap": -0.6,
+      "ivg": -10.4,
+      "seed": 2,
+      "source": "RESCUE",
+      "target": "BRAF"
+     },
+     {
+      "charged_calls": 104,
+      "compose": -11.5,
+      "gap": -1.2,
+      "ivg": -10.3,
+      "seed": 3,
+      "source": "panel",
+      "target": "BRAF"
+     },
+     {
+      "charged_calls": 97,
+      "compose": -10.6,
+      "gap": -0.9,
+      "ivg": -9.7,
+      "seed": 1,
+      "source": "panel",
+      "target": "JAK2"
+     },
+     {
+      "charged_calls": 89,
+      "compose": -10.8,
+      "gap": -0.4,
+      "ivg": -10.4,
+      "seed": 2,
+      "source": "panel",
+      "target": "JAK2"
+     },
+     {
+      "charged_calls": 113,
+      "compose": -10.8,
+      "gap": -0.5,
+      "ivg": -10.3,
+      "seed": 3,
+      "source": "panel",
+      "target": "JAK2"
+     }
+    ],
+    "sum_gap": -7.6
+   }
+  },
+  "objective": "QuickVina2 docking of the best eligible lead, lower is better, subject to QED>=0.6, SA<=4.0, Tanimoto>=delta to the seed",
+  "schema_version": "t4_frozen_result_v1",
+  "status": "FROZEN \u2014 this is the authoritative T4 result. Do not re-derive from a builder."
+ },
+ "payload_sha256": "acaf7dad784cf0aea4513701fe5e0232c7dc531b55defb0e2f59fd96072f6c17"
+}

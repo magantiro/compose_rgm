@@ -1,23 +1,18 @@
 #!/usr/bin/env python3
 """Rebuild the T4 panel from round locks, in InVirtuoGen's reporting convention.
 
-Three things this does NOT do, each because a previous table did and was wrong:
+SUPERSEDED FOR REPORTING.  The authoritative T4 result is
+``diagnostics/T4_FROZEN_RESULT_v1.json`` (human-readable: ``T4_FROZEN_RESULT_v1.md``).
+Read that file; do not quote this script's output as the panel.
 
-* It does not read `checkpoint.json`. Checkpoints are mutable and a container that
-  restarts after preemption reads a stale mount and overwrites a newer one; round
-  locks are append-only per round index and are the authority.
-* It does not pick a run directory by "most rounds" or "best score". A volume can
-  hold several run identities. The authoritative one is the run whose
-  `contract_payload_sha256` equals the payload hash of the live contract file --
-  anything else is a superseded launch.
-* It does not read `delta` from a volume name or from `claim_boundary` prose. Delta
-  is an executable contract field, and at least one contract is misnamed: the volume
-  and file called `jak2_d06_250` declares delta 0.4.
+This builder resolves ONE run per volume -- the run whose launch pins the live
+contract payload.  Work migrates to a new ``run_id`` after a resume or a re-seal, so
+that rule reports an empty run as a cell's result: measured, braf-d06 holds one run
+with 5 round locks and another with 27, and the empty one won.  It also cannot see a
+molecule scored in a cell's FINAL round, because a round lock records a molecule only
+once it becomes a PARENT -- which understated 5ht1b seed 3 at delta 0.4 by 0.2.
 
-The reported score for a cell is the best (most negative) `parent_score` over every
-committed round lock. A molecule only becomes a parent after passing the production
-`Fiber.check`, so its `parent_score` is direct evidence that an ELIGIBLE molecule was
-docked -- which is exactly the quantity the benchmark asks for.
+Kept for per-run inspection.  It is not the panel.
 """
 
 from __future__ import annotations
