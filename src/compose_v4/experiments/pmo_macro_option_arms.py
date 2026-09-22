@@ -127,6 +127,37 @@ def configuration(seed: int) -> ProgramSearchConfig:
     )
 
 
+def assert_production_batch_geometry(config: ProgramSearchConfig, queries_per_round: int) -> None:
+    """Refuse any geometry in which `_allocate` is not the binding discard.
+
+    MEASURED, and the reason this is a guard rather than a convention. Production PMO
+    sets `candidates_per_batch = QUERIES_PER_ROUND` (pmo_population_v1.py:57, :226), so
+    `prepare_query_batch` takes its `len(candidates) <= count` branch, `lock_query_subset`
+    discards ZERO, and the controller's `_allocate` is the only gate that drops a
+    candidate before it is charged. That is where the macro-option reservation sits.
+
+    Give the campaign fewer queries than the controller allocates and a SECOND discard
+    appears -- `select_parent_edits` in parent_edit_search.py picks `queries_per_round` of
+    the allocated pool, and the reservation does not reach it. MEASURED on this harness at
+    8 allocated against 4 charged: the reserved stage-0 leg was generated, reserved and
+    chosen by `_allocate`, and then silently dropped, so no bridge was ever charged and no
+    protection window ever opened across a whole campaign. Nothing raised; the run simply
+    measured a mechanism that never fired.
+
+    That is a different system from production, so the harness refuses it outright rather
+    than reporting a null obtained under it.
+    """
+    if int(queries_per_round) != int(config.candidates_per_batch):
+        raise ValueError(
+            "matched-arm geometry must charge exactly what the controller allocates: "
+            f"queries_per_round={queries_per_round} against "
+            f"candidates_per_batch={config.candidates_per_batch}. Production PMO sets "
+            "them equal, and when they differ `prepare_query_batch` adds a second "
+            "discard the macro-option reservation does not reach -- the mechanism under "
+            "test would never bind and the measurement would be of a different system"
+        )
+
+
 def load_initialization(root: Path, *, count: int, seed: int) -> dict[str, Any]:
     """A bounded slice of the frozen task-independent initialization bank."""
     stored = json.loads((root / INITIALIZATION).read_text())
@@ -160,6 +191,7 @@ def run_arm(
     enable_macro_options: bool = True,
 ) -> dict[str, Any]:
     """One matched arm. Charges only the synthetic scorer; no benchmark oracle exists."""
+    assert_production_batch_geometry(configuration(seed), queries_per_round)
     initialized = load_initialization(root, count=initialization_count, seed=seed)
     origin = Chem.MolFromSmiles(initialized["candidates"][0]["endpoint"])
     scorer = ValleySimilarityScorer(origin_heavy_atoms=origin.GetNumHeavyAtoms())
@@ -240,6 +272,7 @@ def run_arm(
 
 __all__ = [
     "INITIALIZATION",
+    "assert_production_batch_geometry",
     "JUMP_CHECKPOINT",
     "SCHEMA",
     "SYNTHETIC_REFERENCE",

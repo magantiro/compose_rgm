@@ -30,6 +30,7 @@ from compose_v4.control.program_campaign import ProgramQueryLedger, run_program_
 from compose_v4.control.program_task import ProgramTask
 from compose_v4.experiments.pmo_macro_option_arms import (
     ValleySimilarityScorer,
+    assert_production_batch_geometry,
     configuration,
     load_initialization,
     load_jump_checkpoint,
@@ -37,6 +38,9 @@ from compose_v4.experiments.pmo_macro_option_arms import (
 
 ROOT = Path(__file__).resolve().parents[1]
 SEED = 20260923
+# Production charges exactly what the controller allocates, so `_allocate` is the only
+# discard and the macro-option reservation is the binding gate.
+QUERIES_PER_ROUND = configuration(SEED).candidates_per_batch
 SETTINGS = {
     "max_options": 1,
     "synthesis_attempts_per_origin": 3,
@@ -45,6 +49,7 @@ SETTINGS = {
 
 
 def _campaign(folder, *, rounds, budget, protection=True, ledger=None):
+    assert_production_batch_geometry(configuration(SEED), QUERIES_PER_ROUND)
     initialized = load_initialization(ROOT, count=2, seed=SEED)
     origin = Chem.MolFromSmiles(initialized["candidates"][0]["endpoint"])
     scorer = ValleySimilarityScorer(origin_heavy_atoms=origin.GetNumHeavyAtoms())
@@ -65,7 +70,7 @@ def _campaign(folder, *, rounds, budget, protection=True, ledger=None):
         library=(),
         ledger=ledger,
         rounds=rounds,
-        queries_per_round=4,
+        queries_per_round=QUERIES_PER_ROUND,
         hierarchy=None,
         fit_model=None,
         stagnation_rounds=None,
@@ -82,7 +87,7 @@ def _campaign(folder, *, rounds, budget, protection=True, ledger=None):
 @pytest.fixture(scope="module")
 def short_run(tmp_path_factory):
     folder = tmp_path_factory.mktemp("macro_runtime")
-    return (folder, *_campaign(folder, rounds=3, budget=32))
+    return (folder, *_campaign(folder, rounds=5, budget=48))
 
 
 def test_the_option_registry_survives_the_published_json_round_trip(short_run):
@@ -103,7 +108,7 @@ def test_a_resumed_campaign_keeps_its_declared_options_and_does_not_redeclare(sh
     folder, result, ledger, _kwargs, _task = short_run
     before = result["snapshot"]["macro_options"]["registry"]["records"]
     # Re-entering the SAME output directory is the campaign's own resume path.
-    resumed, _, _, _ = _campaign(folder, rounds=3, budget=32, ledger=ledger)
+    resumed, _, _, _ = _campaign(folder, rounds=5, budget=48, ledger=ledger)
     after = resumed["snapshot"]["macro_options"]["registry"]["records"]
     assert [row["option"]["option_id"] for row in after] == [
         row["option"]["option_id"] for row in before
@@ -132,7 +137,7 @@ def test_a_resume_does_not_strand_a_charged_bridge(short_run):
 
 
 def test_the_ledger_budget_binds_and_options_cannot_spend_past_it(tmp_path):
-    budget = 12
+    budget = 20
     result, ledger, _, _ = _campaign(tmp_path, rounds=20, budget=budget)
     assert len(ledger.rows) <= budget
     assert ledger.remaining >= 0

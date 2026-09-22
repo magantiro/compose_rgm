@@ -28,6 +28,7 @@ from compose_v4.control.program_campaign import ProgramQueryLedger, run_program_
 from compose_v4.control.program_task import ProgramTask
 from compose_v4.experiments.pmo_macro_option_arms import (
     ValleySimilarityScorer,
+    assert_production_batch_geometry,
     configuration,
     load_initialization,
     load_jump_checkpoint,
@@ -35,15 +36,24 @@ from compose_v4.experiments.pmo_macro_option_arms import (
 
 ROOT = Path(__file__).resolve().parents[1]
 SEED = 20260922
+# Production charges exactly what the controller allocates; see the guard.
+QUERIES_PER_ROUND = configuration(SEED).candidates_per_batch
 
 
-def _bootstrap(tmp_path, *, count=2, budget=28, rounds=4):
+def _bootstrap(tmp_path, *, count=2, budget=56, rounds=6):
     """Real campaign rounds, so a bridge is CHARGED and a window really opens.
 
     Faking the charge with a bare `note_charged` would leave the bridge outside the
     archive, and then no continuation could be materialized from it -- the tests would
     pass the consumption probe and prove nothing about the leg ever being offered.
+
+    `queries_per_round` MUST equal `candidates_per_batch`, which is what production does.
+    An earlier version of this fixture charged 4 of the 8 the controller allocates, and
+    `select_parent_edits` then dropped the reserved leg after `_allocate` had chosen it --
+    so no bridge was ever charged and every downstream test failed for a reason that had
+    nothing to do with the mechanism. The guard makes that unreproducible.
     """
+    assert_production_batch_geometry(configuration(SEED), QUERIES_PER_ROUND)
     initialized = load_initialization(ROOT, count=count, seed=SEED)
     from rdkit import Chem
 
@@ -70,7 +80,7 @@ def _bootstrap(tmp_path, *, count=2, budget=28, rounds=4):
         library=(),
         ledger=ledger,
         rounds=rounds,
-        queries_per_round=4,
+        queries_per_round=QUERIES_PER_ROUND,
         hierarchy=None,
         fit_model=None,
         stagnation_rounds=None,
@@ -288,3 +298,54 @@ def test_a_macro_inside_the_ceiling_cannot_be_declared():
             declared_at_round=0,
             realization_ceiling=23,
         )
+
+
+# ---- The geometry the reservation depends on ----
+
+
+def test_production_pmo_charges_exactly_what_it_allocates():
+    """The PREMISE the macro-option reservation rests on, read from production source.
+
+    The reservation sits in `_allocate`. It is the binding gate only because production
+    sets `candidates_per_batch == QUERIES_PER_ROUND`, which sends `prepare_query_batch`
+    down its `len(candidates) <= count` branch so `lock_query_subset` discards nothing.
+    If production ever stops doing that, a second discard appears downstream of the
+    reservation and this mechanism silently stops binding -- so the premise is asserted
+    against the production module rather than restated as a comment here.
+    """
+    from compose_v4.experiments import pmo_population_v1
+
+    assert (
+        pmo_population_v1.configuration().candidates_per_batch
+        == pmo_population_v1.QUERIES_PER_ROUND
+    )
+
+
+def test_the_harness_refuses_a_geometry_where_the_reservation_is_not_the_binding_gate():
+    # MEASURED: at 8 allocated against 4 charged, the reserved stage-0 leg was generated,
+    # reserved and chosen by `_allocate`, then dropped by `select_parent_edits`, so no
+    # bridge was charged across an entire campaign and nothing raised.
+    config = configuration(SEED)
+    assert_production_batch_geometry(config, config.candidates_per_batch)
+    for mismatched in (config.candidates_per_batch - 4, config.candidates_per_batch + 1):
+        with pytest.raises(ValueError, match="charge exactly what the controller allocates"):
+            assert_production_batch_geometry(config, mismatched)
+
+
+def test_a_declared_leg_reaches_the_charged_batch_under_the_matched_geometry(bootstrapped):
+    """Not merely allocated: LOCKED into a batch the ledger charged.
+
+    `_allocate` choosing a reserved candidate proves nothing on its own -- that is exactly
+    what happened while the fixture geometry was wrong. The evidence is the published
+    pending batch, which is what the campaign hands the ledger.
+    """
+    folder, _campaign, _kwargs, _, _ = bootstrapped
+    locked = []
+    for path in sorted((folder / "campaign").glob("round_*/pending.json")):
+        batch = json.loads(path.read_text())["batch"]
+        locked += [
+            row["endpoint"]
+            for row in batch["candidates"]
+            if row["provenance"].get("entry_channel") == MACRO_OPTION_CHANNEL_TAG
+        ]
+    assert locked, "no declared macro-option leg was ever locked into a charged batch"
