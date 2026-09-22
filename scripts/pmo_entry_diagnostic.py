@@ -911,6 +911,70 @@ def _permutation(shards, regions, delta: float) -> dict[str, Any]:
     }
 
 
+def _charged_approach_ladder(shards) -> dict[str, Any]:
+    """How the best structural approach moves as a real run spends its budget.
+
+    Only the observed production arm has a charged-call ordering -- it is the
+    run itself -- so this is computed for that arm alone and is absent, never
+    zero, for a regenerated one. It separates two readings a single best-of
+    number cannot: a search still climbing when its budget ran out, and a search
+    that reached a ceiling and stopped.
+    """
+
+    out: dict[str, Any] = {}
+    for shard in shards:
+        if shard["arm"] != PRODUCTION_ARM:
+            continue
+        rows = sorted(
+            (
+                row
+                for row in shard["parent_rows"]
+                if row.get("charged_call_index") is not None
+            ),
+            key=lambda row: row["charged_call_index"],
+        )
+        similarity = shard["parent_similarity_primary"]
+        running, ladder, last_gain = 0.0, [], None
+        for row in rows:
+            value = similarity.get(row["endpoint"])
+            if value is None:
+                continue
+            if value > running:
+                running = value
+                last_gain = row["charged_call_index"]
+            ladder.append({"charged_call": row["charged_call_index"], "best": round(running, 4)})
+        if not ladder:
+            continue
+        marks = {}
+        for at in (16, 50, 100, 150, 200, 250):
+            reached = [row["best"] for row in ladder if row["charged_call"] <= at]
+            if reached:
+                marks[str(at)] = reached[-1]
+        final = ladder[-1]["best"]
+        proposals = _prefix_block(
+            shard["proposals"], shard["region"]["wide_count"], shard["proposals_drawn"]
+        )
+        out[shard["task"]] = {
+            "charged_calls": len(ladder),
+            "best_by_charged_call": marks,
+            "final_best_over_the_run": final,
+            "last_charged_call_that_improved_it": last_gain,
+            "further_proposals_from_those_parents": proposals["proposals"],
+            "further_proposals_best": proposals["best_similarity"],
+            "further_proposals_lift": round(proposals["best_similarity"] - final, 4),
+            "entry_threshold": ENTRY_DELTA,
+            "short_of_entry_by": round(ENTRY_DELTA - max(final, proposals["best_similarity"]), 4),
+            "reading": (
+                "A run still climbing at its last call is budget-limited. A run "
+                "whose best stopped moving long before its last call, and whose "
+                "parents then yield almost nothing over hundreds more proposals, "
+                "has reached what this proposal law can reach from this "
+                "population -- more calls would not close the gap."
+            ),
+        }
+    return out
+
+
 def _pass_criterion(
     arms: dict[str, Any], challenger: str | None, baseline: str | None = None
 ) -> dict[str, Any]:
@@ -1290,6 +1354,7 @@ def phase_report(args: argparse.Namespace) -> int:
         "causal_chains": chains,
         "manifold_context": _manifold_context(repo_root),
         "permutation_control": _permutation(shards, regions, ENTRY_DELTA),
+        "charged_approach_ladder": _charged_approach_ladder(shards),
         "pass_criterion": _pass_criterion(arms, args.challenger, args.baseline),
         "ladder_table": _ladder_table(arms, predicate),
         "software": _software(),
