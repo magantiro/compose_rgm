@@ -254,12 +254,25 @@ def reconcile_cell(folder: Path) -> dict:
             rounds=len(payload.get("rounds", [])),
             expansion_events=len(payload.get("expansion_events", [])),
         )
-        archive = payload.get("archive") or {}
-        record["archive_size"] = len(archive)
         record["root_score"] = (payload.get("root_result") or {}).get("score")
-        # Frontier attribution: which lane produced each molecule that improved the
-        # incumbent, read from the synthesis-time tag on the lock row rather than
-        # reconstructed afterwards.
+    else:
+        record["status"] = "running" if checkpoint_path.exists() else "not_started"
+
+    # Frontier attribution works from whichever archive exists, so a RUNNING cell is
+    # not silently excluded -- the mechanism question is the one a partial table is
+    # most able to answer, and restricting it to terminal cells would have reported it
+    # from the cells that finished first, which are the easiest ones.
+    archive: dict = {}
+    if result_path.exists():
+        archive = _payload(result_path).get("archive") or {}
+    elif checkpoint_path.exists():
+        archive = _payload(checkpoint_path).get("archive") or {}
+    record["archive_size"] = len(archive)
+    if archive:
+        # Which lane produced each molecule that improved the incumbent, read from the
+        # synthesis-time tag on the lock row rather than reconstructed afterwards. The
+        # ordering is the CHARGED sequence (locks in round order), because "improved the
+        # frontier" is only defined on the order the calls were actually made.
         improvements: dict[str, int] = {}
         best = None
         for path in locks:
@@ -274,11 +287,9 @@ def reconcile_cell(folder: Path) -> dict:
                     for lane in query.get("proposal_experts") or ["unattributed"]:
                         improvements[str(lane)] = improvements.get(str(lane), 0) + 1
         record["frontier_improvement_attribution"] = dict(sorted(improvements.items()))
-        record["parent_retention"] = (
-            round(len({p for row in parents_seen for p in row}) / max(1, len(archive)), 3)
+        record["parent_retention"] = round(
+            len({p for row in parents_seen for p in row}) / max(1, len(archive)), 3
         )
-    else:
-        record["status"] = "running" if checkpoint_path.exists() else "not_started"
     return record
 
 
