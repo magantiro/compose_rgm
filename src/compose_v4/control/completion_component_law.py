@@ -67,7 +67,7 @@ from compose_v4.chem.molecular_graph import (
     MolecularGraph,
     is_element,
 )
-from compose_v4.control.bridge_region_law import BridgeRegion, BridgeRegionLaw
+from compose_v4.control.bridge_region_law import BridgeRegionLaw
 from compose_v4.control.docking_value import identity
 from compose_v4.control.donor_program import pendant_cuts
 from compose_v4.experiments.whole_ring_plan import execute_program, fresh_slot

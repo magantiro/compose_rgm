@@ -38,8 +38,8 @@ from pathlib import Path
 from typing import Any
 
 from compose_v4.control.completion_component_law import (
-    ComponentBank,
     CompletionLaw,
+    ComponentBank,
     ScaleLaw,
 )
 
@@ -147,7 +147,7 @@ class _CompletionLawProbe(Exception):
 
 
 class _ProbeScale(ScaleLaw):
-    def draw(self, rng, capacity: int) -> int:  # noqa: D102
+    def draw(self, rng, capacity: int) -> int:
         raise _CompletionLawProbe("completion scale law consulted")
 
 
@@ -184,7 +184,7 @@ def assert_completion_law_is_consumed(
                 "attempts": attempt,
                 "seeds_tried": list(seeds[:attempt]),
             }
-        except Exception:  # noqa: BLE001 - an ordinary refusal; try the next seed
+        except Exception:  # noqa: BLE001,S112 - an ordinary refusal; next seed
             continue
     raise CompletionLawContractError(
         "the completion law was never consulted by the supplied proposal path; "

@@ -19,6 +19,26 @@
   "expand_excision": true,
   "scale_maximum": null
  },
+ "lint_only_revision": {
+  "files_that_moved": {
+   "src/compose_v4/control/completion_component_law.py": {
+    "after": "a5d457872184585b796dd6949c667961311674f6622d1e496a57dfdba6c00712",
+    "before": "9a6a826d74df0741b394cf77d1082f876798ffc5fee8277cb2c981a341fe986e"
+   },
+   "src/compose_v4/control/completion_law_contract.py": {
+    "after": "f88d86a3951b4047f9677043238363aef41c36712fe1c2d67ab8c0ef07d4fbf4",
+    "before": "242ed42cffe824518b010cf46b76455d6b932f023b5c92500fb6ffb11a9bf126"
+   }
+  },
+  "revalidated_after": {
+   "ruff": "all checks passed",
+   "tests": "25 passed"
+  },
+  "scope": "one unused import, one import reorder, one unused noqa, one noqa code added",
+  "scored_runs_were_produced_under": "the BEFORE hashes recorded in implementation_sha256",
+  "semantic_change": "none; dynamic_program_synthesis.py, which the OFF path uses, is untouched",
+  "why": "src/ is kept ruff-clean here and the two new modules carried four findings. The fix was deliberately DEFERRED until every scored run had finished, because moving these bytes earlier would have stranded the contract pin the running arms recorded."
+ },
  "mean_gap_closure": 0.0817,
  "measured_2x2": {
   "content_only": {
