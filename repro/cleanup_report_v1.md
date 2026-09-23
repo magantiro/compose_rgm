@@ -26,7 +26,7 @@ touched.
 | `tools/` | 8 new | the measurement and gate instruments |
 | `diagnostics/repo_hygiene/` | 6 new | pinned set, pin resolution, capability and entry-point baselines, the audit |
 | `repro/` | 7 new | pinned paths, external artifacts, environments, capability manifest, reproducibility graph, migration contract, this report |
-| `tests/` | 1 new | T4/PMO reachability smoke, mutation-proven |
+| `tests/` | 1 new | T4/PMO reachability smoke, mutation-proven, green under two production kernels |
 | `README.md` | 1 edit | states the content-addressing constraint a newcomer hits first |
 
 ## Merge gates
@@ -192,6 +192,16 @@ destination, not a code change, so it was reported rather than improvised.
 - **No semantic change.** Nothing in this pass can alter an executed result,
   which is why the test comparison is a preservation check rather than evidence
   about the controller.
+
+## Kernel portability of the new guard
+
+The reachability smoke test passes under the laptop `.venv` (rdkit 2026.03.6,
+python 3.12) and under the PMO production kernel (`~/compose_pmo_pinned_env`,
+rdkit 2023.09.6, python 3.11): 6 passed in both. It asserts import reachability
+and call signatures, so it carries no chemistry dependence, which is what a
+capability gate should look like. It is deliberately NOT a numerical
+equivalence test; that belongs with the kernel and is pinned into the process
+identity.
 
 ## Verification commands
 
