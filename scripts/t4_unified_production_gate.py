@@ -905,15 +905,13 @@ def reduce_shards(shard_dir: Path, destination: Path, *, root: Path = ROOT) -> d
         "consumption": {
             "router": {"policy": ROUTER_ID, "policy_sha256": ROUTER_SHA256},
             "ladder": {"policy": FROZEN_LADDER_ID, "policy_sha256": FROZEN_LADDER_SHA256},
-            "state_routing_proven_consumed_on_every_trigger_event": all(
-                row["consumption"]["state_routing_attempts"] >= 1
-                for row in shards
-                if row["role"] == "trigger"
+            "state_routing_proven_consumed_on_every_trigger_event": _over(
+                [row for row in shards if row["role"] == "trigger"],
+                lambda row: row["consumption"]["state_routing_attempts"] >= 1,
             ),
-            "terminal_guard_passed_on_every_trigger_event": all(
-                row["consumption"]["terminal_guard_passed"]
-                for row in shards
-                if row["role"] == "trigger"
+            "terminal_guard_passed_on_every_trigger_event": _over(
+                [row for row in shards if row["role"] == "trigger"],
+                lambda row: row["consumption"]["terminal_guard_passed"],
             ),
         },
         "cells": cells,
