@@ -208,6 +208,50 @@ capability gate should look like. It is deliberately NOT a numerical
 equivalence test; that belongs with the kernel and is pinned into the process
 identity.
 
+## Before / after, measured
+
+| quantity | baseline `061ead93` | branch HEAD | delta |
+|---|---|---|---|
+| `compose_v4` modules | 595 | 595 | 0 |
+| importable modules | 590 | 590 | 0 |
+| public symbol pairs (import view) | 17,081 | 17,081 | **0 lost, 0 gained** |
+| public symbol pairs (AST view) | 17,025 | 17,025 | **0 lost, 0 gained** |
+| entry points discovered | 877 | 884 | +7 (new tools) |
+| entry points importing | 821 | 829 | **0 regressed, 0 vanished** |
+| collected test nodes | 6,296 | 6,302 | +6 (new smoke tests) |
+| pinned files modified | - | - | **0** |
+
+Full-suite after-state at HEAD: **297 failed, 5,893 passed, 2 skipped, 4 xfailed,
+102 errors** in 44m53s under the laptop `.venv`. The matching true-baseline run
+at `061ead93` is in a detached worktree; the node-set comparison lands in
+`repro/test_fingerprint_after_v1_vs_baseline.json`.
+
+Attribution already established for the areas this pass touches: the identical
+`region or ring or fiber or completion_law or region_law` selection run at
+`061ead93` and at HEAD gives **31 bad nodes on each side with identical sets** -
+zero regressions, zero repairs
+(`diagnostics/repo_hygiene/focused_suite_attribution_v1.json`).
+
+## Golden and smoke results
+
+| check | result |
+|---|---|
+| T4 path reachable (campaign -> fiber -> synthesis -> region law) | PASS |
+| PMO path reachable (controller -> families -> realization) | PASS |
+| executor path reachable | PASS |
+| `Fiber` still takes `delta` | PASS |
+| `synthesize_dynamic_program` still accepts `region_law` | PASS, mutation-killed |
+| PMO `restore()` accepts the same arm flags as `__init__` | PASS |
+
+Six tests, green under the laptop `.venv` (rdkit 2026.03.6) and the PMO
+production kernel (rdkit 2023.09.6). Zero oracle calls, no docking, no Modal.
+
+## Archived files
+
+**None.** Nothing was moved, so `archive/MANIFEST.json` needed no entry.
+`archive/ARCHIVE_MANIFEST.md` already records that the 2026-08-19 reorganization
+reached the same conclusion and also moved nothing, with its evidence.
+
 ## Verification commands
 
 ```bash
