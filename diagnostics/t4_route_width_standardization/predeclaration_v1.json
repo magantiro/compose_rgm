@@ -1,0 +1,32 @@
+{
+  "schema_version": "t4_route_width_standardization_predeclaration_v1",
+  "sealed_before_any_measurement": true,
+  "question": "Does standardizing the route lane to 48/48/64 preserve the PARP1/BRAF route support that 32/24/32 produced?",
+  "why_it_must_be_measured_rather_than_assumed": "A beam search is not mathematically nested in its width. Intermediate pruning and the order in which candidates are expanded can both move when beam_width, expansion_width or realization_limit change, so a wider search is not guaranteed to contain a narrower one.",
+  "arms": {
+    "narrow": {"beam_width": 32, "expansion_width": 24, "realization_limit": 32, "pool_size": 64, "max_bindings_per_template": 4, "maximum_expansions": 4000},
+    "wide": {"beam_width": 48, "expansion_width": 48, "realization_limit": 64, "pool_size": 64, "max_bindings_per_template": 4, "maximum_expansions": 4000}
+  },
+  "held_fixed": [
+    "the cell and its docked root starting state",
+    "the per-protein route expert checkpoint",
+    "the production Fiber (delta from the contract, support compose_valid)",
+    "the production round-one proposal seed",
+    "every other route-lane field"
+  ],
+  "cells": ["parp1_0", "parp1_1", "parp1_2", "braf_0", "braf_1", "braf_2"],
+  "green_requires_all_of": [
+    "C1 RECOVERY: for every cell, every eligible endpoint SMILES the narrow arm produced also appears in the wide arm's eligible set (wide is a superset of narrow)",
+    "C2 YIELD: for every cell, the wide arm's eligible endpoint count is greater than or equal to the narrow arm's",
+    "C3 CONTAINMENT IS REPORTED EXACTLY: the size and the members of narrow-minus-wide are published per cell whether or not they are empty",
+    "C4 COST: the wide arm's route-lane elapsed stays under 600 s per cell, which is a third of the 1800 s production proposal-worker bound"
+  ],
+  "not_green_action": "STOP and report. Do not select the other width to make it pass, and do not fall back to per-target widths without saying so explicitly; choosing a configuration after seeing a result is what this predeclaration exists to prevent.",
+  "scope_limit": "This is a ROUND-ONE support comparison from each cell's docked root, not a campaign-outcome comparison. It cannot say which arm would win a docked campaign.",
+  "measured_before_sealing": {
+    "executable_divergence_is_three_fields_not_four": "beam_width, expansion_width and realization_limit. scale_balanced also differs in the contracts (None for parp1/braf, true for jak2/fa7/5ht1b) but NO production caller passes it to propose_route_expert_candidates, so every target already runs the function default False. It is declared-but-unconsumed on the production path.",
+    "training_scope_and_training_split_are_provenance_strings_not_executable": true
+  },
+  "oracle_calls": 0,
+  "docking_calls": 0
+}
