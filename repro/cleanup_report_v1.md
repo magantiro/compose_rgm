@@ -130,7 +130,36 @@ free, so a local second copy does not currently fit.
 This is the real reproducibility exposure, and it is larger and far more
 specific than anything in the directory layout.
 
-### 5. A correction I had to make to my own finding (MEASURED)
+### 5. 215 entry points run on import, and one destroyed a committed artifact (MEASURED)
+
+**215 of the 877 entry points perform a module-level write with no
+`if __name__ == "__main__"` guard**, so importing them runs them.
+
+This is not theoretical. The entry-point probe in this pass imported
+`scripts/hphi_valid128_read.py`, which rewrote `docs/VALID128_K8_RESULT.json`
+and dropped its comparator block, panel description and revision note: committed
+scientific record, including the explicit caveat that the VJTNN number "is NOT
+state of the art and must never be presented as such". Nothing in the probe
+noticed; it was found by reading `git status`.
+
+Restored and verified against the baseline blob (`4a2b4d4c...`). The probe now
+brackets itself with `git status --porcelain`, reports every path it touched,
+restores them when the tree started clean, refuses to touch anything when it did
+not, and raises if a restore leaves residue. Verified end to end: clean tree in,
+two paths touched and reverted, clean tree out.
+
+Two consequences worth acting on separately:
+
+- **Adding `__main__` guards is the right fix and is NOT free.** Those scripts
+  live in `scripts/`, which is inside the aggregate training fingerprint, so
+  215 guard additions move the training run identity. Same cost class as the
+  facade; report, do not improvise.
+- **The probe's `import_ok` count is not perfectly stable across runs**
+  (821 -> 832) because earlier side effects create inputs that let later scripts
+  import. The gate is unaffected: it asks only whether a baseline-OK entry point
+  STOPPED importing, which is 0.
+
+### 6. A correction I had to make to my own finding (MEASURED)
 
 The remaining 26 paths were first reported as **permanently lost**, on the
 strength of `git log --all` finding them in no commit on any branch. That was
@@ -142,7 +171,7 @@ Recovery: `git fetch origin "+refs/heads/<branch>:refs/remotes/origin/<branch>"`
 for `codex/compose-baseline-qualification`, `codex/compose-constraints-hard`,
 `codex/compose-multiobjective-package`.
 
-### 6. A third Modal volume shares the name (MEASURED)
+### 7. A third Modal volume shares the name (MEASURED)
 
 The recorded note that two volumes share the name `compose-v4-artifacts`
 undercounts. There are **three**:
@@ -157,7 +186,7 @@ The `created by` column does not separate them, so identity is profile plus
 creation date. The `nitya` volume, which the existing note omits entirely, is
 the one the running T4 campaigns are recorded as using.
 
-### 7. Reproducibility graph: zero broken links (MEASURED)
+### 8. Reproducibility graph: zero broken links (MEASURED)
 
 Traced for the frozen T4 panel, the T4 controller campaigns, the PMO scored runs
 and the PMO diagnostics. Every payload self-hash that exists verifies, every

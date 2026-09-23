@@ -3556,17 +3556,17 @@
   },
   "schema_version": 1,
   "side_effects": {
-    "clean_after": false,
+    "clean_after": true,
     "note": "Importing an entry point RUNS it when the module has no __main__ guard. 215 entry points here perform a module-level write. Paths the scan touched are listed, and restored only when the tree started clean.",
     "paths_touched_by_the_scan": [
       " M docs/VALID128_K8_RESULT.json",
       "?? diagnostics/t4_snapshot.json"
     ],
-    "restored": [],
-    "unrestored_residue": [
-      " M docs/VALID128_K8_RESULT.json",
-      "?? diagnostics/t4_snapshot.json"
+    "restored": [
+      "reverted docs/VALID128_K8_RESULT.json",
+      "removed diagnostics/t4_snapshot.json"
     ],
-    "worktree_started_clean": false
+    "unrestored_residue": [],
+    "worktree_started_clean": true
   }
 }
