@@ -4586,3 +4586,93 @@ independently of whether fa7_0 ever closes.**
   siblings read 10-20 s, from concurrent T4 work on the same laptop. Draws are seeded, so every
   structural number is reproducible; no cost number from a loaded machine is. (Reaffirms: parallelism
   is free during implementation and not during measurement.)
+
+## 2026-09-23 (repo hygiene: the library is read-only in AGGREGATE, and a probe that destroyed what it measured)
+
+- **`src/` is read-only IN AGGREGATE, not per file, and ADDING a file costs the same as editing
+  one.** 1,879 of 8,805 tracked files are the subject of a sha256 pin, including 542 of the 595
+  modules in `src/compose_v4`. That per-file set UNDERSTATES the constraint, because three
+  fingerprints hash DIRECTORIES rather than named files:
+      modal_apps/train_tracelet_gm.py::_source_fingerprint   every .py/.json under src/, scripts/, recipes/  -> run_identity
+      modal_apps/t4_objective_reset_app.py::main             every .py under src/ + one config              -> files_sha256 receipt
+      semantic_p50_successor_cache_implementation_sha256     every .py under src/compose_v4                 -> cache identity
+  MEASURED by recomputing each digest against a perturbed tree: a whitespace-only edit to ANY file
+  under `scripts/` moves the training run identity; the same edit to an individually UNPINNED `src/`
+  module moves two identities; and **adding a module under `src/compose_v4` makes every existing P50
+  successor-cache plan RAISE** `plan implementation or policy is stale`. So there is no per-file
+  exemption and no shim may be added inside `src/`.
+- **CONSEQUENCE, costed rather than argued: a `compose_v4/api/` facade is the most expensive of its
+  three placements.** `src/compose_v4/api/` invalidates the P50 cache plans (~1,025 core-hours to
+  rebuild, and they live on a Modal volume); `src/compose_api/` costs only a fresh training run
+  label; `api/` outside `src/` costs nothing in identity terms and needs one packaging entry.
+- **The seam is not where the directory names suggest.** Import edges make `experiments/` (302
+  modules, 1,080 outbound, 50 inbound) look like a pure consumer and therefore cleanly separable.
+  **21 of those 302 are imported by 37 library-core modules**, led by `whole_ring_plan` (11
+  dependents) and `production_successor_kernel` (6). Moving `experiments/` out wholesale would cut
+  across a real dependency. Promote the 21 first -- and both halves are inside `src/`, so both are
+  blocked by the paragraph above.
+- **AN IMPORT-BASED ENTRY-POINT PROBE IS NOT SIDE-EFFECT FREE, AND MINE DESTROYED COMMITTED RECORD.**
+  **215 of 877 entry points perform a module-level write with no `if __name__ == "__main__"` guard**,
+  so importing them RUNS them. My probe executed `scripts/hphi_valid128_read.py`, which rewrote
+  `docs/VALID128_K8_RESULT.json` and dropped its comparator block, panel description and revision
+  note -- including the explicit caveat that the VJTNN number "is NOT state of the art and must never
+  be presented as such". A second script reduced `diagnostics/ring_type_smoke.json` from 564 lines to
+  1. Nothing in the probe noticed; both were found by reading `git status`.
+  ATTRIBUTION, measured, because "the test suite mutates committed artifacts" would be false and
+  alarming: a detached baseline worktree that ran ONLY pytest was completely clean at the same point.
+  The ordinary test path does not import those scripts. The instrument did.
+  FIX: bracket the scan with `git status --porcelain`, report every path touched, restore when the
+  tree started clean, refuse to touch anything when it did not, and RAISE if a restore leaves
+  residue. Adding `__main__` guards to the 215 is the real fix and is NOT free -- they live in
+  `scripts/`, inside the aggregate training fingerprint.
+- **`git add -u` is how the damage got committed.** It stages every modified tracked file, so an
+  unrelated commit swept in a file nobody had looked at. This is exactly what the standing "no broad
+  `git add`" rule exists to prevent, and it took two restorations to notice.
+- **`git status --porcelain` puts the path at index 3, and splitting on the first space silently
+  breaks restore.** Porcelain v1 is two status characters then a space; an unstaged modification
+  therefore STARTS with a space, so `partition(" ")` yields `"M docs/..."` as the path, the
+  subsequent `git checkout` fails, and the tool reports the file restored while it is still damaged.
+  Found only because the restored file's sha did not match the baseline blob. Verify a restore by
+  hashing, never by the restore function's own return value.
+- **`git log --all` SEARCHES LOCAL REFS ONLY, and I reported 26 files as permanently lost on that
+  basis.** origin carries **168 heads against 122 local refs**. All 26 live on three unfetched remote
+  branches (`codex/compose-{baseline-qualification,constraints-hard,multiobjective-package}`), and
+  **64 of 64 checkable pins match their branch blobs EXACTLY**. Nothing was lost. Recover with an
+  explicit refspec: `git fetch origin "+refs/heads/<branch>:refs/remotes/origin/<branch>"`.
+  Same class as the recorded `for-each-ref refs/remotes` error; a local-only search is not
+  authoritative about what exists.
+- **THREE Modal volumes share the name `compose-v4-artifacts`, not two.** MEASURED:
+  `rahul` 2026-07-17 03:16, **`nitya` 2026-07-29 14:41**, `rahul-94866` 2026-08-09 00:13. The
+  `created by` column does not separate them, so identity is profile PLUS creation date. The `nitya`
+  volume is absent from the existing note and is the one the running T4 campaigns are recorded as
+  using, so a scan of "both" volumes still misses it.
+- **The off-Git reproducibility exposure is ONE directory.** Of 127,098 pins in 432 artifacts,
+  110,208 resolve, 6,014 are stale (normal for an immutable launch record) and 10,876 address
+  something absent -- and **8,828 of the 8,835 repo-shaped absent paths are under
+  `diagnostics/pmo_dynamic_v21/runs/`: 17,064 files, 11.4 GB, present only as untracked files in one
+  checkout**. 300 of 300 sampled are ignored by a single rule, `.gitignore:55`, so the exclusion is a
+  deliberate policy decision and the exposure is a separate consequence of pinning those same paths
+  by hash. The remedy is not to commit 11.4 GB; it is two durable copies with the sha verified AFTER
+  copying. Blocker measured the same day: the disk had ~8 GB free, so a local second copy does not fit.
+- **A pinned-path audit must resolve BOTH path conventions or it manufactures a false finding.**
+  Pins are written repo-root-relative in launch contracts and relative to the artifact's own
+  directory in per-run receipts (`attempt_1/case_0/failure.json`, `../../src/...`). Treating every
+  pin as repo-relative reported 89 live pins as absent.
+- **A pin scanner must be structural, not key-name driven.** Pins appear under at least 22 container
+  names, several generic (`inputs`, `files`, `paths`, `added`), so an allowlist misses them silently.
+  Recognise the SHAPE instead, and over-collect deliberately: a false positive costs one untouched
+  file, a false negative costs a refused contract. Verify the scanner is idempotent -- mine yields
+  1,879 before and after committing its own path-to-sha manifest.
+- **`pytest` without `--continue-on-collection-errors` STOPS at the first collection error and
+  reports `1 skipped, 1 error` with ZERO failures**, which reads as a clean baseline while thousands
+  of tests never ran. And a fingerprint comparison must ask which collected node ids DISAPPEARED,
+  not whether the count matched: requiring equality cries wolf on any pass that adds a test, and
+  would still miss a collection error dropping three tests while a new file adds six.
+- **A short-summary parser anchored as `\S+` silently drops truncated parametrized node ids** (5 of
+  297 here), because such a line has neither a closing bracket nor the ` - ` separator. Guard it with
+  a count check that RAISES when the parsed total disagrees with the number of FAILED/ERROR lines.
+- **Attribute a failing suite against a true baseline WORKTREE, not against the same branch.** My
+  first full run was launched at 02:38 from this branch and therefore measured the AFTER state; it
+  could not attribute anything. A detached worktree at the baseline tag running the identical
+  selection gave **31 bad nodes on each side with identical SETS** -- zero regressions, zero repairs.
+  Matching counts are not attribution; matching sets are.
