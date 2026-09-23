@@ -1,0 +1,27 @@
+{
+ "schema_version": "pmo_two_stage_integration_gate_v1",
+ "evidence_role": "zero_charged_oracle_integration_gate",
+ "new_charged_oracle_calls": 0,
+ "pool_size": 144,
+ "parents": 6,
+ "check3_production_provenance": {
+  "replayed": 60,
+  "mismatched": 0,
+  "pass": true
+ },
+ "check1_q_pre_alters_allocation": {
+  "max_parent_share_shift": 0.028244476340604896,
+  "families_seen": 14,
+  "families_with_zero_support": [],
+  "pass": true
+ },
+ "check2_q_post_alters_selection": {
+  "overlap_with_random": 2,
+  "q_post_selected_mean": 0.09268807148105342,
+  "random_selected_mean": 0.06741699124991339,
+  "pool_mean": 0.0523273944429086,
+  "audit_slots": 2,
+  "pass": true
+ },
+ "verdict": "PASS"
+}
