@@ -191,6 +191,7 @@ def execute_task(
     charged_calls_per_task: int,
     progress=None,
     enable_online_memory: bool = False,
+    construction_prior_spec: dict | None = None,
 ) -> dict:
     """Run one PMO-v1 task after a separately authorized scored launch.
 
@@ -215,6 +216,21 @@ def execute_task(
     checkpoint = _load_checkpoint(root, contract)
     config = configuration(contract["controller"]["seed"])
     report = progress or (lambda row: None)
+    # Arm selectors for the matched comparison. They ride in optimizer_kwargs, so
+    # run_program_campaign folds them into `optimizer_kwargs_sha256` and two arms
+    # cannot share a run identity even if every other input matches.
+    optimizer_kwargs = {
+        "jump_checkpoint": checkpoint,
+        "enable_online_memory": bool(enable_online_memory),
+    }
+    if construction_prior_spec is not None:
+        # ABSENT is the only byte-identical OFF. The key is omitted rather than set to
+        # None so an unflagged run's `optimizer_kwargs_sha256` is unchanged from every
+        # run made before this seam existed, which is what lets the control arm be
+        # compared against the already-completed deployed-B trajectory.
+        optimizer_kwargs["construction_prior_spec"] = json.loads(
+            json.dumps(construction_prior_spec)
+        )
     campaign = run_program_campaign(
         output=folder / "campaign",
         task=task,
@@ -232,13 +248,7 @@ def execute_task(
         initial_parent_fraction=0.2,
         progress=report,
         optimizer_type=PmoPopulationController,
-        optimizer_kwargs={
-            "jump_checkpoint": checkpoint,
-            # Arm selector for the matched comparison. It rides in optimizer_kwargs, so
-            # run_program_campaign folds it into `optimizer_kwargs_sha256` and the two
-            # arms cannot share a run identity even if every other input matches.
-            "enable_online_memory": bool(enable_online_memory),
-        },
+        optimizer_kwargs=optimizer_kwargs,
         initial_batch_fn=initial_dynamic_program_batch_v21,
     )
     curve = _score_curve(ledger.rows)
@@ -257,6 +267,10 @@ def execute_task(
             values, budget=charged_calls_per_task, finish=True
         ),
         "auc_budget": charged_calls_per_task,
+        # The construction-prior declaration travels WITH the number it produced.  It
+        # carries the checkpoint's mandatory development-only status, so a result read
+        # in isolation still says it may not become a publication number.
+        "construction_prior_spec": optimizer_kwargs.get("construction_prior_spec"),
         "campaign": campaign,
     }
 

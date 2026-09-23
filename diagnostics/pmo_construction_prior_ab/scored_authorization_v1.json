@@ -1,0 +1,66 @@
+{
+  "arms": {
+    "B_cp_off": {
+      "charged_calls_per_task": 250,
+      "construction_prior": null,
+      "contract": "configs/pmo_ab_b_construction_prior_off_contract_v1.json",
+      "payload_sha256": "57fee341213796276a82d3d991beeec16e11595690da9d9fe8c5235c79fb6aed",
+      "tasks": [
+        "celecoxib_rediscovery"
+      ]
+    },
+    "B_cp_on": {
+      "charged_calls_per_task": 250,
+      "construction_prior": {
+        "checkpoint_sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+        "corpus_scope_hash": "3721d69851110fdd",
+        "floor": 0.05,
+        "schema_version": "pmo_construction_prior_spec_v1",
+        "status": "DEVELOPMENT_ONLY_CONSTRUCTION_PRIOR_QUALIFICATION",
+        "temperature": 1.0
+      },
+      "contract": "configs/pmo_ab_b_construction_prior_on_contract_v1.json",
+      "payload_sha256": "268c8d93da2ed36841a96e0526f6faf04a681a914e8f742282646ae63117f0f7",
+      "tasks": [
+        "celecoxib_rediscovery"
+      ]
+    }
+  },
+  "authorized_at_utc": "2026-09-22T04:42:35.019612+00:00",
+  "authorized_oracle_calls": {
+    "arms": 2,
+    "hard_limit_note": "500 charged calls and not one more. Each arm is a single Modal call with retries=0; the ledger budget is read from the arm's own sealed payload, and execute_task takes charged_calls_per_task as a REQUIRED argument with no default, so no runtime can inherit a budget it was not authorized for.",
+    "per_arm": 250,
+    "total": 500
+  },
+  "authorizing_instruction": "Owner instruction: freeze every PMO architecture change except the construction prior; run a matched celecoxib development A/B at 250 charged calls, deployed B versus B plus the full construction-lane prior, identical initialization and controller otherwise; the checkpoint may be used only as a development qualification while its publication restriction remains; do not modify donor allocation, 100-init, macro scheduling or exploration policy.",
+  "development_only": {
+    "applies_to_both_arms": "The control arm carries the restriction too. The COMPARISON is a development qualification of the mechanism.",
+    "checkpoint": "ringcore_a7546e2_best.pt",
+    "checkpoint_sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+    "forbidden_because": "the checkpoint was selected by hazard-inclusive GM loss, an explicitly forbidden criterion for frozen results",
+    "forbidden_by": "configs/ringcore_v1_checkpoint_selection.json",
+    "label": "DEVELOPMENT_ONLY_CONSTRUCTION_PRIOR_QUALIFICATION",
+    "may_become_a_published_number": false
+  },
+  "frozen_in_this_experiment": [
+    "donor allocation",
+    "initialization count (16)",
+    "macro scheduling",
+    "exploration policy",
+    "parent allocator",
+    "online memory mechanism",
+    "executor",
+    "oracle adapter",
+    "controller seed 20260920"
+  ],
+  "matched": "Both payloads are built from ONE common dictionary, so they differ in exactly one top-level key, `arm`, by construction rather than by inspection. Within `arm` they differ only in `construction_prior` plus three descriptive strings.",
+  "predeclared_decision_rule": {
+    "commit": "ac077f7ee45d55d82ffcb38378ef9cce1a05b2ee",
+    "declared_before": "the wiring change, the deploy, and any charged call",
+    "path": "diagnostics/pmo_construction_prior_ab/predeclared_decision_rule_v1.json"
+  },
+  "resealed_at_utc": "2026-09-22T04:45:23.173659+00:00",
+  "schema_version": "pmo_construction_prior_ab_authorization_v1",
+  "status": "AUTHORIZED"
+}

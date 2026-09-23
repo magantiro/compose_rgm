@@ -1,0 +1,118 @@
+{
+  "payload": {
+    "arm": {
+      "comparison": "pmo_construction_prior_v1_control",
+      "construction_prior": null,
+      "enable_online_memory": true,
+      "name": "B_cp_off",
+      "what_differs": "NOTHING relative to the deployed B arm. `construction_prior` is ABSENT, which is the only byte-identical off for this seam: execute_task omits the key from optimizer_kwargs entirely rather than setting it to None, and synthesize_dynamic_program keeps v1's exact RNG stream when successor_prior is None. A 'uniform prior object' would NOT be a no-op -- any law object consumes rng.random where the unlawed draw consumes rng.permutation, so it reproduces the support and not the draws."
+    },
+    "authority": "diagnostics/pmo_construction_prior_ab/scored_authorization_v1.json is the only source of runtime scoring authority for this arm. The worker binds arm -> payload sha256 against that receipt and refuses any payload it does not name.",
+    "budget": {
+      "automatic_retries": 0,
+      "backfill": false,
+      "candidate_calls_per_task": 234,
+      "charged_calls_per_task": 250,
+      "charged_calls_total": 250,
+      "cpu_per_worker": 1,
+      "gpu": false,
+      "initialization_calls_per_task": 16,
+      "max_rounds": 64,
+      "queries_per_round": 16
+    },
+    "checkpoint_publication_restriction": {
+      "applies_to_both_arms": "The control carries the restriction too: it is the COMPARISON that is a development qualification, not merely the treated arm.",
+      "checkpoint": "ringcore_a7546e2_best.pt",
+      "checkpoint_sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+      "forbidden_because": "selected by hazard-inclusive GM loss, an explicitly forbidden criterion",
+      "forbidden_by": "configs/ringcore_v1_checkpoint_selection.json",
+      "may_become_a_published_number": false,
+      "status": "DEVELOPMENT_ONLY_CONSTRUCTION_PRIOR_QUALIFICATION"
+    },
+    "controller_contract": "configs/pmo_population_controller_v1.json",
+    "controller_contract_sha256": "300b79055d1afe39d7353cac3ba660162185044a25db0c67930c2b4fee253aaf",
+    "corrected_source_capsule_manifest": "diagnostics/pmo_population_controller_v1/source_capsule_manifest_v2.json",
+    "corrected_worker_app": "compose-pmo-population-v1-corrected",
+    "corrected_worker_path": "modal_apps/pmo_population_v1_app.py",
+    "development_only": true,
+    "implementation_sha256": {
+      "modal_apps/pmo_population_v1_app.py": "af35dad3bd04ab8c55f346ba2bb4fb297757423089108db291fd8fd3eb36b96c",
+      "scripts/evaluate_tracelet_rollouts.py": "b74ceea950d2f3b3a37ba8f5a397d6be6eb670e3fac92d0814f9752c83e85cf8",
+      "src/compose_v4/control/adaptive_program_optimizer.py": "1f1937ca6035f2797235878925a515aff543089d044a8c06cd6197aea6a64a23",
+      "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "9f8bb2ba0b54fe91004ab5a1ba27ead2e14082680e085bc494d89522f9f933a4",
+      "src/compose_v4/control/dynamic_program_synthesis_v21.py": "d5f4d432f3a51d49a1c6f962e079a5ae729c731031998d78caf14f1d3891b743",
+      "src/compose_v4/control/edit_learning_data.py": "b0e71fdbd54c39727765edfe36253c0588b9882ecf8a52f6b65b7c590d711f71",
+      "src/compose_v4/control/learned_successor_prior.py": "97ff5933e42ec1fc649626f7ee7a9cede1ca7468ca12761baf854084ada631a8",
+      "src/compose_v4/control/pmo_construction_prior.py": "835e5ab4d413d9f66dbf4119f8440960d35df1d672430d334a7a3b9be7979de7",
+      "src/compose_v4/control/pmo_credit.py": "9c8e32adec82df973d7175215a424df29367af96c8870981a0909fcd2a77a164",
+      "src/compose_v4/control/pmo_online_memory.py": "027f2c96f34de6ac415397936045599f608671768550feac582daf4d4a512d2d",
+      "src/compose_v4/control/pmo_population_controller.py": "6c4758cc943a7a8497ee155f2cdec1c97e1602a0781294c1ce7bfc0f67327a32",
+      "src/compose_v4/control/pmo_realization.py": "153d2f49b08186abff6088c1f6c462fe2d96b83ede26587b90a8504c0671b308",
+      "src/compose_v4/control/program_campaign.py": "205f4aef97489ee352df9d8284e9d21ad683c3d542d25ce748c03bd9f8d6644b",
+      "src/compose_v4/experiments/pmo_oracle_assets.py": "5ec0b7c9b9185cd2b8edd14c2529f37e825311a2b39d6ce71c68423ab9f4d558",
+      "src/compose_v4/experiments/pmo_population_v1.py": "5600ca302a1573e67453ab20651471f4c388c4e692332b8aac19d2757e0928ba"
+    },
+    "modal_launch_authorized": false,
+    "oracle": {
+      "adapter": "native PyTDC Oracle(name=task)",
+      "calls_include_initialization": true,
+      "direction": "maximize",
+      "prescreen": false
+    },
+    "oracle_calls_authorized": 0,
+    "prior_scope_measured": {
+      "not_prior_aware": [
+        "structured_program_channel (routes through dynamic_program_synthesis_v1)",
+        "joint_dependency_region_jump",
+        "recombination",
+        "ProgramOptimizer._mutate current-state-edit branch",
+        "the cold-start bootstrap pool"
+      ],
+      "note": "This is a PARTIAL-COVERAGE mechanism by construction. A null result is a null about the shallow construction lane, not about a chemical prior in general.",
+      "prior_aware": [
+        "shallow_program_channel, fresh-synthesis branch of DynamicProgramOptimizer._mutate",
+        "shallow_program_channel, warm-memory branch of pmo_online_memory.memory_channel_proposal"
+      ]
+    },
+    "promotion": {
+      "decision_rule": "diagnostics/pmo_construction_prior_ab/predeclared_decision_rule_v1.json, committed at ac077f7ee45d55d82ffcb38378ef9cce1a05b2ee before this wiring existed and before any charged call",
+      "may_become_a_published_number": false
+    },
+    "runtime": {
+      "live_parent_support_gate": "configs/pmo_population_live_parent_gate_v2.json",
+      "live_parent_support_gate_sha256": "510f6920e947e128557d48f52baa43392e7fb4bf9b0469aa864010ca85651ef0",
+      "parent_modes": [
+        "global_explore",
+        "jump_from_elite",
+        "refine_elite"
+      ],
+      "recursive_descendants": true,
+      "task_to_endpoint_lookup": false,
+      "task_to_route_lookup": false,
+      "winner_injection": false
+    },
+    "schema_version": "pmo_population_controller_v1_scored_contract",
+    "scientific_question": "Does the learned, task-independent chemical prior over the CONSTRUCTION draw -- which measurably halves closed-loop manifold drift with zero oracle calls -- translate into a better scored PMO search, or is off-manifold drift an insufficient explanation of basin discovery?",
+    "scored_launch_authorized": false,
+    "status": "FROZEN_FAIL_CLOSED_AUTHORITY_IS_THE_SEALED_RECEIPT",
+    "task_roles": {
+      "celecoxib_rediscovery": "development A/B substrate: the task whose matched 1k A/B is on record, whose manifold drift was measured, and whose plateau this prior is hypothesised to address"
+    },
+    "tasks": [
+      "celecoxib_rediscovery"
+    ],
+    "wall_clock_confound": {
+      "measured_construction_cost_ratio": 1.91,
+      "measured_shallow_lane_seconds_in_deployed_B": {
+        "budget": 45.0,
+        "max": 15.71,
+        "median": 10.97
+      },
+      "mechanism": "each lane stops on 16 candidates or config.wall_seconds = 45.0, whichever first",
+      "prediction": "the shallow lane stops on the candidate cap in BOTH arms",
+      "verification": "realized per-round shallow-lane seconds and pool sizes are compared across arms after the run"
+    }
+  },
+  "payload_sha256": "57fee341213796276a82d3d991beeec16e11595690da9d9fe8c5235c79fb6aed"
+}

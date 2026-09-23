@@ -31,9 +31,24 @@ AB_CONTRACTS = {
     # payload it extends and the revision boundary inside the trajectory.
     "A_baseline_1k": "configs/pmo_ab_a_baseline_1k_contract_v1.json",
     "B_memory_1k": "configs/pmo_ab_b_memory_1k_contract_v1.json",
+    # The construction-prior A/B. Both arms are deployed B (allocator repair plus
+    # online structural memory) at 250 charged calls on celecoxib; the ONLY declared
+    # difference is `arm.construction_prior`. The OFF arm omits the key entirely,
+    # which is the only byte-identical off for this seam.
+    "B_cp_off": "configs/pmo_ab_b_construction_prior_off_contract_v1.json",
+    "B_cp_on": "configs/pmo_ab_b_construction_prior_on_contract_v1.json",
 }
 AB_AUTHORIZATION = "diagnostics/pmo_ab_scored_authorization_v1.json"
 AB_AUTHORIZATION_1K = "diagnostics/pmo_ab_1k_extension_authorization_v1.json"
+AB_AUTHORIZATION_CP = (
+    "diagnostics/pmo_construction_prior_ab/scored_authorization_v1.json"
+)
+# The qualifying editing checkpoint, mounted on the artifact volume rather than
+# baked into the image: it is 24 MB of model weights, it is NOT part of the
+# runtime source capsule, and its identity is enforced by sha256 at load time
+# (`compose_v4.control.pmo_construction_prior.load_prior_model`) rather than by
+# where it happens to sit.
+CONSTRUCTION_PRIOR_CHECKPOINT = "construction_prior/ringcore_a7546e2_best.pt"
 CONTROLLER_CONTRACT = "configs/pmo_population_controller_v1.json"
 ORACLE_CONTRACT = "configs/pmo_dynamic_v21_development_v1.json"
 # The pinned oracle-asset capsule.  PyTDC resolves `oracle/<name>.pkl` RELATIVE to the
@@ -68,6 +83,14 @@ image = (
     .add_local_file(ROOT / AB_AUTHORIZATION_1K, str(REMOTE_ROOT / AB_AUTHORIZATION_1K), copy=True)
     .add_local_file(ROOT / AB_CONTRACTS["B_memory_1k"], str(REMOTE_ROOT / AB_CONTRACTS["B_memory_1k"]), copy=True)
     .add_local_file(ROOT / AB_CONTRACTS["A_baseline_1k"], str(REMOTE_ROOT / AB_CONTRACTS["A_baseline_1k"]), copy=True)
+    .add_local_file(ROOT / AB_CONTRACTS["B_cp_off"], str(REMOTE_ROOT / AB_CONTRACTS["B_cp_off"]), copy=True)
+    .add_local_file(ROOT / AB_CONTRACTS["B_cp_on"], str(REMOTE_ROOT / AB_CONTRACTS["B_cp_on"]), copy=True)
+    .add_local_file(ROOT / AB_AUTHORIZATION_CP, str(REMOTE_ROOT / AB_AUTHORIZATION_CP), copy=True)
+    # The rollout reconstruction lives in `scripts/`, so `scripts` joins PYTHONPATH.
+    # `compose_v4.control.pmo_construction_prior` imports it lazily and only when an
+    # arm declares a prior, so the OFF arm's import graph is unchanged.
+    .add_local_file(ROOT / "scripts/evaluate_tracelet_rollouts.py",
+                    str(REMOTE_ROOT / "scripts/evaluate_tracelet_rollouts.py"), copy=True)
     .add_local_file(ROOT / CONTROLLER_CONTRACT,
                     str(REMOTE_ROOT / CONTROLLER_CONTRACT), copy=True)
     .add_local_file(ROOT / ORACLE_CONTRACT, str(REMOTE_ROOT / ORACLE_CONTRACT), copy=True)
@@ -92,7 +115,7 @@ image = (
         ROOT / ASSET_DIR, str(REMOTE_ROOT / ASSET_DIR), copy=True,
     )
     .env({
-        "PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}",
+        "PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}:{REMOTE_ROOT}/scripts",
         "OMP_NUM_THREADS": "1",
         "OPENBLAS_NUM_THREADS": "1",
         "MKL_NUM_THREADS": "1",
@@ -113,6 +136,7 @@ def _write_json(path: Path, payload: dict) -> None:
 def _rdkit_six_shim() -> None:
     import sys
     import types
+
     import rdkit
 
     shim = types.ModuleType("rdkit.six")
@@ -139,8 +163,6 @@ def run_task(spec: dict) -> dict:
 
     from datetime import datetime, timezone
 
-    from compose_v4.control.docking_value import identity
-    from compose_v4.experiments.continuation_profile import verify_file
     from compose_v4.experiments.pmo_dynamic_v21 import verify_runtime_environment
     from compose_v4.experiments.pmo_oracle_assets import (
         PMO_ORACLE_ASSET_ROOT,
@@ -168,7 +190,12 @@ def run_task(spec: dict) -> dict:
         contract_envelope = json.loads((root / AB_CONTRACTS[arm]).read_text())
         if spec["contract_payload_sha256"] != contract_envelope.get("payload_sha256"):
             raise ValueError("scored payload authorization identity changed")
-        receipt_rel = AB_AUTHORIZATION_1K if arm.endswith("_1k") else AB_AUTHORIZATION
+        if arm.startswith("B_cp_"):
+            receipt_rel = AB_AUTHORIZATION_CP
+        elif arm.endswith("_1k"):
+            receipt_rel = AB_AUTHORIZATION_1K
+        else:
+            receipt_rel = AB_AUTHORIZATION
         authorization = json.loads((root / receipt_rel).read_text())
         entry = (authorization.get("arms") or {}).get(arm) or {}
         if entry.get("payload_sha256") != spec["contract_payload_sha256"]:
@@ -302,6 +329,44 @@ def run_task(spec: dict) -> dict:
         volume.commit()
     control_calls = scorer.calls
 
+    # An arm that DECLARES a construction prior must be able to build it before a
+    # single call is charged.  Building it here -- rather than lazily inside the first
+    # proposal round -- means a missing or wrong-hash checkpoint fails while the task
+    # is still re-runnable, instead of after the budget is spent.  It also proves the
+    # ON arm is genuinely ON: `build_construction_prior` raises rather than returning
+    # None, so a silent fallback to the uniform draw cannot happen.
+    declared_prior = (contract_envelope["payload"].get("arm") or {}).get(
+        "construction_prior"
+    )
+    construction_prior_preflight = None
+    if declared_prior is not None:
+        import os as _os
+
+        from compose_v4.control.pmo_construction_prior import (
+            ConstructionPriorSpec,
+            build_construction_prior,
+        )
+
+        _os.environ.setdefault(
+            "COMPOSE_CONSTRUCTION_PRIOR_CHECKPOINT",
+            str(ARTIFACT_ROOT / CONSTRUCTION_PRIOR_CHECKPOINT),
+        )
+        _spec = ConstructionPriorSpec.from_payload(declared_prior)
+        _prior = build_construction_prior(_spec)
+        construction_prior_preflight = {
+            "schema_version": "pmo_construction_prior_preflight_v1",
+            "checkpoint_path": _spec.checkpoint_path,
+            "checkpoint_sha256": _spec.checkpoint_sha256,
+            "corpus_scope_hash": _spec.corpus_scope_hash,
+            "status": _spec.status,
+            "floor": _spec.floor,
+            "temperature": _spec.temperature,
+            "built": type(_prior).__name__,
+        }
+        _write_json(folder / "construction_prior_preflight.json",
+                    {**construction_prior_preflight, "run_id": run_id})
+        volume.commit()
+
     # The frozen contract stays fail-closed on disk.  The separately authorized
     # receipt is the only source of runtime scoring authority, bound in memory.
     runtime_contract = dict(contract)
@@ -321,6 +386,7 @@ def run_task(spec: dict) -> dict:
                    "distinct_observed_values", "max_abs_delta", "reference_status")}
         ),
         "uncharged_positive_control_calls": control_calls,
+        "construction_prior": construction_prior_preflight,
     })
     volume.commit()
 
@@ -351,6 +417,14 @@ def run_task(spec: dict) -> dict:
                     "enable_online_memory", False
                 )
             ),
+            # Same rule for the construction prior: the arm's own sealed payload is the
+            # only source. ABSENT means the uniform construction draw, byte-identically
+            # -- the key is omitted from `optimizer_kwargs` rather than set to None, so
+            # an OFF arm's `optimizer_kwargs_sha256` matches every run made before this
+            # seam existed.
+            construction_prior_spec=(
+                (contract_envelope["payload"].get("arm") or {}).get("construction_prior")
+            ),
             progress=progress,
         )
         result["run_id"] = run_id
@@ -361,6 +435,7 @@ def run_task(spec: dict) -> dict:
             True if positive_control is None else bool(positive_control["passed"])
         )
         result["uncharged_positive_control_calls"] = control_calls
+        result["construction_prior_preflight"] = construction_prior_preflight
         _write_json(result_path, result)
         volume.commit()
         # The AUC key carries the budget it was computed at; a fixed 1000-call denominator
