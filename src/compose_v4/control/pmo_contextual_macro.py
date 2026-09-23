@@ -49,7 +49,28 @@ MACRO_FAMILIES: tuple[str, ...] = (
     "ring_system_restate",
 )
 
-FEATURE_BLOCKS: tuple[str, ...] = ("macro", "descriptor", "change", "fingerprint")
+FEATURE_BLOCKS: tuple[str, ...] = (
+    "macro_intent",
+    "parent_descriptor",
+    "parent_fingerprint",
+    "macro_realized",
+    "endpoint_descriptor",
+    "change",
+    "endpoint_fingerprint",
+)
+
+#: Available BEFORE the macro is executed, so legal for deciding what to propose.  A family and a
+#: requested module count are INTENTS -- the question `Q_pre` answers is "if I attempt this family
+#: from this parent, what is it worth", which is exactly the allocation decision.
+PRE_EXECUTION_BLOCKS: tuple[str, ...] = (
+    "macro_intent",
+    "parent_descriptor",
+    "parent_fingerprint",
+)
+
+#: Everything, including the realized endpoint.  Legal only AFTER COMPOSE has built the molecule,
+#: i.e. for deciding which realized candidates deserve an oracle call.
+POST_EXECUTION_BLOCKS: tuple[str, ...] = FEATURE_BLOCKS
 
 
 def _mol(smiles: str):
@@ -84,13 +105,19 @@ def _folded(mol) -> np.ndarray:
     return array
 
 
-def _macro_block(edge) -> np.ndarray:
+def _macro_intent_block(edge) -> np.ndarray:
+    """Only what a caller knows BEFORE executing: the family it intends to attempt, the module
+    count it requested, the parent's own score, and where in the search it stands.
+
+    `primitives` and `module_count` are REALIZED and are deliberately excluded here -- a program's
+    true length is known only once it compiles, so using it to decide what to propose would be
+    reading the answer.
+    """
     families = set(edge.get("families") or ())
     return np.asarray(
         [
             float(edge.get("parent_score", 0.0)),
-            float(edge.get("primitives", 0)) / 32.0,
-            float(edge.get("module_count", 0)) / 4.0,
+            float(edge.get("requested_modules", 0)) / 4.0,
             float(edge.get("depth", 0)) / 16.0,
             float(edge.get("generation", 0)) / 16.0,
             float(bool(edge.get("capacity_aware"))),
@@ -106,12 +133,25 @@ def edge_features(edge, *, blocks=FEATURE_BLOCKS) -> np.ndarray:
     if unknown:
         raise ValueError(f"unknown feature blocks: {sorted(unknown)}")
     parent = _mol(edge["parent"])
-    child = _mol(edge["endpoint"])
+    child = _mol(edge["endpoint"]) if _needs_endpoint(blocks) else None
     parts: list[np.ndarray] = []
-    if "macro" in blocks:
-        parts.append(_macro_block(edge))
-    if "descriptor" in blocks:
+    if "macro_intent" in blocks:
+        parts.append(_macro_intent_block(edge))
+    if "parent_descriptor" in blocks:
         parts.append(_descriptors(parent))
+    if "parent_fingerprint" in blocks:
+        parts.append(_folded(parent))
+    if "macro_realized" in blocks:
+        parts.append(
+            np.asarray(
+                [
+                    float(edge.get("primitives", 0)) / 32.0,
+                    float(edge.get("module_count", 0)) / 4.0,
+                ],
+                dtype=float,
+            )
+        )
+    if "endpoint_descriptor" in blocks:
         parts.append(_descriptors(child))
     if "change" in blocks:
         similarity = 0.0
@@ -120,10 +160,14 @@ def edge_features(edge, *, blocks=FEATURE_BLOCKS) -> np.ndarray:
                 AllChem.GetMorganFingerprint(parent, 2), AllChem.GetMorganFingerprint(child, 2)
             )
         parts.append(np.concatenate([[similarity], _descriptors(child) - _descriptors(parent)]))
-    if "fingerprint" in blocks:
+    if "endpoint_fingerprint" in blocks:
         parts.append(_folded(child))
     parts.append(np.ones(1))
     return np.concatenate(parts)
+
+
+def _needs_endpoint(blocks) -> bool:
+    return bool({"macro_realized", "endpoint_descriptor", "change", "endpoint_fingerprint"} & set(blocks))
 
 
 @dataclass

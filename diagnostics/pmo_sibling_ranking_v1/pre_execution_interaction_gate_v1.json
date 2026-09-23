@@ -1,0 +1,31 @@
+{
+ "schema_version": "pmo_pre_execution_interaction_gate_v1",
+ "evidence_role": "held_out_development_gate",
+ "new_charged_oracle_calls": 0,
+ "target": "best of up to 4 realizations per (parent, family-intent) cell",
+ "holdout_start": "init_04",
+ "train_cells": 373,
+ "test_cells": 186,
+ "arms": {
+  "parent_only": {
+   "held_out_r2": 0.18981921844119842,
+   "spearman": 0.5063168740588095,
+   "top10_cell_mean": 0.2528304875609756
+  },
+  "macro_only": {
+   "held_out_r2": 0.08948377165388499,
+   "spearman": 0.3144114616600385,
+   "top10_cell_mean": 0.2336651220731877
+  },
+  "additive": {
+   "held_out_r2": 0.3078677610062661,
+   "spearman": 0.6432469730382443,
+   "top10_cell_mean": 0.2652621722835022
+  },
+  "interaction": {
+   "held_out_r2": 0.26753578761133345,
+   "spearman": 0.5849390877853876,
+   "top10_cell_mean": 0.2639790113268118
+  }
+ }
+}

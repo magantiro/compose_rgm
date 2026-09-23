@@ -108,12 +108,25 @@ def main():
         "sibling_groups": len(groups),
         "arms": {},
     }
-    for blocks in (("macro",), ("macro", "descriptor"), ("macro", "descriptor", "change"),
-                   ("macro", "descriptor", "change", "fingerprint")):
+    # The pre/post split is the point of this run. `Q_pre` may use ONLY what is known before
+    # COMPOSE executes the macro, so it answers "what should I propose"; `Q_post` may use the
+    # realized molecule, so it answers "what deserves an oracle call". Conflating them would
+    # claim upstream control on the strength of information that does not exist upstream.
+    for blocks in (
+        ("macro_intent",),
+        ("macro_intent", "parent_descriptor"),
+        ("macro_intent", "parent_descriptor", "parent_fingerprint"),          # <- Q_pre, strict
+        ("macro_intent", "parent_descriptor", "parent_fingerprint", "macro_realized"),
+        ("macro_intent", "parent_descriptor", "parent_fingerprint", "macro_realized",
+         "endpoint_descriptor", "change"),
+        ("macro_intent", "parent_descriptor", "parent_fingerprint", "macro_realized",
+         "endpoint_descriptor", "change", "endpoint_fingerprint"),            # <- Q_post, full
+    ):
         model = ContextualMacroValue(blocks=blocks)
         model.fit(train, [r["score"] for r in train])
         cache = {id(r): float(p) for r, p in zip(test, model.predict(test), strict=True)}
-        arms["+".join(blocks)] = lambda r, c=cache: c[id(r)]
+        label = "PRE  " if not set(blocks) & {"macro_realized", "endpoint_descriptor", "change", "endpoint_fingerprint"} else "POST "
+        arms[label + "+".join(b.replace("_fingerprint", "_fp") for b in blocks)] = lambda r, c=cache: c[id(r)]
 
     for name, scorer in arms.items():
         accuracy, pairs = pairwise_accuracy(groups, scorer)
@@ -126,7 +139,7 @@ def main():
         }
         report["arms"][name] = entry
         print(
-            f"{name:44s} pair={accuracy:.3f} rho={entry['mean_spearman']:+.3f} "
+            f"{name:72s} pair={accuracy:.3f} rho={entry['mean_spearman']:+.3f} "
             f"pick={entry['mean_true_score_of_pick']:.4f} "
             f"headroom={entry['headroom_captured']:+.1%}"
         )
