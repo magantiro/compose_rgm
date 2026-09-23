@@ -8,16 +8,22 @@ The trap it exists to avoid is specific and was hit once while producing this
 baseline. Without ``--continue-on-collection-errors`` pytest stops at the FIRST
 collection error and reports ``1 skipped, 1 error`` with ZERO failures, which
 reads as a clean baseline. The real state behind that single error is thousands
-of tests never run. So the fingerprint records the collection summary line
-FIRST, and ``compare`` refuses to produce a verdict when the collected count
-moves, because two runs that collected different numbers of tests are not
-comparable no matter how similar their failure lists look.
+of tests never run.
+
+So comparability is a SET question, not a count question. The fingerprint
+records the collected node ids, and ``compare`` asks which baseline nodes
+DISAPPEARED. Requiring the count to match instead would cry wolf on every pass
+that legitimately adds a test, and would still miss the case where a collection
+error drops three tests while a new file adds six.
 
 Usage::
 
     pytest tests/ -q --tb=no -rfE --continue-on-collection-errors > raw.txt
-    python3 tools/repro_test_fingerprint.py --raw raw.txt --out repro/test_fingerprint_v1.json
-    python3 tools/repro_test_fingerprint.py --raw new.txt --out new.json --compare base.json
+    pytest tests/ -q --collect-only --continue-on-collection-errors | grep :: > collected.txt
+    python3 tools/repro_test_fingerprint.py --raw raw.txt --collected collected.txt \
+        --out repro/test_fingerprint_v1.json
+    python3 tools/repro_test_fingerprint.py --raw new.txt --collected new_collected.txt \
+        --out new.json --compare repro/test_fingerprint_v1.json
 """
 
 from __future__ import annotations
@@ -75,21 +81,42 @@ def compare(baseline: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
     regressions = sorted(after_bad - before_bad)
     repaired = sorted(before_bad - after_bad)
 
-    comparable = (
-        baseline["collected"] is not None
-        and after["collected"] is not None
-        and baseline["collected"] == after["collected"]
-    )
+    # Comparability is a SET question, not a count question. Adding a test file
+    # legitimately raises the count, so requiring equality would cry wolf on
+    # every pass that adds a guard. What must never happen is a baseline node
+    # DISAPPEARING, which is the signature of a collection error swallowing
+    # tests while the run still reports zero failures.
+    before_nodes = set(baseline.get("collected_nodes") or [])
+    after_nodes = set(after.get("collected_nodes") or [])
+    if before_nodes and after_nodes:
+        vanished = sorted(before_nodes - after_nodes)
+        added = sorted(after_nodes - before_nodes)
+        comparable = not vanished
+        basis = "node_id_set"
+    else:
+        # Fall back to counts, and then only a DROP is disqualifying.
+        vanished, added = [], []
+        comparable = (
+            baseline["collected"] is not None
+            and after["collected"] is not None
+            and after["collected"] >= baseline["collected"]
+        )
+        basis = "collected_count_floor"
+
     if not comparable:
-        verdict = "NOT_COMPARABLE_COLLECTION_COUNT_MOVED"
+        verdict = "NOT_COMPARABLE_TESTS_DISAPPEARED"
     elif regressions:
         verdict = "TEST_REGRESSION"
     else:
         verdict = "NO_TEST_REGRESSION"
     return {
+        "comparability_basis": basis,
         "baseline_collected": baseline["collected"],
         "after_collected": after["collected"],
-        "collection_counts_match": comparable,
+        "collected_nodes_vanished": vanished[:50],
+        "collected_nodes_vanished_count": len(vanished),
+        "collected_nodes_added_count": len(added),
+        "comparable": comparable,
         "baseline_failing_or_erroring": len(before_bad),
         "after_failing_or_erroring": len(after_bad),
         "new_regressions": regressions,
@@ -104,11 +131,24 @@ def main() -> int:
     parser.add_argument("--raw", required=True, help="captured pytest stdout")
     parser.add_argument("--out", required=True)
     parser.add_argument("--compare", help="baseline fingerprint to diff against")
+    parser.add_argument(
+        "--collected",
+        help="file of collected node ids (pytest --collect-only -q | grep ::). Recorded so the "
+        "comparison can ask which tests DISAPPEARED rather than whether the count changed.",
+    )
     parser.add_argument("--label", default="")
     args = parser.parse_args()
 
     raw = pathlib.Path(args.raw).read_text(encoding="utf-8", errors="ignore")
     report = parse(raw)
+    if args.collected:
+        nodes = [
+            line.strip()
+            for line in pathlib.Path(args.collected).read_text(encoding="utf-8").splitlines()
+            if "::" in line
+        ]
+        report["collected_nodes"] = sorted(set(nodes))
+        report["collected_node_count"] = len(report["collected_nodes"])
     report["label"] = args.label
     report["commit"] = subprocess.run(
         ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False

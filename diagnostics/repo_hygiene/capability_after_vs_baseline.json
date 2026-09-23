@@ -1,0 +1,26 @@
+{
+  "ast_symbols": {
+    "after_pairs": 17025,
+    "baseline_pairs": 17025,
+    "gained_count": 0,
+    "is_superset": true,
+    "lost": [],
+    "lost_count": 0
+  },
+  "environments_match": true,
+  "import_symbols": {
+    "after_pairs": 17081,
+    "baseline_pairs": 17081,
+    "gained_count": 0,
+    "is_superset": true,
+    "lost": [],
+    "lost_count": 0
+  },
+  "importable_modules": {
+    "after": 590,
+    "baseline": 590,
+    "is_superset": true,
+    "lost": []
+  },
+  "verdict": "CAPABILITY_PRESERVED"
+}
