@@ -195,6 +195,15 @@ def build_pinned_paths(root: pathlib.Path, pinned: dict, resolution: dict) -> di
         "baseline_tag": "pre-cleanup-2026-09-23",
         "producing_commit": head,
         "pinned_path_count": len(entries),
+        "schema_note": (
+            "A `historical_run` field was requested and is deliberately ABSENT rather than "
+            "guessed. There is no reliable path from a pinned file to the run that consumed it: "
+            "one file is pinned by up to hundreds of artifacts, many of which are contracts "
+            "written before any run, and the run identity lives in a separate manifest keyed on "
+            "an aggregate source fingerprint rather than on the file. `pinned_by` carries the "
+            "artifacts, which is the link that actually exists; inventing a run id per file would "
+            "be the fabricated-provenance failure this repository has already paid for."
+        ),
         "aggregate_identity_warning": {
             "statement": (
                 "The per-file set UNDERSTATES the constraint. Three whole-tree fingerprints hash "

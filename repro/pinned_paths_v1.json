@@ -39333,11 +39333,12 @@
   },
   "pinned_path_count": 1879,
   "policy": "READ-ONLY. Never re-pin a historical contract to make a cleanup pass succeed.",
-  "producing_commit": "917410cf150d1645f594ed27d3259c35a04df4e7",
+  "producing_commit": "47c647ca583d36f2216ab70c60782556d8ca12cc",
   "resolution_summary": {
     "absent": 10876,
     "resolves": 110208,
     "stale": 6014
   },
+  "schema_note": "A `historical_run` field was requested and is deliberately ABSENT rather than guessed. There is no reliable path from a pinned file to the run that consumed it: one file is pinned by up to hundreds of artifacts, many of which are contracts written before any run, and the run identity lives in a separate manifest keyed on an aggregate source fingerprint rather than on the file. `pinned_by` carries the artifacts, which is the link that actually exists; inventing a run id per file would be the fabricated-provenance failure this repository has already paid for.",
   "schema_version": 1
 }
