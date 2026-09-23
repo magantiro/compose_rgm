@@ -36,6 +36,7 @@ import numpy as np
 
 ROUTES = "diagnostics/pmo_macro_horizon_v1/celecoxib_routes_v1.json"
 OUT = "diagnostics/pmo_blind_traversal_v1/blind_traversal_v1.json"
+RESUME_OUT = "diagnostics/pmo_blind_traversal_v1/blind_traversal_resumed_v1.json"
 
 
 def _oracle():
@@ -70,6 +71,28 @@ def main():
     score = _oracle()
     option = RegionReplacementOption(region_law=ScaleBalancedRegionLaw()) if use_option else None
 
+    # `--resume=<name>` continues a completed start from its SAVED FRONTIER rather than
+    # redoing generations already paid for.  The frontier is the run's own committed output,
+    # so this introduces no information the blind run did not already generate itself.
+    resume = next(
+        (a.removeprefix("--resume=") for a in sys.argv if a.startswith("--resume=")), None
+    )
+    if resume:
+        with open(OUT) as handle:
+            prior = json.load(handle)
+        entry = next(s for s in prior["starts"] if s["name"] == resume)
+        seeded = [
+            {"smiles": r["smiles"], "score": r["score"], "depth": r["depth"]}
+            for r in entry["final_frontier"]
+        ]
+        print(
+            f"resuming {resume} from {len(seeded)} frontier entries, "
+            f"best {max(r['score'] for r in seeded):.4f}, depth<= {max(r['depth'] for r in seeded)}",
+            flush=True,
+        )
+    else:
+        seeded = None
+
     with open(ROUTES) as handle:
         document = json.load(handle)
     # The ORIGINAL init-bank starting molecules, never a teacher intermediate.
@@ -78,6 +101,8 @@ def main():
         for row in document["routes"]
         if row["status"] == "witness_found" and row["source_name"].startswith("init_")
     ]
+    if resume:
+        starts = [s for s in starts if s["name"] == resume]
 
     report = {
         "schema_version": "pmo_blind_traversal_v1",
@@ -96,7 +121,9 @@ def main():
             hashlib.blake2b(start["name"].encode(), digest_size=4).digest(), "big"
         )
         rng = np.random.default_rng(20260923 + seed)
-        frontier = [{"smiles": start["smiles"], "score": float(score(start["smiles"])), "depth": 0}]
+        frontier = seeded or [
+            {"smiles": start["smiles"], "score": float(score(start["smiles"])), "depth": 0}
+        ]
         evaluations = 1
         best_overall = frontier[0]["score"]
         history, started = [], time.time()
@@ -186,10 +213,11 @@ def main():
                 ],
             }
         )
-        pathlib.Path(OUT).parent.mkdir(parents=True, exist_ok=True)
-        with open(OUT, "w") as handle:
+        target = RESUME_OUT if resume else OUT
+        pathlib.Path(target).parent.mkdir(parents=True, exist_ok=True)
+        with open(target, "w") as handle:
             json.dump(report, handle, indent=1)
-    print("WROTE", OUT)
+    print("WROTE", RESUME_OUT if resume else OUT)
 
 
 if __name__ == "__main__":

@@ -295,6 +295,102 @@
      "seconds": 113.7
     }
    }
+  },
+  {
+   "route": "blindmid_2_0.1356",
+   "seg": 18,
+   "boundary_kind": "terminal_cliff",
+   "source_smiles": "CC1=CC=C(C(=CCC(F)(F)F)NC=CC=C(C)S(N)(=O)=O)CC1",
+   "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+   "required_primitives": 5,
+   "parent_score": 0.17391304347826086,
+   "next_score": 1.0,
+   "arms": {
+    "A_production": {
+     "distinct_endpoints": 271,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 71,
+     "fraction_improving": 0.26199261992619927,
+     "best_score": 0.36363636363636365,
+     "best_score_delta_vs_parent": 0.18972332015810278,
+     "best_rank_families": [
+      "ring_system_restate",
+      "cycle_close"
+     ],
+     "best_smiles": "CC(=CC=CN1C(CC(F)(F)F)=C1c1ccc(C)cc1)S(N)(=O)=O",
+     "max_sim_to_next": 0.36363636363636365,
+     "max_sim_candidate_improves": true,
+     "seconds": 97.0
+    },
+    "B_region_option": {
+     "distinct_endpoints": 277,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 37,
+     "fraction_improving": 0.13357400722021662,
+     "best_score": 0.29310344827586204,
+     "best_score_delta_vs_parent": 0.11919040479760118,
+     "best_rank_families": [
+      "segment_grow",
+      "region_replace",
+      "cycle_close"
+     ],
+     "best_smiles": "Cc1ccc(C2=CC(C(F)(F)F)CC(S(N)(=O)=O)=CC=CN2)cc1ONOOO",
+     "max_sim_to_next": 0.29310344827586204,
+     "max_sim_candidate_improves": true,
+     "seconds": 114.1
+    }
+   }
+  },
+  {
+   "route": "blindmid_3_0.1351",
+   "seg": 13,
+   "boundary_kind": "terminal_cliff",
+   "source_smiles": "C=C(c1ccc(C)cc1)N(N)C=CC=C(C)S(N)(=O)=O",
+   "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+   "required_primitives": 8,
+   "parent_score": 0.22772277227722773,
+   "next_score": 1.0,
+   "arms": {
+    "A_production": {
+     "distinct_endpoints": 262,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 21,
+     "fraction_improving": 0.08015267175572519,
+     "best_score": 0.3695652173913043,
+     "best_score_delta_vs_parent": 0.1418424451140766,
+     "best_rank_families": [
+      "cycle_close"
+     ],
+     "best_smiles": "Cc1ccc(C2=CCC(S(N)(=O)=O)=CC=CN2N)cc1",
+     "max_sim_to_next": 0.3695652173913043,
+     "max_sim_candidate_improves": true,
+     "seconds": 95.7
+    },
+    "B_region_option": {
+     "distinct_endpoints": 274,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 10,
+     "fraction_improving": 0.0364963503649635,
+     "best_score": 0.3333333333333333,
+     "best_score_delta_vs_parent": 0.10561056105610558,
+     "best_rank_families": [
+      "region_replace",
+      "region_replace"
+     ],
+     "best_smiles": "C=Cc1cc(-c2ccc(C)cc2)n(N)c1[SH](=O)=O",
+     "max_sim_to_next": 0.3333333333333333,
+     "max_sim_candidate_improves": true,
+     "seconds": 99.9
+    }
+   }
   }
  ]
 }

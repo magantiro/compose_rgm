@@ -202,6 +202,147 @@
      "seconds": 91.0
     }
    }
+  },
+  {
+   "route": "blindtop_1_0.3366",
+   "seg": 0,
+   "boundary_kind": "terminal_cliff",
+   "source_smiles": "Cc1ccc(C(C)(F)C(N)(F)c2cccc3ccccc23)cc1",
+   "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+   "required_primitives": 18,
+   "parent_score": 0.33663366336633666,
+   "next_score": 1.0,
+   "arms": {
+    "A_production": {
+     "distinct_endpoints": 264,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 11,
+     "fraction_improving": 0.041666666666666664,
+     "best_score": 0.37,
+     "best_score_delta_vs_parent": 0.03336633663366334,
+     "best_rank_families": [
+      "functionalize"
+     ],
+     "best_smiles": "Cc1ccc(C(C)(F)C(N)(F)c2cccc3cc(F)ccc23)cc1",
+     "max_sim_to_next": 0.37,
+     "max_sim_candidate_improves": true,
+     "seconds": 157.4
+    },
+    "B_region_option": {
+     "distinct_endpoints": 269,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 5,
+     "fraction_improving": 0.01858736059479554,
+     "best_score": 0.3564356435643564,
+     "best_score_delta_vs_parent": 0.019801980198019764,
+     "best_rank_families": [
+      "functionalize"
+     ],
+     "best_smiles": "Cc1ccc(C(C)(F)C(N)(F)c2cccc3ccc(N)cc23)cc1",
+     "max_sim_to_next": 0.3564356435643564,
+     "max_sim_candidate_improves": true,
+     "seconds": 188.7
+    }
+   }
+  },
+  {
+   "route": "blindmid_2_0.1356",
+   "seg": 0,
+   "boundary_kind": "climb",
+   "source_smiles": "CC1=CC=C(C(CNc2ccc(Br)cc2)CONCO)CC1",
+   "next_smiles": "CC1=CC=C(C(=CCC(F)(F)F)NC=CC=C(C)S(N)(=O)=O)CC1",
+   "required_primitives": 18,
+   "parent_score": 0.13559322033898305,
+   "next_score": 0.17391304347826086,
+   "arms": {
+    "A_production": {
+     "distinct_endpoints": 271,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 71,
+     "fraction_improving": 0.26199261992619927,
+     "best_score": 0.24786324786324787,
+     "best_score_delta_vs_parent": 0.11227002752426482,
+     "best_rank_families": [
+      "fuse_ring",
+      "ring_system_restate"
+     ],
+     "best_smiles": "Cc1ccc(C(CNc2ccc(Br)c3ccccc23)CONCO)cc1",
+     "max_sim_to_next": 0.29292929292929293,
+     "max_sim_candidate_improves": false,
+     "seconds": 107.2
+    },
+    "B_region_option": {
+     "distinct_endpoints": 273,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 51,
+     "fraction_improving": 0.18681318681318682,
+     "best_score": 0.27,
+     "best_score_delta_vs_parent": 0.13440677966101697,
+     "best_rank_families": [
+      "region_replace",
+      "ring_system_restate"
+     ],
+     "best_smiles": "Cc1ccc(C(CO)CN(N)c2ccc(Br)cc2)cc1",
+     "max_sim_to_next": 0.2765957446808511,
+     "max_sim_candidate_improves": false,
+     "seconds": 99.9
+    }
+   }
+  },
+  {
+   "route": "blindmid_3_0.1351",
+   "seg": 1,
+   "boundary_kind": "climb",
+   "source_smiles": "CC1=CC=C(C(C)C(C)Nc2ccc(Br)cc2)CC1",
+   "next_smiles": "C=C(c1ccc(C)cc1)N(N)C=CC=C(C)S(N)(=O)=O",
+   "required_primitives": 12,
+   "parent_score": 0.14814814814814814,
+   "next_score": 0.22772277227722773,
+   "arms": {
+    "A_production": {
+     "distinct_endpoints": 256,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 58,
+     "fraction_improving": 0.2265625,
+     "best_score": 0.27,
+     "best_score_delta_vs_parent": 0.12185185185185188,
+     "best_rank_families": [
+      "ring_system_restate",
+      "carbonyl_insert"
+     ],
+     "best_smiles": "Cc1ccc(C(C=O)C(C)Nc2ccc(Br)cc2)cc1",
+     "max_sim_to_next": 0.2839506172839506,
+     "max_sim_candidate_improves": true,
+     "seconds": 88.0
+    },
+    "B_region_option": {
+     "distinct_endpoints": 271,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 47,
+     "fraction_improving": 0.17343173431734318,
+     "best_score": 0.2653061224489796,
+     "best_score_delta_vs_parent": 0.11715797430083147,
+     "best_rank_families": [
+      "ring_system_restate"
+     ],
+     "best_smiles": "Cc1ccc(C(C)C(C)Nc2ccc(Br)cc2)cc1",
+     "max_sim_to_next": 0.2786885245901639,
+     "max_sim_candidate_improves": true,
+     "seconds": 93.7
+    }
+   }
   }
  ]
 }

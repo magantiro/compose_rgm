@@ -1,0 +1,158 @@
+{
+ "schema_version": "pmo_blind_traversal_v1",
+ "evidence_role": "blind_development_diagnostic_with_counted_objective_evaluations",
+ "teacher_information_used": "none",
+ "objective": "tdc celecoxib_rediscovery",
+ "generations": 8,
+ "lineages_retained": 6,
+ "proposals_per_lineage": 32,
+ "region_option_enabled": true,
+ "starts": [
+  {
+   "name": "init_02",
+   "start_smiles": "CCCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+   "start_score": 0.049586776859504134,
+   "best_score": 0.4444444444444444,
+   "objective_evaluations": 1377,
+   "seconds": 678.7,
+   "history": [
+    {
+     "generation": 1,
+     "best_score": 0.15463917525773196,
+     "top10_mean": 0.09747652940855159,
+     "children": 32,
+     "improving_children": 16,
+     "distinct_improving_lineages": 1,
+     "median_delta_improving": 0.018534916262188984,
+     "median_primitives": 9.0,
+     "best_smiles": "CCCC(C=O)S(=O)(=O)c1ccccc1",
+     "best_depth": 1,
+     "evaluations_so_far": 33
+    },
+    {
+     "generation": 2,
+     "best_score": 0.24210526315789474,
+     "top10_mean": 0.19874962694348833,
+     "children": 192,
+     "improving_children": 52,
+     "distinct_improving_lineages": 6,
+     "median_delta_improving": 0.013950584379688859,
+     "median_primitives": 7.0,
+     "best_smiles": "CCC(C)S(=O)(=O)c1ccc2ccccc2c1",
+     "best_depth": 2,
+     "evaluations_so_far": 225
+    },
+    {
+     "generation": 3,
+     "best_score": 0.2830188679245283,
+     "top10_mean": 0.2496236601877532,
+     "children": 192,
+     "improving_children": 17,
+     "distinct_improving_lineages": 5,
+     "median_delta_improving": 0.019801980198019792,
+     "median_primitives": 9.0,
+     "best_smiles": "CCC(C)S(=O)(=O)c1ccc2c(-c3ccccc3)cccc2c1",
+     "best_depth": 3,
+     "evaluations_so_far": 417
+    },
+    {
+     "generation": 4,
+     "best_score": 0.36893203883495146,
+     "top10_mean": 0.3120326453128849,
+     "children": 192,
+     "improving_children": 19,
+     "distinct_improving_lineages": 5,
+     "median_delta_improving": 0.014010835045768721,
+     "median_primitives": 7.5,
+     "best_smiles": "CCCS(=O)(=O)c1cc(ON)c2c(-c3ccc(C)cc3)cccc2c1",
+     "best_depth": 4,
+     "evaluations_so_far": 609
+    },
+    {
+     "generation": 5,
+     "best_score": 0.40816326530612246,
+     "top10_mean": 0.3639110424639195,
+     "children": 192,
+     "improving_children": 8,
+     "distinct_improving_lineages": 4,
+     "median_delta_improving": 0.033137798787474027,
+     "median_primitives": 9.0,
+     "best_smiles": "CCC(O)S(=O)(=O)c1ccc2c(-c3ccc(C)cc3)cccc2c1",
+     "best_depth": 5,
+     "evaluations_so_far": 801
+    },
+    {
+     "generation": 6,
+     "best_score": 0.40816326530612246,
+     "top10_mean": 0.37540106118057404,
+     "children": 192,
+     "improving_children": 0,
+     "distinct_improving_lineages": 0,
+     "median_delta_improving": null,
+     "median_primitives": 10.0,
+     "best_smiles": "CCC(O)S(=O)(=O)c1ccc2c(-c3ccc(C)cc3)cccc2c1",
+     "best_depth": 5,
+     "evaluations_so_far": 993
+    },
+    {
+     "generation": 7,
+     "best_score": 0.43010752688172044,
+     "top10_mean": 0.3975400243234174,
+     "children": 192,
+     "improving_children": 2,
+     "distinct_improving_lineages": 1,
+     "median_delta_improving": 0.014337306645376052,
+     "median_primitives": 9.0,
+     "best_smiles": "Cc1ccc(-c2cccc3cc(S(=O)(=O)CO)ccc23)cc1",
+     "best_depth": 7,
+     "evaluations_so_far": 1185
+    },
+    {
+     "generation": 8,
+     "best_score": 0.4444444444444444,
+     "top10_mean": 0.4215729385397671,
+     "children": 192,
+     "improving_children": 5,
+     "distinct_improving_lineages": 4,
+     "median_delta_improving": 0.015213909860443853,
+     "median_primitives": 6.5,
+     "best_smiles": "Cc1ccc(-c2ccnc3cc(S(=O)(=O)O)ccc23)cc1",
+     "best_depth": 8,
+     "evaluations_so_far": 1377
+    }
+   ],
+   "final_frontier": [
+    {
+     "smiles": "Cc1ccc(-c2ccnc3cc(S(=O)(=O)O)ccc23)cc1",
+     "score": 0.4444444444444444,
+     "depth": 8
+    },
+    {
+     "smiles": "Cc1ccc(-c2cccc3cc(S(=O)(=O)CON)ccc23)cc1",
+     "score": 0.43157894736842106,
+     "depth": 8
+    },
+    {
+     "smiles": "Cc1ccc(-c2cccc3cc(S(=O)(=O)CO)ccc23)cc1",
+     "score": 0.43010752688172044,
+     "depth": 6
+    },
+    {
+     "smiles": "Cc1ccc(-c2cccc3cc(S(=O)(=O)[IH]O)ccc23)cc1",
+     "score": 0.43010752688172044,
+     "depth": 8
+    },
+    {
+     "smiles": "Cc1ccc(-c2ccbc3cc(S(=O)(=O)CN)ccc23)cc1",
+     "score": 0.43010752688172044,
+     "depth": 8
+    },
+    {
+     "smiles": "Cc1ccc(-c2ccbc3cc(S(=O)(=O)CO)ccc23)cc1",
+     "score": 0.4148936170212766,
+     "depth": 8
+    }
+   ]
+  }
+ ]
+}
