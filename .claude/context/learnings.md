@@ -4535,3 +4535,54 @@ independently of whether fa7_0 ever closes.**
 - **A listing is evidence about a listing.** This repo already recorded "a task count in a
   listing is not proof of live capacity" after a phantom-run diagnosis; the converse now has a
   measured instance too -- an EMPTY grep of a listing is not proof of absence.
+
+## 2026-09-23 (CORRECTION: three PMO region-law "nulls" were read on a metric blind to excision)
+
+- **CORRECTS the standing conclusion "the region draw is not the binding layer, three variants
+  measured null."** All three were scored on `largest_changed_region`, which counts atoms of the
+  ENDPOINT outside the source/endpoint MCS. **A pure excision leaves an endpoint that is entirely a
+  substructure of the source, so every endpoint atom matches and the metric reads EXACTLY ZERO at
+  any excision size.** Forced `substituent_delete` under the scale-balanced law, 240 draws:
+      deleted  1- 3 atoms  n=103   largest_changed_region med 0.0 max 0   retained_mcs 0.947
+      deleted  4- 7        n= 66                          0.0     0                  0.761
+      deleted  8-11        n= 32                          0.0     0                  0.597
+      deleted 12-30        n= 39                          0.0     0                  0.105
+  `corr(deleted, largest_changed_region)` is UNDEFINED -- the column is constant zero --
+  while `corr(deleted, retained_mcs) = -0.955`.
+- **Re-read on the axis that CAN see it, the same three stored artifacts are not null:**
+      uncapped uniform              largest +0.000 +- 0.238   retained **-0.039 +- 0.011 (-3.42 s)**
+      uncapped + uncapped replace   largest +0.167 +- 0.216   retained **-0.048 +- 0.016 (-2.92 s)**
+      scale-balanced                largest -0.208 +- 0.208   retained -0.023 +- 0.012 (-1.93 s)
+  Two of three significant, all three same sign. **The laws were working the whole time.**
+- **THIS IS "a metric that cannot vary is not a measurement" ONE LEVEL SUBTLER, and that is why it
+  survived three rounds.** The metric was not constant -- it varied fine, across the INSERTION half
+  of every transformation -- so nothing looked degenerate, no arm looked broken, and the paired
+  standard errors were healthy. It was blind to exactly ONE HALF of the object, and that half was
+  the half the intervention governed. **When an intervention governs one component of a compound
+  transformation, check that the statistic responds to THAT COMPONENT in isolation before reading a
+  null.** One forced-family probe with the component varied over its whole range costs minutes.
+- **The menu was never the constraint either:** every PMO source offers a bridge-separated region of
+  18-25 heavy atoms, ~95% of the molecule (pooled histogram has 85 of 267 regions at >=18), and the
+  law path does NOT apply `_delete_pendant_fragment`'s `maximum` -- `law.order()` is used directly,
+  so `ScaleBalancedRegionLaw(maximum=None)` really does offer them. Conditional on the option firing,
+  `fraction deleted >= 12` goes **0.000 -> 0.09-0.36** and max deleted **8 -> 24**.
+- **THE LADDER, against an answer-known witness band of retention ~0.30:**
+      production, law inside the family lottery   0.905 -> 0.866      ~6% of the required move
+      option FORCED on every draw                 0.927 -> 0.72-0.74  ~31%
+      capability, large excision actually lands    -> 0.105           past the band
+  Forcing the option multiplies the effect ~5x (-0.039 -> -0.19). The dilution is arithmetic:
+  `segment_replace` and `substituent_delete` are 2 of 13 families and the median program is 1-2
+  modules, so a law governs a small minority of module draws however well designed. **A lane removes
+  that by construction -- which is what makes the option lane worth building after all.**
+- **THE RESIDUAL IS THE INSERTION HALF AND IT IS STRUCTURAL, NOT A DRAW.** With the option forced,
+  `largest_changed_region` is still ~5 against a band of ~19, because `_grow_actions` builds a
+  LINEAR SINGLE-BONDED C/N/O CHAIN off one anchor -- no ring, no branch, no other element -- and its
+  length is `rng.integers(1, capacity+1)`, so it sits at half the excision even when the excision is
+  large. Independently measured requirement: **80.6% of productive transitions install RING content;
+  only 22.2% install something a linear C/N/O chain could build.** So the option lane will move the
+  excision axis and will NOT produce productive replacement content. Build it, judge it on excision,
+  and name the content generator as the NEXT constraint rather than expecting it to follow.
+- **Timing from that probe is contaminated and the chemistry is not.** One arm read 962 s where its
+  siblings read 10-20 s, from concurrent T4 work on the same laptop. Draws are seeded, so every
+  structural number is reproducible; no cost number from a loaded machine is. (Reaffirms: parallelism
+  is free during implementation and not during measurement.)
