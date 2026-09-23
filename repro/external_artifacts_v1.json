@@ -1,109 +1,139 @@
 {
-  "critical_objects_without_two_verified_backups": [
-    "ringcore_a7546e2_best.pt",
-    "pmo_1k_ab_molecules",
-    "lineage_b_denovo_run"
-  ],
-  "known_objects": [
+ "critical_objects_without_two_verified_backups": [
+  "ringcore_a7546e2_best.pt",
+  "pmo_1k_ab_molecules",
+  "lineage_b_denovo_run"
+ ],
+ "known_objects": [
+  {
+   "description": "Provisional 16,000-step editing checkpoint used for chemistry-prior probes.",
+   "durable_backup_locations": 1,
+   "logical_name": "ringcore_a7546e2_best.pt",
+   "meets_two_backup_requirement": false,
+   "note": "Its Modal run directory is recorded as gone from both rahul profiles; the local backup copy is the surviving instance. Selected by hazard-inclusive GM loss, which configs/ringcore_v1_checkpoint_selection.json forbids for frozen results, so it is valid for a mechanism probe and not for a published number.",
+   "type": "editing_checkpoint",
+   "verified_local_copies": [
     {
-      "description": "Provisional 16,000-step editing checkpoint used for chemistry-prior probes.",
-      "durable_backup_locations": 1,
-      "logical_name": "ringcore_a7546e2_best.pt",
-      "meets_two_backup_requirement": false,
-      "note": "Its Modal run directory is recorded as gone from both rahul profiles; the local backup copy is the surviving instance. Selected by hazard-inclusive GM loss, which configs/ringcore_v1_checkpoint_selection.json forbids for frozen results, so it is valid for a mechanism probe and not for a published number.",
-      "type": "editing_checkpoint",
-      "verified_local_copies": [
-        {
-          "path": "/Users/rmaganti/compose_ckpt_backup/ringcore_a7546e2_best.pt",
-          "sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
-          "size_bytes": 24746132,
-          "verified_at": "2026-09-23"
-        }
-      ]
-    },
-    {
-      "description": "Per-query molecules for the matched 1,000-call PMO A/B on celecoxib.",
-      "durable_backup_locations": 0,
-      "logical_name": "pmo_1k_ab_molecules",
-      "meets_two_backup_requirement": false,
-      "note": "Recorded as existing only on a Modal volume under pmo_population_controller_v1/<run_id>/<task>/oracle/query_*/result.json. The local artifacts carry counters only, so a post-hoc question about the molecules cannot be answered from git.",
-      "type": "oracle_ledger",
-      "verified_local_copies": []
-    },
-    {
-      "description": "Original Lineage B de-novo training run, recovery checkpoint and step-2500 continuation.",
-      "durable_backup_locations": 0,
-      "logical_name": "lineage_b_denovo_run",
-      "meets_two_backup_requirement": false,
-      "note": "Held on the compose-v4-artifacts volume of the rahul profile created 2026-07-17, NOT the rahul-94866 volume of the same name created 2026-08-09. Scanning the wrong one already produced a false 'the artifacts are gone' conclusion.",
-      "type": "training_run_directory",
-      "verified_local_copies": []
+     "path": "/Users/rmaganti/compose_ckpt_backup/ringcore_a7546e2_best.pt",
+     "sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+     "size_bytes": 24746132,
+     "verified_at": "2026-09-23"
     }
+   ]
+  },
+  {
+   "description": "Per-query molecules for the matched 1,000-call PMO A/B on celecoxib.",
+   "durable_backup_locations": 0,
+   "logical_name": "pmo_1k_ab_molecules",
+   "meets_two_backup_requirement": false,
+   "note": "Recorded as existing only on a Modal volume under pmo_population_controller_v1/<run_id>/<task>/oracle/query_*/result.json. The local artifacts carry counters only, so a post-hoc question about the molecules cannot be answered from git.",
+   "type": "oracle_ledger",
+   "verified_local_copies": []
+  },
+  {
+   "description": "Original Lineage B de-novo training run, recovery checkpoint and step-2500 continuation.",
+   "durable_backup_locations": 0,
+   "logical_name": "lineage_b_denovo_run",
+   "meets_two_backup_requirement": false,
+   "note": "Held on the compose-v4-artifacts volume of the rahul profile created 2026-07-17, NOT the rahul-94866 volume of the same name created 2026-08-09. Scanning the wrong one already produced a false 'the artifacts are gone' conclusion.",
+   "type": "training_run_directory",
+   "verified_local_copies": []
+  }
+ ],
+ "modal_volume_namespace_collision": {
+  "distinct_volumes": [
+   {
+    "created_at": "2026-07-17 03:16 EDT",
+    "created_by": "rahul-94866",
+    "profile": "rahul"
+   },
+   {
+    "created_at": "2026-07-29 14:41 EDT",
+    "created_by": "nitya",
+    "profile": "nitya"
+   },
+   {
+    "created_at": "2026-08-09 00:13 EDT",
+    "created_by": "rahul-94866",
+    "profile": "rahul-94866"
+   }
   ],
-  "modal_volume_namespace_collision": {
-    "distinct_volumes": [
-      {
-        "created_at": "2026-07-17 03:16 EDT",
-        "created_by": "rahul-94866",
-        "profile": "rahul"
-      },
-      {
-        "created_at": "2026-07-29 14:41 EDT",
-        "created_by": "nitya",
-        "profile": "nitya"
-      },
-      {
-        "created_at": "2026-08-09 00:13 EDT",
-        "created_by": "rahul-94866",
-        "profile": "rahul-94866"
-      }
-    ],
-    "volume_name": "compose-v4-artifacts",
-    "why_it_matters": "Three distinct volumes share one name across three profiles, and the created-by column does not separate them. A volume name is not a volume identity: pin the profile AND the creation date. The running T4 campaigns are recorded as held on the nitya profile, which the existing note does not list at all."
-  },
-  "purpose": "Git cannot resurrect an object that was never committed. These are the links from a published number to something outside the repository.",
-  "repo_shaped_unresolved_by_family": {
-    "diagnostics/baselines": 5,
-    "diagnostics/constraints_hard_sa_applicability.json": 1,
-    "diagnostics/constraints_hard_scaffold_census.json": 1,
-    "diagnostics/pmo_dynamic_v21": 8828,
-    "scripts/compose_shared_evaluator_server.py": 1,
-    "scripts/constraints_hard_make_handoff.py": 1,
-    "scripts/constraints_hard_sa_applicability.py": 1,
-    "scripts/constraints_hard_scaffold_census.py": 1,
-    "scripts/graph_ga_held_in_smoke.py": 1,
-    "scripts/graphxform_held_in_smoke.py": 1,
-    "scripts/mars_held_in_smoke.py": 1,
-    "scripts/oracle_accounting_stress_test.py": 1,
-    "scripts/render_comparator_registry.py": 1,
-    "scripts/validate_shared_evaluator.py": 1,
-    "src/compose_v4": 9
-  },
-  "repo_shaped_unresolved_paths": 8854,
-  "schema_version": 1,
-  "single_largest_off_git_exposure": {
-    "excluded_deliberately": true,
-    "exclusion_rule": ".gitignore:55  diagnostics/pmo_dynamic_v21/runs/",
-    "files_on_disk": 17064,
-    "measured": "300 of 300 sampled unresolved paths are ignored by this single rule, and 40 of 40 sampled are present-but-untracked in the main checkout and in no local ref's history. The exclusion is a deliberate policy decision, not an oversight; the reproducibility exposure is a separate consequence of pinning those paths by hash.",
-    "only_known_location": "/Users/rmaganti/compose_rgm_git (untracked working tree)",
-    "path": "diagnostics/pmo_dynamic_v21/runs/",
-    "pinned_paths_addressed": 8828,
-    "remedy": "Do NOT commit it: 11.4 GB would bloat the repository. Copy the directory to two durable locations and verify the sha AFTER copying, then record the restore path here. NOTE the operational blocker measured 2026-09-23: this disk had about 8 GB free, so a local second copy does not currently fit.",
-    "share_of_repo_shaped_unresolved_pins": "8828 of 8835",
-    "size_mb": 11418.3
-  },
-  "uncommitted_run_output_finding": {
-    "measured": "8,828 of 8,854 repo-shaped unresolved pins resolve to files that exist ONLY as UNTRACKED files in /Users/rmaganti/compose_rgm_git. They are single-copy on one disk, referenced by hash from committed contracts, and absent from git. All 8,828 are under one gitignored directory; see single_largest_off_git_exposure.",
-    "recovered_from_branches": [
-      "codex/compose-baseline-qualification",
-      "codex/compose-constraints-hard",
-      "codex/compose-multiobjective-package"
-    ],
-    "recovery_refspec": "git fetch origin \"+refs/heads/<branch>:refs/remotes/origin/<branch>\"",
-    "remaining_26": "The other 26 were first read as permanently lost because `git log --all` searches LOCAL refs only. All 26 are held on three remote branches that were never fetched locally, and 64 of 64 checkable pins match their branch blobs exactly.",
-    "remote_vs_local_refs": "origin carries 168 heads; this checkout had 122 refs. A local-only search is not authoritative about what exists."
-  },
-  "unresolved_distinct_paths": 10704,
-  "unresolved_pin_count": 10876
+  "volume_name": "compose-v4-artifacts",
+  "why_it_matters": "Three distinct volumes share one name across three profiles, and the created-by column does not separate them. A volume name is not a volume identity: pin the profile AND the creation date. The running T4 campaigns are recorded as held on the nitya profile, which the existing note does not list at all."
+ },
+ "purpose": "Git cannot resurrect an object that was never committed. These are the links from a published number to something outside the repository.",
+ "repo_shaped_unresolved_by_family": {
+  "diagnostics/baselines": 5,
+  "diagnostics/constraints_hard_sa_applicability.json": 1,
+  "diagnostics/constraints_hard_scaffold_census.json": 1,
+  "diagnostics/pmo_dynamic_v21": 8828,
+  "scripts/compose_shared_evaluator_server.py": 1,
+  "scripts/constraints_hard_make_handoff.py": 1,
+  "scripts/constraints_hard_sa_applicability.py": 1,
+  "scripts/constraints_hard_scaffold_census.py": 1,
+  "scripts/graph_ga_held_in_smoke.py": 1,
+  "scripts/graphxform_held_in_smoke.py": 1,
+  "scripts/mars_held_in_smoke.py": 1,
+  "scripts/oracle_accounting_stress_test.py": 1,
+  "scripts/render_comparator_registry.py": 1,
+  "scripts/validate_shared_evaluator.py": 1,
+  "src/compose_v4": 9
+ },
+ "repo_shaped_unresolved_paths": 8854,
+ "schema_version": 1,
+ "single_largest_off_git_exposure": {
+  "excluded_deliberately": true,
+  "exclusion_rule": ".gitignore:55  diagnostics/pmo_dynamic_v21/runs/",
+  "files_on_disk": 17064,
+  "measured": "300 of 300 sampled unresolved paths are ignored by this single rule, and 40 of 40 sampled are present-but-untracked in the main checkout and in no local ref's history. The exclusion is a deliberate policy decision, not an oversight; the reproducibility exposure is a separate consequence of pinning those paths by hash.",
+  "only_known_location": "/Users/rmaganti/compose_rgm_git (untracked working tree)",
+  "path": "diagnostics/pmo_dynamic_v21/runs/",
+  "pinned_paths_addressed": 8828,
+  "remedy": "Do NOT commit it: 11.4 GB would bloat the repository. Copy the directory to two durable locations and verify the sha AFTER copying, then record the restore path here. NOTE the operational blocker measured 2026-09-23: this disk had about 8 GB free, so a local second copy does not currently fit.",
+  "share_of_repo_shaped_unresolved_pins": "8828 of 8835",
+  "size_mb": 11418.3
+ },
+ "uncommitted_run_output_finding": {
+  "measured": "8,828 of 8,854 repo-shaped unresolved pins resolve to files that exist ONLY as UNTRACKED files in /Users/rmaganti/compose_rgm_git. They are single-copy on one disk, referenced by hash from committed contracts, and absent from git. All 8,828 are under one gitignored directory; see single_largest_off_git_exposure.",
+  "recovered_from_branches": [
+   "codex/compose-baseline-qualification",
+   "codex/compose-constraints-hard",
+   "codex/compose-multiobjective-package"
+  ],
+  "recovery_refspec": "git fetch origin \"+refs/heads/<branch>:refs/remotes/origin/<branch>\"",
+  "remaining_26": "The other 26 were first read as permanently lost because `git log --all` searches LOCAL refs only. All 26 are held on three remote branches that were never fetched locally, and 64 of 64 checkable pins match their branch blobs exactly.",
+  "remote_vs_local_refs": "origin carries 168 heads; this checkout had 122 refs. A local-only search is not authoritative about what exists."
+ },
+ "unresolved_distinct_paths": 10704,
+ "unresolved_pin_count": 10876,
+ "artifacts": [
+  {
+   "logical_name": "pmo_dynamic_v21_runs",
+   "type": "campaign_run_tree",
+   "local_path": "/Users/rmaganti/compose_rgm_git/diagnostics/pmo_dynamic_v21/runs",
+   "run_identity_sha256": "97bbbf9a3e3d8ac36965e66ec5c9341b3441622b93f446ee68e414d03cfd0901",
+   "file_count": 17064,
+   "total_bytes": 11972918771,
+   "total_gb": 11.97,
+   "directory_manifest_sha256": "0f58172379bcb5f90fb00d5ac50c86ac70894b771318464c0d99c7ce8cf971d9",
+   "per_file_manifest": "repro/external_artifacts/pmo_dynamic_v21_runs_file_manifest_v1.json",
+   "checksum_method": "sha256 of every file; the directory digest is sha256 over the sorted path/size/sha256 lines, so an added, removed, resized or altered file moves it",
+   "subtrees": [
+    "dynamic_v0",
+    "dynamic_v21"
+   ],
+   "producing_contract": "configs/pmo_dynamic_v21_recovery_v1.json",
+   "depends_on_it": [
+    "src/compose_v4/experiments/pmo_dynamic_v21.py",
+    "src/compose_v4/experiments/pmo_dynamic_v21_recovery.py",
+    "tests/test_pmo_dynamic_v21*.py"
+   ],
+   "git_status": "INTENTIONALLY GITIGNORED (.gitignore:55). The bytes are NOT in git and are NOT recoverable from GitHub. Only this manifest is committed.",
+   "backup_status": "SINGLE COPY, LOCAL ONLY. No durable second copy exists.",
+   "owner_decision_2026_09_23": "Keep local for now, tracked rather than copied or moved. Do not commit the bytes. Do not delete or relocate to free disk.",
+   "risk": "The volume is ~99% full. A single-copy artifact on a near-full disk is the failure mode this repository has already paid for twice (a reaped /private/tmp corpus and a checkpoint whose Modal run directory is gone).",
+   "restore_command": "none available -- there is no second copy to restore from",
+   "verified_at": "2026-09-23"
+  }
+ ]
 }
