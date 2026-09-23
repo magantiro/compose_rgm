@@ -79,6 +79,7 @@ def main():
     queries = int(args[2]) if len(args) > 2 else 16
     task_name = args[3] if len(args) > 3 else "celecoxib_rediscovery"
 
+    from compose_v4.control import dynamic_program_synthesis as dps
     from compose_v4.control import dynamic_program_synthesis_v21 as v21
     from compose_v4.control.docking_value import identity
     from compose_v4.control.pmo_contextual_macro import (
@@ -113,27 +114,41 @@ def main():
     law = ScaleBalancedRegionLaw()
     # A MUTABLE holder, because Q_pre re-weights the rebuild options every round and a
     # closure over a fixed instance would freeze the upstream half of the control loop.
-    portfolio = {"option": RegionReplacementOption(region_law=law), "offers": 0}
-    _production_synthesis = v21.synthesize_dynamic_program
+    portfolio = {
+        "option": RegionReplacementOption(region_law=law),
+        "offers": 0,
+        "by_module": {},
+    }
+    _production_synthesis = dps.synthesize_dynamic_program
 
     def _with_full_portfolio(*a, **k):
         k.setdefault("replacement_option", portfolio["option"])
         # WITHOUT THIS THE OPTION IS INERT. `replacement_option_rate` defaults to 0.0, so
-        # passing the option alone hands it over and never offers it -- the wrapper reads
-        # as correct and produces zero region replacements. The beam comparator drives this
+        # passing the option alone hands it over and never offers it. The beam drives this
         # same option for every child it builds, so a rate near zero would compare a
-        # controller that never uses the portfolio against a beam that always does; 0.5
-        # gives it parity with the thirteen-family lottery rather than replacing it. This is
-        # the arm's DECLARED configuration, not a tuned value.
+        # controller that never uses the portfolio against a beam that always does.
         k.setdefault("replacement_option_rate", REPLACEMENT_OPTION_RATE)
-        # The beam passes this too. Without it the controller's thirteen-family lottery
-        # draws regions under a different law than the beam's, which is a proposal-portfolio
-        # difference that would be charged to FiberControl at comparison time.
+        # The beam passes this too; without it the thirteen-family lottery draws regions
+        # under a different law than the beam's.
         k.setdefault("region_law", law)
         portfolio["offers"] += 1
         return _production_synthesis(*a, **k)
 
-    v21.synthesize_dynamic_program = _with_full_portfolio
+    # PATCH EVERY NAMESPACE THAT HOLDS THE SYMBOL, not just v21's. A module that did
+    # `from ... import synthesize_dynamic_program` bound the function OBJECT at import time,
+    # so rebinding one module's attribute leaves every other caller on the original. That is
+    # why region replacements appeared almost only in the initialization batch: the
+    # controller's own lanes never went through the wrapper. The holder list is DERIVED at
+    # runtime, so a new caller cannot silently fall outside it.
+    patched = []
+    for _name, _module in list(sys.modules.items()):
+        if not _name.startswith("compose_v4"):
+            continue
+        if getattr(_module, "synthesize_dynamic_program", None) is _production_synthesis:
+            _module.synthesize_dynamic_program = _with_full_portfolio
+            patched.append(_name)
+    if len(patched) < 2:
+        raise RuntimeError(f"portfolio wrapper reached only {patched}; expected every holder")
 
     root, score = Path("."), _oracle(task_name)
     contract = production.load_contract(root)
@@ -607,6 +622,7 @@ def main():
         "intent_differs_from_realized": telemetry["intent_differs_from_realized"],
         "option_policy_rounds": len(telemetry["option_policy"]),
         "synthesis_calls_wrapped": portfolio["offers"],
+        "patched_namespaces": patched,
         "replacement_option_rate": REPLACEMENT_OPTION_RATE,
     }
     # The comparison contract, recorded so nobody has to reconstruct it later. Read from

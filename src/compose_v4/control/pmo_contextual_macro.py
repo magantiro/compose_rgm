@@ -142,6 +142,13 @@ def _label_families(label: str) -> list[str]:
     families went unnameable for as long as they did.
     """
     text = str(label)
+    head, _, rest = text.partition(":")
+    if head.isdigit() and rest:
+        text = rest          # strip a positional prefix such as "1:region_replace:fuse_ring"
+    if text.startswith("region_replace:"):
+        # Keep the COMPOUND rather than splitting it into two bare tokens, which would
+        # discard exactly the rebuild identity the label exists to carry.
+        return region_replace_labels(text[len("region_replace:"):])
     if text.startswith("current:"):
         # A NAMESPACE, not noise: stripping it would merge a one-primitive cycle_close into
         # the cycle_close MODULE one-hot.
@@ -195,7 +202,10 @@ def macro_families(candidate) -> tuple[str, ...]:
         family = str(module.get("family", ""))
         if not family:
             continue
-        found.append(family)
+        if family.startswith("region_replace:"):
+            found.extend(region_replace_labels(family[len("region_replace:"):]))
+        else:
+            found.append(family)
         rebuild = (module.get("parameters") or {}).get("rebuild_option")
         if rebuild:
             found.extend(region_replace_labels(str(rebuild))[1:])
@@ -232,7 +242,7 @@ def macro_intent_families(candidate) -> tuple[str, ...]:
         family = str(module.get("family", ""))
         if not family:
             continue
-        found.append(family)
+        found.append(family.split(":")[0] if family.startswith("region_replace:") else family)
         intended = (module.get("parameters") or {}).get("intent_rebuild_option")
         if intended:
             found.extend(region_replace_labels(str(intended))[1:])

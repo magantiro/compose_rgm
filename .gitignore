@@ -114,3 +114,7 @@ artifacts/tdc_originals/
 # Capsules committed before this rule stay tracked; .gitignore does not affect them.
 diagnostics/**/source_capsule/
 diagnostics/**/source_capsule_v[0-9]/
+
+# Zero-oracle gate workspace: 67 MB of campaign state rebuilt from scratch on every run.
+# The 9 KB report beside it is the artifact worth keeping.
+diagnostics/pmo_reward_adaptive_gate_v1/dryrun/

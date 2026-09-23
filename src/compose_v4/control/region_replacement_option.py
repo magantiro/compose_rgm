@@ -228,8 +228,14 @@ class RegionReplacementOption:
                 continue
             actions = [*delete_actions, *build_actions]
             product, receipt = execute_program(source, list(actions))
+            # The option is encoded in the STAGE NAME, which becomes the program block
+            # label and therefore survives on every lane. The richer stage PARAMETERS are
+            # dropped by the shallow and structured candidate records, so without this the
+            # rebuild identity is lost exactly where the controller does its own proposing
+            # -- measured: 6 of 6 initialization region replacements carried it and 0 of 13
+            # from controller rounds did.
             return product, _stage(
-                "region_replace",
+                f"region_replace:{option}",
                 receipt,
                 {
                     "rebuild_option": option,
