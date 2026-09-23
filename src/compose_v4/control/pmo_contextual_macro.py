@@ -30,28 +30,46 @@ RDLogger.DisableLog("rdApp.*")
 #: Folded fingerprint width. Deliberately narrow: the development set is thousands of rows, not
 #: millions, and a 2048-bit design over 9,500 examples is a variance problem wearing a
 #: representation's clothes.
+from compose_v4.control.dynamic_program_synthesis import (
+    GENERIC_MODULES as V0_GENERIC_MODULES,
+)
+from compose_v4.control.dynamic_program_synthesis_v1 import (
+    GENERIC_MODULES as V1_GENERIC_MODULES,
+)
+from compose_v4.control.region_replacement_option import REPLACEMENT_OPTIONS
+from compose_v4.rewrite.action_codec_v4 import supported_executor_rules
+
 FINGERPRINT_BITS = 128
 
-MACRO_FAMILIES: tuple[str, ...] = (
-    "region_replace",
-    "segment_grow",
-    "segment_shrink",
-    "segment_replace",
-    "substituent_delete",
-    "append_ring",
-    "fuse_ring",
-    "functionalize",
-    "carbonyl_insert",
-    "heteroatom_substitute",
-    "bond_reroute",
-    "cycle_open",
-    "cycle_close",
-    "ring_system_restate",
-    # Anchored rebuild options reachable only through a region replacement.  Without
-    # these the model cannot prefer "excise and rebuild a ring" over "excise and regrow a
-    # chain" -- it would see both as the single label ``region_replace``.
-    "regrow",
-    "ring_then_grow",
+#: Every macro family the production proposal stack can emit, DERIVED from the production
+#: constants rather than transcribed.  A hand-written list was wrong in both directions here:
+#: it named all thirteen v0 modules and missed `construct_substituted_ring`,
+#: `ring_path_remodel` and `dependency_branch`, which together are ~22% of observed program
+#: blocks -- families the value model therefore could not prefer or avoid at all.
+#:
+#: A family the model cannot name is invisible to it, so this list going stale is a silent
+#: capability loss, not a lint error.  Importing the constants makes that impossible.
+#: Namespace for the single-primitive current-state edit lane.
+CURRENT_EDIT_PREFIX = "current_edit:"
+
+MACRO_FAMILIES: tuple[str, ...] = tuple(
+    dict.fromkeys(
+        [
+            *V0_GENERIC_MODULES,
+            *V1_GENERIC_MODULES,
+            *REPLACEMENT_OPTIONS,
+            # Structural labels that are not module families: the region-replacement
+            # operation itself, and the structured lane's recombination branch.
+            "region_replace",
+            "dependency_branch",
+            # The shallow lane's "current state edit" macro IS one primitive action, so its
+            # family is an EXECUTOR RULE name. Four of those are spelled identically to
+            # module families (cycle_close, cycle_open, bond_reroute, ring_system_restate),
+            # so they are namespaced: a one-primitive cycle_close and a cycle_close MODULE
+            # are different actions and must not share a one-hot.
+            *(f"{CURRENT_EDIT_PREFIX}{rule}" for rule in supported_executor_rules()),
+        ]
+    )
 )
 
 FEATURE_BLOCKS: tuple[str, ...] = (
@@ -110,27 +128,56 @@ def _folded(mol) -> np.ndarray:
     return array
 
 
+def _label_families(label: str) -> list[str]:
+    """Family tokens inside a program block label.
+
+    Labels come in several shapes -- `substituent_delete`, `current:cycle_close`,
+    `1:ring_system_restate`, `0:1:dependency_branch:1` -- so positional parsing is wrong.
+    Every non-positional token is emitted, INCLUDING ones outside the known vocabulary, so
+    that a family the model cannot name shows up as an unknown label rather than vanishing.
+    Dropping unknowns here would make a vocabulary gap silent, which is how three real
+    families went unnameable for as long as they did.
+    """
+    text = str(label)
+    if text.startswith("current:"):
+        # A NAMESPACE, not noise: stripping it would merge a one-primitive cycle_close into
+        # the cycle_close MODULE one-hot.
+        return [f"{CURRENT_EDIT_PREFIX}{text[len('current:'):]}"]
+    return [
+        token
+        for token in text.split(":")
+        if token and token != "current" and not token.isdigit()
+    ]
+
+
 def macro_families(candidate) -> tuple[str, ...]:
-    """The MACRO families a candidate realized, read from the synthesis metadata.
+    """The MACRO families a candidate realized.
 
     THE POINT OF THIS FUNCTION IS WHAT IT REFUSES TO READ.  A candidate also carries a
     histogram of EXECUTOR RULE NAMES (``atom_insert``, ``cycle_close``, ``bond_reroute``
     ...), and four of those names are spelled identically to macro families.  Keying the
     value model on that histogram would therefore half-work: some family one-hots would
-    fire, for the wrong reason, from primitive counts.  That is precisely the
-    semi-Markov violation the macro abstraction exists to prevent -- the coherent program
-    is the action, not the primitives inside it.
+    fire, for the wrong reason, from primitive counts.  That is precisely the semi-Markov
+    violation the macro abstraction exists to prevent -- the coherent program is the action,
+    not the primitives inside it.
+
+    THREE CARRIERS, because the label lives in a different place on each lane and reading
+    only one reports NOTHING rather than reporting less:
+      - ``metadata["modules"]``            a direct `synthesize_dynamic_program` result (T4)
+      - ``metadata["current_state_edit"]`` the PMO shallow mutation lane
+      - ``program["blocks"][i]["label"]``  every lane, including structured recombination
 
     A region replacement is reported at BOTH resolutions: the compound
-    ``region_replace:<rebuild>`` and the bare rebuild family, so the model can learn "a
-    ring rebuild is good here" while still sharing strength with ring builds reached any
-    other way.
+    ``region_replace:<rebuild>`` and the bare rebuild family, so the model can learn "a ring
+    rebuild is good here" while still sharing strength with ring builds reached any other way.
     """
-    modules = ((candidate.get("provenance") or {}).get("metadata") or {}).get("modules")
-    if modules is None:
-        modules = (candidate.get("metadata") or {}).get("modules") or ()
+    provenance = candidate.get("provenance") or {}
+    metadata = provenance.get("metadata")
+    if metadata is None:
+        metadata = candidate.get("metadata") or {}
     found: list[str] = []
-    for module in modules:
+
+    for module in metadata.get("modules") or ():
         family = str(module.get("family", ""))
         if not family:
             continue
@@ -138,6 +185,14 @@ def macro_families(candidate) -> tuple[str, ...]:
         rebuild = (module.get("parameters") or {}).get("rebuild_option")
         if rebuild:
             found.extend([f"{family}:{rebuild}", str(rebuild)])
+
+    edit = metadata.get("current_state_edit") or {}
+    if edit.get("family"):
+        found.append(f"{CURRENT_EDIT_PREFIX}{edit['family']}")
+
+    for block in (candidate.get("program") or {}).get("blocks") or ():
+        found.extend(_label_families(block.get("label", "")))
+
     return tuple(dict.fromkeys(found))
 
 

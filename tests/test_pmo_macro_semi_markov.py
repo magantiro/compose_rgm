@@ -170,3 +170,46 @@ def test_family_audit_reports_every_required_column():
     # The shift is what shows reward moved the policy rather than merely being recorded.
     assert report["fuse_ring"]["proposal_mass_shift"] > 0
     assert report["segment_grow"]["proposal_mass_shift"] < 0
+
+
+def test_a_one_primitive_edit_is_not_the_module_of_the_same_name():
+    """Four executor rule names are spelled identically to module families.
+
+    The shallow lane's "current state edit" macro IS a single primitive action, so its
+    family is a rule name. Merging it into the module one-hot would relabel a one-atom edit
+    as a coherent multi-primitive ring operation -- the exact conflation the macro
+    abstraction exists to prevent, arriving through a different door.
+    """
+    module = _candidate([{"family": "cycle_close", "parameters": {}}])
+    primitive = {
+        "provenance": {"metadata": {"current_state_edit": {"family": "cycle_close"}}},
+        "program": {"blocks": [{"label": "current:cycle_close"}]},
+    }
+    assert macro_families(module) == ("cycle_close",)
+    assert macro_families(primitive) == ("current_edit:cycle_close",)
+    assert set(macro_families(module)).isdisjoint(macro_families(primitive))
+
+
+def test_every_production_lane_yields_a_family():
+    """Reading only one carrier reported NOTHING rather than reporting less.
+
+    The label lives at `metadata["modules"]` for a direct synthesis, at
+    `metadata["current_state_edit"]` on the PMO shallow lane, and in the block label on the
+    structured lane. All 96 real candidates from a production dry run returned empty until
+    all three were read.
+    """
+    lanes = [
+        _candidate([{"family": "segment_grow", "parameters": {}}]),
+        {
+            "provenance": {"metadata": {"current_state_edit": {"family": "bond_reroute"}}},
+            "program": {"blocks": [{"label": "current:bond_reroute"}]},
+        },
+        {"provenance": {}, "program": {"blocks": [{"label": "0:1:dependency_branch:1"}]}},
+        {"provenance": {}, "program": {"blocks": [{"label": "construct_substituted_ring"}]}},
+        {"provenance": {}, "program": {"blocks": [{"label": "1:ring_path_remodel"}]}},
+    ]
+    for candidate in lanes:
+        families = macro_families(candidate)
+        assert families, candidate
+        for family in families:
+            assert family in MACRO_FAMILIES or family.split(":")[0] in MACRO_FAMILIES, family
