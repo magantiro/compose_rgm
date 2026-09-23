@@ -82,7 +82,12 @@ image = (
         ROOT / "scripts", str(REMOTE_ROOT / "scripts"), copy=True,
         ignore=["**/__pycache__/**", "**/*.pyc"],
     )
-    .add_local_file(ROOT / CONTRACT, str(REMOTE_ROOT / CONTRACT), copy=True)
+    # The WHOLE configs directory: load_contract reads a base contract that the scored
+    # contract references, and guessing the closure file-by-file already cost one launch.
+    .add_local_dir(
+        ROOT / "configs", str(REMOTE_ROOT / "configs"), copy=True,
+        ignore=["**/__pycache__/**"],
+    )
     .add_local_file(
         ROOT / "diagnostics/parent_edit_cycles/prepared/init_20260921.json",
         str(REMOTE_ROOT / "diagnostics/parent_edit_cycles/prepared/init_20260921.json"),
@@ -93,6 +98,12 @@ image = (
         str(REMOTE_ROOT
             / "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json"),
         copy=True,
+    )
+    # The contract VERIFIES the sha256 of each file in implementation_sha256, and one of
+    # them lives outside src/. Baked so the hash chain resolves inside the container.
+    .add_local_file(
+        ROOT / "modal_apps/pmo_population_v1_app.py",
+        str(REMOTE_ROOT / "modal_apps/pmo_population_v1_app.py"), copy=True,
     )
     .add_local_dir(ROOT / ASSET_DIR, str(REMOTE_ROOT / ASSET_DIR), copy=True)
     .env({
@@ -106,6 +117,10 @@ image = (
     })
 )
 
+# ONE mounted volume, and a path namespace per target inside it. A volume cannot be chosen
+# per call -- the mount is declared on the function -- so isolation is enforced by the label,
+# which the launcher refuses to reuse. No two concurrent targets touch the same file.
+volume = modal.Volume.from_name("compose-pmo-fibercontrol", create_if_missing=True)
 app = modal.App(RUN_APP)
 
 
@@ -122,6 +137,7 @@ app = modal.App(RUN_APP)
     # module-level controller state.
     single_use_containers=True,
     scaledown_window=60,
+    volumes={str(ARTIFACT_ROOT): volume},
 )
 def run_target(spec: dict) -> dict:
     """One task, one fresh controller, one volume namespace."""
@@ -132,42 +148,40 @@ def run_target(spec: dict) -> dict:
     seed = int(spec["seed"])
     label = str(spec["label"])
 
-    volume = modal.Volume.from_name(spec["volume"], create_if_missing=True)
-    with volume:
-        out = ARTIFACT_ROOT / label
-        out.mkdir(parents=True, exist_ok=True)
-        environment = {
-            **os.environ,
-            "CANARY_OUT": str(out),
-            "CANARY_SEED": str(seed),
-            "CANARY_SMILES_CACHE": str(spec.get("smiles_cache", 512)),
-            "CANARY_PROPOSAL_WALL": str(spec.get("proposal_wall", 1e9)),
-        }
-        completed = subprocess.run(
-            [
-                "python", "-u",
-                str(REMOTE_ROOT / "scripts/pmo_reward_adaptive_canary.py"),
-                str(budget), str(rounds), str(queries), task,
-            ],
-            cwd=str(REMOTE_ROOT),
-            env=environment,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        (out / "stdout.log").write_text(completed.stdout[-500_000:])
-        (out / "stderr.log").write_text(completed.stderr[-500_000:])
-        provenance = {
-            "task": task,
-            "label": label,
-            "base_seed": spec.get("base_seed"),
-            "derived_seed": seed,
-            "replicate": spec.get("replicate", 0),
-            "budget": budget,
-            "git_commit": spec.get("git_commit"),
-            "modal_call_id": os.environ.get("MODAL_TASK_ID"),
-            "returncode": completed.returncode,
-        }
-        (out / "provenance.json").write_text(json.dumps(provenance, indent=1))
-        volume.commit()
+    out = ARTIFACT_ROOT / label
+    out.mkdir(parents=True, exist_ok=True)
+    environment = {
+        **os.environ,
+        "CANARY_OUT": str(out),
+        "CANARY_SEED": str(seed),
+        "CANARY_SMILES_CACHE": str(spec.get("smiles_cache", 512)),
+        "CANARY_PROPOSAL_WALL": str(spec.get("proposal_wall", 1e9)),
+    }
+    completed = subprocess.run(
+        [
+            "python", "-u",
+            str(REMOTE_ROOT / "scripts/pmo_reward_adaptive_canary.py"),
+            str(budget), str(rounds), str(queries), task,
+        ],
+        cwd=str(REMOTE_ROOT),
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    (out / "stdout.log").write_text(completed.stdout[-500_000:])
+    (out / "stderr.log").write_text(completed.stderr[-500_000:])
+    provenance = {
+        "task": task,
+        "label": label,
+        "base_seed": spec.get("base_seed"),
+        "derived_seed": seed,
+        "replicate": spec.get("replicate", 0),
+        "budget": budget,
+        "git_commit": spec.get("git_commit"),
+        "modal_call_id": os.environ.get("MODAL_TASK_ID"),
+        "returncode": completed.returncode,
+    }
+    (out / "provenance.json").write_text(json.dumps(provenance, indent=1))
+    volume.commit()
     return provenance

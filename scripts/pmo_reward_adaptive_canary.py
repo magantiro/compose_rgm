@@ -603,6 +603,14 @@ def main():
             if getattr(self, "_log_args", None):
                 _round_log(self, *self._log_args)
                 self._log_args = None
+            # COMMIT THE CONTROLLER STATE HERE, not in _allocate. The campaign commits its
+            # round after the outcomes return; writing the brain mid-round left the two
+            # checkpoints out of sync by part of a round, so a resumed run restored a brain
+            # one step behind its campaign and diverged from call 80 onward -- measured.
+            _state = folder / "controller_state.json.tmp"
+            with open(_state, "w") as handle:
+                json.dump(RewardAdaptive.brain.state(), handle)
+            _state.replace(folder / "controller_state.json")
             self._pending_rows = {}
             return result
 
@@ -762,10 +770,6 @@ def main():
             "out_of_range_predictions": telemetry["out_of_range_predictions"],
             "elapsed_seconds": round(time.time() - started, 1),
         }
-        state = folder / "controller_state.json.tmp"
-        with open(state, "w") as handle:
-            json.dump(RewardAdaptive.brain.state(), handle)
-        state.replace(folder / "controller_state.json")
         temporary = folder / "progress.json.tmp"
         with open(temporary, "w") as handle:
             json.dump(snapshot, handle, indent=1)
@@ -1016,11 +1020,16 @@ def main():
             f"out-of-range {report['predictions_outside_unit_range']}",
             flush=True,
         )
+    beam_auc = report["comparator_beam"]["auc_top10_common_grid"]
+    # The beam artifact is CELECOXIB-ONLY, so four of five targets have no comparator by
+    # construction. A missing comparator is a fact to report, not a reason to fail a run
+    # that already produced every number it was asked for.
+    comparator = f"vs beam {beam_auc:.4f}" if beam_auc is not None else "no matched beam"
     print(
-        f"charged {report['charged_oracle_calls']} best {report['best_score']:.4f} "
-        f"top10 {report['final_top10']:.4f} "
-        f"auc(common {common_lo}-{common_hi}) {report['auc_top10_common_grid']:.4f} "
-        f"vs beam {report['comparator_beam']['auc_top10_common_grid']:.4f}"
+        f"charged {report['charged_oracle_calls']} "
+        f"best {report['best_score']:.4f} top10 {report['final_top10']:.4f} "
+        f"auc(common {common_lo}-{common_hi}) "
+        f"{(report['auc_top10_common_grid'] or 0.0):.4f} {comparator}"
         + ("" if report["common_grid_is_full_budget"] else "   [PARTIAL BUDGET]"),
         flush=True,
     )
