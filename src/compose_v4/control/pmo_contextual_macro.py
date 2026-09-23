@@ -210,6 +210,35 @@ def macro_families(candidate) -> tuple[str, ...]:
     return tuple(dict.fromkeys(found))
 
 
+def macro_intent_families(candidate) -> tuple[str, ...]:
+    """The families the controller REQUESTED, which need not be what executed.
+
+    A region replacement draws an option order and takes the first that the executor
+    accepts, so a candidate can carry `intent=substituent_delete, realized=heteroatom_
+    substitute`. Q_pre must be credited for what it ASKED FOR -- otherwise reward flows to
+    whichever option happened to survive refusal, and raising the probability of a requested
+    rebuild would be learning from the wrong label.
+
+    Where no intent is recorded (a lane whose candidate metadata carries no module list)
+    this falls back to the realized families, which is the honest coarser answer rather than
+    a fabricated intent.
+    """
+    provenance = candidate.get("provenance") or {}
+    metadata = provenance.get("metadata")
+    if metadata is None:
+        metadata = candidate.get("metadata") or {}
+    found: list[str] = []
+    for module in metadata.get("modules") or ():
+        family = str(module.get("family", ""))
+        if not family:
+            continue
+        found.append(family)
+        intended = (module.get("parameters") or {}).get("intent_rebuild_option")
+        if intended:
+            found.extend(region_replace_labels(str(intended))[1:])
+    return tuple(dict.fromkeys(found)) or macro_families(candidate)
+
+
 def macro_scale(candidate) -> dict:
     """Realized SCALE of a macro: how much structure it actually moved.
 

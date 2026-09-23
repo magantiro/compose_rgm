@@ -83,6 +83,7 @@ def main():
     from compose_v4.control.docking_value import identity
     from compose_v4.control.pmo_contextual_macro import (
         macro_families,
+        macro_intent_families,
         macro_scale,
         region_replace_labels,
     )
@@ -154,6 +155,7 @@ def main():
         "unscored_parents": 0, "out_of_range_predictions": 0, "duplicate_endpoints": 0,
         "unallocated_batches": 0, "unattributed_outcomes": 0, "root_candidates": 0,
         "region_replace_with_rebuild": 0, "region_replace_bare": 0,
+        "intent_differs_from_realized": 0,
     }
 
     def rows_of(controller, candidates):
@@ -176,6 +178,9 @@ def main():
         for candidate in candidates:
             provenance = candidate.get("provenance") or {}
             families = list(macro_families(candidate))
+            intent = list(macro_intent_families(candidate))
+            if intent != families:
+                telemetry["intent_differs_from_realized"] += 1
             entry_id = provenance.get("entry_id")
             entry = controller.entries.get(entry_id) if entry_id is not None else None
             measured = provenance.get("parent_measured_score")
@@ -192,7 +197,10 @@ def main():
                     "endpoint": candidate["endpoint"],
                     "smiles": candidate["endpoint"],
                     "parent_score": float(measured) if measured is not None else 0.0,
-                    "families": families,
+                    # Q_pre is credited for what it REQUESTED, Q_post for what EXECUTED.
+                    # Keying both on the realized option would flow reward to whichever
+                    # rebuild survived executor refusal rather than to the one asked for.
+                    "families": intent,
                     "realized_families": families,
                     "requested_modules": len(
                         (candidate.get("program", {}) or {}).get("blocks", ()) or ()
@@ -220,6 +228,8 @@ def main():
             super().__init__(*a, **k)
             self._pre_cache: dict = {}
             self._pending_rows: dict = {}
+            self._last_rows: list = []
+            self._last_policy: dict = {}
 
         def _measured(self, key) -> float:
             """A parent's own measured score, joined the way production joins it.
@@ -329,7 +339,16 @@ def main():
                 elif "region_replace" in labels:
                     telemetry["region_replace_bare"] += 1
             room = min(queries, len(rows))
-            before = self.brain.record_policy(rows, f"before_{len(telemetry['rounds'])}")
+            # THE SHIFT MUST STRADDLE THE REWARD UPDATE. Recording `before` and `after`
+            # around `acquire` measures a window that contains no refit -- `observe` moved
+            # into `observe_batch` -- so it can only ever read 0.0. Compare instead the
+            # PREVIOUS round's rows re-scored now, against the policy recorded on those same
+            # rows last round: identical inputs, one reward update in between.
+            if self._last_rows:
+                now = self.brain.record_policy(self._last_rows, f"after_update_{len(telemetry['rounds'])}")
+                telemetry["policy_shifts"].append(
+                    self.brain.policy_shift(self._last_policy, now)
+                )
             scores = [float(o["score"]) for o in self.observations.values()]
             threshold = sorted(scores, reverse=True)[9] if len(scores) >= 10 else 0.0
             # A root has no u(G), so the T4 correction cannot score it. Ranking it with an
@@ -403,8 +422,10 @@ def main():
                 for c, r in zip(selected, rows_of(self, selected), strict=True)
                 if "candidate_id" in c
             }
-            after = self.brain.record_policy(rows, f"after_{len(telemetry['rounds'])}")
-            telemetry["policy_shifts"].append(self.brain.policy_shift(before, after))
+            self._last_rows = rows
+            self._last_policy = self.brain.record_policy(
+                rows, f"round_{len(telemetry['rounds'])}"
+            )
             return selected, {"mode": "reward_adaptive"}
 
         def observe_batch(self, batch_id, outcomes):
@@ -583,6 +604,7 @@ def main():
         # them, so the witness has to come from the same place the claim does.
         "n_compound_region_labels": telemetry["region_replace_with_rebuild"],
         "region_replace_bare": telemetry["region_replace_bare"],
+        "intent_differs_from_realized": telemetry["intent_differs_from_realized"],
         "option_policy_rounds": len(telemetry["option_policy"]),
         "synthesis_calls_wrapped": portfolio["offers"],
         "replacement_option_rate": REPLACEMENT_OPTION_RATE,

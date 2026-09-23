@@ -230,3 +230,123 @@ def _candidate_for_ledger(modules=None, labels=None):
         "provenance": {"metadata": {"modules": modules or []}},
         "program": {"blocks": [{"label": x} for x in (labels or [])]},
     }
+
+
+def test_policy_shift_requires_a_reward_update_between_the_two_snapshots():
+    """A shift measured across a window containing no refit can only ever read 0.0.
+
+    That is what happened once `observe()` moved out of the allocation path: the telemetry
+    reported `policy shift 0.0` every round and looked like a controller that was not
+    learning, when it was a metric incapable of varying. Both directions are pinned -- no
+    update gives exactly zero, an update on identical rows gives more.
+    """
+    brain = RewardAdaptiveProgramController()
+    rows = [_row("regrow", parent_score=0.3), _row("fuse_ring", parent_score=0.3)] * 20
+    for index, row in enumerate(rows[:30]):
+        brain.observe(row, 0.2 + 0.01 * index)
+    assert brain.fitted
+
+    before = brain.record_policy(rows, "before")
+    unchanged = brain.record_policy(rows, "no_update")
+    assert brain.policy_shift(before, unchanged) == 0.0
+
+    for row in rows[:16]:
+        brain.observe(row, 0.95 if "fuse_ring" in row["families"] else 0.05)
+    after = brain.record_policy(rows, "after_update")
+    assert brain.policy_shift(before, after) > 0.0
+
+
+def test_rewarding_an_intent_raises_that_intent_on_the_real_synthesis_path():
+    """The causal claim, exercised through real COMPOSE programs rather than fixtures.
+
+    A region replacement takes the first rebuild the executor accepts, so intent and
+    realization diverge (measured live: intent=substituent_delete, realized=
+    heteroatom_substitute). Q_pre must be credited for what it REQUESTED, or reward flows to
+    whichever option survived refusal and raising a requested rebuild's probability would be
+    learning from the wrong label.
+
+    Builds candidates the way production does, labels them with the production extractors,
+    and checks the option marginal -- the quantity actually fed back to the generator --
+    moves toward the rewarded intent.
+    """
+    from rdkit import RDLogger
+
+    RDLogger.DisableLog("rdApp.*")
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.control.dynamic_program_synthesis import synthesize_dynamic_program
+    from compose_v4.control.pmo_contextual_macro import (
+        macro_families,
+        macro_intent_families,
+        macro_scale,
+    )
+    from compose_v4.control.region_replacement_option import (
+        REPLACEMENT_OPTIONS,
+        RegionReplacementOption,
+    )
+
+    source = pad_molecular_graph(smiles_to_molecular_graph(ASPIRIN), 48)
+    option = RegionReplacementOption()
+    rng = np.random.default_rng(5)
+    rows, diverged = [], 0
+    for _ in range(90):
+        try:
+            _s, program, _a, trace, metadata = synthesize_dynamic_program(
+                source, rng, max_modules=3, max_primitives=32, max_blocks=8,
+                replacement_option=option, replacement_option_rate=0.5,
+            )
+        except (ValueError, RuntimeError):
+            continue
+        candidate = {
+            "endpoint": trace["endpoint"],
+            "provenance": {"metadata": metadata, "actual_changes": {}},
+            "program": program.payload(),
+        }
+        intent = list(macro_intent_families(candidate))
+        realized = list(macro_families(candidate))
+        diverged += intent != realized
+        rows.append(
+            {
+                "parent": ASPIRIN,
+                "endpoint": candidate["endpoint"],
+                "smiles": candidate["endpoint"],
+                "parent_score": 0.3,
+                "families": intent,            # Q_pre: what was requested
+                "realized_families": realized,  # Q_post: what executed
+                "requested_modules": 2, "module_count": 2, "primitives": 0,
+                "depth": 1, "generation": 0, "capacity_aware": False,
+                **macro_scale(candidate),
+            }
+        )
+    assert len(rows) >= 30, len(rows)
+
+    # Pick a rebuild option the real path actually requested, so the test rewards something
+    # the generator can express rather than an option chosen in advance.
+    requested = [
+        f.split(":", 1)[1]
+        for r in rows for f in r["families"] if f.startswith("region_replace:")
+    ]
+    assert requested, "no region replacement was requested on the real path"
+    favoured = Counter(requested).most_common(1)[0][0]
+
+    def option_marginal(brain):
+        intents, index = [], []
+        for name in REPLACEMENT_OPTIONS:
+            intents.append({**rows[0], "families": region_replace_labels(name)})
+            index.append(name)
+        weights = brain.intent_policy(intents)
+        return dict(zip(index, weights, strict=True))
+
+    brain = RewardAdaptiveProgramController()
+    for row in rows:
+        brain.observe(row, 0.5)
+    assert brain.fitted
+    before = option_marginal(brain)
+    for row in rows:
+        asked = [f for f in row["families"] if f.startswith("region_replace:")]
+        brain.observe(row, 0.95 if f"region_replace:{favoured}" in asked else 0.05)
+    after = option_marginal(brain)
+    assert after[favoured] > before[favoured], (favoured, before[favoured], after[favoured])
+
+
+from collections import Counter
