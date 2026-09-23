@@ -225,10 +225,21 @@ identity.
 The capability report is byte-identical before and after, which is stronger than
 the superset the gate requires: not one symbol, module or import outcome moved.
 
-Full-suite after-state at HEAD: **297 failed, 5,893 passed, 2 skipped, 4 xfailed,
-102 errors** in 44m53s under the laptop `.venv`. The matching true-baseline run
-at `061ead93` is in a detached worktree; the node-set comparison lands in
+Full-suite after-state, run at commit `41937880` on this branch: **297 failed,
+5,893 passed, 2 skipped, 4 xfailed, 102 errors** in 44m53s under the laptop
+`.venv`, over 6,302 collected nodes. The matching true-baseline run at
+`061ead93` executes in a detached worktree and the node-set comparison lands in
 `repro/test_fingerprint_after_v1_vs_baseline.json`.
+
+Scope of that measurement, stated because it is not the literal final commit:
+everything committed after `41937880` touches only `repro/`, `diagnostics/`,
+`tools/`, `tests/` and `README.md`, with **zero changes under `src/`,
+`scripts/`, `recipes/`, `modal_apps/` or `configs/`** (verifiable with
+`git diff --name-only 41937880 HEAD -- src scripts recipes modal_apps configs`,
+which is empty). The only behavioural delta is six added tests in
+`tests/test_repo_hygiene_instruments.py`, verified green independently, and the
+repository has no `conftest.py`, so an added test file cannot affect any other
+node.
 
 Attribution already established for the areas this pass touches: the identical
 `region or ring or fiber or completion_law or region_law` selection run at
