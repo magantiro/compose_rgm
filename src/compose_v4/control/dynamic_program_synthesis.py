@@ -427,7 +427,17 @@ def compile_generic_module(
         delete_actions, contracted, anchor, path = _delete_pendant_fragment(
             source, rng, law=region_law
         )
-        capacity = min(MAX_SEGMENT_LENGTH, 40 - contracted.n_real_atoms)
+        # A replacement may be as large as what it replaced.  v1 re-capped the
+        # regrowth at MAX_SEGMENT_LENGTH regardless of how much was excised, so an
+        # uncapped region draw was undone on the way back up: delete twenty atoms,
+        # refill eight, and the endpoint carries only eight new ones.  Measured, the
+        # realized largest changed region sat at the cap whatever the law offered.
+        # With a law supplied the ceiling becomes the excision itself; with no law
+        # the expression is byte-identical to v1, so every existing caller is
+        # unaffected.
+        removed = source.n_real_atoms - contracted.n_real_atoms
+        ceiling = MAX_SEGMENT_LENGTH if region_law is None else max(removed, MAX_SEGMENT_LENGTH)
+        capacity = min(ceiling, 40 - contracted.n_real_atoms)
         if capacity < 1:
             raise ValueError("segment replacement has no insertion capacity")
         growth = int(rng.integers(1, capacity + 1))
