@@ -54,7 +54,7 @@ def main():
         pathlib.Path("."), {"initialization": contract["initialization"]}
     )
     # The SAME 16 molecules the canary initializes from, charged the same way.
-    starts = [c["smiles"] if isinstance(c, dict) else c for c in initialized["candidates"]][:16]
+    starts = [c["endpoint"] for c in initialized["candidates"]][:16]
     option = RegionReplacementOption(region_law=ScaleBalancedRegionLaw())
     rng = np.random.default_rng(contract["controller"]["seed"])
 
