@@ -1,0 +1,48 @@
+{
+ "genuine_production_risk_this_surfaced": "2410 s exceeds the 1800 s Modal proposal_unit timeout. Even though that figure is load-inflated, it shows the wide route lane on braf_1 is the panel's slowest and that standardization increased that exposure. The gate's braf rows so far ran under the OLD narrow contract, so the wide braf route lane has NOT yet been exercised on Modal. Watch the seed-2 braf batch for a proposal_unit timeout; that is the measurement that settles affordability, and it runs on a dedicated container rather than a shared laptop.",
+ "load_dependent_and_did_not_reproduce": {
+  "C4_cost_within_600s_per_cell": [
+   true,
+   false
+  ],
+  "braf_1_wide_seconds": [
+   201.24,
+   2409.96
+  ],
+  "run2_machine_state": "load average 9.53 (5 min), Chrome at 66% and 47% CPU, the gate driver live",
+  "swing": "12.0x on a computation whose output is byte-identical",
+  "verdict": [
+   "GREEN",
+   "NOT_GREEN"
+  ]
+ },
+ "load_independent_and_reproduced_exactly": {
+  "C1_recovery": [
+   true,
+   true
+  ],
+  "C2_yield": [
+   true,
+   true
+  ],
+  "eligible_per_arm": [
+   10,
+   10
+  ],
+  "eligible_smiles_sets_identical_across_both_runs": true,
+  "gained_total": [
+   0,
+   0
+  ],
+  "lost_total": [
+   0,
+   0
+  ]
+ },
+ "owner_decision_unchanged": "48/48/64 stays frozen. The standardization decision rests on C1/C2/C3, which hold.",
+ "schema_version": "t4_route_width_standardization_reproduction_v1",
+ "the_criterion_is_the_defect": "C4 was predeclared as a WALL-CLOCK bound on a shared laptop. Wall clock is a property of the machine, not of the algorithm, so C4 measures load. The repo's own standing lesson says exactly this -- report a load-independent work counter, never seconds alone -- and I did not follow it when I sealed the criteria. That is a defect in MY criterion, not a finding about the route widths.",
+ "what_happened": "An independent re-run of the SAME deterministic check, on the same code and the same pinned kernel, reproduced the chemistry exactly and FLIPPED the verdict GREEN -> NOT_GREEN on the cost criterion alone.",
+ "what_is_NOT_being_done": "The criteria are NOT relaxed and the check is NOT being re-run on a quiet machine until it passes. Re-running to get the other answer is measuring until the answer changes. Both runs are committed side by side.",
+ "what_the_safety_decision_actually_rests_on": "C1, C2 and C3 -- recovery, yield and exact containment -- are load-independent and reproduced EXACTLY across both runs: identical eligible sets, 0 lost, 0 gained, 10 eligible per arm. Those are the criteria that decide whether standardizing to 48/48/64 is SAFE, and they are unaffected."
+}

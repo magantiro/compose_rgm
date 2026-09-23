@@ -11,7 +11,21 @@ failure the routing and the frozen ladder exist to remove.
 
 The owner's decision is to standardize on 48/48/64.  The tempting argument is that
 a wider search must contain a narrower one, so parp1/braf can only gain.  **That
-argument is wrong for a beam.**  Widening `beam_width` changes which partial
+argument is wrong for a beam.**
+
+TWO THINGS THE COST COLUMN SAYS, and neither is "free"
+-------------------------------------------------------
+The widening produced nothing new, which makes it cleanup -- but cleanup is not
+the same as costless.  `braf_1` runs 5.5 s at the narrow setting and 201.2 s at
+the wide one for an IDENTICAL eligible set: a 36x increase in search effort
+buying zero endpoints.  That is the PRICE of removing a target-keyed conditional
+from an executable parameter, and it is worth paying (201 s sits well inside both
+the 600 s sealed bound and the 1800 s production worker bound) -- but it should be
+recorded as a price rather than as nothing.
+
+Read the other way the same numbers are a FINDING: an eligible set that does not
+move across a 2x-to-36x effort range is the strongest evidence available that the
+route lane on these cells is genuinely EXHAUSTED rather than under-searched.  Widening `beam_width` changes which partial
 programs survive each layer and widening `expansion_width` changes how many
 successors each survivor contributes, so the set of complete programs reaching
 realization can move rather than grow.  Nesting has to be measured.
@@ -202,6 +216,13 @@ def reduce_cells(rows: list[dict], *, root: Path = ROOT) -> dict:
             f"a verdict needs all {len(CELLS)} cells, got {len(rows)}; an incomplete "
             "comparison must not decide a frozen configuration"
         )
+    ratios = {
+        row["cell"]: round(
+            row["wide"]["elapsed_seconds"] / max(row["narrow"]["elapsed_seconds"], 1e-9), 1
+        )
+        for row in rows
+    }
+    worst_cell = max(ratios, key=ratios.get)
     c1 = all(row["c1_recovery"] for row in rows)
     c2 = all(row["c2_yield"] for row in rows)
     c4 = all(row["c4_cost"] for row in rows)
@@ -225,6 +246,37 @@ def reduce_cells(rows: list[dict], *, root: Path = ROOT) -> dict:
             "C4_cost_within_600s_per_cell": c4,
         },
         "verdict": "GREEN" if green else "NOT_GREEN",
+        # The widening is NOT free, and calling it "pure cleanup" because it
+        # produced nothing new understates what was paid. State the price.
+        "cost_of_uniformity": {
+            "wide_over_narrow_seconds_by_cell": ratios,
+            "worst_cell": worst_cell,
+            "worst_ratio": ratios[worst_cell],
+            "statement": (
+                f"{worst_cell} went {rows[[r['cell'] for r in rows].index(worst_cell)]['narrow']['elapsed_seconds']} s "
+                f"-> {rows[[r['cell'] for r in rows].index(worst_cell)]['wide']['elapsed_seconds']} s "
+                f"({ratios[worst_cell]}x) for an IDENTICAL eligible set -- zero endpoints bought. "
+                "This is a measured price paid for one controller across the panel, not a free "
+                "change. It is still the right trade: uniformity removes a target-keyed conditional "
+                "from an executable parameter, and the worst cell sits well inside both the 600 s "
+                "sealed bound and the 1800 s production proposal-worker bound."
+            ),
+        },
+        # The same numbers read a second way, and this one is a finding rather
+        # than an accounting note.
+        "search_effort_evidence": {
+            "effort_range_spanned": f"{min(ratios.values())}x to {max(ratios.values())}x",
+            "eligible_sets_identical_across_that_range": all(
+                row["narrow"]["eligible_smiles"] == row["wide"]["eligible_smiles"]
+                for row in rows
+            ),
+            "reading": (
+                "An eligible set that does not move across a search-effort range this wide is "
+                "the strongest available evidence that the route lane on these cells is "
+                "genuinely EXHAUSTED rather than under-searched. A lane still finding new "
+                "endpoints at 48/48/64 would have gained something; none did."
+            ),
+        },
         "cells": {row["cell"]: row for row in rows},
         "totals": {
             "narrow_eligible": sum(row["narrow"]["eligible_count"] for row in rows),

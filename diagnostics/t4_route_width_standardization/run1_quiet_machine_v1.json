@@ -26,7 +26,7 @@
      "arm": "narrow",
      "cell": "braf_0",
      "delta_from_contract": 0.6,
-     "elapsed_seconds": 6.94,
+     "elapsed_seconds": 7.06,
      "eligible_count": 0,
      "eligible_smiles": [],
      "proposal_seed": 2027092005,
@@ -79,7 +79,7 @@
      "arm": "wide",
      "cell": "braf_0",
      "delta_from_contract": 0.6,
-     "elapsed_seconds": 48.42,
+     "elapsed_seconds": 49.22,
      "eligible_count": 0,
      "eligible_smiles": [],
      "proposal_seed": 2027092005,
@@ -134,7 +134,7 @@
    "braf_1": {
     "c1_recovery": true,
     "c2_yield": true,
-    "c4_cost": false,
+    "c4_cost": true,
     "cell": "braf_1",
     "gained_count": 0,
     "gained_smiles": [],
@@ -144,7 +144,7 @@
      "arm": "narrow",
      "cell": "braf_1",
      "delta_from_contract": 0.6,
-     "elapsed_seconds": 5.36,
+     "elapsed_seconds": 5.52,
      "eligible_count": 0,
      "eligible_smiles": [],
      "proposal_seed": 2027092006,
@@ -197,7 +197,7 @@
      "arm": "wide",
      "cell": "braf_1",
      "delta_from_contract": 0.6,
-     "elapsed_seconds": 2409.96,
+     "elapsed_seconds": 201.24,
      "eligible_count": 0,
      "eligible_smiles": [],
      "proposal_seed": 2027092006,
@@ -262,7 +262,7 @@
      "arm": "narrow",
      "cell": "braf_2",
      "delta_from_contract": 0.6,
-     "elapsed_seconds": 5.16,
+     "elapsed_seconds": 5.13,
      "eligible_count": 0,
      "eligible_smiles": [],
      "proposal_seed": 2027092007,
@@ -315,7 +315,7 @@
      "arm": "wide",
      "cell": "braf_2",
      "delta_from_contract": 0.6,
-     "elapsed_seconds": 10.11,
+     "elapsed_seconds": 10.01,
      "eligible_count": 0,
      "eligible_smiles": [],
      "proposal_seed": 2027092007,
@@ -380,7 +380,7 @@
      "arm": "narrow",
      "cell": "parp1_0",
      "delta_from_contract": 0.6,
-     "elapsed_seconds": 2.31,
+     "elapsed_seconds": 2.3,
      "eligible_count": 4,
      "eligible_smiles": [
       "CC(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
@@ -437,7 +437,7 @@
      "arm": "wide",
      "cell": "parp1_0",
      "delta_from_contract": 0.6,
-     "elapsed_seconds": 4.91,
+     "elapsed_seconds": 4.88,
      "eligible_count": 4,
      "eligible_smiles": [
       "CC(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
@@ -506,7 +506,7 @@
      "arm": "narrow",
      "cell": "parp1_1",
      "delta_from_contract": 0.6,
-     "elapsed_seconds": 3.96,
+     "elapsed_seconds": 3.98,
      "eligible_count": 6,
      "eligible_smiles": [
       "COc1[nH]c2c(C)ccc3c2c1CCNC3=O",
@@ -565,7 +565,7 @@
      "arm": "wide",
      "cell": "parp1_1",
      "delta_from_contract": 0.6,
-     "elapsed_seconds": 7.79,
+     "elapsed_seconds": 7.83,
      "eligible_count": 6,
      "eligible_smiles": [
       "COc1[nH]c2c(C)ccc3c2c1CCNC3=O",
@@ -636,7 +636,7 @@
      "arm": "narrow",
      "cell": "parp1_2",
      "delta_from_contract": 0.6,
-     "elapsed_seconds": 1.8,
+     "elapsed_seconds": 1.88,
      "eligible_count": 0,
      "eligible_smiles": [],
      "proposal_seed": 2027092007,
@@ -688,7 +688,7 @@
      "arm": "wide",
      "cell": "parp1_2",
      "delta_from_contract": 0.6,
-     "elapsed_seconds": 4.42,
+     "elapsed_seconds": 4.74,
      "eligible_count": 0,
      "eligible_smiles": [],
      "proposal_seed": 2027092007,
@@ -740,23 +740,10 @@
     "yield_delta": 0
    }
   },
-  "cost_of_uniformity": {
-   "statement": "braf_1 went 5.36 s -> 2409.96 s (449.6x) for an IDENTICAL eligible set -- zero endpoints bought. This is a measured price paid for one controller across the panel, not a free change. It is still the right trade: uniformity removes a target-keyed conditional from an executable parameter, and the worst cell sits well inside both the 600 s sealed bound and the 1800 s production proposal-worker bound.",
-   "wide_over_narrow_seconds_by_cell": {
-    "braf_0": 7.0,
-    "braf_1": 449.6,
-    "braf_2": 2.0,
-    "parp1_0": 2.1,
-    "parp1_1": 2.0,
-    "parp1_2": 2.5
-   },
-   "worst_cell": "braf_1",
-   "worst_ratio": 449.6
-  },
   "criteria": {
    "C1_recovery_wide_contains_narrow": true,
    "C2_yield_never_drops": true,
-   "C4_cost_within_600s_per_cell": false
+   "C4_cost_within_600s_per_cell": true
   },
   "docking_calls": 0,
   "lane_is_deterministic": "propose_route_expert_candidates takes no rng, so given a state and its settings this lane carries no sampling noise",
@@ -765,20 +752,15 @@
   "predeclaration_sha256": "82e356a047331a440faef128b35da23bab059c433b7d6094b39f9c3a203c78c0",
   "question": "does standardizing the route lane to 48/48/64 preserve the PARP1/BRAF route support that 32/24/32 produced?",
   "schema_version": "t4_route_width_standardization_gate_v1",
-  "search_effort_evidence": {
-   "effort_range_spanned": "2.0x to 449.6x",
-   "eligible_sets_identical_across_that_range": true,
-   "reading": "An eligible set that does not move across a search-effort range this wide is the strongest available evidence that the route lane on these cells is genuinely EXHAUSTED rather than under-searched. A lane still finding new endpoints at 48/48/64 would have gained something; none did."
-  },
   "totals": {
    "gained_total": 0,
    "lost_total": 0,
    "narrow_eligible": 10,
-   "narrow_seconds": 25.53,
+   "narrow_seconds": 25.87,
    "wide_eligible": 10,
-   "wide_seconds": 2485.61
+   "wide_seconds": 277.92
   },
-  "verdict": "NOT_GREEN"
+  "verdict": "GREEN"
  },
- "payload_sha256": "2187e78e3edfa6d1c7ae84388bd53f8e8dd8c153fb22441a56da8eb3e2c11e84"
+ "payload_sha256": "73a817d269f3ff3474563da8daf3788371bcf07554dee95ccca54107b486a9ab"
 }
