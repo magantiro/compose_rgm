@@ -323,3 +323,59 @@ def acquire_with_continuation(
         weight = discount ** np.maximum(1.0, lengths)
     spread = np.sqrt(immediate.spread(x) ** 2 + continuation.spread(x) ** 2)
     return immediate.predict(x) + weight * continuation.predict(x) + float(beta) * spread
+
+
+# ---- Expected archive gain from a predicted SCORE -----------------------------------------
+#
+# Learning `archive_gain` directly throws information away. Once the archive is good the target
+# is `max(0, u - tau)/k`, which is ZERO for most candidates, so a macro that produced 0.48
+# against a 0.50 threshold teaches the model nothing -- even though its 0.48 is a perfectly
+# informative statement about what that macro does from that state.
+#
+# So the head predicts the ORACLE SCORE, which is dense and always informative, and the archive
+# gain is DERIVED from it against the archive we already know exactly. For a full archive,
+# admitting `u > tau` displaces the k-th best, so
+#
+#     dF_k = max(0, u - tau) / k
+#
+# and under `u ~ N(mu, sigma)` its expectation is the expected-improvement integral over k --
+# a closed form rather than a plug-in evaluated at the point estimate.
+
+
+def expected_archive_gain(mean, spread, *, threshold: float, k: int = DEFAULT_ARCHIVE_K):
+    """`E[max(0, u - tau)] / k` for `u ~ N(mean, spread)`; exact, not a plug-in.
+
+    An unfilled archive has `threshold = -inf`: every candidate enters, and the gain is the
+    candidate's own contribution to a mean that is still growing, so the caller supplies a
+    finite threshold in that regime rather than having one invented here.
+    """
+    mu = np.asarray(mean, dtype=float)
+    sigma = np.maximum(np.asarray(spread, dtype=float), 0.0)
+    if not math.isfinite(threshold):
+        raise ValueError("expected archive gain needs a finite archive threshold")
+    if type(k) is not int or k < 1:
+        raise ValueError("positive integer archive k required")
+    edge = mu - float(threshold)
+    # A degenerate posterior reduces to the plug-in, which is the correct limit.
+    tiny = sigma <= 1e-12
+    safe = np.where(tiny, 1.0, sigma)
+    z = edge / safe
+    normal = np.exp(-0.5 * z * z) / math.sqrt(2.0 * math.pi)
+    cumulative = 0.5 * (1.0 + np.vectorize(math.erf)(z / math.sqrt(2.0)))
+    improvement = np.where(tiny, np.maximum(0.0, edge), edge * cumulative + safe * normal)
+    return improvement / k
+
+
+def auc_weighted_gain(gain, *, calls_remaining: int, budget: int):
+    """Weight an archive improvement by how much of the query curve it will persist through.
+
+    PMO scores the top-ten trajectory over the whole budget, not the final archive, so an
+    improvement made with `B` calls left contributes to every one of those remaining points.
+    Returned as a FRACTION of the budget so the quantity stays comparable across budgets and
+    cannot silently rescale the exploration term it is summed with.
+    """
+    if type(budget) is not int or budget < 1:
+        raise ValueError("positive integer budget required")
+    if type(calls_remaining) is not int or calls_remaining < 0:
+        raise ValueError("calls remaining must be a non-negative integer")
+    return np.asarray(gain, dtype=float) * (min(calls_remaining, budget) / budget)

@@ -191,3 +191,72 @@ def test_acquisition_explores_when_either_head_is_unsure():
     greedy = acquire_with_continuation(immediate, continuation, probe, beta=0.0)
     curious = acquire_with_continuation(immediate, continuation, probe, beta=6.0)
     assert not np.array_equal(np.argsort(-greedy), np.argsort(-curious))
+
+
+# ---- Expected archive gain and AUC weighting ---------------------------------------------
+
+from compose_v4.control.pmo_macro_value import (  # noqa: E402
+    auc_weighted_gain,
+    expected_archive_gain,
+)
+
+
+def test_a_near_miss_is_worth_nothing_only_when_we_are_certain():
+    """Stage A's blind spot, stated as a test.
+
+    Learning `archive_gain` directly makes every sub-threshold candidate worth exactly zero.
+    Predicting the SCORE and integrating recovers the option value: a 0.48 against a 0.50
+    threshold is worthless only if we are sure it is 0.48.
+    """
+    certain = float(expected_archive_gain(0.48, 0.0, threshold=0.50))
+    unsure = float(expected_archive_gain(0.48, 0.05, threshold=0.50))
+    very_unsure = float(expected_archive_gain(0.48, 0.20, threshold=0.50))
+    assert certain == 0.0
+    assert 0.0 < unsure < very_unsure
+
+
+def test_a_hopeless_candidate_is_negligible_but_not_exactly_zero():
+    """A Gaussian posterior has infinite support, so nothing is ever strictly impossible.
+
+    The honest property is that a hopeless candidate is worth ORDERS less than a live one,
+    not that it is worth exactly nothing. Asserting equality with zero would be asserting a
+    falsehood that happens to survive rounding in a printout.
+    """
+    hopeless = float(expected_archive_gain(0.30, 0.05, threshold=0.50))
+    live = float(expected_archive_gain(0.48, 0.05, threshold=0.50))
+    assert 0.0 < hopeless < 1e-6
+    assert hopeless < live / 1000, "a hopeless candidate must be negligible beside a near miss"
+
+
+def test_the_degenerate_posterior_reduces_to_the_plug_in():
+    """With no uncertainty the closed form must equal `max(0, u - tau) / k` exactly."""
+    for score in (0.30, 0.50, 0.55, 0.90):
+        expected = max(0.0, score - 0.50) / 10
+        assert math.isclose(
+            float(expected_archive_gain(score, 0.0, threshold=0.50)), expected, abs_tol=1e-12
+        )
+
+
+def test_expected_gain_is_monotone_in_the_predicted_score():
+    grid = [float(expected_archive_gain(m, 0.05, threshold=0.50)) for m in np.linspace(0.3, 0.7, 9)]
+    assert all(b >= a for a, b in zip(grid, grid[1:], strict=False))
+
+
+def test_an_early_improvement_is_worth_more_of_the_query_curve():
+    """PMO scores the top-ten trajectory, so a gain persists through the calls that remain."""
+    gain = 0.005
+    early = float(auc_weighted_gain(gain, calls_remaining=200, budget=200))
+    middle = float(auc_weighted_gain(gain, calls_remaining=100, budget=200))
+    late = float(auc_weighted_gain(gain, calls_remaining=10, budget=200))
+    assert early > middle > late
+    assert math.isclose(early, gain, rel_tol=1e-12), "a full budget keeps the full gain"
+    assert math.isclose(late, gain * 0.05, rel_tol=1e-12)
+
+
+def test_auc_weighting_refuses_an_impossible_budget():
+    for bad in ({"calls_remaining": -1, "budget": 10}, {"calls_remaining": 5, "budget": 0}):
+        try:
+            auc_weighted_gain(0.01, **bad)
+        except ValueError:
+            continue
+        raise AssertionError(f"accepted an invalid budget: {bad}")
