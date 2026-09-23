@@ -1830,8 +1830,8 @@
       "import_ok": false
     },
     "scripts/hphi_valid128_read.py": {
-      "error": "TimeoutExpired: import did not finish",
-      "import_ok": false
+      "error": null,
+      "import_ok": true
     },
     "scripts/invgnn_gate2_diagnosis.py": {
       "error": null,
@@ -2386,8 +2386,8 @@
       "import_ok": true
     },
     "scripts/t4_snapshot.py": {
-      "error": "TimeoutExpired: import did not finish",
-      "import_ok": false
+      "error": null,
+      "import_ok": true
     },
     "scripts/t4_support_stage_audit.py": {
       "error": null,
@@ -3538,7 +3538,7 @@
       "import_ok": true
     }
   },
-  "import_ok_count": 829,
+  "import_ok_count": 831,
   "interpreter": "/Users/rmaganti/compose_rgm_git/.venv/bin/python",
   "per_directory": {
     "modal_apps": {
@@ -3546,7 +3546,7 @@
       "total": 286
     },
     "scripts": {
-      "import_ok": 290,
+      "import_ok": 292,
       "total": 339
     },
     "tools": {
