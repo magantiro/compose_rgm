@@ -46,31 +46,44 @@ import numpy as np
 
 from compose_v4.chem.molecular_graph import is_element
 from compose_v4.control.dynamic_program_synthesis import (
+    GENERIC_MODULES,
     MAX_SEGMENT_LENGTH,
     _delete_pendant_fragment,
     _grow_actions,
     _ring_module,
     _stage,
+    compile_generic_module,
 )
 from compose_v4.experiments.whole_ring_plan import execute_program
 
-#: The rebuild vocabulary, every entry dispatching to a builder that already ships.
+#: The rebuild vocabulary is the FULL generic module table plus two anchored composites.
 #:
-#: ``regrow``          the v1 behaviour: a linear C/N/O chain off the retained anchor.
-#: ``append_ring``     a pendant 5- or 6-ring built AT the retained anchor.
-#: ``fuse_ring``       a ring fused onto a ring edge at or adjacent to the anchor.
-#: ``ring_then_grow``  a pendant ring at the anchor, then a short chain off the ring.
+#: The region selects WHERE COMPOSE acts; it must not also decide WHAT COMPOSE may do there.
+#: An earlier version of this module offered four hand-picked rebuild choices, and a parity
+#: report measured the cost: all thirteen generic families are applicable on every Celecoxib
+#: macro-boundary state, and TEN of them were applicable on a contracted state while being
+#: unreachable from the rebuild stage (`diagnostics/pmo_macro_parity_v1/`).  A macro test run
+#: against that reduced vocabulary could not have distinguished a bad search from a capability
+#: that was never exposed.
+#:
+#: Every entry dispatches to a builder that already ships.  ``regrow`` and the two ring
+#: entries are ANCHORED at the region's retained anchor; ``ring_then_grow`` composes two of
+#: them; every other entry is the production ``compile_generic_module`` family applied to the
+#: contracted state.  Families that cannot apply refuse through their own normal validity
+#: path and are recorded as refusals -- no capability class is silently omitted.
+ANCHORED_OPTIONS: tuple[str, ...] = ("regrow", "append_ring", "fuse_ring", "ring_then_grow")
+#: `append_ring` and `fuse_ring` also name generic families.  The anchored branch claims those
+#: names, so listing them twice would silently double their draw mass rather than add anything;
+#: dedupe so the table is exactly one entry per distinct rebuild behaviour.
 REPLACEMENT_OPTIONS: tuple[str, ...] = (
-    "regrow",
-    "append_ring",
-    "fuse_ring",
-    "ring_then_grow",
+    *ANCHORED_OPTIONS,
+    *(family for family in GENERIC_MODULES if family not in ANCHORED_OPTIONS),
 )
 
-#: Equal mass over the declared options.  Deliberately flat: the census says the current
-#: lane is 100% ``regrow``, so any weighting that is not flat would be choosing a rebuild
-#: distribution before measuring one.  An engineering choice, not a fitted one.
-DEFAULT_OPTION_WEIGHTS: tuple[float, ...] = (1.0, 1.0, 1.0, 1.0)
+#: Equal mass over every declared option.  Deliberately flat: the census says the shipped lane
+#: is effectively all plain growth, so any weighting that is not flat would be choosing a
+#: rebuild distribution before measuring one.  An engineering choice, not a fitted one.
+DEFAULT_OPTION_WEIGHTS: tuple[float, ...] = tuple(1.0 for _ in REPLACEMENT_OPTIONS)
 
 
 def _new_slots(before, after) -> list[int]:
@@ -140,6 +153,17 @@ def _build(option: str, contracted, rng, *, anchor: int, budget: int):
             locus=_fusion_locus(contracted, anchor),
         )
         return list(stage["actions"]), product, {"ring": stage["parameters"]}
+    if option in GENERIC_MODULES:
+        # The full production vocabulary, reached through the production compiler so the
+        # chemistry is byte-identical to an ordinary module.  These families carry no locus
+        # argument, so the region constrains them by having already excised R rather than by
+        # pinning the edit to the anchor; that is recorded rather than hidden.
+        product, stage = compile_generic_module(contracted, rng, option)
+        return (
+            list(stage["actions"]),
+            product,
+            {"generic_module": stage["parameters"], "anchored_at_region": False},
+        )
     raise ValueError(f"unknown region replacement option: {option}")
 
 
