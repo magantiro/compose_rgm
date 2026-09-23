@@ -1,0 +1,42 @@
+{
+  "environments": {
+    "laptop_venv": {
+      "numpy": "2.5.3",
+      "path": "/Users/rmaganti/compose_rgm_git/.venv",
+      "python": "3.12.9",
+      "rdkit": "2026.03.6",
+      "role": "PRODUCTION FOR NOTHING. Convenience only.",
+      "warning": "Measured to write different canonical SMILES from the pinned kernels on states a search constructs, and canonical SMILES is used as a cache key, so a spelling difference becomes a permanent divergence in any procedure that dedupes on it."
+    },
+    "pmo_production": {
+      "env_vars": {
+        "KMP_DUPLICATE_LIB_OK": "TRUE",
+        "OMP_NUM_THREADS": "1"
+      },
+      "extra": "setuptools 69.5.1 plus an rdkit.six shim; PyTDC 1.1.15 imports rdkit.six",
+      "image_source": "modal_apps/pmo_population_v1_app.py",
+      "local_mirror": "~/compose_pmo_pinned_env",
+      "numpy": "1.26.4",
+      "pytdc": "1.1.15 (installed --no-deps)",
+      "python": "3.11",
+      "rdkit": "2023.09.6",
+      "role": "PMO scored runs, oracle and COMPOSE executor alike"
+    },
+    "t4_editing_production": {
+      "env_vars": {
+        "KMP_DUPLICATE_LIB_OK": "TRUE",
+        "OMP_NUM_THREADS": "1"
+      },
+      "local_mirror": "~/compose_t4_pinned_env (torch absent there; add it for any path importing t4_fiber_campaign)",
+      "networkx": "3.3",
+      "numpy": "1.26.4",
+      "python": "3.11",
+      "rdkit": "2024.03.5",
+      "role": "T4 campaigns, editing corpus, RingCore catalog fingerprint 639ff6078c32d43c",
+      "scipy": "1.13.1",
+      "torch": "2.4.0"
+    }
+  },
+  "schema_version": 1,
+  "warning": "Three kernels; the laptop venv is production for nothing."
+}
