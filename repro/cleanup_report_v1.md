@@ -90,14 +90,33 @@ A flow_matching-shaped move of `experiments/` out of the package would cut
 across a real dependency. The correct sequence is to promote the 21 first. Both
 halves sit inside `src/`, so both are blocked by finding 1.
 
-### 4. 8,828 pinned artifacts are single-copy, off git (MEASURED)
+### 4. The off-Git exposure is ONE directory, 11.4 GB, deliberately ignored (MEASURED)
 
 Of 127,098 pins in 432 artifacts: 110,208 resolve, 6,014 are stale (normal for
-an immutable launch record), and 10,876 address something absent. Of the 8,854
-repo-shaped absent paths, **8,828 exist only as UNTRACKED files in
-`/Users/rmaganti/compose_rgm_git`** - referenced by hash from committed
-contracts, absent from git, single-copy on one disk. This is the real
-reproducibility exposure and it is larger than anything in the directory layout.
+an immutable launch record), and 10,876 address something absent. Of the 8,835
+repo-shaped absent paths, **8,828 are under a single directory**:
+
+| | |
+|---|---|
+| path | `diagnostics/pmo_dynamic_v21/runs/` |
+| pinned paths it holds | 8,828 |
+| on disk | 17,064 files, **11.4 GB** |
+| only known location | `/Users/rmaganti/compose_rgm_git`, untracked |
+| why untracked | `.gitignore:55`, a deliberate exclusion |
+
+Verified two ways: 300 of 300 sampled unresolved paths are ignored by that one
+rule, and 40 of 40 sampled are present-but-untracked in the main checkout and in
+no local ref's history.
+
+The exclusion is a policy decision and the exposure is a separate consequence of
+pinning those paths by hash; the two were decided independently and only the
+second is a problem. **The remedy is not to commit it** - 11.4 GB would bloat the
+repository - but to copy it to two durable locations and verify the sha after
+copying. Operational blocker measured the same day: this disk had about 8 GB
+free, so a local second copy does not currently fit.
+
+This is the real reproducibility exposure, and it is larger and far more
+specific than anything in the directory layout.
 
 ### 5. A correction I had to make to my own finding (MEASURED)
 

@@ -39333,7 +39333,7 @@
   },
   "pinned_path_count": 1879,
   "policy": "READ-ONLY. Never re-pin a historical contract to make a cleanup pass succeed.",
-  "producing_commit": "46ffba660b73ad6765c05e372583ec66dd605c85",
+  "producing_commit": "917410cf150d1645f594ed27d3259c35a04df4e7",
   "resolution_summary": {
     "absent": 10876,
     "resolves": 110208,

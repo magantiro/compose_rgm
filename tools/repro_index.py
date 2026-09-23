@@ -278,11 +278,34 @@ def build_external_artifacts(root: pathlib.Path, resolution: dict) -> dict[str, 
         "repo_shaped_unresolved_by_family": dict(
             sorted(by_family.items(), key=lambda kv: -kv[1])[:40]
         ),
+        "single_largest_off_git_exposure": {
+            "path": "diagnostics/pmo_dynamic_v21/runs/",
+            "pinned_paths_addressed": 8828,
+            "share_of_repo_shaped_unresolved_pins": "8828 of 8835",
+            "files_on_disk": 17064,
+            "size_mb": 11418.3,
+            "only_known_location": "/Users/rmaganti/compose_rgm_git (untracked working tree)",
+            "excluded_deliberately": True,
+            "exclusion_rule": ".gitignore:55  diagnostics/pmo_dynamic_v21/runs/",
+            "measured": (
+                "300 of 300 sampled unresolved paths are ignored by this single rule, and 40 of 40 "
+                "sampled are present-but-untracked in the main checkout and in no local ref's "
+                "history. The exclusion is a deliberate policy decision, not an oversight; the "
+                "reproducibility exposure is a separate consequence of pinning those paths by hash."
+            ),
+            "remedy": (
+                "Do NOT commit it: 11.4 GB would bloat the repository. Copy the directory to two "
+                "durable locations and verify the sha AFTER copying, then record the restore path "
+                "here. NOTE the operational blocker measured 2026-09-23: this disk had about 8 GB "
+                "free, so a local second copy does not currently fit."
+            ),
+        },
         "uncommitted_run_output_finding": {
             "measured": (
                 "8,828 of 8,854 repo-shaped unresolved pins resolve to files that exist ONLY as "
                 "UNTRACKED files in /Users/rmaganti/compose_rgm_git. They are single-copy on one "
-                "disk, referenced by hash from committed contracts, and absent from git."
+                "disk, referenced by hash from committed contracts, and absent from git. All 8,828 "
+                "are under one gitignored directory; see single_largest_off_git_exposure."
             ),
             "remaining_26": (
                 "The other 26 were first read as permanently lost because `git log --all` searches "

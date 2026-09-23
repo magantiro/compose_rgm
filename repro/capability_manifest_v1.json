@@ -673,7 +673,7 @@
     "4_artifact_to_run": "repro/external_artifacts_v1.json + repro/pinned_paths_v1.json"
   },
   "module_count": 595,
-  "producing_commit": "46ffba660b73ad6765c05e372583ec66dd605c85",
+  "producing_commit": "917410cf150d1645f594ed27d3259c35a04df4e7",
   "public_symbol_pair_count": 17081,
   "schema_version": 1,
   "sufficiency_warning": "A public-symbol superset is NECESSARY AND NOT SUFFICIENT. An import can resolve while the mechanism behind it is reached by no production caller; this repository has found six such cases. Layers 3 and 4, golden behaviour and artifact-to-run reproduction, are separate gates and are reported separately."

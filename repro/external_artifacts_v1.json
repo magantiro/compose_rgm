@@ -81,8 +81,20 @@
   },
   "repo_shaped_unresolved_paths": 8854,
   "schema_version": 1,
+  "single_largest_off_git_exposure": {
+    "excluded_deliberately": true,
+    "exclusion_rule": ".gitignore:55  diagnostics/pmo_dynamic_v21/runs/",
+    "files_on_disk": 17064,
+    "measured": "300 of 300 sampled unresolved paths are ignored by this single rule, and 40 of 40 sampled are present-but-untracked in the main checkout and in no local ref's history. The exclusion is a deliberate policy decision, not an oversight; the reproducibility exposure is a separate consequence of pinning those paths by hash.",
+    "only_known_location": "/Users/rmaganti/compose_rgm_git (untracked working tree)",
+    "path": "diagnostics/pmo_dynamic_v21/runs/",
+    "pinned_paths_addressed": 8828,
+    "remedy": "Do NOT commit it: 11.4 GB would bloat the repository. Copy the directory to two durable locations and verify the sha AFTER copying, then record the restore path here. NOTE the operational blocker measured 2026-09-23: this disk had about 8 GB free, so a local second copy does not currently fit.",
+    "share_of_repo_shaped_unresolved_pins": "8828 of 8835",
+    "size_mb": 11418.3
+  },
   "uncommitted_run_output_finding": {
-    "measured": "8,828 of 8,854 repo-shaped unresolved pins resolve to files that exist ONLY as UNTRACKED files in /Users/rmaganti/compose_rgm_git. They are single-copy on one disk, referenced by hash from committed contracts, and absent from git.",
+    "measured": "8,828 of 8,854 repo-shaped unresolved pins resolve to files that exist ONLY as UNTRACKED files in /Users/rmaganti/compose_rgm_git. They are single-copy on one disk, referenced by hash from committed contracts, and absent from git. All 8,828 are under one gitignored directory; see single_largest_off_git_exposure.",
     "recovered_from_branches": [
       "codex/compose-baseline-qualification",
       "codex/compose-constraints-hard",
