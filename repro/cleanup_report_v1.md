@@ -34,7 +34,7 @@ touched.
 | gate | count | note |
 |---|---|---|
 | `pinned_historical_files_modified` | **0** | `git diff --stat 061ead93 HEAD -- <1,879 pinned paths>` is empty |
-| `lost_public_symbols` | **0** | 17,081 import-view pairs before and after, 0 lost, 0 gained |
+| `lost_public_symbols` | **0** | the before and after reports are BYTE-IDENTICAL, sha256 `85ab89636a352c1b...` |
 | `lost_entrypoints` | **0** | 877 -> 884 entry points, 0 regressed, 0 vanished, +7 new tools |
 | `lost_capability_groups` | **0** | 7 groups, all non-empty |
 | `new_test_regressions` | PENDING | baseline suite still running; not claimed until run |
@@ -216,10 +216,14 @@ identity.
 | importable modules | 590 | 590 | 0 |
 | public symbol pairs (import view) | 17,081 | 17,081 | **0 lost, 0 gained** |
 | public symbol pairs (AST view) | 17,025 | 17,025 | **0 lost, 0 gained** |
+| capability report sha256 | `85ab8963...` | `85ab8963...` | **byte-identical** |
 | entry points discovered | 877 | 884 | +7 (new tools) |
 | entry points importing | 821 | 829 | **0 regressed, 0 vanished** |
 | collected test nodes | 6,296 | 6,302 | +6 (new smoke tests) |
 | pinned files modified | - | - | **0** |
+
+The capability report is byte-identical before and after, which is stronger than
+the superset the gate requires: not one symbol, module or import outcome moved.
 
 Full-suite after-state at HEAD: **297 failed, 5,893 passed, 2 skipped, 4 xfailed,
 102 errors** in 44m53s under the laptop `.venv`. The matching true-baseline run
