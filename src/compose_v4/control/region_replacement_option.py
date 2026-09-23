@@ -212,7 +212,13 @@ class RegionReplacementOption:
             # v1's ceiling and cannot widen an unlawed draw.
             ceiling = max(removed, MAX_SEGMENT_LENGTH)
         failures = {}
-        for option in self.order(rng):
+        draw_order = self.order(rng)
+        # The option the policy INTENDED before any executor refusal. Recording it is what
+        # lets an upstream value model condition on the rebuild it asked for rather than
+        # only on the one that happened to execute -- without it, reward can learn after
+        # the fact that a fused-ring rebuild was good and still have no way to ask for one.
+        intended = draw_order[0] if draw_order else None
+        for option in draw_order:
             try:
                 build_actions, product, detail = _build(
                     option, contracted, rng, anchor=anchor, budget=ceiling
@@ -227,6 +233,8 @@ class RegionReplacementOption:
                 receipt,
                 {
                     "rebuild_option": option,
+                    "intent_rebuild_option": intended,
+                    "intent_realized": option == intended,
                     "deleted_path": path,
                     "deleted_atoms": len(path),
                     "excised_atoms": removed,

@@ -200,6 +200,17 @@ class RewardAdaptiveProgramController:
         self.pre.fit(self.observations, targets)
         self.post.fit(self.observations, targets)
 
+    def _decision_utility(self, model, rows) -> np.ndarray:
+        """Predicted endpoint utility CLIPPED to the PMO range, for ranking only.
+
+        PMO rewards live in [0, 1] and an early ridge fit on a handful of observations can
+        predict well outside it. Clipping the DECISION keeps one wild extrapolation from
+        owning a whole batch. The stored reward labels are never touched -- `observe` keeps
+        the raw delta, so the regression still sees the truth and the out-of-range count
+        stays visible in telemetry rather than being normalised away.
+        """
+        return np.clip(self._endpoint_hat(model, rows), 0.0, 1.0)
+
     def _endpoint_hat(self, model, rows) -> np.ndarray:
         """Predicted ENDPOINT utility: parent offset restored, raw units, never delta alone."""
         parent = np.asarray([float(r.get("parent_score", 0.0)) for r in rows], dtype=float)
@@ -214,7 +225,7 @@ class RewardAdaptiveProgramController:
             return np.zeros(0)
         if not self.fitted:
             return np.full(len(intents), 1.0 / len(intents))
-        value = self._endpoint_hat(self.pre, intents)
+        value = self._decision_utility(self.pre, intents)
         weights = np.exp((value - value.max()) / self.temperature)
         weights = weights / weights.sum()
         # Floor on VOCABULARY entries only. A region replacement reports three labels
@@ -273,7 +284,8 @@ class RewardAdaptiveProgramController:
         by_model = int(room * self.model_share) if self.fitted else 0
         chosen, detail = [], []
         if by_model:
-            predicted = self._endpoint_hat(self.post, candidates)
+            raw = self._endpoint_hat(self.post, candidates)
+            predicted = np.clip(raw, 0.0, 1.0)
             utility = np.maximum(predicted - float(archive_threshold), 0.0)
             for index in np.argsort(-utility)[:by_model]:
                 chosen.append(int(index))
@@ -281,7 +293,10 @@ class RewardAdaptiveProgramController:
                     {
                         "index": int(index),
                         "reason": "model",
-                        "predicted_endpoint": float(predicted[index]),
+                        # RAW, so an out-of-range extrapolation stays countable; the
+                        # clipped value is what decided the ranking.
+                        "predicted_endpoint": float(raw[index]),
+                        "decision_utility": float(predicted[index]),
                         "propensity": float(by_model / len(candidates)),
                     }
                 )

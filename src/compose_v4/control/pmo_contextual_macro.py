@@ -36,6 +36,7 @@ from compose_v4.control.dynamic_program_synthesis import (
 from compose_v4.control.dynamic_program_synthesis_v1 import (
     GENERIC_MODULES as V1_GENERIC_MODULES,
 )
+from compose_v4.control.pmo_channels import CHANNELS
 from compose_v4.control.region_replacement_option import REPLACEMENT_OPTIONS
 from compose_v4.rewrite.action_codec_v4 import supported_executor_rules
 
@@ -62,6 +63,8 @@ MACRO_FAMILIES: tuple[str, ...] = tuple(
             # operation itself, and the structured lane's recombination branch.
             "region_replace",
             "dependency_branch",
+            # Channel names appear as block labels on the jump lane. Derived, not typed.
+            *CHANNELS,
             # The shallow lane's "current state edit" macro IS one primitive action, so its
             # family is an EXECUTOR RULE name. Four of those are spelled identically to
             # module families (cycle_close, cycle_open, bond_reroute, ring_system_restate),
@@ -150,6 +153,17 @@ def _label_families(label: str) -> list[str]:
     ]
 
 
+def region_replace_labels(option: str) -> list[str]:
+    """Labels for a region replacement whose rebuild option is `option`.
+
+    Used for BOTH the pre-execution intent and the realized macro, so an intent asking for
+    a fused-ring rebuild and a realization that delivered one carry the same label and the
+    two heads share statistical strength. Building them separately is how the pre side ends
+    up coarser than the post side without anyone noticing.
+    """
+    return ["region_replace", f"region_replace:{option}", str(option)]
+
+
 def macro_families(candidate) -> tuple[str, ...]:
     """The MACRO families a candidate realized.
 
@@ -184,7 +198,7 @@ def macro_families(candidate) -> tuple[str, ...]:
         found.append(family)
         rebuild = (module.get("parameters") or {}).get("rebuild_option")
         if rebuild:
-            found.extend([f"{family}:{rebuild}", str(rebuild)])
+            found.extend(region_replace_labels(str(rebuild))[1:])
 
     edit = metadata.get("current_state_edit") or {}
     if edit.get("family"):
@@ -199,27 +213,36 @@ def macro_families(candidate) -> tuple[str, ...]:
 def macro_scale(candidate) -> dict:
     """Realized SCALE of a macro: how much structure it actually moved.
 
-    Reported separately from primitive count because they are different quantities -- a
-    coherent eleven-primitive ring operation and an arbitrary eleven-primitive program
-    have the same length and different scale, and the whole reason to represent macros is
-    that the second number is the informative one.
+    Read from `provenance["actual_changes"]`, which is what production records, NOT from
+    invented keys -- an earlier version asked for `heavy_atom_delta` and `ring_delta`, which
+    do not exist, so every scale field read zero on every real candidate and the realized
+    block was back to length alone without anything looking wrong.
+
+    `largest_changed_region` is the census's own quantity: the largest CONNECTED component
+    of changed source atoms. That is the axis on which the controller was measured at 3
+    against a productive requirement of 14, so it is the one the value model must see.
     """
-    modules = ((candidate.get("provenance") or {}).get("metadata") or {}).get("modules")
-    if modules is None:
-        modules = (candidate.get("metadata") or {}).get("modules") or ()
+    provenance = candidate.get("provenance") or {}
+    metadata = provenance.get("metadata")
+    if metadata is None:
+        metadata = candidate.get("metadata") or {}
     excised = rebuilt = largest = 0
-    for module in modules:
+    for module in metadata.get("modules") or ():
         parameters = module.get("parameters") or {}
         excised = max(excised, int(parameters.get("excised_atoms", 0) or 0))
         rebuilt = max(rebuilt, int(parameters.get("rebuild_capacity", 0) or 0))
         largest = max(largest, int(module.get("primitive_edits", 0) or 0))
-    changes = (candidate.get("provenance") or {}).get("actual_changes") or {}
+
+    changes = provenance.get("actual_changes") or {}
+    components = changes.get("source_induced_components") or ()
     return {
-        "excised_atoms": excised,
+        "excised_atoms": max(excised, int(changes.get("deleted_original_atoms", 0) or 0)),
+        "installed_atoms": int(changes.get("surviving_new_atoms", 0) or 0),
         "rebuild_capacity": rebuilt,
         "largest_module_primitives": largest,
-        "d_heavy": float(changes.get("heavy_atom_delta", 0) or 0),
-        "d_rings": float(changes.get("ring_delta", 0) or 0),
+        "changed_sites": int(changes.get("changed_site_count", 0) or 0),
+        "changed_regions": len(components),
+        "largest_changed_region": max((len(c) for c in components), default=0),
     }
 
 
@@ -269,10 +292,12 @@ def edge_features(edge, *, blocks=FEATURE_BLOCKS) -> np.ndarray:
                     # an arbitrary eleven-primitive program agree on the two rows above and
                     # differ here, which is the distinction the macro abstraction is for.
                     float(edge.get("excised_atoms", 0)) / 16.0,
+                    float(edge.get("installed_atoms", 0)) / 16.0,
                     float(edge.get("rebuild_capacity", 0)) / 16.0,
                     float(edge.get("largest_module_primitives", 0)) / 16.0,
-                    float(edge.get("d_heavy", 0)) / 16.0,
-                    float(edge.get("d_rings", 0)) / 4.0,
+                    float(edge.get("changed_sites", 0)) / 16.0,
+                    float(edge.get("changed_regions", 0)) / 8.0,
+                    float(edge.get("largest_changed_region", 0)) / 16.0,
                     # The family that ACTUALLY executed, which need not be the one intended:
                     # a region replacement rebuilds with whichever option first executes.
                     *[
