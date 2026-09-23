@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "4b73e77d7d5b6f62bebf5af1ac83630e5916cc6e",
+  "baseline_commit": "3e08f4fda7847ed935e44f9cf07705ed613ea12a",
   "baseline_tag": "pre-cleanup-2026-09-23",
   "counts": {
     "entry_points": 877,
@@ -9,8 +9,8 @@
     "pinned_files": 1879,
     "pinned_python_files": 783,
     "public_symbol_pairs": 17081,
-    "python_files": 3341,
-    "tracked_files": 8818
+    "python_files": 3346,
+    "tracked_files": 8831
   },
   "dead_code": {
     "interpretation": "No source, driver or app file is unreferenced. The unreferenced set is concentrated in diagnostics (897), tests (386), upload (260) and the manuscript directories, which are results and submission bundles rather than dead code.",
@@ -610,13 +610,13 @@
     },
     "tests": {
       "pinned": 29,
-      "python_files": 619,
-      "unpinned": 590
+      "python_files": 620,
+      "unpinned": 591
     },
     "tools": {
       "pinned": 102,
-      "python_files": 255,
-      "unpinned": 153
+      "python_files": 259,
+      "unpinned": 157
     }
   },
   "reproducibility": {
