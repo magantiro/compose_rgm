@@ -1,0 +1,43 @@
+{
+ "schema_version": "pmo_pool_width_dryrun_v1",
+ "evidence_role": "zero_oracle_configuration_gate",
+ "new_charged_oracle_calls": 0,
+ "stub_scorer_calls": 96,
+ "constant_overridden": {
+  "from": 16,
+  "to": 128
+ },
+ "rounds_observed": 4,
+ "median_pool": 161.0,
+ "min_pool": 132,
+ "max_pool": 174,
+ "median_query_fraction": 0.09944026249758733,
+ "max_query_fraction": 0.12121212121212122,
+ "telemetry": [
+  {
+   "batch": 0,
+   "pool": 174,
+   "selected": 16,
+   "query_fraction": 0.09195402298850575
+  },
+  {
+   "batch": 1,
+   "pool": 157,
+   "selected": 16,
+   "query_fraction": 0.10191082802547771
+  },
+  {
+   "batch": 2,
+   "pool": 165,
+   "selected": 16,
+   "query_fraction": 0.09696969696969697
+  },
+  {
+   "batch": 3,
+   "pool": 132,
+   "selected": 16,
+   "query_fraction": 0.12121212121212122
+  }
+ ],
+ "pass": true
+}
