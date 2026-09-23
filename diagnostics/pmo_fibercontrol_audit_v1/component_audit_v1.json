@@ -1,0 +1,63 @@
+{
+ "schema_version": "pmo_fibercontrol_component_audit_v1",
+ "evidence_role": "zero_oracle_implementation_audit",
+ "question": "Which FiberControl components are genuinely shared with T4, and which are PMO-specific?",
+ "shared_module": "src/compose_v4/control/fiber_control.py",
+ "symbol_usage": {
+  "SearchState": {
+   "t4_refs": 7,
+   "pmo_refs": 3,
+   "verdict": "SHARED"
+  },
+  "ProgramValue": {
+   "t4_refs": 5,
+   "pmo_refs": 3,
+   "verdict": "SHARED"
+  },
+  "acquisition": {
+   "t4_refs": 3,
+   "pmo_refs": 3,
+   "verdict": "SHARED"
+  },
+  "program_features": {
+   "t4_refs": 6,
+   "pmo_refs": 1,
+   "verdict": "SHARED"
+  },
+  "endpoint_utility": {
+   "t4_refs": 1,
+   "pmo_refs": 0,
+   "verdict": "T4_ONLY"
+  },
+  "should_stop": {
+   "t4_refs": 0,
+   "pmo_refs": 0,
+   "verdict": "UNREACHED_BY_BOTH",
+   "note": "built and referenced by neither task; recorded as debt, not chased"
+  }
+ },
+ "pmo_specific_module": "src/compose_v4/control/pmo_credit.py",
+ "pmo_specific_note": "8 symbols (PopulationCredit, CreditKey, CreditCell, basin_label, program_family, scale_for_channel, improvement, credit_key_from_candidate); essentially unreached by any T4 module.",
+ "pmo_controller_base": "DynamicV21ProgramOptimizer",
+ "sign_convention_trap": {
+  "finding": "The shared machinery is written for MINIMIZATION (docking). PMO MAXIMIZES.",
+  "how_pmo_maps_it": {
+   "archive": "{endpoint: -mean_score}  NEGATED",
+   "candidate_parent_score": "-parent_measured_score  NEGATED",
+   "fitted_improvements": "reward - parent  NOT negated"
+  },
+  "why_it_is_consistent": "endpoint_utility = predict(x) - parent = predicted_gain + parent_raw, a raw-maximize endpoint prediction, which acquisition maximizes.",
+  "hazard": "pmo_credit.improvement's own docstring: a flipped sign produces a controller that confidently allocates budget away from every improvement it finds.",
+  "consequence": "The matched replay must DRIVE the real controller methods, never reimplement selection, because this convention is not reconstructible by reasoning."
+ },
+ "three_levels_to_compare": [
+  "1. simple top-k by the true PMO objective (the running blind beam)",
+  "2. shared FiberControl ProgramValue/acquisition, same accumulated SearchState history",
+  "3. full PMO controller including pmo_credit / niches / adaptive allocation (live)"
+ ],
+ "localization_rule": {
+  "shared_acquisition_loses_on_identical_pools": "FiberControl ranking/value layer is the issue",
+  "shared_fine_but_full_pmo_loses_live": "PMO-specific credit/allocation is the issue",
+  "full_pmo_wins": "the old weakness was proposal support"
+ }
+}
