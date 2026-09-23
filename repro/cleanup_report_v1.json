@@ -44,13 +44,13 @@
       "note": "All absent pins at baseline were traced: none is lost. 26 live on unfetched remote branches and the rest are uncommitted run outputs."
     },
     "pinned_historical_files_modified": {
-      "changed_files_total": 28,
+      "changed_files_total": 32,
       "command": "git diff --name-only 061ead93 HEAD  (intersected with the pinned set)",
       "count": 0,
       "violations": []
     }
   },
-  "head": "eed35b503f50628a88891f0efe09906efde97f82",
+  "head": "8455aaa546839bd575f089f080e8cd4cf4f42830",
   "rollback_command": "git checkout 061ead93",
   "rollback_sha": "061ead9355810a021bfbe64c9090ff60edb5599e",
   "schema_version": 1,
