@@ -1,0 +1,656 @@
+{
+ "cell": "fa7_2",
+ "consumption": {
+  "ladder": {
+   "policy": "t4_frozen_escalation_v1",
+   "policy_sha256": "c5cf6ab3e3a516b6aca3c9cc410c17d2f712bf60ccac224363ba57343c256a62"
+  },
+  "router": {
+   "policy": "t4_unified_routing_v1",
+   "policy_sha256": "b69cadcba1824ffcf1a45f8f7f894bec284bf09deea406a4e1da271d52bd609a"
+  },
+  "state_routing_attempts": 1,
+  "terminal_guard_passed": true
+ },
+ "contract": "configs/t4_unified_controller_fa7_d06_v1.json",
+ "contract_payload_sha256": "db62568b74889a68ccad03c30f2096d7724fed039c6a11d9651c77ce89085a7c",
+ "controller_seed": 2026091905,
+ "cumulative_by_rung": [
+  {
+   "cumulative_distinct": 2,
+   "draws_per_lane": 0,
+   "elapsed_seconds": 49.61,
+   "fresh_distinct": 2,
+   "returned": 2,
+   "rung": 0,
+   "stage": "zero_support_fallback"
+  },
+  {
+   "cumulative_distinct": 5,
+   "draws_per_lane": 960,
+   "elapsed_seconds": 1189.909,
+   "fresh_distinct": 3,
+   "returned": 5,
+   "rung": 1,
+   "stage": "draw_ladder"
+  }
+ ],
+ "delta_from_contract": 0.6,
+ "distinct_eligible": 5,
+ "docking_calls": 0,
+ "docking_interlock": {
+  "docking_binaries_present": [],
+  "docking_calls": 0,
+  "forbidden_modules_checked": [
+   "compose_v4.experiments.t4_docking_adapter",
+   "compose_v4.experiments.t4_partial_docking"
+  ],
+  "forbidden_modules_resident": [],
+  "oracle_calls": 0
+ },
+ "drug_like_eligible": 5,
+ "elapsed_seconds": 2299.09,
+ "endpoints": [
+  {
+   "added_bit_fraction": 0.08511,
+   "charge_delta": 0,
+   "deleted_atoms": null,
+   "direction": "prune",
+   "has_strained_ring": false,
+   "heavy": 25,
+   "heavy_delta": -10,
+   "inserted_atoms": null,
+   "margin_qed": 0.092855,
+   "margin_sa": 1.401272,
+   "margin_similarity": 0.071875,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": "shallow",
+   "qed": 0.692855,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.71667,
+   "rewrite_families": [
+    "retained_element"
+   ],
+   "ring_delta": -1,
+   "ring_sizes": [
+    6,
+    6
+   ],
+   "rung": 1,
+   "sa": 2.598728,
+   "scaffold_preserved": false,
+   "similarity": 0.671875,
+   "smiles": "CC(=O)Cn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O",
+   "support_expansion_stage": null
+  },
+  {
+   "added_bit_fraction": 0.08889,
+   "charge_delta": 0,
+   "deleted_atoms": 13,
+   "direction": "prune",
+   "has_strained_ring": false,
+   "heavy": 23,
+   "heavy_delta": -12,
+   "inserted_atoms": 1,
+   "margin_qed": 0.020277,
+   "margin_sa": 1.272163,
+   "margin_similarity": 0.040625,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.620277,
+   "region_size": 13,
+   "retained_source_bit_fraction": 0.68333,
+   "rewrite_families": [
+    "atom_delete"
+   ],
+   "ring_delta": -1,
+   "ring_sizes": [
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 2.727837,
+   "scaffold_preserved": false,
+   "similarity": 0.640625,
+   "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CN)c1=O",
+   "support_expansion_stage": "zero_support_fallback"
+  },
+  {
+   "added_bit_fraction": 0.08889,
+   "charge_delta": 0,
+   "deleted_atoms": 13,
+   "direction": "prune",
+   "has_strained_ring": false,
+   "heavy": 23,
+   "heavy_delta": -12,
+   "inserted_atoms": 1,
+   "margin_qed": 0.021733,
+   "margin_sa": 1.327853,
+   "margin_similarity": 0.040625,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": null,
+   "qed": 0.621733,
+   "region_size": 13,
+   "retained_source_bit_fraction": 0.68333,
+   "rewrite_families": [
+    "atom_delete"
+   ],
+   "ring_delta": -1,
+   "ring_sizes": [
+    6,
+    6
+   ],
+   "rung": 0,
+   "sa": 2.672147,
+   "scaffold_preserved": false,
+   "similarity": 0.640625,
+   "smiles": "CC(C)Nc1ccc(-c2cc(N)cc(C(=O)O)c2)n(CO)c1=O",
+   "support_expansion_stage": "zero_support_fallback"
+  },
+  {
+   "added_bit_fraction": 0.15686,
+   "charge_delta": 0,
+   "deleted_atoms": null,
+   "direction": "prune",
+   "has_strained_ring": false,
+   "heavy": 27,
+   "heavy_delta": -8,
+   "inserted_atoms": null,
+   "margin_qed": 0.014694,
+   "margin_sa": 1.327352,
+   "margin_similarity": 0.032353,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": "shallow",
+   "qed": 0.614694,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.71667,
+   "rewrite_families": [
+    "retained_element"
+   ],
+   "ring_delta": -1,
+   "ring_sizes": [
+    6,
+    6
+   ],
+   "rung": 1,
+   "sa": 2.672648,
+   "scaffold_preserved": false,
+   "similarity": 0.632353,
+   "smiles": "CCCC(=O)Cn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O",
+   "support_expansion_stage": null
+  },
+  {
+   "added_bit_fraction": 0.08889,
+   "charge_delta": 0,
+   "deleted_atoms": null,
+   "direction": "prune",
+   "has_strained_ring": false,
+   "heavy": 23,
+   "heavy_delta": -12,
+   "inserted_atoms": null,
+   "margin_qed": 0.136922,
+   "margin_sa": 1.466136,
+   "margin_similarity": 0.040625,
+   "med_chem_plausible": true,
+   "net_formal_charge": 0,
+   "proposal_lane": "shallow",
+   "qed": 0.736922,
+   "region_size": null,
+   "retained_source_bit_fraction": 0.68333,
+   "rewrite_families": [
+    "retained_deletion"
+   ],
+   "ring_delta": -1,
+   "ring_sizes": [
+    6,
+    6
+   ],
+   "rung": 1,
+   "sa": 2.533864,
+   "scaffold_preserved": false,
+   "similarity": 0.640625,
+   "smiles": "CCn1c(-c2cc(N)cc(C(=O)O)c2)ccc(NC(C)C)c1=O",
+   "support_expansion_stage": null
+  }
+ ],
+ "entrypoint": "production",
+ "execution": {
+  "app": "compose-t4-unified-production-gate",
+  "mode": "modal_fanout"
+ },
+ "expansion": {
+  "attempt_log": [
+   {
+    "cumulative_distinct": 2,
+    "elapsed_seconds": 49.61,
+    "fresh_distinct": 2,
+    "returned": 2,
+    "stage": "zero_support_fallback"
+   },
+   {
+    "attempt": 0,
+    "cumulative_distinct": 5,
+    "draws_per_lane": 960,
+    "elapsed_seconds": 1189.909,
+    "fresh_distinct": 3,
+    "returned": 5,
+    "stage": "draw_ladder"
+   }
+  ],
+  "attempts": 1,
+  "distinct_eligible": 5,
+  "draws_spent": 960,
+  "fallback_eligible": 2,
+  "fallback_ran": true,
+  "fallback_work": {
+   "attempts": 304,
+   "completions_executed": 304,
+   "distinct_eligible_endpoints": 2,
+   "distinct_valid_endpoints": 278,
+   "endpoints_gated": 304,
+   "regions_considered": 38,
+   "regions_excised": 38
+  },
+  "schema_version": "t4_support_expansion_v1",
+  "stop_reason": "reached_target"
+ },
+ "expansion_record": {
+  "expansion": {
+   "attempt_log": [
+    {
+     "cumulative_distinct": 2,
+     "elapsed_seconds": 49.61,
+     "fresh_distinct": 2,
+     "returned": 2,
+     "stage": "zero_support_fallback"
+    },
+    {
+     "attempt": 0,
+     "cumulative_distinct": 5,
+     "draws_per_lane": 960,
+     "elapsed_seconds": 1189.909,
+     "fresh_distinct": 3,
+     "returned": 5,
+     "stage": "draw_ladder"
+    }
+   ],
+   "attempts": 1,
+   "distinct_eligible": 5,
+   "draws_spent": 960,
+   "fallback_eligible": 2,
+   "fallback_ran": true,
+   "fallback_work": {
+    "attempts": 304,
+    "completions_executed": 304,
+    "distinct_eligible_endpoints": 2,
+    "distinct_valid_endpoints": 278,
+    "endpoints_gated": 304,
+    "regions_considered": 38,
+    "regions_excised": 38
+   },
+   "schema_version": "t4_support_expansion_v1",
+   "stop_reason": "reached_target"
+  },
+  "ladder": {
+   "policy": "t4_frozen_escalation_v1",
+   "policy_sha256": "c5cf6ab3e3a516b6aca3c9cc410c17d2f712bf60ccac224363ba57343c256a62"
+  },
+  "ladder_policy": {
+   "draw_ladder": [
+    960,
+    1920,
+    3840
+   ],
+   "lanes": [
+    "shallow",
+    "anchored_replacement"
+   ],
+   "max_extra_draws_per_event": 6720,
+   "schema_version": "t4_support_expansion_v1",
+   "stop_at_distinct_eligible": 4,
+   "wall_seconds": 7200.0,
+   "zero_support_fallback": true
+  },
+  "ladder_source": "contract",
+  "rounds_completed": 0,
+  "routed_kernels": [
+   "region"
+  ],
+  "routed_lanes": [
+   "zero_support_fallback"
+  ],
+  "router": {
+   "policy": "t4_unified_routing_v1",
+   "policy_sha256": "b69cadcba1824ffcf1a45f8f7f894bec284bf09deea406a4e1da271d52bd609a"
+  },
+  "router_source": "contract",
+  "routing": [
+   {
+    "activated_kernel": "region",
+    "applicability": {
+     "charge_refused_regions": 0,
+     "charged_centres": 0,
+     "executable_regions": 38,
+     "growth_headroom": 5,
+     "heavy_atoms": 35,
+     "large_regions": 25,
+     "net_formal_charge": 0,
+     "protonation_sites": 1,
+     "total_regions": 38
+    },
+    "applicability_mask": {
+     "local": 1,
+     "region": 1,
+     "state_aware": 0
+    },
+    "applicable_kernel_if_exhausted": "region",
+    "charge_refused_region_share_diagnostic_only": 0.0,
+    "parent_index": 0,
+    "schema_version": "t4_unified_routing_v1",
+    "search": {
+     "consecutive_empty_rounds": 1,
+     "eligible_pool_size": 0,
+     "rounds_completed": 0
+    },
+    "support_ramp": 1.0,
+    "weights": {
+     "local": 1.0,
+     "region": 1.0,
+     "state_aware": 0.0
+    }
+   }
+  ],
+  "rung_zero_assignments": [
+   {
+    "kernel": "region",
+    "lane": "zero_support_fallback",
+    "parent_index": 0
+   }
+  ],
+  "schema_version": "t4_unified_controller_v1"
+ },
+ "historical_reference": "UNAVAILABLE",
+ "ladder_fired_without_trigger": true,
+ "ladder_units": [
+  {
+   "elapsed_seconds": 478.74,
+   "eligible_records_returned": 0,
+   "expert": "anchored_replacement",
+   "parent": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+   "proposal_seed": 2740092015,
+   "region_law_arm": "declared",
+   "region_law_telemetry": {},
+   "schema_version": "t4_unified_proposal_v1",
+   "telemetry": {
+    "raw_draws": 512
+   },
+   "unit_seconds": 478.74
+  },
+  {
+   "elapsed_seconds": 484.52,
+   "eligible_records_returned": 0,
+   "expert": "anchored_replacement",
+   "parent": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+   "proposal_seed": 2727092012,
+   "region_law_arm": "declared",
+   "region_law_telemetry": {},
+   "schema_version": "t4_unified_proposal_v1",
+   "telemetry": {
+    "raw_draws": 512
+   },
+   "unit_seconds": 484.52
+  },
+  {
+   "elapsed_seconds": 1084.13,
+   "eligible_records_returned": 3,
+   "expert": "shallow",
+   "parent": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+   "proposal_seed": 2740091914,
+   "region_law_arm": "declared",
+   "region_law_telemetry": {
+    "region_law": "free_gate_margin_v1",
+    "region_law_consumption_attempts": 1
+   },
+   "schema_version": "t4_unified_proposal_v1",
+   "telemetry": {
+    "raw_draws": 480
+   },
+   "unit_seconds": 1084.14
+  },
+  {
+   "elapsed_seconds": 1126.2,
+   "eligible_records_returned": 2,
+   "expert": "shallow",
+   "parent": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+   "proposal_seed": 2727091911,
+   "region_law_arm": "declared",
+   "region_law_telemetry": {
+    "region_law": "free_gate_margin_v1",
+    "region_law_consumption_attempts": 12
+   },
+   "schema_version": "t4_unified_proposal_v1",
+   "telemetry": {
+    "raw_draws": 480
+   },
+   "unit_seconds": 1132.62
+  }
+ ],
+ "oracle_calls": 0,
+ "production_controller_seed": 2026091905,
+ "protein": "fa7",
+ "region_law_arm": "declared",
+ "role": "trigger",
+ "round_one": {
+  "agrees_with_committed_audit": false,
+  "audit_delta_mislabelled": false,
+  "decision": {
+   "featured_candidates": 3,
+   "fresh": 3,
+   "merged_pool": 3,
+   "parents_round_one": [
+    "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O"
+   ],
+   "pool_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 0,
+    "shallow": 3,
+    "unique_endpoints": 3
+   },
+   "reproduces_candidate_exhaustion": false,
+   "selected": 3,
+   "selected_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 0,
+    "shallow": 3,
+    "unique_endpoints": 3
+   }
+  },
+  "expected_selected": 0,
+  "lanes": {
+   "anchored_replacement": {
+    "elapsed_seconds": 486.98,
+    "eligible_records_returned": 0,
+    "expert": "anchored_replacement",
+    "parent": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+    "proposal_seed": 2027092009,
+    "region_law_arm": "declared",
+    "region_law_telemetry": {},
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "raw_draws": 512
+    },
+    "unit_seconds": 486.99
+   },
+   "route_complete_region": {
+    "elapsed_seconds": 21.02,
+    "eligible_records_returned": 0,
+    "expert": "route_complete_region",
+    "parent": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+    "proposal_seed": 2027092110,
+    "region_law_arm": "declared",
+    "region_law_telemetry": {},
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "available_large_rewrite_proposals": 69,
+     "available_local_rewrite_proposals": 11,
+     "available_medium_rewrite_proposals": 84,
+     "binding_truncations": 8,
+     "binding_visits": 20986,
+     "candidate_shortfall": 0,
+     "complete_programs_committed": 41,
+     "composition_aliases": 688,
+     "composition_attempts": 2320,
+     "composition_rejections": 682,
+     "composition_repeated_constituent": 260,
+     "exact_realization_precision_denominator": 41,
+     "exact_realization_precision_numerator": 41,
+     "materialization_attempts": 44,
+     "materialization_rejections": 22,
+     "realization_limit": 64,
+     "realization_status_counts": {
+      "committed": 41,
+      "realizer_frontier_exhausted_abstention": 23
+     },
+     "realized_primitive_band_counts": {
+      "large": 0,
+      "medium": 17,
+      "small": 24
+     },
+     "scale_balanced": 0,
+     "selected_large_rewrite_proposals": 8,
+     "selected_local_rewrite_proposals": 11,
+     "selected_medium_rewrite_proposals": 45,
+     "single_aliases": 2,
+     "templates_with_bindings": 16,
+     "unique_ranked_endpoints": 64,
+     "valid_depth_2": 154,
+     "valid_depth_3": 311,
+     "valid_depth_4": 225,
+     "valid_unique_single_goals": 20
+    },
+    "unit_seconds": 21.1
+   },
+   "shallow": {
+    "elapsed_seconds": 1093.85,
+    "eligible_records_returned": 3,
+    "expert": "shallow",
+    "parent": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+    "proposal_seed": 2027091908,
+    "region_law_arm": "declared",
+    "region_law_telemetry": {
+     "region_law": "free_gate_margin_v1",
+     "region_law_consumption_attempts": 4
+    },
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "raw_draws": 480
+    },
+    "unit_seconds": 1099.88
+   }
+  }
+ },
+ "routing": {
+  "agrees": true,
+  "assignments": [
+   {
+    "kernel": "region",
+    "lane": "zero_support_fallback",
+    "parent_index": 0
+   }
+  ],
+  "decisions": [
+   {
+    "activated_kernel": "region",
+    "applicability": {
+     "charge_refused_regions": 0,
+     "charged_centres": 0,
+     "executable_regions": 38,
+     "growth_headroom": 5,
+     "heavy_atoms": 35,
+     "large_regions": 25,
+     "net_formal_charge": 0,
+     "protonation_sites": 1,
+     "total_regions": 38
+    },
+    "applicability_mask": {
+     "local": 1,
+     "region": 1,
+     "state_aware": 0
+    },
+    "applicable_kernel_if_exhausted": "region",
+    "charge_refused_region_share_diagnostic_only": 0.0,
+    "parent_index": 0,
+    "schema_version": "t4_unified_routing_v1",
+    "search": {
+     "consecutive_empty_rounds": 1,
+     "eligible_pool_size": 0,
+     "rounds_completed": 0
+    },
+    "support_ramp": 1.0,
+    "weights": {
+     "local": 1.0,
+     "region": 1.0,
+     "state_aware": 0.0
+    }
+   }
+  ],
+  "historical_kernel": "region",
+  "routed_kernel": "region"
+ },
+ "rung_zero": {
+  "kernel": "region",
+  "units": [
+   {
+    "elapsed_seconds": 39.9,
+    "eligible_records_returned": 2,
+    "expert": "zero_support_fallback",
+    "parent": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+    "proposal_seed": 2027991915,
+    "region_law_arm": "declared",
+    "region_law_telemetry": {},
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "zero_support_fallback_work": {
+      "attempts": 304,
+      "completions_executed": 304,
+      "distinct_eligible_endpoints": 2,
+      "distinct_valid_endpoints": 278,
+      "endpoints_gated": 304,
+      "regions_considered": 38,
+      "regions_excised": 38
+     }
+    },
+    "unit_seconds": 39.91
+   }
+  ]
+ },
+ "rung_zero_fresh_distinct": 2,
+ "schema_version": "t4_unified_production_gate_v1",
+ "seed_index": 0,
+ "seed_role": "production",
+ "slot_semantics_preflight": {
+  "endpoint_heavy_ceiling": 40,
+  "free_slots_in_production_source": 13,
+  "heavy_atoms": 35,
+  "padded_graph_slots": 48,
+  "passed": true,
+  "smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+  "tight_graph_slots": 35,
+  "tight_graph_would_forbid_atom_birth": true
+ },
+ "support": "compose_valid",
+ "verdict": {
+  "detail": "5 distinct eligible endpoints recovered (2 at rung 0)",
+  "failure_kind": null,
+  "historical_kernel": "region",
+  "routed_kernel": "region",
+  "routing_agrees_with_historical_arm": true,
+  "verdict": "PASS"
+ }
+}
