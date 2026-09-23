@@ -4,15 +4,15 @@
       "allocator": "evidence_niches: a centre earns its niche by being far AND carrying evidence (parameter-free, degrades to max-min when utility is flat); escape drains; jump floor removed; parent tilt expressed as a ratio in measured-reward units so evidence terms are not swamped by a dimensionless base of 1.0",
       "comparison": "pmo_allocator_repair_plus_online_memory_v1",
       "enable_online_memory": true,
-      "name": "B_memory",
+      "name": "B_memory_1k",
       "what_differs": "ONLY this flag. Same initialization, executor, chemistry, budget, seed and allocator repair in both arms. Arm A leaves online_memory None, so the adapter delegates to the unmodified production _channel_proposal and the region law is None -- the only true no-op, since an unlawed draw consumes rng.permutation while any law object consumes rng.random."
     },
     "budget": {
       "automatic_retries": 0,
       "backfill": false,
       "candidate_calls_per_task": 234,
-      "charged_calls_per_task": 250,
-      "charged_calls_total": 750,
+      "charged_calls_per_task": 1000,
+      "charged_calls_total": 3000,
       "cpu_per_worker": 1,
       "gpu": false,
       "initialization_calls_per_task": 16,
@@ -20,22 +20,35 @@
       "queries_per_round": 16
     },
     "controller_contract": "configs/pmo_population_controller_v1.json",
-    "controller_contract_sha256": "300b79055d1afe39d7353cac3ba660162185044a25db0c67930c2b4fee253aaf",
+    "controller_contract_sha256": "12af12d80845b0dd456e44bbf8a3ecb9445551dbc308ef9773ff612b0a97cfc7",
     "corrected_source_capsule_manifest": "diagnostics/pmo_population_controller_v1/source_capsule_manifest_v2.json",
     "corrected_worker_app": "compose-pmo-population-v1-corrected",
     "corrected_worker_path": "modal_apps/pmo_population_v1_app.py",
+    "extension": {
+      "extends_payload_sha256": "637c7cd75b89141548ff1dcaa88e37e8fbd8737c730b6db5fee796e2c4170c90",
+      "new_budget": 1000,
+      "prior_budget": 250,
+      "revision_boundary": {
+        "calls_1_to_250": "revision at the 250-call seal",
+        "calls_251_to_1000": "31bc6411fad4",
+        "no_old_calls_regenerated_or_rescored": true,
+        "stored_state_restored_exactly": "round-trip tested; a dropped component breaks the round trip",
+        "what_changed": "state persistence and resume accounting ONLY: OnlineProposalMemory gained payload/restore_payload so a resumed arm cannot silently restart cold; the query ledger permits an authorized budget INCREASE (never a decrease, task still immutable); the worker gained an extension path distinct from retry and backfill.",
+        "what_did_NOT_change": "proposal semantics. No region law, weighting, family choice, parent selection, credit rule or executor behaviour was touched, so the proposals that produced calls 1-250 would be produced identically by this revision."
+      }
+    },
     "implementation_sha256": {
-      "modal_apps/pmo_population_v1_app.py": "c0f0591ea1cca0676449721517c306937e55a05d8845cb77508f758aeb12845c",
+      "modal_apps/pmo_population_v1_app.py": "f97e1e235804ddf5834ec76d7e24b951beee3968c13d8590ba93ea4a65e0242b",
       "src/compose_v4/control/adaptive_program_optimizer.py": "1f1937ca6035f2797235878925a515aff543089d044a8c06cd6197aea6a64a23",
       "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",
       "src/compose_v4/control/edit_learning_data.py": "b0e71fdbd54c39727765edfe36253c0588b9882ecf8a52f6b65b7c590d711f71",
       "src/compose_v4/control/pmo_credit.py": "9c8e32adec82df973d7175215a424df29367af96c8870981a0909fcd2a77a164",
-      "src/compose_v4/control/pmo_online_memory.py": "391c4477fc6c05c83c73cdf180fa397127d7ab185c29064357f5ad0ce3715427",
-      "src/compose_v4/control/pmo_population_controller.py": "e0e5bdd99b6e9ffc4303b0e97eaead09fc377665c6d1c8674f281a0d53f09f32",
+      "src/compose_v4/control/pmo_online_memory.py": "bbea7d6580e81d1075eec9be3eee7a24afa9fc5276644cb3307d11e2071620c6",
+      "src/compose_v4/control/pmo_population_controller.py": "1e9b658c0ccae4685084bbadb0c748749a5ed8f4532a2f00859227755bab2869",
       "src/compose_v4/control/pmo_realization.py": "153d2f49b08186abff6088c1f6c462fe2d96b83ede26587b90a8504c0671b308",
-      "src/compose_v4/control/program_campaign.py": "884f13cbbe49c06a94aafb59880daf38f313b6f4717af012c1fe8eb9074c469e",
+      "src/compose_v4/control/program_campaign.py": "205f4aef97489ee352df9d8284e9d21ad683c3d542d25ce748c03bd9f8d6644b",
       "src/compose_v4/experiments/pmo_oracle_assets.py": "5ec0b7c9b9185cd2b8edd14c2529f37e825311a2b39d6ce71c68423ab9f4d558",
-      "src/compose_v4/experiments/pmo_population_v1.py": "eafc755e5eec80373ff0d134c03f7c9782085fc54e73383489a61a8aa24332bf"
+      "src/compose_v4/experiments/pmo_population_v1.py": "9f1e8afe184ddb078e6ce0a6108e669f02d5fd81d4147cfe35970e5f7bd5dd43"
     },
     "modal_launch_authorized": false,
     "oracle": {
@@ -87,5 +100,5 @@
       "celecoxib_rediscovery"
     ]
   },
-  "payload_sha256": "637c7cd75b89141548ff1dcaa88e37e8fbd8737c730b6db5fee796e2c4170c90"
+  "payload_sha256": "5cd54226b8e471387e86b007675c7bc8fcad754972b682aa4a92246d4f4534cd"
 }
