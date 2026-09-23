@@ -35,7 +35,7 @@ touched.
 |---|---|---|
 | `pinned_historical_files_modified` | **0** | `git diff --stat 061ead93 HEAD -- <1,879 pinned paths>` is empty |
 | `lost_public_symbols` | **0** | 17,081 import-view pairs before and after, 0 lost, 0 gained |
-| `lost_entrypoints` | PENDING | re-measured after the baseline suite finishes; not claimed until run |
+| `lost_entrypoints` | **0** | 877 -> 884 entry points, 0 regressed, 0 vanished, +7 new tools |
 | `lost_capability_groups` | **0** | 7 groups, all non-empty |
 | `new_test_regressions` | PENDING | baseline suite still running; not claimed until run |
 | `newly_broken_pins` | **0** | absent-pin count unchanged at 10,876, all traced |
@@ -45,10 +45,15 @@ touched.
 zero. It is a pre-existing gap this pass measured rather than created, and
 suppressing it would be worse than naming it.
 
-Two lines read PENDING rather than zero. An unrun check is not a passing check,
-and the entry-point re-measurement is deliberately not run while the baseline
-suite holds the machine: this repository has already recorded a phantom
-regression manufactured by measuring under load.
+One line reads PENDING rather than zero. An unrun check is not a passing check.
+
+The entry-point re-measurement WAS run under load from the baseline suite, which
+this repository warns manufactures phantom regressions. That risk is bounded
+here: the probe's only load-sensitive failure mode is its 90 second per-file
+timeout against imports that take 3 to 5 seconds, and the result was 0 regressed
+and 0 vanished, so load could not have hidden a regression behind a timeout. Had
+any file regressed, it would have been re-verified on an idle machine before
+being reported.
 
 ## Findings, ranked by how much future error they prevent
 
