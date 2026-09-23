@@ -52,27 +52,32 @@
    },
    "braf_0": {
     "distinct_eligible_by_seed": {
-     "0": 4
+     "0": 4,
+     "1": 21
     },
     "draws_spent_by_seed": {
-     "0": 0
+     "0": 0,
+     "1": 960
     },
-    "drug_like_eligible_total": 4,
-    "eligible_endpoints_total": 4,
+    "drug_like_eligible_total": 25,
+    "eligible_endpoints_total": 25,
     "historical_kernel": "region",
     "p_any_eligible": 1.0,
     "round_one_selected_by_seed": {
-     "0": 8
+     "0": 8,
+     "1": 8
     },
     "routed_kernel": [
      "region"
     ],
     "routing_agrees": true,
     "rung_zero_yield_by_seed": {
-     "0": 4
+     "0": 4,
+     "1": 2
     },
     "seeds_run": [
-     0
+     0,
+     1
     ],
     "standalone_reference": {
      "comparable": "verdict_and_routing_only",
@@ -89,11 +94,13 @@
      "why": "the production contract declares proposal.shallow.region_law and the standalone gate ran without it, so endpoint counts are not expected to match"
     },
     "state_routing_consumption_attempts": {
-     "0": 1
+     "0": 1,
+     "1": 1
     },
     "status": "RUN",
     "stop_reason_by_seed": {
-     "0": "reached_target"
+     "0": "reached_target",
+     "1": "reached_target"
     },
     "trigger_confirmed_all_seeds": false,
     "verdict": "PASS",
@@ -265,6 +272,53 @@
    },
    "state_routing_proven_consumed_on_every_trigger_event": true,
    "terminal_guard_passed_on_every_trigger_event": true
+  },
+  "contract_identities_seen": {
+   "5ht1b_0": [
+    "88e69f16cd8d9e1497b2b732a876aa6a75dd9113f71c75314843f80822369c88"
+   ],
+   "5ht1b_1": [
+    "88e69f16cd8d9e1497b2b732a876aa6a75dd9113f71c75314843f80822369c88"
+   ],
+   "5ht1b_2": [
+    "88e69f16cd8d9e1497b2b732a876aa6a75dd9113f71c75314843f80822369c88"
+   ],
+   "braf_0": [
+    "3b11dda880760c1415b7a4bf72a73ff88c46b6915bb2142210a1b22cb7d72206"
+   ],
+   "braf_1": [
+    "3b11dda880760c1415b7a4bf72a73ff88c46b6915bb2142210a1b22cb7d72206"
+   ],
+   "braf_2": [
+    "3b11dda880760c1415b7a4bf72a73ff88c46b6915bb2142210a1b22cb7d72206"
+   ],
+   "fa7_0": [
+    "db62568b74889a68ccad03c30f2096d7724fed039c6a11d9651c77ce89085a7c"
+   ],
+   "fa7_1": [
+    "db62568b74889a68ccad03c30f2096d7724fed039c6a11d9651c77ce89085a7c"
+   ],
+   "fa7_2": [
+    "db62568b74889a68ccad03c30f2096d7724fed039c6a11d9651c77ce89085a7c"
+   ],
+   "jak2_0": [
+    "712095cd9ee40c6e1f9b1fc75052e725ae90db7d3089fd88606f63602eaa57c3"
+   ],
+   "jak2_1": [
+    "712095cd9ee40c6e1f9b1fc75052e725ae90db7d3089fd88606f63602eaa57c3"
+   ],
+   "jak2_2": [
+    "712095cd9ee40c6e1f9b1fc75052e725ae90db7d3089fd88606f63602eaa57c3"
+   ],
+   "parp1_0": [
+    "bbe01591bd80d7178dfad29d12e92295547b2572354283ad0b5c55558af0d072"
+   ],
+   "parp1_1": [
+    "d6a6083542c622ec2e4ad8ba73836f978bcebd85172e917dbc05f93d0a1f8749"
+   ],
+   "parp1_2": [
+    "bbe01591bd80d7178dfad29d12e92295547b2572354283ad0b5c55558af0d072"
+   ]
   },
   "controls": {
    "5ht1b_0": {
@@ -462,7 +516,7 @@
    "control_rows_expected": 20,
    "control_rows_present": 10,
    "trigger_rows_expected": 15,
-   "trigger_rows_present": 6
+   "trigger_rows_present": 7
   },
   "docking_calls": 0,
   "entrypoint": "production",
@@ -473,10 +527,10 @@
    "controls_law_off_reproduce_committed_audit": true,
    "controls_run_declared": 0,
    "controls_run_law_off": 10,
-   "distinct_eligible_endpoints_total": 43,
+   "distinct_eligible_endpoints_total": 64,
    "docking_calls": 0,
    "ladder_unreachable_on_every_control": true,
-   "med_chem_plausible_total": 43,
+   "med_chem_plausible_total": 64,
    "oracle_calls": 0,
    "routing_agrees_with_every_historical_arm": true,
    "trigger_cells_passing": 5,
@@ -495,6 +549,7 @@
    "5ht1b_1_seed0_law_off",
    "5ht1b_2_seed0_declared",
    "braf_0_seed0_declared",
+   "braf_0_seed1_declared",
    "braf_1_seed0_declared",
    "braf_1_seed1_declared",
    "braf_2_seed0_law_off",
@@ -510,5 +565,5 @@
   ],
   "verdict": "INCOMPLETE"
  },
- "payload_sha256": "308a4b5f3ddf1ebc4205619758c353a5672e1db81cd6476d165f41a2d505ed18"
+ "payload_sha256": "a37f8cb21f124c58759900009dd8cb63b17631181fe8f966c9cb2d9c10ae837d"
 }
