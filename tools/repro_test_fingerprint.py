@@ -37,7 +37,14 @@ import sys
 from typing import Any
 
 # "FAILED tests/test_x.py::test_y - AssertionError: ..." / "ERROR tests/test_z.py"
-OUTCOME = re.compile(r"^(?P<kind>FAILED|ERROR)\s+(?P<node>\S+)(?:\s+-\s+(?P<detail>.*))?$")
+#
+# Deliberately permissive after the kind. A parametrized node id can contain
+# SPACES inside its brackets, and pytest truncates the short-summary line at the
+# terminal width, so such a line carries neither a closing bracket nor the " - "
+# separator. An end-anchored `\S+` pattern rejects exactly those lines and drops
+# them from the fingerprint silently: measured here at 5 of 297 failures. The
+# count guard below turns any future variant of that into a loud failure.
+OUTCOME = re.compile(r"^(?P<kind>FAILED|ERROR)\s+(?P<rest>.+)$")
 # "6296 tests collected", "6296 tests collected, 1 error"
 COLLECTED = re.compile(r"(?P<n>\d+) tests? collected")
 # "292 failed, 5806 passed, 101 errors in 1234.56s"
@@ -47,15 +54,31 @@ TALLY = re.compile(r"(?P<n>\d+) (?P<word>passed|failed|error|errors|skipped|xfai
 def parse(raw: str) -> dict[str, Any]:
     failed: dict[str, str] = {}
     errored: dict[str, str] = {}
+    candidate_lines = 0
     for line in raw.splitlines():
-        match = OUTCOME.match(line.strip())
+        stripped = line.strip()
+        if stripped.startswith(("FAILED ", "ERROR ")):
+            candidate_lines += 1
+        match = OUTCOME.match(stripped)
         if not match:
             continue
+        rest = match.group("rest")
+        node, separator, detail = rest.partition(" - ")
         # The error signature, not the message: messages carry paths and numbers
-        # that move between machines without any behaviour changing.
-        detail = (match.group("detail") or "").strip()
-        signature = detail.split(":")[0][:120] if detail else ""
-        (failed if match.group("kind") == "FAILED" else errored)[match.group("node")] = signature
+        # that move between machines without any behaviour changing. A truncated
+        # node id has no separator, and keeping the whole remainder is fine
+        # because pytest truncates identically across runs, so the SET comparison
+        # still holds.
+        signature = detail.strip().split(":")[0][:120] if separator else ""
+        (failed if match.group("kind") == "FAILED" else errored)[node.strip()] = signature
+
+    parsed = len(failed) + len(errored)
+    if parsed != candidate_lines:
+        raise ValueError(
+            f"fingerprint parser accounted for {parsed} of {candidate_lines} FAILED/ERROR lines. "
+            "A fingerprint that silently drops entries is worse than no fingerprint; fix the "
+            "parser rather than the expectation."
+        )
 
     tail = "\n".join(raw.strip().splitlines()[-25:])
     tally: dict[str, int] = {}
