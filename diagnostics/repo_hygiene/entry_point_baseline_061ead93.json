@@ -1,0 +1,3530 @@
+{
+  "entry_point_count": 877,
+  "entry_points": {
+    "modal_apps/apply_provenance_overlays_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/archive/aryl_compile_app.pre_frontier_v2.py": {
+      "error": "ModuleNotFoundError: No module named '_entry_point_probe_aryl_compile_app'",
+      "import_ok": false
+    },
+    "modal_apps/archive/macro_basin_app.pre_semantics_arm.py": {
+      "error": "ModuleNotFoundError: No module named '_entry_point_probe_macro_basin_app'",
+      "import_ok": false
+    },
+    "modal_apps/aryl_compile_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/audit_editing_active8_aromatic_cycle_open_impact.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/audit_editing_corpus.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/audit_editing_cycle_open_component_equivalence.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/audit_mmp_semantic_coverage.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/audit_process_v2_t1_terminal_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/batch_scaling_probe_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/bridge_navigation_gate_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/bridge_train_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/build_active8_trace_inventory_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/build_editing_v2_semantic_p50_successor_cache_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/build_editing_v2_semantic_t1_successor_cache_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/build_process_v2_chunk_cache_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/build_semantic_active8_chunk_cache_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/committor_bellman_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/committor_fit_entry.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/committor_train_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/compile_successor_partitions_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/composition_mass_audit_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/dbg_resample_rate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/ddsbm_endpoint_competence_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/delta_n_audit_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/diagnose_r_theta_atom_restate_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/diagnose_r_theta_exposure_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/diagnose_r_theta_family_gap_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/diagnose_r_theta_provenance_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/diagnose_r_theta_series_depth_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/evaluate_rollout_shards.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/executor_reachability_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/experiment1_reference_law_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/experiment_b_exact_control_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/experiment_c0_planning_signal_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/experiment_c_target_recovery_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/family_oracle_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/fast_pmo_run_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/freeze_training_run.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_bidir_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_controller_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_cpu_calib_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_dockbench_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_exact_route_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_gate0_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_gate4_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_hbench_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_opt_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_particle_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_reach_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_reach_b_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_reach_fanout_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_reach_ivg_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_route_audit_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_route_oracle_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_route_replay_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/genmol_t4_selection_diag_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/griddd_qed_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/guided_realization_arm_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/h_phi_closed_loop_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/h_phi_encode_states_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/h_phi_pair_trace_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/h_phi_teacher_cost_probe_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/h_phi_union_collector_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/h_phi_verified_hybrid_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_admission_speedup_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_archive_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_budget_sensitivity_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_cache_parity_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_dev_panel_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_dev_panel_fast_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_dev_panel_par_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_diverse_read_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_early_stop_probe_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_encode_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_execution_parity_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_family_audit_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_family_mass_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_graph_encode_qual_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_h40head_ab_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_horizon_read_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_ladder_rung3_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_law_cache_probe_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_law_parity_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_law_profile_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_law_trace_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_lazy_bench_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_lazy_parity_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_longrange_auc_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_mem_probe_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_memory_probe_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_monotonicity_localize_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_multiplicity_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_n_sweep_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_profile_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_prospective_signal_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_prospective_two_head_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_recede20_read_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_recede_read_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_record_diff_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_rejection_diag_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_rejection_exact_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_rollout_corpus_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_sampler_distribution_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_sampler_floor_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_shortlist_retention_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_slackwe_read_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_smc_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_smc_fast_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_smc_par_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_smoke_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_steering_test_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/hphi_train_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/inspect_function_call.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/invgnn_corpus_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/invgnn_hphi_corpus_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/invgnn_hphi_encode_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/invgnn_lookahead_truth_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/invgnn_mc_sweep_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/jak2_contrastive_dock_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/jak2_where_audit_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/kernel_profile_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/macro_basin_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/materialize_editing_v2_candidate_provenance_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/materialize_editing_v2_candidates_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/materialize_editing_v2_refined_role_lane_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/materialize_editing_v2_refined_role_lane_mapreduce_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/materialize_editing_v2_semantic_corpus_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/materialize_editing_v2_semantic_p50_source_recipe_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/materialize_editing_v2_semantic_p50_validation_baseline_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/materialize_editing_v2_semantic_t1_panel_cache_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/materialize_editing_v2_semantic_v4_migration_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/materialize_editing_v2_split_pipeline_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/materialize_process_v2_predecessor_state_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/mine_edit_traces_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/molleo_basin_substrate_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/molleo_bridge_probe_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/molleo_coverage_sentinel_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/molleo_env_gate_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/molleo_fiber_census_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/molleo_lazy_gate_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/molleo_rtheta_parity_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/multiscale_atlas_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/operator_firing_matrix_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/option_basin_atlas_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pack_mmp_pool_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pack_trace_states_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/parent_edit_cycles_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pareto_budgeted_sweep_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pareto_gen_rank_topup_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pareto_preference_partition_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_archive_branching_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_archive_pilot_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_branch_policy_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_ceiling_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_continuation_choice_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_control_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_donor_comparison_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_environment_smoke_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_evolving_memory_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_hworth_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_inference_speed_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_learned_proposal_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_legacy_oracle_parity_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_local_guidance_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_local_guidance_replication_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_macro_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_macro_probe_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_matched_init_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_online_policy_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_option_controller_bank_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_option_particles_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_pilot_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_plan_policy_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_population_v1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_region_replacement_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_replacement_continuation_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_route_fiber_scored_pilot_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_route_support_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_scaffold_probe_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_surrogate_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pmo_trajectory_value_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pool_ceiling_audit_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/population_search_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/pose_compare_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/precompile_edit_data_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/probe_r_theta_expansion_timing_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/recover_process_v2_t1_publication_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/refine_editing_v2_split_assignment_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/region_scale_gate_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/region_sentinels_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/representability_census_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/retarget_goal_calibration_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/retarget_intervention_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/ring_expansion_support_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_atom_restate_neural_orbit_full_corpus.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_editing_t1_atom_insert_schedule_v3.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_editing_t1_successor_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_editing_t1_uniform_successor_capacity.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_editing_t1_uniform_successor_capacity_v2.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_editing_v2_semantic_gate_zero_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_editing_v2_semantic_p50_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_editing_v2_semantic_t1_capacity_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_process_v2_active8_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_process_v2_active8_fast_finalize_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_process_v2_gate_zero_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_process_v2_p50_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_process_v2_rebind_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_process_v2_t1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_process_v2_training_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_r_theta_gpu_smoke_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_r_theta_training_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/run_semantic_active8_decisions_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/scan_process_v2_corpus_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/stoich_realization_arm_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py": {
+      "error": "RuntimeError: configs/t4_5ht1b2_protonation_rescue_d04_v1.json is not authorized for launch (status='PREPARED_AWAITING_OWNER_AUTHORIZATION'); the owner must set status to 'AUTHORIZED_BY_OWNER_FOR_PROTONATION_RESCUE' and re-seal the contract",
+      "import_ok": false
+    },
+    "modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py": {
+      "error": "RuntimeError: configs/t4_5ht1b2_protonation_rescue_d06_v1.json is not authorized for launch (status='PREPARED_AWAITING_OWNER_AUTHORIZATION'); the owner must set status to 'AUTHORIZED_BY_OWNER_FOR_PROTONATION_RESCUE' and re-seal the contract",
+      "import_ok": false
+    },
+    "modal_apps/t4_anchored_replacement_pilot_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_anchored_replacement_support_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_anchored_replacement_transfer_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_anchored_transfer_pilot_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_braf_first_round_funnel_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_compose_nodistill_parp1_v1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_compose_nodistill_transfer_v1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_donor_probe_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_dynamic_v1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_dynamic_v21_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_dynamic_v22_pilot_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_dynamic_v2_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_fiber_lane_support_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_frozen_program_benchmark_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_frozen_program_rescue_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_braf_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_braf_v2_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_held_5ht1b_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_held_5ht1b_d04_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_held_braf_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_held_braf_d04_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_held_fa7_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_held_fa7_d04_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_held_jak2_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_held_jak2_d06_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_held_parp1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_held_parp1_d04_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_parp1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_integrated_route_fiber_parp1_rescue_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_locked_round_recovery_v1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_no_complete_routes_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_nodistill_feasibility_v4_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_nodistill_topology_four_call_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_objective_reset_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_program_curriculum_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_program_pool_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_region_repair_rescue_braf_d06_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_region_repair_rescue_fa7_d04_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_region_repair_rescue_fa7_d06_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_route_distillation_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_route_distilled_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_route_guided_support_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_route_policy_parallel_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_route_policy_source_sharded_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_second_generation_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_controller_completion_v1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_controller_repaired_exhaustion_v1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_retained_fiber_5ht1b2_protonation_rescue_v1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_retained_fiber_5ht1b_d04_v1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_retained_fiber_5ht1b_d06_v1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_retained_fiber_fa7_d04_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_retained_fiber_fa7_d06_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_retained_fiber_jak2_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_retained_fiber_jak2_s0_d06_rerun_v1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_retained_fiber_jak2_v2_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_retained_fiber_parp1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_retained_fiber_parp1_p0_rescue_v1_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_shared_retained_fiber_parp1_v2_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_structural_subgoal_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_structural_subgoal_realizer_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/t4_utility_data_acquisition_launch_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/task3_fiber_cache_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/task3_phase_a_discovery_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/task3_rtheta_mechanism_ab_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/train_qed_frozen_residual.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/train_tracelet_gm.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/unify_packed_manifest_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "modal_apps/verify_active8_streams_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/acyclic.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/analogue_curriculum_stats.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/analyze_dev_dock.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/analyze_unconditional_sufficiency.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_agile_ugi_bias.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_causal_trace_frontiers.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_e6_a2_3_readiness.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_editing_active8_aromatic_cycle_open_impact.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_editing_cycle_close_global_equivalence.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_editing_cycle_open_component_equivalence.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_editing_cycle_open_global_equivalence.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_factorized_teacher_support.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_full_ring_transport.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_graft_transport.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_mmp_pool.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_packed_charge_policy.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_pancake_ring_commutation_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_ring_junctions.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_ring_restate_ambiguity.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_ring_restate_family.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_ring_restate_primitive_paths.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_ring_template_calibration.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_ring_tracelets.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_rollout_distribution.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_smc_reference.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_successor_fiber_fastpath_oracle.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_t4_protonation_restate_support.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_trace_compiler.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_tracelet_teacher_fiber_coverage.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_tree_source_reachability.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/audit_typed_ring_proposals.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/bank_hphi_dev_panel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/bankable_t4_table.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/bc_compare.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/benchmark_lead_scope_coverage.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/benchmark_path_storage.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/benchmark_process_v2_active8_teacher_support.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/benchmark_process_v2_chunk_sizes.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/benchmark_process_v2_successor_fiber_fastpath.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/benchmark_tracelet_device.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/benchmark_tracelet_rollout_workers.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/branch.py": {
+      "error": "NotADirectoryError: [Errno 20] Not a directory: '/Users/rmaganti/compose_repo_hygiene/scripts/branch.py/rows.json.gz'",
+      "import_ok": false
+    },
+    "scripts/broad_5ht1b.py": {
+      "error": "modal.exception.NotFoundError: Lookup failed for Function 'drive_episodes' from the 'macro-basin' app: App 'macro-basin' not found in environment 'main'.",
+      "import_ok": false
+    },
+    "scripts/broad_preflight_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/broad_vocab_experiment.py": {
+      "error": "modal.exception.NotFoundError: Lookup failed for Function 'drive_episodes' from the 'macro-basin' app: App 'macro-basin' not found in environment 'main'.",
+      "import_ok": false
+    },
+    "scripts/build_active8_trace_inventory.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_analogue_trace_pool.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_compose_lipid_pretraining_inventory.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_corrupted_prior_dataset.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_edit_data_manifest.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_editing_active8_semantic_census_v2.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_editing_t1_p50_decision.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_editing_t1_successor_panel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_editing_v2_split_assignment.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_editing_v2_split_census.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_griddd_qed_lead_manifest.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_murcko_analogue_graph.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_order.py": {
+      "error": "KeyError: '/Users/rmaganti/compose_repo_hygiene/scripts/build_order.py'",
+      "import_ok": false
+    },
+    "scripts/build_pan_lung_filtering_bundle.py": {
+      "error": "ModuleNotFoundError: No module named 'joblib'",
+      "import_ok": false
+    },
+    "scripts/build_pan_lung_qualified_ensemble.py": {
+      "error": "ModuleNotFoundError: No module named 'pandas'",
+      "import_ok": false
+    },
+    "scripts/build_ring_core_v1_manifest.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_ringcore_validation_panels.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_ringcore_validation_semantic_sidecar.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_scaled_edit_manifest.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/build_unified_packed_manifest.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/c_topology_correlation.py": {
+      "error": "KeyError: '/Users/rmaganti/compose_repo_hygiene/scripts/c_topology'",
+      "import_ok": false
+    },
+    "scripts/calibrate_fcd_sample_size.py": {
+      "error": "ModuleNotFoundError: No module named 'fcd_torch'",
+      "import_ok": false
+    },
+    "scripts/characterize_edit_traces.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/characterize_teacher_filter.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/coherence/program_contract.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/cold_vocab_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/collect_editing_t1_arm_results_manifest.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/collect_task3_dev_results.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/collect_twist_trajectories.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/compare_pancake_quotient_repairs.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/compare_tracelet_teacher_checkpoints.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/compile_corruption_shard.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/compile_route.py": {
+      "error": "KeyError: '/Users/rmaganti/compose_repo_hygiene/scripts/compile_route.py'",
+      "import_ok": false
+    },
+    "scripts/composition_learned_vs_uniform.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/conjunction_funnel.py": {
+      "error": "ModuleNotFoundError: No module named 'matplotlib'",
+      "import_ok": false
+    },
+    "scripts/contract_authority_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/corruption_pairs.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/corruption_shard_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/ddsbm_frozen_analysis.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/denovo_learned_vs_uniform.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/diagnostics/analyze_compose_preview_trajectories.py": {
+      "error": "ModuleNotFoundError: No module named 'matplotlib'",
+      "import_ok": false
+    },
+    "scripts/diagnostics/audit_pancake_rollouts.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/diagnostics/compare_unconditional_chemistry_rollouts.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/diagnostics/reduce_rollout_shards_interim.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/diagnostics/render_compose_full_trajectories.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/diagnostics/rerender_saved_compose_trajectories.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/direct_build.py": {
+      "error": "KeyError: '/Users/rmaganti/compose_repo_hygiene/scripts/direct_build.py'",
+      "import_ok": false
+    },
+    "scripts/dock_route.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/doob_guidance_ground_truth.py": {
+      "error": "ModuleNotFoundError: No module named 'matplotlib'",
+      "import_ok": false
+    },
+    "scripts/drd2_oracle_extract.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/drd2_oracle_parity.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/e0_toy_h_exactness.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/e1_unconditional_metrics.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_analyse_sealed67.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_analyse_verified_hybrid.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_available_library_census.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_build_prepared_manifest.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_build_prepared_manifest_from_library.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_build_sampling_law.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_build_sampling_law_from_library.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_carve_matched_validation.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_carve_teacher_validation.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_census_real_endpoint_panel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_collect_teacher_shards.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_consolidate_library.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_corpus_census.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_freeze_eval_panel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_freeze_gate_v2.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_freeze_h_phi.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_freeze_teacher_cohort.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_freeze_v2_dataset.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_fresh_panel_feasibility.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_local_compile.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_manifest_library_reconcile.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_modal_slice_plan.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_multisuccessor_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_pack_collated_store.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_postdedup_census.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_r_theta_smoke.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_report_run_trajectory.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_resolve_split_precedence.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_seal_controller_panel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_smoke_identity_chain.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_teacher_decision_coverage.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_train_h_phi.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_v2_mixture_plan.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/editing_v2_v2_selection.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/emit_family_lane_provenance.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/emit_reference_law_data_backed.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/enumerate_lipid_reaction_pilot.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/evaluate_cnof_checkpoint.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/evaluate_property_conditioned_rollouts.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/evaluate_qed_controlled_rollouts.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/evaluate_qed_successor_guidance.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/evaluate_tiny_rate_checkpoint.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/evaluate_tracelet_rollouts.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/exact_doob_enumerable_benchmark.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/exact_route.py": {
+      "error": "KeyError: '/Users/rmaganti/compose_repo_hygiene/scripts/exact_route.py'",
+      "import_ok": false
+    },
+    "scripts/export_pan_lung_matrix_cell_predictions.py": {
+      "error": "ModuleNotFoundError: No module named 'pandas'",
+      "import_ok": false
+    },
+    "scripts/export_pan_lung_qualified_matrix_comparison.py": {
+      "error": "ModuleNotFoundError: No module named 'pandas'",
+      "import_ok": false
+    },
+    "scripts/extract_lut_source_table.py": {
+      "error": "ModuleNotFoundError: No module named 'pandas'",
+      "import_ok": false
+    },
+    "scripts/forward_planner.py": {
+      "error": "KeyError: '/Users/rmaganti/compose_repo_hygiene/scripts/forward_planner.py'",
+      "import_ok": false
+    },
+    "scripts/fragment_motif_extension_pilot_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/freeze_editing_t1_successor_contract.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/freeze_mmp_pool_v2.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/freeze_molleo_task3_init_sets.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/freeze_ring_core_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/frontier_spawn.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/fuzz_rewrite_runtime.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/griddd_dev_panel_analysis.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/griddd_reward_finetune.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/griddd_reward_finetune_train.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/griddd_valid_fiber_controller_panel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/griddd_value_guided_smc_controller.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/griddd_value_twist.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/hetero_gap_test.py": {
+      "error": "modal.exception.NotFoundError: Lookup failed for Function 'drive_episodes' from the 'macro-basin' app: App 'macro-basin' not found in environment 'main'.",
+      "import_ok": false
+    },
+    "scripts/hphi_budget_max_regression.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/hphi_extend_curve_read.py": {
+      "error": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/rv5/hphi_recede_v5/000_H40.json'",
+      "import_ok": false
+    },
+    "scripts/hphi_h40head_ab_read.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/hphi_horizon_qualification.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/hphi_official800_curve.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/hphi_official800_launch.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/hphi_official800_status.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/hphi_region_census.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/hphi_shortlist_read.py": {
+      "error": "TimeoutExpired: import did not finish",
+      "import_ok": false
+    },
+    "scripts/hphi_valid128_curve.py": {
+      "error": "TimeoutExpired: import did not finish",
+      "import_ok": false
+    },
+    "scripts/hphi_valid128_read.py": {
+      "error": "TimeoutExpired: import did not finish",
+      "import_ok": false
+    },
+    "scripts/invgnn_gate2_diagnosis.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/invgnn_train_hphi.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/lane_status.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/launch_opt.py": {
+      "error": "ValueError: invalid literal for int() with base 10: '/Users/rmaganti/compose_repo_hygiene/scripts/launch_opt.py'",
+      "import_ok": false
+    },
+    "scripts/make_paper_figures.py": {
+      "error": "ModuleNotFoundError: No module named 'matplotlib'",
+      "import_ok": false
+    },
+    "scripts/materialize_editing_v2_packed_candidates.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/materialize_editing_v2_role_lane_packed.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/materialize_process_v2_t1_panel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/md_to_html.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/micro_synth.py": {
+      "error": "ValueError: invalid literal for int() with base 10: '/Users/rmaganti/compose_repo_hygiene/scripts/micro_synth.py'",
+      "import_ok": false
+    },
+    "scripts/mine_edit_traces.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/molecular_objectives.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/molleo_task3_oracle_extract.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/molleo_task3_oracle_parity.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/molleo_task3_rdkit_drift.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/operator_firing_matrix.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/operator_subtype_supervision_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/overfit_tiny_rate_model.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pareto_editing_hero.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pareto_frontier_recovery.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pareto_local_runtime.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pareto_p3_p4_repaired.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pareto_reachability.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pareto_scalable_power.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pareto_smoke_hv_auc.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/parp1_refine_probe.py": {
+      "error": "modal.exception.NotFoundError: Lookup failed for Function 'drive_episodes' from the 'macro-basin' app: App 'macro-basin' not found in environment 'main'.",
+      "import_ok": false
+    },
+    "scripts/pathwise_heldout_power.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pathwise_precheck.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/physchem_box.py": {
+      "error": "ModuleNotFoundError: No module named 'matplotlib'",
+      "import_ok": false
+    },
+    "scripts/plan_process_v2_rebind.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_3x250_autopsy.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_3x250_autopsy_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_3x250_binder_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_3x250_celecoxib_distance.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_3x250_jump_parent_counterfactual.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_binder_repair_report_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_binder_repair_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_controller_adversarial_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_credit_v2.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_credit_v2_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_fibercontrol_funnel.py": {
+      "error": "ModuleNotFoundError: No module named 'tdc'",
+      "import_ok": false
+    },
+    "scripts/pmo_free_oracle_smoke.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_large_proposal_structure.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_macro_coherence_probe.py": {
+      "error": "ValueError: invalid literal for int() with base 10: '/Users/rmaganti/compose_repo_hygiene/scripts/pmo_macro_coherence_probe.py'",
+      "import_ok": false
+    },
+    "scripts/pmo_macro_horizon.py": {
+      "error": "ModuleNotFoundError: No module named 'tdc'",
+      "import_ok": false
+    },
+    "scripts/pmo_macro_support_probe.py": {
+      "error": "ValueError: invalid literal for int() with base 10: '/Users/rmaganti/compose_repo_hygiene/scripts/pmo_macro_support_probe.py'",
+      "import_ok": false
+    },
+    "scripts/pmo_realization_repair_report_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_realization_repair_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_realization_witness_gate_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_region_law_probe.py": {
+      "error": "ValueError: invalid literal for int() with base 10: '/Users/rmaganti/compose_repo_hygiene/scripts/pmo_region_law_probe.py'",
+      "import_ok": false
+    },
+    "scripts/pmo_replacement_option_ceiling.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_route_composer.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_route_composer_eval.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_route_counterfactual_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_route_program_corpus.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_teacher_route_gap_phase_b.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_teacher_route_gap_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/pmo_teacher_route_gap_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/preflight.py": {
+      "error": "exit 1",
+      "import_ok": false
+    },
+    "scripts/prelaunch_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/prepare_griddd_qed_frozen_residual_launch.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/presentation/build_e0_exactness_slide.py": {
+      "error": "ModuleNotFoundError: No module named 'matplotlib'",
+      "import_ok": false
+    },
+    "scripts/property_dial.py": {
+      "error": "ModuleNotFoundError: No module named 'matplotlib'",
+      "import_ok": false
+    },
+    "scripts/qualify_analytic_pancake_quotient_backbone.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/qualify_pancake_quotient_distillation.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/read_broad_c.py": {
+      "error": "KeyError: '/Users/rmaganti/compose_repo_hygiene/scripts/read_broad'",
+      "import_ok": false
+    },
+    "scripts/reagg.py": {
+      "error": "gzip.BadGzipFile: Not a gzipped file (b'\"\"')",
+      "import_ok": false
+    },
+    "scripts/refine_provenance_launch.py": {
+      "error": "TimeoutExpired: import did not finish",
+      "import_ok": false
+    },
+    "scripts/regenerate_ring_core_manifest.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/render_graft_training_path.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/render_rollout_pairs.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/restate_gate_launch.py": {
+      "error": "TimeoutExpired: import did not finish",
+      "import_ok": false
+    },
+    "scripts/retarget_analyse_calibration.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/retarget_analyse_intervention.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/retarget_commit_prefixes.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/retarget_controller_parity_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/retarget_goal_feasibility_census.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/retarget_goal_language_normalizers.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/retarget_goal_movability_census.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/retarget_history_quadrants.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/retarget_seal_heldout_panel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/retarget_select_calibration_sources.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/ring_core_calibration.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/ring_core_checkpoint_selection.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/ring_core_grad_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/ring_core_identity.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/ring_core_rollout_panel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/ring_core_schedule_check_analysis.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/ring_path_cost_study.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/ring_topology_capability_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/ring_type_smoke_launch.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_atom_restate_neural_orbit_full_corpus.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_e5_quotient_invariance.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_e6_a2_2b_graph_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_e6_sizing_sweep.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_editing_gate_zero_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_editing_t1_atom_insert_schedule_v3.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_editing_t1_successor_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_editing_t1_uniform_successor_capacity.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_editing_t1_uniform_successor_capacity_v2.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_griddd_analytic_zero_sidecar_smoke.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_griddd_real_rewrite_smoke.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_process_v2_gate_zero.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_ringcore_support_invariance_qualification.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_successor_micro_overfit_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_task3_dev_baseline.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_task3_dev_policy.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/run_tracelet_recipe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/sampling_unit_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/score_pan_lung_filtering.py": {
+      "error": "ModuleNotFoundError: No module named 'joblib'",
+      "import_ok": false
+    },
+    "scripts/smoke_analytic_pancake_quotient_rollout.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/smoke_canonical_successor_distillation.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/smoke_griddd_conditional.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/smoke_tracelet_gm.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/stage6a_coverage_smoke.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/subtype_supervision_preflight.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_all_runs_reconcile.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_attachment_degeneracy_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_basin_autopsy_probe.py": {
+      "error": "ValueError: invalid literal for int() with base 10: '/Users/rmaganti/compose_repo_hygiene/scripts/t4_basin_autopsy_probe.py'",
+      "import_ok": false
+    },
+    "scripts/t4_bridge_cut_census.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_bridge_region_law_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_combined_table.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_diamine_survival_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_failure_attribution.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_fiber_paired_campaign.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_fiber_paired_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_ivg_convention_table.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_narrow_fill.py": {
+      "error": "modal.exception.NotFoundError: Lookup failed for Function 'drive_episodes' from the 'macro-basin' app: App 'macro-basin' not found in environment 'main'.",
+      "import_ok": false
+    },
+    "scripts/t4_official_panel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_panel_status.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_proposal_mode_census.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_prune_closure_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_region_law_campaign_consumption.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_region_law_counterfactual.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_region_law_kernel_parity.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_region_prefix_coverage.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_scoreboard.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_single_edit_family_census.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_snapshot.py": {
+      "error": "TimeoutExpired: import did not finish",
+      "import_ok": false
+    },
+    "scripts/t4_support_stage_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_teacher_program_factors.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_v2_feasibility_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/t4_v2_feasibility_proposal.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/task3_acquisition_smoke.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/task3_exploration_smoke.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/task3_mechanism_ab_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/task3_objective_structure.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/task3_offmanifold_check.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/task3_phase_a_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/task3_reachable_ab.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/task3_seeded_mechanism_test.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/task3_surrogate_signal.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/tier1_pathwise_safety.py": {
+      "error": "ModuleNotFoundError: No module named 'matplotlib'",
+      "import_ok": false
+    },
+    "scripts/train_cnof_conditional_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/train_lnpdb_lung_oracle_baselines.py": {
+      "error": "ModuleNotFoundError: No module named 'pandas'",
+      "import_ok": false
+    },
+    "scripts/train_lumi_oracle_baselines.py": {
+      "error": "ModuleNotFoundError: No module named 'pandas'",
+      "import_ok": false
+    },
+    "scripts/train_lut_oracle_baselines.py": {
+      "error": "ModuleNotFoundError: No module named 'pandas'",
+      "import_ok": false
+    },
+    "scripts/train_tracelet_cnof_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/verification/admission_mask_parity.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/verification/kernel_cost_profile.py": {
+      "error": "set COMPOSE_SCRATCH to a directory containing 'matscorer' (fetch it from the volume: editing_v2/r_theta_run/materialized_scorer)",
+      "import_ok": false
+    },
+    "scripts/verification/trace_law_batch_reads.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/verification/verify_mark_sampling.py": {
+      "error": "set COMPOSE_SCRATCH to a directory containing 'matscorer' (fetch it from the volume: editing_v2/r_theta_run/materialized_scorer)",
+      "import_ok": false
+    },
+    "scripts/verification/we_toy_exactness.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/verify_pan_lung_filtering_clean_runtime.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/verify_process_v2_chain.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/verify_process_v2_hash_chain.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "scripts/warmstart_dry_run.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/adaptive_program_search.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/analyze_qed_griddd_controller_comparison_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/attachment_program_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/audit_fragment_constrained_protocol.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/audit_t4_5ht1b2_exhaustion.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/audit_t4_cold_start_allocation_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/audit_t4_parp_route_support.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/audit_t4_parp_shared_campaign.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/build_dude_pool.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/build_held_target_250_contract.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/build_held_target_d04_contract.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/build_held_target_jak2_contract.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/build_held_target_parp1_contract.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/build_jak2_true_d06_contract.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/build_pmo_baseline_registry_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/build_pmo_scale_up_plan.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/continuation_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/continuation_profile_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/continuation_replay.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/diagnose_winner_option_prior.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/dynamic_v22_pilot.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/fast_pmo_run.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/fast_program_search.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/fit_prepared_option_proposal.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/fragment_constrained_proposal_panel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/fragment_constrained_proposal_smoke.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/fused_option_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/gen_experiment_index.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/ivg_t4_census.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/ivg_winner_path_review.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/ivg_winner_paths.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/launch_pmo_population_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/launch_pmo_population_v1_corrected.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/launch_t4_compose_nodistill_transfer.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/launch_t4_nodistill_feasibility_campaign_v4.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/launch_t4_nodistill_topology_four_call.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/launch_t4_shared_controller_deployed.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/launch_t4_shared_controller_repaired_exhaustion.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/multi_site_proposal_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/multi_site_route_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/option_controller_retrospective.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/parent_edit_cycles.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/parent_edit_diagnostic.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_archive.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_archive_profile.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_archive_snapshot.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_batch_io_profile.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_branch_policy.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_cached_neighborhood.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_cached_neighborhood_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_chronological_check.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_complete_plan_ranker.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_complete_route_dynamic_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_complete_route_gap_analysis.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_continuation_choice.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_continuation_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_cross_parent_selection.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_delayed_credit_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_dependency_region_audit.py": {
+      "error": "SyntaxError: name 'OUT' is used prior to global declaration",
+      "import_ok": false
+    },
+    "tools/pmo_donor_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_donor_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_dynamic_v21.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_dynamic_v21_recovery.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_edit_chooser.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_edit_replay.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_edit_replay_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_feedback_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_formula_median_panel_wave.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_gsk3b_oracle_diagnosis_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_inference_speed.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_ivg_oracle_parity.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_joint_dependency_jump_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_kernel_profile.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_local_development_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_local_guidance_evidence.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_local_query_selection.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_median1_close.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_online_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_online_policy.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_option_controller_bank.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_option_particle_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_option_particles.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_oracle_asset_audit_app.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_particle_survival_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_persistent_lookahead.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_plan_failure_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_plan_policy.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_plan_pool_lock.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_population_live_parent_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_program_choice.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_program_pool_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_program_ranking.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_property_panel_refinement.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_property_program_wave.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_proposal_data.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_public_winner_recovery.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_replacement_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_route_distillation.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_route_fiber_prelaunch.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_route_fiber_production_yield.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_route_fiber_scored_pilot.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_route_fiber_scored_pilot_contract.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_route_fiber_support_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_route_support.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_route_support_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_saved_guide_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_sibling_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_target_program_wave.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_target_route_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_train_proposal.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_trajectory_value.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_winner_imitation.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/pmo_winner_program_curriculum.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/preflight.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/preflight_t4_5ht1b2_protonation_rescue.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/preflight_t4_jak2_s0_d06_rerun.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/prepare_inverse_ring_proposals.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/prepare_pmo_250_pilot.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/prepare_qed_griddd_controller_comparison_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/prepare_scored_program_replay.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/prepare_t4_program_transfer.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/prepare_t4_second_generation.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/rebuild_source_capsule.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/repo_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/repo_capability_baseline.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/repo_entry_point_check.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/reseal_held_target_250_for_resume.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/reseal_pmo_population_contracts.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/resume_t4_shared_controller_cell.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/review_t4_program_curriculum.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/review_t4_program_pool.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/ring_construction_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/ring_expansion_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/ring_program_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/run_qed_griddd_controller_comparison_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/sampled_continuation_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/score_qed_griddd_arm_a_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/seal_t4_compose_nodistill.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/seal_t4_compose_nodistill_transfer.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/seal_t4_nodistill_feasibility_campaign_v4.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/seal_t4_nodistill_topology_four_call.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/seal_t4_shared_controller_repaired_exhaustion.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/seal_t4_shared_controller_scored_contract.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_5ht1b2_protonation_rescue_feasibility_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_anchored_replacement_candidate_lock.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_anchored_transfer_candidate_lock.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_append_contract_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_audit.py": {
+      "error": "json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "import_ok": false
+    },
+    "tools/t4_closure_diagnosis.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_compare_winners.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_complete_macro_selector.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_complete_program_decoder.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_complete_region_patch_policy.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_complete_region_runtime_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_compositional_structural_subgoal_generator.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_construction_scale.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_constructive_prospect.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_controller_lineage.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_d04_panel_status.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_dependency_region_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_donor_report.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_dynamic_v1.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_dynamic_v1_benchmark.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_dynamic_v21_benchmark.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_dynamic_v2_benchmark.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_fiber_route_recognition.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_frontier_compare_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_frozen_program_benchmark.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_frozen_program_rescue.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_frozen_program_rescue_relaunch.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_frozen_program_rescue_relaunch_v3.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_frozen_program_rescue_relaunch_v4.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_frozen_program_rescue_relaunch_v5.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_hybrid_top3_v0_lock.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_known_good_transformation_forensics.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_launch.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_matched_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_nine_cell_support_preflight.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_no_complete_routes.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_nodistill_feasibility_headroom_gate_v4.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_nodistill_generic_composer_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_nodistill_generic_topology_gate_v2.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_nodistill_joint_stop_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_nodistill_retained_interface_failure_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_nodistill_retained_interface_gate_v3.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_nodistill_topology_four_call_local.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_objective_reset.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_objective_reset_status.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_parp_route_timeout_support_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_partial_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_program_curriculum.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_program_pool.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_program_replay_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_program_retrieval_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_program_vocabulary_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_progressive_support_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_proposal_access_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_proposal_prior_dataset.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_prospect_candidate_lock.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_protonation_aware_proposal_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_reconcile_ledger.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_reset_data_pack.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_reset_suite_classification.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_reset_verification.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_restate_footprint_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_retained_core_preflight.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_retained_core_shared_support.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_ring_chain_probe.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_ring_feasibility.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_ring_quality_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_route_complete_region_expert.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_route_decision_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_route_distillation.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_route_distilled_benchmark.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_route_distilled_full.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_route_guided_support.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_route_policy_comparison.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_route_policy_parallel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_route_policy_select.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_route_policy_source_sharded.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_route_proposal_quality.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_saved_run_download.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_second_generation.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_shared_controller_production_support_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_shared_controller_topology_production_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_shared_retained_rewrite_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_stall_watchdog.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_structural_subgoal_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_structural_subgoal_component_novelty.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_structural_subgoal_modal.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_structural_subgoal_policy.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_structural_subgoal_realizer_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_structural_subgoal_realizer_modal.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_target_conditioned_utility_selector.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_target_path_values.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_task_search_review.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_task_value_check.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_utility_data_acquisition_launch.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_utility_data_acquisition_lock.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_virtual_joint_5ht1b0_complete_combination_forensics.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_virtual_joint_5ht1b0_complete_combination_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_virtual_joint_5ht1b0_particle3_combination_census.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_virtual_joint_5ht1b0_particle_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_virtual_joint_5ht1b0_support_gate.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_virtual_joint_template_allocation_diagnostic.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_warm_audit.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/t4_whole_ring_plan.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/validate_selector.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/verify_pmo_task_registry.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/verify_t4_d04_panel.py": {
+      "error": null,
+      "import_ok": true
+    },
+    "tools/winner_option_proposal.py": {
+      "error": null,
+      "import_ok": true
+    }
+  },
+  "import_ok_count": 821,
+  "interpreter": "/Users/rmaganti/compose_rgm_git/.venv/bin/python",
+  "per_directory": {
+    "modal_apps": {
+      "import_ok": 282,
+      "total": 286
+    },
+    "scripts": {
+      "import_ok": 289,
+      "total": 339
+    },
+    "tools": {
+      "import_ok": 250,
+      "total": 252
+    }
+  },
+  "schema_version": 1
+}
