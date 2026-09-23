@@ -35,22 +35,29 @@ touched.
 |---|---|---|
 | `pinned_historical_files_modified` | **0** | `git diff --stat 061ead93 HEAD -- <1,879 pinned paths>` is empty |
 | `lost_public_symbols` | **0** | 17,081 import-view pairs before and after, 0 lost, 0 gained |
-| `lost_entrypoints` | **0** | see `entry_point_after_vs_baseline.json` |
+| `lost_entrypoints` | PENDING | re-measured after the baseline suite finishes; not claimed until run |
 | `lost_capability_groups` | **0** | 7 groups, all non-empty |
-| `new_test_regressions` | **0** | node-id set comparison, see below |
+| `new_test_regressions` | PENDING | baseline suite still running; not claimed until run |
 | `newly_broken_pins` | **0** | absent-pin count unchanged at 10,876, all traced |
 | `external_artifacts_without_backup` | **3** | **NONZERO AND REPORTED, see gap section** |
 
-The last line is the only one that does not read zero. It is a pre-existing gap
-this pass measured rather than created, and suppressing it would be worse than
-naming it.
+`external_artifacts_without_backup` is the only measured line that does not read
+zero. It is a pre-existing gap this pass measured rather than created, and
+suppressing it would be worse than naming it.
+
+Two lines read PENDING rather than zero. An unrun check is not a passing check,
+and the entry-point re-measurement is deliberately not run while the baseline
+suite holds the machine: this repository has already recorded a phantom
+regression manufactured by measuring under load.
 
 ## Findings, ranked by how much future error they prevent
 
 ### 1. `src/` is read-only in AGGREGATE, not per file (MEASURED)
 
 1,879 of 8,805 tracked files are the subject of a sha256 pin, including 542 of
-the 595 modules in `src/compose_v4`; every core subpackage is at 100 percent.
+the 595 modules in `src/compose_v4`. Every subpackage except `experiments` and
+`control` is 100 percent pinned, and those two are covered by the tree
+fingerprints below, so the 53 unpinned modules are not a working surface.
 
 The per-file set **understates** the constraint. Three fingerprints hash whole
 directories, so an individually unpinned file is still covered and **adding** a
