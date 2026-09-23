@@ -919,6 +919,17 @@ def reduce_shards(shard_dir: Path, destination: Path, *, root: Path = ROOT) -> d
         "headline": {
             "trigger_cells_run": len(run_cells),
             "trigger_cells_passing": len(passing),
+            # A cell can recover support AND no longer exhaust in the first
+            # place, and those are different facts. Where round one selects a
+            # batch, the expansion below it was still measured -- the gate is
+            # about support -- but it is NOT what production would have done on
+            # that seed, and saying so is the difference between a measurement
+            # and a misattributed one.
+            "trigger_cells_whose_exhaustion_did_not_reproduce": sorted(
+                cell
+                for cell, row in cells.items()
+                if row.get("status") == "RUN" and not row["trigger_confirmed_all_seeds"]
+            ),
             "routing_agrees_with_every_historical_arm": _over(
                 run_cells, lambda row: row["routing_agrees"]
             ),

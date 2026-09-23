@@ -5,7 +5,53 @@
     "status": "NOT_RUN"
    },
    "braf_0": {
-    "status": "NOT_RUN"
+    "distinct_eligible_by_seed": {
+     "0": 4
+    },
+    "draws_spent_by_seed": {
+     "0": 0
+    },
+    "drug_like_eligible_total": 4,
+    "eligible_endpoints_total": 4,
+    "historical_kernel": "region",
+    "p_any_eligible": 1.0,
+    "round_one_selected_by_seed": {
+     "0": 8
+    },
+    "routed_kernel": [
+     "region"
+    ],
+    "routing_agrees": true,
+    "rung_zero_yield_by_seed": {
+     "0": 4
+    },
+    "seeds_run": [
+     0
+    ],
+    "standalone_reference": {
+     "comparable": "verdict_and_routing_only",
+     "distinct_eligible_by_seed": {
+      "0": 4,
+      "1": 5,
+      "2": 4
+     },
+     "eligible_endpoints_total": 13,
+     "routed_kernel": [
+      "region"
+     ],
+     "verdict": "PASS",
+     "why": "the production contract declares proposal.shallow.region_law and the standalone gate ran without it, so endpoint counts are not expected to match"
+    },
+    "state_routing_consumption_attempts": {
+     "0": 1
+    },
+    "status": "RUN",
+    "stop_reason_by_seed": {
+     "0": "reached_target"
+    },
+    "trigger_confirmed_all_seeds": false,
+    "verdict": "PASS",
+    "wall_clock_stops": []
    },
    "braf_1": {
     "status": "NOT_RUN"
@@ -26,8 +72,8 @@
     "policy": "t4_unified_routing_v1",
     "policy_sha256": "b69cadcba1824ffcf1a45f8f7f894bec284bf09deea406a4e1da271d52bd609a"
    },
-   "state_routing_proven_consumed_on_every_trigger_event": null,
-   "terminal_guard_passed_on_every_trigger_event": null
+   "state_routing_proven_consumed_on_every_trigger_event": true,
+   "terminal_guard_passed_on_every_trigger_event": true
   },
   "controls": {
    "5ht1b_0": {
@@ -214,7 +260,7 @@
    "control_rows_expected": 20,
    "control_rows_present": 9,
    "trigger_rows_expected": 15,
-   "trigger_rows_present": 0
+   "trigger_rows_present": 1
   },
   "docking_calls": 0,
   "entrypoint": "production",
@@ -225,20 +271,24 @@
    "controls_law_off_reproduce_committed_audit": true,
    "controls_run_declared": 0,
    "controls_run_law_off": 9,
-   "distinct_eligible_endpoints_total": 0,
+   "distinct_eligible_endpoints_total": 4,
    "docking_calls": 0,
    "ladder_unreachable_on_every_control": true,
-   "med_chem_plausible_total": 0,
+   "med_chem_plausible_total": 4,
    "oracle_calls": 0,
-   "routing_agrees_with_every_historical_arm": null,
-   "trigger_cells_passing": 0,
-   "trigger_cells_run": 0
+   "routing_agrees_with_every_historical_arm": true,
+   "trigger_cells_passing": 1,
+   "trigger_cells_run": 1,
+   "trigger_cells_whose_exhaustion_did_not_reproduce": [
+    "braf_0"
+   ]
   },
   "oracle_calls": 0,
   "question": "does the unified controller, run through the functions the campaign app itself calls, reproduce the support the standalone gate measured?",
   "schema_version": "t4_unified_production_gate_v1",
   "shards": [
    "5ht1b_1_seed0_law_off",
+   "braf_0_seed0_declared",
    "braf_2_seed0_law_off",
    "fa7_1_seed0_law_off",
    "jak2_0_seed0_law_off",
@@ -250,5 +300,5 @@
   ],
   "verdict": "INCOMPLETE"
  },
- "payload_sha256": "c731fdd9e1f60b44e4f5582bbd51e21f039fa6be0bfdac189d62a89609625a0c"
+ "payload_sha256": "8320cb01c15f4197d5a92c7c2996b76afcead6be8c785d9ce9b47b6218905d74"
 }
