@@ -278,19 +278,28 @@ def _delete_pendant_fragment(source, rng, *, maximum=MAX_SEGMENT_LENGTH, law=Non
     raise ValueError(f"no pendant fragment deleted exactly: {dict(Counter(failures))}")
 
 
-def _ring_module(source, rng, *, topology, label):
+def _ring_module(source, rng, *, topology, label, locus=None):
+    """Build one ring of ``topology`` on ``source``.
+
+    ``locus`` restricts which atoms may carry the new ring.  ``None`` means every
+    real atom, which is the historical behaviour and keeps every existing caller
+    byte-identical.  Passing a narrower set is what lets a region replacement
+    rebuild AT the anchor it just excised from, reusing this builder rather than
+    reimplementing ring chemistry beside it.
+    """
     specs = [
         RingSpec(*_ring_option_parts(option))
         for option in default_ring_options()
         if f"construct:{topology}:" in option
     ]
+    allowed = (
+        frozenset(int(i) for i in np.flatnonzero(is_element(source.atom_types)))
+        if locus is None
+        else frozenset(int(i) for i in locus)
+    )
     for raw_spec in rng.permutation(len(specs)):
         spec = specs[int(raw_spec)]
-        branches = construction_branches(
-            source,
-            frozenset(int(i) for i in np.flatnonzero(is_element(source.atom_types))),
-            spec,
-        )
+        branches = construction_branches(source, allowed, spec)
         if not branches:
             continue
         for raw_branch in rng.permutation(len(branches)):
