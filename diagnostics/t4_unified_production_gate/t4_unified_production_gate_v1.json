@@ -54,7 +54,53 @@
     "wall_clock_stops": []
    },
    "braf_1": {
-    "status": "NOT_RUN"
+    "distinct_eligible_by_seed": {
+     "0": 6
+    },
+    "draws_spent_by_seed": {
+     "0": 0
+    },
+    "drug_like_eligible_total": 6,
+    "eligible_endpoints_total": 6,
+    "historical_kernel": "region",
+    "p_any_eligible": 1.0,
+    "round_one_selected_by_seed": {
+     "0": 8
+    },
+    "routed_kernel": [
+     "region"
+    ],
+    "routing_agrees": true,
+    "rung_zero_yield_by_seed": {
+     "0": 6
+    },
+    "seeds_run": [
+     0
+    ],
+    "standalone_reference": {
+     "comparable": "verdict_and_routing_only",
+     "distinct_eligible_by_seed": {
+      "0": 6,
+      "1": 8,
+      "2": 8
+     },
+     "eligible_endpoints_total": 22,
+     "routed_kernel": [
+      "region"
+     ],
+     "verdict": "PASS",
+     "why": "the production contract declares proposal.shallow.region_law and the standalone gate ran without it, so endpoint counts are not expected to match"
+    },
+    "state_routing_consumption_attempts": {
+     "0": 1
+    },
+    "status": "RUN",
+    "stop_reason_by_seed": {
+     "0": "reached_target"
+    },
+    "trigger_confirmed_all_seeds": false,
+    "verdict": "PASS",
+    "wall_clock_stops": []
    },
    "fa7_0": {
     "status": "NOT_RUN"
@@ -260,7 +306,7 @@
    "control_rows_expected": 20,
    "control_rows_present": 9,
    "trigger_rows_expected": 15,
-   "trigger_rows_present": 1
+   "trigger_rows_present": 2
   },
   "docking_calls": 0,
   "entrypoint": "production",
@@ -271,16 +317,17 @@
    "controls_law_off_reproduce_committed_audit": true,
    "controls_run_declared": 0,
    "controls_run_law_off": 9,
-   "distinct_eligible_endpoints_total": 4,
+   "distinct_eligible_endpoints_total": 10,
    "docking_calls": 0,
    "ladder_unreachable_on_every_control": true,
-   "med_chem_plausible_total": 4,
+   "med_chem_plausible_total": 10,
    "oracle_calls": 0,
    "routing_agrees_with_every_historical_arm": true,
-   "trigger_cells_passing": 1,
-   "trigger_cells_run": 1,
+   "trigger_cells_passing": 2,
+   "trigger_cells_run": 2,
    "trigger_cells_whose_exhaustion_did_not_reproduce": [
-    "braf_0"
+    "braf_0",
+    "braf_1"
    ]
   },
   "oracle_calls": 0,
@@ -289,6 +336,7 @@
   "shards": [
    "5ht1b_1_seed0_law_off",
    "braf_0_seed0_declared",
+   "braf_1_seed0_declared",
    "braf_2_seed0_law_off",
    "fa7_1_seed0_law_off",
    "jak2_0_seed0_law_off",
@@ -300,5 +348,5 @@
   ],
   "verdict": "INCOMPLETE"
  },
- "payload_sha256": "8320cb01c15f4197d5a92c7c2996b76afcead6be8c785d9ce9b47b6218905d74"
+ "payload_sha256": "ff6e8e2aff1865509ec72146761b295623641f553f3bd00d26c88a2f1bf7364f"
 }
