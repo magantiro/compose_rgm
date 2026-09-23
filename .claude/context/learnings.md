@@ -4738,3 +4738,81 @@ independently of whether fa7_0 ever closes.**
   `run_support_expansion` checks `wall_seconds` against a MONOTONIC clock, so queueing would be
   recorded as an algorithmic stop. The committed standalone fa7 events already ran 4,876-7,295 s
   against a 7,200 s wall. Measured outcome of respecting this: zero `wall_clock` stops so far.
+
+## 2026-09-23 (a `for` loop that finishes is not a run that succeeded)
+
+- **A LOCAL DNS OUTAGE TURNED INTO "ALL PHASES DONE" WITH EIGHT OF FIFTEEN ROWS MISSING.** The T4
+  gate driver was a bare shell `for` loop over `modal run --detach` calls with **no exit-code
+  check**. One in-flight batch died with `[Errno 8] nodename nor servname provided, or not known`;
+  every subsequent launch failed INSTANTLY with `Could not connect to the Modal server`; and the
+  loop marched through all six remaining phases in seconds and printed its final
+  `=== ALL PHASES DONE ===`. Seven of fifteen trigger rows and ZERO of ten declared controls sat
+  behind a confident completion message.
+- **SILENCE IS NOT SUCCESS, AND NEITHER IS A LOOP FINISHING.** Same family as the truncated
+  `modal app list` grep (a pattern longer than the rendered column can only return absence) and the
+  buffered background pipe that wrote 0 bytes before being killed: a confident output produced by an
+  instrument that cannot observe failure. The loop's completion measured only that the loop ran.
+- **THE TELL WAS THE CLOCK, and it is available in one line.** Six phases that had been taking
+  1,700-4,200 s each "completed" in under a minute between them. Any driver whose phases have a
+  known cost should refuse a phase that returns implausibly fast, or at least print per-phase wall
+  time so the collapse is visible.
+- **REPLACEMENT DRIVER SHAPE, and all four parts earn their place:** (1) SKIP a unit whose output
+  artifacts already exist, so a resume is idempotent and cheap; (2) CHECK the exit code of every
+  launch; (3) RETRY a failure a bounded number of times, because a network transient is an expected
+  event rather than a code fault; (4) print an explicit per-unit outcome and a FAILED list at the
+  end, so the summary cannot be a bare "done". The skip probe must also distinguish "artifact
+  absent" from "could not reach the volume" and treat the latter as NOT-present, or an outage makes
+  the resume skip real work.
+- **PER-EVENT COMMIT IS WHY NOTHING WAS LOST.** Each gate event writes its own shard to the volume
+  before returning, so seven completed rows survived the driver's collapse and the resume redid
+  none of them. Sharpens the standing lesson that one `.map()` shard exhausting retries can destroy
+  every healthy sibling: commit per unit and the blast radius of any driver-level failure is zero.
+- **`--detach` KEEPS THE APP ALIVE, NOT THE BATCH.** Modal's own message is precise and worth
+  reading rather than skimming: "running a local entrypoint in detached mode only keeps the LAST
+  TRIGGERED Modal function alive after the parent process has been killed or disconnected." The
+  in-flight batch at the moment of the outage did NOT commit; checking the volume afterwards, not
+  assuming `--detach` saved it, is what established that.
+
+## 2026-09-23 (the affordability re-expression that FAILED, and why that is the finding)
+
+- **ASKED TO RE-EXPRESS A WALL-CLOCK CRITERION IN WORK UNITS, I MEASURED THAT THE AVAILABLE
+  COUNTERS CANNOT CARRY IT.** After a wall-clock criterion flipped a verdict on a deterministic
+  computation, the right repair is a load-independent work counter. The route lane emits 28
+  telemetry counters and **every one is identical across the quiet-machine and loaded-machine runs**
+  -- reproducible, as a deterministic lane must be. But on `braf_1`, whose wall clock moved **36x**,
+  the largest counter movement is `realization_limit` at 2.00x and the largest OBSERVED one is
+  `composition_aliases` at 1.54x; `complete_programs_committed` goes 27 -> 40, and `binding_visits`,
+  `materialization_attempts`, `unique_ranked_endpoints` and `templates_with_bindings` do not move at
+  all. **A 1.5x work signal cannot express a 36x cost.** The re-expression is not available from
+  what the lane emits, and that is the result rather than a reason to keep looking.
+- **INFERRED, not measured: the beam's own expansion work is the uncounted part.**
+  `beam_width x expansion_width` goes 32x24 = 768 to 48x48 = 2304 -- a 3x widening per layer that
+  compounds over program depth. Plausible mechanism, no counter measures it, and adding one would
+  change a module every T4 contract pins. So the honest instrument for affordability is the
+  production hardware, not a better laptop proxy.
+- **A COUNTER BEING REPRODUCIBLE IS NECESSARY AND NOT SUFFICIENT.** All 28 reproduce perfectly and
+  none of them tracks cost. "Report a load-independent work counter rather than seconds" only helps
+  if a counter actually correlates with the work; check the correlation before adopting one as a
+  criterion, or you trade a criterion that measures the machine for one that measures nothing.
+
+## 2026-09-23 (an equivalence measured at one stage: check whether it PROPAGATES)
+
+- **A RE-SEAL MID-GATE LOOKED LIKE A VALIDITY PROBLEM AND IS A COST-ONLY GAP, and the difference was
+  checkable rather than arguable.** Every braf and parp1 gate row landed BEFORE the route widths
+  were standardized, so they ran the OLD settings. Read alone: those rows do not measure the frozen
+  controller.
+- **WHAT RESCUES THEM, CHECKED AT TWO LEVELS.** (1) On braf_0, braf_1, braf_2 and parp1_2 the route
+  lane returns **ZERO eligible endpoints in BOTH arms**, so the width cannot influence anything
+  downstream -- there is nothing to propagate, at any depth. (2) On the only two cells with nonzero
+  output, parp1_0 (4) and parp1_1 (6), the **FULL RECORDS are identical between arms**, not merely
+  the endpoint SMILES: same programs, same families, same gate properties.
+- **THAT SECOND CHECK IS WHAT UPGRADES THE CLAIM FROM ROUND-ONE-ONLY TO EVERY DEPTH.** Identical
+  SMILES sets alone would license only a round-one statement, because two different programs can
+  land on one canonical molecule and the records feed `attach_features` and `select_batch`.
+  Record-level identity means the merged pool, the features and the ranking are all identical under
+  the same RNG, so the campaign proceeds identically. **An equivalence measured at one stage is a
+  statement about that stage until you check what the next stage reads.**
+- **The cheap decomposition came first and made the expensive check small:** four of the six cells
+  emit nothing from the lane in either arm, so only two needed a record comparison -- about twenty
+  seconds rather than a re-run of the whole panel. Ask which cells can possibly carry the effect
+  before measuring all of them.

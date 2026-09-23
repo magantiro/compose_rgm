@@ -1,4 +1,48 @@
 {
+ "affordability_in_work_units": {
+  "ATTEMPT_FAILED_AND_THIS_IS_THE_RESULT": "No emitted counter tracks the cost. On braf_1, whose wall clock moved 36x (5.5 s -> 201.2 s), the LARGEST counter movement is realization_limit at 2.00x and the largest observed one is composition_aliases at 1.54x; complete_programs_committed goes 27 -> 40 (1.48x), and binding_visits, materialization_attempts, unique_ranked_endpoints and templates_with_bindings do not move at all. A 1.5x work signal cannot express a 36x cost, so the re-expression the criterion needs is NOT available from what the lane emits.",
+  "braf_1_counters_narrow_to_wide": {
+   "binding_visits": [
+    4027,
+    4027
+   ],
+   "complete_programs_committed": [
+    27,
+    40
+   ],
+   "composition_aliases": [
+    207,
+    318
+   ],
+   "composition_attempts": [
+    1377,
+    1921
+   ],
+   "materialization_attempts": [
+    62,
+    62
+   ],
+   "realization_limit": [
+    32,
+    64
+   ],
+   "unique_ranked_endpoints": [
+    64,
+    64
+   ]
+  },
+  "what_would_settle_affordability": "The seed-2 braf batch, on a dedicated single-CPU Modal container with no shared load, against the 1800 s proposal_unit timeout. That is a measurement of the production configuration on production hardware rather than a laptop proxy. It is already scheduled as part of finishing the gate, so it costs nothing extra.",
+  "where_the_cost_actually_is_INFERRED_not_measured": "The beam's own expansion work is not counted. beam_width x expansion_width goes 32x24 = 768 to 48x48 = 2304, a 3x widening per layer that compounds over program depth. That is a plausible mechanism for the gap and it is INFERRED: no emitted counter measures it, and adding one would change a module every T4 contract pins.",
+  "why": "C4 was a wall-clock bound and wall clock is a property of the machine. The coordinator asked for affordability re-expressed in work units, which for a deterministic lane is reproducible by construction.",
+  "work_counters_are_reproducible": "Every counter the lane emits is IDENTICAL across the quiet-machine and loaded-machine runs, on all six cells and both arms. Recovered from the runs already in hand; no re-run was needed."
+ },
+ "gate_validity_of_the_already_landed_rows": {
+  "scope": "This covers parp1 and braf, the two proteins whose widths moved. jak2, fa7 and 5ht1b were already at 48/48/64, so their rows were never exposed.",
+  "so_the_equivalence_is_not_round_one_only": "Record-level identity means merge_expert_pools receives an identical route pool, attach_features sees identical records and select_batch ranks them identically under the same RNG. The equivalence therefore propagates past round one rather than stopping at it, so the already-landed braf and parp1 rows are valid evidence for the FROZEN 48/48/64 controller at every depth.",
+  "the_worry": "Every braf and parp1 gate row landed BEFORE the re-seal, so it ran under the OLD NARROW route widths. Read alone that says those rows do not measure the frozen controller.",
+  "what_IS_unmeasured": "The COST column only. The wide braf route lane has still never run on Modal, and the seed-2 braf batch is its first exercise.",
+  "why_they_remain_valid": "CHECKED, not asserted. On braf_0, braf_1, braf_2 and parp1_2 the route lane returns ZERO eligible endpoints in BOTH arms, so the width cannot influence anything downstream -- there is nothing to propagate. On parp1_0 (4 endpoints) and parp1_1 (6), the FULL RECORDS are identical between arms, not merely the endpoint SMILES: same programs, same families, same gate properties."
+ },
  "genuine_production_risk_this_surfaced": "2410 s exceeds the 1800 s Modal proposal_unit timeout. Even though that figure is load-inflated, it shows the wide route lane on braf_1 is the panel's slowest and that standardization increased that exposure. The gate's braf rows so far ran under the OLD narrow contract, so the wide braf route lane has NOT yet been exercised on Modal. Watch the seed-2 braf batch for a proposal_unit timeout; that is the measurement that settles affordability, and it runs on a dedicated container rather than a shared laptop.",
  "load_dependent_and_did_not_reproduce": {
   "C4_cost_within_600s_per_cell": [
