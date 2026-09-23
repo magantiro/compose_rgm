@@ -1,0 +1,796 @@
+{
+  "baseline_commit": "4b73e77d7d5b6f62bebf5af1ac83630e5916cc6e",
+  "baseline_tag": "pre-cleanup-2026-09-23",
+  "counts": {
+    "entry_points": 877,
+    "entry_points_importing": 821,
+    "importable_modules": 590,
+    "modules": 595,
+    "pinned_files": 1879,
+    "pinned_python_files": 783,
+    "public_symbol_pairs": 17081,
+    "python_files": 3341,
+    "tracked_files": 8818
+  },
+  "dead_code": {
+    "interpretation": "No source, driver or app file is unreferenced. The unreferenced set is concentrated in diagnostics (897), tests (386), upload (260) and the manuscript directories, which are results and submission bundles rather than dead code.",
+    "method": "Absence established two ways: the reference-graph scan in tools/repo_audit.py, which also follows Modal add_local_file mounts, and the import closure recorded in the capability and entry-point baselines. A deferred import never appears in sys.modules and a local variable sharing a module name reads as a grep hit, so neither signal alone is sufficient.",
+    "unreferenced_in_modal_apps": 0,
+    "unreferenced_in_scripts": 0,
+    "unreferenced_in_src": 0,
+    "unreferenced_total": 1768
+  },
+  "headline": "The library cannot be restructured by moving files. 542 of 595 src/compose_v4 modules are individually pinned, and three whole-tree fingerprints make the remaining 53 read-only too. Adding a module under src/ moves an identity, so even a facade package inside src/ is not free.",
+  "lint": {
+    "by_rule": {
+      "B023": {
+        "unpinned": 66
+      },
+      "BLE001": {
+        "pinned": 67,
+        "unpinned": 333
+      },
+      "C408": {
+        "pinned": 73,
+        "unpinned": 447
+      },
+      "EXE001": {
+        "pinned": 11,
+        "unpinned": 134
+      },
+      "F401": {
+        "pinned": 31,
+        "unpinned": 209
+      },
+      "F541": {
+        "pinned": 1,
+        "unpinned": 65
+      },
+      "F841": {
+        "pinned": 8,
+        "unpinned": 96
+      },
+      "I001": {
+        "pinned": 149,
+        "unpinned": 826
+      },
+      "PLW1510": {
+        "pinned": 3,
+        "unpinned": 44
+      },
+      "RUF010": {
+        "pinned": 1,
+        "unpinned": 32
+      },
+      "RUF022": {
+        "pinned": 55,
+        "unpinned": 2
+      },
+      "RUF046": {
+        "pinned": 17,
+        "unpinned": 174
+      },
+      "RUF059": {
+        "pinned": 3,
+        "unpinned": 94
+      },
+      "RUF100": {
+        "pinned": 89,
+        "unpinned": 439
+      },
+      "S110": {
+        "pinned": 5,
+        "unpinned": 45
+      },
+      "S112": {
+        "pinned": 19,
+        "unpinned": 94
+      },
+      "SIM115": {
+        "pinned": 10,
+        "unpinned": 114
+      },
+      "TRY004": {
+        "pinned": 44,
+        "unpinned": 17
+      },
+      "UP035": {
+        "pinned": 59,
+        "unpinned": 32
+      },
+      "UP037": {
+        "pinned": 44,
+        "unpinned": 4
+      }
+    },
+    "by_top_directory": {
+      "archive": {
+        "unpinned": 352
+      },
+      "baselines": {
+        "pinned": 17
+      },
+      "diagnostics": {
+        "unpinned": 115
+      },
+      "docs": {
+        "pinned": 5
+      },
+      "modal_apps": {
+        "pinned": 115,
+        "unpinned": 1397
+      },
+      "paper": {
+        "unpinned": 4
+      },
+      "paper_gem_neurips2026": {
+        "unpinned": 39
+      },
+      "paper_iclr2027": {
+        "unpinned": 25
+      },
+      "scripts": {
+        "pinned": 103,
+        "unpinned": 1030
+      },
+      "src": {
+        "pinned": 513,
+        "unpinned": 1
+      },
+      "tests": {
+        "pinned": 3,
+        "unpinned": 387
+      },
+      "third_party": {
+        "unpinned": 212
+      },
+      "tools": {
+        "pinned": 2,
+        "unpinned": 21
+      }
+    },
+    "total": {
+      "pinned": 758,
+      "unpinned": 3583
+    }
+  },
+  "modularity": {
+    "archive_inside_library": [
+      "src/compose_v4/control/archive/macro_engine.pre_fused_stoich.py",
+      "src/compose_v4/control/archive/semantic_actions.enumerated_v1.py"
+    ],
+    "core_to_experiments_back_edges": {
+      "detail": {
+        "compose_v4.experiments.analogue_prior": [
+          "compose_v4.data.mmp_pool_freezer",
+          "compose_v4.data.production_edit_corpus",
+          "compose_v4.rewrite.trace_shard"
+        ],
+        "compose_v4.experiments.cnof_conditional": [
+          "compose_v4.data.production_edit_corpus"
+        ],
+        "compose_v4.experiments.continuation_profile": [
+          "compose_v4.control.molecular_search_codec",
+          "compose_v4.control.option_continuation",
+          "compose_v4.control.program_campaign"
+        ],
+        "compose_v4.experiments.editing_v2_process_v2_contract_chain": [
+          "compose_v4.data.editing_v2_process_v2_gate_zero"
+        ],
+        "compose_v4.experiments.editing_v2_semantic_development_cell_roles": [
+          "compose_v4.data.editing_v2_process_v2_active8_plan"
+        ],
+        "compose_v4.experiments.factorized_mark_conditional": [
+          "compose_v4.data.editing_v2_process_v2_active8_admission"
+        ],
+        "compose_v4.experiments.factorized_successor_training": [
+          "compose_v4.data.active8_trace_inventory",
+          "compose_v4.data.corpus_training_library",
+          "compose_v4.data.indexed_successor_fiber_cache",
+          "compose_v4.data.successor_fiber_cache"
+        ],
+        "compose_v4.experiments.hierarchical_sampler": [
+          "compose_v4.data.production_edit_corpus"
+        ],
+        "compose_v4.experiments.hphi_lazy_family_scores": [
+          "compose_v4.control.ring_fastpath"
+        ],
+        "compose_v4.experiments.hphi_lazy_sampler": [
+          "compose_v4.control.ring_fastpath"
+        ],
+        "compose_v4.experiments.hphi_smc": [
+          "compose_v4.control.option_particles",
+          "compose_v4.control.persistent_option_smc"
+        ],
+        "compose_v4.experiments.pmo_chronological": [
+          "compose_v4.control.branch_policy",
+          "compose_v4.control.complete_plan_ranker",
+          "compose_v4.control.local_endpoint_selector"
+        ],
+        "compose_v4.experiments.pmo_complete_route_dynamic_gate": [
+          "compose_v4.control.pmo_joint_dependency_jump",
+          "compose_v4.control.pmo_realization"
+        ],
+        "compose_v4.experiments.pmo_dependency_region_program": [
+          "compose_v4.control.pmo_joint_dependency_jump",
+          "compose_v4.control.pmo_realization"
+        ],
+        "compose_v4.experiments.pmo_legal_action_policy": [
+          "compose_v4.control.pmo_joint_dependency_jump"
+        ],
+        "compose_v4.experiments.production_successor_kernel": [
+          "compose_v4.control.option_continuation",
+          "compose_v4.control.ring_fastpath",
+          "compose_v4.data.active8_trace_inventory",
+          "compose_v4.data.editing_v2_process_v2_active8_admission",
+          "compose_v4.data.editing_v2_process_v2_active8_sentinel",
+          "compose_v4.data.editing_v2_semantic_active8_admission"
+        ],
+        "compose_v4.experiments.t4_endpoint_selection": [
+          "compose_v4.control.program_task"
+        ],
+        "compose_v4.experiments.t4_shared_controller_cell_runtime": [
+          "compose_v4.control.route_complete_region_particle_receipts"
+        ],
+        "compose_v4.experiments.t4_warm_continuation": [
+          "compose_v4.control.molecular_task_search"
+        ],
+        "compose_v4.experiments.whole_ring_plan": [
+          "compose_v4.control.current_state_edits",
+          "compose_v4.control.dependency_region_program",
+          "compose_v4.control.dynamic_program_synthesis",
+          "compose_v4.control.dynamic_program_synthesis_v1",
+          "compose_v4.control.edit_program",
+          "compose_v4.control.macro_archive_integration",
+          "compose_v4.control.pmo_joint_dependency_jump",
+          "compose_v4.control.pmo_realization",
+          "compose_v4.control.program_task",
+          "compose_v4.control.region_replacement_option",
+          "compose_v4.control.retained_core_pruning"
+        ],
+        "compose_v4.experiments.winner_paths": [
+          "compose_v4.control.donor_program",
+          "compose_v4.control.protonation_restate_program",
+          "compose_v4.control.winner_imitation"
+        ]
+      },
+      "experiments_modules_depended_on_by_core": 21,
+      "finding": "21 of the 302 modules under experiments/ are imported by 37 library-core modules. They are library code filed as experiments. Moving experiments/ out of the package without moving these first would break the core."
+    },
+    "oversized_modules": [
+      {
+        "lines": 5903,
+        "path": "src/compose_v4/model/factorized_tracelet_rate_model.py",
+        "pinned": true
+      },
+      {
+        "lines": 5622,
+        "path": "scripts/train_tracelet_cnof_gate.py",
+        "pinned": true
+      },
+      {
+        "lines": 4075,
+        "path": "modal_apps/run_process_v2_t1_app.py",
+        "pinned": true
+      },
+      {
+        "lines": 3449,
+        "path": "modal_apps/run_process_v2_p50_app.py",
+        "pinned": true
+      },
+      {
+        "lines": 3364,
+        "path": "src/compose_v4/rewrite/ring_system_fiber.py",
+        "pinned": true
+      },
+      {
+        "lines": 3296,
+        "path": "src/compose_v4/data/editing_process_v2_rebind.py",
+        "pinned": true
+      },
+      {
+        "lines": 2910,
+        "path": "modal_apps/train_tracelet_gm.py",
+        "pinned": true
+      },
+      {
+        "lines": 2771,
+        "path": "src/compose_v4/experiments/editing_v2_semantic_t1_panel_cache.py",
+        "pinned": true
+      },
+      {
+        "lines": 2711,
+        "path": "modal_apps/macro_basin_app.py",
+        "pinned": false
+      },
+      {
+        "lines": 2676,
+        "path": "modal_apps/genmol_t4_opt_app.py",
+        "pinned": true
+      },
+      {
+        "lines": 2642,
+        "path": "src/compose_v4/experiments/editing_v2_semantic_p50_successor_cache.py",
+        "pinned": true
+      },
+      {
+        "lines": 2623,
+        "path": "src/compose_v4/data/editing_v2_role_lane_mapreduce.py",
+        "pinned": true
+      },
+      {
+        "lines": 2597,
+        "path": "src/compose_v4/data/editing_corpus_contract.py",
+        "pinned": true
+      },
+      {
+        "lines": 2532,
+        "path": "archive/macro_basin_app.pre_refine_ring.py",
+        "pinned": false
+      },
+      {
+        "lines": 2483,
+        "path": "src/compose_v4/data/editing_v2_packed_candidate_materializer.py",
+        "pinned": true
+      },
+      {
+        "lines": 2464,
+        "path": "src/compose_v4/control/macro_engine.py",
+        "pinned": true
+      },
+      {
+        "lines": 2463,
+        "path": "src/compose_v4/experiments/editing_t1_panel.py",
+        "pinned": true
+      },
+      {
+        "lines": 2420,
+        "path": "tests/test_factorized_mark_rate_model.py",
+        "pinned": true
+      },
+      {
+        "lines": 2375,
+        "path": "src/compose_v4/data/editing_v2_process_v2_chunk_cache.py",
+        "pinned": true
+      },
+      {
+        "lines": 2357,
+        "path": "modal_apps/archive/macro_basin_app.pre_semantics_arm.py",
+        "pinned": false
+      },
+      {
+        "lines": 2323,
+        "path": "src/compose_v4/experiments/editing_v2_semantic_t1_successor_cache.py",
+        "pinned": true
+      },
+      {
+        "lines": 2311,
+        "path": "src/compose_v4/experiments/griddd_conditional.py",
+        "pinned": true
+      },
+      {
+        "lines": 2276,
+        "path": "modal_apps/committor_bellman_app.py",
+        "pinned": false
+      },
+      {
+        "lines": 2273,
+        "path": "src/compose_v4/experiments/editing_t1_successor_runtime.py",
+        "pinned": true
+      },
+      {
+        "lines": 2248,
+        "path": "modal_apps/aryl_compile_app.py",
+        "pinned": false
+      },
+      {
+        "lines": 2245,
+        "path": "src/compose_v4/experiments/editing_v2_process_v2_t1_runtime.py",
+        "pinned": true
+      },
+      {
+        "lines": 2222,
+        "path": "src/compose_v4/experiments/editing_v2_process_v2_contract_chain.py",
+        "pinned": true
+      },
+      {
+        "lines": 2211,
+        "path": "src/compose_v4/experiments/factorized_mark_conditional.py",
+        "pinned": true
+      },
+      {
+        "lines": 2209,
+        "path": "archive/macro_engine.pre_refine_ring.py",
+        "pinned": false
+      },
+      {
+        "lines": 2206,
+        "path": "src/compose_v4/data/editing_v2_split_census.py",
+        "pinned": true
+      },
+      {
+        "lines": 2185,
+        "path": "src/compose_v4/experiments/editing_v2_semantic_p50_execution_contracts.py",
+        "pinned": true
+      },
+      {
+        "lines": 2153,
+        "path": "src/compose_v4/data/editing_v2_semantic_capability_cells.py",
+        "pinned": true
+      },
+      {
+        "lines": 2110,
+        "path": "src/compose_v4/control/archive/macro_engine.pre_fused_stoich.py",
+        "pinned": true
+      },
+      {
+        "lines": 2096,
+        "path": "tests/test_editing_t1_panel.py",
+        "pinned": false
+      },
+      {
+        "lines": 2087,
+        "path": "src/compose_v4/experiments/editing_v2_semantic_p50_validation_baseline.py",
+        "pinned": true
+      },
+      {
+        "lines": 1983,
+        "path": "src/compose_v4/data/editing_semantic_sampling_sidecar.py",
+        "pinned": true
+      },
+      {
+        "lines": 1981,
+        "path": "src/compose_v4/experiments/editing_v2_process_v2_p50_runtime.py",
+        "pinned": true
+      },
+      {
+        "lines": 1972,
+        "path": "src/compose_v4/experiments/editing_v2_semantic_p50_runner.py",
+        "pinned": true
+      },
+      {
+        "lines": 1896,
+        "path": "src/compose_v4/experiments/editing_v2_semantic_t1_capacity_runner.py",
+        "pinned": true
+      },
+      {
+        "lines": 1876,
+        "path": "scripts/pmo_credit_v2_audit.py",
+        "pinned": false
+      },
+      {
+        "lines": 1743,
+        "path": "src/compose_v4/experiments/atom_restate_neural_orbit_full_corpus.py",
+        "pinned": true
+      },
+      {
+        "lines": 1738,
+        "path": "tests/test_editing_v2_process_v2_contract_chain.py",
+        "pinned": false
+      },
+      {
+        "lines": 1734,
+        "path": "third_party/InversionGNN/InversionGNN/molecular/chemutils.py",
+        "pinned": false
+      },
+      {
+        "lines": 1686,
+        "path": "src/compose_v4/data/editing_v2_candidate_provenance_bridge.py",
+        "pinned": true
+      },
+      {
+        "lines": 1661,
+        "path": "src/compose_v4/experiments/editing_v2_semantic_t1_decision.py",
+        "pinned": true
+      },
+      {
+        "lines": 1654,
+        "path": "src/compose_v4/data/editing_v2_semantic_active8_decision_source.py",
+        "pinned": true
+      },
+      {
+        "lines": 1635,
+        "path": "scripts/verify_process_v2_chain.py",
+        "pinned": false
+      },
+      {
+        "lines": 1622,
+        "path": "src/compose_v4/data/indexed_successor_fiber_cache.py",
+        "pinned": true
+      },
+      {
+        "lines": 1589,
+        "path": "modal_apps/run_editing_t1_successor_gate.py",
+        "pinned": true
+      },
+      {
+        "lines": 1580,
+        "path": "modal_apps/pack_mmp_pool_app.py",
+        "pinned": false
+      },
+      {
+        "lines": 1569,
+        "path": "src/compose_v4/data/editing_process_v2_admitted_source.py",
+        "pinned": true
+      },
+      {
+        "lines": 1548,
+        "path": "src/compose_v4/data/active8_inventory_mapreduce.py",
+        "pinned": true
+      },
+      {
+        "lines": 1541,
+        "path": "modal_apps/run_process_v2_active8_app.py",
+        "pinned": true
+      },
+      {
+        "lines": 1526,
+        "path": "tests/test_editing_v2_semantic_t1_capacity_runner.py",
+        "pinned": false
+      },
+      {
+        "lines": 1515,
+        "path": "src/compose_v4/data/editing_candidate_audit_ledger.py",
+        "pinned": true
+      },
+      {
+        "lines": 1515,
+        "path": "tests/test_editing_v2_process_v2_active8_pipeline.py",
+        "pinned": false
+      },
+      {
+        "lines": 1511,
+        "path": "src/compose_v4/data/active8_trace_inventory.py",
+        "pinned": true
+      },
+      {
+        "lines": 1504,
+        "path": "tools/t4_target_conditioned_utility_selector.py",
+        "pinned": true
+      }
+    ],
+    "subpackage_import_edges": {
+      "baselines->benchmark": 1,
+      "benchmark->(top-level)": 2,
+      "benchmark->chem": 2,
+      "benchmark->control": 2,
+      "benchmark->rewrite": 4,
+      "control->(top-level)": 5,
+      "control->chem": 76,
+      "control->data": 4,
+      "control->experiments": 34,
+      "control->gates": 5,
+      "control->rewrite": 139,
+      "data->(top-level)": 12,
+      "data->chem": 26,
+      "data->experiments": 15,
+      "data->model": 4,
+      "data->rewrite": 57,
+      "eval->control": 1,
+      "eval->rewrite": 1,
+      "experiments->(top-level)": 35,
+      "experiments->benchmark": 3,
+      "experiments->chem": 171,
+      "experiments->control": 392,
+      "experiments->data": 120,
+      "experiments->gates": 7,
+      "experiments->gm": 3,
+      "experiments->model": 56,
+      "experiments->rewrite": 305,
+      "model->chem": 8,
+      "model->data": 1,
+      "model->rewrite": 19,
+      "policy->benchmark": 7,
+      "rewrite->(top-level)": 9,
+      "rewrite->chem": 57,
+      "rewrite->data": 7,
+      "rewrite->experiments": 1
+    }
+  },
+  "pinned_by_directory": {
+    "archive": {
+      "pinned": 0,
+      "python_files": 6,
+      "unpinned": 6
+    },
+    "modal_apps": {
+      "pinned": 87,
+      "python_files": 286,
+      "unpinned": 199
+    },
+    "scripts": {
+      "pinned": 18,
+      "python_files": 339,
+      "unpinned": 321
+    },
+    "src": {
+      "pinned": 542,
+      "python_files": 595,
+      "unpinned": 53
+    },
+    "tests": {
+      "pinned": 29,
+      "python_files": 619,
+      "unpinned": 590
+    },
+    "tools": {
+      "pinned": 102,
+      "python_files": 255,
+      "unpinned": 153
+    }
+  },
+  "reproducibility": {
+    "already_broken_links": 0,
+    "manifests": [
+      "repro/pinned_paths_v1.json",
+      "repro/external_artifacts_v1.json",
+      "repro/environments_v1.json",
+      "repro/capability_manifest_v1.json"
+    ],
+    "pins_absent": 10876,
+    "pins_resolving": 110208,
+    "pins_stale": 6014,
+    "pins_total": 127098,
+    "single_copy_off_git_artifacts": 8828
+  },
+  "schema_version": 1,
+  "src_subpackages": {
+    "(top-level)": {
+      "pinned": 2,
+      "python_files": 2,
+      "unpinned": 0
+    },
+    "baselines": {
+      "pinned": 2,
+      "python_files": 2,
+      "unpinned": 0
+    },
+    "benchmark": {
+      "pinned": 12,
+      "python_files": 12,
+      "unpinned": 0
+    },
+    "chem": {
+      "pinned": 7,
+      "python_files": 7,
+      "unpinned": 0
+    },
+    "control": {
+      "pinned": 118,
+      "python_files": 137,
+      "unpinned": 19
+    },
+    "data": {
+      "pinned": 63,
+      "python_files": 63,
+      "unpinned": 0
+    },
+    "eval": {
+      "pinned": 4,
+      "python_files": 5,
+      "unpinned": 1
+    },
+    "experiments": {
+      "pinned": 269,
+      "python_files": 302,
+      "unpinned": 33
+    },
+    "gates": {
+      "pinned": 1,
+      "python_files": 1,
+      "unpinned": 0
+    },
+    "gm": {
+      "pinned": 2,
+      "python_files": 2,
+      "unpinned": 0
+    },
+    "inference": {
+      "pinned": 2,
+      "python_files": 2,
+      "unpinned": 0
+    },
+    "lipids": {
+      "pinned": 5,
+      "python_files": 5,
+      "unpinned": 0
+    },
+    "model": {
+      "pinned": 9,
+      "python_files": 9,
+      "unpinned": 0
+    },
+    "oracles": {
+      "pinned": 3,
+      "python_files": 3,
+      "unpinned": 0
+    },
+    "policy": {
+      "pinned": 9,
+      "python_files": 9,
+      "unpinned": 0
+    },
+    "rewrite": {
+      "pinned": 34,
+      "python_files": 34,
+      "unpinned": 0
+    }
+  },
+  "structure": {
+    "competing_entry_documents": [
+      "README.md",
+      "README_NAVIGATION.md",
+      "CLAUDE.md",
+      "CLAUDE_GENERATOR_READ_NOW.md",
+      "COMPOSE_FULL_HANDOFF_2026-08-19.md",
+      "HANDOFF.md",
+      "REORG_REPORT.md",
+      "AGENTS.md"
+    ],
+    "manuscript_directories": [
+      "paper",
+      "paper_arxiv",
+      "paper_gem_neurips2026",
+      "paper_iclr2027",
+      "paper_iclr_control_substrate",
+      "paper_iclr_stochastic_rewriting",
+      "upload"
+    ],
+    "top_level_tracked_directories": [
+      ".claude",
+      "archive",
+      "artifacts",
+      "baselines",
+      "configs",
+      "containers",
+      "data",
+      "diagnostics",
+      "docs",
+      "experiments",
+      "modal_apps",
+      "paper",
+      "paper_arxiv",
+      "paper_gem_neurips2026",
+      "paper_iclr2027",
+      "paper_iclr_control_substrate",
+      "paper_iclr_stochastic_rewriting",
+      "recipes",
+      "repro",
+      "results",
+      "scripts",
+      "src",
+      "tests",
+      "third_party",
+      "tools",
+      "upload"
+    ],
+    "top_level_tracked_files": [
+      ".gitignore",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "CLAUDE_GENERATOR_READ_NOW.md",
+      "COMPOSE_FULL_HANDOFF_2026-08-19.md",
+      "HANDOFF.md",
+      "LICENSE",
+      "README.md",
+      "README_NAVIGATION.md",
+      "REORG_REPORT.md",
+      "pyproject.toml"
+    ]
+  },
+  "weight": {
+    "largest_tracked_directories_mb": {
+      "artifacts": 101.0,
+      "docs": 10.5,
+      "paper_gem_neurips2026": 9.3,
+      "paper_iclr2027": 8.1,
+      "results": 7.2,
+      "src": 13.2,
+      "tests": 6.9,
+      "upload": 61.7
+    },
+    "pack_size": "193.30 MiB",
+    "pmo_campaign_artifact_note": "The reported ~382 MB of committed PMO campaign artifacts is NOT on this branch: diagnostics/pmo_population_controller_v1* here is 0.1 MB across 29 files. It is reported on pmo-ab-integration-20260921, which is not fetched into this checkout.",
+    "tracked_bytes_approx_mb": 166
+  }
+}
