@@ -21,6 +21,7 @@ ARM B  the same, plus the full-vocabulary region replacement offered before the 
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import pathlib
 import sys
@@ -139,6 +140,17 @@ def main():
         "boundaries": [],
     }
 
+    # Sharding is a WALL-CLOCK convenience only: boundaries are independent and every draw is
+    # seeded from the boundary's own index, so a shard produces byte-identical rows to the same
+    # boundary in an unsharded run.  Shards write separate files and are merged at read time.
+    shard, shards = 0, 1
+    for argument in sys.argv[1:]:
+        if argument.startswith("--shard="):
+            shard, shards = (int(part) for part in argument.removeprefix("--shard=").split("/"))
+    if shards > 1:
+        segments = [row for i, row in enumerate(segments) if i % shards == shard]
+        print(f"shard {shard}/{shards}: {len(segments)} boundaries", flush=True)
+
     for index, row in enumerate(segments):
         source_smiles, next_smiles = row["source_smiles"], row["target_smiles"]
         graph = pad_molecular_graph(smiles_to_molecular_graph(source_smiles), 48)
@@ -157,7 +169,16 @@ def main():
         }
         for label, opt in (("A_production", None), ("B_region_option", option)):
             started = time.time()
-            rows, failures = arm(graph, opt, 20260923 + 7919 * index)
+            # A STABLE digest, never `hash()`: str hashing is PYTHONHASHSEED-salted, so a
+            # hash-derived seed differs between processes and no sharded row would be
+            # reproducible by anyone, including us.
+            identity = int.from_bytes(
+                hashlib.blake2b(
+                    f"{row['route']}:{row['seg']}".encode(), digest_size=4
+                ).digest(),
+                "big",
+            )
+            rows, failures = arm(graph, opt, 20260923 + identity)
             scored = []
             for endpoint, families in rows.items():
                 value = float(score(endpoint))
@@ -211,6 +232,8 @@ def main():
         destination = (
             OUT.replace("_v1.json", "_controller_scale_v1.json") if controller_scale else OUT
         )
+        if shards > 1:
+            destination = destination.replace(".json", f".shard{shard}of{shards}.json")
         pathlib.Path(destination).parent.mkdir(parents=True, exist_ok=True)
         with open(destination, "w") as handle:
             json.dump(report, handle, indent=1)
