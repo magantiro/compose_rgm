@@ -110,3 +110,84 @@ def test_a_constant_bonus_would_not_reorder_but_uncertainty_does():
     plain = np.argsort(-model.predict(probe))
     explored = np.argsort(-model.acquire(probe, beta=5.0))
     assert not np.array_equal(plain, explored), "uncertainty must be able to reorder candidates"
+
+
+# ---- Continuation value ----------------------------------------------------------------
+
+from compose_v4.control.pmo_macro_value import (  # noqa: E402
+    acquire_with_continuation,
+    lineage_continuation,
+)
+
+
+def _observed(rows):
+    return [{"endpoint": e, "score": s, "parent": p} for e, s, p in rows]
+
+
+def test_a_flat_state_whose_descendant_pays_off_gets_credit():
+    """The exact shape the beam showed: 0.44 sits still, then a descendant reaches 0.51."""
+    labels = lineage_continuation(
+        _observed(
+            [
+                ("a", 0.4444, None),
+                ("b", 0.4400, "a"),   # looks like a waste under an immediate target
+                ("c", 0.4380, "b"),
+                ("d", 0.5116, "c"),   # the payoff, three decisions later
+                ("z", 0.1000, None),  # an unrelated root that went nowhere
+            ]
+        ),
+        horizon=5,
+    )
+    assert labels["b"] > 0.0, "a state whose lineage later paid must carry positive continuation"
+    assert labels["c"] > labels["b"], "the state nearer the payoff carries more"
+    assert labels["z"] == 0.0, "a barren lineage carries none"
+
+
+def test_continuation_is_attributed_by_lineage_not_by_wall_clock():
+    """An unrelated branch's success must not credit a state that had nothing to do with it."""
+    labels = lineage_continuation(
+        _observed([("root_a", 0.20, None), ("root_b", 0.20, None), ("b_child", 0.90, "root_b")]),
+        horizon=5,
+    )
+    assert labels["root_b"] > 0.0
+    assert labels["root_a"] == 0.0, "a sibling root must not inherit another lineage's payoff"
+
+
+def test_the_horizon_actually_bounds_attribution():
+    rows = _observed(
+        [("a", 0.10, None)] + [(f"f{i}", 0.10, "a") for i in range(6)] + [("late", 0.90, "f5")]
+    )
+    near = lineage_continuation(rows, horizon=2)
+    far = lineage_continuation(rows, horizon=20)
+    assert near["a"] == 0.0, "a payoff beyond the horizon must not be credited"
+    assert far["a"] > 0.0
+
+
+def test_semi_markov_acquisition_discounts_by_macro_duration():
+    """A long macro is a larger commitment and its continuation is discounted further."""
+    immediate, continuation = MacroValue(), MacroValue()
+    rng = np.random.default_rng(3)
+    x = rng.normal(size=(80, len(FEATURE_NAMES)))
+    immediate.fit(x, np.zeros(len(x)))
+    continuation.fit(x, np.ones(len(x)))
+
+    probe = x[:4]
+    short = acquire_with_continuation(
+        immediate, continuation, probe, beta=0.0, discount=0.9, macro_lengths=[3, 3, 3, 3]
+    )
+    long = acquire_with_continuation(
+        immediate, continuation, probe, beta=0.0, discount=0.9, macro_lengths=[14, 14, 14, 14]
+    )
+    assert np.all(long < short), "a longer macro must discount its continuation more"
+
+
+def test_acquisition_explores_when_either_head_is_unsure():
+    immediate, continuation = MacroValue(), MacroValue()
+    rng = np.random.default_rng(4)
+    x = rng.normal(size=(60, len(FEATURE_NAMES)))
+    immediate.fit(x, x @ np.linspace(0, 1, len(FEATURE_NAMES)))
+    continuation.fit(x, np.zeros(len(x)))
+    probe = rng.normal(size=(10, len(FEATURE_NAMES))) * 4.0
+    greedy = acquire_with_continuation(immediate, continuation, probe, beta=0.0)
+    curious = acquire_with_continuation(immediate, continuation, probe, beta=6.0)
+    assert not np.array_equal(np.argsort(-greedy), np.argsort(-curious))

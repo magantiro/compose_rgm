@@ -222,3 +222,104 @@ class MacroValue:
     def acquire(self, features, *, beta: float = 1.0) -> np.ndarray:
         """`mu + beta * sigma`: exploration scaled by what the model does not know."""
         return self.predict(features) + float(beta) * self.spread(features)
+
+
+# ---- Continuation value ----------------------------------------------------------------
+#
+# The immediate target above scores a macro by what it adds to the frontier NOW.  The blind
+# trajectories say that is not the whole story: the beam sat at 0.4444 for six generations while
+# its lineage deepened, then a descendant reached 0.5116.  Under an immediate-gain target every
+# one of those six generations looks worthless, and a controller trained only on it would stop
+# funding the lineage that was about to pay.
+#
+# So a second head learns what a scored state's DESCENDANTS went on to do, labelled
+# retrospectively from the run's own counted observations.  No teacher, no lookahead at decision
+# time -- the label exists only because the future already happened.
+
+
+def lineage_continuation(
+    observations,
+    *,
+    horizon: int,
+    floor_at_zero: bool = True,
+) -> dict[str, float]:
+    """Label each scored endpoint with the best its DESCENDANTS reached within `horizon`.
+
+    ``observations`` is the counted sequence in CHARGE ORDER as mappings carrying at least
+    ``endpoint``, ``score`` and ``parent`` (``None`` for a root).  The horizon is counted in
+    subsequent OBSERVATIONS, which is the unit a fixed oracle budget is actually spent in.
+
+    The label is ``best_descendant_score - own_score``: "does acting here open a better future",
+    which is exactly the quantity an immediate-gain target cannot express.  Floored at zero by
+    default because a lineage that went nowhere costs its calls and no more -- the parent stays
+    in the archive, so a bad descendant is not a regression to be punished twice.
+
+    ATTRIBUTION IS BY LINEAGE, NOT BY WALL-CLOCK.  A global `F_k(A_{t+H}) - F_k(A_t)` would
+    credit every state alive at time `t` for whatever any unrelated branch happened to find.
+    Descendant attribution is narrower and is the claim actually being made.
+    """
+    if type(horizon) is not int or horizon < 1:
+        raise ValueError("continuation horizon must be a positive number of observations")
+    rows = list(observations)
+    order = {row["endpoint"]: index for index, row in enumerate(rows)}
+    children: dict[str, list[str]] = {}
+    for row in rows:
+        parent = row.get("parent")
+        if parent:
+            children.setdefault(parent, []).append(row["endpoint"])
+    score = {row["endpoint"]: float(row["score"]) for row in rows}
+
+    labels: dict[str, float] = {}
+    for row in rows:
+        endpoint = row["endpoint"]
+        start = order[endpoint]
+        limit = start + horizon
+        best = -math.inf
+        # Walk the lineage forward, keeping only descendants observed inside the horizon.
+        stack = list(children.get(endpoint, ()))
+        seen = set()
+        while stack:
+            child = stack.pop()
+            if child in seen:
+                continue
+            seen.add(child)
+            position = order.get(child)
+            if position is None or position > limit:
+                continue
+            best = max(best, score[child])
+            stack.extend(children.get(child, ()))
+        gain = 0.0 if best == -math.inf else best - score[endpoint]
+        labels[endpoint] = max(0.0, gain) if floor_at_zero else gain
+    return labels
+
+
+def acquire_with_continuation(
+    immediate: MacroValue,
+    continuation: MacroValue,
+    features,
+    *,
+    beta: float = 1.0,
+    discount: float = 1.0,
+    macro_lengths=None,
+) -> np.ndarray:
+    """`r_archive + gamma**len(o) * V_H + beta * sigma`, the semi-Markov acquisition.
+
+    ``macro_lengths`` discounts by the macro's PRIMITIVE DURATION rather than by a step count,
+    because COMPOSE's options are variable length and a 3-edit growth is not the same commitment
+    as a 14-edit ring replacement.  Omitting it reduces to an ordinary one-step discount.
+
+    Uncertainty is taken over the SUM of the two heads, so a candidate is explored when either
+    the immediate or the continuation estimate is poorly supported.
+    """
+    if not 0.0 < discount <= 1.0:
+        raise ValueError("discount must lie in (0, 1]")
+    x = np.atleast_2d(np.asarray(features, dtype=float))
+    if macro_lengths is None:
+        weight = np.full(x.shape[0], discount)
+    else:
+        lengths = np.asarray(macro_lengths, dtype=float)
+        if lengths.shape[0] != x.shape[0]:
+            raise ValueError("one macro length per candidate is required")
+        weight = discount ** np.maximum(1.0, lengths)
+    spread = np.sqrt(immediate.spread(x) ** 2 + continuation.spread(x) ** 2)
+    return immediate.predict(x) + weight * continuation.predict(x) + float(beta) * spread
