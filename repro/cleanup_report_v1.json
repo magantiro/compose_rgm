@@ -1,0 +1,60 @@
+{
+  "baseline": "061ead93",
+  "baseline_tag": "pre-cleanup-2026-09-23",
+  "blocking_gates": [
+    "external_artifacts_without_backup"
+  ],
+  "gates": {
+    "external_artifacts_without_backup": {
+      "blocks_merge": true,
+      "count": 3,
+      "introduced_by_this_pass": false,
+      "note": "EXPECTED NONZERO and deliberately not suppressed. Pre-existing: this pass measured the gap rather than creating it. Closing it requires copying each object to a second durable location and verifying the sha AFTER copying, which is a data-movement task with an owner decision about destination.",
+      "objects": [
+        "ringcore_a7546e2_best.pt",
+        "pmo_1k_ab_molecules",
+        "lineage_b_denovo_run"
+      ]
+    },
+    "lost_capability_groups": {
+      "count": 0,
+      "empty_groups": [],
+      "group_count": 7
+    },
+    "lost_entrypoints": {
+      "count": null,
+      "note": "not yet re-measured; run repo_entry_point_check --compare"
+    },
+    "lost_public_symbols": {
+      "ast_lost_count": 0,
+      "count": 0,
+      "lost": [],
+      "verdict": "CAPABILITY_PRESERVED"
+    },
+    "new_test_regressions": {
+      "count": null,
+      "note": "no post-change run yet; baseline only"
+    },
+    "newly_broken_pins": {
+      "absent_at_baseline": 10876,
+      "absent_now": 10876,
+      "count": 0,
+      "note": "All absent pins at baseline were traced: none is lost. 26 live on unfetched remote branches and the rest are uncommitted run outputs."
+    },
+    "pinned_historical_files_modified": {
+      "changed_files_total": 25,
+      "command": "git diff --name-only 061ead93 HEAD  (intersected with the pinned set)",
+      "count": 0,
+      "violations": []
+    }
+  },
+  "head": "114cc9db50d85fa26a35e6887979a4da52e504f2",
+  "rollback_command": "git checkout 061ead93",
+  "rollback_sha": "061ead9355810a021bfbe64c9090ff60edb5599e",
+  "schema_version": 1,
+  "unmeasured_gates": [
+    "lost_entrypoints",
+    "new_test_regressions"
+  ],
+  "verdict": "BLOCKED"
+}

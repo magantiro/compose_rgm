@@ -136,9 +136,18 @@ def check_external(root: pathlib.Path) -> dict[str, Any]:
     return {
         "count": len(gaps),
         "objects": gaps,
+        # Recorded, not used to soften the verdict. The rule is that any nonzero
+        # line blocks the merge, and a gate that downgrades itself because the
+        # gap predates the change is the failure mode this repository already
+        # paid for: a finding downgraded to a warning gets read as a caveat and
+        # the number gets quoted anyway.
+        "introduced_by_this_pass": False,
+        "blocks_merge": True,
         "note": (
-            "EXPECTED NONZERO and deliberately not suppressed. Closing it requires copying the "
-            "objects to a second durable location and verifying the sha AFTER copying."
+            "EXPECTED NONZERO and deliberately not suppressed. Pre-existing: this pass measured "
+            "the gap rather than creating it. Closing it requires copying each object to a second "
+            "durable location and verifying the sha AFTER copying, which is a data-movement task "
+            "with an owner decision about destination."
         ),
     }
 
