@@ -36,6 +36,7 @@ import numpy as np
 
 ROUTES = "diagnostics/pmo_macro_horizon_v1/celecoxib_routes_v1.json"
 OUT = "diagnostics/pmo_blind_traversal_v1/blind_traversal_v1.json"
+EDGES = "diagnostics/pmo_blind_traversal_v1/control_dataset_edges_v1.jsonl"
 RESUME_OUT = "diagnostics/pmo_blind_traversal_v1/blind_traversal_resumed_v1.json"
 
 
@@ -121,6 +122,7 @@ def main():
             hashlib.blake2b(start["name"].encode(), digest_size=4).digest(), "big"
         )
         rng = np.random.default_rng(20260923 + seed)
+        edge_log = []
         frontier = seeded or [
             {"smiles": start["smiles"], "score": float(score(start["smiles"])), "depth": 0}
         ]
@@ -149,18 +151,36 @@ def main():
                         continue
                     value = float(score(endpoint))
                     evaluations += 1
-                    children.append(
-                        {
-                            "smiles": endpoint,
-                            "score": value,
-                            "depth": parent["depth"] + 1,
-                            "parent": parent["smiles"],
-                            "parent_score": parent["score"],
-                            "delta": value - parent["score"],
-                            "families": [m["family"] for m in meta.get("modules", [])],
-                            "primitives": len(program.marks),
-                        }
-                    )
+                    record = {
+                        "start": start["name"],
+                        "generation": generation,
+                        "endpoint": endpoint,
+                        "score": value,
+                        "depth": parent["depth"] + 1,
+                        "parent": parent["smiles"],
+                        "parent_score": parent["score"],
+                        "delta": value - parent["score"],
+                        # Stage-normalised: the FRACTION of remaining headroom closed. A +0.10
+                        # from 0.10 and a +0.10 from 0.80 are not the same control event.
+                        "headroom_fraction_closed": (value - parent["score"])
+                        / max(1e-9, 1.0 - parent["score"]),
+                        # Siblings share a parent AND a generation, so a contrast between them
+                        # holds parent score and search stage fixed by construction.
+                        "sibling_group": f"{start['name']}|g{generation}|{parent['smiles']}",
+                        "families": [m["family"] for m in meta.get("modules", [])],
+                        "module_count": len(meta.get("modules", [])),
+                        "primitives": len(program.marks),
+                        "rebuild_options": [
+                            m["parameters"].get("rebuild_option")
+                            for m in meta.get("modules", [])
+                            if isinstance(m.get("parameters"), dict)
+                            and m["parameters"].get("rebuild_option")
+                        ],
+                        "capacity_aware": meta.get("capacity_aware"),
+                        "requested_modules": meta.get("requested_module_count"),
+                    }
+                    edge_log.append(record)
+                    children.append(record)
                     families.extend(child["families"] for child in children[-1:])
                     primitives.append(len(program.marks))
 
@@ -198,6 +218,9 @@ def main():
                 flush=True,
             )
 
+        with open(EDGES, "a") as handle:
+            for record in edge_log:
+                handle.write(json.dumps(record) + "\n")
         report["starts"].append(
             {
                 "name": start["name"],
@@ -205,6 +228,7 @@ def main():
                 "start_score": float(score(start["smiles"])),
                 "best_score": best_overall,
                 "objective_evaluations": evaluations,
+                "edges_logged": len(edge_log),
                 "seconds": round(time.time() - started, 1),
                 "history": history,
                 "final_frontier": [
