@@ -58,6 +58,7 @@ from compose_v4.control.pmo_realization import (
     PRODUCTION_SPECIFICATION,
     realize_plan_binding,
 )
+from compose_v4.control.structural_diversity_floor import StructuralDiversityFloor
 from compose_v4.rewrite.trace_shard import decode_state
 
 SCHEMA = "pmo_population_controller_v1"
@@ -186,10 +187,21 @@ def _niche_order(candidates: list[dict[str, Any]], *, seed: int) -> list[int]:
 class PmoPopulationController(DynamicV21ProgramOptimizer):
     """Live PMO archive with local, global and complete-jump proposal modes."""
 
-    def __init__(self, *args, jump_checkpoint: dict[str, Any], **kwargs):
+    def __init__(
+        self,
+        *args,
+        jump_checkpoint: dict[str, Any],
+        diversity_floor: StructuralDiversityFloor | None = None,
+        **kwargs,
+    ):
         if jump_checkpoint.get("schema_version") != CHECKPOINT_SCHEMA:
             raise ValueError("PMO population controller needs a sanitized joint checkpoint")
         super().__init__(*args, **kwargs)
+        # ABSENT is the OFF state and OFF is the shipped controller verbatim: every
+        # floor-aware branch below is guarded on `is None`, so a run made before this
+        # keyword existed and a run made without it draw the same parents, build the
+        # same schedules and emit the same batch payload.
+        self.diversity_floor = diversity_floor
         self.jump_checkpoint = json.loads(json.dumps(jump_checkpoint))
         self.jump_checkpoint_id = identity(self.jump_checkpoint)
         self.jump_rng = np.random.default_rng(np.random.SeedSequence([self.config.seed, 311, 2]))
@@ -497,6 +509,18 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         remaining = [row for row in candidates if row["candidate_id"] not in chosen_ids]
         value, state = self._fit_value()
         room = limit - len(chosen)
+        floor_detail: dict[str, Any] = {"mode": "inactive"}
+        if self.diversity_floor is not None and room > 0 and remaining:
+            reserved_rows, floor_detail = self._diversity_floor_reservation(
+                remaining, value, room
+            )
+            chosen.extend(reserved_rows)
+            allocation_roles.update(
+                {row["candidate_id"]: "archive_cluster_floor" for row in reserved_rows}
+            )
+            reserved_ids = {row["candidate_id"] for row in reserved_rows}
+            remaining = [row for row in remaining if row["candidate_id"] not in reserved_ids]
+            room = limit - len(chosen)
         credit_detail: dict[str, Any] = {"mode": "floor_only"}
         if room > 0 and remaining:
             prepared = [
@@ -564,6 +588,13 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             "program_value_observations": value.n,
             "credit_allocation": credit_detail,
             "credit_summary": self.credit_report(),
+            # OFF adds no key at all, so a batch payload produced without the floor is
+            # byte-identical to one produced before the field existed.
+            **(
+                {"diversity_floor": floor_detail}
+                if self.diversity_floor is not None
+                else {}
+            ),
         }
 
     def _credit_allocate(self, remaining, value, room):
@@ -647,16 +678,145 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             "credit_key_failures": self.population_state.get("credit_key_failures", 0),
         }
 
+    def _parent_schedules(self) -> dict[str, list]:
+        """One parent per proposal attempt, per lane.
+
+        OFF -- ``diversity_floor is None`` -- is the shipped expression verbatim:
+        ``attempts_per_batch`` consecutive draws from the unmodified parent law.
+
+        ON reserves a bounded, stride-interleaved share of each lane's schedule
+        positions for structurally distinct archive clusters.  It reserves WHO is
+        asked, never WHAT is admitted: a reserved position still draws through
+        ``selection()``, merely conditioned on one cluster, and every unreserved
+        position draws from the unmodified distribution.  The rotation advances per
+        lane and per batch so the same cluster does not permanently own the earliest
+        position -- which matters because a lane stops at ``CHANNEL_CANDIDATE_LIMIT``
+        after roughly a fifth of its schedule, and a position past that point is
+        never reached.
+        """
+
+        slots = self.config.attempts_per_batch
+        if self.diversity_floor is None:
+            return {channel: [self._parent() for _ in range(slots)] for channel in CHANNELS}
+        partition = self.diversity_floor.partition(
+            [entry["endpoint"] for entry in self.entries.values()]
+        )
+        schedules: dict[str, list] = {}
+        for index, channel in enumerate(CHANNELS):
+            plan = self.diversity_floor.attempt_plan(
+                clusters=len(partition),
+                slots=slots,
+                rotation=self.batches * len(CHANNELS) + index,
+            )
+            schedules[channel] = [
+                self._parent() if cluster is None else self._floor_parent(partition[cluster])
+                for cluster in plan
+            ]
+        self._floor_partition = partition
+        return schedules
+
+    def _floor_parent(self, cluster) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Draw a parent from ``cluster`` under the controller's own selection law.
+
+        This is a RESTRICTION of the existing distribution, not a replacement for
+        it: the same ``selection()`` weights decide which member of the cluster is
+        drawn, renormalised over the cluster.  A cluster whose members have all left
+        the archive falls back to the unrestricted draw rather than failing, so the
+        floor can never remove a proposal opportunity.
+        """
+
+        members = set(cluster)
+        keys, weights = self.selection()
+        mass = weights * np.asarray(
+            [1.0 if self.entries[key]["endpoint"] in members else 0.0 for key in keys]
+        )
+        total = float(mass.sum())
+        if total <= 0.0:
+            return self._parent()
+        mass = mass / total
+        index = int(self.rng.choice(len(keys), p=mass))
+        key = keys[index]
+        return self.entries[key], {
+            "entry_id": key,
+            "parent_probability": float(mass[index]),
+            "parent_measured_score": float(
+                np.mean(
+                    [
+                        row["score"]
+                        for row in self.observations.values()
+                        if row["endpoint"] == self.entries[key]["endpoint"]
+                    ]
+                )
+            ),
+        }
+
+    def _diversity_floor_reservation(self, remaining, value, room):
+        """Reserve selected-batch slots across distinct archive clusters.
+
+        A candidate is attributed to its PARENT's cluster, using the same partition
+        the schedule hop used, because the quantity being protected is coverage of
+        the ARCHIVE's structural variety.  Re-clustering the pool would measure the
+        variety generation already produced rather than the variety it missed.
+
+        The floor decides WHICH CLUSTER receives a slot; the fitted program value
+        decides which candidate inside it.  Nothing is removed -- unreserved
+        candidates go on to the unchanged credit or acquisition path.
+        """
+
+        partition = getattr(self, "_floor_partition", None) or self.diversity_floor.partition(
+            [entry["endpoint"] for entry in self.entries.values()]
+        )
+        cluster_of = self.diversity_floor.cluster_of_endpoint(partition)
+        predicted: dict[str, float] = {}
+        if value.weights is not None:
+            features = np.asarray([row["fiber_features"] for row in remaining], dtype=float)
+            predicted = dict(
+                zip(
+                    (row["candidate_id"] for row in remaining),
+                    map(float, value.predict(features)),
+                    strict=True,
+                )
+            )
+        ranked: dict[int, list[int]] = defaultdict(list)
+        for position, row in enumerate(remaining):
+            parent = self.entries.get(row["provenance"].get("entry_id"))
+            cluster = cluster_of.get(parent["endpoint"]) if parent else None
+            if cluster is None:
+                continue
+            ranked[cluster].append(position)
+        for positions in ranked.values():
+            positions.sort(
+                key=lambda position: (
+                    -predicted.get(remaining[position]["candidate_id"], 0.0),
+                    remaining[position]["candidate_id"],
+                )
+            )
+        slots = min(self.diversity_floor.pool_slots, room)
+        picks = self.diversity_floor.pool_plan(
+            ranked_by_cluster=ranked,
+            clusters=len(partition),
+            slots=slots,
+            rotation=self.batches,
+        )
+        return [remaining[position] for position in picks], {
+            **self.diversity_floor.payload(),
+            "archive_clusters": len(partition),
+            "clusters_represented_in_pool": len(ranked),
+            "slots_offered": slots,
+            "slots_reserved": len(picks),
+            "reserved_clusters": sorted(
+                {int(cluster_of[self.entries[remaining[p]["provenance"]["entry_id"]]["endpoint"]])
+                 for p in picks}
+            ),
+        }
+
     def propose_batch(self, eligibility):
         if self.pending is not None:
             raise ValueError("resolve the pending PMO population batch first")
         archive_seen = {
             row["endpoint"] for row in self.observations.values()
         } | self.failed_endpoints
-        schedules = {
-            channel: [self._parent() for _ in range(self.config.attempts_per_batch)]
-            for channel in CHANNELS
-        }
+        schedules = self._parent_schedules()
         attempts, pools, seconds = [], {}, {}
         for channel in (SHALLOW_CHANNEL, STRUCTURED_CHANNEL):
             lane_attempts, rows, elapsed = self._generate_channel_pool(
@@ -830,14 +990,22 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         return json.loads(json.dumps({**body, "snapshot_id": identity(body)}))
 
     @classmethod
-    def restore(cls, snapshot, *, hierarchy=None, jump_checkpoint=None):
+    def restore(cls, snapshot, *, hierarchy=None, jump_checkpoint=None, diversity_floor=None):
+        # `diversity_floor` is accepted HERE as well as in `__init__` on purpose. An
+        # arm parameter that only the constructor knows makes the fresh path work and
+        # the RESUME path raise -- or, worse, silently rebuild a floored arm as the
+        # control. `tests/test_pmo_diversity_floor_wiring.py` asserts the two
+        # signatures carry the same arm parameters so a future one cannot repeat it.
         if jump_checkpoint is None:
             raise ValueError("PMO population restore requires its sanitized jump checkpoint")
         result = ProgramOptimizer.restore.__func__(
             cls,
             snapshot,
             hierarchy=hierarchy,
-            constructor_kwargs={"jump_checkpoint": jump_checkpoint},
+            constructor_kwargs={
+                "jump_checkpoint": jump_checkpoint,
+                "diversity_floor": diversity_floor,
+            },
         )
         state = snapshot.get("pmo_population")
         if (
