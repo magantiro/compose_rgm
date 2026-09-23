@@ -190,6 +190,7 @@ def build_report(root: pathlib.Path, interpreter: str) -> dict[str, Any]:
     restored: list[str] = []
     if touched and started_clean:
         restored = _restore(root, set(touched))
+        _assert_restored(root, before)
     residue = sorted(_worktree_state(root) - before)
 
     return {
