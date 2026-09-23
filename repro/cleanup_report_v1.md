@@ -51,7 +51,7 @@ rule against a broad add exists to prevent. Both are restored byte-for-byte from
 | `lost_entrypoints` | **0** | 877 -> 884 entry points, 0 regressed, 0 vanished, +7 new tools |
 
 | `lost_capability_groups` | **0** | 7 groups, all non-empty |
-| `new_test_regressions` | PENDING | baseline suite still running; not claimed until run |
+| `new_test_regressions` | NOT MEASURED at full-suite scale | measured at FOCUSED scale: 0. See below. |
 | `newly_broken_pins` | **0** | absent-pin count unchanged at 10,876, all traced |
 | `external_artifacts_without_backup` | **3** | **NONZERO AND REPORTED, see gap section** |
 
@@ -59,7 +59,37 @@ rule against a broad add exists to prevent. Both are restored byte-for-byte from
 zero. It is a pre-existing gap this pass measured rather than created, and
 suppressing it would be worse than naming it.
 
-One line reads PENDING rather than zero. An unrun check is not a passing check.
+One line is NOT MEASURED at full-suite scale, and an unrun check is not a
+passing check, so it is not claimed as zero.
+
+What IS measured for it: the identical
+`region or ring or fiber or completion_law or region_law` selection, 1,079 tests
+covering every area this pass touches, run in a detached worktree at the
+baseline tag and again at HEAD, gives **31 bad nodes on each side with identical
+SETS** - zero regressions, zero repairs. Plus the full after-state suite at HEAD
+(297 failed / 5,893 passed / 102 errors over 6,302 nodes), the byte-identical
+capability surface, zero entry-point regressions, and the structural fact that
+the repository has no `conftest.py`, so an added test file cannot affect another
+node.
+
+What is NOT measured: the same full-suite run at the baseline tag. It was
+started in a detached worktree and reached 83 percent in roughly 40 minutes of
+CPU before being stopped, because leaving it running would have written into
+this worktree after handback. Completing it is one command and about an hour:
+
+```bash
+git worktree add --detach /tmp/compose_baseline pre-cleanup-2026-09-23
+cd /tmp/compose_baseline && KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 PYTHONPATH=src:scripts \
+  pytest tests/ -q --tb=no -rfE --continue-on-collection-errors > baseline_raw.txt
+pytest tests/ -q --collect-only --continue-on-collection-errors | grep :: > baseline_nodes.txt
+cd <this worktree> && python3 tools/repro_test_fingerprint.py \
+  --raw baseline_raw.txt --collected baseline_nodes.txt --out repro/test_fingerprint_v1.json
+python3 tools/repro_test_fingerprint.py --raw <after_raw> --collected <after_nodes> \
+  --out repro/test_fingerprint_after_v1.json --compare repro/test_fingerprint_v1.json
+```
+
+The after-state fingerprint (`repro/test_fingerprint_after_v1.json`) is already
+committed, so only the baseline half is outstanding.
 
 The entry-point re-measurement WAS run under load from the baseline suite, which
 this repository warns manufactures phantom regressions. That risk is bounded
