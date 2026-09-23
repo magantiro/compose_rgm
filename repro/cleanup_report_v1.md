@@ -17,17 +17,25 @@ falsifiable.
 
 ## What changed
 
-Every change is additive except one README edit. Nothing under `src/`,
-`scripts/`, `recipes/`, `archive/`, `third_party/` or any existing artifact was
-touched.
+33 files. Every change is additive except one README edit. Nothing under `src/`,
+`scripts/`, `recipes/`, `archive/` or `third_party/` was touched.
 
 | area | files | what |
 |---|---|---|
-| `tools/` | 8 new | the measurement and gate instruments |
-| `diagnostics/repo_hygiene/` | 6 new | pinned set, pin resolution, capability and entry-point baselines, the audit |
-| `repro/` | 7 new | pinned paths, external artifacts, environments, capability manifest, reproducibility graph, migration contract, this report |
-| `tests/` | 1 new | T4/PMO reachability smoke, mutation-proven, green under two production kernels |
+| `tools/` | 9 new | the measurement and gate instruments |
+| `diagnostics/repo_hygiene/` | 11 new | pinned set, pin resolution, capability and entry-point baselines and re-measures, the audit, the focused attribution |
+| `repro/` | 9 new | pinned paths, external artifacts, environments, capability manifest, reproducibility graph, fingerprint, migration contract, this report |
+| `tests/` | 2 new | T4/PMO reachability smoke and instrument guards, mutation-proven |
 | `README.md` | 1 edit | states the content-addressing constraint a newcomer hits first |
+
+**One correction, because an earlier revision of this table was wrong.** Two
+committed artifacts WERE damaged during the pass, by the import side effect in
+finding 5: `docs/VALID128_K8_RESULT.json` and `diagnostics/ring_type_smoke.json`
+(564 lines reduced to 1). The second was additionally swept into an unrelated
+commit by a broad `git add -u`, which is precisely what this repository's own
+rule against a broad add exists to prevent. Both are restored byte-for-byte from
+`061ead93`, and `git diff --name-status 061ead93 HEAD | grep -v '^A'` now returns
+`README.md` alone. The probe carries the guard it should have had from the start.
 
 ## Merge gates
 
