@@ -50,6 +50,7 @@ import numpy as np
 # or merged with, the scored run. A smoke and a result must not share a ledger.
 OUT = os.environ.get("CANARY_OUT", "diagnostics/pmo_reward_adaptive_canary_v1")
 BEAM = "diagnostics/pmo_matched_beam_v1/matched_beam_v1.json"
+BEAM_SOURCE = "scripts/pmo_matched_beam_control.py"
 POOL_TARGET = 128
 #: Probability the region-replacement macro is offered at each module position.
 REPLACEMENT_OPTION_RATE = 0.5
@@ -124,6 +125,10 @@ def main():
         # gives it parity with the thirteen-family lottery rather than replacing it. This is
         # the arm's DECLARED configuration, not a tuned value.
         k.setdefault("replacement_option_rate", REPLACEMENT_OPTION_RATE)
+        # The beam passes this too. Without it the controller's thirteen-family lottery
+        # draws regions under a different law than the beam's, which is a proposal-portfolio
+        # difference that would be charged to FiberControl at comparison time.
+        k.setdefault("region_law", law)
         portfolio["offers"] += 1
         return _production_synthesis(*a, **k)
 
@@ -148,6 +153,7 @@ def main():
         "rounds": [], "pool_sizes": [], "policy_shifts": [], "option_policy": [],
         "unscored_parents": 0, "out_of_range_predictions": 0, "duplicate_endpoints": 0,
         "unallocated_batches": 0, "unattributed_outcomes": 0, "root_candidates": 0,
+        "region_replace_with_rebuild": 0, "region_replace_bare": 0,
     }
 
     def rows_of(controller, candidates):
@@ -316,6 +322,12 @@ def main():
             if not candidates:
                 return super()._allocate(candidates)
             rows = rows_of(self, candidates)
+            for row in rows:
+                labels = row["families"]
+                if any(f.startswith("region_replace:") for f in labels):
+                    telemetry["region_replace_with_rebuild"] += 1
+                elif "region_replace" in labels:
+                    telemetry["region_replace_bare"] += 1
             room = min(queries, len(rows))
             before = self.brain.record_policy(rows, f"before_{len(telemetry['rounds'])}")
             scores = [float(o["score"]) for o in self.observations.values()]
@@ -537,6 +549,11 @@ def main():
         ),
         "unscored_parents_excluded": telemetry["unscored_parents"],
         "root_candidates_seen": telemetry["root_candidates"],
+        # After initialization a large root count means provenance is being lost rather
+        # than roots being generated, so the FRACTION is what to read, not the count.
+        "root_candidate_fraction": (
+            telemetry["root_candidates"] / max(sum(telemetry["pool_sizes"]), 1)
+        ),
         "unallocated_batches": telemetry["unallocated_batches"],
         "unattributed_outcomes": telemetry["unattributed_outcomes"],
         "rounds_fully_attributed": sum(
@@ -561,14 +578,60 @@ def main():
         "compound_region_labels": sorted(
             f for f in families if f.startswith("region_replace:")
         )[:12],
-        "n_compound_region_labels": sum(
-            1 for f in families if f.startswith("region_replace:")
-        ),
+        # Counted from the candidate stream at allocation time. The family AUDIT is a
+        # different aggregation and reported zero compounds while the candidates carried
+        # them, so the witness has to come from the same place the claim does.
+        "n_compound_region_labels": telemetry["region_replace_with_rebuild"],
+        "region_replace_bare": telemetry["region_replace_bare"],
         "option_policy_rounds": len(telemetry["option_policy"]),
         "synthesis_calls_wrapped": portfolio["offers"],
         "replacement_option_rate": REPLACEMENT_OPTION_RATE,
     }
-    if not report["portfolio"]["n_compound_region_labels"]:
+    # The comparison contract, recorded so nobody has to reconstruct it later. Read from
+    # the beam's own source: scripts/pmo_matched_beam_control.py passes
+    # replacement_option_rate=0.5 and region_law=ScaleBalancedRegionLaw() to the same
+    # synthesis function. Base proposal opportunity is therefore IDENTICAL; the arms differ
+    # only in that Q_pre re-weights the rebuild-option marginal while the beam holds the
+    # declared default weights fixed.
+    # Did reward actually MOVE the option policy, or merely run? A policy that is recorded
+    # every round and never departs from uniform would satisfy "option_policy_rounds > 0"
+    # while controlling nothing.
+    option_policy = telemetry["option_policy"]
+    uniform = 1.0 / max(len(REPLACEMENT_OPTIONS), 1)
+    report["option_policy_moved"] = {
+        "rounds": len(option_policy),
+        "max_deviation_from_uniform": (
+            max(
+                0.5 * sum(abs(w - uniform) for w in snap["weights"].values())
+                for snap in option_policy
+            )
+            if option_policy else 0.0
+        ),
+        "first_to_last_total_variation": (
+            0.5
+            * sum(
+                abs(
+                    option_policy[-1]["weights"].get(o, 0.0)
+                    - option_policy[0]["weights"].get(o, 0.0)
+                )
+                for o in REPLACEMENT_OPTIONS
+            )
+            if len(option_policy) > 1 else 0.0
+        ),
+    }
+    report["proposal_portfolio_contract"] = {
+        "controller_replacement_option_rate": REPLACEMENT_OPTION_RATE,
+        "beam_replacement_option_rate": 0.5,
+        "controller_region_law": "ScaleBalancedRegionLaw",
+        "beam_region_law": "ScaleBalancedRegionLaw",
+        "rates_match": REPLACEMENT_OPTION_RATE == 0.5,
+        "difference": "rebuild-option weights are adaptive in the controller, fixed in the beam",
+        "beam_source": BEAM_SOURCE,
+    }
+    if not (
+        report["portfolio"]["n_compound_region_labels"]
+        or report["portfolio"]["region_replace_bare"]
+    ):
         # RAISE, not warn. The whole point of this arm is that it carries the same rich
         # portfolio as the beam; a run that quietly produced none of it would be reported
         # as a controller result when it is a wiring result.
@@ -583,6 +646,15 @@ def main():
         )
     with open(folder / "canary_v1.json", "w") as handle:
         json.dump(report, handle, indent=1)
+    moved = report["option_policy_moved"]
+    print(
+        f"option policy: rounds {moved['rounds']} "
+        f"dev-from-uniform {moved['max_deviation_from_uniform']:.4f} "
+        f"first->last TV {moved['first_to_last_total_variation']:.4f} | "
+        f"region_replace compound {report['portfolio']['n_compound_region_labels']} "
+        f"bare {report['portfolio']['region_replace_bare']}",
+        flush=True,
+    )
     rounds = telemetry["rounds"]
     if rounds:
         print(

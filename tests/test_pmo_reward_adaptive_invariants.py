@@ -189,3 +189,44 @@ def test_passing_the_option_without_a_rate_is_inert():
 
     assert realized(0.0) == 0
     assert realized(0.5) > 0
+
+
+def test_the_ledger_sees_exactly_what_the_extractor_sees():
+    """The per-family audit is how we answer, after a scored run, which macro families
+    earned reward and how their proposal mass moved.
+
+    If its family extraction can drift from the authoritative one, that question becomes
+    unanswerable for precisely the macro we care about -- and it fails silently, because a
+    missing family simply does not appear in the report. Pinned on the SAME objects both
+    sides consume.
+    """
+    from compose_v4.control.pmo_contextual_macro import macro_families
+    from compose_v4.control.pmo_reward_adaptive import FamilyLedger
+
+    candidates = [
+        _candidate_for_ledger(
+            modules=[{"family": "region_replace",
+                      "parameters": {"rebuild_option": "fuse_ring"}}],
+        ),
+        _candidate_for_ledger(modules=[{"family": "segment_grow", "parameters": {}}]),
+        _candidate_for_ledger(labels=["current:cycle_close"]),
+        _candidate_for_ledger(labels=["0:1:dependency_branch:1"]),
+    ]
+    rows = [{"families": list(macro_families(c))} for c in candidates]
+    ledger = FamilyLedger()
+    ledger.propose(rows)
+    reported = {k: v["n_proposed"] for k, v in ledger.report()["families"].items()}
+    expected: dict = {}
+    for row in rows:
+        for family in row["families"]:
+            expected[family] = expected.get(family, 0) + 1
+    assert reported == expected
+    # and the compound label specifically must survive into the audit
+    assert reported.get("region_replace:fuse_ring") == 1
+
+
+def _candidate_for_ledger(modules=None, labels=None):
+    return {
+        "provenance": {"metadata": {"modules": modules or []}},
+        "program": {"blocks": [{"label": x} for x in (labels or [])]},
+    }
