@@ -131,8 +131,12 @@ def _restore(root: pathlib.Path, entries: set[str]) -> list[str]:
     """Undo what the scan wrote. Only ever called when the tree started clean."""
     restored: list[str] = []
     for entry in sorted(entries):
-        _status, _, path = entry.partition(" ")
-        path = path.strip().strip('"')
+        # Porcelain v1 is a fixed two-character status followed by a space, so the
+        # path begins at index 3. Splitting on the first space instead yields
+        # "M docs/..." for an unstaged modification, because such a line STARTS
+        # with a space; the resulting git checkout then fails silently and the
+        # file is reported restored while still being damaged.
+        path = entry[3:].strip().strip('"')
         if not path:
             continue
         if entry.startswith("??"):
@@ -149,6 +153,17 @@ def _restore(root: pathlib.Path, entries: set[str]) -> list[str]:
             )
             restored.append(f"reverted {path}")
     return restored
+
+
+def _assert_restored(root: pathlib.Path, before: set[str]) -> None:
+    """A restore that reports success while leaving damage is the worst outcome."""
+    residue = _worktree_state(root) - before
+    if residue:
+        raise RuntimeError(
+            "entry-point scan could not restore what it touched: "
+            + "; ".join(sorted(residue))
+            + ". Restore by hand before trusting any result from this run."
+        )
 
 
 def build_report(root: pathlib.Path, interpreter: str) -> dict[str, Any]:
