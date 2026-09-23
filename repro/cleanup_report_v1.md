@@ -150,6 +150,14 @@ scientific record, including the explicit caveat that the VJTNN number "is NOT
 state of the art and must never be presented as such". Nothing in the probe
 noticed; it was found by reading `git status`.
 
+**Attribution, measured, because "the test suite mutates committed artifacts"
+would be a false and alarming claim.** The detached baseline worktree has run
+pytest and nothing else; through 54 percent of the suite its
+`git status --porcelain` is completely empty. So the ordinary test path does not
+trigger these writes: the entry-point probe did, by importing scripts that the
+suite never imports. The repository condition that made it possible is real and
+pre-existing; the damage was caused by my instrument.
+
 Restored and verified against the baseline blob (`4a2b4d4c...`). The probe now
 brackets itself with `git status --porcelain`, reports every path it touched,
 restores them when the tree started clean, refuses to touch anything when it did
