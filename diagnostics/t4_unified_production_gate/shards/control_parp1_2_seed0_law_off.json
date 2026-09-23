@@ -1,0 +1,143 @@
+{
+ "alternate_kernel_consulted": false,
+ "cell": "parp1_2",
+ "contract": "configs/t4_unified_controller_parp1_d06_v1.json",
+ "contract_payload_sha256": "bbe01591bd80d7178dfad29d12e92295547b2572354283ad0b5c55558af0d072",
+ "controller_seed": 2026091802,
+ "delta_from_contract": 0.6,
+ "docking_calls": 0,
+ "docking_interlock": {
+  "docking_binaries_present": [],
+  "docking_calls": 0,
+  "forbidden_modules_checked": [
+   "compose_v4.experiments.t4_docking_adapter",
+   "compose_v4.experiments.t4_partial_docking"
+  ],
+  "forbidden_modules_resident": [],
+  "oracle_calls": 0
+ },
+ "elapsed_seconds": 398.13,
+ "entrypoint": "production",
+ "execution": {
+  "app": "compose-t4-unified-production-gate",
+  "mode": "modal_fanout"
+ },
+ "expansion_handler_calls_observed": 0,
+ "ladder_units": 0,
+ "ladder_unreachable": true,
+ "oracle_calls": 0,
+ "protein": "parp1",
+ "region_law_arm": "law_off",
+ "role": "control",
+ "round_one": {
+  "agrees_with_committed_audit": true,
+  "audit_delta_mislabelled": false,
+  "decision": {
+   "featured_candidates": 83,
+   "fresh": 83,
+   "merged_pool": 83,
+   "parents_round_one": [
+    "O/N=C/c1cn3CCNC(=O)c2cccc1c23"
+   ],
+   "pool_census": {
+    "anchored_replacement": 66,
+    "multi_expert": 0,
+    "route_complete_region": 0,
+    "shallow": 17,
+    "unique_endpoints": 83
+   },
+   "reproduces_candidate_exhaustion": false,
+   "selected": 8,
+   "selected_census": {
+    "anchored_replacement": 6,
+    "multi_expert": 0,
+    "route_complete_region": 0,
+    "shallow": 2,
+    "unique_endpoints": 8
+   }
+  },
+  "expected_selected": 8,
+  "lanes": {
+   "anchored_replacement": {
+    "elapsed_seconds": 174.26,
+    "eligible_records_returned": 66,
+    "expert": "anchored_replacement",
+    "parent": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+    "proposal_seed": 2027091906,
+    "region_law_arm": "law_off",
+    "region_law_telemetry": {},
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "raw_draws": 512
+    },
+    "unit_seconds": 174.27
+   },
+   "route_complete_region": {
+    "elapsed_seconds": 3.76,
+    "eligible_records_returned": 0,
+    "expert": "route_complete_region",
+    "parent": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+    "proposal_seed": 2027092007,
+    "region_law_arm": "law_off",
+    "region_law_telemetry": {},
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "available_large_rewrite_proposals": 32,
+     "available_local_rewrite_proposals": 4,
+     "available_medium_rewrite_proposals": 62,
+     "binding_truncations": 2,
+     "binding_visits": 768,
+     "candidate_shortfall": 0,
+     "complete_programs_committed": 32,
+     "composition_aliases": 206,
+     "composition_attempts": 528,
+     "composition_rejections": 54,
+     "composition_repeated_constituent": 156,
+     "exact_realization_precision_denominator": 32,
+     "exact_realization_precision_numerator": 32,
+     "materialization_attempts": 26,
+     "materialization_rejections": 14,
+     "realization_limit": 32,
+     "realization_status_counts": {
+      "committed": 32
+     },
+     "realized_primitive_band_counts": {
+      "large": 0,
+      "medium": 18,
+      "small": 14
+     },
+     "scale_balanced": 0,
+     "selected_large_rewrite_proposals": 0,
+     "selected_local_rewrite_proposals": 4,
+     "selected_medium_rewrite_proposals": 60,
+     "single_aliases": 4,
+     "templates_with_bindings": 9,
+     "unique_ranked_endpoints": 64,
+     "valid_depth_2": 26,
+     "valid_depth_3": 45,
+     "valid_depth_4": 41,
+     "valid_unique_single_goals": 8
+    },
+    "unit_seconds": 3.82
+   },
+   "shallow": {
+    "elapsed_seconds": 380.53,
+    "eligible_records_returned": 17,
+    "expert": "shallow",
+    "parent": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+    "proposal_seed": 2027091805,
+    "region_law_arm": "law_off",
+    "region_law_telemetry": {},
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "raw_draws": 480
+    },
+    "unit_seconds": 380.53
+   }
+  }
+ },
+ "rung_zero_units": 0,
+ "schema_version": "t4_unified_production_gate_v1",
+ "searched": true,
+ "seed_index": 0
+}

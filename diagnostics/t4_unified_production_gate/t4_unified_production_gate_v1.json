@@ -1,0 +1,254 @@
+{
+ "payload": {
+  "cells": {
+   "5ht1b_2": {
+    "status": "NOT_RUN"
+   },
+   "braf_0": {
+    "status": "NOT_RUN"
+   },
+   "braf_1": {
+    "status": "NOT_RUN"
+   },
+   "fa7_0": {
+    "status": "NOT_RUN"
+   },
+   "fa7_2": {
+    "status": "NOT_RUN"
+   }
+  },
+  "consumption": {
+   "ladder": {
+    "policy": "t4_frozen_escalation_v1",
+    "policy_sha256": "c5cf6ab3e3a516b6aca3c9cc410c17d2f712bf60ccac224363ba57343c256a62"
+   },
+   "router": {
+    "policy": "t4_unified_routing_v1",
+    "policy_sha256": "b69cadcba1824ffcf1a45f8f7f894bec284bf09deea406a4e1da271d52bd609a"
+   },
+   "state_routing_proven_consumed_on_every_trigger_event": null,
+   "terminal_guard_passed_on_every_trigger_event": null
+  },
+  "controls": {
+   "5ht1b_0": {
+    "declared": {
+     "status": "NOT_RUN"
+    },
+    "law_off": {
+     "status": "NOT_RUN"
+    }
+   },
+   "5ht1b_1": {
+    "declared": {
+     "status": "NOT_RUN"
+    },
+    "law_off": {
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 258.99,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
+    }
+   },
+   "braf_2": {
+    "declared": {
+     "status": "NOT_RUN"
+    },
+    "law_off": {
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 1042.31,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 3,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 3,
+     "status": "RUN"
+    }
+   },
+   "fa7_1": {
+    "declared": {
+     "status": "NOT_RUN"
+    },
+    "law_off": {
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 723.77,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 7,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 7,
+     "status": "RUN"
+    }
+   },
+   "jak2_0": {
+    "declared": {
+     "status": "NOT_RUN"
+    },
+    "law_off": {
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": true,
+     "elapsed_seconds": 659.04,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
+    }
+   },
+   "jak2_1": {
+    "declared": {
+     "status": "NOT_RUN"
+    },
+    "law_off": {
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": true,
+     "elapsed_seconds": 620.89,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
+    }
+   },
+   "jak2_2": {
+    "declared": {
+     "status": "NOT_RUN"
+    },
+    "law_off": {
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": true,
+     "elapsed_seconds": 771.79,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
+    }
+   },
+   "parp1_0": {
+    "declared": {
+     "status": "NOT_RUN"
+    },
+    "law_off": {
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 426.38,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
+    }
+   },
+   "parp1_1": {
+    "declared": {
+     "status": "NOT_RUN"
+    },
+    "law_off": {
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 255.0,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
+    }
+   },
+   "parp1_2": {
+    "declared": {
+     "status": "NOT_RUN"
+    },
+    "law_off": {
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 398.13,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
+    }
+   }
+  },
+  "coverage": {
+   "control_rows_expected": 20,
+   "control_rows_present": 9,
+   "trigger_rows_expected": 15,
+   "trigger_rows_present": 0
+  },
+  "docking_calls": 0,
+  "entrypoint": "production",
+  "headline": {
+   "alternate_kernel_never_consulted_on_a_control": true,
+   "any_wall_clock_stop": false,
+   "controls_declared_all_searched": null,
+   "controls_law_off_reproduce_committed_audit": true,
+   "controls_run_declared": 0,
+   "controls_run_law_off": 9,
+   "distinct_eligible_endpoints_total": 0,
+   "docking_calls": 0,
+   "ladder_unreachable_on_every_control": true,
+   "med_chem_plausible_total": 0,
+   "oracle_calls": 0,
+   "routing_agrees_with_every_historical_arm": null,
+   "trigger_cells_passing": 0,
+   "trigger_cells_run": 0
+  },
+  "oracle_calls": 0,
+  "question": "does the unified controller, run through the functions the campaign app itself calls, reproduce the support the standalone gate measured?",
+  "schema_version": "t4_unified_production_gate_v1",
+  "shards": [
+   "5ht1b_1_seed0_law_off",
+   "braf_2_seed0_law_off",
+   "fa7_1_seed0_law_off",
+   "jak2_0_seed0_law_off",
+   "jak2_1_seed0_law_off",
+   "jak2_2_seed0_law_off",
+   "parp1_0_seed0_law_off",
+   "parp1_1_seed0_law_off",
+   "parp1_2_seed0_law_off"
+  ],
+  "verdict": "INCOMPLETE"
+ },
+ "payload_sha256": "c731fdd9e1f60b44e4f5582bbd51e21f039fa6be0bfdac189d62a89609625a0c"
+}
