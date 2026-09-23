@@ -38,6 +38,20 @@ from pathlib import Path
 
 OUT = "diagnostics/pmo_same_pool_ranking_v1/same_pool_ranking_v1.json"
 
+#: Optimism strengths to replay, in ABSOLUTE units so they can be read against the measured
+#: mean positive improvement of ~0.0077 per productive child. 0.25 is what ships.
+OPTIMISM_SWEEP = (0.25, 0.05, 0.02, 0.0077, 0.002, 0.0)
+
+
+def _credit_key_of(candidates, endpoint):
+    """The credit cell a chosen endpoint belongs to, via the production key function."""
+    from compose_v4.control.pmo_credit import credit_key_from_candidate
+
+    for row in candidates:
+        if row["endpoint"] == endpoint:
+            return credit_key_from_candidate(row)
+    raise KeyError(endpoint)
+
 
 def _oracle():
     stub = types.ModuleType("rdkit.six")
@@ -117,6 +131,22 @@ def main():
                     exploration=min(2, len(selected)),
                 )
                 shared_rows = [candidates[i] for i in shared_idx]
+
+                # ZERO-NEW-ORACLE optimism sweep: the SAME pool and the SAME accumulated credit
+                # evidence, replayed with only `prior_weight` varying. The live arm keeps the
+                # shipped value; each replay restores it, so the campaign is never perturbed.
+                sweep = {}
+                if self.credit.cells:
+                    shipped = self.credit.prior_weight
+                    try:
+                        for weight in OPTIMISM_SWEEP:
+                            self.credit.prior_weight = float(weight)
+                            rows, _detail = self._credit_allocate(
+                                candidates, shared_value, len(selected)
+                            )
+                            sweep[str(weight)] = [r["endpoint"] for r in rows]
+                    finally:
+                        self.credit.prior_weight = shipped
                 truth = {}
                 for row in candidates:
                     endpoint = row["endpoint"]
@@ -146,6 +176,21 @@ def main():
                         "shared_acquisition_max": max(shared_values) if shared_values else None,
                         "shared_value_is_fitted": shared_value.weights is not None,
                         "shared_value_observations": shared_value.n,
+                        "optimism_sweep_selected_means": {
+                            w: sum(truth[e] for e in eps) / max(len(eps), 1)
+                            for w, eps in sweep.items()
+                        },
+                        "optimism_sweep_untried_fraction": {
+                            w: sum(
+                                1
+                                for e in eps
+                                if self.credit.cell(
+                                    _credit_key_of(candidates, e)
+                                ).trials == 0
+                            )
+                            / max(len(eps), 1)
+                            for w, eps in sweep.items()
+                        },
                         "fiber_max": max(fiber_values) if fiber_values else None,
                         "oracle_topk_mean": sum(oracle_values) / max(len(oracle_values), 1),
                         "oracle_topk_max": max(oracle_values) if oracle_values else None,

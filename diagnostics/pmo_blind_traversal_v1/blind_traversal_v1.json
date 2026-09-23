@@ -737,6 +737,152 @@
      "depth": 6
     }
    ]
+  },
+  {
+   "name": "init_11",
+   "start_smiles": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COC3CCCCC3)cc2s1",
+   "start_score": 0.09774436090225563,
+   "best_score": 0.35365853658536583,
+   "objective_evaluations": 1377,
+   "seconds": 769.2,
+   "history": [
+    {
+     "generation": 1,
+     "best_score": 0.168,
+     "top10_mean": 0.12028192949970955,
+     "children": 32,
+     "improving_children": 11,
+     "distinct_improving_lineages": 1,
+     "median_delta_improving": 0.014405171808024739,
+     "median_primitives": 11.0,
+     "best_smiles": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+     "best_depth": 1,
+     "evaluations_so_far": 33
+    },
+    {
+     "generation": 2,
+     "best_score": 0.18796992481203006,
+     "top10_mean": 0.17546877262531907,
+     "children": 192,
+     "improving_children": 39,
+     "distinct_improving_lineages": 6,
+     "median_delta_improving": 0.01614628927147163,
+     "median_primitives": 9.0,
+     "best_smiles": "CC(=O)N=c1[nH]c2cnc(NC(=O)COc3cccc(-c4ccccc4)c3)cc2s1",
+     "best_depth": 2,
+     "evaluations_so_far": 225
+    },
+    {
+     "generation": 3,
+     "best_score": 0.22900763358778625,
+     "top10_mean": 0.19446779462219313,
+     "children": 192,
+     "improving_children": 13,
+     "distinct_improving_lineages": 5,
+     "median_delta_improving": 0.008064516129032251,
+     "median_primitives": 11.0,
+     "best_smiles": "CCCn1c(=N)sc2cc(NCCOc3ccc(-c4ccccc4C=O)cc3)ccc21",
+     "best_depth": 3,
+     "evaluations_so_far": 417
+    },
+    {
+     "generation": 4,
+     "best_score": 0.24719101123595505,
+     "top10_mean": 0.23030298842721578,
+     "children": 192,
+     "improving_children": 16,
+     "distinct_improving_lineages": 6,
+     "median_delta_improving": 0.007347584941888599,
+     "median_primitives": 11.0,
+     "best_smiles": "Oc1cccc(-c2ccc([PH4])cc2)c1",
+     "best_depth": 4,
+     "evaluations_so_far": 609
+    },
+    {
+     "generation": 5,
+     "best_score": 0.2857142857142857,
+     "top10_mean": 0.25216941415761973,
+     "children": 192,
+     "improving_children": 11,
+     "distinct_improving_lineages": 5,
+     "median_delta_improving": 0.00869728444500062,
+     "median_primitives": 10.5,
+     "best_smiles": "Cc1ccc(-c2ccc(OCCNc3ccc4c(c3)SC3=NC(CN)CN34)cc2)cc1",
+     "best_depth": 5,
+     "evaluations_so_far": 801
+    },
+    {
+     "generation": 6,
+     "best_score": 0.32926829268292684,
+     "top10_mean": 0.28375485023195113,
+     "children": 192,
+     "improving_children": 10,
+     "distinct_improving_lineages": 5,
+     "median_delta_improving": 0.008145002087328157,
+     "median_primitives": 11.5,
+     "best_smiles": "Cc1ccc(-c2ccccc2)cc1",
+     "best_depth": 6,
+     "evaluations_so_far": 993
+    },
+    {
+     "generation": 7,
+     "best_score": 0.35051546391752575,
+     "top10_mean": 0.30853724297490975,
+     "children": 192,
+     "improving_children": 11,
+     "distinct_improving_lineages": 5,
+     "median_delta_improving": 0.010204081632653073,
+     "median_primitives": 9.0,
+     "best_smiles": "Cc1ccc(-c2ccc(-c3ccc(C)cc3F)cc2)cc1",
+     "best_depth": 7,
+     "evaluations_so_far": 1185
+    },
+    {
+     "generation": 8,
+     "best_score": 0.35365853658536583,
+     "top10_mean": 0.3431452069619993,
+     "children": 192,
+     "improving_children": 16,
+     "distinct_improving_lineages": 5,
+     "median_delta_improving": 0.011256329714604107,
+     "median_primitives": 10.0,
+     "best_smiles": "Cc1ccc(-c2ccc(O)cc2)cc1",
+     "best_depth": 7,
+     "evaluations_so_far": 1377
+    }
+   ],
+   "final_frontier": [
+    {
+     "smiles": "Cc1ccc(-c2ccc(O)cc2)cc1",
+     "score": 0.35365853658536583,
+     "depth": 7
+    },
+    {
+     "smiles": "Cc1ccc(-c2ccc(-c3ccc(C)cc3F)cc2)cc1",
+     "score": 0.35051546391752575,
+     "depth": 7
+    },
+    {
+     "smiles": "Cc1ccc(-c2ccc(-c3ccc(C)cc3F)cc2)nc1",
+     "score": 0.35051546391752575,
+     "depth": 8
+    },
+    {
+     "smiles": "Cc1ccc(-c2ccc(-c3ccc(F)c(C)c3)cc2)cc1",
+     "score": 0.35051546391752575,
+     "depth": 8
+    },
+    {
+     "smiles": "Cc1ccc(-c2ccc(CCN)cc2)cc1",
+     "score": 0.3448275862068966,
+     "depth": 8
+    },
+    {
+     "smiles": "Cc1ccc(-c2cccc3ccccc23)cc1",
+     "score": 0.34444444444444444,
+     "depth": 7
+    }
+   ]
   }
  ]
 }
