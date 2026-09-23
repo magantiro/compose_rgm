@@ -1,0 +1,21 @@
+{
+  "payload": {
+    "schema_version": "pmo_exact_program_segmentation_prepublication_failure_v1",
+    "attempt": 1,
+    "attempted_output": "diagnostics/pmo_exact_program_segmentation/attempt_1",
+    "contract_path": "configs/pmo_exact_program_segmentation_v1.json",
+    "contract_file_sha256": "46c562f60405f10ca3e6a6595146d3e2520fcc58828025f818e00b42bc14200b",
+    "status": "failed_before_publication",
+    "phase": "same_source_generic_panel_transformation_equivalence_labeling",
+    "exception_type": "ValueError",
+    "exception_message": "a transformation-equivalence target cannot be a self event",
+    "observed_condition": "the generic compiler exact-executed a multi-step program whose terminal canonical molecule equaled its source",
+    "published_output_exists_after_failure": false,
+    "new_oracle_calls": 0,
+    "new_docking_calls": 0,
+    "modal_launches": 0,
+    "repair": "classify terminal canonical self-events as rejected panel attempts before teacher-equivalence labeling",
+    "provenance_limitation": "the transient pre-repair runner byte hash was not recorded; this receipt preserves the console-observed failure class and exact bounded repair without claiming a reproducible numeric result"
+  },
+  "payload_sha256": "ee5a683334c1c10e05353cb64005464df9502ef804c07e36760731f6b5d29e32"
+}

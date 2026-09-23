@@ -1,0 +1,246 @@
+{
+  "payload": {
+    "audit_environment": {
+      "audit_git_revision": "f6e63a9384db9bba2b2baade99192ffdf5c9e6aa",
+      "audit_worktree_clean": false,
+      "architecture": "arm64",
+      "jq": "1.7.1-apple",
+      "python": "3.12.9"
+    },
+    "audited_at_utc": "2026-09-19T06:47:16Z",
+    "costs": {
+      "modal_calls": 0,
+      "new_docking_calls": 0,
+      "new_oracle_calls": 0
+    },
+    "decision": "GSK3B_INVALID_ADAPTER_FALLBACK_PERINDOPRIL_VALID_NO_PROMOTION",
+    "integrity": {
+      "accounting": {
+        "arm_units": 8,
+        "automatic_retries": 0,
+        "candidate_observations": 256,
+        "charged_calls": 384,
+        "charged_calls_per_unit": 48,
+        "initialization_calls_per_unit": 16,
+        "new_oracle_calls_recorded": 384,
+        "passed": true,
+        "post_initialization_calls_per_unit": 32
+      },
+      "candidate_locks": {
+        "all_selected_candidate_ids_in_declared_round_pool": true,
+        "all_selected_candidates_exact_replay_and_valid": true,
+        "cross_round_duplicate_selected_ids_per_arm": 0,
+        "manifest_file_sha256_verified": true,
+        "manifest_payload_sha256_verified": true,
+        "pool_envelope_payload_sha256_verified": "16/16",
+        "pool_file_sha256_verified": "16/16",
+        "round_1_blind_fiber_pairing_verified": "4/4 task-proposal pairs",
+        "score_fields_absent_from_candidate_pools": true
+      },
+      "curves": {
+        "auc48_recomputed_from_all_48_top10_curve_points": true,
+        "best_curve_monotonicity_verified": "8/8",
+        "curve_axis_verified": "8/8 complete call indices 1 through 48",
+        "reported_terminal_best_and_top10_match_curve": "8/8",
+        "top10_curve_monotonicity_after_archive_fill_verified": "8/8"
+      },
+      "launch_identity": {
+        "code_revision": "d201f87cd44074b8d6c9c68ff0b0b516c26de98c",
+        "launch_payload_sha256": "7c7e41e1941703ac552880c60bbf04140642bfc97b477f56bcd70495b0cdfa60",
+        "launch_payload_sha256_recomputed": true,
+        "run_id": "6e12bac0e69c30e7cafcd94cc124936aa7f5f2754eba7bda1a687c658afa3088",
+        "run_id_recomputed_from_launch_without_run_id": true
+      },
+      "result_payload_sha256_recomputed": true,
+      "result_wrapper_sha256": "86982a55d76158bd2c34a6f921a0382fc7d68c58781601da5064101a318bbbf8"
+    },
+    "limitations": [
+      "The aggregate result does not embed the physical query-lock envelopes or per-call ledger receipts. Candidate-lock hashes, selected-ID membership, ordering, pairing, result accounting and the production code path were verified, but remote query-lock and receipt files were not independently rehashed in this zero-remote-access audit.",
+      "The GSK3B rows are operationally recorded complete receipts because PyTDC catches evaluator exceptions internally and returns its default property. They are not valid GSK3B scientific measurements.",
+      "Perindopril is a warm, answer-known development task over immutable root-conditioned pools. It is not a full PMO benchmark, held-out PMO result, dynamic descendant-refinement test or IVG comparison.",
+      "The dependency-region corpus is a sealed training-only artifact whose own provenance records a dirty source worktree. Its route-length counts are used only to diagnose support mismatch, not as scored evidence."
+    ],
+    "metrics": {
+      "gsk3b": {
+        "additive_route_blind": {
+          "auc_top10_48": 0.0,
+          "best_at_calls_16_24_32_40_48": [0.0, 0.0, 0.0, 0.0, 0.0],
+          "best_reward": 0.0,
+          "charged_calls": 48,
+          "top10_at_calls_16_24_32_40_48": [0.0, 0.0, 0.0, 0.0, 0.0]
+        },
+        "additive_route_fiber_control": {
+          "auc_top10_48": 0.0,
+          "best_at_calls_16_24_32_40_48": [0.0, 0.0, 0.0, 0.0, 0.0],
+          "best_reward": 0.0,
+          "charged_calls": 48,
+          "top10_at_calls_16_24_32_40_48": [0.0, 0.0, 0.0, 0.0, 0.0]
+        },
+        "old_v0_blind": {
+          "auc_top10_48": 0.0,
+          "best_at_calls_16_24_32_40_48": [0.0, 0.0, 0.0, 0.0, 0.0],
+          "best_reward": 0.0,
+          "charged_calls": 48,
+          "top10_at_calls_16_24_32_40_48": [0.0, 0.0, 0.0, 0.0, 0.0]
+        },
+        "old_v0_fiber_control": {
+          "auc_top10_48": 0.0,
+          "best_at_calls_16_24_32_40_48": [0.0, 0.0, 0.0, 0.0, 0.0],
+          "best_reward": 0.0,
+          "charged_calls": 48,
+          "top10_at_calls_16_24_32_40_48": [0.0, 0.0, 0.0, 0.0, 0.0]
+        }
+      },
+      "perindopril_mpo": {
+        "additive_route_blind": {
+          "auc_top10_48": 0.1686936111403199,
+          "best_at_calls_16_24_32_40_48": [0.4654746681256314, 0.4654746681256314, 0.4654746681256314, 0.4654746681256314, 0.4654746681256314],
+          "best_reward": 0.4654746681256314,
+          "charged_calls": 48,
+          "top10_at_calls_16_24_32_40_48": [0.1590406801412297, 0.20537484676752968, 0.20537484676752968, 0.23005981540693474, 0.2544003505604003]
+        },
+        "additive_route_fiber_control": {
+          "auc_top10_48": 0.17785138558153277,
+          "best_at_calls_16_24_32_40_48": [0.4654746681256314, 0.4654746681256314, 0.4654746681256314, 0.4654746681256314, 0.4654746681256314],
+          "best_reward": 0.4654746681256314,
+          "charged_calls": 48,
+          "top10_at_calls_16_24_32_40_48": [0.1590406801412297, 0.20537484676752973, 0.21021483964635243, 0.2519609506901582, 0.28602792378810177]
+        },
+        "old_v0_blind": {
+          "auc_top10_48": 0.16219232934100503,
+          "best_at_calls_16_24_32_40_48": [0.4654746681256314, 0.4654746681256314, 0.4654746681256314, 0.4654746681256314, 0.4654746681256314],
+          "best_reward": 0.4654746681256314,
+          "charged_calls": 48,
+          "top10_at_calls_16_24_32_40_48": [0.1590406801412297, 0.17262899522102756, 0.2248770875546681, 0.22717127191947348, 0.2328048532977564]
+        },
+        "old_v0_fiber_control": {
+          "auc_top10_48": 0.17489408534975978,
+          "best_at_calls_16_24_32_40_48": [0.4654746681256314, 0.4654746681256314, 0.4654746681256314, 0.4654746681256314, 0.4654746681256314],
+          "best_reward": 0.4654746681256314,
+          "charged_calls": 48,
+          "top10_at_calls_16_24_32_40_48": [0.1590406801412297, 0.17262899522102756, 0.20554129815586397, 0.25017181049109916, 0.3064842853057829]
+        }
+      }
+    },
+    "perindopril_factor_analysis": {
+      "all_arms_best_came_from_initialization": true,
+      "combined_minus_best_single_auc48": 0.0029573002317729857,
+      "combined_minus_old_v0_blind_auc48": 0.01565905624052774,
+      "combined_route_children_improving_parent": 6,
+      "fiber_gain_with_additive_route_auc48": 0.00915777444121288,
+      "fiber_gain_with_old_v0_auc48": 0.012701756008754755,
+      "factorial_interaction_auc48": -0.003543981567541876,
+      "route_gain_under_blind_auc48": 0.006501281799314862,
+      "route_gain_under_fiber_auc48": 0.0029573002317729857,
+      "route_lane_selected": {
+        "additive_route_blind": 17,
+        "additive_route_fiber_control": 14
+      },
+      "selected_child_max_reward": {
+        "additive_route_blind": 0.3886889973882043,
+        "additive_route_fiber_control": 0.3886889973882043,
+        "old_v0_blind": 0.4034732923929645,
+        "old_v0_fiber_control": 0.4240944648399855
+      },
+      "terminal_top10_combined_minus_old_v0_fiber": -0.020456361517681154,
+      "terminal_top10_fiber_gain_with_additive_route": 0.03162757322770149,
+      "terminal_top10_fiber_gain_with_old_v0": 0.07367943200802651,
+      "terminal_top10_route_gain_under_blind": 0.02159549726264387
+    },
+    "provenance": {
+      "candidate_lock_manifest": {
+        "file_sha256": "a10608e159b6d70ef5c30d1253a911fea9b43057b7b3f300b4ff02f2289dd0be",
+        "git_revision": "d201f87cd44074b8d6c9c68ff0b0b516c26de98c",
+        "path": "diagnostics/pmo_route_fiber_scored_pilot_v1/candidate_locks.json",
+        "payload_sha256": "0908280ab5ebeada232013a4f46a6408fa1fddfc2fb665b5a78ef14048f220d7"
+      },
+      "contract": {
+        "file_sha256": "f7972a42042990ab12568a1cfcb2a00a1ca988db9f0a08725521607adfaa9be2",
+        "git_revision": "d201f87cd44074b8d6c9c68ff0b0b516c26de98c",
+        "path": "configs/pmo_route_fiber_scored_pilot_v1.json",
+        "payload_sha256": "7a00c266df3772012bacf3268a67811328d6f0225bfa9ad4f6650694c3826f21"
+      },
+      "dependency_region_corpus": {
+        "file_sha256": "9b35529eae0975dcf977bc1fc51f3bd838e0184d51de3a7d2822edd0bc3d8b54",
+        "path": "diagnostics/pmo_dependency_region_program_v2/attempt_1/training_dependency_region_corpus.json.gz",
+        "payload_sha256": "d4b65179df6a1a1b372685b440d0ca56f15d4091a7df4125a04eaa7f7452f81b"
+      },
+      "dependency_region_result": {
+        "file_sha256": "144d80aa378e1326f2e50b269a0d1c89a86fda1fd19013527745f721500da579",
+        "path": "diagnostics/pmo_dependency_region_program_v2/attempt_1/result.json",
+        "payload_sha256": "e0212ec30d93ec60f0bf542f6e4a6f6dd92e66c0f52d55f9d8a7c2bc66c5407e"
+      },
+      "gsk3b_asset": {
+        "bytes": 27791877,
+        "sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5"
+      },
+      "initialization_lock": {
+        "file_sha256": "a1f7840df1f75567565de633c4df3d013c3165df3e43cbf2ac87b156d5f206ff",
+        "path": "diagnostics/parent_edit_cycles/prepared/init_20260921.json"
+      },
+      "implementation": {
+        "modal_app_file_sha256": "2155ff1c54a297de246370628086693dfd50e0276920ec8a61bb7729a757c19a",
+        "pilot_core_file_sha256": "7098bf34b7d2931478cd08a60b02d5fa2e140f89fc1db351950d0a710a939f23",
+        "pytdc_chem_oracle_source_sha256": "211be401ec5f3c06ddca37e72064bbeb4de52437b218bb3f4a4a381eec1de1f5",
+        "pytdc_oracles_source_sha256": "d2b2194e3573eb620759998e83d8803eacfd5cbd00531e862ebe3283c301cabe"
+      },
+      "preflight": {
+        "file_sha256": "5a15cfc096f7e58f9f7d10caaedebcf288f1e72b033a1269eefac58265c0f747",
+        "git_revision": "d201f87cd44074b8d6c9c68ff0b0b516c26de98c",
+        "path": "diagnostics/pmo_route_fiber_scored_pilot_v1/preflight.json",
+        "payload_sha256": "986459abcc849dc7d84cf595a2ee489b10ac7a0adaae56187dde1fef97725379"
+      },
+      "scored_result": {
+        "downloaded_path": "/private/tmp/pmo_route_fiber_result.json",
+        "modal_volume": "compose-pmo-route-fiber-scored-pilot-v1",
+        "payload_sha256": "740e4511c7da6f38cb7ca1bbbcfc76fe5c40d6083b1b7ccaf2a4039ea6dca73f",
+        "remote_path": "6e12bac0e69c30e7cafcd94cc124936aa7f5f2754eba7bda1a687c658afa3088/result.json",
+        "run_id": "6e12bac0e69c30e7cafcd94cc124936aa7f5f2754eba7bda1a687c658afa3088",
+        "wrapper_sha256": "86982a55d76158bd2c34a6f921a0382fc7d68c58781601da5064101a318bbbf8"
+      }
+    },
+    "schema_version": "pmo_route_fiber_scored_pilot_forensic_audit_v1",
+    "support_mismatch": {
+      "dependency_region_teacher_unique_routes": 184,
+      "dynamic_descendant_refinement_possible_in_scored_contract": false,
+      "held_initial_parents_reused_every_round": 16,
+      "perindopril_teacher_routes_over_32": 16,
+      "perindopril_teacher_routes_runtime_supported_at_32": 0,
+      "proposal_horizon_saturation": {
+        "gsk3b_route_pool_at_8": 47,
+        "gsk3b_route_pool_total": 64,
+        "perindopril_route_pool_at_8": 40,
+        "perindopril_route_pool_total": 63
+      },
+      "scored_route_maximum_components": 8,
+      "scored_route_maximum_primitives": 8,
+      "teacher_routes_at_most_8": 1,
+      "teacher_routes_over_32": 78,
+      "teacher_routes_over_8": 183,
+      "teacher_routes_over_8_and_at_most_32": 105,
+      "teacher_runtime_routes_at_most_32": 106,
+      "teacher_runtime_routes_over_8_fraction": 0.9905660377358491
+    },
+    "zero_reward_forensics": {
+      "classification": "adapter_default_fallback_after_lazy_relative_asset_load_failure",
+      "evidence": [
+        "All 192 GSK3B charged rows are exactly 0.0, including 64 charged initialization rows and 128 candidate rows across four isolated arms.",
+        "All selected candidate rows map to immutable pools whose candidates are exact-replay and RDKit-valid. ProgramQueryLedger also rejects an invalid endpoint before invoking the oracle.",
+        "The pinned Modal worker constructs tdc.Oracle while temporarily inside the asset directory, then restores the prior working directory before the first evaluation.",
+        "PyTDC GSK3B assigns a function during Oracle construction but lazily loads oracle/gsk3b_current.pkl on the first evaluation using a relative path.",
+        "PyTDC Oracle.__call__ catches every evaluator exception and returns default_property, which is 0.0. ProgramQueryLedger therefore receives a finite zero and records a completed receipt rather than an explicit failure."
+      ],
+      "genuine_gsk3b_model_predictions": false,
+      "invalid_candidate_explanation": false,
+      "model_asset_hash_verified_prelaunch": true,
+      "recorded_default_fallback_values": 192
+    },
+    "next_safe_action": {
+      "action": "ZERO_ORACLE_COMPLETE_DEPENDENCY_REGION_SUPPORT_REPLAY",
+      "description": "Before any scored repair, replay the exact dependency-region decoder and legal binder from the same frozen initial sources with the declared 32-primitive and eight-component runtime support. Compare complete route generation with the eight-primitive transition sampler, report exact execution precision, complete endpoint and transformation recall, source coverage, component and primitive abstentions, and preserve Perindopril as an explicit over-32 abstention. Do not score, broaden support, or reuse the invalid GSK3B zeros.",
+      "new_oracle_calls_authorized": 0,
+      "scored_gsk3b_repair_requires_new_authorization": true
+    }
+  },
+  "payload_sha256": "2cf24041ed8182efb80fb891e80a58fd6de7b251dfaeb70e0a1d44d56c484ccf"
+}

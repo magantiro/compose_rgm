@@ -1,0 +1,21 @@
+{
+  "payload": {
+    "schema_version": "pmo_dependency_region_policy_prepublication_failure_v1",
+    "attempt": 1,
+    "attempted_output": "diagnostics/pmo_dependency_region_policy_comparison/attempt_1",
+    "contract_path": "configs/pmo_dependency_region_policy_comparison_v1.json",
+    "contract_file_sha256": "7546d58df51fa9a5c3ca9450893022292210680fff28f30ce0240575e367eff1",
+    "status": "failed_before_publication",
+    "phase": "teacher_injected_shared_panel_ranking",
+    "exception_type": "ValueError",
+    "exception_message": "teacher-injected panel has no teacher endpoint",
+    "observed_condition": "ten of eighteen lineages have no teacher route inside the unchanged 32-primitive runtime support",
+    "published_output_exists_after_failure": false,
+    "new_oracle_calls": 0,
+    "new_docking_calls": 0,
+    "modal_launches": 0,
+    "repair": "report teacher-injected coverage and abstain on unsupported lineages without increasing support or injecting long routes",
+    "provenance_limitation": "the transient pre-repair runner byte hash was not recorded; this receipt preserves the observed exception and bounded repair without claiming a numeric result"
+  },
+  "payload_sha256": "e01f3261bfcb64d0211ed36a946b4b9577bee4939fcd09334782f4420c2c0964"
+}

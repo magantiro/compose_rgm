@@ -400,6 +400,174 @@ target-to-program map or executable teacher route. The detailed contract is
 generic stage recognizer or running a scored PMO or T4 pilot requires a subsequent
 scoped contract; any scored call also requires separate launch authorization.
 
+**Scoped zero-oracle PMO route-policy quality comparison, 2026-09-14:** after
+the sealed PMO route-distillation `attempt_1` passed, the user explicitly
+authorized policy learning and a grouped offline comparison on that supervision.
+Hold out whole frozen task families and therefore all of their lineages before
+fitting any vocabulary, preprocessing, marginal or conditional model. Compare a
+source/base-lineage-balanced marginal action prior with one goal-free,
+graph-conditioned hierarchical local policy over primitive rule, structural
+operand region, typed parameters, created-handle dependency and stop. Fit only
+targets supported by the exported schema and preserve the separation between
+2,792 decisions on runtime-length complete routes and 3,351 decisions from long
+routes that are local-only supervision.
+
+The exported supervision contains no exact source graphs or executable action
+records and its generic recognizer found zero compound stages. Therefore this
+revision must abstain from fitting the coarse T4 actor, inventing macro labels or
+claiming autonomous complete-program generation. Report the complete-candidate
+ranker and transformation-equivalent proposal evaluations as unsupported with
+coverage, precision, unique yield and shortfall rather than injecting teachers or
+reopening source artifacts. Runtime-evaluable fold checkpoints may contain only
+numeric state preprocessing, generic rules, structural region/parameter/dependency
+classes and hashed training identity. They may contain no task/family name, route
+or lineage identifier, endpoint, SMILES, source graph, absolute atom address,
+assignment or executable teacher route. This is a zero-oracle, CPU-only offline
+development comparison. It may not access or change T4 artifacts or live runs,
+call an oracle or docking function, launch Modal, or select a scored controller.
+The detailed contract is `docs/PMO_ROUTE_POLICY_QUALITY.md`.
+
+**Scoped split-first PMO exact-program segmentation and negative-panel corpus,
+2026-09-14:** after the sanitized local-policy comparison established that exact
+graph/action pairs are required for complete proposal learning, the user
+explicitly authorized one training-data revision. Reopen only the 181 complete
+programs and five witnesses named and hash-bound by the PMO route-distillation
+inclusion manifest. Freeze whole task-family folds and every shared-base lineage
+before deriving a segment, vocabulary, statistic or proposal panel. Preserve exact
+source states, primitive actions and intermediate states, created-handle lineage,
+terminal endpoints and route membership only in a clearly labeled training-only
+fold artifact. No runtime checkpoint is authorized.
+
+Derive task-independent contiguous segments algorithmically from changed-region
+connectivity, created-handle dependency intervals and generic cycle/open-close
+structure. Names may describe only observed structural/action properties. Preserve
+primitive fallback when a protected interval exceeds the bounded segment horizon
+and abstain from a complete representation when more than eight segments or 32
+primitives are required. Measure held-out segmentation action coverage, exact
+executor replay precision, module-count and dependency distributions, runtime-
+length support and source-conditioned negative-panel validity, uniqueness, exact
+recall, transformation-equivalent recall, precision and shortfall. Generate panels
+only with the unchanged task-blind generic Dynamic-v1 compiler under three modules,
+32 primitives and eight blocks. Task scores are not pathwise labels. Do not invent
+semantic macros, fit or select a controller, inject teacher routes into proposals,
+make an oracle or docking call, launch Modal, access live runs, or change any T4
+artifact. The detailed contract is `docs/PMO_EXACT_PROGRAM_SEGMENTATION.md`.
+
+**Scoped zero-oracle PMO dependency-region representation v2, 2026-09-14:**
+after the split-first PMO segmentation audit preserved exact replay but represented
+only eight of 106 runtime-length routes, the user explicitly authorized a separate
+macro-free representation revision. Preserve the v1 `attempt_2` result and corpus
+as an immutable failed gate. Consume them only through their sealed physical and
+payload hashes; reuse their same-source negative panel without generating another
+proposal or changing its labels.
+
+Represent every exact route as at most eight top-level components formed only by
+generic changed-region connectivity, persistent created-handle dependencies and
+cycle open/close connectivity. Preserve the original primitive emission order.
+Within each component, record an ordered primitive microstream with explicit
+open, continue and close control and relative created-handle backreferences. Do
+not assign semantic macro names, increase the 32-total-primitive support, fit a
+model or emit a runtime checkpoint. Measure exact replay coverage and precision
+on all 184 unique traces, with the primary complete-support gate on all 106 traces
+at or below 32 primitives and separately in every frozen held-out fold. Report
+component distributions, cross-component created-handle and cycle dependency
+leakage, fallback and explicit budget abstention. This revision is training-only,
+zero-oracle and single-CPU. It may not call docking or an oracle, launch Modal,
+access live runs, change T4, regenerate panels, train or select a controller. The
+detailed contract is `docs/PMO_DEPENDENCY_REGION_PROGRAM_V2.md`.
+
+**Scoped zero-oracle PMO dependency-region policy comparison, 2026-09-14:**
+after the dependency-region representation exactly replayed all 184 unique PMO
+training routes and covered all 106 routes within the unchanged 32-primitive
+runtime support, the user authorized continued generic PMO policy development.
+Use the already frozen whole-task-family folds. Compare one source-balanced
+generic marginal, one flat graph-conditioned autoregressive ranker and one
+graph-plus-region/dependency hierarchical ranker on exactly the same generic
+heads and complete legal candidate panels. Fit all preprocessing and head
+statistics on the training folds only. Report held-family teacher-forced
+likelihood/rank and reranking of the already generated task-blind panels.
+Teacher-injected panels are a separately labelled rank diagnostic and may not be
+described as autonomous recovery. Because these checkpoints do not yet emit
+typed action parameters or legal bindings, this revision must not select or
+launch a scored controller and must state that autonomous complete-program
+generation remains unimplemented. Runtime checkpoints may contain only generic
+support, numeric preprocessing and fitted statistics, with no task/family,
+lineage, route, endpoint, source graph, absolute atom address or executable
+teacher content. This is CPU-only and zero-oracle. It may not call an oracle or
+docking, launch Modal, alter T4 artifacts, access live runs or regenerate the
+candidate panels. The self-hashed contract is
+`configs/pmo_dependency_region_policy_comparison_v1.json`.
+
+**Scoped zero-oracle PMO legal WHERE/HOW action gate, 2026-09-14:** after the
+dependency-region hierarchy improved held-family complete-candidate rank but the
+unchanged generic panels recovered zero teacher transformations, the user
+authorized continued principled PMO controller development. Keep the dependency-
+region policy comparison immutable. On the same frozen whole-task-family folds,
+enumerate the fixed generic Active8 legal action fiber for the observed generic
+executor rule at each exact teacher state, quotient padding aliases by canonical
+successor, and measure whether the observed next successor remains inside that
+runtime support. Fit a target-free, source/lineage/decision-balanced graph-
+conditioned successor ranker using only training-fold teacher successors and
+same-state legal negatives. Compare it with uniform ranking within the same rule
+fiber. Report
+coverage and precision separately, candidate fiber sizes, teacher successor rank
+and top-k recall for runtime-supported routes and long-route local decisions.
+The runtime checkpoint may contain only the fixed operator support, numeric
+preprocessing, coefficients and hashes. It may contain no task/family, route,
+lineage, endpoint, source graph, absolute atom address, teacher action or
+executable trace. This is a one-step WHERE/HOW gate conditional on the observed
+generic rule, not a rule-selection result, complete autonomous route recovery or
+PMO objective evidence. Do not inject the teacher when it
+is absent from the enumerated fiber, increase action support after seeing a held
+fold, call any oracle or docking function, launch Modal, access a live run or
+alter T4. A complete-program beam decoder and scored PMO pilot require a later
+sealed gate.
+
+**Scoped zero-oracle PMO complete-program decoder gate, 2026-09-14:** after
+the legal WHERE/HOW development preview showed strong held-family one-step
+ranking conditional on the observed generic rule, the user authorized
+continued aggressive but principled PMO route distillation. Implement the
+smallest autonomous complete-program gate that combines the fold-specific
+`balanced_generic_marginal` primitive-rule and program-control heads from the
+immutable dependency-region comparison with the fold-matched legal-action
+ranker. Compare exactly two decoders with identical marginal rule and stop
+probabilities: uniform selection within each exact canonical Active8 legal
+rule fiber, and learned WHERE/HOW ranking within the same fiber. Do not select
+the flat or hierarchical dependency-region policies after inspecting their
+held results, and do not add another action family or target-specific feature.
+
+Generate from the held source graph without teacher actions, routes, endpoints,
+task identity or task scores. At each prefix, enumerate and exact-execute the
+canonical legal fiber for every supported rule, retain at most the top 32
+successors per rule, combine log rule and legal-action probabilities, and use
+the marginal continue/stop head. Compare beam widths 1 and 8 with snapshots at
+depths 8, 16, 24 and 32, force termination at 32 primitives, and reject or
+abstain from completed programs exceeding eight dependency components or 40
+active atoms. Candidate outputs must be deterministically locked before a
+separate evaluator loads teacher identities. Report exact canonical route,
+exact endpoint and radius-2 transformation recall and reciprocal rank at output
+cutoffs 1, 5, 10 and 32; report emitted precision, exact-execution precision,
+unique endpoint yield, source coverage, component-budget abstentions,
+expansions, fibers, successors, wall time and peak memory. Preserve the frozen
+whole-task-family folds and report all 18 held lineages, with the eight
+runtime-supported lineages and 106 supported routes identified separately.
+
+The engineering gate requires zero oracle and task-score access, exact split
+and input hashes, deterministic locks, exact-execution precision 1.0, declared
+support enforcement and at least one unique completed endpoint per held source.
+The scientific WHERE/HOW gate at beam width 8 and depth 32 requires nonzero
+autonomous radius-2 recovery, strictly higher aggregate radius-2 recall and
+reciprocal rank than uniform, no lower exact-endpoint recall, and improvement
+in at least two of three folds. Exact route recovery is reported separately
+and is required only for an exact route-recovery claim. This gate cannot by
+itself authorize a scored PMO pilot. The existing legal-action attempt 1 is a
+non-authoritative development preview and may be used only while implementing
+focused fixtures. An authoritative decoder execution must consume an unchanged
+legal-action result rerun from clean committed source after its implementation,
+configuration, tests and documentation are committed. This milestone is
+CPU-only and zero-oracle. It may not call an oracle or docking function, launch
+Modal, access live runs, alter T4, or modify any prior artifact.
+
 **Scoped T4 route-distilled Dynamic COMPOSE development, 2026-09-14:** after
 Dynamic-v2.2 recovered the Full-146 BRAF seed-1 score early but remained far
 behind on JAK2 and candidate-starved on FA7, the user explicitly authorized
