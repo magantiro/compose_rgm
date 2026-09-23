@@ -1,0 +1,355 @@
+{
+ "schema_version": "pmo_controller_scale_boundaries_v1",
+ "evidence_role": "answer_known_offline_diagnostic",
+ "new_charged_oracle_calls": 0,
+ "why": "The 14 boundaries tested earlier came from segmenting at cap 23, which produced a single 23-primitive jump straight to celecoxib. That is a compression artifact of the diagnostic, not the controller's action size. The measured useful macro regime is ~12-18 primitives, so boundaries are rebuilt at cap 12 (falling back to 18).",
+ "caps_tried": [
+  12,
+  18
+ ],
+ "routes": [
+  {
+   "source_name": "init_02",
+   "cap_used": 12,
+   "n_segments": 3,
+   "cuts": [
+    0,
+    12,
+    24,
+    32
+   ],
+   "boundaries": [
+    {
+     "from_index": 0,
+     "to_index": 12,
+     "primitives": 12,
+     "source_smiles": "CCCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+     "next_smiles": "CS(=O)(=O)c1ccccc1",
+     "source_score": 0.049586776859504134,
+     "next_score": 0.18072289156626506,
+     "delta": 0.131136
+    },
+    {
+     "from_index": 12,
+     "to_index": 24,
+     "primitives": 12,
+     "source_smiles": "CS(=O)(=O)c1ccccc1",
+     "next_smiles": "CC=CC=C(C)C(=CC)Nc1ccc(S(N)(=O)=O)cc1",
+     "source_score": 0.18072289156626506,
+     "next_score": 0.2376237623762376,
+     "delta": 0.056901
+    },
+    {
+     "from_index": 24,
+     "to_index": 32,
+     "primitives": 8,
+     "source_smiles": "CC=CC=C(C)C(=CC)Nc1ccc(S(N)(=O)=O)cc1",
+     "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+     "source_score": 0.2376237623762376,
+     "next_score": 1.0,
+     "delta": 0.762376
+    }
+   ]
+  },
+  {
+   "source_name": "init_03",
+   "cap_used": 18,
+   "n_segments": 2,
+   "cuts": [
+    0,
+    14,
+    25
+   ],
+   "boundaries": [
+    {
+     "from_index": 0,
+     "to_index": 14,
+     "primitives": 14,
+     "source_smiles": "CCC(NC(=O)C1CCOCC1)c1cn(C)nc1C",
+     "next_smiles": "CCC(NC(=CCC(F)(F)F)C1CCC(C)CC1)C1=N[SH](=O)(O)C=C1",
+     "source_score": 0.0782608695652174,
+     "next_score": 0.10317460317460317,
+     "delta": 0.024914
+    },
+    {
+     "from_index": 14,
+     "to_index": 25,
+     "primitives": 11,
+     "source_smiles": "CCC(NC(=CCC(F)(F)F)C1CCC(C)CC1)C1=N[SH](=O)(O)C=C1",
+     "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+     "source_score": 0.10317460317460317,
+     "next_score": 1.0,
+     "delta": 0.896825
+    }
+   ]
+  },
+  {
+   "source_name": "init_04",
+   "cap_used": 12,
+   "n_segments": 3,
+   "cuts": [
+    0,
+    11,
+    23,
+    31
+   ],
+   "boundaries": [
+    {
+     "from_index": 0,
+     "to_index": 11,
+     "primitives": 11,
+     "source_smiles": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)c1ccccc1",
+     "next_smiles": "CS(=O)(=O)c1ccccc1",
+     "source_score": 0.13392857142857142,
+     "next_score": 0.18072289156626506,
+     "delta": 0.046794
+    },
+    {
+     "from_index": 11,
+     "to_index": 23,
+     "primitives": 12,
+     "source_smiles": "CS(=O)(=O)c1ccccc1",
+     "next_smiles": "CC=CC=C(C)C(=CC)Nc1ccc(S(N)(=O)=O)cc1",
+     "source_score": 0.18072289156626506,
+     "next_score": 0.2376237623762376,
+     "delta": 0.056901
+    },
+    {
+     "from_index": 23,
+     "to_index": 31,
+     "primitives": 8,
+     "source_smiles": "CC=CC=C(C)C(=CC)Nc1ccc(S(N)(=O)=O)cc1",
+     "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+     "source_score": 0.2376237623762376,
+     "next_score": 1.0,
+     "delta": 0.762376
+    }
+   ]
+  },
+  {
+   "source_name": "init_06",
+   "monotone_segmentation": null,
+   "note": "no monotone segmentation at any controller scale"
+  },
+  {
+   "source_name": "init_08",
+   "monotone_segmentation": null,
+   "note": "no monotone segmentation at any controller scale"
+  },
+  {
+   "source_name": "init_11",
+   "cap_used": 12,
+   "n_segments": 3,
+   "cuts": [
+    0,
+    7,
+    19,
+    31
+   ],
+   "boundaries": [
+    {
+     "from_index": 0,
+     "to_index": 7,
+     "primitives": 7,
+     "source_smiles": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COC3CCCCC3)cc2s1",
+     "next_smiles": "CCCCOCCNc1ccc2[nH]c(=N[SH2](N)=O)sc2c1",
+     "source_score": 0.09774436090225563,
+     "next_score": 0.11016949152542373,
+     "delta": 0.012425
+    },
+    {
+     "from_index": 7,
+     "to_index": 19,
+     "primitives": 12,
+     "source_smiles": "CCCCOCCNc1ccc2[nH]c(=N[SH2](N)=O)sc2c1",
+     "next_smiles": "CCC(C)CCCCCC1=CNC2CC=C(S(N)(=O)=O)CC2=C1F",
+     "source_score": 0.11016949152542373,
+     "next_score": 0.1322314049586777,
+     "delta": 0.022062
+    },
+    {
+     "from_index": 19,
+     "to_index": 31,
+     "primitives": 12,
+     "source_smiles": "CCC(C)CCCCCC1=CNC2CC=C(S(N)(=O)=O)CC2=C1F",
+     "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+     "source_score": 0.1322314049586777,
+     "next_score": 1.0,
+     "delta": 0.867769
+    }
+   ]
+  },
+  {
+   "source_name": "init_13",
+   "cap_used": 12,
+   "n_segments": 3,
+   "cuts": [
+    0,
+    12,
+    24,
+    32
+   ],
+   "boundaries": [
+    {
+     "from_index": 0,
+     "to_index": 12,
+     "primitives": 12,
+     "source_smiles": "C=CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+     "next_smiles": "CS(=O)(=O)c1ccccc1",
+     "source_score": 0.049586776859504134,
+     "next_score": 0.18072289156626506,
+     "delta": 0.131136
+    },
+    {
+     "from_index": 12,
+     "to_index": 24,
+     "primitives": 12,
+     "source_smiles": "CS(=O)(=O)c1ccccc1",
+     "next_smiles": "CC=CC=C(C)C(=CC)Nc1ccc(S(N)(=O)=O)cc1",
+     "source_score": 0.18072289156626506,
+     "next_score": 0.2376237623762376,
+     "delta": 0.056901
+    },
+    {
+     "from_index": 24,
+     "to_index": 32,
+     "primitives": 8,
+     "source_smiles": "CC=CC=C(C)C(=CC)Nc1ccc(S(N)(=O)=O)cc1",
+     "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+     "source_score": 0.2376237623762376,
+     "next_score": 1.0,
+     "delta": 0.762376
+    }
+   ]
+  },
+  {
+   "source_name": "blindtop_1_0.3366",
+   "cap_used": 18,
+   "n_segments": 1,
+   "cuts": [
+    0,
+    18
+   ],
+   "boundaries": [
+    {
+     "from_index": 0,
+     "to_index": 18,
+     "primitives": 18,
+     "source_smiles": "Cc1ccc(C(C)(F)C(N)(F)c2cccc3ccccc23)cc1",
+     "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+     "source_score": 0.33663366336633666,
+     "next_score": 1.0,
+     "delta": 0.663366
+    }
+   ]
+  },
+  {
+   "source_name": "blindmid_1_0.1364",
+   "cap_used": 12,
+   "n_segments": 2,
+   "cuts": [
+    0,
+    9,
+    21
+   ],
+   "boundaries": [
+    {
+     "from_index": 0,
+     "to_index": 9,
+     "primitives": 9,
+     "source_smiles": "CC1=CC(F)=C(C(F)Cc2cc(N)c(Cl)cc2Br)CC1",
+     "next_smiles": "CC1=CC=C(C(CCC(F)F)Nc2ccc(C)c(N)c2)CC1",
+     "source_score": 0.13636363636363635,
+     "next_score": 0.15789473684210525,
+     "delta": 0.021531
+    },
+    {
+     "from_index": 9,
+     "to_index": 21,
+     "primitives": 12,
+     "source_smiles": "CC1=CC=C(C(CCC(F)F)Nc2ccc(C)c(N)c2)CC1",
+     "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+     "source_score": 0.15789473684210525,
+     "next_score": 1.0,
+     "delta": 0.842105
+    }
+   ]
+  },
+  {
+   "source_name": "blindmid_2_0.1356",
+   "cap_used": 18,
+   "n_segments": 2,
+   "cuts": [
+    0,
+    18,
+    23
+   ],
+   "boundaries": [
+    {
+     "from_index": 0,
+     "to_index": 18,
+     "primitives": 18,
+     "source_smiles": "CC1=CC=C(C(CNc2ccc(Br)cc2)CONCO)CC1",
+     "next_smiles": "CC1=CC=C(C(=CCC(F)(F)F)NC=CC=C(C)S(N)(=O)=O)CC1",
+     "source_score": 0.13559322033898305,
+     "next_score": 0.17391304347826086,
+     "delta": 0.03832
+    },
+    {
+     "from_index": 18,
+     "to_index": 23,
+     "primitives": 5,
+     "source_smiles": "CC1=CC=C(C(=CCC(F)(F)F)NC=CC=C(C)S(N)(=O)=O)CC1",
+     "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+     "source_score": 0.17391304347826086,
+     "next_score": 1.0,
+     "delta": 0.826087
+    }
+   ]
+  },
+  {
+   "source_name": "blindmid_3_0.1351",
+   "cap_used": 12,
+   "n_segments": 3,
+   "cuts": [
+    0,
+    1,
+    13,
+    21
+   ],
+   "boundaries": [
+    {
+     "from_index": 0,
+     "to_index": 1,
+     "primitives": 1,
+     "source_smiles": "CC1=CC=C(C(C)C(C)Nc2ccc(Br)cc2Cl)CC1",
+     "next_smiles": "CC1=CC=C(C(C)C(C)Nc2ccc(Br)cc2)CC1",
+     "source_score": 0.13513513513513514,
+     "next_score": 0.14814814814814814,
+     "delta": 0.013013
+    },
+    {
+     "from_index": 1,
+     "to_index": 13,
+     "primitives": 12,
+     "source_smiles": "CC1=CC=C(C(C)C(C)Nc2ccc(Br)cc2)CC1",
+     "next_smiles": "C=C(c1ccc(C)cc1)N(N)C=CC=C(C)S(N)(=O)=O",
+     "source_score": 0.14814814814814814,
+     "next_score": 0.22772277227722773,
+     "delta": 0.079575
+    },
+    {
+     "from_index": 13,
+     "to_index": 21,
+     "primitives": 8,
+     "source_smiles": "C=C(c1ccc(C)cc1)N(N)C=CC=C(C)S(N)(=O)=O",
+     "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+     "source_score": 0.22772277227722773,
+     "next_score": 1.0,
+     "delta": 0.772277
+    }
+   ]
+  }
+ ],
+ "total_controller_scale_boundaries": 22
+}
