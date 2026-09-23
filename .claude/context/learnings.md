@@ -4569,3 +4569,87 @@ independently of whether fa7_0 ever closes.**
   HISTORICAL contracts and must keep sharing it) or two unrelated proteins whose base seeds differ by
   a representable ladder offset. The property that matters is that a cell's own replicates do not
   share a stream; scoped to that it is 0. Test the property you need, and RECORD the inherited one.
+
+## 2026-09-22 (T4 unified controller: wiring the eighth inert mechanism, and three ways a guard lies)
+
+- **THE EIGHTH AND NINTH INERT MECHANISMS, found by the standing one-grep check.**
+  `t4_unified_routing` and `frozen_proposal_escalation` were built, measured (routing
+  regression 30/30, support restoration 5 PASS / 0 FAIL, 93 distinct eligible endpoints) and
+  tested, and **no Modal app imported either and no contract in `configs/` named the ladder**.
+  Their only caller was the zero-oracle gate harness that measured them. The tell was static
+  and cost one grep at CALL sites. Now wired, with three hops guarded separately.
+- **MUTATION A6 IS THE ONE THAT JUSTIFIES A BY-EXECUTION GUARD, and it is worth copying.**
+  A call-site (AST) check over the app proves `expand_support` calls `routed_support_expansion`,
+  `run_cell` calls the terminal guard, and so on -- five real defects it catches. It CANNOT
+  catch rung 0 ignoring the route: every required call is still made, the record still names
+  the routed kernel, and only the LANE the fan-out is asked for changes. Killing that needed a
+  test that drives the app's own `expand_support` with an injected dispatcher and reads the
+  requests it issued. **A static guard sees that a call happened; only execution sees what it
+  was called WITH.** 24/24 mutations as required (21 killed, 3 positive controls green).
+- **`all([])` IS TRUE, so a reduced headline reads as a PASS on a table with no rows.** The
+  first reduction of a partial gate reported `routing_agrees_with_every_historical_arm: true`
+  and `controls_declared_all_searched: true` over ZERO rows. Same family as the container
+  census whose value could not vary, now at the REDUCER. Fix: an `_over(rows, predicate)` that
+  returns `None` on an empty population, coverage counts (`rows_expected` / `rows_present`)
+  published beside the headline, and a top-level verdict that is `INCOMPLETE` until every
+  expected row exists. Check this on any reducer that can run before its inputs are complete.
+- **A CONTROL'S "nothing was consulted" MUST BE MEASURED, NOT WRITTEN.** The gate's control
+  event first carried a literal `"alternate_kernel_consulted": False` -- a field that echoes
+  the design and cannot witness it, the `rings_closed` shape again. Replaced by a context
+  manager that substitutes the module's own empty-pool handler with a sentinel raising a
+  CUSTOM exception if reached, and records the observed call count. Measured across every
+  control shard: `expansion_handler_calls_observed = 0`, `rung_zero_units = 0`.
+- **A BOUND CHECKED MID-RUN WHILE ITS VALIDATOR CHECKS A WEAKER CONDITION HAS A DEAD HALF AND
+  A LIVE HALF, and the live half is the dangerous one.** `t4_support_expansion` broke out of
+  the ladder with `stop_reason="draw_cap"` when the next step would cross
+  `max_extra_draws_per_event`, while `from_contract` only required the cap to admit the
+  LARGEST STEP. DEAD: under the frozen ladder the cap IS the ladder's sum (960+1920+3840 =
+  6720), so the branch could never fire and `draw_cap` was an untestable production stop
+  reason. LIVE: a policy declaring `(960, 1920)` against a cap of 2000 VALIDATED and then ran
+  ONE of its two declared steps, reporting a bound nobody wrote down. **Fix the bound where it
+  can be checked** -- at construction, against the ladder SUM, in `__post_init__` so
+  hand-built policies are covered -- and make the runtime check RAISE, because reaching it
+  means a policy bypassed its own invariant. A cap and a ladder that disagree are two ways of
+  saying one thing, and carrying both is the per-target tuning freedom the frozen ladder exists
+  to remove.
+- **FORK THE ENGINE, DO NOT MUTATE IT, WHEN SEALED CONTRACTS PIN ITS HASH.** `modal_apps/
+  t4_integrated_route_fiber_parp1_app.py` is the shared held-target engine and **19 sealed
+  contracts pin its sha256** in `runtime_inputs_sha256`, including every frozen-panel contract.
+  Mutating it would have forced re-pinning nineteen authorization records for a FROZEN panel --
+  manufacturing consent. The repo's own precedent is a fork (`t4_fa7_0_support_expansion_base_app`
+  did exactly this), and forking left every pin valid and preflight at drift 0. The cost is
+  engine drift, paid down by putting all new behaviour in `src/` and keeping the fork's delta
+  small.
+- **AN INJECTED DISPATCHER (`fan_out=`) IS WHAT MAKES AN APP FUNCTION PROBE-ABLE.** The probe
+  needs the production function to reach the router and then NOT schedule work. Closures built
+  inside the function cannot be replaced from outside, so the function has to accept the
+  dispatcher. With it, the probe drives the real `expand_support` with a dispatcher that raises,
+  which distinguishes "the router was consulted" from "consulted early enough to matter".
+- **BATCH TRIGGER EVENTS AGAINST THE CONTAINER POOL, OR THE STOPPING RULE RECORDS QUEUEING AS
+  AN ALGORITHM.** At ladder rung 3 one event wants 16 proposal units (2 lanes x 8 replicates);
+  three concurrent events oversubscribe a 40-container pool, and `run_support_expansion` checks
+  `wall_seconds` against a MONOTONIC clock. The committed standalone fa7 events already ran
+  5011-7295 s against a 7200 s wall, so 2x contention would have converted them into
+  `wall_clock` stops that look like a support finding. Two events per batch, fa7 cells in a
+  batch of their own.
+- **CROSS-PATH REPRODUCTION, MEASURED: rung-0 `state_aware` on `5ht1b_2` returns 14 eligible
+  endpoints through the production `proposal_unit`, identical to the committed standalone
+  gate's `fresh_distinct: 14` at seed 0.** The `law_off` controls likewise reproduce the
+  committed round-one `selected` counts exactly (9 of 10 at the time of writing: 8/8/8/8/8/8/7
+  and so on, `agrees_with_committed_audit` true on every one). That is what licenses saying the
+  production entrypoint is equivalent to the harness it replaces, rather than merely similar.
+- **A DECLARED CONFIGURATION CHANGE AND A CODE-PATH CHANGE MUST NOT BE MEASURED TOGETHER.** The
+  unified contracts declare `proposal.shallow.region_law = free_gate_margin_v1` and the held
+  contracts do not, so a production-entrypoint gate differs from the standalone one in TWO
+  ways. Every unit carries a `region_law_arm`, and the controls run in BOTH: `law_off`
+  reproduces the standalone draws exactly and carries the byte-identical claim, `declared`
+  shows the production contract still searches. Without the split, a per-cell difference could
+  not be attributed.
+- **FINDING FOR THE OWNER, inherited not introduced: the T4 panel is NOT one controller on
+  `proposal.route_complete_region`.** parp1/braf run `beam_width 32 / expansion_width 24 /
+  realization_limit 32` and jak2/fa7/5ht1b run `48 / 48 / 64`. These are EXECUTABLE -- they go
+  straight into `propose_route_expert_candidates` -- so the route lane is configured by target
+  identity, the exact "family of controllers" failure the routing and the frozen ladder exist
+  to remove. Recorded as a `panel_uniformity` block hashed into every unified contract
+  (`one_controller: false`) rather than resolved, because picking either value changes what the
+  route lane searches on two or three proteins and that is a scientific call.
