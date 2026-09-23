@@ -55,8 +55,12 @@ CONTROLLER = "src/compose_v4/experiments/t4_unified_controller.py"
 PROPOSAL = "src/compose_v4/experiments/t4_unified_proposal.py"
 ROUTING = "src/compose_v4/control/t4_unified_routing.py"
 
+APP = "modal_apps/t4_unified_controller_app.py"
+FA7_CONTRACT = "configs/t4_unified_controller_fa7_d06_v1.json"
+
 CONTROLLER_TESTS = "tests/test_t4_unified_controller.py"
 PROPOSAL_TESTS = "tests/test_t4_unified_proposal.py"
+APP_TESTS = "tests/test_t4_unified_controller_app.py"
 
 
 def controller(name: str) -> str:
@@ -69,9 +73,23 @@ def controller(name: str) -> str:
 def proposal(name: str) -> str:
     return f"{PROPOSAL_TESTS}::{name}"
 
+
+def appguard(name: str) -> str:
+    return f"{APP_TESTS}::{name}"
+
+
+def call_site(function: str, required: str) -> str:
+    """The call-site row for one hop. Built here so a renamed parameter id cannot
+    leave a mutation pointing at a test node that no longer exists."""
+
+    return appguard(
+        "test_the_load_bearing_call_is_made_by_the_function_that_must_make_it"
+        f"[{function}-{required}]"
+    )
+
 #: Copied into the temp tree. `configs/` is needed because the behavioural tests
 #: read the SHIPPED contracts rather than a fixture transcribed from them.
-COPIED = ("src", "tests", "configs", "pyproject.toml")
+COPIED = ("src", "tests", "configs", "modal_apps", "pyproject.toml")
 
 
 @dataclass
@@ -389,6 +407,92 @@ MUTATIONS: list[Mutation] = [
         positive_control=True,
         note="a rename cannot change behaviour; the suite must stay green",
     ),
+    # ---- The APP hop. Five of these are call-site defects a static check can
+    # see; A6 is the one it cannot, and it is the reason the by-execution guard
+    # exists at all.
+    Mutation(
+        name="A1_engine_drives_the_stopping_rule_itself",
+        path=APP,
+        edits=[("    outcome, record = routed_support_expansion(",
+                "    outcome, record = _bypassed_expansion(")],
+        must_kill=[call_site("expand_support", "routed_support_expansion")],
+        note="the empty-pool branch no longer goes through the routed expansion",
+    ),
+    Mutation(
+        name="A2_terminal_guard_is_not_run_before_publishing_exhaustion",
+        path=APP,
+        edits=[("            assert_unified_expansion_is_consumed(expansion_record, expansion)",
+                "            pass  # terminal guard removed")],
+        must_kill=[
+            appguard("test_candidate_exhaustion_is_published_only_behind_the_terminal_guard"),
+            call_site("run_cell", "assert_unified_expansion_is_consumed"),
+        ],
+        note="hop 3: a round loop quietly returning to the bare hard stop",
+    ),
+    Mutation(
+        name="A3_routing_consumption_is_never_proven",
+        path=APP,
+        edits=[("    routing_probe_attempts = assert_state_routing_is_consumed(_probe_route)",
+                "    routing_probe_attempts = 0")],
+        must_kill=[call_site("run_cell", "assert_state_routing_is_consumed")],
+        note="hop 2: the app stops proving the declared routing is installed",
+    ),
+    Mutation(
+        name="A4_proposal_worker_stops_using_the_shared_lane_unit",
+        path=APP,
+        edits=[("    answer = proposal_unit(", "    answer = _inlined_lane(")],
+        must_kill=[call_site("proposal_worker", "proposal_unit")],
+        note="the gate would then measure a different proposal law from the campaign",
+    ),
+    Mutation(
+        name="A5_contract_policy_is_not_resolved_on_every_role",
+        path=APP,
+        edits=[("    resolve_unified_controller(contract)\n    return contract",
+                "    return contract")],
+        must_kill=[call_site("_validate_task", "resolve_unified_controller")],
+        note="hop 1: a contract missing the routing or the ladder stops failing early",
+    ),
+    Mutation(
+        name="A6_rung_zero_ignores_the_route_and_always_uses_the_region_lane",
+        path=APP,
+        edits=[
+            (
+                '        for item in assignments:\n            lane = item["lane"]',
+                (
+                    '        for item in assignments:\n'
+                    '            lane = ROUTED_RUNG_ZERO_LANE["region"]'
+                ),
+            )
+        ],
+        must_kill=[
+            appguard(
+                "test_the_apps_own_expansion_routes_each_parent_and_dispatches_that_lane"
+                "[5ht1b-5ht1b_2-state_aware]"
+            )
+        ],
+        must_survive=[call_site("expand_support", "routed_support_expansion")],
+        note=(
+            "THE ONE A CALL-SITE CHECK CANNOT SEE: every required call is still made "
+            "and the record still names the routed kernel, but the lane the fan-out "
+            "is asked for no longer follows it. Only driving the app's own "
+            "expand_support and reading the dispatched requests catches it."
+        ),
+    ),
+    Mutation(
+        name="A7_a_contract_authorizes_its_own_scored_launch",
+        path=FA7_CONTRACT,
+        edits=[('"scored_launch_authorized":false', '"scored_launch_authorized":true')],
+        must_kill=[appguard("test_every_contract_refuses_to_launch_without_the_owner")],
+        note="the 22,500-call decision is the owner's, and the suite says so",
+    ),
+    Mutation(
+        name="P3_positive_control_app_comment_reflow",
+        path=APP,
+        edits=[("# ---- Resume ----", "# ---- Resume: restore a preempted cell ----")],
+        must_kill=[],
+        positive_control=True,
+        note="bytes move, nothing semantic does",
+    ),
 ]
 
 
@@ -452,7 +556,7 @@ def _pytest(tree: Path, targets: list[str]) -> subprocess.CompletedProcess:
 def _assert_no_git_dependency() -> None:
     """The reason `.git` is not copied, checked rather than asserted in prose."""
 
-    for relative in (CONTROLLER_TESTS, PROPOSAL_TESTS):
+    for relative in (CONTROLLER_TESTS, PROPOSAL_TESTS, APP_TESTS):
         text = (ROOT / relative).read_text()
         for token in ("subprocess", "git ", "check_output"):
             assert token not in text, (
@@ -480,7 +584,7 @@ def main() -> int:
     print("=" * 78)
     print("BASELINE: the unmutated tree must be green before any verdict is read")
     print("=" * 78)
-    baseline = _pytest(ROOT, [CONTROLLER_TESTS, PROPOSAL_TESTS])
+    baseline = _pytest(ROOT, [CONTROLLER_TESTS, PROPOSAL_TESTS, APP_TESTS])
     print(baseline.stdout.strip().splitlines()[-1] if baseline.stdout else "")
     if baseline.returncode != 0:
         print(baseline.stdout[-4000:])
@@ -503,7 +607,7 @@ def main() -> int:
             print(diff.rstrip())
 
             if mutation.positive_control:
-                run = _pytest(tree, [CONTROLLER_TESTS, PROPOSAL_TESTS])
+                run = _pytest(tree, [CONTROLLER_TESTS, PROPOSAL_TESTS, APP_TESTS])
                 tail = run.stdout.strip().splitlines()[-1] if run.stdout else ""
                 verdict = "GREEN" if run.returncode == 0 else "RED"
                 detail = tail

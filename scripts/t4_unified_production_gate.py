@@ -683,11 +683,23 @@ def main() -> None:
                                                 "elapsed_seconds")}), flush=True)
 
 
-if __name__ == "__main__":  # pragma: no cover - CLI
-    sys.exit(main())
 
 
 # ---- Reduction ----
+
+
+def _over(rows, predicate) -> bool | None:
+    """`all(...)` over rows, but ``None`` when there are NO rows.
+
+    `all([])` is True, so a headline built from it reads as a pass on an empty
+    table -- a metric that cannot vary is not a measurement. Returning ``None``
+    for an empty population makes an incomplete run say so instead.
+    """
+
+    rows = list(rows)
+    if not rows:
+        return None
+    return all(predicate(row) for row in rows)
 
 
 def _committed_standalone(*, root: Path = ROOT) -> dict:
@@ -828,6 +840,9 @@ def reduce_shards(shard_dir: Path, destination: Path, *, root: Path = ROOT) -> d
                 "searched": row["searched"],
                 "ladder_unreachable": row["ladder_unreachable"],
                 "alternate_kernel_consulted": row["alternate_kernel_consulted"],
+                "expansion_handler_calls_observed": row[
+                    "expansion_handler_calls_observed"
+                ],
                 "rung_zero_units": row["rung_zero_units"],
                 "ladder_units": row["ladder_units"],
                 "elapsed_seconds": row["elapsed_seconds"],
@@ -845,6 +860,29 @@ def reduce_shards(shard_dir: Path, destination: Path, *, root: Path = ROOT) -> d
     run_cells = [row for row in cells.values() if row.get("status") == "RUN"]
     passing = [row for row in run_cells if row["verdict"] == "PASS"]
 
+    complete = (
+        len(
+            [
+                row
+                for row in shards
+                if row["role"] == "trigger" and row["region_law_arm"] == PRODUCTION_ARM
+            ]
+        )
+        == len(TRIGGER_CELLS) * len(SEED_INDICES)
+        and sum(1 for row in shards if row["role"] == "control")
+        == len(CONTROL_CELLS) * len(REGION_LAW_ARMS)
+    )
+    if not complete:
+        # An incomplete table must say so rather than let `all([])` read as a
+        # pass on rows that were never run.
+        _verdict = "INCOMPLETE"
+    elif len(passing) == len(TRIGGER_CELLS) and all(
+        entry["law_off"]["agrees_with_committed_audit"] for entry in run_controls
+    ):
+        _verdict = "PASS"
+    else:
+        _verdict = "FAIL"
+
     payload = {
         "schema_version": SCHEMA_VERSION,
         "entrypoint": "production",
@@ -854,6 +892,16 @@ def reduce_shards(shard_dir: Path, destination: Path, *, root: Path = ROOT) -> d
         ),
         "oracle_calls": 0,
         "docking_calls": 0,
+        "coverage": {
+            "trigger_rows_expected": len(TRIGGER_CELLS) * len(SEED_INDICES),
+            "trigger_rows_present": sum(
+                1
+                for row in shards
+                if row["role"] == "trigger" and row["region_law_arm"] == PRODUCTION_ARM
+            ),
+            "control_rows_expected": len(CONTROL_CELLS) * len(REGION_LAW_ARMS),
+            "control_rows_present": sum(1 for row in shards if row["role"] == "control"),
+        },
         "consumption": {
             "router": {"policy": ROUTER_ID, "policy_sha256": ROUTER_SHA256},
             "ladder": {"policy": FROZEN_LADDER_ID, "policy_sha256": FROZEN_LADDER_SHA256},
@@ -873,8 +921,8 @@ def reduce_shards(shard_dir: Path, destination: Path, *, root: Path = ROOT) -> d
         "headline": {
             "trigger_cells_run": len(run_cells),
             "trigger_cells_passing": len(passing),
-            "routing_agrees_with_every_historical_arm": all(
-                row["routing_agrees"] for row in run_cells
+            "routing_agrees_with_every_historical_arm": _over(
+                run_cells, lambda row: row["routing_agrees"]
             ),
             "distinct_eligible_endpoints_total": sum(
                 row["eligible_endpoints_total"] for row in run_cells
@@ -883,23 +931,36 @@ def reduce_shards(shard_dir: Path, destination: Path, *, root: Path = ROOT) -> d
                 row["drug_like_eligible_total"] for row in run_cells
             ),
             "controls_run_law_off": len(run_controls),
-            "controls_law_off_reproduce_committed_audit": all(
-                entry["law_off"]["agrees_with_committed_audit"] for entry in run_controls
+            "controls_law_off_reproduce_committed_audit": _over(
+                run_controls, lambda e: e["law_off"]["agrees_with_committed_audit"]
             ),
             "controls_run_declared": len(declared_controls),
-            "controls_declared_all_searched": all(
-                entry[PRODUCTION_ARM]["searched"] for entry in declared_controls
+            "controls_declared_all_searched": _over(
+                declared_controls, lambda e: e[PRODUCTION_ARM]["searched"]
             ),
-            "ladder_unreachable_on_every_control": all(
-                entry[arm]["ladder_unreachable"]
-                for entry in controls.values()
-                for arm in REGION_LAW_ARMS
-                if entry.get(arm, {}).get("status") == "RUN"
+            "ladder_unreachable_on_every_control": _over(
+                [
+                    entry[arm]
+                    for entry in controls.values()
+                    for arm in REGION_LAW_ARMS
+                    if entry.get(arm, {}).get("status") == "RUN"
+                ],
+                lambda row: row["ladder_unreachable"],
+            ),
+            "alternate_kernel_never_consulted_on_a_control": _over(
+                [
+                    entry[arm]
+                    for entry in controls.values()
+                    for arm in REGION_LAW_ARMS
+                    if entry.get(arm, {}).get("status") == "RUN"
+                ],
+                lambda row: row["expansion_handler_calls_observed"] == 0,
             ),
             "any_wall_clock_stop": any(row["wall_clock_stops"] for row in run_cells),
             "oracle_calls": 0,
             "docking_calls": 0,
         },
+        "verdict": _verdict,
         "shards": sorted(
             f"{row['cell']}_seed{row['seed_index']}_{row['region_law_arm']}"
             for row in shards
@@ -909,3 +970,7 @@ def reduce_shards(shard_dir: Path, destination: Path, *, root: Path = ROOT) -> d
     envelope = {"payload": payload, "payload_sha256": identity(payload)}
     destination.write_text(json.dumps(envelope, indent=1, sort_keys=True))
     return payload
+
+
+if __name__ == "__main__":  # pragma: no cover - CLI
+    sys.exit(main())
