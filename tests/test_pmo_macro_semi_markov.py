@@ -213,3 +213,47 @@ def test_every_production_lane_yields_a_family():
         assert families, candidate
         for family in families:
             assert family in MACRO_FAMILIES or family.split(":")[0] in MACRO_FAMILIES, family
+
+
+def test_a_compound_label_does_not_buy_extra_floor_mass():
+    """A region replacement reports three labels and a plain module reports one.
+
+    Flooring per label would rescue the region replacement from starvation three times over,
+    which is a winner declared by bookkeeping. Both must receive the same floor treatment.
+    """
+    from compose_v4.control.pmo_reward_adaptive import RewardAdaptiveProgramController
+
+    brain = RewardAdaptiveProgramController()
+    rows = []
+    for index in range(40):
+        compound = index % 2 == 0
+        rows.append(
+            {
+                "parent": PHENOL,
+                "endpoint": ASPIRIN,
+                "smiles": ASPIRIN,
+                "parent_score": 0.0,
+                "families": (
+                    ["region_replace", "region_replace:fuse_ring", "fuse_ring"]
+                    if compound
+                    else ["segment_grow"]
+                ),
+                "requested_modules": 1,
+                "module_count": 1,
+                "primitives": 3,
+                "depth": 1,
+                "generation": 0,
+                "capacity_aware": False,
+            }
+        )
+    for row in rows[:30]:
+        brain.observe(row, 0.5)
+    assert brain.fitted
+    weights = brain.intent_policy(rows)
+    # Every floored group must land at or above the floor, and the compound rows must not be
+    # lifted to a multiple of it by carrying more labels.
+    compound_mass = float(sum(w for r, w in zip(rows, weights, strict=True)
+                              if "region_replace" in r["families"]))
+    plain_mass = float(sum(w for r, w in zip(rows, weights, strict=True)
+                           if "segment_grow" in r["families"]))
+    assert compound_mass <= 3 * plain_mass, (compound_mass, plain_mass)

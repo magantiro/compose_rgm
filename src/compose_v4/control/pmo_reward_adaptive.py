@@ -42,6 +42,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from compose_v4.control.pmo_contextual_macro import (
+    MACRO_FAMILIES,
     POST_EXECUTION_BLOCKS,
     PRE_EXECUTION_BLOCKS,
     ContextualMacroValue,
@@ -216,9 +217,17 @@ class RewardAdaptiveProgramController:
         value = self._endpoint_hat(self.pre, intents)
         weights = np.exp((value - value.max()) / self.temperature)
         weights = weights / weights.sum()
-        families = {f for row in intents for f in (row.get("families") or ())}
+        # Floor on VOCABULARY entries only. A region replacement reports three labels
+        # (`region_replace`, `region_replace:fuse_ring`, `fuse_ring`) where a plain module
+        # reports one, so flooring every label would rescue it from starvation three times
+        # and quietly favour one family -- a winner declared by bookkeeping rather than by
+        # data. The compound refinement stays a FEATURE; it is not an allocation group.
+        def groups(row):
+            return [f for f in (row.get("families") or ()) if f in MACRO_FAMILIES]
+
+        families = {f for row in intents for f in groups(row)}
         for family in families:
-            members = [i for i, r in enumerate(intents) if family in (r.get("families") or ())]
+            members = [i for i, r in enumerate(intents) if family in groups(r)]
             share = float(weights[members].sum())
             if share < self.family_floor:
                 weights[members] += (self.family_floor - share) / len(members)
