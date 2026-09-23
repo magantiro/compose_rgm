@@ -58,7 +58,10 @@ def main():
     queries = int(args[1]) if len(args) > 1 else 16
     budget = int(args[2]) if len(args) > 2 else 200
 
+    import numpy as np
+
     from compose_v4.control.docking_value import identity
+    from compose_v4.control.fiber_control import acquisition
     from compose_v4.control.pmo_population_controller import PmoPopulationController
     from compose_v4.control.program_campaign import ProgramQueryLedger, run_program_campaign
     from compose_v4.control.program_task import ProgramTask
@@ -89,6 +92,31 @@ def main():
             nonlocal diagnostic_evaluations
             selected, detail = super()._allocate(candidates)
             if candidates:
+                # ARM 2, measured at the same seam and never allowed to drive: the SHARED
+                # FiberControl path alone -- the controller's own fitted value and accumulated
+                # SearchState, ranked by `acquisition` over the whole pool with NO pmo_credit,
+                # no niches and no channel quotas. A separate RNG keeps the live stream intact.
+                shared_value, shared_state = self._fit_value()
+                prepared = [
+                    {
+                        "features": np.asarray(row["fiber_features"], dtype=float),
+                        "fingerprint": set(row["fiber_fingerprint"]),
+                        "parent_score": -float(
+                            row["provenance"].get("parent_measured_score", 0.0)
+                        ),
+                    }
+                    for row in candidates
+                ]
+                shared_idx = acquisition(
+                    prepared,
+                    shared_value,
+                    shared_state,
+                    np.random.default_rng(20260923),
+                    batch=len(selected),
+                    diversity=0.5,
+                    exploration=min(2, len(selected)),
+                )
+                shared_rows = [candidates[i] for i in shared_idx]
                 truth = {}
                 for row in candidates:
                     endpoint = row["endpoint"]
@@ -99,6 +127,7 @@ def main():
                 ordered = sorted(candidates, key=lambda r: -truth[r["endpoint"]])
                 oracle_pick = ordered[:room]
                 fiber_values = [truth[r["endpoint"]] for r in selected]
+                shared_values = [truth[r["endpoint"]] for r in shared_rows]
                 oracle_values = [truth[r["endpoint"]] for r in oracle_pick]
                 pool_values = [truth[r["endpoint"]] for r in candidates]
                 ranks = sorted(range(len(ordered)), key=lambda i: 0)
@@ -111,6 +140,12 @@ def main():
                         "selected": room,
                         "allocation_mode": detail.get("mode") or detail.get("role"),
                         "fiber_mean": sum(fiber_values) / max(len(fiber_values), 1),
+                        "shared_acquisition_mean": (
+                            sum(shared_values) / max(len(shared_values), 1)
+                        ),
+                        "shared_acquisition_max": max(shared_values) if shared_values else None,
+                        "shared_value_is_fitted": shared_value.weights is not None,
+                        "shared_value_observations": shared_value.n,
                         "fiber_max": max(fiber_values) if fiber_values else None,
                         "oracle_topk_mean": sum(oracle_values) / max(len(oracle_values), 1),
                         "oracle_topk_max": max(oracle_values) if oracle_values else None,
