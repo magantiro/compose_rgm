@@ -526,8 +526,19 @@ def synthesize_dynamic_program(
     max_primitives: int = 32,
     max_blocks: int = 8,
     region_law=None,
+    replacement_option=None,
+    replacement_option_rate: float = 0.0,
 ):
-    """Construct one complete K-module program without any task evaluation."""
+    """Construct one complete K-module program without any task evaluation.
+
+    ``replacement_option`` is an EXPLICIT region-replacement option, offered at each
+    module position with probability ``replacement_option_rate`` BEFORE the thirteen-family
+    lottery is drawn.  That ordering is the point: the two families that consult a region
+    law are 2 of 13, so a law reached only through the lottery governs a small minority of
+    module draws and its effect is diluted by construction.  Offering the option first is
+    what removes the dilution.  ``None`` (or rate 0.0) keeps the historical path exactly,
+    including its RNG consumption, so every existing caller stays byte-identical.
+    """
     if not 1 <= max_modules <= MAX_GENERIC_MODULES:
         raise ValueError(f"generic module count must be 1 to {MAX_GENERIC_MODULES}")
     near_capacity = source.n_real_atoms >= CAPACITY_AWARE_THRESHOLD
@@ -542,10 +553,37 @@ def synthesize_dynamic_program(
             p=module_count_distribution(count_probabilities, max_modules),
         )
     )
+    if not 0.0 <= replacement_option_rate <= 1.0:
+        raise ValueError("replacement option rate must be a probability")
+    if replacement_option_rate > 0.0 and replacement_option is None:
+        raise ValueError("a positive replacement option rate needs an option")
     current, stages, selected, failures = source, [], [], Counter()
     for module_index in range(count):
         accepted = None
-        for family in _weighted_module_order(rng, near_capacity=near_capacity):
+        # WHERE before WHAT: offer the explicit region replacement ahead of the lottery.
+        if replacement_option is not None and rng.random() < replacement_option_rate:
+            try:
+                product, stage = replacement_option.compile(current, rng)
+            except (ValueError, RuntimeError) as error:
+                failures[f"region_replace:{error!s}"] += 1
+            else:
+                candidate_stages = [*stages, stage]
+                try:
+                    program, assignment = extract_program(source, candidate_stages)
+                except ValueError as error:
+                    failures[f"region_replace:extract:{error!s}"] += 1
+                else:
+                    if (
+                        len(program.marks) <= max_primitives
+                        and len(program.blocks) <= max_blocks
+                    ):
+                        accepted = product, stage, program, assignment
+                    else:
+                        failures["region_replace:work_limit"] += 1
+        for family in (
+            () if accepted is not None
+            else _weighted_module_order(rng, near_capacity=near_capacity)
+        ):
             try:
                 product, stage = compile_generic_module(
                     current, rng, family, region_law=region_law
