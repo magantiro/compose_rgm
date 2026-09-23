@@ -1,0 +1,207 @@
+{
+ "schema_version": "pmo_macro_boundary_v1",
+ "evidence_role": "answer_known_offline_diagnostic",
+ "new_charged_oracle_calls": 0,
+ "oracle": "tdc celecoxib_rediscovery (pure rdkit, no asset)",
+ "draws_per_arm": 300,
+ "replacement_option_rate": 0.5,
+ "boundary_source": "diagnostics/pmo_macro_boundary_v1/controller_scale_boundaries_v1.json",
+ "information_boundary": "G_{i+1} is read only AFTER generation. No property of it reaches any proposal draw.",
+ "boundaries": [
+  {
+   "route": "init_02",
+   "seg": 24,
+   "boundary_kind": "terminal_cliff",
+   "source_smiles": "CC=CC=C(C)C(=CC)Nc1ccc(S(N)(=O)=O)cc1",
+   "next_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+   "required_primitives": 8,
+   "parent_score": 0.2376237623762376,
+   "next_score": 1.0,
+   "arms": {
+    "A_production": {
+     "distinct_endpoints": 259,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 29,
+     "fraction_improving": 0.11196911196911197,
+     "best_score": 0.34408602150537637,
+     "best_score_delta_vs_parent": 0.10646225912913876,
+     "best_rank_families": [
+      "carbonyl_insert",
+      "cycle_close",
+      "segment_replace"
+     ],
+     "best_smiles": "CC=C1C(C)=C(NON)N1c1ccc(S(N)(=O)=O)cc1",
+     "max_sim_to_next": 0.34408602150537637,
+     "max_sim_candidate_improves": true,
+     "seconds": 74.7
+    },
+    "B_region_option": {
+     "distinct_endpoints": 274,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 46,
+     "fraction_improving": 0.1678832116788321,
+     "best_score": 0.4084507042253521,
+     "best_score_delta_vs_parent": 0.1708269418491145,
+     "best_rank_families": [
+      "region_replace"
+     ],
+     "best_smiles": "Cc1ccc(S(N)(=O)=O)cc1",
+     "max_sim_to_next": 0.4084507042253521,
+     "max_sim_candidate_improves": true,
+     "seconds": 96.0
+    }
+   }
+  },
+  {
+   "route": "init_04",
+   "seg": 0,
+   "boundary_kind": "climb",
+   "source_smiles": "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)c1ccccc1",
+   "next_smiles": "CS(=O)(=O)c1ccccc1",
+   "required_primitives": 11,
+   "parent_score": 0.13392857142857142,
+   "next_score": 0.18072289156626506,
+   "arms": {
+    "A_production": {
+     "distinct_endpoints": 280,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 89,
+     "fraction_improving": 0.31785714285714284,
+     "best_score": 0.2543859649122807,
+     "best_score_delta_vs_parent": 0.12045739348370929,
+     "best_rank_families": [
+      "append_ring",
+      "segment_shrink"
+     ],
+     "best_smiles": "C#CCCOC(=O)C(C(C)C)S(=O)(=O)c1ccc(-c2ccccn2)cc1",
+     "max_sim_to_next": 0.5476190476190477,
+     "max_sim_candidate_improves": true,
+     "seconds": 92.9
+    },
+    "B_region_option": {
+     "distinct_endpoints": 291,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 74,
+     "fraction_improving": 0.2542955326460481,
+     "best_score": 0.23622047244094488,
+     "best_score_delta_vs_parent": 0.10229190101237345,
+     "best_rank_families": [
+      "region_replace",
+      "region_replace",
+      "bond_reroute"
+     ],
+     "best_smiles": "Cc1cc(C(Cc2cccnc2)S(=O)(=O)c2ccccc2)ccc1NONONN",
+     "max_sim_to_next": 0.5897435897435898,
+     "max_sim_candidate_improves": true,
+     "seconds": 102.3
+    }
+   }
+  },
+  {
+   "route": "init_11",
+   "seg": 0,
+   "boundary_kind": "climb",
+   "source_smiles": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COC3CCCCC3)cc2s1",
+   "next_smiles": "CCCCOCCNc1ccc2[nH]c(=N[SH2](N)=O)sc2c1",
+   "required_primitives": 7,
+   "parent_score": 0.09774436090225563,
+   "next_score": 0.11016949152542373,
+   "arms": {
+    "A_production": {
+     "distinct_endpoints": 268,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 109,
+     "fraction_improving": 0.40671641791044777,
+     "best_score": 0.184,
+     "best_score_delta_vs_parent": 0.08625563909774436,
+     "best_rank_families": [
+      "functionalize",
+      "ring_system_restate",
+      "cycle_close"
+     ],
+     "best_smiles": "CCCC(=O)N=c1sc2c(C)c3ccc2n1-c1cccc(c1)OCC(=O)N3",
+     "max_sim_to_next": 0.4931506849315068,
+     "max_sim_candidate_improves": true,
+     "seconds": 152.3
+    },
+    "B_region_option": {
+     "distinct_endpoints": 285,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 97,
+     "fraction_improving": 0.34035087719298246,
+     "best_score": 0.18840579710144928,
+     "best_score_delta_vs_parent": 0.09066143619919365,
+     "best_rank_families": [
+      "append_ring",
+      "ring_system_restate"
+     ],
+     "best_smiles": "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3cccc(-c4ccccn4)c3)cc2s1",
+     "max_sim_to_next": 0.6578947368421053,
+     "max_sim_candidate_improves": false,
+     "seconds": 162.6
+    }
+   }
+  },
+  {
+   "route": "init_13",
+   "seg": 0,
+   "boundary_kind": "climb",
+   "source_smiles": "C=CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+   "next_smiles": "CS(=O)(=O)c1ccccc1",
+   "required_primitives": 12,
+   "parent_score": 0.049586776859504134,
+   "next_score": 0.18072289156626506,
+   "arms": {
+    "A_production": {
+     "distinct_endpoints": 272,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 156,
+     "fraction_improving": 0.5735294117647058,
+     "best_score": 0.19166666666666668,
+     "best_score_delta_vs_parent": 0.14207988980716255,
+     "best_rank_families": [
+      "append_ring",
+      "ring_system_restate",
+      "substituent_delete"
+     ],
+     "best_smiles": "C=CCC(C)OC(=O)C(C(C)C)[SH2](=O)c1ccc(-c2ccccn2)cc1",
+     "max_sim_to_next": 0.4339622641509434,
+     "max_sim_candidate_improves": true,
+     "seconds": 83.9
+    },
+    "B_region_option": {
+     "distinct_endpoints": 284,
+     "failures": 0,
+     "exact_next_proposed": false,
+     "exact_next_rank": null,
+     "n_improving_parent": 138,
+     "fraction_improving": 0.4859154929577465,
+     "best_score": 0.15625,
+     "best_score_delta_vs_parent": 0.10666322314049587,
+     "best_rank_families": [
+      "ring_system_restate",
+      "region_replace"
+     ],
+     "best_smiles": "CC(C)C(CO)S(=O)(=O)c1ccccc1",
+     "max_sim_to_next": 0.5227272727272727,
+     "max_sim_candidate_improves": true,
+     "seconds": 91.0
+    }
+   }
+  }
+ ]
+}
