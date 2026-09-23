@@ -127,7 +127,18 @@
      "status": "NOT_RUN"
     },
     "law_off": {
-     "status": "NOT_RUN"
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 2103.65,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
     }
    },
    "5ht1b_1": {
@@ -304,7 +315,7 @@
   },
   "coverage": {
    "control_rows_expected": 20,
-   "control_rows_present": 9,
+   "control_rows_present": 10,
    "trigger_rows_expected": 15,
    "trigger_rows_present": 2
   },
@@ -316,7 +327,7 @@
    "controls_declared_all_searched": null,
    "controls_law_off_reproduce_committed_audit": true,
    "controls_run_declared": 0,
-   "controls_run_law_off": 9,
+   "controls_run_law_off": 10,
    "distinct_eligible_endpoints_total": 10,
    "docking_calls": 0,
    "ladder_unreachable_on_every_control": true,
@@ -334,6 +345,7 @@
   "question": "does the unified controller, run through the functions the campaign app itself calls, reproduce the support the standalone gate measured?",
   "schema_version": "t4_unified_production_gate_v1",
   "shards": [
+   "5ht1b_0_seed0_law_off",
    "5ht1b_1_seed0_law_off",
    "braf_0_seed0_declared",
    "braf_1_seed0_declared",
@@ -348,5 +360,5 @@
   ],
   "verdict": "INCOMPLETE"
  },
- "payload_sha256": "ff6e8e2aff1865509ec72146761b295623641f553f3bd00d26c88a2f1bf7364f"
+ "payload_sha256": "849a101601851dab095dcb98879f85f47ab6e5eaacc3f0c2f2b44139b2376f3d"
 }
