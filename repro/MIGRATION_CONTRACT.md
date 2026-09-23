@@ -109,6 +109,17 @@ encodes a past failure.
 - **Stale pins** are normally immutable launch records. Re-pointing one to make a
   cleanup pass succeed forges the record rather than fixing anything.
 
+## 4b. The scanner is idempotent, verified
+
+A pin scanner whose own output looks like a pin container would grow the
+read-only set every time it ran, and the second run would be worthless.
+Re-running `tools/repo_pinned_file_set.py` after committing
+`repro/pinned_paths_v1.json` (which maps paths to sha256 values) gives
+**1,879 pinned files, 0 added, 0 removed**: the manifests do not feed back into
+their own input. Two reasons, both structural rather than lucky: `repro/` is not
+in the scan set, and the manifests nest their digest one level below the path
+key, so neither recognised shape matches.
+
 ## 5. Rules for any change
 
 1. Never edit, move, rename, split or reformat a path in `repro/pinned_paths_v1.json`.
