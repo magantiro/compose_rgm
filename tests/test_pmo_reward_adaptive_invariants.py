@@ -90,3 +90,102 @@ def test_a_decision_is_clipped_while_the_stored_label_stays_raw():
     assert all(o["delta_raw"] == pytest.approx(0.95 - 0.9) for o in brain.observations)
     decision = brain._decision_utility(brain.post, rows)
     assert float(decision.min()) >= 0.0 and float(decision.max()) <= 1.0
+
+
+def test_a_self_parent_makes_the_change_block_constant():
+    """Production provenance carries no `parent_smiles`, so defaulting `parent` to the
+    candidate's own endpoint is silent and total: the change block compares a molecule with
+    itself for a similarity of 1.0 every time, the parent descriptor duplicates the endpoint
+    descriptor, and every candidate becomes its own lineage so the lineage floor is inert.
+
+    Nothing errors, which is why this is pinned as a feature-level invariant rather than
+    left to a runtime assertion.
+    """
+    from compose_v4.control.pmo_contextual_macro import FEATURE_BLOCKS
+
+    base = {
+        "endpoint": "Oc1ccccc1",
+        "smiles": "Oc1ccccc1",
+        "parent_score": 0.4,
+        "families": ["segment_grow"],
+        "realized_families": ["segment_grow"],
+        "requested_modules": 1,
+        "module_count": 1,
+        "primitives": 3,
+        "depth": 1,
+        "generation": 0,
+        "capacity_aware": False,
+    }
+    self_parent = edge_features({**base, "parent": base["endpoint"]}, blocks=FEATURE_BLOCKS)
+    real_parent = edge_features({**base, "parent": ASPIRIN}, blocks=FEATURE_BLOCKS)
+    assert not np.allclose(self_parent, real_parent)
+    # Two DIFFERENT candidates sharing one real parent must agree on the parent half and
+    # differ on the endpoint half; under a self-parent they would differ on both.
+    sibling = edge_features(
+        {**base, "parent": ASPIRIN, "endpoint": "Cc1ccccc1", "smiles": "Cc1ccccc1"},
+        blocks=FEATURE_BLOCKS,
+    )
+    assert not np.allclose(real_parent, sibling)
+
+
+def test_a_root_is_flagged_rather_than_given_a_zero_parent_score():
+    """`u_hat(G') = u(G) + delta_hat` has no meaning for a candidate with no parent.
+
+    Imputing zero would rank every root as though its parent scored the worst possible
+    value, and would teach the regression that unscored parents are worthless -- the same
+    failure the endpoint join fixed, one layer down.
+    """
+    brain = RewardAdaptiveProgramController()
+    parented = [_row("regrow", parent_score=0.8) for _ in range(30)]
+    for row in parented:
+        brain.observe(row, 0.85)
+    assert brain.fitted
+    # A root scored with an imputed zero parent would be predicted far below the parented
+    # rows purely from the offset, regardless of its chemistry.
+    root = {**_row("regrow"), "parent_score": 0.0}
+    hat = brain._endpoint_hat(brain.post, [parented[0], root])
+    assert hat[0] - hat[1] == pytest.approx(0.8, abs=0.2)
+
+
+def test_passing_the_option_without_a_rate_is_inert():
+    """`replacement_option_rate` defaults to 0.0, so handing over a RegionReplacementOption
+    and nothing else offers it zero times.
+
+    A wrapper that does exactly that reads as correct at every layer -- the option is
+    constructed, passed, and accepted -- and produces no region replacement at all. This is
+    the seventh built-but-inert mechanism found in this repo, so it is pinned by execution
+    rather than by review.
+    """
+    from rdkit import RDLogger
+
+    RDLogger.DisableLog("rdApp.*")
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+    from compose_v4.control.dynamic_program_synthesis import synthesize_dynamic_program
+    from compose_v4.control.pmo_contextual_macro import macro_families
+    from compose_v4.control.region_replacement_option import RegionReplacementOption
+
+    source = pad_molecular_graph(smiles_to_molecular_graph(ASPIRIN), 48)
+    option = RegionReplacementOption()
+
+    def realized(rate, draws=60):
+        rng = np.random.default_rng(11)
+        found = 0
+        for _ in range(draws):
+            try:
+                _s, program, _a, _t, metadata = synthesize_dynamic_program(
+                    source, rng, max_modules=3, max_primitives=32, max_blocks=8,
+                    replacement_option=option, replacement_option_rate=rate,
+                )
+            except (ValueError, RuntimeError):
+                continue
+            candidate = {
+                "provenance": {"metadata": metadata}, "program": program.payload()
+            }
+            found += sum(
+                1 for f in macro_families(candidate) if f.startswith("region_replace:")
+            )
+        return found
+
+    assert realized(0.0) == 0
+    assert realized(0.5) > 0
