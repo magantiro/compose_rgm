@@ -1826,8 +1826,8 @@
       "import_ok": true
     },
     "scripts/hphi_valid128_curve.py": {
-      "error": "TimeoutExpired: import did not finish",
-      "import_ok": false
+      "error": null,
+      "import_ok": true
     },
     "scripts/hphi_valid128_read.py": {
       "error": null,
@@ -3538,7 +3538,7 @@
       "import_ok": true
     }
   },
-  "import_ok_count": 831,
+  "import_ok_count": 832,
   "interpreter": "/Users/rmaganti/compose_rgm_git/.venv/bin/python",
   "per_directory": {
     "modal_apps": {
@@ -3546,7 +3546,7 @@
       "total": 286
     },
     "scripts": {
-      "import_ok": 292,
+      "import_ok": 293,
       "total": 339
     },
     "tools": {
@@ -3554,5 +3554,19 @@
       "total": 259
     }
   },
-  "schema_version": 1
+  "schema_version": 1,
+  "side_effects": {
+    "clean_after": false,
+    "note": "Importing an entry point RUNS it when the module has no __main__ guard. 215 entry points here perform a module-level write. Paths the scan touched are listed, and restored only when the tree started clean.",
+    "paths_touched_by_the_scan": [
+      " M docs/VALID128_K8_RESULT.json",
+      "?? diagnostics/t4_snapshot.json"
+    ],
+    "restored": [],
+    "unrestored_residue": [
+      " M docs/VALID128_K8_RESULT.json",
+      "?? diagnostics/t4_snapshot.json"
+    ],
+    "worktree_started_clean": false
+  }
 }

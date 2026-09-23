@@ -1,10 +1,10 @@
 {
   "after_entry_points": 884,
-  "after_import_ok": 831,
+  "after_import_ok": 832,
   "baseline_entry_points": 877,
   "baseline_import_ok": 821,
   "entry_points_no_longer_present": [],
-  "newly_importable_count": 10,
+  "newly_importable_count": 11,
   "regressed_count": 0,
   "regressed_entry_points": [],
   "verdict": "ENTRY_POINTS_PRESERVED"

@@ -22,6 +22,21 @@ effect, ``sys.exit`` or hang destroy the measurement for every file after it, an
 an entry point that hangs is exactly the kind of thing this check should report
 rather than be killed by.
 
+IMPORTING IS NOT SIDE-EFFECT FREE, AND THIS TOOL LEARNED THAT THE HARD WAY.
+215 of this repository's entry points perform a module-level write with no
+``if __name__ == "__main__"`` guard, so importing them RUNS them. A first run of
+this check executed ``scripts/hphi_valid128_read.py``, which rewrote
+``docs/VALID128_K8_RESULT.json`` and silently dropped its comparator block, panel
+description and revision note: committed scientific record, destroyed by a
+measurement that was supposed to observe. Nothing in the check noticed.
+
+So the scan now brackets itself with ``git status --porcelain``. If the tree was
+CLEAN beforehand, any path the scan touched is restored and reported. If the tree
+was already dirty, nothing is touched, because telling someone else's
+uncommitted work apart from a probe's side effect is not something this tool can
+do, and guessing would be worse than reporting. Either way the mutated paths
+appear in the report rather than being absorbed silently.
+
 The comparison rule is a SUPERSET check on the set of entry points whose import
 succeeds. An entry point that already fails at baseline is recorded with its
 error so the failure is attributable and cannot later be mistaken for a
@@ -104,7 +119,41 @@ def _probe(root: pathlib.Path, relative: str, interpreter: str) -> tuple[str, di
     }
 
 
+def _worktree_state(root: pathlib.Path) -> set[str]:
+    completed = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=str(root), capture_output=True, text=True, check=False,
+    )
+    return {line for line in completed.stdout.splitlines() if line.strip()}
+
+
+def _restore(root: pathlib.Path, entries: set[str]) -> list[str]:
+    """Undo what the scan wrote. Only ever called when the tree started clean."""
+    restored: list[str] = []
+    for entry in sorted(entries):
+        _status, _, path = entry.partition(" ")
+        path = path.strip().strip('"')
+        if not path:
+            continue
+        if entry.startswith("??"):
+            target = root / path
+            try:
+                if target.is_file():
+                    target.unlink()
+                    restored.append(f"removed {path}")
+            except OSError:
+                restored.append(f"COULD NOT REMOVE {path}")
+        else:
+            subprocess.run(
+                ["git", "checkout", "--", path], cwd=str(root), capture_output=True, check=False
+            )
+            restored.append(f"reverted {path}")
+    return restored
+
+
 def build_report(root: pathlib.Path, interpreter: str) -> dict[str, Any]:
+    before = _worktree_state(root)
+    started_clean = not before
     entry_points = discover_entry_points(root)
     results: dict[str, Any] = {}
     with concurrent.futures.ThreadPoolExecutor(MAX_CONCURRENT_SUBPROCESSES) as pool:
@@ -121,12 +170,31 @@ def build_report(root: pathlib.Path, interpreter: str) -> dict[str, Any]:
             "total": len(members),
             "import_ok": sum(1 for n in members if results[n]["import_ok"]),
         }
+    after = _worktree_state(root)
+    touched = sorted(after - before)
+    restored: list[str] = []
+    if touched and started_clean:
+        restored = _restore(root, set(touched))
+    residue = sorted(_worktree_state(root) - before)
+
     return {
         "schema_version": 1,
         "interpreter": interpreter,
         "entry_point_count": len(results),
         "import_ok_count": len(ok),
         "per_directory": per_directory,
+        "side_effects": {
+            "note": (
+                "Importing an entry point RUNS it when the module has no __main__ guard. "
+                "215 entry points here perform a module-level write. Paths the scan touched "
+                "are listed, and restored only when the tree started clean."
+            ),
+            "worktree_started_clean": started_clean,
+            "paths_touched_by_the_scan": touched,
+            "restored": restored,
+            "unrestored_residue": residue,
+            "clean_after": not residue,
+        },
         "entry_points": {name: results[name] for name in sorted(results)},
     }
 
@@ -169,6 +237,17 @@ def main() -> int:
         f"entry_points={report['entry_point_count']} import_ok={report['import_ok_count']} "
         f"per_directory={report['per_directory']} -> {out}"
     )
+    side = report["side_effects"]
+    if side["paths_touched_by_the_scan"]:
+        print(f"SIDE EFFECTS: the scan touched {len(side['paths_touched_by_the_scan'])} path(s)")
+        for entry in side["paths_touched_by_the_scan"][:20]:
+            print(f"   {entry}")
+        for entry in side["restored"][:20]:
+            print(f"   {entry}")
+        if side["unrestored_residue"]:
+            print("   UNRESTORED -- the tree was already dirty, so nothing was touched:")
+            for entry in side["unrestored_residue"][:20]:
+                print(f"     {entry}")
 
     if args.compare:
         baseline = json.loads(pathlib.Path(args.compare).read_text(encoding="utf-8"))
