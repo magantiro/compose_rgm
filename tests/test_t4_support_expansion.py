@@ -166,18 +166,68 @@ def test_a_ladder_that_never_yields_is_exhaustion_with_the_bound_named():
     assert not outcome.found_any
 
 
-def test_the_draw_cap_binds_before_the_ladder_ends():
-    outcome = run_support_expansion(
+def test_a_cap_below_its_own_ladder_is_refused_at_construction_not_mid_run():
+    """The `draw_cap` fix: the bound now binds where it can be checked.
+
+    `draw_ladder=(960, 1920)` with `max_extra_draws_per_event=2000` used to
+    VALIDATE -- the old rule only required the cap to admit the largest STEP --
+    and then run exactly ONE of its two declared steps, reporting
+    `stop_reason="draw_cap"` for a bound nobody wrote down. It is refused before
+    anything is spent.
+    """
+
+    with pytest.raises(SupportExpansionContractError) as refusal:
         _policy(
             zero_support_fallback=False,
             draw_ladder=[960, 1920],
             max_extra_draws_per_event=2000,
-        ),
-        escalate=lambda draws, attempt: [],
+        )
+    assert "2880" in str(refusal.value)
+
+
+def test_a_policy_that_bypasses_construction_cannot_truncate_its_ladder_silently():
+    """Defence in depth: the runtime cap check RAISES, it does not stop.
+
+    `object.__new__` plus `object.__setattr__` is the only way to reach this
+    state, and it is used here precisely because no legitimate caller can
+    produce it. A policy that got past `__post_init__` and would still cross its
+    cap is a bug, so the event must fail loudly rather than record a short
+    ladder as an ordinary stop.
+    """
+
+    rogue = object.__new__(SupportExpansionPolicy)
+    for name, value in {
+        "draw_ladder": (960, 1920),
+        "lanes": ("shallow",),
+        "zero_support_fallback": False,
+        "stop_at_distinct_eligible": 4,
+        "max_extra_draws_per_event": 2000,
+        "wall_seconds": 60.0,
+    }.items():
+        object.__setattr__(rogue, name, value)
+
+    with pytest.raises(SupportExpansionContractError):
+        run_support_expansion(rogue, escalate=lambda draws, attempt: [])
+
+
+def test_the_frozen_ladder_spends_exactly_its_declared_total():
+    """The frozen ladder's cap IS its sum, so the whole ladder always runs.
+
+    This is the fact that made the old mid-run check dead code. Asserting it by
+    name means a future ladder growing past its own declared total is caught
+    here rather than by a branch that can never fire.
+    """
+
+    from compose_v4.control.frozen_proposal_escalation import FROZEN_LADDER
+
+    assert sum(FROZEN_LADDER.draw_ladder) == FROZEN_LADDER.max_extra_draws_per_event
+
+    outcome = run_support_expansion(
+        FROZEN_LADDER, escalate=lambda draws, attempt: [], fallback=lambda: ([], {})
     )
-    assert outcome.stop_reason == "draw_cap"
-    assert outcome.attempts == 1
-    assert outcome.draws_spent == 960
+    assert outcome.stop_reason == "ladder_exhausted"
+    assert outcome.attempts == len(FROZEN_LADDER.draw_ladder)
+    assert outcome.draws_spent == FROZEN_LADDER.max_extra_draws_per_event
 
 
 def test_the_wall_clock_binds_and_is_checked_before_a_step_is_spent():
@@ -293,7 +343,7 @@ def test_publishing_exhaustion_without_an_expansion_is_refused():
 def test_an_event_that_ran_no_stage_at_all_is_refused():
     """A misconfigured bound that spends nothing must not end the cell."""
 
-    outcome = ExpansionOutcome(stop_reason="draw_cap")
+    outcome = ExpansionOutcome(stop_reason="wall_clock")
     with pytest.raises(SupportExpansionNotConsumed):
         assert_support_expansion_is_consumed(outcome)
 

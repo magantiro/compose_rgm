@@ -59,14 +59,48 @@ THE STOPPING RULE
 Stop at the first of:
 
 ``reached_target``     `stop_at_distinct_eligible` distinct endpoints accumulated
-``draw_cap``           the next ladder step would exceed `max_extra_draws_per_event`
 ``wall_clock``         `wall_seconds` elapsed since the event began
 ``ladder_exhausted``   every ladder step ran
 
 Only `reached_target` is not, by itself, grounds to end the cell; the caller
-still has to select from what came back.  The other three are written verbatim
+still has to select from what came back.  The other two are written verbatim
 into the round lock, so a terminal result records WHICH bound stopped it instead
 of a bare status string.
+
+WHY THERE IS NO ``draw_cap`` STOP REASON, AND WHY THAT IS THE FIX
+------------------------------------------------------------------
+`max_extra_draws_per_event` is the event's declared total spend.  It used to be
+checked mid-run -- the loop broke with ``stop_reason="draw_cap"`` the first time
+the next step would cross it -- while `from_contract` only required the cap to
+admit the LARGEST STEP.  Those two facts together are a defect with a dead half
+and a live half:
+
+DEAD.  Under the frozen ladder the cap IS the ladder's sum (960+1920+3840 =
+6720), so `spent + step` reaches the cap exactly and never exceeds it.  The
+branch could not fire, which made ``draw_cap`` an untestable production stop
+reason -- a guard is only tested where it binds, and this one never bound.
+
+LIVE, and worse.  A policy declaring ``draw_ladder=(960, 1920)`` with
+``max_extra_draws_per_event=2000`` PASSED validation (1920 <= 2000) and then ran
+exactly ONE of its two declared steps, reporting a bound its author never meant
+to set.  Silently spending less than the declared ladder is the same class of
+failure this module exists to prevent: a bounded search whose realized bound is
+not the one anybody wrote down.
+
+So the cap is now enforced where it can actually be checked -- at CONSTRUCTION,
+against the ladder's SUM, in `__post_init__` so a hand-built policy is covered
+too, and again in `from_contract` with a contract-shaped message.  A policy
+whose cap cannot admit its own ladder is refused before a single CPU-second is
+spent rather than discovered halfway through.  The cap keeps its stated purpose
+-- it is the tripwire for a future ladder that grows past its own declared total
+-- and now that tripwire actually fires.
+
+The runtime check survives as defence in depth and RAISES rather than breaking:
+reaching it means a policy bypassed its own construction invariant, which is a
+bug and not a legitimate stop.  A ladder that should spend less must be declared
+shorter; a cap and a ladder that disagree are two ways of saying one thing, and
+carrying both is exactly the per-target tuning freedom
+`compose_v4.control.frozen_proposal_escalation` exists to remove.
 """
 
 from __future__ import annotations
@@ -115,6 +149,30 @@ class SupportExpansionPolicy:
     stop_at_distinct_eligible: int
     max_extra_draws_per_event: int
     wall_seconds: float
+
+    def __post_init__(self) -> None:
+        """Refuse a policy whose cap cannot admit its own declared ladder.
+
+        This is the CONSTRUCTION-time form of the bound that used to be
+        discovered mid-run as ``stop_reason="draw_cap"``.  It lives here rather
+        than only in `from_contract` so a hand-built policy -- the form every
+        test and `frozen_proposal_escalation.FROZEN_LADDER` itself use -- is
+        covered by the same invariant a contract-built one is.
+
+        After this, ``spent + step <= sum(draw_ladder) <= max_extra_draws_per_event``
+        holds at every ladder step, so the runtime cap check is unreachable and
+        a ladder always runs to the length it declares.
+        """
+
+        total = sum(self.draw_ladder)
+        if self.max_extra_draws_per_event < total:
+            raise SupportExpansionContractError(
+                f"max_extra_draws_per_event={self.max_extra_draws_per_event} cannot "
+                f"admit the declared draw_ladder {list(self.draw_ladder)} summing to "
+                f"{total}; the event would silently run only part of its own ladder "
+                "and report a bound nobody declared. Shorten the ladder or raise the "
+                "cap -- the two must agree before anything is spent"
+            )
 
     @staticmethod
     def from_contract(block: Any) -> SupportExpansionPolicy:
@@ -169,10 +227,15 @@ class SupportExpansionPolicy:
                 f"{CONTRACT_FIELD}.stop_at_distinct_eligible must be at least one"
             )
         cap = int(block.get("max_extra_draws_per_event", 0))
-        if cap < max(ladder):
+        if cap < sum(ladder):
+            # The SUM, not the largest step. A cap that admits only some prefix
+            # of the ladder validated under the old rule and then truncated the
+            # event mid-flight, which is a bound the contract never declared.
             raise SupportExpansionContractError(
-                f"{CONTRACT_FIELD}.max_extra_draws_per_event must admit at least the "
-                f"largest ladder step ({max(ladder)}), got {cap}"
+                f"{CONTRACT_FIELD}.max_extra_draws_per_event must admit the WHOLE "
+                f"declared ladder {list(ladder)} summing to {sum(ladder)}, got {cap}; "
+                "a cap below its own ladder would run only part of it and report a "
+                "bound the contract never declared"
             )
         wall = float(block.get("wall_seconds", 0.0))
         if wall <= 0:
@@ -335,8 +398,17 @@ def run_support_expansion(
     else:
         for attempt, step in enumerate(policy.draw_ladder):
             if spent + step > policy.max_extra_draws_per_event:
-                stop_reason = "draw_cap"
-                break
+                # Unreachable for any policy that passed `__post_init__`, which
+                # requires the cap to admit the ladder's SUM. Reaching it means a
+                # policy bypassed its own construction invariant, so this is a
+                # bug and not a stop: truncating here is how an event used to
+                # spend less than its declared ladder without saying so.
+                raise SupportExpansionContractError(
+                    f"ladder step {attempt} of {list(policy.draw_ladder)} would take "
+                    f"spend to {spent + step} against a declared cap of "
+                    f"{policy.max_extra_draws_per_event}; this policy violates its own "
+                    "construction invariant and must not truncate its ladder silently"
+                )
             if clock() - started >= policy.wall_seconds:
                 stop_reason = "wall_clock"
                 break
