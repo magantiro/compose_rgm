@@ -4653,3 +4653,88 @@ independently of whether fa7_0 ever closes.**
   to remove. Recorded as a `panel_uniformity` block hashed into every unified contract
   (`one_controller: false`) rather than resolved, because picking either value changes what the
   route lane searches on two or three proteins and that is a scientific call.
+
+## 2026-09-23 (route-width standardization: uniform-at-a-value-nothing-reads is not uniformity)
+
+- **THE T4 PANEL RAN TWO ROUTE SEARCHES SELECTED BY TARGET IDENTITY, and it is now one.**
+  parp1/braf declared `beam_width 32 / expansion_width 24 / realization_limit 32` and jak2/fa7/5ht1b
+  `48 / 48 / 64`; `t4_unified_proposal.proposal_unit` passes all three straight into
+  `propose_route_expert_candidates`, so they are EXECUTABLE, not descriptive. Standardized to
+  48/48/64 for every target. `panel_uniformity` now reads `one_controller: true` with zero divergent
+  controller parameters over 15 checked.
+- **A BEAM IS NOT NESTED IN ITS WIDTH, so this was measured rather than deduced.** Widening
+  `beam_width` changes which partial programs survive each layer and `expansion_width` changes how
+  many successors each contributes, so the set of complete programs reaching realization can MOVE
+  rather than grow. Criteria were sealed (`82e356a047331a44`) before any number was read; the driver
+  refuses to publish a verdict if that file's hash moves.
+- **MEASURED, six parp1/braf cells, zero oracle calls, pinned kernel, only the widths differing:
+  the eligible endpoint SETS are IDENTICAL on every cell** -- 0 lost, 0 gained, 10 eligible in each
+  arm. Stronger than the containment the check asked for.
+- **THE COST COLUMN SAYS TWO THINGS AND I FIRST RECORDED NEITHER.** I called the change "pure
+  cleanup" because it produced nothing new. (a) It is NOT free: `braf_1` runs 5.5 s narrow and
+  **201.2 s wide -- 36x the search effort for an identical eligible set, zero endpoints bought**.
+  That is a measured PRICE paid for removing a target-keyed conditional, worth paying (201 s sits
+  inside both the 600 s sealed bound and the 1800 s worker bound) but not nothing. (b) Read the
+  other way it is a FINDING: **an eligible set that does not move across a 2x-to-36x effort range is
+  the strongest available evidence that the lane on those cells is genuinely EXHAUSTED rather than
+  under-searched.** "Produced nothing new" and "cost nothing" are different claims, and the second
+  one was wrong.
+- **THE EXECUTABLE DIVERGENCE WAS FOUR FIELDS, NOT THREE, and the fourth is the interesting one.**
+  `scale_balanced` also differed (true on three arms, absent on two) and IS a real parameter of
+  `propose_route_expert_candidates` -- but **no production caller passes it**, so all five arms
+  already ran the function default `False` whatever their contract said. **DROPPED rather than made
+  uniform: uniform-at-a-value-nothing-reads is not uniformity.** Standardizing only the three named
+  widths would have produced `one_controller: true` sitting beside a fourth paper divergence. This
+  is the same declared-but-unconsumed defect class the repo has now hit six times.
+- **`training_split` IS KEPT and named separately as per-target BY PROTOCOL.** The route expert for
+  protein P is fit leave-P-out, which is what makes the panel held-target -- a benchmark INPUT in the
+  same sense as delta or the start molecule, not a tuning knob. Folding it into the divergence test
+  would make `one_controller` permanently unreachable for a protocol working as designed. The
+  uniformity comparison therefore runs on the lane's EXECUTABLE keys and names the protocol field
+  beside it, rather than hiding it inside the claim.
+- **A RE-SEAL MID-GATE IS A REAL BOUNDARY: publish it, do not argue the content is unaffected.**
+  Re-sealing moved all five contract payload hashes while the zero-oracle gate was in flight, so its
+  shards span two contract identities. The reducer now emits `contract_identities_seen` per cell.
+  (The running Modal image was baked with the old contracts via `add_local_file(copy=True)`, so
+  nothing changed underneath a live run -- but a table assembled across the boundary must SAY so.)
+
+## 2026-09-23 (the production-entrypoint gate: a two-sided attribution, and one exhibit)
+
+- **THE TWO-SIDED CHECK IS WHAT MAKES THE GATE'S ATTRIBUTION SAFE, and either half alone would be
+  weak.** Running the support gate through the production functions rather than a faithful harness
+  differs from the committed standalone in TWO declared ways (code path; the unified contracts carry
+  `proposal.shallow.region_law` and the held contracts do not). Both halves were measured:
+      IDENTICAL WHERE IT MUST BE  rung 0 is the zero-support fallback and never touches the region
+                                  law: braf_0 4=4, braf_1 6=6, 5ht1b_2 14=14, fa7_0 0=0, fa7_2 2=2
+                                  against the committed standalone. Five cells, five exact matches.
+      DIFFERENT WHERE IT SHOULD BE  the law is shallow-only by contract and ONLY the shallow lane
+                                  moved (0 -> 9 and 0 -> 24 on the two braf cells); the other two
+                                  lanes stayed at 0 and correctly report `region_law: None`.
+  Plus all ten `law_off` controls reproducing the committed round-one `selected` counts EXACTLY.
+  That combination rules out the integration as the cause of anything that moved.
+- **A CELL CAN RECOVER SUPPORT *AND* NO LONGER EXHAUST, and those are different facts.** Under the
+  declared region law `braf_0`, `braf_1` and `fa7_2` select a full round-one batch where the law-off
+  reference selects 0 -- their trigger condition dissolves. The gate still scores them PASS on the
+  support question, but `ladder_fired_without_trigger` is true, so the expansion measured beneath
+  them is NOT what production would have done. Headline field
+  `trigger_cells_whose_exhaustion_did_not_reproduce` names them rather than letting a PASS read as
+  ladder evidence.
+- **fa7_0 seed 0 IS THE LADDER EXHIBIT and the only production-faithful one so far.** Its trigger
+  REPRODUCES (round one still selects nothing even with the law), rung 0 still yields nothing, and
+  rungs 1-2 produce all 6 eligible endpoints -- all 6 med-chem plausible -- reaching the target where
+  the standalone took three rungs to reach 3 and exhausted the ladder. The BRAF PASSes are rung-0
+  results and must not be quoted as ladder evidence.
+- **Rungs 1-3 run on only 7 of 15 seed-rows** (fa7_0 x3, fa7_2 x3, braf_0 seed 1), from the committed
+  standalone data. braf_1 and 5ht1b_2 never reach the ladder on any seed. So most of the panel tests
+  the ROUTING and rung 0; the ladder itself has a narrow exhibit set, and saying which rows carry
+  which claim is the difference between a gate and a scoreboard.
+- **`all([])` IS TRUE, so a reducer run before its inputs are complete reports a PASS on zero rows.**
+  The first partial reduction read `routing_agrees_with_every_historical_arm: true` over ZERO trigger
+  rows. Fixed with an `_over(rows, predicate)` returning `None` on an empty population, coverage
+  counts published beside the headline, and a top-level verdict that is `INCOMPLETE` until every
+  expected row exists. Check this on any reducer that can run mid-flight.
+- **Batch trigger events at most TWO at a time.** At ladder rung 3 one event wants 16 proposal units
+  (2 lanes x 8 replicates), so three concurrent events oversubscribe a 40-container pool -- and
+  `run_support_expansion` checks `wall_seconds` against a MONOTONIC clock, so queueing would be
+  recorded as an algorithmic stop. The committed standalone fa7 events already ran 4,876-7,295 s
+  against a 7,200 s wall. Measured outcome of respecting this: zero `wall_clock` stops so far.
