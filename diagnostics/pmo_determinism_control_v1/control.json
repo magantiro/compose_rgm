@@ -1,0 +1,37 @@
+{
+ "schema_version": "pmo_determinism_control_v1",
+ "evidence_role": "same_configuration_negative_control",
+ "arms": [
+  "/private/tmp/claude-502/-Users-rmaganti-compose-rgm-git--worktrees-t4-objective-dynamic-reset-20260916/bb0c2749-8879-4944-95f7-4b5f1d1086ea/scratchpad/detB1",
+  "/private/tmp/claude-502/-Users-rmaganti-compose-rgm-git--worktrees-t4-objective-dynamic-reset-20260916/bb0c2749-8879-4944-95f7-4b5f1d1086ea/scratchpad/detB2"
+ ],
+ "findings": {
+  "parent_probabilities": {
+   "compared": 9,
+   "first_difference": null
+  },
+  "rebuild_option_probabilities": {
+   "compared": 3,
+   "first_difference": null
+  },
+  "selected_endpoints_per_round": {
+   "compared": 5,
+   "first_difference": null
+  },
+  "generated_endpoint_sequence": {
+   "compared": 112,
+   "first_difference": null
+  },
+  "observations_rewards_updates": {
+   "compared": 80,
+   "first_difference": null
+  },
+  "rng_state": {
+   "compared": 1,
+   "first_difference": null
+  }
+ },
+ "empty_comparisons": [],
+ "first_divergence": null,
+ "verdict": "REPRODUCIBLE"
+}

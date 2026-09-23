@@ -35,6 +35,8 @@ anywhere in the controller.  The budget is enforced by the ledger, which is the 
 """
 from __future__ import annotations
 
+import contextlib
+import dataclasses
 import json
 import os
 import pathlib
@@ -49,6 +51,37 @@ import numpy as np
 # Overridable so a wiring SMOKE writes to its own directory and can never be mistaken for,
 # or merged with, the scored run. A smoke and a result must not share a ledger.
 OUT = os.environ.get("CANARY_OUT", "diagnostics/pmo_reward_adaptive_canary_v1")
+#: Activate the repo's SHIPPED context-local serialization memo. It is keyed on exact array
+#: bytes, so it returns what the uncached call returns and changes no decision, no RNG draw
+#: and no candidate -- measured 1.74x on the real synthesis path with an element-wise
+#: identical endpoint sequence. Size is immaterial above a few hundred (512 == 8192 ==
+#: 65536 measured), so the smallest sufficient value is used. Env-toggleable ONLY so the
+#: equivalence harness can run both arms through identical code.
+SERIALIZATION_CACHE_ENTRIES = int(os.environ.get("CANARY_SMILES_CACHE") or "512")
+
+#: PROPOSAL BREADTH IS A COUNT, NOT A DURATION.
+#:
+#: Both proposal loops stop on `len(candidates) >= CHANNEL_CANDIDATE_LIMIT OR elapsed >=
+#: wall_seconds`. With the wall term live, machine speed is an input to the search: a faster
+#: process fits more attempts inside the same 45 s and builds a different pool from the same
+#: seed. That is why a memo returning byte-identical SMILES still moved the trajectory, and
+#: it would also mean two Modal containers of differing speed ran different searches.
+#:
+#: Raising the wall bound past any achievable runtime makes the COUNT the sole normal stop,
+#: so the proposal envelope is identical on a laptop, a fast container and a slow one. The
+#: matched beam was already count-based (`for _ in range(8)`), so this makes the two arms
+#: agree rather than changing one of them.
+PROPOSAL_WALL_SECONDS = float(os.environ.get("CANARY_PROPOSAL_WALL") or "1e9")
+
+#: Wall clock survives ONLY as a fail-loud safety bound. A round that exceeds it aborts the
+#: run; it never silently returns a smaller pool and continues, which is exactly the failure
+#: the count-based envelope exists to remove.
+HARD_ROUND_TIMEOUT_SECONDS = float(os.environ.get("CANARY_HARD_TIMEOUT") or "3600")
+
+#: Controller seed. Absent, the contract seed is used, so every existing run is
+#: unchanged. Supplied, it is the ONLY thing that differs between replicates -- the
+#: initialization bank and every controller constant stay frozen.
+SEED_OVERRIDE = os.environ.get("CANARY_SEED")
 BEAM = "diagnostics/pmo_matched_beam_v1/matched_beam_v1.json"
 BEAM_SOURCE = "scripts/pmo_matched_beam_control.py"
 POOL_TARGET = 128
@@ -79,6 +112,7 @@ def main():
     queries = int(args[2]) if len(args) > 2 else 16
     task_name = args[3] if len(args) > 3 else "celecoxib_rediscovery"
 
+    from compose_v4.chem.molecular_graph import molecular_serialization_cache
     from compose_v4.control import dynamic_program_synthesis as dps
     from compose_v4.control import dynamic_program_synthesis_v21 as v21
     from compose_v4.control.docking_value import identity
@@ -107,6 +141,30 @@ def main():
     # The REAL pool cap. `candidates_per_batch` does not govern this path -- an arm that set it
     # produced byte-identical numbers to its control, which is how that was caught.
     v21.CHANNEL_CANDIDATE_LIMIT = POOL_TARGET
+
+    # THE SECOND WALL-CLOCK STOP. The jump lane's realizer is capped by
+    # `PRODUCTION_SECONDS_CAP = 20.0` as well as by `PRODUCTION_NODE_BUDGET = 64`, so a
+    # faster run completes a different number of realizations and builds a different pool.
+    # That is what made two IDENTICAL uncached arms disagree on parent probabilities by
+    # 6.3e-4 while every charged decision still matched -- the jump lane contributes few
+    # charged candidates, so it perturbed the pool without yet moving the trajectory.
+    #
+    # The node budget is the deterministic bound and is the one that actually governs
+    # successes: measured, every realization needs at most 55 of the 64 nodes and finishes
+    # within 16.9 s, while only the unproductive searches run 18-64 s. Raising the seconds
+    # cap therefore preserves every success and merely lets hopeless searches reach their
+    # node limit. Patched in EVERY namespace holding the constant, because a module that
+    # imported the value bound it at import time.
+    _realizer_cap = float(os.environ.get("CANARY_REALIZER_SECONDS") or "1e9")
+    _patched_caps = []
+    for _name, _module in list(sys.modules.items()):
+        if not _name.startswith("compose_v4"):
+            continue
+        if getattr(_module, "PRODUCTION_SECONDS_CAP", None) is not None:
+            _module.PRODUCTION_SECONDS_CAP = _realizer_cap
+            _patched_caps.append(_name)
+    if not _patched_caps:
+        raise RuntimeError("realizer seconds cap not found; proposal breadth stays timed")
 
     # Expose the full macro portfolio on the production path.  Wrapped, not transcribed: the
     # real `synthesize_dynamic_program` still does the work and still decides, so the arm
@@ -156,7 +214,9 @@ def main():
         root, {"initialization": contract["initialization"]}
     )
     checkpoint = production._load_checkpoint(root, contract)
-    config = production.configuration(contract["controller"]["seed"])
+    seed = int(SEED_OVERRIDE) if SEED_OVERRIDE else int(contract["controller"]["seed"])
+    config = production.configuration(seed)
+    config = dataclasses.replace(config, wall_seconds=PROPOSAL_WALL_SECONDS)
     task = ProgramTask(
         task_name, identity(production._runtime_protocol(contract, task_name)), "pmo"
     )
@@ -169,6 +229,7 @@ def main():
         "rounds": [], "pool_sizes": [], "policy_shifts": [], "option_policy": [],
         "unscored_parents": 0, "out_of_range_predictions": 0, "duplicate_endpoints": 0,
         "unallocated_batches": 0, "unattributed_outcomes": 0, "root_candidates": 0,
+        "selected_endpoints": [], "rng_state": None,
         "region_replace_with_rebuild": 0, "region_replace_bare": 0,
         "intent_differs_from_realized": 0,
     }
@@ -344,6 +405,7 @@ def main():
             return keys, (blended / total if total > 0 else weights)
 
         def _allocate(self, candidates):
+            self._round_began = getattr(self, "_round_began", time.time())
             if not candidates:
                 return super()._allocate(candidates)
             rows = rows_of(self, candidates)
@@ -416,11 +478,29 @@ def main():
             ]
             outside = [v for v in predicted if not 0.0 <= v <= 1.0]
             telemetry["out_of_range_predictions"] += len(outside)
+            round_seconds = time.time() - self._round_began
+            if round_seconds > HARD_ROUND_TIMEOUT_SECONDS:
+                raise RuntimeError(
+                    f"round {len(telemetry['rounds'])} took {round_seconds:.0f}s against a "
+                    f"{HARD_ROUND_TIMEOUT_SECONDS:.0f}s safety bound; aborting rather than "
+                    "continuing on a degraded pool"
+                )
+            channels = {
+                name: dict(counts)
+                for name, counts in (self.population_state.get("channels") or {}).items()
+            }
             telemetry["pool_sizes"].append(len(candidates))
             telemetry["rounds"].append(
                 {
                     "round": len(telemetry["rounds"]),
                     "pool": len(candidates),
+                    # The compute contract, auditable per round: how many proposals were
+                    # attempted and how many became candidates.
+                    "proposal_attempts": sum(
+                        int(c.get("attempts", 0)) for c in channels.values()
+                    ),
+                    "channel_counters": channels,
+                    "round_seconds": round(round_seconds, 2),
                     "unique_endpoints": len({r["endpoint"] for r in rows}),
                     "queried": len(selected),
                     "fitted": self.brain.fitted,
@@ -437,6 +517,17 @@ def main():
                 for c, r in zip(selected, rows_of(self, selected), strict=True)
                 if "candidate_id" in c
             }
+            # PURE I/O, no RNG and no state mutation: a run that is meant to be stopped
+            # mid-flight must leave a complete artifact at every round, or killing it
+            # discards every in-memory series (option policy, lineages, family audit) while
+            # only the oracle ledger survives.
+            _checkpoint()
+            _round_log(self, rows, selected, detail)
+            telemetry["selected_endpoints"].append([c["endpoint"] for c in selected])
+            telemetry["rng_state"] = json.loads(
+                json.dumps(self.rng.bit_generator.state, default=str)
+            )
+            self._round_began = time.time()
             self._last_rows = rows
             self._last_policy = self.brain.record_policy(
                 rows, f"round_{len(telemetry['rounds'])}"
@@ -491,18 +582,176 @@ def main():
             self._pending_rows = {}
             return result
 
+    def _round_log(controller, rows, selected, detail):
+        """One concise status block per round, plus append-only machine-readable rows.
+
+        Observational ONLY: it reads state that already exists and consumes no RNG. A
+        logger that drew a random number, or that re-derived a decision, would change the
+        trajectory it is supposed to be reporting.
+        """
+        values = [r["score"] for r in ledger.rows]
+        if not values:
+            return
+        rounds = telemetry["rounds"]
+        last = rounds[-1] if rounds else {}
+        top10 = archive_top_k([(r["endpoint"], r["score"]) for r in ledger.rows], k=10)
+        best = max(values)
+        best_row = max(ledger.rows, key=lambda r: r["score"])
+        recent = [x.get("round_seconds", 0.0) for x in rounds[-3:]]
+        pace = sum(recent) / max(len(recent), 1)
+        remaining = max(budget - len(values), 0)
+        eta_hours = (remaining / max(queries, 1)) * pace / 3600.0
+
+        # the reward-bearing transitions charged this round
+        fresh = [
+            r for r in ledger.rows[-len(selected):]
+        ] if selected else []
+        by_score = sorted(fresh, key=lambda r: -r["score"])[:3]
+        gains = []
+        for row in rows:
+            match = next(
+                (q for q in fresh if q["endpoint"] == row["endpoint"]), None
+            )
+            if match is not None and row.get("has_parent"):
+                gains.append((match["score"] - row["parent_score"], row, match))
+        gains.sort(key=lambda g: -g[0])
+
+        families = RewardAdaptive.brain.ledger.report()["families"]
+        by_mass = sorted(
+            families.items(), key=lambda kv: -(kv[1].get("proposal_mass_last") or 0.0)
+        )[:3]
+        by_delta = sorted(
+            (kv for kv in families.items() if kv[1].get("expected_delta_u") is not None),
+            key=lambda kv: -kv[1]["expected_delta_u"],
+        )[:3]
+
+        print(
+            f"[{task_name}] round {last.get('round', '?')} | "
+            f"{len(values)}/{budget} charged | best {best:.4f} | top10 {top10:.4f} | "
+            f"pool {last.get('pool')} attempts {last.get('proposal_attempts')} "
+            f"queried {len(selected)} | lineages {last.get('effective_lineages', 0):.1f} "
+            f"maxshare {last.get('max_lineage_share', 0):.2f} | "
+            f"shift {(telemetry['policy_shifts'][-1] if telemetry['policy_shifts'] else 0):.3f} "
+            f"optTV {(telemetry['option_policy'][-1]['weights'] and 0) if False else 0:.0f} | "
+            f"roots {telemetry['root_candidates']} attr {last.get('attributed')}/"
+            f"{last.get('charged')} | {last.get('round_seconds', 0):.0f}s "
+            f"ETA {eta_hours:.1f}h",
+            flush=True,
+        )
+        print(f"    best so far  {best:.4f}  {best_row['endpoint']}", flush=True)
+        for row in by_score:
+            print(f"    queried      {row['score']:.4f}  {row['endpoint']}", flush=True)
+        if gains and gains[0][0] > 0:
+            delta, parent_row, child = gains[0]
+            print(
+                f"    best gain    +{delta:.4f}  "
+                f"{parent_row['parent_score']:.4f} {parent_row['parent']}\n"
+                f"                 -> intent {[f for f in parent_row['families'] if ':' in f] or parent_row['families'][:2]}\n"
+                f"                 -> realized {[f for f in parent_row['realized_families'] if ':' in f] or parent_row['realized_families'][:2]}\n"
+                f"                 -> {child['score']:.4f} {child['endpoint']}",
+                flush=True,
+            )
+        if by_mass:
+            print(
+                "    families by mass: "
+                + ", ".join(f"{k}={v['proposal_mass_last']:.3f}" for k, v in by_mass),
+                flush=True,
+            )
+        if by_delta:
+            print(
+                "    families by E[du]: "
+                + ", ".join(
+                    f"{k}={v['expected_delta_u']:+.4f}(n={v['n_queried']})"
+                    for k, v in by_delta
+                ),
+                flush=True,
+            )
+
+        with open(folder / "trajectory.jsonl", "a") as handle:
+            handle.write(json.dumps({
+                "round": last.get("round"), "charged": len(values), "best": best,
+                "top10": top10, **{k: last.get(k) for k in (
+                    "pool", "proposal_attempts", "queried", "attributed",
+                    "effective_lineages", "max_lineage_share", "round_seconds")},
+            }) + "\n")
+        with open(folder / "queries.jsonl", "a") as handle:
+            for entry in detail:
+                row = rows[entry["index"]]
+                match = next(
+                    (q for q in fresh if q["endpoint"] == row["endpoint"]), None
+                )
+                handle.write(json.dumps({
+                    "round": last.get("round"),
+                    "parent": row["parent"], "parent_score": row["parent_score"],
+                    "parent_key": row["parent_key"], "has_parent": row["has_parent"],
+                    "intent_families": row["families"],
+                    "realized_families": row["realized_families"],
+                    "endpoint": row["endpoint"],
+                    "score": match["score"] if match else None,
+                    "delta_u": (match["score"] - row["parent_score"]) if match else None,
+                    "reason": entry.get("reason"),
+                    "predicted_endpoint": entry.get("predicted_endpoint"),
+                    "decision_utility": entry.get("decision_utility"),
+                }) + "\n")
+        if best > getattr(_round_log, "_best", float("-inf")):
+            _round_log._best = best
+            with open(folder / "best_molecules.jsonl", "a") as handle:
+                handle.write(json.dumps({
+                    "charged": len(values), "score": best,
+                    "smiles": best_row["endpoint"], "task": task_name,
+                }) + "\n")
+            print(f"    *** NEW GLOBAL BEST {best:.4f} {best_row['endpoint']}", flush=True)
+
+    def _checkpoint():
+        values = [r["score"] for r in ledger.rows]
+        if not values:
+            return
+        snapshot = {
+            "schema_version": "pmo_reward_adaptive_canary_progress_v1",
+            "status": "IN_PROGRESS",
+            "task": task_name,
+            "budget": budget,
+            "charged_oracle_calls": len(values),
+            "best_score": max(values),
+            "final_top10": archive_top_k(
+                [(r["endpoint"], r["score"]) for r in ledger.rows], k=10
+            ),
+            "option_policy": telemetry["option_policy"],
+            "rounds": telemetry["rounds"],
+            "policy_shifts": telemetry["policy_shifts"],
+            "family_audit": RewardAdaptive.brain.ledger.report(),
+            "unscored_parents": telemetry["unscored_parents"],
+            "root_candidates": telemetry["root_candidates"],
+            "duplicate_endpoints": telemetry["duplicate_endpoints"],
+            "region_replace_with_rebuild": telemetry["region_replace_with_rebuild"],
+            "region_replace_bare": telemetry["region_replace_bare"],
+            "out_of_range_predictions": telemetry["out_of_range_predictions"],
+            "elapsed_seconds": round(time.time() - started, 1),
+        }
+        temporary = folder / "progress.json.tmp"
+        with open(temporary, "w") as handle:
+            json.dump(snapshot, handle, indent=1)
+        temporary.replace(folder / "progress.json")
+
     started = time.time()
     print(f"=== reward-adaptive canary: {task_name}, budget {budget} ===", flush=True)
-    run_program_campaign(
-        output=folder / "campaign", task=task, config=config,
-        initialization=initialized, library=(), ledger=ledger,
-        rounds=rounds, queries_per_round=queries, hierarchy=None, fit_model=None,
-        stagnation_rounds=None, bootstrap_rounds=1,
-        initialization_mode="all_scored_pool", initial_parent_fraction=0.2,
-        progress=lambda row: None,
-        optimizer_type=RewardAdaptive, optimizer_kwargs={"jump_checkpoint": checkpoint},
-        initial_batch_fn=initial_dynamic_program_batch_v21,
+    cache_scope = (
+        molecular_serialization_cache(max_entries=SERIALIZATION_CACHE_ENTRIES)
+        if SERIALIZATION_CACHE_ENTRIES > 0
+        else contextlib.nullcontext()
     )
+    with cache_scope:
+        run_program_campaign(
+            output=folder / "campaign", task=task, config=config,
+            initialization=initialized, library=(), ledger=ledger,
+            rounds=rounds, queries_per_round=queries, hierarchy=None, fit_model=None,
+            stagnation_rounds=None, bootstrap_rounds=1,
+            initialization_mode="all_scored_pool", initial_parent_fraction=0.2,
+            progress=lambda row: None,
+            optimizer_type=RewardAdaptive,
+            optimizer_kwargs={"jump_checkpoint": checkpoint},
+            initial_batch_fn=initial_dynamic_program_batch_v21,
+        )
 
     values = [r["score"] for r in ledger.rows]
     curve = []
@@ -657,6 +906,15 @@ def main():
             if len(option_policy) > 1 else 0.0
         ),
     }
+    report["proposal_compute_contract"] = {
+        "breadth_is": "fixed attempt count, not elapsed time",
+        "proposal_wall_seconds": PROPOSAL_WALL_SECONDS,
+        "hard_round_timeout_seconds": HARD_ROUND_TIMEOUT_SECONDS,
+        "attempts_per_batch": config.attempts_per_batch,
+        "channel_candidate_limit": POOL_TARGET,
+        "beam_breadth": "8 attempts per frontier parent, already count-based",
+        "serialization_cache_entries": SERIALIZATION_CACHE_ENTRIES,
+    }
     report["proposal_portfolio_contract"] = {
         "controller_replacement_option_rate": REPLACEMENT_OPTION_RATE,
         "beam_replacement_option_rate": 0.5,
@@ -682,6 +940,23 @@ def main():
             "region replacement produced no realized macro; refusing to report a "
             f"portfolio result (wrapped syntheses={portfolio['offers']})"
         )
+    equivalence = {
+        "endpoint_sequence": [(r["endpoint"], r["score"]) for r in ledger.rows],
+        "selected_endpoints_per_round": telemetry["selected_endpoints"],
+        "parent_policy_history": [
+            {"label": h["label"], "parent_mass": h["parent_mass"]}
+            for h in RewardAdaptive.brain.policy_history
+        ],
+        "option_policy": telemetry["option_policy"],
+        "observations": [
+            {"endpoint": o["endpoint"], "score": o["score"], "delta_raw": o["delta_raw"]}
+            for o in RewardAdaptive.brain.observations
+        ],
+        "rng_state": telemetry["rng_state"],
+        "serialization_cache_entries": SERIALIZATION_CACHE_ENTRIES,
+    }
+    with open(folder / "equivalence.json", "w") as handle:
+        json.dump(equivalence, handle, indent=1, sort_keys=True, default=str)
     with open(folder / "canary_v1.json", "w") as handle:
         json.dump(report, handle, indent=1)
     moved = report["option_policy_moved"]

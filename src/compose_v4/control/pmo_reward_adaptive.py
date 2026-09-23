@@ -236,14 +236,19 @@ class RewardAdaptiveProgramController:
         def groups(row):
             return [f for f in (row.get("families") or ()) if f in MACRO_FAMILIES]
 
+        # SORTED, because each floor application MUTATES `weights`, so the result depends
+        # on the order they are applied in. Iterating a set of strings makes that order
+        # depend on PYTHONHASHSEED, which differs per process -- two identical runs then
+        # land ~3e-3 apart on parent mass, and at ten thousand calls that eventually flips a
+        # selection. Deterministic order, identical semantics.
         families = {f for row in intents for f in groups(row)}
-        for family in families:
+        for family in sorted(families):
             members = [i for i, r in enumerate(intents) if family in groups(r)]
             share = float(weights[members].sum())
             if share < self.family_floor:
                 weights[members] += (self.family_floor - share) / len(members)
         parents = {r["parent"] for r in intents}
-        for parent in parents:
+        for parent in sorted(parents):
             members = [i for i, r in enumerate(intents) if r["parent"] == parent]
             share = float(weights[members].sum())
             floor = self.lineage_floor / len(parents)
