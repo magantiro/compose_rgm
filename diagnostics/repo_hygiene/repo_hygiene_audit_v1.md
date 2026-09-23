@@ -1,7 +1,7 @@
 # Repository hygiene audit v1
 
 Machine-readable companion: `repo_hygiene_audit_v1.json`. Every number below is
-MEASURED on this branch at `000044c9`, against baseline `061ead93` (tag
+MEASURED on this branch at `51b898f5`, against baseline `061ead93` (tag
 `pre-cleanup-2026-09-23`), unless marked INFERRED. The two differ only by
 additive hygiene artifacts; no `src/` file is touched by either.
 

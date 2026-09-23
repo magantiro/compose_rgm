@@ -222,6 +222,12 @@ def build(root: pathlib.Path) -> dict[str, Any]:
             )[:10],
         },
         "dead_code": {
+            # Captured from `python3 tools/repo_audit.py` at 061ead93 rather than
+            # recomputed here: that scan takes minutes and its result is a
+            # point-in-time fact about this commit. Flagged as a literal so a
+            # later regeneration cannot present a stale number as a fresh one.
+            "values_are_literals_captured_at": "061ead93",
+            "recompute_with": "python3 tools/repo_audit.py",
             "method": (
                 "Absence established two ways: the reference-graph scan in tools/repo_audit.py, "
                 "which also follows Modal add_local_file mounts, and the import closure recorded "
