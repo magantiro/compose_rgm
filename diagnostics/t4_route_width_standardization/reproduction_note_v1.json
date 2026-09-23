@@ -83,9 +83,21 @@
    0
   ]
  },
+ "no_further_local_timing_work": "The work-counter re-expression was attempted once from artifacts already in hand and is recorded as having FAILED to carry the cost. It is bookkeeping, not a performance investigation, and it is closed. The Modal run speaks next.",
  "owner_decision_unchanged": "48/48/64 stays frozen. The standardization decision rests on C1/C2/C3, which hold.",
+ "predeclared_outcomes_for_the_seed2_braf_batch": {
+  "comfortably_under_1800s": "Nothing is wrong. Finish the gate, freeze, move on. No action.",
+  "declared_before_the_measurement": true,
+  "forbidden_response": "Retrying into a pass, or quietly narrowing the widths so the timing fits.",
+  "over_1800s_on_an_unloaded_dedicated_worker": "This is an INFRASTRUCTURE PACKAGING issue, not a controller problem. Keep 48/48/64 EXACTLY as it is; shard the proposal computation or raise the unit timeout. DO NOT WEAKEN THE CONTROLLER and DO NOT narrow the widths to make it fit. The decision returns to the owner.",
+  "slow_in_WORK_UNITS_rather_than_seconds": "Far more node expansions than comparable cells would be a real algorithmic finding worth inspecting. There is NO evidence of it today: the largest counter movement narrow->wide on braf_1 is 2.00x and the largest observed is 1.54x.",
+  "why_predeclared": "So none of the three is a judgement call after the number is seen. The batch is the first time the wide braf route lane runs on a dedicated single-CPU production container with no shared load."
+ },
  "schema_version": "t4_route_width_standardization_reproduction_v1",
+ "status": "SCIENTIFICALLY GREEN, OPERATIONAL TIMING CHECK PENDING",
+ "strongest_reassuring_fact": "Narrow and wide produced the SAME eligible endpoint sets on all six parp1/braf cells across two independent runs, and identical FULL RECORDS on the only two cells with nonzero output. Nothing suggests the wide search wanders into pathological chemistry: it does more search and recovers the same answer.",
  "the_criterion_is_the_defect": "C4 was predeclared as a WALL-CLOCK bound on a shared laptop. Wall clock is a property of the machine, not of the algorithm, so C4 measures load. The repo's own standing lesson says exactly this -- report a load-independent work counter, never seconds alone -- and I did not follow it when I sealed the criteria. That is a defect in MY criterion, not a finding about the route widths.",
+ "what_2410_seconds_is_NOT": "It is NOT 'braf takes 40 minutes now because the controller was unified'. A 12x wall-clock swing with BYTE-IDENTICAL scientific output is resource contention, not intrinsic algorithmic cost: run 2 shared the machine at load average 9.5 with Chrome at 66% and 47% CPU, and run 1 on the same code and the same kernel is the control at 201.2 s. Quoting 2410 s as the controller's cost would be reading a laptop's load as a property of the algorithm.",
  "what_happened": "An independent re-run of the SAME deterministic check, on the same code and the same pinned kernel, reproduced the chemistry exactly and FLIPPED the verdict GREEN -> NOT_GREEN on the cost criterion alone.",
  "what_is_NOT_being_done": "The criteria are NOT relaxed and the check is NOT being re-run on a quiet machine until it passes. Re-running to get the other answer is measuring until the answer changes. Both runs are committed side by side.",
  "what_the_safety_decision_actually_rests_on": "C1, C2 and C3 -- recovery, yield and exact containment -- are load-independent and reproduced EXACTLY across both runs: identical eligible sets, 0 lost, 0 gained, 10 eligible per arm. Those are the criteria that decide whether standardizing to 48/48/64 is SAFE, and they are unaffected."
