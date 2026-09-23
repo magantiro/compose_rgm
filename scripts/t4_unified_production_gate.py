@@ -892,6 +892,23 @@ def reduce_shards(shard_dir: Path, destination: Path, *, root: Path = ROOT) -> d
         ),
         "oracle_calls": 0,
         "docking_calls": 0,
+        # The route-lane standardization moved every contract payload hash while
+        # this gate was in flight. Measured on all six parp1/braf cells, the
+        # route lane's eligible endpoint set is IDENTICAL at both width settings
+        # and the other four proteins' widths never moved -- so the scientific
+        # content is unaffected. It is published anyway: a table assembled from
+        # shards bound to two contract identities must SAY so rather than let the
+        # mix be silent.
+        "contract_identities_seen": {
+            cell: sorted(
+                {
+                    row["contract_payload_sha256"]
+                    for row in shards
+                    if row["cell"] == cell
+                }
+            )
+            for cell in sorted({row["cell"] for row in shards})
+        },
         "coverage": {
             "trigger_rows_expected": len(TRIGGER_CELLS) * len(SEED_INDICES),
             "trigger_rows_present": sum(

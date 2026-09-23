@@ -1,0 +1,766 @@
+{
+ "payload": {
+  "arms": {
+   "narrow": {
+    "beam_width": 32,
+    "expansion_width": 24,
+    "realization_limit": 32
+   },
+   "wide": {
+    "beam_width": 48,
+    "expansion_width": 48,
+    "realization_limit": 64
+   }
+  },
+  "cells": {
+   "braf_0": {
+    "c1_recovery": true,
+    "c2_yield": true,
+    "c4_cost": true,
+    "cell": "braf_0",
+    "gained_count": 0,
+    "gained_smiles": [],
+    "lost_count": 0,
+    "lost_smiles": [],
+    "narrow": {
+     "arm": "narrow",
+     "cell": "braf_0",
+     "delta_from_contract": 0.6,
+     "elapsed_seconds": 7.06,
+     "eligible_count": 0,
+     "eligible_smiles": [],
+     "proposal_seed": 2027092005,
+     "records_returned": 0,
+     "settings": {
+      "beam_width": 32,
+      "expansion_width": 24,
+      "realization_limit": 32
+     },
+     "telemetry": {
+      "available_large_rewrite_proposals": 46,
+      "available_local_rewrite_proposals": 6,
+      "available_medium_rewrite_proposals": 30,
+      "binding_truncations": 10,
+      "binding_visits": 7581,
+      "candidate_shortfall": 0,
+      "complete_programs_committed": 11,
+      "composition_aliases": 134,
+      "composition_attempts": 612,
+      "composition_rejections": 245,
+      "composition_repeated_constituent": 159,
+      "exact_realization_precision_denominator": 11,
+      "exact_realization_precision_numerator": 11,
+      "materialization_attempts": 55,
+      "materialization_rejections": 44,
+      "realization_limit": 32,
+      "realization_status_counts": {
+       "committed": 11,
+       "realizer_frontier_exhausted_abstention": 21
+      },
+      "realized_primitive_band_counts": {
+       "large": 0,
+       "medium": 5,
+       "small": 6
+      },
+      "scale_balanced": 0,
+      "selected_large_rewrite_proposals": 30,
+      "selected_local_rewrite_proposals": 6,
+      "selected_medium_rewrite_proposals": 28,
+      "single_aliases": 2,
+      "templates_with_bindings": 19,
+      "unique_ranked_endpoints": 64,
+      "valid_depth_2": 27,
+      "valid_depth_3": 33,
+      "valid_depth_4": 14,
+      "valid_unique_single_goals": 9
+     }
+    },
+    "wide": {
+     "arm": "wide",
+     "cell": "braf_0",
+     "delta_from_contract": 0.6,
+     "elapsed_seconds": 49.22,
+     "eligible_count": 0,
+     "eligible_smiles": [],
+     "proposal_seed": 2027092005,
+     "records_returned": 0,
+     "settings": {
+      "beam_width": 48,
+      "expansion_width": 48,
+      "realization_limit": 64
+     },
+     "telemetry": {
+      "available_large_rewrite_proposals": 46,
+      "available_local_rewrite_proposals": 6,
+      "available_medium_rewrite_proposals": 31,
+      "binding_truncations": 10,
+      "binding_visits": 7581,
+      "candidate_shortfall": 0,
+      "complete_programs_committed": 13,
+      "composition_aliases": 135,
+      "composition_attempts": 621,
+      "composition_rejections": 250,
+      "composition_repeated_constituent": 162,
+      "exact_realization_precision_denominator": 13,
+      "exact_realization_precision_numerator": 13,
+      "materialization_attempts": 55,
+      "materialization_rejections": 44,
+      "realization_limit": 64,
+      "realization_status_counts": {
+       "committed": 13,
+       "realizer_frontier_exhausted_abstention": 51
+      },
+      "realized_primitive_band_counts": {
+       "large": 0,
+       "medium": 7,
+       "small": 6
+      },
+      "scale_balanced": 0,
+      "selected_large_rewrite_proposals": 30,
+      "selected_local_rewrite_proposals": 6,
+      "selected_medium_rewrite_proposals": 28,
+      "single_aliases": 2,
+      "templates_with_bindings": 19,
+      "unique_ranked_endpoints": 64,
+      "valid_depth_2": 27,
+      "valid_depth_3": 33,
+      "valid_depth_4": 14,
+      "valid_unique_single_goals": 9
+     }
+    },
+    "wide_contains_narrow": true,
+    "yield_delta": 0
+   },
+   "braf_1": {
+    "c1_recovery": true,
+    "c2_yield": true,
+    "c4_cost": true,
+    "cell": "braf_1",
+    "gained_count": 0,
+    "gained_smiles": [],
+    "lost_count": 0,
+    "lost_smiles": [],
+    "narrow": {
+     "arm": "narrow",
+     "cell": "braf_1",
+     "delta_from_contract": 0.6,
+     "elapsed_seconds": 5.52,
+     "eligible_count": 0,
+     "eligible_smiles": [],
+     "proposal_seed": 2027092006,
+     "records_returned": 0,
+     "settings": {
+      "beam_width": 32,
+      "expansion_width": 24,
+      "realization_limit": 32
+     },
+     "telemetry": {
+      "available_large_rewrite_proposals": 65,
+      "available_local_rewrite_proposals": 10,
+      "available_medium_rewrite_proposals": 38,
+      "binding_truncations": 10,
+      "binding_visits": 4027,
+      "candidate_shortfall": 0,
+      "complete_programs_committed": 27,
+      "composition_aliases": 207,
+      "composition_attempts": 1377,
+      "composition_rejections": 787,
+      "composition_repeated_constituent": 177,
+      "exact_realization_precision_denominator": 27,
+      "exact_realization_precision_numerator": 27,
+      "materialization_attempts": 62,
+      "materialization_rejections": 38,
+      "realization_limit": 32,
+      "realization_status_counts": {
+       "committed": 27,
+       "realizer_frontier_exhausted_abstention": 5
+      },
+      "realized_primitive_band_counts": {
+       "large": 0,
+       "medium": 13,
+       "small": 14
+      },
+      "scale_balanced": 0,
+      "selected_large_rewrite_proposals": 16,
+      "selected_local_rewrite_proposals": 10,
+      "selected_medium_rewrite_proposals": 38,
+      "single_aliases": 7,
+      "templates_with_bindings": 20,
+      "unique_ranked_endpoints": 64,
+      "valid_depth_2": 78,
+      "valid_depth_3": 87,
+      "valid_depth_4": 41,
+      "valid_unique_single_goals": 17
+     }
+    },
+    "wide": {
+     "arm": "wide",
+     "cell": "braf_1",
+     "delta_from_contract": 0.6,
+     "elapsed_seconds": 201.24,
+     "eligible_count": 0,
+     "eligible_smiles": [],
+     "proposal_seed": 2027092006,
+     "records_returned": 0,
+     "settings": {
+      "beam_width": 48,
+      "expansion_width": 48,
+      "realization_limit": 64
+     },
+     "telemetry": {
+      "available_large_rewrite_proposals": 97,
+      "available_local_rewrite_proposals": 10,
+      "available_medium_rewrite_proposals": 54,
+      "binding_truncations": 10,
+      "binding_visits": 4027,
+      "candidate_shortfall": 0,
+      "complete_programs_committed": 40,
+      "composition_aliases": 318,
+      "composition_attempts": 1921,
+      "composition_rejections": 1112,
+      "composition_repeated_constituent": 257,
+      "exact_realization_precision_denominator": 40,
+      "exact_realization_precision_numerator": 40,
+      "materialization_attempts": 62,
+      "materialization_rejections": 38,
+      "realization_limit": 64,
+      "realization_status_counts": {
+       "committed": 40,
+       "realizer_frontier_exhausted_abstention": 24
+      },
+      "realized_primitive_band_counts": {
+       "large": 0,
+       "medium": 22,
+       "small": 18
+      },
+      "scale_balanced": 0,
+      "selected_large_rewrite_proposals": 1,
+      "selected_local_rewrite_proposals": 10,
+      "selected_medium_rewrite_proposals": 53,
+      "single_aliases": 7,
+      "templates_with_bindings": 20,
+      "unique_ranked_endpoints": 64,
+      "valid_depth_2": 78,
+      "valid_depth_3": 105,
+      "valid_depth_4": 51,
+      "valid_unique_single_goals": 17
+     }
+    },
+    "wide_contains_narrow": true,
+    "yield_delta": 0
+   },
+   "braf_2": {
+    "c1_recovery": true,
+    "c2_yield": true,
+    "c4_cost": true,
+    "cell": "braf_2",
+    "gained_count": 0,
+    "gained_smiles": [],
+    "lost_count": 0,
+    "lost_smiles": [],
+    "narrow": {
+     "arm": "narrow",
+     "cell": "braf_2",
+     "delta_from_contract": 0.6,
+     "elapsed_seconds": 5.13,
+     "eligible_count": 0,
+     "eligible_smiles": [],
+     "proposal_seed": 2027092007,
+     "records_returned": 0,
+     "settings": {
+      "beam_width": 32,
+      "expansion_width": 24,
+      "realization_limit": 32
+     },
+     "telemetry": {
+      "available_large_rewrite_proposals": 64,
+      "available_local_rewrite_proposals": 10,
+      "available_medium_rewrite_proposals": 37,
+      "binding_truncations": 10,
+      "binding_visits": 6039,
+      "candidate_shortfall": 0,
+      "complete_programs_committed": 30,
+      "composition_aliases": 326,
+      "composition_attempts": 1185,
+      "composition_rejections": 376,
+      "composition_repeated_constituent": 175,
+      "exact_realization_precision_denominator": 30,
+      "exact_realization_precision_numerator": 30,
+      "materialization_attempts": 59,
+      "materialization_rejections": 38,
+      "realization_limit": 32,
+      "realization_status_counts": {
+       "committed": 30,
+       "realizer_frontier_exhausted_abstention": 2
+      },
+      "realized_primitive_band_counts": {
+       "large": 0,
+       "medium": 12,
+       "small": 18
+      },
+      "scale_balanced": 0,
+      "selected_large_rewrite_proposals": 17,
+      "selected_local_rewrite_proposals": 10,
+      "selected_medium_rewrite_proposals": 37,
+      "single_aliases": 6,
+      "templates_with_bindings": 18,
+      "unique_ranked_endpoints": 64,
+      "valid_depth_2": 81,
+      "valid_depth_3": 143,
+      "valid_depth_4": 84,
+      "valid_unique_single_goals": 15
+     }
+    },
+    "wide": {
+     "arm": "wide",
+     "cell": "braf_2",
+     "delta_from_contract": 0.6,
+     "elapsed_seconds": 10.01,
+     "eligible_count": 0,
+     "eligible_smiles": [],
+     "proposal_seed": 2027092007,
+     "records_returned": 0,
+     "settings": {
+      "beam_width": 48,
+      "expansion_width": 48,
+      "realization_limit": 64
+     },
+     "telemetry": {
+      "available_large_rewrite_proposals": 96,
+      "available_local_rewrite_proposals": 10,
+      "available_medium_rewrite_proposals": 53,
+      "binding_truncations": 10,
+      "binding_visits": 6039,
+      "candidate_shortfall": 0,
+      "complete_programs_committed": 54,
+      "composition_aliases": 494,
+      "composition_attempts": 1665,
+      "composition_rejections": 576,
+      "composition_repeated_constituent": 255,
+      "exact_realization_precision_denominator": 54,
+      "exact_realization_precision_numerator": 54,
+      "materialization_attempts": 59,
+      "materialization_rejections": 38,
+      "realization_limit": 64,
+      "realization_status_counts": {
+       "committed": 54,
+       "realizer_frontier_exhausted_abstention": 10
+      },
+      "realized_primitive_band_counts": {
+       "large": 0,
+       "medium": 31,
+       "small": 23
+      },
+      "scale_balanced": 0,
+      "selected_large_rewrite_proposals": 1,
+      "selected_local_rewrite_proposals": 10,
+      "selected_medium_rewrite_proposals": 53,
+      "single_aliases": 6,
+      "templates_with_bindings": 18,
+      "unique_ranked_endpoints": 64,
+      "valid_depth_2": 81,
+      "valid_depth_3": 164,
+      "valid_depth_4": 95,
+      "valid_unique_single_goals": 15
+     }
+    },
+    "wide_contains_narrow": true,
+    "yield_delta": 0
+   },
+   "parp1_0": {
+    "c1_recovery": true,
+    "c2_yield": true,
+    "c4_cost": true,
+    "cell": "parp1_0",
+    "gained_count": 0,
+    "gained_smiles": [],
+    "lost_count": 0,
+    "lost_smiles": [],
+    "narrow": {
+     "arm": "narrow",
+     "cell": "parp1_0",
+     "delta_from_contract": 0.6,
+     "elapsed_seconds": 2.3,
+     "eligible_count": 4,
+     "eligible_smiles": [
+      "CC(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
+      "CN(C)Cc1ccc2c(c1)CNC(=O)Cc1cccn1-2",
+      "Cc1cc(CN(C)C)cc2c1-n1cccc1C(=O)NC2",
+      "Cc1cc2c(cc1CN(C)C)CNC(=O)c1cccn1-2"
+     ],
+     "proposal_seed": 2027092005,
+     "records_returned": 4,
+     "settings": {
+      "beam_width": 32,
+      "expansion_width": 24,
+      "realization_limit": 32
+     },
+     "telemetry": {
+      "available_large_rewrite_proposals": 32,
+      "available_local_rewrite_proposals": 4,
+      "available_medium_rewrite_proposals": 62,
+      "binding_truncations": 4,
+      "binding_visits": 628,
+      "candidate_shortfall": 0,
+      "complete_programs_committed": 32,
+      "composition_aliases": 206,
+      "composition_attempts": 528,
+      "composition_rejections": 55,
+      "composition_repeated_constituent": 156,
+      "exact_realization_precision_denominator": 32,
+      "exact_realization_precision_numerator": 32,
+      "materialization_attempts": 30,
+      "materialization_rejections": 18,
+      "realization_limit": 32,
+      "realization_status_counts": {
+       "committed": 32
+      },
+      "realized_primitive_band_counts": {
+       "large": 0,
+       "medium": 18,
+       "small": 14
+      },
+      "scale_balanced": 0,
+      "selected_large_rewrite_proposals": 0,
+      "selected_local_rewrite_proposals": 4,
+      "selected_medium_rewrite_proposals": 60,
+      "single_aliases": 4,
+      "templates_with_bindings": 9,
+      "unique_ranked_endpoints": 64,
+      "valid_depth_2": 26,
+      "valid_depth_3": 45,
+      "valid_depth_4": 40,
+      "valid_unique_single_goals": 8
+     }
+    },
+    "wide": {
+     "arm": "wide",
+     "cell": "parp1_0",
+     "delta_from_contract": 0.6,
+     "elapsed_seconds": 4.88,
+     "eligible_count": 4,
+     "eligible_smiles": [
+      "CC(c1ccc2c(c1)CNC(=O)c1cccn1-2)N(C)C",
+      "CN(C)Cc1ccc2c(c1)CNC(=O)Cc1cccn1-2",
+      "Cc1cc(CN(C)C)cc2c1-n1cccc1C(=O)NC2",
+      "Cc1cc2c(cc1CN(C)C)CNC(=O)c1cccn1-2"
+     ],
+     "proposal_seed": 2027092005,
+     "records_returned": 4,
+     "settings": {
+      "beam_width": 48,
+      "expansion_width": 48,
+      "realization_limit": 64
+     },
+     "telemetry": {
+      "available_large_rewrite_proposals": 49,
+      "available_local_rewrite_proposals": 4,
+      "available_medium_rewrite_proposals": 71,
+      "binding_truncations": 4,
+      "binding_visits": 628,
+      "candidate_shortfall": 0,
+      "complete_programs_committed": 64,
+      "composition_aliases": 251,
+      "composition_attempts": 632,
+      "composition_rejections": 70,
+      "composition_repeated_constituent": 195,
+      "exact_realization_precision_denominator": 64,
+      "exact_realization_precision_numerator": 64,
+      "materialization_attempts": 30,
+      "materialization_rejections": 18,
+      "realization_limit": 64,
+      "realization_status_counts": {
+       "committed": 64
+      },
+      "realized_primitive_band_counts": {
+       "large": 0,
+       "medium": 46,
+       "small": 18
+      },
+      "scale_balanced": 0,
+      "selected_large_rewrite_proposals": 0,
+      "selected_local_rewrite_proposals": 4,
+      "selected_medium_rewrite_proposals": 60,
+      "single_aliases": 4,
+      "templates_with_bindings": 9,
+      "unique_ranked_endpoints": 64,
+      "valid_depth_2": 26,
+      "valid_depth_3": 45,
+      "valid_depth_4": 45,
+      "valid_unique_single_goals": 8
+     }
+    },
+    "wide_contains_narrow": true,
+    "yield_delta": 0
+   },
+   "parp1_1": {
+    "c1_recovery": true,
+    "c2_yield": true,
+    "c4_cost": true,
+    "cell": "parp1_1",
+    "gained_count": 0,
+    "gained_smiles": [],
+    "lost_count": 0,
+    "lost_smiles": [],
+    "narrow": {
+     "arm": "narrow",
+     "cell": "parp1_1",
+     "delta_from_contract": 0.6,
+     "elapsed_seconds": 3.98,
+     "eligible_count": 6,
+     "eligible_smiles": [
+      "COc1[nH]c2c(C)ccc3c2c1CCNC3=O",
+      "COc1[nH]c2cc(C)cc3c2c1CCNC3=O",
+      "COc1[nH]c2ccc(C)c3c2c1CCNC3=O",
+      "COc1[nH]c2cccc3c2c1CC(C)NC3=O",
+      "COc1[nH]c2cccc3c2c1CCCNC3=O",
+      "COc1[nH]c2cccc3c2c1CCNC(=O)C3"
+     ],
+     "proposal_seed": 2027092006,
+     "records_returned": 6,
+     "settings": {
+      "beam_width": 32,
+      "expansion_width": 24,
+      "realization_limit": 32
+     },
+     "telemetry": {
+      "available_large_rewrite_proposals": 98,
+      "available_local_rewrite_proposals": 4,
+      "available_medium_rewrite_proposals": 12,
+      "binding_truncations": 3,
+      "binding_visits": 934,
+      "candidate_shortfall": 0,
+      "complete_programs_committed": 32,
+      "composition_aliases": 319,
+      "composition_attempts": 1476,
+      "composition_rejections": 575,
+      "composition_repeated_constituent": 178,
+      "exact_realization_precision_denominator": 32,
+      "exact_realization_precision_numerator": 32,
+      "materialization_attempts": 39,
+      "materialization_rejections": 18,
+      "realization_limit": 32,
+      "realization_status_counts": {
+       "committed": 32
+      },
+      "realized_primitive_band_counts": {
+       "large": 18,
+       "medium": 6,
+       "small": 8
+      },
+      "scale_balanced": 0,
+      "selected_large_rewrite_proposals": 48,
+      "selected_local_rewrite_proposals": 4,
+      "selected_medium_rewrite_proposals": 12,
+      "single_aliases": 3,
+      "templates_with_bindings": 20,
+      "unique_ranked_endpoints": 64,
+      "valid_depth_2": 119,
+      "valid_depth_3": 173,
+      "valid_depth_4": 112,
+      "valid_unique_single_goals": 18
+     }
+    },
+    "wide": {
+     "arm": "wide",
+     "cell": "parp1_1",
+     "delta_from_contract": 0.6,
+     "elapsed_seconds": 7.83,
+     "eligible_count": 6,
+     "eligible_smiles": [
+      "COc1[nH]c2c(C)ccc3c2c1CCNC3=O",
+      "COc1[nH]c2cc(C)cc3c2c1CCNC3=O",
+      "COc1[nH]c2ccc(C)c3c2c1CCNC3=O",
+      "COc1[nH]c2cccc3c2c1CC(C)NC3=O",
+      "COc1[nH]c2cccc3c2c1CCCNC3=O",
+      "COc1[nH]c2cccc3c2c1CCNC(=O)C3"
+     ],
+     "proposal_seed": 2027092006,
+     "records_returned": 6,
+     "settings": {
+      "beam_width": 48,
+      "expansion_width": 48,
+      "realization_limit": 64
+     },
+     "telemetry": {
+      "available_large_rewrite_proposals": 136,
+      "available_local_rewrite_proposals": 4,
+      "available_medium_rewrite_proposals": 22,
+      "binding_truncations": 3,
+      "binding_visits": 934,
+      "candidate_shortfall": 0,
+      "complete_programs_committed": 64,
+      "composition_aliases": 507,
+      "composition_attempts": 2052,
+      "composition_rejections": 782,
+      "composition_repeated_constituent": 258,
+      "exact_realization_precision_denominator": 64,
+      "exact_realization_precision_numerator": 64,
+      "materialization_attempts": 39,
+      "materialization_rejections": 18,
+      "realization_limit": 64,
+      "realization_status_counts": {
+       "committed": 64
+      },
+      "realized_primitive_band_counts": {
+       "large": 36,
+       "medium": 14,
+       "small": 14
+      },
+      "scale_balanced": 0,
+      "selected_large_rewrite_proposals": 40,
+      "selected_local_rewrite_proposals": 4,
+      "selected_medium_rewrite_proposals": 20,
+      "single_aliases": 3,
+      "templates_with_bindings": 20,
+      "unique_ranked_endpoints": 64,
+      "valid_depth_2": 119,
+      "valid_depth_3": 258,
+      "valid_depth_4": 128,
+      "valid_unique_single_goals": 18
+     }
+    },
+    "wide_contains_narrow": true,
+    "yield_delta": 0
+   },
+   "parp1_2": {
+    "c1_recovery": true,
+    "c2_yield": true,
+    "c4_cost": true,
+    "cell": "parp1_2",
+    "gained_count": 0,
+    "gained_smiles": [],
+    "lost_count": 0,
+    "lost_smiles": [],
+    "narrow": {
+     "arm": "narrow",
+     "cell": "parp1_2",
+     "delta_from_contract": 0.6,
+     "elapsed_seconds": 1.88,
+     "eligible_count": 0,
+     "eligible_smiles": [],
+     "proposal_seed": 2027092007,
+     "records_returned": 0,
+     "settings": {
+      "beam_width": 32,
+      "expansion_width": 24,
+      "realization_limit": 32
+     },
+     "telemetry": {
+      "available_large_rewrite_proposals": 32,
+      "available_local_rewrite_proposals": 4,
+      "available_medium_rewrite_proposals": 62,
+      "binding_truncations": 2,
+      "binding_visits": 768,
+      "candidate_shortfall": 0,
+      "complete_programs_committed": 32,
+      "composition_aliases": 206,
+      "composition_attempts": 528,
+      "composition_rejections": 54,
+      "composition_repeated_constituent": 156,
+      "exact_realization_precision_denominator": 32,
+      "exact_realization_precision_numerator": 32,
+      "materialization_attempts": 26,
+      "materialization_rejections": 14,
+      "realization_limit": 32,
+      "realization_status_counts": {
+       "committed": 32
+      },
+      "realized_primitive_band_counts": {
+       "large": 0,
+       "medium": 18,
+       "small": 14
+      },
+      "scale_balanced": 0,
+      "selected_large_rewrite_proposals": 0,
+      "selected_local_rewrite_proposals": 4,
+      "selected_medium_rewrite_proposals": 60,
+      "single_aliases": 4,
+      "templates_with_bindings": 9,
+      "unique_ranked_endpoints": 64,
+      "valid_depth_2": 26,
+      "valid_depth_3": 45,
+      "valid_depth_4": 41,
+      "valid_unique_single_goals": 8
+     }
+    },
+    "wide": {
+     "arm": "wide",
+     "cell": "parp1_2",
+     "delta_from_contract": 0.6,
+     "elapsed_seconds": 4.74,
+     "eligible_count": 0,
+     "eligible_smiles": [],
+     "proposal_seed": 2027092007,
+     "records_returned": 0,
+     "settings": {
+      "beam_width": 48,
+      "expansion_width": 48,
+      "realization_limit": 64
+     },
+     "telemetry": {
+      "available_large_rewrite_proposals": 49,
+      "available_local_rewrite_proposals": 4,
+      "available_medium_rewrite_proposals": 71,
+      "binding_truncations": 2,
+      "binding_visits": 768,
+      "candidate_shortfall": 0,
+      "complete_programs_committed": 64,
+      "composition_aliases": 251,
+      "composition_attempts": 632,
+      "composition_rejections": 70,
+      "composition_repeated_constituent": 195,
+      "exact_realization_precision_denominator": 64,
+      "exact_realization_precision_numerator": 64,
+      "materialization_attempts": 26,
+      "materialization_rejections": 14,
+      "realization_limit": 64,
+      "realization_status_counts": {
+       "committed": 64
+      },
+      "realized_primitive_band_counts": {
+       "large": 0,
+       "medium": 46,
+       "small": 18
+      },
+      "scale_balanced": 0,
+      "selected_large_rewrite_proposals": 0,
+      "selected_local_rewrite_proposals": 4,
+      "selected_medium_rewrite_proposals": 60,
+      "single_aliases": 4,
+      "templates_with_bindings": 9,
+      "unique_ranked_endpoints": 64,
+      "valid_depth_2": 26,
+      "valid_depth_3": 45,
+      "valid_depth_4": 45,
+      "valid_unique_single_goals": 8
+     }
+    },
+    "wide_contains_narrow": true,
+    "yield_delta": 0
+   }
+  },
+  "criteria": {
+   "C1_recovery_wide_contains_narrow": true,
+   "C2_yield_never_drops": true,
+   "C4_cost_within_600s_per_cell": true
+  },
+  "docking_calls": 0,
+  "lane_is_deterministic": "propose_route_expert_candidates takes no rng, so given a state and its settings this lane carries no sampling noise",
+  "oracle_calls": 0,
+  "predeclaration": "diagnostics/t4_route_width_standardization/predeclaration_v1.json",
+  "predeclaration_sha256": "82e356a047331a440faef128b35da23bab059c433b7d6094b39f9c3a203c78c0",
+  "question": "does standardizing the route lane to 48/48/64 preserve the PARP1/BRAF route support that 32/24/32 produced?",
+  "schema_version": "t4_route_width_standardization_gate_v1",
+  "totals": {
+   "gained_total": 0,
+   "lost_total": 0,
+   "narrow_eligible": 10,
+   "narrow_seconds": 25.87,
+   "wide_eligible": 10,
+   "wide_seconds": 277.92
+  },
+  "verdict": "GREEN"
+ },
+ "payload_sha256": "73a817d269f3ff3474563da8daf3788371bcf07554dee95ccca54107b486a9ab"
+}

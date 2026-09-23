@@ -206,6 +206,7 @@ def build_payload(protein: str) -> dict:
     # carry its own `proposal` / `region_law` / `state_routing` key.
     proposal[REGION_CONFIGURATION_LANE][REGION_CONFIGURATION_FIELD] = FREE_GATE_MARGIN_V1
     proposal[STATE_AWARE_LANE] = protonation_lane_settings()
+    proposal[ROUTE_LANE] = standardized_route_lane(proposal[ROUTE_LANE])
     payload["proposal"] = proposal
 
     # JSON int/float typing, not a controller choice: parp1 stored `1` and the other
@@ -323,6 +324,8 @@ CONTROLLER_PARAMETERS = (
 #: (`training_split`, `training_scope`, `scale_balanced`) is a per-arm PROVENANCE
 #: string that the runtime never reads, and grouping on the whole block would hide
 #: the executable split behind five distinct provenance strings.
+ROUTE_LANE = "route_complete_region"
+
 ROUTE_LANE_EXECUTABLE_KEYS = (
     "beam_width",
     "expansion_width",
@@ -333,6 +336,57 @@ ROUTE_LANE_EXECUTABLE_KEYS = (
 )
 
 
+#: The ONE route-search width for every target. The source arms ran parp1/braf at
+#: `beam_width 32 / expansion_width 24 / realization_limit 32` and jak2/fa7/5ht1b at
+#: `48 / 48 / 64`, and those three keys are EXECUTABLE -- `proposal_unit` passes them
+#: straight into `propose_route_expert_candidates` -- so the panel ran two route
+#: searches selected by target identity.
+#:
+#: These are proposal-search WIDTHS: how much cheap effort the route expert is
+#: allowed. They are not a different model, a different kernel or a different oracle
+#: budget, and there is no molecular-state feature for a rule to key on, so the
+#: correct resolution is one constant rather than a derived rule.
+#:
+#: MEASURED before freezing, zero oracle calls, pinned kernel, on all six parp1/braf
+#: cells with only the widths differing
+#: (`diagnostics/t4_route_width_standardization/t4_route_width_standardization_v1.json`,
+#: criteria sealed beforehand at `82e356a047331a44...`): the wide arm's eligible
+#: endpoint set is IDENTICAL to the narrow arm's on every cell -- 0 lost, 0 gained,
+#: 10 eligible in each arm. A beam is not mathematically nested in its width, so
+#: this had to be measured rather than assumed; it was, and nothing moves.
+STANDARD_ROUTE_LANE_WIDTHS = {
+    "beam_width": 48,
+    "expansion_width": 48,
+    "realization_limit": 64,
+}
+
+#: Declared and never read. `propose_route_expert_candidates` accepts
+#: `scale_balanced`, but NO production caller passes it -- `proposal_unit` forwards
+#: six keys and this is not one of them -- so all five arms already run the function
+#: default `False` whatever their contract said. Three arms declared `true` and two
+#: omitted it, which is a divergence that exists only on paper. A declared field no
+#: runtime consumes is the defect `region_law_contract` refuses by name, so it is
+#: dropped rather than made uniform at a value nothing honours.
+UNCONSUMED_ROUTE_LANE_KEYS = ("scale_balanced",)
+
+#: Legitimately per-target and kept: the route expert for protein P is fit
+#: leave-P-out, which IS the held-target protocol rather than a tuning knob. It
+#: names which checkpoint the arm loads, so it is honest provenance about a
+#: benchmark input, not a controller parameter.
+PER_TARGET_ROUTE_LANE_PROVENANCE = ("training_split",)
+
+
+def standardized_route_lane(lane: dict) -> dict:
+    """One route search for every target: the widths fixed, the dead key removed."""
+
+    standardized = {k: v for k, v in lane.items() if k not in UNCONSUMED_ROUTE_LANE_KEYS}
+    standardized.update(STANDARD_ROUTE_LANE_WIDTHS)
+    standardized["training_scope"] = (
+        "one shared task-independent expert fit on all 77 locked routes"
+    )
+    return standardized
+
+
 def _at(payload: dict, dotted: str):
     node = payload
     for part in dotted.split("."):
@@ -340,28 +394,50 @@ def _at(payload: dict, dotted: str):
     return node
 
 
+def _controller_view(payload: dict, dotted: str):
+    """The part of a controller parameter the panel must agree on.
+
+    For the route lane that is its EXECUTABLE keys: `training_split` names the
+    leave-one-target-out expert the arm loads, which is the held-target protocol
+    rather than a tuning knob, and folding it in would report a permanent
+    divergence for something working as designed.
+    """
+
+    value = _at(payload, dotted)
+    if dotted == f"proposal.{ROUTE_LANE}":
+        return {key: value[key] for key in ROUTE_LANE_EXECUTABLE_KEYS}
+    return value
+
+
 def panel_uniformity(payloads: dict) -> dict:
     """A DECLARED, hashed statement of where the five arms agree and where they do not.
 
-    MEASURED, and it is the finding worth carrying: the five source contracts do
-    NOT agree on `proposal.route_complete_region`. parp1 and braf declare
-    beam_width 32 / expansion_width 24 / realization_limit 32 while jak2, fa7 and
-    5ht1b declare 48 / 48 / 64, and `t4_unified_proposal.proposal_unit` passes
-    every one of those straight into `propose_route_expert_candidates` -- so they
-    are executable, not descriptive.
+    HISTORY, because a resolved divergence should not vanish from the record: the
+    five SOURCE contracts did not agree on `proposal.route_complete_region`. parp1
+    and braf declared beam_width 32 / expansion_width 24 / realization_limit 32
+    while jak2, fa7 and 5ht1b declared 48 / 48 / 64, and
+    `t4_unified_proposal.proposal_unit` passes every one of those straight into
+    `propose_route_expert_candidates` -- so the panel ran two route searches
+    selected by target identity.
 
-    That is inherited from the historical arms, not introduced here, and it is
-    left UNRESOLVED on purpose: picking one of the two settings changes what the
-    route lane searches on three proteins or on two, which is a scientific call
-    for the owner rather than a sealing detail. Recording it in every payload is
-    what stops it from being rediscovered after a scored run.
+    RESOLVED to 48 / 48 / 64 for every target (owner decision), after measuring it
+    rather than assuming a wider beam contains a narrower one, which is not
+    mathematically guaranteed. See `standardized_route_lane`.
+
+    The route lane is therefore compared here on its EXECUTABLE keys only.
+    `training_split` still differs by protein and is declared as per-target BY
+    PROTOCOL: the expert for protein P is fit leave-P-out, which is what makes the
+    panel held-target. That is a benchmark input in the same sense as delta or the
+    start molecule, not a controller parameter, and calling it a divergence would
+    make `one_controller` permanently unreachable for a protocol that is working
+    as designed.
     """
 
     proteins = sorted(payloads)
     divergent = {}
     for dotted in CONTROLLER_PARAMETERS:
         values = {
-            protein: json.dumps(_at(payloads[protein], dotted), sort_keys=True)
+            protein: json.dumps(_controller_view(payloads[protein], dotted), sort_keys=True)
             for protein in proteins
         }
         if len(set(values.values())) == 1:
@@ -391,6 +467,33 @@ def panel_uniformity(payloads: dict) -> dict:
             for value, arms in sorted(route_groups.items())
         ],
         "route_lane_executable_keys": list(ROUTE_LANE_EXECUTABLE_KEYS),
+        "route_lane_per_target_by_protocol": list(PER_TARGET_ROUTE_LANE_PROVENANCE),
+        "route_lane_standardization": {
+            "resolved_to": dict(STANDARD_ROUTE_LANE_WIDTHS),
+            "superseded": {
+                "parp1_braf": {
+                    "beam_width": 32,
+                    "expansion_width": 24,
+                    "realization_limit": 32,
+                },
+                "jak2_fa7_5ht1b": dict(STANDARD_ROUTE_LANE_WIDTHS),
+            },
+            "dropped_unconsumed_keys": list(UNCONSUMED_ROUTE_LANE_KEYS),
+            "evidence": (
+                "diagnostics/t4_route_width_standardization/"
+                "t4_route_width_standardization_v1.json"
+            ),
+            "predeclaration_sha256": (
+                "82e356a047331a440faef128b35da23bab059c433b7d6094b39f9c3a203c78c0"
+            ),
+            "measured": (
+                "all six parp1/braf cells, zero oracle calls, pinned kernel, only the "
+                "three widths differing: the wide arm's eligible endpoint set is "
+                "IDENTICAL to the narrow arm's on every cell -- 0 lost, 0 gained, 10 "
+                "eligible in each arm; cost 25.9 s -> 277.9 s total, max 201 s on one "
+                "cell against the 1800 s production proposal-worker bound"
+            ),
+        },
         "note": (
             "Fields NOT listed here -- cells, docking_box, docking_seed, "
             "evaluator_sha256, runtime_inputs_sha256, baseline tables and prose -- "
