@@ -1,0 +1,139 @@
+{
+  "broken_link_count": 0,
+  "broken_links": [],
+  "families": {
+    "pmo_diagnostics": [
+      {
+        "absent_pinned_paths": [],
+        "artifact": "diagnostics/pmo_realization_binder_cost_v1.json",
+        "branch_links_resolving_on_origin": [
+          "pmo-v2-integration-20260920"
+        ],
+        "dated_tokens_not_resolving_as_branches": [],
+        "payload_self_hash_verifies": null,
+        "pins_absent": 0,
+        "pins_resolving": 0,
+        "pins_stale": 0,
+        "pins_total": 0,
+        "present": true,
+        "referenced_contracts": []
+      },
+      {
+        "absent_pinned_paths": [],
+        "artifact": "diagnostics/compose_progress_scoreboard_v1.json",
+        "branch_links_resolving_on_origin": [
+          "pmo-donor-wiring-20260921",
+          "pmo-entry-diagnostic-20260921",
+          "pmo-global-delta-census-20260922",
+          "pmo-macro-options-20260921",
+          "pmo-teacher-atlas-20260921",
+          "t4-canonical-shared-controller-20260922"
+        ],
+        "dated_tokens_not_resolving_as_branches": [],
+        "payload_self_hash_verifies": null,
+        "pins_absent": 0,
+        "pins_resolving": 0,
+        "pins_stale": 0,
+        "pins_total": 0,
+        "present": true,
+        "referenced_contracts": []
+      }
+    ],
+    "pmo_scored_runs": [
+      {
+        "absent_pinned_paths": [],
+        "artifact": "configs/pmo_population_controller_v1.json",
+        "branch_links_resolving_on_origin": [],
+        "dated_tokens_not_resolving_as_branches": [],
+        "payload_self_hash_verifies": true,
+        "pins_absent": 0,
+        "pins_resolving": 10,
+        "pins_stale": 0,
+        "pins_total": 10,
+        "present": true,
+        "referenced_contracts": []
+      },
+      {
+        "absent_pinned_paths": [],
+        "artifact": "diagnostics/pmo_realization_repair_v1.json",
+        "branch_links_resolving_on_origin": [
+          "pmo-realization-repair-20260920"
+        ],
+        "dated_tokens_not_resolving_as_branches": [],
+        "payload_self_hash_verifies": null,
+        "pins_absent": 0,
+        "pins_resolving": 0,
+        "pins_stale": 0,
+        "pins_total": 0,
+        "present": true,
+        "referenced_contracts": []
+      }
+    ],
+    "t4_controller_campaigns": [
+      {
+        "absent_pinned_paths": [],
+        "artifact": "configs/t4_region_repair_rescue_plan_v1.json",
+        "branch_links_resolving_on_origin": [
+          "t4-objective-dynamic-reset-20260916",
+          "t4-region-repair-20260920"
+        ],
+        "dated_tokens_not_resolving_as_branches": [],
+        "payload_self_hash_verifies": true,
+        "pins_absent": 0,
+        "pins_resolving": 1,
+        "pins_stale": 2,
+        "pins_total": 3,
+        "present": true,
+        "referenced_contracts": [
+          "configs/t4_held_target_distilled_braf_d06_250.json",
+          "configs/t4_held_target_distilled_fa7_d04_250.json",
+          "configs/t4_held_target_distilled_fa7_d06_250.json",
+          "configs/t4_region_repair_rescue_plan_v1.json",
+          "configs/t4_shared_retained_fiber_5ht1b2_protonation_rescue_v1.json"
+        ]
+      },
+      {
+        "absent_pinned_paths": [],
+        "artifact": "configs/t4_region_repair_rescue_braf_d06_v1.json",
+        "branch_links_resolving_on_origin": [
+          "t4-region-law-wiring-20260920"
+        ],
+        "dated_tokens_not_resolving_as_branches": [],
+        "payload_self_hash_verifies": true,
+        "pins_absent": 0,
+        "pins_resolving": 16,
+        "pins_stale": 1,
+        "pins_total": 17,
+        "present": true,
+        "referenced_contracts": [
+          "configs/t4_held_target_distilled_braf_d06_250.json",
+          "configs/t4_region_repair_rescue_braf_d06_v1.json",
+          "configs/t4_region_repair_rescue_fa7_d04_v1.json",
+          "configs/t4_region_repair_rescue_fa7_d06_v1.json",
+          "configs/t4_region_repair_rescue_plan_v1.json"
+        ]
+      }
+    ],
+    "t4_frozen_panel": [
+      {
+        "absent_pinned_paths": [],
+        "artifact": "diagnostics/T4_FROZEN_RESULT_v1.json",
+        "branch_links_resolving_on_origin": [
+          "t4-generic-fallback-20260922"
+        ],
+        "dated_tokens_not_resolving_as_branches": [],
+        "payload_self_hash_verifies": true,
+        "pins_absent": 0,
+        "pins_resolving": 0,
+        "pins_stale": 0,
+        "pins_total": 0,
+        "present": true,
+        "referenced_contracts": []
+      }
+    ]
+  },
+  "method_note": "Branch resolution uses git ls-remote, not local refs. A pushed branch nobody has fetched is absent from `git log --all` and reads as lost; that mistake produced a false report of 26 permanently lost files in this same audit.",
+  "remote_branch_count": 168,
+  "schema_version": 1,
+  "verdict": "NO_BROKEN_LINKS"
+}
