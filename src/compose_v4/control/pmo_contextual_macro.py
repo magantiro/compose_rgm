@@ -47,6 +47,11 @@ MACRO_FAMILIES: tuple[str, ...] = (
     "cycle_open",
     "cycle_close",
     "ring_system_restate",
+    # Anchored rebuild options reachable only through a region replacement.  Without
+    # these the model cannot prefer "excise and rebuild a ring" over "excise and regrow a
+    # chain" -- it would see both as the single label ``region_replace``.
+    "regrow",
+    "ring_then_grow",
 )
 
 FEATURE_BLOCKS: tuple[str, ...] = (
@@ -105,6 +110,64 @@ def _folded(mol) -> np.ndarray:
     return array
 
 
+def macro_families(candidate) -> tuple[str, ...]:
+    """The MACRO families a candidate realized, read from the synthesis metadata.
+
+    THE POINT OF THIS FUNCTION IS WHAT IT REFUSES TO READ.  A candidate also carries a
+    histogram of EXECUTOR RULE NAMES (``atom_insert``, ``cycle_close``, ``bond_reroute``
+    ...), and four of those names are spelled identically to macro families.  Keying the
+    value model on that histogram would therefore half-work: some family one-hots would
+    fire, for the wrong reason, from primitive counts.  That is precisely the
+    semi-Markov violation the macro abstraction exists to prevent -- the coherent program
+    is the action, not the primitives inside it.
+
+    A region replacement is reported at BOTH resolutions: the compound
+    ``region_replace:<rebuild>`` and the bare rebuild family, so the model can learn "a
+    ring rebuild is good here" while still sharing strength with ring builds reached any
+    other way.
+    """
+    modules = ((candidate.get("provenance") or {}).get("metadata") or {}).get("modules")
+    if modules is None:
+        modules = (candidate.get("metadata") or {}).get("modules") or ()
+    found: list[str] = []
+    for module in modules:
+        family = str(module.get("family", ""))
+        if not family:
+            continue
+        found.append(family)
+        rebuild = (module.get("parameters") or {}).get("rebuild_option")
+        if rebuild:
+            found.extend([f"{family}:{rebuild}", str(rebuild)])
+    return tuple(dict.fromkeys(found))
+
+
+def macro_scale(candidate) -> dict:
+    """Realized SCALE of a macro: how much structure it actually moved.
+
+    Reported separately from primitive count because they are different quantities -- a
+    coherent eleven-primitive ring operation and an arbitrary eleven-primitive program
+    have the same length and different scale, and the whole reason to represent macros is
+    that the second number is the informative one.
+    """
+    modules = ((candidate.get("provenance") or {}).get("metadata") or {}).get("modules")
+    if modules is None:
+        modules = (candidate.get("metadata") or {}).get("modules") or ()
+    excised = rebuilt = largest = 0
+    for module in modules:
+        parameters = module.get("parameters") or {}
+        excised = max(excised, int(parameters.get("excised_atoms", 0) or 0))
+        rebuilt = max(rebuilt, int(parameters.get("rebuild_capacity", 0) or 0))
+        largest = max(largest, int(module.get("primitive_edits", 0) or 0))
+    changes = (candidate.get("provenance") or {}).get("actual_changes") or {}
+    return {
+        "excised_atoms": excised,
+        "rebuild_capacity": rebuilt,
+        "largest_module_primitives": largest,
+        "d_heavy": float(changes.get("heavy_atom_delta", 0) or 0),
+        "d_rings": float(changes.get("ring_delta", 0) or 0),
+    }
+
+
 def _macro_intent_block(edge) -> np.ndarray:
     """Only what a caller knows BEFORE executing: the family it intends to attempt, the module
     count it requested, the parent's own score, and where in the search it stands.
@@ -147,6 +210,20 @@ def edge_features(edge, *, blocks=FEATURE_BLOCKS) -> np.ndarray:
                 [
                     float(edge.get("primitives", 0)) / 32.0,
                     float(edge.get("module_count", 0)) / 4.0,
+                    # SCALE, not length.  An eleven-primitive coherent ring operation and
+                    # an arbitrary eleven-primitive program agree on the two rows above and
+                    # differ here, which is the distinction the macro abstraction is for.
+                    float(edge.get("excised_atoms", 0)) / 16.0,
+                    float(edge.get("rebuild_capacity", 0)) / 16.0,
+                    float(edge.get("largest_module_primitives", 0)) / 16.0,
+                    float(edge.get("d_heavy", 0)) / 16.0,
+                    float(edge.get("d_rings", 0)) / 4.0,
+                    # The family that ACTUALLY executed, which need not be the one intended:
+                    # a region replacement rebuilds with whichever option first executes.
+                    *[
+                        float(name in set(edge.get("realized_families") or ()))
+                        for name in MACRO_FAMILIES
+                    ],
                 ],
                 dtype=float,
             )

@@ -36,6 +36,7 @@ raw delta units before acquisition sees them.
 from __future__ import annotations
 
 import math
+from collections import Counter
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -88,10 +89,78 @@ class RunningScale:
 
 
 @dataclass
+class FamilyLedger:
+    """Per-macro-family audit, logged rather than acted on.
+
+    Kept deliberately OUTSIDE the value model so it cannot become a control surface.  No
+    family is declared a winner in advance and none is floored or boosted from these
+    numbers; they exist so that after a scored run we can read whether the controller
+    discovered a preference -- region replacements in one phase, small growth in another
+    -- instead of asserting one.  ``mass_history`` snapshots each family's proposal mass
+    per round, so the change in its proposal probability AFTER reward is recoverable,
+    which is what distinguishes a controller that learned from one that merely ran.
+    """
+
+    proposed: Counter = field(default_factory=Counter)
+    queried: Counter = field(default_factory=Counter)
+    deltas: dict = field(default_factory=dict)
+    predicted: dict = field(default_factory=dict)
+    mass_history: list = field(default_factory=list)
+
+    def propose(self, rows) -> None:
+        for row in rows:
+            for family in row.get("families") or ():
+                self.proposed[family] += 1
+
+    def query(self, row, predicted_value=None) -> None:
+        for family in row.get("families") or ():
+            self.queried[family] += 1
+            if predicted_value is not None:
+                self.predicted.setdefault(family, []).append(float(predicted_value))
+
+    def outcome(self, row, delta: float) -> None:
+        for family in row.get("families") or ():
+            self.deltas.setdefault(family, []).append(float(delta))
+
+    def snapshot(self, rows, weights, label: str) -> None:
+        """Record each family's total proposal mass under the CURRENT policy."""
+        mass: dict = {}
+        for row, weight in zip(rows, weights, strict=True):
+            for family in row.get("families") or ():
+                mass[family] = mass.get(family, 0.0) + float(weight)
+        self.mass_history.append({"label": label, "mass": mass})
+
+    def report(self) -> dict:
+        families = sorted(set(self.proposed) | set(self.queried) | set(self.deltas))
+        first = self.mass_history[0]["mass"] if self.mass_history else {}
+        last = self.mass_history[-1]["mass"] if self.mass_history else {}
+        rows = {}
+        for family in families:
+            deltas = self.deltas.get(family, [])
+            predicted = self.predicted.get(family, [])
+            rows[family] = {
+                "n_proposed": int(self.proposed.get(family, 0)),
+                "n_queried": int(self.queried.get(family, 0)),
+                "expected_delta_u": float(np.mean(deltas)) if deltas else None,
+                "p_delta_positive": (
+                    float(np.mean([d > 0 for d in deltas])) if deltas else None
+                ),
+                "mean_predicted_value": float(np.mean(predicted)) if predicted else None,
+                "proposal_mass_first": float(first.get(family, 0.0)),
+                "proposal_mass_last": float(last.get(family, 0.0)),
+            }
+            rows[family]["proposal_mass_shift"] = (
+                rows[family]["proposal_mass_last"] - rows[family]["proposal_mass_first"]
+            )
+        return {"families": rows, "rounds_snapshotted": len(self.mass_history)}
+
+
+@dataclass
 class RewardAdaptiveProgramController:
     """Online action-value control over COMPOSE macros, learned from charged PMO calls only."""
 
     model_share: float = MODEL_SHARE
+    ledger: FamilyLedger = field(default_factory=FamilyLedger)
     lineage_floor: float = LINEAGE_FLOOR
     family_floor: float = FAMILY_FLOOR
     temperature: float = 0.05
@@ -123,6 +192,7 @@ class RewardAdaptiveProgramController:
         }
         self.observations.append(record)
         self.scale.update(delta)
+        self.ledger.outcome(record, delta)
         if not self.fitted:
             return
         targets = self.scale.standardize([o["delta_raw"] for o in self.observations])
@@ -174,6 +244,7 @@ class RewardAdaptiveProgramController:
             "parent_mass": parents,
         }
         self.policy_history.append(snapshot)
+        self.ledger.snapshot(intents, weights, label)
         return snapshot
 
     @staticmethod
@@ -219,4 +290,9 @@ class RewardAdaptiveProgramController:
                     }
                 )
         self.propensities.extend(detail)
+        self.ledger.propose(candidates)
+        for entry in detail:
+            self.ledger.query(
+                candidates[entry["index"]], entry.get("predicted_endpoint")
+            )
         return chosen, detail
