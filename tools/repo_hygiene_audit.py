@@ -290,7 +290,9 @@ subset that is safe to apply, and an explicit cost for the rest.
 
 `src/compose_v4` holds {modules} modules, of which **542 are individually
 pinned**. Repo-wide the figure is {pinned_py} of {python_files} tracked Python
-files. Every core subpackage is 100 percent pinned:
+files. Every subpackage except `experiments` and `control` is 100 percent
+pinned, and those two are still covered by the tree fingerprints below, so the
+53 unpinned modules are not a working surface:
 
 {subpackage_table}
 

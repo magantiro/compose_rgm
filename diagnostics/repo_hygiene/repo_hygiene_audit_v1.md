@@ -1,7 +1,7 @@
 # Repository hygiene audit v1
 
 Machine-readable companion: `repo_hygiene_audit_v1.json`. Every number below is
-MEASURED on this branch at `3e08f4fd`, against baseline `061ead93` (tag
+MEASURED on this branch at `000044c9`, against baseline `061ead93` (tag
 `pre-cleanup-2026-09-23`), unless marked INFERRED. The two differ only by
 additive hygiene artifacts; no `src/` file is touched by either.
 
@@ -18,7 +18,9 @@ subset that is safe to apply, and an explicit cost for the rest.
 
 `src/compose_v4` holds 595 modules, of which **542 are individually
 pinned**. Repo-wide the figure is 783 of 3346 tracked Python
-files. Every core subpackage is 100 percent pinned:
+files. Every subpackage except `experiments` and `control` is 100 percent
+pinned, and those two are still covered by the tree fingerprints below, so the
+53 unpinned modules are not a working surface:
 
 | subpackage | modules | pinned | unpinned |
 |---|---|---|---|
