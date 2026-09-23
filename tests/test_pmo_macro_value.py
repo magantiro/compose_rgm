@@ -133,24 +133,37 @@ def test_a_flat_state_whose_descendant_pays_off_gets_credit():
                 ("b", 0.4400, "a"),   # looks like a waste under an immediate target
                 ("c", 0.4380, "b"),
                 ("d", 0.5116, "c"),   # the payoff, three decisions later
-                ("z", 0.1000, None),  # an unrelated root that went nowhere
+                ("z", 0.1000, None),      # expanded, went nowhere -> a real zero
+                ("z_dud", 0.0500, "z"),
+                ("never", 0.2000, None),  # never expanded -> UNKNOWN, must be absent
             ]
         ),
-        horizon=5,
+        horizon=6,
     )
     assert labels["b"] > 0.0, "a state whose lineage later paid must carry positive continuation"
     assert labels["c"] > labels["b"], "the state nearer the payoff carries more"
-    assert labels["z"] == 0.0, "a barren lineage carries none"
+    assert labels["z"] == 0.0, "an EXPANDED lineage that went nowhere is a real zero"
+    assert "never" not in labels, "an unexpanded state is unknown, not zero"
 
 
 def test_continuation_is_attributed_by_lineage_not_by_wall_clock():
     """An unrelated branch's success must not credit a state that had nothing to do with it."""
     labels = lineage_continuation(
-        _observed([("root_a", 0.20, None), ("root_b", 0.20, None), ("b_child", 0.90, "root_b")]),
-        horizon=5,
+        _observed(
+            [
+                ("root_a", 0.20, None),
+                ("a_child", 0.21, "root_a"),   # root_a IS expanded, so it gets a real label
+                ("root_b", 0.20, None),
+                ("b_child", 0.90, "root_b"),
+            ]
+        ),
+        horizon=6,
     )
-    assert labels["root_b"] > 0.0
-    assert labels["root_a"] == 0.0, "a sibling root must not inherit another lineage's payoff"
+    assert labels["root_b"] > 0.5, "the lineage that produced the payoff carries it"
+    assert labels["root_a"] < 0.05, (
+        "a sibling root that was itself expanded must be labelled on ITS OWN descendants, "
+        "never on another lineage's payoff that merely happened at the same time"
+    )
 
 
 def test_the_horizon_actually_bounds_attribution():
@@ -163,8 +176,25 @@ def test_the_horizon_actually_bounds_attribution():
     assert far["a"] > 0.0
 
 
-def test_semi_markov_acquisition_discounts_by_macro_duration():
-    """A long macro is a larger commitment and its continuation is discounted further."""
+def test_an_unexpanded_state_is_unlabelled_rather_than_labelled_zero():
+    """UNKNOWN is not ZERO. Training an unexpanded child as worthless teaches the model that
+    unexplored states have no future, which is exactly the gateway a continuation head exists
+    to find. It must be absent from the labels, not present with a zero."""
+    labels = lineage_continuation(
+        _observed([("expanded", 0.30, None), ("dud", 0.10, "expanded"), ("never", 0.40, None)]),
+        horizon=5,
+    )
+    assert "never" not in labels, "an unexpanded state must not be labelled at all"
+    assert labels["expanded"] == 0.0, "expanded-and-failed is a real zero"
+
+
+def test_discount_is_per_oracle_call_not_per_primitive():
+    """A 12-primitive and a 3-primitive macro both cost ONE oracle call.
+
+    Discounting by primitive count would penalise coordinated actions for being coordinated --
+    the bias the proposal work existed to remove. PMO integrates over oracle calls, so that is
+    the unit the discount must use.
+    """
     immediate, continuation = MacroValue(), MacroValue()
     rng = np.random.default_rng(3)
     x = rng.normal(size=(80, len(FEATURE_NAMES)))
@@ -172,13 +202,27 @@ def test_semi_markov_acquisition_discounts_by_macro_duration():
     continuation.fit(x, np.ones(len(x)))
 
     probe = x[:4]
-    short = acquire_with_continuation(
-        immediate, continuation, probe, beta=0.0, discount=0.9, macro_lengths=[3, 3, 3, 3]
+    three_primitives = acquire_with_continuation(
+        immediate, continuation, probe, beta=0.0, discount=0.9, macro_lengths=[1, 1, 1, 1]
     )
-    long = acquire_with_continuation(
-        immediate, continuation, probe, beta=0.0, discount=0.9, macro_lengths=[14, 14, 14, 14]
+    fourteen_primitives = acquire_with_continuation(
+        immediate, continuation, probe, beta=0.0, discount=0.9, macro_lengths=[1, 1, 1, 1]
     )
-    assert np.all(long < short), "a longer macro must discount its continuation more"
+    assert np.allclose(three_primitives, fourteen_primitives), (
+        "macro SIZE must not change the discount; both cost one oracle call"
+    )
+    two_calls = acquire_with_continuation(
+        immediate, continuation, probe, beta=0.0, discount=0.9, macro_lengths=[2, 2, 2, 2]
+    )
+    assert np.all(two_calls < three_primitives), "more ORACLE CALLS must discount further"
+    try:
+        acquire_with_continuation(
+            immediate, continuation, probe, discount=0.9, macro_lengths=[0, 0, 0, 0]
+        )
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("an option consuming zero oracle calls must be refused")
 
 
 def test_acquisition_explores_when_either_head_is_unsure():

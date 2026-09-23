@@ -155,6 +155,9 @@ def main():
                         "start": start["name"],
                         "generation": generation,
                         "endpoint": endpoint,
+                        # `smiles` is the frontier's key and `endpoint` the dataset's; both name
+                        # the same molecule and are kept in step deliberately.
+                        "smiles": endpoint,
                         "score": value,
                         "depth": parent["depth"] + 1,
                         "parent": parent["smiles"],

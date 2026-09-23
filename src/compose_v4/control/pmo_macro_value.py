@@ -251,7 +251,7 @@ def lineage_continuation(
 
     The label is ``best_descendant_score - own_score``: "does acting here open a better future",
     which is exactly the quantity an immediate-gain target cannot express.  Floored at zero by
-    default because a lineage that went nowhere costs its calls and no more -- the parent stays
+    default because a lineage that was EXPANDED and went nowhere costs its calls and no more -- the parent stays
     in the archive, so a bad descendant is not a regression to be punished twice.
 
     ATTRIBUTION IS BY LINEAGE, NOT BY WALL-CLOCK.  A global `F_k(A_{t+H}) - F_k(A_t)` would
@@ -288,7 +288,13 @@ def lineage_continuation(
                 continue
             best = max(best, score[child])
             stack.extend(children.get(child, ()))
-        gain = 0.0 if best == -math.inf else best - score[endpoint]
+        if best == -math.inf:
+            # NEVER EXPANDED. Its continuation is UNKNOWN, not zero. Labelling it zero would
+            # train the model that unexplored states are worthless, which is precisely the
+            # gateway state a continuation head exists to find. Omitted from the labels so a
+            # caller cannot silently fit on it.
+            continue
+        gain = best - score[endpoint]
         labels[endpoint] = max(0.0, gain) if floor_at_zero else gain
     return labels
 
@@ -304,9 +310,17 @@ def acquire_with_continuation(
 ) -> np.ndarray:
     """`r_archive + gamma**len(o) * V_H + beta * sigma`, the semi-Markov acquisition.
 
-    ``macro_lengths`` discounts by the macro's PRIMITIVE DURATION rather than by a step count,
-    because COMPOSE's options are variable length and a 3-edit growth is not the same commitment
-    as a 14-edit ring replacement.  Omitting it reduces to an ordinary one-step discount.
+    CORRECTION.  An earlier version discounted by PRIMITIVE COUNT, on the reasoning that a
+    14-edit ring replacement is a larger commitment than a 3-edit growth.  That is wrong for the
+    quantity being discounted here: both macros produce ONE endpoint and cost ONE oracle call,
+    and PMO's objective is integrated over oracle calls.  Charging the larger macro as fourteen
+    discounted steps penalises coordinated actions for being coordinated -- reintroducing exactly
+    the bias against large structured moves that the proposal work existed to remove.
+
+    ``macro_lengths`` is therefore the number of ORACLE CALLS the option consumes, which is one
+    for an ordinary macro and more only for an option that scores intermediates.  Primitive work
+    and wall time are real costs, but they are compute budgets and must be accounted separately
+    rather than folded into the reward discount.
 
     Uncertainty is taken over the SUM of the two heads, so a candidate is explored when either
     the immediate or the continuation estimate is poorly supported.
@@ -319,8 +333,10 @@ def acquire_with_continuation(
     else:
         lengths = np.asarray(macro_lengths, dtype=float)
         if lengths.shape[0] != x.shape[0]:
-            raise ValueError("one macro length per candidate is required")
-        weight = discount ** np.maximum(1.0, lengths)
+            raise ValueError("one oracle-call count per candidate is required")
+        if np.any(lengths < 1):
+            raise ValueError("an option consumes at least one oracle call")
+        weight = discount ** lengths
     spread = np.sqrt(immediate.spread(x) ** 2 + continuation.spread(x) ** 2)
     return immediate.predict(x) + weight * continuation.predict(x) + float(beta) * spread
 
