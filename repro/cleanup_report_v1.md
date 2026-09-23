@@ -44,6 +44,7 @@ rule against a broad add exists to prevent. Both are restored byte-for-byte from
 | `pinned_historical_files_modified` | **0** | `git diff --stat 061ead93 HEAD -- <1,879 pinned paths>` is empty |
 | `lost_public_symbols` | **0** | the before and after reports are BYTE-IDENTICAL, sha256 `85ab89636a352c1b...` |
 | `lost_entrypoints` | **0** | 877 -> 884 entry points, 0 regressed, 0 vanished, +7 new tools |
+
 | `lost_capability_groups` | **0** | 7 groups, all non-empty |
 | `new_test_regressions` | PENDING | baseline suite still running; not claimed until run |
 | `newly_broken_pins` | **0** | absent-pin count unchanged at 10,876, all traced |
@@ -263,7 +264,7 @@ identity.
 | public symbol pairs (AST view) | 17,025 | 17,025 | **0 lost, 0 gained** |
 | capability report sha256 | `85ab8963...` | `85ab8963...` | **byte-identical** |
 | entry points discovered | 877 | 884 | +7 (new tools) |
-| entry points importing | 821 | 829 | **0 regressed, 0 vanished** |
+| entry points importing | 821 | 832 | **0 regressed, 0 vanished** |
 | collected test nodes | 6,296 | 6,302 | +6 (new smoke tests) |
 | pinned files modified | - | - | **0** |
 
