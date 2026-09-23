@@ -6,7 +6,12 @@ baseline `061ead93` (tag `pre-cleanup-2026-09-23`).
 Machine-readable gate: `repro/cleanup_report_v1.json`, regenerate with
 `python3 tools/repro_gate.py --base 061ead93`.
 
-**Rollback: `git checkout 061ead93` (tag `pre-cleanup-2026-09-23`).**
+**Rollback: `git checkout pre-cleanup-2026-09-23`**, equivalently
+`git checkout 061ead93`. Verified present locally and on origin. It is an
+ANNOTATED tag, so `git rev-parse pre-cleanup-2026-09-23` returns the tag object
+`acc3f3a1...`; the commit is `git rev-parse pre-cleanup-2026-09-23^{}` =
+`061ead9355810a021bfbe64c9090ff60edb5599e`. Any script comparing the tag against
+a commit sha must dereference it or it will report a spurious mismatch.
 
 ## Outcome in one line
 
