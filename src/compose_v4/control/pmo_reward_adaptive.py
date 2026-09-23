@@ -131,6 +131,28 @@ class FamilyLedger:
                 mass[family] = mass.get(family, 0.0) + float(weight)
         self.mass_history.append({"label": label, "mass": mass})
 
+    def state(self) -> dict:
+        """Serializable form. Named `state` rather than `snapshot` because `snapshot` is
+        already this class's per-round mass recorder; two meanings on one name is how a
+        resume quietly records nothing."""
+        return {
+            "proposed": dict(self.proposed),
+            "queried": dict(self.queried),
+            "deltas": {k: list(v) for k, v in self.deltas.items()},
+            "predicted": {k: list(v) for k, v in self.predicted.items()},
+            "mass_history": list(self.mass_history),
+        }
+
+    @classmethod
+    def from_state(cls, payload: dict) -> FamilyLedger:
+        return cls(
+            proposed=Counter(payload.get("proposed") or {}),
+            queried=Counter(payload.get("queried") or {}),
+            deltas={k: list(v) for k, v in (payload.get("deltas") or {}).items()},
+            predicted={k: list(v) for k, v in (payload.get("predicted") or {}).items()},
+            mass_history=list(payload.get("mass_history") or []),
+        )
+
     def report(self) -> dict:
         families = sorted(set(self.proposed) | set(self.queried) | set(self.deltas))
         first = self.mass_history[0]["mass"] if self.mass_history else {}
@@ -217,6 +239,48 @@ class RewardAdaptiveProgramController:
         if model.weights is None:
             return parent
         return parent + self.scale.restore(model.predict(rows))
+
+    # ---- Persistence: an interrupted campaign must resume, not restart cold -------------
+    def state(self) -> dict:
+        """Everything needed to continue the SAME trajectory after a container restart.
+
+        The value heads are NOT serialized because they do not need to be: `observe` refits
+        both on the entire observation log, so the fitted state is a pure function of that
+        log and is reproduced exactly by replaying it. The running scale is likewise
+        replayed in order rather than stored, since Welford is order-dependent and the order
+        is the log's. What genuinely cannot be recomputed -- the family ledger's counters
+        and the policy history -- is carried verbatim.
+
+        A resume that silently restarts the model cold is indistinguishable from a working
+        resume in every artifact, which is the failure this exists to prevent.
+        """
+        return {
+            "schema_version": "pmo_reward_adaptive_state_v1",
+            "observations": list(self.observations),
+            "ledger": self.ledger.state(),
+            "policy_history": list(self.policy_history),
+            "propensities": list(self.propensities),
+        }
+
+    @classmethod
+    def restore(cls, payload: dict, **kwargs) -> RewardAdaptiveProgramController:
+        """Rebuild by REPLAYING the observation log, then refitting once."""
+        if payload.get("schema_version") != "pmo_reward_adaptive_state_v1":
+            raise ValueError(f"unknown controller state {payload.get('schema_version')!r}")
+        brain = cls(**kwargs)
+        brain.observations = list(payload.get("observations") or [])
+        brain.policy_history = list(payload.get("policy_history") or [])
+        brain.propensities = list(payload.get("propensities") or [])
+        brain.ledger = FamilyLedger.from_state(payload.get("ledger") or {})
+        for record in brain.observations:
+            brain.scale.update(float(record["delta_raw"]))
+        if brain.fitted:
+            targets = brain.scale.standardize(
+                [o["delta_raw"] for o in brain.observations]
+            )
+            brain.pre.fit(brain.observations, targets)
+            brain.post.fit(brain.observations, targets)
+        return brain
 
     # ---- Upstream: reward changes what gets proposed -----------------------------------------
     def intent_policy(self, intents) -> np.ndarray:

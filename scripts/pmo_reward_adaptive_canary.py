@@ -295,10 +295,26 @@ def main():
             )
         return out
 
+    _state_path = folder / "controller_state.json"
+    if _state_path.exists():
+        with open(_state_path) as handle:
+            _restored = RewardAdaptiveProgramController.restore(json.load(handle))
+        print(
+            f"RESUMED controller state: {len(_restored.observations)} observations, "
+            f"fitted={_restored.fitted}",
+            flush=True,
+        )
+    else:
+        _restored = RewardAdaptiveProgramController()
+
     class RewardAdaptive(PmoPopulationController):
         """Production machinery end to end; reward steers proposal AND acquisition."""
 
-        brain = RewardAdaptiveProgramController()
+        # Restored when a previous attempt left state, fresh otherwise. A container that
+        # restarts after preemption resumes the SAME trajectory; without this the campaign
+        # archive would continue while the value model silently restarted cold, which is
+        # indistinguishable from a working resume in every artifact.
+        brain = _restored
 
         def __init__(self, *a, **k):
             super().__init__(*a, **k)
@@ -497,7 +513,10 @@ def main():
                     # The compute contract, auditable per round: how many proposals were
                     # attempted and how many became candidates.
                     "proposal_attempts": sum(
-                        int(c.get("attempts", 0)) for c in channels.values()
+                        int(c.get("proposals", 0)) for c in channels.values()
+                    ),
+                    "eligible_candidates": sum(
+                        int(c.get("eligible_novel", 0)) for c in channels.values()
                     ),
                     "channel_counters": channels,
                     "round_seconds": round(round_seconds, 2),
@@ -522,7 +541,9 @@ def main():
             # discards every in-memory series (option policy, lineages, family audit) while
             # only the oracle ledger survives.
             _checkpoint()
-            _round_log(self, rows, selected, detail)
+            # Logged from observe_batch instead: attribution is only known once the
+            # outcomes come back, and logging here printed `attr None/None` every round.
+            self._log_args = (rows, selected, detail)
             telemetry["selected_endpoints"].append([c["endpoint"] for c in selected])
             telemetry["rng_state"] = json.loads(
                 json.dumps(self.rng.bit_generator.state, default=str)
@@ -579,8 +600,21 @@ def main():
             # it selected. Record what was CHARGED; comparing against the selected count
             # reports a correct round as incomplete.
             telemetry["rounds"][-1]["charged"] = len(scored)
+            if getattr(self, "_log_args", None):
+                _round_log(self, *self._log_args)
+                self._log_args = None
             self._pending_rows = {}
             return result
+
+    def _option_tv() -> float:
+        """Total variation between the first and latest rebuild-option policy."""
+        history = telemetry["option_policy"]
+        if len(history) < 2:
+            return 0.0
+        first, last = history[0]["weights"], history[-1]["weights"]
+        return 0.5 * sum(
+            abs(last.get(k, 0.0) - first.get(k, 0.0)) for k in set(first) | set(last)
+        )
 
     def _round_log(controller, rows, selected, detail):
         """One concise status block per round, plus append-only machine-readable rows.
@@ -632,7 +666,7 @@ def main():
             f"queried {len(selected)} | lineages {last.get('effective_lineages', 0):.1f} "
             f"maxshare {last.get('max_lineage_share', 0):.2f} | "
             f"shift {(telemetry['policy_shifts'][-1] if telemetry['policy_shifts'] else 0):.3f} "
-            f"optTV {(telemetry['option_policy'][-1]['weights'] and 0) if False else 0:.0f} | "
+            f"optTV {_option_tv():.4f} | "
             f"roots {telemetry['root_candidates']} attr {last.get('attributed')}/"
             f"{last.get('charged')} | {last.get('round_seconds', 0):.0f}s "
             f"ETA {eta_hours:.1f}h",
@@ -728,6 +762,10 @@ def main():
             "out_of_range_predictions": telemetry["out_of_range_predictions"],
             "elapsed_seconds": round(time.time() - started, 1),
         }
+        state = folder / "controller_state.json.tmp"
+        with open(state, "w") as handle:
+            json.dump(RewardAdaptive.brain.state(), handle)
+        state.replace(folder / "controller_state.json")
         temporary = folder / "progress.json.tmp"
         with open(temporary, "w") as handle:
             json.dump(snapshot, handle, indent=1)

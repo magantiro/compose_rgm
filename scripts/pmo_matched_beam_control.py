@@ -10,13 +10,18 @@ If the beam wins here, that is the finding, and it is worth more than a favourab
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import sys
 import types
 
 import numpy as np
 
-OUT = "diagnostics/pmo_matched_beam_v1/matched_beam_v1.json"
+# Overridable so a run at a different budget cannot overwrite the artifact a completed run
+# at another budget already produced.
+OUT = os.environ.get(
+    "BEAM_OUT", "diagnostics/pmo_matched_beam_v1/matched_beam_v1.json"
+)
 
 
 def _oracle():
