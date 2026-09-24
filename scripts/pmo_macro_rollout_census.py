@@ -160,8 +160,16 @@ def main() -> int:
     parser.add_argument("--out", required=True)
     parser.add_argument("--arms", type=int, default=7, help="macro arms, plus no_macro")
     parser.add_argument("--top-n", type=int, default=20000)
-    parser.add_argument("--min-support", type=int, default=3)
+    parser.add_argument("--min-support", type=int, default=2)
     parser.add_argument("--library-top", type=int, default=300)
+    # DEFAULT NON-BINDING ON PURPOSE. Diversity-filtering the library was my first fix
+    # for the census missing the winning payload class, and it MEASURED WORSE: at
+    # min_support=2 a plain top-300-by-mean offers 11 of the 172 winning-class regions
+    # and a diverse-300 offers 7. The real lever was min_support (3 -> 2), which takes
+    # the library from 19,115 regions with 22 winning-class and NONE in the top 300, to
+    # 45,452 with 172 and 11 offered. Kept as a knob, off by default.
+    parser.add_argument("--library-diversity", type=float, default=1.0,
+                        help="max Tanimoto between two payloads offered; 1.0 = no filter")
     parser.add_argument("--budget", type=int, default=DEFAULT_RUNG_CALLS)
     parser.add_argument("--attachment-molecules", type=int, default=60000)
     parser.add_argument("--attachment-min-support", type=int, default=2)
@@ -181,13 +189,40 @@ def main() -> int:
           f"{len(twos):,} two-cut ring regions")
 
     leader = args.leader
+
+    def diverse_library(rows, limit, threshold):
+        """Top-N by library mean surfaces COMMON payloads, not rare structural classes.
+
+        MEASURED on thiothixene, and the first reading was wrong. At min_support=3 the
+        winning payload class (>=3 rings with an exocyclic ring alkene) is 22 of 19,115
+        regions with best library-mean rank #387, so a top-300 cut offered ZERO and the
+        census beat the incumbent on 0 of 9 arms. That looked like a ranking problem. It
+        was a SUPPORT-THRESHOLD problem: at min_support=2 the library holds 172 of that
+        class and a plain top-300-by-mean already offers 11, while this diversity filter
+        offers only 7. The filter is therefore OFF by default and kept only as a knob.
+        """
+        kept, fingerprints = [], []
+        for smiles, mean, n in rows:
+            mol = Chem.MolFromSmiles(smiles)
+            if mol is None:
+                continue
+            fingerprint = AllChem.GetMorganFingerprintAsBitVect(mol, 2, 1024)
+            if fingerprints and max(DataStructs.BulkTanimotoSimilarity(
+                    fingerprint, fingerprints)) > threshold:
+                continue
+            kept.append((smiles, {"library_mean": mean, "library_n": n}))
+            fingerprints.append(fingerprint)
+            if len(kept) >= limit:
+                break
+        return kept
+
+    one_lib = diverse_library(ones, args.library_top, args.library_diversity)
+    two_lib = diverse_library(twos, args.library_top, args.library_diversity)
+    print(f"  library after diversity: {len(one_lib)} one-cut, {len(two_lib)} two-cut")
     families: dict = {}
     families["substituent_replace"] = substituent_replacements(
-        leader, [(s, {"library_mean": m, "library_n": n})
-                 for s, m, n in ones[:args.library_top]], limit=400)
-    families["region_replace"] = region_replacements(
-        leader, [(s, {"library_mean": m, "library_n": n})
-                 for s, m, n in twos[:args.library_top]], limit=400)
+        leader, one_lib, limit=400)
+    families["region_replace"] = region_replacements(leader, two_lib, limit=400)
     families["region_excise"] = region_excisions(leader, min_removed=1, max_removed=24)
 
     # The one unconstrained degree of freedom a context-preserving macro still has is the

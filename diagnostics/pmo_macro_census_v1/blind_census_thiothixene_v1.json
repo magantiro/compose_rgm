@@ -1,0 +1,47 @@
+{
+ "schema_version": "pmo_blind_macro_census_v1",
+ "measured_at_utc": "2026-09-24T15:35:48.968237+00:00",
+ "oracle_calls_spent": 330,
+ "accounting": "10 arms x 33 charged calls, thiothixene, development screen",
+ "verdict": "THE_BLIND_CENSUS_DOES_NOT_REPRODUCE_ITS_OWN_POSITIVE_CONTROL",
+ "result": {
+  "no_macro": {
+   "best": 0.4839,
+   "top10": 0.4034,
+   "auc_17_33": 0.3974
+  },
+  "best_macro_arm": {
+   "label": "substituent_replace_2",
+   "best": 0.4318,
+   "top10": 0.3867,
+   "auc_17_33": 0.3834
+  },
+  "worst_macro_arm": {
+   "label": "region_excise_7",
+   "best": 0.2273,
+   "auc_17_33": 0.1991
+  },
+  "macro_arms_beating_no_macro": 0,
+  "macro_arms": 9
+ },
+ "why_this_is_decision_relevant": "A macro CAN win on this exact task: junction #3 went 0.5000 -> 0.5966 over 64 matched calls while the incumbent stayed at 0.4839. The reference-BLIND census, given the same leader and the same three operator families, beat the incumbent on 0 of 9 arms.",
+ "the_reason_my_earlier_win_is_not_a_blind_result": "The candidates that won were selected by filtering the mined region library to >=3 rings AND an exocyclic ring alkene -- a filter I chose because I had already diagnosed thiothixene's architecture as a thioxanthene with an exocyclic 9-position alkene. That is ANSWER-KNOWN structural guidance. It establishes CAPABILITY (COMPOSE can reach a much better basin through a two-cut macro) and it does NOT establish that a blind controller finds it.",
+ "where_the_blind_pipeline_loses_it_MEASURED": {
+  "min_support_3": {
+   "regions": 19115,
+   "winning_class": 22,
+   "best_library_mean_rank": 387,
+   "offered_in_top_300": 0
+  },
+  "min_support_2": {
+   "regions": 45452,
+   "winning_class": 172,
+   "offered_in_top_300": 11
+  },
+  "arms_selected_from_the_winning_class": 0,
+  "reading": "Lowering the support threshold fixes LIBRARY exposure (0 -> 11 offered) and does NOT fix ARM exposure: the class is 11 of 300 payloads and none of its candidates ranks top-3 by library mean within its family. Exposure at the library level is not exposure at the arm level."
+ },
+ "a_fix_of_mine_that_measured_worse": "I first attributed the miss to library-mean ranking and added a diversity filter over the payload library. Measured: plain top-300-by-mean offers 11 of the winning class, diversity-300 offers 7. The filter is left in as a knob and DEFAULTS OFF.",
+ "what_is_still_true": "The operator families, the attachment-compatibility table and the continuation tournament are all unaffected -- the tournament did its job, which is to report that these particular candidates are worse than staying put. What is not established is that a blind CANDIDATE GENERATOR proposes the ones worth running.",
+ "limits": "One task, one leader, 33-call rung, 9 macro arms, one seed."
+}
