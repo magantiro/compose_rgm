@@ -1,0 +1,260 @@
+{
+  "arms": {
+    "completed_site": {
+      "attempts": 80,
+      "committed": 80,
+      "completed_site_redirect_commits": 4,
+      "completed_site_redirect_offers": 4,
+      "completed_site_redirects": 4,
+      "fragment_preserving_committed": 80,
+      "full_task_success": 77,
+      "interface_rejections": 120,
+      "lock_rejections": 237,
+      "official_diversity_mean": 0.618013961988304,
+      "official_quality_mean": 40.0,
+      "official_uniqueness_mean": 100.0,
+      "per_prompt": {
+        "BARICITINIB": {
+          "committed": 20,
+          "completed_site_redirect_commits": 0,
+          "official": {
+            "distance": 0.5379041874097673,
+            "distance_to_original_drug": 0.48432812228918837,
+            "diversity": 0.4518947368421053,
+            "quality": 60.0,
+            "uniqueness": 100.0,
+            "validity": 95.0
+          },
+          "staging_rejections": 64,
+          "task_success": 19
+        },
+        "ERLOTINIB": {
+          "committed": 20,
+          "completed_site_redirect_commits": 0,
+          "official": {
+            "distance": 0.658595753450157,
+            "distance_to_original_drug": 0.6282038944045216,
+            "diversity": 0.5891,
+            "quality": 40.0,
+            "uniqueness": 100.0,
+            "validity": 100.0
+          },
+          "staging_rejections": 106,
+          "task_success": 20
+        },
+        "LIOTHYRONINE": {
+          "committed": 20,
+          "completed_site_redirect_commits": 0,
+          "official": {
+            "distance": 0.8820111696586717,
+            "distance_to_original_drug": 0.752696820196455,
+            "diversity": 0.7279499999999999,
+            "quality": 40.0,
+            "uniqueness": 100.0,
+            "validity": 100.0
+          },
+          "staging_rejections": 150,
+          "task_success": 20
+        },
+        "MARIBAVIR": {
+          "committed": 20,
+          "completed_site_redirect_commits": 4,
+          "official": {
+            "distance": 0.8851093507209757,
+            "distance_to_original_drug": 0.7732660732200617,
+            "diversity": 0.7031111111111111,
+            "quality": 20.0,
+            "uniqueness": 100.0,
+            "validity": 90.0
+          },
+          "staging_rejections": 130,
+          "task_success": 18
+        }
+      },
+      "seconds": 36.84,
+      "staging_rejections": 450,
+      "valid_committed": 80
+    },
+    "historical": {
+      "attempts": 80,
+      "committed": 80,
+      "completed_site_redirect_commits": 0,
+      "completed_site_redirect_offers": 0,
+      "completed_site_redirects": 0,
+      "fragment_preserving_committed": 80,
+      "full_task_success": 77,
+      "interface_rejections": 125,
+      "lock_rejections": 268,
+      "official_diversity_mean": 0.6160000730994152,
+      "official_quality_mean": 38.75,
+      "official_uniqueness_mean": 100.0,
+      "per_prompt": {
+        "BARICITINIB": {
+          "committed": 20,
+          "completed_site_redirect_commits": 0,
+          "official": {
+            "distance": 0.5379041874097673,
+            "distance_to_original_drug": 0.48432812228918837,
+            "diversity": 0.4518947368421053,
+            "quality": 60.0,
+            "uniqueness": 100.0,
+            "validity": 95.0
+          },
+          "staging_rejections": 64,
+          "task_success": 19
+        },
+        "ERLOTINIB": {
+          "committed": 20,
+          "completed_site_redirect_commits": 0,
+          "official": {
+            "distance": 0.658595753450157,
+            "distance_to_original_drug": 0.6282038944045216,
+            "diversity": 0.5891,
+            "quality": 40.0,
+            "uniqueness": 100.0,
+            "validity": 100.0
+          },
+          "staging_rejections": 106,
+          "task_success": 20
+        },
+        "LIOTHYRONINE": {
+          "committed": 20,
+          "completed_site_redirect_commits": 0,
+          "official": {
+            "distance": 0.8820111696586717,
+            "distance_to_original_drug": 0.752696820196455,
+            "diversity": 0.7279499999999999,
+            "quality": 40.0,
+            "uniqueness": 100.0,
+            "validity": 100.0
+          },
+          "staging_rejections": 150,
+          "task_success": 20
+        },
+        "MARIBAVIR": {
+          "committed": 20,
+          "completed_site_redirect_commits": 0,
+          "official": {
+            "distance": 0.8846724075115142,
+            "distance_to_original_drug": 0.7776139906840807,
+            "diversity": 0.6950555555555555,
+            "quality": 15.0,
+            "uniqueness": 100.0,
+            "validity": 90.0
+          },
+          "staging_rejections": 171,
+          "task_success": 18
+        }
+      },
+      "seconds": 172.61,
+      "staging_rejections": 491,
+      "valid_committed": 80
+    }
+  },
+  "checks": {
+    "all_committed_chemically_valid": true,
+    "diversity_drop_at_most_point_zero_three": true,
+    "full_success_lost_at_most_two": true,
+    "mechanism_accepted_at_least_five": false,
+    "negative_controls_identical": true,
+    "quality_drop_at_most_five_points": true,
+    "staging_rejections_down_at_least_ten_percent": false
+  },
+  "control_identity": {
+    "motif_extension/BARICITINIB": true,
+    "superstructure_generation/LOVASTATIN": true
+  },
+  "identity": {
+    "attempts_per_prompt": 20,
+    "contract_sha256": "5c95ce27d2608053f906bae860c649e6e21df7ecc60f0e312a59ad000fa7f795",
+    "git_commit": "4f5b35f0926128184216c6adcd3c8b192d0e3f74",
+    "hardware": {
+      "device": "cpu",
+      "precision": "float32"
+    },
+    "implementation_sha256": {
+      "src/compose_v4/benchmark/fragment_attachment_control.py": "e8bfd922bc083502835f0f49ec84aa9b555a89a952f72de5fefa9ed8a42ffe30",
+      "src/compose_v4/benchmark/fragment_conditioned_sampler.py": "4112ae2f47cfd8e37a0576bec9a8b256d86bc77d65e47935dc5ade873b82bcae",
+      "src/compose_v4/benchmark/fragment_constrained.py": "cd9113a6afd22e833de462a0ad7d816ed170e8bde0d9d5577d7cae98caf0ddc6",
+      "src/compose_v4/benchmark/fragment_official_metrics.py": "eb8430c08a6a57da25a2f7f7d57ec892fbeec6d81a78b31c616295e23cb42726",
+      "src/compose_v4/model/factorized_tracelet_rate_model.py": "3b47e1ff03577e77075952bcfdecc8101c73efc452b4a45f7e89af48c849a1ec",
+      "tools/run_fragment_completed_interface_dev.py": "4ea0872c93f7aa9c3cb97bfff6cb58cd4f363ba0663611b19ae5d619243c35fd",
+      "tools/run_fragment_constrained_suite.py": "9f67cebaa812982e2a3b383412beede735383e1b930bc8549021aba8829184a1"
+    },
+    "inputs_sha256": {
+      "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+      "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9"
+    },
+    "official_ivg_blobs_sha256": {
+      "in_virtuo_gen/evaluation/downstream.py": "ab34f586b41f1ad6e21cd933b08e7ff86eb44711c9c9a4c31c29f894cc9c7b50",
+      "in_virtuo_gen/train_utils/metrics.py": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+      "in_virtuo_gen/utils/mol.py": "ed5609c72a3effe2547f4b264e35be8134affccc206978605307d1365a028145",
+      "references/fragments.csv": "43db9adbcf7f8895be6197bccdf729517c4433b7fdbf637f413fa9c8055c3a31",
+      "references/frags_downstream.csv": "dceeec39f389dda928a210694449948645be73d12da0ad93bc843ba1f2bb5975",
+      "references/reference_metrics.csv": "e75676431628987d3d0bacbafc3028ffd7ebc8d797ecb03fb386b13a453823f9"
+    },
+    "prompts": [
+      [
+        "scaffold_decoration",
+        "BARICITINIB"
+      ],
+      [
+        "scaffold_decoration",
+        "ERLOTINIB"
+      ],
+      [
+        "scaffold_decoration",
+        "LIOTHYRONINE"
+      ],
+      [
+        "scaffold_decoration",
+        "MARIBAVIR"
+      ],
+      [
+        "motif_extension",
+        "BARICITINIB"
+      ],
+      [
+        "superstructure_generation",
+        "LOVASTATIN"
+      ]
+    ],
+    "sampler": {
+      "config": {
+        "mark_attempts_per_event": 24,
+        "max_events": 32,
+        "n_slots": 48,
+        "operational_horizon": 16.0
+      },
+      "config_sha256": "805b2d10fa863c278dfd760fb3b9f5fd29eb94f91ef1653b1bf5ebe44aaab9ae"
+    },
+    "schema_version": "fragment_completed_interface_dev_v1",
+    "seed": 0,
+    "software": {
+      "networkx": "3.3",
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "platform": "macOS-26.5.2-arm64-arm-64bit",
+      "python": "3.11.13",
+      "rdkit": "2024.03.5",
+      "scipy": "1.13.1",
+      "torch": "2.4.0"
+    }
+  },
+  "qualified_for_held_test": false,
+  "schema_version": "fragment_completed_interface_dev_summary_v1",
+  "units_sha256": {
+    "diagnostics/fragment_completed_interface_redirection_dev_v1/units/completed_site__motif_extension__baricitinib.json": "cb2579a40a0bd1f6550dca35911f18c56bb4bd05be63af91d541517c4c6ccf36",
+    "diagnostics/fragment_completed_interface_redirection_dev_v1/units/completed_site__scaffold_decoration__baricitinib.json": "50dd4529dc0c4a6ce72aa115076dab3ac26c0dc8f9b0554a725c66f0a44ff577",
+    "diagnostics/fragment_completed_interface_redirection_dev_v1/units/completed_site__scaffold_decoration__erlotinib.json": "61e5173f7c6cd189166805573896fd44855c1daec37a5e52b78cc666af7b6f4a",
+    "diagnostics/fragment_completed_interface_redirection_dev_v1/units/completed_site__scaffold_decoration__liothyronine.json": "20c00904303505fe8bc62aeb5888813619801dce073f3c2617146868dcbff8b6",
+    "diagnostics/fragment_completed_interface_redirection_dev_v1/units/completed_site__scaffold_decoration__maribavir.json": "124f6109b546d772ac9e0323ca67ef831aba371c05f3b773d7a1b2f323a17f3e",
+    "diagnostics/fragment_completed_interface_redirection_dev_v1/units/completed_site__superstructure_generation__lovastatin.json": "6dc519a080dbc0799b6b48e8982d68755a6a69375bec3b45ea2d060f6725f4e0",
+    "diagnostics/fragment_completed_interface_redirection_dev_v1/units/historical__motif_extension__baricitinib.json": "00dff252d5ce9fa0344b864c3ea50e5ce989980856c5d2e1129d56072ad068d2",
+    "diagnostics/fragment_completed_interface_redirection_dev_v1/units/historical__scaffold_decoration__baricitinib.json": "daae3149369e3caa2054946c22cfa8417b7c0d9a72976c1b4e9cf5270555fe63",
+    "diagnostics/fragment_completed_interface_redirection_dev_v1/units/historical__scaffold_decoration__erlotinib.json": "eac977dfdbcd4c5b50f96631d7a7127cd2c7a7a6fcc8e3bad26a4538abacf0eb",
+    "diagnostics/fragment_completed_interface_redirection_dev_v1/units/historical__scaffold_decoration__liothyronine.json": "8c08bb6849e64aba4b26c986c13e6666b511b70c76ac39b0fa8d9a1bb1ce9534",
+    "diagnostics/fragment_completed_interface_redirection_dev_v1/units/historical__scaffold_decoration__maribavir.json": "0d2ebcb89433b39e244d030e42482a557498845edfeb72d38b03b219c2cba829",
+    "diagnostics/fragment_completed_interface_redirection_dev_v1/units/historical__superstructure_generation__lovastatin.json": "68b0646293f164074f32985ee8f16cffe3d7f9a098edd958cbf543ecb9b0bfb8"
+  }
+}
