@@ -1,0 +1,142 @@
+{
+  "code_revision": "6f67ce77fb3102efb29be3593e44f75f20d2cdd2",
+  "image_sha256": {
+    "motif_extension.png": "a670898b8648d0ed8e0c867ae8e747b360691f78f1426e89f543cb5c8ade4ae3",
+    "scaffold_decoration.png": "5307a8d0bd7e91f46fbec3f4d8b65dc14a7b8db5b1c73b600822c53314371c8f"
+  },
+  "input_sha256": {
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/manifest.json": "641133d92c55966ae26ca53b393cf2d4e6935ae543f3cc46f2093bc963bc51e3",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/motif_extension_BARICITINIB.json": "cc757c3c8b38d2ede61c5d0879f9a525dc9d9ab370791b06b60b4daceafa1055",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/motif_extension_CYCLOTHIAZIDE.json": "655665703f1a5bdd30208c1d5c9e1371bc01aa48077a4fa5ef208380c8939ca1",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/motif_extension_ELIGLUSTAT.json": "d833f69085da9d111a95b456be716a7b4dab912adcc507479daa91da19ca6fc9",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/motif_extension_ERLOTINIB.json": "32c337f63c1bd49ad4ad487ba04dddb344aac87a42c4fffa85a080ce1b27e573",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/motif_extension_FUTIBATINIB.json": "29cab17fb7168e97b5bb23c225e6a4bca93f20086e9ce9fb11dc2a292af329c2",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/motif_extension_LESINURAD.json": "b5fd47f6d69d34d358f41f1cfee3aa4733a29fed4c93ae6e7abcb09560201d51",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/motif_extension_LIOTHYRONINE.json": "9b65fb8de6e9988ca07bc9420308e96eef0c4b46a74b17b8968fc2cb4160f792",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/motif_extension_LOVASTATIN.json": "b5f080b176605e77addea7acbfe0fed539f584f5aa962dceaa00402fb5bf2a87",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/motif_extension_MARIBAVIR.json": "aa690ea38cbbae311d68f0ac07b5c8da5498b0cfd7de470b05d7b3285d925f1e",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/motif_extension_SPIRAPRIL.json": "12b4b77b676cdf9c2e2bf2ecc1e254d9b9931864def495fdc2c6e6403eb58f74",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/scaffold_decoration_BARICITINIB.json": "300052055de58a1c206f8faf45c1551906e82b53acbbed16ebe544ff5afdac5b",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/scaffold_decoration_CYCLOTHIAZIDE.json": "90533d5c2ae8e43c9750b74fc9673195b9eab2235326100e8eba7a2ab7144020",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/scaffold_decoration_ELIGLUSTAT.json": "7a1b77f90ba9053732e52bcbdf35401eb992181516c9df3b3a1885e3430d7246",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/scaffold_decoration_ERLOTINIB.json": "8e17cf7f102fe65667ee14df6f3b701e814980d0a988d29a1422b8256fe566bc",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/scaffold_decoration_FUTIBATINIB.json": "7f9085b7ffef43d9b216f0ae69ca28e907a748280da9746e16c3814c84e6ddcf",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/scaffold_decoration_LESINURAD.json": "d2e198efe1687d324d47f577baf1bd20f3da4e6969270bd3e081baa87089d3c2",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/scaffold_decoration_LIOTHYRONINE.json": "1225a1f5168e493ea418c8f9d5695dfae3d27c3a42d5691c02f548d26e40cab5",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/scaffold_decoration_LOVASTATIN.json": "718aa589b655a31ac6a876dcaf29f4cb53de593810981e14caead2753215cd88",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/scaffold_decoration_MARIBAVIR.json": "f44980c3950a2554065ae2efba9a44669b30fdd0a78739959c63b56159dc109b",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/rows/scaffold_decoration_SPIRAPRIL.json": "99ede56488f1c4be66cbdc73744a923ec19c88543f41a24fe71a8313a2ef7048",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v2/summary.json": "069c73c5584a86a1604cdd4f6796897bfc13c1e24a25d7cd5d3b306398b585da",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/tools/render_fragment_joint_support.py": "be337e30e26102cf18970aa73fe2ea473cef3a2cd70eae5eb6025f5de723c4bc"
+  },
+  "records": [
+    {
+      "attempt": 0,
+      "drug": "BARICITINIB",
+      "task": "motif_extension"
+    },
+    {
+      "attempt": 0,
+      "drug": "CYCLOTHIAZIDE",
+      "task": "motif_extension"
+    },
+    {
+      "attempt": 0,
+      "drug": "ELIGLUSTAT",
+      "task": "motif_extension"
+    },
+    {
+      "attempt": 0,
+      "drug": "ERLOTINIB",
+      "task": "motif_extension"
+    },
+    {
+      "attempt": 0,
+      "drug": "FUTIBATINIB",
+      "task": "motif_extension"
+    },
+    {
+      "attempt": 0,
+      "drug": "LESINURAD",
+      "task": "motif_extension"
+    },
+    {
+      "attempt": 0,
+      "drug": "LIOTHYRONINE",
+      "task": "motif_extension"
+    },
+    {
+      "attempt": 0,
+      "drug": "LOVASTATIN",
+      "task": "motif_extension"
+    },
+    {
+      "attempt": 0,
+      "drug": "MARIBAVIR",
+      "task": "motif_extension"
+    },
+    {
+      "attempt": 0,
+      "drug": "SPIRAPRIL",
+      "task": "motif_extension"
+    },
+    {
+      "attempt": 0,
+      "drug": "BARICITINIB",
+      "task": "scaffold_decoration"
+    },
+    {
+      "attempt": 0,
+      "drug": "CYCLOTHIAZIDE",
+      "task": "scaffold_decoration"
+    },
+    {
+      "attempt": 0,
+      "drug": "ELIGLUSTAT",
+      "task": "scaffold_decoration"
+    },
+    {
+      "attempt": 0,
+      "drug": "ERLOTINIB",
+      "task": "scaffold_decoration"
+    },
+    {
+      "attempt": 0,
+      "drug": "FUTIBATINIB",
+      "task": "scaffold_decoration"
+    },
+    {
+      "attempt": 0,
+      "drug": "LESINURAD",
+      "task": "scaffold_decoration"
+    },
+    {
+      "attempt": 0,
+      "drug": "LIOTHYRONINE",
+      "task": "scaffold_decoration"
+    },
+    {
+      "attempt": 0,
+      "drug": "LOVASTATIN",
+      "task": "scaffold_decoration"
+    },
+    {
+      "attempt": 0,
+      "drug": "MARIBAVIR",
+      "task": "scaffold_decoration"
+    },
+    {
+      "attempt": 0,
+      "drug": "SPIRAPRIL",
+      "task": "scaffold_decoration"
+    }
+  ],
+  "role": "first emitted attempt per prompt; no quality calculation or selection",
+  "schema": "fragment_joint_support_visual_v1",
+  "stereo": "not asserted; supplied prompt stereo omitted to match model support",
+  "versions": {
+    "python": "3.11.13",
+    "rdkit": "2024.03.5"
+  }
+}

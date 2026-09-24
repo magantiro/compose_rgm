@@ -30,6 +30,15 @@ from compose_v4.benchmark.joint_completion_prior import JointCompletionPrior, Jo
 from compose_v4.benchmark.training_attachment_fragments import physical_sha256
 
 
+def prompt_ring_count(smiles):
+    # RingInfo does not keep its parent ROMol alive in the pinned RDKit runtime.
+    # Chaining MolFromSmiles(...).GetRingInfo().NumRings() silently returns zero.
+    molecule = Chem.MolFromSmiles(smiles)
+    if molecule is None:
+        raise ValueError("invalid prompt SMILES for structural accounting")
+    return molecule.GetRingInfo().NumRings()
+
+
 def collect_summary(rows, mode):
     summary = {"schema": "fragment_joint_prior_summary_v1", "mode": mode, "tasks": {}}
     for task in TASKS:
@@ -188,7 +197,7 @@ def main():
     rows = []
     for prompt in prompts:
         context = build_prompt_context(prompt)
-        initial_rings = Chem.MolFromSmiles(context.start_smiles).GetRingInfo().NumRings()
+        initial_rings = prompt_ring_count(context.start_smiles)
         rng = np.random.default_rng(prompt_rng_seed(prompt.drug_name, prompt.task.value, 0))
         attempts = []
         for index in range(samples):

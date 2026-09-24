@@ -1,0 +1,250 @@
+{
+  "attempts": [
+    {
+      "corrected_sha256": "0b6fdfd0a6f9873414c997ae8b2d00ce2d72335b8f3cd8dcac8f672a438cf2a9",
+      "labels_changed": 1,
+      "path": "attempts/motif_extension_BARICITINIB_000.json",
+      "source_sha256": "9f641949cfc9d65d49482baa2c130c1a8b9f9ba278722011ccbe0d33fb3fdfe5"
+    },
+    {
+      "corrected_sha256": "91cf8115e86c481d3cdcb15b14bc3fc361979ac6a3e2f7b4c5060a8f3f11761a",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_BARICITINIB_001.json",
+      "source_sha256": "91cf8115e86c481d3cdcb15b14bc3fc361979ac6a3e2f7b4c5060a8f3f11761a"
+    },
+    {
+      "corrected_sha256": "1c69bf994304c927e82e398c578240a10bfbcb95c2c6373709cc7b51866687a1",
+      "labels_changed": 1,
+      "path": "attempts/motif_extension_CYCLOTHIAZIDE_000.json",
+      "source_sha256": "9ef799e62306aa7ca7a8622a4a695ada2255f057c02ac996c420b30fa26d2409"
+    },
+    {
+      "corrected_sha256": "6ebfbb161100ace76133e1b9960ee12a48d1c928ab76fe5b690903720d966b8d",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_CYCLOTHIAZIDE_001.json",
+      "source_sha256": "6ebfbb161100ace76133e1b9960ee12a48d1c928ab76fe5b690903720d966b8d"
+    },
+    {
+      "corrected_sha256": "1ea5d5abce992713efb6eadf62fe97322d3f0e187c11d230b7795769b74e8702",
+      "labels_changed": 1,
+      "path": "attempts/motif_extension_ELIGLUSTAT_000.json",
+      "source_sha256": "73eacfa3b84f3e8e57cdd5e3df8b22990976e8ffe68ab9d2333b785addf41e69"
+    },
+    {
+      "corrected_sha256": "65ad6cf6481927a0c6815e13819420c5eab097f3d0a810fb7f68c1bdf11794d7",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_ELIGLUSTAT_001.json",
+      "source_sha256": "65ad6cf6481927a0c6815e13819420c5eab097f3d0a810fb7f68c1bdf11794d7"
+    },
+    {
+      "corrected_sha256": "cff98a502f5f3e5045d3e03cc01b34625e8cde51b704869db947673d45e2340c",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_ERLOTINIB_000.json",
+      "source_sha256": "cff98a502f5f3e5045d3e03cc01b34625e8cde51b704869db947673d45e2340c"
+    },
+    {
+      "corrected_sha256": "00ab0ee424f71f9b51c0dec78e0506921db64e63ea9180b45e98a8a7d5268695",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_ERLOTINIB_001.json",
+      "source_sha256": "00ab0ee424f71f9b51c0dec78e0506921db64e63ea9180b45e98a8a7d5268695"
+    },
+    {
+      "corrected_sha256": "6dd937db7be296e694cea94cbaa9e3917d9effd20dbcc7af946779ccf71211a0",
+      "labels_changed": 1,
+      "path": "attempts/motif_extension_FUTIBATINIB_000.json",
+      "source_sha256": "b45cc30eb4c17a8b1105474710fa04cba5c51937bdcb5cddd5c21b6e5a2632e0"
+    },
+    {
+      "corrected_sha256": "e5d84a89aa88a2d1b435d958a2773276997f3a87fb308262a240b94405309416",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_FUTIBATINIB_001.json",
+      "source_sha256": "e5d84a89aa88a2d1b435d958a2773276997f3a87fb308262a240b94405309416"
+    },
+    {
+      "corrected_sha256": "880c73b9400cf2fdc948299c4762c9595ed0f5fe6f6cbdc9892de741c5490284",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_LESINURAD_000.json",
+      "source_sha256": "880c73b9400cf2fdc948299c4762c9595ed0f5fe6f6cbdc9892de741c5490284"
+    },
+    {
+      "corrected_sha256": "8884df512264f9d8c9ed7ed380b5a28ac510862f7bd2ed1abe098d5e24e72df2",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_LESINURAD_001.json",
+      "source_sha256": "8884df512264f9d8c9ed7ed380b5a28ac510862f7bd2ed1abe098d5e24e72df2"
+    },
+    {
+      "corrected_sha256": "96daeff97207766a0ea44219fd60de462c858684240115a262102937fa772032",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_LIOTHYRONINE_000.json",
+      "source_sha256": "96daeff97207766a0ea44219fd60de462c858684240115a262102937fa772032"
+    },
+    {
+      "corrected_sha256": "b557a3795fcc7bc99e9980df4973efbcfb7581485f369af4c9104adc0753ffa6",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_LIOTHYRONINE_001.json",
+      "source_sha256": "b557a3795fcc7bc99e9980df4973efbcfb7581485f369af4c9104adc0753ffa6"
+    },
+    {
+      "corrected_sha256": "7e96d5bee1e9b0f28bd0daf5f96237024fa7edb033e36238bfedd1c7e80928a2",
+      "labels_changed": 1,
+      "path": "attempts/motif_extension_LOVASTATIN_000.json",
+      "source_sha256": "0e9fcf956c61a05cffb439d4db783f6c98beeba5abaf79eb0a79bcbf402c96f9"
+    },
+    {
+      "corrected_sha256": "f789c4551b0b8c13cb38f860274474bf55a50c0c77335637932b416c19e8700f",
+      "labels_changed": 1,
+      "path": "attempts/motif_extension_LOVASTATIN_001.json",
+      "source_sha256": "de5cc4e6c99eec79b053ff936438aae77d30e4e5f625dc5f563c41c00a01ebd8"
+    },
+    {
+      "corrected_sha256": "4b3cf451dd27da65406c4c8bb803957c45530c706a87970b5445a1ee7a22d7c1",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_MARIBAVIR_000.json",
+      "source_sha256": "4b3cf451dd27da65406c4c8bb803957c45530c706a87970b5445a1ee7a22d7c1"
+    },
+    {
+      "corrected_sha256": "cfed5aadaeede22a66f3d6b66de8cb11f8b6b602e6e2ae463fb581616863842c",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_MARIBAVIR_001.json",
+      "source_sha256": "cfed5aadaeede22a66f3d6b66de8cb11f8b6b602e6e2ae463fb581616863842c"
+    },
+    {
+      "corrected_sha256": "18c07ad386c473148536526aa073c206ef0b7f312563acfede82c1737062bd36",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_SPIRAPRIL_000.json",
+      "source_sha256": "18c07ad386c473148536526aa073c206ef0b7f312563acfede82c1737062bd36"
+    },
+    {
+      "corrected_sha256": "4236b13f39bcbbc6eda2ad6fc22604383b2c49759f3e74718480e5718c62ee3d",
+      "labels_changed": 0,
+      "path": "attempts/motif_extension_SPIRAPRIL_001.json",
+      "source_sha256": "4236b13f39bcbbc6eda2ad6fc22604383b2c49759f3e74718480e5718c62ee3d"
+    },
+    {
+      "corrected_sha256": "4032cfec061e955a566de80f4f21bc380ba133ebc58e85dcf8ced7a9a18f95ab",
+      "labels_changed": 5,
+      "path": "attempts/scaffold_decoration_BARICITINIB_000.json",
+      "source_sha256": "f8c7bab6977903602edf59b21dc72c6235c0f0c53f7eaf20fe01c2ca32db8e6b"
+    },
+    {
+      "corrected_sha256": "8cf6338d5cf45f18510f8afca37357cd43c1566d73dadf7ffcf4c1a0606914dc",
+      "labels_changed": 3,
+      "path": "attempts/scaffold_decoration_BARICITINIB_001.json",
+      "source_sha256": "44e94970adca03bdb63024554f74ce88a79aa6f49fc1f1c8d3e55001bcecab55"
+    },
+    {
+      "corrected_sha256": "0839d357a76b7c9a6795b4b349b474a60d071b038f6852f87a647ed0e33e0727",
+      "labels_changed": 2,
+      "path": "attempts/scaffold_decoration_CYCLOTHIAZIDE_000.json",
+      "source_sha256": "ab2a122e137f828b9a0b523de13daaff5beedecb1948bb66c2707e9aeb50702c"
+    },
+    {
+      "corrected_sha256": "b0e4009a1f4a7a6a1b9e84314fea9baba151f90f29121d99fe825394f46c3cb0",
+      "labels_changed": 5,
+      "path": "attempts/scaffold_decoration_CYCLOTHIAZIDE_001.json",
+      "source_sha256": "f9550a9c6cf223a55ddbad078ddec3d9b9fc979f438cb22ee3b95960020485d1"
+    },
+    {
+      "corrected_sha256": "7d0572eea481038609e85e4790417f2ce6a54569d9e2cbcca5862659ab530c6a",
+      "labels_changed": 0,
+      "path": "attempts/scaffold_decoration_ELIGLUSTAT_000.json",
+      "source_sha256": "7d0572eea481038609e85e4790417f2ce6a54569d9e2cbcca5862659ab530c6a"
+    },
+    {
+      "corrected_sha256": "9ce408423eb0e667a1e01ddcfc78204790f14432ad709425895074afbaa2e84e",
+      "labels_changed": 2,
+      "path": "attempts/scaffold_decoration_ELIGLUSTAT_001.json",
+      "source_sha256": "d1bb3a6fe3a4b27471d18c47ca6b5d2f1916ad1636ca281425d7e62b0e2ef898"
+    },
+    {
+      "corrected_sha256": "6853ed4d93203469a100005bef93e0070a4cf7ed7ef44d18339c3fea9c0e696b",
+      "labels_changed": 2,
+      "path": "attempts/scaffold_decoration_ERLOTINIB_000.json",
+      "source_sha256": "0c4080bb4ff36584a916f0d1d035f55c2650d5143fb593760d7bf0aa6f95058d"
+    },
+    {
+      "corrected_sha256": "4cccc438f28c7abe4f42ff2c3dd614283139a9b6fd69eb3852aee6440ea520b5",
+      "labels_changed": 0,
+      "path": "attempts/scaffold_decoration_ERLOTINIB_001.json",
+      "source_sha256": "4cccc438f28c7abe4f42ff2c3dd614283139a9b6fd69eb3852aee6440ea520b5"
+    },
+    {
+      "corrected_sha256": "2714ffc7c4009015313c0abe59a8dcdd3516a7b9e0bd0010f0d5f8f1fa3feae5",
+      "labels_changed": 2,
+      "path": "attempts/scaffold_decoration_FUTIBATINIB_000.json",
+      "source_sha256": "7f842c1f76be6604696003b839231f5f0df6b8dcdfcb838a380d688f1d99269f"
+    },
+    {
+      "corrected_sha256": "4607ed0dcb0b3014692e07990028668117cb064435da6288a2d0a7e2af768944",
+      "labels_changed": 1,
+      "path": "attempts/scaffold_decoration_FUTIBATINIB_001.json",
+      "source_sha256": "7edcef32840f347458c405bf6f9db5bcb67922ee0066658a5a9a65fe9a9cea0a"
+    },
+    {
+      "corrected_sha256": "b9203fddb10bc48afa1b1a6d224757e70b30a1f76efdacd0e34253a78d238126",
+      "labels_changed": 2,
+      "path": "attempts/scaffold_decoration_LESINURAD_000.json",
+      "source_sha256": "652b2fa1bcbbc59b5796d55478c3cb95f89b9a1ae52e80b032789263d7cf850c"
+    },
+    {
+      "corrected_sha256": "dae4a7a433ee7a50d4c165af1507b40bc737b878fe663a04e9bed4302acb3445",
+      "labels_changed": 2,
+      "path": "attempts/scaffold_decoration_LESINURAD_001.json",
+      "source_sha256": "73153f2177727741ac38b28167b247517b1a258b5a1fd2de802237ecfd9a9c09"
+    },
+    {
+      "corrected_sha256": "bc8a811a106d763c06dde0701009e4f0cd7f6c6c56e153cba0b0abfd91e595f0",
+      "labels_changed": 0,
+      "path": "attempts/scaffold_decoration_LIOTHYRONINE_000.json",
+      "source_sha256": "bc8a811a106d763c06dde0701009e4f0cd7f6c6c56e153cba0b0abfd91e595f0"
+    },
+    {
+      "corrected_sha256": "dc304703b226397d60b7de34e5520c6deb500a39bf00bbca87b2218be6a8a241",
+      "labels_changed": 2,
+      "path": "attempts/scaffold_decoration_LIOTHYRONINE_001.json",
+      "source_sha256": "e440a3f6916f28069f2b01e11062b62055f159d236f8c2757c916e988b700d73"
+    },
+    {
+      "corrected_sha256": "c6568188765974eaebb3a1021fb8ea4886887f82e51127479e4a3829f086f8fb",
+      "labels_changed": 1,
+      "path": "attempts/scaffold_decoration_LOVASTATIN_000.json",
+      "source_sha256": "0de54ed996b7bcfcfe839c801900b0e06a3bda8ecc2d5aa991f151fe1851a660"
+    },
+    {
+      "corrected_sha256": "ff1cb273d04b543df1444de16fc1d3d3e916dc1f7fddb47963a51cd5b38fabef",
+      "labels_changed": 2,
+      "path": "attempts/scaffold_decoration_LOVASTATIN_001.json",
+      "source_sha256": "0e5bdd75a1d15a8b41a1b8f7fcb5a8a42580a815b43bb8f9cc690e600d466390"
+    },
+    {
+      "corrected_sha256": "c0f46a5bf5c161181388e28e72dbb3e2c6c20780f4501c1f6c64c45958e71b56",
+      "labels_changed": 2,
+      "path": "attempts/scaffold_decoration_MARIBAVIR_000.json",
+      "source_sha256": "12ad9cd6d4a510e72917249f3c433df597d30338fae8806ffbd8c36cebd96d92"
+    },
+    {
+      "corrected_sha256": "9dab5943ac9e3b26800fb12039e5b5f1255c76c1229c6509dcec61beff8f0f69",
+      "labels_changed": 1,
+      "path": "attempts/scaffold_decoration_MARIBAVIR_001.json",
+      "source_sha256": "29ff6674a12951bb16911b937ae6b6f4357a259dad0de518e414345840680768"
+    },
+    {
+      "corrected_sha256": "d51932d1d0c308d16467ba424efa0199108550aa718df4f9a9ed9f12fe6d4197",
+      "labels_changed": 0,
+      "path": "attempts/scaffold_decoration_SPIRAPRIL_000.json",
+      "source_sha256": "d51932d1d0c308d16467ba424efa0199108550aa718df4f9a9ed9f12fe6d4197"
+    },
+    {
+      "corrected_sha256": "f89ff95b9a71d5d4e2f56a2e7f496c521d9b8d4f73bb50fe0eb84c32aa84ac90",
+      "labels_changed": 2,
+      "path": "attempts/scaffold_decoration_SPIRAPRIL_001.json",
+      "source_sha256": "d58e6324c408df2e7ce1211b8443bf4c2f9da5d4a721af01e99299afe19ab662"
+    }
+  ],
+  "code_sha256": "71685ebdec6d06fd7ade9125bc663147cef742f10ff952b1c5388f7c5ef28c41",
+  "next_step": "rerun same support reducer under corrected ring counter, without resampling completed attempts",
+  "role": "reporting-only correction; no regeneration, reselection, scoring or RNG changes",
+  "schema": "fragment_ring_capability_accounting_correction_v1",
+  "source_summary": "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_joint_completion_support_v1/summary.json",
+  "source_summary_sha256": "4176bd68298d5bf44e0c21f27a37d11185bdd1aa03b6b2b2d8f4e64219508759"
+}
