@@ -1,0 +1,672 @@
+{
+ "schema_version": "pmo_zinc_depth_v1",
+ "measured_at_utc": "2026-09-24T08:35:42.586051+00:00",
+ "oracle_calls_spent": 0,
+ "question": "Is the top-40 prescreen seed cutoff too shallow for the three structural-gap rows?",
+ "verdict": "YES_DEEPEN_THE_RESERVOIR_BUT_NOT_BECAUSE_OF_SIMILARITY",
+ "the_decisive_asymmetry": "Best ECFP4-to-reference is essentially FLAT in K -- celecoxib 0.3478 -> 0.3556, troglitazone 0.3934 -> 0.3934, thiothixene 0.3425 -> 0.3425 from K=40 to K=5000. Since ECFP4-to-reference IS essentially the rediscovery oracle for these tasks, that flatness says deepening the reservoir buys NO additional oracle-rank quality. What it buys is structural MOTIF COVERAGE, which multiplies 18-35x: celecoxib diaryl-azole 2 -> 36, troglitazone thiazolidinedione 2 -> 71 and chroman 2 -> 62. So the production fix is target-BLIND diversification over a deeper high-oracle reservoir, NOT a second target-ranking signal.",
+ "sharpest_single_fact": "thiothixene's characteristic tricyclic thioxanthene core appears ZERO times in the top 40 and first appears at K=100. The donor reservoir for that row literally cannot supply the ring system the task is about, which no scheduler or dedup fix can repair.",
+ "mcs_gains": {
+  "celecoxib_rediscovery": "16/26 at K=40 -> 19/26 by K=500",
+  "thiothixene_rediscovery": "12/30 at K=40 -> 17/30 already at K=100",
+  "troglitazone_rediscovery": "16/31 flat"
+ },
+ "caveat_mcs": "MCS was searched over the top-150 by ECFP4 WITHIN each prefix, so every MCS number is a LOWER BOUND and can move non-monotonically across K as the pool composition changes (celecoxib reads 19 at K=1000 and 17 at K=5000 for this reason). Motif, scaffold and fingerprint counts are exhaustive over each prefix.",
+ "information_boundary": "Every reference-derived quantity here is DIAGNOSTIC. ECFP4-to-target, MCS-to-target, scaffold overlap and motif SMARTS must not enter the production proposal law; the implied fix ranks by the official oracle and diversifies without reference.",
+ "implied_production_change": [
+  "keep ranking by the official task oracle",
+  "widen the reservoir well past 40 (the motif curves argue for ~1000-5000)",
+  "select donors from it by TARGET-BLIND structural coverage (Murcko scaffold, ring systems, Morgan/atom-pair/torsion diversity), not by rank alone",
+  "combine with the deduplicated dedicated transplant lane already built"
+ ],
+ "raw": {
+  "celecoxib_rediscovery": {
+   "reference": "CC1=CC=C(C=C1)C1=CC(=NN1C1=CC=C(C=C1)S(N)(=O)=O)C(F)(F)F",
+   "ref_scaffold": "c1ccc(-c2ccnn2-c2ccccc2)cc1",
+   "prefixes": {
+    "40": {
+     "n": 40,
+     "min_oracle_score": 0.3949579831932773,
+     "best_ecfp4": {
+      "value": 0.34782608695652173,
+      "rank": 25,
+      "smiles": "CC1CCN(C(=O)c2ccc(-n3nc(C(F)(F)F)cc3-c3cccs3)cc2)CC1"
+     },
+     "best_atompair": {
+      "value": 0.4816053511705686,
+      "rank": 20
+     },
+     "best_torsion": {
+      "value": 0.46153846153846156,
+      "rank": 25
+     },
+     "best_mcs_atoms": 16,
+     "best_mcs_fraction": 0.6153846153846154,
+     "best_mcs_rank": 25,
+     "best_mcs_smiles": "CC1CCN(C(=O)c2ccc(-n3nc(C(F)(F)F)cc3-c3cccs3)cc2)CC1",
+     "mcs_searched_over": 40,
+     "exact_scaffold_hits": 0,
+     "ring_profile_hits": 19,
+     "motifs": {
+      "diaryl_5ring_azole": {
+       "n": 2,
+       "first_rank": 9
+      },
+      "pyrazole": {
+       "n": 8,
+       "first_rank": 3
+      },
+      "benzenesulfonamide": {
+       "n": 21,
+       "first_rank": 2
+      },
+      "trifluoromethyl": {
+       "n": 18,
+       "first_rank": 3
+      }
+     }
+    },
+    "100": {
+     "n": 100,
+     "min_oracle_score": 0.37373737373737376,
+     "best_ecfp4": {
+      "value": 0.34782608695652173,
+      "rank": 25,
+      "smiles": "CC1CCN(C(=O)c2ccc(-n3nc(C(F)(F)F)cc3-c3cccs3)cc2)CC1"
+     },
+     "best_atompair": {
+      "value": 0.4816053511705686,
+      "rank": 20
+     },
+     "best_torsion": {
+      "value": 0.46153846153846156,
+      "rank": 25
+     },
+     "best_mcs_atoms": 16,
+     "best_mcs_fraction": 0.6153846153846154,
+     "best_mcs_rank": 25,
+     "best_mcs_smiles": "CC1CCN(C(=O)c2ccc(-n3nc(C(F)(F)F)cc3-c3cccs3)cc2)CC1",
+     "mcs_searched_over": 100,
+     "exact_scaffold_hits": 0,
+     "ring_profile_hits": 48,
+     "motifs": {
+      "diaryl_5ring_azole": {
+       "n": 2,
+       "first_rank": 9
+      },
+      "pyrazole": {
+       "n": 18,
+       "first_rank": 3
+      },
+      "benzenesulfonamide": {
+       "n": 57,
+       "first_rank": 2
+      },
+      "trifluoromethyl": {
+       "n": 36,
+       "first_rank": 3
+      }
+     }
+    },
+    "500": {
+     "n": 500,
+     "min_oracle_score": 0.336283185840708,
+     "best_ecfp4": {
+      "value": 0.35555555555555557,
+      "rank": 187,
+      "smiles": "NS(=O)(=O)c1ccc(S(=O)(=O)C(F)(F)F)cc1"
+     },
+     "best_atompair": {
+      "value": 0.4816053511705686,
+      "rank": 20
+     },
+     "best_torsion": {
+      "value": 0.46153846153846156,
+      "rank": 25
+     },
+     "best_mcs_atoms": 19,
+     "best_mcs_fraction": 0.7307692307692307,
+     "best_mcs_rank": 382,
+     "best_mcs_smiles": "CCOC(=O)c1cc(-c2ccc(CC)cc2)n(-c2ccc(C(=O)N3CCCC[C@@H]3C)cc2)n1",
+     "mcs_searched_over": 150,
+     "exact_scaffold_hits": 1,
+     "ring_profile_hits": 175,
+     "motifs": {
+      "diaryl_5ring_azole": {
+       "n": 8,
+       "first_rank": 9
+      },
+      "pyrazole": {
+       "n": 78,
+       "first_rank": 3
+      },
+      "benzenesulfonamide": {
+       "n": 259,
+       "first_rank": 2
+      },
+      "trifluoromethyl": {
+       "n": 144,
+       "first_rank": 3
+      }
+     }
+    },
+    "1000": {
+     "n": 1000,
+     "min_oracle_score": 0.3177570093457944,
+     "best_ecfp4": {
+      "value": 0.35555555555555557,
+      "rank": 187,
+      "smiles": "NS(=O)(=O)c1ccc(S(=O)(=O)C(F)(F)F)cc1"
+     },
+     "best_atompair": {
+      "value": 0.4816053511705686,
+      "rank": 20
+     },
+     "best_torsion": {
+      "value": 0.46153846153846156,
+      "rank": 25
+     },
+     "best_mcs_atoms": 19,
+     "best_mcs_fraction": 0.7307692307692307,
+     "best_mcs_rank": 382,
+     "best_mcs_smiles": "CCOC(=O)c1cc(-c2ccc(CC)cc2)n(-c2ccc(C(=O)N3CCCC[C@@H]3C)cc2)n1",
+     "mcs_searched_over": 150,
+     "exact_scaffold_hits": 1,
+     "ring_profile_hits": 323,
+     "motifs": {
+      "diaryl_5ring_azole": {
+       "n": 13,
+       "first_rank": 9
+      },
+      "pyrazole": {
+       "n": 140,
+       "first_rank": 3
+      },
+      "benzenesulfonamide": {
+       "n": 507,
+       "first_rank": 2
+      },
+      "trifluoromethyl": {
+       "n": 262,
+       "first_rank": 3
+      }
+     }
+    },
+    "5000": {
+     "n": 5000,
+     "min_oracle_score": 0.2689075630252101,
+     "best_ecfp4": {
+      "value": 0.35555555555555557,
+      "rank": 187,
+      "smiles": "NS(=O)(=O)c1ccc(S(=O)(=O)C(F)(F)F)cc1"
+     },
+     "best_atompair": {
+      "value": 0.4816053511705686,
+      "rank": 20
+     },
+     "best_torsion": {
+      "value": 0.4782608695652174,
+      "rank": 1878
+     },
+     "best_mcs_atoms": 17,
+     "best_mcs_fraction": 0.6538461538461539,
+     "best_mcs_rank": 649,
+     "best_mcs_smiles": "CC1=NNC(=O)/C1=C\\c1ccc(-n2nc(-c3ccccc3)cc2-c2ccccc2)cc1",
+     "mcs_searched_over": 150,
+     "exact_scaffold_hits": 1,
+     "ring_profile_hits": 1459,
+     "motifs": {
+      "diaryl_5ring_azole": {
+       "n": 36,
+       "first_rank": 9
+      },
+      "pyrazole": {
+       "n": 751,
+       "first_rank": 3
+      },
+      "benzenesulfonamide": {
+       "n": 1858,
+       "first_rank": 2
+      },
+      "trifluoromethyl": {
+       "n": 1077,
+       "first_rank": 3
+      }
+     }
+    }
+   }
+  },
+  "troglitazone_rediscovery": {
+   "reference": "Cc1c(C)c2OC(C)(COc3ccc(CC4SC(=O)NC4=O)cc3)CCc2c(C)c1O",
+   "ref_scaffold": "O=C1NC(=O)C(Cc2ccc(OCC3CCc4ccccc4O3)cc2)S1",
+   "prefixes": {
+    "40": {
+     "n": 40,
+     "min_oracle_score": 0.28205128205128205,
+     "best_ecfp4": {
+      "value": 0.39344262295081966,
+      "rank": 1,
+      "smiles": "O=C1NC(=O)[C@H](Cc2ccc(F)cc2)S1"
+     },
+     "best_atompair": {
+      "value": 0.43079922027290446,
+      "rank": 7
+     },
+     "best_torsion": {
+      "value": 0.3709677419354839,
+      "rank": 1
+     },
+     "best_mcs_atoms": 16,
+     "best_mcs_fraction": 0.5161290322580645,
+     "best_mcs_rank": 2,
+     "best_mcs_smiles": "Cc1c(C)c2c(c(C)c1O)CC[C@@](C)(C(=O)N1CCc3c(nc[nH]c3=O)C1)O2",
+     "mcs_searched_over": 40,
+     "exact_scaffold_hits": 0,
+     "ring_profile_hits": 1,
+     "motifs": {
+      "thiazolidinedione": {
+       "n": 2,
+       "first_rank": 1
+      },
+      "chroman": {
+       "n": 2,
+       "first_rank": 2
+      },
+      "phenol": {
+       "n": 36,
+       "first_rank": 2
+      },
+      "aryl_ether_linker": {
+       "n": 35,
+       "first_rank": 2
+      }
+     }
+    },
+    "100": {
+     "n": 100,
+     "min_oracle_score": 0.2698412698412698,
+     "best_ecfp4": {
+      "value": 0.39344262295081966,
+      "rank": 1,
+      "smiles": "O=C1NC(=O)[C@H](Cc2ccc(F)cc2)S1"
+     },
+     "best_atompair": {
+      "value": 0.43079922027290446,
+      "rank": 7
+     },
+     "best_torsion": {
+      "value": 0.3709677419354839,
+      "rank": 1
+     },
+     "best_mcs_atoms": 16,
+     "best_mcs_fraction": 0.5161290322580645,
+     "best_mcs_rank": 2,
+     "best_mcs_smiles": "Cc1c(C)c2c(c(C)c1O)CC[C@@](C)(C(=O)N1CCc3c(nc[nH]c3=O)C1)O2",
+     "mcs_searched_over": 100,
+     "exact_scaffold_hits": 0,
+     "ring_profile_hits": 6,
+     "motifs": {
+      "thiazolidinedione": {
+       "n": 4,
+       "first_rank": 1
+      },
+      "chroman": {
+       "n": 3,
+       "first_rank": 2
+      },
+      "phenol": {
+       "n": 90,
+       "first_rank": 2
+      },
+      "aryl_ether_linker": {
+       "n": 89,
+       "first_rank": 2
+      }
+     }
+    },
+    "500": {
+     "n": 500,
+     "min_oracle_score": 0.2463768115942029,
+     "best_ecfp4": {
+      "value": 0.39344262295081966,
+      "rank": 1,
+      "smiles": "O=C1NC(=O)[C@H](Cc2ccc(F)cc2)S1"
+     },
+     "best_atompair": {
+      "value": 0.43079922027290446,
+      "rank": 7
+     },
+     "best_torsion": {
+      "value": 0.3709677419354839,
+      "rank": 1
+     },
+     "best_mcs_atoms": 16,
+     "best_mcs_fraction": 0.5161290322580645,
+     "best_mcs_rank": 2,
+     "best_mcs_smiles": "Cc1c(C)c2c(c(C)c1O)CC[C@@](C)(C(=O)N1CCc3c(nc[nH]c3=O)C1)O2",
+     "mcs_searched_over": 150,
+     "exact_scaffold_hits": 0,
+     "ring_profile_hits": 57,
+     "motifs": {
+      "thiazolidinedione": {
+       "n": 12,
+       "first_rank": 1
+      },
+      "chroman": {
+       "n": 6,
+       "first_rank": 2
+      },
+      "phenol": {
+       "n": 443,
+       "first_rank": 2
+      },
+      "aryl_ether_linker": {
+       "n": 431,
+       "first_rank": 2
+      }
+     }
+    },
+    "1000": {
+     "n": 1000,
+     "min_oracle_score": 0.2366412213740458,
+     "best_ecfp4": {
+      "value": 0.39344262295081966,
+      "rank": 1,
+      "smiles": "O=C1NC(=O)[C@H](Cc2ccc(F)cc2)S1"
+     },
+     "best_atompair": {
+      "value": 0.43079922027290446,
+      "rank": 7
+     },
+     "best_torsion": {
+      "value": 0.3709677419354839,
+      "rank": 1
+     },
+     "best_mcs_atoms": 16,
+     "best_mcs_fraction": 0.5161290322580645,
+     "best_mcs_rank": 2,
+     "best_mcs_smiles": "Cc1c(C)c2c(c(C)c1O)CC[C@@](C)(C(=O)N1CCc3c(nc[nH]c3=O)C1)O2",
+     "mcs_searched_over": 150,
+     "exact_scaffold_hits": 0,
+     "ring_profile_hits": 136,
+     "motifs": {
+      "thiazolidinedione": {
+       "n": 23,
+       "first_rank": 1
+      },
+      "chroman": {
+       "n": 13,
+       "first_rank": 2
+      },
+      "phenol": {
+       "n": 850,
+       "first_rank": 2
+      },
+      "aryl_ether_linker": {
+       "n": 821,
+       "first_rank": 2
+      }
+     }
+    },
+    "5000": {
+     "n": 5000,
+     "min_oracle_score": 0.21138211382113822,
+     "best_ecfp4": {
+      "value": 0.39344262295081966,
+      "rank": 1,
+      "smiles": "O=C1NC(=O)[C@H](Cc2ccc(F)cc2)S1"
+     },
+     "best_atompair": {
+      "value": 0.44871794871794873,
+      "rank": 1195
+     },
+     "best_torsion": {
+      "value": 0.3709677419354839,
+      "rank": 1
+     },
+     "best_mcs_atoms": 16,
+     "best_mcs_fraction": 0.5161290322580645,
+     "best_mcs_rank": 2,
+     "best_mcs_smiles": "Cc1c(C)c2c(c(C)c1O)CC[C@@](C)(C(=O)N1CCc3c(nc[nH]c3=O)C1)O2",
+     "mcs_searched_over": 150,
+     "exact_scaffold_hits": 0,
+     "ring_profile_hits": 643,
+     "motifs": {
+      "thiazolidinedione": {
+       "n": 71,
+       "first_rank": 1
+      },
+      "chroman": {
+       "n": 62,
+       "first_rank": 2
+      },
+      "phenol": {
+       "n": 3823,
+       "first_rank": 2
+      },
+      "aryl_ether_linker": {
+       "n": 3642,
+       "first_rank": 2
+      }
+     }
+    }
+   }
+  },
+  "thiothixene_rediscovery": {
+   "reference": "CN(C)S(=O)(=O)c1ccc2Sc3ccccc3C(=CCCN4CCN(C)CC4)c2c1",
+   "ref_scaffold": "C(CCN1CCNCC1)=C1c2ccccc2Sc2ccccc21",
+   "prefixes": {
+    "40": {
+     "n": 40,
+     "min_oracle_score": 0.3488372093023256,
+     "best_ecfp4": {
+      "value": 0.3424657534246575,
+      "rank": 3,
+      "smiles": "CN(CC(=O)N1CCCc2cc(S(=O)(=O)N(C)C)ccc21)c1ccccc1"
+     },
+     "best_atompair": {
+      "value": 0.4816753926701571,
+      "rank": 36
+     },
+     "best_torsion": {
+      "value": 0.32894736842105265,
+      "rank": 27
+     },
+     "best_mcs_atoms": 12,
+     "best_mcs_fraction": 0.4,
+     "best_mcs_rank": 3,
+     "best_mcs_smiles": "CN(CC(=O)N1CCCc2cc(S(=O)(=O)N(C)C)ccc21)c1ccccc1",
+     "mcs_searched_over": 40,
+     "exact_scaffold_hits": 0,
+     "ring_profile_hits": 0,
+     "motifs": {
+      "thioxanthene_core": {
+       "n": 0,
+       "first_rank": null
+      },
+      "tricyclic_S": {
+       "n": 0,
+       "first_rank": null
+      },
+      "piperazine": {
+       "n": 29,
+       "first_rank": 1
+      },
+      "sulfonamide": {
+       "n": 34,
+       "first_rank": 1
+      }
+     }
+    },
+    "100": {
+     "n": 100,
+     "min_oracle_score": 0.3333333333333333,
+     "best_ecfp4": {
+      "value": 0.3424657534246575,
+      "rank": 3,
+      "smiles": "CN(CC(=O)N1CCCc2cc(S(=O)(=O)N(C)C)ccc21)c1ccccc1"
+     },
+     "best_atompair": {
+      "value": 0.5152284263959391,
+      "rank": 62
+     },
+     "best_torsion": {
+      "value": 0.5081967213114754,
+      "rank": 41
+     },
+     "best_mcs_atoms": 17,
+     "best_mcs_fraction": 0.5666666666666667,
+     "best_mcs_rank": 41,
+     "best_mcs_smiles": "C[NH+](C)CCC=C1c2cc(F)ccc2Sc2ccc(Cl)cc21",
+     "mcs_searched_over": 100,
+     "exact_scaffold_hits": 0,
+     "ring_profile_hits": 3,
+     "motifs": {
+      "thioxanthene_core": {
+       "n": 1,
+       "first_rank": 41
+      },
+      "tricyclic_S": {
+       "n": 1,
+       "first_rank": 41
+      },
+      "piperazine": {
+       "n": 68,
+       "first_rank": 1
+      },
+      "sulfonamide": {
+       "n": 84,
+       "first_rank": 1
+      }
+     }
+    },
+    "500": {
+     "n": 500,
+     "min_oracle_score": 0.30597014925373134,
+     "best_ecfp4": {
+      "value": 0.3424657534246575,
+      "rank": 3,
+      "smiles": "CN(CC(=O)N1CCCc2cc(S(=O)(=O)N(C)C)ccc21)c1ccccc1"
+     },
+     "best_atompair": {
+      "value": 0.5152284263959391,
+      "rank": 62
+     },
+     "best_torsion": {
+      "value": 0.5081967213114754,
+      "rank": 41
+     },
+     "best_mcs_atoms": 17,
+     "best_mcs_fraction": 0.5666666666666667,
+     "best_mcs_rank": 41,
+     "best_mcs_smiles": "C[NH+](C)CCC=C1c2cc(F)ccc2Sc2ccc(Cl)cc21",
+     "mcs_searched_over": 150,
+     "exact_scaffold_hits": 0,
+     "ring_profile_hits": 37,
+     "motifs": {
+      "thioxanthene_core": {
+       "n": 2,
+       "first_rank": 41
+      },
+      "tricyclic_S": {
+       "n": 2,
+       "first_rank": 41
+      },
+      "piperazine": {
+       "n": 318,
+       "first_rank": 1
+      },
+      "sulfonamide": {
+       "n": 369,
+       "first_rank": 1
+      }
+     }
+    },
+    "1000": {
+     "n": 1000,
+     "min_oracle_score": 0.29310344827586204,
+     "best_ecfp4": {
+      "value": 0.3424657534246575,
+      "rank": 3,
+      "smiles": "CN(CC(=O)N1CCCc2cc(S(=O)(=O)N(C)C)ccc21)c1ccccc1"
+     },
+     "best_atompair": {
+      "value": 0.5152284263959391,
+      "rank": 62
+     },
+     "best_torsion": {
+      "value": 0.5081967213114754,
+      "rank": 41
+     },
+     "best_mcs_atoms": 17,
+     "best_mcs_fraction": 0.5666666666666667,
+     "best_mcs_rank": 41,
+     "best_mcs_smiles": "C[NH+](C)CCC=C1c2cc(F)ccc2Sc2ccc(Cl)cc21",
+     "mcs_searched_over": 150,
+     "exact_scaffold_hits": 0,
+     "ring_profile_hits": 79,
+     "motifs": {
+      "thioxanthene_core": {
+       "n": 2,
+       "first_rank": 41
+      },
+      "tricyclic_S": {
+       "n": 2,
+       "first_rank": 41
+      },
+      "piperazine": {
+       "n": 626,
+       "first_rank": 1
+      },
+      "sulfonamide": {
+       "n": 688,
+       "first_rank": 1
+      }
+     }
+    },
+    "5000": {
+     "n": 5000,
+     "min_oracle_score": 0.25757575757575757,
+     "best_ecfp4": {
+      "value": 0.3424657534246575,
+      "rank": 3,
+      "smiles": "CN(CC(=O)N1CCCc2cc(S(=O)(=O)N(C)C)ccc21)c1ccccc1"
+     },
+     "best_atompair": {
+      "value": 0.5152284263959391,
+      "rank": 62
+     },
+     "best_torsion": {
+      "value": 0.5081967213114754,
+      "rank": 41
+     },
+     "best_mcs_atoms": 17,
+     "best_mcs_fraction": 0.5666666666666667,
+     "best_mcs_rank": 41,
+     "best_mcs_smiles": "C[NH+](C)CCC=C1c2cc(F)ccc2Sc2ccc(Cl)cc21",
+     "mcs_searched_over": 150,
+     "exact_scaffold_hits": 0,
+     "ring_profile_hits": 432,
+     "motifs": {
+      "thioxanthene_core": {
+       "n": 3,
+       "first_rank": 41
+      },
+      "tricyclic_S": {
+       "n": 3,
+       "first_rank": 41
+      },
+      "piperazine": {
+       "n": 2523,
+       "first_rank": 1
+      },
+      "sulfonamide": {
+       "n": 2720,
+       "first_rank": 1
+      }
+     }
+    }
+   }
+  }
+ }
+}
