@@ -1,0 +1,924 @@
+{
+  "asset_backed_tasks": [
+    "drd2",
+    "gsk3b",
+    "jnk3"
+  ],
+  "capsule": {
+    "assets": [
+      "gsk3b_current.pkl"
+    ],
+    "path": "/root/compose/diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets"
+  },
+  "cwd_at_end": "/tmp/pmo_audit_elsewhere_jnk3_0skmup7r",
+  "deferred_to_download": [
+    "jnk3"
+  ],
+  "download_stubbed": [
+    "tdc.utils.load.dataverse_download"
+  ],
+  "dynamic": {
+    "drd2": {
+      "asset_source": "downloaded",
+      "cwd_dependent": true,
+      "elsewhere_has_oracle_dir": false,
+      "positive_control": {
+        "all_zero": false,
+        "distinct_observed_values": 6,
+        "max_abs_delta": 0.0,
+        "n_agreeing": 6,
+        "n_disagreeing": 0,
+        "n_references": 6,
+        "passed": true,
+        "reference_status": "INFERRED",
+        "rows": [
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.7537053303355454,
+            "observed": 0.7537053303355454,
+            "role": "drd2/high",
+            "smiles": "C=1C(=CC=C(C1)OCCN2CCCC2)NC3=NC=C(S3)C4=CC=CC=C4",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.5475828952606038,
+            "observed": 0.5475828952606038,
+            "role": "drd2/high",
+            "smiles": "C=1C=CC(N2CCN(CC2)CCCNC(=O)C=3ON=C(N3)C=4C=NC=CC4)=C(C1)F",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.18060387163257433,
+            "observed": 0.18060387163257433,
+            "role": "drd2/intermediate",
+            "smiles": "CCc1noc(CC)c1CC(=O)N1c2ccccc2C[C@H]1C",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.16003438414126,
+            "observed": 0.16003438414126,
+            "role": "drd2/intermediate",
+            "smiles": "CC(C)Cc1ccc2c(c1)[C@@H](Cl)CC2",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 1.8113384239191436e-05,
+            "observed": 1.8113384239191436e-05,
+            "role": "drd2/inactive",
+            "smiles": "Cc1cc(OCC(=O)Nc2ccc([N-]S(C)(=O)=O)cc2)no1",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 3.0298196625955345e-05,
+            "observed": 3.0298196625955345e-05,
+            "role": "drd2/inactive",
+            "smiles": "C=1(C=CSC1C(OCC)=O)NC(CC2=CC=CC=C2)=O",
+            "tolerance": 1e-06
+          }
+        ],
+        "schema_version": "pmo_oracle_positive_control_v1",
+        "task": "drd2"
+      },
+      "relative_asset_paths": [
+        "oracle/drd2.pkl",
+        "oracle/drd2_current.pkl"
+      ],
+      "score_from_unpinned_cwd": 0.0,
+      "score_with_cwd_pinned_at_call": 0.7537053303355454,
+      "scored_launch_authorized": true,
+      "status": "POSITIVE_CONTROL_PASSED",
+      "task": "drd2"
+    },
+    "gsk3b": {
+      "asset_source": "pinned_capsule",
+      "cwd_dependent": true,
+      "elsewhere_has_oracle_dir": false,
+      "positive_control": {
+        "all_zero": false,
+        "distinct_observed_values": 9,
+        "max_abs_delta": 0.0,
+        "n_agreeing": 13,
+        "n_disagreeing": 0,
+        "n_references": 13,
+        "passed": true,
+        "reference_status": "MEASURED",
+        "rows": [
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 1.0,
+            "observed": 1.0,
+            "role": "gsk3b_active/high",
+            "smiles": "C1(C2=CN(CCCO)C=3C2=CC=CN3)=C(C(=O)NC1=O)C4=NC=CC=C4",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 1.0,
+            "observed": 1.0,
+            "role": "gsk3b_active/high",
+            "smiles": "C12=C(C=3C=C(C(F)(F)F)C=CC3N1)CC(=O)NC=4C2=CC(/C=C/C(=O)OC)=CC4",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 1.0,
+            "observed": 1.0,
+            "role": "gsk3b_active/high",
+            "smiles": "ClC1=NC(=NC(C=2C3=C(NC2)N=CC=C3)=C1)NC4C(N)CCCC4",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.99,
+            "observed": 0.99,
+            "role": "gsk3b_active/high",
+            "smiles": "BrC1=C2N(N=C1)C(NCC3=CC=CN=C3)=CC(=N2)C=4C=CC=CC4",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.58,
+            "observed": 0.58,
+            "role": "gsk3b_active/intermediate",
+            "smiles": "C=1(C(=C(C=C(C1Br)Br)/C=C/C(=O)O)Br)Br",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.58,
+            "observed": 0.58,
+            "role": "gsk3b_active/intermediate",
+            "smiles": "O1[C@H](CCCC(=O)CCCC=CC=2C(C1=O)=C(O)C=C(O)C2)C",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.51,
+            "observed": 0.51,
+            "role": "gsk3b_active/intermediate",
+            "smiles": "S(=O)(=O)(NC=1C=C2N=C(C(=NC2=CC1)C)C)C3=CC=C(N)C=C3",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.49,
+            "observed": 0.49,
+            "role": "gsk3b_active/intermediate",
+            "smiles": "NS(=O)(=O)C1=CC=C(N/N=C/2\\C(=O)NC3=CC=C4N=CC=CC4=C23)C=C1",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.66,
+            "observed": 0.66,
+            "role": "zinc/graded",
+            "smiles": "O=C([O-])C1(Cc2ccccc2Cl)CCN(c2ncnc3[nH]ccc23)CC1",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.31,
+            "observed": 0.31,
+            "role": "zinc/graded",
+            "smiles": "CC(C)NC(=O)C(=O)NCc1nc(-c2cccc(F)c2)c(-c2ccccn2)[nH]1",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.23,
+            "observed": 0.23,
+            "role": "zinc/graded",
+            "smiles": "COc1ccc(-c2n[nH]cc2C[NH+]2CCC[C@@H](N3CCNC3=O)C2)cc1",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.0,
+            "observed": 0.0,
+            "role": "zinc/inactive",
+            "smiles": "C#CCN(Cc1ccccc1Cl)C1CCCC1",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.0,
+            "observed": 0.0,
+            "role": "zinc/inactive",
+            "smiles": "CC(=O)CCC(C(C)=O)C(C)=O",
+            "tolerance": 1e-06
+          }
+        ],
+        "schema_version": "pmo_oracle_positive_control_v1",
+        "task": "gsk3b"
+      },
+      "relative_asset_paths": [
+        "oracle/gsk3b.pkl",
+        "oracle/gsk3b_current.pkl"
+      ],
+      "score_from_unpinned_cwd": 0.0,
+      "score_with_cwd_pinned_at_call": 1.0,
+      "scored_launch_authorized": true,
+      "status": "POSITIVE_CONTROL_PASSED",
+      "task": "gsk3b"
+    },
+    "jnk3": {
+      "asset_source": "downloaded",
+      "cwd_dependent": false,
+      "elsewhere_has_oracle_dir": false,
+      "positive_control": {
+        "all_zero": false,
+        "distinct_observed_values": 6,
+        "max_abs_delta": 0.0,
+        "n_agreeing": 10,
+        "n_disagreeing": 0,
+        "n_references": 10,
+        "passed": true,
+        "reference_status": "INFERRED",
+        "rows": [
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 1.0,
+            "observed": 1.0,
+            "role": "jnk3_active/high",
+            "smiles": "C1(=C(C=2C=CN(N2)C)C=C(N=C1)NC=3C=CC(N4N=C(N=C4)N5CCOCC5)=CC3)F",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 1.0,
+            "observed": 1.0,
+            "role": "jnk3_active/high",
+            "smiles": "C1(C(F)(F)F)=C(NC=2C=CC=CC2C(=O)N)C=C(OC3=CC=CC(=C3)OC)N=C1",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 1.0,
+            "observed": 1.0,
+            "role": "jnk3_active/high",
+            "smiles": "C1=C(Cl)C(=NC(N[C@@H]2CCCN(C2)C(=O)NCC)=N1)C=3C4=C(C=CC=C4)NC3",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.99,
+            "observed": 0.99,
+            "role": "jnk3_active/high",
+            "smiles": "C=1C(C(=O)NCC)=CC=2N(C(=C(C2C1)N=O)O)CC3=C4C(=CC(=C3)F)COCO4",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.59,
+            "observed": 0.59,
+            "role": "jnk3_active/intermediate",
+            "smiles": "C=1C(=CC(=NC1)NC2=C(C=CC=C2)OC)C3=CC(=NC=C3)NC4=CC=CC=C4OC",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.59,
+            "observed": 0.59,
+            "role": "jnk3_active/intermediate",
+            "smiles": "C=1C=C(S(/C=C/C#N)(=O)=O)C=CC1C",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.14,
+            "observed": 0.14,
+            "role": "zinc/graded",
+            "smiles": "O=[N+]([O-])c1ccc(/C=N/Nc2ccc(C(F)(F)F)cc2[N+](=O)[O-])o1",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.11,
+            "observed": 0.11,
+            "role": "zinc/graded",
+            "smiles": "CC(C)[C@@H](O)c1cccc([N+](=O)[O-])c1",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.0,
+            "observed": 0.0,
+            "role": "zinc/inactive",
+            "smiles": "C#CCN(Cc1ccccc1Cl)C1CCCC1",
+            "tolerance": 1e-06
+          },
+          {
+            "abs_delta": 0.0,
+            "agrees": true,
+            "error": null,
+            "expected": 0.0,
+            "observed": 0.0,
+            "role": "zinc/inactive",
+            "smiles": "C=CCN1C(=O)C(C#N)=C(C)/C(=C\\c2cn(-c3ccccc3)nc2-c2ccc(OCC)cc2)C1=O",
+            "tolerance": 1e-06
+          }
+        ],
+        "schema_version": "pmo_oracle_positive_control_v1",
+        "task": "jnk3"
+      },
+      "relative_asset_paths": [
+        "oracle/jnk3.pkl",
+        "oracle/jnk3_current.pkl"
+      ],
+      "score_from_unpinned_cwd": 1.0,
+      "score_with_cwd_pinned_at_call": 1.0,
+      "scored_launch_authorized": true,
+      "status": "POSITIVE_CONTROL_PASSED",
+      "task": "jnk3"
+    }
+  },
+  "environment": {
+    "pytdc": "unknown",
+    "python": "3.11.12",
+    "rdkit": "2023.09.6",
+    "sklearn": "1.2.2",
+    "tdc_oracle_module": "/usr/local/lib/python3.11/site-packages/tdc/chem_utils/oracle/oracle.py"
+  },
+  "schema_version": "pmo_oracle_asset_audit_v1",
+  "swallow": {
+    "consequence": "any failure inside an evaluator -- including a FileNotFoundError on a relative asset path -- is returned as a plausible score, not raised",
+    "default_property_returned_on_failure": true,
+    "oracle_call_has_bare_except": true
+  },
+  "tasks": {
+    "albuterol_similarity": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "similarity_meta"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "similarity_meta",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [],
+      "relative_asset_paths": [],
+      "requested": "albuterol_similarity",
+      "resolved_name": "albuterol_similarity"
+    },
+    "amlodipine_mpo": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "GaussianModifier",
+        "ScoreModifier",
+        "amlodipine_mpo",
+        "smiles_2_fingerprint_ECFP4",
+        "smiles_to_rdkit_mol"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "amlodipine_mpo",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [
+        "amlodipine_fp",
+        "num_rings"
+      ],
+      "relative_asset_paths": [],
+      "requested": "amlodipine_mpo",
+      "resolved_name": "amlodipine_mpo"
+    },
+    "celecoxib_rediscovery": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "rediscovery_meta"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "rediscovery_meta",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [],
+      "relative_asset_paths": [],
+      "requested": "celecoxib_rediscovery",
+      "resolved_name": "celecoxib_rediscovery"
+    },
+    "deco_hop": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "ClippedScoreModifier",
+        "SMARTS_scoring",
+        "ScoreModifier",
+        "deco_hop",
+        "get_PHCO_fingerprint",
+        "smiles_to_rdkit_mol"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "deco_hop",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [
+        "Generate",
+        "Gobbi_Pharm2D",
+        "deco1_smarts_scoring",
+        "deco2_smarts_scoring",
+        "pharmacophor_fp",
+        "scaffold_smarts_scoring"
+      ],
+      "relative_asset_paths": [],
+      "requested": "deco_hop",
+      "resolved_name": "deco_hop"
+    },
+    "drd2": {
+      "asset_backed": true,
+      "call_graph_functions": [
+        "drd2",
+        "fingerprints_from_mol",
+        "load_drd2_model",
+        "load_pickled_model"
+      ],
+      "classification": "ASSET_BACKED_LAZY_RELATIVE",
+      "construction_requires_asset": false,
+      "evaluator": "drd2",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": true,
+      "loader_calls": [
+        "drd2:load_drd2_model",
+        "load_drd2_model:load_pickled_model",
+        "load_pickled_model:load",
+        "load_pickled_model:open"
+      ],
+      "module_global_cache": [
+        "drd2_model"
+      ],
+      "relative_asset_paths": [
+        "oracle/drd2.pkl",
+        "oracle/drd2_current.pkl"
+      ],
+      "requested": "drd2",
+      "resolved_name": "drd2_current"
+    },
+    "fexofenadine_mpo": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "ClippedScoreModifier",
+        "ScoreModifier",
+        "fexofenadine_mpo",
+        "smiles_2_fingerprint_AP",
+        "smiles_to_rdkit_mol"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "fexofenadine_mpo",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [
+        "fexofenadine_fp"
+      ],
+      "relative_asset_paths": [],
+      "requested": "fexofenadine_mpo",
+      "resolved_name": "fexofenadine_mpo"
+    },
+    "gsk3b": {
+      "asset_backed": true,
+      "call_graph_functions": [
+        "gsk3b",
+        "load_gsk3b_model",
+        "load_pickled_model",
+        "smiles_to_rdkit_mol"
+      ],
+      "classification": "ASSET_BACKED_LAZY_RELATIVE",
+      "construction_requires_asset": false,
+      "evaluator": "gsk3b",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": true,
+      "loader_calls": [
+        "gsk3b:load_gsk3b_model",
+        "load_gsk3b_model:load_pickled_model",
+        "load_pickled_model:load",
+        "load_pickled_model:open"
+      ],
+      "module_global_cache": [
+        "gsk3_model"
+      ],
+      "relative_asset_paths": [
+        "oracle/gsk3b.pkl",
+        "oracle/gsk3b_current.pkl"
+      ],
+      "requested": "gsk3b",
+      "resolved_name": "gsk3b_current"
+    },
+    "isomers_c7h8n2o2": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "AtomCounter",
+        "GaussianModifier",
+        "Isomer_scoring",
+        "ScoreModifier",
+        "canonicalize",
+        "parse_molecular_formula",
+        "smiles2formula",
+        "smiles_to_rdkit_mol"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "Isomer_scoring",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [],
+      "relative_asset_paths": [],
+      "requested": "isomers_c7h8n2o2",
+      "resolved_name": "isomers_c7h8n2o2"
+    },
+    "isomers_c9h10n2o2pf2cl": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "AtomCounter",
+        "GaussianModifier",
+        "Isomer_scoring",
+        "ScoreModifier",
+        "canonicalize",
+        "parse_molecular_formula",
+        "smiles2formula",
+        "smiles_to_rdkit_mol"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "Isomer_scoring",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [],
+      "relative_asset_paths": [],
+      "requested": "isomers_c9h10n2o2pf2cl",
+      "resolved_name": "isomers_c9h10n2o2pf2cl"
+    },
+    "jnk3": {
+      "asset_backed": true,
+      "call_graph_functions": [
+        "jnk3",
+        "load_pickled_model",
+        "smiles_to_rdkit_mol"
+      ],
+      "classification": "ASSET_BACKED_EAGER_RELATIVE",
+      "construction_error_without_asset": "FileNotFoundError: [Errno 2] No such file or directory: 'oracle/jnk3_current.pkl'",
+      "construction_requires_asset": true,
+      "evaluator": "jnk3",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [
+        "jnk3:load_pickled_model",
+        "load_pickled_model:load",
+        "load_pickled_model:open"
+      ],
+      "module_global_cache": [],
+      "relative_asset_paths": [
+        "oracle/jnk3.pkl",
+        "oracle/jnk3_current.pkl"
+      ],
+      "requested": "jnk3",
+      "resolved_name": "jnk3_current"
+    },
+    "median1": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "median_meta"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "median_meta",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [],
+      "relative_asset_paths": [],
+      "requested": "median1",
+      "resolved_name": "median1"
+    },
+    "median2": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "median_meta"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "median_meta",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [],
+      "relative_asset_paths": [],
+      "requested": "median2",
+      "resolved_name": "median2"
+    },
+    "mestranol_similarity": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "similarity_meta"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "similarity_meta",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [],
+      "relative_asset_paths": [],
+      "requested": "mestranol_similarity",
+      "resolved_name": "mestranol_similarity"
+    },
+    "osimertinib_mpo": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "ClippedScoreModifier",
+        "ScoreModifier",
+        "osimertinib_mpo",
+        "smiles_2_fingerprint_ECFP6",
+        "smiles_2_fingerprint_FCFP4",
+        "smiles_to_rdkit_mol"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "osimertinib_mpo",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [
+        "osimertinib_fp_ecfc6",
+        "osimertinib_fp_fcfc4"
+      ],
+      "relative_asset_paths": [],
+      "requested": "osimertinib_mpo",
+      "resolved_name": "osimertinib_mpo"
+    },
+    "perindopril_mpo": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "GaussianModifier",
+        "ScoreModifier",
+        "perindopril_mpo",
+        "smiles_2_fingerprint_ECFP4",
+        "smiles_to_rdkit_mol"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "perindopril_mpo",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [
+        "num_aromatic_rings",
+        "perindopril_fp"
+      ],
+      "relative_asset_paths": [],
+      "requested": "perindopril_mpo",
+      "resolved_name": "perindopril_mpo"
+    },
+    "qed": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "qed"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "qed",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [],
+      "relative_asset_paths": [],
+      "requested": "qed",
+      "resolved_name": "qed"
+    },
+    "ranolazine_mpo": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "AtomCounter",
+        "ClippedScoreModifier",
+        "GaussianModifier",
+        "ScoreModifier",
+        "ranolazine_mpo",
+        "smiles_2_fingerprint_AP",
+        "smiles_to_rdkit_mol"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "ranolazine_mpo",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [
+        "fluorine_counter",
+        "ranolazine_fp"
+      ],
+      "relative_asset_paths": [],
+      "requested": "ranolazine_mpo",
+      "resolved_name": "ranolazine_mpo"
+    },
+    "scaffold_hop": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "ClippedScoreModifier",
+        "SMARTS_scoring",
+        "ScoreModifier",
+        "get_PHCO_fingerprint",
+        "scaffold_hop",
+        "smiles_to_rdkit_mol"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "scaffold_hop",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [
+        "Generate",
+        "Gobbi_Pharm2D",
+        "deco_smarts_scoring",
+        "pharmacophor_fp",
+        "scaffold_smarts_scoring"
+      ],
+      "relative_asset_paths": [],
+      "requested": "scaffold_hop",
+      "resolved_name": "scaffold_hop"
+    },
+    "sitagliptin_mpo": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "AtomCounter",
+        "GaussianModifier",
+        "Isomer_scoring",
+        "ScoreModifier",
+        "canonicalize",
+        "parse_molecular_formula",
+        "sitagliptin_mpo",
+        "smiles2formula",
+        "smiles_2_fingerprint_ECFP4",
+        "smiles_to_rdkit_mol"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "sitagliptin_mpo",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [
+        "isomers_scoring_C16H15F6N5O",
+        "sitagliptin_fp_ecfp4",
+        "sitagliptin_logp_modifier",
+        "sitagliptin_similar_modifier",
+        "sitagliptin_tpsa_modifier"
+      ],
+      "relative_asset_paths": [],
+      "requested": "sitagliptin_mpo",
+      "resolved_name": "sitagliptin_mpo"
+    },
+    "thiothixene_rediscovery": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "rediscovery_meta"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "rediscovery_meta",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [],
+      "relative_asset_paths": [],
+      "requested": "thiothixene_rediscovery",
+      "resolved_name": "thiothixene_rediscovery"
+    },
+    "troglitazone_rediscovery": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "rediscovery_meta"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "rediscovery_meta",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [],
+      "relative_asset_paths": [],
+      "requested": "troglitazone_rediscovery",
+      "resolved_name": "troglitazone_rediscovery"
+    },
+    "valsartan_smarts": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "GaussianModifier",
+        "ScoreModifier",
+        "smiles_to_rdkit_mol",
+        "valsartan_smarts"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "valsartan_smarts",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [
+        "valsartan_bertz_modifier",
+        "valsartan_logp_modifier",
+        "valsartan_mol",
+        "valsartan_tpsa_modifier"
+      ],
+      "relative_asset_paths": [],
+      "requested": "valsartan_smarts",
+      "resolved_name": "valsartan_smarts"
+    },
+    "zaleplon_mpo": {
+      "asset_backed": false,
+      "call_graph_functions": [
+        "AtomCounter",
+        "GaussianModifier",
+        "Isomer_scoring",
+        "ScoreModifier",
+        "canonicalize",
+        "parse_molecular_formula",
+        "smiles2formula",
+        "smiles_2_fingerprint_ECFP4",
+        "smiles_to_rdkit_mol",
+        "zaleplon_mpo"
+      ],
+      "classification": "PURE_RDKIT_NO_ASSET",
+      "construction_requires_asset": false,
+      "evaluator": "zaleplon_mpo",
+      "evaluator_module": "tdc.chem_utils.oracle.oracle",
+      "lazy": false,
+      "loader_calls": [],
+      "module_global_cache": [
+        "isomer_scoring_C19H17N3O2",
+        "zaleplon_fp"
+      ],
+      "relative_asset_paths": [],
+      "requested": "zaleplon_mpo",
+      "resolved_name": "zaleplon_mpo"
+    }
+  }
+}

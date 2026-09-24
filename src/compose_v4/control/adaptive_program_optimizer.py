@@ -1136,7 +1136,7 @@ class ProgramOptimizer:
         return json.loads(json.dumps({**body, "snapshot_id": identity(body)}))
 
     @classmethod
-    def restore(cls, snapshot, *, hierarchy=None):
+    def restore(cls, snapshot, *, hierarchy=None, constructor_kwargs=None):
         body = {k: v for k, v in snapshot.items() if k != "snapshot_id"}
         if (
             snapshot.get("schema_version") != "adaptive_program_optimizer_v1"
@@ -1145,11 +1145,13 @@ class ProgramOptimizer:
             raise ValueError("corrupt or incompatible optimizer snapshot")
         config = dict(snapshot["configuration"])
         config["channel_probabilities"] = tuple(config["channel_probabilities"])
+        constructor_kwargs = {} if constructor_kwargs is None else dict(constructor_kwargs)
         result = cls(
             ProgramSearchConfig(**config),
             source_group=snapshot["source_group"],
             oracle_protocol=snapshot["oracle_protocol"],
             hierarchy=hierarchy,
+            **constructor_kwargs,
         )
         result.rng.bit_generator.state = snapshot["rng"]
         for key in ("entries", "observations", "duplicate_counts", "history", "pending", "batches"):

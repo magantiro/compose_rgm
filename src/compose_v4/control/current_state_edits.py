@@ -28,7 +28,7 @@ ENUMERATORS = {
 }
 
 
-def current_state_program(source, rng, *, family=None, work_cache=None):
+def current_state_program(source, rng, *, family=None, work_cache=None, successor_prior=None):
     """One sampled legal operation; absent/invalid choices are explicit failures.
 
     Select the family before enumerating, so a large restatement frontier does
@@ -50,7 +50,18 @@ def current_state_program(source, rng, *, family=None, work_cache=None):
     )
     if not actions:
         raise ValueError(f"current-state family has no applicable action: {family}")
-    action = actions[int(rng.integers(len(actions)))]
+    if successor_prior is None:
+        # Historical uniform draw.  Absence of a prior is the only byte-identical
+        # "off": a uniform prior object would reproduce this support but not these
+        # draws, because it consumes a different number of RNG values.
+        action = actions[int(rng.integers(len(actions)))]
+        conditional_probability = 1 / len(actions)
+    else:
+        ordered = successor_prior.order(source, rng, family=family, actions=actions)
+        action = ordered[0]
+        conditional_probability = successor_prior.probability_of(
+            source, family=family, actions=actions, action=action
+        )
     _, receipt = execute_program(source, [encode_action(family, action)])
     program, binding = extract_program(source, [{"name": f"current:{family}", **receipt}])
     return (
@@ -60,7 +71,14 @@ def current_state_program(source, rng, *, family=None, work_cache=None):
             "family": family,
             "enumerated_actions": len(actions),
             "enumeration_and_execution_seconds": perf_counter() - start,
-            "conditional_action_probability": 1 / len(actions),
+            "conditional_action_probability": conditional_probability,
             "source": "saved exact current state, not reconstruction from SMILES",
+            # ABSENT means the uniform v1 draw. Tagging the uniform case too would put a
+            # new key in every stage dict, which changes stage CONTENT and therefore the
+            # program -- measured: it perturbed 1 of 120 seeded programs while every
+            # RNG-consuming path was byte-identical. A prior-off arm must be byte-identical,
+            # so the tag is only emitted when a prior actually ran.
+            **({} if successor_prior is None
+               else {"proposal_law": "learned editing model over legal actions, floored"}),
         },
     )

@@ -119,6 +119,39 @@ class ProgramQueryLedger:
         return row
 
 
+def initial_parent_weights(starts, ledger, task):
+    """Rank charged initialization molecules by the ARCHIVE'S OWN parent-quality rule.
+
+    `AdaptiveProgramOptimizer.selection` scores a measured endpoint by `1 / rank`, rank 1
+    being the best utility. Initialization molecules are charged and scored exactly like
+    every other endpoint -- `ledger.cache` holds their official oracle rows -- but they are
+    not archive ENTRIES, because an entry carries an `EditProgram` and a molecule handed to
+    the campaign has no edit history. The bootstrap draw is therefore their only access
+    path, and drawing it uniformly discards the one thing already paid for: their measured
+    score. Reusing `1 / rank` here keeps exploration (the worst seed keeps positive mass)
+    and introduces no selection rule the archive does not already apply.
+
+    Uses ONLY counted feedback. No reference structure, no uncharged evaluation.
+    """
+    import numpy as np
+
+    utilities = []
+    for row in starts:
+        cached = ledger.cache.get(row["endpoint"])
+        score = None if cached is None else cached.get("score")
+        utilities.append(None if score is None else float(task.utility(score)))
+    known = [u for u in utilities if u is not None]
+    if not known:
+        return np.full(len(starts), 1.0 / len(starts))
+    # An unscored initialization row ranks below every scored one rather than being
+    # dropped, so a scoring failure can never silently shrink the candidate pool.
+    floor = min(known) - 1.0
+    values = np.asarray([floor if u is None else u for u in utilities], dtype=float)
+    ranks = 1.0 + np.sum(values[None, :] > values[:, None], axis=1)
+    weights = 1.0 / ranks
+    return weights / weights.sum()
+
+
 def run_program_campaign(
     *,
     output,
@@ -139,6 +172,10 @@ def run_program_campaign(
     max_seconds=None,
     initialization_mode="legacy_bootstrap",
     initial_parent_fraction=0.2,
+    initial_parent_weighting: str = "uniform",
+    optimizer_type=None,
+    optimizer_kwargs=None,
+    initial_batch_fn=None,
 ):
     """Initial states are charged, then complete programs bootstrap the archive.
 
@@ -159,6 +196,9 @@ def run_program_campaign(
     if max_seconds is not None and max_seconds <= 0:
         raise ValueError("positive campaign time limit required")
     progress = progress or (lambda row: None)
+    optimizer_type = ProgramOptimizer if optimizer_type is None else optimizer_type
+    optimizer_kwargs = {} if optimizer_kwargs is None else dict(optimizer_kwargs)
+    initial_batch_fn = initial_program_batch if initial_batch_fn is None else initial_batch_fn
     began = perf_counter()
     if fit_model is not None and (not isinstance(fit_model_id, str) or len(fit_model_id) != 64):
         raise ValueError("learning cycles require an immutable update-rule identity")
@@ -190,7 +230,13 @@ def run_program_campaign(
         "max_seconds": max_seconds,
         "initialization_mode": initialization_mode,
         "initial_parent_fraction": initial_parent_fraction,
+        "initial_parent_weighting": initial_parent_weighting,
+        "optimizer_type": f"{optimizer_type.__module__}.{optimizer_type.__qualname__}",
+        "optimizer_kwargs_sha256": identity(optimizer_kwargs),
+        "initial_batch_fn": f"{initial_batch_fn.__module__}.{initial_batch_fn.__qualname__}",
     }
+    if initial_parent_weighting not in ("uniform", "measured_score"):
+        raise ValueError(f"unknown initial_parent_weighting: {initial_parent_weighting}")
     manifest = output / "manifest.json"
     if manifest.exists() and json.loads(manifest.read_text()) != json.loads(json.dumps(recipe)):
         raise ValueError("campaign recipe changed during resume")
@@ -207,11 +253,15 @@ def run_program_campaign(
     source_group = initialization["lock_sha256"]
     for row in starts:
         ledger.query(row["endpoint"], lock_id=initialization["lock_sha256"], role="initialization")
-    search = ProgramOptimizer(
-        config, source_group=source_group, oracle_protocol=task.oracle_protocol, hierarchy=hierarchy
+    search = optimizer_type(
+        config,
+        source_group=source_group,
+        oracle_protocol=task.oracle_protocol,
+        hierarchy=hierarchy,
+        **optimizer_kwargs,
     )
     if warm_start is not None:
-        search = ProgramOptimizer.restore(warm_start, hierarchy=hierarchy)
+        search = optimizer_type.restore(warm_start, hierarchy=hierarchy, **optimizer_kwargs)
         if search.config != config or search.oracle_protocol != task.oracle_protocol:
             raise ValueError("warm archive configuration or oracle domain changed")
         if search.pending is not None or not search.entries:
@@ -225,7 +275,9 @@ def run_program_campaign(
         complete = folder / "complete.json"
         if complete.exists():
             saved = json.loads(complete.read_text())
-            search = ProgramOptimizer.restore(saved["snapshot"], hierarchy=hierarchy)
+            search = optimizer_type.restore(
+                saved["snapshot"], hierarchy=hierarchy, **optimizer_kwargs
+            )
             history.append(saved["summary"])
             continue
         if not ledger.remaining:
@@ -248,7 +300,15 @@ def run_program_campaign(
             )
             bootstrap = bootstrap or parent_rng.random() < initial_parent_fraction
             if bootstrap:
-                initial_choice = int(parent_rng.integers(len(starts)))
+                if initial_parent_weighting == "uniform":
+                    initial_choice = int(parent_rng.integers(len(starts)))
+                else:
+                    initial_choice = int(
+                        parent_rng.choice(
+                            len(starts),
+                            p=initial_parent_weights(starts, ledger, task),
+                        )
+                    )
         if bootstrap:
             at = round_index % len(starts) if initial_choice is None else initial_choice
             source = decode_state(starts[at]["state"])
@@ -265,7 +325,7 @@ def run_program_campaign(
                         max_options=config.max_blocks,
                     )
 
-            batch = initial_program_batch(
+            batch = initial_batch_fn(
                 source,
                 library,
                 replace(config, seed=config.seed + round_index, candidates_per_batch=count),
@@ -280,9 +340,13 @@ def run_program_campaign(
                 "endpoint": starts[at]["endpoint"],
                 "index": at,
                 "available_scored_parents": len(starts),
-                "selection": "uniform_all_scored"
-                if initial_choice is not None
-                else "legacy_round_index",
+                # Name the rule that actually drew it: an artifact labelled
+                # "uniform_all_scored" while a weighted draw ran would mislabel the arm.
+                "selection": (
+                    f"{initial_parent_weighting}_all_scored"
+                    if initial_choice is not None
+                    else "legacy_round_index"
+                ),
                 "observation_receipt": ledger.cache[starts[at]["endpoint"]]["receipt_id"],
             }
             bootstrap = True
