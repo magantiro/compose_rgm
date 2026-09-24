@@ -411,7 +411,8 @@ def test_every_wrapper_points_at_an_existing_unified_contract_and_the_engine():
         for path in (ROOT / "modal_apps").glob("t4_unified_controller_*_app.py")
         if path != APP
     )
-    assert len(wrappers) == 5, f"expected five wrappers, found {len(wrappers)}"
+    assert wrappers, "no unified-controller wrappers found"
+    named = set()
     for wrapper in wrappers:
         text = wrapper.read_text()
         assert "from modal_apps.t4_unified_controller_app import" in text, wrapper.name
@@ -423,13 +424,40 @@ def test_every_wrapper_points_at_an_existing_unified_contract_and_the_engine():
         assert contracts, f"{wrapper.name} names no unified contract"
         for relative in contracts:
             assert (ROOT / relative).exists(), f"{wrapper.name} -> missing {relative}"
+        named.update(contracts)
+
+    # The count used to be pinned at five. That is an inventory literal: it fails
+    # whenever an arm is legitimately added and it never checks the property that
+    # matters. The bijection does, in BOTH directions -- a wrapper naming a
+    # contract nobody sealed is a launch that cannot start, and a sealed contract
+    # with no wrapper is an arm nobody can launch.
+    sealed = {
+        str(path.relative_to(ROOT))
+        for path in (ROOT / "configs").glob("t4_unified_controller_*_v1.json")
+    }
+    assert named == sealed, (
+        f"wrappers and sealed contracts disagree; "
+        f"contracts with no wrapper: {sorted(sealed - named)}; "
+        f"wrappers naming an unsealed contract: {sorted(named - sealed)}"
+    )
 
 
 def test_every_contract_refuses_to_launch_without_the_owner():
     """The scored panel is a 22,500-call decision, and it is not ours to take."""
 
-    for protein in ("braf", "fa7", "5ht1b", "parp1", "jak2"):
-        payload = _contract(protein)
-        assert payload["scored_launch_authorized"] is False, protein
-        assert payload["modal_launch_authorized"] is False, protein
-        assert payload["delta"] == 0.6, protein
+    import json
+
+    checked = 0
+    for path in sorted((ROOT / "configs").glob("t4_unified_controller_*_v1.json")):
+        payload = json.loads(path.read_text())["payload"]
+        assert payload["scored_launch_authorized"] is False, path.name
+        assert payload["modal_launch_authorized"] is False, path.name
+        # The threshold is part of the arm's identity, so a filename that
+        # disagrees with the executable field would launch the wrong experiment.
+        expected = 0.4 if "_d04" in path.name else 0.6
+        assert payload["delta"] == expected, (
+            f"{path.name} declares delta={payload['delta']} but its name says "
+            f"{expected}"
+        )
+        checked += 1
+    assert checked >= 5, f"expected at least the five base arms, checked {checked}"

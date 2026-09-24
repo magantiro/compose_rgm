@@ -1,0 +1,148 @@
+{
+ "alternate_kernel_consulted": false,
+ "cell": "fa7_1",
+ "contract": "configs/t4_unified_controller_fa7_d06_v1.json",
+ "contract_payload_sha256": "0f4c46c83d3376f56ea2e3da3991bd155573f8af506bd08430b4455d25e2cef8",
+ "controller_seed": 2026091904,
+ "delta_from_contract": 0.6,
+ "docking_calls": 0,
+ "docking_interlock": {
+  "docking_binaries_present": [],
+  "docking_calls": 0,
+  "forbidden_modules_checked": [
+   "compose_v4.experiments.t4_docking_adapter",
+   "compose_v4.experiments.t4_partial_docking"
+  ],
+  "forbidden_modules_resident": [],
+  "oracle_calls": 0
+ },
+ "elapsed_seconds": 746.08,
+ "entrypoint": "production",
+ "execution": {
+  "app": "compose-t4-unified-production-gate",
+  "mode": "modal_fanout"
+ },
+ "expansion_handler_calls_observed": 0,
+ "ladder_units": 0,
+ "ladder_unreachable": true,
+ "oracle_calls": 0,
+ "protein": "fa7",
+ "region_law_arm": "declared",
+ "role": "control",
+ "round_one": {
+  "agrees_with_committed_audit": false,
+  "audit_delta_mislabelled": false,
+  "decision": {
+   "featured_candidates": 11,
+   "fresh": 11,
+   "merged_pool": 11,
+   "parents_round_one": [
+    "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N"
+   ],
+   "pool_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 0,
+    "shallow": 11,
+    "unique_endpoints": 11
+   },
+   "reproduces_candidate_exhaustion": false,
+   "selected": 8,
+   "selected_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 0,
+    "shallow": 8,
+    "unique_endpoints": 8
+   }
+  },
+  "expected_selected": 7,
+  "lanes": {
+   "anchored_replacement": {
+    "elapsed_seconds": 495.64,
+    "eligible_records_returned": 0,
+    "expert": "anchored_replacement",
+    "parent": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+    "proposal_seed": 2027092008,
+    "region_law_arm": "declared",
+    "region_law_telemetry": {},
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "raw_draws": 512
+    },
+    "unit_seconds": 495.64
+   },
+   "route_complete_region": {
+    "elapsed_seconds": 366.18,
+    "eligible_records_returned": 0,
+    "expert": "route_complete_region",
+    "parent": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+    "proposal_seed": 2027092109,
+    "region_law_arm": "declared",
+    "region_law_telemetry": {},
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "available_large_rewrite_proposals": 89,
+     "available_local_rewrite_proposals": 9,
+     "available_medium_rewrite_proposals": 65,
+     "binding_truncations": 7,
+     "binding_visits": 1180,
+     "candidate_shortfall": 0,
+     "complete_programs_committed": 52,
+     "composition_aliases": 415,
+     "composition_attempts": 2185,
+     "composition_rejections": 1133,
+     "composition_repeated_constituent": 259,
+     "exact_realization_precision_denominator": 52,
+     "exact_realization_precision_numerator": 52,
+     "materialization_attempts": 36,
+     "materialization_rejections": 12,
+     "realization_limit": 64,
+     "realization_status_counts": {
+      "committed": 52,
+      "realizer_frontier_exhausted_abstention": 10,
+      "realizer_search_limit_abstention": 2
+     },
+     "realized_primitive_band_counts": {
+      "large": 8,
+      "medium": 18,
+      "small": 26
+     },
+     "scale_balanced": 0,
+     "selected_large_rewrite_proposals": 20,
+     "selected_local_rewrite_proposals": 9,
+     "selected_medium_rewrite_proposals": 35,
+     "single_aliases": 5,
+     "templates_with_bindings": 13,
+     "unique_ranked_endpoints": 64,
+     "valid_depth_2": 97,
+     "valid_depth_3": 168,
+     "valid_depth_4": 113,
+     "valid_unique_single_goals": 19
+    },
+    "unit_seconds": 366.23
+   },
+   "shallow": {
+    "elapsed_seconds": 737.33,
+    "eligible_records_returned": 11,
+    "expert": "shallow",
+    "parent": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+    "proposal_seed": 2027091907,
+    "region_law_arm": "declared",
+    "region_law_telemetry": {
+     "region_law": "free_gate_margin_v1",
+     "region_law_consumption_attempts": 2
+    },
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "raw_draws": 480
+    },
+    "unit_seconds": 738.37
+   }
+  }
+ },
+ "rung_zero_units": 0,
+ "schema_version": "t4_unified_production_gate_v1",
+ "searched": true,
+ "seed_index": 0
+}

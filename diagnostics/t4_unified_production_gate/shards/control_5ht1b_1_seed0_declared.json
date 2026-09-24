@@ -1,0 +1,147 @@
+{
+ "alternate_kernel_consulted": false,
+ "cell": "5ht1b_1",
+ "contract": "configs/t4_unified_controller_5ht1b_d06_v1.json",
+ "contract_payload_sha256": "3abd2ec2b7085e09c5682b3bd44464ae9e898c66b82bb8c2660a8b5a4b845f28",
+ "controller_seed": 2026091907,
+ "delta_from_contract": 0.6,
+ "docking_calls": 0,
+ "docking_interlock": {
+  "docking_binaries_present": [],
+  "docking_calls": 0,
+  "forbidden_modules_checked": [
+   "compose_v4.experiments.t4_docking_adapter",
+   "compose_v4.experiments.t4_partial_docking"
+  ],
+  "forbidden_modules_resident": [],
+  "oracle_calls": 0
+ },
+ "elapsed_seconds": 339.5,
+ "entrypoint": "production",
+ "execution": {
+  "app": "compose-t4-unified-production-gate",
+  "mode": "modal_fanout"
+ },
+ "expansion_handler_calls_observed": 0,
+ "ladder_units": 0,
+ "ladder_unreachable": true,
+ "oracle_calls": 0,
+ "protein": "5ht1b",
+ "region_law_arm": "declared",
+ "role": "control",
+ "round_one": {
+  "agrees_with_committed_audit": true,
+  "audit_delta_mislabelled": false,
+  "decision": {
+   "featured_candidates": 31,
+   "fresh": 31,
+   "merged_pool": 31,
+   "parents_round_one": [
+    "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1"
+   ],
+   "pool_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 1,
+    "shallow": 30,
+    "unique_endpoints": 31
+   },
+   "reproduces_candidate_exhaustion": false,
+   "selected": 8,
+   "selected_census": {
+    "anchored_replacement": 0,
+    "multi_expert": 0,
+    "route_complete_region": 1,
+    "shallow": 7,
+    "unique_endpoints": 8
+   }
+  },
+  "expected_selected": 8,
+  "lanes": {
+   "anchored_replacement": {
+    "elapsed_seconds": 188.03,
+    "eligible_records_returned": 0,
+    "expert": "anchored_replacement",
+    "parent": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+    "proposal_seed": 2027092011,
+    "region_law_arm": "declared",
+    "region_law_telemetry": {},
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "raw_draws": 512
+    },
+    "unit_seconds": 188.04
+   },
+   "route_complete_region": {
+    "elapsed_seconds": 2.01,
+    "eligible_records_returned": 1,
+    "expert": "route_complete_region",
+    "parent": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+    "proposal_seed": 2027092112,
+    "region_law_arm": "declared",
+    "region_law_telemetry": {},
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "available_large_rewrite_proposals": 7,
+     "available_local_rewrite_proposals": 3,
+     "available_medium_rewrite_proposals": 4,
+     "binding_truncations": 3,
+     "binding_visits": 219,
+     "candidate_shortfall": 50,
+     "complete_programs_committed": 7,
+     "composition_aliases": 10,
+     "composition_attempts": 84,
+     "composition_rejections": 42,
+     "composition_repeated_constituent": 24,
+     "exact_realization_precision_denominator": 7,
+     "exact_realization_precision_numerator": 7,
+     "materialization_attempts": 20,
+     "materialization_rejections": 10,
+     "realization_limit": 64,
+     "realization_status_counts": {
+      "committed": 7,
+      "realizer_charge_policy_abstention": 7
+     },
+     "realized_primitive_band_counts": {
+      "large": 0,
+      "medium": 2,
+      "small": 5
+     },
+     "scale_balanced": 0,
+     "selected_large_rewrite_proposals": 7,
+     "selected_local_rewrite_proposals": 3,
+     "selected_medium_rewrite_proposals": 4,
+     "single_aliases": 4,
+     "templates_with_bindings": 7,
+     "unique_ranked_endpoints": 14,
+     "valid_depth_2": 6,
+     "valid_depth_3": 2,
+     "valid_depth_4": 0,
+     "valid_unique_single_goals": 6
+    },
+    "unit_seconds": 2.09
+   },
+   "shallow": {
+    "elapsed_seconds": 268.48,
+    "eligible_records_returned": 30,
+    "expert": "shallow",
+    "parent": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+    "proposal_seed": 2027091910,
+    "region_law_arm": "declared",
+    "region_law_telemetry": {
+     "region_law": "free_gate_margin_v1",
+     "region_law_consumption_attempts": 1
+    },
+    "schema_version": "t4_unified_proposal_v1",
+    "telemetry": {
+     "raw_draws": 480
+    },
+    "unit_seconds": 268.74
+   }
+  }
+ },
+ "rung_zero_units": 0,
+ "schema_version": "t4_unified_production_gate_v1",
+ "searched": true,
+ "seed_index": 0
+}
