@@ -1,0 +1,31 @@
+{
+  "schema_version": "denovo_native_prior_compile_launches_v1",
+  "recorded_at_utc": "2026-09-24T05:46:55Z",
+  "training_contract": "configs/denovo_native_prior_scale_training_v1.json",
+  "training_contract_payload_sha256": "62eea12e463b81384ca07c8a5ffa09c2eedbdbdad172546026d91a5f5d06979d",
+  "runtime_commit": "37d72126e5895231a9a8335ff2096832f3710960",
+  "recipe_and_source_commit": "ea05c50c",
+  "modal_profile": "nitya",
+  "artifact_volume": "compose-v4-artifacts",
+  "frozen_manifest_remote_path": "denovo_native_prior_scale_v1/frozen_split.json",
+  "frozen_manifest_remote_sha256": "c06bff5e50f27bebe7ff4cfed260f76c2e1730113b3b7c213e5b13bbd7193f6e",
+  "frozen_corpus_remote_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
+  "status": "cpu_path_compilation_submitted_not_training",
+  "arms": {
+    "small": {
+      "run_label": "denovo-cnof-prior-scale-small-ea05c50c-v1",
+      "recipe": "denovo_frozen_cnof_prior_small_v1.json",
+      "modal_app_id": "ap-y9p9Z13GUPraaa6Xz0S3k2",
+      "modal_function_call_id": "fc-01M38Z2ABNX53DM75C3MZ48PFT",
+      "observed_preflight": "exact remote corpus and split SHA-256, frozen held-outs, 50k shared source prior; compilation still running"
+    },
+    "large": {
+      "run_label": "denovo-cnof-prior-scale-large-ea05c50c-v1",
+      "recipe": "denovo_frozen_cnof_prior_large_v1.json",
+      "modal_app_id": "ap-8mVFZd9m32gkHQTFdeTwFF",
+      "modal_function_call_id": "fc-01M38Z6T9BG7Y7TBWD024699TZ",
+      "observed_preflight": "exact remote corpus and split SHA-256, frozen held-outs, shared 50k source-size prior; compilation still running"
+    }
+  },
+  "note": "The Modal CLI adds a 41-byte completion message to stdout when streaming a volume file; remote hashes above were computed over the exact contracted file byte counts, excluding that message."
+}
