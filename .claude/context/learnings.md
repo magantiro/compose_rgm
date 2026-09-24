@@ -4684,3 +4684,53 @@ independently of whether fa7_0 ever closes.**
 - **The capsule is gitignored, so those assets are LOCAL-ONLY and an image built before they
   existed does not carry them.** Any launch of drd2/gsk3b/jnk3 needs a redeploy first, and a
   fresh clone cannot build a working image at all.
+
+## 2026-09-24 (PMO reward hacking is SPECIFIC to the ML-predictor oracles, tested prospectively)
+
+- **MEASURED on completed and in-flight no-prescreen runs, zero new oracle calls.** The
+  headline score on the three fingerprint-predictor tasks is produced by leaving the
+  drug-like manifold; the similarity/rediscovery tasks are unaffected:
+      task        oracle          n     best   r(score,QED)  QED@best  on-manifold best
+      gsk3b       ML predictor   936    0.410     **-0.705**   0.038        0.130
+      jnk3        ML predictor   384    0.230     **-0.750**   0.035        0.100
+      celecoxib   similarity     919    0.299       +0.229     0.426        0.293
+      celecoxib   similarity     528    0.366       -0.199     0.348        0.340
+  On-manifold = QED>=0.5 AND SA<=5, applied ONLY to read the result; PMO is no-prescreen
+  and nothing was filtered during search.
+- **THE DECISIVE ASYMMETRY: on the similarity tasks the on-manifold best essentially EQUALS
+  the overall best (0.293 vs 0.299; 0.340 vs 0.366) -- nothing is lost. On the predictor
+  tasks it is a 3.2x and 2.3x gap.** So "restrict to plausible chemistry" costs nothing
+  where the oracle is honest and costs everything where it is not -- which is the
+  signature of exploitation rather than of a conservative filter.
+- **The molecules settle it, and a score table cannot.** gsk3b's 0.410 is
+  `CCCN(N)Cc1ccnn1C[IH3]CC(NCCCN(CC)CCC1CNN1)C([IH2])CC1CCCCNN1` (two hypervalent iodines,
+  stacked hydrazines, QED 0.038); jnk3's 0.230 is
+  `B[SH]1CCCCNCC1C(C=CF)=C(BC(C)CCN1CCCCC1C1CCNN1)C(=C)OOOCCOON` -- boron, hypervalent
+  sulfur and an `OOO` TRIOXIDE chain. Neither is a molecule. **Always read the leader's
+  SMILES before banking a PMO number.**
+- **TESTED PROSPECTIVELY, not just retrospectively.** The gsk3b run was analysed first; the
+  claim "this is specific to the ML-predictor oracles" then PREDICTED jnk3 would show it and
+  celecoxib would not, and both held on runs that were still in flight. A retrospective
+  correlation across four runs would have been much weaker evidence than one prediction.
+- **`r(score, heavy_atoms)` is +0.67 to +0.79 on EVERY task, hacked or not.** The size
+  gradient is universal and is NOT the discriminator; it only becomes hacking where the
+  oracle rewards size with no chemistry constraint. Do not use it to classify a task.
+- **CONSEQUENCE FOR THE TABLE: gsk3b, jnk3 and drd2 numbers are inflated and must not be
+  banked as PMO wins.** Report them with the on-manifold column beside them, or scope the
+  claim to the 20 non-predictor tasks. This does not weaken the similarity/rediscovery
+  results, which are measured healthy.
+
+## 2026-09-24 (a matched A/B must be read on the COMMON BUDGET PREFIX, not on whatever each arm has produced)
+
+- **NEAR-MISS I nearly reported as a win.** In the construction-prior gate the two arms
+  consume their budget at different wall-clock rates (arm B was at 64 charged calls when
+  arm A was at 32, same wall time). Reading "whatever each arm has so far" showed arm B at
+  best 0.380 against arm A's 0.130 -- which looks decisive and is an artifact of arm B
+  simply being further through its budget. **Truncated to the common 32-call prefix the
+  arms are dead even: 0.160 vs 0.130 best, top-10 0.115 vs 0.113, on-manifold best
+  IDENTICAL at 0.110.**
+- The ledger is written in charge order, so the fix is one slice (`rows[:common]`) and the
+  comparison script now prints the matched budget it used. A matched A/B whose output does
+  not state the budget each arm was read at is not yet a matched A/B.
+- **A gate on an oracle known to be hackable must report manifold adherence beside score**,
+  or a treatment arm that hacks harder reads as a treatment arm that works.
