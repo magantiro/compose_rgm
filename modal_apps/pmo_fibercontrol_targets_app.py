@@ -32,7 +32,11 @@ import modal
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
-RUN_APP = "compose-pmo-fibercontrol-targets"
+# Overridable so a replication arm can deploy WITHOUT rebaking the image an in-flight
+# campaign would pick up on a preemption retry.  Absent -> the historical name.
+RUN_APP = os.environ.get("PMO_FIBERCONTROL_APP") or "compose-pmo-fibercontrol-targets"
+ARTIFACT_VOLUME = (os.environ.get("PMO_FIBERCONTROL_VOLUME")
+                   or "compose-pmo-fibercontrol")
 
 ASSET_DIR = "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets"
 CONTRACT = "configs/pmo_population_controller_v1_scored_contract_corrected.json"
@@ -53,6 +57,36 @@ TARGET_INDEX = {
     "gsk3b": 8,
     "jnk3": 9,
     "qed": 10,
+    # The remaining six drug-MPO tasks.  Appended, never renumbered: `derived_seed` is
+    # `base_seed + 1000 * index`, so reusing or reordering an index would silently give
+    # two different tasks the same seed or move a task already launched under one.
+    # All seven resolve as exact `tdc.metadata.oracle_names` members, so none is exposed
+    # to `fuzzy_search`'s 0.8-threshold fallback onto a neighbouring oracle.
+    "amlodipine_mpo": 11,
+    "fexofenadine_mpo": 12,
+    "osimertinib_mpo": 13,
+    "ranolazine_mpo": 14,
+    "sitagliptin_mpo": 15,
+    "zaleplon_mpo": 16,
+    # The remaining deterministic PMO objectives.  Wired now so the registry stops being
+    # discovered one launch failure at a time; launching stays a separate decision.
+    # Chosen for what they stress: deco_hop and valsartan_smarts exercise retained
+    # substructure and decoration change (the anchored-replacement lane); scaffold_hop
+    # exercises scaffold remodeling (the ring-topology question); the isomer tasks force
+    # an elemental/topological assembly rather than fingerprint hill-climbing, and the
+    # second one exercises P/F/Cl; median1/median2 test interpolation between two
+    # neighbourhoods rather than copying one target; qed is a sanity control.
+    "valsartan_smarts": 17,
+    "deco_hop": 18,
+    "scaffold_hop": 19,
+    "isomers_c9h10n2o2pf2cl": 20,
+    "median2": 21,
+    # drd2 joins gsk3b/jnk3 as the learned-predictor trio.  These three are the ONLY
+    # asset-backed oracles in the suite (measured: the other 20 are pure RDKit and open
+    # no file), and gsk3b/drd2 load their pickle LAZILY on first call from a RELATIVE
+    # path, so they need the working directory pinned for the oracle's whole lifetime,
+    # not just its constructor.  Registered here, launched only after that check.
+    "drd2": 22,
 }
 
 
@@ -120,7 +154,7 @@ image = (
 # ONE mounted volume, and a path namespace per target inside it. A volume cannot be chosen
 # per call -- the mount is declared on the function -- so isolation is enforced by the label,
 # which the launcher refuses to reuse. No two concurrent targets touch the same file.
-volume = modal.Volume.from_name("compose-pmo-fibercontrol", create_if_missing=True)
+volume = modal.Volume.from_name(ARTIFACT_VOLUME, create_if_missing=True)
 app = modal.App(RUN_APP)
 
 
