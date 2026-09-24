@@ -1,0 +1,14 @@
+{
+  "attempt_index": 1,
+  "drug": "ELIGLUSTAT",
+  "manifest_sha256": "96d3e048deee16140eedf70ce0ac2e22af2705e66d86ed0a3203774671958b92",
+  "rng_state_before": {
+    "bit_generator": "PCG64",
+    "has_uint32": 0,
+    "state": {
+      "inc": 289234472714212559517784934778342249461,
+      "state": 57900209479551029180455855169029680824
+    },
+    "uinteger": 0
+  }
+}

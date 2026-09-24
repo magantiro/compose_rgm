@@ -1,0 +1,14 @@
+{
+  "attempt_index": 1,
+  "drug": "ERLOTINIB",
+  "manifest_sha256": "96d3e048deee16140eedf70ce0ac2e22af2705e66d86ed0a3203774671958b92",
+  "rng_state_before": {
+    "bit_generator": "PCG64",
+    "has_uint32": 0,
+    "state": {
+      "inc": 244719985956648461348040813807449744023,
+      "state": 250746267422899389983281515925029372519
+    },
+    "uinteger": 0
+  }
+}

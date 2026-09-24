@@ -1,0 +1,14 @@
+{
+  "attempt_index": 0,
+  "drug": "LESINURAD",
+  "manifest_sha256": "96d3e048deee16140eedf70ce0ac2e22af2705e66d86ed0a3203774671958b92",
+  "rng_state_before": {
+    "bit_generator": "PCG64",
+    "has_uint32": 0,
+    "state": {
+      "inc": 327158653797638334991514749052919115193,
+      "state": 62527000431801998115713683126745481147
+    },
+    "uinteger": 0
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "attempt_index": 0,
+  "drug": "BARICITINIB",
+  "manifest_sha256": "96d3e048deee16140eedf70ce0ac2e22af2705e66d86ed0a3203774671958b92",
+  "rng_state_before": {
+    "bit_generator": "PCG64",
+    "has_uint32": 0,
+    "state": {
+      "inc": 193589766238391028794868440662766836595,
+      "state": 103947400382157096318620827944591634183
+    },
+    "uinteger": 0
+  }
+}

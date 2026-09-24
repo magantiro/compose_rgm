@@ -1,0 +1,14 @@
+{
+  "attempt_index": 0,
+  "drug": "SPIRAPRIL",
+  "manifest_sha256": "96d3e048deee16140eedf70ce0ac2e22af2705e66d86ed0a3203774671958b92",
+  "rng_state_before": {
+    "bit_generator": "PCG64",
+    "has_uint32": 0,
+    "state": {
+      "inc": 45905395697763613724701101355564303651,
+      "state": 68661082305802409583677304367663368290
+    },
+    "uinteger": 0
+  }
+}

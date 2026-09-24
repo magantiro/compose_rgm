@@ -1,0 +1,14 @@
+{
+  "attempt_index": 0,
+  "drug": "MARIBAVIR",
+  "manifest_sha256": "96d3e048deee16140eedf70ce0ac2e22af2705e66d86ed0a3203774671958b92",
+  "rng_state_before": {
+    "bit_generator": "PCG64",
+    "has_uint32": 0,
+    "state": {
+      "inc": 274267877493348771380683808164824783293,
+      "state": 235225024291909925016971934532393306996
+    },
+    "uinteger": 0
+  }
+}

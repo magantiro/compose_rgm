@@ -1,0 +1,14 @@
+{
+  "attempt_index": 0,
+  "drug": "LIOTHYRONINE",
+  "manifest_sha256": "96d3e048deee16140eedf70ce0ac2e22af2705e66d86ed0a3203774671958b92",
+  "rng_state_before": {
+    "bit_generator": "PCG64",
+    "has_uint32": 0,
+    "state": {
+      "inc": 1808546027363907306333824196845861335,
+      "state": 201401452917889546411798406750489094056
+    },
+    "uinteger": 0
+  }
+}

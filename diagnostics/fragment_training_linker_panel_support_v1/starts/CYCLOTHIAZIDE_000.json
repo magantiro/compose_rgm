@@ -1,0 +1,14 @@
+{
+  "attempt_index": 0,
+  "drug": "CYCLOTHIAZIDE",
+  "manifest_sha256": "96d3e048deee16140eedf70ce0ac2e22af2705e66d86ed0a3203774671958b92",
+  "rng_state_before": {
+    "bit_generator": "PCG64",
+    "has_uint32": 0,
+    "state": {
+      "inc": 28497572286084438757049166285833298159,
+      "state": 294074455677013242007017951547774355090
+    },
+    "uinteger": 0
+  }
+}
