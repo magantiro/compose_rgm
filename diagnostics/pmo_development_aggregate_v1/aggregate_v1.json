@@ -1,0 +1,264 @@
+{
+ "schema_version": "pmo_development_aggregate_v1",
+ "measured_at_utc": "2026-09-24T12:25:56.792164+00:00",
+ "THIS_IS_NOT_A_BENCHMARK_SCORE": "Rows come from DIFFERENT controller versions, different arms and wildly different call counts (255 to 3,242 of a 3,000-10,000 budget), and each row is the best arm for that row. That is exactly the 'never merge run directories by picking whichever has the best score' pattern -- done deliberately here as a DEVELOPMENT tracker, and it must never be reported as a suite result.",
+ "METRIC_IS_NOT_MATCHED": "IVG's published column is auc_top10 at 10k calls. COMPOSE 'best' is a single maximum and 'top10' is the FINAL top-ten level, not an integral from call 0. best >= top10 >= AUC, so both COMPOSE columns flatter us against IVG. The metric-matched comparison is the flatline-projected AUC in diagnostics/pmo_auc_debt_v1, which stood at 12.802 vs 15.213 over 19 trusted rows.",
+ "sums": {
+  "compose_best": 17.788893495928836,
+  "compose_final_top10": 17.259518201843708,
+  "ivg_prescreened_auc_top10": 18.991999999999997
+ },
+ "at_or_above_ivg": [
+  "drd2",
+  "gsk3b",
+  "isomers_c7h8n2o2",
+  "isomers_c9h10n2o2pf2cl",
+  "median1",
+  "mestranol_similarity",
+  "qed",
+  "valsartan_smarts"
+ ],
+ "largest_remaining_gaps": [
+  [
+   0.2536341463414634,
+   "celecoxib_rediscovery"
+  ],
+  [
+   0.16812903225806453,
+   "thiothixene_rediscovery"
+  ],
+  [
+   0.14697605489852528,
+   "scaffold_hop"
+  ],
+  [
+   0.1297586726908142,
+   "perindopril_mpo"
+  ],
+  [
+   0.128,
+   "jnk3"
+  ],
+  [
+   0.10595189691371854,
+   "fexofenadine_mpo"
+  ],
+  [
+   0.10382346785300178,
+   "amlodipine_mpo"
+  ],
+  [
+   0.1032655783107228,
+   "sitagliptin_mpo"
+  ]
+ ],
+ "tasks": {
+  "albuterol_similarity": {
+   "best": 0.9425287356321839,
+   "top10": 0.9312146539212252,
+   "calls": 3242,
+   "arm": "scored_albuterol_similarity_seed20261973_20260924T013046Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.975,
+   "best_minus_ivg": -0.03247126436781611
+  },
+  "amlodipine_mpo": {
+   "best": 0.7321765321469982,
+   "top10": 0.7070430132000218,
+   "calls": 2702,
+   "arm": "scored_amlodipine_mpo_seed20271973_20260924T020259Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.836,
+   "best_minus_ivg": -0.10382346785300178
+  },
+  "celecoxib_rediscovery": {
+   "best": 0.5853658536585366,
+   "top10": 0.486641126452308,
+   "calls": 861,
+   "arm": "scored_celecoxib_rediscovery_seed20260927_base_20260924T090746Z",
+   "vol": "compose-pmo-structural-panel",
+   "ivg_auc_top10": 0.839,
+   "best_minus_ivg": -0.2536341463414634
+  },
+  "deco_hop": {
+   "best": 0.9172794117647058,
+   "top10": 0.9170914573694647,
+   "calls": 272,
+   "arm": "scored_deco_hop_seed20278924_measured_score_20260924T065706Z",
+   "vol": "compose-pmo-seed-weighting",
+   "ivg_auc_top10": 0.968,
+   "best_minus_ivg": -0.05072058823529413
+  },
+  "fexofenadine_mpo": {
+   "best": 0.7980481030862815,
+   "top10": 0.7949199941090637,
+   "calls": 1336,
+   "arm": "scored_fexofenadine_mpo_seed20272973_20260924T020259Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.904,
+   "best_minus_ivg": -0.10595189691371854
+  },
+  "isomers_c7h8n2o2": {
+   "best": 1.0,
+   "top10": 1.0,
+   "calls": 2958,
+   "arm": "scored_isomers_c7h8n2o2_seed20266973_20260924T020259Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.988,
+   "best_minus_ivg": 0.01200000000000001
+  },
+  "isomers_c9h10n2o2pf2cl": {
+   "best": 1.0,
+   "top10": 0.990697862203245,
+   "calls": 2791,
+   "arm": "scored_isomers_c9h10n2o2pf2cl_seed20280973_20260924T020259Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.898,
+   "best_minus_ivg": 0.10199999999999998
+  },
+  "median1": {
+   "best": 0.39999999999999997,
+   "top10": 0.3322944277941905,
+   "calls": 2307,
+   "arm": "scored_median1_seed20265973_20260924T020259Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.386,
+   "best_minus_ivg": 0.013999999999999957
+  },
+  "median2": {
+   "best": 0.3111254754997473,
+   "top10": 0.3046057761180086,
+   "calls": 1536,
+   "arm": "scored_median2_seed20281973_20260924T020259Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.377,
+   "best_minus_ivg": -0.06587452450025272
+  },
+  "mestranol_similarity": {
+   "best": 1.0,
+   "top10": 1.0,
+   "calls": 2252,
+   "arm": "scored_mestranol_similarity_seed20262973_20260924T013046Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.991,
+   "best_minus_ivg": 0.009000000000000008
+  },
+  "osimertinib_mpo": {
+   "best": 0.8526407276208925,
+   "top10": 0.8481643736230804,
+   "calls": 840,
+   "arm": "scored_osimertinib_mpo_seed20273973_20260924T013046Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.881,
+   "best_minus_ivg": -0.028359272379107514
+  },
+  "perindopril_mpo": {
+   "best": 0.6232413273091858,
+   "top10": 0.6159027793315517,
+   "calls": 1834,
+   "arm": "scored_perindopril_mpo_seed20267973_20260924T020259Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.753,
+   "best_minus_ivg": -0.1297586726908142
+  },
+  "qed": {
+   "best": 0.948442042791664,
+   "top10": 0.9481174691651141,
+   "calls": 1007,
+   "arm": "scored_qed_seed20270973_20260924T020259Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.943,
+   "best_minus_ivg": 0.005442042791664048
+  },
+  "ranolazine_mpo": {
+   "best": 0.8275706125042481,
+   "top10": 0.8191479425215794,
+   "calls": 1849,
+   "arm": "scored_ranolazine_mpo_seed20274973_20260924T020259Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.854,
+   "best_minus_ivg": -0.026429387495751855
+  },
+  "scaffold_hop": {
+   "best": 0.5640239451014747,
+   "top10": 0.551990629804265,
+   "calls": 1980,
+   "arm": "scored_scaffold_hop_seed20279973_20260924T020259Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.711,
+   "best_minus_ivg": -0.14697605489852528
+  },
+  "sitagliptin_mpo": {
+   "best": 0.6397344216892772,
+   "top10": 0.621020347960467,
+   "calls": 2372,
+   "arm": "scored_sitagliptin_mpo_seed20275973_20260924T020259Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.743,
+   "best_minus_ivg": -0.1032655783107228
+  },
+  "thiothixene_rediscovery": {
+   "best": 0.4838709677419355,
+   "top10": 0.45510407190872526,
+   "calls": 1024,
+   "arm": "scored_thiothixene_rediscovery_seed20263925_nodonor_20260924T070507Z",
+   "vol": "compose-pmo-donor-qual",
+   "ivg_auc_top10": 0.652,
+   "best_minus_ivg": -0.16812903225806453
+  },
+  "troglitazone_rediscovery": {
+   "best": 0.8229166666666666,
+   "top10": 0.6922962781546014,
+   "calls": 255,
+   "arm": "scored_troglitazone_rediscovery_seed20264927_lane_20260924T090802Z",
+   "vol": "compose-pmo-structural-panel",
+   "ivg_auc_top10": 0.853,
+   "best_minus_ivg": -0.03008333333333335
+  },
+  "valsartan_smarts": {
+   "best": 0.9873842823791779,
+   "top10": 0.9783191854008629,
+   "calls": 2080,
+   "arm": "scored_valsartan_smarts_seed20277973_20260924T013046Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.935,
+   "best_minus_ivg": 0.052384282379177805
+  },
+  "zaleplon_mpo": {
+   "best": 0.5925466802963288,
+   "top10": 0.5729563381464545,
+   "calls": 2337,
+   "arm": "scored_zaleplon_mpo_seed20276973_20260924T020259Z",
+   "vol": "compose-pmo-fibercontrol-mpo",
+   "ivg_auc_top10": 0.624,
+   "best_minus_ivg": -0.031453319703671156
+  },
+  "drd2": {
+   "best": 0.9999977100395335,
+   "top10": 0.9999904746594768,
+   "calls": 1102,
+   "arm": "scored_drd2_seed20282926_mscore_20260924T080406Z",
+   "vol": "compose-pmo-learned-trio",
+   "ivg_auc_top10": 0.995,
+   "best_minus_ivg": 0.004997710039533532
+  },
+  "gsk3b": {
+   "best": 0.99,
+   "top10": 0.944,
+   "calls": 1097,
+   "arm": "scored_gsk3b_seed20268926_mscore_20260924T080406Z",
+   "vol": "compose-pmo-learned-trio",
+   "ivg_auc_top10": 0.988,
+   "best_minus_ivg": 0.0020000000000000018
+  },
+  "jnk3": {
+   "best": 0.77,
+   "top10": 0.748,
+   "calls": 878,
+   "arm": "scored_jnk3_seed20269926_mscore_20260924T080406Z",
+   "vol": "compose-pmo-learned-trio",
+   "ivg_auc_top10": 0.898,
+   "best_minus_ivg": -0.128
+  }
+ }
+}
