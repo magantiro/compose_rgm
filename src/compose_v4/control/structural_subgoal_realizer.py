@@ -687,6 +687,33 @@ def realize_target(
     }
 
 
+def realize_target_without_search(
+    source: MolecularGraph,
+    target: MolecularGraph,
+    *,
+    config: RealizerConfig | None = None,
+) -> dict:
+    """Expose the existing deterministic complete-region compiler, without search.
+
+    A target here is a proposed structural region, not an objective/reference
+    molecule. Failure is an explicit abstention; no beam or route is substituted.
+    Existing callers of ``realize_target`` and ``realize_structural_goal`` are
+    unchanged.
+    """
+    config = RealizerConfig() if config is None else config
+    if source.n_atoms != target.n_atoms:
+        raise ValueError("source and structural target slot counts disagree")
+    if not charge_policy_preserved(source, target):
+        return {
+            "status": "charge_policy_abstention",
+            "actions": [],
+            "states": [encode_state(source)],
+            "expanded": 0,
+            "attempted": 0,
+        }
+    return _deterministic_target_schedule(source, target, config=config, progress=None)
+
+
 def _realize_bound_goal(
     source: MolecularGraph,
     bound: _BoundGoal,
@@ -939,5 +966,6 @@ __all__ = [
     "RealizerConfig",
     "realize_structural_goal",
     "realize_target",
+    "realize_target_without_search",
     "target_distance",
 ]

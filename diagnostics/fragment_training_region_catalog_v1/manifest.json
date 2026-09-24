@@ -1,0 +1,19 @@
+{
+  "benchmark_reference_identities_excluded": 10,
+  "catalog_sha256": "a8775b466f479c2594ff5d8afd81049a57969211d3152035c93e9db51e8b1347",
+  "entries": 110525,
+  "inputs": {
+    "/Users/rmaganti/compose_denovo_artifacts/guacamol/guacamol_subset_500000_seed0.smiles": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/src/compose_v4/benchmark/training_region_catalog.py": "38c98cd3b61d3967003ed50438b2b7dc999312436a2ae007663ed089796d4888",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/src/compose_v4/data/scaffold_partition.py": "9eb97923e8ec065bb382e5178416fbcade2d69e7a2e91d36517397e98fa1bc30",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/tools/build_training_region_catalog.py": "7aad8e42b03de1174bf9d601e7d1a6f621a4b817124d230a151d74e937d51f5e"
+  },
+  "python": "3.11.13",
+  "rdkit": "2024.03.5",
+  "schema": "split_first_training_region_catalog_build_v1",
+  "selection_uses_qed_sa": false,
+  "source_access_basis": "existing local GuacaMol research asset; no redistribution license asserted",
+  "source_commit": "a16ef9417cdf44d50381fbb8e5069edc31e7c9df",
+  "training_molecules": 10000
+}
