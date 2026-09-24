@@ -4328,8 +4328,14 @@ class FactorizedTraceletRateModel(nn.Module):
         *,
         property_values: tuple[float, ...] | None,
         property_mask: tuple[bool, ...] | None = None,
+        allowed_rule_names: frozenset[str] | None = None,
     ) -> SampledRewriteMark:
-        """Sample one legal mark under an optional standardized target vector."""
+        """Sample one legal mark under optional property and rule-fiber conditions."""
+
+        if allowed_rule_names is not None:
+            unknown = allowed_rule_names.difference(MARK_RULE_TO_INDEX)
+            if unknown:
+                raise ValueError(f"unknown allowed rule names: {sorted(unknown)}")
 
         if (property_values is None) != (property_mask is None):
             raise ValueError("property values and mask must be provided together")
@@ -4417,6 +4423,10 @@ class FactorizedTraceletRateModel(nn.Module):
             family_index = MARK_RULE_TO_INDEX.get(rule_name)
             if family_index is not None:
                 enabled[family_index] = False
+        if allowed_rule_names is not None:
+            for rule_name, family_index in MARK_RULE_TO_INDEX.items():
+                if rule_name not in allowed_rule_names:
+                    enabled[family_index] = False
         while bool(enabled.any()):
             family_logits = _masked_family_logits(
                 self._family_base_logits(batch, global_state)[0],

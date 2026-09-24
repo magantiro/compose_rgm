@@ -22,9 +22,12 @@ the branch the official model uses, and both are ASSERTED rather than assumed:
     counting two spellings of one molecule twice.  Emitting canonical strings
     makes official uniqueness exactly ``unique molecules / valid molecules``.
 
-A failed or constraint-violating attempt is represented by
-``FAILED_SAMPLE_PLACEHOLDER``, which RDKit cannot parse, so the official
-function counts it as invalid -- which is the intended accounting.
+An attempt that produced no chemically committed endpoint is represented by
+``FAILED_SAMPLE_PLACEHOLDER``, which RDKit cannot parse. A chemically valid
+commit that misses the prompt constraint remains in the *headline* official
+metric population and is counted separately as a prompt-fidelity failure.
+The caller may additionally score a task-filtered diagnostic population, but
+must never relabel that stricter number as published chemical validity.
 """
 
 from __future__ import annotations
@@ -164,9 +167,7 @@ def official_prompt_metrics(
     """
     samples = tuple(samples)
     if len(samples) != expected_samples:
-        raise ValueError(
-            f"expected exactly {expected_samples} samples, got {len(samples)}"
-        )
+        raise ValueError(f"expected exactly {expected_samples} samples, got {len(samples)}")
     assert_emission_invariants(samples)
 
     evaluate_smiles = _official_evaluate_smiles()

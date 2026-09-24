@@ -168,6 +168,57 @@ def test_legacy_graft_thinning_restores_prequotient_support_without_executing_se
     assert all(isinstance(draw.action, BondReroute) for draw in chemical)
 
 
+def test_allowed_rule_fiber_samples_only_its_supported_family() -> None:
+    catalog, _ = _catalog_and_records(("CCO",))
+    state = pad_molecular_graph(smiles_to_molecular_graph("CCO"), 12)
+    model = FactorizedTraceletRateModel(
+        catalog, hidden_dim=16, message_passing_steps=1
+    ).eval()
+    allowed = frozenset({"atom_insert"})
+    rng = np.random.default_rng(907)
+    draws = tuple(
+        model.sample_rewrite_mark_conditioned(
+            state, 0.0, rng,
+            property_values=None,
+            property_mask=None,
+            allowed_rule_names=allowed,
+        )
+        for _ in range(12)
+    )
+    assert all(draw.rule_name == "atom_insert" for draw in draws)
+    with pytest.raises(ValueError, match="unknown allowed rule"):
+        model.sample_rewrite_mark_conditioned(
+            state, 0.0, rng,
+            property_values=None,
+            property_mask=None,
+            allowed_rule_names=frozenset({"unknown_rule"}),
+        )
+
+
+def test_omitted_rule_fiber_preserves_default_draws() -> None:
+    catalog, _ = _catalog_and_records(("CCO",))
+    state = pad_molecular_graph(smiles_to_molecular_graph("CCO"), 12)
+    model = FactorizedTraceletRateModel(
+        catalog, hidden_dim=16, message_passing_steps=1
+    ).eval()
+    historical = np.random.default_rng(908)
+    explicit_none = np.random.default_rng(908)
+    for _ in range(12):
+        old = model.sample_rewrite_mark_conditioned(
+            state, 0.0, historical, property_values=None, property_mask=None
+        )
+        unchanged = model.sample_rewrite_mark_conditioned(
+            state,
+            0.0,
+            explicit_none,
+            property_values=None,
+            property_mask=None,
+            allowed_rule_names=None,
+        )
+        assert old == unchanged
+    assert historical.bit_generator.state == explicit_none.bit_generator.state
+
+
 def test_superposed_family_scores_include_executable_match_partition() -> None:
     raw = torch.tensor(((0.2, -0.1, 0.7), (1.0, -2.0, 4.0)))
     action_log_z = torch.tensor(((0.0, -1.5, float("-inf")), (2.0, float("-inf"), float("-inf"))))

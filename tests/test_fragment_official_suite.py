@@ -284,6 +284,52 @@ def test_corrected_table_reports_task_success_separately():
             assert not block["secondary_metrics_valid"], task
 
 
+def test_headline_official_metrics_keep_chemically_valid_task_failures():
+    """A wrong-site molecule is valid chemistry, not an empty benchmark sample."""
+    suite = _suite_module()
+    real = suite.sample_completion
+    calls = 0
+
+    def stub(model, system, context, rng, *, config, receipt, control):
+        nonlocal calls
+        del model, system, rng, config, control
+        calls += 1
+        receipt.events.append(1 if calls == 1 else 0)
+        receipt.action_traces.append([])
+        if calls == 1:
+            # The unextended core is a valid connected molecule but fails the
+            # motif's required attachment-site extension.
+            receipt.committed_endpoints.append(context.start_smiles)
+
+    suite.sample_completion = stub
+    try:
+        result = suite.run_task(
+            None,
+            None,
+            _prompts(),
+            FragmentTask.MOTIF_EXTENSION,
+            seeds=1,
+            samples=2,
+            config=suite.SamplerConfig(),
+            control=suite.AttachmentControlConfig(enabled=True),
+            verbose=False,
+            seed_list=[0],
+            drugs=["BARICITINIB"],
+        )
+    finally:
+        suite.sample_completion = real
+
+    detail = result["per_drug"]["BARICITINIB"][0]
+    assert detail["committed_endpoints"] == 1
+    assert detail["committed_chemically_valid"] == 1
+    assert detail["chemical_samples"] == [detail["start_smiles"], ""]
+    assert detail["emitted_samples"] == ["", ""]
+    assert detail["official"]["validity"] == 50.0
+    assert detail["official_task_filtered"]["validity"] == 0.0
+    assert detail["task_fidelity_over_attempts"] == 0.0
+    assert detail["task_fidelity_over_commits"] == 0.0
+
+
 # ---- Global sampler knobs ----
 #
 # A knob that is parsed but never reaches SamplerConfig is INERT, and an inert
@@ -344,9 +390,7 @@ def test_no_per_task_or_per_drug_sampler_knob_is_expressible():
     """
     suite = _suite_module()
     options = {
-        option
-        for action in suite.build_parser()._actions
-        for option in action.option_strings
+        option for action in suite.build_parser()._actions for option in action.option_strings
     }
     for forbidden in (
         "--mark-attempts-for-drug",
@@ -383,9 +427,7 @@ def test_the_path_program_flag_reaches_the_controller_configuration():
 
 def test_post_coverage_growth_flag_changes_only_interface_restriction():
     suite, default_args = _parsed("--attachment-control")
-    _, release_args = _parsed(
-        "--attachment-control", "--allow-post-coverage-core-growth"
-    )
+    _, release_args = _parsed("--attachment-control", "--allow-post-coverage-core-growth")
     default = suite.control_from_args(default_args)
     release = suite.control_from_args(release_args)
     assert default == suite.AttachmentControlConfig(enabled=True)
@@ -393,14 +435,15 @@ def test_post_coverage_growth_flag_changes_only_interface_restriction():
     assert release.restrict_interfaces is False
     assert release.attachment_first == default.attachment_first is True
     assert release.redirect_attachment == default.redirect_attachment is True
-    assert {
-        k for k in vars(default) if getattr(default, k) != getattr(release, k)
-    } == {"restrict_interfaces"}
+    assert {k for k in vars(default) if getattr(default, k) != getattr(release, k)} == {
+        "restrict_interfaces"
+    }
     assert suite.frozen_attachment_identity(default)["config_sha256"] == (
         "80a40b905adf84eae5d55be274aba4fbc1af9f088170028fc7452bdcbbdc44c6"
     )
-    assert suite.frozen_attachment_identity(default)["config_sha256"] != (
-        suite.frozen_attachment_identity(release)["config_sha256"]
+    assert (
+        suite.frozen_attachment_identity(default)["config_sha256"]
+        != (suite.frozen_attachment_identity(release)["config_sha256"])
     )
 
 
@@ -410,10 +453,51 @@ def test_post_coverage_growth_flag_requires_active_controller():
         suite.control_from_args(args)
 
 
-def test_single_interface_policy_is_distinct_and_preserves_legacy_hash():
-    suite, args = _parsed(
-        "--attachment-control", "--release-single-interface-after-coverage"
+def test_effective_lock_flag_has_new_identity_and_preserves_legacy_hash():
+    suite, old_args = _parsed("--attachment-control")
+    _, new_args = _parsed("--attachment-control", "--hard-lock-effective-chemistry")
+    old = suite.control_from_args(old_args)
+    new = suite.control_from_args(new_args)
+    assert old.hard_lock_effective_chemistry is False
+    assert new.hard_lock_effective_chemistry is True
+    assert suite.frozen_attachment_identity(old)["config_sha256"] == (
+        "80a40b905adf84eae5d55be274aba4fbc1af9f088170028fc7452bdcbbdc44c6"
     )
+    assert "hard_lock_effective_chemistry" not in suite.frozen_attachment_identity(old)["config"]
+    assert suite.frozen_attachment_identity(new)["config"]["hard_lock_effective_chemistry"]
+    assert (
+        suite.frozen_attachment_identity(new)["config_sha256"]
+        != (suite.frozen_attachment_identity(old)["config_sha256"])
+    )
+    _, inactive_args = _parsed("--hard-lock-effective-chemistry")
+    with pytest.raises(ValueError, match="requires --attachment-control"):
+        suite.control_from_args(inactive_args)
+
+
+def test_initial_locked_family_flag_is_scoped_and_hash_distinct():
+    suite, historical_args = _parsed("--attachment-control")
+    _, conditioned_args = _parsed(
+        "--attachment-control", "--condition-initial-locked-family"
+    )
+    historical = suite.control_from_args(historical_args)
+    conditioned = suite.control_from_args(conditioned_args)
+    assert historical.condition_initial_locked_family is False
+    assert conditioned.condition_initial_locked_family is True
+    old_identity = suite.frozen_attachment_identity(historical)
+    new_identity = suite.frozen_attachment_identity(conditioned)
+    assert old_identity["config_sha256"] == (
+        "80a40b905adf84eae5d55be274aba4fbc1af9f088170028fc7452bdcbbdc44c6"
+    )
+    assert "condition_initial_locked_family" not in old_identity["config"]
+    assert new_identity["config"]["condition_initial_locked_family"]
+    assert new_identity["config_sha256"] != old_identity["config_sha256"]
+    _, inactive_args = _parsed("--condition-initial-locked-family")
+    with pytest.raises(ValueError, match="requires --attachment-control"):
+        suite.control_from_args(inactive_args)
+
+
+def test_single_interface_policy_is_distinct_and_preserves_legacy_hash():
+    suite, args = _parsed("--attachment-control", "--release-single-interface-after-coverage")
     candidate = suite.control_from_args(args)
     assert candidate.restrict_interfaces == "single_interface_after_coverage"
     assert candidate.attachment_first and candidate.redirect_attachment
@@ -421,8 +505,9 @@ def test_single_interface_policy_is_distinct_and_preserves_legacy_hash():
     assert suite.frozen_attachment_identity(historical)["config_sha256"] == (
         "80a40b905adf84eae5d55be274aba4fbc1af9f088170028fc7452bdcbbdc44c6"
     )
-    assert suite.frozen_attachment_identity(candidate)["config_sha256"] != (
-        suite.frozen_attachment_identity(historical)["config_sha256"]
+    assert (
+        suite.frozen_attachment_identity(candidate)["config_sha256"]
+        != (suite.frozen_attachment_identity(historical)["config_sha256"])
     )
     _, inactive = _parsed("--release-single-interface-after-coverage")
     with pytest.raises(ValueError, match="requires --attachment-control"):
@@ -430,9 +515,7 @@ def test_single_interface_policy_is_distinct_and_preserves_legacy_hash():
 
 
 def test_completed_interface_redirection_flag_has_distinct_frozen_identity():
-    suite, args = _parsed(
-        "--attachment-control", "--redirect-completed-interfaces"
-    )
+    suite, args = _parsed("--attachment-control", "--redirect-completed-interfaces")
     candidate = suite.control_from_args(args)
     historical = suite.AttachmentControlConfig(enabled=True)
     assert candidate.redirect_attachment == "redirect_completed_interfaces"
@@ -440,8 +523,9 @@ def test_completed_interface_redirection_flag_has_distinct_frozen_identity():
     assert suite.frozen_attachment_identity(historical)["config_sha256"] == (
         "80a40b905adf84eae5d55be274aba4fbc1af9f088170028fc7452bdcbbdc44c6"
     )
-    assert suite.frozen_attachment_identity(candidate)["config_sha256"] != (
-        suite.frozen_attachment_identity(historical)["config_sha256"]
+    assert (
+        suite.frozen_attachment_identity(candidate)["config_sha256"]
+        != (suite.frozen_attachment_identity(historical)["config_sha256"])
     )
     _, inactive = _parsed("--redirect-completed-interfaces")
     with pytest.raises(ValueError, match="requires --attachment-control"):
@@ -453,8 +537,12 @@ def test_interface_release_flags_are_mutually_exclusive():
     with pytest.raises(SystemExit):
         suite.build_parser().parse_args(
             [
-                "--checkpoint", "ckpt.pt", "--output", "out.json",
-                "--attachment-control", "--allow-post-coverage-core-growth",
+                "--checkpoint",
+                "ckpt.pt",
+                "--output",
+                "out.json",
+                "--attachment-control",
+                "--allow-post-coverage-core-growth",
                 "--release-single-interface-after-coverage",
             ]
         )
@@ -585,9 +673,7 @@ def test_the_bridge_knob_survives_the_args_to_run_task_hop():
 def test_no_per_task_or_per_drug_two_core_knob_is_expressible():
     suite = _suite_module()
     options = {
-        option
-        for action in suite.build_parser()._actions
-        for option in action.option_strings
+        option for action in suite.build_parser()._actions for option in action.option_strings
     }
     for forbidden in (
         "--path-program-for-drug",
@@ -680,11 +766,17 @@ def test_the_recorded_seed_follows_the_bridge_knob():
         seeds = {}
         for bridge in (1, 3):
             result = suite.run_task(
-                None, None, _prompts(), FragmentTask.LINKER_DESIGN,
-                seeds=1, samples=1,
+                None,
+                None,
+                _prompts(),
+                FragmentTask.LINKER_DESIGN,
+                seeds=1,
+                samples=1,
                 config=suite.SamplerConfig(),
                 control=suite.AttachmentControlConfig(enabled=True, path_program=True),
-                verbose=False, seed_list=[0], drugs=["BARICITINIB"],
+                verbose=False,
+                seed_list=[0],
+                drugs=["BARICITINIB"],
                 linker_bridge_atoms=bridge,
             )
             seeds[bridge] = result["per_drug"]["BARICITINIB"][0]["seeded_linker_length"]

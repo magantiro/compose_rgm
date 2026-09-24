@@ -11,12 +11,12 @@ description (``in_virtuo_gen/evaluation/downstream.py``):
 * ``scaffold_morphing`` reuses the linker prompts and the linker results, which
   is what the executable upstream code does.
 
-COMPOSE emits the failure placeholder for an attempt that produced nothing
-admissible, so the official function counts it invalid.  Official validity is
-therefore COMPOSE's STRICT benchmark validity: chemically valid, connected, AND
-prompt-satisfying.  Chemical validity of committed endpoints is recorded
-separately, because committed states are valid by construction and that is a
-different claim from satisfying the prompt.
+The headline official evaluator receives every chemically committed endpoint,
+including one that missed the requested attachment. Only an attempt that
+produced no endpoint receives the failure placeholder. Thus official validity
+is chemical output per attempt, as in the published comparator. Prompt/task
+fidelity is recorded separately; a task-filtered evaluator row is diagnostic
+and must not be substituted for the headline row.
 
 Zero oracle calls.  QED and SA are the benchmark's own quality diagnostic and are
 computed inside the official evaluator.
@@ -27,7 +27,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import platform
+import tempfile
 import time
 from collections import defaultdict
 from dataclasses import asdict
@@ -89,6 +91,13 @@ def frozen_attachment_identity(control: AttachmentControlConfig) -> dict:
     aggregator refuses to combine shards whose hashes disagree.
     """
     payload = {k: v for k, v in sorted(asdict(control).items())}
+    # Backward-compatible optional field: absence is the historical False.
+    # Preserve the exact frozen identity of existing runs, while an enabled
+    # effective-chemistry lock is explicit in both config and hash.
+    if not control.hard_lock_effective_chemistry:
+        payload.pop("hard_lock_effective_chemistry")
+    if not control.condition_initial_locked_family:
+        payload.pop("condition_initial_locked_family")
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return {
         "config": payload,
@@ -236,7 +245,7 @@ def run_task(
     per_drug_detail: dict[str, list[dict]] = defaultdict(list)
     build_failures: list[dict[str, str]] = []
 
-    for seed in (seed_list if seed_list is not None else range(seeds)):
+    for seed in seed_list if seed_list is not None else range(seeds):
         drug_metrics: list[dict[str, float]] = []
         for prompt in task_prompts:
             try:
@@ -247,17 +256,14 @@ def run_task(
                     linker_bridge_atoms=linker_bridge_atoms,
                 )
             except FragmentConditioningError as exc:
-                build_failures.append(
-                    {"drug": prompt.drug_name, "seed": seed, "error": str(exc)}
-                )
+                build_failures.append({"drug": prompt.drug_name, "seed": seed, "error": str(exc)})
                 continue
 
             # Measurement only: the same function the program uses as its
             # predicate, so the number that judges the run and the number the
             # run steers by cannot disagree.
             controller_for_report = AttachmentController(
-                context.attachment
-                or AttachmentSpec((), (), (frozenset(context.locked_slots),)),
+                context.attachment or AttachmentSpec((), (), (frozenset(context.locked_slots),)),
                 context.locked_slots,
                 control,
             )
@@ -266,22 +272,29 @@ def run_task(
             rng = np.random.default_rng(rng_seed)
             receipt = SamplingReceipt()
             emitted: list[str] = []
+            chemical_samples: list[str] = []
             attempt_records: list[dict] = []
             started = time.time()
             refusal_fields = (
-                "lock_rejections", "executor_refusals", "budget_exhausted",
-                "constraint_failures", "interface_rejections", "staging_rejections",
-                "redirections", "completed_site_redirect_offers",
-                "completed_site_redirects", "completed_site_redirect_commits",
+                "lock_rejections",
+                "executor_refusals",
+                "budget_exhausted",
+                "constraint_failures",
+                "interface_rejections",
+                "staging_rejections",
+                "redirections",
+                "completed_site_redirect_offers",
+                "completed_site_redirects",
+                "completed_site_redirect_commits",
                 "separation_failures",
+                "initial_family_conditioned_draws",
+                "initial_family_conditioned_accepts",
             ) + PATH_CENSUS_FIELDS
             for attempt_index in range(samples):
                 before_committed = len(receipt.committed_endpoints)
                 before_trace_count = len(receipt.action_traces)
                 before_event_count = len(receipt.events)
-                before_refusals = {
-                    field: getattr(receipt, field) for field in refusal_fields
-                }
+                before_refusals = {field: getattr(receipt, field) for field in refusal_fields}
                 before_families = dict(receipt.families)
                 out = sample_completion(
                     model,
@@ -303,6 +316,9 @@ def run_task(
                 new_committed = receipt.committed_endpoints[before_committed:]
                 if len(new_committed) > 1:
                     raise AssertionError("one attempt committed more than one endpoint")
+                chemical_samples.append(
+                    new_committed[0] if new_committed else FAILED_SAMPLE_PLACEHOLDER
+                )
                 attempt_records.append(
                     {
                         "attempt_index": attempt_index,
@@ -323,21 +339,18 @@ def run_task(
                 )
             elapsed = time.time() - started
 
-            metrics = official_prompt_metrics(emitted, expected_samples=samples)
+            metrics = official_prompt_metrics(chemical_samples, expected_samples=samples)
+            task_filtered_metrics = official_prompt_metrics(emitted, expected_samples=samples)
 
             queries = audit_queries(prompt)
             reference = prompt_reference_smiles(prompt)
             committed = receipt.committed_endpoints
-            committed_preserving = sum(
-                contains_all_fragments(s, queries) for s in committed
-            )
+            committed_preserving = sum(contains_all_fragments(s, queries) for s in committed)
             emitted_real = [s for s in emitted if s]
-            emitted_preserving = sum(
-                contains_all_fragments(s, queries) for s in emitted_real
-            )
-            metrics["distance"] = official_distance(emitted, reference)
+            emitted_preserving = sum(contains_all_fragments(s, queries) for s in emitted_real)
+            metrics["distance"] = official_distance(chemical_samples, reference)
             metrics["distance_to_original_drug"] = official_distance(
-                emitted, prompt.original_smiles
+                chemical_samples, prompt.original_smiles
             )
             drug_metrics.append(metrics)
             per_drug_detail[prompt.drug_name].append(
@@ -345,11 +358,16 @@ def run_task(
                     "seed": seed,
                     "rng_seed": rng_seed,
                     "official": metrics,
+                    "official_task_filtered": task_filtered_metrics,
                     "attempts": samples,
                     "validity_denominator": samples,
+                    "task_fidelity_over_attempts": 100.0 * len(emitted_real) / samples,
+                    "task_fidelity_over_commits": (
+                        100.0 * len(emitted_real) / len(committed) if committed else 0.0
+                    ),
                     "emitted_nonempty": len(emitted_real),
                     "distance_reference_prompt": reference,
-                    "unique_valid_count": len(official_unique_valid(emitted)),
+                    "unique_valid_count": len(official_unique_valid(chemical_samples)),
                     "committed_endpoints": len(committed),
                     "committed_chemically_valid": _chemically_valid(committed),
                     "committed_fragment_preserving": committed_preserving,
@@ -357,6 +375,8 @@ def run_task(
                     "constraint_failures": receipt.constraint_failures,
                     "lock_rejections": receipt.lock_rejections,
                     "budget_exhausted": receipt.budget_exhausted,
+                    "initial_family_conditioned_draws": receipt.initial_family_conditioned_draws,
+                    "initial_family_conditioned_accepts": receipt.initial_family_conditioned_accepts,
                     "executor_refusals": receipt.executor_refusals,
                     "mean_events": float(np.mean(receipt.events)) if receipt.events else 0.0,
                     "families": dict(receipt.families),
@@ -369,6 +389,7 @@ def run_task(
                     # are retained so any of those metrics can be re-scored
                     # over EITHER denominator without re-running the sampler.
                     "committed_endpoint_smiles": list(committed),
+                    "chemical_samples": list(chemical_samples),
                     "emitted_samples": list(emitted),
                     # Attempt-aligned provenance, including a null committed
                     # endpoint for a genuine no-output trajectory.  The two
@@ -388,9 +409,7 @@ def run_task(
                     # realized_linker_lengths, which is measured either way and
                     # is exactly what makes the two arms comparable.
                     "seeded_linker_length": (
-                        controller_for_report.realized_linker_length(
-                            context.start_state
-                        )
+                        controller_for_report.realized_linker_length(context.start_state)
                         if context.attachment
                         else None
                     ),
@@ -399,19 +418,13 @@ def run_task(
                     "path_transactions": receipt.path_transactions,
                     "path_transaction_refusals": receipt.path_transaction_refusals,
                     "path_rejections": receipt.path_rejections,
-                    "path_census": {
-                        field: getattr(receipt, field) for field in PATH_CENSUS_FIELDS
-                    },
+                    "path_census": {field: getattr(receipt, field) for field in PATH_CENSUS_FIELDS},
                     "interface_rejections": receipt.interface_rejections,
                     "staging_rejections": receipt.staging_rejections,
                     "redirections": receipt.redirections,
-                    "completed_site_redirect_offers": (
-                        receipt.completed_site_redirect_offers
-                    ),
+                    "completed_site_redirect_offers": (receipt.completed_site_redirect_offers),
                     "completed_site_redirects": receipt.completed_site_redirects,
-                    "completed_site_redirect_commits": (
-                        receipt.completed_site_redirect_commits
-                    ),
+                    "completed_site_redirect_commits": (receipt.completed_site_redirect_commits),
                     "separation_failures": receipt.separation_failures,
                     "committed_interfaces_covered": receipt.interface_covered,
                     "declared_interfaces": list(
@@ -420,9 +433,7 @@ def run_task(
                     "start_smiles": context.start_smiles,
                     "locked_slots": list(context.locked_slots),
                     "attachment_spec": (
-                        context.attachment.identity_payload()
-                        if context.attachment
-                        else None
+                        context.attachment.identity_payload() if context.attachment else None
                     ),
                     "start_state_interface_coverage": (
                         interface_coverage_report(
@@ -446,19 +457,20 @@ def run_task(
 
         if drug_metrics:
             per_seed_rows.append(
-                {
-                    key: float(np.nanmean([m[key] for m in drug_metrics]))
-                    for key in _ROW_KEYS
-                }
+                {key: float(np.nanmean([m[key] for m in drug_metrics])) for key in _ROW_KEYS}
             )
 
-    summary = {
-        key: {
-            "mean": float(np.mean([r[key] for r in per_seed_rows])),
-            "std": float(np.std([r[key] for r in per_seed_rows])),
+    summary = (
+        {
+            key: {
+                "mean": float(np.mean([r[key] for r in per_seed_rows])),
+                "std": float(np.std([r[key] for r in per_seed_rows])),
+            }
+            for key in _ROW_KEYS
         }
-        for key in _ROW_KEYS
-    } if per_seed_rows else {}
+        if per_seed_rows
+        else {}
+    )
 
     return {
         "task": task.value,
@@ -504,14 +516,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument(
-        "--task", action="append", default=None, help="repeatable; default = all"
-    )
+    parser.add_argument("--task", action="append", default=None, help="repeatable; default = all")
     parser.add_argument("--seeds", type=int, default=OFFICIAL_SEEDS)
-    parser.add_argument("--seed-list", type=int, action="append", default=None,
-                        help="explicit seed ids for sharding; default = range(--seeds)")
-    parser.add_argument("--drug", action="append", default=None,
-                        help="repeatable drug filter for sharding")
+    parser.add_argument(
+        "--seed-list",
+        type=int,
+        action="append",
+        default=None,
+        help="explicit seed ids for sharding; default = range(--seeds)",
+    )
+    parser.add_argument(
+        "--drug", action="append", default=None, help="repeatable drug filter for sharding"
+    )
     parser.add_argument("--samples", type=int, default=OFFICIAL_SAMPLES_PER_PROMPT)
     parser.add_argument("--max-events", type=int, default=32)
     parser.add_argument("--operational-horizon", type=float, default=16.0)
@@ -533,6 +549,24 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "steer growth to the prompt's DECLARED attachment interfaces. "
             "Default off, so the frozen-sampler baseline rows reproduce."
+        ),
+    )
+    parser.add_argument(
+        "--hard-lock-effective-chemistry",
+        action="store_true",
+        help=(
+            "opt-in v2 region lock: preserve RDKit-perceived locked atom/bond "
+            "chemistry and refuse external paths that close a ring through a "
+            "locked core; requires --attachment-control"
+        ),
+    )
+    parser.add_argument(
+        "--condition-initial-locked-family",
+        action="store_true",
+        help=(
+            "opt-in constructive first-event law when all real source atoms "
+            "are retained; samples the learned atom-insert family directly, "
+            "then applies the unchanged executor and region lock"
         ),
     )
     parser.add_argument(
@@ -604,10 +638,10 @@ def control_from_args(args: argparse.Namespace) -> AttachmentControlConfig:
         args.allow_post_coverage_core_growth
         or args.release_single_interface_after_coverage
         or args.redirect_completed_interfaces
+        or args.hard_lock_effective_chemistry
+        or args.condition_initial_locked_family
     ) and not args.attachment_control:
-        raise ValueError(
-            "interface control option requires --attachment-control"
-        )
+        raise ValueError("interface control option requires --attachment-control")
     restriction = (
         SINGLE_INTERFACE_RELEASE
         if args.release_single_interface_after_coverage
@@ -617,11 +651,11 @@ def control_from_args(args: argparse.Namespace) -> AttachmentControlConfig:
         enabled=bool(args.attachment_control),
         restrict_interfaces=restriction,
         redirect_attachment=(
-            REDIRECT_COMPLETED_INTERFACES
-            if args.redirect_completed_interfaces
-            else True
+            REDIRECT_COMPLETED_INTERFACES if args.redirect_completed_interfaces else True
         ),
         path_program=bool(args.path_program),
+        hard_lock_effective_chemistry=bool(args.hard_lock_effective_chemistry),
+        condition_initial_locked_family=bool(args.condition_initial_locked_family),
     )
 
 
@@ -655,6 +689,7 @@ def protocol_block(args: argparse.Namespace) -> dict:
         "source": "in_virtuo_gen/evaluation/downstream.py @ b50bb3ae",
         "samples_per_prompt": args.samples,
         "seeds": args.seeds,
+        "seed_list": list(args.seed_list) if args.seed_list is not None else None,
         "task_row": "unweighted mean over the task's drugs",
         "scaffold_morphing": "upstream copies the linker result",
         "linker_bridge_atoms": args.linker_bridge_atoms,
@@ -690,11 +725,7 @@ def main() -> None:
     # reads a drug name, a task label or any other instance identity.
     control = control_from_args(args)
 
-    selected = (
-        [FragmentTask(t) for t in args.task]
-        if args.task
-        else list(FragmentTask)
-    )
+    selected = [FragmentTask(t) for t in args.task] if args.task else list(FragmentTask)
 
     results = {}
     for task in selected:
@@ -710,7 +741,7 @@ def main() -> None:
         )
 
     payload = {
-        "schema": "compose_fragment_official_suite_v1",
+        "schema": "compose_fragment_official_suite_v2",
         "protocol": protocol_block(args),
         "kernel": _kernel_provenance(),
         "checkpoint": {
@@ -724,7 +755,12 @@ def main() -> None:
         "metric_provenance": {
             "validity_uniqueness_quality_diversity": (
                 "official in_virtuo_gen.train_utils.metrics.evaluate_smiles "
-                "@ b50bb3ae, already_smiles=True"
+                "@ b50bb3ae, already_smiles=True, on all chemically committed "
+                "endpoints plus no-output placeholders"
+            ),
+            "task_fidelity": (
+                "separate diagnostic: prompt-compliant emitted endpoints per "
+                "attempt and per chemical commit; never relabel as official validity"
             ),
             "distance": (
                 "NOT in the released evaluator: evaluate_smiles returns no "
@@ -740,7 +776,13 @@ def main() -> None:
         "results": results,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(payload, indent=2))
+    with tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", dir=args.output.parent, suffix=".tmp", delete=False
+    ) as handle:
+        temporary = Path(handle.name)
+        json.dump(payload, handle, indent=2, sort_keys=True, allow_nan=False)
+        handle.write("\n")
+    os.replace(temporary, args.output)
     print(f"\nwrote {args.output}")
 
 

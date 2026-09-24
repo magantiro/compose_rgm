@@ -119,6 +119,14 @@ class AttachmentControlConfig:
     # explores the declared band instead of pinning one length per prompt.
     path_length_min: int = 2
     path_length_max: int = 5
+    # Opt-in v2 region lock. The historical graph-only lock and its frozen
+    # artifacts remain reproducible when this is false. When true, admission
+    # also preserves RDKit-perceived locked atom/bond chemistry at every step.
+    hard_lock_effective_chemistry: bool = False
+    # Opt-in constructive first event when the entire source is retained.
+    # This conditions the existing learned action law on atom_insert, rather
+    # than spending a bounded rejection budget on destructive core edits.
+    condition_initial_locked_family: bool = False
 
     def __post_init__(self) -> None:
         mode = self.restrict_interfaces
@@ -321,9 +329,7 @@ class AttachmentController:
         no interface.  Nothing here reads a drug or a task.
         """
         return (
-            self._config.enabled
-            and self._config.path_program
-            and len(self._spec.lock_groups) >= 2
+            self._config.enabled and self._config.path_program and len(self._spec.lock_groups) >= 2
         )
 
     def path_target(self, rng) -> int:
@@ -424,14 +430,9 @@ class AttachmentController:
         if not self.active:
             return True, ""
         mode = self._config.restrict_interfaces
-        restrict_undeclared = (
-            mode is True
-            or (
-                mode == SINGLE_INTERFACE_RELEASE
-                and (
-                    len(self._interfaces) != 1 or bool(self.unsatisfied(predecessor))
-                )
-            )
+        restrict_undeclared = mode is True or (
+            mode == SINGLE_INTERFACE_RELEASE
+            and (len(self._interfaces) != 1 or bool(self.unsatisfied(predecessor)))
         )
         if restrict_undeclared:
             real = is_element(successor.atom_types)
@@ -478,8 +479,7 @@ class AttachmentController:
         anchor, order = action.neighbors[0]
         anchor = int(anchor)
         if anchor in self._interfaces and (
-            self._config.redirect_attachment is True
-            or anchor in self.unsatisfied(state)
+            self._config.redirect_attachment is True or anchor in self.unsatisfied(state)
         ):
             return action
         target = self.redirect_target(state)
@@ -513,16 +513,12 @@ def interface_coverage_report(
 ) -> dict:
     """Per-interface coverage of one state, for the run artifact."""
     locked = frozenset(int(slot) for slot in locked_slots)
-    covered = {
-        slot: external_neighbour_count(state, slot, locked) for slot in spec.interfaces
-    }
+    covered = {slot: external_neighbour_count(state, slot, locked) for slot in spec.interfaces}
     return {
         "interfaces": list(spec.interfaces),
         "required": {str(slot): spec.requirement_of(slot) for slot in spec.interfaces},
         "covered": {str(slot): covered[slot] for slot in spec.interfaces},
-        "satisfied": all(
-            covered[slot] >= spec.requirement_of(slot) for slot in spec.interfaces
-        ),
+        "satisfied": all(covered[slot] >= spec.requirement_of(slot) for slot in spec.interfaces),
     }
 
 

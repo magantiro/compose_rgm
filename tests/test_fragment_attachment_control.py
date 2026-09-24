@@ -81,6 +81,183 @@ def _attach_new_atom(state, anchor: int, *, order: int = 1):
     return successor
 
 
+def test_effective_region_lock_refuses_aromaticity_change_without_graph_change():
+    """Closing a diene through a new atom must not aromaticize the locked core."""
+    from compose_v4.chem.molecular_graph import (
+        molecular_graph_to_smiles,
+        smiles_to_molecular_graph,
+    )
+    from compose_v4.chem.state import is_valid_state, pad_molecular_graph
+
+    source = pad_molecular_graph(smiles_to_molecular_graph("C=CC=CC"), 6)
+    locked = tuple(range(5))
+    legacy = RegionLock(source, locked)
+    strict = RegionLock(
+        source,
+        locked,
+        preserve_effective_chemistry=True,
+        allowed_external_slots=(0, 4),
+    )
+
+    # External growth through a declared site is legal and leaves the retained
+    # diene's perceived atom and internal-bond chemistry unchanged.
+    grown = copy.deepcopy(source)
+    grown.atom_types[5] = 2
+    grown.implicit_h_counts[5] = 3
+    grown.implicit_h_counts[4] = 2
+    grown.bonds[4, 5] = grown.bonds[5, 4] = 1
+    assert is_valid_state(grown)
+    assert strict.permits(grown)
+    assert not RegionLock(
+        source,
+        locked,
+        preserve_effective_chemistry=True,
+        allowed_external_slots=(0,),
+    ).permits(grown)
+
+    # The raw locked atom types, charges and internal bonds remain byte-identical,
+    # so v1 admits this state. RDKit now perceives benzene; v2 must refuse it.
+    aromaticized = copy.deepcopy(source)
+    aromaticized.atom_types[5] = 2
+    aromaticized.implicit_h_counts[5] = 1
+    aromaticized.implicit_h_counts[0] = 1
+    aromaticized.implicit_h_counts[4] = 1
+    aromaticized.bonds[0, 5] = aromaticized.bonds[5, 0] = 1
+    aromaticized.bonds[4, 5] = aromaticized.bonds[5, 4] = 2
+    assert is_valid_state(aromaticized)
+    assert molecular_graph_to_smiles(aromaticized) == "c1ccccc1"
+    assert legacy.permits(aromaticized)
+    assert not strict.permits(aromaticized)
+
+
+def test_effective_region_lock_rejects_undeclared_slot_configuration():
+    from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
+    from compose_v4.chem.state import pad_molecular_graph
+
+    source = pad_molecular_graph(smiles_to_molecular_graph("CC"), 3)
+    with pytest.raises(ValueError, match="not locked"):
+        RegionLock(
+            source,
+            (0, 1),
+            preserve_effective_chemistry=True,
+            allowed_external_slots=(2,),
+        )
+
+
+def test_effective_region_lock_refuses_nonaromatic_ring_closure_through_core():
+    from compose_v4.chem.molecular_graph import (
+        molecular_graph_to_smiles,
+        smiles_to_molecular_graph,
+    )
+    from compose_v4.chem.state import is_valid_state, pad_molecular_graph
+
+    source = pad_molecular_graph(smiles_to_molecular_graph("CCCC"), 5)
+    lock = RegionLock(
+        source,
+        tuple(range(4)),
+        preserve_effective_chemistry=True,
+        allowed_external_slots=(0, 3),
+    )
+    closed = copy.deepcopy(source)
+    closed.atom_types[4] = 2
+    closed.implicit_h_counts[4] = 2
+    closed.implicit_h_counts[0] = 2
+    closed.implicit_h_counts[3] = 2
+    closed.bonds[0, 4] = closed.bonds[4, 0] = 1
+    closed.bonds[3, 4] = closed.bonds[4, 3] = 1
+    assert is_valid_state(closed)
+    assert molecular_graph_to_smiles(closed) == "C1CCCC1"
+    assert RegionLock(source, tuple(range(4))).permits(closed)
+    assert not lock.permits(closed)
+
+
+def test_effective_region_lock_accepts_all_benchmark_start_contexts():
+    """The exact query gate must not declare a supplied prompt impossible."""
+    strict = AttachmentControlConfig(
+        enabled=True, hard_lock_effective_chemistry=True
+    )
+    for prompt in _prompts():
+        context = build_prompt_context(
+            prompt,
+            control=strict,
+            linker_bridge_atoms=1 if len(prompt.fragments) == 2 else 0,
+        )
+        spec = context.attachment
+        lock = RegionLock(
+            context.start_state,
+            context.locked_slots,
+            released_pairs=spec.released_pairs,
+            preserve_effective_chemistry=True,
+            allowed_external_slots=(
+                spec.interfaces if spec.interfaces else context.locked_slots
+            ),
+            lock_groups=spec.lock_groups,
+            fragment_queries=tuple(
+                _fragment_spec(fragment).core for fragment in prompt.fragments
+            ),
+        )
+        assert lock.permits(context.start_state), (prompt.task, prompt.drug_name)
+
+
+def test_constructive_first_event_uses_conditional_law_before_lock():
+    from compose_v4.benchmark.fragment_conditioned_sampler import (
+        SamplingReceipt,
+        sample_completion,
+    )
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+    from compose_v4.rewrite.operators import AtomInsert
+
+    control = AttachmentControlConfig(
+        enabled=True, condition_initial_locked_family=True
+    )
+    context = build_prompt_context(
+        _prompt(FragmentTask.SUPERSTRUCTURE_GENERATION, "BARICITINIB"),
+        control=control,
+    )
+    source = context.start_state
+    anchor = next(
+        slot for slot in context.locked_slots
+        if int(source.implicit_h_counts[slot]) > 0
+    )
+    payload = AtomInsert(
+        _first_null_slot(source), 2, 0, 3, ((anchor, 1),)
+    )
+
+    class ConditionalStub:
+        def __init__(self):
+            self.plain_calls = 0
+            self.conditioned_calls = 0
+
+        def sample_rewrite_mark(self, state, time, rng):
+            self.plain_calls += 1
+            return _StubMark("atom_delete", None)
+
+        def sample_rewrite_mark_conditioned(
+            self, state, time, rng, *, property_values, property_mask, allowed_rule_names
+        ):
+            self.conditioned_calls += 1
+            assert allowed_rule_names == frozenset({"atom_insert"})
+            assert property_values is property_mask is None
+            return _StubMark("atom_insert", payload)
+
+    model = ConditionalStub()
+    receipt = SamplingReceipt()
+    result = sample_completion(
+        model,
+        de_novo_rewrite_system(),
+        context,
+        np.random.default_rng(400),
+        config=SamplerConfig(max_events=1, mark_attempts_per_event=1),
+        receipt=receipt,
+        control=control,
+    )
+    assert result is not None
+    assert model.conditioned_calls == 1 and model.plain_calls == 0
+    assert receipt.initial_family_conditioned_draws == 1
+    assert receipt.initial_family_conditioned_accepts == 1
+    assert receipt.events == [1]
+
+
 # ---- The interfaces are the benchmark's own ----
 
 
@@ -102,9 +279,9 @@ def test_two_core_construction_routes_agree_on_every_released_fragment():
             assert [a.GetSymbol() for a in core.GetAtoms()] == [
                 a.GetSymbol() for a in spec.core.GetAtoms()
             ], fragment
-            assert sites == tuple(
-                sorted(site for site, _count in spec.attachment_requirements)
-            ), fragment
+            assert sites == tuple(sorted(site for site, _count in spec.attachment_requirements)), (
+                fragment
+            )
             checked += 1
     assert checked == 70
 
@@ -185,14 +362,10 @@ def test_declared_interface_count_matches_the_prompt_dummy_count():
             if atom.GetAtomicNum() == 0
         )
         declared = sum(
-            count
-            for fragment in prompt.fragments
-            for _site, count in _declared_sites(fragment)
+            count for fragment in prompt.fragments for _site, count in _declared_sites(fragment)
         )
         assert declared == dummies, prompt.drug_name
-        assert (
-            sum(count for _slot, count in context.attachment.requirements) == dummies
-        )
+        assert sum(count for _slot, count in context.attachment.requirements) == dummies
 
 
 def test_superstructure_declares_no_interface_and_deactivates_the_controller():
@@ -202,17 +375,13 @@ def test_superstructure_declares_no_interface_and_deactivates_the_controller():
             continue
         context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
         assert context.attachment.interfaces == ()
-        controller = AttachmentController(
-            context.attachment, context.locked_slots, _ON
-        )
+        controller = AttachmentController(context.attachment, context.locked_slots, _ON)
         assert controller.active is False
         state = context.start_state
         # With no declared interface, every locked atom stays open: growth
         # anywhere on the core is admitted exactly as before.
         for anchor in context.locked_slots[:5]:
-            admitted, reason = controller.permits(
-                _attach_new_atom(state, anchor), state
-            )
+            admitted, reason = controller.permits(_attach_new_atom(state, anchor), state)
             assert admitted and reason == ""
 
 
@@ -295,15 +464,9 @@ def test_interface_release_preserves_first_growth_then_allows_legal_core_growth(
     prompt = _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
     strict_config = AttachmentControlConfig(enabled=True)
     release_config = dataclasses.replace(strict_config, restrict_interfaces=False)
-    context = build_prompt_context(
-        prompt, config=SamplerConfig(), control=strict_config
-    )
-    strict = AttachmentController(
-        context.attachment, context.locked_slots, strict_config
-    )
-    release = AttachmentController(
-        context.attachment, context.locked_slots, release_config
-    )
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=strict_config)
+    strict = AttachmentController(context.attachment, context.locked_slots, strict_config)
+    release = AttachmentController(context.attachment, context.locked_slots, release_config)
     lock = RegionLock(
         context.start_state,
         context.locked_slots,
@@ -314,8 +477,7 @@ def test_interface_release_preserves_first_growth_then_allows_legal_core_growth(
     undeclared = next(
         slot
         for slot in context.locked_slots
-        if slot not in context.attachment.interfaces
-        and int(start.implicit_h_counts[slot]) > 0
+        if slot not in context.attachment.interfaces and int(start.implicit_h_counts[slot]) > 0
     )
 
     # Before coverage, redirection stays active in BOTH arms. The released
@@ -381,28 +543,24 @@ def test_single_interface_policy_routes_by_declared_count_and_coverage_only():
         undeclared = next(
             slot
             for slot in context.locked_slots
-            if slot not in context.attachment.interfaces
-            and int(start.implicit_h_counts[slot]) > 0
+            if slot not in context.attachment.interfaces and int(start.implicit_h_counts[slot]) > 0
         )
         lock = RegionLock(
-            start, context.locked_slots,
+            start,
+            context.locked_slots,
             released_pairs=context.attachment.released_pairs,
         )
         state = start
         if expected_interfaces:
             for interface in context.attachment.interfaces:
-                action = AtomInsert(
-                    _first_null_slot(state), 2, 0, 3, ((interface, 1),)
-                )
+                action = AtomInsert(_first_null_slot(state), 2, 0, 3, ((interface, 1),))
                 successor = system.apply(state, "atom_insert", action)
                 assert lock.permits(successor)
                 assert controllers[2].permits(successor, state) == (True, "")
                 state = successor
             assert controllers[2].all_interfaces_covered(state)
 
-        outside = AtomInsert(
-            _first_null_slot(state), 2, 0, 3, ((undeclared, 1),)
-        )
+        outside = AtomInsert(_first_null_slot(state), 2, 0, 3, ((undeclared, 1),))
         successor = system.apply(state, "atom_insert", outside)
         assert lock.permits(successor)
         decisions = [controller.permits(successor, state) for controller in controllers]
@@ -410,9 +568,7 @@ def test_single_interface_policy_routes_by_declared_count_and_coverage_only():
             assert decisions[0] == (False, "undeclared_interface")
             assert decisions[1:] == [(True, ""), (True, "")]
         elif expected_interfaces > 1:
-            assert decisions[0] == decisions[2] == (
-                False, "undeclared_interface"
-            )
+            assert decisions[0] == decisions[2] == (False, "undeclared_interface")
             assert decisions[1] == (True, "")
         else:
             assert decisions == [(True, "")] * 3
@@ -502,13 +658,8 @@ def test_redirection_refuses_to_manufacture_a_bond_at_a_saturated_site():
     context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
     controller = AttachmentController(context.attachment, context.locked_slots, _ON)
     state = context.start_state
-    assert all(
-        int(state.implicit_h_counts[slot]) == 0
-        for slot in context.attachment.interfaces
-    )
-    undeclared = next(
-        s for s in context.locked_slots if s not in context.attachment.interfaces
-    )
+    assert all(int(state.implicit_h_counts[slot]) == 0 for slot in context.attachment.interfaces)
+    undeclared = next(s for s in context.locked_slots if s not in context.attachment.interfaces)
     proposed = AtomInsert(_first_null_slot(state), 2, 0, 3, ((undeclared, 1),))
     assert controller.redirect("atom_insert", proposed, state) is proposed
 
@@ -532,9 +683,7 @@ def test_redirection_is_the_identity_when_the_controller_is_off():
     context = build_prompt_context(prompt, config=SamplerConfig(), control=_OFF)
     controller = AttachmentController(context.attachment, context.locked_slots, _OFF)
     state = context.start_state
-    undeclared = next(
-        s for s in context.locked_slots if s not in context.attachment.interfaces
-    )
+    undeclared = next(s for s in context.locked_slots if s not in context.attachment.interfaces)
     proposed = AtomInsert(_first_null_slot(state), 2, 0, 3, ((undeclared, 1),))
     assert controller.redirect("atom_insert", proposed, state) is proposed
 
@@ -580,9 +729,7 @@ def test_redirection_moves_a_redundant_declared_anchor_to_an_open_interface():
     from compose_v4.rewrite.operators import AtomInsert
 
     prompt = _prompt(FragmentTask.SCAFFOLD_DECORATION, "ERLOTINIB")
-    repaired = dataclasses.replace(
-        _ON, redirect_attachment=REDIRECT_COMPLETED_INTERFACES
-    )
+    repaired = dataclasses.replace(_ON, redirect_attachment=REDIRECT_COMPLETED_INTERFACES)
     context = build_prompt_context(prompt, config=SamplerConfig(), control=repaired)
     controller = AttachmentController(context.attachment, context.locked_slots, repaired)
     first, second = context.attachment.interfaces[:2]
@@ -616,12 +763,7 @@ def test_region_lock_pins_the_linker_join_when_the_controller_is_off():
         released_pairs=context.attachment.released_pairs,
     )
     left, right = context.attachment.lock_groups
-    joined = [
-        (i, j)
-        for i in left
-        for j in right
-        if int(context.start_state.bonds[i][j]) > 0
-    ]
+    joined = [(i, j) for i in left for j in right if int(context.start_state.bonds[i][j]) > 0]
     assert len(joined) == 1, "the constructed start state joins the cores exactly once"
     i, j = joined[0]
     broken = copy.deepcopy(context.start_state)
@@ -637,9 +779,7 @@ def test_region_lock_releases_only_the_join_pair_when_the_controller_is_on():
     assert len(released) == 1
     (pair,) = released
     i, j = sorted(pair)
-    lock = RegionLock(
-        context.start_state, context.locked_slots, released_pairs=released
-    )
+    lock = RegionLock(context.start_state, context.locked_slots, released_pairs=released)
 
     opened = copy.deepcopy(context.start_state)
     opened.bonds[i][j] = 0
@@ -715,9 +855,7 @@ def test_switching_the_controller_off_restores_every_decision():
             assert lock._bonds == legacy._bonds
             state = off.start_state
             for anchor in off.locked_slots:
-                admitted, reason = controller.permits(
-                    _attach_new_atom(state, anchor), state
-                )
+                admitted, reason = controller.permits(_attach_new_atom(state, anchor), state)
                 assert admitted and reason == ""
 
 
@@ -727,9 +865,7 @@ def test_the_start_state_never_satisfies_a_declared_interface():
         if prompt.task is FragmentTask.SCAFFOLD_MORPHING:
             continue
         context = build_prompt_context(prompt, config=SamplerConfig(), control=_ON)
-        controller = AttachmentController(
-            context.attachment, context.locked_slots, _ON
-        )
+        controller = AttachmentController(context.attachment, context.locked_slots, _ON)
         assert set(controller.unsatisfied(context.start_state)) == set(
             context.attachment.interfaces
         ), (prompt.drug_name, prompt.task.value)
@@ -799,9 +935,7 @@ def _shard(
                             "seed": seed,
                             "attempts": 100,
                             "committed_endpoints": produced,
-                            "committed_chemically_valid": (
-                                produced if valid is None else valid
-                            ),
+                            "committed_chemically_valid": (produced if valid is None else valid),
                             "committed_fragment_preserving": contained,
                             "emitted_nonempty": success,
                             "committed_endpoint_smiles": ["C"] * produced,
@@ -846,8 +980,11 @@ def test_aggregator_names_a_pre_controller_shard_instead_of_reading_it_as_agreem
 
 def test_row_guard_refuses_a_committed_endpoint_that_is_not_chemically_valid():
     row = {
-        "drug": "X", "seed": 0, "committed_endpoints": 40,
-        "committed_chemically_valid": 39, "committed_fragment_preserving": 30,
+        "drug": "X",
+        "seed": 0,
+        "committed_endpoints": 40,
+        "committed_chemically_valid": 39,
+        "committed_fragment_preserving": 30,
         "emitted_nonempty": 20,
     }
     with pytest.raises(ArmError, match="BY CONSTRUCTION"):
@@ -856,8 +993,11 @@ def test_row_guard_refuses_a_committed_endpoint_that_is_not_chemically_valid():
 
 def test_row_guard_refuses_success_above_containment():
     row = {
-        "drug": "X", "seed": 0, "committed_endpoints": 40,
-        "committed_chemically_valid": 40, "committed_fragment_preserving": 10,
+        "drug": "X",
+        "seed": 0,
+        "committed_endpoints": 40,
+        "committed_chemically_valid": 40,
+        "committed_fragment_preserving": 10,
         "emitted_nonempty": 20,
     }
     with pytest.raises(ArmError, match="is violated"):
@@ -866,8 +1006,11 @@ def test_row_guard_refuses_success_above_containment():
 
 def test_row_guard_refuses_containment_above_produced():
     row = {
-        "drug": "X", "seed": 0, "committed_endpoints": 40,
-        "committed_chemically_valid": 40, "committed_fragment_preserving": 41,
+        "drug": "X",
+        "seed": 0,
+        "committed_endpoints": 40,
+        "committed_chemically_valid": 40,
+        "committed_fragment_preserving": 41,
         "emitted_nonempty": 20,
     }
     with pytest.raises(ArmError, match="is violated"):
@@ -878,8 +1021,11 @@ def test_row_guard_accepts_the_admissible_ordering():
     check_row_guards(
         "motif_extension",
         {
-            "drug": "X", "seed": 0, "committed_endpoints": 40,
-            "committed_chemically_valid": 40, "committed_fragment_preserving": 30,
+            "drug": "X",
+            "seed": 0,
+            "committed_endpoints": 40,
+            "committed_chemically_valid": 40,
+            "committed_fragment_preserving": 30,
             "emitted_nonempty": 30,
         },
     )
@@ -904,9 +1050,7 @@ def test_direct_join_leaves_the_two_cores_bonded_on_every_released_drug():
     """The defect itself, pinned so a silent revert is visible."""
     for prompt in _linker_prompts():
         context = build_prompt_context(prompt, linker_bridge_atoms=0)
-        controller = AttachmentController(
-            context.attachment, context.locked_slots, _ON
-        )
+        controller = AttachmentController(context.attachment, context.locked_slots, _ON)
         assert not controller.cores_are_separated(context.start_state), (
             f"{prompt.drug_name}: the direct join is supposed to leave the cores "
             "bonded; if this passes, the zero-atom-linker defect is gone and the "
@@ -917,9 +1061,7 @@ def test_direct_join_leaves_the_two_cores_bonded_on_every_released_drug():
 def test_a_seeded_bridge_separates_the_cores_on_every_released_drug():
     for prompt in _linker_prompts():
         context = build_prompt_context(prompt, linker_bridge_atoms=1)
-        controller = AttachmentController(
-            context.attachment, context.locked_slots, _ON
-        )
+        controller = AttachmentController(context.attachment, context.locked_slots, _ON)
         assert controller.cores_are_separated(context.start_state), (
             f"{prompt.drug_name}: a seeded bridge must leave no direct core-core bond"
         )
@@ -948,12 +1090,9 @@ def test_seeding_a_bridge_releases_nothing_from_the_lock():
     weaken the retained region for no reason.
     """
     for prompt in _linker_prompts():
-        seeded = build_prompt_context(
-            prompt, control=_ON, linker_bridge_atoms=1
-        )
+        seeded = build_prompt_context(prompt, control=_ON, linker_bridge_atoms=1)
         assert seeded.attachment.released_pairs == frozenset(), (
-            f"{prompt.drug_name}: a seeded-bridge start has no constructed join "
-            "to release"
+            f"{prompt.drug_name}: a seeded-bridge start has no constructed join to release"
         )
         direct = build_prompt_context(prompt, control=_ON, linker_bridge_atoms=0)
         assert direct.attachment.released_pairs, (
@@ -989,9 +1128,7 @@ def test_a_negative_bridge_length_is_refused():
 
 def _controller_for(prompt, *, bridge: int):
     context = build_prompt_context(prompt, control=_ON, linker_bridge_atoms=bridge)
-    return context, AttachmentController(
-        context.attachment, context.locked_slots, _ON
-    )
+    return context, AttachmentController(context.attachment, context.locked_slots, _ON)
 
 
 def test_realized_length_is_undefined_for_a_single_core_prompt():
@@ -1068,9 +1205,7 @@ def _synthetic_spec(groups, interfaces=()):
 
 
 def _chain_state(n_slots, bonds, elements=6):
-    state = build_prompt_context(
-        _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
-    ).start_state
+    state = build_prompt_context(_prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")).start_state
     blank = copy.deepcopy(state)
     blank.atom_types[:] = NULL_IDX
     blank.formal_charges[:] = 0
@@ -1094,8 +1229,9 @@ def test_realized_length_never_routes_through_a_third_core():
     """
     # 0-1-2-3-4 chain, with 2 a third locked core; plus a long free detour
     # 0-5-6-7-8-4 that does not touch any core.
-    state = _chain_state(9, [(0, 1), (1, 2), (2, 3), (3, 4),
-                             (0, 5), (5, 6), (6, 7), (7, 8), (8, 4)])
+    state = _chain_state(
+        9, [(0, 1), (1, 2), (2, 3), (3, 4), (0, 5), (5, 6), (6, 7), (7, 8), (8, 4)]
+    )
     spec = _synthetic_spec([{0}, {4}, {2}])
     controller = AttachmentController(spec, (0, 2, 4), _ON)
     assert controller.realized_linker_length(state) == 4, (
@@ -1139,11 +1275,7 @@ def test_the_controller_names_no_benchmark_instance():
     source = Path(module.__file__).read_text()
     lowered = source.lower()
     offenders = sorted(
-        {
-            prompt.drug_name
-            for prompt in _prompts()
-            if prompt.drug_name.lower() in lowered
-        }
+        {prompt.drug_name for prompt in _prompts() if prompt.drug_name.lower() in lowered}
     )
     assert not offenders, (
         f"the attachment controller names benchmark instances {offenders}; a "
@@ -1165,11 +1297,7 @@ def test_the_sampler_names_no_benchmark_instance_either():
     source = Path(module.__file__).read_text()
     lowered = source.lower()
     offenders = sorted(
-        {
-            prompt.drug_name
-            for prompt in _prompts()
-            if prompt.drug_name.lower() in lowered
-        }
+        {prompt.drug_name for prompt in _prompts() if prompt.drug_name.lower() in lowered}
     )
     assert not offenders, (
         f"the sampler names benchmark instances {offenders}; a mechanism must "
@@ -1223,9 +1351,7 @@ def test_the_controller_does_not_branch_on_the_task_label():
     import compose_v4.benchmark.fragment_attachment_control as module
 
     source = Path(module.__file__).read_text()
-    code = "\n".join(
-        line for line in source.splitlines() if not line.strip().startswith("#")
-    )
+    code = "\n".join(line for line in source.splitlines() if not line.strip().startswith("#"))
     _, _, body = code.partition('"""')
     _, _, body = body.partition('"""')  # drop the module docstring
     for forbidden in ("FragmentTask", "prompt.task", "drug_name"):
@@ -1241,12 +1367,8 @@ def test_one_frozen_parameter_set_covers_every_prompt():
     seen = set()
     for prompt in _prompts():
         bridge = 1 if len(prompt.fragments) == 2 else 0
-        context = build_prompt_context(
-            prompt, control=config, linker_bridge_atoms=bridge
-        )
-        controller = AttachmentController(
-            context.attachment, context.locked_slots, config
-        )
+        context = build_prompt_context(prompt, control=config, linker_bridge_atoms=bridge)
+        controller = AttachmentController(context.attachment, context.locked_slots, config)
         # The tunable parameter set must not vary with the instance; only the
         # DECLARED spec may differ from prompt to prompt.
         seen.add(json.dumps(dataclasses.asdict(controller.config), sort_keys=True))
@@ -1276,26 +1398,18 @@ def test_path_program_is_vacuous_for_a_single_core_prompt():
     for task in (FragmentTask.MOTIF_EXTENSION, FragmentTask.SCAFFOLD_DECORATION):
         prompt = _prompt(task, "BARICITINIB")
         context = build_prompt_context(prompt, control=config)
-        controller = AttachmentController(
-            context.attachment, context.locked_slots, config
-        )
+        controller = AttachmentController(context.attachment, context.locked_slots, config)
         assert not controller.path_active
         assert not controller.path_unsatisfied(context.start_state, 3)
-        ok, _ = controller.path_permits(
-            context.start_state, context.start_state, 3
-        )
+        ok, _ = controller.path_permits(context.start_state, context.start_state, 3)
         assert ok
 
 
 def test_path_program_activates_on_a_two_core_prompt():
     config = AttachmentControlConfig(enabled=True, path_program=True)
     for prompt in _linker_prompts():
-        context = build_prompt_context(
-            prompt, control=config, linker_bridge_atoms=1
-        )
-        controller = AttachmentController(
-            context.attachment, context.locked_slots, config
-        )
+        context = build_prompt_context(prompt, control=config, linker_bridge_atoms=1)
+        controller = AttachmentController(context.attachment, context.locked_slots, config)
         assert controller.path_active, prompt.drug_name
         # Seed length 1 against a target of 3 is unsatisfied -- which is exactly
         # what coverage staging could NOT express, since both interfaces are
@@ -1310,9 +1424,7 @@ def test_path_target_is_drawn_from_the_declared_band():
     )
     prompt = _linker_prompts()[0]
     context = build_prompt_context(prompt, control=config, linker_bridge_atoms=1)
-    controller = AttachmentController(
-        context.attachment, context.locked_slots, config
-    )
+    controller = AttachmentController(context.attachment, context.locked_slots, config)
     rng = np.random.default_rng(20260921)
     draws = {controller.path_target(rng) for _ in range(200)}
     assert draws <= {2, 3, 4, 5}
@@ -1362,12 +1474,8 @@ def test_a_saturated_anchor_no_longer_blocks_the_transaction():
     config = AttachmentControlConfig(enabled=True, path_program=True)
     available = 0
     for prompt in _linker_prompts():
-        context = build_prompt_context(
-            prompt, control=config, linker_bridge_atoms=1
-        )
-        controller = AttachmentController(
-            context.attachment, context.locked_slots, config
-        )
+        context = build_prompt_context(prompt, control=config, linker_bridge_atoms=1)
+        controller = AttachmentController(context.attachment, context.locked_slots, config)
         sites = controller.path_transaction_sites(context.start_state)
         assert sites is not None, (
             f"{prompt.drug_name}: v3 must offer the transaction on every linker "
@@ -1379,8 +1487,7 @@ def test_a_saturated_anchor_no_longer_blocks_the_transaction():
         blocked = copy.deepcopy(context.start_state)
         blocked.implicit_h_counts[anchor] = 0
         assert controller.path_transaction_sites(blocked) is not None, (
-            f"{prompt.drug_name}: an atomic bridge exchange needs no free "
-            "valence at the anchor"
+            f"{prompt.drug_name}: an atomic bridge exchange needs no free valence at the anchor"
         )
     assert available == 10, "all ten released linker prompts must host it"
 
@@ -1451,7 +1558,8 @@ def _monovalent_payload(state, slot_hint: int):
         if not bool(real[i]):
             continue
         degree = sum(
-            1 for j in range(state.n_atoms)
+            1
+            for j in range(state.n_atoms)
             if j != i and bool(real[j]) and int(state.bonds[i][j]) > 0
         )
         if degree == 1:
@@ -1517,8 +1625,7 @@ def test_the_transaction_lengthens_the_core_to_core_path():
         exercised += 1
         after = controller.realized_linker_length(out)
         assert after is not None and after > before, (
-            f"{prompt.drug_name}: the transaction must lengthen the path, "
-            f"{before} -> {after}"
+            f"{prompt.drug_name}: the transaction must lengthen the path, {before} -> {after}"
         )
         assert controller.cores_are_separated(out)
         assert lock.permits(out)
@@ -1552,8 +1659,12 @@ def test_the_transaction_payload_comes_from_the_prior():
             continue
         out = _attempt_path_transaction(
             _StubModel(_StubMark("atom_insert", payload)),
-            system, context.start_state, controller, lock,
-            np.random.default_rng(0), SamplingReceipt(),
+            system,
+            context.start_state,
+            controller,
+            lock,
+            np.random.default_rng(0),
+            SamplingReceipt(),
         )
         if out is not None:
             assert int(out.atom_types[free_slot]) == payload.atom_type, (
@@ -1566,8 +1677,12 @@ def test_the_transaction_payload_comes_from_the_prior():
         no_payload_receipt = SamplingReceipt()
         nothing = _attempt_path_transaction(
             _StubModel(_StubMark("bond_reorder", None)),
-            system, context.start_state, controller, lock,
-            np.random.default_rng(0), no_payload_receipt,
+            system,
+            context.start_state,
+            controller,
+            lock,
+            np.random.default_rng(0),
+            no_payload_receipt,
         )
         assert nothing is None, (
             f"{prompt.drug_name}: with no payload from the prior the transaction "
@@ -1585,8 +1700,12 @@ def test_the_transaction_payload_comes_from_the_prior():
         rebound_receipt = SamplingReceipt()
         rebound = _attempt_path_transaction(
             _StubModel(_StubMark("atom_insert", elsewhere)),
-            system, context.start_state, controller, lock,
-            np.random.default_rng(0), rebound_receipt,
+            system,
+            context.start_state,
+            controller,
+            lock,
+            np.random.default_rng(0),
+            rebound_receipt,
         )
         if out is not None:
             assert rebound is not None
@@ -1622,15 +1741,20 @@ def test_rebound_double_bond_payload_preserves_valence_class():
         receipt = SamplingReceipt()
         out = _attempt_path_transaction(
             _StubModel(_StubMark("atom_insert", doubled)),
-            system, context.start_state, controller, lock,
-            np.random.default_rng(0), receipt,
+            system,
+            context.start_state,
+            controller,
+            lock,
+            np.random.default_rng(0),
+            receipt,
         )
         if out is None:
             continue
         assert receipt.path_payload_rebound == 1
-        assert int(out.implicit_h_counts[free_slot]) + 2 - int(
-            out.formal_charges[free_slot]
-        ) == original_valence
+        assert (
+            int(out.implicit_h_counts[free_slot]) + 2 - int(out.formal_charges[free_slot])
+            == original_valence
+        )
         exercised += 1
     assert exercised >= 5
 
@@ -1660,8 +1784,12 @@ def test_the_transaction_commits_nothing_when_the_exchange_cannot_execute():
     before = copy.deepcopy(context.start_state)
     out = _attempt_path_transaction(
         _StubModel(_StubMark("atom_insert", impossible)),
-        system, context.start_state, controller, lock,
-        np.random.default_rng(0), receipt,
+        system,
+        context.start_state,
+        controller,
+        lock,
+        np.random.default_rng(0),
+        receipt,
     )
     assert out is None
     assert receipt.path_transactions == 0

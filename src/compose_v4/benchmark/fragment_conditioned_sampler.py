@@ -50,8 +50,11 @@ from compose_v4.benchmark.fragment_constrained import (
     _fragment_spec,
     check_fragment_constraint,
 )
+from compose_v4.chem.aromaticity import resonance_invariant_bond_classes
 from compose_v4.chem.molecular_graph import (
     MolecularGraph,
+    contract_scars,
+    is_element,
     molecular_graph_to_smiles,
     smiles_to_molecular_graph,
 )
@@ -149,6 +152,8 @@ class SamplingReceipt:
     path_lock_refusals: int = 0
     path_controller_refusals: int = 0
     path_nonlengthening_refusals: int = 0
+    initial_family_conditioned_draws: int = 0
+    initial_family_conditioned_accepts: int = 0
 
 
 def _accepted_action_record(rule_name: str, action) -> dict:
@@ -191,9 +196,7 @@ def _validate_path_census(receipt: SamplingReceipt) -> None:
         + receipt.path_payload_found
     )
     offer_components = (
-        receipt.path_unavailable_sites
-        + receipt.path_payload_absent
-        + receipt.path_payload_found
+        receipt.path_unavailable_sites + receipt.path_payload_absent + receipt.path_payload_found
     )
     refusal_components = (
         receipt.path_insert_refusals
@@ -262,9 +265,7 @@ def retained_core(fragment_smiles: str) -> tuple[Chem.Mol, tuple[int, ...]]:
     except Exception as exc:
         raise FragmentConditioningError(f"core did not sanitize: {exc}") from exc
 
-    sites = tuple(
-        sorted(a.GetIdx() for a in core.GetAtoms() if a.GetAtomMapNum() != 0)
-    )
+    sites = tuple(sorted(a.GetIdx() for a in core.GetAtoms() if a.GetAtomMapNum() != 0))
     for atom in core.GetAtoms():
         atom.SetAtomMapNum(0)
     return core, sites
@@ -370,11 +371,8 @@ def build_prompt_context(
                 )
             )
             join_is_direct = False
-        declared = [
-            (site, count) for site, count in _declared_sites(prompt.fragments[0])
-        ] + [
-            (site + offset, count)
-            for site, count in _declared_sites(prompt.fragments[1])
+        declared = [(site, count) for site, count in _declared_sites(prompt.fragments[0])] + [
+            (site + offset, count) for site, count in _declared_sites(prompt.fragments[1])
         ]
         group_bounds = (
             tuple(range(left.GetNumAtoms())),
@@ -387,9 +385,7 @@ def build_prompt_context(
         try:
             Chem.SanitizeMol(start)
         except Exception as exc:
-            raise FragmentConditioningError(
-                f"joined linker start did not sanitize: {exc}"
-            ) from exc
+            raise FragmentConditioningError(f"joined linker start did not sanitize: {exc}") from exc
         # The bridge carbons are deliberately NOT locked: they are the linker the
         # generator is being asked to design.
         locked = tuple(range(left.GetNumAtoms() + right.GetNumAtoms()))
@@ -428,12 +424,8 @@ def build_prompt_context(
     # ``order[i]`` is the canonical slot of start-molecule atom ``i``; the
     # declared interfaces are addressed in the same coordinates as the lock.
     interfaces = tuple(sorted(order[site] for site, _count in declared))
-    requirements = tuple(
-        sorted((order[site], int(count)) for site, count in declared)
-    )
-    lock_groups = tuple(
-        frozenset(order[i] for i in bounds) for bounds in group_bounds
-    )
+    requirements = tuple(sorted((order[site], int(count)) for site, count in declared))
+    lock_groups = tuple(frozenset(order[i] for i in bounds) for bounds in group_bounds)
     release = control is not None and control.enabled and control.release_linker_join
     released_pairs = (
         frozenset({frozenset({order[join_pair[0]], order[join_pair[1]]})})
@@ -459,7 +451,7 @@ def build_prompt_context(
 
 
 class RegionLock:
-    """Admits exactly the successors that leave the retained core untouched."""
+    """Admit successors preserving exact slots and, opt-in, perceived chemistry."""
 
     def __init__(
         self,
@@ -467,6 +459,10 @@ class RegionLock:
         locked_slots: Sequence[int],
         *,
         released_pairs: frozenset[frozenset[int]] = frozenset(),
+        preserve_effective_chemistry: bool = False,
+        allowed_external_slots: Sequence[int] | None = None,
+        lock_groups: Sequence[frozenset[int]] | None = None,
+        fragment_queries: Sequence[Chem.Mol] = (),
     ) -> None:
         self._slots = tuple(locked_slots)
         self._types = {i: int(state.atom_types[i]) for i in self._slots}
@@ -476,15 +472,112 @@ class RegionLock:
         # executor refuses a disconnected state, so pinning its order would
         # make a genuine linker unreachable.  Element and charge stay locked on
         # both of its endpoints; only the bond between them is free.
-        self._released = frozenset(
-            frozenset(int(x) for x in pair) for pair in released_pairs
-        )
+        self._released = frozenset(frozenset(int(x) for x in pair) for pair in released_pairs)
         self._bonds = {
             (i, j): int(state.bonds[i][j])
             for index, i in enumerate(self._slots)
             for j in self._slots[index + 1 :]
             if frozenset({i, j}) not in self._released
         }
+        self._preserve_effective_chemistry = preserve_effective_chemistry
+        if preserve_effective_chemistry:
+            allowed = frozenset(
+                self._slots if allowed_external_slots is None else allowed_external_slots
+            )
+            if not allowed.issubset(self._slots):
+                raise ValueError("allowed external attachment slot is not locked")
+            self._allowed_external = allowed
+            self._fragment_queries = tuple(fragment_queries)
+            self._groups = tuple(
+                lock_groups if lock_groups is not None else (frozenset(self._slots),)
+            )
+            if (
+                not self._groups
+                or frozenset().union(*self._groups) != frozenset(self._slots)
+                or sum(map(len, self._groups)) != len(self._slots)
+            ):
+                raise ValueError("lock groups must partition the locked slots")
+            self._external_baseline = {
+                (slot, other): int(state.bonds[slot, other])
+                for slot in self._slots
+                for other in range(state.n_atoms)
+                if other not in self._slots and int(state.bonds[slot, other]) > 0
+            }
+            self._effective_baseline = self._effective_signature(state)
+            if self._effective_baseline is None:
+                raise ValueError("cannot perceive effective chemistry of locked source")
+            if not self._has_no_core_spanning_external_path(state):
+                raise ValueError("locked source has an external path spanning one core")
+            if not self._queries_preserved(state):
+                raise ValueError("locked source fails its fragment query")
+
+    def _queries_preserved(self, state: MolecularGraph) -> bool:
+        """Require benchmark-visible fragment identity before admitting a mark."""
+        if not self._fragment_queries:
+            return True
+        smiles = molecular_graph_to_smiles(state)
+        molecule = Chem.MolFromSmiles(smiles) if smiles else None
+        if molecule is None:
+            return False
+        matches = [
+            molecule.GetSubstructMatches(
+                query, uniquify=False, useChirality=False, maxMatches=1000
+            )
+            for query in self._fragment_queries
+        ]
+        if any(not options for options in matches):
+            return False
+
+        def choose(index: int, used: frozenset[int]) -> bool:
+            if index == len(matches):
+                return True
+            return any(
+                choose(index + 1, used | frozenset(match))
+                for match in matches[index]
+                if frozenset(match).isdisjoint(used)
+            )
+
+        return choose(0, frozenset())
+
+    def _has_no_core_spanning_external_path(self, state: MolecularGraph) -> bool:
+        """No outside component may contact the same retained core twice.
+
+        Two such contacts close a ring through that core. A linker may still
+        connect two *different* locked cores through one outside component.
+        """
+        real = is_element(state.atom_types)
+        remaining = {
+            slot for slot in range(state.n_atoms) if bool(real[slot]) and slot not in self._types
+        }
+        while remaining:
+            component = set()
+            frontier = [remaining.pop()]
+            while frontier:
+                slot = frontier.pop()
+                component.add(slot)
+                neighbors = {other for other in remaining if int(state.bonds[slot, other]) > 0}
+                remaining.difference_update(neighbors)
+                frontier.extend(neighbors)
+            for group in self._groups:
+                contacts = sum(
+                    int(state.bonds[slot, anchor] > 0) for slot in component for anchor in group
+                )
+                if contacts > 1:
+                    return False
+        return True
+
+    def _effective_signature(self, state: MolecularGraph) -> tuple | None:
+        """Aromatic atoms and internal bond classes under RDKit sanitization."""
+        contracted = contract_scars(state)
+        if contracted is None:
+            return None
+        try:
+            perceived = resonance_invariant_bond_classes(contracted)
+        except (ValueError, RuntimeError):
+            return None
+        aromatic = tuple(bool((perceived[slot] == 4).any()) for slot in self._slots)
+        internal = tuple((i, j, int(perceived[i, j])) for i, j in self._bonds)
+        return aromatic, internal
 
     @property
     def locked_slots(self) -> tuple[int, ...]:
@@ -504,15 +597,39 @@ class RegionLock:
         for (i, j), expected in self._bonds.items():
             if int(successor.bonds[i][j]) != expected:
                 return False
+        if self._preserve_effective_chemistry:
+            real = is_element(successor.atom_types)
+            for slot in self._slots:
+                if slot in self._allowed_external:
+                    continue
+                for other in range(successor.n_atoms):
+                    if other in self._types or not bool(real[other]):
+                        continue
+                    if int(successor.bonds[slot, other]) != self._external_baseline.get(
+                        (slot, other), 0
+                    ):
+                        return False
+            if self._effective_signature(successor) != self._effective_baseline:
+                return False
+            if not self._has_no_core_spanning_external_path(successor):
+                return False
+            if not self._queries_preserved(successor):
+                return False
         return True
 
 
 # ---- Conditioned sampling ----
 
 
-
 def _attempt_path_transaction(
-    model, system, state, controller, lock, rng, receipt, *,
+    model,
+    system,
+    state,
+    controller,
+    lock,
+    rng,
+    receipt,
+    *,
     action_trace: list[dict] | None = None,
     payload_draws: int = 32,
 ):
@@ -682,6 +799,10 @@ def sample_completion(
     control = control or AttachmentControlConfig()
     spec = context.attachment or AttachmentSpec((), (), (frozenset(context.locked_slots),))
     controller = AttachmentController(spec, context.locked_slots, control)
+    if control.condition_initial_locked_family and not callable(
+        getattr(model, "sample_rewrite_mark_conditioned", None)
+    ):
+        raise TypeError("initial locked-family conditioning needs the learned conditional sampler")
     # The path target is drawn ONCE per trajectory, from the declared band, and
     # only when the specification declares two retained regions.  Drawing it
     # here rather than per event keeps one linker goal per trajectory; drawing
@@ -692,6 +813,16 @@ def sample_completion(
         context.start_state,
         context.locked_slots,
         released_pairs=spec.released_pairs,
+        preserve_effective_chemistry=control.hard_lock_effective_chemistry,
+        # A superstructure prompt declares no restricted site: every retained
+        # atom is an available interface. Declared-site tasks remain restricted
+        # to precisely those sites when the opt-in chemistry lock is active.
+        allowed_external_slots=(spec.interfaces if spec.interfaces else context.locked_slots),
+        lock_groups=spec.lock_groups,
+        fragment_queries=(
+            tuple(_fragment_spec(fragment).core for fragment in context.prompt.fragments)
+            if control.hard_lock_effective_chemistry else ()
+        ),
     )
 
     state = context.start_state
@@ -707,7 +838,13 @@ def sample_completion(
         # nothing to admit and the trajectory stalls at the seeded length.
         if controller.path_unsatisfied(state, path_target):
             lengthened = _attempt_path_transaction(
-                model, system, state, controller, lock, rng, receipt,
+                model,
+                system,
+                state,
+                controller,
+                lock,
+                rng,
+                receipt,
                 action_trace=action_trace,
             )
             if lengthened is not None:
@@ -716,11 +853,36 @@ def sample_completion(
                 continue
         accepted = None
         for _ in range(config.mark_attempts_per_event):
-            try:
-                mark = model.sample_rewrite_mark(state, time_feature, rng)
-            except Exception:  # noqa: BLE001
-                receipt.executor_refusals += 1
-                continue
+            initial_locked = (
+                control.enabled
+                and control.condition_initial_locked_family
+                and events == 0
+                and len(spec.lock_groups) == 1
+                and all(
+                    slot in context.locked_slots
+                    for slot in range(state.n_atoms)
+                    if bool(is_element(state.atom_types[slot]))
+                )
+            )
+            if initial_locked:
+                receipt.initial_family_conditioned_draws += 1
+                # Fail loudly if the new conditional sampler cannot draw.
+                # Swallowing this as an ordinary executor refusal would turn a
+                # wiring defect into a misleading zero-output benchmark row.
+                mark = model.sample_rewrite_mark_conditioned(
+                    state,
+                    time_feature,
+                    rng,
+                    property_values=None,
+                    property_mask=None,
+                    allowed_rule_names=frozenset({"atom_insert"}),
+                )
+            else:
+                try:
+                    mark = model.sample_rewrite_mark(state, time_feature, rng)
+                except Exception:  # noqa: BLE001
+                    receipt.executor_refusals += 1
+                    continue
             # Attachment (``alpha``) is the controller's degree of freedom: the
             # prior keeps the payload, the declared constraint picks the site.
             # ``redirect`` is the identity whenever the controller is inactive,
@@ -732,8 +894,7 @@ def sample_completion(
                 and isinstance(mark.action, AtomInsert)
                 and len(mark.action.neighbors) == 1
                 and int(mark.action.neighbors[0][0]) in spec.interfaces
-                and int(mark.action.neighbors[0][0])
-                not in controller.unsatisfied(state)
+                and int(mark.action.neighbors[0][0]) not in controller.unsatisfied(state)
                 and bool(controller.unsatisfied(state))
             )
             if completed_site_offer:
@@ -754,9 +915,7 @@ def sample_completion(
                 continue
             admitted, reason = controller.permits(successor, state)
             if admitted:
-                admitted, reason = controller.path_permits(
-                    successor, state, path_target
-                )
+                admitted, reason = controller.path_permits(successor, state, path_target)
             if not admitted:
                 if reason == "undeclared_interface":
                     receipt.interface_rejections += 1
@@ -773,6 +932,8 @@ def sample_completion(
             break
 
         mark, action, successor, completed_site_redirect = accepted
+        if initial_locked:
+            receipt.initial_family_conditioned_accepts += 1
         action_trace.append(_accepted_action_record(mark.rule_name, action))
         if completed_site_redirect:
             receipt.completed_site_redirect_commits += 1
