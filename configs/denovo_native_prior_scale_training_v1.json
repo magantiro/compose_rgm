@@ -1,0 +1,81 @@
+{
+  "payload": {
+    "schema_version": "denovo_native_prior_scale_training_contract_v1",
+    "evidence_class": "development_training_not_paper_result",
+    "scientific_question": "Does greater split-clean molecular training density improve the COMPOSE CNOF de novo quality-diversity frontier without weakening exact committed-state validity?",
+    "authorization_basis": "The user requested a comparable pretrained COMPOSE molecular prior and explicitly approved generic de novo sampler controls; this contract limits the first causal data-scale comparison.",
+    "scope": {
+      "generated_object": "connected complete neutral CNOF MolecularGraph with at most 40 active atoms, represented by the exact persistent-slot rewrite executor",
+      "not_claimed": ["stereochemistry", "broad-organic elements", "universal ring topology", "synthetic route validity"],
+      "target_guidance": false,
+      "qed_sa_training_labels": false,
+      "qed_sa_sampling_filter": false,
+      "posthoc_rejection_for_quality": false,
+      "source_checkpoint_warmstart": false
+    },
+    "frozen_data": {
+      "source_path_on_modal": "/guacamol/guacamol_subset_500000_seed0.smiles",
+      "source_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791",
+      "manifest_path_on_modal": "/artifacts/denovo_native_prior_scale_v1/frozen_split.json",
+      "manifest_path_in_repo": "diagnostics/denovo_native_prior_scale_v1/frozen_split.json",
+      "manifest_sha256": "c06bff5e50f27bebe7ff4cfed260f76c2e1730113b3b7c213e5b13bbd7193f6e",
+      "manifest_payload_sha256": "06563ba7eefbae2a9591588e0e574d0b63aefcef44061512747f723d0483110c",
+      "validation_sha256": "e2551b7527c7fe6aba66fe2f13ff5da1090648bfc3084c60de64a41d478297cf",
+      "iid_test_sha256": "35f1fd798208699d71106df272cfde63d2674e7007b118b4d538b58bdda5cb45",
+      "scaffold_test_sha256": "01cb742a46de12e83b40618737fffc79ef1250932865f3063c2ad0e4a76fe244",
+      "shared_source_prior_prefix_size": 50000,
+      "shared_source_prior_sha256": "fbcba140be04fc07267248711d733f2605d45a6773caa1d912c09f2220398bda"
+    },
+    "arms": {
+      "small": {
+        "recipe": "recipes/denovo_frozen_cnof_prior_small_v1.json",
+        "recipe_sha256": "27370feab402ac5bab6152f32823fccf24c25da49b8b0cee9782f4254bdb5196",
+        "train_size": 50000,
+        "run_label": "denovo-cnof-prior-scale-small-ea05c50c-v1"
+      },
+      "large": {
+        "recipe": "recipes/denovo_frozen_cnof_prior_large_v1.json",
+        "recipe_sha256": "0b1d31e7ac425dc1ba7de0280fb9306b997165d3efeaf286b4f564c5c5d64977",
+        "train_size": 216149,
+        "run_label": "denovo-cnof-prior-scale-large-ea05c50c-v1"
+      }
+    },
+    "matched_training": {
+      "seed": 20260924,
+      "optimizer_steps_per_arm": 3000,
+      "schedule_steps_per_arm": 3000,
+      "batch_size": 64,
+      "data_exposure_draws_per_arm": 192000,
+      "model": "from_scratch",
+      "source_size_law": "same empirical law from first 50000 frozen training molecules",
+      "architecture_optimizer_and_executor": "identical across arms; asserted by tests/test_denovo_prior_scale_recipes.py",
+      "sampling_during_training": false,
+      "checkpoint_recovery_every_steps": 250,
+      "automatic_retry_limit_per_arm": 5,
+      "gpu": "A100",
+      "max_wall_seconds_per_arm": 86400,
+      "max_arms": 2,
+      "no_additional_training_extensions_under_this_contract": true
+    },
+    "gates": {
+      "before_launch": "verify physical hashes, self-hash, recipes' only permitted differences, immutable run labels, and Modal source/manifest mounts",
+      "checkpoint_selection": "validation criterion only; final IID and scaffold-held-out test values must not select an architecture, checkpoint, temperature, or noise setting",
+      "sampler_selection": "separate predeclared development sweep after training; no hidden oversampling or QED/SA acceptance filter",
+      "paper_claim": "none until exact official evaluator and full molecule/provenance persistence pass",
+      "validity_floor": 1.0,
+      "uniqueness_floor": 0.95,
+      "diversity_floor": 0.85,
+      "large_arm_quality_improvement_required_for_scale_promotion": 0.05,
+      "quality_improvement_denominator": "all generation attempts on matched development seeds",
+      "negative_result": "if the larger arm fails any floor or improves joint quality by less than 0.05 absolute, do not promote a scale claim"
+    },
+    "implementation_sha256": {
+      "scripts/train_tracelet_cnof_gate.py": "6d8c1e104ba4893717673a5bc22fbc334969120f1abaad43a314bf2c9dc95199",
+      "src/compose_v4/data/frozen_cnof_prior_split.py": "49c3db8604de22e8e166dab3d2ec298b28259e440bd947cff1ee3da78c8d49bf",
+      "src/compose_v4/experiments/recipe.py": "6e00eaa98585ccbf3a1bebfbf433d6f9ed46cc4956df9f30088667b47b87ef56",
+      "modal_apps/train_tracelet_gm.py": "ca44c223000b87a57e8915689193857e1cce4e1d6f62c8e814e55e00de9c01b1"
+    },
+    "source_commit": "ea05c50c"
+  },
+  "payload_sha256": "62eea12e463b81384ca07c8a5ffa09c2eedbdbdad172546026d91a5f5d06979d"
+}
