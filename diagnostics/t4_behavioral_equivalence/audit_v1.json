@@ -1,0 +1,1518 @@
+{
+  "agreement_on_fired_rows": "7/7",
+  "docking_calls": 0,
+  "equivalence_criterion": "branch-level: historical execution branch == branch the unified router selects from the same state. Wrapper module, contract hash, controller fingerprint and code revision are NOT criteria.",
+  "fired_rows": 7,
+  "fired_rows_agreeing": 7,
+  "kernel": "rdkit 2024.03.5 (T4 production)",
+  "new_oracle_calls": 0,
+  "primary_path_rows": 23,
+  "question": "does the unified state-adaptive controller select and execute the same molecular process that produced each historical row, given the same molecular state?",
+  "rows": [
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "parp1_0",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_parp1_d04_app.py",
+      "historical_best": -11.9,
+      "historical_charged_calls": 73,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091800,
+        "2": 10026091829,
+        "3": 18026091858
+      },
+      "start_smiles": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+      "starting_molecule_index": 0,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 10,
+          "growth_headroom": 21,
+          "heavy_atoms": 19,
+          "large_regions": 5,
+          "net_formal_charge": 0,
+          "protonation_sites": 2,
+          "total_regions": 10
+        },
+        "trigger": null
+      },
+      "target": "parp1",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "parp1_1",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_parp1_d04_app.py",
+      "historical_best": -12.3,
+      "historical_charged_calls": 81,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091801,
+        "2": 10026091830,
+        "3": 18026091859
+      },
+      "start_smiles": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+      "starting_molecule_index": 1,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 6,
+          "growth_headroom": 24,
+          "heavy_atoms": 16,
+          "large_regions": 3,
+          "net_formal_charge": 0,
+          "protonation_sites": 0,
+          "total_regions": 6
+        },
+        "trigger": null
+      },
+      "target": "parp1",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "parp1_2",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_parp1_d04_app.py",
+      "historical_best": -14.1,
+      "historical_charged_calls": 129,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091802,
+        "2": 10026091831,
+        "3": 18026091860
+      },
+      "start_smiles": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+      "starting_molecule_index": 2,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 8,
+          "growth_headroom": 23,
+          "heavy_atoms": 17,
+          "large_regions": 4,
+          "net_formal_charge": 0,
+          "protonation_sites": 1,
+          "total_regions": 8
+        },
+        "trigger": null
+      },
+      "target": "parp1",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "fa7_0",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_fa7_d04_app.py",
+      "historical_best": -9.3,
+      "historical_charged_calls": 89,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091903,
+        "2": 10026091932,
+        "3": 18026091961
+      },
+      "start_smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+      "starting_molecule_index": 3,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 26,
+          "growth_headroom": 8,
+          "heavy_atoms": 32,
+          "large_regions": 17,
+          "net_formal_charge": 0,
+          "protonation_sites": 1,
+          "total_regions": 26
+        },
+        "trigger": null
+      },
+      "target": "fa7",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "fa7_1",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_fa7_d04_app.py",
+      "historical_best": -9.4,
+      "historical_charged_calls": 217,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091904,
+        "2": 10026091933,
+        "3": 18026091962
+      },
+      "start_smiles": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+      "starting_molecule_index": 4,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 38,
+          "growth_headroom": 11,
+          "heavy_atoms": 29,
+          "large_regions": 24,
+          "net_formal_charge": 0,
+          "protonation_sites": 1,
+          "total_regions": 38
+        },
+        "trigger": null
+      },
+      "target": "fa7",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": true,
+      "agrees_on_fired_branch": true,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "fa7_2",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_region_repair_rescue_fa7_d04_app.py",
+      "historical_best": -9.6,
+      "historical_charged_calls": 105,
+      "historical_execution_branch": "region",
+      "historical_support_operator": "region_repair",
+      "replicate_seeds": {
+        "1": 2026091905,
+        "2": 10026091934,
+        "3": 18026091963
+      },
+      "start_smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+      "starting_molecule_index": 5,
+      "state_support_condition": {
+        "fallback_fired_historically": true,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 38,
+          "growth_headroom": 5,
+          "heavy_atoms": 35,
+          "large_regions": 25,
+          "net_formal_charge": 0,
+          "protonation_sites": 1,
+          "total_regions": 38
+        },
+        "trigger": "terminal candidate_exhaustion"
+      },
+      "target": "fa7",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "5ht1b_0",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_5ht1b_d04_app.py",
+      "historical_best": -12.4,
+      "historical_charged_calls": 130,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091906,
+        "2": 10026091935,
+        "3": 18026091964
+      },
+      "start_smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)[C@]4(CC[N@H+](C)CC4)CO6)cc3)c(C)c2)no1",
+      "starting_molecule_index": 6,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 9,
+          "charged_centres": 1,
+          "executable_regions": 7,
+          "growth_headroom": 1,
+          "heavy_atoms": 39,
+          "large_regions": 11,
+          "net_formal_charge": 1,
+          "protonation_sites": 2,
+          "total_regions": 16
+        },
+        "trigger": null
+      },
+      "target": "5ht1b",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "state_aware",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "5ht1b_1",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_5ht1b_d04_app.py",
+      "historical_best": -11.9,
+      "historical_charged_calls": 161,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091907,
+        "2": 10026091936,
+        "3": 18026091965
+      },
+      "start_smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+      "starting_molecule_index": 7,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 5,
+          "charged_centres": 1,
+          "executable_regions": 5,
+          "growth_headroom": 24,
+          "heavy_atoms": 16,
+          "large_regions": 5,
+          "net_formal_charge": 1,
+          "protonation_sites": 1,
+          "total_regions": 10
+        },
+        "trigger": null
+      },
+      "target": "5ht1b",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "state_aware",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": true,
+      "agrees_on_fired_branch": true,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "5ht1b_2",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_5ht1b2_protonation_rescue_d04_app.py",
+      "historical_best": -12.5,
+      "historical_charged_calls": 249,
+      "historical_execution_branch": "state_aware",
+      "historical_support_operator": "protonation",
+      "replicate_seeds": {
+        "1": 2026091908,
+        "2": 10026091937,
+        "3": 18026091966
+      },
+      "start_smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1",
+      "starting_molecule_index": 8,
+      "state_support_condition": {
+        "fallback_fired_historically": true,
+        "molecular_state": {
+          "charge_refused_regions": 9,
+          "charged_centres": 1,
+          "executable_regions": 7,
+          "growth_headroom": 9,
+          "heavy_atoms": 31,
+          "large_regions": 12,
+          "net_formal_charge": 1,
+          "protonation_sites": 3,
+          "total_regions": 16
+        },
+        "trigger": "terminal candidate_exhaustion"
+      },
+      "target": "5ht1b",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "state_aware",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "braf_0",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_braf_d04_app.py",
+      "historical_best": -12.2,
+      "historical_charged_calls": 77,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091800,
+        "2": 10026091829,
+        "3": 18026091858
+      },
+      "start_smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34",
+      "starting_molecule_index": 9,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 42,
+          "growth_headroom": 0,
+          "heavy_atoms": 40,
+          "large_regions": 27,
+          "net_formal_charge": 0,
+          "protonation_sites": 2,
+          "total_regions": 42
+        },
+        "trigger": null
+      },
+      "target": "braf",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "braf_1",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_braf_d04_app.py",
+      "historical_best": -10.5,
+      "historical_charged_calls": 113,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091801,
+        "2": 10026091830,
+        "3": 18026091859
+      },
+      "start_smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+      "starting_molecule_index": 10,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 36,
+          "growth_headroom": 1,
+          "heavy_atoms": 39,
+          "large_regions": 26,
+          "net_formal_charge": 0,
+          "protonation_sites": 1,
+          "total_regions": 36
+        },
+        "trigger": null
+      },
+      "target": "braf",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "braf_2",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_braf_d04_app.py",
+      "historical_best": -10.9,
+      "historical_charged_calls": 73,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091802,
+        "2": 10026091831,
+        "3": 18026091860
+      },
+      "start_smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+      "starting_molecule_index": 11,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 32,
+          "growth_headroom": 3,
+          "heavy_atoms": 37,
+          "large_regions": 23,
+          "net_formal_charge": 0,
+          "protonation_sites": 0,
+          "total_regions": 32
+        },
+        "trigger": null
+      },
+      "target": "braf",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "jak2_0",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_jak2_app.py",
+      "historical_best": -10.4,
+      "historical_charged_calls": 225,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091912,
+        "2": 10026091941,
+        "3": 18026091970
+      },
+      "start_smiles": "OCCCCc2nc1ccccc1c4ncnc3[nH]cc2c34",
+      "starting_molecule_index": 12,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 10,
+          "growth_headroom": 18,
+          "heavy_atoms": 22,
+          "large_regions": 5,
+          "net_formal_charge": 0,
+          "protonation_sites": 0,
+          "total_regions": 10
+        },
+        "trigger": null
+      },
+      "target": "jak2",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "jak2_1",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_jak2_app.py",
+      "historical_best": -11.3,
+      "historical_charged_calls": 145,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091913,
+        "2": 10026091942,
+        "3": 18026091971
+      },
+      "start_smiles": "COC(=O)CC2Nc1ccccc1c3ccnc4[nH]cc2c34",
+      "starting_molecule_index": 13,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 10,
+          "growth_headroom": 18,
+          "heavy_atoms": 22,
+          "large_regions": 5,
+          "net_formal_charge": 0,
+          "protonation_sites": 0,
+          "total_regions": 10
+        },
+        "trigger": null
+      },
+      "target": "jak2",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "jak2_2",
+      "delta": 0.4,
+      "feasibility": {
+        "delta": 0.4,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_jak2_app.py",
+      "historical_best": -10.7,
+      "historical_charged_calls": 129,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091914,
+        "2": 10026091943,
+        "3": 18026091972
+      },
+      "start_smiles": "Oc5ccc(C2NC(=O)c1ccccc1c3ccnc4[nH]cc2c34)c(F)c5",
+      "starting_molecule_index": 14,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 8,
+          "growth_headroom": 13,
+          "heavy_atoms": 27,
+          "large_regions": 4,
+          "net_formal_charge": 0,
+          "protonation_sites": 0,
+          "total_regions": 8
+        },
+        "trigger": null
+      },
+      "target": "jak2",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "parp1_0",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_parp1_app.py",
+      "historical_best": -13.6,
+      "historical_charged_calls": 246,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091800,
+        "2": 10026091829,
+        "3": 18026091858
+      },
+      "start_smiles": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+      "starting_molecule_index": 0,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 10,
+          "growth_headroom": 21,
+          "heavy_atoms": 19,
+          "large_regions": 5,
+          "net_formal_charge": 0,
+          "protonation_sites": 2,
+          "total_regions": 10
+        },
+        "trigger": null
+      },
+      "target": "parp1",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "parp1_1",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_parp1_app.py",
+      "historical_best": -12.7,
+      "historical_charged_calls": 244,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091801,
+        "2": 10026091830,
+        "3": 18026091859
+      },
+      "start_smiles": "COc1[nH]c3cccc2C(=O)NCCc1c23",
+      "starting_molecule_index": 1,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 6,
+          "growth_headroom": 24,
+          "heavy_atoms": 16,
+          "large_regions": 3,
+          "net_formal_charge": 0,
+          "protonation_sites": 0,
+          "total_regions": 6
+        },
+        "trigger": null
+      },
+      "target": "parp1",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "parp1_2",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_parp1_app.py",
+      "historical_best": -11.3,
+      "historical_charged_calls": 249,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091802,
+        "2": 10026091831,
+        "3": 18026091860
+      },
+      "start_smiles": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+      "starting_molecule_index": 2,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 8,
+          "growth_headroom": 23,
+          "heavy_atoms": 17,
+          "large_regions": 4,
+          "net_formal_charge": 0,
+          "protonation_sites": 1,
+          "total_regions": 8
+        },
+        "trigger": null
+      },
+      "target": "parp1",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": true,
+      "agrees_on_fired_branch": true,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "fa7_0",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_region_repair_rescue_fa7_d06_app.py",
+      "historical_best": null,
+      "historical_charged_calls": 0,
+      "historical_execution_branch": "region",
+      "historical_support_operator": "region_repair",
+      "replicate_seeds": {
+        "1": 2026091903,
+        "2": 10026091932,
+        "3": 18026091961
+      },
+      "start_smiles": "CC(C)CCN(Cc2ccc1ccc(C(N)=N)cc1c2)C(=O)c3cccc4ccccc34",
+      "starting_molecule_index": 3,
+      "state_support_condition": {
+        "fallback_fired_historically": true,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 26,
+          "growth_headroom": 8,
+          "heavy_atoms": 32,
+          "large_regions": 17,
+          "net_formal_charge": 0,
+          "protonation_sites": 1,
+          "total_regions": 26
+        },
+        "trigger": "terminal candidate_exhaustion"
+      },
+      "target": "fa7",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "fa7_1",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_fa7_app.py",
+      "historical_best": -7.8,
+      "historical_charged_calls": 249,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091904,
+        "2": 10026091933,
+        "3": 18026091962
+      },
+      "start_smiles": "N[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)N[C@H](CCl)CCCN=C(N)N",
+      "starting_molecule_index": 4,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 38,
+          "growth_headroom": 11,
+          "heavy_atoms": 29,
+          "large_regions": 24,
+          "net_formal_charge": 0,
+          "protonation_sites": 1,
+          "total_regions": 38
+        },
+        "trigger": null
+      },
+      "target": "fa7",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": true,
+      "agrees_on_fired_branch": true,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "fa7_2",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_region_repair_rescue_fa7_d06_app.py",
+      "historical_best": -8.5,
+      "historical_charged_calls": 40,
+      "historical_execution_branch": "region",
+      "historical_support_operator": "region_repair",
+      "replicate_seeds": {
+        "1": 2026091905,
+        "2": 10026091934,
+        "3": 18026091963
+      },
+      "start_smiles": "CC(C)Nc3ccc(c1cc(N)cc(C(O)=O)c1)n(CC(=O)NCc2ccc(C(N)=N)cc2)c3=O",
+      "starting_molecule_index": 5,
+      "state_support_condition": {
+        "fallback_fired_historically": true,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 38,
+          "growth_headroom": 5,
+          "heavy_atoms": 35,
+          "large_regions": 25,
+          "net_formal_charge": 0,
+          "protonation_sites": 1,
+          "total_regions": 38
+        },
+        "trigger": "terminal candidate_exhaustion"
+      },
+      "target": "fa7",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "5ht1b_0",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_5ht1b_app.py",
+      "historical_best": -13.3,
+      "historical_charged_calls": 217,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091906,
+        "2": 10026091935,
+        "3": 18026091964
+      },
+      "start_smiles": "Cc1nc(-c2ccc(-c3ccc(C(=O)N4CCc5cc6c(cc54)[C@]4(CC[N@H+](C)CC4)CO6)cc3)c(C)c2)no1",
+      "starting_molecule_index": 6,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 9,
+          "charged_centres": 1,
+          "executable_regions": 7,
+          "growth_headroom": 1,
+          "heavy_atoms": 39,
+          "large_regions": 11,
+          "net_formal_charge": 1,
+          "protonation_sites": 2,
+          "total_regions": 16
+        },
+        "trigger": null
+      },
+      "target": "5ht1b",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "state_aware",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "5ht1b_1",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_5ht1b_app.py",
+      "historical_best": -11.3,
+      "historical_charged_calls": 222,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091907,
+        "2": 10026091936,
+        "3": 18026091965
+      },
+      "start_smiles": "FC(F)(F)c1cccc(N2CC[NH2+]CC2)c1",
+      "starting_molecule_index": 7,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 5,
+          "charged_centres": 1,
+          "executable_regions": 5,
+          "growth_headroom": 24,
+          "heavy_atoms": 16,
+          "large_regions": 5,
+          "net_formal_charge": 1,
+          "protonation_sites": 1,
+          "total_regions": 10
+        },
+        "trigger": null
+      },
+      "target": "5ht1b",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "state_aware",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": true,
+      "agrees_on_fired_branch": true,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "5ht1b_2",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_5ht1b2_protonation_rescue_d06_app.py",
+      "historical_best": -10.8,
+      "historical_charged_calls": 126,
+      "historical_execution_branch": "state_aware",
+      "historical_support_operator": "protonation",
+      "replicate_seeds": {
+        "1": 2026091908,
+        "2": 10026091937,
+        "3": 18026091966
+      },
+      "start_smiles": "C1=CC2=NC=C(CCCN3CC[NH+](CCc4ccccc4)CC3)[C@H]2C=C1n1cnnc1",
+      "starting_molecule_index": 8,
+      "state_support_condition": {
+        "fallback_fired_historically": true,
+        "molecular_state": {
+          "charge_refused_regions": 9,
+          "charged_centres": 1,
+          "executable_regions": 7,
+          "growth_headroom": 9,
+          "heavy_atoms": 31,
+          "large_regions": 12,
+          "net_formal_charge": 1,
+          "protonation_sites": 3,
+          "total_regions": 16
+        },
+        "trigger": "terminal candidate_exhaustion"
+      },
+      "target": "5ht1b",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "state_aware",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": true,
+      "agrees_on_fired_branch": true,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "braf_0",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_region_repair_rescue_braf_d06_app.py",
+      "historical_best": -9.0,
+      "historical_charged_calls": 33,
+      "historical_execution_branch": "region",
+      "historical_support_operator": "region_repair",
+      "replicate_seeds": {
+        "1": 2026091800,
+        "2": 10026091829,
+        "3": 18026091858
+      },
+      "start_smiles": "CCN(CC)CCNC(=O)c3cnn4c(c2cccc(NC(=O)Nc1ccc(Cl)c(C(F)(F)F)c1)c2)ccnc34",
+      "starting_molecule_index": 9,
+      "state_support_condition": {
+        "fallback_fired_historically": true,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 42,
+          "growth_headroom": 0,
+          "heavy_atoms": 40,
+          "large_regions": 27,
+          "net_formal_charge": 0,
+          "protonation_sites": 2,
+          "total_regions": 42
+        },
+        "trigger": "terminal candidate_exhaustion"
+      },
+      "target": "braf",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": true,
+      "agrees_on_fired_branch": true,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "braf_1",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_region_repair_rescue_braf_d06_app.py",
+      "historical_best": -11.0,
+      "historical_charged_calls": 89,
+      "historical_execution_branch": "region",
+      "historical_support_operator": "region_repair",
+      "replicate_seeds": {
+        "1": 2026091801,
+        "2": 10026091830,
+        "3": 18026091859
+      },
+      "start_smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)NCCN1CCOCC1)c2)cc3)ccc4Cl",
+      "starting_molecule_index": 10,
+      "state_support_condition": {
+        "fallback_fired_historically": true,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 36,
+          "growth_headroom": 1,
+          "heavy_atoms": 39,
+          "large_regions": 26,
+          "net_formal_charge": 0,
+          "protonation_sites": 1,
+          "total_regions": 36
+        },
+        "trigger": "terminal candidate_exhaustion"
+      },
+      "target": "braf",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "braf_2",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_braf_app.py",
+      "historical_best": -11.5,
+      "historical_charged_calls": 104,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091802,
+        "2": 10026091831,
+        "3": 18026091860
+      },
+      "start_smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
+      "starting_molecule_index": 11,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 32,
+          "growth_headroom": 3,
+          "heavy_atoms": 37,
+          "large_regions": 23,
+          "net_formal_charge": 0,
+          "protonation_sites": 0,
+          "total_regions": 32
+        },
+        "trigger": null
+      },
+      "target": "braf",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "jak2_0",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_jak2_d06_app.py",
+      "historical_best": -10.6,
+      "historical_charged_calls": 97,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091912,
+        "2": 10026091941,
+        "3": 18026091970
+      },
+      "start_smiles": "OCCCCc2nc1ccccc1c4ncnc3[nH]cc2c34",
+      "starting_molecule_index": 12,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 10,
+          "growth_headroom": 18,
+          "heavy_atoms": 22,
+          "large_regions": 5,
+          "net_formal_charge": 0,
+          "protonation_sites": 0,
+          "total_regions": 10
+        },
+        "trigger": null
+      },
+      "target": "jak2",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "jak2_1",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_jak2_d06_app.py",
+      "historical_best": -10.8,
+      "historical_charged_calls": 89,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091913,
+        "2": 10026091942,
+        "3": 18026091971
+      },
+      "start_smiles": "COC(=O)CC2Nc1ccccc1c3ccnc4[nH]cc2c34",
+      "starting_molecule_index": 13,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 10,
+          "growth_headroom": 18,
+          "heavy_atoms": 22,
+          "large_regions": 5,
+          "net_formal_charge": 0,
+          "protonation_sites": 0,
+          "total_regions": 10
+        },
+        "trigger": null
+      },
+      "target": "jak2",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    },
+    {
+      "BEHAVIORALLY_EQUIVALENT_TO_UNIFIED_POLICY": "PRIMARY_PATH",
+      "agrees_on_fired_branch": null,
+      "branch_depends_on_state_not_identity": true,
+      "branch_identity_basis": "molecular_applicability() accepts a MolecularGraph and no name, id, score or provenance, so target identity and historical outcome are not in scope of the decision",
+      "cell": "jak2_2",
+      "delta": 0.6,
+      "feasibility": {
+        "delta": 0.6,
+        "qed_min": 0.6,
+        "sa_max": 4.0,
+        "support": "compose_valid"
+      },
+      "historical_app_module": "modal_apps/t4_integrated_route_fiber_held_jak2_d06_app.py",
+      "historical_best": -10.8,
+      "historical_charged_calls": 113,
+      "historical_execution_branch": "primary",
+      "historical_support_operator": "none",
+      "replicate_seeds": {
+        "1": 2026091914,
+        "2": 10026091943,
+        "3": 18026091972
+      },
+      "start_smiles": "Oc5ccc(C2NC(=O)c1ccccc1c3ccnc4[nH]cc2c34)c(F)c5",
+      "starting_molecule_index": 14,
+      "state_support_condition": {
+        "fallback_fired_historically": false,
+        "molecular_state": {
+          "charge_refused_regions": 0,
+          "charged_centres": 0,
+          "executable_regions": 8,
+          "growth_headroom": 13,
+          "heavy_atoms": 27,
+          "large_regions": 4,
+          "net_formal_charge": 0,
+          "protonation_sites": 0,
+          "total_regions": 8
+        },
+        "trigger": null
+      },
+      "target": "jak2",
+      "unified_proposal_kernel": 480,
+      "unified_region_law": "free_gate_margin_v1",
+      "unified_router_branch_if_exhausted": "region",
+      "unified_state_aware_lane": true,
+      "unified_state_routing": "t4_unified_routing_v1",
+      "unified_support_expansion": "t4_frozen_escalation_v1",
+      "unified_trigger": "terminal candidate_exhaustion only"
+    }
+  ],
+  "rows_audited": 30,
+  "schema_version": "t4_behavioral_equivalence_audit_v1",
+  "scope_limit": {
+    "distinct_branch_values_observed": [
+      "region",
+      "state_aware"
+    ],
+    "distinct_source_molecules_among_fired_rows": 5,
+    "warning": "7 fired ROWS rest on fewer distinct MOLECULES, because a source that exhausted at both thresholds contributes two rows sharing one molecular state. The operative rule is close to binary -- net formal charge != 0 selects state_aware, else region -- so this is a small test that could not have failed in many ways. It establishes that the unified router lands on the branch each historical arm used; it does NOT establish that formal charge universally determines the correct molecular-search operator."
+  },
+  "unified_policy": {
+    "arms_checked": [
+      "t4_unified_controller_5ht1b_d06_v1.json",
+      "t4_unified_controller_braf_d06_v1.json",
+      "t4_unified_controller_fa7_d06_v1.json",
+      "t4_unified_controller_jak2_d06_v1.json",
+      "t4_unified_controller_parp1_d06_v1.json"
+    ],
+    "divergent": {},
+    "policy": {
+      "anchored_draws": 512,
+      "batch": 8,
+      "charged_calls_per_cell": 250,
+      "parents": 4,
+      "region_law": "free_gate_margin_v1",
+      "shallow_draws": 480,
+      "state_aware_lane": true,
+      "state_routing": "t4_unified_routing_v1",
+      "support": "compose_valid",
+      "support_expansion": "t4_frozen_escalation_v1",
+      "value_penalty": 1.0
+    }
+  },
+  "vacuity_guard": "rows whose historical arm never reached a fallback branch are reported PRIMARY_PATH and EXCLUDED from the agreement fraction",
+  "verdict": "ALL_FIRED_ROWS_BEHAVIORALLY_EQUIVALENT"
+}
