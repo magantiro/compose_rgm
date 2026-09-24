@@ -1,0 +1,53 @@
+{
+  "payload": {
+    "schema_version": "denovo_restate_prior_pilot_contract_v1",
+    "evidence_class": "bounded_zero_oracle_development_pilot",
+    "scientific_question": "Does a task-independent corpus-calibrated fluorine restate logit reduce C1 fluorine excess without breaking exact validity or losing diversity?",
+    "base_arm": "C1",
+    "F_restate_logit_delta": -0.6,
+    "penalty_derivation": "Rounded log(0.4933/0.9333)=-0.637 from support- and size-matched training F-atom mean versus saved C1 F-atom mean; no QED or SA was used to choose the coefficient.",
+    "selected_indices": [138, 185, 57, 139, 137, 81, 198, 4, 30, 184, 39, 86, 34, 8, 49, 136, 28, 2, 85, 177, 178, 186, 59, 40],
+    "selection": "First 24 saved C1 seeds by ascending BLAKE2b-8 rank of denovo_f_prior_pilot_v1:<trajectory_seed>; development set, not held-out test",
+    "configuration": {
+      "n_slots": 40,
+      "operational_horizon": 16.0,
+      "time_step": 0.1,
+      "max_events": 128,
+      "torch_threads": 1,
+      "checkpoint_ring_electronic_mode": "factorized_local",
+      "no_change_to_executor_or_action_support": true,
+      "no_posthoc_filtering": true
+    },
+    "pilot_signal_gate": {
+      "committed_validity": 1.0,
+      "unique_fraction_min": 0.95,
+      "diversity_drop_max_absolute": 0.03,
+      "mean_F_atoms_drop_min_relative": 0.25,
+      "strained_ring_prevalence_increase_max_absolute": 0.05,
+      "quality": "Report, but 24 pairs are underpowered and do not authorize promotion by themselves"
+    },
+    "inputs": {
+      "checkpoint": {
+        "path": "/private/tmp/compose_quality_JKbB09/checkpoint.best_so_far.pt",
+        "source": "Modal volume compose-denovo-eval-v1/lineageB/checkpoint.best_so_far.pt",
+        "sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c"
+      },
+      "ring_prior": {
+        "path": "diagnostics/denovo_ring_marginal_v1/plan_prior_v1.json",
+        "sha256": "de2a5f995df74eab18345c564b8953fd3733f0852ba165edd864b5e8c897fc8d"
+      },
+      "baseline_records": {
+        "path": "diagnostics/denovo_fragment_quality_v1/attempt_1/records.json",
+        "sha256": "3da4657d500adee468f8706b07a6cd7e6b00f70d19cde410d3ea9d2afee3d9a5"
+      },
+      "size_support_matched_reference": {
+        "path": "diagnostics/denovo_fragment_quality_v1/attempt_1/size_support_matched_reference/report.json",
+        "sha256": "7de866b9db8b02122cbfce2c22d14c6f20dd68c718a227ec780d2deac9f959a7"
+      }
+    },
+    "implementation_sha256": {
+      "pilot_script": "dff9b7309a7fc2b7600e8bbd279a487d0ce5502cde1c0d059880f635cf5276f3"
+    }
+  },
+  "payload_sha256": "81ad879792d25cb083ee11a422f37d98d3612f2d56d9c62024aa2858946642c0"
+}
