@@ -1,0 +1,59 @@
+{
+ "schema_version": "pmo_seed_weighting_ab_v1",
+ "note": "Recovered from launcher stdout: both arms launched within one second and the second receipt overwrote the first. The launcher now scopes the receipt path by arm and refuses to overwrite.",
+ "app": "compose-pmo-seed-weighting",
+ "volume": "compose-pmo-seed-weighting",
+ "profile": "rahul-94866",
+ "contract": "configs/pmo_population_controller_v3_seed_weighting.json",
+ "contract_payload_sha256": "a38e64996bbad5301d56f8c7ad6a9ab72f0c9bf7b3b00b718bd1103339dae88e",
+ "budget_per_campaign": 5000,
+ "queries": 16,
+ "rounds": 400,
+ "prescreen": true,
+ "base_seed": 20260924,
+ "stamp": "20260924T065706Z",
+ "matched_design": "identical task/seed/build/contract; the ONLY difference is initial_parent_weighting",
+ "primary_readout": "AUC-top10 at 250/500/1000/2000 calls, plus calls-to-first-improvement over the best initialization seed",
+ "arms": {
+  "uniform": [
+   {
+    "task": "mestranol_similarity",
+    "modal_call_id": "fc-01M393880M66PPNH774PA5PES8",
+    "seed": 20262924,
+    "label": "scored_mestranol_similarity_seed20262924_uniform_20260924T065706Z"
+   },
+   {
+    "task": "deco_hop",
+    "modal_call_id": "fc-01M393884DZ77C48RNV7KXJVZF",
+    "seed": 20278924,
+    "label": "scored_deco_hop_seed20278924_uniform_20260924T065706Z"
+   },
+   {
+    "task": "zaleplon_mpo",
+    "modal_call_id": "fc-01M3938860G1KGD2KE53GVZ973",
+    "seed": 20276924,
+    "label": "scored_zaleplon_mpo_seed20276924_uniform_20260924T065706Z"
+   }
+  ],
+  "measured_score": [
+   {
+    "task": "mestranol_similarity",
+    "modal_call_id": "fc-01M39388GY9JM1392K4A9YMEEC",
+    "seed": 20262924,
+    "label": "scored_mestranol_similarity_seed20262924_measured_score_20260924T065706Z"
+   },
+   {
+    "task": "deco_hop",
+    "modal_call_id": "fc-01M39388MQJV1569FV79BBTYFQ",
+    "seed": 20278924,
+    "label": "scored_deco_hop_seed20278924_measured_score_20260924T065706Z"
+   },
+   {
+    "task": "zaleplon_mpo",
+    "modal_call_id": "fc-01M39388PWZ036A8WR06TTTHWH",
+    "seed": 20276924,
+    "label": "scored_zaleplon_mpo_seed20276924_measured_score_20260924T065706Z"
+   }
+  ]
+ }
+}

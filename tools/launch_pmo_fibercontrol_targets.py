@@ -101,7 +101,13 @@ def main() -> int:
         submitted.append(spec)
         print(f"  {task:28s} seed={seed}  call={handle.object_id}", flush=True)
 
-    receipt = pathlib.Path(arguments.receipt) / f"launch_{arguments.stage}_{stamp}.json"
+    # The stamp is second-resolution, so two arms of one A/B launched back to back land
+    # on the SAME path and the second silently overwrites the first's call ids. The arm
+    # tag is part of the receipt identity for exactly that reason.
+    tag = f"_{arguments.label_suffix}" if arguments.label_suffix else ""
+    receipt = pathlib.Path(arguments.receipt) / f"launch_{arguments.stage}{tag}_{stamp}.json"
+    if receipt.exists():
+        raise SystemExit(f"refusing to overwrite an existing launch receipt: {receipt}")
     receipt.parent.mkdir(parents=True, exist_ok=True)
     with open(receipt, "w") as handle:
         json.dump(

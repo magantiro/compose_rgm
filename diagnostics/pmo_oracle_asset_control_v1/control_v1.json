@@ -1,0 +1,99 @@
+{
+ "schema_version": "pmo_oracle_asset_control_v1",
+ "measured_at_utc": "2026-09-24T07:00:16.856011+00:00",
+ "environment": {
+  "rdkit": "2023.9.6",
+  "pytdc": "1.1.15",
+  "note": "local PMO-production mirror"
+ },
+ "method": "Each oracle is wrapped in AssetPinnedOracle rooted at the capsule and called from a HOSTILE working directory -- the exact condition that makes PyTDC's relative, lazily loaded pickle raise into a bare except and return default_property 0.0.",
+ "before_capsule_populated": {
+  "gsk3b": {
+   "passed": true,
+   "n_agreeing": 13,
+   "n_references": 13,
+   "max_abs_delta": 0.0,
+   "distinct_observed_values": 9,
+   "all_zero": false,
+   "failures": []
+  },
+  "drd2": {
+   "passed": false,
+   "n_agreeing": 0,
+   "n_references": 6,
+   "max_abs_delta": 0.7537053303355454,
+   "distinct_observed_values": 1,
+   "all_zero": true,
+   "failures": [
+    {
+     "role": "drd2/high",
+     "expected": 0.7537053303355454,
+     "observed": 0.0,
+     "error": null
+    },
+    {
+     "role": "drd2/high",
+     "expected": 0.5475828952606038,
+     "observed": 0.0,
+     "error": null
+    },
+    {
+     "role": "drd2/intermediate",
+     "expected": 0.18060387163257433,
+     "observed": 0.0,
+     "error": null
+    },
+    {
+     "role": "drd2/intermediate",
+     "expected": 0.16003438414126,
+     "observed": 0.0,
+     "error": null
+    }
+   ]
+  },
+  "jnk3": {
+   "passed": true,
+   "n_agreeing": 10,
+   "n_references": 10,
+   "max_abs_delta": 0.0,
+   "distinct_observed_values": 6,
+   "all_zero": false,
+   "failures": []
+  }
+ },
+ "after_capsule_populated": {
+  "gsk3b": {
+   "passed": true,
+   "n_agreeing": 13,
+   "n_references": 13,
+   "max_abs_delta": 0.0,
+   "distinct_observed_values": 9,
+   "all_zero": false
+  },
+  "drd2": {
+   "passed": true,
+   "n_agreeing": 6,
+   "n_references": 6,
+   "max_abs_delta": 0.0,
+   "distinct_observed_values": 6,
+   "all_zero": false
+  },
+  "jnk3": {
+   "passed": true,
+   "n_agreeing": 10,
+   "n_references": 10,
+   "max_abs_delta": 0.0,
+   "distinct_observed_values": 6,
+   "all_zero": false
+  }
+ },
+ "asset_sha256": {
+  "drd2_current.pkl": "ef1f00e47d5e4670a45b0a4178db3c41b2e1aa9dad7113ac9d0f58e3f9d67532",
+  "gsk3b_current.pkl": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5",
+  "jnk3_current.pkl": "cde8576fb4fa3f60b9f258ff9cf1b9ff346eb50d196d5cbbe25965efc1864889"
+ },
+ "finding": "drd2 FAILED the control at all_zero=True, 0/6 references agreeing, 1 distinct value. AssetPinnedOracle was correct; the capsule simply did not CONTAIN drd2_current.pkl, so the pinned directory had no asset to load. gsk3b passed because its pickle is in the capsule; jnk3 passed because it loads EAGERLY at construction and caches on the instance, so it never consults the filesystem at call time.",
+ "resolution": "Constructed drd2 and jnk3 with the working directory set to the capsule so TDC's relative download landed there. All three then pass from a hostile cwd.",
+ "verdict": "PASS_ALL_THREE_AFTER_POPULATING_CAPSULE",
+ "blocking_caveat": "The capsule is gitignored, so these assets are LOCAL-ONLY. The already-deployed compose-pmo-seed-weighting image was built when only gsk3b_current.pkl existed, so drd2/jnk3 require a REDEPLOY before they can be launched."
+}

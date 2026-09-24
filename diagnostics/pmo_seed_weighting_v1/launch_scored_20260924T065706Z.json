@@ -1,0 +1,57 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "scored",
+ "git_commit": "e4bdb4a5bd1a0283ff7681aa4167d8b0481e5b8f",
+ "base_seed": 20260924,
+ "budget": 5000,
+ "submitted": [
+  {
+   "task": "mestranol_similarity",
+   "prescreen": true,
+   "transplant_share": 0.0,
+   "parent_weighting": "measured_score",
+   "budget": 5000,
+   "rounds": 400,
+   "queries": 16,
+   "seed": 20262924,
+   "base_seed": 20260924,
+   "replicate": 0,
+   "label": "scored_mestranol_similarity_seed20262924_measured_score_20260924T065706Z",
+   "volume": "pmo-fiber-mestranol-similarity-seed20262924-measured-score",
+   "git_commit": "e4bdb4a5bd1a0283ff7681aa4167d8b0481e5b8f",
+   "modal_call_id": "fc-01M39388GY9JM1392K4A9YMEEC"
+  },
+  {
+   "task": "deco_hop",
+   "prescreen": true,
+   "transplant_share": 0.0,
+   "parent_weighting": "measured_score",
+   "budget": 5000,
+   "rounds": 400,
+   "queries": 16,
+   "seed": 20278924,
+   "base_seed": 20260924,
+   "replicate": 0,
+   "label": "scored_deco_hop_seed20278924_measured_score_20260924T065706Z",
+   "volume": "pmo-fiber-deco-hop-seed20278924-measured-score",
+   "git_commit": "e4bdb4a5bd1a0283ff7681aa4167d8b0481e5b8f",
+   "modal_call_id": "fc-01M39388MQJV1569FV79BBTYFQ"
+  },
+  {
+   "task": "zaleplon_mpo",
+   "prescreen": true,
+   "transplant_share": 0.0,
+   "parent_weighting": "measured_score",
+   "budget": 5000,
+   "rounds": 400,
+   "queries": 16,
+   "seed": 20276924,
+   "base_seed": 20260924,
+   "replicate": 0,
+   "label": "scored_zaleplon_mpo_seed20276924_measured_score_20260924T065706Z",
+   "volume": "pmo-fiber-zaleplon-mpo-seed20276924-measured-score",
+   "git_commit": "e4bdb4a5bd1a0283ff7681aa4167d8b0481e5b8f",
+   "modal_call_id": "fc-01M39388PWZ036A8WR06TTTHWH"
+  }
+ ]
+}
