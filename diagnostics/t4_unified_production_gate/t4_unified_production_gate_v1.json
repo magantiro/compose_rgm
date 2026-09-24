@@ -296,9 +296,11 @@
   },
   "contract_identities_seen": {
    "5ht1b_0": [
+    "3abd2ec2b7085e09c5682b3bd44464ae9e898c66b82bb8c2660a8b5a4b845f28",
     "88e69f16cd8d9e1497b2b732a876aa6a75dd9113f71c75314843f80822369c88"
    ],
    "5ht1b_1": [
+    "3abd2ec2b7085e09c5682b3bd44464ae9e898c66b82bb8c2660a8b5a4b845f28",
     "88e69f16cd8d9e1497b2b732a876aa6a75dd9113f71c75314843f80822369c88"
    ],
    "5ht1b_2": [
@@ -319,6 +321,7 @@
     "db62568b74889a68ccad03c30f2096d7724fed039c6a11d9651c77ce89085a7c"
    ],
    "fa7_1": [
+    "0f4c46c83d3376f56ea2e3da3991bd155573f8af506bd08430b4455d25e2cef8",
     "db62568b74889a68ccad03c30f2096d7724fed039c6a11d9651c77ce89085a7c"
    ],
    "fa7_2": [
@@ -326,28 +329,45 @@
     "db62568b74889a68ccad03c30f2096d7724fed039c6a11d9651c77ce89085a7c"
    ],
    "jak2_0": [
+    "41abff14d0497598b073a416aa331b3bcb4f96d83fa92e272bae3fb28680e9ea",
     "712095cd9ee40c6e1f9b1fc75052e725ae90db7d3089fd88606f63602eaa57c3"
    ],
    "jak2_1": [
+    "41abff14d0497598b073a416aa331b3bcb4f96d83fa92e272bae3fb28680e9ea",
     "712095cd9ee40c6e1f9b1fc75052e725ae90db7d3089fd88606f63602eaa57c3"
    ],
    "jak2_2": [
+    "41abff14d0497598b073a416aa331b3bcb4f96d83fa92e272bae3fb28680e9ea",
     "712095cd9ee40c6e1f9b1fc75052e725ae90db7d3089fd88606f63602eaa57c3"
    ],
    "parp1_0": [
+    "89674e94f48cb87858e76a027288baec7c156d6b65278f3a31d694d18f900caa",
     "bbe01591bd80d7178dfad29d12e92295547b2572354283ad0b5c55558af0d072"
    ],
    "parp1_1": [
+    "89674e94f48cb87858e76a027288baec7c156d6b65278f3a31d694d18f900caa",
     "d6a6083542c622ec2e4ad8ba73836f978bcebd85172e917dbc05f93d0a1f8749"
    ],
    "parp1_2": [
+    "89674e94f48cb87858e76a027288baec7c156d6b65278f3a31d694d18f900caa",
     "bbe01591bd80d7178dfad29d12e92295547b2572354283ad0b5c55558af0d072"
    ]
   },
   "controls": {
    "5ht1b_0": {
     "declared": {
-     "status": "NOT_RUN"
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 1075.3,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
     },
     "law_off": {
      "agrees_with_committed_audit": true,
@@ -366,7 +386,18 @@
    },
    "5ht1b_1": {
     "declared": {
-     "status": "NOT_RUN"
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 339.5,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
     },
     "law_off": {
      "agrees_with_committed_audit": true,
@@ -404,7 +435,18 @@
    },
    "fa7_1": {
     "declared": {
-     "status": "NOT_RUN"
+     "agrees_with_committed_audit": false,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 746.08,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 7,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
     },
     "law_off": {
      "agrees_with_committed_audit": true,
@@ -423,7 +465,18 @@
    },
    "jak2_0": {
     "declared": {
-     "status": "NOT_RUN"
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": true,
+     "elapsed_seconds": 765.01,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
     },
     "law_off": {
      "agrees_with_committed_audit": true,
@@ -442,7 +495,18 @@
    },
    "jak2_1": {
     "declared": {
-     "status": "NOT_RUN"
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": true,
+     "elapsed_seconds": 912.79,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
     },
     "law_off": {
      "agrees_with_committed_audit": true,
@@ -461,7 +525,18 @@
    },
    "jak2_2": {
     "declared": {
-     "status": "NOT_RUN"
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": true,
+     "elapsed_seconds": 961.88,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
     },
     "law_off": {
      "agrees_with_committed_audit": true,
@@ -480,7 +555,18 @@
    },
    "parp1_0": {
     "declared": {
-     "status": "NOT_RUN"
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 520.73,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
     },
     "law_off": {
      "agrees_with_committed_audit": true,
@@ -499,7 +585,18 @@
    },
    "parp1_1": {
     "declared": {
-     "status": "NOT_RUN"
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 362.05,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
     },
     "law_off": {
      "agrees_with_committed_audit": true,
@@ -518,7 +615,18 @@
    },
    "parp1_2": {
     "declared": {
-     "status": "NOT_RUN"
+     "agrees_with_committed_audit": true,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 383.69,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 8,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
     },
     "law_off": {
      "agrees_with_committed_audit": true,
@@ -538,7 +646,7 @@
   },
   "coverage": {
    "control_rows_expected": 20,
-   "control_rows_present": 10,
+   "control_rows_present": 19,
    "trigger_rows_expected": 15,
    "trigger_rows_present": 10
   },
@@ -547,9 +655,9 @@
   "headline": {
    "alternate_kernel_never_consulted_on_a_control": true,
    "any_wall_clock_stop": false,
-   "controls_declared_all_searched": null,
+   "controls_declared_all_searched": true,
    "controls_law_off_reproduce_committed_audit": true,
-   "controls_run_declared": 0,
+   "controls_run_declared": 9,
    "controls_run_law_off": 10,
    "distinct_eligible_endpoints_total": 87,
    "docking_calls": 0,
@@ -569,7 +677,9 @@
   "question": "does the unified controller, run through the functions the campaign app itself calls, reproduce the support the standalone gate measured?",
   "schema_version": "t4_unified_production_gate_v1",
   "shards": [
+   "5ht1b_0_seed0_declared",
    "5ht1b_0_seed0_law_off",
+   "5ht1b_1_seed0_declared",
    "5ht1b_1_seed0_law_off",
    "5ht1b_2_seed0_declared",
    "5ht1b_2_seed1_declared",
@@ -580,17 +690,24 @@
    "braf_2_seed0_law_off",
    "fa7_0_seed0_declared",
    "fa7_0_seed1_declared",
+   "fa7_1_seed0_declared",
    "fa7_1_seed0_law_off",
    "fa7_2_seed0_declared",
    "fa7_2_seed1_declared",
+   "jak2_0_seed0_declared",
    "jak2_0_seed0_law_off",
+   "jak2_1_seed0_declared",
    "jak2_1_seed0_law_off",
+   "jak2_2_seed0_declared",
    "jak2_2_seed0_law_off",
+   "parp1_0_seed0_declared",
    "parp1_0_seed0_law_off",
+   "parp1_1_seed0_declared",
    "parp1_1_seed0_law_off",
+   "parp1_2_seed0_declared",
    "parp1_2_seed0_law_off"
   ],
   "verdict": "INCOMPLETE"
  },
- "payload_sha256": "6c455a90ff42b59f3b1b6b5fd5d0b527f8e4a42c3ad9dfd39a164e0024789143"
+ "payload_sha256": "44309c0b0654f0ad987fd941cc0f426e0c03a0ee76eacedbf38c07f30edbb261"
 }
