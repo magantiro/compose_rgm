@@ -1,0 +1,122 @@
+{
+ "schema_version": "pmo_graft_topology_v1",
+ "measured_at_utc": "2026-09-24T13:32:54.178890+00:00",
+ "oracle_calls_spent": 0,
+ "why_this_exists": "Scoring the endpoint is the wrong readout -- thiothixene's graft moved the oracle by only +0.024 and was still a confirmed basin entry. This asks whether TOPOLOGY improved, and then looks at the molecules, because scalars misled twice today.",
+ "verdict": "NO_TOPOLOGY_GAIN_EITHER_AND_THE_VISUAL_SHOWS_WHY",
+ "measured": {
+  "celecoxib_rediscovery": {
+   "leader_mcs": 16,
+   "leader_ring_systems_matched": "2/2",
+   "best_graft_mcs": 16,
+   "best_graft_ring_systems_matched": 1
+  },
+  "amlodipine_mpo": {
+   "leader_mcs": 17,
+   "leader_ring_systems_matched": "1/2",
+   "best_graft_mcs": 17,
+   "best_graft_ring_systems_matched": 1
+  },
+  "scaffold_hop": {
+   "leader_mcs": 13,
+   "leader_ring_systems_matched": "0/2",
+   "best_graft_mcs": 13,
+   "best_graft_ring_systems_matched": 0
+  },
+  "perindopril_mpo": {
+   "leader_mcs": 14,
+   "leader_ring_systems_matched": "1/1",
+   "best_graft_mcs": 14,
+   "best_graft_ring_systems_matched": 1
+  }
+ },
+ "SUPERSEDES_THE_RARITY_EXPLANATION": "The earlier reading -- 'mean-over-carriers is rarity-biased so common donors never surface' -- is true but is NOT the main cause. Visual inspection shows something more basic: THE GRAFT ENUMERATOR HAS NO NOTION OF WHICH REGIONS ARE ALREADY CORRECT, so it replaces the very chemistry that makes the leader good.",
+ "what_the_pictures_show": {
+  "celecoxib_rediscovery": "The leader is already near-celecoxib: 1,5-diaryl pyrazole, CF3, tolyl, needing only its thiophene swapped for a 4-sulfamoylphenyl. Every graft instead DESTROYED the correct pyrazole, replacing it with fused N-heterocycles (isoxazolopyrimidine, triazolopyrazine, phthalazine) while keeping the thiophene. Ring systems matched fell 2/2 -> 1/2. Worse, the library stores BARE ring systems, so it strips the sulfonamide decoration and could not supply 4-sulfamoylphenyl even if it aimed there.",
+  "perindopril_mpo": "The target has ZERO aromatic rings. The leader already carries the correct octahydroindole plus an extra benzene and isoxazole. Every graft either kept those extra rings or replaced the correct core with another bicyclic -- grafting adds where the row needs deletion, exactly as the residual table said."
+ },
+ "why_thiothixene_was_different": "Its leader's ring systems were ALL wrong, so unguarded replacement could only help. For a leader that already contains correct cores, unguarded grafting is destructive BY CONSTRUCTION.",
+ "design_implication": "A graft proposal must (a) protect regions already matching the high-scoring context, (b) carry donor DECORATION, not bare skeletons, and (c) not be offered at all on rows whose residual is excision. None of these is a ranking fix.",
+ "topology": {
+  "celecoxib_rediscovery": {
+   "leader": {
+    "mcs": 16,
+    "ring_systems_matched": 2,
+    "ref_ring_systems": 2,
+    "ecfp4": 0.5294117647058824,
+    "scaffold_match": false
+   },
+   "leader_score": 0.5853658536585366,
+   "best_topology": {
+    "mcs": 16,
+    "ring_systems_matched": 1,
+    "ref_ring_systems": 2,
+    "ecfp4": 0.2898550724637681,
+    "scaffold_match": false,
+    "score": 0.2905982905982906,
+    "donor": "c1ccc2nc3c(nc2c1)NCN3",
+    "endpoint": "Cc1cc2nc3c(nc2cc1-n1nc(C(F)(F)F)cc1-c1cccs1)NCN3"
+   }
+  },
+  "amlodipine_mpo": {
+   "leader": {
+    "mcs": 17,
+    "ring_systems_matched": 1,
+    "ref_ring_systems": 2,
+    "ecfp4": 0.45588235294117646,
+    "scaffold_match": false
+   },
+   "leader_score": 0.7321765321469982,
+   "best_topology": {
+    "mcs": 17,
+    "ring_systems_matched": 1,
+    "ref_ring_systems": 2,
+    "ecfp4": 0.3684210526315789,
+    "scaffold_match": false,
+    "score": 0.6485065517506754,
+    "donor": "C1=CNc2ncncc2C1",
+    "endpoint": "CCOC(=O)C1=C(C)NC(Cl)=C(C(=O)OC)C1C1=CNc2ncncc2C1"
+   }
+  },
+  "scaffold_hop": {
+   "leader": {
+    "mcs": 13,
+    "ring_systems_matched": 0,
+    "ref_ring_systems": 2,
+    "ecfp4": 0.2441860465116279,
+    "scaffold_match": false
+   },
+   "leader_score": 0.5640239451014747,
+   "best_topology": {
+    "mcs": 13,
+    "ring_systems_matched": 0,
+    "ref_ring_systems": 2,
+    "ecfp4": 0.19607843137254902,
+    "scaffold_match": false,
+    "score": 0.509706045479756,
+    "donor": "c1cc2c(cn1)Oc1ncncc1C2",
+    "endpoint": "COc1ncc2c(c1-c1csc3ncnc(Nc4ccc5c(c4)OCCO5)c13)Cc1cncnc1O2"
+   }
+  },
+  "perindopril_mpo": {
+   "leader": {
+    "mcs": 14,
+    "ring_systems_matched": 1,
+    "ref_ring_systems": 1,
+    "ecfp4": 0.3333333333333333,
+    "scaffold_match": false
+   },
+   "leader_score": 0.6232413273091858,
+   "best_topology": {
+    "mcs": 14,
+    "ring_systems_matched": 1,
+    "ref_ring_systems": 1,
+    "ecfp4": 0.31521739130434784,
+    "scaffold_match": false,
+    "score": 0.6012806844880862,
+    "donor": "c1scc2c1OCO2",
+    "endpoint": "CCCC(CC)C(C)c1cccc(C(=O)N2C(C(=O)OCc3scc4c3OCO4)CC3CCCCC32)c1"
+   }
+  }
+ }
+}
