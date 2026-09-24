@@ -453,3 +453,25 @@ def frozen_cnof_arm_identity(path: Path, *, train_size: int) -> dict:
         "train_arm": arm_name,
         "train_scaffold_diagnostics": payload["census"]["training_arm_diagnostics"][arm_name],
     }
+
+
+def frozen_cnof_source_alias_identity(source: Path, *, expected_sha256: str) -> dict:
+    """Bind a runtime mount path to the manifest's exact source bytes.
+
+    The preparation host and an accelerator container can mount one frozen
+    corpus at different absolute paths. A path-only equality check rejects
+    that valid deployment; accepting any path without checking bytes would
+    silently change the training population. This bridge verifies the full
+    physical SHA-256 and records both runtime path and observed identity.
+    """
+
+    source = Path(source)
+    if not source.is_file():
+        raise ValueError(f"missing frozen CNOF runtime source: {source}")
+    observed = file_sha256(source)
+    if observed != expected_sha256:
+        raise ValueError(
+            f"frozen CNOF source SHA-256 mismatch for {source}: "
+            f"expected {expected_sha256}, observed {observed}"
+        )
+    return {"runtime_source_path": str(source), "runtime_source_sha256": observed}

@@ -28,6 +28,7 @@ from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.data.cnof import load_cnof_corpus_split
 from compose_v4.data.frozen_cnof_prior_split import (
     frozen_cnof_arm_identity,
+    frozen_cnof_source_alias_identity,
     load_frozen_cnof_arm,
 )
 from compose_v4.data.organic_corpus import BROAD_ORGANIC_V1, load_organic_corpus_split
@@ -2648,8 +2649,15 @@ def main() -> None:
         split_identity = frozen_cnof_arm_identity(
             args.frozen_cnof_split_manifest, train_size=args.train_size
         )
+        # A local preparation path and a mounted accelerator path need not have
+        # the same spelling. Permit that alias only after verifying the FULL
+        # physical source hash, and record the runtime path in the checkpoint.
+        split_identity.update(
+            frozen_cnof_source_alias_identity(
+                args.smiles_file, expected_sha256=split_identity["source_sha256"]
+            )
+        )
         expected = (
-            ("source_path", str(args.smiles_file)),
             ("max_atoms", args.max_atoms),
             ("validation_size", args.validation_size),
             ("iid_test_size", args.test_size),

@@ -85,8 +85,11 @@ contract, not a local file in this worktree. The command must fail if that
 asset is missing or differs physically. The trainer's opt-in
 `--frozen-cnof-split-manifest` path consumes this artifact directly and records
 the manifest, source, training-prefix and held-out partition hashes in its
-checkpoint. The default historical loader remains unchanged. No training
-recipe or accelerator launch is authorized by preparing the split.
+checkpoint. On an accelerator host, a different mount path for the corpus is
+accepted only after its full physical SHA-256 equals the frozen source hash;
+the runtime path and observed hash are recorded separately. The default
+historical loader remains unchanged. No training recipe or accelerator launch
+is authorized by preparing the split.
 
 ## Prospective model and evaluation gates
 

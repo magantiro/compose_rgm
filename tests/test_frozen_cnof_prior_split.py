@@ -10,6 +10,7 @@ import pytest
 from compose_v4.data.frozen_cnof_prior_split import (
     _digest,
     file_sha256,
+    frozen_cnof_source_alias_identity,
     load_frozen_cnof_arm,
     prepare_frozen_cnof_split,
     validate_frozen_cnof_split,
@@ -185,3 +186,24 @@ def test_deep_validation_names_malformed_partition_row(tmp_path):
     )
     with pytest.raises(ValueError, match="malformed source row in validation"):
         validate_frozen_cnof_split(changed, deep=True)
+
+
+def test_runtime_mount_alias_requires_exact_source_bytes(tmp_path):
+    preparation = tmp_path / "prepare" / "source.smiles"
+    preparation.parent.mkdir()
+    preparation.write_text("CCO\nCCN\n")
+    runtime = tmp_path / "mounted" / "source.smiles"
+    runtime.parent.mkdir()
+    runtime.write_bytes(preparation.read_bytes())
+    expected = file_sha256(preparation)
+    identity = frozen_cnof_source_alias_identity(runtime, expected_sha256=expected)
+    assert identity == {
+        "runtime_source_path": str(runtime),
+        "runtime_source_sha256": expected,
+    }
+    runtime.write_text("CCO\nCCC\n")
+    with pytest.raises(ValueError, match="source SHA-256 mismatch"):
+        frozen_cnof_source_alias_identity(runtime, expected_sha256=expected)
+    runtime.unlink()
+    with pytest.raises(ValueError, match="missing frozen CNOF runtime source"):
+        frozen_cnof_source_alias_identity(runtime, expected_sha256=expected)
