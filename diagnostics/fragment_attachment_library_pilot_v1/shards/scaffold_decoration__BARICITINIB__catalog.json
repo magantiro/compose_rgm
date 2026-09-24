@@ -1,0 +1,3125 @@
+{
+  "arm": "catalog",
+  "attempt_records": [
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                20,
+                2
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                22,
+                2
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                24,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 0,
+      "committed_smiles": "CNC(=O)N1CC(C(C)C=O)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "CNC(=O)N1CC(C(C)C=O)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*C(C)C=O",
+          "site": 7,
+          "training_occurrences": 6
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*C(=O)NC",
+          "site": 9,
+          "training_occurrences": 60
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                21,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 1,
+      "committed_smiles": "CN(C)CCN1CC(CO)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "CN(C)CCN1CC(CO)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*CO",
+          "site": 7,
+          "training_occurrences": 8400
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*CCN(C)C",
+          "site": 9,
+          "training_occurrences": 294
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                21,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                23,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                24,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 2,
+      "committed_smiles": "OCCCCCN1CC(OO)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "OCCCCCN1CC(OO)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*OO",
+          "site": 7,
+          "training_occurrences": 37
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*CCCCCO",
+          "site": 9,
+          "training_occurrences": 8
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 5,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 5,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 5,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                22,
+                2
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 3,
+      "committed_smiles": "CC(=O)N1CC(n2cc(-c3ncnc4[nH]ccc34)cn2)(C(F)(F)F)C1",
+      "emitted_smiles": "CC(=O)N1CC(n2cc(-c3ncnc4[nH]ccc34)cn2)(C(F)(F)F)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*C(F)(F)F",
+          "site": 7,
+          "training_occurrences": 940
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*C(C)=O",
+          "site": 9,
+          "training_occurrences": 2454
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                21,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                23,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 4,
+      "committed_smiles": "CCCCCN1CC(OC)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "CCCCCN1CC(OC)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*OC",
+          "site": 7,
+          "training_occurrences": 3556
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*CCCCC",
+          "site": 9,
+          "training_occurrences": 68
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                22,
+                2
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                24,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                25,
+                3
+              ]
+            ],
+            "slot": 26
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 5,
+      "committed_smiles": "CC(C)(C)C1(n2cc(-c3ncnc4[nH]ccc34)cn2)CN(C(=O)CC#N)C1",
+      "emitted_smiles": "CC(C)(C)C1(n2cc(-c3ncnc4[nH]ccc34)cn2)CN(C(=O)CC#N)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*C(C)(C)C",
+          "site": 7,
+          "training_occurrences": 447
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*C(=O)CC#N",
+          "site": 9,
+          "training_occurrences": 42
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                18,
+                2
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                23,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                24,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                24,
+                1
+              ]
+            ],
+            "slot": 26
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 6,
+      "committed_smiles": "COC(=O)C1(n2cc(-c3ncnc4[nH]ccc34)cn2)CN(CCN(C)C)C1",
+      "emitted_smiles": "COC(=O)C1(n2cc(-c3ncnc4[nH]ccc34)cn2)CN(CCN(C)C)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*C(=O)OC",
+          "site": 7,
+          "training_occurrences": 2399
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*CCN(C)C",
+          "site": 9,
+          "training_occurrences": 294
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                19,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                23,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                24,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                25,
+                1
+              ]
+            ],
+            "slot": 26
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 7,
+      "committed_smiles": "NCCCCN1CC(NCCN)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "NCCCCN1CC(NCCN)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*NCCN",
+          "site": 7,
+          "training_occurrences": 3
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*CCCCN",
+          "site": 9,
+          "training_occurrences": 13
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                19,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                23,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                23,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                25,
+                1
+              ]
+            ],
+            "slot": 26
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                26,
+                2
+              ]
+            ],
+            "slot": 27
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                26,
+                1
+              ]
+            ],
+            "slot": 28
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 8,
+      "committed_smiles": "CC(CC(=O)O)N1CC(CCN(C)C)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "CC(CC(=O)O)N1CC(CCN(C)C)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*CCN(C)C",
+          "site": 7,
+          "training_occurrences": 47
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*C(C)CC(=O)O",
+          "site": 9,
+          "training_occurrences": 7
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                18,
+                2
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                23,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                23,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                25,
+                1
+              ]
+            ],
+            "slot": 26
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 9,
+      "committed_smiles": "CCC(C)N1CC(C(=O)N(C)C)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "CCC(C)N1CC(C(=O)N(C)C)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*C(=O)N(C)C",
+          "site": 7,
+          "training_occurrences": 184
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*C(C)CC",
+          "site": 9,
+          "training_occurrences": 34
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                21,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 10,
+      "committed_smiles": "CCN1CC(C(C)O)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "CCN1CC(C(C)O)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*C(C)O",
+          "site": 7,
+          "training_occurrences": 539
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*CC",
+          "site": 9,
+          "training_occurrences": 2611
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                18,
+                2
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                21,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                23,
+                2
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                23,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                25,
+                1
+              ]
+            ],
+            "slot": 26
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                25,
+                1
+              ]
+            ],
+            "slot": 27
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                27,
+                1
+              ]
+            ],
+            "slot": 28
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 11,
+      "committed_smiles": "CCOC(=O)C1(n2cc(-c3ncnc4[nH]ccc34)cn2)CN(C(=O)C(N)CO)C1",
+      "emitted_smiles": "CCOC(=O)C1(n2cc(-c3ncnc4[nH]ccc34)cn2)CN(C(=O)C(N)CO)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*C(=O)OCC",
+          "site": 7,
+          "training_occurrences": 1701
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*C(=O)C(N)CO",
+          "site": 9,
+          "training_occurrences": 8
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                19,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                19,
+                2
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                22,
+                2
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 12,
+      "committed_smiles": "CC(=O)N1CC(CC(N)=O)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "CC(=O)N1CC(CC(N)=O)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*CC(N)=O",
+          "site": 7,
+          "training_occurrences": 91
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*C(C)=O",
+          "site": 9,
+          "training_occurrences": 2454
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                19,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                20,
+                2
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                24,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                25,
+                1
+              ]
+            ],
+            "slot": 26
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                26,
+                1
+              ]
+            ],
+            "slot": 27
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 13,
+      "committed_smiles": "COCCN1CC(COC(=O)CN)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "COCCN1CC(COC(=O)CN)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*COC(=O)CN",
+          "site": 7,
+          "training_occurrences": 1
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*CCOC",
+          "site": 9,
+          "training_occurrences": 488
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                19,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                19,
+                2
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                23,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                24,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                25,
+                1
+              ]
+            ],
+            "slot": 26
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 14,
+      "committed_smiles": "CCOCCN1CC(OC(N)=O)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "CCOCCN1CC(OC(N)=O)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*OC(N)=O",
+          "site": 7,
+          "training_occurrences": 120
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*CCOCC",
+          "site": 9,
+          "training_occurrences": 24
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                19,
+                2
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                19,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                21,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                24,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                25,
+                1
+              ]
+            ],
+            "slot": 26
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                26,
+                1
+              ]
+            ],
+            "slot": 27
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                26,
+                1
+              ]
+            ],
+            "slot": 28
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                28,
+                1
+              ]
+            ],
+            "slot": 29
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 15,
+      "committed_smiles": "CCCC(=O)OC1(n2cc(-c3ncnc4[nH]ccc34)cn2)CN(CCN(C)CC)C1",
+      "emitted_smiles": "CCCC(=O)OC1(n2cc(-c3ncnc4[nH]ccc34)cn2)CN(CCN(C)CC)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*OC(=O)CCC",
+          "site": 7,
+          "training_occurrences": 164
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*CCN(C)CC",
+          "site": 9,
+          "training_occurrences": 1
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                19,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 5,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 5,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                24,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                25,
+                1
+              ]
+            ],
+            "slot": 26
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                26,
+                1
+              ]
+            ],
+            "slot": 27
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                27,
+                1
+              ]
+            ],
+            "slot": 28
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                27,
+                1
+              ]
+            ],
+            "slot": 29
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 16,
+      "committed_smiles": "CC(C)CCCN1CC(NCC(C)(F)F)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "CC(C)CCCN1CC(NCC(C)(F)F)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*NCC(C)(F)F",
+          "site": 7,
+          "training_occurrences": 1
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*CCCC(C)C",
+          "site": 9,
+          "training_occurrences": 15
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                19,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                20,
+                2
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                23,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                23,
+                2
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 17,
+      "committed_smiles": "CC(=O)OCC1(n2cc(-c3ncnc4[nH]ccc34)cn2)CN(C(C)=O)C1",
+      "emitted_smiles": "CC(=O)OCC1(n2cc(-c3ncnc4[nH]ccc34)cn2)CN(C(C)=O)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*COC(C)=O",
+          "site": 7,
+          "training_occurrences": 681
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*C(C)=O",
+          "site": 9,
+          "training_occurrences": 2454
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                21,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                21,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                23,
+                2
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                23,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                25,
+                1
+              ]
+            ],
+            "slot": 26
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 18,
+      "committed_smiles": "COC(=O)C(C)N1CC(C(C)C)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "emitted_smiles": "COC(=O)C(C)N1CC(C(C)C)(n2cc(-c3ncnc4[nH]ccc34)cn2)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*C(C)C",
+          "site": 7,
+          "training_occurrences": 1542
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*C(C)C(=O)OC",
+          "site": 9,
+          "training_occurrences": 8
+        }
+      ],
+      "rng_seed": 2773572828
+    },
+    {
+      "accepted_actions": [
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                9,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 23
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                22,
+                1
+              ]
+            ],
+            "slot": 24
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                24,
+                1
+              ]
+            ],
+            "slot": 25
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 19,
+      "committed_smiles": "CC(CO)N1CC(n2cc(-c3ncnc4[nH]ccc34)cn2)(C(C)(C)C)C1",
+      "emitted_smiles": "CC(CO)N1CC(n2cc(-c3ncnc4[nH]ccc34)cn2)(C(C)(C)C)C1",
+      "failure_reason": null,
+      "fallback_count": 0,
+      "offered_fragments": [
+        {
+          "context": "C:0:1",
+          "fragment": "*C(C)(C)C",
+          "site": 7,
+          "training_occurrences": 447
+        },
+        {
+          "context": "N:0:1",
+          "fragment": "*C(C)CO",
+          "site": 9,
+          "training_occurrences": 824
+        }
+      ],
+      "rng_seed": 2773572828
+    }
+  ],
+  "attempts": 20,
+  "drug": "BARICITINIB",
+  "fallback_count": 0,
+  "metrics": {
+    "distance": 0.5699385772402921,
+    "diversity": 0.46565,
+    "quality": 60.0,
+    "uniqueness": 100.0,
+    "validity": 100.0
+  },
+  "rng_seed": 2773572828,
+  "schema": "fragment_attachment_library_pilot_shard_v1",
+  "seed": 0,
+  "task": "scaffold_decoration",
+  "task_fidelity_count": 20
+}

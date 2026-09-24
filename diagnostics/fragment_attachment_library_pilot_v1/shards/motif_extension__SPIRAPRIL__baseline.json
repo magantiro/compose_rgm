@@ -1,0 +1,3903 @@
+{
+  "arm": "baseline",
+  "attempt_records": [
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                14,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 16
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                16,
+                1
+              ]
+            ],
+            "slot": 17
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                17,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                17,
+                2
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 20
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 0,
+      "committed_smiles": "CCOC(=O)CCCCCN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CCOC(=O)CCCCCN1CC2(CC1C(=O)O)SCCS2",
+      "events": 16,
+      "family_deltas": {
+        "atom_delete": 3,
+        "atom_insert": 13
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 8,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 2,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                13,
+                2
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 8,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 1,
+      "committed_smiles": "O=C(Cl)CN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "O=C(Cl)CN1CC2(CC1C(=O)O)SCCS2",
+      "events": 8,
+      "family_deltas": {
+        "atom_delete": 2,
+        "atom_insert": 6
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 8,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 2,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 14
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomRestate",
+          "payload": {
+            "atom_type": 7,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "v": 13
+          },
+          "rule": "atom_restate"
+        },
+        {
+          "action_type": "AtomRestate",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "v": 13
+          },
+          "rule": "atom_restate"
+        }
+      ],
+      "attempt_index": 2,
+      "committed_smiles": "CON1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CON1CC2(CC1C(=O)O)SCCS2",
+      "events": 6,
+      "family_deltas": {
+        "atom_delete": 1,
+        "atom_insert": 3,
+        "atom_restate": 2
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 14,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 1,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 7,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "BondReroute",
+          "payload": {
+            "a": 14,
+            "b": 13,
+            "new_order": 1,
+            "u": 14,
+            "v": 12
+          },
+          "rule": "bond_reroute"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 3,
+      "committed_smiles": "CCC(N)N1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CCC(N)N1CC2(CC1C(=O)O)SCCS2",
+      "events": 11,
+      "family_deltas": {
+        "atom_delete": 3,
+        "atom_insert": 7,
+        "bond_reroute": 1
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 20,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 3,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 13
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                12,
+                2
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 13
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                14,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 16
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                14,
+                1
+              ]
+            ],
+            "slot": 17
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                17,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                17,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                17,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 4,
+      "committed_smiles": "CCC(C)N(CCN1CC2(CC1C(=O)O)SCCS2)C(C)(C)C",
+      "emitted_smiles": "CCC(C)N(CCN1CC2(CC1C(=O)O)SCCS2)C(C)(C)C",
+      "events": 15,
+      "family_deltas": {
+        "atom_delete": 2,
+        "atom_insert": 13
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 3,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 1,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                14,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                14,
+                2
+              ]
+            ],
+            "slot": 16
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 17
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                17,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 5,
+      "committed_smiles": "CCOC(=O)CCN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CCOC(=O)CCN1CC2(CC1C(=O)O)SCCS2",
+      "events": 11,
+      "family_deltas": {
+        "atom_delete": 2,
+        "atom_insert": 9
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 11,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 1,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomRestate",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "v": 12
+          },
+          "rule": "atom_restate"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 13
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 13
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                13,
+                2
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                12,
+                2
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "BondReorder",
+          "payload": {
+            "a": 12,
+            "b": 15,
+            "new_order": 1
+          },
+          "rule": "bond_reorder"
+        }
+      ],
+      "attempt_index": 6,
+      "committed_smiles": "C=CC(O)N1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "C=CC(O)N1CC2(CC1C(=O)O)SCCS2",
+      "events": 10,
+      "family_deltas": {
+        "atom_delete": 2,
+        "atom_insert": 6,
+        "atom_restate": 1,
+        "bond_reorder": 1
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 15,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 1,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 14
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 14
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 7,
+      "committed_smiles": "CC(C)CN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CC(C)CN1CC2(CC1C(=O)O)SCCS2",
+      "events": 10,
+      "family_deltas": {
+        "atom_delete": 3,
+        "atom_insert": 7
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 16,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 2,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 13
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                12,
+                2
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                14,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 15
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomRestate",
+          "payload": {
+            "atom_type": 7,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "v": 14
+          },
+          "rule": "atom_restate"
+        },
+        {
+          "action_type": "AtomRestate",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "v": 14
+          },
+          "rule": "atom_restate"
+        }
+      ],
+      "attempt_index": 8,
+      "committed_smiles": "CC(=O)N1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CC(=O)N1CC2(CC1C(=O)O)SCCS2",
+      "events": 9,
+      "family_deltas": {
+        "atom_delete": 2,
+        "atom_insert": 5,
+        "atom_restate": 2
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 5,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 1,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomRestate",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "v": 12
+          },
+          "rule": "atom_restate"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                14,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 16
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                16,
+                1
+              ]
+            ],
+            "slot": 17
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 7,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                17,
+                2
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                15,
+                2
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                17,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 9,
+      "committed_smiles": "NC(=S)NC(=O)CCCN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "NC(=S)NC(=O)CCCN1CC2(CC1C(=O)O)SCCS2",
+      "events": 14,
+      "family_deltas": {
+        "atom_delete": 2,
+        "atom_insert": 11,
+        "atom_restate": 1
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 8,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 2,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                13,
+                2
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 16
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 17
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                17,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                19,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 10,
+      "committed_smiles": "CCCCCN(O)C(=O)CN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CCCCCN(O)C(=O)CN1CC2(CC1C(=O)O)SCCS2",
+      "events": 14,
+      "family_deltas": {
+        "atom_delete": 2,
+        "atom_insert": 12
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 19,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 2,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 13
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "BondReorder",
+          "payload": {
+            "a": 12,
+            "b": 13,
+            "new_order": 3
+          },
+          "rule": "bond_reorder"
+        },
+        {
+          "action_type": "BondReorder",
+          "payload": {
+            "a": 12,
+            "b": 13,
+            "new_order": 2
+          },
+          "rule": "bond_reorder"
+        }
+      ],
+      "attempt_index": 11,
+      "committed_smiles": "C=CN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "C=CN1CC2(CC1C(=O)O)SCCS2",
+      "events": 8,
+      "family_deltas": {
+        "atom_delete": 2,
+        "atom_insert": 4,
+        "bond_reorder": 2
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 14,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 1,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                12,
+                2
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 13
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "BondReorder",
+          "payload": {
+            "a": 12,
+            "b": 13,
+            "new_order": 3
+          },
+          "rule": "bond_reorder"
+        },
+        {
+          "action_type": "BondReorder",
+          "payload": {
+            "a": 12,
+            "b": 13,
+            "new_order": 2
+          },
+          "rule": "bond_reorder"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                13,
+                2
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 12,
+      "committed_smiles": "CC(=C=O)N1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CC(=C=O)N1CC2(CC1C(=O)O)SCCS2",
+      "events": 10,
+      "family_deltas": {
+        "atom_delete": 2,
+        "atom_insert": 6,
+        "bond_reorder": 2
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 33,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 1,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 13
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomRestate",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "v": 12
+          },
+          "rule": "atom_restate"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                14,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 16
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 16
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 16
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                16,
+                1
+              ]
+            ],
+            "slot": 17
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                17,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                20,
+                2
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                16,
+                2
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 13,
+      "committed_smiles": "CCOC(=O)N(C=O)CCCN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CCOC(=O)N(C=O)CCCN1CC2(CC1C(=O)O)SCCS2",
+      "events": 16,
+      "family_deltas": {
+        "atom_delete": 2,
+        "atom_insert": 13,
+        "atom_restate": 1
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 16,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 1,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomRestate",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "v": 12
+          },
+          "rule": "atom_restate"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                13,
+                2
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 5,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomRestate",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "v": 15
+          },
+          "rule": "atom_restate"
+        },
+        {
+          "action_type": "BondReorder",
+          "payload": {
+            "a": 13,
+            "b": 14,
+            "new_order": 1
+          },
+          "rule": "bond_reorder"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 16
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 14,
+      "committed_smiles": "CC(C)(O)CN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CC(C)(O)CN1CC2(CC1C(=O)O)SCCS2",
+      "events": 10,
+      "family_deltas": {
+        "atom_delete": 1,
+        "atom_insert": 6,
+        "atom_restate": 2,
+        "bond_reorder": 1
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 6,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 1,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "BondReorder",
+          "payload": {
+            "a": 12,
+            "b": 13,
+            "new_order": 3
+          },
+          "rule": "bond_reorder"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 13
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                14,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                15,
+                2
+              ]
+            ],
+            "slot": 16
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 17
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                17,
+                1
+              ]
+            ],
+            "slot": 18
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                18,
+                1
+              ]
+            ],
+            "slot": 19
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                19,
+                1
+              ]
+            ],
+            "slot": 20
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 21
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                20,
+                1
+              ]
+            ],
+            "slot": 22
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 15,
+      "committed_smiles": "CC(C)CCOC(=O)NCCN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CC(C)CCOC(=O)NCCN1CC2(CC1C(=O)O)SCCS2",
+      "events": 14,
+      "family_deltas": {
+        "atom_delete": 1,
+        "atom_insert": 12,
+        "bond_reorder": 1
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 4,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 1,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomRestate",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "v": 12
+          },
+          "rule": "atom_restate"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                14,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 16
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                16,
+                1
+              ]
+            ],
+            "slot": 17
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 16,
+      "committed_smiles": "NCCOCCN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "NCCOCCN1CC2(CC1C(=O)O)SCCS2",
+      "events": 9,
+      "family_deltas": {
+        "atom_delete": 1,
+        "atom_insert": 7,
+        "atom_restate": 1
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 2,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 2,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 9,
+            "formal_charge": 0,
+            "implicit_h_count": 0,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "BondReorder",
+          "payload": {
+            "a": 12,
+            "b": 13,
+            "new_order": 3
+          },
+          "rule": "bond_reorder"
+        },
+        {
+          "action_type": "BondReorder",
+          "payload": {
+            "a": 12,
+            "b": 13,
+            "new_order": 2
+          },
+          "rule": "bond_reorder"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                15,
+                1
+              ]
+            ],
+            "slot": 16
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 17,
+      "committed_smiles": "CCC(Br)=CN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CCC(Br)=CN1CC2(CC1C(=O)O)SCCS2",
+      "events": 9,
+      "family_deltas": {
+        "atom_delete": 1,
+        "atom_insert": 6,
+        "bond_reorder": 2
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 18,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 2,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 4,
+            "formal_charge": 0,
+            "implicit_h_count": 1,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                14,
+                1
+              ]
+            ],
+            "slot": 15
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                14,
+                1
+              ]
+            ],
+            "slot": 16
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                14,
+                1
+              ]
+            ],
+            "slot": 17
+          },
+          "rule": "atom_insert"
+        }
+      ],
+      "attempt_index": 18,
+      "committed_smiles": "CC(C)(C)CCN1CC2(CC1C(=O)O)SCCS2",
+      "emitted_smiles": "CC(C)(C)CCN1CC2(CC1C(=O)O)SCCS2",
+      "events": 10,
+      "family_deltas": {
+        "atom_delete": 2,
+        "atom_insert": 8
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 7,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 3,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    },
+    {
+      "accepted_actions": [
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                7,
+                1
+              ]
+            ],
+            "slot": 12
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 2,
+            "formal_charge": 0,
+            "implicit_h_count": 3,
+            "neighbors": [
+              [
+                12,
+                1
+              ]
+            ],
+            "slot": 13
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomInsert",
+          "payload": {
+            "atom_type": 3,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "neighbors": [
+              [
+                13,
+                1
+              ]
+            ],
+            "slot": 14
+          },
+          "rule": "atom_insert"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 14
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 13
+          },
+          "rule": "atom_delete"
+        },
+        {
+          "action_type": "AtomRestate",
+          "payload": {
+            "atom_type": 7,
+            "formal_charge": 0,
+            "implicit_h_count": 2,
+            "v": 11
+          },
+          "rule": "atom_restate"
+        },
+        {
+          "action_type": "AtomDelete",
+          "payload": {
+            "v": 12
+          },
+          "rule": "atom_delete"
+        }
+      ],
+      "attempt_index": 19,
+      "committed_smiles": "O=C(O)C1CC2(CN1)SCC[SH2]2",
+      "emitted_smiles": null,
+      "events": 7,
+      "family_deltas": {
+        "atom_delete": 3,
+        "atom_insert": 3,
+        "atom_restate": 1
+      },
+      "refusal_deltas": {
+        "budget_exhausted": 0,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 1,
+        "executor_refusals": 0,
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_rejections": 0,
+        "lock_rejections": 23,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_reroute_refusals": 0,
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 0,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      }
+    }
+  ],
+  "attempts": 20,
+  "drug": "SPIRAPRIL",
+  "fallback_count": 0,
+  "metrics": {
+    "distance": 0.666726165041698,
+    "distance_to_original_drug": 0.6476688933315757,
+    "diversity": 0.5352,
+    "quality": 10.0,
+    "uniqueness": 100.0,
+    "validity": 100.0
+  },
+  "rng_seed": 3860443628,
+  "schema": "fragment_attachment_library_pilot_shard_v1",
+  "seed": 0,
+  "task": "motif_extension",
+  "task_fidelity_count": 19
+}

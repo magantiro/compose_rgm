@@ -1,0 +1,388 @@
+{
+  "baseline_attachment_control": {
+    "attachment_first": true,
+    "condition_initial_locked_family": true,
+    "enabled": true,
+    "hard_lock_effective_chemistry": true,
+    "path_length_max": 5,
+    "path_length_min": 2,
+    "path_program": false,
+    "realize_redirected_order": true,
+    "redirect_attachment": true,
+    "release_linker_join": true,
+    "require_separated_cores": true,
+    "restrict_interfaces": true
+  },
+  "baseline_sampler": {
+    "mark_attempts_per_event": 24,
+    "max_events": 32,
+    "n_slots": 48,
+    "operational_horizon": 16.0
+  },
+  "catalog_code_sha256": "66402727a92fe54301ec8890bb6fd0988aea644626199929a595bf47e89eb02d",
+  "catalog_dir": "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_attachment_catalog_train500k_v1",
+  "catalog_sha256": "636ae5f16921632c9838d7171a77ca67c6bbcc94f297f5bf135ea66d1f4f57ce",
+  "checkpoint": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+  "checkpoint_sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+  "checkpoint_steps": 16000,
+  "evaluator_sha256": "9406ddffad9e05d67bc7b6333d4b51eef534f2f4b11a2cedc237e80698389459",
+  "library_coverage": {
+    "motif_extension|BARICITINIB": [
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 7
+      }
+    ],
+    "motif_extension|CYCLOTHIAZIDE": [
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 12
+      }
+    ],
+    "motif_extension|ELIGLUSTAT": [
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 0
+      }
+    ],
+    "motif_extension|ERLOTINIB": [
+      {
+        "compatible_distinct_fragments": 372,
+        "compatible_training_occurrences": 59897,
+        "context": "O:0:0",
+        "required_count": 1,
+        "site": 4
+      }
+    ],
+    "motif_extension|FUTIBATINIB": [
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 6
+      }
+    ],
+    "motif_extension|LESINURAD": [
+      {
+        "compatible_distinct_fragments": 225,
+        "compatible_training_occurrences": 16029,
+        "context": "N:1:1",
+        "required_count": 1,
+        "site": 10
+      }
+    ],
+    "motif_extension|LIOTHYRONINE": [
+      {
+        "compatible_distinct_fragments": 419,
+        "compatible_training_occurrences": 90322,
+        "context": "C:0:0",
+        "required_count": 1,
+        "site": 0
+      }
+    ],
+    "motif_extension|LOVASTATIN": [
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 17
+      }
+    ],
+    "motif_extension|MARIBAVIR": [
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 4
+      }
+    ],
+    "motif_extension|SPIRAPRIL": [
+      {
+        "compatible_distinct_fragments": 283,
+        "compatible_training_occurrences": 17221,
+        "context": "N:0:1",
+        "required_count": 1,
+        "site": 7
+      }
+    ],
+    "scaffold_decoration|BARICITINIB": [
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 7
+      },
+      {
+        "compatible_distinct_fragments": 283,
+        "compatible_training_occurrences": 17221,
+        "context": "N:0:1",
+        "required_count": 1,
+        "site": 9
+      }
+    ],
+    "scaffold_decoration|CYCLOTHIAZIDE": [
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 15
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 16
+      }
+    ],
+    "scaffold_decoration|ELIGLUSTAT": [
+      {
+        "compatible_distinct_fragments": 419,
+        "compatible_training_occurrences": 90322,
+        "context": "C:0:0",
+        "required_count": 1,
+        "site": 6
+      },
+      {
+        "compatible_distinct_fragments": 419,
+        "compatible_training_occurrences": 90322,
+        "context": "C:0:0",
+        "required_count": 1,
+        "site": 7
+      }
+    ],
+    "scaffold_decoration|ERLOTINIB": [
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 1
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 11
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 12
+      }
+    ],
+    "scaffold_decoration|FUTIBATINIB": [
+      {
+        "compatible_distinct_fragments": 283,
+        "compatible_training_occurrences": 17221,
+        "context": "N:0:1",
+        "required_count": 1,
+        "site": 8
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 14
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 18
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 20
+      }
+    ],
+    "scaffold_decoration|LESINURAD": [
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 6
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 9
+      }
+    ],
+    "scaffold_decoration|LIOTHYRONINE": [
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 0
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 2
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 8
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 9
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 11
+      }
+    ],
+    "scaffold_decoration|LOVASTATIN": [
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 3
+      },
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 9
+      },
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 14
+      },
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 16
+      }
+    ],
+    "scaffold_decoration|MARIBAVIR": [
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 0
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 1
+      },
+      {
+        "compatible_distinct_fragments": 995,
+        "compatible_training_occurrences": 272267,
+        "context": "C:1:1",
+        "required_count": 1,
+        "site": 7
+      },
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 10
+      },
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 11
+      },
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 12
+      }
+    ],
+    "scaffold_decoration|SPIRAPRIL": [
+      {
+        "compatible_distinct_fragments": 419,
+        "compatible_training_occurrences": 90322,
+        "context": "C:0:0",
+        "required_count": 1,
+        "site": 2
+      },
+      {
+        "compatible_distinct_fragments": 419,
+        "compatible_training_occurrences": 90322,
+        "context": "C:0:0",
+        "required_count": 1,
+        "site": 4
+      },
+      {
+        "compatible_distinct_fragments": 655,
+        "compatible_training_occurrences": 50970,
+        "context": "C:0:1",
+        "required_count": 1,
+        "site": 14
+      }
+    ]
+  },
+  "metric_denominator": "20 attempted generations per prompt, no task-fidelity censoring",
+  "pilot_code_sha256": "f7816f78d17f63dd1cd82fcb0771f4ec36c7350bdc54261d3ecf6c3c965dfb15",
+  "prompt_manifest": "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv",
+  "prompt_sha256": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+  "samples_per_prompt": 20,
+  "schema": "fragment_attachment_library_pilot_v1",
+  "scientific_role": "matched development pilot, not a full benchmark",
+  "seed": 0,
+  "seed_derivation": "BLAKE2b drug|task|seed, 8-byte digest modulo 2^32",
+  "software": {
+    "numpy": "1.26.4",
+    "python": "3.11.13",
+    "rdkit": "2024.03.5"
+  },
+  "source_commit": "a16ef9417cdf44d50381fbb8e5069edc31e7c9df",
+  "training_source_sha256": "70526d92f1f08d8e292cb31218f81b6924a2182f772c43348015110669d47791"
+}
