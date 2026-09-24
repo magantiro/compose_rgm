@@ -1,0 +1,481 @@
+{
+ "schema_version": "pmo_leader_structural_residual_v1",
+ "oracle_calls_spent": 0,
+ "information_boundary": "DIAGNOSTIC_reference_ring_systems exists so a human can name the operation each row needs. It must never enter candidate ranking or the proposal law; the production retrieval is matched on ATTACHMENT SIGNATURE and task-oracle statistics only.",
+ "why_ring_systems_and_not_BRICS": "BRICS shreds a fused polycycle. Thiothixene's defining thioxanthene exists only as a whole 14-atom tricycle, so the donor unit has to be the ring SYSTEM -- a connected component of the ring-bond graph -- not a BRICS fragment.",
+ "named_operations": {
+  "thiothixene_rediscovery": "DROP-IN RING SWAP: leader already carries the correct piperazine(6 atoms, 2 attachments); replace its indoline(9a, 2x) with thioxanthene(14a, 2x). Identical attachment count, so the cut geometry matches exactly.",
+  "celecoxib_rediscovery": "ONE PENDANT SWAP: benzene and pyrazole already correct; replace thiophene(5a, 1x) with a tolyl benzene(6a, 2x).",
+  "amlodipine_mpo": "replace benzimidazole(9a, 1x) with benzene(6a, 2x); dihydropyridine already correct",
+  "scaffold_hop": "two swaps: thienopyrimidine(9a,2x)->quinazoline(10a,3x), benzodioxine(10a,1x)->benzothiazole(9a,1x)",
+  "perindopril_mpo": "EXCISION, NOT GRAFTING -- the leader already contains the correct octahydroindole(9a,2x) and carries TWO EXTRA ring systems the reference does not have.",
+  "troglitazone_rediscovery": "all three ring systems already match the reference; only a substituent differs",
+  "fexofenadine_mpo": "leader carries a strained aziridine(3a,4x) absent from the reference's four simple rings"
+ },
+ "residual": {
+  "amlodipine_mpo": {
+   "leader": "CCOC(=O)C1=C(C)NC(Cl)=C(C(=O)OC)C1c1nc2ccccc2[nH]1",
+   "leader_score": 0.7321765321469982,
+   "heavy": 26,
+   "ring_systems": [
+    {
+     "smiles": "C1=CNC=CC1",
+     "atoms": 6,
+     "attachments": 5
+    },
+    {
+     "smiles": "c1ccc2[nH]cnc2c1",
+     "atoms": 9,
+     "attachments": 1
+    }
+   ],
+   "one_cut_pendants": [
+    {
+     "smiles": "c1ccc2[nH]cnc2c1",
+     "atoms": 9
+    },
+    {
+     "smiles": "CCOC=O",
+     "atoms": 5
+    },
+    {
+     "smiles": "COC=O",
+     "atoms": 4
+    },
+    {
+     "smiles": "CCO",
+     "atoms": 3
+    },
+    {
+     "smiles": "CC",
+     "atoms": 2
+    },
+    {
+     "smiles": "CO",
+     "atoms": 2
+    }
+   ],
+   "DIAGNOSTIC_reference_ring_systems": [
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "C1=CNC=CC1",
+     "atoms": 6,
+     "attachments": 5
+    }
+   ]
+  },
+  "celecoxib_rediscovery": {
+   "leader": "Cc1ccc(-n2nc(C(F)(F)F)cc2-c2cccs2)cc1",
+   "leader_score": 0.5853658536585366,
+   "heavy": 21,
+   "ring_systems": [
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "c1cnnc1",
+     "atoms": 5,
+     "attachments": 3
+    },
+    {
+     "smiles": "c1ccsc1",
+     "atoms": 5,
+     "attachments": 1
+    }
+   ],
+   "one_cut_pendants": [
+    {
+     "smiles": "Cc1ccccc1",
+     "atoms": 7
+    },
+    {
+     "smiles": "c1ccsc1",
+     "atoms": 5
+    },
+    {
+     "smiles": "FC(F)F",
+     "atoms": 4
+    }
+   ],
+   "DIAGNOSTIC_reference_ring_systems": [
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "c1cnnc1",
+     "atoms": 5,
+     "attachments": 3
+    },
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 2
+    }
+   ]
+  },
+  "fexofenadine_mpo": {
+   "leader": "CC1(N)C(CCC=CC[NH+]2CCC(O)(c3cccc(C=CC(=O)CC(O)CCCNN)c3)c3ccccc32)N1O",
+   "leader_score": 0.7980481030862815,
+   "heavy": 40,
+   "ring_systems": [
+    {
+     "smiles": "C1CN1",
+     "atoms": 3,
+     "attachments": 4
+    },
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "c1ccc2c(c1)CCC[NH+]2",
+     "atoms": 10,
+     "attachments": 3
+    }
+   ],
+   "one_cut_pendants": [
+    {
+     "smiles": "NNCCCC(O)CC(=O)C=Cc1ccccc1",
+     "atoms": 18
+    },
+    {
+     "smiles": "C=CC(=O)CC(O)CCCNN",
+     "atoms": 12
+    },
+    {
+     "smiles": "CC=CCCC1N(O)C1(C)N",
+     "atoms": 11
+    },
+    {
+     "smiles": "C=CCCC1N(O)C1(C)N",
+     "atoms": 10
+    },
+    {
+     "smiles": "NNCCCC(O)CC=O",
+     "atoms": 10
+    },
+    {
+     "smiles": "CCC1N(O)C1(C)N",
+     "atoms": 8
+    }
+   ],
+   "DIAGNOSTIC_reference_ring_systems": [
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "C1CCNCC1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 1
+    },
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 1
+    }
+   ]
+  },
+  "jnk3": {
+   "leader": "CN(CCc1ccc(-c2ccnc(NC3CC3)n2)cc1)CC1(C)CCCN1N",
+   "leader_score": 0.77,
+   "heavy": 28,
+   "ring_systems": [
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "c1cncnc1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "C1CC1",
+     "atoms": 3,
+     "attachments": 1
+    },
+    {
+     "smiles": "C1CCNC1",
+     "atoms": 5,
+     "attachments": 3
+    }
+   ],
+   "one_cut_pendants": [
+    {
+     "smiles": "CCN(C)CC1(C)CCCN1N",
+     "atoms": 12
+    },
+    {
+     "smiles": "CN(C)CC1(C)CCCN1N",
+     "atoms": 11
+    },
+    {
+     "smiles": "c1cnc(NC2CC2)nc1",
+     "atoms": 10
+    },
+    {
+     "smiles": "CNCC1(C)CCCN1N",
+     "atoms": 10
+    },
+    {
+     "smiles": "CC1(C)CCCN1N",
+     "atoms": 8
+    },
+    {
+     "smiles": "CC1CCCN1N",
+     "atoms": 7
+    }
+   ],
+   "DIAGNOSTIC_reference_ring_systems": null
+  },
+  "perindopril_mpo": {
+   "leader": "CCCC(CC)C(C)c1cccc(C(=O)N2C(C(=O)OCc3ccno3)CC3CCCCC32)c1",
+   "leader_score": 0.6232413273091858,
+   "heavy": 34,
+   "ring_systems": [
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "c1cnoc1",
+     "atoms": 5,
+     "attachments": 1
+    },
+    {
+     "smiles": "C1CCC2NCCC2C1",
+     "atoms": 9,
+     "attachments": 2
+    }
+   ],
+   "one_cut_pendants": [
+    {
+     "smiles": "CCCC(CC)C(C)c1cccc(C=O)c1",
+     "atoms": 16
+    },
+    {
+     "smiles": "CCCC(CC)C(C)c1ccccc1",
+     "atoms": 14
+    },
+    {
+     "smiles": "O=COCc1ccno1",
+     "atoms": 9
+    },
+    {
+     "smiles": "CCCC(CC)CC",
+     "atoms": 8
+    },
+    {
+     "smiles": "OCc1ccno1",
+     "atoms": 7
+    },
+    {
+     "smiles": "Cc1ccno1",
+     "atoms": 6
+    }
+   ],
+   "DIAGNOSTIC_reference_ring_systems": [
+    {
+     "smiles": "C1CCC2NCCC2C1",
+     "atoms": 9,
+     "attachments": 2
+    }
+   ]
+  },
+  "scaffold_hop": {
+   "leader": "COc1ccccc1-c1csc2ncnc(Nc3ccc4c(c3)OCCO4)c12",
+   "leader_score": 0.5640239451014747,
+   "heavy": 28,
+   "ring_systems": [
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "c1ncc2ccsc2n1",
+     "atoms": 9,
+     "attachments": 2
+    },
+    {
+     "smiles": "c1ccc2c(c1)OCCO2",
+     "atoms": 10,
+     "attachments": 1
+    }
+   ],
+   "one_cut_pendants": [
+    {
+     "smiles": "Nc1ccc2c(c1)OCCO2",
+     "atoms": 11
+    },
+    {
+     "smiles": "c1ccc2c(c1)OCCO2",
+     "atoms": 10
+    },
+    {
+     "smiles": "COc1ccccc1",
+     "atoms": 8
+    },
+    {
+     "smiles": "CO",
+     "atoms": 2
+    }
+   ],
+   "DIAGNOSTIC_reference_ring_systems": [
+    {
+     "smiles": "c1ccc2ncncc2c1",
+     "atoms": 10,
+     "attachments": 3
+    },
+    {
+     "smiles": "c1ccc2scnc2c1",
+     "atoms": 9,
+     "attachments": 1
+    }
+   ]
+  },
+  "thiothixene_rediscovery": {
+   "leader": "CN1CCN(C(CCCN2C(=O)c3ccccc32)N2CCc3cc(S(=O)(=O)N(C)C)ccc32)CC1",
+   "leader_score": 0.4838709677419355,
+   "heavy": 35,
+   "ring_systems": [
+    {
+     "smiles": "C1CNCCN1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "C1Nc2ccccc21",
+     "atoms": 8,
+     "attachments": 2
+    },
+    {
+     "smiles": "c1ccc2c(c1)CCN2",
+     "atoms": 9,
+     "attachments": 2
+    }
+   ],
+   "one_cut_pendants": [
+    {
+     "smiles": "CN(C)S(=O)(=O)c1ccc2c(c1)CCN2",
+     "atoms": 15
+    },
+    {
+     "smiles": "CCCN1C(=O)c2ccccc21",
+     "atoms": 12
+    },
+    {
+     "smiles": "CCN1C(=O)c2ccccc21",
+     "atoms": 11
+    },
+    {
+     "smiles": "CN1C(=O)c2ccccc21",
+     "atoms": 10
+    },
+    {
+     "smiles": "O=C1Nc2ccccc21",
+     "atoms": 9
+    },
+    {
+     "smiles": "CN1CCNCC1",
+     "atoms": 7
+    }
+   ],
+   "DIAGNOSTIC_reference_ring_systems": [
+    {
+     "smiles": "C1c2ccccc2Sc2ccccc21",
+     "atoms": 14,
+     "attachments": 2
+    },
+    {
+     "smiles": "C1CNCCN1",
+     "atoms": 6,
+     "attachments": 2
+    }
+   ]
+  },
+  "troglitazone_rediscovery": {
+   "leader": "Cc1c(C)c2c(c(C)c1O)CCC(C=O)(COc1ccc(CC3SC(=O)NC3=O)cc1)O2",
+   "leader_score": 0.8229166666666666,
+   "heavy": 32,
+   "ring_systems": [
+    {
+     "smiles": "c1ccc2c(c1)CCCO2",
+     "atoms": 10,
+     "attachments": 6
+    },
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "C1CSCN1",
+     "atoms": 5,
+     "attachments": 3
+    }
+   ],
+   "one_cut_pendants": [
+    {
+     "smiles": "Cc1c(C)c2c(c(C)c1O)CCC(C=O)O2",
+     "atoms": 16
+    },
+    {
+     "smiles": "O=C1NC(=O)C(Cc2ccc(O)cc2)S1",
+     "atoms": 15
+    },
+    {
+     "smiles": "O=C1NC(=O)C(Cc2ccccc2)S1",
+     "atoms": 14
+    },
+    {
+     "smiles": "CC1SC(=O)NC1=O",
+     "atoms": 8
+    },
+    {
+     "smiles": "O=C1CSC(=O)N1",
+     "atoms": 7
+    },
+    {
+     "smiles": "C=O",
+     "atoms": 2
+    }
+   ],
+   "DIAGNOSTIC_reference_ring_systems": [
+    {
+     "smiles": "c1ccc2c(c1)CCCO2",
+     "atoms": 10,
+     "attachments": 6
+    },
+    {
+     "smiles": "c1ccccc1",
+     "atoms": 6,
+     "attachments": 2
+    },
+    {
+     "smiles": "C1CSCN1",
+     "atoms": 5,
+     "attachments": 3
+    }
+   ]
+  }
+ }
+}
