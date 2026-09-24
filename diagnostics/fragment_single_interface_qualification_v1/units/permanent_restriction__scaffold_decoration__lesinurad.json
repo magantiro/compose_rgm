@@ -1,0 +1,696 @@
+{
+  "arm": "permanent_restriction",
+  "attachment_control": {
+    "arm": "attachment_control",
+    "config": {
+      "attachment_first": true,
+      "enabled": true,
+      "path_length_max": 5,
+      "path_length_min": 2,
+      "path_program": false,
+      "realize_redirected_order": true,
+      "redirect_attachment": true,
+      "release_linker_join": true,
+      "require_separated_cores": true,
+      "restrict_interfaces": true
+    },
+    "config_sha256": "80a40b905adf84eae5d55be274aba4fbc1af9f088170028fc7452bdcbbdc44c6"
+  },
+  "drug": "LESINURAD",
+  "identity": {
+    "base_git_commit": "526e30a3852211df315b73740522d3af4f16eea8",
+    "checkpoint_metadata": {
+      "completed_steps": 16000,
+      "corpus_scope_hash": "3721d69851110fdd"
+    },
+    "contract_sha256": "1b348d3278c953a7fc0e086fbb251fbdb1420919ba1feceb10a45dd36cdcb314",
+    "development_summary_sha256": "bb2c9fcb1954afa36dc0b92383239fa4d61e4c496cbd4bb737e1cc5fec4145db",
+    "implementation_sha256": {
+      "src/compose_v4/benchmark/fragment_attachment_control.py": "b2df909f9e283cfb06a7491eb4f76e4806c4c81e3222c8d70523ac719e8e8e2f",
+      "src/compose_v4/benchmark/fragment_conditioned_sampler.py": "684f6e156945498529d24aa9e4267e91efcaf46ffedfccfc6650e4bed9645b2f",
+      "src/compose_v4/benchmark/fragment_constrained.py": "cd9113a6afd22e833de462a0ad7d816ed170e8bde0d9d5577d7cae98caf0ddc6",
+      "src/compose_v4/benchmark/fragment_official_metrics.py": "eb8430c08a6a57da25a2f7f7d57ec892fbeec6d81a78b31c616295e23cb42726",
+      "tools/fetch_official_fragment_evaluator.py": "3426da4a3fa126fa5c84afd13cd955c743affb08e3825d9a67506db12f1e0147",
+      "tools/run_fragment_constrained_suite.py": "b1bfe44cbeaed80c1feb54c30c2180018ed6510482c30b5dc7145d7b70ef9199",
+      "tools/run_fragment_interface_release_pilot.py": "d050b0915b6e65ce6081c379354ccc2d67a79bec5a27b0d8982c03248cf646af",
+      "tools/run_fragment_single_interface_qualification.py": "08c63e44e22594a8aa6a2c90f271cfda6ef47b3c6be92bf4942bbecd81b4223d"
+    },
+    "inputs_sha256": {
+      "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+      "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9"
+    },
+    "official_ivg_blobs_sha256": {
+      "in_virtuo_gen/evaluation/downstream.py": "ab34f586b41f1ad6e21cd933b08e7ff86eb44711c9c9a4c31c29f894cc9c7b50",
+      "in_virtuo_gen/train_utils/metrics.py": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+      "in_virtuo_gen/utils/mol.py": "ed5609c72a3effe2547f4b264e35be8134affccc206978605307d1365a028145",
+      "references/fragments.csv": "43db9adbcf7f8895be6197bccdf729517c4433b7fdbf637f413fa9c8055c3a31",
+      "references/frags_downstream.csv": "dceeec39f389dda928a210694449948645be73d12da0ad93bc843ba1f2bb5975",
+      "references/reference_metrics.csv": "e75676431628987d3d0bacbafc3028ffd7ebc8d797ecb03fb386b13a453823f9"
+    },
+    "official_ivg_evaluator_commit": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "protocol": {
+      "arms": [
+        "permanent_restriction",
+        "global_release",
+        "single_interface_policy"
+      ],
+      "attempts_per_prompt": 20,
+      "seed": 0,
+      "status": "held-prompt zero-oracle qualification; not full official benchmark",
+      "task_drugs": {
+        "motif_extension": [
+          "CYCLOTHIAZIDE",
+          "ELIGLUSTAT",
+          "FUTIBATINIB",
+          "LESINURAD",
+          "LOVASTATIN",
+          "SPIRAPRIL"
+        ],
+        "scaffold_decoration": [
+          "CYCLOTHIAZIDE",
+          "ELIGLUSTAT",
+          "FUTIBATINIB",
+          "LESINURAD",
+          "LOVASTATIN",
+          "SPIRAPRIL"
+        ],
+        "superstructure_generation": [
+          "CYCLOTHIAZIDE",
+          "ELIGLUSTAT",
+          "ERLOTINIB",
+          "FUTIBATINIB",
+          "LESINURAD",
+          "LIOTHYRONINE"
+        ]
+      }
+    },
+    "schema": "fragment_single_interface_qualification_v1",
+    "software": {
+      "networkx": "3.3",
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "platform": "macOS-26.5.2-arm64-arm-64bit",
+      "python": "3.11.13",
+      "rdkit": "2024.03.5",
+      "scipy": "1.13.1",
+      "torch": "2.4.0"
+    }
+  },
+  "result": {
+    "build_failures": [],
+    "per_drug": {
+      "LESINURAD": [
+        {
+          "attachment_spec": {
+            "interfaces": [
+              6,
+              9
+            ],
+            "lock_group_sizes": [
+              18
+            ],
+            "released_pairs": [],
+            "requirements": [
+              [
+                6,
+                1
+              ],
+              [
+                9,
+                1
+              ]
+            ]
+          },
+          "attempt_records": [
+            {
+              "attempt_index": 0,
+              "committed_smiles": "CCN(C)C(=O)OCc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CCN(C)C(=O)OCc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 14,
+              "family_deltas": {
+                "atom_delete": 2,
+                "atom_insert": 11,
+                "atom_restate": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 4,
+                "lock_rejections": 5,
+                "redirections": 2,
+                "separation_failures": 0,
+                "staging_rejections": 3
+              }
+            },
+            {
+              "attempt_index": 1,
+              "committed_smiles": "CCCCOC(=O)Oc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CCCCOC(=O)Oc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 17,
+              "family_deltas": {
+                "atom_delete": 4,
+                "atom_insert": 13
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 1,
+                "lock_rejections": 1,
+                "redirections": 5,
+                "separation_failures": 0,
+                "staging_rejections": 3
+              }
+            },
+            {
+              "attempt_index": 2,
+              "committed_smiles": "CCC(Nc1nnc(Cl)n1-c1ccc(C2CC2)c2ccccc12)C(C)=O",
+              "emitted_smiles": "CCC(Nc1nnc(Cl)n1-c1ccc(C2CC2)c2ccccc12)C(C)=O",
+              "events": 14,
+              "family_deltas": {
+                "atom_delete": 2,
+                "atom_insert": 10,
+                "atom_restate": 1,
+                "bond_reroute": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 2,
+                "lock_rejections": 3,
+                "redirections": 4,
+                "separation_failures": 0,
+                "staging_rejections": 6
+              }
+            },
+            {
+              "attempt_index": 3,
+              "committed_smiles": "CCc1nnc(F)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CCc1nnc(F)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 9,
+              "family_deltas": {
+                "atom_delete": 3,
+                "atom_insert": 6
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 4,
+                "redirections": 4,
+                "separation_failures": 0,
+                "staging_rejections": 1
+              }
+            },
+            {
+              "attempt_index": 4,
+              "committed_smiles": "CCOc1nnc(C(C)(C)O)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CCOc1nnc(C(C)(C)O)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 16,
+              "family_deltas": {
+                "atom_delete": 3,
+                "atom_insert": 10,
+                "atom_restate": 2,
+                "bond_reorder": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 2,
+                "lock_rejections": 1,
+                "redirections": 2,
+                "separation_failures": 0,
+                "staging_rejections": 1
+              }
+            },
+            {
+              "attempt_index": 5,
+              "committed_smiles": "CCOc1nnc(CC)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CCOc1nnc(CC)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 11,
+              "family_deltas": {
+                "atom_delete": 3,
+                "atom_insert": 8
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 4,
+                "lock_rejections": 1,
+                "redirections": 3,
+                "separation_failures": 0,
+                "staging_rejections": 4
+              }
+            },
+            {
+              "attempt_index": 6,
+              "committed_smiles": "CCOC(=O)CCN(Cc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12)C(C)C",
+              "emitted_smiles": "CCOC(=O)CCN(Cc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12)C(C)C",
+              "events": 19,
+              "family_deltas": {
+                "atom_delete": 3,
+                "atom_insert": 16
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 5,
+                "redirections": 3,
+                "separation_failures": 0,
+                "staging_rejections": 4
+              }
+            },
+            {
+              "attempt_index": 7,
+              "committed_smiles": "CCOCc1nnc(NC=O)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CCOCc1nnc(NC=O)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 11,
+              "family_deltas": {
+                "atom_delete": 2,
+                "atom_insert": 9
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 2,
+                "lock_rejections": 2,
+                "redirections": 1,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 8,
+              "committed_smiles": "CCC(C)(C)C(=O)Nc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CCC(C)(C)C(=O)Nc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 13,
+              "family_deltas": {
+                "atom_delete": 2,
+                "atom_insert": 11
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 1,
+                "lock_rejections": 3,
+                "redirections": 2,
+                "separation_failures": 0,
+                "staging_rejections": 3
+              }
+            },
+            {
+              "attempt_index": 9,
+              "committed_smiles": "CNCC(=O)CCP(=O)(O)CNC(=O)C(C)c1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CNCC(=O)CCP(=O)(O)CNC(=O)C(C)c1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 17,
+              "family_deltas": {
+                "atom_insert": 17
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 2,
+                "lock_rejections": 0,
+                "redirections": 2,
+                "separation_failures": 0,
+                "staging_rejections": 3
+              }
+            },
+            {
+              "attempt_index": 10,
+              "committed_smiles": "CCOC(=O)CCc1nnc(OC)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CCOC(=O)CCc1nnc(OC)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 14,
+              "family_deltas": {
+                "atom_delete": 2,
+                "atom_insert": 11,
+                "bond_reroute": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 2,
+                "lock_rejections": 4,
+                "redirections": 1,
+                "separation_failures": 0,
+                "staging_rejections": 1
+              }
+            },
+            {
+              "attempt_index": 11,
+              "committed_smiles": "COCCN(CCO)C(=O)Cc1nnc(O)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "COCCN(CCO)C(=O)Cc1nnc(O)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 22,
+              "family_deltas": {
+                "atom_delete": 5,
+                "atom_insert": 17
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 3,
+                "lock_rejections": 0,
+                "redirections": 4,
+                "separation_failures": 0,
+                "staging_rejections": 7
+              }
+            },
+            {
+              "attempt_index": 12,
+              "committed_smiles": "CCN(CC(O)C(=O)NP(=O)(OC)c1nnc(C)n1-c1ccc(C2CC2)c2ccccc12)N=O",
+              "emitted_smiles": "CCN(CC(O)C(=O)NP(=O)(OC)c1nnc(C)n1-c1ccc(C2CC2)c2ccccc12)N=O",
+              "events": 18,
+              "family_deltas": {
+                "atom_delete": 1,
+                "atom_insert": 17
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 0,
+                "redirections": 3,
+                "separation_failures": 0,
+                "staging_rejections": 1
+              }
+            },
+            {
+              "attempt_index": 13,
+              "committed_smiles": "CNCC(=O)Cc1nnc(O)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CNCC(=O)Cc1nnc(O)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 13,
+              "family_deltas": {
+                "atom_delete": 3,
+                "atom_insert": 10
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 1,
+                "lock_rejections": 1,
+                "redirections": 4,
+                "separation_failures": 0,
+                "staging_rejections": 1
+              }
+            },
+            {
+              "attempt_index": 14,
+              "committed_smiles": "OCc1nnc(OCC(F)(F)F)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "OCc1nnc(OCC(F)(F)F)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 16,
+              "family_deltas": {
+                "atom_delete": 4,
+                "atom_insert": 12
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 6,
+                "lock_rejections": 0,
+                "redirections": 4,
+                "separation_failures": 0,
+                "staging_rejections": 4
+              }
+            },
+            {
+              "attempt_index": 15,
+              "committed_smiles": "Cc1nnc(C(O)CCN(C)C)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "Cc1nnc(C(O)CCN(C)C)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 16,
+              "family_deltas": {
+                "atom_delete": 4,
+                "atom_insert": 12
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 4,
+                "lock_rejections": 1,
+                "redirections": 4,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 16,
+              "committed_smiles": "NC(=O)c1nnc(NCCCCCC(=O)O)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "NC(=O)c1nnc(NCCCCCC(=O)O)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 17,
+              "family_deltas": {
+                "atom_delete": 2,
+                "atom_insert": 14,
+                "atom_restate": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 0,
+                "redirections": 2,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 17,
+              "committed_smiles": "CC(=O)CC=N[IH]c1nnc(O)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CC(=O)CC=N[IH]c1nnc(O)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 14,
+              "family_deltas": {
+                "atom_delete": 2,
+                "atom_insert": 10,
+                "atom_restate": 1,
+                "bond_reorder": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 3,
+                "lock_rejections": 6,
+                "redirections": 2,
+                "separation_failures": 0,
+                "staging_rejections": 6
+              }
+            },
+            {
+              "attempt_index": 18,
+              "committed_smiles": "CC=COc1nnc(N)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CC=COc1nnc(N)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 9,
+              "family_deltas": {
+                "atom_delete": 1,
+                "atom_insert": 6,
+                "bond_reorder": 2
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 3,
+                "redirections": 2,
+                "separation_failures": 0,
+                "staging_rejections": 4
+              }
+            },
+            {
+              "attempt_index": 19,
+              "committed_smiles": "CCCCCOc1nnc(CO)n1-c1ccc(C2CC2)c2ccccc12",
+              "emitted_smiles": "CCCCCOc1nnc(CO)n1-c1ccc(C2CC2)c2ccccc12",
+              "events": 12,
+              "family_deltas": {
+                "atom_delete": 2,
+                "atom_insert": 10
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 1,
+                "redirections": 3,
+                "separation_failures": 0,
+                "staging_rejections": 5
+              }
+            }
+          ],
+          "attempts": 20,
+          "budget_exhausted": 0,
+          "committed_chemically_valid": 20,
+          "committed_endpoint_smiles": [
+            "CCN(C)C(=O)OCc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCCCOC(=O)Oc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCC(Nc1nnc(Cl)n1-c1ccc(C2CC2)c2ccccc12)C(C)=O",
+            "CCc1nnc(F)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCOc1nnc(C(C)(C)O)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCOc1nnc(CC)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCOC(=O)CCN(Cc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12)C(C)C",
+            "CCOCc1nnc(NC=O)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCC(C)(C)C(=O)Nc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+            "CNCC(=O)CCP(=O)(O)CNC(=O)C(C)c1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCOC(=O)CCc1nnc(OC)n1-c1ccc(C2CC2)c2ccccc12",
+            "COCCN(CCO)C(=O)Cc1nnc(O)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCN(CC(O)C(=O)NP(=O)(OC)c1nnc(C)n1-c1ccc(C2CC2)c2ccccc12)N=O",
+            "CNCC(=O)Cc1nnc(O)n1-c1ccc(C2CC2)c2ccccc12",
+            "OCc1nnc(OCC(F)(F)F)n1-c1ccc(C2CC2)c2ccccc12",
+            "Cc1nnc(C(O)CCN(C)C)n1-c1ccc(C2CC2)c2ccccc12",
+            "NC(=O)c1nnc(NCCCCCC(=O)O)n1-c1ccc(C2CC2)c2ccccc12",
+            "CC(=O)CC=N[IH]c1nnc(O)n1-c1ccc(C2CC2)c2ccccc12",
+            "CC=COc1nnc(N)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCCCCOc1nnc(CO)n1-c1ccc(C2CC2)c2ccccc12"
+          ],
+          "committed_endpoints": 20,
+          "committed_fragment_preserving": 20,
+          "committed_interfaces_covered": 20,
+          "constraint_failures": 0,
+          "declared_interfaces": [
+            6,
+            9
+          ],
+          "distance_reference_prompt": "c1ccc2c(-n3cnnc3)ccc(C3CC3)c2c1",
+          "emitted_fragment_preserving": 20,
+          "emitted_nonempty": 20,
+          "emitted_samples": [
+            "CCN(C)C(=O)OCc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCCCOC(=O)Oc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCC(Nc1nnc(Cl)n1-c1ccc(C2CC2)c2ccccc12)C(C)=O",
+            "CCc1nnc(F)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCOc1nnc(C(C)(C)O)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCOc1nnc(CC)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCOC(=O)CCN(Cc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12)C(C)C",
+            "CCOCc1nnc(NC=O)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCC(C)(C)C(=O)Nc1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+            "CNCC(=O)CCP(=O)(O)CNC(=O)C(C)c1nnc(C)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCOC(=O)CCc1nnc(OC)n1-c1ccc(C2CC2)c2ccccc12",
+            "COCCN(CCO)C(=O)Cc1nnc(O)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCN(CC(O)C(=O)NP(=O)(OC)c1nnc(C)n1-c1ccc(C2CC2)c2ccccc12)N=O",
+            "CNCC(=O)Cc1nnc(O)n1-c1ccc(C2CC2)c2ccccc12",
+            "OCc1nnc(OCC(F)(F)F)n1-c1ccc(C2CC2)c2ccccc12",
+            "Cc1nnc(C(O)CCN(C)C)n1-c1ccc(C2CC2)c2ccccc12",
+            "NC(=O)c1nnc(NCCCCCC(=O)O)n1-c1ccc(C2CC2)c2ccccc12",
+            "CC(=O)CC=N[IH]c1nnc(O)n1-c1ccc(C2CC2)c2ccccc12",
+            "CC=COc1nnc(N)n1-c1ccc(C2CC2)c2ccccc12",
+            "CCCCCOc1nnc(CO)n1-c1ccc(C2CC2)c2ccccc12"
+          ],
+          "executor_refusals": 0,
+          "families": {
+            "atom_delete": 50,
+            "atom_insert": 230,
+            "atom_restate": 6,
+            "bond_reorder": 4,
+            "bond_reroute": 2
+          },
+          "interface_rejections": 37,
+          "lock_rejections": 41,
+          "mean_events": 14.6,
+          "official": {
+            "distance": 0.6109751035692155,
+            "distance_to_original_drug": 0.5879248739642322,
+            "diversity": 0.5558,
+            "quality": 60.0,
+            "uniqueness": 100.0,
+            "validity": 100.0
+          },
+          "path_rejections": 0,
+          "path_targets": [],
+          "path_transaction_refusals": 0,
+          "path_transactions": 0,
+          "realized_linker_lengths": [],
+          "redirections": 57,
+          "rng_seed": 1167276446,
+          "seconds": 32.66,
+          "seed": 0,
+          "seeded_linker_length": null,
+          "separation_failures": 0,
+          "staging_rejections": 57,
+          "start_state_interface_coverage": {
+            "covered": {
+              "6": 0,
+              "9": 0
+            },
+            "interfaces": [
+              6,
+              9
+            ],
+            "required": {
+              "6": 1,
+              "9": 1
+            },
+            "satisfied": false
+          },
+          "unique_valid_count": 20,
+          "validity_denominator": 20
+        }
+      ]
+    },
+    "per_seed": [
+      {
+        "distance": 0.6109751035692155,
+        "distance_to_original_drug": 0.5879248739642322,
+        "diversity": 0.5558,
+        "quality": 60.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    ],
+    "prompts_declared": 1,
+    "prompts_scored": 1,
+    "samples_per_prompt": 20,
+    "seeds": 1,
+    "summary": {
+      "distance": {
+        "mean": 0.6109751035692155,
+        "std": 0.0
+      },
+      "distance_to_original_drug": {
+        "mean": 0.5879248739642322,
+        "std": 0.0
+      },
+      "diversity": {
+        "mean": 0.5558,
+        "std": 0.0
+      },
+      "quality": {
+        "mean": 60.0,
+        "std": 0.0
+      },
+      "uniqueness": {
+        "mean": 100.0,
+        "std": 0.0
+      },
+      "validity": {
+        "mean": 100.0,
+        "std": 0.0
+      }
+    },
+    "task": "scaffold_decoration"
+  },
+  "sampler": {
+    "config": {
+      "mark_attempts_per_event": 24,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "config_sha256": "805b2d10fa863c278dfd760fb3b9f5fd29eb94f91ef1653b1bf5ebe44aaab9ae"
+  },
+  "task": "scaffold_decoration"
+}
