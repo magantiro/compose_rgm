@@ -168,6 +168,25 @@ def test_legacy_graft_thinning_restores_prequotient_support_without_executing_se
     assert all(isinstance(draw.action, BondReroute) for draw in chemical)
 
 
+def test_optional_learned_logit_scale_preserves_default_draw_and_legal_support() -> None:
+    catalog, _ = _catalog_and_records(("CCO",))
+    state = pad_molecular_graph(smiles_to_molecular_graph("CCO"), 12)
+    model = FactorizedTraceletRateModel(catalog, hidden_dim=16, message_passing_steps=1)
+    baseline = model.sample_rewrite_mark(state, 0.5, np.random.default_rng(704))
+    model.sampling_logit_scale = 1.0
+    unchanged = model.sample_rewrite_mark(state, 0.5, np.random.default_rng(704))
+    assert unchanged == baseline
+    model.sampling_logit_scale = 2.0
+    runtime = de_novo_rewrite_system()
+    for seed in range(8):
+        mark = model.sample_rewrite_mark(state, 0.5, np.random.default_rng(seed))
+        if mark.action is not None and not mark.rule_name.startswith("<VIRTUAL_"):
+            runtime.apply(state, mark.rule_name, mark.action)
+    model.sampling_logit_scale = 0.0
+    with pytest.raises(ValueError, match="finite and positive"):
+        model.sample_rewrite_mark(state, 0.5, np.random.default_rng(1))
+
+
 def test_superposed_family_scores_include_executable_match_partition() -> None:
     raw = torch.tensor(((0.2, -0.1, 0.7), (1.0, -2.0, 4.0)))
     action_log_z = torch.tensor(((0.0, -1.5, float("-inf")), (2.0, float("-inf"), float("-inf"))))

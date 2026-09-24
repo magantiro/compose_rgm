@@ -4417,6 +4417,17 @@ class FactorizedTraceletRateModel(nn.Module):
             family_index = MARK_RULE_TO_INDEX.get(rule_name)
             if family_index is not None:
                 enabled[family_index] = False
+        # Development-only learned-prior temperature. Scale=1 keeps the
+        # historical exact sampling path; other positive scales modify only
+        # probabilities on the checkpoint's already legal mark support.
+        sampling_logit_scale = float(getattr(self, "sampling_logit_scale", 1.0))
+        if not np.isfinite(sampling_logit_scale) or sampling_logit_scale <= 0.0:
+            raise ValueError("sampling_logit_scale must be finite and positive")
+        sampling_logits = (
+            logits
+            if sampling_logit_scale == 1.0
+            else {name: value * sampling_logit_scale for name, value in logits.items()}
+        )
         while bool(enabled.any()):
             family_logits = _masked_family_logits(
                 self._family_base_logits(batch, global_state)[0],
@@ -4424,6 +4435,8 @@ class FactorizedTraceletRateModel(nn.Module):
                 enabled,
                 rate_factorization=self.rate_factorization,
             )
+            if sampling_logit_scale != 1.0:
+                family_logits = family_logits * sampling_logit_scale
             family_probabilities = (
                 torch.softmax(family_logits, dim=-1).float().cpu().numpy()
             )
@@ -4437,7 +4450,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 global_state[0],
                 pair[0],
                 masks,
-                logits,
+                sampling_logits,
                 rng,
             )
             if action is None:

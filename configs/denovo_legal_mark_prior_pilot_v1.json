@@ -1,0 +1,26 @@
+{
+  "payload": {
+    "schema": "denovo_legal_mark_prior_pilot_v1",
+    "status": "frozen_zero_oracle_development_screen",
+    "scientific_question": "Does sharpening the existing learned logits over the model's legal mark fiber improve de novo C1 quality without sacrificing validity, uniqueness or diversity?",
+    "baseline": "unchanged saved C1 endpoints at the exact selected trajectory seeds",
+    "selection_source_contract_payload_sha256": "455112593d58df5ef78341b34baaecffc32dcb9b3fe9b726c6c0229e9d5615ab",
+    "selected_indices": [138, 185, 57, 139, 137, 81, 198, 4, 30, 184, 39, 86, 34, 8, 49, 136, 28, 2, 85, 177, 178, 186, 59, 40],
+    "prior": {"sampling_logit_scale": 2.0},
+    "runtime": {"arm": "C1", "n_slots": 40, "operational_horizon": 16.0, "time_step": 0.1, "max_events": 128, "torch_threads": 1},
+    "qualification_gate": {
+      "quality_gain_percentage_points_at_least": 10.0,
+      "diversity_loss_at_most": 0.03,
+      "committed_chemical_validity": 1.0,
+      "unique_fraction_at_least": 0.95,
+      "interpretation": "Directional screen only. Twenty-four paired seeds are underpowered for a benchmark win or model promotion. Preserve a negative result."
+    },
+    "inputs": {
+      "checkpoint": {"path": "/private/tmp/compose_quality_JKbB09/checkpoint.best_so_far.pt", "sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c"},
+      "ring_prior": {"path": "diagnostics/denovo_ring_marginal_v1/plan_prior_v1.json", "sha256": "de2a5f995df74eab18345c564b8953fd3733f0852ba165edd864b5e8c897fc8d"},
+      "baseline_records": {"path": "diagnostics/denovo_fragment_quality_v1/attempt_1/records.json", "sha256": "3da4657d500adee468f8706b07a6cd7e6b00f70d19cde410d3ea9d2afee3d9a5"}
+    },
+    "prohibitions": ["no SA or QED in proposal selection", "no target-specific rule", "no posthoc filtering", "no change to source tree, ring plan, executor or model checkpoint", "no promotion based on this pilot alone"]
+  },
+  "payload_sha256": "9b8a7e96de1e5e2f11dc4186cd8b12efc39ab6fcf80c9ab1503fc692ffafbfe9"
+}
