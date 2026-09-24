@@ -5,14 +5,24 @@ thiothixene was already inspected by hand. It is never a production filter; the 
 whether a supposedly broad blind sampler systematically fails to represent a structural
 class that is 8% of its own admissible pool.
 """
-import sys, csv, importlib.util, collections
+import collections
+import csv
+import importlib.util
+import sys
+
 import numpy as np
+
 sys.path.insert(0, "src")
-from rdkit import Chem, RDLogger, DataStructs
+from rdkit import Chem, DataStructs, RDLogger
 from rdkit.Chem import AllChem
+
 RDLogger.DisableLog("rdApp.*")
-from compose_v4.control.contextual_region_replace import region_replacements, substituent_replacements, region_excisions
-from compose_v4.control.attachment_compatibility import build_attachment_table, admissible
+from compose_v4.control.attachment_compatibility import admissible, build_attachment_table
+from compose_v4.control.contextual_region_replace import (
+    region_excisions,
+    region_replacements,
+    substituent_replacements,
+)
 
 S = sys.argv[1]; TRIALS = int(sys.argv[2]); ARMS = int(sys.argv[3])
 spec = importlib.util.spec_from_file_location("cen", "scripts/pmo_macro_rollout_census.py")
