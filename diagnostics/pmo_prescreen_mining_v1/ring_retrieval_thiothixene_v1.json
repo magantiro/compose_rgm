@@ -1,0 +1,567 @@
+{
+ "schema_version": "pmo_ring_retrieval_v1",
+ "measured_at_utc": "2026-09-24T12:59:37.280918+00:00",
+ "oracle_calls_spent": 0,
+ "verdict": "TARGET_BLIND_RETRIEVAL_RECOVERS_THE_ANSWER_AT_RANK_3",
+ "library": {
+  "source": "all 249,455 prescreen molecules",
+  "unit": "intact fused ring system",
+  "distinct": 5872,
+  "polycyclic_ge_9_atoms": 4802,
+  "no_minimum_support": true
+ },
+ "query": {
+  "leader_system_replaced": "c1ccc2c(c1)CCN2 (9 atoms, 2 attachments)",
+  "candidates": 2167,
+  "ranking": "mean of the task's OWN oracle over molecules carrying each ring system",
+  "reference_used_in_ranking": false
+ },
+ "result": {
+  "thioxanthene": "C1c2ccccc2Sc2ccccc21 ranks #3 of 2167, mean oracle 0.2650, 6 molecules",
+  "top4_are_all_sulfur_tricyclics": true
+ },
+ "THE_DESIGN_FLAW_THIS_CAUGHT": "Matching a donor ring system on EQUALITY of attachment count makes this row impossible. ZINC's six thioxanthene-bearing molecules carry it at 3 or 4 attachment points and NEVER at 2, while thiothixene itself uses 2. Under '==' the answer is absent from the candidate set entirely; under '>=' it ranks #3. A surplus attachment point simply becomes a hydrogen when the system is grafted, so '>=' is also the chemically correct rule.",
+ "known_limitation": "The leader system to replace is currently chosen as 'largest with >=2 attachments'. That is right for thiothixene and WRONG for celecoxib, whose needed swap is its 1-attachment thiophene. Production retrieval must enumerate every leader ring system, not just the largest.",
+ "ranked": [
+  {
+   "ring_system": "c1ccc2c(c1)CCc1ccccc1S2",
+   "atoms": 15,
+   "n_molecules": 4,
+   "n_sampled": 4,
+   "mean_oracle": 0.29343719353970854,
+   "max_oracle": 0.31666666666666665,
+   "lift": 0.13124327888169562
+  },
+  {
+   "ring_system": "C1Cc2ccccc2S1",
+   "atoms": 9,
+   "n_molecules": 10,
+   "n_sampled": 10,
+   "mean_oracle": 0.26664227782818595,
+   "max_oracle": 0.33035714285714285,
+   "lift": 0.10444836317017303
+  },
+  {
+   "ring_system": "C1c2ccccc2Sc2ccccc21",
+   "atoms": 14,
+   "n_molecules": 6,
+   "n_sampled": 6,
+   "mean_oracle": 0.2650017726058143,
+   "max_oracle": 0.3486238532110092,
+   "lift": 0.1028078579478014
+  },
+  {
+   "ring_system": "c1ccc2c(c1)Nc1ccccc1S2",
+   "atoms": 14,
+   "n_molecules": 20,
+   "n_sampled": 20,
+   "mean_oracle": 0.2607305066153167,
+   "max_oracle": 0.30952380952380953,
+   "lift": 0.0985365919573038
+  },
+  {
+   "ring_system": "c1ccc2c(c1)ccc1ncsc12",
+   "atoms": 13,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.25996524958719175,
+   "max_oracle": 0.2777777777777778,
+   "lift": 0.09777133492917883
+  },
+  {
+   "ring_system": "c1ccc2nc3n(cc2c1)CCNCC3",
+   "atoms": 15,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.2523709577114428,
+   "max_oracle": 0.2835820895522388,
+   "lift": 0.09017704305342988
+  },
+  {
+   "ring_system": "C1Nc2ccccc2Sc2ncccc21",
+   "atoms": 15,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.25191812706160616,
+   "max_oracle": 0.2733812949640288,
+   "lift": 0.08972421240359324
+  },
+  {
+   "ring_system": "c1ccc2c(c1)NSc1ccccc1-2",
+   "atoms": 14,
+   "n_molecules": 10,
+   "n_sampled": 10,
+   "mean_oracle": 0.25019560733046786,
+   "max_oracle": 0.2926829268292683,
+   "lift": 0.08800169267245495
+  },
+  {
+   "ring_system": "c1ccc2nc3c(nc2c1)NCN3",
+   "atoms": 13,
+   "n_molecules": 4,
+   "n_sampled": 4,
+   "mean_oracle": 0.24829686506614998,
+   "max_oracle": 0.26865671641791045,
+   "lift": 0.08610295040813706
+  },
+  {
+   "ring_system": "c1cc2c(cnc3cnnn32)s1",
+   "atoms": 12,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.24789170987543951,
+   "max_oracle": 0.25735294117647056,
+   "lift": 0.0856977952174266
+  },
+  {
+   "ring_system": "C1N[C@@H]2CNCC2Cc2ccccc21",
+   "atoms": 14,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.24702045378118015,
+   "max_oracle": 0.2845528455284553,
+   "lift": 0.08482653912316723
+  },
+  {
+   "ring_system": "c1ccc2nc3c(nc2c1)NCCCN3",
+   "atoms": 15,
+   "n_molecules": 6,
+   "n_sampled": 6,
+   "mean_oracle": 0.24690501709014712,
+   "max_oracle": 0.2777777777777778,
+   "lift": 0.0847111024321342
+  },
+  {
+   "ring_system": "c1ccc2nc3c(nc2c1)NCCN3",
+   "atoms": 14,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.2463169617544861,
+   "max_oracle": 0.2556390977443609,
+   "lift": 0.0841230470964732
+  },
+  {
+   "ring_system": "C1Nc2ccccc2Sc2ccccc21",
+   "atoms": 15,
+   "n_molecules": 26,
+   "n_sampled": 26,
+   "mean_oracle": 0.24295086647582673,
+   "max_oracle": 0.34532374100719426,
+   "lift": 0.08075695181781381
+  },
+  {
+   "ring_system": "C1Nc2ccccc2[C@@]12CCCNC2",
+   "atoms": 14,
+   "n_molecules": 4,
+   "n_sampled": 4,
+   "mean_oracle": 0.24133554780538566,
+   "max_oracle": 0.265625,
+   "lift": 0.07914163314737274
+  },
+  {
+   "ring_system": "c1ccc2c(c1)SCc1cnnc1-2",
+   "atoms": 13,
+   "n_molecules": 10,
+   "n_sampled": 10,
+   "mean_oracle": 0.24033299673157296,
+   "max_oracle": 0.28,
+   "lift": 0.07813908207356005
+  },
+  {
+   "ring_system": "C1NC2CCCN2c2ccccc21",
+   "atoms": 13,
+   "n_molecules": 23,
+   "n_sampled": 23,
+   "mean_oracle": 0.23836410115792314,
+   "max_oracle": 0.27692307692307694,
+   "lift": 0.07617018649991023
+  },
+  {
+   "ring_system": "C1CCNc2ccccc21",
+   "atoms": 10,
+   "n_molecules": 4,
+   "n_sampled": 4,
+   "mean_oracle": 0.23789191890827674,
+   "max_oracle": 0.24561403508771928,
+   "lift": 0.07569800425026382
+  },
+  {
+   "ring_system": "C1c2ccccc2-c2onc3cccc1c23",
+   "atoms": 16,
+   "n_molecules": 8,
+   "n_sampled": 8,
+   "mean_oracle": 0.23645080069110982,
+   "max_oracle": 0.27702702702702703,
+   "lift": 0.07425688603309691
+  },
+  {
+   "ring_system": "c1ccc2c(c1)NCCS2",
+   "atoms": 10,
+   "n_molecules": 82,
+   "n_sampled": 40,
+   "mean_oracle": 0.23639857866374794,
+   "max_oracle": 0.3050847457627119,
+   "lift": 0.07420466400573503
+  },
+  {
+   "ring_system": "c1ccc2c(c1)NCCCO2",
+   "atoms": 11,
+   "n_molecules": 11,
+   "n_sampled": 11,
+   "mean_oracle": 0.23629628116679668,
+   "max_oracle": 0.2661290322580645,
+   "lift": 0.07410236650878377
+  },
+  {
+   "ring_system": "C1Nc2ccccc2S1",
+   "atoms": 9,
+   "n_molecules": 17,
+   "n_sampled": 17,
+   "mean_oracle": 0.23596105073800105,
+   "max_oracle": 0.2727272727272727,
+   "lift": 0.07376713607998814
+  },
+  {
+   "ring_system": "C1Nc2ccccc2CN2CCC[C@H]12",
+   "atoms": 14,
+   "n_molecules": 4,
+   "n_sampled": 4,
+   "mean_oracle": 0.23526561158140105,
+   "max_oracle": 0.26515151515151514,
+   "lift": 0.07307169692338814
+  },
+  {
+   "ring_system": "C1NCCCn2nccc21",
+   "atoms": 10,
+   "n_molecules": 6,
+   "n_sampled": 6,
+   "mean_oracle": 0.23424970838105222,
+   "max_oracle": 0.24817518248175183,
+   "lift": 0.0720557937230393
+  },
+  {
+   "ring_system": "C1CCSc2ccccc2N1",
+   "atoms": 11,
+   "n_molecules": 48,
+   "n_sampled": 40,
+   "mean_oracle": 0.23398718794728912,
+   "max_oracle": 0.29850746268656714,
+   "lift": 0.0717932732892762
+  },
+  {
+   "ring_system": "c1ccc2c(c1)=[NH+][C@H]1CCNCC=21",
+   "atoms": 13,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.2338737302869297,
+   "max_oracle": 0.2689075630252101,
+   "lift": 0.07167981562891679
+  },
+  {
+   "ring_system": "C1NC2(CCNCC2)Oc2ccccc21",
+   "atoms": 15,
+   "n_molecules": 6,
+   "n_sampled": 6,
+   "mean_oracle": 0.2338199515687114,
+   "max_oracle": 0.25925925925925924,
+   "lift": 0.07162603691069849
+  },
+  {
+   "ring_system": "C1Cc2ccccc2C=C1",
+   "atoms": 10,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.23349000051361635,
+   "max_oracle": 0.2900763358778626,
+   "lift": 0.07129608585560343
+  },
+  {
+   "ring_system": "c1ccc2nc3c(cc2c1)CNCCO3",
+   "atoms": 15,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.23347587624421443,
+   "max_oracle": 0.2440944881889764,
+   "lift": 0.07128196158620151
+  },
+  {
+   "ring_system": "C1CNC[C@H]2c3ccccc3CCN12",
+   "atoms": 14,
+   "n_molecules": 5,
+   "n_sampled": 5,
+   "mean_oracle": 0.23317624895401762,
+   "max_oracle": 0.29838709677419356,
+   "lift": 0.0709823342960047
+  },
+  {
+   "ring_system": "C1Nc2ccccc2[C@]12CCCNC2",
+   "atoms": 14,
+   "n_molecules": 5,
+   "n_sampled": 5,
+   "mean_oracle": 0.23220209897629251,
+   "max_oracle": 0.25384615384615383,
+   "lift": 0.0700081843182796
+  },
+  {
+   "ring_system": "c1cc2n(cn1)CCC2",
+   "atoms": 9,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.23180677394613164,
+   "max_oracle": 0.31092436974789917,
+   "lift": 0.06961285928811872
+  },
+  {
+   "ring_system": "C1NCCOc2ccccc21",
+   "atoms": 11,
+   "n_molecules": 12,
+   "n_sampled": 12,
+   "mean_oracle": 0.2317924116411705,
+   "max_oracle": 0.27049180327868855,
+   "lift": 0.06959849698315759
+  },
+  {
+   "ring_system": "C1NC[C@]2(CCCCc3ccccc32)N1",
+   "atoms": 15,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.23173493173493173,
+   "max_oracle": 0.25,
+   "lift": 0.06954101707691882
+  },
+  {
+   "ring_system": "C1=NN2[C@@H](C1)c1ccccc1OC21CCNCC1",
+   "atoms": 18,
+   "n_molecules": 4,
+   "n_sampled": 4,
+   "mean_oracle": 0.23114731117271609,
+   "max_oracle": 0.26865671641791045,
+   "lift": 0.06895339651470317
+  },
+  {
+   "ring_system": "c1ccc2c(c1)NCCCS2",
+   "atoms": 11,
+   "n_molecules": 68,
+   "n_sampled": 40,
+   "mean_oracle": 0.2309644608166963,
+   "max_oracle": 0.3305785123966942,
+   "lift": 0.06877054615868339
+  },
+  {
+   "ring_system": "C1CC2(CCN1)NCCO2",
+   "atoms": 10,
+   "n_molecules": 38,
+   "n_sampled": 38,
+   "mean_oracle": 0.2308772233131552,
+   "max_oracle": 0.27941176470588236,
+   "lift": 0.06868330865514227
+  },
+  {
+   "ring_system": "C1NC2(CCNCC2)Nc2ccccc21",
+   "atoms": 15,
+   "n_molecules": 9,
+   "n_sampled": 9,
+   "mean_oracle": 0.23079445328507925,
+   "max_oracle": 0.3089430894308943,
+   "lift": 0.06860053862706633
+  },
+  {
+   "ring_system": "c1ccc2c(c1)Cc1ccccc1-2",
+   "atoms": 13,
+   "n_molecules": 109,
+   "n_sampled": 40,
+   "mean_oracle": 0.2302223991052853,
+   "max_oracle": 0.29285714285714287,
+   "lift": 0.06802848444727239
+  },
+  {
+   "ring_system": "C1Nc2ccccc2[C@@]12NN=CS2",
+   "atoms": 13,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.23016090515443155,
+   "max_oracle": 0.2426470588235294,
+   "lift": 0.06796699049641863
+  },
+  {
+   "ring_system": "C1Cc2ccccc2CN1",
+   "atoms": 10,
+   "n_molecules": 59,
+   "n_sampled": 40,
+   "mean_oracle": 0.22945915655263047,
+   "max_oracle": 0.2894736842105263,
+   "lift": 0.06726524189461755
+  },
+  {
+   "ring_system": "c1ccc2c(c1)NC1(CCNCC1)c1cccn1-2",
+   "atoms": 18,
+   "n_molecules": 15,
+   "n_sampled": 15,
+   "mean_oracle": 0.22927029018804174,
+   "max_oracle": 0.26666666666666666,
+   "lift": 0.06707637553002882
+  },
+  {
+   "ring_system": "C1Nc2ccccc2[C@]12NCCc1c2[nH]c2ccccc12",
+   "atoms": 21,
+   "n_molecules": 4,
+   "n_sampled": 4,
+   "mean_oracle": 0.22869427379052337,
+   "max_oracle": 0.2391304347826087,
+   "lift": 0.06650035913251046
+  },
+  {
+   "ring_system": "C1Cc2ccccc2SN1",
+   "atoms": 10,
+   "n_molecules": 4,
+   "n_sampled": 4,
+   "mean_oracle": 0.22840078617112108,
+   "max_oracle": 0.256,
+   "lift": 0.06620687151310817
+  },
+  {
+   "ring_system": "C1Nc2ccccc2CN2CCCC[C@@H]12",
+   "atoms": 15,
+   "n_molecules": 6,
+   "n_sampled": 6,
+   "mean_oracle": 0.22828643641051302,
+   "max_oracle": 0.2578125,
+   "lift": 0.0660925217525001
+  },
+  {
+   "ring_system": "c1cc2nncc-2cn1",
+   "atoms": 9,
+   "n_molecules": 21,
+   "n_sampled": 21,
+   "mean_oracle": 0.2282665799940863,
+   "max_oracle": 0.3153846153846154,
+   "lift": 0.0660726653360734
+  },
+  {
+   "ring_system": "C1C=CCc2ccccc21",
+   "atoms": 10,
+   "n_molecules": 27,
+   "n_sampled": 27,
+   "mean_oracle": 0.2277852662130239,
+   "max_oracle": 0.2975206611570248,
+   "lift": 0.06559135155501097
+  },
+  {
+   "ring_system": "C1NCc2cccc3cccc1c23",
+   "atoms": 13,
+   "n_molecules": 51,
+   "n_sampled": 40,
+   "mean_oracle": 0.22763638014101353,
+   "max_oracle": 0.30597014925373134,
+   "lift": 0.06544246548300062
+  },
+  {
+   "ring_system": "C1c2ccccc2-c2ccccc21",
+   "atoms": 13,
+   "n_molecules": 22,
+   "n_sampled": 22,
+   "mean_oracle": 0.2275260387744396,
+   "max_oracle": 0.34814814814814815,
+   "lift": 0.06533212411642669
+  },
+  {
+   "ring_system": "c1cc2c(n1)CCNC2",
+   "atoms": 9,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.22746175880504238,
+   "max_oracle": 0.25384615384615383,
+   "lift": 0.06526784414702946
+  },
+  {
+   "ring_system": "C1c2ccccc2C[C@H]2c3ccccc3CCN12",
+   "atoms": 18,
+   "n_molecules": 12,
+   "n_sampled": 12,
+   "mean_oracle": 0.22740324010807444,
+   "max_oracle": 0.25,
+   "lift": 0.06520932545006153
+  },
+  {
+   "ring_system": "C1Nc2ccccc2N2CCC[C@H]12",
+   "atoms": 13,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.2270223133532486,
+   "max_oracle": 0.2805755395683453,
+   "lift": 0.06482839869523568
+  },
+  {
+   "ring_system": "c1ncc2c(nc3n2CCN3)n1",
+   "atoms": 12,
+   "n_molecules": 15,
+   "n_sampled": 15,
+   "mean_oracle": 0.2269902687805954,
+   "max_oracle": 0.24444444444444444,
+   "lift": 0.06479635412258247
+  },
+  {
+   "ring_system": "c1ccc2nc3ncncc3cc2c1",
+   "atoms": 14,
+   "n_molecules": 5,
+   "n_sampled": 5,
+   "mean_oracle": 0.22665266141264542,
+   "max_oracle": 0.26153846153846155,
+   "lift": 0.0644587467546325
+  },
+  {
+   "ring_system": "C1=Nc2ccccc2Oc2ccccc21",
+   "atoms": 15,
+   "n_molecules": 7,
+   "n_sampled": 7,
+   "mean_oracle": 0.22656809588969137,
+   "max_oracle": 0.2602739726027397,
+   "lift": 0.06437418123167846
+  },
+  {
+   "ring_system": "C1C2=C(Nc3ncncc3C2)c2ccccc21",
+   "atoms": 17,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.22561944962837613,
+   "max_oracle": 0.22695035460992907,
+   "lift": 0.06342553497036321
+  },
+  {
+   "ring_system": "C1c2ccccc2C[C@@H]2c3ccccc3CCN12",
+   "atoms": 18,
+   "n_molecules": 6,
+   "n_sampled": 6,
+   "mean_oracle": 0.2254351230965493,
+   "max_oracle": 0.23484848484848486,
+   "lift": 0.0632412084385364
+  },
+  {
+   "ring_system": "C1CSc2ccccc2N1",
+   "atoms": 10,
+   "n_molecules": 322,
+   "n_sampled": 40,
+   "mean_oracle": 0.22541138924346332,
+   "max_oracle": 0.2890625,
+   "lift": 0.0632174745854504
+  },
+  {
+   "ring_system": "C1CC2(CCNCC2)Oc2ccccc21",
+   "atoms": 15,
+   "n_molecules": 3,
+   "n_sampled": 3,
+   "mean_oracle": 0.22495476740122697,
+   "max_oracle": 0.23776223776223776,
+   "lift": 0.06276085274321405
+  },
+  {
+   "ring_system": "c1ccc2nc3c(cc2c1)CNCC3",
+   "atoms": 14,
+   "n_molecules": 6,
+   "n_sampled": 6,
+   "mean_oracle": 0.22477305969923328,
+   "max_oracle": 0.2357142857142857,
+   "lift": 0.06257914504122036
+  }
+ ]
+}
