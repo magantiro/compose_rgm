@@ -1,0 +1,45 @@
+{
+ "schema_version": "pmo_donor_funnel_v1",
+ "measured_at_utc": "2026-09-24T08:15:44.431747+00:00",
+ "oracle_calls_spent": 0,
+ "source": "committed round batches of the 5 donor arms, compose-pmo-donor-qual, transplant_share=0.5",
+ "funnel": {
+  "rounds": 49,
+  "attempts_total": 20328,
+  "donor_attempts": 1178,
+  "charged_total": 784,
+  "donor_charged": 30
+ },
+ "donor_vs_rest": {
+  "donor": {
+   "n": 1260,
+   "eligible": 0.487,
+   "duplicate": 0.513,
+   "execution_rejected": 0.0,
+   "surviving_new_atoms": {
+    "median": 14,
+    "p90": 19,
+    "max": 20
+   }
+  },
+  "non_donor": {
+   "n": 19914,
+   "eligible": 0.735,
+   "duplicate": 0.057,
+   "execution_rejected": 0.183,
+   "surviving_new_atoms": {
+    "median": 4,
+    "p90": 8,
+    "max": 21
+   }
+  }
+ },
+ "verdict": "GRAFTS_ARE_GENERATED_AT_THE_RIGHT_SCALE_BUT_HALF_ARE_DUPLICATES_AND_THE_FOOTPRINT_IS_SMALL",
+ "answers_the_question": "The lane does NOT fail to generate useful grafts, and the controller does NOT systematically discard them. Donor attempts carry a median 14 surviving new atoms against 4 for every other proposal -- exactly the >=13-atom structural scale the global-delta census measured as required by 58.3% of productive transitions and reached by the controller on only 0.4% of proposals. Donor transplants also NEVER fail execution (0% vs 18.3%), because they are valid by construction. They are charged roughly in proportion to their share of the stream (3.8% of charged against 5.8% of attempts), so selection is not the bottleneck either.",
+ "the_two_real_defects": [
+  "51.3% of donor attempts are DUPLICATES against 5.7% for everything else -- a 9x rate. The lane keeps redrawing (donor, cut) pairs it has already produced, so half its budget buys nothing.",
+  "Donor reaches only ~5.8% of attempts at transplant_share=0.5, because recombination is one proposal kind among many. A mechanism with a 6% footprint cannot move AUC, so the matched A/B is underpowered BY CONSTRUCTION -- the same 'effect cannot exceed footprint' problem that made the completion-law A/B a throttle test."
+ ],
+ "consequence": "Do NOT integrate donor into the combined controller on this evidence, and do NOT tune transplant share/timeout/ceiling/cuts. But the null is NOT evidence that large structural transplantation is useless: it is evidence that this lane's draw is half-wasted and too small a share of the stream to be measurable. The reusable finding is that the transplant generator produces the right structural scale, which is what the next mechanism needs to preserve.",
+ "caveat": "Arms are 48-336 charged calls in. These are PROPOSAL-STREAM statistics, which are far better powered than the AUC comparison (20,328 attempts), but say nothing directly about final score."
+}
