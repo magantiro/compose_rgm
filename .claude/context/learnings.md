@@ -4734,3 +4734,71 @@ independently of whether fa7_0 ever closes.**
   not state the budget each arm was read at is not yet a matched A/B.
 - **A gate on an oracle known to be hackable must report manifold adherence beside score**,
   or a treatment arm that hacks harder reads as a treatment arm that works.
+
+## 2026-09-24 (the construction prior is a MECHANISM result; the first seed's 2.19x was trajectory variance)
+
+- **THREE matched seeds, gsk3b, 250 charged calls per arm, arms differing only in the
+  `PMO_CONSTRUCTION_PRIOR` env flag (ABSENT = byte-identical OFF, verified 120/120 seeded
+  programs including RNG consumption on FAILURE paths):**
+      metric            per-seed B-A                 B wins
+      best              +0.310, -0.060, +0.070        2/3
+      top10             +0.344, -0.055, +0.076        2/3
+      AUC               +0.198, -0.032, +0.042        2/3
+      on-manifold %     +0.030, +0.043, +0.011        3/3
+      on-manifold best  +0.140, +0.140, +0.010        3/3
+  On-manifold = QED>=0.5 AND SA<=5, applied ONLY to read the result; nothing is filtered
+  during search.
+- **THE BENCHMARK EFFECT IS NOT ESTABLISHED AND THE FIRST SEED NEARLY BECAME A HEADLINE.**
+  Seed 1 alone gave B/A AUC **2.190** (0.3635 vs 0.1660) and B at 250 calls beating the
+  1000-call baseline on both AUC and best. Seed 2 REVERSED it (0.886). Seed 3 gave +0.042.
+  A 2/3 sign test is p=0.5. **A large effect at n=1 on a stochastic search is a trajectory
+  draw until a second seed says otherwise** -- the arms diverge in RNG stream from the first
+  prior-influenced draw, so they are different random walks, not a controlled contrast.
+- **The MANIFOLD effect is consistent 3/3 on both measures and is far better powered per
+  seed**, because on-manifold FRACTION is computed over ~250 charged molecules while
+  best-score is a maximum. Mean sampling rate 7.3% -> 10.1%. Still only p=0.125 one-tailed
+  at n=3: report it as consistent in direction, never as significant.
+- **CONSEQUENCE, and it reconciles with the reward-hacking finding: gsk3b REWARDS leaving
+  the manifold** (r(score,QED) = -0.705), so a prior that pulls proposals toward drug-like
+  chemistry is fighting the oracle on exactly this task. Testing the prior on gsk3b is
+  therefore close to the worst available test of whether it helps SCORE. The informative
+  test is the 20 similarity/descriptor tasks where the oracle is honest and on-manifold
+  best essentially EQUALS overall best.
+- **A MATCHED A/B MUST BE READ ON THE COMMON BUDGET PREFIX.** The arms do not consume budget
+  at the same wall-clock rate (arm B was at 64 charged calls when arm A was at 32). Reading
+  "whatever each arm has produced so far" showed B at 0.380 vs A at 0.130, which looks
+  decisive and is purely an artifact of B being further along. Truncated to the common
+  prefix the arms were dead even. The ledger is written in charge order, so the fix is one
+  slice -- and the comparison script must PRINT the budget it matched at.
+- **An exact tie across independent seeds is not evidence of structure when the oracle is
+  quantized.** On-manifold best read 0.110/0.110 for arm A and 0.250/0.250 for arm B across
+  two seeds, which I called "too exact to be noise". The molecules are DIFFERENT; gsk3b is a
+  random-forest classifier whose output is a vote fraction quantized to 0.01, so distinct
+  molecules landing on one value is unremarkable. Check whether the metric is discrete
+  before reading a coincidence as a mechanism.
+- **Seed 2026003 collapsed BOTH arms** (on-manifold 3.8% / 4.8%, on-manifold best 0.04 /
+  0.05) and drags every aggregate. Per-seed spread across three seeds is larger than the
+  treatment effect on every benchmark column, which is the argument for more seeds before
+  quoting any mean.
+
+## 2026-09-24 (a matched A/B is void unless you can PROVE both arms ran the same bytes)
+
+- **RETRACTED: a celecoxib +/- online-memory 1K pair reporting B/A AUC 1.165.** Three
+  proposal-path files in the gate worktree -- `dynamic_program_synthesis.py`,
+  `current_state_edits.py`, `pmo_online_memory.py` -- were edited at 15:26-15:33 while the
+  two arms were running, and **none of the three is in the contract's
+  `implementation_sha256`**, so the fail-closed chain never fired. The result artifact
+  records no implementation hash, so there is no evidence either way that both arms executed
+  identical bytes. The number is withdrawn rather than caveated.
+- **The tell arrived later and by luck**: a second-seed relaunch in the same tree refused
+  with `input identity mismatch` on `pmo_population_controller.py` -- the tree announcing its
+  own drift. Without that relaunch the confounded number would have stood.
+- **TWO GENERAL RULES.** (1) A canary/diagnostic artifact must record the implementation it
+  ran -- a git commit or a source-closure hash -- or a matched comparison cannot be
+  defended after the fact; `canary_v1.json` recorded neither arm identity nor implementation
+  until this session added the arm field. (2) **Contract pinning covers only the pinned
+  files**; the PMO v1 contract pins 10 controller-level modules and NOT the proposal
+  synthesis path, so the most-edited files in an active session are exactly the unprotected
+  ones. Run a matched A/B in a QUIESCENT tree, or hash the source closure into the artifact.
+- This is the WRITE half of the working-tree race whose LOAD half was recorded 2026-08-03
+  (a full suite run concurrently with agent suites manufacturing a phantom regression).
