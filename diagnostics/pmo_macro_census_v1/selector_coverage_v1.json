@@ -1,0 +1,58 @@
+{
+ "schema_version": "pmo_macro_selector_coverage_v1",
+ "measured_at_utc": "2026-09-24T17:21:14.058739+00:00",
+ "oracle_calls_spent": 0,
+ "task": "thiothixene_rediscovery",
+ "admissible_pool": 5937,
+ "diagnostic_class": {
+  "definition": ">=3 rings and an exocyclic ring alkene",
+  "n": 424,
+  "share": 0.0714,
+  "status": "DIAGNOSTIC POSITIVE CONTROL ONLY. Known from hand inspection of thiothixene. It is NOT a production filter and no selector optimises for it; the question is only whether a blind sampler represents a class that is 7% of its own admissible pool."
+ },
+ "selectors_200_seeds": {
+  "random_plus_diversity": {
+   "mean": 2.39,
+   "median": 2.0,
+   "p_zero": 0.06
+  },
+  "uniform": {
+   "mean": 2.33,
+   "median": 2.0,
+   "p_zero": 0.095
+  },
+  "hybrid_50_50": {
+   "mean": 1.85,
+   "median": 2.0,
+   "p_zero": 0.13
+  },
+  "family_quota_plus_diversity": {
+   "mean": 1.03,
+   "median": 1.0,
+   "p_zero": 0.36
+  },
+  "top_n_library_mean": {
+   "mean": 0.0,
+   "median": 0.0,
+   "p_zero": 1.0,
+   "deterministic": true
+  }
+ },
+ "independent_uniform_expectation": 2.29,
+ "findings": [
+  "Library-mean ranking is SYSTEMATICALLY broken, not unlucky: it is deterministic, so its zero is a fact rather than a p=0.06 draw. Library mean is the mean oracle of molecules CONTAINING a payload -- a prevalence statistic -- and it is anti-correlated with the rare structural classes that carry the gain.",
+  "An EQUAL family quota is 2.3x WORSE than uniform (1.03 vs 2.33, p(zero) 0.36 vs 0.095) because it under-samples whichever family holds most of the pool: region_replace is 4,978 of 5,937 here and contains the entire class.",
+  "CORRECTION TO MY OWN EARLIER CLAIM: I read a single 32-arm draw of zero as proof the stratifier suppressed the class. At a 7.14% base rate p(zero) under uniform is ~0.095, so one zero proves nothing. The 200-seed census is what settled it.",
+  "Plain random loses a family that is small BY CONSTRUCTION: region_excise is 30 of 5,937 (0.5%) and was absent from 84 of 100 draws. Hence a small reserved floor per family plus unbiased sampling for the remainder."
+ ],
+ "shipped": {
+  "selector": "family_floor_then_unbiased_random_with_diversity",
+  "family_floor": 3,
+  "realized_on_thiothixene": {
+   "substituent_replace": 4,
+   "region_replace": 25,
+   "region_excise": 3
+  },
+  "winning_class_arms": 2
+ }
+}

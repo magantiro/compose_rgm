@@ -174,6 +174,12 @@ def main() -> int:
     parser.add_argument("--attachment-molecules", type=int, default=60000)
     parser.add_argument("--attachment-min-support", type=int, default=2)
     parser.add_argument("--diversity", type=float, default=0.6)
+    parser.add_argument("--family-floor", type=int, default=3,
+                        help="arms reserved per family before unbiased sampling")
+    parser.add_argument("--sampler-seed", type=int, default=20260924,
+                        help="seeds the within-band ordering so arms are reproducible")
+    parser.add_argument("--enumeration-limit", type=int, default=8000,
+                        help="candidates enumerated per family before the band sampler")
     args = parser.parse_args()
 
     canonical = {}
@@ -219,10 +225,17 @@ def main() -> int:
     one_lib = diverse_library(ones, args.library_top, args.library_diversity)
     two_lib = diverse_library(twos, args.library_top, args.library_diversity)
     print(f"  library after diversity: {len(one_lib)} one-cut, {len(two_lib)} two-cut")
+    # ENUMERATION LIMIT IS LOAD-BEARING AND WAS THE ACTUAL DEFECT.
+    # `region_replacements` iterates (cut pair) x (payload), so a limit of 400 against a
+    # 300-payload library exhausts itself on roughly ONE cut pair of the leader: the census
+    # was exploring a single region and never reaching a payload ranked past the first few.
+    # MEASURED: the payload class known to win on thiothixene produces 3,389 admissible
+    # candidates from that same leader, yet zero reached the pool at limit=400.
     families: dict = {}
     families["substituent_replace"] = substituent_replacements(
-        leader, one_lib, limit=400)
-    families["region_replace"] = region_replacements(leader, two_lib, limit=400)
+        leader, one_lib, limit=args.enumeration_limit)
+    families["region_replace"] = region_replacements(
+        leader, two_lib, limit=args.enumeration_limit)
     families["region_excise"] = region_excisions(leader, min_removed=1, max_removed=24)
 
     # The one unconstrained degree of freedom a context-preserving macro still has is the
@@ -238,22 +251,37 @@ def main() -> int:
         print(f"  {family:22s} {len(proposals):5d} produced")
     print(f"  {refused} refused on attachment compatibility; {len(pool)} admissible")
 
-    # STRATIFY BY FAMILY. Ranking the pooled candidates by library mean put all seven
-    # thiothixene arms in ONE family, which would leave the census matrix with empty
-    # columns and answer nothing about which family helps. Take a quota per family, then
-    # backfill from whatever is left, and PRINT the realized strata.
-    # Diversity within a stratum, not library rank: two near-identical arms waste a rung,
-    # measured on the thiothixene Cl/F siblings which scored identically and were both dead.
+    # SAMPLING: A SMALL RESERVED FLOOR PER FAMILY, THEN UNBIASED RANDOM FOR THE REST.
+    #
+    # MEASURED on thiothixene over 200 seeds, asking how many of 32 arms land in the payload
+    # class known to win (424 of 5,937 admissible = 7.14%; independent-uniform expectation
+    # 2.29):
+    #
+    #     random + diversity        mean 2.39   p(zero) 0.060
+    #     uniform                   mean 2.33   p(zero) 0.095
+    #     hybrid 50/50              mean 1.85   p(zero) 0.130
+    #     family QUOTA + diversity  mean 1.03   p(zero) 0.360   <- 2.3x worse than uniform
+    #     top-N by library mean     mean 0.00   p(zero) 1.000   <- deterministic, always zero
+    #
+    # Two things that measurement settled. Library-mean ranking is systematically broken, not
+    # unlucky: it is deterministic, so its zero is a fact. And an EQUAL family quota is much
+    # worse than uniform, because it under-samples whichever family holds most of the pool --
+    # here region_replace is 4,978 of 5,937 and carries the whole class.
+    #
+    # But plain random loses a family that is small BY CONSTRUCTION: region_excise is 30 of
+    # 5,937 (0.5%) and was absent from 84 of 100 draws. So reserve a few arms for each family
+    # and sample everything else unbiased. The sampler's job is breadth; the charged
+    # continuation rung is what selects.
     by_family: dict = collections.defaultdict(list)
     for proposal in pool:
         by_family[proposal.family].append(proposal)
-    for proposals in by_family.values():
-        proposals.sort(key=lambda p: -p.detail.get("library_mean", 0.0))
 
     chosen, fingerprints = [], []
 
     def _take(proposal):
         mol = Chem.MolFromSmiles(proposal.endpoint)
+        if mol is None:
+            return False
         fingerprint = AllChem.GetMorganFingerprintAsBitVect(mol, 2, 2048)
         if fingerprints and max(DataStructs.BulkTanimotoSimilarity(
                 fingerprint, fingerprints)) > args.diversity:
@@ -262,22 +290,24 @@ def main() -> int:
         fingerprints.append(fingerprint)
         return True
 
-    present = [f for f in FAMILIES if by_family.get(f)]
-    quota = max(1, args.arms // max(1, len(present)))
-    for family in present:
+    sampler = np.random.default_rng(args.sampler_seed)
+    for family in [f for f in FAMILIES if by_family.get(f)]:
+        bucket = by_family[family]
         taken = 0
-        for proposal in by_family[family]:
-            if len(chosen) >= args.arms or taken >= quota:
+        for index in sampler.permutation(len(bucket)):
+            if taken >= args.family_floor or len(chosen) >= args.arms:
                 break
-            if _take(proposal):
+            if _take(bucket[int(index)]):
                 taken += 1
-    for proposal in pool:  # backfill, still diversity-filtered
+    for index in sampler.permutation(len(pool)):
         if len(chosen) >= args.arms:
             break
-        if proposal not in chosen:
-            _take(proposal)
+        candidate = pool[int(index)]
+        if candidate not in chosen:
+            _take(candidate)
     realized = collections.Counter(p.family for p in chosen)
-    print(f"  realized strata: {dict(realized)} (quota {quota} over {present})")
+    print(f"  realized strata: {dict(realized)} "
+          f"(floor {args.family_floor}/family, remainder unbiased)")
 
     out_root = pathlib.Path(args.out)
     arms = [{"label": f"{args.task}__no_macro", "family": "no_macro",
