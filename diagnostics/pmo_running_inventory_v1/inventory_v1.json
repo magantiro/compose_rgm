@@ -1,0 +1,52 @@
+{
+ "schema_version": "pmo_running_inventory_v1",
+ "measured_at_utc": "2026-09-24T07:09:44.440192+00:00",
+ "method": "modal app list task-count column, per profile, COLUMNS=250 so the description is not truncated",
+ "why_this_file": "PMO work is currently SPLIT across two Modal profiles. A listing read under the wrong profile reports 0 tasks and reads as 'nothing is running', which has already produced one false diagnosis. This is the map.",
+ "profiles": {
+  "nitya": {
+   "total_running_tasks": 45,
+   "apps": {
+    "compose-pmo-fibercontrol-mpo": {
+     "tasks": 37,
+     "volume": "compose-pmo-fibercontrol-mpo",
+     "what": "10k PMO fleet: 20-task prescreen arm (replicate 50), no-prescreen rediscovery (60), deterministic/MPO tasks"
+    },
+    "compose-pmo-fibercontrol-targets": {
+     "tasks": 5,
+     "volume": "compose-pmo-fibercontrol",
+     "what": "5 similarity 10k runs, base seed 20260923 replicate 0"
+    },
+    "compose-lipid-complete-generator-health-v3": {
+     "tasks": 1,
+     "what": "unrelated to PMO"
+    },
+    "compose-v4-tracelet-gm": {
+     "tasks": 2,
+     "what": "unrelated to PMO (two ephemeral apps)"
+    }
+   }
+  },
+  "rahul-94866": {
+   "total_running_tasks": 16,
+   "apps": {
+    "compose-pmo-seed-weighting": {
+     "tasks": 6,
+     "volume": "compose-pmo-seed-weighting",
+     "contract": "configs/pmo_population_controller_v3_seed_weighting.json",
+     "what": "parent-weighting A/B: mestranol/deco_hop/zaleplon x {uniform, measured_score}, 5000 calls, matched seeds"
+    },
+    "compose-pmo-donor-qual": {
+     "tasks": 10,
+     "volume": "compose-pmo-donor-qual",
+     "contract": "configs/pmo_population_controller_v3_seed_weighting.json",
+     "what": "donor A/B: celecoxib/troglitazone/thiothixene/deco_hop/ranolazine x {0.0, 0.5} transplant share, 3000 calls, matched seeds"
+    }
+   }
+  }
+ },
+ "known_dead": {
+  "scored_*_seed2026*993_20260924T042755Z": "the FIRST donor arm, 5 campaigns, returncode 1 on a contract input-identity mismatch; ZERO calls charged; superseded by compose-pmo-donor-qual"
+ },
+ "correction": "A learnings note claimed nitya was capped at 3 containers against rahul-94866's 40, from a 2026-09-20 probe. It was measured false on 2026-09-24 (nitya at 45 concurrent tasks) and has been deleted. The two new arms were placed on rahul-94866 on the strength of that stale figure; they were left there because they were already charging, not because the workspace was better."
+}
