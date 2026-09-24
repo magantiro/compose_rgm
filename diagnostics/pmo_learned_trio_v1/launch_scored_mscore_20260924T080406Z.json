@@ -1,0 +1,57 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "scored",
+ "git_commit": "aa83259d0100b1d85e6d3777a6d8f68f57cfc184",
+ "base_seed": 20260924,
+ "budget": 3000,
+ "submitted": [
+  {
+   "task": "gsk3b",
+   "prescreen": true,
+   "transplant_share": 0.0,
+   "parent_weighting": "measured_score",
+   "budget": 3000,
+   "rounds": 260,
+   "queries": 16,
+   "seed": 20268926,
+   "base_seed": 20260924,
+   "replicate": 2,
+   "label": "scored_gsk3b_seed20268926_mscore_20260924T080406Z",
+   "volume": "pmo-fiber-gsk3b-seed20268926-mscore",
+   "git_commit": "aa83259d0100b1d85e6d3777a6d8f68f57cfc184",
+   "modal_call_id": "fc-01M3972YB8A3JNDX2GHRTD5PDN"
+  },
+  {
+   "task": "jnk3",
+   "prescreen": true,
+   "transplant_share": 0.0,
+   "parent_weighting": "measured_score",
+   "budget": 3000,
+   "rounds": 260,
+   "queries": 16,
+   "seed": 20269926,
+   "base_seed": 20260924,
+   "replicate": 2,
+   "label": "scored_jnk3_seed20269926_mscore_20260924T080406Z",
+   "volume": "pmo-fiber-jnk3-seed20269926-mscore",
+   "git_commit": "aa83259d0100b1d85e6d3777a6d8f68f57cfc184",
+   "modal_call_id": "fc-01M3972YE04AZB51J54MTVAGRZ"
+  },
+  {
+   "task": "drd2",
+   "prescreen": true,
+   "transplant_share": 0.0,
+   "parent_weighting": "measured_score",
+   "budget": 3000,
+   "rounds": 260,
+   "queries": 16,
+   "seed": 20282926,
+   "base_seed": 20260924,
+   "replicate": 2,
+   "label": "scored_drd2_seed20282926_mscore_20260924T080406Z",
+   "volume": "pmo-fiber-drd2-seed20282926-mscore",
+   "git_commit": "aa83259d0100b1d85e6d3777a6d8f68f57cfc184",
+   "modal_call_id": "fc-01M3972YKH5T5MDE57FRXD8AW8"
+  }
+ ]
+}

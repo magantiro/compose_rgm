@@ -1,0 +1,14 @@
+{
+  "schema": "pmo_prescreen_source_v1",
+  "source_path": "/Users/rmaganti/compose_v2_work/local_runtime/zinc250k/250k_rndm_zinc_drugs_clean_3.csv",
+  "source_sha256": "35e3f1a52b1badc0697e373d73a18ad773f415936ff992f4c6baa2e067b3e6ae",
+  "source_bytes": 22606589,
+  "canonical_file": "diagnostics/pmo_prescreen_v1/zinc250k_canonical_v1.csv",
+  "canonical_sha256": "46b61aa460d500fe53589658e089c656c4dd5e6ed83455b8c8b728c26e7a340a",
+  "molecules": 249455,
+  "unparseable": 0,
+  "distinct_canonical": 249455,
+  "rdkit_version": "2023.09.6",
+  "python": "3.11.13",
+  "note": "Standard ZINC250k (250k_rndm_zinc_drugs_clean_3.csv), the corpus the PMO paper and downstream methods including IVG's frags_zinc250 derive from. Canonicalized ONCE here; scoring containers must treat this file as immutable and key results by source_row_id."
+}
