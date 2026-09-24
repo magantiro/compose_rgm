@@ -1,0 +1,401 @@
+{
+  "checkpoint": {
+    "path": "/private/tmp/compose_quality_JKbB09/checkpoint.best_so_far.pt",
+    "sha256": "c9d927510360ec6eb84ff8dae1a222b0b693a9bef0ca23bb5d9cca063025876c"
+  },
+  "configuration": {
+    "arm": "C1",
+    "horizon": 16.0,
+    "max_events": 128,
+    "n_slots": 40,
+    "time_step": 0.1
+  },
+  "events": [
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.14930981376138225,
+      "rule": "atom_insert",
+      "sa": 4.71321746633056,
+      "sa_fragment_score": 0.946354347826087,
+      "smiles": "CCCCC(CCC)CCC(C)C(C)(CCC(C)(CC)CC)C(C)(C)CC(C)(CC)CC(C)CC",
+      "step": 1
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.14082941281805353,
+      "rule": "bond_reroute",
+      "sa": 4.551833820654089,
+      "sa_fragment_score": 0.9837279569892473,
+      "smiles": "CCCCC(CCC)CCC(C)C(CCC(C)(CC)CC)C(C)(C)CC(C)(CC)CC(CC)CC",
+      "step": 2
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.15372298094395767,
+      "rule": "atom_delete",
+      "sa": 4.541891867657505,
+      "sa_fragment_score": 0.9679566666666667,
+      "smiles": "CCCCC(CC)CCC(C)C(CCC(C)(CC)CC)C(C)(C)CC(C)(CC)CC(CC)CC",
+      "step": 3
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.1678847449995349,
+      "rule": "atom_delete",
+      "sa": 4.480393146892554,
+      "sa_fragment_score": 0.9895712643678161,
+      "smiles": "CCCCC(CC)CCC(C)C(CCC(C)(C)CC)C(C)(C)CC(C)(CC)CC(CC)CC",
+      "step": 4
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.1728283294494988,
+      "rule": "atom_delete",
+      "sa": 4.236897657990311,
+      "sa_fragment_score": 1.0458729411764707,
+      "smiles": "CCCCC(CC)CCCC(CCC(C)(C)CC)C(C)(C)CC(C)(CC)CC(CC)CC",
+      "step": 5
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.14806528487004914,
+      "rule": "atom_insert",
+      "sa": 4.217311348075999,
+      "sa_fragment_score": 1.0826647727272727,
+      "smiles": "CCCCCC(CC)CCCC(CCC(C)(C)CC)C(C)(C)CC(C)(CC)CC(CC)CC",
+      "step": 6
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.15242581605361338,
+      "rule": "atom_delete",
+      "sa": 4.237366721566023,
+      "sa_fragment_score": 1.1424441860465118,
+      "smiles": "CCCCCC(CC)CCCC(CCC(C)(C)CC)C(C)CC(C)(CC)CC(CC)CC",
+      "step": 7
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.16635179361874944,
+      "rule": "atom_delete",
+      "sa": 4.303311829712837,
+      "sa_fragment_score": 1.1515120481927712,
+      "smiles": "CCCCCC(CC)CCCC(CCC(C)(C)CC)C(C)CC(C)(CC)CC(C)CC",
+      "step": 8
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.18144884122966112,
+      "rule": "atom_delete",
+      "sa": 4.076611346434217,
+      "sa_fragment_score": 1.2137375000000001,
+      "smiles": "CCCCCC(CC)CCCC(CCC(C)(C)CC)C(C)CC(C)(C)CC(C)CC",
+      "step": 9
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.20980894956949403,
+      "rule": "atom_delete",
+      "sa": 3.9768050074450247,
+      "sa_fragment_score": 1.263668831168831,
+      "smiles": "CCCCCC(CC)CCCC(CCC(C)(C)C)C(C)CC(C)(C)CC(C)CC",
+      "step": 10
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.1863205060628327,
+      "rule": "bond_reroute",
+      "sa": 3.8921405488267196,
+      "sa_fragment_score": 1.3248153846153845,
+      "smiles": "CCCCCC(CC)CCCC(CCC(C)C)C(C)CC(C)(C)CC(C)CCC",
+      "step": 11
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.17560632013568755,
+      "rule": "bond_reroute",
+      "sa": 3.601185961120409,
+      "sa_fragment_score": 1.438039240506329,
+      "smiles": "CCCCCCC(C)(C)CC(C)C(CCCC(CC)CCCCC)CCC(C)C",
+      "step": 12
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.16556111774634444,
+      "rule": "bond_reroute",
+      "sa": 3.6496828121403277,
+      "sa_fragment_score": 1.49992375,
+      "smiles": "CCCCCCC(C)CC(C)C(CCCC(CCC)CCCCC)CCC(C)C",
+      "step": 13
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.17561379596011104,
+      "rule": "bond_reroute",
+      "sa": 3.9248759030650833,
+      "sa_fragment_score": 1.3803544303797468,
+      "smiles": "CCCCCC(C)CC(C)C(CCCC(CCC)CCC(C)CC)CCC(C)C",
+      "step": 14
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.18633068698083177,
+      "rule": "bond_reroute",
+      "sa": 4.130359840830907,
+      "sa_fragment_score": 1.2988961538461539,
+      "smiles": "CCCCCC(C)CC(C)C(CCCC(CC)CCC(C)CC)CC(C)C(C)C",
+      "step": 15
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.21125147815517037,
+      "rule": "atom_restate",
+      "sa": 4.252264574558717,
+      "sa_fragment_score": 1.2108538461538463,
+      "smiles": "CCCCCC(N)CC(C)C(CCCC(CC)CCC(C)CC)CC(C)C(C)C",
+      "step": 16
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.16748413553231722,
+      "rule": "bond_reorder",
+      "sa": 4.388796527221439,
+      "sa_fragment_score": 1.112247435897436,
+      "smiles": "C=C(C)C(C)CC(CCCC(CC)CCC(C)CC)C(C)CC(N)CCCCC",
+      "step": 17
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 0,
+      "qed": 0.17242659728673776,
+      "rule": "atom_restate",
+      "sa": 4.468474042014339,
+      "sa_fragment_score": 1.0547025641025642,
+      "smiles": "C=C(C)C(C)CC(CCCC(CC)CCC(C)OC)C(C)CC(N)CCCCC",
+      "step": 18
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 2,
+      "nonaromatic_unsaturated_5_6_rings": 2,
+      "qed": 0.7756445204217033,
+      "rule": "ring_system_grow",
+      "sa": 5.890748623081638,
+      "sa_fragment_score": 0.08549620253164555,
+      "smiles": "C=C1C=C2CCC3(CCC(C)OC)C(C)(OC(N)N4C=CC(C)C43C)C2CN1C",
+      "step": 19
+    },
+    {
+      "F_atoms": 0,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 0,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 2,
+      "qed": 0.7817607535714547,
+      "rule": "atom_restate",
+      "sa": 5.772779392312406,
+      "sa_fragment_score": 0.17069620253164555,
+      "smiles": "COC(C)CCC12CCC3=CC(=O)N(C)CC3C1(C)OC(N)N1C=CC(C)C12C",
+      "step": 20
+    },
+    {
+      "F_atoms": 1,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 1,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 2,
+      "qed": 0.776195332939527,
+      "rule": "atom_restate",
+      "sa": 5.858138301757393,
+      "sa_fragment_score": 0.10904810126582275,
+      "smiles": "COC(C)CCC12CCC3=CC(=O)N(C)CC3C1(F)OC(N)N1C=CC(C)C12C",
+      "step": 21
+    },
+    {
+      "F_atoms": 2,
+      "aromatic_rings": 0,
+      "delta_F_atoms": 1,
+      "delta_aromatic_rings": 0,
+      "delta_nonaromatic_unsaturated_5_6_rings": 0,
+      "nonaromatic_unsaturated_5_6_rings": 2,
+      "qed": 0.7207313620395206,
+      "rule": "atom_restate",
+      "sa": 5.921005098252038,
+      "sa_fragment_score": 0.06364430379746837,
+      "smiles": "COC(C)CCC12CCC3=CC(=O)N(C)CC3C1(F)OC(N)N1C=CC(C)C12F",
+      "step": 22
+    }
+  ],
+  "evidence_class": "exact_saved_seed_replay_exploratory_local_rdkit",
+  "implementation": {
+    "code_revision": "730803d91dc3c7bf1afda760a3c0b167cf5677fd",
+    "descriptor_helper_sha256": "577e7dde942bc18840c037e8f5a5ddf95bf354fd20749f31767f6574a2b95731",
+    "script_sha256": "e08b19baec8b260ca664adcf5144745c2a2961b95af7766de508d6f7fc7cd213"
+  },
+  "initial_state": "CCCC(CCC)CCC(C)C(C)(CCC(C)(CC)CC)C(C)(C)CC(C)(CC)CC(C)CC",
+  "plan": {
+    "bin_provenance": {
+      "bin_fallback": false,
+      "bin_observations": 1345,
+      "drawn_bin": "31-34",
+      "host_atoms": 34,
+      "realized_at_frozen_time": 0.883515842226503,
+      "requested_bin": "31-34"
+    },
+    "events": 1,
+    "fully_realized": true,
+    "order": [
+      [
+        5,
+        6,
+        6,
+        6
+      ]
+    ],
+    "realized": [
+      [
+        5,
+        6,
+        6,
+        6
+      ]
+    ],
+    "requested": [
+      [
+        5,
+        6,
+        6,
+        6
+      ]
+    ],
+    "unrealized": []
+  },
+  "qualitative_event_counts": {
+    "F_birth:atom_restate": 2,
+    "nonaromatic_unsaturated_ring_birth:ring_system_grow": 2
+  },
+  "replay_endpoint_exact": true,
+  "ring_prior": {
+    "path": "diagnostics/denovo_ring_marginal_v1/plan_prior_v1.json",
+    "sha256": "de2a5f995df74eab18345c564b8953fd3733f0852ba165edd864b5e8c897fc8d"
+  },
+  "rule_event_counts": {
+    "atom_delete": 7,
+    "atom_insert": 2,
+    "atom_restate": 5,
+    "bond_reorder": 1,
+    "bond_reroute": 6,
+    "ring_system_grow": 1
+  },
+  "saved": {
+    "group": "QED_PASS_SA_FAIL",
+    "index": 23,
+    "seed": 10203868723176089054,
+    "smiles": "COC(C)CCC12CCC3=CC(=O)N(C)CC3C1(F)OC(N)N1C=CC(C)C12F"
+  },
+  "schema_version": "denovo_saved_seed_trace_v1",
+  "source": {
+    "records": "diagnostics/denovo_fragment_quality_v1/attempt_1/records.json",
+    "sha256": "3da4657d500adee468f8706b07a6cd7e6b00f70d19cde410d3ea9d2afee3d9a5"
+  },
+  "versions": {
+    "numpy": "2.5.3",
+    "python": "3.12.9",
+    "rdkit": "2026.03.6",
+    "torch": "2.14.0"
+  }
+}
