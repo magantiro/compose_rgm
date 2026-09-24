@@ -23,7 +23,9 @@
    "calls_remaining": 8192,
    "required_future_mean_top10": 1.0093214735360037,
    "attainable": false,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.8847654223782707,
+   "projected_gap_to_ivg": 0.09023457762172926
   },
   "amlodipine_mpo": {
    "label": "scored_amlodipine_mpo_seed20271973_20260924T020259Z",
@@ -39,7 +41,9 @@
    "calls_remaining": 8576,
    "required_future_mean_top10": 0.8656792150665691,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.6968816085277374,
+   "projected_gap_to_ivg": 0.13911839147226257
   },
   "celecoxib_rediscovery": {
    "label": "scored_celecoxib_rediscovery_seed20260973_20260924T013046Z",
@@ -55,7 +59,9 @@
    "calls_remaining": 8548,
    "required_future_mean_top10": 0.906433502496087,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.4773294995297723,
+   "projected_gap_to_ivg": 0.36167050047022764
   },
   "deco_hop": {
    "label": "scored_deco_hop_seed20278973_20260924T020259Z",
@@ -71,7 +77,9 @@
    "calls_remaining": 8898,
    "required_future_mean_top10": 1.0051573147302646,
    "attainable": false,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.7082951494609145,
+   "projected_gap_to_ivg": 0.25970485053908543
   },
   "fexofenadine_mpo": {
    "label": "scored_fexofenadine_mpo_seed20272973_20260924T020259Z",
@@ -87,7 +95,9 @@
    "calls_remaining": 9040,
    "required_future_mean_top10": 0.921180649196542,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.7887042087304255,
+   "projected_gap_to_ivg": 0.11529579126957457
   },
   "isomers_c7h8n2o2": {
    "label": "scored_isomers_c7h8n2o2_seed20266973_20260924T020259Z",
@@ -103,7 +113,9 @@
    "calls_remaining": 8371,
    "required_future_mean_top10": 0.9933417003396758,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.9935736626456574,
+   "projected_gap_to_ivg": -0.005573662645657396
   },
   "isomers_c9h10n2o2pf2cl": {
    "label": "scored_isomers_c9h10n2o2pf2cl_seed20280973_20260924T020259Z",
@@ -119,7 +131,9 @@
    "calls_remaining": 8528,
    "required_future_mean_top10": 0.9037585748785142,
    "attainable": true,
-   "reconstruction_exact": false
+   "reconstruction_exact": false,
+   "projected_auc_if_flat": 0.9322508574620231,
+   "projected_gap_to_ivg": -0.034250857462023054
   },
   "median1": {
    "label": "scored_median1_seed20265973_20260924T020259Z",
@@ -135,7 +149,9 @@
    "calls_remaining": 8800,
    "required_future_mean_top10": 0.39835533508730403,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.3278664015820601,
+   "projected_gap_to_ivg": 0.05813359841793991
   },
   "median2": {
    "label": "scored_median2_seed20281973_20260924T020259Z",
@@ -151,7 +167,9 @@
    "calls_remaining": 9072,
    "required_future_mean_top10": 0.38770570128345716,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.30045005793053514,
+   "projected_gap_to_ivg": 0.07654994206946486
   },
   "mestranol_similarity": {
    "label": "scored_mestranol_similarity_seed20262973_20260924T013046Z",
@@ -167,7 +185,9 @@
    "calls_remaining": 8624,
    "required_future_mean_top10": 1.030350251998504,
    "attainable": false,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.9337196685802513,
+   "projected_gap_to_ivg": 0.05728033141974864
   },
   "osimertinib_mpo": {
    "label": "scored_osimertinib_mpo_seed20273973_20260924T013046Z",
@@ -183,7 +203,9 @@
    "calls_remaining": 9328,
    "required_future_mean_top10": 0.8886913294938181,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.8432525362191143,
+   "projected_gap_to_ivg": 0.03774746378088567
   },
   "perindopril_mpo": {
    "label": "scored_perindopril_mpo_seed20267973_20260924T020259Z",
@@ -199,7 +221,9 @@
    "calls_remaining": 9120,
    "required_future_mean_top10": 0.7709588437391172,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.6098388668550612,
+   "projected_gap_to_ivg": 0.14316113314493883
   },
   "qed": {
    "label": "scored_qed_seed20270973_20260924T020259Z",
@@ -215,7 +239,9 @@
    "calls_remaining": 9104,
    "required_future_mean_top10": 0.9477034952862823,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.9433768818192885,
+   "projected_gap_to_ivg": -0.0003768818192885215
   },
   "ranolazine_mpo": {
    "label": "scored_ranolazine_mpo_seed20274973_20260924T020259Z",
@@ -231,7 +257,9 @@
    "calls_remaining": 8960,
    "required_future_mean_top10": 0.8677772383070357,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.7993760282581728,
+   "projected_gap_to_ivg": 0.054623971741827204
   },
   "scaffold_hop": {
    "label": "scored_scaffold_hop_seed20279973_20260924T020259Z",
@@ -247,7 +275,9 @@
    "calls_remaining": 8978,
    "required_future_mean_top10": 0.7334526364341293,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.5468830203950595,
+   "projected_gap_to_ivg": 0.16411697960494043
   },
   "sitagliptin_mpo": {
    "label": "scored_sitagliptin_mpo_seed20275973_20260924T020259Z",
@@ -263,7 +293,9 @@
    "calls_remaining": 8817,
    "required_future_mean_top10": 0.7737911406407487,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.5742310591245384,
+   "projected_gap_to_ivg": 0.16876894087546157
   },
   "thiothixene_rediscovery": {
    "label": "scored_thiothixene_rediscovery_seed20263973_20260924T013046Z",
@@ -279,7 +311,9 @@
    "calls_remaining": 8529,
    "required_future_mean_top10": 0.6919928828272598,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.43575680279191276,
+   "projected_gap_to_ivg": 0.21624319720808727
   },
   "troglitazone_rediscovery": {
    "label": "scored_troglitazone_rediscovery_seed20264973_20260924T013046Z",
@@ -295,7 +329,9 @@
    "calls_remaining": 8800,
    "required_future_mean_top10": 0.9132722630180884,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.44198615476804926,
+   "projected_gap_to_ivg": 0.4110138452319507
   },
   "valsartan_smarts": {
    "label": "scored_valsartan_smarts_seed20277973_20260924T013046Z",
@@ -311,7 +347,9 @@
    "calls_remaining": 8880,
    "required_future_mean_top10": 0.9574168343872694,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.9429561987556799,
+   "projected_gap_to_ivg": -0.007956198755679877
   },
   "zaleplon_mpo": {
    "label": "scored_zaleplon_mpo_seed20276973_20260924T020259Z",
@@ -327,7 +365,27 @@
    "calls_remaining": 8849,
    "required_future_mean_top10": 0.6373370171391981,
    "attainable": true,
-   "reconstruction_exact": true
+   "reconstruction_exact": true,
+   "projected_auc_if_flat": 0.5532342715799247,
+   "projected_gap_to_ivg": 0.07076572842007534
   }
+ },
+ "projection_note": "projected_auc_if_flat holds each run at its CURRENT top-10 for every remaining call: a lower bound while a run is still climbing, an upper bound once it saturates. This is the metric-matched priority ranking -- required_future_mean_top10 is dominated by IVG's absolute level and therefore mostly ranks how strong IVG is, not where we lose.",
+ "projected_suite": {
+  "n_tasks": 19,
+  "compose_projected_sum": 12.802477499932424,
+  "ivg_sum": 15.213,
+  "gap": 2.4105225000675743,
+  "label": "DEVELOPMENT AGGREGATE, NOT AN OFFICIAL SCORE: rows are mid-run and from one controller version"
+ },
+ "concentration": {
+  "top4_rows": [
+   "troglitazone_rediscovery",
+   "celecoxib_rediscovery",
+   "deco_hop",
+   "thiothixene_rediscovery"
+  ],
+  "top4_share_of_gap": 0.5179924242210343,
+  "note": "the donor A/B targets exactly these four"
  }
 }
