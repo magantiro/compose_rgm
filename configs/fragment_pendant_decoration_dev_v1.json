@@ -1,0 +1,32 @@
+{
+  "payload": {
+    "schema": "fragment_focused_dev_v1",
+    "task": "scaffold_decoration",
+    "drugs": ["BARICITINIB", "CYCLOTHIAZIDE", "ELIGLUSTAT", "ERLOTINIB", "FUTIBATINIB", "LESINURAD", "LIOTHYRONINE", "LOVASTATIN", "MARIBAVIR", "SPIRAPRIL"],
+    "attempts_per_prompt": 20,
+    "candidate_draws_per_attempt": 8,
+    "seed": 1,
+    "workers": 1,
+    "quality_selection": false,
+    "output_dir": "diagnostics/fragment_pendant_decoration_dev_v1",
+    "checkpoint_path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "checkpoint_sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+    "catalog_sha256": "fad4dd91495b46d08a66f219c0887f0f8acdaf9f245613e1202904891b9211be",
+    "prompt_sha256": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+    "official_evaluator_sha256": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+    "baseline_summary_sha256": "a07425a5fdd6304ee960ca81d7aa235739fd95c099e205de2c331cd76defe589",
+    "support_summary_sha256": "defe4751756f5a35418d0d7b249cb3752c43189a088f989c0383769a0a6e83e1",
+    "minimum_quality": 28.5,
+    "minimum_uniqueness": 90.0,
+    "minimum_diversity": 0.56,
+    "versions": {"python": "3.11.13", "rdkit": "2024.03.5", "numpy": "1.26.4", "torch": "2.4.0"},
+    "material_sha256": {
+      "tools/run_fragment_motif_focused_dev_v1.py": "697a3b82d0d592353a4dee2fcb96c19d4816aef9b9c88a21bffe626dba74add0",
+      "src/compose_v4/benchmark/fragment_pendant_programs.py": "5495dbeb69210c568f100366b53b22e218f02fa2ff1fc59cbec4ed519c9c23c3",
+      "src/compose_v4/benchmark/pendant_completion_policy.py": "6d6a15d68ce26f7941463092bc05e217ba4c258392ef877ce702ed5054b45fce",
+      "src/compose_v4/benchmark/fragment_program_adapter.py": "686a0eec9c2a95b0ee64c459e054e0b59456723bdf60ea17154e8ae78c64e0df",
+      "src/compose_v4/benchmark/fragment_official_metrics.py": "9406ddffad9e05d67bc7b6333d4b51eef534f2f4b11a2cedc237e80698389459"
+    }
+  },
+  "payload_sha256": "7cfe87060373c186ab1c8d837bbe93938f9ffdfbe73fedf1bc648aedb23bb16f"
+}

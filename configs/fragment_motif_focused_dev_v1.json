@@ -1,0 +1,32 @@
+{
+  "payload": {
+    "schema": "fragment_focused_dev_v1",
+    "task": "motif_extension",
+    "drugs": ["BARICITINIB", "CYCLOTHIAZIDE", "ELIGLUSTAT", "ERLOTINIB", "FUTIBATINIB", "LESINURAD", "LIOTHYRONINE", "LOVASTATIN", "MARIBAVIR", "SPIRAPRIL"],
+    "attempts_per_prompt": 20,
+    "candidate_draws_per_attempt": 8,
+    "seed": 1,
+    "workers": 1,
+    "quality_selection": false,
+    "output_dir": "diagnostics/fragment_motif_focused_dev_v1",
+    "checkpoint_path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "checkpoint_sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+    "catalog_sha256": "a8775b466f479c2594ff5d8afd81049a57969211d3152035c93e9db51e8b1347",
+    "prior_sha256": "6ae0fcb635ec2876f5d7f1c326cef92c241d42267a897f441d0cc9ee5752eea2",
+    "prompt_sha256": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+    "official_evaluator_sha256": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+    "baseline_summary_sha256": "a07425a5fdd6304ee960ca81d7aa235739fd95c099e205de2c331cd76defe589",
+    "minimum_quality": 39.27,
+    "minimum_uniqueness": 96.83,
+    "minimum_diversity": 0.62,
+    "versions": {"python": "3.11.13", "rdkit": "2024.03.5", "numpy": "1.26.4", "torch": "2.4.0"},
+    "material_sha256": {
+      "tools/run_fragment_motif_focused_dev_v1.py": "697a3b82d0d592353a4dee2fcb96c19d4816aef9b9c88a21bffe626dba74add0",
+      "src/compose_v4/benchmark/fragment_motif_focused_programs.py": "78ded3b93872e1bda2b404ee82b232aab4d4e87dc79192bfc62a6cd7171dd6b6",
+      "src/compose_v4/benchmark/fragment_joint_programs.py": "941ac878fc39cef7de2e59d6178e0007e86a6479022335eec4e8025f1a4ba697",
+      "src/compose_v4/benchmark/fragment_program_adapter.py": "686a0eec9c2a95b0ee64c459e054e0b59456723bdf60ea17154e8ae78c64e0df",
+      "src/compose_v4/benchmark/fragment_official_metrics.py": "9406ddffad9e05d67bc7b6333d4b51eef534f2f4b11a2cedc237e80698389459"
+    }
+  },
+  "payload_sha256": "94cefd52661228c731789c41a88a46d7e05da34c6d74b735d1f59d0d6c390539"
+}
