@@ -1,0 +1,26 @@
+{
+ "schema_version": "pmo_basin_entry_continuation_v1",
+ "measured_at_utc": "2026-09-24T13:16:43.794439+00:00",
+ "oracle_calls_spent": 128,
+ "accounting": "2 x 64 development-screen calls; no campaign ledger, no budget",
+ "design": "Identical frozen controller, identical seed, identical budget. The ONLY difference is the single molecule each run starts from: the live thiothixene leader (0.4839) versus the best target-blind ring graft (0.5076).",
+ "result": {
+  "leader_start": {
+   "start": 0.4839,
+   "best_at_64": 0.4839,
+   "top10_at_64": 0.454,
+   "auc_common_17_64": 0.4288,
+   "improvement": 0.0
+  },
+  "graft_start": {
+   "start": 0.5076,
+   "best_at_64": 0.581,
+   "top10_at_64": 0.5307,
+   "auc_common_17_64": 0.498,
+   "improvement": 0.0734
+  }
+ },
+ "verdict": "BASIN_ENTRY_CONFIRMED_THE_ONE_STEP_DELTA_UNDERSTATED_IT",
+ "reading": "The leader start improved by EXACTLY ZERO over 64 calls, which matches the live campaigns sitting near 0.48 for ~1,000 charged calls. The graft start gained +0.0734 under the same controller. So the ring swap's value is not its +0.0237 one-step reward -- it is that it places the search somewhere ordinary COMPOSE edits can make progress. The gap widened from +0.0237 at the graft to +0.0971 after 64 matched calls.",
+ "limits": "One task, one seed, 64 calls, and a single start molecule per arm. It establishes that THIS graft is a better basin, not that ring swaps generally are."
+}
