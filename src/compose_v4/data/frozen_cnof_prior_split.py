@@ -451,6 +451,8 @@ def frozen_cnof_arm_identity(path: Path, *, train_size: int) -> dict:
         "iid_test_size": payload["config"]["iid_test_size"],
         "train_size": train_size,
         "train_arm": arm_name,
+        "shared_source_prior_prefix_size": payload["config"]["small_train_size"],
+        "shared_source_prior_sha256": _digest(reservoir[: payload["config"]["small_train_size"]]),
         "train_scaffold_diagnostics": payload["census"]["training_arm_diagnostics"][arm_name],
     }
 

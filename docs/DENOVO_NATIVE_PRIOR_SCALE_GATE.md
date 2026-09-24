@@ -88,8 +88,15 @@ the manifest, source, training-prefix and held-out partition hashes in its
 checkpoint. On an accelerator host, a different mount path for the corpus is
 accepted only after its full physical SHA-256 equals the frozen source hash;
 the runtime path and observed hash are recorded separately. The default
-historical loader remains unchanged. No training recipe or accelerator launch
-is authorized by preparing the split.
+historical loader remains unchanged. The later request to learn a comparable
+COMPOSE-native prior authorizes preparing the two matched recipes, but neither
+this split nor those recipes authorizes an accelerator launch without the
+separate self-hashed training contract.
+
+For the matched scale comparison, both arms derive the empirical carbon-tree
+source-size law from the identical first 50,000 frozen training molecules.
+The larger arm changes target training density, not its starting-size law. The
+common source-prior prefix digest is recorded in both checkpoint identities.
 
 ## Prospective model and evaluation gates
 

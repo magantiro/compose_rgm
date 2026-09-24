@@ -10,6 +10,7 @@ import pytest
 from compose_v4.data.frozen_cnof_prior_split import (
     _digest,
     file_sha256,
+    frozen_cnof_arm_identity,
     frozen_cnof_source_alias_identity,
     load_frozen_cnof_arm,
     prepare_frozen_cnof_split,
@@ -62,6 +63,14 @@ def test_nested_arms_share_validation_and_tests(tmp_path):
     manifest.write_text(json.dumps(payload, sort_keys=True))
     small = load_frozen_cnof_arm(manifest, train_size=2)
     large = load_frozen_cnof_arm(manifest, train_size=len(payload["partitions"]["train"]))
+    small_identity = frozen_cnof_arm_identity(manifest, train_size=2)
+    large_identity = frozen_cnof_arm_identity(
+        manifest, train_size=len(payload["partitions"]["train"])
+    )
+    assert small_identity["shared_source_prior_prefix_size"] == 2
+    assert (
+        small_identity["shared_source_prior_sha256"] == large_identity["shared_source_prior_sha256"]
+    )
     assert small.train == large.train[:2]
     assert small.validation == large.validation
     assert small.test == large.test

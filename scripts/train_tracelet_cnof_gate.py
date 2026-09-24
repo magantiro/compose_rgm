@@ -2725,8 +2725,17 @@ def main() -> None:
     if args.source_prior == "carbon_tree" and not zero_denovo:
         _zmi.bump("carbon_tree_prior_constructions")
         if args.tree_size_prior == "empirical":
+            # In the frozen scale comparison, both arms must start from the
+            # SAME empirical carbon-tree size law. The 50k arm is an exact
+            # prefix of the larger arm, so derive source sizes from that prefix
+            # for both; only the TARGET training population changes.
+            source_prior_rows = (
+                split.train[: split_identity["shared_source_prior_prefix_size"]]
+                if split_identity is not None
+                else split.train
+            )
             size_counts = Counter(
-                smiles_to_molecular_graph(text).n_real_atoms for text in split.train
+                smiles_to_molecular_graph(text).n_real_atoms for text in source_prior_rows
             )
             tree_source_prior = DegreeBoundedCarbonTreePrior.from_size_counts(dict(size_counts))
         else:
