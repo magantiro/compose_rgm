@@ -1,0 +1,65 @@
+{
+  "payload": {
+    "schema": "compose_fragment_linker_path_binding_validation_v2",
+    "status": "zero_oracle_fresh_seed_validation_not_official_benchmark",
+    "supersedes_payload_sha256": "ed0510d7bd8ae36e20bc1a060280586bee544949b07e2e6c6aa7841f6533cf89",
+    "revision_reason": "v1 transcribed one character of the old runner SHA incorrectly; its seed-3 result is exploratory and cannot satisfy that failed identity gate. This v2 contract corrects the physical hash against the v1-pinned old commit and uses a new untouched seed 4 with unchanged numerical gates.",
+    "arms": {
+      "old_site_matching": {
+        "git_commit": "1e1f258185154c87cc05b3a2b52f92a277b77231",
+        "sampler_sha256": "684f6e156945498529d24aa9e4267e91efcaf46ffedfccfc6650e4bed9645b2f",
+        "runner_sha256": "b1bfe44cbeaed80c1feb54c30c2180018ed6510482c30b5dc7145d7b70ef9199"
+      },
+      "constraint_bound": {
+        "git_commit": "14889e50",
+        "sampler_sha256": "c2132dc2ceb956847f2b8862f4d8a025179fce88c743f22b823e2af03971f421",
+        "runner_sha256": "7b4e5448004ffc852572ec5c9027883c1dd58c4b7bc8c3341bd794a63db11049"
+      }
+    },
+    "inputs": {
+      "checkpoint_sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+      "prompt_manifest_sha256": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+      "official_ivg_metrics_sha256": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+      "official_ivg_commit": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb"
+    },
+    "protocol": {
+      "task": "linker_design",
+      "prompt_count": 10,
+      "seed_ids": [4],
+      "attempts_per_prompt": 20,
+      "seeded_bridge_atoms": 1,
+      "attachment_control": true,
+      "path_program": true,
+      "mark_attempts_per_event": 96,
+      "max_events": 32,
+      "operational_horizon": 16.0,
+      "path_length_band": [2, 5],
+      "no_oracle_calls": true,
+      "new_seed_relative_to_development_and_v1": true
+    },
+    "signal_gate": {
+      "committed_exact_chemical_validity": 1.0,
+      "exact_locked_graph_preservation": true,
+      "newly_bound_genuine_linker_rate_gain_min_absolute": 0.15,
+      "official_quality_loss_max_absolute": 0.02,
+      "mean_emitted_diversity_loss_max_absolute": 0.05,
+      "mean_emitted_uniqueness_loss_max_absolute": 0.10,
+      "must_report": [
+        "attempts",
+        "commits",
+        "valid_commits",
+        "fragment_containment",
+        "full_task_success",
+        "genuine_linkers_longer_than_seed",
+        "realized_linker_length_distribution",
+        "official_quality",
+        "official_uniqueness",
+        "official_diversity",
+        "per_prompt_results",
+        "path_refusal_census"
+      ]
+    },
+    "interpretation": "A passed signal qualifies only a frozen full-size rerun; it does not turn the constructed bridge into a generated linker or license a paper comparator row. All failed attempts remain in every denominator."
+  },
+  "payload_sha256": "1fc306b789f1ef9e28d423a8527856447608adb6b12c19a3032a1b1da746bae4"
+}
