@@ -9,6 +9,7 @@ tool must verify a separately sealed scored contract before calling ``execute_ta
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Callable
 from dataclasses import asdict, replace
 from pathlib import Path
@@ -32,7 +33,11 @@ from compose_v4.experiments.pmo_dynamic_v21 import (
 )
 
 SCHEMA = "pmo_population_controller_v1"
-CONTRACT = "configs/pmo_population_controller_v1.json"
+#: Overridable so a REVISED runtime loads its own versioned preflight contract instead
+#: of re-pinning the one the previous runtime was authorized under.  Absent -> the
+#: historical path, so every existing caller is unchanged.
+CONTRACT = (os.environ.get("PMO_POPULATION_CONTRACT")
+            or "configs/pmo_population_controller_v1.json")
 CHECKPOINTS = "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json"
 INIT_COUNT = 16
 QUERY_BUDGET = 1000

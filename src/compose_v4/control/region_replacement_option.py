@@ -110,7 +110,7 @@ def _build(option: str, contracted, rng, *, anchor: int, budget: int):
         raise ValueError("region replacement has no rebuild capacity")
     if option == "regrow":
         length = int(rng.integers(1, capacity + 1))
-        actions, _tip, elements = _grow_actions(
+        actions, _tip, elements, _origin = _grow_actions(
             contracted, rng, length=length, elements=("C", "N", "O"), anchor=anchor
         )
         product, _receipt = execute_program(contracted, list(actions))
@@ -134,7 +134,7 @@ def _build(option: str, contracted, rng, *, anchor: int, budget: int):
         if remaining < 1:
             raise ValueError("ring consumed the rebuild capacity")
         tail = int(rng.integers(1, remaining + 1))
-        grown, _tip, elements = _grow_actions(
+        grown, _tip, elements, _origin = _grow_actions(
             product,
             rng,
             length=tail,

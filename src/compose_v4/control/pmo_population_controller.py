@@ -54,6 +54,10 @@ from compose_v4.control.pmo_credit import (
 from compose_v4.control.pmo_joint_dependency_jump import (
     CHECKPOINT_SCHEMA,
 )
+from compose_v4.control.pmo_online_memory import (
+    OnlineProposalMemory,
+    memory_channel_proposal,
+)
 from compose_v4.control.pmo_realization import (
     PRODUCTION_MAX_REALIZATIONS,
     PRODUCTION_NODE_BUDGET,
@@ -198,7 +202,13 @@ def _niche_order(candidates: list[dict[str, Any]], *, seed: int) -> list[int]:
 class PmoPopulationController(DynamicV21ProgramOptimizer):
     """Live PMO archive with local, global and complete-jump proposal modes."""
 
-    def __init__(self, *args, jump_checkpoint: dict[str, Any], **kwargs):
+    def __init__(
+        self,
+        *args,
+        jump_checkpoint: dict[str, Any],
+        enable_online_memory: bool = False,
+        **kwargs,
+    ):
         if jump_checkpoint.get("schema_version") != CHECKPOINT_SCHEMA:
             raise ValueError("PMO population controller needs a sanitized joint checkpoint")
         super().__init__(*args, **kwargs)
@@ -209,6 +219,61 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         self._population_bootstrap_pool_id = None
         self._pool_continuity = BootstrapPoolContinuity()
         self.credit = PopulationCredit()
+        # Arm B of the matched comparison. OFF by default, so the unflagged controller is
+        # byte-identical to arm A: a cold or absent memory makes `region_law()` return None,
+        # and an unlawed draw consumes `rng.permutation` while ANY law object consumes
+        # `rng.random` -- so a "uniform law" would NOT be a no-op.
+        self.online_memory = OnlineProposalMemory() if enable_online_memory else None
+        self.online_memory_attribution_failures = 0
+
+    def _channel_proposal(self, channel, entry):
+        """The one integration point for the online structural memory.
+
+        Delegates to the unmodified production implementation whenever the memory is
+        absent, cold, or the lane is not the shallow one -- so this is a no-op in arm A.
+        """
+
+        return memory_channel_proposal(
+            self, channel, entry, super()._channel_proposal, self.online_memory
+        )
+
+    def _observe_into_online_memory(self, candidate: dict[str, Any], score: float) -> None:
+        """Record one COUNTED oracle observation and its transition into the memory.
+
+        Everything here comes from the candidate the controller already holds plus the
+        score just charged -- no oracle internals, no task identity, no off-ledger
+        property evaluation.
+        """
+
+        trace = candidate.get("trace") or {}
+        endpoint = candidate.get("endpoint") or trace.get("endpoint")
+        if not endpoint:
+            return
+        child = decode_state(trace["states"][-1]) if trace.get("states") else None
+        self.online_memory.observe_scored_molecule(
+            endpoint=endpoint, score=score, graph=child
+        )
+        provenance = candidate.get("provenance") or {}
+        parent_score = provenance.get("parent_measured_score")
+        source = candidate.get("source_state")
+        if source is None or not trace.get("actions"):
+            return
+        parent_graph = decode_state(source)
+        families = [a.get("model_family") for a in trace["actions"] if a.get("model_family")]
+        touched = tuple(
+            int(x)
+            for x in (provenance.get("actual_changes") or {}).get("changed_original_slots", ())
+        )
+        self.online_memory.observe_transition(
+            parent_graph=parent_graph,
+            parent_endpoint=provenance.get("parent_endpoint") or "",
+            parent_score=None if parent_score is None else float(parent_score),
+            child_endpoint=endpoint,
+            child_score=score,
+            child_heavy=int(child.n_real_atoms) if child is not None else 0,
+            family=families[0] if families else "unknown",
+            touched_slots=touched,
+        )
 
     def selection(self):
         """Preserve structural niches, then tilt toward parents with measured upside."""
@@ -791,6 +856,13 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             score = float(score)
             scored.append(score)
             counts["scored_outcomes"] += 1
+            if self.online_memory is not None:
+                try:
+                    self._observe_into_online_memory(candidate, score)
+                except (KeyError, ValueError, TypeError, IndexError):
+                    # Losing an observation must not lose the CHARGED call; count it so a
+                    # silent attribution failure cannot masquerade as a cold memory.
+                    self.online_memory_attribution_failures += 1
             parent_score = candidate["provenance"].get("parent_measured_score")
             if parent_score is not None:
                 gain = score - float(parent_score)
@@ -842,18 +914,30 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             # re-learn from nothing, which is measurably worse than the credit path.
             "credit": self.credit.payload(),
             "pool_continuity": self._pool_continuity.payload(),
+            "online_memory": (
+                None if self.online_memory is None else self.online_memory.payload()
+            ),
+            "online_memory_attribution_failures": self.online_memory_attribution_failures,
         }
         return json.loads(json.dumps({**body, "snapshot_id": identity(body)}))
 
     @classmethod
-    def restore(cls, snapshot, *, hierarchy=None, jump_checkpoint=None):
+    def restore(cls, snapshot, *, hierarchy=None, jump_checkpoint=None,
+                enable_online_memory: bool = False):
+        # `enable_online_memory` MUST appear here as well as in `__init__`. A flag accepted
+        # by the constructor and not by `restore` makes the fresh path work and the RESUME
+        # path raise -- and worse, a `restore` that silently accepted and dropped it would
+        # rebuild arm B as arm A with nothing in the artifact to show it.
         if jump_checkpoint is None:
             raise ValueError("PMO population restore requires its sanitized jump checkpoint")
         result = ProgramOptimizer.restore.__func__(
             cls,
             snapshot,
             hierarchy=hierarchy,
-            constructor_kwargs={"jump_checkpoint": jump_checkpoint},
+            constructor_kwargs={
+                "jump_checkpoint": jump_checkpoint,
+                "enable_online_memory": enable_online_memory,
+            },
         )
         state = snapshot.get("pmo_population")
         if (
@@ -870,6 +954,16 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         # persisted still loads, rather than failing a resume outright.
         result.credit = PopulationCredit.restore(state["credit"]) if state.get("credit") else PopulationCredit()
         result._pool_continuity = BootstrapPoolContinuity.restore(state.get("pool_continuity"))
+        memory_payload = state.get("online_memory")
+        if memory_payload is not None:
+            if result.online_memory is None:
+                raise ValueError(
+                    "snapshot carries an online memory but the resume did not enable it"
+                )
+            result.online_memory.restore_payload(memory_payload)
+        result.online_memory_attribution_failures = int(
+            state.get("online_memory_attribution_failures", 0)
+        )
         return result
 
 

@@ -90,6 +90,10 @@ PRESCREEN_INIT = os.environ.get("PMO_PRESCREEN_INIT")
 #: handed to the campaign has no edit history.  Drawing that one path uniformly throws away
 #: their measured score.  Absent -> "uniform" -> byte-identical to every run so far.
 PARENT_WEIGHTING = os.environ.get("PMO_PARENT_WEIGHTING") or "uniform"
+#: Arm B of the memory portability gate. ABSENT is the byte-identical OFF: the controller
+#: constructs no memory object, so `region_law()` returns None and the unlawed draw keeps
+#: its own RNG stream. A "uniform memory" would NOT be a no-op.
+ONLINE_MEMORY = (os.environ.get("PMO_ONLINE_MEMORY") or "").lower() in ("1", "true", "yes")
 #: Where PyTDC's relative `oracle/<name>.pkl` resolves FROM for the three asset-backed
 #: tasks. The Modal image bakes this same path.
 ORACLE_ASSET_ROOT = (os.environ.get("PMO_ORACLE_ASSET_ROOT")
@@ -855,7 +859,8 @@ def main():
             initial_parent_weighting=PARENT_WEIGHTING,
             progress=lambda row: None,
             optimizer_type=RewardAdaptive,
-            optimizer_kwargs={"jump_checkpoint": checkpoint},
+            optimizer_kwargs={"jump_checkpoint": checkpoint,
+                              "enable_online_memory": ONLINE_MEMORY},
             initial_batch_fn=initial_dynamic_program_batch_v21,
         )
 

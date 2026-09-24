@@ -24,7 +24,23 @@ from compose_v4.control.edit_program_graph import (
     compile_program_graph,
 )
 
-PARAMETER_MOVES = ("created_atom_type", "extend_segment", "contract_segment")
+#: ``sibling_branch`` and ``created_bond_order`` close two topological holes the first
+#: three leave open, and both are additions to THIS vocabulary rather than a new
+#: generator.  ``extend_segment`` rewires the original birth onto the fresh atom, so it
+#: lengthens a chain and can never raise an anchor's degree -- its own comment says "a
+#: fresh one-neighbor birth, not a multi-neighbor insertion".  A branch is that move
+#: WITHOUT the rewiring.  Measured consequence of the omission: a quaternary carbon
+#: appeared in 2 of 181 shallow proposals and tert-butyl in 0 of 2,803, on every one of
+#: five live molecules, at every module cap from three to eight.  Separately, no move
+#: touched a created edge's bond order, which is why a terminal alkyne could not be
+#: reached by mutation at all.
+PARAMETER_MOVES = (
+    "created_atom_type",
+    "extend_segment",
+    "contract_segment",
+    "sibling_branch",
+    "created_bond_order",
+)
 
 
 def _rebuild(program, records_by_block):
@@ -75,6 +91,21 @@ def parameter_choices(program: EditProgram, move: str):
                     choices.append((index, class_index))
         elif move == "extend_segment" and neighbors[0][1] == 1:
             choices.append((index, None))
+        elif move == "sibling_branch" and neighbors[0][1] == 1:
+            # A SECOND child at the same anchor.  Whether the anchor still has a free
+            # valence is not decided here: a mutated program is a proposal, and the
+            # production executor validates the complete trace on the bound source.
+            choices.append((index, None))
+        elif move == "created_bond_order":
+            for class_index, (element, _) in enumerate(ORGANIC_VOCABULARY.classes):
+                if element != payload["atom_type"]:
+                    continue
+                for order in (1, 2, 3):
+                    if order == neighbors[0][1]:
+                        continue
+                    h = ORGANIC_VOCABULARY.h_count(class_index, order, 0)
+                    if h is not None:
+                        choices.append((index, (class_index, order)))
         elif move == "contract_segment" and neighbors[0][1] == 1:
             ref = next(iter(payload["slot"].items()))
             uses = [j for j, r in enumerate(records) if j != index and ref in _references(r)]
@@ -121,6 +152,29 @@ def mutate_parameter(program: EditProgram, move: str, choice) -> EditProgram:
                     )
                     block_records.append(extension)
                     record["payload"]["neighbors"] = [[fresh, 1]]
+                elif move == "sibling_branch":
+                    # Identical to extend_segment EXCEPT that `record` is left pointing
+                    # at its own anchor.  extend_segment rehangs it on the fresh atom
+                    # (chain); leaving it alone puts both births on the anchor (branch).
+                    anchor = record["payload"]["neighbors"][0][0]
+                    fresh = {"created": len(records) + 1}
+                    sibling = json.loads(_json(record))
+                    sibling["payload"].update(
+                        slot=fresh,
+                        atom_type=ELEMENT_TO_IDX["C"],
+                        formal_charge=0,
+                        implicit_h_count=3,
+                        neighbors=[[anchor, 1]],
+                    )
+                    block_records.append(sibling)
+                elif move == "created_bond_order":
+                    class_index, order = parameter
+                    record["payload"]["neighbors"] = [
+                        [record["payload"]["neighbors"][0][0], order]
+                    ]
+                    record["payload"]["implicit_h_count"] = ORGANIC_VOCABULARY.h_count(
+                        class_index, order, 0
+                    )
                 else:
                     continue
             if move == "contract_segment" and i == parameter:
