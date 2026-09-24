@@ -1,0 +1,527 @@
+{
+  "code_revision": "f1a347e87c52d5b4cfc9a5d4edb16dd6b3b8a6f6",
+  "image_sha256": "bc281be4de832be56d786788d5e494b939b870c65f7965b58cddf398749f2f5e",
+  "input_sha256": {
+    "/Users/rmaganti/compose_rgm_git/.venv_pinned_chem/lib/python3.11/site-packages/rdkit/Chem/QED.py": "7b788ab1f4a66430b58229cd0dfe1d00e3e8d73bddd8c03f8444214fb19372e1",
+    "/Users/rmaganti/compose_rgm_git/.venv_pinned_chem/lib/python3.11/site-packages/rdkit/Contrib/SA_Score/sascorer.py": "40c66080be6f7e2086375f6e2d76b0a0d41d25c5d7116902a377404a5f260323",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_complete_program_inspection_decoration_partial_v1/inspection.json": "8fcb76430b8abcc3e34ff4b6a0a83e3176044197433997997b6e04a11adc1321",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/tools/fragment_decoration_counterfactuals.py": "d606a9736b87a267a85d54936ee94afc23a006cd65089194af49655af51a6e88"
+  },
+  "limitations": "changes size and chemical content jointly; no isolated size causality; current non-stereo model scope",
+  "results": [
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 0,
+      "largest_to_methyl": {
+        "heavy_atoms": 26,
+        "joint_pass": true,
+        "qed": 0.8035859071782403,
+        "sa": 3.7287273236100704,
+        "smiles": "CC(c1ccc2c(c1)OCCO2)C(CN1CCCC1)C1COC(C)(C)O1"
+      },
+      "original": {
+        "heavy_atoms": 36,
+        "joint_pass": false,
+        "qed": 0.5017346986258324,
+        "sa": 4.323925233550541,
+        "smiles": "C=CCNc1nnc(C(c2ccc3c(c2)OCCO3)C(CN2CCCC2)C2COC(C)(C)O2)c(O)n1"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 1,
+      "largest_to_methyl": {
+        "heavy_atoms": 23,
+        "joint_pass": true,
+        "qed": 0.874039192547859,
+        "sa": 3.1909922795087517,
+        "smiles": "CC(C)NC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "original": {
+        "heavy_atoms": 40,
+        "joint_pass": false,
+        "qed": 0.1708349272565488,
+        "sa": 4.056344865101114,
+        "smiles": "CC(C)NC(CN1CCCC1)C(Sc1nnc(-c2ccco2)n1-c1ccc([IH2])cc1)c1ccc2c(c1)OCCO2"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 2,
+      "largest_to_methyl": {
+        "heavy_atoms": 28,
+        "joint_pass": true,
+        "qed": 0.7793613743657883,
+        "sa": 3.0821191506347283,
+        "smiles": "COc1cccc(NC(CN2CCCC2)C(C)c2ccc3c(c2)OCCO3)c1"
+      },
+      "original": {
+        "heavy_atoms": 39,
+        "joint_pass": false,
+        "qed": 0.37553126371118073,
+        "sa": 3.9855036300203874,
+        "smiles": "COc1cccc(NC(CN2CCCC2)C(C2=NC=C(Cc3ccccc3)[SH4]2)c2ccc3c(c2)OCCO3)c1"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 3,
+      "largest_to_methyl": {
+        "heavy_atoms": 28,
+        "joint_pass": true,
+        "qed": 0.7430569706691958,
+        "sa": 3.0596360361881976,
+        "smiles": "CC(c1ccc2c(c1)OCCO2)C(CN1CCCC1)NCc1ccc(Cl)cc1"
+      },
+      "original": {
+        "heavy_atoms": 40,
+        "joint_pass": false,
+        "qed": 0.23062252601196723,
+        "sa": 3.5298273242325937,
+        "smiles": "Cc1ccc(-c2cc(NC(c3ccc4c(c3)OCCO4)C(CN3CCCC3)NCc3ccc(Cl)cc3)on2)cc1"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 4,
+      "largest_to_methyl": {
+        "heavy_atoms": 30,
+        "joint_pass": false,
+        "qed": 0.5512286837900643,
+        "sa": 3.891995365001856,
+        "smiles": "CC(CN1CCCC1)C(c1ccc2c(c1)OCCO2)N1C(=O)C2CC=CCC2C1=O"
+      },
+      "original": {
+        "heavy_atoms": 40,
+        "joint_pass": false,
+        "qed": 0.3738544191922338,
+        "sa": 4.0126393590608345,
+        "smiles": "O=C(O)c1ccc(COC(CN2CCCC2)C(c2ccc3c(c2)OCCO3)N2C(=O)C3CC=CCC3C2=O)cc1"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 5,
+      "largest_to_methyl": {
+        "heavy_atoms": 24,
+        "joint_pass": true,
+        "qed": 0.8337130940551373,
+        "sa": 3.2667905109583053,
+        "smiles": "CC(CN1CCCC1)C(c1ccc2c(c1)OCCO2)c1ccco1"
+      },
+      "original": {
+        "heavy_atoms": 40,
+        "joint_pass": false,
+        "qed": 0.22901058563830665,
+        "sa": 4.515183611185098,
+        "smiles": "COc1ccccc1NC(NC(CN1CCCC1)C(c1ccc2c(c1)OCCO2)c1ccco1)C1(O)CCNN1"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 6,
+      "largest_to_methyl": {
+        "heavy_atoms": 27,
+        "joint_pass": true,
+        "qed": 0.8328210283731785,
+        "sa": 3.670240493689394,
+        "smiles": "CC(c1ccc2c(c1)OCCO2)C(CN1CCCC1)NC1=C(C#N)CCC1"
+      },
+      "original": {
+        "heavy_atoms": 37,
+        "joint_pass": false,
+        "qed": 0.30911382781975955,
+        "sa": 4.280596700391651,
+        "smiles": "CC(C)CC(NC(c1ccc2c(c1)OCCO2)C(CN1CCCC1)NC1=C(C#N)CCC1)C(=O)NC#N"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 7,
+      "largest_to_methyl": {
+        "heavy_atoms": 22,
+        "joint_pass": true,
+        "qed": 0.8069458226936609,
+        "sa": 3.142963844490904,
+        "smiles": "CCOC(c1ccc2c(c1)OCCO2)C(C)CN1CCCC1"
+      },
+      "original": {
+        "heavy_atoms": 40,
+        "joint_pass": false,
+        "qed": 0.3284437921285467,
+        "sa": 4.27146911551128,
+        "smiles": "CCOC(c1ccc2c(c1)OCCO2)C(CN1CCCC1)NC(C(=O)N(C)C(C=C(C)C(=O)O)C(C)C)C(C)C"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 8,
+      "largest_to_methyl": {
+        "heavy_atoms": 25,
+        "joint_pass": false,
+        "qed": 0.8137866913357518,
+        "sa": 4.044667773025755,
+        "smiles": "CC(c1ccc2c(c1)OCCO2)C(CN1CCCC1)OC1CNCN1"
+      },
+      "original": {
+        "heavy_atoms": 38,
+        "joint_pass": false,
+        "qed": 0.5539028422866099,
+        "sa": 4.062242585240177,
+        "smiles": "O=C(c1ccccc1C(c1ccc2c(c1)OCCO2)C(CN1CCCC1)OC1CNCN1)N1CCCCC1"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 9,
+      "largest_to_methyl": {
+        "heavy_atoms": 23,
+        "joint_pass": true,
+        "qed": 0.7988548249390778,
+        "sa": 3.2329974459840667,
+        "smiles": "CC(c1ccc2c(c1)OCCO2)C(CN1CCCC1)NCCN"
+      },
+      "original": {
+        "heavy_atoms": 28,
+        "joint_pass": true,
+        "qed": 0.6666251113223302,
+        "sa": 3.8112510613922046,
+        "smiles": "NCCNC(CN1CCCC1)C(c1ccc2c(c1)OCCO2)C1SCCCS1"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 10,
+      "largest_to_methyl": {
+        "heavy_atoms": 23,
+        "joint_pass": true,
+        "qed": 0.8034215974248659,
+        "sa": 3.282114657131129,
+        "smiles": "CC(C)OC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "original": {
+        "heavy_atoms": 39,
+        "joint_pass": false,
+        "qed": 0.3814229707785355,
+        "sa": 3.7947220829560804,
+        "smiles": "CC(C)OC(CN1CCCC1)C(NCc1ccc(C(F)(F)F)nc1OCC1CC1)c1ccc2c(c1)OCCO2"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 11,
+      "largest_to_methyl": {
+        "heavy_atoms": 25,
+        "joint_pass": true,
+        "qed": 0.8108314348698984,
+        "sa": 2.9596126824204987,
+        "smiles": "CC(CN1CCCC1)C(c1ccccc1)c1ccc2c(c1)OCCO2"
+      },
+      "original": {
+        "heavy_atoms": 40,
+        "joint_pass": false,
+        "qed": 0.41021171595932393,
+        "sa": 4.397578150013772,
+        "smiles": "O=c1c(F)c(O)ccn1C1OC(C(CN2CCCC2)C(c2ccccc2)c2ccc3c(c2)OCCO3)C(O)C1O"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 12,
+      "largest_to_methyl": {
+        "heavy_atoms": 23,
+        "joint_pass": true,
+        "qed": 0.8172360820794085,
+        "sa": 3.267218111885329,
+        "smiles": "CC(CN1CCCC1)C(c1ccc2c(c1)OCCO2)C1CCC1"
+      },
+      "original": {
+        "heavy_atoms": 38,
+        "joint_pass": false,
+        "qed": 0.36284951157109707,
+        "sa": 3.3922464775797447,
+        "smiles": "Cc1cccc(C(=O)Nc2ccccc2C(CN2CCCC2)C(c2ccc3c(c2)OCCO3)C2CCC2)c1"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 13,
+      "largest_to_methyl": {
+        "heavy_atoms": 26,
+        "joint_pass": true,
+        "qed": 0.7328629964566911,
+        "sa": 3.3810595344601158,
+        "smiles": "CCCN(CCN)C(c1ccc2c(c1)OCCO2)C(C)CN1CCCC1"
+      },
+      "original": {
+        "heavy_atoms": 40,
+        "joint_pass": false,
+        "qed": 0.4070468205953962,
+        "sa": 5.246837128945922,
+        "smiles": "CCCN(CCN)C(c1ccc2c(c1)OCCO2)C(CN1CCCC1)N1CC2CC1CN2C(O)C1CCCCC1"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 14,
+      "largest_to_methyl": {
+        "heavy_atoms": 28,
+        "joint_pass": true,
+        "qed": 0.7945614764452378,
+        "sa": 3.1715976580351866,
+        "smiles": "CC(c1ccc2c(c1)OCCO2)C(CN1CCCC1)Nc1ccc(F)cc1F"
+      },
+      "original": {
+        "heavy_atoms": 37,
+        "joint_pass": false,
+        "qed": 0.4673570286447696,
+        "sa": 4.447238661622697,
+        "smiles": "COC1CC(OC)NC(C(c2ccc3c(c2)OCCO3)C(CN2CCCC2)Nc2ccc(F)cc2F)N1"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 15,
+      "largest_to_methyl": {
+        "heavy_atoms": 21,
+        "joint_pass": true,
+        "qed": 0.9016031362193341,
+        "sa": 3.1141078545837324,
+        "smiles": "CNC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "original": {
+        "heavy_atoms": 40,
+        "joint_pass": false,
+        "qed": 0.39936017225862575,
+        "sa": 4.622682386710915,
+        "smiles": "CNC(CN1CCCC1)C(c1ccc2c(c1)OCCO2)N1CBn2cc(C(=O)OC(C)C(C)(C)C)c(C)c2C1=O"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 16,
+      "largest_to_methyl": {
+        "heavy_atoms": 27,
+        "joint_pass": true,
+        "qed": 0.8120453345650254,
+        "sa": 3.3473148851207473,
+        "smiles": "CC(CN1CCCC1)C(Nc1ncc(Cl)cn1)c1ccc2c(c1)OCCO2"
+      },
+      "original": {
+        "heavy_atoms": 39,
+        "joint_pass": false,
+        "qed": 0.28718158017929113,
+        "sa": 3.7233330383931236,
+        "smiles": "COc1cccc(-c2cc(C(CN3CCCC3)C(Nc3ncc(Cl)cn3)c3ccc4c(c3)OCCO4)no2)c1"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 17,
+      "largest_to_methyl": {
+        "heavy_atoms": 29,
+        "joint_pass": true,
+        "qed": 0.7330480880897077,
+        "sa": 3.6366009778898576,
+        "smiles": "CNC(=O)C(NC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2)C(C)(C)C"
+      },
+      "original": {
+        "heavy_atoms": 39,
+        "joint_pass": false,
+        "qed": 0.43611864070322887,
+        "sa": 5.134672368902744,
+        "smiles": "CNC(=O)C(NC(CN1CCCC1)C(NC12CC3CC(CC(C3)C1)C2)c1ccc2c(c1)OCCO2)C(C)(C)C"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 18,
+      "largest_to_methyl": {
+        "heavy_atoms": 26,
+        "joint_pass": true,
+        "qed": 0.7475625318579315,
+        "sa": 3.6477460633360987,
+        "smiles": "CC(c1ccc2c(c1)OCCO2)C(CN1CCCC1)OC(C)C(C)(C)C"
+      },
+      "original": {
+        "heavy_atoms": 36,
+        "joint_pass": false,
+        "qed": 0.463635029397824,
+        "sa": 4.420709848935156,
+        "smiles": "CC(OC(CN1CCCC1)C(Oc1nonc1-c1c[nH]cn1)c1ccc2c(c1)OCCO2)C(C)(C)C"
+      }
+    },
+    {
+      "all_to_methyl": {
+        "heavy_atoms": 20,
+        "joint_pass": true,
+        "qed": 0.8413569158969659,
+        "sa": 2.9910470817672046,
+        "smiles": "CC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2"
+      },
+      "attempt": 19,
+      "largest_to_methyl": {
+        "heavy_atoms": 30,
+        "joint_pass": true,
+        "qed": 0.7197968951718352,
+        "sa": 3.4579384756126306,
+        "smiles": "CC(CN1CCCC1)C(c1ccc2c(c1)OCCO2)N(C)CCc1cccc(N)n1"
+      },
+      "original": {
+        "heavy_atoms": 40,
+        "joint_pass": false,
+        "qed": 0.300553476420239,
+        "sa": 3.669046395401052,
+        "smiles": "CN(CCc1cccc(N)n1)C(c1ccc2c(c1)OCCO2)C(CN1CCCC1)c1ccc(NC(=O)CBr)cc1"
+      }
+    }
+  ],
+  "role": "manual post-generation diagnosis only; RDKit edited, not COMPOSE executed; no benchmark claim, no inference selection",
+  "rule": "methyl replacement fixed before scoring; largest non-core single-boundary pendant or all such pendants; no drug rules",
+  "schema": "manual_decoration_counterfactual_v1",
+  "summary": {
+    "all_to_methyl": {
+      "attempts": 20,
+      "completed": 20,
+      "joint_pass": 20,
+      "mean_qed": 0.8413569158969662,
+      "mean_sa": 2.9910470817672055,
+      "unique": 1
+    },
+    "largest_to_methyl": {
+      "attempts": 20,
+      "completed": 20,
+      "joint_pass": 18,
+      "mean_qed": 0.7855181581563946,
+      "mean_sa": 3.3788220561783673,
+      "unique": 20
+    },
+    "original": {
+      "attempts": 20,
+      "completed": 20,
+      "joint_pass": 1,
+      "mean_qed": 0.38277054702508234,
+      "mean_sa": 4.184902501257354,
+      "unique": 20
+    }
+  },
+  "versions": {
+    "python": "3.11.13",
+    "rdkit": "2024.03.5"
+  }
+}

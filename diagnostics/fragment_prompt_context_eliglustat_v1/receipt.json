@@ -1,0 +1,28 @@
+{
+  "attachment_requirements": [
+    [
+      0,
+      1
+    ],
+    [
+      7,
+      1
+    ]
+  ],
+  "code_revision": "f1a347e87c52d5b4cfc9a5d4edb16dd6b3b8a6f6",
+  "core_heavy_atoms": 18,
+  "inputs_and_image_sha256": {
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_complete_program_inspection_decoration_partial_v1/inspection.json": "8fcb76430b8abcc3e34ff4b6a0a83e3176044197433997997b6e04a11adc1321",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_prompt_context_eliglustat_v1/prompt_and_completions.png": "86292568b96456e25afe865e7914d5f14f69d721bbab166fe1f801dc3b290454",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/tools/render_fragment_prompt_context.py": "d81eb46bbf0063efd3a37616498a64390165cca915c0f279c236c961e53b4c8d"
+  },
+  "prompt": "[1*][C@H](CN1CCCC1)[C@H]([2*])c1ccc2c(c1)OCCO2",
+  "role": "diagnostic only; first saved attempt per arm, no quality selection",
+  "schema": "fragment_prompt_context_visual_v1",
+  "stereo": "not asserted; omitted in prompt drawing to match current model support",
+  "versions": {
+    "python": "3.11.13",
+    "rdkit": "2024.03.5"
+  }
+}

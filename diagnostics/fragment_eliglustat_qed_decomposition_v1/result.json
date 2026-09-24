@@ -1,0 +1,1696 @@
+{
+  "code_revision": "f1a347e87c52d5b4cfc9a5d4edb16dd6b3b8a6f6",
+  "example_selection": "first joint pass in baseline; first joint pass in new; first failure in new; illustration, not representative frequency",
+  "image_sha256": "c394fc1d0d608edaf4617eda06080c8f62a4bff60b644e35ce79d4699c59292d",
+  "input_sha256": {
+    "/Users/rmaganti/compose_rgm_git/.venv_pinned_chem/lib/python3.11/site-packages/rdkit/Chem/QED.py": "7b788ab1f4a66430b58229cd0dfe1d00e3e8d73bddd8c03f8444214fb19372e1",
+    "/Users/rmaganti/compose_rgm_git/.venv_pinned_chem/lib/python3.11/site-packages/rdkit/Contrib/SA_Score/sascorer.py": "40c66080be6f7e2086375f6e2d76b0a0d41d25c5d7116902a377404a5f260323",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_complete_program_inspection_decoration_partial_v1/inspection.json": "8fcb76430b8abcc3e34ff4b6a0a83e3176044197433997997b6e04a11adc1321",
+    "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/tools/diagnose_fragment_qed.py": "cce7b3eea4ec955a9943aaefaa42925b8b17c21f4cea72e7a696ccb3f780baad"
+  },
+  "interpretation": "Exact descriptive score decomposition, not causal effects of molecular edits.",
+  "mean_log_qed_terms": {
+    "baseline": {
+      "ALERTS": -0.24479933984253238,
+      "ALOGP": -0.009407245141050102,
+      "AROM": -0.02320888697139645,
+      "HBA": -0.005490145437698681,
+      "HBD": -0.0613879353330648,
+      "MW": -0.0459692381484471,
+      "PSA": -0.0022271191513131244,
+      "ROTB": -0.08448920938752098
+    },
+    "new": {
+      "ALERTS": -0.11546857366523688,
+      "ALOGP": -0.07035221212250502,
+      "AROM": -0.11993753379579253,
+      "HBA": -0.01869527813200191,
+      "HBD": -0.0662486597951734,
+      "MW": -0.3686788483565064,
+      "PSA": -0.004036063931742035,
+      "ROTB": -0.24353667563534925
+    }
+  },
+  "molecules": {
+    "baseline": [
+      {
+        "attempt": 0,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 25,
+        "log_qed_terms": {
+          "ALERTS": -0.34445383951491865,
+          "ALOGP": -0.0033547347871270908,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.0040815726404516365,
+          "HBD": -0.08163540221877782,
+          "MW": -0.04452980692958265,
+          "PSA": -0.00010488542297722312,
+          "ROTB": -0.06188869834041995
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 2,
+          "ALOGP": 3.4013000000000018,
+          "AROM": 1,
+          "HBA": 5,
+          "HBD": 0,
+          "MW": 367.8730000000001,
+          "PSA": 48.0,
+          "ROTB": 6
+        },
+        "qed": 0.5693511915937888,
+        "rings": 3,
+        "sa": 3.3475341869152437,
+        "smiles": "CC(C)C(=O)OC(CN1CCCC1)C(Cl)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 1,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_pass",
+        "heavy_atoms": 25,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -2.5945350101099373e-05,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.0040815726404516365,
+          "HBD": -0.0020998701518562327,
+          "MW": -0.02088984128507209,
+          "PSA": -0.00012296892997448782,
+          "ROTB": -0.15200425695878886
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 2.7574000000000005,
+          "AROM": 1,
+          "HBA": 5,
+          "HBD": 1,
+          "MW": 347.45500000000015,
+          "PSA": 59.00000000000001,
+          "ROTB": 8
+        },
+        "qed": 0.7835060677716378,
+        "rings": 3,
+        "sa": 3.2583941273269437,
+        "smiles": "CCCCC(=O)C(c1ccc2c(c1)OCCO2)C(O)CN1CCCC1"
+      },
+      {
+        "attempt": 2,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 22,
+        "log_qed_terms": {
+          "ALERTS": -0.6070193384660922,
+          "ALOGP": -0.006090394218900146,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.0040815726404516365,
+          "HBD": -0.08163540221877782,
+          "MW": -9.41576364638688e-05,
+          "PSA": -2.8213758076535484e-05,
+          "ROTB": -0.02742286384300449
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 3,
+          "ALOGP": 1.9415,
+          "AROM": 1,
+          "HBA": 5,
+          "HBD": 0,
+          "MW": 303.3580000000001,
+          "PSA": 55.84,
+          "ROTB": 5
+        },
+        "qed": 0.47256459624959807,
+        "rings": 3,
+        "sa": 3.1109956588753453,
+        "smiles": "CC(C=O)(CN1CCCC1)C(=O)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 3,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 30,
+        "log_qed_terms": {
+          "ALERTS": -1.1539501189586132,
+          "ALOGP": -0.004098319219288976,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.021096894346942462,
+          "HBD": -0.0020998701518562327,
+          "MW": -0.1636959247168792,
+          "PSA": -0.009921666151311011,
+          "ROTB": -0.25733382446062575
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 5,
+          "ALOGP": 2.0957,
+          "AROM": 1,
+          "HBA": 8,
+          "HBD": 1,
+          "MW": 436.53400000000033,
+          "PSA": 115.81,
+          "ROTB": 10
+        },
+        "qed": 0.19487333316862035,
+        "rings": 3,
+        "sa": 3.9634485428509256,
+        "smiles": "CC(=O)OC(CN=NN)CSC(CN1CCCC1)C(=O)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 4,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_pass",
+        "heavy_atoms": 21,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.01896786426519885,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.0040815726404516365,
+          "HBD": -0.0020998701518562327,
+          "MW": -0.0028298649021163778,
+          "PSA": -0.00012296892997448438,
+          "ROTB": -0.005102778424618857
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 1.3301999999999998,
+          "AROM": 1,
+          "HBA": 5,
+          "HBD": 1,
+          "MW": 291.3470000000001,
+          "PSA": 59.0,
+          "ROTB": 4
+        },
+        "qed": 0.9066879478245755,
+        "rings": 3,
+        "sa": 2.886048229813067,
+        "smiles": "CC(O)(C(=O)CN1CCCC1)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 5,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 30,
+        "log_qed_terms": {
+          "ALERTS": -0.1082596373571352,
+          "ALOGP": -0.00709850342918536,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.008229188416152838,
+          "HBD": -0.15111507926652828,
+          "MW": -0.2976452637962517,
+          "PSA": -0.0071751545827163175,
+          "ROTB": -0.20338516973618342
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 1,
+          "ALOGP": 1.8743,
+          "AROM": 1,
+          "HBA": 6,
+          "HBD": 3,
+          "MW": 501.4470000000003,
+          "PSA": 105.92,
+          "ROTB": 9
+        },
+        "qed": 0.44658886015770527,
+        "rings": 3,
+        "sa": 3.890879631590483,
+        "smiles": "CSC(CNC(N)=O)C(=O)NC(CN1CCCC1)C(Br)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 6,
+        "duplicate": false,
+        "fluorines": 1,
+        "group": "both_pass",
+        "heavy_atoms": 19,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.00017059319324561065,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.00019533040236949126,
+          "HBD": -0.08163540221877782,
+          "MW": -0.02173899846737328,
+          "PSA": -0.006549492635375357,
+          "ROTB": -0.005102778424618857
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 2.954300000000001,
+          "AROM": 1,
+          "HBA": 3,
+          "HBD": 0,
+          "MW": 265.328,
+          "PSA": 21.700000000000003,
+          "ROTB": 4
+        },
+        "qed": 0.8351494293825489,
+        "rings": 3,
+        "sa": 2.786755036421898,
+        "smiles": "FC(CCN1CCCC1)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 7,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_pass",
+        "heavy_atoms": 22,
+        "log_qed_terms": {
+          "ALERTS": -0.1082596373571352,
+          "ALOGP": -0.00948191222429129,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.0040815726404516365,
+          "HBD": -0.0020998701518562327,
+          "MW": -5.9340328695731e-06,
+          "PSA": -0.00012296892997448438,
+          "ROTB": -0.02742286384300449
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 1,
+          "ALOGP": 1.7349,
+          "AROM": 1,
+          "HBA": 5,
+          "HBD": 1,
+          "MW": 305.37400000000014,
+          "PSA": 59.0,
+          "ROTB": 5
+        },
+        "qed": 0.8397226282395727,
+        "rings": 3,
+        "sa": 2.9460000544797413,
+        "smiles": "CC(CO)(CN1CCCC1)C(=O)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 8,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_pass",
+        "heavy_atoms": 22,
+        "log_qed_terms": {
+          "ALERTS": -0.34445383951491865,
+          "ALOGP": -0.0009992150320849902,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.0015364652092994854,
+          "HBD": -0.08163540221877782,
+          "MW": -0.00017569536250675304,
+          "PSA": -0.0004255425214107027,
+          "ROTB": -0.02742286384300449
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 2,
+          "ALOGP": 2.4603,
+          "AROM": 1,
+          "HBA": 4,
+          "HBD": 0,
+          "MW": 302.3740000000001,
+          "PSA": 43.290000000000006,
+          "ROTB": 5
+        },
+        "qed": 0.6188713205683156,
+        "rings": 3,
+        "sa": 2.629932251417525,
+        "smiles": "C=C(CN1CCCC1)C(=NOC)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 9,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 26,
+        "log_qed_terms": {
+          "ALERTS": -0.34445383951491865,
+          "ALOGP": -0.011341479177268054,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.008229188416152838,
+          "HBD": -0.15111507926652828,
+          "MW": -0.03879653430455697,
+          "PSA": -0.005085866879689006,
+          "ROTB": -0.10428765357548811
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 2,
+          "ALOGP": 1.6401999999999994,
+          "AROM": 1,
+          "HBA": 6,
+          "HBD": 3,
+          "MW": 363.4580000000001,
+          "PSA": 97.05,
+          "ROTB": 7
+        },
+        "qed": 0.503325335296969,
+        "rings": 3,
+        "sa": 3.5647547610713426,
+        "smiles": "CC(c1ccc2c(c1)OCCO2)C(N)(CCC(=O)NO)CN1CCCC1"
+      },
+      {
+        "attempt": 10,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 22,
+        "log_qed_terms": {
+          "ALERTS": -0.34445383951491865,
+          "ALOGP": -3.436777312406778e-06,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.0015364652092994854,
+          "HBD": -0.08163540221877782,
+          "MW": -0.004007015210244093,
+          "PSA": -0.0009910968495375927,
+          "ROTB": -0.06188869834041995
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 2,
+          "ALOGP": 2.8336000000000015,
+          "AROM": 1,
+          "HBA": 4,
+          "HBD": 0,
+          "MW": 323.8200000000001,
+          "PSA": 38.77,
+          "ROTB": 6
+        },
+        "qed": 0.5958747165812053,
+        "rings": 3,
+        "sa": 3.434903507952443,
+        "smiles": "O=CCC(c1ccc2c(c1)OCCO2)C(Cl)CN1CCCC1"
+      },
+      {
+        "attempt": 11,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_pass",
+        "heavy_atoms": 20,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.03361132581759317,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.0040815726404516365,
+          "HBD": -0.03624367673345044,
+          "MW": -0.010076442415878089,
+          "PSA": -0.0006953829574982149,
+          "ROTB": -0.005102778424618857
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 0.9142999999999997,
+          "AROM": 1,
+          "HBA": 5,
+          "HBD": 2,
+          "MW": 278.35200000000003,
+          "PSA": 67.95,
+          "ROTB": 4
+        },
+        "qed": 0.8567893443899511,
+        "rings": 3,
+        "sa": 3.0660550393268853,
+        "smiles": "NC(CN1CCCC1)C(O)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 12,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 26,
+        "log_qed_terms": {
+          "ALERTS": -0.34445383951491865,
+          "ALOGP": -0.007478577660892378,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.0040815726404516365,
+          "HBD": -0.08163540221877782,
+          "MW": -0.05809486726159262,
+          "PSA": -0.00010488542297722312,
+          "ROTB": -0.10428765357548811
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 2,
+          "ALOGP": 1.8503999999999998,
+          "AROM": 1,
+          "HBA": 5,
+          "HBD": 0,
+          "MW": 377.50600000000014,
+          "PSA": 48.0,
+          "ROTB": 7
+        },
+        "qed": 0.5361476522308231,
+        "rings": 3,
+        "sa": 3.673631637306096,
+        "smiles": "C#CCCC(=[SH4])OC(C(=O)CN1CCCC1)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 13,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 32,
+        "log_qed_terms": {
+          "ALERTS": -0.1082596373571352,
+          "ALOGP": -0.00010774339811028397,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.014055050545717639,
+          "HBD": -0.15111507926652828,
+          "MW": -0.19019025427596056,
+          "PSA": -0.004111800735532653,
+          "ROTB": -0.42804941858801016
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 1,
+          "ALOGP": 2.9257,
+          "AROM": 1,
+          "HBA": 7,
+          "HBD": 3,
+          "MW": 449.5920000000002,
+          "PSA": 92.29,
+          "ROTB": 13
+        },
+        "qed": 0.39887871882682,
+        "rings": 3,
+        "sa": 3.806460024702882,
+        "smiles": "CNCC(COCCCC(CN1CCCC1)C(C)c1ccc2c(c1)OCCO2)NC(=O)O"
+      },
+      {
+        "attempt": 14,
+        "duplicate": true,
+        "fluorines": 0,
+        "group": "both_pass",
+        "heavy_atoms": 22,
+        "log_qed_terms": {
+          "ALERTS": -0.1082596373571352,
+          "ALOGP": -0.00948191222429129,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.0040815726404516365,
+          "HBD": -0.0020998701518562327,
+          "MW": -5.9340328695731e-06,
+          "PSA": -0.00012296892997448438,
+          "ROTB": -0.02742286384300449
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 1,
+          "ALOGP": 1.7349,
+          "AROM": 1,
+          "HBA": 5,
+          "HBD": 1,
+          "MW": 305.37400000000014,
+          "PSA": 59.0,
+          "ROTB": 5
+        },
+        "qed": 0.8397226282395727,
+        "rings": 3,
+        "sa": 2.9460000544797413,
+        "smiles": "CC(CO)(CN1CCCC1)C(=O)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 15,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_pass",
+        "heavy_atoms": 22,
+        "log_qed_terms": {
+          "ALERTS": -0.34445383951491865,
+          "ALOGP": -0.04535152606844582,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.008229188416152838,
+          "HBD": -0.03624367673345044,
+          "MW": -2.171893418665113e-05,
+          "PSA": -0.0019562210586902564,
+          "ROTB": -0.02742286384300449
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 2,
+          "ALOGP": 0.6632,
+          "AROM": 1,
+          "HBA": 6,
+          "HBD": 2,
+          "MW": 307.34599999999995,
+          "PSA": 79.23,
+          "ROTB": 5
+        },
+        "qed": 0.6145359053227359,
+        "rings": 3,
+        "sa": 2.9206989555786436,
+        "smiles": "O=C(c1ccc2c(c1)OCCO2)C(CN1CCCC1)C(O)O"
+      },
+      {
+        "attempt": 16,
+        "duplicate": true,
+        "fluorines": 1,
+        "group": "both_pass",
+        "heavy_atoms": 19,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.00017059319324561065,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.00019533040236949126,
+          "HBD": -0.08163540221877782,
+          "MW": -0.02173899846737328,
+          "PSA": -0.006549492635375357,
+          "ROTB": -0.005102778424618857
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 2.954300000000001,
+          "AROM": 1,
+          "HBA": 3,
+          "HBD": 0,
+          "MW": 265.328,
+          "PSA": 21.700000000000003,
+          "ROTB": 4
+        },
+        "qed": 0.8351494293825489,
+        "rings": 3,
+        "sa": 2.786755036421898,
+        "smiles": "FC(CCN1CCCC1)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 17,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_pass",
+        "heavy_atoms": 21,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.02310816495163515,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.0040815726404516365,
+          "HBD": -0.03624367673345044,
+          "MW": -0.0021049555362174545,
+          "PSA": -0.0002770592732844375,
+          "ROTB": -0.02742286384300449
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 1.1954999999999996,
+          "AROM": 1,
+          "HBA": 5,
+          "HBD": 2,
+          "MW": 293.3630000000001,
+          "PSA": 62.16000000000001,
+          "ROTB": 5
+        },
+        "qed": 0.853858055442253,
+        "rings": 3,
+        "sa": 3.131837741090667,
+        "smiles": "OCC(CN1CCCC1)C(O)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 18,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_pass",
+        "heavy_atoms": 23,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.004382484935736736,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.0015364652092994854,
+          "HBD": -0.0020998701518562327,
+          "MW": -0.0013729046779907485,
+          "PSA": -1.99031947500462e-05,
+          "ROTB": -0.02742286384300449
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 2.0715,
+          "AROM": 1,
+          "HBA": 4,
+          "HBD": 1,
+          "MW": 316.401,
+          "PSA": 50.800000000000004,
+          "ROTB": 5
+        },
+        "qed": 0.9034030230460538,
+        "rings": 3,
+        "sa": 2.9301827040330526,
+        "smiles": "C=C(c1ccc2c(c1)OCCO2)C(CN1CCCC1)NC(C)=O"
+      },
+      {
+        "attempt": 19,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 26,
+        "log_qed_terms": {
+          "ALERTS": -0.34445383951491865,
+          "ALOGP": -0.0028201768970477596,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.008229188416152838,
+          "HBD": -0.08163540221877782,
+          "MW": -0.04136965072295652,
+          "PSA": -5.384322716261147e-05,
+          "ROTB": -0.10428765357548811
+        },
+        "program": null,
+        "properties": {
+          "ALERTS": 2,
+          "ALOGP": 3.3564000000000016,
+          "AROM": 1,
+          "HBA": 6,
+          "HBD": 0,
+          "MW": 365.47000000000014,
+          "PSA": 49.39,
+          "ROTB": 7
+        },
+        "qed": 0.5454966354564439,
+        "rings": 3,
+        "sa": 3.5940730562896377,
+        "smiles": "COOC(CN1CCCC1)C(OC(C)(C)C)c1ccc2c(c1)OCCO2"
+      }
+    ],
+    "new": [
+      {
+        "attempt": 0,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_fail",
+        "heavy_atoms": 36,
+        "log_qed_terms": {
+          "ALERTS": -0.1082596373571352,
+          "ALOGP": -0.00014108205986411405,
+          "AROM": -0.007872240499873236,
+          "HBA": -0.0354838873523219,
+          "HBD": -0.03624367673345044,
+          "MW": -0.2897410722066146,
+          "PSA": -0.00855702183755168,
+          "ROTB": -0.20338516973618342
+        },
+        "program": {
+          "conflict_edges": 0,
+          "dependency_edges": 0,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 18,
+            "cycle_close": 2
+          },
+          "primitives": 20,
+          "program_blocks": 2,
+          "ring_containing_endpoint": true,
+          "t4_lane": null,
+          "t4_refinement": false,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 1,
+          "ALOGP": 2.9417000000000013,
+          "AROM": 2,
+          "HBA": 10,
+          "HBD": 2,
+          "MW": 497.5960000000004,
+          "PSA": 111.09000000000002,
+          "ROTB": 9
+        },
+        "qed": 0.5017346986258323,
+        "rings": 5,
+        "sa": 4.323925233550541,
+        "smiles": "C=CCNc1nnc(C(c2ccc3c(c2)OCCO3)C(CN2CCCC2)C2COC(C)(C)O2)c(O)n1"
+      },
+      {
+        "attempt": 1,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_fail",
+        "heavy_atoms": 40,
+        "log_qed_terms": {
+          "ALERTS": -0.34445383951491865,
+          "ALOGP": -0.1762235084443931,
+          "AROM": -0.4121557338716127,
+          "HBA": -0.021096894346942462,
+          "HBD": -0.0020998701518562327,
+          "MW": -0.5519570007703569,
+          "PSA": -0.0017368548382676453,
+          "ROTB": -0.25733382446062575
+        },
+        "program": {
+          "conflict_edges": 1,
+          "dependency_edges": 1,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 22,
+            "atom_restate_semantic": 1,
+            "cycle_close": 3
+          },
+          "primitives": 26,
+          "program_blocks": 3,
+          "ring_containing_endpoint": true,
+          "t4_lane": "shallow",
+          "t4_refinement": true,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 2,
+          "ALOGP": 5.663500000000007,
+          "AROM": 4,
+          "HBA": 8,
+          "HBD": 1,
+          "MW": 673.621,
+          "PSA": 77.58,
+          "ROTB": 10
+        },
+        "qed": 0.1708349272565488,
+        "rings": 6,
+        "sa": 4.056344865101114,
+        "smiles": "CC(C)NC(CN1CCCC1)C(Sc1nnc(-c2ccco2)n1-c1ccc([IH2])cc1)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 2,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 39,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.12334198258961808,
+          "AROM": -0.16650093274079839,
+          "HBA": -0.0040815726404516365,
+          "HBD": -0.0020998701518562327,
+          "MW": -0.38449342979581863,
+          "PSA": -1.8809495261405165e-05,
+          "ROTB": -0.25733382446062575
+        },
+        "program": {
+          "conflict_edges": 1,
+          "dependency_edges": 1,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 21,
+            "atom_restate_semantic": 1,
+            "cycle_close": 3
+          },
+          "primitives": 25,
+          "program_blocks": 3,
+          "ring_containing_endpoint": true,
+          "t4_lane": "structured",
+          "t4_refinement": true,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 5.285100000000009,
+          "AROM": 3,
+          "HBA": 5,
+          "HBD": 1,
+          "MW": 545.7490000000001,
+          "PSA": 55.32000000000001,
+          "ROTB": 10
+        },
+        "qed": 0.3755312637111808,
+        "rings": 6,
+        "sa": 3.9855036300203874,
+        "smiles": "COc1cccc(NC(CN2CCCC2)C(C2=NC=C(Cc3ccccc3)[SH4]2)c2ccc3c(c2)OCCO3)c1"
+      },
+      {
+        "attempt": 3,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 40,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.2960295765576148,
+          "AROM": -0.4121557338716127,
+          "HBA": -0.014055050545717639,
+          "HBD": -0.03624367673345044,
+          "MW": -0.40855093746779914,
+          "PSA": -0.0010610614427362822,
+          "ROTB": -0.25733382446062575
+        },
+        "program": {
+          "conflict_edges": 0,
+          "dependency_edges": 0,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 22,
+            "cycle_close": 3
+          },
+          "primitives": 25,
+          "program_blocks": 2,
+          "ring_containing_endpoint": true,
+          "t4_lane": null,
+          "t4_refinement": false,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 6.482020000000006,
+          "AROM": 4,
+          "HBA": 7,
+          "HBD": 2,
+          "MW": 559.1100000000004,
+          "PSA": 71.78999999999999,
+          "ROTB": 10
+        },
+        "qed": 0.23062252601196717,
+        "rings": 6,
+        "sa": 3.5298273242325937,
+        "smiles": "Cc1ccc(-c2cc(NC(c3ccc4c(c3)OCCO4)C(CN3CCCC3)NCc3ccc(Cl)cc3)on2)cc1"
+      },
+      {
+        "attempt": 4,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_fail",
+        "heavy_atoms": 40,
+        "log_qed_terms": {
+          "ALERTS": -0.34445383951491865,
+          "ALOGP": -0.011786383030325271,
+          "AROM": -0.007872240499873236,
+          "HBA": -0.021096894346942462,
+          "HBD": -0.0020998701518562327,
+          "MW": -0.38609830151484803,
+          "PSA": -0.007096112048166648,
+          "ROTB": -0.20338516973618342
+        },
+        "program": {
+          "conflict_edges": 0,
+          "dependency_edges": 0,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 22,
+            "cycle_close": 3
+          },
+          "primitives": 25,
+          "program_blocks": 2,
+          "ring_containing_endpoint": true,
+          "t4_lane": null,
+          "t4_refinement": false,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 2,
+          "ALOGP": 3.829500000000003,
+          "AROM": 2,
+          "HBA": 8,
+          "HBD": 1,
+          "MW": 546.6200000000003,
+          "PSA": 105.60999999999999,
+          "ROTB": 9
+        },
+        "qed": 0.37385441919223383,
+        "rings": 6,
+        "sa": 4.0126393590608345,
+        "smiles": "O=C(O)c1ccc(COC(CN2CCCC2)C(c2ccc3c(c2)OCCO3)N2C(=O)C3CC=CCC3C2=O)cc1"
+      },
+      {
+        "attempt": 5,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_fail",
+        "heavy_atoms": 40,
+        "log_qed_terms": {
+          "ALERTS": -0.1082596373571352,
+          "ALOGP": -2.7092789096144124e-05,
+          "AROM": -0.16650093274079839,
+          "HBA": -0.0354838873523219,
+          "HBD": -0.45000818048835217,
+          "MW": -0.3916829139928668,
+          "PSA": -0.008931731602120494,
+          "ROTB": -0.31309267467878255
+        },
+        "program": {
+          "conflict_edges": 2,
+          "dependency_edges": 2,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_delete": 1,
+            "atom_insert": 23,
+            "cycle_close": 3
+          },
+          "primitives": 27,
+          "program_blocks": 4,
+          "ring_containing_endpoint": true,
+          "t4_lane": "anchored_replacement",
+          "t4_refinement": true,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 1,
+          "ALOGP": 2.87,
+          "AROM": 3,
+          "HBA": 10,
+          "HBD": 5,
+          "MW": 549.6720000000003,
+          "PSA": 112.42000000000002,
+          "ROTB": 11
+        },
+        "qed": 0.22901058563830667,
+        "rings": 6,
+        "sa": 4.515183611185098,
+        "smiles": "COc1ccccc1NC(NC(CN1CCCC1)C(c1ccc2c(c1)OCCO2)c1ccco1)C1(O)CCNN1"
+      },
+      {
+        "attempt": 6,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_fail",
+        "heavy_atoms": 37,
+        "log_qed_terms": {
+          "ALERTS": -0.34445383951491865,
+          "ALOGP": -0.0008172906899359178,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.021096894346942462,
+          "HBD": -0.15111507926652828,
+          "MW": -0.3082635367582533,
+          "PSA": -0.011997492869751731,
+          "ROTB": -0.31309267467878255
+        },
+        "program": {
+          "conflict_edges": 0,
+          "dependency_edges": 0,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 19,
+            "cycle_close": 1
+          },
+          "primitives": 20,
+          "program_blocks": 2,
+          "ring_containing_endpoint": true,
+          "t4_lane": null,
+          "t4_refinement": false,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 2,
+          "ALOGP": 3.116060000000001,
+          "AROM": 1,
+          "HBA": 8,
+          "HBD": 3,
+          "MW": 506.6510000000004,
+          "PSA": 122.44,
+          "ROTB": 11
+        },
+        "qed": 0.30911382781975966,
+        "rings": 4,
+        "sa": 4.280596700391651,
+        "smiles": "CC(C)CC(NC(c1ccc2c(c1)OCCO2)C(CN1CCCC1)NC1=C(C#N)CCC1)C(=O)NC#N"
+      },
+      {
+        "attempt": 7,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_fail",
+        "heavy_atoms": 40,
+        "log_qed_terms": {
+          "ALERTS": -0.1082596373571352,
+          "ALOGP": -0.022453192680857072,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.021096894346942462,
+          "HBD": -0.03624367673345044,
+          "MW": -0.4096683033373483,
+          "PSA": -0.005872184802695462,
+          "ROTB": -0.4865867840992307
+        },
+        "program": {
+          "conflict_edges": 0,
+          "dependency_edges": 0,
+          "multi_primitive": true,
+          "new_ring": false,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 22
+          },
+          "primitives": 22,
+          "program_blocks": 2,
+          "ring_containing_endpoint": true,
+          "t4_lane": null,
+          "t4_refinement": false,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 1,
+          "ALOGP": 4.127900000000002,
+          "AROM": 1,
+          "HBA": 8,
+          "HBD": 2,
+          "MW": 559.7480000000002,
+          "PSA": 100.57000000000001,
+          "ROTB": 14
+        },
+        "qed": 0.3284437921285468,
+        "rings": 3,
+        "sa": 4.27146911551128,
+        "smiles": "CCOC(c1ccc2c(c1)OCCO2)C(CN1CCCC1)NC(C(=O)N(C)C(C=C(C)C(=O)O)C(C)C)C(C)C"
+      },
+      {
+        "attempt": 8,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_fail",
+        "heavy_atoms": 38,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.0011726015354084276,
+          "AROM": -0.007872240499873236,
+          "HBA": -0.014055050545717639,
+          "HBD": -0.03624367673345044,
+          "MW": -0.33642182567725487,
+          "PSA": -0.0014532001135486472,
+          "ROTB": -0.15200425695878886
+        },
+        "program": {
+          "conflict_edges": 2,
+          "dependency_edges": 2,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_delete": 3,
+            "atom_insert": 23,
+            "cycle_close": 3
+          },
+          "primitives": 29,
+          "program_blocks": 4,
+          "ring_containing_endpoint": true,
+          "t4_lane": "anchored_replacement",
+          "t4_refinement": true,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 3.1732000000000014,
+          "AROM": 2,
+          "HBA": 7,
+          "HBD": 2,
+          "MW": 520.6740000000004,
+          "PSA": 75.3,
+          "ROTB": 8
+        },
+        "qed": 0.5539028422866099,
+        "rings": 6,
+        "sa": 4.062242585240177,
+        "smiles": "O=C(c1ccccc1C(c1ccc2c(c1)OCCO2)C(CN1CCCC1)OC1CNCN1)N1CCCCC1"
+      },
+      {
+        "attempt": 9,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_pass",
+        "heavy_atoms": 28,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -3.2910867404144864e-05,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.014055050545717639,
+          "HBD": -0.03624367673345044,
+          "MW": -0.13828511472880353,
+          "PSA": -0.000154415777181079,
+          "ROTB": -0.15200425695878886
+        },
+        "program": {
+          "conflict_edges": 1,
+          "dependency_edges": 1,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_delete": 6,
+            "atom_insert": 16,
+            "cycle_close": 2,
+            "cycle_open": 1
+          },
+          "primitives": 25,
+          "program_blocks": 3,
+          "ring_containing_endpoint": true,
+          "t4_lane": "shallow",
+          "t4_refinement": true,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 2.750300000000001,
+          "AROM": 1,
+          "HBA": 7,
+          "HBD": 2,
+          "MW": 423.64800000000025,
+          "PSA": 59.75,
+          "ROTB": 8
+        },
+        "qed": 0.6666251113223302,
+        "rings": 4,
+        "sa": 3.8112510613922046,
+        "smiles": "NCCNC(CN1CCCC1)C(c1ccc2c(c1)OCCO2)C1SCCCS1"
+      },
+      {
+        "attempt": 10,
+        "duplicate": false,
+        "fluorines": 3,
+        "group": "qed_fail",
+        "heavy_atoms": 39,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.13606937239922265,
+          "AROM": -0.007872240499873236,
+          "HBA": -0.014055050545717639,
+          "HBD": -0.0020998701518562327,
+          "MW": -0.3916137582664079,
+          "PSA": -0.0004671720744296761,
+          "ROTB": -0.37012576568089317
+        },
+        "program": {
+          "conflict_edges": 0,
+          "dependency_edges": 0,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 21,
+            "cycle_close": 2
+          },
+          "primitives": 23,
+          "program_blocks": 2,
+          "ring_containing_endpoint": true,
+          "t4_lane": null,
+          "t4_refinement": false,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 5.380700000000005,
+          "AROM": 2,
+          "HBA": 7,
+          "HBD": 1,
+          "MW": 549.6340000000001,
+          "PSA": 65.08000000000001,
+          "ROTB": 12
+        },
+        "qed": 0.38142297077853554,
+        "rings": 5,
+        "sa": 3.7947220829560804,
+        "smiles": "CC(C)OC(CN1CCCC1)C(NCc1ccc(C(F)(F)F)nc1OCC1CC1)c1ccc2c(c1)OCCO2"
+      },
+      {
+        "attempt": 11,
+        "duplicate": false,
+        "fluorines": 1,
+        "group": "both_fail",
+        "heavy_atoms": 40,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.0002812225088435391,
+          "AROM": -0.16650093274079839,
+          "HBA": -0.021096894346942462,
+          "HBD": -0.15111507926652828,
+          "MW": -0.3969804951637376,
+          "PSA": -0.009276464086613203,
+          "ROTB": -0.10428765357548811
+        },
+        "program": {
+          "conflict_edges": 0,
+          "dependency_edges": 0,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 22,
+            "cycle_close": 3
+          },
+          "primitives": 25,
+          "program_blocks": 2,
+          "ring_containing_endpoint": true,
+          "t4_lane": null,
+          "t4_refinement": false,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 2.627500000000001,
+          "AROM": 3,
+          "HBA": 8,
+          "HBD": 3,
+          "MW": 552.5990000000004,
+          "PSA": 113.62,
+          "ROTB": 7
+        },
+        "qed": 0.41021171595932404,
+        "rings": 6,
+        "sa": 4.397578150013772,
+        "smiles": "O=c1c(F)c(O)ccn1C1OC(C(CN2CCCC2)C(c2ccccc2)c2ccc3c(c2)OCCO3)C(O)C1O"
+      },
+      {
+        "attempt": 12,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 38,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.33363937398263177,
+          "AROM": -0.16650093274079839,
+          "HBA": -0.0015364652092994854,
+          "HBD": -0.0020998701518562327,
+          "MW": -0.3164231666264658,
+          "PSA": -1.9903194750049606e-05,
+          "ROTB": -0.15200425695878886
+        },
+        "program": {
+          "conflict_edges": 0,
+          "dependency_edges": 0,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 20,
+            "cycle_close": 3
+          },
+          "primitives": 23,
+          "program_blocks": 2,
+          "ring_containing_endpoint": true,
+          "t4_lane": null,
+          "t4_refinement": false,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 6.781820000000007,
+          "AROM": 3,
+          "HBA": 4,
+          "HBD": 1,
+          "MW": 510.6780000000005,
+          "PSA": 50.80000000000001,
+          "ROTB": 8
+        },
+        "qed": 0.36284951157109696,
+        "rings": 6,
+        "sa": 3.3922464775797447,
+        "smiles": "Cc1cccc(C(=O)Nc2ccccc2C(CN2CCCC2)C(c2ccc3c(c2)OCCO3)C2CCC2)c1"
+      },
+      {
+        "attempt": 13,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_fail",
+        "heavy_atoms": 40,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.002139484055011725,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.021096894346942462,
+          "HBD": -0.03624367673345044,
+          "MW": -0.40272070793098214,
+          "PSA": -0.0017485156346286265,
+          "ROTB": -0.37012576568089317
+        },
+        "program": {
+          "conflict_edges": 2,
+          "dependency_edges": 2,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_delete": 2,
+            "atom_insert": 24,
+            "cycle_close": 3
+          },
+          "primitives": 29,
+          "program_blocks": 4,
+          "ring_containing_endpoint": true,
+          "t4_lane": "shallow",
+          "t4_refinement": true,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 3.2912000000000035,
+          "AROM": 1,
+          "HBA": 8,
+          "HBD": 2,
+          "MW": 555.8080000000002,
+          "PSA": 77.67,
+          "ROTB": 12
+        },
+        "qed": 0.4070468205953962,
+        "rings": 6,
+        "sa": 5.246837128945922,
+        "smiles": "CCCN(CCN)C(c1ccc2c(c1)OCCO2)C(CN1CCCC1)N1CC2CC1CN2C(O)C1CCCCC1"
+      },
+      {
+        "attempt": 14,
+        "duplicate": false,
+        "fluorines": 2,
+        "group": "both_fail",
+        "heavy_atoms": 37,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.0017654145452524568,
+          "AROM": -0.007872240499873236,
+          "HBA": -0.021096894346942462,
+          "HBD": -0.15111507926652828,
+          "MW": -0.3323152309303554,
+          "PSA": -0.0015686382970596748,
+          "ROTB": -0.20338516973618342
+        },
+        "program": {
+          "conflict_edges": 2,
+          "dependency_edges": 2,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_delete": 1,
+            "atom_insert": 20,
+            "cycle_close": 2,
+            "ring_system_restate": 1
+          },
+          "primitives": 24,
+          "program_blocks": 4,
+          "ring_containing_endpoint": true,
+          "t4_lane": "shallow",
+          "t4_refinement": true,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 3.2500999999999998,
+          "AROM": 2,
+          "HBA": 8,
+          "HBD": 3,
+          "MW": 518.6050000000004,
+          "PSA": 76.25,
+          "ROTB": 9
+        },
+        "qed": 0.4673570286447696,
+        "rings": 5,
+        "sa": 4.447238661622697,
+        "smiles": "COC1CC(OC)NC(C(c2ccc3c(c2)OCCO3)C(CN2CCCC2)Nc2ccc(F)cc2F)N1"
+      },
+      {
+        "attempt": 15,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_fail",
+        "heavy_atoms": 40,
+        "log_qed_terms": {
+          "ALERTS": -0.34445383951491865,
+          "ALOGP": -0.0013425227832910434,
+          "AROM": -0.007872240499873236,
+          "HBA": -0.014055050545717639,
+          "HBD": -0.0020998701518562327,
+          "MW": -0.3932037115795705,
+          "PSA": -0.002860089870502572,
+          "ROTB": -0.15200425695878886
+        },
+        "program": {
+          "conflict_edges": 2,
+          "dependency_edges": 2,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_delete": 1,
+            "atom_insert": 23,
+            "atom_restate_semantic": 1,
+            "cycle_close": 2
+          },
+          "primitives": 27,
+          "program_blocks": 4,
+          "ring_containing_endpoint": true,
+          "t4_lane": "shallow",
+          "t4_refinement": true,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 2,
+          "ALOGP": 3.197120000000001,
+          "AROM": 2,
+          "HBA": 7,
+          "HBD": 1,
+          "MW": 550.5090000000004,
+          "PSA": 85.27000000000001,
+          "ROTB": 8
+        },
+        "qed": 0.39936017225862575,
+        "rings": 5,
+        "sa": 4.622682386710915,
+        "smiles": "CNC(CN1CCCC1)C(c1ccc2c(c1)OCCO2)N1CBn2cc(C(=O)OC(C)C(C)(C)C)c(C)c2C1=O"
+      },
+      {
+        "attempt": 16,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 39,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.16659940451893285,
+          "AROM": -0.4121557338716127,
+          "HBA": -0.028540998983293663,
+          "HBD": -0.0020998701518562327,
+          "MW": -0.3887097306701447,
+          "PSA": -0.004606541314104753,
+          "ROTB": -0.20338516973618342
+        },
+        "program": {
+          "conflict_edges": 0,
+          "dependency_edges": 0,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 21,
+            "cycle_close": 3
+          },
+          "primitives": 24,
+          "program_blocks": 2,
+          "ring_containing_endpoint": true,
+          "t4_lane": null,
+          "t4_refinement": false,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 5.597600000000005,
+          "AROM": 4,
+          "HBA": 9,
+          "HBD": 1,
+          "MW": 548.0430000000002,
+          "PSA": 94.77000000000001,
+          "ROTB": 9
+        },
+        "qed": 0.28718158017929113,
+        "rings": 6,
+        "sa": 3.7233330383931236,
+        "smiles": "COc1cccc(-c2cc(C(CN3CCCC3)C(Nc3ncc(Cl)cn3)c3ccc4c(c3)OCCO4)no2)c1"
+      },
+      {
+        "attempt": 17,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_fail",
+        "heavy_atoms": 39,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.029481482686525687,
+          "AROM": -0.023208886971396458,
+          "HBA": -0.008229188416152838,
+          "HBD": -0.15111507926652828,
+          "MW": -0.37147695354341315,
+          "PSA": -0.0014010698392145707,
+          "ROTB": -0.20338516973618342
+        },
+        "program": {
+          "conflict_edges": 0,
+          "dependency_edges": 0,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 21,
+            "cycle_close": 3
+          },
+          "primitives": 24,
+          "program_blocks": 2,
+          "ring_containing_endpoint": true,
+          "t4_lane": null,
+          "t4_refinement": false,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 4.272000000000003,
+          "AROM": 1,
+          "HBA": 6,
+          "HBD": 3,
+          "MW": 538.7770000000004,
+          "PSA": 74.86000000000001,
+          "ROTB": 9
+        },
+        "qed": 0.43611864070322887,
+        "rings": 7,
+        "sa": 5.134672368902744,
+        "smiles": "CNC(=O)C(NC(CN1CCCC1)C(NC12CC3CC(CC(C3)C1)C2)c1ccc2c(c1)OCCO2)C(C)(C)C"
+      },
+      {
+        "attempt": 18,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "both_fail",
+        "heavy_atoms": 36,
+        "log_qed_terms": {
+          "ALERTS": -0.04154313048471019,
+          "ALOGP": -0.029193202269927648,
+          "AROM": -0.16650093274079839,
+          "HBA": -0.028540998983293663,
+          "HBD": -0.0020998701518562327,
+          "MW": -0.2897410722066139,
+          "PSA": -0.0076532342682470375,
+          "ROTB": -0.20338516973618342
+        },
+        "program": {
+          "conflict_edges": 0,
+          "dependency_edges": 0,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_insert": 18,
+            "cycle_close": 2
+          },
+          "primitives": 20,
+          "program_blocks": 2,
+          "ring_containing_endpoint": true,
+          "t4_lane": null,
+          "t4_refinement": false,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 0,
+          "ALOGP": 4.266600000000004,
+          "AROM": 3,
+          "HBA": 9,
+          "HBD": 1,
+          "MW": 497.5960000000003,
+          "PSA": 107.76,
+          "ROTB": 9
+        },
+        "qed": 0.46363502939782403,
+        "rings": 5,
+        "sa": 4.420709848935156,
+        "smiles": "CC(OC(CN1CCCC1)C(Oc1nonc1-c1c[nH]cn1)c1ccc2c(c1)OCCO2)C(C)(C)C"
+      },
+      {
+        "attempt": 19,
+        "duplicate": false,
+        "fluorines": 0,
+        "group": "qed_fail",
+        "heavy_atoms": 40,
+        "log_qed_terms": {
+          "ALERTS": -0.1082596373571352,
+          "ALOGP": -0.07450714145594375,
+          "AROM": -0.16650093274079839,
+          "HBA": -0.014055050545717639,
+          "HBD": -0.03624367673345044,
+          "MW": -0.48522970396247356,
+          "PSA": -0.004240765228009484,
+          "ROTB": -0.31309267467878255
+        },
+        "program": {
+          "conflict_edges": 2,
+          "dependency_edges": 2,
+          "multi_primitive": true,
+          "new_ring": true,
+          "one_step": false,
+          "primitive_families": {
+            "atom_delete": 1,
+            "atom_insert": 23,
+            "cycle_close": 2
+          },
+          "primitives": 26,
+          "program_blocks": 4,
+          "ring_containing_endpoint": true,
+          "t4_lane": "structured",
+          "t4_refinement": true,
+          "two_boundary_program": false,
+          "whole_region_program": true
+        },
+        "properties": {
+          "ALERTS": 1,
+          "ALOGP": 4.863600000000004,
+          "AROM": 3,
+          "HBA": 7,
+          "HBD": 2,
+          "MW": 608.5810000000004,
+          "PSA": 92.94999999999999,
+          "ROTB": 11
+        },
+        "qed": 0.300553476420239,
+        "rings": 5,
+        "sa": 3.669046395401052,
+        "smiles": "CN(CCc1cccc(N)n1)C(c1ccc2c(c1)OCCO2)C(CN1CCCC1)c1ccc(NC(=O)CBr)cc1"
+      }
+    ]
+  },
+  "new_minus_baseline_log_qed": {
+    "ALERTS": 0.1293307661772955,
+    "ALOGP": -0.060944966981454914,
+    "AROM": -0.09672864682439608,
+    "HBA": -0.013205132694303227,
+    "HBD": -0.004860724462108598,
+    "MW": -0.32270961020805927,
+    "PSA": -0.001808944780428911,
+    "ROTB": -0.15904746624782828
+  },
+  "role": "post-generation diagnostic only; not score guidance or sampler selection",
+  "schema": "fragment_qed_decomposition_v1",
+  "scope": {
+    "attempts": {
+      "baseline": 20,
+      "new": 20
+    },
+    "drug": "ELIGLUSTAT",
+    "task": "scaffold_decoration"
+  },
+  "versions": {
+    "python": "3.11.13",
+    "rdkit": "2024.03.5"
+  }
+}
