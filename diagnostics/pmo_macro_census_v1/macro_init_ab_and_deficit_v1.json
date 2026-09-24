@@ -1,0 +1,353 @@
+{
+ "schema_version": "pmo_macro_init_ab_and_deficit_v1",
+ "measured_at_utc": "2026-09-24T15:21:02.185722+00:00",
+ "ab": {
+  "task": "celecoxib_rediscovery",
+  "calls_per_arm": 250,
+  "control": {
+   "best": 0.4583,
+   "top10": 0.4401,
+   "auc_common_17_250": 0.4379
+  },
+  "treatment_macro_seats": {
+   "best": 0.4815,
+   "top10": 0.4417,
+   "auc_common_17_250": 0.4391
+  },
+  "delta": {
+   "best": 0.0232,
+   "top10": 0.0016,
+   "auc": 0.0012
+  },
+  "verdict": "MACRO_AT_INITIALIZATION_MOVES_THE_START_NOT_THE_DYNAMICS",
+  "the_finding": "BOTH arms reached their final best at charged call 48 and did not improve once over the remaining 202 calls (control 0.4583 flat, treatment 0.4815 flat). The macro seats bought a better starting molecule -- +0.0232 best -- and bought essentially nothing on the benchmark metric: +0.0016 top-ten and +0.0012 AUC. Seeding a better molecule does not change what ordinary COMPOSE search does from it.",
+  "why_this_matters": "It is the dead-basin signature at whole-campaign scale, and it reproduces the standing observation that deco_hop, qed and zaleplon each found their best at charged call 48 and then spent ~1,000 further calls without one improvement. The lever is therefore NOT better initialization; it is selecting a macro by what search REACHES from it, which is what the continuation tournament measures."
+ },
+ "deficit_table": {
+  "note": "proj is the flat-tail projection to 10k and is NOT a realized benchmark number; realized auc@n is reported beside it and is much lower. Use the RANKING.",
+  "compose_projected_sum": 17.258,
+  "genmol_sum": 18.362,
+  "gap": -1.104,
+  "tasks_over_0_03_behind": 13,
+  "recoverable_in_those": 1.42,
+  "rows": {
+   "albuterol_similarity": {
+    "n": 2592,
+    "auc_at_n": 0.8478193214988946,
+    "top10": 0.9389069616135327,
+    "best": 1.0,
+    "proj_auc_10k": 0.9152970452958185,
+    "arm": "scored_albuterol_similarity_seed20261973_20260924T013046Z"
+   },
+   "celecoxib_rediscovery": {
+    "n": 1039,
+    "auc_at_n": 0.46216360705544635,
+    "top10": 0.543109544624127,
+    "best": 0.5853658536585366,
+    "proj_auc_10k": 0.5346992617107411,
+    "arm": "scored_celecoxib_rediscovery_seed20260927_base_20260924T090746Z"
+   },
+   "mestranol_similarity": {
+    "n": 608,
+    "auc_at_n": 0.8228070168414711,
+    "top10": 1.0,
+    "best": 1.0,
+    "proj_auc_10k": 0.9892266666239615,
+    "arm": "scored_mestranol_similarity_seed20262924_uniform_20260924T065706Z"
+   },
+   "thiothixene_rediscovery": {
+    "n": 1456,
+    "auc_at_n": 0.45070148329854,
+    "top10": 0.4737443316184448,
+    "best": 0.4824561403508772,
+    "proj_auc_10k": 0.4703892929030667,
+    "arm": "scored_thiothixene_rediscovery_seed20263927_base_20260924T090746Z"
+   },
+   "troglitazone_rediscovery": {
+    "n": 288,
+    "auc_at_n": 0.5880697264629678,
+    "top10": 0.7870784028645585,
+    "best": 0.8229166666666666,
+    "proj_auc_10k": 0.7813469529841928,
+    "arm": "scored_troglitazone_rediscovery_seed20264927_lane_20260924T090802Z"
+   },
+   "amlodipine_mpo": {
+    "n": 2496,
+    "auc_at_n": 0.6774027777451188,
+    "top10": 0.7047312728433847,
+    "best": 0.7321765321469982,
+    "proj_auc_10k": 0.6979100804668575,
+    "arm": "scored_amlodipine_mpo_seed20271973_20260924T020259Z"
+   },
+   "deco_hop": {
+    "n": 528,
+    "auc_at_n": 0.8251403145627628,
+    "top10": 0.9180373597997233,
+    "best": 0.9260305119554056,
+    "proj_auc_10k": 0.9131323958112118,
+    "arm": "scored_deco_hop_seed20278929_mscore2_20260924T124510Z"
+   },
+   "fexofenadine_mpo": {
+    "n": 1072,
+    "auc_at_n": 0.7476983184275678,
+    "top10": 0.7949199941090634,
+    "best": 0.7980481030862815,
+    "proj_auc_10k": 0.7898578304760071,
+    "arm": "scored_fexofenadine_mpo_seed20272973_20260924T020259Z"
+   },
+   "isomers_c7h8n2o2": {
+    "n": 2701,
+    "auc_at_n": 0.9762075625533408,
+    "top10": 1.0,
+    "best": 1.0,
+    "proj_auc_10k": 0.9935736626456574,
+    "arm": "scored_isomers_c7h8n2o2_seed20266973_20260924T020259Z"
+   },
+   "isomers_c9h10n2o2pf2cl": {
+    "n": 2432,
+    "auc_at_n": 0.9095479523766901,
+    "top10": 1.0,
+    "best": 1.0,
+    "proj_auc_10k": 0.978002062018011,
+    "arm": "scored_isomers_c9h10n2o2pf2cl_seed20280973_20260924T020259Z"
+   },
+   "median1": {
+    "n": 2064,
+    "auc_at_n": 0.3108408124253418,
+    "top10": 0.3322944277941905,
+    "best": 0.39999999999999997,
+    "proj_auc_10k": 0.3278664015820601,
+    "arm": "scored_median1_seed20265973_20260924T020259Z"
+   },
+   "median2": {
+    "n": 1296,
+    "auc_at_n": 0.2812515215969074,
+    "top10": 0.3046057761180086,
+    "best": 0.3111254754997473,
+    "proj_auc_10k": 0.30157906473207385,
+    "arm": "scored_median2_seed20281973_20260924T020259Z"
+   },
+   "osimertinib_mpo": {
+    "n": 672,
+    "auc_at_n": 0.7742370215500969,
+    "top10": 0.8482244943942409,
+    "best": 0.8526407276208925,
+    "proj_auc_10k": 0.8432525362191143,
+    "arm": "scored_osimertinib_mpo_seed20273973_20260924T013046Z"
+   },
+   "perindopril_mpo": {
+    "n": 1616,
+    "auc_at_n": 0.5889644242786807,
+    "top10": 0.6171691750971317,
+    "best": 0.6232413273091858,
+    "proj_auc_10k": 0.61261128736487,
+    "arm": "scored_perindopril_mpo_seed20267973_20260924T020259Z"
+   },
+   "qed": {
+    "n": 1008,
+    "auc_at_n": 0.901087832797797,
+    "top10": 0.9481174691651141,
+    "best": 0.948442042791664,
+    "proj_auc_10k": 0.9433768818192886,
+    "arm": "scored_qed_seed20270923_20260924T002249Z"
+   },
+   "ranolazine_mpo": {
+    "n": 1872,
+    "auc_at_n": 0.7719441506815545,
+    "top10": 0.8231229835086247,
+    "best": 0.8303743430222411,
+    "proj_auc_10k": 0.8135423060033972,
+    "arm": "scored_ranolazine_mpo_seed20274973_20260924T020259Z"
+   },
+   "scaffold_hop": {
+    "n": 1806,
+    "auc_at_n": 0.5300810155409549,
+    "top10": 0.5535967442766927,
+    "best": 0.5640239451014747,
+    "proj_auc_10k": 0.5493498036670184,
+    "arm": "scored_scaffold_hop_seed20279973_20260924T020259Z"
+   },
+   "sitagliptin_mpo": {
+    "n": 2079,
+    "auc_at_n": 0.5551328442480841,
+    "top10": 0.622353650494536,
+    "best": 0.6397344216892772,
+    "proj_auc_10k": 0.6083784448758986,
+    "arm": "scored_sitagliptin_mpo_seed20275973_20260924T020259Z"
+   },
+   "valsartan_smarts": {
+    "n": 2080,
+    "auc_at_n": 0.8577443775066652,
+    "top10": 0.9823127250182655,
+    "best": 0.9873842823791779,
+    "proj_auc_10k": 0.9564025087358526,
+    "arm": "scored_valsartan_smarts_seed20277973_20260924T013046Z"
+   },
+   "zaleplon_mpo": {
+    "n": 2063,
+    "auc_at_n": 0.5410934162754453,
+    "top10": 0.5729563381464546,
+    "best": 0.5925466802963288,
+    "proj_auc_10k": 0.5663830173644654,
+    "arm": "scored_zaleplon_mpo_seed20276973_20260924T020259Z"
+   },
+   "drd2": {
+    "n": 1280,
+    "auc_at_n": 0.9569961303661507,
+    "top10": 0.9999977342302133,
+    "best": 0.9999983217582273,
+    "proj_auc_10k": 0.9944935289356134,
+    "arm": "scored_drd2_seed20282926_mscore_20260924T080406Z"
+   },
+   "gsk3b": {
+    "n": 1247,
+    "auc_at_n": 0.881935846030473,
+    "top10": 0.942,
+    "best": 0.99,
+    "proj_auc_10k": 0.9345099999999998,
+    "arm": "scored_gsk3b_seed20268926_mscore_20260924T080406Z"
+   },
+   "jnk3": {
+    "n": 735,
+    "auc_at_n": 0.6302721088435375,
+    "top10": 0.752,
+    "best": 0.77,
+    "proj_auc_10k": 0.743053,
+    "arm": "scored_jnk3_seed20269926_mscore_20260924T080406Z"
+   }
+  },
+  "behind": [
+   {
+    "task": "celecoxib_rediscovery",
+    "deficit": 0.29130073828925884,
+    "n": 1039,
+    "auc_at_n": 0.46216360705544635,
+    "top10": 0.543109544624127,
+    "best": 0.5853658536585366,
+    "proj_auc_10k": 0.5346992617107411,
+    "arm": "scored_celecoxib_rediscovery_seed20260927_base_20260924T090746Z"
+   },
+   {
+    "task": "thiothixene_rediscovery",
+    "deficit": 0.22161070709693326,
+    "n": 1456,
+    "auc_at_n": 0.45070148329854,
+    "top10": 0.4737443316184448,
+    "best": 0.4824561403508772,
+    "proj_auc_10k": 0.4703892929030667,
+    "arm": "scored_thiothixene_rediscovery_seed20263927_base_20260924T090746Z"
+   },
+   {
+    "task": "jnk3",
+    "deficit": 0.16294700000000006,
+    "n": 735,
+    "auc_at_n": 0.6302721088435375,
+    "top10": 0.752,
+    "best": 0.77,
+    "proj_auc_10k": 0.743053,
+    "arm": "scored_jnk3_seed20269926_mscore_20260924T080406Z"
+   },
+   {
+    "task": "amlodipine_mpo",
+    "deficit": 0.11208991953314251,
+    "n": 2496,
+    "auc_at_n": 0.6774027777451188,
+    "top10": 0.7047312728433847,
+    "best": 0.7321765321469982,
+    "proj_auc_10k": 0.6979100804668575,
+    "arm": "scored_amlodipine_mpo_seed20271973_20260924T020259Z"
+   },
+   {
+    "task": "perindopril_mpo",
+    "deficit": 0.10538871263512994,
+    "n": 1616,
+    "auc_at_n": 0.5889644242786807,
+    "top10": 0.6171691750971317,
+    "best": 0.6232413273091858,
+    "proj_auc_10k": 0.61261128736487,
+    "arm": "scored_perindopril_mpo_seed20267973_20260924T020259Z"
+   },
+   {
+    "task": "fexofenadine_mpo",
+    "deficit": 0.10414216952399291,
+    "n": 1072,
+    "auc_at_n": 0.7476983184275678,
+    "top10": 0.7949199941090634,
+    "best": 0.7980481030862815,
+    "proj_auc_10k": 0.7898578304760071,
+    "arm": "scored_fexofenadine_mpo_seed20272973_20260924T020259Z"
+   },
+   {
+    "task": "troglitazone_rediscovery",
+    "deficit": 0.08565304701580723,
+    "n": 288,
+    "auc_at_n": 0.5880697264629678,
+    "top10": 0.7870784028645585,
+    "best": 0.8229166666666666,
+    "proj_auc_10k": 0.7813469529841928,
+    "arm": "scored_troglitazone_rediscovery_seed20264927_lane_20260924T090802Z"
+   },
+   {
+    "task": "scaffold_hop",
+    "deficit": 0.07865019633298165,
+    "n": 1806,
+    "auc_at_n": 0.5300810155409549,
+    "top10": 0.5535967442766927,
+    "best": 0.5640239451014747,
+    "proj_auc_10k": 0.5493498036670184,
+    "arm": "scored_scaffold_hop_seed20279973_20260924T020259Z"
+   },
+   {
+    "task": "median1",
+    "deficit": 0.07013359841793992,
+    "n": 2064,
+    "auc_at_n": 0.3108408124253418,
+    "top10": 0.3322944277941905,
+    "best": 0.39999999999999997,
+    "proj_auc_10k": 0.3278664015820601,
+    "arm": "scored_median1_seed20265973_20260924T020259Z"
+   },
+   {
+    "task": "median2",
+    "deficit": 0.05742093526792613,
+    "n": 1296,
+    "auc_at_n": 0.2812515215969074,
+    "top10": 0.3046057761180086,
+    "best": 0.3111254754997473,
+    "proj_auc_10k": 0.30157906473207385,
+    "arm": "scored_median2_seed20281973_20260924T020259Z"
+   },
+   {
+    "task": "gsk3b",
+    "deficit": 0.05149000000000015,
+    "n": 1247,
+    "auc_at_n": 0.881935846030473,
+    "top10": 0.942,
+    "best": 0.99,
+    "proj_auc_10k": 0.9345099999999998,
+    "arm": "scored_gsk3b_seed20268926_mscore_20260924T080406Z"
+   },
+   {
+    "task": "deco_hop",
+    "deficit": 0.046867604188788214,
+    "n": 528,
+    "auc_at_n": 0.8251403145627628,
+    "top10": 0.9180373597997233,
+    "best": 0.9260305119554056,
+    "proj_auc_10k": 0.9131323958112118,
+    "arm": "scored_deco_hop_seed20278929_mscore2_20260924T124510Z"
+   },
+   {
+    "task": "osimertinib_mpo",
+    "deficit": 0.032747463780885666,
+    "n": 672,
+    "auc_at_n": 0.7742370215500969,
+    "top10": 0.8482244943942409,
+    "best": 0.8526407276208925,
+    "proj_auc_10k": 0.8432525362191143,
+    "arm": "scored_osimertinib_mpo_seed20273973_20260924T013046Z"
+   }
+  ]
+ },
+ "rung_length_is_measured": "Five matched thiothixene arms reported at charged 33/49/64 and the FINAL ordering was already correct at 33 -- the winner reached its final 0.5966 at the first checkpoint while both dead arms were flat. 33 is the cheapest rung shown to separate."
+}
