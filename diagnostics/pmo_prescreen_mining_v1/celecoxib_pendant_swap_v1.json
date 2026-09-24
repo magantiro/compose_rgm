@@ -1,0 +1,145 @@
+{
+ "schema_version": "pmo_decorated_pendant_swap_v1",
+ "measured_at_utc": "2026-09-24T14:25:01.867364+00:00",
+ "oracle_calls_spent": 140,
+ "accounting": "12 swap screen + 128 continuation; development screens, no campaign ledger",
+ "verdict": "DECORATED_PENDANT_SWAP_WORKS_WHERE_THE_BARE_RING_GRAFT_FAILED",
+ "the_representation_was_the_defect": {
+  "bare_ring_graft": {
+   "best_delta": -0.2457,
+   "beat_leader": "0/10",
+   "failure": "replaced the CORRECT pyrazole and kept the wrong thiophene; the library stores bare skeletons so it could only ever offer 'benzene'"
+  },
+  "decorated_pendant_swap": {
+   "best_delta": 0.0383,
+   "beat_leader": "2/12",
+   "success": "both winners replaced the THIOPHENE, the diagnosed operation, with sulfonamide-bearing payloads while the pyrazole, CF3 and tolyl stayed intact"
+  },
+  "retrievability": "4-sulfamoylphenyl ranks #32 of 4,444 decorated substituents (n=309), against benzene at #382 in the bare ring library"
+ },
+ "why_one_cut_protects_the_core": "A single cut per proposal leaves everything outside it untouched, so the correct context is preserved BY CONSTRUCTION rather than by a heuristic. That is the whole difference from the ring enumerator.",
+ "continuation_64_calls": {
+  "leader_start": {
+   "start": 0.5854,
+   "best": 0.5854,
+   "top10": 0.4585,
+   "auc_17_64": 0.4539,
+   "improvement": 0.0
+  },
+  "swap_start": {
+   "start": 0.6237,
+   "best": 0.6277,
+   "top10": 0.5668,
+   "auc_17_64": 0.5492,
+   "improvement": 0.004
+  }
+ },
+ "basin_entry_now_2_of_2": "Both the thiothixene leader and the celecoxib leader improved by EXACTLY ZERO over 64 identical calls, while both macro entries carried a large AUC advantage (+16% and +21%). The current leaders sit in dead basins; the macro is what moves them somewhere ordinary COMPOSE edits are productive.",
+ "gotcha": "Chem.molzip defaults to AtomMapNumber labels. FragmentOnBonds writes ISOTOPE dummies, so the default silently returns a DISCONNECTED molecule instead of raising, and a '.' guard then discards every join as if nothing matched -- it read as 0 valid swaps. Set MolzipParams.label = MolzipLabel.Isotope.",
+ "screen": {
+  "leader": {
+   "smiles": "Cc1ccc(-n2nc(C(F)(F)F)cc2-c2cccs2)cc1",
+   "score": 0.5853658536585366,
+   "charged": 813,
+   "arm": "scored_celecoxib_rediscovery_seed20260927_base_20260924T090746Z"
+  },
+  "scored": [
+   {
+    "endpoint": "Cc1ccc(-n2nc(C(F)(F)F)cc2/C=N/NS(=O)(=O)c2ccc(C)cc2)cc1",
+    "removed": "[1*]c1cccs1",
+    "added": "[1*]/C=N/NS(=O)(=O)c1ccc(C)cc1",
+    "removed_atoms": 5,
+    "payload_mean_oracle": 0.3500327132841628,
+    "score": 0.6236559139784946
+   },
+   {
+    "endpoint": "Cc1ccc(N(C)S(=O)(=O)c2cc(C(F)(F)F)nn2-c2ccc(C)cc2)cc1",
+    "removed": "[1*]c1cccs1",
+    "added": "[1*]S(=O)(=O)N(C)c1ccc(C)cc1",
+    "removed_atoms": 5,
+    "payload_mean_oracle": 0.33910667922768534,
+    "score": 0.5978260869565217
+   },
+   {
+    "endpoint": "Cc1ccc(-n2nc(C(F)(F)F)cc2-c2cnn(-c3ccc(C)cc3)c2C)cc1",
+    "removed": "[1*]c1cccs1",
+    "added": "[1*]c1cnn(-c2ccc(C)cc2)c1C",
+    "removed_atoms": 5,
+    "payload_mean_oracle": 0.3394933394933395,
+    "score": 0.5353535353535354
+   },
+   {
+    "endpoint": "Cc1ccc(S(=O)(=O)N/N=C/n2nc(C(F)(F)F)cc2-c2cccs2)cc1",
+    "removed": "[1*]c1ccc(C)cc1",
+    "added": "[1*]/C=N/NS(=O)(=O)c1ccc(C)cc1",
+    "removed_atoms": 7,
+    "payload_mean_oracle": 0.3500327132841628,
+    "score": 0.5051546391752577
+   },
+   {
+    "endpoint": "Cc1ccc(-n2ncc(-n3nc(C(F)(F)F)cc3-c3cccs3)c2C)cc1",
+    "removed": "[1*]c1ccc(C)cc1",
+    "added": "[1*]c1cnn(-c2ccc(C)cc2)c1C",
+    "removed_atoms": 7,
+    "payload_mean_oracle": 0.3394933394933395,
+    "score": 0.5
+   },
+   {
+    "endpoint": "Cc1ccc(N(C)S(=O)(=O)n2nc(C(F)(F)F)cc2-c2cccs2)cc1",
+    "removed": "[1*]c1ccc(C)cc1",
+    "added": "[1*]S(=O)(=O)N(C)c1ccc(C)cc1",
+    "removed_atoms": 7,
+    "payload_mean_oracle": 0.33910667922768534,
+    "score": 0.4791666666666667
+   },
+   {
+    "endpoint": "Cc1ccc(-n2nc(-n3nccc3C(F)(F)F)cc2-c2cccs2)cc1",
+    "removed": "[1*]C(F)(F)F",
+    "added": "[1*]n1nccc1C(F)(F)F",
+    "removed_atoms": 4,
+    "payload_mean_oracle": 0.3630169172932331,
+    "score": 0.46464646464646464
+   },
+   {
+    "endpoint": "Cc1ccc(-n2nc(C(F)(F)F)cc2-n2nccc2C(F)(F)F)cc1",
+    "removed": "[1*]c1cccs1",
+    "added": "[1*]n1nccc1C(F)(F)F",
+    "removed_atoms": 5,
+    "payload_mean_oracle": 0.3630169172932331,
+    "score": 0.4631578947368421
+   },
+   {
+    "endpoint": "Cc1ccc(-n2nc(/C=N/NS(=O)(=O)c3ccc(C)cc3)cc2-c2cccs2)cc1",
+    "removed": "[1*]C(F)(F)F",
+    "added": "[1*]/C=N/NS(=O)(=O)c1ccc(C)cc1",
+    "removed_atoms": 4,
+    "payload_mean_oracle": 0.3500327132841628,
+    "score": 0.44036697247706424
+   },
+   {
+    "endpoint": "Cc1ccc(N(C)S(=O)(=O)c2cc(-c3cccs3)n(-c3ccc(C)cc3)n2)cc1",
+    "removed": "[1*]C(F)(F)F",
+    "added": "[1*]S(=O)(=O)N(C)c1ccc(C)cc1",
+    "removed_atoms": 4,
+    "payload_mean_oracle": 0.33910667922768534,
+    "score": 0.4166666666666667
+   },
+   {
+    "endpoint": "Cc1ccc(-n2nc(-c3cnn(-c4ccc(C)cc4)c3C)cc2-c2cccs2)cc1",
+    "removed": "[1*]C(F)(F)F",
+    "added": "[1*]c1cnn(-c2ccc(C)cc2)c1C",
+    "removed_atoms": 4,
+    "payload_mean_oracle": 0.3394933394933395,
+    "score": 0.3389830508474576
+   },
+   {
+    "endpoint": "FC(F)(F)c1cc(-c2cccs2)n(-n2nccc2C(F)(F)F)n1",
+    "removed": "[1*]c1ccc(C)cc1",
+    "added": "[1*]n1nccc1C(F)(F)F",
+    "removed_atoms": 7,
+    "payload_mean_oracle": 0.3630169172932331,
+    "score": 0.2761904761904762
+   }
+  ]
+ }
+}
