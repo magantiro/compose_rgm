@@ -4802,3 +4802,45 @@ independently of whether fa7_0 ever closes.**
   ones. Run a matched A/B in a QUIESCENT tree, or hash the source closure into the artifact.
 - This is the WRITE half of the working-tree race whose LOAD half was recorded 2026-08-03
   (a full suite run concurrently with agent suites manufacturing a phantom regression).
+
+## 2026-09-24 (best-of-N is a BIASED statistic and the bias grows with N -- it moved a baseline 10.4 kcal/mol)
+
+- **MEASURED on the GenMol T4 baseline: 240 runs, the SAME cells, only the summary
+  statistic changing:**
+      delta=0.4  best-of-3   14 cells  -147.3   (vs published -148.7, baseline looks WORSE)
+      delta=0.4  best-of-8   14 cells  -153.2   (vs published -148.7, baseline looks BETTER)
+      delta=0.4  mean-of-8   14 cells  -142.8   (baseline looks worse still)
+  **A 10.4 kcal/mol swing across one fixed cell set, purely from the choice of statistic --
+  larger than any per-cell effect in the table and larger than the margins a COMPOSE-vs-
+  GenMol verdict turns on.**
+- **Running MORE replicates STRENGTHENED the rival on any best-of-N comparison**, which is
+  the opposite of the usual intuition. It is the same generator; more draws simply give a
+  maximum more chances to be extreme. So "add replicates to be rigorous" silently changes
+  the comparison unless the statistic is fixed first.
+- **RULE: a cross-system verdict is meaningful only if BOTH sides use the same statistic at
+  the same N.** I reported "COMPOSE wins 20/24" comparing COMPOSE best-of-1 against GenMol
+  best-of-3 -- mismatched. The mismatch happened to favour the RIVAL (we gave them three
+  draws at a maximum and ourselves one), so the conclusion survived; that was luck in the
+  direction of the error, not method. Against mean-of-8, the like-for-like estimate of what
+  a single rival run achieves, it is 24/24.
+- **Which statistic is right depends on what the published column IS.** The published GenMol
+  column carries no +- while IVG's does, suggesting single runs; if so mean-of-N estimates
+  "what one run achieves" and best-of-N is an upper envelope. INFERRED from table
+  formatting, not verified in their code -- label it that way.
+- **A like-for-like cell set can MOVE when N grows.** At 3 passes delta=0.6 compared 10 cells
+  and read "exactly equal, -99.9 vs -99.9"; at 8 passes an 11th cell succeeds once, so the
+  set becomes 11 cells and the comparison becomes -108.9 vs -107.2. The earlier figure was
+  correct FOR ITS N and is not the same comparison. Never restate it silently.
+- **The extension earned its cost on exactly the bimodal cells**: 5ht1b id2 delta=0.4 went
+  1/3 -> 6/8 with best -10.6 -> -12.1, and fa7 id0 delta=0.6 went 0/3 -> 1/8 (the rival CAN
+  do that cell, rarely). A 1/3 success rate is not quotable; 9 of 30 cell-instances here are
+  measurably bimodal, so three draws misrepresent nearly a third of the panel.
+- **The bimodality has a MECHANISM, not variance:** GenMol seeds its fragment population only
+  from the start molecule and grows it solely from molecules passing the FULL four-way gate
+  (DS > start AND QED >= 0.6 AND SA <= 4 AND sim >= delta). Where the start molecule's own
+  QED is below 0.6, a run must land all four constraints at once before the population can
+  grow at all -- land one early and eligible molecules cascade, miss early and it resamples
+  the seed fragments for its whole budget. 20 of 30 instances are so exposed. **Exposure
+  predicts failure well but NOT perfectly** -- all 6 zero-success instances are exposed and
+  9 of 10 partials, but one (5ht1b id1 delta=0.6, 6/8) is exposed on neither criterion.
+  A strong predictor, not a law; say so rather than rounding it up.
