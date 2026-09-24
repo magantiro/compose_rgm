@@ -1,0 +1,326 @@
+{
+  "analysis_script_sha256": "9205e221a91db078a296ed989e40934ef1aca27fb01b6d9fa9b451093d99fb6a",
+  "arms": {
+    "attachment": {
+      "above_seed": 15,
+      "above_seed_pct_of_committed": 0.6765899864682002,
+      "attempts": 3000,
+      "chemical_validity_pct_of_attempts": {
+        "mean": 73.89999999999999,
+        "per_seed": [
+          73.8,
+          74.4,
+          73.5
+        ],
+        "std": 0.37416573867739694
+      },
+      "commit_rate_pct_of_attempts": {
+        "mean": 73.89999999999999,
+        "per_seed": [
+          73.8,
+          74.4,
+          73.5
+        ],
+        "std": 0.37416573867739694
+      },
+      "committed_two_core_endpoints": 2217,
+      "drugs": 10,
+      "fragment_containment_pct_of_attempts": {
+        "mean": 73.89999999999999,
+        "per_seed": [
+          73.8,
+          74.4,
+          73.5
+        ],
+        "std": 0.37416573867739694
+      },
+      "mean_events": {
+        "mean": 6.890333333333334,
+        "per_seed": [
+          6.896000000000001,
+          6.832000000000001,
+          6.9430000000000005
+        ],
+        "std": 0.04549236810230423
+      },
+      "official_diversity": {
+        "mean": 0.5209550532580892,
+        "per_seed": [
+          0.5243682852472926,
+          0.5208736751862164,
+          0.5176231993407587
+        ],
+        "std": 0.002754270957932646
+      },
+      "official_quality": {
+        "mean": 17.166666666666668,
+        "per_seed": [
+          18.1,
+          16.6,
+          16.8
+        ],
+        "std": 0.6649979114420003
+      },
+      "official_uniqueness": {
+        "mean": 59.92801331434554,
+        "per_seed": [
+          62.06376852571806,
+          55.08979592879425,
+          62.630475488524304
+        ],
+        "std": 3.4289502570331263
+      },
+      "path_rejections": 0,
+      "path_transaction_refusals": 0,
+      "path_transactions": 0,
+      "realized_length_histogram": {
+        "1": 2202,
+        "2": 14,
+        "4": 1
+      },
+      "seeded_linker_length": 1,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "task_success_pct_of_attempts": {
+        "mean": 73.89999999999999,
+        "per_seed": [
+          73.8,
+          74.4,
+          73.5
+        ],
+        "std": 0.37416573867739694
+      }
+    },
+    "path_program": {
+      "above_seed": 421,
+      "above_seed_pct_of_committed": 99.76303317535545,
+      "attempts": 3000,
+      "chemical_validity_pct_of_attempts": {
+        "mean": 14.066666666666668,
+        "per_seed": [
+          14.0,
+          13.5,
+          14.7
+        ],
+        "std": 0.49216076867444636
+      },
+      "commit_rate_pct_of_attempts": {
+        "mean": 14.066666666666668,
+        "per_seed": [
+          14.0,
+          13.5,
+          14.7
+        ],
+        "std": 0.49216076867444636
+      },
+      "committed_two_core_endpoints": 422,
+      "drugs": 10,
+      "fragment_containment_pct_of_attempts": {
+        "mean": 14.066666666666668,
+        "per_seed": [
+          14.0,
+          13.5,
+          14.7
+        ],
+        "std": 0.49216076867444636
+      },
+      "mean_events": {
+        "mean": 0.6819999999999999,
+        "per_seed": [
+          0.677,
+          0.701,
+          0.6679999999999999
+        ],
+        "std": 0.01392838827718412
+      },
+      "official_diversity": {
+        "mean": 0.442705513029033,
+        "per_seed": [
+          0.4422561193708253,
+          0.4226913440860215,
+          0.4631690756302521
+        ],
+        "std": 0.016528019718783184
+      },
+      "official_quality": {
+        "mean": 4.066666666666666,
+        "per_seed": [
+          4.7,
+          3.4,
+          4.1
+        ],
+        "std": 0.5312459150169744
+      },
+      "official_uniqueness": {
+        "mean": 61.088022170820246,
+        "per_seed": [
+          68.61499493414388,
+          55.92445342917041,
+          58.72461814914645
+        ],
+        "std": 5.443756047045182
+      },
+      "path_rejections": 11117,
+      "path_transaction_refusals": 426,
+      "path_transactions": 516,
+      "realized_length_histogram": {
+        "1": 1,
+        "2": 353,
+        "3": 46,
+        "4": 19,
+        "5": 3
+      },
+      "seeded_linker_length": 1,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "task_success_pct_of_attempts": {
+        "mean": 14.066666666666668,
+        "per_seed": [
+          14.0,
+          13.5,
+          14.7
+        ],
+        "std": 0.49216076867444636
+      }
+    }
+  },
+  "code_revision": "1e1f258185154c87cc05b3a2b52f92a277b77231",
+  "deltas": {
+    "commit_rate_pct_of_attempts": -59.83333333333332,
+    "official_diversity": -0.07824954022905622,
+    "official_quality": -13.100000000000001,
+    "official_uniqueness": 1.160008856474704,
+    "task_success_pct_of_attempts": -59.83333333333332
+  },
+  "differs_only_in": [
+    "path_program"
+  ],
+  "identities": {
+    "attachment": {
+      "checkpoint": "/root/checkpoint/ringcore_a7546e2_best.pt",
+      "controller": {
+        "attachment_first": true,
+        "enabled": true,
+        "path_length_max": 5,
+        "path_length_min": 2,
+        "path_program": false,
+        "realize_redirected_order": true,
+        "redirect_attachment": true,
+        "release_linker_join": true,
+        "require_separated_cores": true,
+        "restrict_interfaces": true
+      },
+      "controller_sha256": "80a40b905adf84eae5d55be274aba4fbc1af9f088170028fc7452bdcbbdc44c6",
+      "linker_bridge_atoms": 1,
+      "sampler_sha256": "7a7268a2f6cd5ca8d42c9f7560fe2b7ea4f1875cf827668e224914d68fbc1125",
+      "samples_per_prompt": 100,
+      "shards": 30
+    },
+    "path_program": {
+      "checkpoint": "/root/checkpoint/ringcore_a7546e2_best.pt",
+      "controller": {
+        "attachment_first": true,
+        "enabled": true,
+        "path_length_max": 5,
+        "path_length_min": 2,
+        "path_program": true,
+        "realize_redirected_order": true,
+        "redirect_attachment": true,
+        "release_linker_join": true,
+        "require_separated_cores": true,
+        "restrict_interfaces": true
+      },
+      "controller_sha256": "4b549c2f62a9042f370d2bdc4bda45549df3acbfdcd7cfad93af68d435220353",
+      "linker_bridge_atoms": 1,
+      "sampler_sha256": "7a7268a2f6cd5ca8d42c9f7560fe2b7ea4f1875cf827668e224914d68fbc1125",
+      "samples_per_prompt": 100,
+      "shards": 30
+    }
+  },
+  "input_shards_sha256": {
+    "attachment": {
+      "linker_design__BARICITINIB__seed0.json": "53b6e5c3319cfd9100cbed9089c1d7bbcb862db327862cc1263dcfd59a61d1bc",
+      "linker_design__BARICITINIB__seed1.json": "33cd71c00f5910583a1f17f1e8707ea4f9d5dab8587d0305fddf59b64e87edd3",
+      "linker_design__BARICITINIB__seed2.json": "63122643ac084449016d8f9ef7a951e3be909c78163285ccdf181bbb603bb4bc",
+      "linker_design__CYCLOTHIAZIDE__seed0.json": "e05e87d27e988547cc99105fb67ae822e113f5445281f24e5d8232d816600bf8",
+      "linker_design__CYCLOTHIAZIDE__seed1.json": "7408cc6caf12060afb8f849d962124677a351a44ff4ee31cc554eba5ae684d6c",
+      "linker_design__CYCLOTHIAZIDE__seed2.json": "4b9520a7fdc89a3aff9c16f814e0c221ded0f7ad91dede29c0451cd758552a67",
+      "linker_design__ELIGLUSTAT__seed0.json": "2677b98a04b0429120940c1a1130f8593812ff681802678069c63d2427d55a6a",
+      "linker_design__ELIGLUSTAT__seed1.json": "1ff103070faa7265783bd60cac7ef048ab1cf97075f306851ec490b2178a99d7",
+      "linker_design__ELIGLUSTAT__seed2.json": "e6d652dfe34791f654eb9bd60ea3d2f23fde3dd89e72e8cc1b8a3b08745ad241",
+      "linker_design__ERLOTINIB__seed0.json": "9937fddcf1829e55d993791a9a58632d3b2eb9bc595c93c50e2bc275a5352f9a",
+      "linker_design__ERLOTINIB__seed1.json": "1bfe5ed0bd7439324dc457f67752a4bdc92b590859aad26f187487c36f9136dd",
+      "linker_design__ERLOTINIB__seed2.json": "db60187ae894811977eb222caa11d51350e0f1ada062a1a3e5d0d253e7a88059",
+      "linker_design__FUTIBATINIB__seed0.json": "95d7211917dad4308075fe07bc658a700045a8f9df02b04bea135140d397e5b2",
+      "linker_design__FUTIBATINIB__seed1.json": "7a22408e293c99ee66c63b7d7b2aa13400b715f1abc5c54490512b65e85aaa1b",
+      "linker_design__FUTIBATINIB__seed2.json": "aca69015c3c4438fef1fa7885dd956c3b28678ce9dfa45c08fdaad850903ccef",
+      "linker_design__LESINURAD__seed0.json": "d578d51fa7c7d2d6259f405a006f53c48ff2b3c656df2369ad573355a260fb27",
+      "linker_design__LESINURAD__seed1.json": "a5e76d294535673d194764a5945ded6e36782154bab9f9f6c69d7ed3ec7b9a95",
+      "linker_design__LESINURAD__seed2.json": "65bb52d4c146a31b4a715add5231b1ad0276e1ff82971c16b44653dcae54c55d",
+      "linker_design__LIOTHYRONINE__seed0.json": "1e2d3b7f9eeeb59530e9ee64cf71d9ecf150a9efa1925793c6cb00e6005f819e",
+      "linker_design__LIOTHYRONINE__seed1.json": "18f2bd8b7aa48e1019b48ccad42a21756078596d27a18a625dc37ae399181ca8",
+      "linker_design__LIOTHYRONINE__seed2.json": "d15308b43aecf2d10be70111d706d03e22e3ec9092da0b37e2ae1bf91e43e0cf",
+      "linker_design__LOVASTATIN__seed0.json": "b7bf1e9a7bfe99d48e6cf40e03f71b1253ecd9c096a638fa2de73efa6d276cc2",
+      "linker_design__LOVASTATIN__seed1.json": "bec451bf78395f867f7113d3f906b4f56a1c134b0d776caf5fcc06056df88898",
+      "linker_design__LOVASTATIN__seed2.json": "e950020a23c1e0402ceb0022eb13bd14544f06ebd724b1afb0d191bcea9fd06c",
+      "linker_design__MARIBAVIR__seed0.json": "08d3a95643728477efc0eb2b623582c0131309817f75317c9439d1fd1fd10d56",
+      "linker_design__MARIBAVIR__seed1.json": "bdbf761b86047d947b885be117b427faacf6853a5a56cea0cab627f236dbd482",
+      "linker_design__MARIBAVIR__seed2.json": "08eccf5bdddcb5e25c99b4f669b6f67635fc65c28abec21693e13fb2a1a5b283",
+      "linker_design__SPIRAPRIL__seed0.json": "fb994df1c5ecd04d4c36e3ad1087a95526994d8ce08099c5b7e70be296472845",
+      "linker_design__SPIRAPRIL__seed1.json": "68cb8fff7e5edbe07c71fcf939fb86d724a88ae66b31ceef0fab91c0c2e2f697",
+      "linker_design__SPIRAPRIL__seed2.json": "1291af6361e530a0e48e9b1a3b64c193d2257165a80240093fabfe1fdb14b7d1"
+    },
+    "path_program": {
+      "linker_design__BARICITINIB__seed0.json": "03f8c9a4996f82a563ec04f696766454892de7d0cfbce575b30ca346b8cd2dfd",
+      "linker_design__BARICITINIB__seed1.json": "10c069abd8158c4bbeaf245519b16aee91701ced44e28c17e79f4bad7f2af66f",
+      "linker_design__BARICITINIB__seed2.json": "a7c869030e2b76b70147c0b1e4fdfd7ebe67902f9e3bc4c45d3ec06dd79b0076",
+      "linker_design__CYCLOTHIAZIDE__seed0.json": "6248d3a5f53927dec399c1ae2cef038c8623e58b5e0e941f8e58fed6f185206a",
+      "linker_design__CYCLOTHIAZIDE__seed1.json": "a1fd1cd28431704711aa70b235d6a6646139d2fea0570b25a8fecd060ea492ce",
+      "linker_design__CYCLOTHIAZIDE__seed2.json": "7261263d820e6c713ecf36ea3b9c217b60050156ba92b43ddba4bbc2484eb0d8",
+      "linker_design__ELIGLUSTAT__seed0.json": "e82f6b7d417cf0995f58a4c1e5ee78c1fdd6a55ebe68feab2e663df27d4ff8df",
+      "linker_design__ELIGLUSTAT__seed1.json": "9d34cc34baca52592ed48781d44ef98619901c7119a7b2ca9918f99c4df08fd2",
+      "linker_design__ELIGLUSTAT__seed2.json": "f1ae6e2100300d7d44568f490a894a17b0dab8aedf7fd9a7250d11f17eccecff",
+      "linker_design__ERLOTINIB__seed0.json": "f18cb0b73f685e1c9644aa37f91c05ee86f7b41568aa8696c650156f43989c89",
+      "linker_design__ERLOTINIB__seed1.json": "3c90ce4d07f6d2033a10d47bc6c93827cb6621fac7ed7c7ddf323c93fb89cffb",
+      "linker_design__ERLOTINIB__seed2.json": "232a3050942756c3396a1a5495ecb78487f79490fe92ffe6454ed1668b9b0f8f",
+      "linker_design__FUTIBATINIB__seed0.json": "c95fa8f8e28516918e2359087838975fb5ccb89bca2da0bb03ce5a22d8f723e8",
+      "linker_design__FUTIBATINIB__seed1.json": "caab0541e0a0fa49f8dd2c03f2a1926fd08d83a9975dffd5fb9c0360f5ea7cd4",
+      "linker_design__FUTIBATINIB__seed2.json": "b55035a0ef8aae261aa9a02098ef2b39e18468b83786ddce6a333e7e2495c219",
+      "linker_design__LESINURAD__seed0.json": "cdb0938cf58f855885474a47481b6f10f9d9bdfe189fc65818a15abd36d9b2c3",
+      "linker_design__LESINURAD__seed1.json": "81d35fd2efe0855e704a4f55c7b485dc9dfa2885674a8b3c45bb84564686cea1",
+      "linker_design__LESINURAD__seed2.json": "526ab32f0cc493ea74ad319d890b20d26a2e91fbf13997265d67c45ee7c8365d",
+      "linker_design__LIOTHYRONINE__seed0.json": "06131b51650b9a1b3ef37da1b8e1711d5b9ae426ca514ba790231733ab53999f",
+      "linker_design__LIOTHYRONINE__seed1.json": "0177a93b53db60f58d2d6535ef67b4b9ee15a42577cc0d5f1bcecea83520b78a",
+      "linker_design__LIOTHYRONINE__seed2.json": "9d0b85a3f27c9f43b9138d9c466a35994c35f7f68b8072580755d60c596c9473",
+      "linker_design__LOVASTATIN__seed0.json": "bfa34636d44e677352db59daa7d1d5cab0d5a12c46a064b1edb090cea88cb92d",
+      "linker_design__LOVASTATIN__seed1.json": "a0cb6801c2467558f566e88876f33ff3a3c69f41576a6376988b872e9da666bf",
+      "linker_design__LOVASTATIN__seed2.json": "3489594eb32d7d2c7c4eaf688ac72e064b32c50065e57343f1d44b873d48600c",
+      "linker_design__MARIBAVIR__seed0.json": "e020f44018f62be0dfd2601fdf9e12baecc1a97e97f3a0b31bdcfdff10d50858",
+      "linker_design__MARIBAVIR__seed1.json": "412094dee456b7ea0640303e0802cf5840e7cb6ae86e37b0c904c55aae4ff14a",
+      "linker_design__MARIBAVIR__seed2.json": "de778da900f93f133f782b43dd22cabacffe7c96bb34722e4f402be18d23df0f",
+      "linker_design__SPIRAPRIL__seed0.json": "868a1fddfc31f68732f2ccac9106e1a66c008f9fa45efd70243a0e3abad5fa50",
+      "linker_design__SPIRAPRIL__seed1.json": "1938c43aceae2e03e4c7492baf42412de55e096d8d774aa47a8b6c269136600e",
+      "linker_design__SPIRAPRIL__seed2.json": "c26b513896414e326bd97177877e950dab3af640c652f1ff5e6130b36e067654"
+    }
+  },
+  "matched_on": {
+    "checkpoint": "/root/checkpoint/ringcore_a7546e2_best.pt",
+    "linker_bridge_atoms": 1,
+    "sampler_sha256": "7a7268a2f6cd5ca8d42c9f7560fe2b7ea4f1875cf827668e224914d68fbc1125",
+    "samples_per_prompt": 100
+  },
+  "predeclaration_discipline": "NO THRESHOLD IS PREDECLARED HERE, because no pass/fail decision is taken from this arm. It is DESCRIPTIVE: it reports a comparison. Its size was fixed by the benchmark protocol before launch (10 drugs x 3 seeds x 100 samples = 3,000 attempts per arm), not chosen after seeing data, and the arms were launched together. If a DECISION is later taken from a linker comparison -- promoting a row, choosing between routes -- that decision needs its own predeclared threshold, n from a power calculation, and denominator, committed before its first sample. Reading a threshold off this artifact afterwards would be exactly the move the v3 predeclaration exists to prevent.",
+  "reading": "The share above the seeded length is over COMMITTED two-core endpoints. The per-event gate is measured to convert seed-length COMMITS into non-commits, so that share is not comparable across arms on its own and is reported beside the commit rate, which is over attempts and is not filtered by the gate.",
+  "schema": "compose_fragment_linker_matched_arm_v1",
+  "software": {
+    "python": "3.12.9"
+  },
+  "status": "DIAGNOSTIC, NOT A BENCHMARK ROW. linker_design remains withheld by the aggregator. This reports the matched comparison the v3 predeclaration licenses, with the realized-length distribution beside it; whether a row may be published depends on the open question of whether the composite is a capability EXTENSION, which the constituent scoring probe answers and this file does not.",
+  "support_statement_that_must_accompany_any_linker_row": "The composite is a capability EXTENSION on 8 of 10 released prompts and an ACCELERATION on 2 (see diagnostics/fragment_path_v3_classification_v1.json). On 8 prompts it performs a transition the proposal law does not propose, so a linker number from this arm is not a number the prior could have reached by sampling."
+}
