@@ -42,12 +42,12 @@
       },
       "size_support_matched_reference": {
         "path": "diagnostics/denovo_fragment_quality_v1/attempt_1/size_support_matched_reference/report.json",
-        "sha256": "7de866b9db8b02122cbfce2c22d14c6f20dd68c718a227ec780d2deac9f959a7"
+        "sha256": "bc1b5c3ac99f2ffcd1ff6d3a5613b52ea61991b8c52ebd3037f864cf10fd5893"
       }
     },
     "implementation_sha256": {
       "pilot_script": "dff9b7309a7fc2b7600e8bbd279a487d0ce5502cde1c0d059880f635cf5276f3"
     }
   },
-  "payload_sha256": "81ad879792d25cb083ee11a422f37d98d3612f2d56d9c62024aa2858946642c0"
+  "payload_sha256": "455112593d58df5ef78341b34baaecffc32dcb9b3fe9b726c6c0229e9d5615ab"
 }
