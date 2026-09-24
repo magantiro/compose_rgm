@@ -14,11 +14,13 @@ import os
 import platform
 import subprocess
 from pathlib import Path
+from shutil import copytree
 
 import numpy as np
 import rdkit
 import torch
 from evaluate_tracelet_rollouts import load_factorized_rollout_checkpoint
+from fetch_official_fragment_evaluator import default_cache_dir, verify_only
 from run_fragment_constrained_suite import run_task
 from run_fragment_superstructure_official_v2 import read_shard
 
@@ -61,6 +63,14 @@ def run(output: Path, *, attempts: int = 10) -> dict:
     if _sha256(official_contract_path) != pilot_payload["source_official_contract_sha256"]:
         raise ValueError("official baseline contract hash mismatch")
     official = json.loads(official_contract_path.read_text())["payload"]
+    # An isolated worktree has no local evaluator cache. Reuse only the exact
+    # hash-verified upstream blobs from the frozen run; never silently fetch a
+    # different release or substitute a local metric implementation.
+    baseline_cache = ROOT.parent / "fragment-interface-ablation-20260923" / ".official_eval_cache"
+    verify_only(baseline_cache)
+    if not default_cache_dir().exists():
+        copytree(baseline_cache, default_cache_dir())
+    verified_evaluator = verify_only()
     checkpoint = Path(official["checkpoint"]["path"])
     if _sha256(checkpoint) != official["checkpoint"]["sha256"]:
         raise ValueError("checkpoint hash mismatch")
@@ -164,6 +174,7 @@ def run(output: Path, *, attempts: int = 10) -> dict:
             "prompt_manifest": str(manifest),
             "prompt_manifest_sha256": _sha256(manifest),
             "baseline_shards_sha256": baseline_hashes,
+            "official_evaluator_blobs_sha256": verified_evaluator,
         },
         "implementation_sha256": {
             path: _sha256(ROOT / path)
