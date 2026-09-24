@@ -1,0 +1,53 @@
+{
+ "payload": {
+  "aggregate": {
+   "genmol_base": {
+    "auc_top10_at_1k": 0.537,
+    "top10_at_1k": 0.542
+   },
+   "genmol_plus_memory": {
+    "auc_top10_at_1k": 0.606,
+    "top10_at_1k": 0.613
+   }
+  },
+  "derived_sums_over_22": {
+   "genmol_base_auc": 11.814,
+   "genmol_base_top10": 11.924000000000001,
+   "genmol_memory_auc": 13.331999999999999,
+   "genmol_memory_top10": 13.486
+  },
+  "per_task_completeness": "PARTIAL: 13 of 22 transcribed. Any suite-sum comparison using this file must state which tasks are covered; do not silently substitute the aggregate mean for a missing per-task value.",
+  "per_task_top10_at_1k_genmol_base": {
+   "albuterol_similarity": 0.567,
+   "amlodipine_mpo": 0.571,
+   "celecoxib_rediscovery": 0.456,
+   "deco_hop": 0.641,
+   "drd2": 0.984,
+   "fexofenadine_mpo": 0.731,
+   "gsk3b": 0.673,
+   "jnk3": 0.492,
+   "median2": 0.244,
+   "osimertinib_mpo": 0.815,
+   "scaffold_hop": 0.506,
+   "thiothixene_rediscovery": 0.397,
+   "zaleplon_mpo": 0.46
+  },
+  "protocol": {
+   "budget": 1000,
+   "seeds": 3,
+   "tasks_in_aggregate": 22,
+   "valsartan_excluded": true
+  },
+  "recorded_at_utc": "2026-09-24T18:11:53.468379+00:00",
+  "schema_version": "genmol_pmo_1k_targets_v1",
+  "source": {
+   "VERIFIED_AGAINST_SOURCE": false,
+   "aggregate_table": "main table -- Top-10@1K and AUC-Top10@1K means over 22 tasks",
+   "caveat": "Their GenMol is initialized from the full UNSCORED fragment pool rather than the original GenMol task-oracle prescreen, so this is 'GenMol (that paper's implementation), PMO-1K', not the official GenMol 1K result. That is what makes it the right comparator for our no-prescreen lane. 1K results are averaged over three random seeds. valsartan is excluded from their 22-task aggregate as unstable.",
+   "citation": "Oracle-Budgeted Molecular Optimization with Short-Term Graph Memory (2026)",
+   "table": "Appendix Table 8 -- final top-10 score per oracle at a 1,000-call budget",
+   "transcribed_by": "owner, from the paper"
+  }
+ },
+ "payload_sha256": "fc4d7b9487ade23ab490ab52ee07e65d620619af43bfcbae71649d9b26b1ff2a"
+}
