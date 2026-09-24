@@ -236,6 +236,7 @@ def run_task(
     seed_list: list[int] | None = None,
     drugs: list[str] | None = None,
     linker_bridge_atoms: int = 0,
+    learned_prior=None,
 ) -> dict:
     task_prompts = [p for p in prompts if p.task is task]
     if drugs:
@@ -289,6 +290,9 @@ def run_task(
                 "separation_failures",
                 "initial_family_conditioned_draws",
                 "initial_family_conditioned_accepts",
+                "prior_admitted_offers",
+                "prior_rank_events",
+                "prior_nonfirst_selections",
             ) + PATH_CENSUS_FIELDS
             for attempt_index in range(samples):
                 before_committed = len(receipt.committed_endpoints)
@@ -304,6 +308,7 @@ def run_task(
                     config=config,
                     receipt=receipt,
                     control=control,
+                    learned_prior=learned_prior,
                 )
                 if (
                     len(receipt.action_traces) != before_trace_count + 1
@@ -377,6 +382,9 @@ def run_task(
                     "budget_exhausted": receipt.budget_exhausted,
                     "initial_family_conditioned_draws": receipt.initial_family_conditioned_draws,
                     "initial_family_conditioned_accepts": receipt.initial_family_conditioned_accepts,
+                    "prior_admitted_offers": receipt.prior_admitted_offers,
+                    "prior_rank_events": receipt.prior_rank_events,
+                    "prior_nonfirst_selections": receipt.prior_nonfirst_selections,
                     "executor_refusals": receipt.executor_refusals,
                     "mean_events": float(np.mean(receipt.events)) if receipt.events else 0.0,
                     "families": dict(receipt.families),

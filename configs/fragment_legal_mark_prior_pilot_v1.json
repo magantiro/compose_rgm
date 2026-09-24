@@ -1,0 +1,36 @@
+{
+  "payload": {
+    "schema": "fragment_legal_mark_prior_pilot_v1",
+    "status": "frozen_zero_oracle_development_screen",
+    "scientific_question": "Does a single learned-logit tilt among executor- and lock-admitted edits improve ten-prompt superstructure quality without sacrificing diversity, output rate or exact preservation?",
+    "source_official_contract": "configs/fragment_superstructure_official_v2.json",
+    "source_official_contract_sha256": "0b91b3e6aef22743b212c4dd0e45115026df2d512c550a986bac4106ea4d386c",
+    "baseline": "first ten attempts of seed zero in each of the ten frozen official shards; no regenerated control or task-filtered denominator",
+    "candidate": {
+      "legal_mark_candidates": 3,
+      "learned_log_probability_strength": 1.0,
+      "attempts_per_prompt": 10,
+      "seed": 0,
+      "same_checkpoint_executor_prompt_and_hard_lock": true,
+      "quality_oracle_at_inference": false,
+      "posthoc_endpoint_filter": false
+    },
+    "qualification_gate": {
+      "quality_gain_percentage_points_at_least": 10.0,
+      "diversity_loss_at_most": 0.03,
+      "output_rate_loss_at_most": 0.05,
+      "fidelity_rate_loss_at_most": 0.05,
+      "committed_chemical_validity": 1.0,
+      "committed_fragment_preservation": 1.0,
+      "interpretation": "Directional development screen only. It neither selects a benchmark checkpoint nor establishes a paper result. A qualifying candidate still needs a separate de novo screen and full official evaluation."
+    },
+    "prohibitions": [
+      "no change to the ongoing official superstructure run",
+      "no SA or QED in the proposal law",
+      "no drug-specific branches or target SMILES",
+      "no benchmark-score-based parameter sweep",
+      "no promotion on fragment fidelity alone"
+    ]
+  },
+  "payload_sha256": "604c498259f95c73836ceecc32de3783872d11d563bf003020b50b9502d1cdbf"
+}

@@ -59,6 +59,7 @@ from compose_v4.chem.molecular_graph import (
     smiles_to_molecular_graph,
 )
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.model.legal_mark_prior import LearnedLegalMarkPrior
 from compose_v4.model.time_convention import frozen_time
 from compose_v4.rewrite.operators import AtomInsert, BondReroute
 
@@ -154,6 +155,9 @@ class SamplingReceipt:
     path_nonlengthening_refusals: int = 0
     initial_family_conditioned_draws: int = 0
     initial_family_conditioned_accepts: int = 0
+    prior_admitted_offers: int = 0
+    prior_rank_events: int = 0
+    prior_nonfirst_selections: int = 0
 
 
 def _accepted_action_record(rule_name: str, action) -> dict:
@@ -520,9 +524,7 @@ class RegionLock:
         if molecule is None:
             return False
         matches = [
-            molecule.GetSubstructMatches(
-                query, uniquify=False, useChirality=False, maxMatches=1000
-            )
+            molecule.GetSubstructMatches(query, uniquify=False, useChirality=False, maxMatches=1000)
             for query in self._fragment_queries
         ]
         if any(not options for options in matches):
@@ -785,6 +787,7 @@ def sample_completion(
     config: SamplerConfig | None = None,
     receipt: SamplingReceipt | None = None,
     control: AttachmentControlConfig | None = None,
+    learned_prior: LearnedLegalMarkPrior | None = None,
 ) -> str | None:
     """Sample ONE completion of ``context``'s prompt from the learned process.
 
@@ -821,7 +824,8 @@ def sample_completion(
         lock_groups=spec.lock_groups,
         fragment_queries=(
             tuple(_fragment_spec(fragment).core for fragment in context.prompt.fragments)
-            if control.hard_lock_effective_chemistry else ()
+            if control.hard_lock_effective_chemistry
+            else ()
         ),
     )
 
@@ -852,6 +856,7 @@ def sample_completion(
                 events += 1
                 continue
         accepted = None
+        admitted_candidates = []
         for _ in range(config.mark_attempts_per_event):
             initial_locked = (
                 control.enabled
@@ -924,8 +929,26 @@ def sample_completion(
                 else:
                     receipt.staging_rejections += 1
                 continue
-            accepted = (mark, action, successor, completed_site_redirect)
-            break
+            candidate = (mark, action, successor, completed_site_redirect)
+            if learned_prior is None:
+                accepted = candidate
+                break
+            admitted_candidates.append(candidate)
+            receipt.prior_admitted_offers += 1
+            if len(admitted_candidates) >= learned_prior.candidates:
+                break
+
+        if admitted_candidates:
+            chosen, _scores = learned_prior.choose(
+                model,
+                state,
+                time_feature,
+                rng,
+                [(mark.rule_name, action) for mark, action, _, _ in admitted_candidates],
+            )
+            accepted = admitted_candidates[chosen]
+            receipt.prior_rank_events += 1
+            receipt.prior_nonfirst_selections += int(chosen != 0)
 
         if accepted is None:
             receipt.budget_exhausted += 1
