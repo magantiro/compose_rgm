@@ -1,0 +1,615 @@
+{
+  "created_utc": "2026-09-24T02:35:52.677965+00:00",
+  "identity": {
+    "base_git_commit": "21e113f65e233db9c339f6902b8dccfa3f3fb278",
+    "checkpoint_metadata": {
+      "completed_steps": 16000,
+      "corpus_scope_hash": "3721d69851110fdd"
+    },
+    "contract_sha256": "1152f6303eddc52062f6c0ec81263ebc0428b10478f895cd4a8912a5e4d381e2",
+    "implementation_sha256": {
+      "src/compose_v4/benchmark/fragment_attachment_control.py": "4797a9994fec58b2eed0e81897c7a48dc90b59f9a9ecbd7810cd3ad6f17f6c70",
+      "src/compose_v4/benchmark/fragment_conditioned_sampler.py": "684f6e156945498529d24aa9e4267e91efcaf46ffedfccfc6650e4bed9645b2f",
+      "src/compose_v4/benchmark/fragment_constrained.py": "cd9113a6afd22e833de462a0ad7d816ed170e8bde0d9d5577d7cae98caf0ddc6",
+      "src/compose_v4/benchmark/fragment_official_metrics.py": "eb8430c08a6a57da25a2f7f7d57ec892fbeec6d81a78b31c616295e23cb42726",
+      "tools/fetch_official_fragment_evaluator.py": "3426da4a3fa126fa5c84afd13cd955c743affb08e3825d9a67506db12f1e0147",
+      "tools/run_fragment_constrained_suite.py": "759fda5ff51cce2fd22c770f1cda981c200a3c587529a22e3e4daa2e6449add8",
+      "tools/run_fragment_interface_release_pilot.py": "d050b0915b6e65ce6081c379354ccc2d67a79bec5a27b0d8982c03248cf646af"
+    },
+    "inputs_sha256": {
+      "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+      "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9"
+    },
+    "official_ivg_blobs_sha256": {
+      "in_virtuo_gen/evaluation/downstream.py": "ab34f586b41f1ad6e21cd933b08e7ff86eb44711c9c9a4c31c29f894cc9c7b50",
+      "in_virtuo_gen/train_utils/metrics.py": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+      "in_virtuo_gen/utils/mol.py": "ed5609c72a3effe2547f4b264e35be8134affccc206978605307d1365a028145",
+      "references/fragments.csv": "43db9adbcf7f8895be6197bccdf729517c4433b7fdbf637f413fa9c8055c3a31",
+      "references/frags_downstream.csv": "dceeec39f389dda928a210694449948645be73d12da0ad93bc843ba1f2bb5975",
+      "references/reference_metrics.csv": "e75676431628987d3d0bacbafc3028ffd7ebc8d797ecb03fb386b13a453823f9"
+    },
+    "official_ivg_evaluator_commit": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "protocol": {
+      "attempts_per_prompt": 20,
+      "seed": 0,
+      "status": "small zero-oracle development pilot; not an official benchmark row",
+      "task_drugs": {
+        "motif_extension": [
+          "BARICITINIB",
+          "ERLOTINIB",
+          "LIOTHYRONINE",
+          "MARIBAVIR"
+        ],
+        "scaffold_decoration": [
+          "BARICITINIB",
+          "ERLOTINIB",
+          "LIOTHYRONINE",
+          "MARIBAVIR"
+        ],
+        "superstructure_generation": [
+          "BARICITINIB",
+          "LOVASTATIN"
+        ]
+      }
+    },
+    "schema": "fragment_interface_release_pilot_v1",
+    "software": {
+      "networkx": "3.3",
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "platform": "macOS-26.5.2-arm64-arm-64bit",
+      "python": "3.11.13",
+      "rdkit": "2024.03.5",
+      "scipy": "1.13.1",
+      "torch": "2.4.0"
+    }
+  },
+  "summary": {
+    "permanent_restriction": {
+      "motif_extension": {
+        "attempts": 80,
+        "chemically_valid_committed": 74,
+        "committed": 74,
+        "committed_official_formula": {
+          "count": 74,
+          "diversity": 0.8446984126984127,
+          "quality": 6.756756756756757,
+          "uniqueness": 85.13513513513513,
+          "validity": 100.0
+        },
+        "fragment_preserving_committed": 74,
+        "full_task_successes": 68,
+        "interface_rejections": 608,
+        "interfaces_covered_committed": 68,
+        "per_prompt": {
+          "BARICITINIB": {
+            "attempts": 20,
+            "committed": 15,
+            "committed_official_formula": {
+              "count": 15,
+              "diversity": 0.5948571428571429,
+              "quality": 20.0,
+              "uniqueness": 46.666666666666664,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.6577372103567708,
+              "distance_to_original_drug": 0.6984778686862355,
+              "diversity": 0.5695,
+              "quality": 10.0,
+              "uniqueness": 42.857142857142854,
+              "validity": 70.0
+            },
+            "task_success": 14
+          },
+          "ERLOTINIB": {
+            "attempts": 20,
+            "committed": 19,
+            "committed_official_formula": {
+              "count": 19,
+              "diversity": 0.7144375000000001,
+              "quality": 0.0,
+              "uniqueness": 84.21052631578947,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.7240677399670709,
+              "distance_to_original_drug": 0.8602824116199856,
+              "diversity": 0.7130666666666666,
+              "quality": 0.0,
+              "uniqueness": 100.0,
+              "validity": 75.0
+            },
+            "task_success": 15
+          },
+          "LIOTHYRONINE": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.75335,
+              "quality": 10.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.71998936943818,
+              "distance_to_original_drug": 0.8203163779559076,
+              "diversity": 0.7571052631578948,
+              "quality": 10.0,
+              "uniqueness": 100.0,
+              "validity": 95.0
+            },
+            "task_success": 19
+          },
+          "MARIBAVIR": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.7226999999999999,
+              "quality": 0.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.7750151561255216,
+              "distance_to_original_drug": 0.7839283390718401,
+              "diversity": 0.7226999999999999,
+              "quality": 0.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "task_success": 20
+          }
+        },
+        "redirections": 166,
+        "staging_rejections": 0
+      },
+      "scaffold_decoration": {
+        "attempts": 80,
+        "chemically_valid_committed": 80,
+        "committed": 80,
+        "committed_official_formula": {
+          "count": 80,
+          "diversity": 0.8254374999999999,
+          "quality": 40.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "fragment_preserving_committed": 80,
+        "full_task_successes": 77,
+        "interface_rejections": 125,
+        "interfaces_covered_committed": 77,
+        "per_prompt": {
+          "BARICITINIB": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.46355,
+              "quality": 65.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.5379041874097673,
+              "distance_to_original_drug": 0.48432812228918837,
+              "diversity": 0.4518947368421052,
+              "quality": 60.0,
+              "uniqueness": 100.0,
+              "validity": 95.0
+            },
+            "task_success": 19
+          },
+          "ERLOTINIB": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.5891,
+              "quality": 40.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.658595753450157,
+              "distance_to_original_drug": 0.6282038944045216,
+              "diversity": 0.5891,
+              "quality": 40.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "task_success": 20
+          },
+          "LIOTHYRONINE": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.7279499999999999,
+              "quality": 40.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.8820111696586717,
+              "distance_to_original_drug": 0.752696820196455,
+              "diversity": 0.7279499999999999,
+              "quality": 40.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "task_success": 20
+          },
+          "MARIBAVIR": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.70355,
+              "quality": 15.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.8846724075115142,
+              "distance_to_original_drug": 0.7776139906840807,
+              "diversity": 0.6950555555555555,
+              "quality": 15.0,
+              "uniqueness": 100.0,
+              "validity": 90.0
+            },
+            "task_success": 18
+          }
+        },
+        "redirections": 354,
+        "staging_rejections": 491
+      },
+      "superstructure_generation": {
+        "attempts": 40,
+        "chemically_valid_committed": 39,
+        "committed": 39,
+        "committed_official_formula": {
+          "count": 39,
+          "diversity": 0.8302307692307692,
+          "quality": 28.205128205128204,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "fragment_preserving_committed": 39,
+        "full_task_successes": 39,
+        "interface_rejections": 0,
+        "interfaces_covered_committed": 0,
+        "per_prompt": {
+          "BARICITINIB": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.7276499999999999,
+              "quality": 55.00000000000001,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.6408615077544864,
+              "distance_to_original_drug": 0.7096513111987963,
+              "diversity": 0.7276499999999999,
+              "quality": 55.00000000000001,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "task_success": 20
+          },
+          "LOVASTATIN": {
+            "attempts": 20,
+            "committed": 19,
+            "committed_official_formula": {
+              "count": 19,
+              "diversity": 0.7528421052631579,
+              "quality": 0.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.6375342667522645,
+              "distance_to_original_drug": 0.7990140283566568,
+              "diversity": 0.7528421052631579,
+              "quality": 0.0,
+              "uniqueness": 100.0,
+              "validity": 95.0
+            },
+            "task_success": 19
+          }
+        },
+        "redirections": 0,
+        "staging_rejections": 0
+      }
+    },
+    "release_after_coverage": {
+      "motif_extension": {
+        "attempts": 80,
+        "chemically_valid_committed": 73,
+        "committed": 73,
+        "committed_official_formula": {
+          "count": 73,
+          "diversity": 0.8644507042253522,
+          "quality": 16.43835616438356,
+          "uniqueness": 97.26027397260275,
+          "validity": 100.0
+        },
+        "fragment_preserving_committed": 73,
+        "full_task_successes": 70,
+        "interface_rejections": 0,
+        "interfaces_covered_committed": 70,
+        "per_prompt": {
+          "BARICITINIB": {
+            "attempts": 20,
+            "committed": 13,
+            "committed_official_formula": {
+              "count": 13,
+              "diversity": 0.7076153846153846,
+              "quality": 30.76923076923077,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.7669000220351835,
+              "distance_to_original_drug": 0.7796610719019438,
+              "diversity": 0.7076153846153846,
+              "quality": 20.0,
+              "uniqueness": 100.0,
+              "validity": 65.0
+            },
+            "task_success": 13
+          },
+          "ERLOTINIB": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.8208,
+              "quality": 15.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.8179119308130913,
+              "distance_to_original_drug": 0.9218610487801406,
+              "diversity": 0.8208,
+              "quality": 15.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "task_success": 20
+          },
+          "LIOTHYRONINE": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.8250555555555555,
+              "quality": 25.0,
+              "uniqueness": 90.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.8042592027411027,
+              "distance_to_original_drug": 0.8692037820004691,
+              "diversity": 0.8278235294117647,
+              "quality": 25.0,
+              "uniqueness": 100.0,
+              "validity": 85.0
+            },
+            "task_success": 17
+          },
+          "MARIBAVIR": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.7987500000000002,
+              "quality": 0.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.837579120886567,
+              "distance_to_original_drug": 0.8260556091493176,
+              "diversity": 0.7987500000000002,
+              "quality": 0.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "task_success": 20
+          }
+        },
+        "redirections": 144,
+        "staging_rejections": 28
+      },
+      "scaffold_decoration": {
+        "attempts": 80,
+        "chemically_valid_committed": 80,
+        "committed": 80,
+        "committed_official_formula": {
+          "count": 80,
+          "diversity": 0.8453125,
+          "quality": 31.25,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "fragment_preserving_committed": 80,
+        "full_task_successes": 77,
+        "interface_rejections": 0,
+        "interfaces_covered_committed": 77,
+        "per_prompt": {
+          "BARICITINIB": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.66825,
+              "quality": 45.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.6802994902302183,
+              "distance_to_original_drug": 0.6220011218405785,
+              "diversity": 0.6759999999999999,
+              "quality": 40.0,
+              "uniqueness": 100.0,
+              "validity": 95.0
+            },
+            "task_success": 19
+          },
+          "ERLOTINIB": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.7374499999999999,
+              "quality": 30.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.762435266157095,
+              "distance_to_original_drug": 0.7135528855245434,
+              "diversity": 0.7432105263157895,
+              "quality": 30.0,
+              "uniqueness": 100.0,
+              "validity": 95.0
+            },
+            "task_success": 19
+          },
+          "LIOTHYRONINE": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.7328,
+              "quality": 35.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.8836870755250323,
+              "distance_to_original_drug": 0.7560150904633729,
+              "diversity": 0.7328,
+              "quality": 35.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "task_success": 20
+          },
+          "MARIBAVIR": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.7047000000000001,
+              "quality": 15.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.885361662307671,
+              "distance_to_original_drug": 0.7712933979764878,
+              "diversity": 0.7017894736842106,
+              "quality": 15.0,
+              "uniqueness": 100.0,
+              "validity": 95.0
+            },
+            "task_success": 19
+          }
+        },
+        "redirections": 337,
+        "staging_rejections": 549
+      },
+      "superstructure_generation": {
+        "attempts": 40,
+        "chemically_valid_committed": 39,
+        "committed": 39,
+        "committed_official_formula": {
+          "count": 39,
+          "diversity": 0.8302307692307692,
+          "quality": 28.205128205128204,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "fragment_preserving_committed": 39,
+        "full_task_successes": 39,
+        "interface_rejections": 0,
+        "interfaces_covered_committed": 0,
+        "per_prompt": {
+          "BARICITINIB": {
+            "attempts": 20,
+            "committed": 20,
+            "committed_official_formula": {
+              "count": 20,
+              "diversity": 0.7276499999999999,
+              "quality": 55.00000000000001,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.6408615077544864,
+              "distance_to_original_drug": 0.7096513111987963,
+              "diversity": 0.7276499999999999,
+              "quality": 55.00000000000001,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "task_success": 20
+          },
+          "LOVASTATIN": {
+            "attempts": 20,
+            "committed": 19,
+            "committed_official_formula": {
+              "count": 19,
+              "diversity": 0.7528421052631579,
+              "quality": 0.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "emitted_official_formula": {
+              "distance": 0.6375342667522645,
+              "distance_to_original_drug": 0.7990140283566568,
+              "diversity": 0.7528421052631579,
+              "quality": 0.0,
+              "uniqueness": 100.0,
+              "validity": 95.0
+            },
+            "task_success": 19
+          }
+        },
+        "redirections": 0,
+        "staging_rejections": 0
+      }
+    }
+  },
+  "units": [
+    "diagnostics/fragment_interface_release_pilot_v1/units/permanent_restriction__motif_extension__baricitinib.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/permanent_restriction__motif_extension__erlotinib.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/permanent_restriction__motif_extension__liothyronine.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/permanent_restriction__motif_extension__maribavir.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/permanent_restriction__scaffold_decoration__baricitinib.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/permanent_restriction__scaffold_decoration__erlotinib.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/permanent_restriction__scaffold_decoration__liothyronine.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/permanent_restriction__scaffold_decoration__maribavir.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/permanent_restriction__superstructure_generation__baricitinib.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/permanent_restriction__superstructure_generation__lovastatin.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/release_after_coverage__motif_extension__baricitinib.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/release_after_coverage__motif_extension__erlotinib.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/release_after_coverage__motif_extension__liothyronine.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/release_after_coverage__motif_extension__maribavir.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/release_after_coverage__scaffold_decoration__baricitinib.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/release_after_coverage__scaffold_decoration__erlotinib.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/release_after_coverage__scaffold_decoration__liothyronine.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/release_after_coverage__scaffold_decoration__maribavir.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/release_after_coverage__superstructure_generation__baricitinib.json",
+    "diagnostics/fragment_interface_release_pilot_v1/units/release_after_coverage__superstructure_generation__lovastatin.json"
+  ]
+}

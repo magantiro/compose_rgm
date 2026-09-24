@@ -285,6 +285,149 @@ def test_staging_releases_once_every_interface_is_covered():
     assert admitted and reason == ""
 
 
+def test_interface_release_preserves_first_growth_then_allows_legal_core_growth():
+    """Only the permanent post-coverage ban differs between the two arms."""
+    from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+    from compose_v4.rewrite.operators import AtomInsert
+
+    prompt = _prompt(FragmentTask.MOTIF_EXTENSION, "BARICITINIB")
+    strict_config = AttachmentControlConfig(enabled=True)
+    release_config = dataclasses.replace(strict_config, restrict_interfaces=False)
+    context = build_prompt_context(
+        prompt, config=SamplerConfig(), control=strict_config
+    )
+    strict = AttachmentController(
+        context.attachment, context.locked_slots, strict_config
+    )
+    release = AttachmentController(
+        context.attachment, context.locked_slots, release_config
+    )
+    lock = RegionLock(
+        context.start_state,
+        context.locked_slots,
+        released_pairs=context.attachment.released_pairs,
+    )
+    system = de_novo_rewrite_system()
+    start = context.start_state
+    undeclared = next(
+        slot
+        for slot in context.locked_slots
+        if slot not in context.attachment.interfaces
+        and int(start.implicit_h_counts[slot]) > 0
+    )
+
+    # Before coverage, redirection stays active in BOTH arms. The released
+    # arm's attachment-first gate also refuses a non-progressing insertion.
+    first = AtomInsert(_first_null_slot(start), 2, 0, 3, ((undeclared, 1),))
+    assert strict.redirect("atom_insert", first, start) == release.redirect(
+        "atom_insert", first, start
+    )
+    redirected = release.redirect("atom_insert", first, start)
+    assert redirected.neighbors[0][0] in context.attachment.interfaces
+    uncovered = system.apply(start, "atom_insert", first)
+    assert release.permits(uncovered, start) == (False, "no_coverage_progress")
+
+    covered = system.apply(start, "atom_insert", redirected)
+    assert strict.permits(covered, start) == (True, "")
+    assert release.permits(covered, start) == (True, "")
+    assert strict.all_interfaces_covered(covered)
+    assert release.all_interfaces_covered(covered)
+    assert lock.permits(covered)
+
+    second = AtomInsert(_first_null_slot(covered), 2, 0, 3, ((undeclared, 1),))
+    grown = system.apply(covered, "atom_insert", second)
+    assert strict.permits(grown, covered) == (False, "undeclared_interface")
+    assert release.permits(grown, covered) == (True, "")
+    assert lock.permits(grown)
+
+    # Exact locked atom/bond identity survives both accepted steps, and the
+    # production executor produces chemically valid connected endpoints.
+    for state in (covered, grown):
+        for slot in context.locked_slots:
+            assert state.atom_types[slot] == start.atom_types[slot]
+            for other in context.locked_slots:
+                assert state.bonds[slot, other] == start.bonds[slot, other]
+        mol = Chem.MolFromSmiles(molecular_graph_to_smiles(state))
+        assert mol is not None and len(Chem.GetMolFrags(mol)) == 1
+
+
+def test_single_interface_policy_routes_by_declared_count_and_coverage_only():
+    """One-interface release, multi-interface restriction, zero-interface no-op."""
+    from compose_v4.chem.molecular_graph import molecular_graph_to_smiles
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+    from compose_v4.rewrite.operators import AtomInsert
+
+    policy = AttachmentControlConfig(
+        enabled=True, restrict_interfaces="single_interface_after_coverage"
+    )
+    strict = AttachmentControlConfig(enabled=True)
+    released = AttachmentControlConfig(enabled=True, restrict_interfaces=False)
+    system = de_novo_rewrite_system()
+    for task, drug, expected_interfaces in (
+        (FragmentTask.MOTIF_EXTENSION, "BARICITINIB", 1),
+        (FragmentTask.SCAFFOLD_DECORATION, "ERLOTINIB", 3),
+        (FragmentTask.SUPERSTRUCTURE_GENERATION, "BARICITINIB", 0),
+    ):
+        prompt = _prompt(task, drug)
+        context = build_prompt_context(prompt, config=SamplerConfig(), control=policy)
+        assert len(context.attachment.interfaces) == expected_interfaces
+        controllers = [
+            AttachmentController(context.attachment, context.locked_slots, config)
+            for config in (strict, released, policy)
+        ]
+        start = context.start_state
+        undeclared = next(
+            slot
+            for slot in context.locked_slots
+            if slot not in context.attachment.interfaces
+            and int(start.implicit_h_counts[slot]) > 0
+        )
+        lock = RegionLock(
+            start, context.locked_slots,
+            released_pairs=context.attachment.released_pairs,
+        )
+        state = start
+        if expected_interfaces:
+            for interface in context.attachment.interfaces:
+                action = AtomInsert(
+                    _first_null_slot(state), 2, 0, 3, ((interface, 1),)
+                )
+                successor = system.apply(state, "atom_insert", action)
+                assert lock.permits(successor)
+                assert controllers[2].permits(successor, state) == (True, "")
+                state = successor
+            assert controllers[2].all_interfaces_covered(state)
+
+        outside = AtomInsert(
+            _first_null_slot(state), 2, 0, 3, ((undeclared, 1),)
+        )
+        successor = system.apply(state, "atom_insert", outside)
+        assert lock.permits(successor)
+        decisions = [controller.permits(successor, state) for controller in controllers]
+        if expected_interfaces == 1:
+            assert decisions[0] == (False, "undeclared_interface")
+            assert decisions[1:] == [(True, ""), (True, "")]
+        elif expected_interfaces > 1:
+            assert decisions[0] == decisions[2] == (
+                False, "undeclared_interface"
+            )
+            assert decisions[1] == (True, "")
+        else:
+            assert decisions == [(True, "")] * 3
+        for slot in context.locked_slots:
+            assert successor.atom_types[slot] == start.atom_types[slot]
+            for other in context.locked_slots:
+                assert successor.bonds[slot, other] == start.bonds[slot, other]
+        mol = Chem.MolFromSmiles(molecular_graph_to_smiles(successor))
+        assert mol is not None and len(Chem.GetMolFrags(mol)) == 1
+
+
+def test_interface_policy_rejects_unrecognized_mode():
+    with pytest.raises(ValueError, match="unknown interface restriction mode"):
+        AttachmentControlConfig(enabled=True, restrict_interfaces="other")
+
+
 def test_coverage_ignores_neighbours_inside_the_retained_region():
     """A locked neighbour is not an EXTERNAL neighbour; the linker join is the case."""
     prompt = _prompt(FragmentTask.LINKER_DESIGN, "ELIGLUSTAT")

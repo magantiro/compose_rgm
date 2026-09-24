@@ -63,9 +63,12 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass, replace
+from typing import Literal
 
 from compose_v4.chem.molecular_graph import MolecularGraph, is_element
 from compose_v4.rewrite.operators import AtomInsert
+
+SINGLE_INTERFACE_RELEASE = "single_interface_after_coverage"
 
 
 @dataclass(frozen=True)
@@ -73,8 +76,14 @@ class AttachmentControlConfig:
     """One frozen parameter set, used for every drug and every task."""
 
     enabled: bool = False
-    # Refuse a bond from an undeclared locked atom to a new atom.
-    restrict_interfaces: bool = True
+    # Refuse a bond from an undeclared locked atom to a new atom, even after
+    # all declared interfaces have been covered.  Setting this false releases
+    # that *post-coverage* restriction while attachment_first still requires
+    # coverage progress before the declared interfaces are satisfied.
+    # The explicit third mode is derived solely from the supplied interface
+    # count.  Keeping the historical Boolean field/default means all old
+    # serialized configs and hashes remain byte-identical.
+    restrict_interfaces: bool | Literal["single_interface_after_coverage"] = True
     # Admit only coverage-increasing events while an interface is unsatisfied.
     attachment_first: bool = True
     # Re-anchor an inadmissible atom_insert onto an unsatisfied interface.
@@ -106,6 +115,11 @@ class AttachmentControlConfig:
     # explores the declared band instead of pinning one length per prompt.
     path_length_min: int = 2
     path_length_max: int = 5
+
+    def __post_init__(self) -> None:
+        mode = self.restrict_interfaces
+        if mode is not True and mode is not False and mode != SINGLE_INTERFACE_RELEASE:
+            raise ValueError(f"unknown interface restriction mode: {mode!r}")
 
 
 @dataclass(frozen=True)
@@ -398,7 +412,17 @@ class AttachmentController:
         """Admit or refuse a candidate successor; returns (ok, reason_code)."""
         if not self.active:
             return True, ""
-        if self._config.restrict_interfaces:
+        mode = self._config.restrict_interfaces
+        restrict_undeclared = (
+            mode is True
+            or (
+                mode == SINGLE_INTERFACE_RELEASE
+                and (
+                    len(self._interfaces) != 1 or bool(self.unsatisfied(predecessor))
+                )
+            )
+        )
+        if restrict_undeclared:
             real = is_element(successor.atom_types)
             for slot in self._undeclared:
                 row = successor.bonds[slot]

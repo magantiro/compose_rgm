@@ -381,6 +381,66 @@ def test_the_path_program_flag_reaches_the_controller_configuration():
     assert suite.control_from_args(off).enabled is True
 
 
+def test_post_coverage_growth_flag_changes_only_interface_restriction():
+    suite, default_args = _parsed("--attachment-control")
+    _, release_args = _parsed(
+        "--attachment-control", "--allow-post-coverage-core-growth"
+    )
+    default = suite.control_from_args(default_args)
+    release = suite.control_from_args(release_args)
+    assert default == suite.AttachmentControlConfig(enabled=True)
+    assert default.restrict_interfaces is True
+    assert release.restrict_interfaces is False
+    assert release.attachment_first == default.attachment_first is True
+    assert release.redirect_attachment == default.redirect_attachment is True
+    assert {
+        k for k in vars(default) if getattr(default, k) != getattr(release, k)
+    } == {"restrict_interfaces"}
+    assert suite.frozen_attachment_identity(default)["config_sha256"] == (
+        "80a40b905adf84eae5d55be274aba4fbc1af9f088170028fc7452bdcbbdc44c6"
+    )
+    assert suite.frozen_attachment_identity(default)["config_sha256"] != (
+        suite.frozen_attachment_identity(release)["config_sha256"]
+    )
+
+
+def test_post_coverage_growth_flag_requires_active_controller():
+    suite, args = _parsed("--allow-post-coverage-core-growth")
+    with pytest.raises(ValueError, match="requires --attachment-control"):
+        suite.control_from_args(args)
+
+
+def test_single_interface_policy_is_distinct_and_preserves_legacy_hash():
+    suite, args = _parsed(
+        "--attachment-control", "--release-single-interface-after-coverage"
+    )
+    candidate = suite.control_from_args(args)
+    assert candidate.restrict_interfaces == "single_interface_after_coverage"
+    assert candidate.attachment_first and candidate.redirect_attachment
+    historical = suite.AttachmentControlConfig(enabled=True)
+    assert suite.frozen_attachment_identity(historical)["config_sha256"] == (
+        "80a40b905adf84eae5d55be274aba4fbc1af9f088170028fc7452bdcbbdc44c6"
+    )
+    assert suite.frozen_attachment_identity(candidate)["config_sha256"] != (
+        suite.frozen_attachment_identity(historical)["config_sha256"]
+    )
+    _, inactive = _parsed("--release-single-interface-after-coverage")
+    with pytest.raises(ValueError, match="requires --attachment-control"):
+        suite.control_from_args(inactive)
+
+
+def test_interface_release_flags_are_mutually_exclusive():
+    suite = _suite_module()
+    with pytest.raises(SystemExit):
+        suite.build_parser().parse_args(
+            [
+                "--checkpoint", "ckpt.pt", "--output", "out.json",
+                "--attachment-control", "--allow-post-coverage-core-growth",
+                "--release-single-interface-after-coverage",
+            ]
+        )
+
+
 def test_the_path_program_flag_moves_the_recorded_controller_identity():
     """Two arms that differ in the program must not be combinable by accident.
 

@@ -37,6 +37,7 @@ import numpy as np
 from rdkit import Chem
 
 from compose_v4.benchmark.fragment_attachment_control import (
+    SINGLE_INTERFACE_RELEASE,
     AttachmentControlConfig,
     AttachmentController,
     AttachmentSpec,
@@ -263,8 +264,19 @@ def run_task(
             rng = np.random.default_rng(rng_seed)
             receipt = SamplingReceipt()
             emitted: list[str] = []
+            attempt_records: list[dict] = []
             started = time.time()
-            for _ in range(samples):
+            refusal_fields = (
+                "lock_rejections", "executor_refusals", "budget_exhausted",
+                "constraint_failures", "interface_rejections", "staging_rejections",
+                "redirections", "separation_failures",
+            )
+            for attempt_index in range(samples):
+                before_committed = len(receipt.committed_endpoints)
+                before_refusals = {
+                    field: getattr(receipt, field) for field in refusal_fields
+                }
+                before_families = dict(receipt.families)
                 out = sample_completion(
                     model,
                     system,
@@ -275,6 +287,26 @@ def run_task(
                     control=control,
                 )
                 emitted.append(out if out else FAILED_SAMPLE_PLACEHOLDER)
+                new_committed = receipt.committed_endpoints[before_committed:]
+                if len(new_committed) > 1:
+                    raise AssertionError("one attempt committed more than one endpoint")
+                attempt_records.append(
+                    {
+                        "attempt_index": attempt_index,
+                        "committed_smiles": new_committed[0] if new_committed else None,
+                        "emitted_smiles": out,
+                        "events": receipt.events[-1],
+                        "refusal_deltas": {
+                            field: getattr(receipt, field) - before_refusals[field]
+                            for field in refusal_fields
+                        },
+                        "family_deltas": {
+                            family: count - before_families.get(family, 0)
+                            for family, count in receipt.families.items()
+                            if count > before_families.get(family, 0)
+                        },
+                    }
+                )
             elapsed = time.time() - started
 
             metrics = official_prompt_metrics(emitted, expected_samples=samples)
@@ -324,6 +356,10 @@ def run_task(
                     # over EITHER denominator without re-running the sampler.
                     "committed_endpoint_smiles": list(committed),
                     "emitted_samples": list(emitted),
+                    # Attempt-aligned provenance, including a null committed
+                    # endpoint for a genuine no-output trajectory.  The two
+                    # legacy lists above remain for backward compatibility.
+                    "attempt_records": attempt_records,
                     # ---- Two-interface path accounting ----
                     #
                     # A linker row is only ABOUT designed linkers if the
@@ -473,6 +509,27 @@ def build_parser() -> argparse.ArgumentParser:
             "Default off, so the frozen-sampler baseline rows reproduce."
         ),
     )
+    interface_modes = parser.add_mutually_exclusive_group()
+    interface_modes.add_argument(
+        "--allow-post-coverage-core-growth",
+        action="store_true",
+        help=(
+            "with --attachment-control, release the permanent ban on growth "
+            "from undeclared retained-core atoms after all required attachment "
+            "interfaces have been covered. Attachment-first and redirection "
+            "remain on. Default off preserves the existing controller."
+        ),
+    )
+    interface_modes.add_argument(
+        "--release-single-interface-after-coverage",
+        action="store_true",
+        help=(
+            "derive the post-coverage rule only from the declared constraint: "
+            "release extra retained-core growth for exactly one interface; "
+            "keep permanent restriction for two or more; leave zero-interface "
+            "prompts unchanged. Requires --attachment-control."
+        ),
+    )
     parser.add_argument(
         "--path-program",
         action="store_true",
@@ -508,8 +565,21 @@ def control_from_args(args: argparse.Namespace) -> AttachmentControlConfig:
     itself is recomputing its expectation from the code under test and cannot
     fail when the real call site stops reading the flag.
     """
+    if (
+        args.allow_post_coverage_core_growth
+        or args.release_single_interface_after_coverage
+    ) and not args.attachment_control:
+        raise ValueError(
+            "interface-release mode requires --attachment-control"
+        )
+    restriction = (
+        SINGLE_INTERFACE_RELEASE
+        if args.release_single_interface_after_coverage
+        else not bool(args.allow_post_coverage_core_growth)
+    )
     return AttachmentControlConfig(
         enabled=bool(args.attachment_control),
+        restrict_interfaces=restriction,
         path_program=bool(args.path_program),
     )
 

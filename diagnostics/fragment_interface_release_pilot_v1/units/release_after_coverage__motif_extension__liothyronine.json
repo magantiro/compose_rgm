@@ -1,0 +1,672 @@
+{
+  "arm": "release_after_coverage",
+  "attachment_control": {
+    "arm": "attachment_control",
+    "config": {
+      "attachment_first": true,
+      "enabled": true,
+      "path_length_max": 5,
+      "path_length_min": 2,
+      "path_program": false,
+      "realize_redirected_order": true,
+      "redirect_attachment": true,
+      "release_linker_join": true,
+      "require_separated_cores": true,
+      "restrict_interfaces": false
+    },
+    "config_sha256": "12892fdae20adf8fa9fc533e16bd38ffdeaff84e3c9ec684b60e6f5c3b51864c"
+  },
+  "drug": "LIOTHYRONINE",
+  "identity": {
+    "base_git_commit": "21e113f65e233db9c339f6902b8dccfa3f3fb278",
+    "checkpoint_metadata": {
+      "completed_steps": 16000,
+      "corpus_scope_hash": "3721d69851110fdd"
+    },
+    "contract_sha256": "1152f6303eddc52062f6c0ec81263ebc0428b10478f895cd4a8912a5e4d381e2",
+    "implementation_sha256": {
+      "src/compose_v4/benchmark/fragment_attachment_control.py": "4797a9994fec58b2eed0e81897c7a48dc90b59f9a9ecbd7810cd3ad6f17f6c70",
+      "src/compose_v4/benchmark/fragment_conditioned_sampler.py": "684f6e156945498529d24aa9e4267e91efcaf46ffedfccfc6650e4bed9645b2f",
+      "src/compose_v4/benchmark/fragment_constrained.py": "cd9113a6afd22e833de462a0ad7d816ed170e8bde0d9d5577d7cae98caf0ddc6",
+      "src/compose_v4/benchmark/fragment_official_metrics.py": "eb8430c08a6a57da25a2f7f7d57ec892fbeec6d81a78b31c616295e23cb42726",
+      "tools/fetch_official_fragment_evaluator.py": "3426da4a3fa126fa5c84afd13cd955c743affb08e3825d9a67506db12f1e0147",
+      "tools/run_fragment_constrained_suite.py": "759fda5ff51cce2fd22c770f1cda981c200a3c587529a22e3e4daa2e6449add8",
+      "tools/run_fragment_interface_release_pilot.py": "d050b0915b6e65ce6081c379354ccc2d67a79bec5a27b0d8982c03248cf646af"
+    },
+    "inputs_sha256": {
+      "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+      "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9"
+    },
+    "official_ivg_blobs_sha256": {
+      "in_virtuo_gen/evaluation/downstream.py": "ab34f586b41f1ad6e21cd933b08e7ff86eb44711c9c9a4c31c29f894cc9c7b50",
+      "in_virtuo_gen/train_utils/metrics.py": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+      "in_virtuo_gen/utils/mol.py": "ed5609c72a3effe2547f4b264e35be8134affccc206978605307d1365a028145",
+      "references/fragments.csv": "43db9adbcf7f8895be6197bccdf729517c4433b7fdbf637f413fa9c8055c3a31",
+      "references/frags_downstream.csv": "dceeec39f389dda928a210694449948645be73d12da0ad93bc843ba1f2bb5975",
+      "references/reference_metrics.csv": "e75676431628987d3d0bacbafc3028ffd7ebc8d797ecb03fb386b13a453823f9"
+    },
+    "official_ivg_evaluator_commit": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+    "protocol": {
+      "attempts_per_prompt": 20,
+      "seed": 0,
+      "status": "small zero-oracle development pilot; not an official benchmark row",
+      "task_drugs": {
+        "motif_extension": [
+          "BARICITINIB",
+          "ERLOTINIB",
+          "LIOTHYRONINE",
+          "MARIBAVIR"
+        ],
+        "scaffold_decoration": [
+          "BARICITINIB",
+          "ERLOTINIB",
+          "LIOTHYRONINE",
+          "MARIBAVIR"
+        ],
+        "superstructure_generation": [
+          "BARICITINIB",
+          "LOVASTATIN"
+        ]
+      }
+    },
+    "schema": "fragment_interface_release_pilot_v1",
+    "software": {
+      "networkx": "3.3",
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "platform": "macOS-26.5.2-arm64-arm-64bit",
+      "python": "3.11.13",
+      "rdkit": "2024.03.5",
+      "scipy": "1.13.1",
+      "torch": "2.4.0"
+    }
+  },
+  "result": {
+    "build_failures": [],
+    "per_drug": {
+      "LIOTHYRONINE": [
+        {
+          "attachment_spec": {
+            "interfaces": [
+              0
+            ],
+            "lock_group_sizes": [
+              6
+            ],
+            "released_pairs": [],
+            "requirements": [
+              [
+                0,
+                1
+              ]
+            ]
+          },
+          "attempt_records": [
+            {
+              "attempt_index": 0,
+              "committed_smiles": "CCOC(=O)C(NC=C(CN(CC)CC)C(=O)O)C(C)CC",
+              "emitted_smiles": "CCOC(=O)C(NC=C(CN(CC)CC)C(=O)O)C(C)CC",
+              "events": 22,
+              "family_deltas": {
+                "atom_delete": 3,
+                "atom_insert": 19
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 7,
+                "redirections": 1,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 1,
+              "committed_smiles": "CC(N)C(=O)O",
+              "emitted_smiles": null,
+              "events": 2,
+              "family_deltas": {
+                "atom_delete": 1,
+                "atom_insert": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 1,
+                "constraint_failures": 1,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 29,
+                "redirections": 1,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 2,
+              "committed_smiles": "CCCCN(CCCO)CCC(NCC(C)=O)C(=O)O",
+              "emitted_smiles": "CCCCN(CCCO)CCC(NCC(C)=O)C(=O)O",
+              "events": 25,
+              "family_deltas": {
+                "atom_delete": 5,
+                "atom_insert": 19,
+                "atom_restate": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 10,
+                "redirections": 1,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 3,
+              "committed_smiles": "COC(=O)C(CCNC(C)=O)NC(=O)N(C)C",
+              "emitted_smiles": "COC(=O)C(CCNC(C)=O)NC(=O)N(C)C",
+              "events": 17,
+              "family_deltas": {
+                "atom_delete": 3,
+                "atom_insert": 14
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 4,
+                "redirections": 2,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 4,
+              "committed_smiles": "CCCCOC(=O)C(N)(O)CCCCCN(C)C",
+              "emitted_smiles": "CCCCOC(=O)C(N)(O)CCCCCN(C)C",
+              "events": 22,
+              "family_deltas": {
+                "atom_delete": 5,
+                "atom_insert": 17
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 8,
+                "redirections": 4,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 5,
+              "committed_smiles": "CCC(N)C(C)(C)NC(CCCCC(=O)OC)C(=O)O",
+              "emitted_smiles": "CCC(N)C(C)(C)NC(CCCCC(=O)OC)C(=O)O",
+              "events": 22,
+              "family_deltas": {
+                "atom_delete": 4,
+                "atom_insert": 18
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 10,
+                "redirections": 2,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 6,
+              "committed_smiles": "CCC(CC(C)(C)C)N(C)C(C(=O)O)C(C)C(=O)O",
+              "emitted_smiles": "CCC(CC(C)(C)C)N(C)C(C(=O)O)C(C)C(=O)O",
+              "events": 23,
+              "family_deltas": {
+                "atom_delete": 5,
+                "atom_insert": 18
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 21,
+                "redirections": 0,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 7,
+              "committed_smiles": "CNC(=O)NC(CCCCC(C)(C)C)C(=O)OC(=O)NO",
+              "emitted_smiles": "CNC(=O)NC(CCCCC(C)(C)C)C(=O)OC(=O)NO",
+              "events": 23,
+              "family_deltas": {
+                "atom_delete": 4,
+                "atom_insert": 19
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 10,
+                "redirections": 1,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 8,
+              "committed_smiles": "CNC(C(=O)OC)C(CO)NCC(C)(C)CO",
+              "emitted_smiles": "CNC(C(=O)OC)C(CO)NCC(C)(C)CO",
+              "events": 21,
+              "family_deltas": {
+                "atom_delete": 5,
+                "atom_insert": 16
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 13,
+                "redirections": 1,
+                "separation_failures": 0,
+                "staging_rejections": 1
+              }
+            },
+            {
+              "attempt_index": 9,
+              "committed_smiles": "CC1NCCNC1C(=O)OCN",
+              "emitted_smiles": "CC1NCCNC1C(=O)OCN",
+              "events": 17,
+              "family_deltas": {
+                "atom_delete": 4,
+                "atom_insert": 10,
+                "atom_restate": 1,
+                "bond_insert": 1,
+                "bond_reorder": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 19,
+                "redirections": 1,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 10,
+              "committed_smiles": "CC(N)C(=O)O",
+              "emitted_smiles": null,
+              "events": 4,
+              "family_deltas": {
+                "atom_delete": 2,
+                "atom_insert": 2
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 1,
+                "constraint_failures": 1,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 32,
+                "redirections": 0,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 11,
+              "committed_smiles": "CCCN(CC)C(CP(=O)=O)C(=O)O",
+              "emitted_smiles": "CCCN(CC)C(CP(=O)=O)C(=O)O",
+              "events": 10,
+              "family_deltas": {
+                "atom_delete": 1,
+                "atom_insert": 9
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 6,
+                "redirections": 0,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 12,
+              "committed_smiles": "CC(C)CN(O)CCC(N)C(=O)O",
+              "emitted_smiles": "CC(C)CN(O)CCC(N)C(=O)O",
+              "events": 18,
+              "family_deltas": {
+                "atom_delete": 5,
+                "atom_insert": 12,
+                "bond_reorder": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 26,
+                "redirections": 3,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 13,
+              "committed_smiles": "CC(C)COCCN(CC(N)C(=O)O)C(N)=S",
+              "emitted_smiles": "CC(C)COCCN(CC(N)C(=O)O)C(N)=S",
+              "events": 17,
+              "family_deltas": {
+                "atom_delete": 3,
+                "atom_insert": 14
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 16,
+                "redirections": 0,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 14,
+              "committed_smiles": "CCC(C)(C)C(N)C(=O)OCCCNC(=O)O",
+              "emitted_smiles": "CCC(C)(C)C(N)C(=O)OCCCNC(=O)O",
+              "events": 20,
+              "family_deltas": {
+                "atom_delete": 4,
+                "atom_insert": 15,
+                "atom_restate": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 13,
+                "redirections": 2,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 15,
+              "committed_smiles": "CC(=O)NCCC(N)(F)C(=O)O",
+              "emitted_smiles": "CC(=O)NCCC(N)(F)C(=O)O",
+              "events": 17,
+              "family_deltas": {
+                "atom_delete": 4,
+                "atom_insert": 10,
+                "atom_restate": 3
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 37,
+                "redirections": 1,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 16,
+              "committed_smiles": "CC(N)C(=O)O",
+              "emitted_smiles": null,
+              "events": 2,
+              "family_deltas": {
+                "atom_delete": 1,
+                "atom_insert": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 1,
+                "constraint_failures": 1,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 31,
+                "redirections": 1,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 17,
+              "committed_smiles": "CC(CS)C(=O)NC(CC(NN=O)C(=O)O)C(=O)O",
+              "emitted_smiles": "CC(CS)C(=O)NC(CC(NN=O)C(=O)O)C(=O)O",
+              "events": 22,
+              "family_deltas": {
+                "atom_delete": 4,
+                "atom_insert": 17,
+                "atom_restate": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 28,
+                "redirections": 1,
+                "separation_failures": 0,
+                "staging_rejections": 0
+              }
+            },
+            {
+              "attempt_index": 18,
+              "committed_smiles": "CCOC(=O)C(C=CBr)N(C)C",
+              "emitted_smiles": "CCOC(=O)C(C=CBr)N(C)C",
+              "events": 15,
+              "family_deltas": {
+                "atom_delete": 4,
+                "atom_insert": 10,
+                "bond_reorder": 1
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 11,
+                "redirections": 2,
+                "separation_failures": 0,
+                "staging_rejections": 1
+              }
+            },
+            {
+              "attempt_index": 19,
+              "committed_smiles": "CCC(N)(CC(=O)NC(C)(C)C)C(=O)O",
+              "emitted_smiles": "CCC(N)(CC(=O)NC(C)(C)C)C(=O)O",
+              "events": 17,
+              "family_deltas": {
+                "atom_delete": 4,
+                "atom_insert": 13
+              },
+              "refusal_deltas": {
+                "budget_exhausted": 0,
+                "constraint_failures": 0,
+                "executor_refusals": 0,
+                "interface_rejections": 0,
+                "lock_rejections": 35,
+                "redirections": 1,
+                "separation_failures": 0,
+                "staging_rejections": 4
+              }
+            }
+          ],
+          "attempts": 20,
+          "budget_exhausted": 3,
+          "committed_chemically_valid": 20,
+          "committed_endpoint_smiles": [
+            "CCOC(=O)C(NC=C(CN(CC)CC)C(=O)O)C(C)CC",
+            "CC(N)C(=O)O",
+            "CCCCN(CCCO)CCC(NCC(C)=O)C(=O)O",
+            "COC(=O)C(CCNC(C)=O)NC(=O)N(C)C",
+            "CCCCOC(=O)C(N)(O)CCCCCN(C)C",
+            "CCC(N)C(C)(C)NC(CCCCC(=O)OC)C(=O)O",
+            "CCC(CC(C)(C)C)N(C)C(C(=O)O)C(C)C(=O)O",
+            "CNC(=O)NC(CCCCC(C)(C)C)C(=O)OC(=O)NO",
+            "CNC(C(=O)OC)C(CO)NCC(C)(C)CO",
+            "CC1NCCNC1C(=O)OCN",
+            "CC(N)C(=O)O",
+            "CCCN(CC)C(CP(=O)=O)C(=O)O",
+            "CC(C)CN(O)CCC(N)C(=O)O",
+            "CC(C)COCCN(CC(N)C(=O)O)C(N)=S",
+            "CCC(C)(C)C(N)C(=O)OCCCNC(=O)O",
+            "CC(=O)NCCC(N)(F)C(=O)O",
+            "CC(N)C(=O)O",
+            "CC(CS)C(=O)NC(CC(NN=O)C(=O)O)C(=O)O",
+            "CCOC(=O)C(C=CBr)N(C)C",
+            "CCC(N)(CC(=O)NC(C)(C)C)C(=O)O"
+          ],
+          "committed_endpoints": 20,
+          "committed_fragment_preserving": 20,
+          "committed_interfaces_covered": 17,
+          "constraint_failures": 3,
+          "declared_interfaces": [
+            0
+          ],
+          "distance_reference_prompt": "C[C@H](N)C(=O)O",
+          "emitted_fragment_preserving": 17,
+          "emitted_nonempty": 17,
+          "emitted_samples": [
+            "CCOC(=O)C(NC=C(CN(CC)CC)C(=O)O)C(C)CC",
+            "",
+            "CCCCN(CCCO)CCC(NCC(C)=O)C(=O)O",
+            "COC(=O)C(CCNC(C)=O)NC(=O)N(C)C",
+            "CCCCOC(=O)C(N)(O)CCCCCN(C)C",
+            "CCC(N)C(C)(C)NC(CCCCC(=O)OC)C(=O)O",
+            "CCC(CC(C)(C)C)N(C)C(C(=O)O)C(C)C(=O)O",
+            "CNC(=O)NC(CCCCC(C)(C)C)C(=O)OC(=O)NO",
+            "CNC(C(=O)OC)C(CO)NCC(C)(C)CO",
+            "CC1NCCNC1C(=O)OCN",
+            "",
+            "CCCN(CC)C(CP(=O)=O)C(=O)O",
+            "CC(C)CN(O)CCC(N)C(=O)O",
+            "CC(C)COCCN(CC(N)C(=O)O)C(N)=S",
+            "CCC(C)(C)C(N)C(=O)OCCCNC(=O)O",
+            "CC(=O)NCCC(N)(F)C(=O)O",
+            "",
+            "CC(CS)C(=O)NC(CC(NN=O)C(=O)O)C(=O)O",
+            "CCOC(=O)C(C=CBr)N(C)C",
+            "CCC(N)(CC(=O)NC(C)(C)C)C(=O)O"
+          ],
+          "executor_refusals": 0,
+          "families": {
+            "atom_delete": 71,
+            "atom_insert": 254,
+            "atom_restate": 7,
+            "bond_insert": 1,
+            "bond_reorder": 3
+          },
+          "interface_rejections": 0,
+          "lock_rejections": 366,
+          "mean_events": 16.8,
+          "official": {
+            "distance": 0.8042592027411027,
+            "distance_to_original_drug": 0.8692037820004691,
+            "diversity": 0.8278235294117647,
+            "quality": 25.0,
+            "uniqueness": 100.0,
+            "validity": 85.0
+          },
+          "path_rejections": 0,
+          "path_targets": [],
+          "path_transaction_refusals": 0,
+          "path_transactions": 0,
+          "realized_linker_lengths": [],
+          "redirections": 25,
+          "rng_seed": 100812900,
+          "seconds": 10.62,
+          "seed": 0,
+          "seeded_linker_length": null,
+          "separation_failures": 0,
+          "staging_rejections": 6,
+          "start_state_interface_coverage": {
+            "covered": {
+              "0": 0
+            },
+            "interfaces": [
+              0
+            ],
+            "required": {
+              "0": 1
+            },
+            "satisfied": false
+          },
+          "unique_valid_count": 17,
+          "validity_denominator": 20
+        }
+      ]
+    },
+    "per_seed": [
+      {
+        "distance": 0.8042592027411027,
+        "distance_to_original_drug": 0.8692037820004691,
+        "diversity": 0.8278235294117647,
+        "quality": 25.0,
+        "uniqueness": 100.0,
+        "validity": 85.0
+      }
+    ],
+    "prompts_declared": 1,
+    "prompts_scored": 1,
+    "samples_per_prompt": 20,
+    "seeds": 1,
+    "summary": {
+      "distance": {
+        "mean": 0.8042592027411027,
+        "std": 0.0
+      },
+      "distance_to_original_drug": {
+        "mean": 0.8692037820004691,
+        "std": 0.0
+      },
+      "diversity": {
+        "mean": 0.8278235294117647,
+        "std": 0.0
+      },
+      "quality": {
+        "mean": 25.0,
+        "std": 0.0
+      },
+      "uniqueness": {
+        "mean": 100.0,
+        "std": 0.0
+      },
+      "validity": {
+        "mean": 85.0,
+        "std": 0.0
+      }
+    },
+    "task": "motif_extension"
+  },
+  "sampler": {
+    "config": {
+      "mark_attempts_per_event": 24,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "config_sha256": "805b2d10fa863c278dfd760fb3b9f5fd29eb94f91ef1653b1bf5ebe44aaab9ae"
+  },
+  "task": "motif_extension"
+}
