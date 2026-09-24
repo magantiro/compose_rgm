@@ -26,6 +26,7 @@ from compose_v4.control.adaptive_program_optimizer import ProgramOptimizer
 from compose_v4.control.bootstrap_pool_continuity import BootstrapPoolContinuity
 from compose_v4.control.docking_value import identity
 from compose_v4.control.dynamic_program_synthesis_v2 import (
+    ANCHORED_CHANNEL,
     SHALLOW_CHANNEL,
     STRUCTURED_CHANNEL,
 )
@@ -42,6 +43,8 @@ from compose_v4.control.edit_program_graph import (
     program_size_profile,
 )
 from compose_v4.control.fiber_control import ProgramValue, SearchState, acquisition
+from compose_v4.control.pmo_channels import CHANNELS as _SHARED_CHANNELS
+from compose_v4.control.pmo_channels import TRANSPLANT_CHANNEL
 from compose_v4.control.pmo_credit import (
     PopulationCredit,
     basin_label,
@@ -62,10 +65,19 @@ from compose_v4.rewrite.trace_shard import decode_state
 
 SCHEMA = "pmo_population_controller_v1"
 JUMP_CHANNEL = "joint_dependency_region_jump"
-CHANNELS = (SHALLOW_CHANNEL, STRUCTURED_CHANNEL, JUMP_CHANNEL)
+#: `anchored_replacement` is the third lane T4 dispatches and the only one PMO never
+#: imported.  Measured on T4's 15-cell held-target audit it supplied 921 of ~2,383
+#: eligible endpoints (39%) and 16 of 74 selections at a HIGHER gate-call yield than
+#: shallow, and on a live PMO molecule it is the only lane reaching piperazine (7.6%)
+#: and the best at quaternary carbon (6.0%) -- at a fifth of structured's cost.
+CHANNELS = _SHARED_CHANNELS
+#: A mode is a provenance LABEL, not a policy: `_parent()` takes no channel argument,
+#: so every channel draws its parents from one distribution.
 MODE_BY_CHANNEL = {
+    TRANSPLANT_CHANNEL: "transplant_region",
     SHALLOW_CHANNEL: "refine_elite",
     STRUCTURED_CHANNEL: "global_explore",
+    ANCHORED_CHANNEL: "anchored_replace",
     JUMP_CHANNEL: "jump_from_elite",
 }
 FINGERPRINT = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
@@ -467,9 +479,11 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
         escape = self.population_state["escape_rounds_remaining"] > 0
         early = self.batches < 4
         quota = (
-            {SHALLOW_CHANNEL: 1, STRUCTURED_CHANNEL: 4, JUMP_CHANNEL: 3}
+            {SHALLOW_CHANNEL: 1, STRUCTURED_CHANNEL: 4,
+             ANCHORED_CHANNEL: 2, JUMP_CHANNEL: 3, TRANSPLANT_CHANNEL: 3}
             if escape
-            else {SHALLOW_CHANNEL: 2, STRUCTURED_CHANNEL: 2, JUMP_CHANNEL: 2}
+            else {SHALLOW_CHANNEL: 2, STRUCTURED_CHANNEL: 2,
+                  ANCHORED_CHANNEL: 2, JUMP_CHANNEL: 2, TRANSPLANT_CHANNEL: 2}
             if early
             else {channel: 1 for channel in CHANNELS}
         )
@@ -658,7 +672,9 @@ class PmoPopulationController(DynamicV21ProgramOptimizer):
             for channel in CHANNELS
         }
         attempts, pools, seconds = [], {}, {}
-        for channel in (SHALLOW_CHANNEL, STRUCTURED_CHANNEL):
+        # Derived, not hand-listed: this pair fell out of step with CHANNELS once
+        # already, which left a restored lane scheduled but never generated.
+        for channel in (c for c in CHANNELS if c != JUMP_CHANNEL):
             lane_attempts, rows, elapsed = self._generate_channel_pool(
                 channel, eligibility, archive_seen, schedules[channel]
             )

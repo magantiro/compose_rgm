@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from contextlib import contextmanager
 from dataclasses import asdict
 from time import perf_counter
@@ -32,6 +33,7 @@ from compose_v4.control.dynamic_program_synthesis import (
     synthesize_named_module_sequence,
 )
 from compose_v4.control.dynamic_program_synthesis_v2 import (
+    ANCHORED_CHANNEL,
     SHALLOW_CHANNEL,
     STRUCTURED_CHANNEL,
     synthesize_structured_program,
@@ -41,14 +43,62 @@ from compose_v4.control.edit_program_graph import (
     execute_program_graph,
     program_size_profile,
 )
+from compose_v4.control.pmo_channels import (
+    TRANSPLANT_CHANNEL,
+    transplant_lane_enabled,
+)
+from compose_v4.control.progressive_structured_sampler import (
+    synthesize_anchored_replacement_program,
+)
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
 
 SCHEMA = "dynamic_program_synthesis_v21"
-CHANNELS = (SHALLOW_CHANNEL, STRUCTURED_CHANNEL)
+CHANNELS = (SHALLOW_CHANNEL, STRUCTURED_CHANNEL, ANCHORED_CHANNEL) + (
+    (TRANSPLANT_CHANNEL,) if transplant_lane_enabled() else ()
+)
 CHANNEL_CANDIDATE_LIMIT = 16
+def transplant_share() -> float:
+    """Fraction of recombination draws that attempt a molecular-state transplant.
+
+    Read at CALL time, not import time.  A module global is re-evaluated inside the
+    Modal container, where a launcher-side export does not exist -- that is exactly how
+    two launches were spent watching an override silently revert to its default.
+    0.0 keeps the runtime byte-identical to branch recombination alone.
+    """
+    return float(os.environ.get("PMO_TRANSPLANT_SHARE") or 0.0)
 UCB_EXPLORATION = 1.0
 EXPLORATION_FLOOR = 1
+
+
+def _transplant_proposal(optimizer, entry):
+    """Transplant a region from another ARCHIVE molecule into this parent."""
+    from compose_v4.control.prescreen_donor_lane import transplant_program
+
+    source = optimizer._source(entry)
+    # Per-SOURCE, because the ranking is deterministic per source: the same parent would
+    # otherwise be handed its own top transplant every round. Keyed by entry so two
+    # parents never share an exclusion set.
+    memory = getattr(optimizer, "_transplant_seen", None)
+    if memory is None:
+        memory = optimizer._transplant_seen = {}
+    seen = memory.setdefault(str(entry.get("entry_id")), set())
+    donors = []
+    for key, other in optimizer.entries.items():
+        if key == entry.get("entry_id"):
+            continue
+        endpoint = other.get("endpoint")
+        if not endpoint:
+            continue
+        donors.append((optimizer._source(other), str(endpoint)))
+    if not donors:
+        raise ValueError("no archive donors available")
+    return transplant_program(
+        source, donors, optimizer.rng, attempts=24,
+        max_primitives=optimizer.config.max_primitives,
+        max_blocks=optimizer.config.max_blocks,
+        exclude=seen,
+    )
 
 
 def _blank_counts() -> dict[str, int | float]:
@@ -340,12 +390,54 @@ class DynamicV21ProgramOptimizer(DynamicProgramOptimizer):
             def program_sampler(kind):
                 chosen["proposal_kind"] = kind
                 if kind == "recombination":
+                    # PRESCREEN TRANSPLANT.  `_recombine` decomposes a DONOR'S PROGRAM,
+                    # so an archive entry that arrived as a plain molecule -- every
+                    # prescreen seed -- is invisible to it as donor material however
+                    # good a molecule it is.  `transplant_program` needs only the donor's
+                    # STATE.  Measured zero-oracle on four tasks: 52.5% of attempts admit
+                    # a transplant, every one carrying >=6 donor heavy atoms at retention
+                    # 0.85-0.96.  Falls through to branch recombination on refusal, so
+                    # this can only add proposals, never remove them.
+                    share = transplant_share()
+                    if share and self.rng.random() < share:
+                        try:
+                            return _transplant_proposal(self, entry)
+                        except (ValueError, RuntimeError, KeyError, IndexError):
+                            pass
                     return ProgramOptimizer._recombine(self, entry)
+                if channel == TRANSPLANT_CHANNEL:
+                    # The dedicated lane calls the generator directly: no share gamble,
+                    # no fallback to branch recombination. A lane that silently fell back
+                    # would report a transplant footprint it does not have -- which is
+                    # exactly the measurement error the lane exists to remove.
+                    return _transplant_proposal(self, entry)
                 if channel == SHALLOW_CHANNEL:
                     return DynamicProgramOptimizer._mutate(self, entry)
                 if self.rng.random() >= FRESH_SYNTHESIS_PROBABILITY:
                     return ProgramOptimizer._mutate(self, entry)
                 current = decode_state(entry["trace"]["states"][-1])
+                if channel == ANCHORED_CHANNEL:
+                    (
+                        source,
+                        program,
+                        binding,
+                        _,
+                        detail,
+                    ) = synthesize_anchored_replacement_program(
+                        current,
+                        self.rng,
+                        max_primitives=self.config.max_primitives,
+                        max_blocks=self.config.max_blocks,
+                    )
+                    return (
+                        source,
+                        program,
+                        binding,
+                        {
+                            "anchored_replacement_program": detail,
+                            **self._continuation_lineage(entry),
+                        },
+                    )
                 source, program, binding, _, detail = synthesize_structured_program(
                     current,
                     self.rng,
@@ -667,6 +759,21 @@ def _cold_channel_pool(
                     max_primitives=config.max_primitives,
                     max_blocks=config.max_blocks,
                 )
+            elif channel == ANCHORED_CHANNEL:
+                # Ported verbatim from the T4 call site (t4_fiber_campaign.py:290),
+                # which passes only (source, rng) and takes the sampler's own defaults.
+                (
+                    _,
+                    program,
+                    binding,
+                    trace,
+                    metadata,
+                ) = synthesize_anchored_replacement_program(
+                    source,
+                    rng,
+                    max_primitives=config.max_primitives,
+                    max_blocks=config.max_blocks,
+                )
             else:
                 _, program, binding, trace, metadata = synthesize_structured_program(
                     source,
@@ -748,16 +855,29 @@ def initial_dynamic_program_batch_v21(
         raise ValueError("Dynamic-v2.1 initialization does not use reference inference")
     began = perf_counter()
     state = initial_allocator_state(score_direction=config.score_direction)
-    shallow_rng = np.random.default_rng(np.random.SeedSequence([config.seed, 71]))
-    structured_rng = np.random.default_rng(np.random.SeedSequence([config.seed, 73]))
     arbitration_rng = np.random.default_rng(
         np.random.SeedSequence([config.seed, 211, 0])
     )
+    # Derived from CHANNELS rather than written out beside it.  The pools were built
+    # from a hand-listed pair while the merge below iterates CHANNELS, so adding a
+    # channel raised `KeyError` at the merge -- after the container had started.  A
+    # missing stream now fails HERE, naming the channel, before any work is done.
+    channel_seed_offsets = {
+        SHALLOW_CHANNEL: 71,
+        STRUCTURED_CHANNEL: 73,
+        ANCHORED_CHANNEL: 79,
+    }
+    missing = [name for name in CHANNELS if name not in channel_seed_offsets]
+    if missing:
+        raise ValueError(f"no initialization seed stream for channels: {missing}")
+    channel_rngs = {
+        name: np.random.default_rng(
+            np.random.SeedSequence([config.seed, channel_seed_offsets[name]])
+        )
+        for name in CHANNELS
+    }
     pools, attempts, seconds = {}, [], {}
-    for channel, rng in (
-        (SHALLOW_CHANNEL, shallow_rng),
-        (STRUCTURED_CHANNEL, structured_rng),
-    ):
+    for channel, rng in ((name, channel_rngs[name]) for name in CHANNELS):
         channel_attempts, candidates, elapsed = _cold_channel_pool(
             source,
             channel=channel,
@@ -798,9 +918,14 @@ def initial_dynamic_program_batch_v21(
     bootstrap = {
         "pool_id": identity([row["candidate_id"] for row in merged]),
         "allocator_state": json.loads(json.dumps(state)),
-        "shallow_rng": shallow_rng.bit_generator.state,
-        "structured_rng": structured_rng.bit_generator.state,
+        "shallow_rng": channel_rngs[SHALLOW_CHANNEL].bit_generator.state,
+        "structured_rng": channel_rngs[STRUCTURED_CHANNEL].bit_generator.state,
         "arbitration_rng": arbitration_rng.bit_generator.state,
+        # Keyed by channel so a future lane is carried without another hand-listed pair
+        # falling out of step with CHANNELS, which is what broke the first launch.
+        "channel_rngs": {
+            name: channel_rngs[name].bit_generator.state for name in CHANNELS
+        },
     }
     for candidate in selected:
         candidate["provenance"]["dynamic_v21_bootstrap"] = bootstrap
