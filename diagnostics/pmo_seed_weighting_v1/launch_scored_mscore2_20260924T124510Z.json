@@ -1,0 +1,27 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "scored",
+ "git_commit": "756ce6e7b9b3416f32fff75a0180bf71fae8decd",
+ "base_seed": 20260924,
+ "budget": 5000,
+ "submitted": [
+  {
+   "task": "deco_hop",
+   "prescreen": true,
+   "transplant_share": 0.0,
+   "parent_weighting": "measured_score",
+   "transplant_lane": false,
+   "donor_reservoir": false,
+   "budget": 5000,
+   "rounds": 400,
+   "queries": 16,
+   "seed": 20278929,
+   "base_seed": 20260924,
+   "replicate": 5,
+   "label": "scored_deco_hop_seed20278929_mscore2_20260924T124510Z",
+   "volume": "pmo-fiber-deco-hop-seed20278929-mscore2",
+   "git_commit": "756ce6e7b9b3416f32fff75a0180bf71fae8decd",
+   "modal_call_id": "fc-01M39Q5K03JMDZ5X1MBEVEF0DA"
+  }
+ ]
+}

@@ -1,0 +1,567 @@
+{
+ "schema_version": "pmo_prescreen_mining_v1",
+ "measured_at_utc": "2026-09-24T12:52:57.345880+00:00",
+ "oracle_calls_spent": 0,
+ "finding_1_whole_molecule_mining_is_dead": {
+  "verdict": "NO_BETTER_NEIGHBOUR_EXISTS_ON_ANY_PANEL_TASK",
+  "detail": "On all 8 panel tasks the current COMPOSE leader already outscores EVERY one of the 249,455 prescreen molecules. 'Retrieve a higher-scoring structurally-near prescreen molecule and compile the graph delta' therefore has no material to operate on, and that branch of the plan is dropped rather than attempted.",
+  "per_task": {
+   "amlodipine_mpo": {
+    "leader_score": 0.7321765321469982,
+    "zinc_max": 0.6855654600401043,
+    "n_prescreen_molecules_better": 0
+   },
+   "celecoxib_rediscovery": {
+    "leader_score": 0.5853658536585366,
+    "zinc_max": 0.4583333333333333,
+    "n_prescreen_molecules_better": 0
+   },
+   "fexofenadine_mpo": {
+    "leader_score": 0.7980481030862815,
+    "zinc_max": 0.7563948721762481,
+    "n_prescreen_molecules_better": 0
+   },
+   "perindopril_mpo": {
+    "leader_score": 0.6232413273091858,
+    "zinc_max": 0.5595028849441883,
+    "n_prescreen_molecules_better": 0
+   },
+   "scaffold_hop": {
+    "leader_score": 0.5640239451014747,
+    "zinc_max": 0.5261475514640072,
+    "n_prescreen_molecules_better": 0
+   },
+   "thiothixene_rediscovery": {
+    "leader_score": 0.4838709677419355,
+    "zinc_max": 0.4083333333333333,
+    "n_prescreen_molecules_better": 0
+   },
+   "troglitazone_rediscovery": {
+    "leader_score": 0.8229166666666666,
+    "zinc_max": 0.391304347826087,
+    "n_prescreen_molecules_better": 0
+   },
+   "jnk3": {
+    "leader_score": 0.77,
+    "zinc_max": 0.68,
+    "n_prescreen_molecules_better": 0
+   }
+  }
+ },
+ "finding_2_the_prescreen_holds_PARTS_not_molecules": {
+  "verdict": "FRAGMENT_ENRICHMENT_IS_THE_LIVE_ROUTE",
+  "why": "Troglitazone is the existence proof: its winning thiazolidinedione half came from a prescreen molecule scoring 0.391 while the leader sat at 0.42. A part can be worth more than the molecule carrying it, so a whole-molecule score filter discards exactly the material that works.",
+  "method": "log P(fragment | top-1000 by the task's own oracle) / P(fragment | 20k background), BRICS decomposition, fragments appearing >= 8 times in the top slice. Target-blind: no reference, no motif list, only the declared prescreen oracle scores.",
+  "standouts": {
+   "jnk3": "pyrazolidinedione E=+6.49 (33 top / 0 background), thiohydantoin +5.94, thiazolidinedione +5.63, aminoisoquinoline +5.56 -- none in the leader, and jnk3 is precisely the row where no near-answer molecule exists (ZINC max 0.68)",
+   "perindopril_mpo": "[5*]N[C@H](CCC)C(=O)OC at +5.19 is perindopril's own norvaline ester",
+   "scaffold_hop": "nitro-pyrimidinol +5.48 and benzotriazole +5.19, both 0 in background"
+  },
+  "enrichment": {
+   "amlodipine_mpo": {
+    "leader": "CCOC(=O)C1=C(C)NC(Cl)=C(C(=O)OC)C1c1nc2ccccc2[nH]1",
+    "leader_score": 0.7321765321469982,
+    "n_enriched": 54,
+    "top_missing_from_leader": [
+     {
+      "fragment": "[1*]C(=O)c1[nH]c(C)c(C([1*])=O)c1C",
+      "enrichment": 5.075223813983869,
+      "n_top": 8,
+      "n_bg": 0,
+      "in_leader": false
+     },
+     {
+      "fragment": "[1*]C(=O)C1=C(C)NC(=O)N[C@@H]1[13*]",
+      "enrichment": 4.787541741532087,
+      "n_top": 12,
+      "n_bg": 1,
+      "in_leader": false
+     },
+     {
+      "fragment": "[1*]C(=O)C1=C(C)NC(=O)N[C@H]1[13*]",
+      "enrichment": 4.382076633423924,
+      "n_top": 16,
+      "n_bg": 3,
+      "in_leader": false
+     },
+     {
+      "fragment": "[1*]C(=O)C1=C(C)NC(=S)N[C@H]1[13*]",
+      "enrichment": 3.688929452863978,
+      "n_top": 8,
+      "n_bg": 3,
+      "in_leader": false
+     },
+     {
+      "fragment": "[1*]C(=O)c1[nH]c(C)c([16*])c1C",
+      "enrichment": 2.877999236647649,
+      "n_top": 8,
+      "n_bg": 8,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]NCc1ccccc1Cl",
+      "enrichment": 2.590317164195868,
+      "n_top": 8,
+      "n_bg": 11,
+      "in_leader": false
+     },
+     {
+      "fragment": "[3*]OCCOC",
+      "enrichment": 2.4252374138364194,
+      "n_top": 13,
+      "n_bg": 22,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]Nc1cccc(Cl)c1C",
+      "enrichment": 2.4079956074019138,
+      "n_top": 10,
+      "n_bg": 17,
+      "in_leader": false
+     }
+    ]
+   },
+   "celecoxib_rediscovery": {
+    "leader": "Cc1ccc(-n2nc(C(F)(F)F)cc2-c2cccs2)cc1",
+    "leader_score": 0.5853658536585366,
+    "n_enriched": 67,
+    "top_missing_from_leader": [
+     {
+      "fragment": "[5*]NS(=O)(=O)c1ccc(C)cc1",
+      "enrichment": 5.634839601919292,
+      "n_top": 56,
+      "n_bg": 3,
+      "in_leader": false
+     },
+     {
+      "fragment": "[4*][C@@H](C)c1ccc(S(N)(=O)=O)cc1",
+      "enrichment": 5.298367365298079,
+      "n_top": 10,
+      "n_bg": 0,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]Nc1ccc(S(N)(=O)=O)cc1",
+      "enrichment": 4.997262272514156,
+      "n_top": 37,
+      "n_bg": 4,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]N([5*])S(=O)(=O)c1ccc(C)cc1",
+      "enrichment": 4.867584449205624,
+      "n_top": 13,
+      "n_bg": 1,
+      "in_leader": false
+     },
+     {
+      "fragment": "[16*]c1ccc(S(N)(=O)=O)cc1",
+      "enrichment": 4.787541741532087,
+      "n_top": 78,
+      "n_bg": 12,
+      "in_leader": false
+     },
+     {
+      "fragment": "[12*]S(=O)(=O)c1ccc(C)cc1",
+      "enrichment": 4.5286801076157985,
+      "n_top": 88,
+      "n_bg": 18,
+      "in_leader": false
+     },
+     {
+      "fragment": "[4*]CCc1ccc(S(N)(=O)=O)cc1",
+      "enrichment": 4.382076633423924,
+      "n_top": 8,
+      "n_bg": 1,
+      "in_leader": false
+     },
+     {
+      "fragment": "[3*]OS(=O)(=O)c1ccc(C)cc1",
+      "enrichment": 3.976611525315759,
+      "n_top": 8,
+      "n_bg": 2,
+      "in_leader": false
+     }
+    ]
+   },
+   "fexofenadine_mpo": {
+    "leader": "CC1(N)C(CCC=CC[NH+]2CCC(O)(c3cccc(C=CC(=O)CC(O)CCCNN)c3)c3ccccc32)N1O",
+    "leader_score": 0.7980481030862815,
+    "n_enriched": 114,
+    "top_missing_from_leader": [
+     {
+      "fragment": "[4*]CCN1C(=O)C([O-])=C(C([6*])=O)[C@@H]1[13*]",
+      "enrichment": 4.382076633423924,
+      "n_top": 8,
+      "n_bg": 1,
+      "in_leader": false
+     },
+     {
+      "fragment": "[12*]S(=O)(=O)c1ccc2ccccc2c1",
+      "enrichment": 4.094394560972142,
+      "n_top": 9,
+      "n_bg": 2,
+      "in_leader": false
+     },
+     {
+      "fragment": "[1*]C(=O)c1ccc([16*])c([N+](=O)[O-])c1",
+      "enrichment": 4.007383183982513,
+      "n_top": 11,
+      "n_bg": 3,
+      "in_leader": false
+     },
+     {
+      "fragment": "[1*]C(=O)c1cccc([N+](=O)[O-])c1",
+      "enrichment": 3.36350705242935,
+      "n_top": 13,
+      "n_bg": 8,
+      "in_leader": false
+     },
+     {
+      "fragment": "[1*]C(=O)c1ccc([N+](=O)[O-])cc1",
+      "enrichment": 3.2034216370822772,
+      "n_top": 16,
+      "n_bg": 12,
+      "in_leader": false
+     },
+     {
+      "fragment": "[8*]Cc1ccccc1[16*]",
+      "enrichment": 2.995782272304033,
+      "n_top": 10,
+      "n_bg": 9,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*][NH+]1CCOCC1",
+      "enrichment": 2.813460715510078,
+      "n_top": 10,
+      "n_bg": 11,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]Nc1cc([16*])ccc1[16*]",
+      "enrichment": 2.7951115768418813,
+      "n_top": 9,
+      "n_bg": 10,
+      "in_leader": false
+     }
+    ]
+   },
+   "jnk3": {
+    "leader": "CN(CCc1ccc(-c2ccnc(NC3CC3)n2)cc1)CC1(C)CCCN1N",
+    "leader_score": 0.77,
+    "n_enriched": 94,
+    "top_missing_from_leader": [
+     {
+      "fragment": "[7*]C1C(=O)NN([10*])C1=O",
+      "enrichment": 6.492289833770513,
+      "n_top": 33,
+      "n_bg": 0,
+      "in_leader": false
+     },
+     {
+      "fragment": "[7*]C1C(=O)NC(=S)N([10*])C1=O",
+      "enrichment": 5.940221251470473,
+      "n_top": 19,
+      "n_bg": 0,
+      "in_leader": false
+     },
+     {
+      "fragment": "[7*]C1SC(=O)NC1=O",
+      "enrichment": 5.634839601919292,
+      "n_top": 14,
+      "n_bg": 0,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]Nc1cccc2cnccc12",
+      "enrichment": 5.560731629765569,
+      "n_top": 26,
+      "n_bg": 1,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]NS(=O)(=O)c1cccc2cnccc12",
+      "enrichment": 5.3936775451024035,
+      "n_top": 11,
+      "n_bg": 0,
+      "in_leader": false
+     },
+     {
+      "fragment": "[7*]C1SC(=N)NC1=O",
+      "enrichment": 5.3936775451024035,
+      "n_top": 11,
+      "n_bg": 0,
+      "in_leader": false
+     },
+     {
+      "fragment": "[11*]Sc1ncnc2scc([16*])c12",
+      "enrichment": 5.193006849640252,
+      "n_top": 9,
+      "n_bg": 0,
+      "in_leader": false
+     },
+     {
+      "fragment": "[12*]S(=O)(=O)c1cccc2cnccc12",
+      "enrichment": 5.075223813983869,
+      "n_top": 8,
+      "n_bg": 0,
+      "in_leader": false
+     }
+    ]
+   },
+   "perindopril_mpo": {
+    "leader": "CCCC(CC)C(C)c1cccc(C(=O)N2C(C(=O)OCc3ccno3)CC3CCCCC32)c1",
+    "leader_score": 0.6232413273091858,
+    "n_enriched": 89,
+    "top_missing_from_leader": [
+     {
+      "fragment": "[5*]N[C@H](CCC)C(=O)OC",
+      "enrichment": 5.193006849640252,
+      "n_top": 9,
+      "n_bg": 0,
+      "in_leader": false
+     },
+     {
+      "fragment": "[1*]C(=O)c1c(N[5*])sc2c1CCCC2",
+      "enrichment": 4.4998596690803065,
+      "n_top": 9,
+      "n_bg": 1,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]N[C@H]1CCCC[C@@H]1[S@](=O)CC",
+      "enrichment": 4.382076633423924,
+      "n_top": 8,
+      "n_bg": 1,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]N[C@@H]1CCCC[C@H]1C",
+      "enrichment": 4.2950652564342935,
+      "n_top": 11,
+      "n_bg": 2,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]NCC1CCCCC1",
+      "enrichment": 3.5347787730367197,
+      "n_top": 12,
+      "n_bg": 6,
+      "in_leader": false
+     },
+     {
+      "fragment": "[1*]C(=O)c1cnn([9*])c1",
+      "enrichment": 3.420665466269299,
+      "n_top": 26,
+      "n_bg": 16,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]NC1CCCC1",
+      "enrichment": 3.198723116300723,
+      "n_top": 49,
+      "n_bg": 39,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]N[C@H]1CCCC[C@@H]1C",
+      "enrichment": 3.1293136649285556,
+      "n_top": 8,
+      "n_bg": 6,
+      "in_leader": false
+     }
+    ]
+   },
+   "scaffold_hop": {
+    "leader": "COc1ccccc1-c1csc2ncnc(Nc3ccc4c(c3)OCCO4)c12",
+    "leader_score": 0.5640239451014747,
+    "n_enriched": 96,
+    "top_missing_from_leader": [
+     {
+      "fragment": "[3*]Oc1ncnc([14*])c1[N+](=O)[O-]",
+      "enrichment": 5.480688922092033,
+      "n_top": 12,
+      "n_bg": 0,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]Nc1ccc2nn([9*])nc2c1",
+      "enrichment": 5.193006849640252,
+      "n_top": 9,
+      "n_bg": 0,
+      "in_leader": false
+     },
+     {
+      "fragment": "[3*]Oc1ncnc(N[5*])c1[N+](=O)[O-]",
+      "enrichment": 4.605220184738133,
+      "n_top": 10,
+      "n_bg": 1,
+      "in_leader": false
+     },
+     {
+      "fragment": "[14*]c1nc([14*])c(C)o1",
+      "enrichment": 4.094394560972142,
+      "n_top": 9,
+      "n_bg": 2,
+      "in_leader": false
+     },
+     {
+      "fragment": "[9*]n1nnc([14*])c1C",
+      "enrichment": 3.976611525315759,
+      "n_top": 8,
+      "n_bg": 2,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]Nc1nccc([14*])n1",
+      "enrichment": 3.688929452863978,
+      "n_top": 8,
+      "n_bg": 3,
+      "in_leader": false
+     },
+     {
+      "fragment": "[14*]c1ncnc([14*])c1[N+](=O)[O-]",
+      "enrichment": 3.652561808693103,
+      "n_top": 27,
+      "n_bg": 13,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]Nc1ncnc(N[5*])c1N",
+      "enrichment": 3.614821480710256,
+      "n_top": 13,
+      "n_bg": 6,
+      "in_leader": false
+     }
+    ]
+   },
+   "thiothixene_rediscovery": {
+    "leader": "CN1CCN(C(CCCN2C(=O)c3ccccc32)N2CCc3cc(S(=O)(=O)N(C)C)ccc32)CC1",
+    "leader_score": 0.4838709677419355,
+    "n_enriched": 81,
+    "top_missing_from_leader": [
+     {
+      "fragment": "[1*]C(=O)c1cc(S([12*])(=O)=O)ccc1Cl",
+      "enrichment": 4.382076633423924,
+      "n_top": 12,
+      "n_bg": 2,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]Nc1cc(S([12*])(=O)=O)ccc1C",
+      "enrichment": 4.382076633423924,
+      "n_top": 12,
+      "n_bg": 2,
+      "in_leader": false
+     },
+     {
+      "fragment": "[12*]S(=O)(=O)c1ccc(C)c(C)c1",
+      "enrichment": 4.199755076629969,
+      "n_top": 10,
+      "n_bg": 2,
+      "in_leader": false
+     },
+     {
+      "fragment": "[12*]S(=O)(=O)c1ccc2ccccc2c1",
+      "enrichment": 4.148461782242419,
+      "n_top": 19,
+      "n_bg": 5,
+      "in_leader": false
+     },
+     {
+      "fragment": "[12*]S(=O)(=O)c1cc(C)ccc1C",
+      "enrichment": 4.094394560972142,
+      "n_top": 9,
+      "n_bg": 2,
+      "in_leader": false
+     },
+     {
+      "fragment": "[4*]CCN1CCN([5*])CC1",
+      "enrichment": 3.912073004178188,
+      "n_top": 20,
+      "n_bg": 7,
+      "in_leader": false
+     },
+     {
+      "fragment": "[3*]Oc1ccc(S([12*])(=O)=O)cc1",
+      "enrichment": 3.806712488520361,
+      "n_top": 9,
+      "n_bg": 3,
+      "in_leader": false
+     },
+     {
+      "fragment": "[5*]Nc1cc(S([12*])(=O)=O)ccc1OC",
+      "enrichment": 3.806712488520361,
+      "n_top": 9,
+      "n_bg": 3,
+      "in_leader": false
+     }
+    ]
+   },
+   "troglitazone_rediscovery": {
+    "leader": "Cc1c(C)c2c(c(C)c1O)CCC(C=O)(COc1ccc(CC3SC(=O)NC3=O)cc1)O2",
+    "leader_score": 0.8229166666666666,
+    "n_enriched": 86,
+    "top_missing_from_leader": [
+     {
+      "fragment": "[3*]OCc1c(C)noc1C",
+      "enrichment": 3.976611525315759,
+      "n_top": 24,
+      "n_bg": 8,
+      "in_leader": false
+     },
+     {
+      "fragment": "[3*]Oc1ccc(CC)cc1",
+      "enrichment": 3.940243881144884,
+      "n_top": 18,
+      "n_bg": 6,
+      "in_leader": false
+     },
+     {
+      "fragment": "[8*]CCc1ccc(OC)cc1",
+      "enrichment": 3.8607797097906373,
+      "n_top": 19,
+      "n_bg": 7,
+      "in_leader": false
+     },
+     {
+      "fragment": "[3*]Oc1ccc(C[4*])cc1",
+      "enrichment": 3.851448382361753,
+      "n_top": 40,
+      "n_bg": 16,
+      "in_leader": false
+     },
+     {
+      "fragment": "[8*]Cc1ccc(OC)cc1",
+      "enrichment": 3.724020772675248,
+      "n_top": 29,
+      "n_bg": 13,
+      "in_leader": false
+     },
+     {
+      "fragment": "[3*]Oc1ccc(C[7*])cc1",
+      "enrichment": 3.437615024583072,
+      "n_top": 14,
+      "n_bg": 8,
+      "in_leader": false
+     },
+     {
+      "fragment": "[3*]OC[C@@H](O)C[8*]",
+      "enrichment": 3.3524572162427653,
+      "n_top": 10,
+      "n_bg": 6,
+      "in_leader": false
+     },
+     {
+      "fragment": "[3*]Oc1ccc(CN[5*])cc1",
+      "enrichment": 3.3524572162427653,
+      "n_top": 10,
+      "n_bg": 6,
+      "in_leader": false
+     }
+    ]
+   }
+  }
+ }
+}
