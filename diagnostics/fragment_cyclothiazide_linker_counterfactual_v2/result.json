@@ -1,0 +1,2167 @@
+{
+  "configuration": {
+    "connectors": [
+      "[1*]C[2*]",
+      "[1*]CC[2*]",
+      "[1*]O[2*]",
+      "[1*]N[2*]",
+      "[1*]CO[2*]",
+      "[1*]CNC[2*]"
+    ],
+    "manual_selection": "none; every predeclared connector reported",
+    "pilot_attempts": 20,
+    "quality_thresholds": {
+      "qed_min": 0.6,
+      "sa_max": 4.0
+    }
+  },
+  "drug": "CYCLOTHIAZIDE",
+  "generated": [
+    {
+      "attempt_index": 0,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          17
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            27,
+            28,
+            29,
+            26
+          ],
+          [
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 4,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15,
+          16,
+          17
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 00",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.6906336160332633,
+        "density_bonus": 0.0,
+        "fragment_mean": 1.1017880952380952,
+        "hba": 5,
+        "hbd": 3,
+        "heavy_atoms": 30,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 465.9840000000002,
+        "qed": 0.6017531203897425,
+        "qed_pass": true,
+        "quality_pass": false,
+        "rings": 5,
+        "rotatable_bonds": 3,
+        "sa": 4.892247644177925,
+        "sa_pass": false,
+        "size_penalty": 0.5145423569775822,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(c1ccc(C3CC4C=CC3C4)cc1)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 118.35999999999999
+      }
+    },
+    {
+      "attempt_index": 1,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          21
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            31,
+            32,
+            33,
+            30
+          ],
+          [
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 7,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15,
+          17,
+          18,
+          19,
+          20,
+          21
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 01",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.7808887146945265,
+        "density_bonus": 0.0,
+        "fragment_mean": 1.014022105263158,
+        "hba": 7,
+        "hbd": 4,
+        "heavy_atoms": 34,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 530.0720000000003,
+        "qed": 0.4119225322803855,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 5,
+        "rotatable_bonds": 5,
+        "sa": 5.138738382289588,
+        "sa_pass": false,
+        "size_penalty": 0.6047974556388453,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CNC(=O)C1CCN(C3CC4C=CC3C4)CC1)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 150.7
+      }
+    },
+    {
+      "attempt_index": 2,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          21
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            31,
+            32,
+            33,
+            30
+          ],
+          [
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 7,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          19,
+          20,
+          21
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 02",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.7808887146945265,
+        "density_bonus": 0.0,
+        "fragment_mean": 1.0429884210526315,
+        "hba": 7,
+        "hbd": 4,
+        "heavy_atoms": 34,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 530.0720000000003,
+        "qed": 0.4155059851066858,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 5,
+        "rotatable_bonds": 5,
+        "sa": 5.098631175811854,
+        "sa_pass": false,
+        "size_penalty": 0.6047974556388453,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(N1CCC(C(=O)NCC3CC4C=CC3C4)CC1)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 150.7
+      }
+    },
+    {
+      "attempt_index": 3,
+      "fidelity": {
+        "attachment_atoms": [
+          5,
+          22
+        ],
+        "core_maps": [
+          [
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21
+          ],
+          [
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 2,
+        "linker_path": [
+          5,
+          4,
+          3,
+          22
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 03",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 5,
+        "complexity_penalty": 1.74766383731308,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.7326025316455695,
+        "hba": 7,
+        "hbd": 5,
+        "heavy_atoms": 29,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 461.95300000000015,
+        "qed": 0.3715870290856775,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 5,
+        "sa": 5.482392577078091,
+        "sa_pass": false,
+        "size_penalty": 0.49239133220977394,
+        "smiles": "NC(=O)C(NC1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1)C1CC2C=CC1C2",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.7781512503836436,
+        "tpsa": 173.48
+      }
+    },
+    {
+      "attempt_index": 4,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          19
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            29,
+            30,
+            31,
+            28
+          ],
+          [
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 5,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          19
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 04",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.7354414063416355,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.993894382022472,
+        "hba": 7,
+        "hbd": 3,
+        "heavy_atoms": 32,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 502.0180000000003,
+        "qed": 0.506464324153555,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 5,
+        "rotatable_bonds": 3,
+        "sa": 5.103680495211149,
+        "sa_pass": false,
+        "size_penalty": 0.5593501472859543,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(N1CCN(C(=O)C3CC4C=CC3C4)CC1)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 141.90999999999997
+      }
+    },
+    {
+      "attempt_index": 5,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          20
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            28,
+            29,
+            30,
+            27
+          ],
+          [
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 5,
+        "linker_path": [
+          12,
+          13,
+          14,
+          16,
+          17,
+          18,
+          20
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 05",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.712955044990746,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.9841023529411767,
+        "hba": 8,
+        "hbd": 4,
+        "heavy_atoms": 31,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 490.9470000000003,
+        "qed": 0.3252028267426382,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 5,
+        "sa": 5.08610372745325,
+        "sa_pass": false,
+        "size_penalty": 0.5368637859350649,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(NC(=O)COC(=O)C1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 173.76
+      }
+    },
+    {
+      "attempt_index": 6,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          19
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            29,
+            30,
+            31,
+            28
+          ],
+          [
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 5,
+        "linker_path": [
+          12,
+          13,
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 06",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.7354414063416355,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.976802247191011,
+        "hba": 7,
+        "hbd": 3,
+        "heavy_atoms": 32,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 502.0180000000003,
+        "qed": 0.4993765632340722,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 5,
+        "rotatable_bonds": 3,
+        "sa": 5.12734652805471,
+        "sa_pass": false,
+        "size_penalty": 0.5593501472859543,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(C(=O)N1CCN(C3CC4C=CC3C4)CC1)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 141.90999999999997
+      }
+    },
+    {
+      "attempt_index": 7,
+      "fidelity": {
+        "attachment_atoms": [
+          15,
+          5
+        ],
+        "core_maps": [
+          [
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          [
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 5,
+        "linker_path": [
+          15,
+          14,
+          12,
+          1,
+          2,
+          3,
+          5
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 07",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 5,
+        "complexity_penalty": 1.8146226523892603,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.9625712643678159,
+        "hba": 8,
+        "hbd": 4,
+        "heavy_atoms": 32,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 504.97400000000016,
+        "qed": 0.32542504439074704,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 5,
+        "sa": 5.256686537260462,
+        "sa_pass": false,
+        "size_penalty": 0.5593501472859543,
+        "smiles": "CC(OC(=O)C1CC2C=CC1C2)C(=O)NC1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.7781512503836436,
+        "tpsa": 173.76
+      }
+    },
+    {
+      "attempt_index": 8,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          18
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            26,
+            27,
+            28,
+            25
+          ],
+          [
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 4,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15,
+          17,
+          18
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 08",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.668482591265455,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.9226474999999998,
+        "hba": 6,
+        "hbd": 4,
+        "heavy_atoms": 29,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 460.96500000000015,
+        "qed": 0.4792343576441918,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 5,
+        "sa": 5.109617818675245,
+        "sa_pass": false,
+        "size_penalty": 0.49239133220977394,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CCC(=O)NC1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 147.45999999999998
+      }
+    },
+    {
+      "attempt_index": 9,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          24
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            32,
+            33,
+            34,
+            31
+          ],
+          [
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 6,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15,
+          20,
+          19,
+          23,
+          24
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 09",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.803840304403529,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.86500202020202,
+        "hba": 10,
+        "hbd": 3,
+        "heavy_atoms": 35,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 554.0790000000002,
+        "qed": 0.24374515434788172,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 6,
+        "rotatable_bonds": 5,
+        "sa": 5.376853008894397,
+        "sa_pass": false,
+        "size_penalty": 0.6277490453478478,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CSc1ncnc3c1ncn3C1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 161.95999999999998
+      }
+    },
+    {
+      "attempt_index": 10,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          16
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            24,
+            25,
+            26,
+            23
+          ],
+          [
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 2,
+        "linker_path": [
+          12,
+          13,
+          15,
+          16
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 10",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.6247155648275855,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.899718918918919,
+        "hba": 6,
+        "hbd": 4,
+        "heavy_atoms": 27,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 432.9110000000001,
+        "qed": 0.4976911901191986,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 3,
+        "sa": 5.080764586642768,
+        "sa_pass": false,
+        "size_penalty": 0.4486243057719044,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(C(=O)NC1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 147.45999999999998
+      }
+    },
+    {
+      "attempt_index": 11,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          16
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            26,
+            27,
+            28,
+            25
+          ],
+          [
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 3,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 11",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.668482591265455,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.6802185185185184,
+        "hba": 8,
+        "hbd": 3,
+        "heavy_atoms": 29,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 456.9370000000002,
+        "qed": 0.5854238503705842,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 5,
+        "rotatable_bonds": 3,
+        "sa": 5.4452887161111425,
+        "sa_pass": false,
+        "size_penalty": 0.49239133220977394,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(n1cc(C3CC4C=CC3C4)nn1)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 149.07
+      }
+    },
+    {
+      "attempt_index": 12,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          5
+        ],
+        "core_maps": [
+          [
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28
+          ],
+          [
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 2,
+        "linker_path": [
+          12,
+          3,
+          4,
+          5
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 12",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 5,
+        "complexity_penalty": 1.74766383731308,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.7517506329113923,
+        "hba": 7,
+        "hbd": 5,
+        "heavy_atoms": 29,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 461.9530000000002,
+        "qed": 0.36455189990139497,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 5,
+        "sa": 5.455879821479259,
+        "sa_pass": false,
+        "size_penalty": 0.49239133220977394,
+        "smiles": "NC(=O)C(NC1CC2C=CC1C2)C1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.7781512503836436,
+        "tpsa": 173.48
+      }
+    },
+    {
+      "attempt_index": 13,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          16
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            24,
+            25,
+            26,
+            23
+          ],
+          [
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 3,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 13",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.6247155648275855,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.7961159999999999,
+        "hba": 6,
+        "hbd": 3,
+        "heavy_atoms": 27,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 433.93900000000014,
+        "qed": 0.6018103099705197,
+        "qed_pass": true,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 5,
+        "sa": 5.224214782068965,
+        "sa_pass": false,
+        "size_penalty": 0.4486243057719044,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CCOC1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 127.59
+      }
+    },
+    {
+      "attempt_index": 14,
+      "fidelity": {
+        "attachment_atoms": [
+          17,
+          7
+        ],
+        "core_maps": [
+          [
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33
+          ],
+          [
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 5,
+        "linker_path": [
+          17,
+          16,
+          14,
+          4,
+          5,
+          6,
+          7
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 14",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.8269380603347327,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.7141300000000002,
+        "hba": 12,
+        "hbd": 5,
+        "heavy_atoms": 36,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 575.0540000000002,
+        "qed": 0.1750688694897008,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 5,
+        "rotatable_bonds": 6,
+        "sa": 5.6177342373865535,
+        "sa_pass": false,
+        "size_penalty": 0.6508468012790516,
+        "smiles": "Nc1nc(C(=NOC2CC3C=CC2C3)C(=O)NC2Nc3cc(Cl)c(S(N)(=O)=O)cc3S(=O)(=O)N2)ns1",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 220.84999999999997
+      }
+    },
+    {
+      "attempt_index": 15,
+      "fidelity": {
+        "attachment_atoms": [
+          5,
+          25
+        ],
+        "core_maps": [
+          [
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21
+          ],
+          [
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 5,
+        "linker_path": [
+          5,
+          3,
+          2,
+          1,
+          22,
+          24,
+          25
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 15",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 5,
+        "complexity_penalty": 1.8146226523892603,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.9857333333333332,
+        "hba": 8,
+        "hbd": 4,
+        "heavy_atoms": 32,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 504.9740000000002,
+        "qed": 0.32062195110822084,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 5,
+        "sa": 5.224615980231283,
+        "sa_pass": false,
+        "size_penalty": 0.5593501472859543,
+        "smiles": "CC(OC(=O)C1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1)C(=O)NC1CC2C=CC1C2",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.7781512503836436,
+        "tpsa": 173.75999999999996
+      }
+    },
+    {
+      "attempt_index": 16,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          20
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            28,
+            29,
+            30,
+            27
+          ],
+          [
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 5,
+        "linker_path": [
+          12,
+          13,
+          14,
+          16,
+          17,
+          18,
+          20
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 16",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.712955044990746,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.9841023529411767,
+        "hba": 8,
+        "hbd": 4,
+        "heavy_atoms": 31,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 490.9470000000003,
+        "qed": 0.3252028267426382,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 5,
+        "sa": 5.08610372745325,
+        "sa_pass": false,
+        "size_penalty": 0.5368637859350649,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(NC(=O)COC(=O)C1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 173.76
+      }
+    },
+    {
+      "attempt_index": 17,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          17
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            25,
+            26,
+            27,
+            24
+          ],
+          [
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 3,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15,
+          17
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 17",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.6465078190898266,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.9060181818181821,
+        "hba": 6,
+        "hbd": 4,
+        "heavy_atoms": 28,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 446.9380000000002,
+        "qed": 0.4902323038254812,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 4,
+        "sa": 5.102216420837662,
+        "sa_pass": false,
+        "size_penalty": 0.47041656003414545,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CNC(=O)C1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 147.45999999999998
+      }
+    },
+    {
+      "attempt_index": 18,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          18
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            26,
+            27,
+            28,
+            25
+          ],
+          [
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 4,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15,
+          17,
+          18
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 18",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.668482591265455,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.92082125,
+        "hba": 6,
+        "hbd": 4,
+        "heavy_atoms": 29,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 460.96500000000026,
+        "qed": 0.47609959931270307,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 5,
+        "sa": 5.112146472521399,
+        "sa_pass": false,
+        "size_penalty": 0.49239133220977394,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CNC(=O)CC1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 147.45999999999998
+      }
+    },
+    {
+      "attempt_index": 19,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          18
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            26,
+            27,
+            28,
+            25
+          ],
+          [
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 4,
+        "linker_path": [
+          12,
+          13,
+          14,
+          16,
+          17,
+          18
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "attempt 19",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.668482591265455,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.9372537500000002,
+        "hba": 6,
+        "hbd": 4,
+        "heavy_atoms": 29,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 460.9650000000002,
+        "qed": 0.47609959931270307,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 5,
+        "sa": 5.089393780213707,
+        "sa_pass": false,
+        "size_penalty": 0.49239133220977394,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CC(=O)NCC1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 147.45999999999998
+      }
+    }
+  ],
+  "manual_fixed_connector_panel": [
+    {
+      "connector": "[1*]C[2*]",
+      "exact_compose_program": true,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          14
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            22,
+            23,
+            24,
+            21
+          ],
+          [
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 1,
+        "linker_path": [
+          12,
+          13,
+          14
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "[1*]C[2*]",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.5817060407388117,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.7727115942028984,
+        "hba": 5,
+        "hbd": 3,
+        "heavy_atoms": 25,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 403.9130000000001,
+        "qed": 0.6624426463247591,
+        "qed_pass": true,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 3,
+        "sa": 5.197069233665111,
+        "sa_pass": false,
+        "size_penalty": 0.4056147816831306,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CC1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 118.35999999999999
+      },
+      "not_sampler_output": true
+    },
+    {
+      "connector": "[1*]CC[2*]",
+      "exact_compose_program": true,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          15
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            23,
+            24,
+            25,
+            22
+          ],
+          [
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 2,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "[1*]CC[2*]",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.6031125570016582,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.8284861111111109,
+        "hba": 5,
+        "hbd": 3,
+        "heavy_atoms": 26,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 417.9400000000001,
+        "qed": 0.6472901440795717,
+        "qed_pass": true,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 4,
+        "sa": 5.149482771233066,
+        "sa_pass": false,
+        "size_penalty": 0.4270212979459771,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CCC1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 118.35999999999999
+      },
+      "not_sampler_output": true
+    },
+    {
+      "connector": "[1*]O[2*]",
+      "exact_compose_program": true,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          14
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            22,
+            23,
+            24,
+            21
+          ],
+          [
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 1,
+        "linker_path": [
+          12,
+          13,
+          14
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "[1*]O[2*]",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.5817060407388117,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.6919753623188405,
+        "hba": 6,
+        "hbd": 3,
+        "heavy_atoms": 25,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 405.88500000000016,
+        "qed": 0.642332647338099,
+        "qed_pass": true,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 3,
+        "sa": 5.308857862427653,
+        "sa_pass": false,
+        "size_penalty": 0.4056147816831306,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(OC1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 127.59
+      },
+      "not_sampler_output": true
+    },
+    {
+      "connector": "[1*]N[2*]",
+      "exact_compose_program": true,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          14
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            22,
+            23,
+            24,
+            21
+          ],
+          [
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 1,
+        "linker_path": [
+          12,
+          13,
+          14
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "[1*]N[2*]",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.5817060407388117,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.7148608695652172,
+        "hba": 6,
+        "hbd": 4,
+        "heavy_atoms": 25,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 404.9010000000002,
+        "qed": 0.5434075152517186,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 3,
+        "sa": 5.277170237009591,
+        "sa_pass": false,
+        "size_penalty": 0.4056147816831306,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(NC1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 130.39
+      },
+      "not_sampler_output": true
+    },
+    {
+      "connector": "[1*]CO[2*]",
+      "exact_compose_program": true,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          15
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            23,
+            24,
+            25,
+            22
+          ],
+          [
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 2,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "[1*]CO[2*]",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.6031125570016582,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.7792277777777777,
+        "hba": 6,
+        "hbd": 3,
+        "heavy_atoms": 26,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 419.91200000000015,
+        "qed": 0.6244222626361714,
+        "qed_pass": true,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 4,
+        "sa": 5.217686617386912,
+        "sa_pass": false,
+        "size_penalty": 0.4270212979459771,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(COC1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 127.59
+      },
+      "not_sampler_output": true
+    },
+    {
+      "connector": "[1*]CNC[2*]",
+      "exact_compose_program": true,
+      "fidelity": {
+        "attachment_atoms": [
+          12,
+          16
+        ],
+        "core_maps": [
+          [
+            12,
+            11,
+            7,
+            8,
+            9,
+            10,
+            4,
+            1,
+            0,
+            2,
+            3,
+            5,
+            6,
+            24,
+            25,
+            26,
+            23
+          ],
+          [
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22
+          ]
+        ],
+        "direct_core_shortcut": false,
+        "exact_core_contacts": true,
+        "linker_internal_atoms": 3,
+        "linker_path": [
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "reason": null,
+        "satisfied": true
+      },
+      "label": "[1*]CNC[2*]",
+      "metrics": {
+        "bridgehead_atoms": 2,
+        "bridgehead_penalty": 0.47712125471966244,
+        "chiral_centers": 4,
+        "complexity_penalty": 1.6247155648275855,
+        "density_bonus": 0.0,
+        "fragment_mean": 0.8326639999999998,
+        "hba": 6,
+        "hbd": 4,
+        "heavy_atoms": 27,
+        "macrocycle_penalty": 0.0,
+        "molecular_weight": 432.9550000000002,
+        "qed": 0.5093633480706551,
+        "qed_pass": false,
+        "quality_pass": false,
+        "rings": 4,
+        "rotatable_bonds": 5,
+        "sa": 5.173609858992041,
+        "sa_pass": false,
+        "size_penalty": 0.4486243057719044,
+        "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CNCC1CC3C=CC1C3)NS2(=O)=O",
+        "spiro_atoms": 0,
+        "spiro_penalty": 0.0,
+        "stereo_penalty": 0.6989700043360189,
+        "tpsa": 130.39
+      },
+      "not_sampler_output": true
+    }
+  ],
+  "original_drug_control": {
+    "bridgehead_atoms": 2,
+    "bridgehead_penalty": 0.47712125471966244,
+    "chiral_centers": 4,
+    "complexity_penalty": 1.5605038397151387,
+    "density_bonus": 0.0,
+    "fragment_mean": 0.8605060606060605,
+    "hba": 5,
+    "hbd": 3,
+    "heavy_atoms": 24,
+    "linker_admissible": false,
+    "macrocycle_penalty": 0.0,
+    "molecular_weight": 389.8860000000001,
+    "qed": 0.6571692284800612,
+    "qed_pass": true,
+    "quality_pass": false,
+    "rings": 4,
+    "rotatable_bonds": 2,
+    "sa": 5.0461507710741085,
+    "sa_pass": false,
+    "size_penalty": 0.3844125806594576,
+    "smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(C1CC3C=CC1C3)NS2(=O)=O",
+    "spiro_atoms": 0,
+    "spiro_penalty": 0.0,
+    "stereo_penalty": 0.6989700043360189,
+    "tpsa": 118.35999999999999
+  },
+  "provenance": {
+    "code_revision": "e62e3a57999747403fc00f17525d011d2838e97c",
+    "exclusions": 0,
+    "execution": {
+      "hardware": "cpu",
+      "precision": "rdkit double",
+      "seeds": "none; locked inputs and fixed manual panel"
+    },
+    "image_sha256": {
+      "locked_outputs_00.png": "93410d14164c02bc2d2347c497548f9e15bb78a99fae610e9eab5fb9748ced70",
+      "locked_outputs_10.png": "60511ec461d0c9fc675df7fb831141723c4e3c1cdf03540ac115480132da8627",
+      "manual_connectors.png": "3e2ad9318aca405bb55e516680cdb538433620bd72cbf16308d39d9742f049de"
+    },
+    "input_sha256": {
+      "/Users/rmaganti/compose_rgm_git/.venv_pinned_chem/lib/python3.11/site-packages/rdkit/Chem/QED.py": "7b788ab1f4a66430b58229cd0dfe1d00e3e8d73bddd8c03f8444214fb19372e1",
+      "/Users/rmaganti/compose_rgm_git/.venv_pinned_chem/lib/python3.11/site-packages/rdkit/Contrib/SA_Score/sascorer.py": "40c66080be6f7e2086375f6e2d76b0a0d41d25c5d7116902a377404a5f260323",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_000.json": "93a9f53bf2144ba18518944e5f03facb2a9257db10fd8082aae8ea60aecc0aaf",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_001.json": "085e8982f7aa799d1cfa29a41fadd0677dbb7b60ea72294a4f6c05f344de38f6",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_002.json": "0346c96e0ef65a1f2c44e450288649136b3e4151723e8d471343e7b4816d14e0",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_003.json": "47bca7014a2997888c7d1e907dabcad995ea3b1ccf7d6b083258423f76ad3291",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_004.json": "49ed8e657a13adde7c9916dc4910b01597cff57838a2234e7d916570e94b378f",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_005.json": "e0aebc0398195751d12b26c8ee68ae692b67599715911425c595dd06e1f414fa",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_006.json": "bce11c01b88c9210e81cc8d05e1b7fee07fd9a2bbba9dad8299eecc8158e0f09",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_007.json": "a3c2abaa431d67742aa954cd110ed55ccee2287a9902fbd7888a9f192b504dd0",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_008.json": "ed9960427144b8da8e8e8ec4d0dda04bf36fc4aa7dbc98f765432cdf3c43d346",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_009.json": "c9bd61a78ab591968aef9b86bb92dc2fb3cd79ffe3ff34d271c47f8b919e9f43",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_010.json": "595ec321f36fbc12e8c4f6aa5e6b3c30a6a928c890f14fb250493c0b814a68ae",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_011.json": "ccc734bff39692a6e8b0d0661398b57416d7d1aff5c61151256dfc3b721c01d7",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_012.json": "b4d9d6d11bb7b6fe8c2aa5b574106ab65bd4326d4362e5bab5f822a1911a46b2",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_013.json": "949f9cd3a9b0567bf77a510077d90b96dd7205dd3df55681fa72d55b059438a5",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_014.json": "7c62c008751d06e253745285401ebcc06b624a55b31367588dbe19d5d63334f9",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_015.json": "89055b12b5e6ddf33618d421be64113d10c5c12084a094383578c526bb5c4547",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_016.json": "6775c193c59a0ff3efaf765ddcab9e0906241cd56b174719e55072f0979efae8",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_017.json": "ed45b3b958daa3f3d91caa5c691524ad56cdd1088d40f91854fa7cdac57fa7ef",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_018.json": "cd9aa3ddd5a72b8234ae65df999149c726a51b2d8f9057fe5f4b7a69e05cfbb0",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/attempts/CYCLOTHIAZIDE_019.json": "8f2689669a6b04e6fa2e5cf9a914f73bdec4ea88bdb85b9c7ba9bb63f8429fa7",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/locks/CYCLOTHIAZIDE.json": "dc61649c3559dc96fa29509504c33bc061d9f20080b619095fdf7afb09ee4217",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v1/manifest.json": "1914d308d128057d8f0011b8f1b0e226e0310c20439b9dd9c618771b72908789",
+      "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/tools/diagnose_fragment_linker_counterfactuals.py": "545af3944daf4979c634d78f288fdd9c37c7ffbdfb1fc6c5948577d9f49fd7b7"
+    },
+    "versions": {
+      "python": "3.11.13",
+      "rdkit": "2024.03.5"
+    }
+  },
+  "role": "post-generation diagnosis only; never a sampler, benchmark row, or QED/SA-guided selection",
+  "schema": "fragment_linker_manual_counterfactual_v2",
+  "summary": {
+    "locked_attempts": 20,
+    "manual_panel_quality_pass": 0,
+    "mean_linker_atoms": 4.3,
+    "mean_qed": 0.4246509668764361,
+    "mean_sa": 5.205532820992635,
+    "qed_pass": 2,
+    "quality_pass": 0,
+    "sa_pass": 0
+  },
+  "task": "linker_design"
+}
