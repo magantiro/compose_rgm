@@ -4816,3 +4816,58 @@ independently of whether fa7_0 ever closes.**
   emit nothing from the lane in either arm, so only two needed a record comparison -- about twenty
   seconds rather than a re-run of the whole panel. Ask which cells can possibly carry the effect
   before measuring all of them.
+
+## 2026-09-24 (T4 replicate 1: counting implementations is not an equivalence criterion)
+
+- **I ruled that the frozen T4 panel could not be replicate 1 because it was produced by 15 app
+  modules, 10 controller fingerprints, 15 contract hashes and 5 code revisions, with 3 bespoke
+  rescue apps. Every one of those numbers is MEASURED and correct, and the conclusion was WRONG,
+  because none of them is the equivalence criterion.** The scientific object being unified is the
+  POLICY OVER MOLECULAR STATES, not the Python wrapper that invoked a branch. The right question is
+  whether the unified router selects and executes the same molecular process from the same state.
+  Measured that way: of 30 historical rows, 7 fired a fallback and **7/7 agree** with the branch the
+  unified router picks from the same molecular state, and the sealed unified arms already carry each
+  historical row's own `controller_seed` (**30/30**, rescue rows included), so replicate 1 is neither
+  re-run nor re-seeded. The code was heterogeneous because the mechanisms were discovered
+  incrementally -- a fact about the code's history, not about the chemistry.
+  **LESSON: before declaring two things different, say which PROPERTY has to match. An
+  implementation-identity answer to a behavioural question is confidently wrong.**
+- **A MAPPING BUG THE VERDICT COULD NOT DETECT.** The first equivalence audit hardcoded the
+  seeds-file target order as `(parp1, fa7, 5ht1b, jak2, braf)`; the file is
+  `(parp1, fa7, 5ht1b, braf, jak2)`. Every braf row was therefore paired with a jak2 molecule -- and
+  the audit still returned 7/7, because braf and jak2 sources are both neutral and route to the same
+  kernel. A join error that the checked quantity is insensitive to is invisible. Fix: derive the
+  index FROM the file, assert the resolved entry carries the row's own target, and cross-check the
+  whole mapping against an independent inventory (15/15). **Any audit that joins two artifacts needs
+  a guard on the JOIN, not only on the conclusion.**
+- **"5 PASS, 0 FAIL, coverage complete" can coexist with the production configuration never having
+  been run.** The unified production gate reported five trigger cells passing while
+  `controls_run_declared: 0` -- every non-trigger control had been run in the `law_off` arm only, so
+  the DECLARED configuration (region law live), which is what would actually launch, had never
+  touched a healthy cell. Read a gate's coverage block, not its verdict line. Running the ten
+  declared controls (zero oracle, on Modal) closed it: all searched, ladder unreachable on every one,
+  alternate kernel never consulted.
+- **The volume held three shards the repository did not.** Gate coverage read 7/15 triggers when it
+  was really 10/15, because three committed shards were never pulled. `modal volume ls` and
+  `modal app list` both mislead here; `Volume.listdir` + a diff against the repo is the check.
+  Companion to the standing "check the artifact, not the listing" rule.
+- **`assert len(wrappers) == 5` is an inventory literal, and it fails for the right reason at the
+  wrong time.** Adding legitimate arms broke it while it never checked the property that matters.
+  Replaced with a bijection -- the set of contracts the wrappers name must EQUAL the set of sealed
+  contracts on disk -- which catches a wrapper naming an unsealed contract AND a sealed contract no
+  wrapper can launch. Mutation-checked in both directions. Same class as the repo's other
+  recomputed-expectation tautologies, one level up at the file-inventory layer.
+- **Replicate 1 charged 4,114 docking calls across 30 rows, not 30x250.** Every row terminated early
+  (0 to 249 calls; one cell, fa7_0 at d0.6, is blank at 0). Two consequences: its three-replicate
+  mean for that cell will be n=2, and replicates 2/3 will likely charge MORE than replicate 1, not
+  less, because the ladder restores support on cells that previously exhausted at a handful of calls
+  (braf_0 d0.6 charged 33 historically; the unified controller finds 4-21 eligible endpoints there).
+  Do not size a replicate budget from the previous replicate's realized spend when the mechanism
+  changed what exhausts.
+- **The shipped escalation ladder is `draw_ladder=(960, 1920, 3840)` plus a lane-adding rung 0.**
+  The 480 that circulates in summaries is the PRIMARY shallow lane's draw count, not a ladder rung.
+  Measured on fa7_0: rung 0 gives 0, rung 1 (960/lane) gives 1, rung 2 (1920/lane) gives 5 more.
+- **A contract's `docking_seed` is not uniform across the T4 panel** -- braf/parp1 use 20260918 and
+  5ht1b/fa7/jak2 use 20260919 -- and the replicate arms inherit that split exactly, which is correct
+  for a replicate and worth stating rather than discovering. Conformer generation is unseeded in
+  every arm regardless, so this is a minor variance term beside the measured ~1.3 kcal/mol.
