@@ -1,0 +1,41 @@
+{
+  "schema": "fragment_training_linker_metric_pilot_contract_v1",
+  "scope": "bounded development measurement; not an official benchmark or independent replication",
+  "task": "linker_design",
+  "prompts": 10,
+  "attempts_per_prompt": 20,
+  "candidate_draws_per_attempt": 8,
+  "seed": 0,
+  "support_attempts_reused_per_prompt": 2,
+  "new_attempts": 180,
+  "new_candidate_draws": 1440,
+  "max_workers": 1,
+  "threads_per_worker": 1,
+  "quality_selection": false,
+  "oracle_calls": 0,
+  "metrics_after": "all twenty output attempts for a prompt are durably locked",
+  "required_output_coverage": 0.9,
+  "required_selected_exact_core_path_fidelity": 1.0,
+  "reported_comparators": {
+    "invirtuogen_paper_table_4": {
+      "validity": 60.37,
+      "uniqueness": 84.76,
+      "quality": 22.33,
+      "diversity": 0.52,
+      "source": "docs/FRAGMENT_CONSTRAINED_BENCHMARK.md",
+      "role": "paper-reported three-run aggregate; unmatched sample budget"
+    },
+    "genmol_v2_author_readme": {
+      "validity": 81.8,
+      "uniqueness": 87.1,
+      "quality": 28.6,
+      "diversity": 0.566,
+      "source": "diagnostics/fragment_linker_comparator_references_v1/genmol_README.md",
+      "role": "author-reported GenMol-V2 one-step README row; distinct from paper V1"
+    }
+  },
+  "comparison_rule": "report macro means and signed differences to each comparator separately; no formal win from 200 attempts",
+  "morphing": "alias only when all ten supplied input pairs match exactly; no duplicated samples or independent claim",
+  "recovery": "reuse completed attempts with exact RNG chain; interrupted starts fail closed without automatic regeneration",
+  "immutable_dependencies": "same sampler, prior, catalog, checkpoint, limits and softmax as passing support; exact source hashes checked before and after run"
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "fragment_linker_comparator_reference_v1",
+  "role": "author-reported comparator only; never a generation, selection or training input",
+  "repository": "NVIDIA-BioNeMo/genmol",
+  "commit": "add09fc83b7255bd09c797e527c0f4b51f5fb7c1",
+  "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/README.md",
+  "path": "genmol_README.md",
+  "bytes": 12232,
+  "git_blob_sha1": "df2102dbb15b34ac0f48ea307d9aaa6861b50231",
+  "sha256": "5891b9ae1869ee55c1efa5952e11a356a02ca001f5df3b56978e480f4f55810e",
+  "git_blob_verified_against": "diagnostics/fragment_comparator_outputs_audit_v1/genmol_tree.json",
+  "access_basis": "public official repository; repository code license Apache-2.0, source attribution preserved",
+  "row": "GenMol V2 | Linker design (1-step)",
+  "row_line": 218,
+  "metrics": {
+    "validity": 81.8,
+    "uniqueness": 87.1,
+    "quality": 28.6,
+    "diversity": 0.566
+  },
+  "distance_omitted": "different estimator/reference protocol; not computed in this pilot",
+  "interpretation": "README author report, distinct from paper Table 4 GenMol V1 and from two-step/rejection-filtered linker results"
+}
