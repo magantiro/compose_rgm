@@ -1,0 +1,343 @@
+{
+ "schema_version": "pmo_panel_ring_graft_v1",
+ "measured_at_utc": "2026-09-24T13:30:50.967045+00:00",
+ "oracle_calls_spent": 32,
+ "accounting": "development screen; no campaign ledger, no budget",
+ "verdict": "RING_SWAP_IS_THIOTHIXENE_SPECIFIC_AND_THE_RANKING_RULE_EXPLAINS_WHY",
+ "result": {
+  "celecoxib_rediscovery": {
+   "leader": 0.5853658536585366,
+   "best_graft": 0.33962264150943394,
+   "delta": -0.2457432121491026,
+   "n_beating_leader": 0,
+   "n_screened": 10
+  },
+  "amlodipine_mpo": {
+   "leader": 0.7321765321469982,
+   "best_graft": 0.6485065517506754,
+   "delta": -0.08366998039632279,
+   "n_beating_leader": 0,
+   "n_screened": 7
+  },
+  "scaffold_hop": {
+   "leader": 0.5640239451014747,
+   "best_graft": 0.509706045479756,
+   "delta": -0.054317899621718735,
+   "n_beating_leader": 0,
+   "n_screened": 6
+  },
+  "perindopril_mpo": {
+   "leader": 0.6232413273091858,
+   "best_graft": 0.6012806844880862,
+   "delta": -0.021960642821099552,
+   "n_beating_leader": 0,
+   "n_screened": 9
+  }
+ },
+ "headline": "0 of 32 grafts beat the leader on celecoxib, amlodipine, scaffold_hop or perindopril",
+ "the_mechanism_MEASURED": "Donors are ranked by the mean of the task's oracle over the molecules carrying each ring system, which is a RARITY-BIASED statistic. thiothixene's needed thioxanthene is carried by 6 molecules and ranks #3 of 2,402. celecoxib's and amlodipine's needed donor is plain BENZENE, carried by 203,732 molecules, whose mean is pinned near the corpus average: it ranks #382 and #1,043. A common ring can therefore never surface under this rule however useful it is in context. Same shape as the attachment-count '==' bug -- the ranking excludes the needed material by construction.",
+ "also": "perindopril was diagnosed as needing EXCISION, not grafting, so a graft screen was always the wrong operation there and its -0.0220 is not evidence about the library.",
+ "design_implication": "Mean-over-carriers is the right statistic for rare specific donors and the wrong one for common ones. A second lane is needed -- context-conditioned utility, or simply treating common rings as always-available -- but per the standing instruction no further infrastructure is built until an endpoint screen shows a scored gain, and only thiothixene has.",
+ "screen": {
+  "celecoxib_rediscovery": {
+   "leader": 0.5853658536585366,
+   "best": 0.33962264150943394,
+   "delta": -0.2457432121491026,
+   "n_beat": 0,
+   "n": 10,
+   "best_endpoint": "Cc1ccc(-c2nc(C(F)(F)F)c3onc(-c4cccs4)c3n2)cc1",
+   "best_donor": "c1ncc2oncc2n1",
+   "rows": [
+    {
+     "endpoint": "Cc1ccc(-c2nc(C(F)(F)F)c3onc(-c4cccs4)c3n2)cc1",
+     "donor": "c1ncc2oncc2n1",
+     "donor_mean_oracle": 0.24489432949641873,
+     "cut_atoms": 5,
+     "anchors": 3,
+     "score": 0.33962264150943394
+    },
+    {
+     "endpoint": "Cc1ccc(-c2nc(-c3cccs3)c3onc(C(F)(F)F)c3n2)cc1",
+     "donor": "c1nc2cnoc2cn1",
+     "donor_mean_oracle": 0.24325975615196285,
+     "cut_atoms": 5,
+     "anchors": 3,
+     "score": 0.33962264150943394
+    },
+    {
+     "endpoint": "CC1N=c2ccccc2=[NH+]C1n1nc(C(F)(F)F)cc1-c1cccs1",
+     "donor": "C1C[NH+]=c2ccccc2=N1",
+     "donor_mean_oracle": 0.25475598439054264,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.3148148148148148
+    },
+    {
+     "endpoint": "Cc1nn2ccn3cnnc3c2c1-n1nc(C(F)(F)F)cc1-c1cccs1",
+     "donor": "c1cc2c3nncn3ccn2n1",
+     "donor_mean_oracle": 0.2537653324120698,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.30973451327433627
+    },
+    {
+     "endpoint": "Cc1nnc(-n2nc(C(F)(F)F)cc2-c2cccs2)c2c1CCCC2",
+     "donor": "c1nncc2c1CCCC2",
+     "donor_mean_oracle": 0.2541226324273175,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.2909090909090909
+    },
+    {
+     "endpoint": "CC1Nc2ncccc2SN1n1nc(C(F)(F)F)cc1-c1cccs1",
+     "donor": "C1NSc2cccnc2N1",
+     "donor_mean_oracle": 0.24923076923076923,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.2909090909090909
+    },
+    {
+     "endpoint": "Cc1cc2nc3c(nc2cc1-n1nc(C(F)(F)F)cc1-c1cccs1)NCN3",
+     "donor": "c1ccc2nc3c(nc2c1)NCN3",
+     "donor_mean_oracle": 0.2642434561965812,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.2905982905982906
+    },
+    {
+     "endpoint": "Cc1ccc(C2[C@@H]3CNO[C@H]3C(c3cccs3)N2C(F)(F)F)cc1",
+     "donor": "C1NC[C@@H]2ONC[C@@H]12",
+     "donor_mean_oracle": 0.23921641779399586,
+     "cut_atoms": 5,
+     "anchors": 3,
+     "score": 0.2636363636363636
+    },
+    {
+     "endpoint": "CC1C2=CNN[C@@H]2CN1n1nc(C(F)(F)F)cc1-c1cccs1",
+     "donor": "C1NC[C@H]2NNC=C12",
+     "donor_mean_oracle": 0.25543538953664446,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.25925925925925924
+    },
+    {
+     "endpoint": "CC1C2=NN=C[C@H]2CN1n1nc(C(F)(F)F)cc1-c1cccs1",
+     "donor": "C1NC[C@@H]2C=NN=C12",
+     "donor_mean_oracle": 0.25323663875065744,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.25925925925925924
+    }
+   ]
+  },
+  "amlodipine_mpo": {
+   "leader": 0.7321765321469982,
+   "best": 0.6485065517506754,
+   "delta": -0.08366998039632279,
+   "n_beat": 0,
+   "n": 7,
+   "best_endpoint": "CCOC(=O)C1=C(C)NC(Cl)=C(C(=O)OC)C1C1=CNc2ncncc2C1",
+   "best_donor": "C1=CNc2ncncc2C1",
+   "rows": [
+    {
+     "endpoint": "CCOC(=O)C1=C(C)NC(Cl)=C(C(=O)OC)C1C1=CNc2ncncc2C1",
+     "donor": "C1=CNc2ncncc2C1",
+     "donor_mean_oracle": 0.5358262922335802,
+     "cut_atoms": 9,
+     "anchors": 1,
+     "score": 0.6485065517506754
+    },
+    {
+     "endpoint": "CCOC(=O)C1=C(C)NC(Cl)=C(C(=O)OC)C1C1N=CC=C2OC=CC[C@H]21",
+     "donor": "C1N=CC=C2OC=CC[C@@H]12",
+     "donor_mean_oracle": 0.46380305121923865,
+     "cut_atoms": 9,
+     "anchors": 1,
+     "score": 0.6280886982298255
+    },
+    {
+     "endpoint": "CCOC(=O)C1=C(C)NC(Cl)=C(C(=O)OC)C1C1N=CN=C2NC=CC[C@H]21",
+     "donor": "C1N=CN=C2NC=CC[C@@H]12",
+     "donor_mean_oracle": 0.5345152134341328,
+     "cut_atoms": 9,
+     "anchors": 1,
+     "score": 0.6179143806533247
+    },
+    {
+     "endpoint": "CCOC(=O)C1=C(C)NC(Cl)=C(C(=O)OC)C1C1CCSC2=NC=CCN21",
+     "donor": "C1CCSC2=NC=CCN12",
+     "donor_mean_oracle": 0.49925432094157846,
+     "cut_atoms": 9,
+     "anchors": 1,
+     "score": 0.6077576567756011
+    },
+    {
+     "endpoint": "CCOC(=O)C1=C(C)NC(Cl)=C(C(=O)OC)C1C1OC=C[C@@]12C=CNc1ccccc12",
+     "donor": "C1OC=C[C@@]12C=CNc1ccccc12",
+     "donor_mean_oracle": 0.5409911400882252,
+     "cut_atoms": 9,
+     "anchors": 1,
+     "score": 0.24363411166529084
+    },
+    {
+     "endpoint": "CCOC(=O)C1=C(C)NC(Cl)=C(C(=O)OC)C1C1Nc2ccccc2C12C=COC=C2",
+     "donor": "C1Nc2ccccc2[C@@]12C=COC=C2",
+     "donor_mean_oracle": 0.5276610904550239,
+     "cut_atoms": 9,
+     "anchors": 1,
+     "score": 0.24363411166529084
+    },
+    {
+     "endpoint": "CCOC(=O)C1=C(C)NC(Cl)=C(C(=O)OC)C1C1NC=C[C@@]12C=COc1ccccc12",
+     "donor": "C1NC=C[C@@]12C=COc1ccccc12",
+     "donor_mean_oracle": 0.5230356511315806,
+     "cut_atoms": 9,
+     "anchors": 1,
+     "score": 0.24363411166529084
+    }
+   ]
+  },
+  "scaffold_hop": {
+   "leader": 0.5640239451014747,
+   "best": 0.509706045479756,
+   "delta": -0.054317899621718735,
+   "n_beat": 0,
+   "n": 6,
+   "best_endpoint": "COc1ncc2c(c1-c1csc3ncnc(Nc4ccc5c(c4)OCCO5)c13)Cc1cncnc1O2",
+   "best_donor": "c1cc2c(cn1)Oc1ncncc1C2",
+   "rows": [
+    {
+     "endpoint": "COc1ncc2c(c1-c1csc3ncnc(Nc4ccc5c(c4)OCCO5)c13)Cc1cncnc1O2",
+     "donor": "c1cc2c(cn1)Oc1ncncc1C2",
+     "donor_mean_oracle": 0.43887413818923315,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.509706045479756
+    },
+    {
+     "endpoint": "COc1nc2c(s1)c(-c1csc3ncnc(Nc4ccc5c(c4)OCCO5)c13)cc1ncsc12",
+     "donor": "c1nc2c(ccc3ncsc32)s1",
+     "donor_mean_oracle": 0.4479790745728815,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.5084876543209876
+    },
+    {
+     "endpoint": "COc1nc2c(c(-c3csc4ncnc(Nc5ccc6c(c5)OCCO6)c34)n1)C[NH2+]C2",
+     "donor": "c1ncc2c(n1)C[NH2+]C2",
+     "donor_mean_oracle": 0.44414780920960395,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.5040091638029782
+    },
+    {
+     "endpoint": "COc1nc2c(-c3csc4ncnc(Nc5ccc6c(c5)OCCO6)c34)cc3ncsc3c2s1",
+     "donor": "c1nc2ccc3ncsc3c2s1",
+     "donor_mean_oracle": 0.4367981641287577,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.5018655018655018
+    },
+    {
+     "endpoint": "COc1nn2ccn3cnnc3c2c1-c1csc2ncnc(Nc3ccc4c(c3)OCCO4)c12",
+     "donor": "c1cc2c3nncn3ccn2n1",
+     "donor_mean_oracle": 0.4387068831233596,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.49687794029595417
+    },
+    {
+     "endpoint": "COc1cc2c(nc1-c1csc3ncnc(Nc4ccc5c(c4)OCCO5)c13)sc1c2ncn2ncnc12",
+     "donor": "c1cnc2sc3c(ncn4ncnc34)c2c1",
+     "donor_mean_oracle": 0.4416146094925913,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.48047023132347366
+    }
+   ]
+  },
+  "perindopril_mpo": {
+   "leader": 0.6232413273091858,
+   "best": 0.6012806844880862,
+   "delta": -0.021960642821099552,
+   "n_beat": 0,
+   "n": 9,
+   "best_endpoint": "CCCC(CC)C(C)c1cccc(C(=O)N2C(C(=O)OCc3scc4c3OCO4)CC3CCCCC32)c1",
+   "best_donor": "c1scc2c1OCO2",
+   "rows": [
+    {
+     "endpoint": "CCCC(CC)C(C)c1cccc(C(=O)N2C(C(=O)OCc3scc4c3OCO4)CC3CCCCC32)c1",
+     "donor": "c1scc2c1OCO2",
+     "donor_mean_oracle": 0.35489457332161967,
+     "cut_atoms": 5,
+     "anchors": 1,
+     "score": 0.6012806844880862
+    },
+    {
+     "endpoint": "CCCC(CC)C(C)C1C[C@@H]2C[NH+](C(=O)N3C(C(=O)OCc4ccno4)CC4CCCCC43)C[C@@H]2C1",
+     "donor": "C1C[C@H]2C[NH+]C[C@H]2C1",
+     "donor_mean_oracle": 0.3426208742561136,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.2237961374087171
+    },
+    {
+     "endpoint": "CCCC(CC)C(C)C1C[C@@H]2C[NH+](C(=O)N3C(C(=O)OCc4ccno4)CC4CCCCC43)CC[C@@H]2N1",
+     "donor": "C1C[C@@H]2C[NH+]CC[C@@H]2N1",
+     "donor_mean_oracle": 0.3723186358830735,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.22119880219665952
+    },
+    {
+     "endpoint": "CCCC(CC)C(C)C1C[C@H]2CNCC[C@H]2NC1C(=O)N1C(C(=O)OCc2ccno2)CC2CCCCC21",
+     "donor": "C1CN[C@@H]2CCNC[C@@H]2C1",
+     "donor_mean_oracle": 0.4036340966724493,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.21868984994067203
+    },
+    {
+     "endpoint": "CCCC(CC)C(C)C1CN[C@@H]2CCCN[C@@H]2CC1C(=O)N1C(C(=O)OCc2ccno2)CC2CCCCC21",
+     "donor": "C1CC[C@H]2NCCC[C@H]2NC1",
+     "donor_mean_oracle": 0.342734038506473,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.21626437919077326
+    },
+    {
+     "endpoint": "CCCC(CC)C(C)C1N[C@@]2(CCCC1C(=O)N1C(C(=O)OCc3ccno3)CC3CCCCC31)CCNC2",
+     "donor": "C1CCCC[C@]2(CNCC2)N1",
+     "donor_mean_oracle": 0.338427944652521,
+     "cut_atoms": 6,
+     "anchors": 2,
+     "score": 0.21626437919077326
+    },
+    {
+     "endpoint": "CCCC(CC)C(C)c1cccc(C(=O)C2[C@@H]3CCCCN3Cc3ccccc3N2C(=O)OCc2ccno2)c1",
+     "donor": "C1Nc2ccccc2CN2CCCC[C@@H]12",
+     "donor_mean_oracle": 0.35154875068706504,
+     "cut_atoms": 9,
+     "anchors": 2,
+     "score": 0.18022338354605114
+    },
+    {
+     "endpoint": "CCCC(CC)C(C)c1cccc(C(=O)C2N(C(=O)OCc3ccno3)c3ccccc3C23CCOCC3)c1",
+     "donor": "C1Nc2ccccc2C12CCOCC2",
+     "donor_mean_oracle": 0.3612512071422352,
+     "cut_atoms": 9,
+     "anchors": 2,
+     "score": 0.15635748804758087
+    },
+    {
+     "endpoint": "CCCC(CC)C(C)c1cccc(C(=O)c2cc3nc4c(cn3n2)C[NH+](C(=O)OCc2ccno2)CC4)c1",
+     "donor": "c1cc2nc3c(cn2n1)C[NH+]CC3",
+     "donor_mean_oracle": 0.35243667400246204,
+     "cut_atoms": 9,
+     "anchors": 2,
+     "score": 0.007525725717029322
+    }
+   ]
+  }
+ }
+}
