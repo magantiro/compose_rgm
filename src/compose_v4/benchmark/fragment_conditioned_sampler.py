@@ -124,6 +124,75 @@ class SamplingReceipt:
     # Composite path transactions committed, and refused.
     path_transactions: int = 0
     path_transaction_refusals: int = 0
+    # A refusal census separate from the historical aggregate. These counters
+    # do not alter sampling or consume random numbers.
+    path_transaction_offers: int = 0
+    path_unavailable_sites: int = 0
+    path_payload_draws: int = 0
+    path_payload_exceptions: int = 0
+    path_payload_noninsert: int = 0
+    path_payload_wrong_site: int = 0
+    path_payload_multi_neighbor: int = 0
+    path_payload_absent: int = 0
+    path_payload_found: int = 0
+    path_payload_rebound: int = 0
+    path_insert_refusals: int = 0
+    path_reroute_refusals: int = 0
+    path_lock_refusals: int = 0
+    path_controller_refusals: int = 0
+    path_nonlengthening_refusals: int = 0
+
+
+PATH_CENSUS_FIELDS = (
+    "path_transaction_offers",
+    "path_unavailable_sites",
+    "path_payload_draws",
+    "path_payload_exceptions",
+    "path_payload_noninsert",
+    "path_payload_wrong_site",
+    "path_payload_multi_neighbor",
+    "path_payload_absent",
+    "path_payload_found",
+    "path_payload_rebound",
+    "path_insert_refusals",
+    "path_reroute_refusals",
+    "path_lock_refusals",
+    "path_controller_refusals",
+    "path_nonlengthening_refusals",
+    "path_transactions",
+    "path_transaction_refusals",
+)
+
+
+def _validate_path_census(receipt: SamplingReceipt) -> None:
+    draw_components = (
+        receipt.path_payload_exceptions
+        + receipt.path_payload_noninsert
+        + receipt.path_payload_wrong_site
+        + receipt.path_payload_multi_neighbor
+        + receipt.path_payload_found
+    )
+    offer_components = (
+        receipt.path_unavailable_sites
+        + receipt.path_payload_absent
+        + receipt.path_payload_found
+    )
+    refusal_components = (
+        receipt.path_insert_refusals
+        + receipt.path_reroute_refusals
+        + receipt.path_lock_refusals
+        + receipt.path_controller_refusals
+        + receipt.path_nonlengthening_refusals
+    )
+    if (
+        receipt.path_payload_draws != draw_components
+        or receipt.path_transaction_offers != offer_components
+        or receipt.path_transaction_refusals != refusal_components
+        or receipt.path_payload_found
+        != receipt.path_transactions + receipt.path_transaction_refusals
+        or receipt.path_payload_rebound > receipt.path_payload_found
+    ):
+        raise RuntimeError("linker path refusal census does not reconcile")
 
 
 class FragmentConditioningError(RuntimeError):
@@ -471,31 +540,57 @@ def _attempt_path_transaction(
     the chosen site, and the transaction is abandoned rather than invented if
     the model offers none.
     """
+    receipt.path_transaction_offers += 1
     sites = controller.path_transaction_sites(state)
     if sites is None:
+        receipt.path_unavailable_sites += 1
         return None
     path_atom, far_anchor, free_slot = sites
 
-    # ---- payload from the prior, never invented here ----
+    # ---- payload from the prior, constraint-derived path binding ----
     payload = None
+    original_order = None
     for _ in range(payload_draws):
+        receipt.path_payload_draws += 1
         try:
             mark = model.sample_rewrite_mark(state, 0.0, rng)
-        except Exception:  # noqa: BLE001, S112 -- a refused draw is simply not a payload
+        except Exception:  # noqa: BLE001 -- a refused draw is simply not a payload
+            receipt.path_payload_exceptions += 1
             continue
         if mark.rule_name != "atom_insert":
+            receipt.path_payload_noninsert += 1
             continue
         action = mark.action
-        if not any(n[0] == path_atom for n in getattr(action, "neighbors", ())):
+        neighbors = getattr(action, "neighbors", ())
+        if len(neighbors) != 1 or int(neighbors[0][1]) not in (1, 2, 3):
+            receipt.path_payload_multi_neighbor += 1
             continue
         payload = action
+        original_order = int(neighbors[0][1])
+        receipt.path_payload_found += 1
+        if int(neighbors[0][0]) != path_atom:
+            receipt.path_payload_rebound += 1
         break
     if payload is None:
+        receipt.path_payload_absent += 1
         return None
 
-    step_insert = replace(payload, slot=free_slot, neighbors=((path_atom, 1),))
+    # The model chose element, charge and valence class. Rebinding an original
+    # double/triple-bond insertion to a single path bond changes its bond-order
+    # sum; add the removed bond order to H so the same valence class survives.
+    step_insert = replace(
+        payload,
+        slot=free_slot,
+        neighbors=((path_atom, 1),),
+        implicit_h_count=int(payload.implicit_h_count) + original_order - 1,
+    )
     try:
         after_insert = system.apply(state, "atom_insert", step_insert)
+    except Exception:  # noqa: BLE001
+        receipt.path_insert_refusals += 1
+        receipt.path_transaction_refusals += 1
+        return None
+    try:
         # ONE atomic bridge exchange: the path atom's bond to the far core is
         # removed and the new atom's bond to it inserted in a single committed
         # rewrite, so no disconnected state is ever visible and the anchor never
@@ -507,19 +602,23 @@ def _attempt_path_transaction(
             BondReroute(a=path_atom, b=far_anchor, u=free_slot, v=far_anchor),
         )
     except Exception:  # noqa: BLE001
+        receipt.path_reroute_refusals += 1
         receipt.path_transaction_refusals += 1
         return None
 
     if not lock.permits(after_open):
+        receipt.path_lock_refusals += 1
         receipt.path_transaction_refusals += 1
         return None
     admitted, _reason = controller.permits(after_open, state)
     if not admitted:
+        receipt.path_controller_refusals += 1
         receipt.path_transaction_refusals += 1
         return None
     before = controller.realized_linker_length(state)
     after = controller.realized_linker_length(after_open)
     if after is None or (before is not None and after <= before):
+        receipt.path_nonlengthening_refusals += 1
         receipt.path_transaction_refusals += 1
         return None
     receipt.path_transactions += 1
@@ -634,6 +733,7 @@ def sample_completion(
 
     if controller.path_active:
         receipt.path_targets.append(path_target)
+    _validate_path_census(receipt)
     receipt.events.append(events)
     if events == 0:
         return None

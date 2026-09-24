@@ -1,0 +1,121 @@
+{
+  "analysis_script_sha256": "98548d5f79d35283e381c3754e68c18bd516e756765d4a58b6ce862b5ec7d1cd",
+  "attempts_per_arm": 30,
+  "checkpoint_sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+  "code_revision": "1e1f258185154c87cc05b3a2b52f92a277b77231",
+  "evidence_class": "selected_prompt_same_seed_development_signal",
+  "implementation_and_asset_sha256": {
+    ".official_eval_cache/pkg/in_virtuo_gen/train_utils/metrics.py": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+    "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+    "docs/FRAGMENT_LINKER_PATH_BINDING_DEV_2026-09-24.md": "db4879bc333a312f36501a281ea9e9e02584852d8c74925f6a51a44e3bfcd538",
+    "src/compose_v4/benchmark/fragment_attachment_control.py": "b2df909f9e283cfb06a7491eb4f76e4806c4c81e3222c8d70523ac719e8e8e2f",
+    "src/compose_v4/benchmark/fragment_conditioned_sampler.py": "c2132dc2ceb956847f2b8862f4d8a025179fce88c743f22b823e2af03971f421",
+    "src/compose_v4/benchmark/fragment_official_metrics.py": "eb8430c08a6a57da25a2f7f7d57ec892fbeec6d81a78b31c616295e23cb42726",
+    "tools/run_fragment_constrained_suite.py": "7b4e5448004ffc852572ec5c9027883c1dd58c4b7bc8c3341bd794a63db11049"
+  },
+  "input_sha256": {
+    "diagnostics/fragment_linker_census_pilot_v1/eliglustat_seed0_10.json": "3a0d25011523850857da9b53996f58cb1b4c81d44e1715d442e7bef531828f05",
+    "diagnostics/fragment_linker_census_pilot_v1/futibatinib_seed0_10.json": "a23f9f6ea6335cd68c1fa03223daabb7690e1e26ccb3c2a3b72444d8d2e33a11",
+    "diagnostics/fragment_linker_census_pilot_v1/lovastatin_seed0_10.json": "3c0171b1f54e22836696ead4c49343c24bd7e0156677a5f27a29ac9ee580cf56",
+    "diagnostics/fragment_linker_matched_v1/shards/path_program/linker_design__ELIGLUSTAT__seed0.json": "e82f6b7d417cf0995f58a4c1e5ee78c1fdd6a55ebe68feab2e663df27d4ff8df",
+    "diagnostics/fragment_linker_matched_v1/shards/path_program/linker_design__FUTIBATINIB__seed0.json": "c95fa8f8e28516918e2359087838975fb5ccb89bca2da0bb03ce5a22d8f723e8",
+    "diagnostics/fragment_linker_matched_v1/shards/path_program/linker_design__LOVASTATIN__seed0.json": "bfa34636d44e677352db59daa7d1d5cab0d5a12c46a064b1edb090cea88cb92d",
+    "diagnostics/fragment_linker_path_binding_dev_v1/after_eliglustat_seed0_10.json": "6d2ce077648bcdf613e06e991f193e13cb5813a42ef961a80c4404f62d1dc87d",
+    "diagnostics/fragment_linker_path_binding_dev_v1/after_futibatinib_seed0_10.json": "a3e3e52bd2f314827bbdfb19b43176a591be33d45b8dc451aa49b3b537ccf422",
+    "diagnostics/fragment_linker_path_binding_dev_v1/after_lovastatin_seed0_10.json": "99e2b9d4d52a718815f7e958d96fc35cc79b311e488165f1e9f377a0a0444fdb"
+  },
+  "limitations": [
+    "Three prompts were selected after seeing the original path failure.",
+    "Ten attempts per prompt are insufficient for an official benchmark claim.",
+    "The one-atom bridge was constructed before sampling and is not a generated linker.",
+    "The old census-control implementation lacks a physical source hash; its emitted-prefix identity is verified against frozen shards."
+  ],
+  "predeclared_signal_pass": true,
+  "python_version": "3.11.13",
+  "rows": [
+    {
+      "after": {
+        "chemically_valid_commits": 9,
+        "committed": 9,
+        "genuine_linkers": 9,
+        "path_payload_absent": 0,
+        "path_transactions": 15,
+        "qualified_emitted": 5,
+        "unique_valid": 6
+      },
+      "before": {
+        "chemically_valid_commits": 5,
+        "committed": 5,
+        "genuine_linkers": 5,
+        "path_payload_absent": 1,
+        "path_transactions": 6,
+        "qualified_emitted": 5,
+        "unique_valid": 5
+      },
+      "prompt": "eliglustat"
+    },
+    {
+      "after": {
+        "chemically_valid_commits": 6,
+        "committed": 6,
+        "genuine_linkers": 6,
+        "path_payload_absent": 2,
+        "path_transactions": 9,
+        "qualified_emitted": 3,
+        "unique_valid": 6
+      },
+      "before": {
+        "chemically_valid_commits": 1,
+        "committed": 1,
+        "genuine_linkers": 1,
+        "path_payload_absent": 10,
+        "path_transactions": 1,
+        "qualified_emitted": 1,
+        "unique_valid": 1
+      },
+      "prompt": "futibatinib"
+    },
+    {
+      "after": {
+        "chemically_valid_commits": 6,
+        "committed": 6,
+        "genuine_linkers": 6,
+        "path_payload_absent": 3,
+        "path_transactions": 12,
+        "qualified_emitted": 0,
+        "unique_valid": 5
+      },
+      "before": {
+        "chemically_valid_commits": 0,
+        "committed": 0,
+        "genuine_linkers": 0,
+        "path_payload_absent": 10,
+        "path_transactions": 0,
+        "qualified_emitted": 0,
+        "unique_valid": 0
+      },
+      "prompt": "lovastatin"
+    }
+  ],
+  "schema": "compose_fragment_linker_path_binding_dev_v1",
+  "totals": {
+    "after": {
+      "chemically_valid_commits": 21,
+      "committed": 21,
+      "genuine_linkers": 21,
+      "path_payload_absent": 5,
+      "path_transactions": 36,
+      "qualified_emitted": 8,
+      "unique_valid": 17
+    },
+    "before": {
+      "chemically_valid_commits": 6,
+      "committed": 6,
+      "genuine_linkers": 6,
+      "path_payload_absent": 21,
+      "path_transactions": 7,
+      "qualified_emitted": 6,
+      "unique_valid": 6
+    }
+  }
+}

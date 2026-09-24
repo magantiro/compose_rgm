@@ -1469,6 +1469,7 @@ def test_the_transaction_lengthens_the_core_to_core_path():
         if payload is None:
             continue
         before = controller.realized_linker_length(context.start_state)
+        receipt = SamplingReceipt()
         out = _attempt_path_transaction(
             _StubModel(_StubMark("atom_insert", payload)),
             system,
@@ -1476,10 +1477,14 @@ def test_the_transaction_lengthens_the_core_to_core_path():
             controller,
             lock,
             np.random.default_rng(0),
-            SamplingReceipt(),
+            receipt,
         )
         if out is None:
             continue
+        assert receipt.path_transaction_offers == 1
+        assert receipt.path_payload_found == 1
+        assert receipt.path_transactions == 1
+        assert receipt.path_transaction_refusals == 0
         exercised += 1
         after = controller.realized_linker_length(out)
         assert after is not None and after > before, (
@@ -1529,36 +1534,76 @@ def test_the_transaction_payload_comes_from_the_prior():
             carried += 1
 
         # A prior that never offers an atom_insert must not be overridden.
+        no_payload_receipt = SamplingReceipt()
         nothing = _attempt_path_transaction(
             _StubModel(_StubMark("bond_reorder", None)),
             system, context.start_state, controller, lock,
-            np.random.default_rng(0), SamplingReceipt(),
+            np.random.default_rng(0), no_payload_receipt,
         )
         assert nothing is None, (
             f"{prompt.drug_name}: with no payload from the prior the transaction "
             "must be abandoned, never invented"
         )
+        assert no_payload_receipt.path_transaction_offers == 1
+        assert no_payload_receipt.path_payload_draws == 32
+        assert no_payload_receipt.path_payload_noninsert == 32
+        assert no_payload_receipt.path_payload_absent == 1
 
-        # And the SITE is the prior's too. An atom_insert the model proposed
-        # somewhere ELSE must not be re-anchored onto the path atom: the module
-        # rewrites the payload's slot and neighbours unconditionally, so without
-        # the site filter any insert anywhere would be accepted and the prior
-        # would be choosing the atom while the module chose the position. The
-        # previous version of this test passed a payload already anchored at the
-        # path atom, which satisfies the filter whether or not it is there --
-        # a guard another guard also satisfies is not load-bearing.
+        # The prompt specifies the path, so the prior may draw its payload at
+        # another site while the constraint binds that payload to the path.
         elsewhere = dataclasses.replace(payload, neighbors=((_anchor, 1),))
         assert _anchor != path_atom
-        off_site = _attempt_path_transaction(
+        rebound_receipt = SamplingReceipt()
+        rebound = _attempt_path_transaction(
             _StubModel(_StubMark("atom_insert", elsewhere)),
             system, context.start_state, controller, lock,
-            np.random.default_rng(0), SamplingReceipt(),
+            np.random.default_rng(0), rebound_receipt,
         )
-        assert off_site is None, (
-            f"{prompt.drug_name}: a payload the prior proposed away from the "
-            "path atom must not be re-anchored onto it"
-        )
+        if out is not None:
+            assert rebound is not None
+            assert int(rebound.atom_types[free_slot]) == payload.atom_type
+            assert rebound_receipt.path_payload_rebound == 1
+            assert rebound_receipt.path_payload_absent == 0
     assert carried >= 5
+
+
+def test_rebound_double_bond_payload_preserves_valence_class():
+    from compose_v4.benchmark.fragment_conditioned_sampler import (
+        SamplingReceipt,
+        _attempt_path_transaction,
+    )
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
+
+    system = de_novo_rewrite_system()
+    exercised = 0
+    for prompt in _linker_prompts():
+        context, controller, lock = _transaction_fixture(prompt)
+        sites = controller.path_transaction_sites(context.start_state)
+        assert sites is not None
+        path_atom, far_anchor, free_slot = sites
+        payload = _monovalent_payload(context.start_state, path_atom)
+        if payload is None or payload.implicit_h_count < 1:
+            continue
+        original_valence = payload.implicit_h_count + 1 - payload.formal_charge
+        doubled = dataclasses.replace(
+            payload,
+            implicit_h_count=payload.implicit_h_count - 1,
+            neighbors=((far_anchor, 2),),
+        )
+        receipt = SamplingReceipt()
+        out = _attempt_path_transaction(
+            _StubModel(_StubMark("atom_insert", doubled)),
+            system, context.start_state, controller, lock,
+            np.random.default_rng(0), receipt,
+        )
+        if out is None:
+            continue
+        assert receipt.path_payload_rebound == 1
+        assert int(out.implicit_h_counts[free_slot]) + 2 - int(
+            out.formal_charges[free_slot]
+        ) == original_valence
+        exercised += 1
+    assert exercised >= 5
 
 
 def test_the_transaction_commits_nothing_when_the_exchange_cannot_execute():
@@ -1591,5 +1636,8 @@ def test_the_transaction_commits_nothing_when_the_exchange_cannot_execute():
     )
     assert out is None
     assert receipt.path_transactions == 0
+    assert receipt.path_payload_found == 1
+    assert receipt.path_insert_refusals == 1
+    assert receipt.path_transaction_refusals == 1
     assert np.array_equal(before.atom_types, context.start_state.atom_types)
     assert np.array_equal(before.bonds, context.start_state.bonds)

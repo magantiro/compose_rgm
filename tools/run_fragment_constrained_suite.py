@@ -44,6 +44,7 @@ from compose_v4.benchmark.fragment_attachment_control import (
     interface_coverage_report,
 )
 from compose_v4.benchmark.fragment_conditioned_sampler import (
+    PATH_CENSUS_FIELDS,
     FragmentConditioningError,
     SamplerConfig,
     SamplingReceipt,
@@ -270,7 +271,7 @@ def run_task(
                 "lock_rejections", "executor_refusals", "budget_exhausted",
                 "constraint_failures", "interface_rejections", "staging_rejections",
                 "redirections", "separation_failures",
-            )
+            ) + PATH_CENSUS_FIELDS
             for attempt_index in range(samples):
                 before_committed = len(receipt.committed_endpoints)
                 before_refusals = {
@@ -385,6 +386,9 @@ def run_task(
                     "path_transactions": receipt.path_transactions,
                     "path_transaction_refusals": receipt.path_transaction_refusals,
                     "path_rejections": receipt.path_rejections,
+                    "path_census": {
+                        field: getattr(receipt, field) for field in PATH_CENSUS_FIELDS
+                    },
                     "interface_rejections": receipt.interface_rejections,
                     "staging_rejections": receipt.staging_rejections,
                     "redirections": receipt.redirections,
