@@ -1,0 +1,48 @@
+{
+  "blocking_before_scoring": [
+    "the production gate verdict is INCOMPLETE: trigger rows 10/15, control rows 10/20, controls_run_declared=0"
+  ],
+  "branch_equivalence": {
+    "agreement_on_fired_rows": "7/7",
+    "fired_rows": 7,
+    "primary_path_rows": 23,
+    "rows_audited": 30,
+    "scope_limit": "7 fired ROWS rest on fewer distinct MOLECULES, because a source that exhausted at both thresholds contributes two rows sharing one molecular state. The operative rule is close to binary -- net formal charge != 0 selects state_aware, else region -- so this is a small test that could not have failed in many ways. It establishes that the unified router lands on the branch each historical arm used; it does NOT establish that formal charge universally determines the correct molecular-search operator.",
+    "source": "diagnostics/t4_behavioral_equivalence/audit_v1.json",
+    "verdict": "ALL_FIRED_ROWS_BEHAVIORALLY_EQUIVALENT"
+  },
+  "criterion": "branch-level equivalence: the unified router selects and executes the same molecular process from the same state. Implementation identity (wrapper, contract hash, fingerprint, revision) is NOT a criterion.",
+  "docking_calls": 0,
+  "new_oracle_calls": 0,
+  "production_consumption": {
+    "alternate_kernel_never_consulted_on_a_control": true,
+    "controls_law_off_reproduce_committed_audit": true,
+    "coverage": {
+      "control_rows_expected": 20,
+      "control_rows_present": 10,
+      "trigger_rows_expected": 15,
+      "trigger_rows_present": 10
+    },
+    "docking_calls": 0,
+    "entrypoint": "production",
+    "gate_verdict": "INCOMPLETE",
+    "ladder_unreachable_on_every_control": true,
+    "oracle_calls": 0,
+    "routing_agrees_with_every_historical_arm": true,
+    "source": "diagnostics/t4_unified_production_gate/t4_unified_production_gate_v1.json",
+    "state_routing_proven_consumed_on_every_trigger_event": true,
+    "terminal_guard_passed_on_every_trigger_event": true,
+    "trigger_cells_passing": 5
+  },
+  "qualifies_as_replicate_1": true,
+  "question": "does the historical T4 panel qualify as replicate 1 of the unified state-adaptive policy?",
+  "schema_version": "t4_replicate_one_qualification_v1",
+  "seed_correspondence": {
+    "cells_checked": 30,
+    "cells_matching": 30,
+    "meaning": "replicate 1 is not re-seeded: the sealed unified arms already carry the seed each historical row ran under",
+    "mismatches": []
+  },
+  "what_is_NOT_claimed": "that every historical cell was literally executed through modal_apps/t4_unified_controller_app.py -- it was not, and the replication manifest records the fifteen arms that did run it",
+  "what_is_claimed": "the unified state-adaptive controller SUBSUMES the execution rules that produced the historical panel"
+}
