@@ -32,10 +32,16 @@ import modal
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path("/root/compose")
 ARTIFACT_ROOT = Path("/artifacts")
-RUN_APP = "compose-pmo-fibercontrol-targets"
+# Overridable so a new arm can deploy WITHOUT rebaking the image an in-flight campaign
+# would pick up on a preemption retry.  Absent -> the historical name, unchanged.
+RUN_APP = os.environ.get("PMO_FIBERCONTROL_APP") or "compose-pmo-fibercontrol-targets"
+ARTIFACT_VOLUME = os.environ.get("PMO_FIBERCONTROL_VOLUME") or "compose-pmo-fibercontrol"
 
 ASSET_DIR = "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets"
-CONTRACT = "configs/pmo_population_controller_v1_scored_contract_corrected.json"
+# Overridable so a revised runtime runs under its OWN versioned contract instead of
+# re-pointing the authorization the previous runtime was granted.
+CONTRACT = (os.environ.get("PMO_FIBERCONTROL_CONTRACT")
+            or "configs/pmo_population_controller_v1_scored_contract_corrected.json")
 
 #: Deterministic seed derivation. NEVER Python's `hash()`: `str` hashing is
 #: PYTHONHASHSEED-salted, so the same key yields a different seed in every process and no
@@ -53,6 +59,36 @@ TARGET_INDEX = {
     "gsk3b": 8,
     "jnk3": 9,
     "qed": 10,
+    # The remaining six drug-MPO tasks.  Appended, never renumbered: `derived_seed` is
+    # `base_seed + 1000 * index`, so reusing or reordering an index would silently give
+    # two different tasks the same seed or move a task already launched under one.
+    # All seven resolve as exact `tdc.metadata.oracle_names` members, so none is exposed
+    # to `fuzzy_search`'s 0.8-threshold fallback onto a neighbouring oracle.
+    "amlodipine_mpo": 11,
+    "fexofenadine_mpo": 12,
+    "osimertinib_mpo": 13,
+    "ranolazine_mpo": 14,
+    "sitagliptin_mpo": 15,
+    "zaleplon_mpo": 16,
+    # The remaining deterministic PMO objectives.  Wired now so the registry stops being
+    # discovered one launch failure at a time; launching stays a separate decision.
+    # Chosen for what they stress: deco_hop and valsartan_smarts exercise retained
+    # substructure and decoration change (the anchored-replacement lane); scaffold_hop
+    # exercises scaffold remodeling (the ring-topology question); the isomer tasks force
+    # an elemental/topological assembly rather than fingerprint hill-climbing, and the
+    # second one exercises P/F/Cl; median1/median2 test interpolation between two
+    # neighbourhoods rather than copying one target; qed is a sanity control.
+    "valsartan_smarts": 17,
+    "deco_hop": 18,
+    "scaffold_hop": 19,
+    "isomers_c9h10n2o2pf2cl": 20,
+    "median2": 21,
+    # drd2 joins gsk3b/jnk3 as the learned-predictor trio.  These three are the ONLY
+    # asset-backed oracles in the suite (measured: the other 20 are pure RDKit and open
+    # no file), and gsk3b/drd2 load their pickle LAZILY on first call from a RELATIVE
+    # path, so they need the working directory pinned for the oracle's whole lifetime,
+    # not just its constructor.  Registered here, launched only after that check.
+    "drd2": 22,
 }
 
 
@@ -106,6 +142,13 @@ image = (
         str(REMOTE_ROOT / "modal_apps/pmo_population_v1_app.py"), copy=True,
     )
     .add_local_dir(ROOT / ASSET_DIR, str(REMOTE_ROOT / ASSET_DIR), copy=True)
+    # Per-task prescreen initialization banks.  Baked so the prescreen arm is a per-call
+    # FLAG on the same deployment rather than a second image: both arms then provably
+    # share one controller build, which is what makes the comparison matched.
+    .add_local_dir(
+        ROOT / "diagnostics/pmo_prescreen_v1/initialization",
+        str(REMOTE_ROOT / "diagnostics/pmo_prescreen_v1/initialization"), copy=True,
+    )
     .env({
         "PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}/scripts:{REMOTE_ROOT}",
         "OMP_NUM_THREADS": "1",
@@ -114,13 +157,19 @@ image = (
         # Pinned so dict/set iteration cannot differ between containers. Nothing in the
         # controller derives a seed from hashing, and this keeps it that way by construction.
         "PYTHONHASHSEED": "0",
+        # BAKED at build time.  `CONTRACT` is a module global, and the module is
+        # re-imported INSIDE the container where the launcher's environment does not
+        # exist -- so an override that is only exported at deploy time silently reverts
+        # to the default there.  Putting the resolved value in the image env is what
+        # makes the deployed runtime and its contract agree.
+        "PMO_POPULATION_CONTRACT": CONTRACT,
     })
 )
 
 # ONE mounted volume, and a path namespace per target inside it. A volume cannot be chosen
 # per call -- the mount is declared on the function -- so isolation is enforced by the label,
 # which the launcher refuses to reuse. No two concurrent targets touch the same file.
-volume = modal.Volume.from_name("compose-pmo-fibercontrol", create_if_missing=True)
+volume = modal.Volume.from_name(ARTIFACT_VOLUME, create_if_missing=True)
 app = modal.App(RUN_APP)
 
 
@@ -156,6 +205,21 @@ def run_target(spec: dict) -> dict:
         "CANARY_SEED": str(seed),
         "CANARY_SMILES_CACHE": str(spec.get("smiles_cache", 512)),
         "CANARY_PROPOSAL_WALL": str(spec.get("proposal_wall", 1e9)),
+        **({"PMO_PRESCREEN_INIT": str(REMOTE_ROOT / "diagnostics/pmo_prescreen_v1/initialization")}
+           if spec.get("prescreen") else {}),
+        # Per-call, and read per call on the other side, so one deployment serves the
+        # donor and no-donor arms and they provably share a controller build.
+        **({"PMO_TRANSPLANT_SHARE": str(spec["transplant_share"])}
+           if spec.get("transplant_share") else {}),
+        # Per-call so the parent-weighting arm and its control provably share ONE
+        # controller build; absent -> "uniform" -> byte-identical to the frozen runs.
+        **({"PMO_PARENT_WEIGHTING": str(spec["parent_weighting"])}
+           if spec.get("parent_weighting") else {}),
+        # NOTE: PMO_POPULATION_CONTRACT is deliberately NOT set here.  `**os.environ`
+        # already carries the value baked into the image at build time, and re-deriving
+        # it from CONTRACT would re-evaluate that global INSIDE the container, where the
+        # launcher's override does not exist -- silently replacing the deployed
+        # contract with the default.  That cost two launches to find.
     }
     completed = subprocess.run(
         [

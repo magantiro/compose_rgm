@@ -82,6 +82,14 @@ HARD_ROUND_TIMEOUT_SECONDS = float(os.environ.get("CANARY_HARD_TIMEOUT") or "360
 #: unchanged. Supplied, it is the ONLY thing that differs between replicates -- the
 #: initialization bank and every controller constant stay frozen.
 SEED_OVERRIDE = os.environ.get("CANARY_SEED")
+#: Directory of per-task prescreen initialization banks.  Absent -> the frozen
+#: task-independent bank, so the no-prescreen runtime is byte-identical.
+PRESCREEN_INIT = os.environ.get("PMO_PRESCREEN_INIT")
+#: Charged initialization molecules reach the search ONLY through the bootstrap draw --
+#: they are never archive ENTRIES, because an entry carries an `EditProgram` and a molecule
+#: handed to the campaign has no edit history.  Drawing that one path uniformly throws away
+#: their measured score.  Absent -> "uniform" -> byte-identical to every run so far.
+PARENT_WEIGHTING = os.environ.get("PMO_PARENT_WEIGHTING") or "uniform"
 BEAM = "diagnostics/pmo_matched_beam_v1/matched_beam_v1.json"
 BEAM_SOURCE = "scripts/pmo_matched_beam_control.py"
 POOL_TARGET = 128
@@ -210,9 +218,37 @@ def main():
 
     root, score = Path("."), _oracle(task_name)
     contract = production.load_contract(root)
-    initialized = production._load_initialization(
-        root, {"initialization": contract["initialization"]}
-    )
+    if PRESCREEN_INIT:
+        # PRESCREEN ARM. The ONLY change from the frozen runtime is which molecules
+        # initialize the population: a per-task bank drawn from the ZINC250k prescreen
+        # table by that task's own official oracle. The controller, its constants, the
+        # population size and the accounting are untouched.
+        #
+        # The contract cannot pin this file (it is per task), so the checks the
+        # production loader would have applied are applied HERE instead, including the
+        # refusal of any candidate row carrying task information.
+        init_path = pathlib.Path(PRESCREEN_INIT) / f"{task_name}.json"
+        initialized = json.loads(init_path.read_text())
+        body = {k: v for k, v in initialized.items() if k != "lock_sha256"}
+        if identity(body) != initialized.get("lock_sha256"):
+            raise ValueError(f"prescreen initialization lock changed: {init_path}")
+        if initialized.get("count") != production.INIT_COUNT:
+            raise ValueError("prescreen initialization must keep the frozen population size")
+        if len(initialized.get("candidates", ())) != production.INIT_COUNT:
+            raise ValueError("prescreen initialization candidate count mismatch")
+        if initialized.get("accounting") != (
+            "all initialization scores count against each run's oracle budget"
+        ):
+            raise ValueError("prescreen initialization must charge its scores")
+        if any("score" in row or "task" in row for row in initialized["candidates"]):
+            raise ValueError("prescreen initialization leaks task information")
+        print(f"PRESCREEN initialization: {init_path} "
+              f"({initialized['count']} seeds, lock {initialized['lock_sha256'][:16]})",
+              flush=True)
+    else:
+        initialized = production._load_initialization(
+            root, {"initialization": contract["initialization"]}
+        )
     checkpoint = production._load_checkpoint(root, contract)
     seed = int(SEED_OVERRIDE) if SEED_OVERRIDE else int(contract["controller"]["seed"])
     config = production.configuration(seed)
@@ -789,6 +825,7 @@ def main():
             rounds=rounds, queries_per_round=queries, hierarchy=None, fit_model=None,
             stagnation_rounds=None, bootstrap_rounds=1,
             initialization_mode="all_scored_pool", initial_parent_fraction=0.2,
+            initial_parent_weighting=PARENT_WEIGHTING,
             progress=lambda row: None,
             optimizer_type=RewardAdaptive,
             optimizer_kwargs={"jump_checkpoint": checkpoint},

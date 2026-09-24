@@ -119,6 +119,39 @@ class ProgramQueryLedger:
         return row
 
 
+def initial_parent_weights(starts, ledger, task):
+    """Rank charged initialization molecules by the ARCHIVE'S OWN parent-quality rule.
+
+    `AdaptiveProgramOptimizer.selection` scores a measured endpoint by `1 / rank`, rank 1
+    being the best utility. Initialization molecules are charged and scored exactly like
+    every other endpoint -- `ledger.cache` holds their official oracle rows -- but they are
+    not archive ENTRIES, because an entry carries an `EditProgram` and a molecule handed to
+    the campaign has no edit history. The bootstrap draw is therefore their only access
+    path, and drawing it uniformly discards the one thing already paid for: their measured
+    score. Reusing `1 / rank` here keeps exploration (the worst seed keeps positive mass)
+    and introduces no selection rule the archive does not already apply.
+
+    Uses ONLY counted feedback. No reference structure, no uncharged evaluation.
+    """
+    import numpy as np
+
+    utilities = []
+    for row in starts:
+        cached = ledger.cache.get(row["endpoint"])
+        score = None if cached is None else cached.get("score")
+        utilities.append(None if score is None else float(task.utility(score)))
+    known = [u for u in utilities if u is not None]
+    if not known:
+        return np.full(len(starts), 1.0 / len(starts))
+    # An unscored initialization row ranks below every scored one rather than being
+    # dropped, so a scoring failure can never silently shrink the candidate pool.
+    floor = min(known) - 1.0
+    values = np.asarray([floor if u is None else u for u in utilities], dtype=float)
+    ranks = 1.0 + np.sum(values[None, :] > values[:, None], axis=1)
+    weights = 1.0 / ranks
+    return weights / weights.sum()
+
+
 def run_program_campaign(
     *,
     output,
@@ -139,6 +172,7 @@ def run_program_campaign(
     max_seconds=None,
     initialization_mode="legacy_bootstrap",
     initial_parent_fraction=0.2,
+    initial_parent_weighting: str = "uniform",
     optimizer_type=None,
     optimizer_kwargs=None,
     initial_batch_fn=None,
@@ -196,10 +230,13 @@ def run_program_campaign(
         "max_seconds": max_seconds,
         "initialization_mode": initialization_mode,
         "initial_parent_fraction": initial_parent_fraction,
+        "initial_parent_weighting": initial_parent_weighting,
         "optimizer_type": f"{optimizer_type.__module__}.{optimizer_type.__qualname__}",
         "optimizer_kwargs_sha256": identity(optimizer_kwargs),
         "initial_batch_fn": f"{initial_batch_fn.__module__}.{initial_batch_fn.__qualname__}",
     }
+    if initial_parent_weighting not in ("uniform", "measured_score"):
+        raise ValueError(f"unknown initial_parent_weighting: {initial_parent_weighting}")
     manifest = output / "manifest.json"
     if manifest.exists() and json.loads(manifest.read_text()) != json.loads(json.dumps(recipe)):
         raise ValueError("campaign recipe changed during resume")
@@ -263,7 +300,15 @@ def run_program_campaign(
             )
             bootstrap = bootstrap or parent_rng.random() < initial_parent_fraction
             if bootstrap:
-                initial_choice = int(parent_rng.integers(len(starts)))
+                if initial_parent_weighting == "uniform":
+                    initial_choice = int(parent_rng.integers(len(starts)))
+                else:
+                    initial_choice = int(
+                        parent_rng.choice(
+                            len(starts),
+                            p=initial_parent_weights(starts, ledger, task),
+                        )
+                    )
         if bootstrap:
             at = round_index % len(starts) if initial_choice is None else initial_choice
             source = decode_state(starts[at]["state"])
