@@ -4586,3 +4586,59 @@ independently of whether fa7_0 ever closes.**
   siblings read 10-20 s, from concurrent T4 work on the same laptop. Draws are seeded, so every
   structural number is reproducible; no cost number from a loaded machine is. (Reaffirms: parallelism
   is free during implementation and not during measurement.)
+
+## 2026-09-24 (the prescreen seed is charged, scored, and structurally unable to be a parent)
+
+- **AN ARCHIVE ENTRY IS A PROGRAM, NOT A MOLECULE, so a molecule handed to the campaign has
+  no representation in it.** `AdaptiveProgramOptimizer` builds every entry as
+  `{**record, "program": program.payload(), ...}`. A prescreen seed is a raw ZINC molecule
+  with no edit history, so it cannot be one. MEASURED on a real campaign: **0 of 16
+  initialization molecules appear among 112 archive entries.** This is NOT an arbitrary
+  filter and NOT a bug -- it is structural, and it was harmless while initialization was
+  objective-blind, because no seed deserved preferential refinement.
+- **The single access path that does exist draws UNIFORMLY, discarding the one thing already
+  paid for.** `initialization_mode="all_scored_pool"` makes the bootstrap fire on ~20% of
+  rounds and then picks `parent_rng.integers(len(starts))` -- uniform over 16. Under
+  prescreen the bank spans a large MEASURED range (mestranol 0.479-0.886, valsartan
+  0.000-0.320, qed 0.9473-0.9484 i.e. flat). A 16-round campaign fires ~4.11 bootstrap
+  rounds, so the best seed is the batch source in **0.24 of them: in ~77% of campaigns it is
+  never used once** ((15/16)^4.11).
+- **FIX = the archive's OWN rule, not a new heuristic.** `selection()` already scores a
+  measured endpoint by `1/rank`. `initial_parent_weighting="measured_score"` applies exactly
+  that to the charged initialization rows: best seed 0.0625 -> 0.296 (**4.7x**, 5.2x averaged
+  over 7 real banks), worst keeps 1.85%, nothing excluded. Uses ONLY counted feedback -- these
+  rows are charged through `ledger.query(..., role="initialization")` -- so no reference
+  structure and no uncharged evaluation. Absent -> `"uniform"` -> byte-identical; an unknown
+  value fails closed.
+- **GOTCHA: `1/rank` under heavy TIES is a much weaker intervention, and the test must assert
+  the real number.** With 1 seed at 0.9 and 15 tied at 0.0, all 15 share rank 2 and absorb
+  15/17 of the mass, so the best gets 1/8.5 = **1.9x uniform, not 4.7x**. Faithful to the
+  archive's tie semantics (`1 + count strictly greater`), and the reason a degenerate bank
+  (valsartan: 15 of 16 near zero) gains least from this fix.
+- **MY AUDIT WAS MEASURING THE WRONG FIELD and read as a much stronger claim than it was.** It
+  reported "seeds used as parent 5/320" by counting ARCHIVE-parent selections; bootstrap
+  rounds do not record one, they record `initialization_parent` in the round summary and take
+  the WHOLE round from `initial_batch_fn`. Verified on a real campaign: 2 of 7 rounds
+  bootstrapped. The true statement is narrower and sharper -- seeds are never archive parents
+  **by construction**, and their one access path is under-weighted.
+- **CORRECTION: "the five stuck tasks are trapped at their seed" was a 250-CALL observation
+  and does not survive the 10k budget.** At ~1,300 charged calls `mestranol_similarity`
+  reaches **1.0000** (exact rediscovery) from a seed at 0.8859 -- the edit is a single
+  aryl O-methylation, `c(O)` -> `c(OC)`, which the search does make. `median1` also escaped
+  (0.400 vs seed 0.324). But `deco_hop` (0.8708), `qed` (0.9484) and `zaleplon_mpo` (0.5672)
+  are still EXACTLY at their seed, each having found that molecule at charged call **48** and
+  then spent **~1,000 further calls without one improvement**. Budget rescues some of these
+  and not others; do not generalize either way from one budget.
+- **METRIC TRAP, mine: IVG's published PMO column is `auc_top10`, and I compared COMPOSE's
+  BEST SCORE against it.** Best >= top-10 mean >= AUC (which trapezoids from (0,0)), so that
+  comparison flatters COMPOSE twice over. Report COMPOSE best and top-10 mean in their own
+  columns, and only compare AUC to AUC at a matched completed budget. Also: `targets` in
+  `docs/invirtuogen_pmo_targets.json` is the PRESCREENED column (sum 18.993 over 23);
+  `no_prescreen_targets_partial` is a 7-task subset of the 16.676 column.
+- **`modal app list` on the WRONG PROFILE reports 0 tasks for live work.** All five 10k
+  campaigns read `tasks=0` under `rahul-94866` and were RUNNING under `nitya`; the volumes
+  likewise "do not exist" cross-profile. Confirm liveness with
+  `modal.FunctionCall.from_id(cid).get(timeout=0)` under the right profile -- a `TimeoutError`
+  is the RUNNING evidence, and a `PermissionDeniedError` means wrong profile, not dead work.
+  Third distinct way this listing has produced a false negative (truncated description,
+  stale task counts, now wrong profile).
