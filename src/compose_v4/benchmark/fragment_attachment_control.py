@@ -69,6 +69,7 @@ from compose_v4.chem.molecular_graph import MolecularGraph, is_element
 from compose_v4.rewrite.operators import AtomInsert
 
 SINGLE_INTERFACE_RELEASE = "single_interface_after_coverage"
+REDIRECT_COMPLETED_INTERFACES = "redirect_completed_interfaces"
 
 
 @dataclass(frozen=True)
@@ -87,7 +88,10 @@ class AttachmentControlConfig:
     # Admit only coverage-increasing events while an interface is unsatisfied.
     attachment_first: bool = True
     # Re-anchor an inadmissible atom_insert onto an unsatisfied interface.
-    redirect_attachment: bool = True
+    # The optional mode also redirects insertions aimed at a declared site
+    # whose requirement is ALREADY met while other sites remain open.  The
+    # historical Boolean identity is unchanged for causal comparison.
+    redirect_attachment: bool | Literal["redirect_completed_interfaces"] = True
     # Release the constructed linker join from the region lock so a genuine
     # linker can displace it.  Vacuous for single-core prompts.
     release_linker_join: bool = True
@@ -120,6 +124,13 @@ class AttachmentControlConfig:
         mode = self.restrict_interfaces
         if mode is not True and mode is not False and mode != SINGLE_INTERFACE_RELEASE:
             raise ValueError(f"unknown interface restriction mode: {mode!r}")
+        redirect = self.redirect_attachment
+        if (
+            redirect is not True
+            and redirect is not False
+            and redirect != REDIRECT_COMPLETED_INTERFACES
+        ):
+            raise ValueError(f"unknown attachment redirection mode: {redirect!r}")
 
 
 @dataclass(frozen=True)
@@ -466,7 +477,10 @@ class AttachmentController:
             return action
         anchor, order = action.neighbors[0]
         anchor = int(anchor)
-        if anchor in self._interfaces:
+        if anchor in self._interfaces and (
+            self._config.redirect_attachment is True
+            or anchor in self.unsatisfied(state)
+        ):
             return action
         target = self.redirect_target(state)
         if target is None or target == anchor:

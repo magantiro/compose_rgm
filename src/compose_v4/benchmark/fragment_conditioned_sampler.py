@@ -33,12 +33,13 @@ diagnostic and are computed by the official evaluator downstream, never here.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass, field, replace
+from dataclasses import asdict, dataclass, field, is_dataclass, replace
 
 import numpy as np
 from rdkit import Chem
 
 from compose_v4.benchmark.fragment_attachment_control import (
+    REDIRECT_COMPLETED_INTERFACES,
     AttachmentControlConfig,
     AttachmentController,
     AttachmentSpec,
@@ -56,7 +57,7 @@ from compose_v4.chem.molecular_graph import (
 )
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.model.time_convention import frozen_time
-from compose_v4.rewrite.operators import BondReroute
+from compose_v4.rewrite.operators import AtomInsert, BondReroute
 
 # Slot budget for the proposal state.  This is a PADDING width, not the
 # ``REPRESENTABLE_HEAVY_ATOMS`` endpoint ceiling: an unpadded (tight) graph has
@@ -97,6 +98,10 @@ class SamplingReceipt:
     budget_exhausted: int = 0
     constraint_failures: int = 0
     events: list[int] = field(default_factory=list)
+    # One exact accepted-action sequence per attempted trajectory.  Together
+    # with the recorded prompt/start state and seed this allows path replay;
+    # family counts alone cannot diagnose a wrong attachment site.
+    action_traces: list[list[dict]] = field(default_factory=list)
     families: dict[str, int] = field(default_factory=dict)
     # Every endpoint COMPOSE actually committed, whether or not it satisfied the
     # prompt's attachment condition.  Committed states are valid and connected by
@@ -108,6 +113,9 @@ class SamplingReceipt:
     interface_rejections: int = 0
     staging_rejections: int = 0
     redirections: int = 0
+    completed_site_redirect_offers: int = 0
+    completed_site_redirects: int = 0
+    completed_site_redirect_commits: int = 0
     separation_failures: int = 0
     interface_covered: int = 0
     # Realized linker length per COMMITTED endpoint of a two-core prompt, in the
@@ -141,6 +149,16 @@ class SamplingReceipt:
     path_lock_refusals: int = 0
     path_controller_refusals: int = 0
     path_nonlengthening_refusals: int = 0
+
+
+def _accepted_action_record(rule_name: str, action) -> dict:
+    if not is_dataclass(action):
+        raise TypeError(f"accepted {rule_name} action has no typed record")
+    return {
+        "rule": rule_name,
+        "action_type": type(action).__name__,
+        "payload": asdict(action),
+    }
 
 
 PATH_CENSUS_FIELDS = (
@@ -494,7 +512,9 @@ class RegionLock:
 
 
 def _attempt_path_transaction(
-    model, system, state, controller, lock, rng, receipt, *, payload_draws: int = 32
+    model, system, state, controller, lock, rng, receipt, *,
+    action_trace: list[dict] | None = None,
+    payload_draws: int = 32,
 ):
     """Execute the two-event path-lengthening transaction, or return None.
 
@@ -584,6 +604,7 @@ def _attempt_path_transaction(
         neighbors=((path_atom, 1),),
         implicit_h_count=int(payload.implicit_h_count) + original_order - 1,
     )
+    step_reroute = BondReroute(a=path_atom, b=far_anchor, u=free_slot, v=far_anchor)
     try:
         after_insert = system.apply(state, "atom_insert", step_insert)
     except Exception:  # noqa: BLE001
@@ -599,7 +620,7 @@ def _attempt_path_transaction(
         after_open = system.apply(
             after_insert,
             "bond_reroute",
-            BondReroute(a=path_atom, b=far_anchor, u=free_slot, v=far_anchor),
+            step_reroute,
         )
     except Exception:  # noqa: BLE001
         receipt.path_reroute_refusals += 1
@@ -622,6 +643,19 @@ def _attempt_path_transaction(
         receipt.path_transaction_refusals += 1
         return None
     receipt.path_transactions += 1
+    if action_trace is not None:
+        action_trace.extend(
+            (
+                {
+                    "transaction": "linker_path_lengthen",
+                    **_accepted_action_record("atom_insert", step_insert),
+                },
+                {
+                    "transaction": "linker_path_lengthen",
+                    **_accepted_action_record("bond_reroute", step_reroute),
+                },
+            )
+        )
     return after_open
 
 
@@ -663,6 +697,7 @@ def sample_completion(
     state = context.start_state
     operational_time = 0.0
     events = 0
+    action_trace: list[dict] = []
 
     while events < config.max_events and operational_time < config.operational_horizon:
         time_feature = frozen_time(operational_time)
@@ -672,7 +707,8 @@ def sample_completion(
         # nothing to admit and the trajectory stalls at the seeded length.
         if controller.path_unsatisfied(state, path_target):
             lengthened = _attempt_path_transaction(
-                model, system, state, controller, lock, rng, receipt
+                model, system, state, controller, lock, rng, receipt,
+                action_trace=action_trace,
             )
             if lengthened is not None:
                 state = lengthened
@@ -689,7 +725,23 @@ def sample_completion(
             # prior keeps the payload, the declared constraint picks the site.
             # ``redirect`` is the identity whenever the controller is inactive,
             # so the off path executes exactly the mark the prior sampled.
+            completed_site_offer = (
+                control.redirect_attachment == REDIRECT_COMPLETED_INTERFACES
+                and controller.active
+                and mark.rule_name == "atom_insert"
+                and isinstance(mark.action, AtomInsert)
+                and len(mark.action.neighbors) == 1
+                and int(mark.action.neighbors[0][0]) in spec.interfaces
+                and int(mark.action.neighbors[0][0])
+                not in controller.unsatisfied(state)
+                and bool(controller.unsatisfied(state))
+            )
+            if completed_site_offer:
+                receipt.completed_site_redirect_offers += 1
             action = controller.redirect(mark.rule_name, mark.action, state)
+            completed_site_redirect = completed_site_offer and action is not mark.action
+            if completed_site_redirect:
+                receipt.completed_site_redirects += 1
             if action is not mark.action:
                 receipt.redirections += 1
             try:
@@ -713,14 +765,17 @@ def sample_completion(
                 else:
                     receipt.staging_rejections += 1
                 continue
-            accepted = (mark, successor)
+            accepted = (mark, action, successor, completed_site_redirect)
             break
 
         if accepted is None:
             receipt.budget_exhausted += 1
             break
 
-        mark, successor = accepted
+        mark, action, successor, completed_site_redirect = accepted
+        action_trace.append(_accepted_action_record(mark.rule_name, action))
+        if completed_site_redirect:
+            receipt.completed_site_redirect_commits += 1
         receipt.families[mark.rule_name] = receipt.families.get(mark.rule_name, 0) + 1
         hazard = float(getattr(mark, "total_hazard", 0.0) or 0.0)
         # Reference holding time.  Only the endpoint enters the benchmark
@@ -735,6 +790,7 @@ def sample_completion(
         receipt.path_targets.append(path_target)
     _validate_path_census(receipt)
     receipt.events.append(events)
+    receipt.action_traces.append(action_trace)
     if events == 0:
         return None
 

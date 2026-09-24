@@ -37,6 +37,7 @@ import numpy as np
 from rdkit import Chem
 
 from compose_v4.benchmark.fragment_attachment_control import (
+    REDIRECT_COMPLETED_INTERFACES,
     SINGLE_INTERFACE_RELEASE,
     AttachmentControlConfig,
     AttachmentController,
@@ -270,10 +271,14 @@ def run_task(
             refusal_fields = (
                 "lock_rejections", "executor_refusals", "budget_exhausted",
                 "constraint_failures", "interface_rejections", "staging_rejections",
-                "redirections", "separation_failures",
+                "redirections", "completed_site_redirect_offers",
+                "completed_site_redirects", "completed_site_redirect_commits",
+                "separation_failures",
             ) + PATH_CENSUS_FIELDS
             for attempt_index in range(samples):
                 before_committed = len(receipt.committed_endpoints)
+                before_trace_count = len(receipt.action_traces)
+                before_event_count = len(receipt.events)
                 before_refusals = {
                     field: getattr(receipt, field) for field in refusal_fields
                 }
@@ -287,6 +292,13 @@ def run_task(
                     receipt=receipt,
                     control=control,
                 )
+                if (
+                    len(receipt.action_traces) != before_trace_count + 1
+                    or len(receipt.events) != before_event_count + 1
+                ):
+                    raise RuntimeError(
+                        "one fragment attempt must append exactly one event and action trace"
+                    )
                 emitted.append(out if out else FAILED_SAMPLE_PLACEHOLDER)
                 new_committed = receipt.committed_endpoints[before_committed:]
                 if len(new_committed) > 1:
@@ -297,6 +309,7 @@ def run_task(
                         "committed_smiles": new_committed[0] if new_committed else None,
                         "emitted_smiles": out,
                         "events": receipt.events[-1],
+                        "accepted_actions": receipt.action_traces[-1],
                         "refusal_deltas": {
                             field: getattr(receipt, field) - before_refusals[field]
                             for field in refusal_fields
@@ -392,11 +405,20 @@ def run_task(
                     "interface_rejections": receipt.interface_rejections,
                     "staging_rejections": receipt.staging_rejections,
                     "redirections": receipt.redirections,
+                    "completed_site_redirect_offers": (
+                        receipt.completed_site_redirect_offers
+                    ),
+                    "completed_site_redirects": receipt.completed_site_redirects,
+                    "completed_site_redirect_commits": (
+                        receipt.completed_site_redirect_commits
+                    ),
                     "separation_failures": receipt.separation_failures,
                     "committed_interfaces_covered": receipt.interface_covered,
                     "declared_interfaces": list(
                         context.attachment.interfaces if context.attachment else ()
                     ),
+                    "start_smiles": context.start_smiles,
+                    "locked_slots": list(context.locked_slots),
                     "attachment_spec": (
                         context.attachment.identity_payload()
                         if context.attachment
@@ -513,6 +535,15 @@ def build_parser() -> argparse.ArgumentParser:
             "Default off, so the frozen-sampler baseline rows reproduce."
         ),
     )
+    parser.add_argument(
+        "--redirect-completed-interfaces",
+        action="store_true",
+        help=(
+            "while attachment-first staging is active, rebind an insertion aimed "
+            "at an already-covered declared site to an unsatisfied declared site. "
+            "Requires --attachment-control; default preserves historical behavior."
+        ),
+    )
     interface_modes = parser.add_mutually_exclusive_group()
     interface_modes.add_argument(
         "--allow-post-coverage-core-growth",
@@ -572,9 +603,10 @@ def control_from_args(args: argparse.Namespace) -> AttachmentControlConfig:
     if (
         args.allow_post_coverage_core_growth
         or args.release_single_interface_after_coverage
+        or args.redirect_completed_interfaces
     ) and not args.attachment_control:
         raise ValueError(
-            "interface-release mode requires --attachment-control"
+            "interface control option requires --attachment-control"
         )
     restriction = (
         SINGLE_INTERFACE_RELEASE
@@ -584,6 +616,11 @@ def control_from_args(args: argparse.Namespace) -> AttachmentControlConfig:
     return AttachmentControlConfig(
         enabled=bool(args.attachment_control),
         restrict_interfaces=restriction,
+        redirect_attachment=(
+            REDIRECT_COMPLETED_INTERFACES
+            if args.redirect_completed_interfaces
+            else True
+        ),
         path_program=bool(args.path_program),
     )
 

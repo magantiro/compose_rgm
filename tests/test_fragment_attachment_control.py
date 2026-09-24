@@ -28,6 +28,7 @@ import pytest
 from rdkit import Chem
 
 from compose_v4.benchmark.fragment_attachment_control import (
+    REDIRECT_COMPLETED_INTERFACES,
     AttachmentControlConfig,
     AttachmentController,
     AttachmentSpec,
@@ -572,6 +573,34 @@ def test_redirection_spreads_across_unsatisfied_interfaces():
         state = _attach_new_atom(state, target)
     assert sorted(hit) == sorted(interfaces)
     assert controller.unsatisfied(state) == ()
+
+
+def test_redirection_moves_a_redundant_declared_anchor_to_an_open_interface():
+    """A declared site stops being admissible during staging once it is covered."""
+    from compose_v4.rewrite.operators import AtomInsert
+
+    prompt = _prompt(FragmentTask.SCAFFOLD_DECORATION, "ERLOTINIB")
+    repaired = dataclasses.replace(
+        _ON, redirect_attachment=REDIRECT_COMPLETED_INTERFACES
+    )
+    context = build_prompt_context(prompt, config=SamplerConfig(), control=repaired)
+    controller = AttachmentController(context.attachment, context.locked_slots, repaired)
+    first, second = context.attachment.interfaces[:2]
+    state = _attach_new_atom(context.start_state, first)
+    assert first not in controller.unsatisfied(state)
+    assert second in controller.unsatisfied(state)
+
+    proposed = AtomInsert(_first_null_slot(state), 2, 0, 3, ((first, 1),))
+    redirected = controller.redirect("atom_insert", proposed, state)
+    assert redirected.neighbors == ((second, 1),)
+    assert redirected.atom_type == proposed.atom_type
+    assert redirected.slot == proposed.slot
+
+    historical = AttachmentController(context.attachment, context.locked_slots, _ON)
+    assert historical.redirect("atom_insert", proposed, state) is proposed
+
+    already_open = dataclasses.replace(proposed, neighbors=((second, 1),))
+    assert controller.redirect("atom_insert", already_open, state) is already_open
 
 
 # ---- The linker join ----

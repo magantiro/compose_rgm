@@ -429,6 +429,25 @@ def test_single_interface_policy_is_distinct_and_preserves_legacy_hash():
         suite.control_from_args(inactive)
 
 
+def test_completed_interface_redirection_flag_has_distinct_frozen_identity():
+    suite, args = _parsed(
+        "--attachment-control", "--redirect-completed-interfaces"
+    )
+    candidate = suite.control_from_args(args)
+    historical = suite.AttachmentControlConfig(enabled=True)
+    assert candidate.redirect_attachment == "redirect_completed_interfaces"
+    assert candidate.restrict_interfaces is historical.restrict_interfaces is True
+    assert suite.frozen_attachment_identity(historical)["config_sha256"] == (
+        "80a40b905adf84eae5d55be274aba4fbc1af9f088170028fc7452bdcbbdc44c6"
+    )
+    assert suite.frozen_attachment_identity(candidate)["config_sha256"] != (
+        suite.frozen_attachment_identity(historical)["config_sha256"]
+    )
+    _, inactive = _parsed("--redirect-completed-interfaces")
+    with pytest.raises(ValueError, match="requires --attachment-control"):
+        suite.control_from_args(inactive)
+
+
 def test_interface_release_flags_are_mutually_exclusive():
     suite = _suite_module()
     with pytest.raises(SystemExit):
@@ -607,7 +626,8 @@ def test_a_linker_shard_records_the_seed_and_the_realized_lengths():
             receipt.path_transactions = 5
             receipt.path_transaction_refusals = 7
             receipt.path_rejections = 11
-            receipt.events.append(3)
+        receipt.events.append(3)
+        receipt.action_traces.append([])
 
     suite.sample_completion = stub
     try:
@@ -634,6 +654,8 @@ def test_a_linker_shard_records_the_seed_and_the_realized_lengths():
     assert detail["path_transactions"] == 5
     assert detail["path_transaction_refusals"] == 7
     assert detail["path_rejections"] == 11
+    assert len(detail["attempt_records"]) == 2
+    assert [row["accepted_actions"] for row in detail["attempt_records"]] == [[], []]
     # The seed is measured from the START STATE with the same function the
     # program uses as its predicate, so the number that judges the run and the
     # number the run steers by cannot disagree.
@@ -651,6 +673,7 @@ def test_the_recorded_seed_follows_the_bridge_knob():
     def stub(model, system, context, rng, *, config, receipt, control):
         del model, system, context, rng, config, control
         receipt.events.append(1)
+        receipt.action_traces.append([])
 
     suite.sample_completion = stub
     try:
