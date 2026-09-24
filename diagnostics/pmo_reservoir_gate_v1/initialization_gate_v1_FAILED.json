@@ -1,0 +1,82 @@
+{
+ "thiothixene_rediscovery": {
+  "scaffolds": [
+   16,
+   16
+  ],
+  "ring_sigs": [
+   5,
+   5
+  ],
+  "tricyclic_S_hits": [
+   0,
+   0
+  ],
+  "donor_pool": [
+   40,
+   6,
+   1
+  ],
+  "target_blind_pass": true
+ },
+ "troglitazone_rediscovery": {
+  "scaffolds": [
+   14,
+   16
+  ],
+  "ring_sigs": [
+   9,
+   9
+  ],
+  "TZD_hits": [
+   2,
+   2
+  ],
+  "donor_pool": [
+   40,
+   11,
+   2
+  ],
+  "target_blind_pass": true
+ },
+ "celecoxib_rediscovery": {
+  "scaffolds": [
+   16,
+   16
+  ],
+  "ring_sigs": [
+   5,
+   5
+  ],
+  "diaryl_azole_hits": [
+   2,
+   1
+  ],
+  "donor_pool": [
+   40,
+   7,
+   2
+  ],
+  "target_blind_pass": true
+ },
+ "ranolazine_mpo": {
+  "scaffolds": [
+   16,
+   16
+  ],
+  "ring_sigs": [
+   10,
+   9
+  ],
+  "piperazine_hits": [
+   0,
+   0
+  ],
+  "donor_pool": [
+   40,
+   16,
+   0
+  ],
+  "target_blind_pass": false
+ }
+}

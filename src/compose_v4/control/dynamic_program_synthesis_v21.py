@@ -71,6 +71,37 @@ UCB_EXPLORATION = 1.0
 EXPLORATION_FLOOR = 1
 
 
+def _donor_reservoir() -> list[tuple]:
+    """Scaffold-deduplicated donor bank, loaded once per process.
+
+    The archive alone is a poor donor pool for a prescreen run: initialization molecules
+    are charged but are never archive ENTRIES (an entry carries an EditProgram and a bank
+    molecule has no edit history), so the richest structural material is invisible to the
+    lane. MEASURED on the frozen prescreen table, deduplicating the oracle ranking by
+    Bemis-Murcko scaffold lifts thiothixene's donor pool from 36 distinct scaffolds to 40
+    and admits the thioxanthene tricycle the shipped top-40 misses -- while consulting no
+    deeper than rank 44. Absent the env var this returns nothing and the lane is exactly
+    as before.
+    """
+    global _DONOR_RESERVOIR
+    if _DONOR_RESERVOIR is not None:
+        return _DONOR_RESERVOIR
+    path = os.environ.get("PMO_DONOR_RESERVOIR_FILE")
+    if not path or not os.path.exists(path):
+        _DONOR_RESERVOIR = []
+        return _DONOR_RESERVOIR
+    with open(path) as handle:
+        bank = json.load(handle)
+    loaded = []
+    for row in bank.get("candidates", []):
+        try:
+            loaded.append((decode_state(row["state"]), str(row["endpoint"])))
+        except (KeyError, ValueError, TypeError):
+            continue
+    _DONOR_RESERVOIR = loaded
+    return _DONOR_RESERVOIR
+
+
 def _transplant_proposal(optimizer, entry):
     """Transplant a region from another ARCHIVE molecule into this parent."""
     from compose_v4.control.prescreen_donor_lane import transplant_program
@@ -91,6 +122,7 @@ def _transplant_proposal(optimizer, entry):
         if not endpoint:
             continue
         donors.append((optimizer._source(other), str(endpoint)))
+    donors.extend(_donor_reservoir())
     if not donors:
         raise ValueError("no archive donors available")
     return transplant_program(
@@ -99,6 +131,9 @@ def _transplant_proposal(optimizer, entry):
         max_blocks=optimizer.config.max_blocks,
         exclude=seen,
     )
+
+
+_DONOR_RESERVOIR: list[tuple] | None = None
 
 
 def _blank_counts() -> dict[str, int | float]:

@@ -149,6 +149,13 @@ image = (
         ROOT / "diagnostics/pmo_prescreen_v1/initialization",
         str(REMOTE_ROOT / "diagnostics/pmo_prescreen_v1/initialization"), copy=True,
     )
+    # Scaffold-deduplicated donor banks for the transplant lane. Gated zero-oracle:
+    # 36->40 distinct scaffolds on thiothixene and the thioxanthene tricycle admitted,
+    # consulting no deeper than oracle rank 44.
+    .add_local_dir(
+        ROOT / "diagnostics/pmo_prescreen_v1/reservoir_donors",
+        str(REMOTE_ROOT / "diagnostics/pmo_prescreen_v1/reservoir_donors"), copy=True,
+    )
     .env({
         "PYTHONPATH": f"{REMOTE_ROOT}/src:{REMOTE_ROOT}/scripts:{REMOTE_ROOT}",
         "OMP_NUM_THREADS": "1",
@@ -215,6 +222,12 @@ def run_target(spec: dict) -> dict:
         # controller build; absent -> "uniform" -> byte-identical to the frozen runs.
         **({"PMO_PARENT_WEIGHTING": str(spec["parent_weighting"])}
            if spec.get("parent_weighting") else {}),
+        # The dedicated transplant lane and the donor bank it draws from. Both absent ->
+        # byte-identical to every run so far.
+        **({"PMO_TRANSPLANT_LANE": "1"} if spec.get("transplant_lane") else {}),
+        **({"PMO_DONOR_RESERVOIR_FILE": str(
+            REMOTE_ROOT / "diagnostics/pmo_prescreen_v1/reservoir_donors" / f"{task}.json")}
+           if spec.get("donor_reservoir") else {}),
         # NOTE: PMO_POPULATION_CONTRACT is deliberately NOT set here.  `**os.environ`
         # already carries the value baked into the image at build time, and re-deriving
         # it from CONTRACT would re-evaluate that global INSIDE the container, where the

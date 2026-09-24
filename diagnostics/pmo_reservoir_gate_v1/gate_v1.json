@@ -1,0 +1,164 @@
+{
+ "schema_version": "pmo_reservoir_gate_v1",
+ "measured_at_utc": "2026-09-24T08:54:53.681349+00:00",
+ "oracle_calls_spent": 0,
+ "donor_bank": {
+  "verdict": "PASS",
+  "detail": {
+   "thiothixene_rediscovery": {
+    "scaffolds": [
+     36,
+     40
+    ],
+    "ring_sigs": [
+     6,
+     6
+    ],
+    "tricyclic_S": [
+     0,
+     1
+    ],
+    "max_oracle_rank_consulted": 44,
+    "pass": true
+   },
+   "troglitazone_rediscovery": {
+    "scaffolds": [
+     35,
+     40
+    ],
+    "ring_sigs": [
+     11,
+     11
+    ],
+    "TZD": [
+     2,
+     2
+    ],
+    "max_oracle_rank_consulted": 46,
+    "pass": true
+   },
+   "celecoxib_rediscovery": {
+    "scaffolds": [
+     40,
+     40
+    ],
+    "ring_sigs": [
+     7,
+     7
+    ],
+    "diaryl_azole": [
+     2,
+     2
+    ],
+    "max_oracle_rank_consulted": 40,
+    "pass": true
+   },
+   "ranolazine_mpo": {
+    "scaffolds": [
+     37,
+     40
+    ],
+    "ring_sigs": [
+     15,
+     16
+    ],
+    "piperazine": [
+     0,
+     0
+    ],
+    "max_oracle_rank_consulted": 44,
+    "pass": true
+   }
+  },
+  "rule": "rank by the official oracle, keep the FIRST molecule of each distinct Bemis-Murcko scaffold. Target-blind: the dedup key sees no reference.",
+  "why_this_rule": "Max-min structural spread was tried FIRST and failed: it selects outliers rather than sweeping scaffold families, needed a 200-molecule pool to reach the thioxanthene core at all, and at bank size 16 dropped troglitazone's ring-signature coverage 9 -> 7. Scaffold coverage reaches thiothixene's rank-41 donor at bank size 40 while consulting no deeper than rank 44.",
+  "smallness_is_the_point": "This is NOT 'widen to K=5000'. Every bank consults oracle rank <= 46. The repair is to stop spending the bank on repeated scaffolds."
+ },
+ "initialization_bank": {
+  "verdict": "FAIL_AND_DROPPED",
+  "detail": {
+   "thiothixene_rediscovery": {
+    "scaffolds": [
+     16,
+     16
+    ],
+    "ring_sigs": [
+     5,
+     5
+    ],
+    "tricyclic_S_hits": [
+     0,
+     0
+    ],
+    "donor_pool": [
+     40,
+     6,
+     1
+    ],
+    "target_blind_pass": true
+   },
+   "troglitazone_rediscovery": {
+    "scaffolds": [
+     14,
+     16
+    ],
+    "ring_sigs": [
+     9,
+     9
+    ],
+    "TZD_hits": [
+     2,
+     2
+    ],
+    "donor_pool": [
+     40,
+     11,
+     2
+    ],
+    "target_blind_pass": true
+   },
+   "celecoxib_rediscovery": {
+    "scaffolds": [
+     16,
+     16
+    ],
+    "ring_sigs": [
+     5,
+     5
+    ],
+    "diaryl_azole_hits": [
+     2,
+     1
+    ],
+    "donor_pool": [
+     40,
+     7,
+     2
+    ],
+    "target_blind_pass": true
+   },
+   "ranolazine_mpo": {
+    "scaffolds": [
+     16,
+     16
+    ],
+    "ring_sigs": [
+     10,
+     9
+    ],
+    "piperazine_hits": [
+     0,
+     0
+    ],
+    "donor_pool": [
+     40,
+     16,
+     0
+    ],
+    "target_blind_pass": false
+   }
+  },
+  "why": "No scaffold or ring-signature coverage gain at 16 molecules, and troglitazone's ring-signature coverage fell. Initialization is therefore LEFT UNCHANGED; only the donor pool moves. Recorded rather than retuned until it passed."
+ },
+ "adopted": "donor reservoir only, behind --donor-reservoir; initialization untouched"
+}

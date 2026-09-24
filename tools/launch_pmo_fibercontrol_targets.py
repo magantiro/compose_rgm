@@ -56,6 +56,10 @@ def main() -> int:
     # collide on the same volume namespace and the launcher would refuse the second.
     parser.add_argument("--label-suffix", default="",
                         help="arm tag appended to the label and namespace")
+    parser.add_argument("--transplant-lane", action="store_true",
+                        help="dedicated deduplicated transplant proposal lane")
+    parser.add_argument("--donor-reservoir", action="store_true",
+                        help="draw transplant donors from the scaffold-deduplicated bank")
     parser.add_argument("--prescreen", action="store_true",
                         help="initialize from the per-task ZINC250k prescreen bank")
     parser.add_argument("--receipt", default="diagnostics/pmo_fibercontrol_targets_v1")
@@ -85,6 +89,8 @@ def main() -> int:
             "prescreen": bool(arguments.prescreen),
             "transplant_share": float(arguments.transplant_share),
             "parent_weighting": arguments.parent_weighting,
+            "transplant_lane": bool(arguments.transplant_lane),
+            "donor_reservoir": bool(arguments.donor_reservoir),
             "budget": arguments.budget,
             "rounds": arguments.rounds,
             "queries": arguments.queries,
