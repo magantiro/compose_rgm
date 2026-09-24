@@ -1,11 +1,20 @@
 # COMPOSE-native de novo prior scaling gate
 
-Status: preparation only. This document authorizes no model training, scored
-benchmark, Modal launch, checkpoint promotion, or change to a live campaign.
-The 2026-09-23 user request to pursue a stronger molecular prior authorizes
-the split-first preparation and implementation checks below. A training launch
-needs a separate self-hashed contract binding the prepared data, source code,
-compute ceiling, recovery policy, and frozen decision rule.
+Status of this document: preparation only. It does not itself authorize model
+training, a scored benchmark, checkpoint promotion, or a change to a live
+campaign. The 2026-09-23 user request to pursue a stronger molecular prior
+authorized the split-first preparation and implementation checks below.
+
+Subsequent status, without changing this preparation gate: the separate
+self-hashed training contract is
+`configs/denovo_native_prior_scale_training_v1.json` (payload SHA-256
+`62eea12e463b81384ca07c8a5ffa09c2eedbdbdad172546026d91a5f5d06979d`).
+The two CPU-only path-compilation launches and their exact runtime handles are
+recorded in `diagnostics/denovo_native_prior_scale_v1/compile_launches.json`.
+They are preparation for the matched 50,000-versus-216,149 training comparison,
+not trained checkpoints or evidence of improved quality. The contract, rather
+than this preparation document, governs any later support compilation, training,
+evaluation and promotion decision.
 
 ## Identity
 
