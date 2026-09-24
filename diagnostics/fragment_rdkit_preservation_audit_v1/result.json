@@ -1,0 +1,877 @@
+{
+  "auditor_sha256": "f003f38abbbe322373fefd1cb3adc051a2ec1ebefee236036e4574a82d453412",
+  "evidence_role": "Exploratory diagnosis of previously held prompts. Do not select or qualify a repaired controller on these same examples.",
+  "manifest_sha256": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+  "misses": [
+    {
+      "arm": "global_release",
+      "attempt_index": 8,
+      "committed_smiles": "CCN(C)C(=O)C1CCn2c1ccc(C)c2=O",
+      "drug": "FUTIBATINIB",
+      "fragments": [
+        {
+          "bond_agnostic_overlap": {
+            "atom_state_differences": [
+              {
+                "element": "N",
+                "product_atom": 9,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 3,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              },
+              {
+                "element": "C",
+                "product_atom": 10,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 8,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              },
+              {
+                "element": "C",
+                "product_atom": 15,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 4,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              },
+              {
+                "element": "C",
+                "product_atom": 13,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 6,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              },
+              {
+                "element": "C",
+                "product_atom": 12,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 7,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              }
+            ],
+            "bond_state_differences": [
+              {
+                "product_atoms": [
+                  15,
+                  9
+                ],
+                "product_bond_state": [
+                  "AROMATIC",
+                  true
+                ],
+                "query_atoms": [
+                  3,
+                  4
+                ],
+                "query_bond_state": [
+                  "SINGLE",
+                  false
+                ]
+              },
+              {
+                "product_atoms": [
+                  13,
+                  15
+                ],
+                "product_bond_state": [
+                  "AROMATIC",
+                  true
+                ],
+                "query_atoms": [
+                  4,
+                  6
+                ],
+                "query_bond_state": [
+                  "SINGLE",
+                  false
+                ]
+              },
+              {
+                "product_atoms": [
+                  12,
+                  13
+                ],
+                "product_bond_state": [
+                  "AROMATIC",
+                  true
+                ],
+                "query_atoms": [
+                  6,
+                  7
+                ],
+                "query_bond_state": [
+                  "DOUBLE",
+                  false
+                ]
+              },
+              {
+                "product_atoms": [
+                  9,
+                  10
+                ],
+                "product_bond_state": [
+                  "AROMATIC",
+                  true
+                ],
+                "query_atoms": [
+                  3,
+                  8
+                ],
+                "query_bond_state": [
+                  "SINGLE",
+                  false
+                ]
+              }
+            ],
+            "canceled": false,
+            "mcs_atoms": 9,
+            "mcs_bonds": 9,
+            "query_atoms": 9,
+            "query_bonds": 9
+          },
+          "exact_matches": 0,
+          "prompt_fragment": "[8*][C@H]1CCN(C(=O)C=C)C1"
+        }
+      ],
+      "task": "motif_extension",
+      "unit": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__motif_extension__futibatinib.json"
+    },
+    {
+      "arm": "global_release",
+      "attempt_index": 19,
+      "committed_smiles": "C=CCOC(=O)c1sc2nnc(Br)n2c1COC",
+      "drug": "LESINURAD",
+      "fragments": [
+        {
+          "bond_agnostic_overlap": {
+            "atom_state_differences": [
+              {
+                "element": "S",
+                "product_atom": 7,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 6,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              },
+              {
+                "element": "C",
+                "product_atom": 6,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 7,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              }
+            ],
+            "bond_state_differences": [
+              {
+                "product_atoms": [
+                  7,
+                  8
+                ],
+                "product_bond_state": [
+                  "AROMATIC",
+                  true
+                ],
+                "query_atoms": [
+                  5,
+                  6
+                ],
+                "query_bond_state": [
+                  "SINGLE",
+                  false
+                ]
+              },
+              {
+                "product_atoms": [
+                  6,
+                  7
+                ],
+                "product_bond_state": [
+                  "AROMATIC",
+                  true
+                ],
+                "query_atoms": [
+                  6,
+                  7
+                ],
+                "query_bond_state": [
+                  "SINGLE",
+                  false
+                ]
+              }
+            ],
+            "canceled": false,
+            "mcs_atoms": 11,
+            "mcs_bonds": 11,
+            "query_atoms": 11,
+            "query_bonds": 11
+          },
+          "exact_matches": 0,
+          "prompt_fragment": "[11*]n1c(Br)nnc1SCC(=O)O"
+        }
+      ],
+      "task": "motif_extension",
+      "unit": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__motif_extension__lesinurad.json"
+    },
+    {
+      "arm": "global_release",
+      "attempt_index": 4,
+      "committed_smiles": "Cc1cc2c(cc1Cl)S(=O)(=O)NC(C1(C)CC3CC1c1cnccc13)N2",
+      "drug": "CYCLOTHIAZIDE",
+      "fragments": [
+        {
+          "bond_agnostic_overlap": {
+            "atom_state_differences": [
+              {
+                "element": "C",
+                "product_atom": 19,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 12,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              },
+              {
+                "element": "C",
+                "product_atom": 24,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 11,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              }
+            ],
+            "bond_state_differences": [
+              {
+                "product_atoms": [
+                  24,
+                  19
+                ],
+                "product_bond_state": [
+                  "AROMATIC",
+                  true
+                ],
+                "query_atoms": [
+                  11,
+                  12
+                ],
+                "query_bond_state": [
+                  "DOUBLE",
+                  false
+                ]
+              }
+            ],
+            "canceled": false,
+            "mcs_atoms": 19,
+            "mcs_bonds": 22,
+            "query_atoms": 19,
+            "query_bonds": 22
+          },
+          "exact_matches": 0,
+          "prompt_fragment": "[1*]c1cc2c(cc1[2*])NC(C1CC3C=CC1C3)NS2(=O)=O"
+        }
+      ],
+      "task": "scaffold_decoration",
+      "unit": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__scaffold_decoration__cyclothiazide.json"
+    },
+    {
+      "arm": "single_interface_policy",
+      "attempt_index": 8,
+      "committed_smiles": "C=C1Cn2c(cc(C(=O)OC(C)=O)cc2=O)C1=O",
+      "drug": "FUTIBATINIB",
+      "fragments": [
+        {
+          "bond_agnostic_overlap": {
+            "atom_state_differences": [
+              {
+                "element": "C",
+                "product_atom": 4,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 2,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              },
+              {
+                "element": "N",
+                "product_atom": 3,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 3,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              },
+              {
+                "element": "C",
+                "product_atom": 14,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 4,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              },
+              {
+                "element": "C",
+                "product_atom": 13,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 6,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              },
+              {
+                "element": "C",
+                "product_atom": 6,
+                "product_charge_aromatic": [
+                  0,
+                  true
+                ],
+                "query_atom": 7,
+                "query_charge_aromatic": [
+                  0,
+                  false
+                ]
+              }
+            ],
+            "bond_state_differences": [
+              {
+                "product_atoms": [
+                  3,
+                  4
+                ],
+                "product_bond_state": [
+                  "AROMATIC",
+                  true
+                ],
+                "query_atoms": [
+                  2,
+                  3
+                ],
+                "query_bond_state": [
+                  "SINGLE",
+                  false
+                ]
+              },
+              {
+                "product_atoms": [
+                  14,
+                  3
+                ],
+                "product_bond_state": [
+                  "AROMATIC",
+                  true
+                ],
+                "query_atoms": [
+                  3,
+                  4
+                ],
+                "query_bond_state": [
+                  "SINGLE",
+                  false
+                ]
+              },
+              {
+                "product_atoms": [
+                  13,
+                  14
+                ],
+                "product_bond_state": [
+                  "AROMATIC",
+                  true
+                ],
+                "query_atoms": [
+                  4,
+                  6
+                ],
+                "query_bond_state": [
+                  "SINGLE",
+                  false
+                ]
+              },
+              {
+                "product_atoms": [
+                  6,
+                  13
+                ],
+                "product_bond_state": [
+                  "AROMATIC",
+                  true
+                ],
+                "query_atoms": [
+                  6,
+                  7
+                ],
+                "query_bond_state": [
+                  "DOUBLE",
+                  false
+                ]
+              }
+            ],
+            "canceled": false,
+            "mcs_atoms": 9,
+            "mcs_bonds": 9,
+            "query_atoms": 9,
+            "query_bonds": 9
+          },
+          "exact_matches": 0,
+          "prompt_fragment": "[8*][C@H]1CCN(C(=O)C=C)C1"
+        }
+      ],
+      "task": "motif_extension",
+      "unit": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__motif_extension__futibatinib.json"
+    }
+  ],
+  "rdkit_version": "2024.03.5",
+  "schema_version": "fragment_rdkit_preservation_audit_v1",
+  "source_sha256": "38a2e74ad1a52dd4a2de76a03f5f5c1eb7fe3b3a8b74ae2110f71465297f931c",
+  "totals": {
+    "attempts": 1080,
+    "committed": 973,
+    "nonpreserving": 4,
+    "rdkit_preserving": 969,
+    "units": 54
+  },
+  "units": [
+    {
+      "attempts": 20,
+      "committed": 19,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__motif_extension__cyclothiazide.json",
+      "rdkit_preserving": 19,
+      "sha256": "b5321c3f2cf9205825fa80a8a7c0248adc858ba793f457f7a3cff4fdb25011bc"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__motif_extension__eliglustat.json",
+      "rdkit_preserving": 20,
+      "sha256": "4fb3a1155773ea349b01c9854f27b5e42b9973d5ad9ba5cdb7609179d900f652"
+    },
+    {
+      "attempts": 20,
+      "committed": 15,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__motif_extension__futibatinib.json",
+      "rdkit_preserving": 14,
+      "sha256": "ac2cefcfd5450d21b4ea32769a225e92b717616a9f35ade1237895ddfd5deb3d"
+    },
+    {
+      "attempts": 20,
+      "committed": 12,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__motif_extension__lesinurad.json",
+      "rdkit_preserving": 11,
+      "sha256": "5fed2ffe3af0877d31b2e574b5efd523376fae4789bbd58adc21993f2de97070"
+    },
+    {
+      "attempts": 20,
+      "committed": 12,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__motif_extension__lovastatin.json",
+      "rdkit_preserving": 12,
+      "sha256": "14516aded0c333f5af79b3a0499a77680c6d7ff6fafe80b3001f97c1fa54032a"
+    },
+    {
+      "attempts": 20,
+      "committed": 19,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__motif_extension__spirapril.json",
+      "rdkit_preserving": 19,
+      "sha256": "ed741e2ad155d0370bfaff8e56c25a6d1b5b6ce944983499b48a92558af0e7c3"
+    },
+    {
+      "attempts": 20,
+      "committed": 19,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__scaffold_decoration__cyclothiazide.json",
+      "rdkit_preserving": 18,
+      "sha256": "86fa324aaa0c76162879d054f6c1be71348c434787c5ec5cf28e049ca1a0cb67"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__scaffold_decoration__eliglustat.json",
+      "rdkit_preserving": 20,
+      "sha256": "c56c549053e44101160a3b408e48d38976c5c2c3fae94c091df3bbd213faa9d1"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__scaffold_decoration__futibatinib.json",
+      "rdkit_preserving": 20,
+      "sha256": "c136037bcabf96b18455e579f3699a7e6d7e31db2ba9c294b561db1326fbf188"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__scaffold_decoration__lesinurad.json",
+      "rdkit_preserving": 20,
+      "sha256": "6b1d2832a48a1c9aaacfef5cb0d8980af95e4dc6b3b7bf4a9be0c070a3564048"
+    },
+    {
+      "attempts": 20,
+      "committed": 18,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__scaffold_decoration__lovastatin.json",
+      "rdkit_preserving": 18,
+      "sha256": "e7e69e6abef2ef0c3192501f3fcd00bf818b898a96c48db7dff8b9029dc72031"
+    },
+    {
+      "attempts": 20,
+      "committed": 10,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__scaffold_decoration__spirapril.json",
+      "rdkit_preserving": 10,
+      "sha256": "d61defa37975463ea263327b8398faea25762ffed2f1e461062395f1ddb38839"
+    },
+    {
+      "attempts": 20,
+      "committed": 19,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__superstructure_generation__cyclothiazide.json",
+      "rdkit_preserving": 19,
+      "sha256": "1b4045884d4f1d50a4caa9e476bae399b61b2e7cc7c765740cdf933a15ab63f8"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__superstructure_generation__eliglustat.json",
+      "rdkit_preserving": 20,
+      "sha256": "1a75ed8d9b75e3b848fc6bf8a61fc513af8d343cce0f8fbb63eea0015cdc5b78"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__superstructure_generation__erlotinib.json",
+      "rdkit_preserving": 20,
+      "sha256": "88c1492bb60c8b77610d25a1c443dd9b5c5817750b605347a801c21bde35595b"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__superstructure_generation__futibatinib.json",
+      "rdkit_preserving": 20,
+      "sha256": "475c83871da6f83e510db37bc9ec5f7775411779bc29f5bacba796288f50ad0a"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__superstructure_generation__lesinurad.json",
+      "rdkit_preserving": 20,
+      "sha256": "55c45dc31a943d713145895d234c80f4389064b3484f1c7460df94d28027abda"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/global_release__superstructure_generation__liothyronine.json",
+      "rdkit_preserving": 20,
+      "sha256": "6f644c6552e735a132cbc974cedbb85be3e277d8491f52e042739dfef7180f7f"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__motif_extension__cyclothiazide.json",
+      "rdkit_preserving": 20,
+      "sha256": "29d9bc45a0fc09d2b7235e6f50edb9325534348da2425370f1ebd794f54bce4c"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__motif_extension__eliglustat.json",
+      "rdkit_preserving": 20,
+      "sha256": "da3d16e5caf11c7925fd5e71c6ce9a1fdb2fbf160520503c1a4514b572d414a7"
+    },
+    {
+      "attempts": 20,
+      "committed": 15,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__motif_extension__futibatinib.json",
+      "rdkit_preserving": 15,
+      "sha256": "04289cc5d2969a14748fc966eb791f6a83cefecfc800339432bbb3b9e567851d"
+    },
+    {
+      "attempts": 20,
+      "committed": 11,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__motif_extension__lesinurad.json",
+      "rdkit_preserving": 11,
+      "sha256": "f1d52d371a161f02ce88b52d01181c3af430a01e18a79732542dc6887de05cfa"
+    },
+    {
+      "attempts": 20,
+      "committed": 13,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__motif_extension__lovastatin.json",
+      "rdkit_preserving": 13,
+      "sha256": "5f94783c42f1b192d0f22b9576ec683eb7b670a9fbe9e0ab51a7b7a31e47c67c"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__motif_extension__spirapril.json",
+      "rdkit_preserving": 20,
+      "sha256": "c0d16d74c7da82ffcf1d5c3012e3224043090497009a202aa4768496b94acd97"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__scaffold_decoration__cyclothiazide.json",
+      "rdkit_preserving": 20,
+      "sha256": "22b39c55c38453753d5ebae5004fe3035772a4e6703192406e46c69a354f5cfc"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__scaffold_decoration__eliglustat.json",
+      "rdkit_preserving": 20,
+      "sha256": "94110c506d38d223b34a7d0c4703e56ba8c5aacc17256acc44a285e37f844eed"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__scaffold_decoration__futibatinib.json",
+      "rdkit_preserving": 20,
+      "sha256": "1d9ce7cee8c7a1fcab0dd45fe5f129677ee3efb76c1a50345b8341553371e66b"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__scaffold_decoration__lesinurad.json",
+      "rdkit_preserving": 20,
+      "sha256": "f57f3d050125cb4fe36e6b4c778a1f814132c67182e6f85dbf2508156a22a3f8"
+    },
+    {
+      "attempts": 20,
+      "committed": 18,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__scaffold_decoration__lovastatin.json",
+      "rdkit_preserving": 18,
+      "sha256": "dadbe1af87cbaa2ed3bed1a7362b3616b28f645fc7a3123425091bf2a5c8bc1d"
+    },
+    {
+      "attempts": 20,
+      "committed": 11,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__scaffold_decoration__spirapril.json",
+      "rdkit_preserving": 11,
+      "sha256": "c161dac5695a04eed6b5409899c0702ac6c0e66df061a4e02b518da5fa4ef749"
+    },
+    {
+      "attempts": 20,
+      "committed": 19,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__superstructure_generation__cyclothiazide.json",
+      "rdkit_preserving": 19,
+      "sha256": "32923a329fbef27650b5c9378852dcf7ecb6a33faa129db5de74e15cafd968bb"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__superstructure_generation__eliglustat.json",
+      "rdkit_preserving": 20,
+      "sha256": "95934ba31fee4aeaa67d12e453d30440b415f46bdf5a09cfb515392b0e30459b"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__superstructure_generation__erlotinib.json",
+      "rdkit_preserving": 20,
+      "sha256": "2f73731ceda44d770497da5276748342d5f844a3d99486e51bbc7153221cdb35"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__superstructure_generation__futibatinib.json",
+      "rdkit_preserving": 20,
+      "sha256": "d3adc41871dd7fc60038604906865083a5bd1813cb479dc553307c95807ad4c4"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__superstructure_generation__lesinurad.json",
+      "rdkit_preserving": 20,
+      "sha256": "15558810bd86c88639e22ff8b338a22e22d5b5205a946d1d73b2a512a0a6fe18"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/permanent_restriction__superstructure_generation__liothyronine.json",
+      "rdkit_preserving": 20,
+      "sha256": "8a884c8ccec5c216f036c3e9177e1ac55ebfea4d808669fa0db17939332be87f"
+    },
+    {
+      "attempts": 20,
+      "committed": 19,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__motif_extension__cyclothiazide.json",
+      "rdkit_preserving": 19,
+      "sha256": "81a03e8b5a2fec93bfddf3d88ee875651227871e1a56e4b9ec71d48c86cbeb76"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__motif_extension__eliglustat.json",
+      "rdkit_preserving": 20,
+      "sha256": "dc2b9d53b50b621701572197dd36304057a2ebcdd0b353d65300dcdb5d073977"
+    },
+    {
+      "attempts": 20,
+      "committed": 16,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__motif_extension__futibatinib.json",
+      "rdkit_preserving": 15,
+      "sha256": "986ba73dc5fe778f8e1a186da12342a21a00469f8cd48a104382815fb8c37e0c"
+    },
+    {
+      "attempts": 20,
+      "committed": 10,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__motif_extension__lesinurad.json",
+      "rdkit_preserving": 10,
+      "sha256": "b26a20080576884a1c8d5b224e4fa7c6b3d051c0300f578a9622522821114507"
+    },
+    {
+      "attempts": 20,
+      "committed": 11,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__motif_extension__lovastatin.json",
+      "rdkit_preserving": 11,
+      "sha256": "7cb6d8fd49082b00635b935f3e98a012d3c7d79587ad480e0ff51643a25ca8b5"
+    },
+    {
+      "attempts": 20,
+      "committed": 19,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__motif_extension__spirapril.json",
+      "rdkit_preserving": 19,
+      "sha256": "9d51178009c7c2a7252ba2695958590b1f63243e5314899427d049ac75e6bb4f"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__scaffold_decoration__cyclothiazide.json",
+      "rdkit_preserving": 20,
+      "sha256": "6c5b5ec666f46572b97538a45c5713d5a94ab3f1a4574179b376aee3263fe45b"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__scaffold_decoration__eliglustat.json",
+      "rdkit_preserving": 20,
+      "sha256": "661a709ce17b128499b7b43b9dab5d9f9d544499ab711c3cece130dc38d67f7f"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__scaffold_decoration__futibatinib.json",
+      "rdkit_preserving": 20,
+      "sha256": "15adf60ee7065506653f6abea764a137f7acc4a9e5c3bab7b1fb0f825a21afcd"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__scaffold_decoration__lesinurad.json",
+      "rdkit_preserving": 20,
+      "sha256": "d4b2d223c5b0a7bf116d83fcad8240e0d6c1f5d5583a791a57611bcdee8305fb"
+    },
+    {
+      "attempts": 20,
+      "committed": 18,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__scaffold_decoration__lovastatin.json",
+      "rdkit_preserving": 18,
+      "sha256": "a2c03218f9031cfb91176f6b8346455273efd00f0735d107f34801d72954ad83"
+    },
+    {
+      "attempts": 20,
+      "committed": 11,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__scaffold_decoration__spirapril.json",
+      "rdkit_preserving": 11,
+      "sha256": "2fd443a0d23436ac8ad93a2a171de7dc1f918bc4ab3a42368db347272bc15a8c"
+    },
+    {
+      "attempts": 20,
+      "committed": 19,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__superstructure_generation__cyclothiazide.json",
+      "rdkit_preserving": 19,
+      "sha256": "2c34de5e0cc62e7c9294f7a73a040a5f0a87e03d34242d4f7be1642412aa8c8e"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__superstructure_generation__eliglustat.json",
+      "rdkit_preserving": 20,
+      "sha256": "1431902c60f1e0a7d87f8771e0374fe741fd27fce41b27740c753ad90da41a09"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__superstructure_generation__erlotinib.json",
+      "rdkit_preserving": 20,
+      "sha256": "35ac1c2645a5d789da060f540335eebb7b682e013e7165177bab3fbc7f83576a"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__superstructure_generation__futibatinib.json",
+      "rdkit_preserving": 20,
+      "sha256": "9998312c904963faf17768fc85bb809f046e460b8fb44bce6fa5cb8171eb9bcc"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__superstructure_generation__lesinurad.json",
+      "rdkit_preserving": 20,
+      "sha256": "200d9c7df25e356f5d8f8cee97a676aee6d19885f96bca7f16885aa5f1479e41"
+    },
+    {
+      "attempts": 20,
+      "committed": 20,
+      "path": "diagnostics/fragment_single_interface_qualification_v1/units/single_interface_policy__superstructure_generation__liothyronine.json",
+      "rdkit_preserving": 20,
+      "sha256": "1b0946c2988e16d75d0a2f9d13d18c867498f657ef5cd937ff2da999934835ad"
+    }
+  ]
+}

@@ -1,0 +1,5161 @@
+{
+  "auditor_sha256": "1bbd36be5dabc5cd3908f3d1f99915d88294b04a0a8c44f4acfce5e3bb2e3bf4",
+  "evidence_role": "Retrospective exact rescore of frozen runs; no new generation or model selection",
+  "git_head": "a3f753ea71b0dbe92c69fc28920d8cd33c943696",
+  "input_sha256": {
+    "diagnostics/fragment_attachment_control_v1/before_after_table.json": "9ecf66a06b8a0068a62bf661ab5a522731e40599ec97673f3ca6431dc020ab6f",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__BARICITINIB__seed0.json": "882af295ebc25d9b190bcc07bbf760a9075d987b56444015d985f4a5b092eaeb",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__BARICITINIB__seed1.json": "67081b33787d9fd2d64a6920ffa77f20e569878b426dc897be859a2c4a67642f",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__BARICITINIB__seed2.json": "051f7b1f796bdbd01eb6380e054541f0cfcd9a55afcabe5833cd78fb94a6f6bb",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__CYCLOTHIAZIDE__seed0.json": "6a99d2e5807a209c6919946c19d756663da7a26f1f2b307d74f0e390df69507b",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__CYCLOTHIAZIDE__seed1.json": "367ce3f5796b7c37c1ea88cc7bb2fbfb3baa2f34b791b48a9a92f04f7c646dfd",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__CYCLOTHIAZIDE__seed2.json": "446e24e9af60d06df92f5f80300134401d9ce2fc5a6d76ccfd909fac9165e36c",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__ELIGLUSTAT__seed0.json": "d0f4356db2a3f0ea5b705cc80b32328f58a865de4830f51dc8e835598eaa0498",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__ELIGLUSTAT__seed1.json": "58dcd02fe3eb9c3d1cdfac0740249a9d25bf2f68202023c55f784a43b8c218d7",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__ELIGLUSTAT__seed2.json": "71b8d4d024694c83e2a5f5d0465928bd58ef2c736a49f68ec976804227846e98",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__ERLOTINIB__seed0.json": "3356e620f650120745b2e29038d76fc0423475fe799bcf51f83d77d7ae56ab78",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__ERLOTINIB__seed1.json": "c8476ab540d4fabd87f6ab32a4a3466ef01fdba3dedd7427cb346c66c2822225",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__ERLOTINIB__seed2.json": "0c9f98e59539a59e3c2e357b9087c6db1db9ea5cf4b3748954e65b1c9156c988",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__FUTIBATINIB__seed0.json": "298e7c230df78af5bb6ce55ae0b2489ce03b630effcfca8a323a0ce7ff6054b7",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__FUTIBATINIB__seed1.json": "058c3b100a78377359c38519afd61d8767a54048c52e835b6b733a302f291de3",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__FUTIBATINIB__seed2.json": "72f4df2686deeab00b0984f4236efdb1d1f57a1a1b85b0c5ef590b091f137858",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LESINURAD__seed0.json": "f6bf6b8069701557076931b2479fde594747fa6952486c2b6c6d91350115d78b",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LESINURAD__seed1.json": "fe981385d76fa0a71f9102caf7ed22e4f2dc7104c1243b50274973829a67418b",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LESINURAD__seed2.json": "635724f8e8d2fa9e247c1a200c2189f697ad15ab181daa56883d0e6a111a1f3f",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LIOTHYRONINE__seed0.json": "b4f95c354d9486ebae154427463f3de7f280248655505778e68a8acc0aa7aa55",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LIOTHYRONINE__seed1.json": "f2eef257986018bdc7993d5f76a83ca4aed8d5ff5330ff6dc90f5f487e0f5287",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LIOTHYRONINE__seed2.json": "f83f9780a793b16e69829a31261ebac546a4704386a60354ffc17ab7bb6e3fa3",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LOVASTATIN__seed0.json": "265d535509d47bd75c38b4d7882ef760a941cb875cdcbc778468658884489e4d",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LOVASTATIN__seed1.json": "0f47f0309fbb2a2ed3c5f4054a6af1da4439f8e63383362d4d32c253fe3a8251",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LOVASTATIN__seed2.json": "7bdd38698b9886d98ef26d7b0460a834c5a383d9d691224a713fc0bf5b5cff7e",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__MARIBAVIR__seed0.json": "afb43d3bbe88f243f6986374eb8112cd8f196d3546861c4782cdef45cd8c3ecf",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__MARIBAVIR__seed1.json": "ca5fdca1ce08ad39aa97ff34306066e53e63c2dba4aa46e2902e178c02b56aff",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__MARIBAVIR__seed2.json": "304b099cdd4bf51f79a3ed9b475499f91125796f54ff2926225cc4f6e7362ce5",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__SPIRAPRIL__seed0.json": "6d4b91bfd541f8f1b3348b2fa77169a408088301ba4579b185f39ce5d7a08b88",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__SPIRAPRIL__seed1.json": "f3811c910764bb50546ee74972cc2e512398694bffbefb3a1d084cf8c459fd3c",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__SPIRAPRIL__seed2.json": "4f32a8b414de6166ebd88eba403fa06d3c7d49474d56b8e101bcfac241699563",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__BARICITINIB__seed0.json": "f5504b6c441d68b8a9f3c8bb10cd66eac6fd3e3541421d871edbbb6658317091",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__BARICITINIB__seed1.json": "9a10a80f08a5900d1f978823231d0a1cd64474ca338b1ce590b5d56bc3465af5",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__BARICITINIB__seed2.json": "64a8631b26e4b357b4e74c141240c569cce6c9a43ce027736d76b5513e4f2a54",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__CYCLOTHIAZIDE__seed0.json": "84855fbd9e9bc3d70e628b04fd6a35fe14cac2ea81365ad9a779e7d805a94681",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__CYCLOTHIAZIDE__seed1.json": "e0107d5bdcafba180eec8f1a43145076e47bd04efc6b8aec9442dab2a67574d9",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__CYCLOTHIAZIDE__seed2.json": "9571224fc4fcc72c96fe6b52d1880fca8c479913f8cbd8b64f09fa5bdcb40c4d",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__ELIGLUSTAT__seed0.json": "ab159da01a3ff01593ee0801c798ad114f580040c7e338c8c1ef7fb04d4d6efd",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__ELIGLUSTAT__seed1.json": "9ad264effef9f79c2344ff3a5afd0a7c999ff6843bf856e1190b7bcfca78d2d0",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__ELIGLUSTAT__seed2.json": "2f365d7d6af46a50929cfbd78cb4b47252851e8c6dbc9fd846eb2725ff885168",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__ERLOTINIB__seed0.json": "5dc5c943e212a16fad6dfa5190a7064ce6bd30a591fe036fecb5afe5bcf15db0",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__ERLOTINIB__seed1.json": "485d13d757d471a59464422187c791ed9c5d75cc36bf3166ed938424bed35a83",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__ERLOTINIB__seed2.json": "1afd868240967bcfa4d5bf666f278147ddbcf511449045cbbaf4bff23bafc468",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__FUTIBATINIB__seed0.json": "fbf6347018790ac415237b355b247e76994a316710b293db6dbba2aefffb1c75",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__FUTIBATINIB__seed1.json": "57fbe57bd40d5743e46f9f57b0c372e41f6fc85aaa6f990ab002c6a8e147d3e0",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__FUTIBATINIB__seed2.json": "877e78336a6388f86ea7b8ca09c3368a421b518d1156f27a2d8bd24ccc791290",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LESINURAD__seed0.json": "e2c4f82c282318c4441959120a30b5cc18bd4c97fe92af3179902ba39185b9a9",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LESINURAD__seed1.json": "7acf83a1d29ce229425f46b69c6d0a4f9d5ce7917e1e54f3e839a163834a316b",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LESINURAD__seed2.json": "2a1c9c2b3725bf4e9fd2f0ac4737b875bd20a301412c7648b559368436f6bcca",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LIOTHYRONINE__seed0.json": "bab5e49feba2f932fb31eaa8cf0cee0aa51e29d5c4635b972caf8072c7fa88d2",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LIOTHYRONINE__seed1.json": "91f00e54b9fd45c8c2f41dbed82bbc35c2a38de12d2d2c06581ab10ac3880a79",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LIOTHYRONINE__seed2.json": "876957271e3e4d1459d2690a0bd83581ea08fbe2bd98e5101653863c7ef921f1",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LOVASTATIN__seed0.json": "e7d82f1d20137256071a496a22f03091ef71fbd8e3c8b444b7d2543c90e91bb3",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LOVASTATIN__seed1.json": "4568283d34f1fb88f20c0e5ca5e501f891f827d90f89b415656d48810d24e075",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LOVASTATIN__seed2.json": "4f522c78f0f3280574ffb4b68ee15cca45728cc45859ab02cfd180f732e908bd",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__MARIBAVIR__seed0.json": "18b0427e0359056c4c19e62c1f20334bb1f20a1d6e910d372a77cb53f25dc3f6",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__MARIBAVIR__seed1.json": "173b1e5968cbdff7af2da06bea8e35b26ff4e302112b6af07d3e25521615d4ce",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__MARIBAVIR__seed2.json": "743423e9ae62c07442f4c098759291d7ade268cf31d78fb395e6a23612f34fd5",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__SPIRAPRIL__seed0.json": "bb6ea3f3a5792304d6430ebcdd808613684ea9576f96446abb906be2e8c7cb55",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__SPIRAPRIL__seed1.json": "cfa364684b3cdf37def1f6f38152164d472c790ecf4a5e8d5ecc5e41d556cf67",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__SPIRAPRIL__seed2.json": "d26f89aef0fb90660fc35d013bfd651e158a1fa054e86ea0e0db61e367915d1b",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__BARICITINIB__seed0.json": "132860270891fa4d29e404833fc39111c98f7fbe4a8a8813fb988445b1f688d8",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__BARICITINIB__seed1.json": "cd2f2175f085e032013732f8fe98891bac2209a00bc3847b11c4b8d03a184985",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__BARICITINIB__seed2.json": "0108c413c3818e5adf8f0941c85700c50140c3c0bb62a5a177104b14fa69a64e",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__CYCLOTHIAZIDE__seed0.json": "bd7792a8b4bec422ad9ba5a99a931e4539811ac347d87eaa073314c020441d7e",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__CYCLOTHIAZIDE__seed1.json": "76c4f00f65f9ccbbbd4618b5280b88af44058de104f279d61cd4dba17010df33",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__CYCLOTHIAZIDE__seed2.json": "faaf2a686dc2ae470e45b27acfaada200ee68b2e3f5266edabff9cd01d49854d",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__ELIGLUSTAT__seed0.json": "fed7467ce02d5af4f3758732458937efbd5f7d5c7880ac468636caee0edcd0a6",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__ELIGLUSTAT__seed1.json": "785598d3daccb88583dec0ed2c96da9159d5a6fb2c07c503eb59ba0dd0b84971",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__ELIGLUSTAT__seed2.json": "97617693b82e42fe113841ea5cdaf2398f689ba2e666847c5290eb20c70ba947",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__ERLOTINIB__seed0.json": "b69695d7b89bd2efe6759c69f423c2ca6ae26527badf106932d945c118c0fcaf",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__ERLOTINIB__seed1.json": "bfa24cd27d36b705e46cfcf5f7117baf8111629b9378dd95e0c74ffaea6852ec",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__ERLOTINIB__seed2.json": "d03e69408000a8a5e51ff1f0a2e96d5f018af4a38e769b1e4cb6b333756a4c2c",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__FUTIBATINIB__seed0.json": "f881af94132c8855ffc1b6ae7ad741f6532ae07c7a127a84ed79232a8aa3606e",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__FUTIBATINIB__seed1.json": "6a37aee6cb134d04bbaf3d2e32878d5a6002cf32d3f2dac6059c189ccee6737a",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__FUTIBATINIB__seed2.json": "8eeba820e4efc566598c830a25f40e11350ce023eac6b10aab00702ac7800301",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LESINURAD__seed0.json": "8e3b243e8f829e37a06f335f2909d5a2ddcec72e63dc752cc8a1599396e8d747",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LESINURAD__seed1.json": "a77aa3ccf45f179cfa564d340c7d48fd6f6efa2fe1668a6689746ce9c2db0049",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LESINURAD__seed2.json": "604ba58d46104fa75f223ad02f3097965ae9bbd986b9ee90d158a69abd0e4838",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LIOTHYRONINE__seed0.json": "978a99544614ea3389a0a501db302967ce2cfefafe4db0bfd1d61ef071085bae",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LIOTHYRONINE__seed1.json": "28a7246fe1be8f8d8b76279cf3113695f8b957061c9fcf43e46284b83e13acd5",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LIOTHYRONINE__seed2.json": "b4f9becab2ed343780ea614516383f9ce2e45f4fd1813fb469481f7e53527289",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LOVASTATIN__seed0.json": "1586533ed92e976fa795244b0cd228591e7dd629cf1ab12cc2389b1c260f6133",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LOVASTATIN__seed1.json": "d717b5d846dcadd46c7a184125fc90620237a49cc25916a099663cac47c1d70e",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LOVASTATIN__seed2.json": "6e00a8deb1cd8b782bba5e97313a3ea48339d89f15d2b4db09b82e609ee463a9",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__MARIBAVIR__seed0.json": "b34d9195122e583df36473306f931c4f8a0b1652317302e9f139a75f61959303",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__MARIBAVIR__seed1.json": "de5516930ae9a7e56c295f72707491c3dc357818efa0a112cbb1b075cf863250",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__MARIBAVIR__seed2.json": "9e04f8b3b73729fac55e951d292d129a9cbc08c9a454aee3f14254bcd8b66e9f",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__SPIRAPRIL__seed0.json": "5cece0a573936190330afeaf1358075272159814cde20922aba6b5c3845068e1",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__SPIRAPRIL__seed1.json": "ccaa0503947678085f0af59aa2ae82fc60ec9db4456ffca7a23d24a6687efe7c",
+    "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__SPIRAPRIL__seed2.json": "cea600775daecfe0b54b3315d7cb6a888dfc4d42828b63812f517a019d19de1b",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__BARICITINIB__seed0.json": "3e6758a03de679e3137834801a5eac2213b228b4fe5f2f596cd39e6e52d84a09",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__BARICITINIB__seed1.json": "ad72663339278b3de1bd0d2241e8507756e7d6aefef7edf94bcb7d174f1a3c58",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__BARICITINIB__seed2.json": "11aff47756f02841a72da55596d33ee0015c18478b4ac77a9b3ff5116b168899",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__CYCLOTHIAZIDE__seed0.json": "00124bd74bc8cd60bba31ff55916259fd7e960c204d494512e504367fae6a812",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__CYCLOTHIAZIDE__seed1.json": "3834c66b5aa947aa5fcd0278a8292f82ad395757d7cf01390fb6dcecf289b66e",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__CYCLOTHIAZIDE__seed2.json": "ec9e0198b45de0104286c1c235a3c168ebc747e660fb1d9465b8d4732566ac97",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__ELIGLUSTAT__seed0.json": "b2dea2fcad4c40498f402befb124b037505eb3411035989a8226190c01bfe688",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__ELIGLUSTAT__seed1.json": "ddee7a64a7cd0f44e07c85c2aefe106cb7ae9838089d3395ff14c0c1818773a9",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__ELIGLUSTAT__seed2.json": "cd33179ae444a6940ce0b54b3a0d9e82202a78af215b04fe779dfe7e21b88a83",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__ERLOTINIB__seed0.json": "a9dfd86a068277adc796f02b9a7659889ab901d490f12912ee166ae6b6d38733",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__ERLOTINIB__seed1.json": "4597952e873ea19df15368bc5a327385419efed48a18f9e25601a059501ab326",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__ERLOTINIB__seed2.json": "72ec1e9a262426f51f61ac47ccab552b9b62bb9dc948f4aacaec0b99149b1eac",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__FUTIBATINIB__seed0.json": "b544b9ab0fb6af8eec7eefcdf52be7d8d4f4ff6a66294b622fcdcaac6c748d7b",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__FUTIBATINIB__seed1.json": "8c652c0c653df0d03e3da193e620dc1c8453004d33bff38c9a280bbb73dd7879",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__FUTIBATINIB__seed2.json": "cde7d872ccbe9d828744925eca23bd5c132348dead4f60c8b9f5fc19e491616d",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LESINURAD__seed0.json": "8919f7c72282407ad8443e1e15dd7cc4792f23a124a587ba218b8a0bf2d67534",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LESINURAD__seed1.json": "6e65031c32fa41b989b865586954f3a823f346d60899baf8f5899aa430d4ed77",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LESINURAD__seed2.json": "7dcf454f74e28efe737cf18844408bb3890f1a650320af58040ab6261386843f",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LIOTHYRONINE__seed0.json": "cac0fc7b6275e449364400e2ffcad3bbe57a013c9cc892089b05b973f95586cb",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LIOTHYRONINE__seed1.json": "67e88ba258541bcb43f686460c5c6b7236de437ea5b165c766faeca2aae3931a",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LIOTHYRONINE__seed2.json": "48e5b864de4f43a66602bf3f1ed8bb6227a06d9f7a67e625f13d1d3e45c61090",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LOVASTATIN__seed0.json": "45712ef67e89dbfae3c1990f49d6ab67375241aab3fcc4944a90ca6ef333ea20",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LOVASTATIN__seed1.json": "0a0f4962dbdba57b260c10d9654ee9dea4e306eb687ca5a08b7d92d811623f37",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LOVASTATIN__seed2.json": "af2664f15596d3c95f2731d4869fa2ffdac9f6cca4b9209d65da13eeec7f0dad",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__MARIBAVIR__seed0.json": "41d716c919a8ab708cd87a3791e677bd1a8f7f5869322a62dbe97e6462c4e9e2",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__MARIBAVIR__seed1.json": "82fe202f6012ea46dc57eae8b9515ebd6102da46d7d5fe0db5a58a127c4e178b",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__MARIBAVIR__seed2.json": "a85af1bc72cd78e802249d8aa5251e7e770a425c78e98a6b5b7e7ed1246f0c73",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__SPIRAPRIL__seed0.json": "3348283384da8fdafeabaf8b5472116e128004fae4716f33924c786d9f6fd4a3",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__SPIRAPRIL__seed1.json": "f091dce6b8fb8df2ad911c032e087f9a028c3e96283419c6b4e59d3f63e221d6",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__SPIRAPRIL__seed2.json": "9cf157e204b59af49ed1703184bdb29948de7fb815b9049dce334ee87a97bdc8",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__BARICITINIB__seed0.json": "ce889f0b1812590591b51be3b15b76fe1d182cc54c111de146c9312bc7ef0cae",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__BARICITINIB__seed1.json": "393800b416a7ac1e2e22120d419d1107ff675c443c6cabff825461d719c202e4",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__BARICITINIB__seed2.json": "198518664056b5fd260e6e19315d5c7b0911e680bf964953e987846735a8daba",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__CYCLOTHIAZIDE__seed0.json": "bb5a4aaef21cdd02f69ff80e722d731a31163a33958b2fb5a291706a2d7a93e2",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__CYCLOTHIAZIDE__seed1.json": "81d42ea9009aa9b60cbf18c873456847dc52536245ddf2746b7bbe63f57dc313",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__CYCLOTHIAZIDE__seed2.json": "88a9fdfdda56488edc27f51f9f0d9469ce72b246022098fe831ac7511ce4f92e",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__ELIGLUSTAT__seed0.json": "c064e29cbf82d3fe7811427f64548ae68887e31d5a62b453a6b2af89b1ce1f54",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__ELIGLUSTAT__seed1.json": "be4092882d695c318b771870201026b55b88fb3ebbae411c3412bb2be34da3a2",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__ELIGLUSTAT__seed2.json": "1e2e228c2cca6a4ac2ab77303644aa4917915719a972c0311fce4cedb81e759f",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__ERLOTINIB__seed0.json": "7c9a628cf3aa922a1a64325c601d49be8a3f344b080032bb9c85893c5fae4432",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__ERLOTINIB__seed1.json": "7668392cf3d2bd460adb66e0aee83a2c45047001fe9dc727aa6d1db8a5df7805",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__ERLOTINIB__seed2.json": "a2f1b2b0754da36c6fe9c83bda818dedcac95194ef1c5492542e1e6fc0df9309",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__FUTIBATINIB__seed0.json": "1847cc2a227d3c444f6e525c50e5307d48b8c4dda21180f2fa1c44c806e39b74",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__FUTIBATINIB__seed1.json": "8bad1b34157712e2ee3cae6a2b3d1b4903305eef6a3fc0e9bb976c3560ae0a56",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__FUTIBATINIB__seed2.json": "37f6bf8e93acc8e29a63983b60da3f4885f03d192d7874ea822cafd1b7cb7a52",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LESINURAD__seed0.json": "4ae22e2e4cb985318ecf1af76dd6712a7342c83f95aca3bb872a0e574f9c17ec",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LESINURAD__seed1.json": "35717efcd296bba41d8ab83174dc111d4762d79c0e3bf8af60432eb9b4a873f5",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LESINURAD__seed2.json": "6705692a6883352f1a8b9ac10ec02d796ae1f6f2075e7042b75e981fca502f8f",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LIOTHYRONINE__seed0.json": "5e25e0c2633290b2172459e862e004a5fc5f182e4f7bc9a0f72d8626c6f8adc3",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LIOTHYRONINE__seed1.json": "7ff3c3df7651fed33ee22e5677ddac14bfaab437fdeff32e807b61ef62f439a3",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LIOTHYRONINE__seed2.json": "c7cf514f553ab6836cbd2196773d2bb8ce727b53a79326cce12d1d3f331cbad2",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LOVASTATIN__seed0.json": "8f89cef1973cdf06bbc394c12ce17d3db687564792b0ab296bec3c9fd42fb75e",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LOVASTATIN__seed1.json": "8240e874ee09dc55e212cc00f63bed12d999d6ff1fd2638476a5af4263b66a4d",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LOVASTATIN__seed2.json": "ba431298cd1dee4ab171cbc93bf74a63950c41355f5b414e0c9689902868caa2",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__MARIBAVIR__seed0.json": "3c774708005937ee4e424d1e102670a5db69fa0e6916d4989fe447846a305992",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__MARIBAVIR__seed1.json": "16d4ae58371b8f0382f59c4023b38d913851c2ac1e969ae8f3e90d9fa3b9bdd0",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__MARIBAVIR__seed2.json": "959e2805fef2c409ffbe296d828e5d290c8b67f4d5e9bdacaefc9fdf58e1fe40",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__SPIRAPRIL__seed0.json": "4373ed90883b64da7863e4cb98631d7c51f0cda46b90026ae90ee849df47f696",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__SPIRAPRIL__seed1.json": "9c1bf101542f8ce489da613ea641b0db878f7cafa004ab2506db083fa12ca929",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__SPIRAPRIL__seed2.json": "02d6d88faae1b662b4e1602e468ec6690c7efe3146db36cdf61e04fcfca5f9d2",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__BARICITINIB__seed0.json": "c148a9b063c37fd36cf80e167021dc7a1eb7b678223ad23e2ce1b3934778a5fc",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__BARICITINIB__seed1.json": "08689614e83d28ce7bb8eb2c28bfdfdf15008c955a785970b5e3a2663e47a1b4",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__BARICITINIB__seed2.json": "10d0fd4cc6d010188623b40f5f1208702208af3aa67759c6954b4cbac5334853",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__CYCLOTHIAZIDE__seed0.json": "e744e107da77dd7a433e704afb7396611cc2901306b80a65419296d6e4a06ecb",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__CYCLOTHIAZIDE__seed1.json": "a81ba149d6e6742dabb56eff3f187caea936a57d00daaacd86f44a6b91f68630",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__CYCLOTHIAZIDE__seed2.json": "869809067ea6c51ab5422ed1d840c0f730cf14e789438582031c80d8e5ff527d",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__ELIGLUSTAT__seed0.json": "d3d2472ef214d9b96999a00d20dea76d04b375ee2748627e6f92e3f8591496a1",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__ELIGLUSTAT__seed1.json": "0ae7385c81dcedc4b3771ab80c60849512658b51e65ef899b16be12808f841f3",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__ELIGLUSTAT__seed2.json": "fb9a4bd325c2cf1a3ab2c1da553978f585a8a0a18b9513de2b393c460d53583b",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__ERLOTINIB__seed0.json": "302e8e967f4ee8ae5a59eb22ddcbc8b42b00568112f491f4fb852c377d253da1",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__ERLOTINIB__seed1.json": "caa21c7c3fc30d3bb9c7e3218ff955b729081e23ec5e70a7375c1bb636c27b43",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__ERLOTINIB__seed2.json": "50622de2fff003332a2ec805ae790a2c8b792f1e4a5f62e699375a89af3580d1",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__FUTIBATINIB__seed0.json": "eb5e8e5a9743b872985eaacd46cab8662eab0f717a2f5bb63948a5febb4dc9ca",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__FUTIBATINIB__seed1.json": "96ce155a0b0f496d2e6e1cb0f873ee683d4c233777313fc02f5c848c7b4d2b9e",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__FUTIBATINIB__seed2.json": "5186ae1c18106dc06fc4af357881286d3e7d0065804312a813126a3fca4ae2c4",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LESINURAD__seed0.json": "0975b597185c497730945f8ec55954f639720eaae2d0811509d873e0ef3aaaf8",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LESINURAD__seed1.json": "bf91e9b2fbb66a88e5cd299a1992c29c821f83009e5c577bad66e91afd648a61",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LESINURAD__seed2.json": "657a3ce0d1cec401230b71ba789f5e9c006be35b397f7be93efdc58a55905376",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LIOTHYRONINE__seed0.json": "b8f48d70901d548877b2d509f6334f295170822a56cdaa679e695746e9553208",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LIOTHYRONINE__seed1.json": "4d106c12941bd6acd754e659b1ba34bf8632ca644131ab556bd2e7f7e41119bd",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LIOTHYRONINE__seed2.json": "7b9b01a3fc2f4d8df5dd8c52843b1ed3ce5b7eb94a7ff0ad0d8af6579bd5eabe",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LOVASTATIN__seed0.json": "43d6c767bea063d64614aaea945c8043a2d81d3b8020fb867ef2522d3ab701f0",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LOVASTATIN__seed1.json": "a4dc6d316e2a1fc70ed7e59d8acf561218943e65f597cbd4ffc57d1e39698b86",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LOVASTATIN__seed2.json": "432ce6ed9ade90dd757c18344038932998295682bd8521add46ad587ece9b99e",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__MARIBAVIR__seed0.json": "2e1d4940adcf724d356d671a8a2ce946502062c89d048da2e7a71c2dacb99074",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__MARIBAVIR__seed1.json": "fd17c639460011d2727c0deefc1242a05a83ac37e2ba80addd7c14cdb21f6c7a",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__MARIBAVIR__seed2.json": "8c065c9bd171977d0e1ef00339073012306ea75b0abd8b52e5f5269c91ac4a84",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__SPIRAPRIL__seed0.json": "b2cf4c5e3ff2aac0ccc9997ade2a81e465698fe4fb304894c3fc398cc4783b8d",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__SPIRAPRIL__seed1.json": "5e759a8dd6547ca5627d443de992b29dc106f3200497c2020d44447db28e28db",
+    "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__SPIRAPRIL__seed2.json": "13ef96b24920ddf7f162da8b42d407625256eed8fee7367501f22913163696ae"
+  },
+  "official_evaluator_sha256": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+  "official_property_sha256": "ed5609c72a3effe2547f4b264e35be8134affccc206978605307d1365a028145",
+  "rows": [
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 71,
+      "committed": 71,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 71,
+      "no_output": 29,
+      "official_chemical": {
+        "distance": 0.6392155536238355,
+        "diversity": 0.7381014492753623,
+        "quality": 10.0,
+        "uniqueness": 97.1830985915493,
+        "validity": 71.0
+      },
+      "prompt_compliant": 8,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__BARICITINIB__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.727875,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 8.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 77,
+      "committed": 77,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 77,
+      "no_output": 23,
+      "official_chemical": {
+        "distance": 0.6587334008084538,
+        "diversity": 0.7504931506849315,
+        "quality": 13.0,
+        "uniqueness": 94.8051948051948,
+        "validity": 77.0
+      },
+      "prompt_compliant": 6,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__BARICITINIB__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7046666666666667,
+        "quality": 1.0,
+        "uniqueness": 100.0,
+        "validity": 6.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 75,
+      "committed": 75,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 75,
+      "no_output": 25,
+      "official_chemical": {
+        "distance": 0.6502341011651849,
+        "diversity": 0.7446027397260273,
+        "quality": 13.0,
+        "uniqueness": 97.33333333333334,
+        "validity": 75.0
+      },
+      "prompt_compliant": 9,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__BARICITINIB__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7432222222222222,
+        "quality": 1.0,
+        "uniqueness": 100.0,
+        "validity": 9.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.6953852947546946,
+        "diversity": 0.7140515463917526,
+        "quality": 16.0,
+        "uniqueness": 100.0,
+        "validity": 97.0
+      },
+      "prompt_compliant": 70,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__CYCLOTHIAZIDE__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7021999999999999,
+        "quality": 11.0,
+        "uniqueness": 100.0,
+        "validity": 70.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 92,
+      "committed": 92,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 92,
+      "no_output": 8,
+      "official_chemical": {
+        "distance": 0.6855225045978299,
+        "diversity": 0.7143586956521739,
+        "quality": 22.0,
+        "uniqueness": 100.0,
+        "validity": 92.0
+      },
+      "prompt_compliant": 58,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__CYCLOTHIAZIDE__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7027241379310346,
+        "quality": 12.0,
+        "uniqueness": 100.0,
+        "validity": 57.99999999999999
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 96,
+      "committed": 96,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 96,
+      "no_output": 4,
+      "official_chemical": {
+        "distance": 0.6918700306270168,
+        "diversity": 0.7097395833333332,
+        "quality": 18.0,
+        "uniqueness": 100.0,
+        "validity": 96.0
+      },
+      "prompt_compliant": 62,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__CYCLOTHIAZIDE__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6818064516129032,
+        "quality": 10.0,
+        "uniqueness": 100.0,
+        "validity": 62.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7910845181061049,
+        "diversity": 0.7849200000000002,
+        "quality": 54.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 74,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__ELIGLUSTAT__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.774445945945946,
+        "quality": 39.0,
+        "uniqueness": 100.0,
+        "validity": 74.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 99,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7954893288222585,
+        "diversity": 0.79204,
+        "quality": 51.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 76,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__ELIGLUSTAT__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7680921052631579,
+        "quality": 44.0,
+        "uniqueness": 100.0,
+        "validity": 76.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 99,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7999378980844837,
+        "diversity": 0.78712,
+        "quality": 49.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 80,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__ELIGLUSTAT__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7743249999999999,
+        "quality": 39.0,
+        "uniqueness": 100.0,
+        "validity": 80.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 89,
+      "committed": 89,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 89,
+      "no_output": 11,
+      "official_chemical": {
+        "distance": 0.8451838415147586,
+        "diversity": 0.831313953488372,
+        "quality": 9.0,
+        "uniqueness": 96.62921348314607,
+        "validity": 89.0
+      },
+      "prompt_compliant": 44,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__ERLOTINIB__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.8202727272727276,
+        "quality": 4.0,
+        "uniqueness": 100.0,
+        "validity": 44.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 90,
+      "committed": 90,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 90,
+      "no_output": 10,
+      "official_chemical": {
+        "distance": 0.8480587400878739,
+        "diversity": 0.8307441860465115,
+        "quality": 13.0,
+        "uniqueness": 95.55555555555556,
+        "validity": 90.0
+      },
+      "prompt_compliant": 47,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__ERLOTINIB__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.8036595744680851,
+        "quality": 3.0,
+        "uniqueness": 100.0,
+        "validity": 47.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 92,
+      "committed": 92,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 91,
+      "no_output": 8,
+      "official_chemical": {
+        "distance": 0.8557407892088887,
+        "diversity": 0.8495842696629213,
+        "quality": 13.0,
+        "uniqueness": 96.73913043478261,
+        "validity": 92.0
+      },
+      "prompt_compliant": 56,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__ERLOTINIB__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.8388363636363638,
+        "quality": 7.000000000000001,
+        "uniqueness": 98.21428571428571,
+        "validity": 56.00000000000001
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 78,
+      "committed": 78,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 76,
+      "no_output": 22,
+      "official_chemical": {
+        "distance": 0.7551953162974607,
+        "diversity": 0.8138421052631578,
+        "quality": 12.0,
+        "uniqueness": 97.43589743589743,
+        "validity": 78.0
+      },
+      "prompt_compliant": 28,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__FUTIBATINIB__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.8276071428571429,
+        "quality": 3.0,
+        "uniqueness": 100.0,
+        "validity": 28.000000000000004
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 81,
+      "committed": 81,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 79,
+      "no_output": 19,
+      "official_chemical": {
+        "distance": 0.750984849473461,
+        "diversity": 0.8237160493827161,
+        "quality": 16.0,
+        "uniqueness": 100.0,
+        "validity": 81.0
+      },
+      "prompt_compliant": 32,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__FUTIBATINIB__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.8274375,
+        "quality": 2.0,
+        "uniqueness": 100.0,
+        "validity": 32.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 71,
+      "committed": 71,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 67,
+      "no_output": 29,
+      "official_chemical": {
+        "distance": 0.7770063518767073,
+        "diversity": 0.827608695652174,
+        "quality": 13.0,
+        "uniqueness": 97.1830985915493,
+        "validity": 71.0
+      },
+      "prompt_compliant": 28,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__FUTIBATINIB__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.8354642857142858,
+        "quality": 5.0,
+        "uniqueness": 100.0,
+        "validity": 28.000000000000004
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 50,
+      "committed": 50,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 48,
+      "no_output": 50,
+      "official_chemical": {
+        "distance": 0.6764076263909947,
+        "diversity": 0.7343488372093023,
+        "quality": 10.0,
+        "uniqueness": 86.0,
+        "validity": 50.0
+      },
+      "prompt_compliant": 26,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LESINURAD__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6796800000000001,
+        "quality": 5.0,
+        "uniqueness": 96.15384615384616,
+        "validity": 26.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 48,
+      "committed": 48,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 47,
+      "no_output": 52,
+      "official_chemical": {
+        "distance": 0.6406287477428718,
+        "diversity": 0.7091951219512195,
+        "quality": 11.0,
+        "uniqueness": 85.41666666666666,
+        "validity": 48.0
+      },
+      "prompt_compliant": 21,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LESINURAD__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6741904761904762,
+        "quality": 5.0,
+        "uniqueness": 100.0,
+        "validity": 21.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 53,
+      "committed": 53,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 49,
+      "no_output": 47,
+      "official_chemical": {
+        "distance": 0.6679368535343709,
+        "diversity": 0.7370217391304348,
+        "quality": 15.0,
+        "uniqueness": 86.79245283018868,
+        "validity": 53.0
+      },
+      "prompt_compliant": 26,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LESINURAD__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7109230769230769,
+        "quality": 7.000000000000001,
+        "uniqueness": 100.0,
+        "validity": 26.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 94,
+      "committed": 94,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 94,
+      "no_output": 6,
+      "official_chemical": {
+        "distance": 0.7954934582849041,
+        "diversity": 0.8317717391304348,
+        "quality": 13.0,
+        "uniqueness": 97.87234042553192,
+        "validity": 94.0
+      },
+      "prompt_compliant": 81,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LIOTHYRONINE__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.8295555555555554,
+        "quality": 11.0,
+        "uniqueness": 100.0,
+        "validity": 81.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 95,
+      "committed": 95,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 95,
+      "no_output": 5,
+      "official_chemical": {
+        "distance": 0.8065380864302271,
+        "diversity": 0.8319032258064515,
+        "quality": 11.0,
+        "uniqueness": 97.89473684210527,
+        "validity": 95.0
+      },
+      "prompt_compliant": 82,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LIOTHYRONINE__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.8273902439024389,
+        "quality": 9.0,
+        "uniqueness": 100.0,
+        "validity": 82.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 95,
+      "committed": 95,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 95,
+      "no_output": 5,
+      "official_chemical": {
+        "distance": 0.7983269011326309,
+        "diversity": 0.8359789473684208,
+        "quality": 12.0,
+        "uniqueness": 100.0,
+        "validity": 95.0
+      },
+      "prompt_compliant": 83,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LIOTHYRONINE__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.836168674698795,
+        "quality": 11.0,
+        "uniqueness": 100.0,
+        "validity": 83.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 78,
+      "committed": 78,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 78,
+      "no_output": 22,
+      "official_chemical": {
+        "distance": 0.5903196327487633,
+        "diversity": 0.7071052631578948,
+        "quality": 0.0,
+        "uniqueness": 97.43589743589743,
+        "validity": 78.0
+      },
+      "prompt_compliant": 4,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LOVASTATIN__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.80675,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 4.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 78,
+      "committed": 78,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 78,
+      "no_output": 22,
+      "official_chemical": {
+        "distance": 0.5809719609837334,
+        "diversity": 0.7030972222222223,
+        "quality": 0.0,
+        "uniqueness": 92.3076923076923,
+        "validity": 78.0
+      },
+      "prompt_compliant": 3,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LOVASTATIN__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.793,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 3.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 75,
+      "committed": 75,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 75,
+      "no_output": 25,
+      "official_chemical": {
+        "distance": 0.5723178225061661,
+        "diversity": 0.6998591549295773,
+        "quality": 0.0,
+        "uniqueness": 94.66666666666667,
+        "validity": 75.0
+      },
+      "prompt_compliant": 4,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__LOVASTATIN__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7414999999999999,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 4.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 99,
+      "committed": 99,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 99,
+      "no_output": 1,
+      "official_chemical": {
+        "distance": 0.8037706190402021,
+        "diversity": 0.8204343434343433,
+        "quality": 4.0,
+        "uniqueness": 100.0,
+        "validity": 99.0
+      },
+      "prompt_compliant": 37,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__MARIBAVIR__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.8150270270270271,
+        "quality": 1.0,
+        "uniqueness": 100.0,
+        "validity": 37.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 99,
+      "committed": 99,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 99,
+      "no_output": 1,
+      "official_chemical": {
+        "distance": 0.8049072209692146,
+        "diversity": 0.818151515151515,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 99.0
+      },
+      "prompt_compliant": 37,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__MARIBAVIR__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.812,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 37.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7969037897730686,
+        "diversity": 0.81577,
+        "quality": 4.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 27,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__MARIBAVIR__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.8174074074074075,
+        "quality": 1.0,
+        "uniqueness": 100.0,
+        "validity": 27.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 96,
+      "committed": 96,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 96,
+      "no_output": 4,
+      "official_chemical": {
+        "distance": 0.713369261988472,
+        "diversity": 0.7655684210526316,
+        "quality": 3.0,
+        "uniqueness": 98.95833333333334,
+        "validity": 96.0
+      },
+      "prompt_compliant": 47,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__SPIRAPRIL__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7294255319148937,
+        "quality": 3.0,
+        "uniqueness": 100.0,
+        "validity": 47.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.7016870370248968,
+        "diversity": 0.7622680412371136,
+        "quality": 2.0,
+        "uniqueness": 100.0,
+        "validity": 97.0
+      },
+      "prompt_compliant": 41,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__SPIRAPRIL__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7290731707317072,
+        "quality": 2.0,
+        "uniqueness": 100.0,
+        "validity": 41.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 96,
+      "committed": 96,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 96,
+      "no_output": 4,
+      "official_chemical": {
+        "distance": 0.7030956472920448,
+        "diversity": 0.755375,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 96.0
+      },
+      "prompt_compliant": 46,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/motif_extension__SPIRAPRIL__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7253695652173913,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 46.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.618630491341879,
+        "diversity": 0.7104949494949495,
+        "quality": 48.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 1,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__BARICITINIB__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 1.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 99,
+      "committed": 99,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 99,
+      "no_output": 1,
+      "official_chemical": {
+        "distance": 0.5877052002766849,
+        "diversity": 0.7045816326530612,
+        "quality": 44.0,
+        "uniqueness": 98.98989898989899,
+        "validity": 99.0
+      },
+      "prompt_compliant": 5,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__BARICITINIB__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6314000000000001,
+        "quality": 2.0,
+        "uniqueness": 100.0,
+        "validity": 5.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6107073843881634,
+        "diversity": 0.7124444444444444,
+        "quality": 43.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 6,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__BARICITINIB__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6108333333333333,
+        "quality": 5.0,
+        "uniqueness": 100.0,
+        "validity": 6.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 99,
+      "committed": 99,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 99,
+      "no_output": 1,
+      "official_chemical": {
+        "distance": 0.6451638325196418,
+        "diversity": 0.7421875,
+        "quality": 0.0,
+        "uniqueness": 96.96969696969697,
+        "validity": 99.0
+      },
+      "prompt_compliant": 1,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__CYCLOTHIAZIDE__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 1.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 95,
+      "committed": 95,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 95,
+      "no_output": 5,
+      "official_chemical": {
+        "distance": 0.6349061802877642,
+        "diversity": 0.7339894736842104,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 95.0
+      },
+      "prompt_compliant": 2,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__CYCLOTHIAZIDE__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.826,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 2.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.6492470070968771,
+        "diversity": 0.7449583333333334,
+        "quality": 0.0,
+        "uniqueness": 98.96907216494846,
+        "validity": 97.0
+      },
+      "prompt_compliant": 1,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__CYCLOTHIAZIDE__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 1.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6630287297212979,
+        "diversity": 0.74027,
+        "quality": 66.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 15,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__ELIGLUSTAT__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7046666666666667,
+        "quality": 11.0,
+        "uniqueness": 100.0,
+        "validity": 15.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6528857189942028,
+        "diversity": 0.7277300000000001,
+        "quality": 67.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 17,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__ELIGLUSTAT__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7156470588235294,
+        "quality": 11.0,
+        "uniqueness": 100.0,
+        "validity": 17.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 99,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6674379394200943,
+        "diversity": 0.7409899999999999,
+        "quality": 61.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 11,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__ELIGLUSTAT__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7300909090909091,
+        "quality": 4.0,
+        "uniqueness": 100.0,
+        "validity": 11.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6723367480527418,
+        "diversity": 0.7487,
+        "quality": 28.000000000000004,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 0,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__ERLOTINIB__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6916201068490628,
+        "diversity": 0.75471,
+        "quality": 35.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 1,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__ERLOTINIB__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 1.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6825486137040804,
+        "diversity": 0.7504500000000001,
+        "quality": 43.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 2,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__ERLOTINIB__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.77,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 2.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 99,
+      "committed": 99,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 99,
+      "no_output": 1,
+      "official_chemical": {
+        "distance": 0.5347916312899773,
+        "diversity": 0.6364693877551021,
+        "quality": 48.0,
+        "uniqueness": 98.98989898989899,
+        "validity": 99.0
+      },
+      "prompt_compliant": 0,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__FUTIBATINIB__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.5039945016697874,
+        "diversity": 0.6172210526315789,
+        "quality": 43.0,
+        "uniqueness": 97.9381443298969,
+        "validity": 97.0
+      },
+      "prompt_compliant": 0,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__FUTIBATINIB__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.5466363510742815,
+        "diversity": 0.6568437500000001,
+        "quality": 38.0,
+        "uniqueness": 98.96907216494846,
+        "validity": 97.0
+      },
+      "prompt_compliant": 0,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__FUTIBATINIB__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 99,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6879542443505895,
+        "diversity": 0.7399300000000002,
+        "quality": 61.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 14,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LESINURAD__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7537142857142857,
+        "quality": 7.000000000000001,
+        "uniqueness": 100.0,
+        "validity": 14.000000000000002
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6778943754867985,
+        "diversity": 0.73662,
+        "quality": 49.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 15,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LESINURAD__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7518,
+        "quality": 6.0,
+        "uniqueness": 100.0,
+        "validity": 15.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6956768684285083,
+        "diversity": 0.7417,
+        "quality": 54.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 13,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LESINURAD__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7592307692307692,
+        "quality": 8.0,
+        "uniqueness": 100.0,
+        "validity": 13.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7854455906493579,
+        "diversity": 0.7718600000000001,
+        "quality": 44.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 1,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LIOTHYRONINE__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 1.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.803395017308189,
+        "diversity": 0.78476,
+        "quality": 43.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 0,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LIOTHYRONINE__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.8015826689851714,
+        "diversity": 0.7866200000000001,
+        "quality": 49.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 0,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LIOTHYRONINE__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 90,
+      "committed": 90,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 90,
+      "no_output": 10,
+      "official_chemical": {
+        "distance": 0.6155363648632102,
+        "diversity": 0.7352471910112359,
+        "quality": 0.0,
+        "uniqueness": 98.88888888888889,
+        "validity": 90.0
+      },
+      "prompt_compliant": 0,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LOVASTATIN__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 94,
+      "committed": 94,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 94,
+      "no_output": 6,
+      "official_chemical": {
+        "distance": 0.6104343759758477,
+        "diversity": 0.739430107526882,
+        "quality": 0.0,
+        "uniqueness": 98.93617021276596,
+        "validity": 94.0
+      },
+      "prompt_compliant": 0,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LOVASTATIN__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 95,
+      "committed": 95,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 95,
+      "no_output": 5,
+      "official_chemical": {
+        "distance": 0.6428199732529241,
+        "diversity": 0.7466315789473685,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 95.0
+      },
+      "prompt_compliant": 0,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__LOVASTATIN__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6830736583181897,
+        "diversity": 0.7678500000000001,
+        "quality": 72.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 0,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__MARIBAVIR__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6867406672138064,
+        "diversity": 0.77081,
+        "quality": 72.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 0,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__MARIBAVIR__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6592076750679944,
+        "diversity": 0.75319,
+        "quality": 67.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 0,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__MARIBAVIR__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 50,
+      "committed": 50,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 49,
+      "no_output": 50,
+      "official_chemical": {
+        "distance": 0.5503387363909755,
+        "diversity": 0.6524318181818182,
+        "quality": 19.0,
+        "uniqueness": 88.0,
+        "validity": 50.0
+      },
+      "prompt_compliant": 0,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__SPIRAPRIL__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 52,
+      "committed": 52,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 52,
+      "no_output": 48,
+      "official_chemical": {
+        "distance": 0.5400516137902178,
+        "diversity": 0.6667619047619048,
+        "quality": 13.0,
+        "uniqueness": 80.76923076923077,
+        "validity": 52.0
+      },
+      "prompt_compliant": 0,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__SPIRAPRIL__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 40,
+      "committed": 40,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 40,
+      "no_output": 60,
+      "official_chemical": {
+        "distance": 0.5401398652264426,
+        "diversity": 0.6543333333333333,
+        "quality": 11.0,
+        "uniqueness": 82.5,
+        "validity": 40.0
+      },
+      "prompt_compliant": 0,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/scaffold_decoration__SPIRAPRIL__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.0,
+        "quality": 0.0,
+        "uniqueness": 0.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6241786743707118,
+        "diversity": 0.72238,
+        "quality": 50.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__BARICITINIB__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.72238,
+        "quality": 50.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6055156813294067,
+        "diversity": 0.7157878787878788,
+        "quality": 45.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__BARICITINIB__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7157878787878788,
+        "quality": 45.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.5871724864040612,
+        "diversity": 0.7060700000000001,
+        "quality": 50.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__BARICITINIB__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7060700000000001,
+        "quality": 50.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.6547146364400388,
+        "diversity": 0.7479896907216494,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 97.0
+      },
+      "prompt_compliant": 97,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__CYCLOTHIAZIDE__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7479896907216494,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 97.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 98,
+      "committed": 98,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 98,
+      "no_output": 2,
+      "official_chemical": {
+        "distance": 0.6327667466033656,
+        "diversity": 0.7352736842105264,
+        "quality": 0.0,
+        "uniqueness": 96.93877551020408,
+        "validity": 98.0
+      },
+      "prompt_compliant": 98,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__CYCLOTHIAZIDE__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7352736842105264,
+        "quality": 0.0,
+        "uniqueness": 96.93877551020408,
+        "validity": 98.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 98,
+      "committed": 98,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 98,
+      "no_output": 2,
+      "official_chemical": {
+        "distance": 0.6634326108888469,
+        "diversity": 0.7555918367346939,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 98.0
+      },
+      "prompt_compliant": 98,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__CYCLOTHIAZIDE__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7555918367346939,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 98.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6404914842457796,
+        "diversity": 0.7412727272727272,
+        "quality": 60.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__ELIGLUSTAT__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7412727272727272,
+        "quality": 60.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 99,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6474991997965778,
+        "diversity": 0.73334,
+        "quality": 63.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 99,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__ELIGLUSTAT__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7330303030303029,
+        "quality": 62.0,
+        "uniqueness": 100.0,
+        "validity": 99.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6630865193962835,
+        "diversity": 0.7369500000000001,
+        "quality": 70.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__ELIGLUSTAT__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7369500000000001,
+        "quality": 70.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6750029878239745,
+        "diversity": 0.756919191919192,
+        "quality": 44.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__ERLOTINIB__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.756919191919192,
+        "quality": 44.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6743290474274629,
+        "diversity": 0.74727,
+        "quality": 33.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__ERLOTINIB__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.74727,
+        "quality": 33.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6908855872551216,
+        "diversity": 0.7533999999999998,
+        "quality": 36.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__ERLOTINIB__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7533999999999998,
+        "quality": 36.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 99,
+      "committed": 99,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 99,
+      "no_output": 1,
+      "official_chemical": {
+        "distance": 0.522191580545389,
+        "diversity": 0.641469387755102,
+        "quality": 39.0,
+        "uniqueness": 98.98989898989899,
+        "validity": 99.0
+      },
+      "prompt_compliant": 99,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__FUTIBATINIB__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.641469387755102,
+        "quality": 39.0,
+        "uniqueness": 98.98989898989899,
+        "validity": 99.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 98,
+      "committed": 98,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 98,
+      "no_output": 2,
+      "official_chemical": {
+        "distance": 0.5232503577042783,
+        "diversity": 0.6290618556701031,
+        "quality": 48.0,
+        "uniqueness": 98.9795918367347,
+        "validity": 98.0
+      },
+      "prompt_compliant": 98,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__FUTIBATINIB__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6290618556701031,
+        "quality": 48.0,
+        "uniqueness": 98.9795918367347,
+        "validity": 98.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 98,
+      "committed": 98,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 98,
+      "no_output": 2,
+      "official_chemical": {
+        "distance": 0.5634879188685427,
+        "diversity": 0.6554742268041237,
+        "quality": 42.0,
+        "uniqueness": 98.9795918367347,
+        "validity": 98.0
+      },
+      "prompt_compliant": 98,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__FUTIBATINIB__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6554742268041237,
+        "quality": 42.0,
+        "uniqueness": 98.9795918367347,
+        "validity": 98.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 99,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6697049761221436,
+        "diversity": 0.7269399999999999,
+        "quality": 48.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 99,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LESINURAD__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7258989898989898,
+        "quality": 48.0,
+        "uniqueness": 100.0,
+        "validity": 99.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6889858921630797,
+        "diversity": 0.7389199999999999,
+        "quality": 56.99999999999999,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LESINURAD__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7389199999999999,
+        "quality": 56.99999999999999,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6943577548426998,
+        "diversity": 0.75133,
+        "quality": 53.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LESINURAD__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.75133,
+        "quality": 53.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7967090371918988,
+        "diversity": 0.78033,
+        "quality": 53.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LIOTHYRONINE__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.78033,
+        "quality": 53.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7993082534425376,
+        "diversity": 0.78357,
+        "quality": 41.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LIOTHYRONINE__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.78357,
+        "quality": 41.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7829856601348062,
+        "diversity": 0.7754500000000002,
+        "quality": 49.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LIOTHYRONINE__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7754500000000002,
+        "quality": 49.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 95,
+      "committed": 95,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 95,
+      "no_output": 5,
+      "official_chemical": {
+        "distance": 0.6331554477009286,
+        "diversity": 0.7480631578947369,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 95.0
+      },
+      "prompt_compliant": 95,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LOVASTATIN__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7480631578947369,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 95.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 94,
+      "committed": 94,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 94,
+      "no_output": 6,
+      "official_chemical": {
+        "distance": 0.6307646913526977,
+        "diversity": 0.7403936170212767,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 94.0
+      },
+      "prompt_compliant": 94,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LOVASTATIN__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7403936170212767,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 94.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 88,
+      "committed": 88,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 88,
+      "no_output": 12,
+      "official_chemical": {
+        "distance": 0.618007618918078,
+        "diversity": 0.7421931818181818,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 88.0
+      },
+      "prompt_compliant": 88,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__LOVASTATIN__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7421931818181818,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 88.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6609535768395238,
+        "diversity": 0.7580600000000001,
+        "quality": 71.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__MARIBAVIR__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7580600000000001,
+        "quality": 71.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6835792397679457,
+        "diversity": 0.76721,
+        "quality": 63.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__MARIBAVIR__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.76721,
+        "quality": 63.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6675567407555097,
+        "diversity": 0.75791,
+        "quality": 69.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__MARIBAVIR__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.75791,
+        "quality": 69.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 47,
+      "committed": 47,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 46,
+      "no_output": 53,
+      "official_chemical": {
+        "distance": 0.5474219618208658,
+        "diversity": 0.673,
+        "quality": 14.000000000000002,
+        "uniqueness": 82.97872340425532,
+        "validity": 47.0
+      },
+      "prompt_compliant": 46,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__SPIRAPRIL__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.667421052631579,
+        "quality": 13.0,
+        "uniqueness": 82.6086956521739,
+        "validity": 46.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 44,
+      "committed": 44,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 44,
+      "no_output": 56,
+      "official_chemical": {
+        "distance": 0.5173458616144239,
+        "diversity": 0.644125,
+        "quality": 16.0,
+        "uniqueness": 72.72727272727273,
+        "validity": 44.0
+      },
+      "prompt_compliant": 44,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__SPIRAPRIL__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.644125,
+        "quality": 16.0,
+        "uniqueness": 72.72727272727273,
+        "validity": 44.0
+      }
+    },
+    {
+      "arm": "baseline",
+      "attempts": 100,
+      "chemically_valid_committed": 53,
+      "committed": 53,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 53,
+      "no_output": 47,
+      "official_chemical": {
+        "distance": 0.5094882800358965,
+        "diversity": 0.6243255813953489,
+        "quality": 18.0,
+        "uniqueness": 81.13207547169812,
+        "validity": 53.0
+      },
+      "prompt_compliant": 53,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/baseline/superstructure_generation__SPIRAPRIL__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6243255813953489,
+        "quality": 18.0,
+        "uniqueness": 81.13207547169812,
+        "validity": 53.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 82,
+      "committed": 82,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 82,
+      "no_output": 18,
+      "official_chemical": {
+        "distance": 0.6746581043637222,
+        "diversity": 0.6080000000000001,
+        "quality": 9.0,
+        "uniqueness": 43.90243902439025,
+        "validity": 82.0
+      },
+      "prompt_compliant": 78,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__BARICITINIB__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6029714285714286,
+        "quality": 8.0,
+        "uniqueness": 44.871794871794876,
+        "validity": 78.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 78,
+      "committed": 78,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 78,
+      "no_output": 22,
+      "official_chemical": {
+        "distance": 0.6633116030764405,
+        "diversity": 0.599235294117647,
+        "quality": 14.000000000000002,
+        "uniqueness": 43.58974358974359,
+        "validity": 78.0
+      },
+      "prompt_compliant": 71,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__BARICITINIB__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5940303030303031,
+        "quality": 13.0,
+        "uniqueness": 46.478873239436616,
+        "validity": 71.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 72,
+      "committed": 72,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 72,
+      "no_output": 28,
+      "official_chemical": {
+        "distance": 0.6734452059152993,
+        "diversity": 0.613825,
+        "quality": 16.0,
+        "uniqueness": 55.55555555555556,
+        "validity": 72.0
+      },
+      "prompt_compliant": 68,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__BARICITINIB__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6098461538461538,
+        "quality": 15.0,
+        "uniqueness": 57.35294117647059,
+        "validity": 68.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.5602154256624174,
+        "diversity": 0.5463066666666667,
+        "quality": 13.0,
+        "uniqueness": 77.31958762886599,
+        "validity": 97.0
+      },
+      "prompt_compliant": 97,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__CYCLOTHIAZIDE__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5463066666666667,
+        "quality": 13.0,
+        "uniqueness": 77.31958762886599,
+        "validity": 97.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 93,
+      "committed": 93,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 93,
+      "no_output": 7,
+      "official_chemical": {
+        "distance": 0.5544889060903581,
+        "diversity": 0.5473676470588235,
+        "quality": 18.0,
+        "uniqueness": 73.11827956989248,
+        "validity": 93.0
+      },
+      "prompt_compliant": 93,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__CYCLOTHIAZIDE__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5473676470588235,
+        "quality": 18.0,
+        "uniqueness": 73.11827956989248,
+        "validity": 93.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 92,
+      "committed": 92,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 92,
+      "no_output": 8,
+      "official_chemical": {
+        "distance": 0.5451763398304817,
+        "diversity": 0.5446301369863015,
+        "quality": 18.0,
+        "uniqueness": 79.34782608695652,
+        "validity": 92.0
+      },
+      "prompt_compliant": 91,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__CYCLOTHIAZIDE__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5444444444444445,
+        "quality": 17.0,
+        "uniqueness": 79.12087912087912,
+        "validity": 91.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7465169946669665,
+        "diversity": 0.66539,
+        "quality": 57.99999999999999,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__ELIGLUSTAT__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.66539,
+        "quality": 57.99999999999999,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7507285309450038,
+        "diversity": 0.6627010309278352,
+        "quality": 57.99999999999999,
+        "uniqueness": 97.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__ELIGLUSTAT__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6627010309278352,
+        "quality": 57.99999999999999,
+        "uniqueness": 97.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7425425665928261,
+        "diversity": 0.6627113402061856,
+        "quality": 55.00000000000001,
+        "uniqueness": 97.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__ELIGLUSTAT__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6627113402061856,
+        "quality": 55.00000000000001,
+        "uniqueness": 97.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 98,
+      "committed": 98,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 98,
+      "no_output": 2,
+      "official_chemical": {
+        "distance": 0.7040492314112141,
+        "diversity": 0.6991851851851852,
+        "quality": 2.0,
+        "uniqueness": 82.6530612244898,
+        "validity": 98.0
+      },
+      "prompt_compliant": 88,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__ERLOTINIB__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6987875000000001,
+        "quality": 2.0,
+        "uniqueness": 90.9090909090909,
+        "validity": 88.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 90,
+      "committed": 90,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 90,
+      "no_output": 10,
+      "official_chemical": {
+        "distance": 0.7065286321584188,
+        "diversity": 0.7070909090909091,
+        "quality": 4.0,
+        "uniqueness": 85.55555555555556,
+        "validity": 90.0
+      },
+      "prompt_compliant": 81,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__ERLOTINIB__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7068421052631578,
+        "quality": 4.0,
+        "uniqueness": 93.82716049382715,
+        "validity": 81.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 96,
+      "committed": 96,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 96,
+      "no_output": 4,
+      "official_chemical": {
+        "distance": 0.708724170201163,
+        "diversity": 0.6950574712643678,
+        "quality": 4.0,
+        "uniqueness": 90.625,
+        "validity": 96.0
+      },
+      "prompt_compliant": 92,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__ERLOTINIB__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6945116279069766,
+        "quality": 4.0,
+        "uniqueness": 93.47826086956522,
+        "validity": 92.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 77,
+      "committed": 77,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 77,
+      "no_output": 23,
+      "official_chemical": {
+        "distance": 0.5863289236503616,
+        "diversity": 0.5927704918032787,
+        "quality": 14.000000000000002,
+        "uniqueness": 79.22077922077922,
+        "validity": 77.0
+      },
+      "prompt_compliant": 76,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__FUTIBATINIB__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5926333333333332,
+        "quality": 14.000000000000002,
+        "uniqueness": 78.94736842105263,
+        "validity": 76.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 75,
+      "committed": 75,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 75,
+      "no_output": 25,
+      "official_chemical": {
+        "distance": 0.5944259117156666,
+        "diversity": 0.5986612903225806,
+        "quality": 15.0,
+        "uniqueness": 82.66666666666667,
+        "validity": 75.0
+      },
+      "prompt_compliant": 74,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__FUTIBATINIB__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5985081967213116,
+        "quality": 15.0,
+        "uniqueness": 82.43243243243244,
+        "validity": 74.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 76,
+      "committed": 76,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 76,
+      "no_output": 24,
+      "official_chemical": {
+        "distance": 0.5895306137807088,
+        "diversity": 0.6019322033898306,
+        "quality": 13.0,
+        "uniqueness": 77.63157894736842,
+        "validity": 76.0
+      },
+      "prompt_compliant": 74,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__FUTIBATINIB__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6019137931034484,
+        "quality": 13.0,
+        "uniqueness": 78.37837837837837,
+        "validity": 74.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 54,
+      "committed": 54,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 54,
+      "no_output": 46,
+      "official_chemical": {
+        "distance": 0.6561947379737683,
+        "diversity": 0.5469999999999999,
+        "quality": 22.0,
+        "uniqueness": 79.62962962962963,
+        "validity": 54.0
+      },
+      "prompt_compliant": 52,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LESINURAD__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5409523809523809,
+        "quality": 21.0,
+        "uniqueness": 80.76923076923077,
+        "validity": 52.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 45,
+      "committed": 45,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 45,
+      "no_output": 55,
+      "official_chemical": {
+        "distance": 0.6460030141514251,
+        "diversity": 0.5424210526315789,
+        "quality": 21.0,
+        "uniqueness": 84.44444444444444,
+        "validity": 45.0
+      },
+      "prompt_compliant": 38,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LESINURAD__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5357567567567567,
+        "quality": 20.0,
+        "uniqueness": 97.36842105263158,
+        "validity": 38.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 47,
+      "committed": 47,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 47,
+      "no_output": 53,
+      "official_chemical": {
+        "distance": 0.6398289626434737,
+        "diversity": 0.5217142857142857,
+        "quality": 19.0,
+        "uniqueness": 89.36170212765957,
+        "validity": 47.0
+      },
+      "prompt_compliant": 46,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LESINURAD__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.515048780487805,
+        "quality": 18.0,
+        "uniqueness": 89.13043478260869,
+        "validity": 46.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.7065508403535482,
+        "diversity": 0.7498586956521739,
+        "quality": 10.0,
+        "uniqueness": 94.84536082474226,
+        "validity": 97.0
+      },
+      "prompt_compliant": 91,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LIOTHYRONINE__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7506813186813187,
+        "quality": 10.0,
+        "uniqueness": 100.0,
+        "validity": 91.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 95,
+      "committed": 95,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 95,
+      "no_output": 5,
+      "official_chemical": {
+        "distance": 0.7060139844355316,
+        "diversity": 0.7449777777777778,
+        "quality": 11.0,
+        "uniqueness": 94.73684210526315,
+        "validity": 95.0
+      },
+      "prompt_compliant": 90,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LIOTHYRONINE__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7457078651685393,
+        "quality": 11.0,
+        "uniqueness": 98.88888888888889,
+        "validity": 90.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 96,
+      "committed": 96,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 96,
+      "no_output": 4,
+      "official_chemical": {
+        "distance": 0.7097970841328407,
+        "diversity": 0.7518369565217392,
+        "quality": 11.0,
+        "uniqueness": 95.83333333333334,
+        "validity": 96.0
+      },
+      "prompt_compliant": 91,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LIOTHYRONINE__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7526593406593407,
+        "quality": 11.0,
+        "uniqueness": 100.0,
+        "validity": 91.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 75,
+      "committed": 75,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 75,
+      "no_output": 25,
+      "official_chemical": {
+        "distance": 0.31571700475061815,
+        "diversity": 0.3563333333333334,
+        "quality": 0.0,
+        "uniqueness": 12.0,
+        "validity": 75.0
+      },
+      "prompt_compliant": 71,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LOVASTATIN__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.35662499999999997,
+        "quality": 0.0,
+        "uniqueness": 11.267605633802818,
+        "validity": 71.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 81,
+      "committed": 81,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 81,
+      "no_output": 19,
+      "official_chemical": {
+        "distance": 0.33472417791700204,
+        "diversity": 0.36433333333333334,
+        "quality": 0.0,
+        "uniqueness": 14.814814814814813,
+        "validity": 81.0
+      },
+      "prompt_compliant": 80,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LOVASTATIN__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.36399999999999993,
+        "quality": 0.0,
+        "uniqueness": 13.750000000000002,
+        "validity": 80.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 74,
+      "committed": 74,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 74,
+      "no_output": 26,
+      "official_chemical": {
+        "distance": 0.3279087516231361,
+        "diversity": 0.3548,
+        "quality": 0.0,
+        "uniqueness": 13.513513513513514,
+        "validity": 74.0
+      },
+      "prompt_compliant": 72,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__LOVASTATIN__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.35233333333333333,
+        "quality": 0.0,
+        "uniqueness": 12.5,
+        "validity": 72.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 99,
+      "committed": 99,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 99,
+      "no_output": 1,
+      "official_chemical": {
+        "distance": 0.7757189203623482,
+        "diversity": 0.7214673913043477,
+        "quality": 0.0,
+        "uniqueness": 92.92929292929293,
+        "validity": 99.0
+      },
+      "prompt_compliant": 99,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__MARIBAVIR__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7214673913043477,
+        "quality": 0.0,
+        "uniqueness": 92.92929292929293,
+        "validity": 99.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 99,
+      "committed": 99,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 99,
+      "no_output": 1,
+      "official_chemical": {
+        "distance": 0.774762774175828,
+        "diversity": 0.7191777777777778,
+        "quality": 2.0,
+        "uniqueness": 90.9090909090909,
+        "validity": 99.0
+      },
+      "prompt_compliant": 99,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__MARIBAVIR__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7191777777777778,
+        "quality": 2.0,
+        "uniqueness": 90.9090909090909,
+        "validity": 99.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7740803957902284,
+        "diversity": 0.7252765957446807,
+        "quality": 2.0,
+        "uniqueness": 94.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__MARIBAVIR__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7252765957446807,
+        "quality": 2.0,
+        "uniqueness": 94.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.67907613726005,
+        "diversity": 0.5239,
+        "quality": 7.000000000000001,
+        "uniqueness": 92.78350515463917,
+        "validity": 97.0
+      },
+      "prompt_compliant": 97,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__SPIRAPRIL__seed0.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5239,
+        "quality": 7.000000000000001,
+        "uniqueness": 92.78350515463917,
+        "validity": 97.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 96,
+      "committed": 96,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 96,
+      "no_output": 4,
+      "official_chemical": {
+        "distance": 0.6829871635088539,
+        "diversity": 0.5388452380952381,
+        "quality": 13.0,
+        "uniqueness": 87.5,
+        "validity": 96.0
+      },
+      "prompt_compliant": 95,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__SPIRAPRIL__seed1.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5330963855421688,
+        "quality": 13.0,
+        "uniqueness": 87.36842105263159,
+        "validity": 95.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 96,
+      "committed": 96,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 96,
+      "no_output": 4,
+      "official_chemical": {
+        "distance": 0.6732197817937597,
+        "diversity": 0.5537692307692307,
+        "quality": 12.0,
+        "uniqueness": 94.79166666666666,
+        "validity": 96.0
+      },
+      "prompt_compliant": 93,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/motif_extension__SPIRAPRIL__seed2.json",
+      "task": "motif_extension",
+      "task_filtered_diagnostic": {
+        "diversity": 0.540159090909091,
+        "quality": 12.0,
+        "uniqueness": 94.6236559139785,
+        "validity": 93.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.5309288913369842,
+        "diversity": 0.4431827956989248,
+        "quality": 61.0,
+        "uniqueness": 93.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 96,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__BARICITINIB__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.4371011235955056,
+        "quality": 57.99999999999999,
+        "uniqueness": 92.70833333333334,
+        "validity": 96.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.5329574076037684,
+        "diversity": 0.46259183673469384,
+        "quality": 63.0,
+        "uniqueness": 98.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 92,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__BARICITINIB__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.4534945054945055,
+        "quality": 57.99999999999999,
+        "uniqueness": 98.91304347826086,
+        "validity": 92.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.5339261462323261,
+        "diversity": 0.4407113402061856,
+        "quality": 61.0,
+        "uniqueness": 97.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 99,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__BARICITINIB__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.43878125000000007,
+        "quality": 60.0,
+        "uniqueness": 96.96969696969697,
+        "validity": 99.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 95,
+      "committed": 95,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 95,
+      "no_output": 5,
+      "official_chemical": {
+        "distance": 0.4424638751790641,
+        "diversity": 0.4345977011494253,
+        "quality": 0.0,
+        "uniqueness": 91.57894736842105,
+        "validity": 95.0
+      },
+      "prompt_compliant": 79,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__CYCLOTHIAZIDE__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.42898630136986304,
+        "quality": 0.0,
+        "uniqueness": 92.40506329113924,
+        "validity": 79.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.4383802702126928,
+        "diversity": 0.42370454545454544,
+        "quality": 0.0,
+        "uniqueness": 90.72164948453609,
+        "validity": 97.0
+      },
+      "prompt_compliant": 90,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__CYCLOTHIAZIDE__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.4229012345679012,
+        "quality": 0.0,
+        "uniqueness": 90.0,
+        "validity": 90.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.4377554506749965,
+        "diversity": 0.43521590909090907,
+        "quality": 0.0,
+        "uniqueness": 90.72164948453609,
+        "validity": 97.0
+      },
+      "prompt_compliant": 86,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__CYCLOTHIAZIDE__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.43503749999999997,
+        "quality": 0.0,
+        "uniqueness": 93.02325581395348,
+        "validity": 86.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6176264234644232,
+        "diversity": 0.5804945054945054,
+        "quality": 65.0,
+        "uniqueness": 91.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 86,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__ELIGLUSTAT__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.58,
+        "quality": 59.0,
+        "uniqueness": 98.83720930232558,
+        "validity": 86.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.616003821415621,
+        "diversity": 0.5746382978723404,
+        "quality": 65.0,
+        "uniqueness": 94.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 86,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__ELIGLUSTAT__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5740116279069767,
+        "quality": 56.99999999999999,
+        "uniqueness": 100.0,
+        "validity": 86.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6196162581085363,
+        "diversity": 0.5796043956043956,
+        "quality": 67.0,
+        "uniqueness": 91.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 88,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__ELIGLUSTAT__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5804942528735633,
+        "quality": 63.0,
+        "uniqueness": 98.86363636363636,
+        "validity": 88.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6724397218604579,
+        "diversity": 0.59717,
+        "quality": 26.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__ERLOTINIB__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.59717,
+        "quality": 26.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6757792237358964,
+        "diversity": 0.60494,
+        "quality": 23.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 98,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__ERLOTINIB__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6041530612244898,
+        "quality": 22.0,
+        "uniqueness": 100.0,
+        "validity": 98.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6724230152465579,
+        "diversity": 0.5974299999999999,
+        "quality": 27.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 98,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__ERLOTINIB__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5961836734693877,
+        "quality": 26.0,
+        "uniqueness": 100.0,
+        "validity": 98.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 98,
+      "committed": 98,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 98,
+      "no_output": 2,
+      "official_chemical": {
+        "distance": 0.7210140102800462,
+        "diversity": 0.5398571428571429,
+        "quality": 19.0,
+        "uniqueness": 100.0,
+        "validity": 98.0
+      },
+      "prompt_compliant": 92,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__FUTIBATINIB__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5291630434782608,
+        "quality": 19.0,
+        "uniqueness": 100.0,
+        "validity": 92.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.7146040174093868,
+        "diversity": 0.5527553191489362,
+        "quality": 23.0,
+        "uniqueness": 96.90721649484536,
+        "validity": 97.0
+      },
+      "prompt_compliant": 84,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__FUTIBATINIB__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5362857142857143,
+        "quality": 20.0,
+        "uniqueness": 100.0,
+        "validity": 84.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 98,
+      "committed": 98,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 97,
+      "no_output": 2,
+      "official_chemical": {
+        "distance": 0.7184704253381143,
+        "diversity": 0.5509591836734694,
+        "quality": 21.0,
+        "uniqueness": 100.0,
+        "validity": 98.0
+      },
+      "prompt_compliant": 85,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__FUTIBATINIB__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.532764705882353,
+        "quality": 17.0,
+        "uniqueness": 100.0,
+        "validity": 85.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6077429997994087,
+        "diversity": 0.5741400000000001,
+        "quality": 44.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 96,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LESINURAD__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5682708333333334,
+        "quality": 41.0,
+        "uniqueness": 100.0,
+        "validity": 96.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6115610477335197,
+        "diversity": 0.5697040816326531,
+        "quality": 49.0,
+        "uniqueness": 98.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 97,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LESINURAD__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5646631578947369,
+        "quality": 46.0,
+        "uniqueness": 97.9381443298969,
+        "validity": 97.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6148519884976131,
+        "diversity": 0.5751200000000001,
+        "quality": 36.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 98,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LESINURAD__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5723367346938776,
+        "quality": 35.0,
+        "uniqueness": 100.0,
+        "validity": 98.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.8812595021502132,
+        "diversity": 0.7277999999999999,
+        "quality": 42.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 99,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LIOTHYRONINE__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7276767676767676,
+        "quality": 41.0,
+        "uniqueness": 100.0,
+        "validity": 99.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.8844683522258733,
+        "diversity": 0.73628,
+        "quality": 27.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 99,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LIOTHYRONINE__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7355252525252526,
+        "quality": 27.0,
+        "uniqueness": 100.0,
+        "validity": 99.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.8817642331401088,
+        "diversity": 0.7332499999999998,
+        "quality": 32.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 98,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LIOTHYRONINE__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7322755102040814,
+        "quality": 31.0,
+        "uniqueness": 100.0,
+        "validity": 98.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 93,
+      "committed": 93,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 93,
+      "no_output": 7,
+      "official_chemical": {
+        "distance": 0.7676137991761651,
+        "diversity": 0.6669673913043478,
+        "quality": 0.0,
+        "uniqueness": 98.9247311827957,
+        "validity": 93.0
+      },
+      "prompt_compliant": 77,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LOVASTATIN__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6560389610389611,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 77.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 94,
+      "committed": 94,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 94,
+      "no_output": 6,
+      "official_chemical": {
+        "distance": 0.7608730927894877,
+        "diversity": 0.6824395604395604,
+        "quality": 0.0,
+        "uniqueness": 96.80851063829788,
+        "validity": 94.0
+      },
+      "prompt_compliant": 79,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LOVASTATIN__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6752405063291139,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 79.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 95,
+      "committed": 95,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 95,
+      "no_output": 5,
+      "official_chemical": {
+        "distance": 0.7639640957644304,
+        "diversity": 0.6700105263157895,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 95.0
+      },
+      "prompt_compliant": 84,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__LOVASTATIN__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6618928571428572,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 84.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.8759069399964118,
+        "diversity": 0.7127,
+        "quality": 17.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 86,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__MARIBAVIR__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6991627906976744,
+        "quality": 12.0,
+        "uniqueness": 100.0,
+        "validity": 86.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.872248100843207,
+        "diversity": 0.7213699999999998,
+        "quality": 12.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 88,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__MARIBAVIR__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7080568181818182,
+        "quality": 8.0,
+        "uniqueness": 100.0,
+        "validity": 88.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.8753798772556474,
+        "diversity": 0.7124299999999999,
+        "quality": 14.000000000000002,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 83,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__MARIBAVIR__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7009638554216868,
+        "quality": 11.0,
+        "uniqueness": 100.0,
+        "validity": 83.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 49,
+      "committed": 49,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 49,
+      "no_output": 51,
+      "official_chemical": {
+        "distance": 0.5710867092830557,
+        "diversity": 0.5754390243902439,
+        "quality": 16.0,
+        "uniqueness": 83.6734693877551,
+        "validity": 49.0
+      },
+      "prompt_compliant": 31,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__SPIRAPRIL__seed0.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5631333333333334,
+        "quality": 8.0,
+        "uniqueness": 96.7741935483871,
+        "validity": 31.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 54,
+      "committed": 54,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 54,
+      "no_output": 46,
+      "official_chemical": {
+        "distance": 0.5525398192765897,
+        "diversity": 0.5454255319148936,
+        "quality": 19.0,
+        "uniqueness": 87.03703703703704,
+        "validity": 54.0
+      },
+      "prompt_compliant": 29,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__SPIRAPRIL__seed1.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5282068965517241,
+        "quality": 4.0,
+        "uniqueness": 100.0,
+        "validity": 28.999999999999996
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 46,
+      "committed": 46,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 46,
+      "no_output": 54,
+      "official_chemical": {
+        "distance": 0.5605578930617118,
+        "diversity": 0.5795277777777779,
+        "quality": 13.0,
+        "uniqueness": 78.26086956521739,
+        "validity": 46.0
+      },
+      "prompt_compliant": 22,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/scaffold_decoration__SPIRAPRIL__seed2.json",
+      "task": "scaffold_decoration",
+      "task_filtered_diagnostic": {
+        "diversity": 0.5781363636363636,
+        "quality": 4.0,
+        "uniqueness": 100.0,
+        "validity": 22.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6241786743707118,
+        "diversity": 0.72238,
+        "quality": 50.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__BARICITINIB__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.72238,
+        "quality": 50.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6055156813294067,
+        "diversity": 0.7157878787878788,
+        "quality": 45.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__BARICITINIB__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7157878787878788,
+        "quality": 45.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "BARICITINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.5871724864040612,
+        "diversity": 0.7060700000000001,
+        "quality": 50.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__BARICITINIB__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7060700000000001,
+        "quality": 50.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 97,
+      "committed": 97,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 97,
+      "no_output": 3,
+      "official_chemical": {
+        "distance": 0.6547146364400388,
+        "diversity": 0.7479896907216494,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 97.0
+      },
+      "prompt_compliant": 97,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__CYCLOTHIAZIDE__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7479896907216494,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 97.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 98,
+      "committed": 98,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 98,
+      "no_output": 2,
+      "official_chemical": {
+        "distance": 0.6327667466033656,
+        "diversity": 0.7352736842105264,
+        "quality": 0.0,
+        "uniqueness": 96.93877551020408,
+        "validity": 98.0
+      },
+      "prompt_compliant": 98,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__CYCLOTHIAZIDE__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7352736842105264,
+        "quality": 0.0,
+        "uniqueness": 96.93877551020408,
+        "validity": 98.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 98,
+      "committed": 98,
+      "drug": "CYCLOTHIAZIDE",
+      "fragment_containing_committed": 98,
+      "no_output": 2,
+      "official_chemical": {
+        "distance": 0.6634326108888469,
+        "diversity": 0.7555918367346939,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 98.0
+      },
+      "prompt_compliant": 98,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__CYCLOTHIAZIDE__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7555918367346939,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 98.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6404914842457796,
+        "diversity": 0.7412727272727272,
+        "quality": 60.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__ELIGLUSTAT__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7412727272727272,
+        "quality": 60.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 99,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6474991997965778,
+        "diversity": 0.73334,
+        "quality": 63.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 99,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__ELIGLUSTAT__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7330303030303029,
+        "quality": 62.0,
+        "uniqueness": 100.0,
+        "validity": 99.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ELIGLUSTAT",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6630865193962835,
+        "diversity": 0.7369500000000001,
+        "quality": 70.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__ELIGLUSTAT__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7369500000000001,
+        "quality": 70.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6750029878239745,
+        "diversity": 0.756919191919192,
+        "quality": 44.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__ERLOTINIB__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.756919191919192,
+        "quality": 44.0,
+        "uniqueness": 99.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6743290474274629,
+        "diversity": 0.74727,
+        "quality": 33.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__ERLOTINIB__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.74727,
+        "quality": 33.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "ERLOTINIB",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6908855872551216,
+        "diversity": 0.7533999999999998,
+        "quality": 36.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__ERLOTINIB__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7533999999999998,
+        "quality": 36.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 99,
+      "committed": 99,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 99,
+      "no_output": 1,
+      "official_chemical": {
+        "distance": 0.522191580545389,
+        "diversity": 0.641469387755102,
+        "quality": 39.0,
+        "uniqueness": 98.98989898989899,
+        "validity": 99.0
+      },
+      "prompt_compliant": 99,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__FUTIBATINIB__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.641469387755102,
+        "quality": 39.0,
+        "uniqueness": 98.98989898989899,
+        "validity": 99.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 98,
+      "committed": 98,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 98,
+      "no_output": 2,
+      "official_chemical": {
+        "distance": 0.5232503577042783,
+        "diversity": 0.6290618556701031,
+        "quality": 48.0,
+        "uniqueness": 98.9795918367347,
+        "validity": 98.0
+      },
+      "prompt_compliant": 98,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__FUTIBATINIB__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6290618556701031,
+        "quality": 48.0,
+        "uniqueness": 98.9795918367347,
+        "validity": 98.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 98,
+      "committed": 98,
+      "drug": "FUTIBATINIB",
+      "fragment_containing_committed": 98,
+      "no_output": 2,
+      "official_chemical": {
+        "distance": 0.5634879188685427,
+        "diversity": 0.6554742268041237,
+        "quality": 42.0,
+        "uniqueness": 98.9795918367347,
+        "validity": 98.0
+      },
+      "prompt_compliant": 98,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__FUTIBATINIB__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6554742268041237,
+        "quality": 42.0,
+        "uniqueness": 98.9795918367347,
+        "validity": 98.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 99,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6697049761221436,
+        "diversity": 0.7269399999999999,
+        "quality": 48.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 99,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LESINURAD__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7258989898989898,
+        "quality": 48.0,
+        "uniqueness": 100.0,
+        "validity": 99.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6889858921630797,
+        "diversity": 0.7389199999999999,
+        "quality": 56.99999999999999,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LESINURAD__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7389199999999999,
+        "quality": 56.99999999999999,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LESINURAD",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6943577548426998,
+        "diversity": 0.75133,
+        "quality": 53.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LESINURAD__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.75133,
+        "quality": 53.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7967090371918988,
+        "diversity": 0.78033,
+        "quality": 53.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LIOTHYRONINE__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.78033,
+        "quality": 53.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7993082534425376,
+        "diversity": 0.78357,
+        "quality": 41.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LIOTHYRONINE__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.78357,
+        "quality": 41.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "LIOTHYRONINE",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.7829856601348062,
+        "diversity": 0.7754500000000002,
+        "quality": 49.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LIOTHYRONINE__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7754500000000002,
+        "quality": 49.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 95,
+      "committed": 95,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 95,
+      "no_output": 5,
+      "official_chemical": {
+        "distance": 0.6331554477009286,
+        "diversity": 0.7480631578947369,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 95.0
+      },
+      "prompt_compliant": 95,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LOVASTATIN__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7480631578947369,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 95.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 94,
+      "committed": 94,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 94,
+      "no_output": 6,
+      "official_chemical": {
+        "distance": 0.6307646913526977,
+        "diversity": 0.7403936170212767,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 94.0
+      },
+      "prompt_compliant": 94,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LOVASTATIN__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7403936170212767,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 94.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 88,
+      "committed": 88,
+      "drug": "LOVASTATIN",
+      "fragment_containing_committed": 88,
+      "no_output": 12,
+      "official_chemical": {
+        "distance": 0.618007618918078,
+        "diversity": 0.7421931818181818,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 88.0
+      },
+      "prompt_compliant": 88,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__LOVASTATIN__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7421931818181818,
+        "quality": 0.0,
+        "uniqueness": 100.0,
+        "validity": 88.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6609535768395238,
+        "diversity": 0.7580600000000001,
+        "quality": 71.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__MARIBAVIR__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.7580600000000001,
+        "quality": 71.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6835792397679457,
+        "diversity": 0.76721,
+        "quality": 63.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__MARIBAVIR__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.76721,
+        "quality": 63.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 100,
+      "committed": 100,
+      "drug": "MARIBAVIR",
+      "fragment_containing_committed": 100,
+      "no_output": 0,
+      "official_chemical": {
+        "distance": 0.6675567407555097,
+        "diversity": 0.75791,
+        "quality": 69.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      },
+      "prompt_compliant": 100,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__MARIBAVIR__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.75791,
+        "quality": 69.0,
+        "uniqueness": 100.0,
+        "validity": 100.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 47,
+      "committed": 47,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 46,
+      "no_output": 53,
+      "official_chemical": {
+        "distance": 0.5474219618208658,
+        "diversity": 0.673,
+        "quality": 14.000000000000002,
+        "uniqueness": 82.97872340425532,
+        "validity": 47.0
+      },
+      "prompt_compliant": 46,
+      "seed": 0,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__SPIRAPRIL__seed0.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.667421052631579,
+        "quality": 13.0,
+        "uniqueness": 82.6086956521739,
+        "validity": 46.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 44,
+      "committed": 44,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 44,
+      "no_output": 56,
+      "official_chemical": {
+        "distance": 0.5173458616144239,
+        "diversity": 0.644125,
+        "quality": 16.0,
+        "uniqueness": 72.72727272727273,
+        "validity": 44.0
+      },
+      "prompt_compliant": 44,
+      "seed": 1,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__SPIRAPRIL__seed1.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.644125,
+        "quality": 16.0,
+        "uniqueness": 72.72727272727273,
+        "validity": 44.0
+      }
+    },
+    {
+      "arm": "attachment",
+      "attempts": 100,
+      "chemically_valid_committed": 53,
+      "committed": 53,
+      "drug": "SPIRAPRIL",
+      "fragment_containing_committed": 53,
+      "no_output": 47,
+      "official_chemical": {
+        "distance": 0.5094882800358965,
+        "diversity": 0.6243255813953489,
+        "quality": 18.0,
+        "uniqueness": 81.13207547169812,
+        "validity": 53.0
+      },
+      "prompt_compliant": 53,
+      "seed": 2,
+      "source": "diagnostics/fragment_attachment_control_v1/shards/attachment/superstructure_generation__SPIRAPRIL__seed2.json",
+      "task": "superstructure_generation",
+      "task_filtered_diagnostic": {
+        "diversity": 0.6243255813953489,
+        "quality": 18.0,
+        "uniqueness": 81.13207547169812,
+        "validity": 53.0
+      }
+    }
+  ],
+  "schema": "fragment_attachment_headline_rescore_v1",
+  "software": {
+    "python": "3.11.13",
+    "rdkit": "2024.03.5"
+  },
+  "summary": [
+    {
+      "arm": "baseline",
+      "attempts": 3000,
+      "committed": 2562,
+      "fragment_containing_committed": 2544,
+      "official_chemical_mean": {
+        "distance": 0.7297439061630525,
+        "diversity": 0.7746694998780331,
+        "quality": 13.566666666666668,
+        "uniqueness": 97.00697695796968,
+        "validity": 85.39999999999999
+      },
+      "official_chemical_std": {
+        "distance": 0.0017220236098771397,
+        "diversity": 0.0011509425628964257,
+        "quality": 0.3399346342395192,
+        "uniqueness": 0.293320595614783,
+        "validity": 0.21602468994692955
+      },
+      "per_seed": [
+        {
+          "distance": 0.7305425122750191,
+          "diversity": 0.7741457658403251,
+          "quality": 13.1,
+          "uniqueness": 97.15147807053555,
+          "validity": 85.2
+        },
+        {
+          "distance": 0.727352187694082,
+          "diversity": 0.7735967208134855,
+          "quality": 13.9,
+          "uniqueness": 96.59798461772145,
+          "validity": 85.7
+        },
+        {
+          "distance": 0.7313370185200563,
+          "diversity": 0.7762660129802889,
+          "quality": 13.7,
+          "uniqueness": 97.27146818565207,
+          "validity": 85.3
+        }
+      ],
+      "prompt_compliant": 1243,
+      "prompt_fidelity_over_attempts_pct": 41.43333333333333,
+      "prompt_fidelity_over_commits_pct": 48.5167837626854,
+      "task": "motif_extension"
+    },
+    {
+      "arm": "baseline",
+      "attempts": 3000,
+      "committed": 2804,
+      "fragment_containing_committed": 2801,
+      "official_chemical_mean": {
+        "distance": 0.644731071066492,
+        "diversity": 0.7256738819253075,
+        "quality": 37.26666666666667,
+        "uniqueness": 97.9306691160058,
+        "validity": 93.46666666666665
+      },
+      "official_chemical_std": {
+        "distance": 0.004389077749449724,
+        "diversity": 0.0022509455382389663,
+        "quality": 0.9428090415820634,
+        "uniqueness": 0.21310595060996992,
+        "validity": 0.40276819911981615
+      },
+      "per_seed": [
+        {
+          "distance": 0.6456300027497861,
+          "diversity": 0.7245440846443106,
+          "quality": 38.6,
+          "uniqueness": 98.18484848484849,
+          "validity": 93.8
+        },
+        {
+          "distance": 0.6389627757852361,
+          "diversity": 0.7236614171257637,
+          "quality": 36.6,
+          "uniqueness": 97.66334443017925,
+          "validity": 93.7
+        },
+        {
+          "distance": 0.6496004346644537,
+          "diversity": 0.728816144005848,
+          "quality": 36.6,
+          "uniqueness": 97.94381443298968,
+          "validity": 92.9
+        }
+      ],
+      "prompt_compliant": 105,
+      "prompt_fidelity_over_attempts_pct": 3.5,
+      "prompt_fidelity_over_commits_pct": 3.7446504992867333,
+      "task": "scaffold_decoration"
+    },
+    {
+      "arm": "baseline",
+      "attempts": 3000,
+      "committed": 2809,
+      "fragment_containing_committed": 2806,
+      "official_chemical_mean": {
+        "distance": 0.6422776837267625,
+        "diversity": 0.7263357006001847,
+        "quality": 37.733333333333334,
+        "uniqueness": 97.59086432589329,
+        "validity": 93.63333333333333
+      },
+      "official_chemical_std": {
+        "distance": 0.001520292904661475,
+        "diversity": 0.0025311490367750994,
+        "quality": 0.8653836657164783,
+        "uniqueness": 0.5843117414811588,
+        "validity": 0.16996731711975635
+      },
+      "per_seed": [
+        {
+          "distance": 0.6424524363101254,
+          "diversity": 0.7296424155563408,
+          "quality": 37.9,
+          "uniqueness": 97.99686223941544,
+          "validity": 93.8
+        },
+        {
+          "distance": 0.6403344971201776,
+          "diversity": 0.7234952035689785,
+          "quality": 36.6,
+          "uniqueness": 96.76456400742116,
+          "validity": 93.4
+        },
+        {
+          "distance": 0.6440461177499845,
+          "diversity": 0.7258694826752348,
+          "quality": 38.7,
+          "uniqueness": 98.01116673084329,
+          "validity": 93.7
+        }
+      ],
+      "prompt_compliant": 2806,
+      "prompt_fidelity_over_attempts_pct": 93.53333333333333,
+      "prompt_fidelity_over_commits_pct": 99.8932004271983,
+      "task": "superstructure_generation"
+    },
+    {
+      "arm": "attachment",
+      "attempts": 3000,
+      "committed": 2577,
+      "fragment_containing_committed": 2577,
+      "official_chemical_mean": {
+        "distance": 0.6401084963644487,
+        "diversity": 0.6020192111891703,
+        "quality": 14.700000000000001,
+        "uniqueness": 76.57597565077847,
+        "validity": 85.90000000000002
+      },
+      "official_chemical_std": {
+        "distance": 0.0012449433527640527,
+        "diversity": 0.0007063667669996662,
+        "quality": 0.8831760866327846,
+        "uniqueness": 1.549077289607252,
+        "validity": 1.2083045973594524
+      },
+      "per_seed": [
+        {
+          "distance": 0.6405026320455015,
+          "diversity": 0.6010211763944986,
+          "quality": 13.5,
+          "uniqueness": 75.52836556368294,
+          "validity": 87.6
+        },
+        {
+          "distance": 0.6413974698174528,
+          "diversity": 0.6024811351133501,
+          "quality": 15.6,
+          "uniqueness": 75.43354376554716,
+          "validity": 85.2
+        },
+        {
+          "distance": 0.6384253872303918,
+          "diversity": 0.6025553220596622,
+          "quality": 15.0,
+          "uniqueness": 78.76601762310534,
+          "validity": 84.9
+        }
+      ],
+      "prompt_compliant": 2497,
+      "prompt_fidelity_over_attempts_pct": 83.23333333333333,
+      "prompt_fidelity_over_commits_pct": 96.89561505626698,
+      "task": "motif_extension"
+    },
+    {
+      "arm": "attachment",
+      "attempts": 3000,
+      "committed": 2813,
+      "fragment_containing_committed": 2812,
+      "official_chemical_mean": {
+        "distance": 0.6675402469697439,
+        "diversity": 0.5866818955586913,
+        "quality": 28.066666666666666,
+        "uniqueness": 95.88780268811472,
+        "validity": 93.76666666666665
+      },
+      "official_chemical_std": {
+        "distance": 0.0011934859040151206,
+        "diversity": 0.0010233482906800593,
+        "quality": 0.7760297817881872,
+        "uniqueness": 0.18995969316695033,
+        "validity": 0.3091206165165258
+      },
+      "per_seed": [
+        {
+          "distance": 0.668808287252623,
+          "diversity": 0.5852348560894589,
+          "quality": 29.0,
+          "uniqueness": 95.81771479389718,
+          "validity": 93.5
+        },
+        {
+          "distance": 0.6659415153246043,
+          "diversity": 0.5873849173197623,
+          "quality": 28.1,
+          "uniqueness": 96.14744136547164,
+          "validity": 94.2
+        },
+        {
+          "distance": 0.6678709383320043,
+          "diversity": 0.5874259132668527,
+          "quality": 27.1,
+          "uniqueness": 95.69825190497535,
+          "validity": 93.6
+        }
+      ],
+      "prompt_compliant": 2525,
+      "prompt_fidelity_over_attempts_pct": 84.16666666666667,
+      "prompt_fidelity_over_commits_pct": 89.7618201208674,
+      "task": "scaffold_decoration"
+    },
+    {
+      "arm": "attachment",
+      "attempts": 3000,
+      "committed": 2809,
+      "fragment_containing_committed": 2806,
+      "official_chemical_mean": {
+        "distance": 0.6422776837267625,
+        "diversity": 0.7263357006001847,
+        "quality": 37.733333333333334,
+        "uniqueness": 97.59086432589329,
+        "validity": 93.63333333333333
+      },
+      "official_chemical_std": {
+        "distance": 0.001520292904661475,
+        "diversity": 0.0025311490367750994,
+        "quality": 0.8653836657164783,
+        "uniqueness": 0.5843117414811588,
+        "validity": 0.16996731711975635
+      },
+      "per_seed": [
+        {
+          "distance": 0.6424524363101254,
+          "diversity": 0.7296424155563408,
+          "quality": 37.9,
+          "uniqueness": 97.99686223941544,
+          "validity": 93.8
+        },
+        {
+          "distance": 0.6403344971201776,
+          "diversity": 0.7234952035689785,
+          "quality": 36.6,
+          "uniqueness": 96.76456400742116,
+          "validity": 93.4
+        },
+        {
+          "distance": 0.6440461177499845,
+          "diversity": 0.7258694826752348,
+          "quality": 38.7,
+          "uniqueness": 98.01116673084329,
+          "validity": 93.7
+        }
+      ],
+      "prompt_compliant": 2806,
+      "prompt_fidelity_over_attempts_pct": 93.53333333333333,
+      "prompt_fidelity_over_commits_pct": 99.8932004271983,
+      "task": "superstructure_generation"
+    }
+  ]
+}

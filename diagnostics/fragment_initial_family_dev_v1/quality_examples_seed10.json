@@ -1,0 +1,223 @@
+{
+  "input_sha256": "08bdcdac176f812a09f4664feed402dab1b451a9d4db49ba981034fd44274072",
+  "rows": [
+    {
+      "arm": "baseline",
+      "attempt_index": 2,
+      "drug": "ERLOTINIB",
+      "qed": 0.6812414999809471,
+      "quality_pass": true,
+      "sa": 2.3482460666801277,
+      "smiles": "C=C(C)C=Cc1ccc2c(Nc3ccccc3F)ncnc2c1"
+    },
+    {
+      "arm": "baseline",
+      "attempt_index": 5,
+      "drug": "ERLOTINIB",
+      "qed": 0.6164948778213283,
+      "quality_pass": true,
+      "sa": 2.0176240496645246,
+      "smiles": "CC(C)COCCOc1ccc(Nc2ncnc3ccccc23)cc1"
+    },
+    {
+      "arm": "baseline",
+      "attempt_index": 8,
+      "drug": "ERLOTINIB",
+      "qed": 0.6562698092575401,
+      "quality_pass": true,
+      "sa": 1.9596321446493583,
+      "smiles": "CCCOc1ccc(Nc2nc(CCC)nc3ccccc23)cc1"
+    },
+    {
+      "arm": "baseline",
+      "attempt_index": 0,
+      "drug": "ERLOTINIB",
+      "qed": 0.40388797644082725,
+      "quality_pass": false,
+      "sa": 2.3069505563683066,
+      "smiles": "COc1cc(Nc2ncnc3ccc(Cl)cc23)ccc1C(=O)OCCOCCO"
+    },
+    {
+      "arm": "baseline",
+      "attempt_index": 1,
+      "drug": "ERLOTINIB",
+      "qed": 0.3513629561780466,
+      "quality_pass": false,
+      "sa": 2.260901629272233,
+      "smiles": "CCCCCCCCOc1ccc(OC)c(Nc2nc(N(C)C)nc3ccccc23)c1"
+    },
+    {
+      "arm": "baseline",
+      "attempt_index": 3,
+      "drug": "ERLOTINIB",
+      "qed": 0.549072729027568,
+      "quality_pass": false,
+      "sa": 2.33954491185907,
+      "smiles": "CCOc1ccc(Nc2nc(CCOC(=O)C(C)(C)C)nc3ccc(F)cc23)cc1"
+    },
+    {
+      "arm": "conditioned",
+      "attempt_index": 4,
+      "drug": "ERLOTINIB",
+      "qed": 0.7307097332735462,
+      "quality_pass": true,
+      "sa": 2.0924743788208797,
+      "smiles": "COc1ccccc1Nc1ncnc2ccc(NC(=O)C(C)(C)C)cc12"
+    },
+    {
+      "arm": "conditioned",
+      "attempt_index": 5,
+      "drug": "ERLOTINIB",
+      "qed": 0.7363372844157969,
+      "quality_pass": true,
+      "sa": 2.298088261037467,
+      "smiles": "C#CCc1ccc2c(Nc3ccccc3)nc(C)nc2c1"
+    },
+    {
+      "arm": "conditioned",
+      "attempt_index": 8,
+      "drug": "ERLOTINIB",
+      "qed": 0.7013057736626568,
+      "quality_pass": true,
+      "sa": 2.674534601183039,
+      "smiles": "COC(C)Nc1cccc(Nc2ncnc3ccccc23)c1"
+    },
+    {
+      "arm": "conditioned",
+      "attempt_index": 0,
+      "drug": "ERLOTINIB",
+      "qed": 0.4095975772162921,
+      "quality_pass": false,
+      "sa": 2.3423050446626625,
+      "smiles": "CCCC(=O)CC(=O)NCc1nc(Nc2ccc(O)cc2)c2ccccc2n1"
+    },
+    {
+      "arm": "conditioned",
+      "attempt_index": 1,
+      "drug": "ERLOTINIB",
+      "qed": 0.5458465368761317,
+      "quality_pass": false,
+      "sa": 2.500065316650172,
+      "smiles": "CCC(=O)N(F)C(=O)c1ccc(Nc2nc(Cl)nc3ccccc23)cc1"
+    },
+    {
+      "arm": "conditioned",
+      "attempt_index": 2,
+      "drug": "ERLOTINIB",
+      "qed": 0.4750146218160967,
+      "quality_pass": false,
+      "sa": 2.3529053051300437,
+      "smiles": "CC(C)(CCNc1nc(Nc2ccccc2Cl)c2ccccc2n1)CC(=O)O"
+    },
+    {
+      "arm": "baseline",
+      "attempt_index": 2,
+      "drug": "FUTIBATINIB",
+      "qed": 0.735306140695487,
+      "quality_pass": true,
+      "sa": 3.254194223935918,
+      "smiles": "OCCN1CCC(n2nc(C#Cc3ccccc3)c3cncnc32)C1"
+    },
+    {
+      "arm": "baseline",
+      "attempt_index": 4,
+      "drug": "FUTIBATINIB",
+      "qed": 0.643768584073669,
+      "quality_pass": true,
+      "sa": 3.360831577120484,
+      "smiles": "CNC(=O)N1CCC(n2nc(C#Cc3ccc(Cl)cc3)c3c(C)ncnc32)C1"
+    },
+    {
+      "arm": "baseline",
+      "attempt_index": 5,
+      "drug": "FUTIBATINIB",
+      "qed": 0.6909819661103511,
+      "quality_pass": true,
+      "sa": 3.270689401152355,
+      "smiles": "CCCN1CCC(n2nc(C#Cc3ccc(C(=O)O)cc3)c3c(C)ncnc32)C1"
+    },
+    {
+      "arm": "baseline",
+      "attempt_index": 0,
+      "drug": "FUTIBATINIB",
+      "qed": 0.5097329344776681,
+      "quality_pass": false,
+      "sa": 3.7610774038923864,
+      "smiles": "CC(C)CC(=O)ON1CCC(n2nc(C#Cc3ccc(F)c(N)c3)c3cncnc32)C1"
+    },
+    {
+      "arm": "baseline",
+      "attempt_index": 1,
+      "drug": "FUTIBATINIB",
+      "qed": 0.5426108395083521,
+      "quality_pass": false,
+      "sa": 3.5798459753085003,
+      "smiles": "CNCOc1ccc(C#Cc2nn(C3CCNC3)c3ncnc(C)c23)cc1"
+    },
+    {
+      "arm": "baseline",
+      "attempt_index": 9,
+      "drug": "FUTIBATINIB",
+      "qed": 0.6028807648627972,
+      "quality_pass": false,
+      "sa": 5.0911314099634755,
+      "smiles": "CC(C)(C)C1C(=O)C2CN1CC2n1nc(C#Cc2ccccc2)c2cncnc21"
+    },
+    {
+      "arm": "conditioned",
+      "attempt_index": 1,
+      "drug": "FUTIBATINIB",
+      "qed": 0.6661553628185186,
+      "quality_pass": true,
+      "sa": 3.7858076615975937,
+      "smiles": "CNC(=O)C1(n2nc(C#Cc3ccccc3)c3cncnc32)CCNC1"
+    },
+    {
+      "arm": "conditioned",
+      "attempt_index": 3,
+      "drug": "FUTIBATINIB",
+      "qed": 0.6814134234085473,
+      "quality_pass": true,
+      "sa": 3.21319069614448,
+      "smiles": "CCN1CCC(n2nc(C#Cc3ccccc3)c3cncnc32)C1"
+    },
+    {
+      "arm": "conditioned",
+      "attempt_index": 4,
+      "drug": "FUTIBATINIB",
+      "qed": 0.6875356862801237,
+      "quality_pass": true,
+      "sa": 3.455947821268758,
+      "smiles": "O=C1NCCC1n1nc(C#Cc2ccccc2)c2cncnc21"
+    },
+    {
+      "arm": "conditioned",
+      "attempt_index": 0,
+      "drug": "FUTIBATINIB",
+      "qed": 0.2526642682294621,
+      "quality_pass": false,
+      "sa": 3.5871513899063725,
+      "smiles": "O=CCC(=O)OCCN1CCC(n2nc(C#Cc3cccc(Cl)c3)c3cncnc32)C1"
+    },
+    {
+      "arm": "conditioned",
+      "attempt_index": 2,
+      "drug": "FUTIBATINIB",
+      "qed": 0.3722245031985772,
+      "quality_pass": false,
+      "sa": 3.955382574003174,
+      "smiles": "COCC(C)(C)OOc1cc(C#Cc2nn(C3CCNC3)c3ncncc23)ccc1C"
+    },
+    {
+      "arm": "conditioned",
+      "attempt_index": 6,
+      "drug": "FUTIBATINIB",
+      "qed": 0.7046250175644296,
+      "quality_pass": false,
+      "sa": 4.258485481373176,
+      "smiles": "CCC(C)OC1CC(n2nc(C#Cc3ccccc3)c3cncnc32)CN1O"
+    }
+  ],
+  "schema": "fragment_initial_family_quality_grid_v1",
+  "selection": "first three distinct emitted quality pass and first three quality fail per drug/arm in attempt order"
+}
