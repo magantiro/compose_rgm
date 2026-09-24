@@ -1,0 +1,379 @@
+{
+ "schema_version": "pmo_reservoir_visual_v1",
+ "measured_at_utc": "2026-09-24T08:45:51.996971+00:00",
+ "oracle_calls_spent": 0,
+ "status": "DIAGNOSTIC ONLY -- target/MCS/motif annotations must not enter production selection",
+ "headline": "THE THREE ROWS FAIL FOR DIFFERENT REASONS; ONE FIX DOES NOT COVER THEM",
+ "per_task": {
+  "thiothixene_rediscovery": {
+   "binding_constraint": "RESERVOIR DEPTH",
+   "evidence": "The defining thioxanthene tricycle is absent from the top 40 and the best donor sits at RANK 41 -- one position outside the cutoff. That molecule carries the tricycle AND the propylidene chain AND a basic amine terminus (MCS 17/30, oracle 0.349). A second appears at rank 135 (MCS 17/30), a third at 2861. Meanwhile the live COMPOSE leader (0.450) is a BIPHENYL with no tricycle at all.",
+   "implication": "Deepening the reservoir is decisive here and nothing else can substitute."
+  },
+  "troglitazone_rediscovery": {
+   "binding_constraint": "COMBINATION, NOT DEPTH",
+   "evidence": "The two complementary halves are ALREADY inside the top 40, at ranks 1 and 2. Rank 1 (oracle 0.391, MCS 14/31) is O=C1NC(=O)[C@H](Cc2ccc(F)cc2)S1 -- exactly the thiazolidinedione borne on a benzyl aryl, the half the leader lacks. Rank 2 (0.370, MCS 16/31) is the chromanol half. The live leader ALREADY carries the chromanol half and fails on the other one.",
+   "implication": "Depth is NOT the constraint for this row. The material is present and the controller cannot COMBINE it -- which is precisely the deduplicated transplant lane's job, and the strongest available argument for that lane."
+  },
+  "celecoxib_rediscovery": {
+   "binding_constraint": "WEAKEST CASE OF THE THREE",
+   "evidence": "The top 40 already holds usable pyrazole material: rank 25 gives the best MCS in the displayed set at 16/26, and ranks 3/6/13/21/24 are all pyrazoles. The deeper diaryl-azoles at ranks 149/168/222/224 carry LOWER MCS (8-11). Depth multiplies the diaryl-azole COUNT 2->36 but does not obviously supply better single donors.",
+   "implication": "Report the depth gain here as modest and count-based, not as better material. Do not generalise thiothixene's result to this row."
+  }
+ },
+ "leader_quality_warning": "The celecoxib leader, scored 0.500, is B=c1c(=Cc2ccc(OCO)cc2)c(C(F)(F)F)nn1-c1ccc(S(N)(=O)=O)cc1 -- a BORON-bearing exocyclic quinoid. It carries the right fingerprint fragments (pyrazole, CF3, benzenesulfonamide) without being a plausible molecule. This is the off-manifold reward-hacking pattern already recorded for fingerprint oracles, now visible on a rediscovery row, and it is an argument for manifold-respecting proposals independent of any reservoir change.",
+ "candidates": {
+  "celecoxib_rediscovery": {
+   "reference": "CC1=CC=C(C=C1)C1=CC(=NN1C1=CC=C(C=C1)S(N)(=O)=O)C(F)(F)F",
+   "leader": {
+    "smiles": "B=c1c(=Cc2ccc(OCO)cc2)c(C(F)(F)F)nn1-c1ccc(S(N)(=O)=O)cc1",
+    "score": 0.5,
+    "charged": 1751,
+    "label": "scored_celecoxib_rediscovery_seed20260973_20260924T013046Z"
+   },
+   "candidates": [
+    {
+     "pattern": "diaryl_azole",
+     "rank": 9,
+     "oracle_score": 0.42857142857142855,
+     "smiles": "NS(=O)(=O)c1ccc(-n2ccnc2-c2ccc(O)c(C(=O)[O-])c2)cc1",
+     "mcs_atoms": 11,
+     "scaffold": "c1ccc(-c2nccn2-c2ccccc2)cc1",
+     "motif_tags": [
+      "diaryl_azole",
+      "sulfonamide_ph"
+     ]
+    },
+    {
+     "pattern": "diaryl_azole",
+     "rank": 26,
+     "oracle_score": 0.40336134453781514,
+     "smiles": "Cc1ccc(-n2c(SCC(=O)Nc3ccc(S(N)(=O)=O)cc3)nnc2-c2ccccc2F)cc1",
+     "mcs_atoms": 10,
+     "scaffold": "O=C(CSc1nnc(-c2ccccc2)n1-c1ccccc1)Nc1ccccc1",
+     "motif_tags": [
+      "diaryl_azole",
+      "sulfonamide_ph"
+     ]
+    },
+    {
+     "pattern": "diaryl_azole",
+     "rank": 149,
+     "oracle_score": 0.3627450980392157,
+     "smiles": "CCSc1ncc(-c2nccn2-c2ccc(S(N)(=O)=O)cc2)cn1",
+     "mcs_atoms": 11,
+     "scaffold": "c1ccc(-n2ccnc2-c2cncnc2)cc1",
+     "motif_tags": [
+      "diaryl_azole",
+      "sulfonamide_ph"
+     ]
+    },
+    {
+     "pattern": "diaryl_azole",
+     "rank": 168,
+     "oracle_score": 0.35964912280701755,
+     "smiles": "Cc1ccc(-c2cn3c4c(=O)n(C)c(=O)n(C)c4nc3n2-c2ccc(O)cc2)cc1",
+     "mcs_atoms": 8,
+     "scaffold": "O=c1[nH]c(=O)c2c(nc3n(-c4ccccc4)c(-c4ccccc4)cn23)[nH]1",
+     "motif_tags": [
+      "diaryl_azole"
+     ]
+    },
+    {
+     "pattern": "diaryl_azole",
+     "rank": 222,
+     "oracle_score": 0.3524590163934426,
+     "smiles": "Cc1ccc(-n2c(SCC(=O)Nc3cccc(C(F)(F)F)c3)nnc2-c2ccccn2)cc1",
+     "mcs_atoms": 7,
+     "scaffold": "O=C(CSc1nnc(-c2ccccn2)n1-c1ccccc1)Nc1ccccc1",
+     "motif_tags": [
+      "diaryl_azole",
+      "CF3"
+     ]
+    },
+    {
+     "pattern": "diaryl_azole",
+     "rank": 224,
+     "oracle_score": 0.3523809523809524,
+     "smiles": "CNC(=O)CSc1nnc(-c2ccc(C)cc2)n1-c1ccc(C)cc1",
+     "mcs_atoms": 8,
+     "scaffold": "c1ccc(-c2nncn2-c2ccccc2)cc1",
+     "motif_tags": [
+      "diaryl_azole"
+     ]
+    },
+    {
+     "pattern": "pyrazole",
+     "rank": 3,
+     "oracle_score": 0.4387755102040816,
+     "smiles": "Cc1ccc(-c2nn(Cc3cccc(C(F)(F)F)c3)cc2C=O)cc1",
+     "mcs_atoms": 12,
+     "scaffold": "c1ccc(Cn2ccc(-c3ccccc3)n2)cc1",
+     "motif_tags": [
+      "pyrazole",
+      "CF3"
+     ]
+    },
+    {
+     "pattern": "pyrazole",
+     "rank": 6,
+     "oracle_score": 0.43157894736842106,
+     "smiles": "COC(=O)c1ccc(-n2ncc(-c3ccc(C)cc3)c2N)cc1",
+     "mcs_atoms": 11,
+     "scaffold": "c1ccc(-c2cnn(-c3ccccc3)c2)cc1",
+     "motif_tags": [
+      "pyrazole"
+     ]
+    },
+    {
+     "pattern": "pyrazole",
+     "rank": 13,
+     "oracle_score": 0.4247787610619469,
+     "smiles": "Cc1cccc(-c2nn(-c3ccc(F)cc3)cc2C(=O)Nc2ccc(S(N)(=O)=O)cc2)c1",
+     "mcs_atoms": 11,
+     "scaffold": "O=C(Nc1ccccc1)c1cn(-c2ccccc2)nc1-c1ccccc1",
+     "motif_tags": [
+      "pyrazole",
+      "sulfonamide_ph"
+     ]
+    },
+    {
+     "pattern": "pyrazole",
+     "rank": 21,
+     "oracle_score": 0.41237113402061853,
+     "smiles": "Cc1ccc(S(=O)(=O)NCc2ccc(-n3cccn3)cc2)cc1",
+     "mcs_atoms": 11,
+     "scaffold": "O=S(=O)(NCc1ccc(-n2cccn2)cc1)c1ccccc1",
+     "motif_tags": [
+      "pyrazole",
+      "sulfonamide_ph"
+     ]
+    },
+    {
+     "pattern": "pyrazole",
+     "rank": 24,
+     "oracle_score": 0.40594059405940597,
+     "smiles": "Cc1ccc(N(C)S(=O)(=O)c2c(C)nn(-c3ccc(C)cc3)c2C)cc1",
+     "mcs_atoms": 12,
+     "scaffold": "O=S(=O)(Nc1ccccc1)c1cnn(-c2ccccc2)c1",
+     "motif_tags": [
+      "pyrazole"
+     ]
+    },
+    {
+     "pattern": "pyrazole",
+     "rank": 25,
+     "oracle_score": 0.4036697247706422,
+     "smiles": "CC1CCN(C(=O)c2ccc(-n3nc(C(F)(F)F)cc3-c3cccs3)cc2)CC1",
+     "mcs_atoms": 16,
+     "scaffold": "O=C(c1ccc(-n2nccc2-c2cccs2)cc1)N1CCCCC1",
+     "motif_tags": [
+      "pyrazole",
+      "CF3"
+     ]
+    }
+   ],
+   "image": "diagnostics/pmo_reservoir_visual_v1/celecoxib_rediscovery.png"
+  },
+  "troglitazone_rediscovery": {
+   "reference": "Cc1c(C)c2OC(C)(COc3ccc(CC4SC(=O)NC4=O)cc3)CCc2c(C)c1O",
+   "leader": {
+    "smiles": "Cc1c(C)c2c(c(C)c1O)CCC(C)(CN1C3C(=O)c4c(nc[nH]c4=O)C31)O2",
+    "score": 0.45535714285714285,
+    "charged": 703,
+    "label": "scored_troglitazone_rediscovery_seed20264973_20260924T013046Z"
+   },
+   "candidates": [
+    {
+     "pattern": "TZD",
+     "rank": 1,
+     "oracle_score": 0.391304347826087,
+     "smiles": "O=C1NC(=O)[C@H](Cc2ccc(F)cc2)S1",
+     "mcs_atoms": 14,
+     "scaffold": "O=C1NC(=O)C(Cc2ccccc2)S1",
+     "motif_tags": [
+      "TZD"
+     ]
+    },
+    {
+     "pattern": "TZD",
+     "rank": 3,
+     "oracle_score": 0.34285714285714286,
+     "smiles": "O=C1NC(=O)[C@H](Cc2ccc(-n3cccn3)cc2)S1",
+     "mcs_atoms": 14,
+     "scaffold": "O=C1NC(=O)C(Cc2ccc(-n3cccn3)cc2)S1",
+     "motif_tags": [
+      "TZD"
+     ]
+    },
+    {
+     "pattern": "TZD",
+     "rank": 55,
+     "oracle_score": 0.2786885245901639,
+     "smiles": "CCCCc1ccc(-n2c(C)cc(/C=C3/SC(=O)NC3=O)c2C)cc1",
+     "mcs_atoms": 7,
+     "scaffold": "O=C1NC(=O)C(=Cc2ccn(-c3ccccc3)c2)S1",
+     "motif_tags": [
+      "TZD"
+     ]
+    },
+    {
+     "pattern": "TZD",
+     "rank": 91,
+     "oracle_score": 0.27102803738317754,
+     "smiles": "Cc1ccccc1NC(=O)C[C@@H]1SC(=O)NC1=O",
+     "mcs_atoms": 8,
+     "scaffold": "O=C(CC1SC(=O)NC1=O)Nc1ccccc1",
+     "motif_tags": [
+      "TZD"
+     ]
+    },
+    {
+     "pattern": "TZD",
+     "rank": 195,
+     "oracle_score": 0.25984251968503935,
+     "smiles": "Cc1ccc(C)c(N2C(=O)S[C@@H](CC(=O)Nc3ccc(O)cc3C)C2=O)c1",
+     "mcs_atoms": 8,
+     "scaffold": "O=C(CC1SC(=O)N(c2ccccc2)C1=O)Nc1ccccc1",
+     "motif_tags": [
+      "TZD",
+      "phenol"
+     ]
+    },
+    {
+     "pattern": "TZD",
+     "rank": 212,
+     "oracle_score": 0.25862068965517243,
+     "smiles": "CCCCCCOc1ccc(/C=C2\\SC(=O)NC2=O)cc1",
+     "mcs_atoms": 9,
+     "scaffold": "O=C1NC(=O)C(=Cc2ccccc2)S1",
+     "motif_tags": [
+      "TZD",
+      "phenol"
+     ]
+    },
+    {
+     "pattern": "chroman",
+     "rank": 2,
+     "oracle_score": 0.3697478991596639,
+     "smiles": "Cc1c(C)c2c(c(C)c1O)CC[C@@](C)(C(=O)N1CCc3c(nc[nH]c3=O)C1)O2",
+     "mcs_atoms": 16,
+     "scaffold": "O=C(C1CCc2ccccc2O1)N1CCc2c(nc[nH]c2=O)C1",
+     "motif_tags": [
+      "chroman",
+      "phenol"
+     ]
+    },
+    {
+     "pattern": "chroman",
+     "rank": 7,
+     "oracle_score": 0.30935251798561153,
+     "smiles": "Cc1c(C)c2c(OCC(=O)NCc3ccc4c(c3)OCO4)cc3c(c2oc1=O)CCC(C)(C)O3",
+     "mcs_atoms": 12,
+     "scaffold": "O=C(COc1cc2c(c3oc(=O)ccc13)CCCO2)NCc1ccc2c(c1)OCO2",
+     "motif_tags": [
+      "chroman",
+      "phenol"
+     ]
+    },
+    {
+     "pattern": "chroman",
+     "rank": 64,
+     "oracle_score": 0.2755905511811024,
+     "smiles": "Cc1c(C)c2c(OCC(=O)N[C@H](C)CO)cc3c(c2oc1=O)CCC(C)(C)O3",
+     "mcs_atoms": 12,
+     "scaffold": "O=c1ccc2ccc3c(c2o1)CCCO3",
+     "motif_tags": [
+      "chroman",
+      "phenol"
+     ]
+    },
+    {
+     "pattern": "chroman",
+     "rank": 103,
+     "oracle_score": 0.2695035460992908,
+     "smiles": "COc1cc2c(c3oc(=O)c(CC(=O)N=c4[nH]c5ccccc5[nH]4)c(C)c13)CCC(C)(C)O2",
+     "mcs_atoms": 12,
+     "scaffold": "O=C(Cc1cc2ccc3c(c2oc1=O)CCCO3)N=c1[nH]c2ccccc2[nH]1",
+     "motif_tags": [
+      "chroman",
+      "phenol"
+     ]
+    },
+    {
+     "pattern": "chroman",
+     "rank": 277,
+     "oracle_score": 0.25547445255474455,
+     "smiles": "CC[C@]1(C)CC(=O)c2c(ccc3oc(C(=O)Nc4ccc(OC)c(OC)c4)c(C)c23)O1",
+     "mcs_atoms": 12,
+     "scaffold": "O=C(Nc1ccccc1)c1cc2c3c(ccc2o1)OCCC3=O",
+     "motif_tags": [
+      "chroman",
+      "phenol"
+     ]
+    },
+    {
+     "pattern": "chroman",
+     "rank": 344,
+     "oracle_score": 0.25203252032520324,
+     "smiles": "COc1ccc(N2C(=O)N[C@H]3C[C@]2(C)Oc2ccc(C)cc23)cc1",
+     "mcs_atoms": 11,
+     "scaffold": "O=C1NC2CC(Oc3ccccc32)N1c1ccccc1",
+     "motif_tags": [
+      "chroman",
+      "phenol"
+     ]
+    }
+   ],
+   "image": "diagnostics/pmo_reservoir_visual_v1/troglitazone_rediscovery.png"
+  },
+  "thiothixene_rediscovery": {
+   "reference": "CN(C)S(=O)(=O)c1ccc2Sc3ccccc3C(=CCCN4CCN(C)CC4)c2c1",
+   "leader": {
+    "smiles": "CNCCc1ccccc1-c1ccc(S(=O)(=O)N2CCN(C)CC2)cc1F",
+    "score": 0.45045045045045046,
+    "charged": 1724,
+    "label": "scored_thiothixene_rediscovery_seed20263973_20260924T013046Z"
+   },
+   "candidates": [
+    {
+     "pattern": "tricyclic_S",
+     "rank": 41,
+     "oracle_score": 0.3486238532110092,
+     "smiles": "C[NH+](C)CCC=C1c2cc(F)ccc2Sc2ccc(Cl)cc21",
+     "mcs_atoms": 17,
+     "scaffold": "C=C1c2ccccc2Sc2ccccc21",
+     "motif_tags": [
+      "thioxanthene",
+      "tricyclic_S"
+     ]
+    },
+    {
+     "pattern": "tricyclic_S",
+     "rank": 135,
+     "oracle_score": 0.33035714285714285,
+     "smiles": "C[NH+](C)CC/C=C1/c2ccccc2S(=O)(=O)c2ccc(Cl)cc21",
+     "mcs_atoms": 17,
+     "scaffold": "C=C1c2ccccc2S(=O)(=O)c2ccccc21",
+     "motif_tags": [
+      "thioxanthene",
+      "tricyclic_S"
+     ]
+    },
+    {
+     "pattern": "tricyclic_S",
+     "rank": 2861,
+     "oracle_score": 0.2706766917293233,
+     "smiles": "C[C@H]1CN(CCNC(=O)c2ccc3c(c2)S(=O)(=O)c2ccccc2C3=O)C[C@H](C)O1",
+     "mcs_atoms": 14,
+     "scaffold": "O=C(NCCN1CCOCC1)c1ccc2c(c1)S(=O)(=O)c1ccccc1C2=O",
+     "motif_tags": [
+      "thioxanthene",
+      "tricyclic_S"
+     ]
+    }
+   ],
+   "image": "diagnostics/pmo_reservoir_visual_v1/thiothixene_rediscovery.png"
+  }
+ }
+}
