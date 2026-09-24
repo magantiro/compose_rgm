@@ -204,7 +204,15 @@ def propose_linker_completion(
     molecule = Chem.MolFromSmiles(candidate.smiles)
     final_cell = (molecule.GetNumHeavyAtoms(), molecule.GetRingInfo().NumRings())
     if final_cell != cell:
-        raise RuntimeError("exact connector endpoint differs from its sampled structural cell")
+        # RDKit's symmetrized perceived-ring count is not additive for every
+        # bridged connector, even though graph cycle rank is. The joint prior
+        # sampled the declared cell, so a different exact cell is an offered
+        # proposal refusal, never an unrecorded crash or a silently relabelled
+        # accepted candidate.
+        raise LinkerProposalAbstention(
+            "exact connector endpoint differs from its sampled perceived-ring cell",
+            {**receipt, "actual_final_cell": list(final_cell)},
+        )
     return CompleteProgram(
         candidate.endpoint,
         candidate.trace,

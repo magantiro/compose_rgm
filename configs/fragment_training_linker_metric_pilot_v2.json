@@ -1,0 +1,18 @@
+{
+  "schema": "fragment_training_linker_metric_pilot_repair_v2",
+  "source_v1_manifest_sha256": "1914d308d128057d8f0011b8f1b0e226e0310c20439b9dd9c618771b72908789",
+  "source_v1_completed_attempts": 127,
+  "source_v1_completed_prompt_rows": 6,
+  "interrupted_started_attempt": "LIOTHYRONINE_007",
+  "remaining_attempts_including_explicit_replay": 73,
+  "candidate_draws_per_attempt": 8,
+  "seed": 0,
+  "max_workers": 1,
+  "repair": "classify an exact perceived-ring-cell mismatch as a recorded consumed proposal refusal, without changing the sampled cell or accepting a relabelled endpoint",
+  "forbidden": [
+    "modify source v1 artifacts",
+    "automatic retry of a v2 interrupted attempt",
+    "change catalog, prior, checkpoint, prompts, quality criterion, model selection, budgets or source v1 prefix",
+    "use QED or SA for proposal or selection"
+  ]
+}

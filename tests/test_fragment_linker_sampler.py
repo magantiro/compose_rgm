@@ -2,15 +2,22 @@
 
 from copy import deepcopy
 from dataclasses import replace
+from pathlib import Path
 
 import numpy as np
 import pytest
 from rdkit import Chem
 
 from compose_v4.benchmark import fragment_linker_sampler as sampler
-from compose_v4.benchmark.fragment_constrained import FragmentPrompt, FragmentTask
-from compose_v4.benchmark.fragment_constrained_runner import ProposalLimits
+from compose_v4.benchmark.fragment_constrained import (
+    FragmentPrompt,
+    FragmentTask,
+    load_genmol_prompts,
+)
+from compose_v4.benchmark.fragment_constrained_runner import ProposalLimits, _capped_core
+from compose_v4.benchmark.fragment_linker_assembly import _specs
 from compose_v4.benchmark.joint_completion_prior import JointCompletionPrior
+from compose_v4.benchmark.training_attachment_fragments import atom_context
 from compose_v4.rewrite.trace_shard import decode_state
 
 
@@ -171,6 +178,31 @@ def test_selected_connector_metadata_drift_fails_closed():
         sampler.propose_linker_completion(
             prompt(), runtime(raw), JointCompletionPrior(((5, 1, 1),)), np.random.default_rng(0)
         )
+
+
+def test_nonadditive_perceived_ring_count_consumes_a_refused_draw():
+    csv = Path("data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv")
+    if not csv.exists():
+        pytest.skip("documented GenMol fragment prompt asset absent")
+    query = next(
+        p
+        for p in load_genmol_prompts(csv)
+        if p.drug_name == "LIOTHYRONINE" and p.task == FragmentTask.LINKER_DESIGN
+    )
+    specs = _specs(query)
+    cores = tuple(_capped_core(text) for text in query.fragments)
+    contexts = tuple(
+        atom_context(core.GetAtomWithIdx(spec.attachment_requirements[0][0]))
+        for core, spec in zip(cores, specs, strict=True)
+    )
+    connector = "[1*]N1C2CNCC1C2[2*]"
+    library = runtime(entry(connector, contexts=contexts))
+    with pytest.raises(sampler.LinkerProposalAbstention, match="perceived-ring cell") as failure:
+        sampler.propose_linker_completion(
+            query, library, JointCompletionPrior(((21, 4, 1),)), np.random.default_rng(0)
+        )
+    assert failure.value.receipt["planned_final_cell"] == [21, 4]
+    assert failure.value.receipt["actual_final_cell"] == [21, 3]
 
 
 @pytest.mark.parametrize("score", [0.0, -np.inf])
