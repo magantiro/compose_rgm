@@ -51,11 +51,11 @@ def main() -> int:
 
     import modal
 
-    from modal_apps.pmo_fibercontrol_targets_app import derived_seed
+    from modal_apps.pmo_fibercontrol_targets_app import RUN_APP, derived_seed
 
-    function = modal.Function.from_name(
-        "compose-pmo-fibercontrol-targets", "run_target"
-    )
+    # Same override the app honours, so launcher and deployment cannot address
+    # different apps.
+    function = modal.Function.from_name(RUN_APP, "run_target")
     commit = _commit()
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
 
