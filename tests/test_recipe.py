@@ -116,3 +116,17 @@ def test_stage3_integration_smoke_recipe_is_tiny_but_semantically_matched() -> N
         "teacher_ordering",
     ):
         assert smoke[key] == production[key]
+
+
+def test_frozen_cnof_manifest_flag_survives_recipe_materialization() -> None:
+    argv = build_tracelet_recipe_argv(
+        {
+            "arguments": {
+                "train_size": 50000,
+                "frozen_cnof_split_manifest": "frozen_split.json",
+            }
+        },
+        smiles_file=Path("/guacamol/source.smiles"),
+    )
+    assert argv[:3] == ("/guacamol/source.smiles", "--train-size", "50000")
+    assert argv[-2:] == ("--frozen-cnof-split-manifest", "frozen_split.json")

@@ -26,6 +26,10 @@ from compose_v4.chem.molecular_graph import (
 from compose_v4.chem.source_prior import DegreeBoundedCarbonTreePrior
 from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.data.cnof import load_cnof_corpus_split
+from compose_v4.data.frozen_cnof_prior_split import (
+    frozen_cnof_arm_identity,
+    load_frozen_cnof_arm,
+)
 from compose_v4.data.organic_corpus import BROAD_ORGANIC_V1, load_organic_corpus_split
 from compose_v4.experiments.hierarchical_sampler import build_layered_sampler
 from compose_v4.eval.molecular_quality import molecular_quality_report
@@ -1352,6 +1356,15 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("smiles_file", type=Path)
     parser.add_argument(
+        "--frozen-cnof-split-manifest",
+        type=Path,
+        default=None,
+        help=(
+            "consume a prepared nested CNOF split without rescanning or "
+            "repartitioning the source corpus"
+        ),
+    )
+    parser.add_argument(
         "--model",
         choices=("from_scratch", "prior_only", "prior_tilted"),
         default="from_scratch",
@@ -2626,7 +2639,40 @@ def main() -> None:
     # Broad-organic B-edit uses the SHARED scope loader (the same mining/validation/eval use) so the
     # production edit path never runs the CNOF-neutral filter. The CNOF loader stays only for the de-novo
     # CNOF base / ablation (organic_vocabulary off).
-    if args.organic_vocabulary:
+    split_identity = None
+    if args.frozen_cnof_split_manifest is not None:
+        if args.organic_vocabulary or args.fast_split:
+            raise ValueError(
+                "a frozen CNOF split cannot use --organic-vocabulary or --fast-split"
+            )
+        split_identity = frozen_cnof_arm_identity(
+            args.frozen_cnof_split_manifest, train_size=args.train_size
+        )
+        expected = (
+            ("source_path", str(args.smiles_file)),
+            ("max_atoms", args.max_atoms),
+            ("validation_size", args.validation_size),
+            ("iid_test_size", args.test_size),
+        )
+        for field, observed in expected:
+            if split_identity[field] != observed:
+                raise ValueError(
+                    f"frozen CNOF {field} mismatch: manifest="
+                    f"{split_identity[field]!r}, launch={observed!r}"
+                )
+        split = load_frozen_cnof_arm(
+            args.frozen_cnof_split_manifest, train_size=args.train_size
+        )
+        corpus_scope_descriptor = {
+            "scope_name": "cnof_neutral",
+            "scope_hash": None,
+        }
+        print(
+            json.dumps({"phase": "frozen_cnof_split_loaded", **split_identity},
+                       sort_keys=True),
+            flush=True,
+        )
+    elif args.organic_vocabulary:
         corpus_scope = BROAD_ORGANIC_V1
         if args.max_atoms != corpus_scope.max_atoms:
             # EQUALITY: the padded state capacity (n_slots == --max-atoms) must EQUAL the scope bound so the
@@ -4375,6 +4421,8 @@ def main() -> None:
         "operational_horizon": args.operational_horizon,
         "provenance_sha256": args.provenance_sha256,
     }
+    if split_identity is not None:
+        checkpoint_metadata["frozen_cnof_split_identity"] = split_identity
     if canonical_successor_backend:
         if successor_runtime is None or successor_training_objective is None:
             raise RuntimeError("canonical-successor runtime was not initialized")
@@ -4622,6 +4670,9 @@ def main() -> None:
             }
             if not args.allow_resume_provenance_mismatch:
                 resume_expected["provenance_sha256"] = checkpoint_metadata["provenance_sha256"]
+            # A convenience provenance override cannot turn a different split
+            # into a valid optimizer/RNG continuation, in either direction.
+            resume_expected["frozen_cnof_split_identity"] = split_identity
             resume_mismatches = {
                 key: (
                     checkpoint_payload.get(
