@@ -314,6 +314,7 @@
     "3b11dda880760c1415b7a4bf72a73ff88c46b6915bb2142210a1b22cb7d72206"
    ],
    "braf_2": [
+    "28deab76c30c31144ef53d53888722845b935af7fe0aa7eb210434fda0cd8fe1",
     "3b11dda880760c1415b7a4bf72a73ff88c46b6915bb2142210a1b22cb7d72206"
    ],
    "fa7_0": [
@@ -416,7 +417,18 @@
    },
    "braf_2": {
     "declared": {
-     "status": "NOT_RUN"
+     "agrees_with_committed_audit": false,
+     "alternate_kernel_consulted": false,
+     "audit_delta_mislabelled": false,
+     "elapsed_seconds": 1487.76,
+     "expansion_handler_calls_observed": 0,
+     "expected_selected": 3,
+     "ladder_units": 0,
+     "ladder_unreachable": true,
+     "rung_zero_units": 0,
+     "searched": true,
+     "selected": 8,
+     "status": "RUN"
     },
     "law_off": {
      "agrees_with_committed_audit": true,
@@ -646,7 +658,7 @@
   },
   "coverage": {
    "control_rows_expected": 20,
-   "control_rows_present": 19,
+   "control_rows_present": 20,
    "trigger_rows_expected": 15,
    "trigger_rows_present": 10
   },
@@ -657,7 +669,7 @@
    "any_wall_clock_stop": false,
    "controls_declared_all_searched": true,
    "controls_law_off_reproduce_committed_audit": true,
-   "controls_run_declared": 9,
+   "controls_run_declared": 10,
    "controls_run_law_off": 10,
    "distinct_eligible_endpoints_total": 87,
    "docking_calls": 0,
@@ -687,6 +699,7 @@
    "braf_0_seed1_declared",
    "braf_1_seed0_declared",
    "braf_1_seed1_declared",
+   "braf_2_seed0_declared",
    "braf_2_seed0_law_off",
    "fa7_0_seed0_declared",
    "fa7_0_seed1_declared",
@@ -709,5 +722,5 @@
   ],
   "verdict": "INCOMPLETE"
  },
- "payload_sha256": "44309c0b0654f0ad987fd941cc0f426e0c03a0ee76eacedbf38c07f30edbb261"
+ "payload_sha256": "8bc34be42c03fa6aba5432ee287ae392e04f0cb8877dbf274e85a523d82823c5"
 }
