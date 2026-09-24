@@ -4642,3 +4642,45 @@ independently of whether fa7_0 ever closes.**
   is the RUNNING evidence, and a `PermissionDeniedError` means wrong profile, not dead work.
   Third distinct way this listing has produced a false negative (truncated description,
   stale task counts, now wrong profile).
+
+## 2026-09-24 (the donor arm charged ZERO calls for three hours and read as running)
+
+- **A FIVE-CAMPAIGN DONOR ARM WAS BELIEVED LIVE FOR ~3 HOURS AND HAD NEVER RUN A SINGLE
+  ORACLE CALL.** Every container exited `returncode: 1` within seconds:
+  `ValueError: input identity mismatch: src/compose_v4/control/dynamic_program_synthesis_v21.py:
+  expected 3e591297..., got fc769f2c...`. It was launched against a redeploy whose baked
+  SOURCE had moved while its baked CONTRACT still pinned the pre-edit hash. The fail-closed
+  chain did exactly its job -- nothing was charged -- but nothing said so either.
+- **THE TELL WAS AVAILABLE THE WHOLE TIME AND IS CHEAP: 40 of 45 campaign namespaces had a
+  `progress.json` and the 5 without were EXACTLY the donor arm.** A namespace holding
+  `provenance.json` + `stderr.log` + `stdout.log` and NO `campaign/` directory means the
+  worker subprocess RAN AND EXITED -- the app writes those logs only after `subprocess.run`
+  returns. `provenance.json` carries `returncode`, so one read settles live-vs-dead.
+  **Check `returncode` in provenance before reading any arm as running.**
+- **`modal.FunctionCall.get(timeout=0)` raising `TimeoutError` means NOT FINISHED, which
+  includes QUEUED and includes a call whose container already died and is being retried.**
+  It reported RUNNING for all five dead campaigns. Liveness must be read from the ARTIFACT
+  the work produces, not from the call handle -- the same lesson the truncated `modal app
+  list`, the stale task count and the wrong-profile listing each taught separately.
+- **This is the third distinct instance of the standing rule that an edit to a pinned file
+  landing AFTER a re-seal fails at the far end of the chain**, and the first where the cost
+  was an entire arm of a qualification panel silently producing nothing. When a session edits
+  pinned sources repeatedly, re-seal and redeploy as ONE step, and verify the first container
+  of any new arm reaches `campaign/round_0000` before treating the arm as launched.
+- **A launch receipt keyed on a second-resolution timestamp is not unique.** Two arms of one
+  matched A/B submitted back to back produced the SAME receipt path and the second silently
+  overwrote the first's call ids; they survived only in launcher stdout. The receipt path is
+  now arm-scoped and refuses to overwrite an existing file.
+- **THE ORACLE POSITIVE CONTROL EARNED ITS KEEP ON ITS FIRST REAL RUN.** From a hostile cwd
+  through `AssetPinnedOracle`: gsk3b 13/13 and jnk3 10/10 agree at `max_abs_delta 0.0`, while
+  **drd2 FAILED at `all_zero: True`, 0 of 6 references, ONE distinct observed value.** The
+  wrapper was correct -- the pinned capsule simply did not CONTAIN `drd2_current.pkl`, so the
+  lazy relative load found nothing and PyTDC's bare `except` returned 0.0. gsk3b passed
+  because its pickle is committed; jnk3 passed because it loads EAGERLY at construction and
+  caches on the instance, so it never touches the filesystem at call time. Constructing drd2
+  and jnk3 with the working directory set to the capsule put the downloads where calls look,
+  and all three then pass. **"The wrapper is correct" and "the asset is present" are two
+  different claims and only the positive control tests the second.**
+- **The capsule is gitignored, so those assets are LOCAL-ONLY and an image built before they
+  existed does not carry them.** Any launch of drd2/gsk3b/jnk3 needs a redeploy first, and a
+  fresh clone cannot build a working image at all.
