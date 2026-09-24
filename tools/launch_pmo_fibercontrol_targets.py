@@ -60,6 +60,8 @@ def main() -> int:
                         help="dedicated deduplicated transplant proposal lane")
     parser.add_argument("--donor-reservoir", action="store_true",
                         help="draw transplant donors from the scaffold-deduplicated bank")
+    parser.add_argument("--graft-init", action="store_true",
+                        help="initialize from the target-blind ring-graft entry bank")
     parser.add_argument("--prescreen", action="store_true",
                         help="initialize from the per-task ZINC250k prescreen bank")
     parser.add_argument("--receipt", default="diagnostics/pmo_fibercontrol_targets_v1")
@@ -89,6 +91,7 @@ def main() -> int:
             "prescreen": bool(arguments.prescreen),
             "transplant_share": float(arguments.transplant_share),
             "parent_weighting": arguments.parent_weighting,
+            "graft_init": bool(arguments.graft_init),
             "transplant_lane": bool(arguments.transplant_lane),
             "donor_reservoir": bool(arguments.donor_reservoir),
             "budget": arguments.budget,

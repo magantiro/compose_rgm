@@ -149,6 +149,12 @@ image = (
         ROOT / "diagnostics/pmo_prescreen_v1/initialization",
         str(REMOTE_ROOT / "diagnostics/pmo_prescreen_v1/initialization"), copy=True,
     )
+    # Graft-seeded initialization: puts a target-blind retrieved ring-swap basin in play
+    # from call 0, which is what AUC rewards. Selected per call by `graft_init`.
+    .add_local_dir(
+        ROOT / "diagnostics/pmo_prescreen_v1/graft_initialization",
+        str(REMOTE_ROOT / "diagnostics/pmo_prescreen_v1/graft_initialization"), copy=True,
+    )
     # Scaffold-deduplicated donor banks for the transplant lane. Gated zero-oracle:
     # 36->40 distinct scaffolds on thiothixene and the thioxanthene tricycle admitted,
     # consulting no deeper than oracle rank 44.
@@ -212,7 +218,9 @@ def run_target(spec: dict) -> dict:
         "CANARY_SEED": str(seed),
         "CANARY_SMILES_CACHE": str(spec.get("smiles_cache", 512)),
         "CANARY_PROPOSAL_WALL": str(spec.get("proposal_wall", 1e9)),
-        **({"PMO_PRESCREEN_INIT": str(REMOTE_ROOT / "diagnostics/pmo_prescreen_v1/initialization")}
+        **({"PMO_PRESCREEN_INIT": str(
+            REMOTE_ROOT / "diagnostics/pmo_prescreen_v1"
+            / ("graft_initialization" if spec.get("graft_init") else "initialization"))}
            if spec.get("prescreen") else {}),
         # Per-call, and read per call on the other side, so one deployment serves the
         # donor and no-donor arms and they provably share a controller build.

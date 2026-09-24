@@ -1,0 +1,28 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "scored",
+ "git_commit": "59cc7989a1dd9e4f2e5e6439995e02dd60dfc390",
+ "base_seed": 20260924,
+ "budget": 3000,
+ "submitted": [
+  {
+   "task": "thiothixene_rediscovery",
+   "prescreen": true,
+   "transplant_share": 0.0,
+   "parent_weighting": "measured_score",
+   "graft_init": false,
+   "transplant_lane": false,
+   "donor_reservoir": false,
+   "budget": 3000,
+   "rounds": 260,
+   "queries": 16,
+   "seed": 20263930,
+   "base_seed": 20260924,
+   "replicate": 6,
+   "label": "scored_thiothixene_rediscovery_seed20263930_prescreeninit_20260924T131856Z",
+   "volume": "pmo-fiber-thiothixene-rediscovery-seed20263930-prescreeninit",
+   "git_commit": "59cc7989a1dd9e4f2e5e6439995e02dd60dfc390",
+   "modal_call_id": "fc-01M39S3D6389RHC8VJGP7QWA0T"
+  }
+ ]
+}
