@@ -1,0 +1,275 @@
+{
+  "assets": {
+    "genmol/LICENSE/license_code.txt": {
+      "bytes": 11357,
+      "git_blob_sha1": "7a4a3ea2424c09fbe48d455aed1eaa94d9124835",
+      "origin": "verified_existing_cache",
+      "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/LICENSE/license_code.txt"
+    },
+    "genmol/LICENSE/license_weights.txt": {
+      "bytes": 9730,
+      "git_blob_sha1": "baf99e2e02a8a570c6cf5b0ad8b594777d50aa68",
+      "origin": "verified_existing_cache",
+      "sha256": "1dc7d3bf639a7527a0063fb035d824e0cb6e49b83694b2c877b125f1dbdb0dbb",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/LICENSE/license_weights.txt"
+    },
+    "genmol/MODEL_CARD.md": {
+      "bytes": 9173,
+      "git_blob_sha1": "0ac237b78d7f1ba989a57e0230b4080416331f43",
+      "origin": "pinned_primary_download",
+      "sha256": "70bf15b11e797069c5911bd73993494cc350ecc870accdf2e55d1824e2c9b501",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/MODEL_CARD.md"
+    },
+    "genmol/README.md": {
+      "bytes": 12232,
+      "git_blob_sha1": "df2102dbb15b34ac0f48ea307d9aaa6861b50231",
+      "origin": "pinned_primary_download",
+      "sha256": "5891b9ae1869ee55c1efa5952e11a356a02ca001f5df3b56978e480f4f55810e",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/README.md"
+    },
+    "genmol/configs/base.yaml": {
+      "bytes": 1810,
+      "git_blob_sha1": "fac902e282febeb94fa393b5384be5cb7b088ab5",
+      "origin": "pinned_primary_download",
+      "sha256": "6aab9eb079897343b9160bfc6f07bdfc1e43c1ec0df9c9e5db5a4a31cfcd2157",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/configs/base.yaml"
+    },
+    "genmol/data/len.pk": {
+      "bytes": 499487,
+      "git_blob_sha1": "31423fb3549579b76c0a2c825680e4e007eec8b0",
+      "origin": "pinned_primary_download",
+      "sha256": "9795cde72c60e9e58cd6dc99551801bdf47d00de6e060cbafb5f30584b19cf27",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/data/len.pk"
+    },
+    "genmol/scripts/exps/denovo/hparams.yaml": {
+      "bytes": 91,
+      "git_blob_sha1": "254b3f6345b12003a777c2825b1077633d87f5c5",
+      "origin": "pinned_primary_download",
+      "sha256": "42eadcb450cfc97f151157cae54d2a12ee88227d7368a9834b2fb75e40d40830",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/scripts/exps/denovo/hparams.yaml"
+    },
+    "genmol/scripts/exps/denovo/hparams_v2.yaml": {
+      "bytes": 94,
+      "git_blob_sha1": "791643da5bb2cbb40fdcd829ee440b75421e83cc",
+      "origin": "pinned_primary_download",
+      "sha256": "79b1cc67bc9434a3693799baa218c32d4dc64bf6bcb7043dc130e48b1e2f5cce",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/scripts/exps/denovo/hparams_v2.yaml"
+    },
+    "genmol/scripts/exps/denovo/run.py": {
+      "bytes": 2115,
+      "git_blob_sha1": "3831f8e54ab20f90ff12fd0a13a393841465b5ee",
+      "origin": "pinned_primary_download",
+      "sha256": "1bfb658421aa0bcd29051e7d4e936b5691597cad558471a788b7805b1a104822",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/scripts/exps/denovo/run.py"
+    },
+    "genmol/scripts/exps/frag/hparams.yaml": {
+      "bytes": 475,
+      "git_blob_sha1": "2fe5901bf6a1728b090b616ea53ccb7d05814808",
+      "origin": "pinned_primary_download",
+      "sha256": "b2b85faaef145634f43e0f27341ed4c155b68f1512886bc174b7e1a6d5e04077",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/scripts/exps/frag/hparams.yaml"
+    },
+    "genmol/scripts/exps/frag/hparams_v2.yaml": {
+      "bytes": 478,
+      "git_blob_sha1": "3e1e84fdfbe0622b5599f0f5a00300a37d7e2083",
+      "origin": "pinned_primary_download",
+      "sha256": "4314e986599ac61a5465974b29b249ddc98d56eb6f82845947f32e32b007c726",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/scripts/exps/frag/hparams_v2.yaml"
+    },
+    "genmol/scripts/exps/frag/run.py": {
+      "bytes": 4370,
+      "git_blob_sha1": "0dfe39b1fdfb69eb821ec0e985fd3c3bfbd51517",
+      "origin": "verified_existing_cache",
+      "sha256": "157be112b3beb76541c1915d78cea03c9b7a826ed4158122ff2a2d023aad456e",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/scripts/exps/frag/run.py"
+    },
+    "genmol/scripts/preprocess_data.py": {
+      "bytes": 1341,
+      "git_blob_sha1": "bdb8b5686939b3ec27eda08b27fd80b649557ec5",
+      "origin": "pinned_primary_download",
+      "sha256": "559d5e16be49b12960a45af2ec56355d3c6bccf4dba43aae960c2de2b69809d5",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/scripts/preprocess_data.py"
+    },
+    "genmol/src/genmol/model.py": {
+      "bytes": 5689,
+      "git_blob_sha1": "5582daf824f3ccb7d6e77b8a120b98ca58ae8495",
+      "origin": "pinned_primary_download",
+      "sha256": "7e6004fbb0cc22f68988d76d52b0c6066194a8a2e7a182eaadbf73dd856402ab",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/src/genmol/model.py"
+    },
+    "genmol/src/genmol/sampler.py": {
+      "bytes": 10302,
+      "git_blob_sha1": "d52fe9349fb072821499fc4472dc5655b68c52b0",
+      "origin": "pinned_primary_download",
+      "sha256": "30b2e04282440471fb9059c35fa51ad4adcda9f7a81c838e2b5ca62073d1111f",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/src/genmol/sampler.py"
+    },
+    "genmol/src/genmol/utils/utils_chem.py": {
+      "bytes": 3748,
+      "git_blob_sha1": "bb373954ade8b9cff86daa66417ba99580293a81",
+      "origin": "pinned_primary_download",
+      "sha256": "d4617be5b282c031a3dd899ffcd999f3090d14c404e649d2dbbf4cb223d8f664",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/src/genmol/utils/utils_chem.py"
+    },
+    "genmol/src/genmol/utils/utils_data.py": {
+      "bytes": 3267,
+      "git_blob_sha1": "080a7fd5354ee242f4190712b5c253c0b8d51f0d",
+      "origin": "pinned_primary_download",
+      "sha256": "9c2b07daa1577844aea8ec0597b14cb46b3149c2ea0d137aa21d25231fe4edf5",
+      "url": "https://raw.githubusercontent.com/NVIDIA-BioNeMo/genmol/add09fc83b7255bd09c797e527c0f4b51f5fb7c1/src/genmol/utils/utils_data.py"
+    },
+    "ivg/LICENSE": {
+      "bytes": 19559,
+      "git_blob_sha1": "b1b08c760512915eccd8bce2550f275397283ab8",
+      "origin": "verified_existing_cache",
+      "sha256": "0b7d1874c1d2b3bbb9f279c79263a601f3565c5d580ee142e8ee95ceb5f1cf22",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/LICENSE"
+    },
+    "ivg/README.md": {
+      "bytes": 24971,
+      "git_blob_sha1": "4fa973f25aee7aebf83e7829940aa0e6ba3f83e2",
+      "origin": "pinned_primary_download",
+      "sha256": "a5ae0d826fc458caa1bdfa0a4d8f23927da33cea39188c3e4375a55164de6b80",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/README.md"
+    },
+    "ivg/configs/zinc_dist.pt": {
+      "bytes": 2020,
+      "git_blob_sha1": "5d983a8435f9069d0b2000bf119adfa684417333",
+      "origin": "pinned_primary_download",
+      "sha256": "af1945a2b57b0bfe04c39c6e566cc9f85f0c2b552b28839b3d1b62878008a5f9",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/configs/zinc_dist.pt"
+    },
+    "ivg/in_virtuo_gen/evaluation/denovo.py": {
+      "bytes": 13814,
+      "git_blob_sha1": "81aa37a7d6a063f937d847b852b6cd4a4e4f8042",
+      "origin": "pinned_primary_download",
+      "sha256": "877b8b22dc71a94159ec85637147a24606b072a1b7258f98e741f1e5c648ed4f",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/in_virtuo_gen/evaluation/denovo.py"
+    },
+    "ivg/in_virtuo_gen/evaluation/downstream.py": {
+      "bytes": 28675,
+      "git_blob_sha1": "539de4f8133fa4261429ef0193c677e270b639ad",
+      "origin": "verified_existing_cache",
+      "sha256": "ab34f586b41f1ad6e21cd933b08e7ff86eb44711c9c9a4c31c29f894cc9c7b50",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/in_virtuo_gen/evaluation/downstream.py"
+    },
+    "ivg/in_virtuo_gen/generate.py": {
+      "bytes": 1726,
+      "git_blob_sha1": "1345117b1411e7d3ccc9c8a55e7e33713f5a2e0f",
+      "origin": "pinned_primary_download",
+      "sha256": "1a4957f31c8e8ec8124ccddf2d602910fbad0ad185232c36b0e80864b99eeba2",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/in_virtuo_gen/generate.py"
+    },
+    "ivg/in_virtuo_gen/models/invirtuobase.py": {
+      "bytes": 22568,
+      "git_blob_sha1": "684b6c7f3f30fae40f960ba84fed74ddf1979fb2",
+      "origin": "pinned_primary_download",
+      "sha256": "03c85826ff40a310aee78581966dfc8c1f154ca604d70c0f270c7a09c0981211",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/in_virtuo_gen/models/invirtuobase.py"
+    },
+    "ivg/in_virtuo_gen/models/invirtuofm.py": {
+      "bytes": 19325,
+      "git_blob_sha1": "b62db8908125a249187ba150de8c110521f6ead1",
+      "origin": "pinned_primary_download",
+      "sha256": "6a48de5fc7aed6b3336fb88b413feb0bd41bd858dbf3b12b061af5695811e7dc",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/in_virtuo_gen/models/invirtuofm.py"
+    },
+    "ivg/in_virtuo_gen/preprocess/create_mmap_buckets.py": {
+      "bytes": 14234,
+      "git_blob_sha1": "89e61070a634fb09cdcfc076ebb39b9c315eb406",
+      "origin": "pinned_primary_download",
+      "sha256": "0417dcb0fb473f0f34e042e7bcbd9b2afcb4eb298095d7c795b9a016c90b0032",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/in_virtuo_gen/preprocess/create_mmap_buckets.py"
+    },
+    "ivg/in_virtuo_gen/preprocess/preprocess_tokenize.py": {
+      "bytes": 6509,
+      "git_blob_sha1": "19a5411e89c4ba1747e82e95db756e2146d27a67",
+      "origin": "pinned_primary_download",
+      "sha256": "f6eb96f3b7d1a0e32818c3a611fad8af7281566ae400ef13478bbfcde22d3b93",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/in_virtuo_gen/preprocess/preprocess_tokenize.py"
+    },
+    "ivg/in_virtuo_gen/train_utils/metrics.py": {
+      "bytes": 7989,
+      "git_blob_sha1": "d984c9b61fc15f3b5fb9cdc67c0b22d510deb432",
+      "origin": "pinned_primary_download",
+      "sha256": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/in_virtuo_gen/train_utils/metrics.py"
+    },
+    "ivg/in_virtuo_gen/train_utils/sampling.py": {
+      "bytes": 5133,
+      "git_blob_sha1": "b846ed9b9eba9843216aa5a5c8fb3034348d54aa",
+      "origin": "pinned_primary_download",
+      "sha256": "f6b2af561a99d835ce2ae2467575a2f2b70bfc910830b6fa22bd20b0afa39f6c",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/in_virtuo_gen/train_utils/sampling.py"
+    },
+    "ivg/in_virtuo_gen/utils/fragments.py": {
+      "bytes": 25543,
+      "git_blob_sha1": "8abbb63f2af238d4c1927957c66d2048165e476f",
+      "origin": "pinned_primary_download",
+      "sha256": "8f39e9933a13286f6594a5f7f1cd835001a355f6a073312e6606ecd7e92c1bf1",
+      "url": "https://raw.githubusercontent.com/invirtuolabs/InVirtuoGen_results/b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb/in_virtuo_gen/utils/fragments.py"
+    }
+  },
+  "binary_policy": "downloaded length assets are not deserialized or executed",
+  "cached_tree_identities": {
+    "genmol": {
+      "path": "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_comparator_outputs_audit_v1/genmol_tree.json",
+      "sha256": "4c2d4111c42c1e10a95b28a149243a0c60a48981b7656fe368759ca25422adb3"
+    },
+    "ivg": {
+      "path": "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_comparator_outputs_audit_v1/ivg_tree.json",
+      "sha256": "2222930fa092e5a56f7b68f4eba29f1575893b93ea17119a6baacff8c7676326"
+    }
+  },
+  "code_revision": "91c2fb56b9d958ac5c4e24706c2c4a7ec69b0a2f",
+  "python": "3.11.13",
+  "role": "primary-source read-only audit; no generation, training, checkpoint loading or quality scoring",
+  "schema": "fragment_comparator_length_sources_v1",
+  "script_sha256": "e79c0ba6e910d22ee293e04076a736fa9f86bbd5a1a3648bb14b5ebe5aa933cc",
+  "sources": {
+    "genmol": {
+      "commit": "add09fc83b7255bd09c797e527c0f4b51f5fb7c1",
+      "paths": [
+        "README.md",
+        "MODEL_CARD.md",
+        "configs/base.yaml",
+        "src/genmol/sampler.py",
+        "src/genmol/model.py",
+        "src/genmol/utils/utils_chem.py",
+        "src/genmol/utils/utils_data.py",
+        "scripts/preprocess_data.py",
+        "scripts/exps/frag/hparams.yaml",
+        "scripts/exps/frag/hparams_v2.yaml",
+        "scripts/exps/frag/run.py",
+        "scripts/exps/denovo/hparams.yaml",
+        "scripts/exps/denovo/hparams_v2.yaml",
+        "scripts/exps/denovo/run.py",
+        "data/len.pk",
+        "LICENSE/license_code.txt",
+        "LICENSE/license_weights.txt"
+      ],
+      "repo": "NVIDIA-BioNeMo/genmol"
+    },
+    "ivg": {
+      "commit": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+      "paths": [
+        "README.md",
+        "LICENSE",
+        "in_virtuo_gen/generate.py",
+        "in_virtuo_gen/evaluation/downstream.py",
+        "in_virtuo_gen/evaluation/denovo.py",
+        "in_virtuo_gen/models/invirtuobase.py",
+        "in_virtuo_gen/models/invirtuofm.py",
+        "in_virtuo_gen/train_utils/sampling.py",
+        "in_virtuo_gen/train_utils/metrics.py",
+        "in_virtuo_gen/preprocess/create_mmap_buckets.py",
+        "in_virtuo_gen/preprocess/preprocess_tokenize.py",
+        "in_virtuo_gen/utils/fragments.py",
+        "configs/zinc_dist.pt"
+      ],
+      "repo": "invirtuolabs/InVirtuoGen_results"
+    }
+  },
+  "timestamp_utc": "2026-09-24T16:10:57.210734+00:00"
+}
