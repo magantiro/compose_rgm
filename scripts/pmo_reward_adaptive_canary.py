@@ -90,6 +90,10 @@ PRESCREEN_INIT = os.environ.get("PMO_PRESCREEN_INIT")
 #: handed to the campaign has no edit history.  Drawing that one path uniformly throws away
 #: their measured score.  Absent -> "uniform" -> byte-identical to every run so far.
 PARENT_WEIGHTING = os.environ.get("PMO_PARENT_WEIGHTING") or "uniform"
+#: Where PyTDC's relative `oracle/<name>.pkl` resolves FROM for the three asset-backed
+#: tasks. The Modal image bakes this same path.
+ORACLE_ASSET_ROOT = (os.environ.get("PMO_ORACLE_ASSET_ROOT")
+                     or "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets")
 BEAM = "diagnostics/pmo_matched_beam_v1/matched_beam_v1.json"
 BEAM_SOURCE = "scripts/pmo_matched_beam_control.py"
 POOL_TARGET = 128
@@ -107,7 +111,30 @@ def _oracle(name: str):
     rdkit.six = stub
     from tdc import Oracle
 
-    return Oracle(name=name)
+    from compose_v4.experiments.pmo_oracle_assets import (
+        AssetPinnedOracle,
+        assert_positive_control,
+        requires_positive_control,
+    )
+
+    oracle = Oracle(name=name)
+    if not requires_positive_control(name):
+        # 20 of the 23 PMO tasks are pure RDKit: no asset file, no cwd dependency.
+        return oracle
+    # drd2/gsk3b/jnk3 open `oracle/<name>.pkl` by a RELATIVE path, and gsk3b/drd2 do it
+    # LAZILY on the first call, inside tdc.Oracle.__call__'s bare `except` -- so a wrong
+    # working directory does not raise, it returns default_property 0.0 for the entire
+    # budget and writes a ledger nothing can distinguish from a real result. Pin the
+    # directory for the oracle's LIFETIME, then refuse to proceed unless known actives
+    # actually score. The control runs here, BEFORE the first charged call.
+    oracle = AssetPinnedOracle(oracle, Path(ORACLE_ASSET_ROOT), name=name)
+    report = assert_positive_control(oracle, name)
+    print(
+        f"ORACLE POSITIVE CONTROL {name}: {report['n_agreeing']}/{report['n_references']} "
+        f"agree, max_abs_delta {report['max_abs_delta']:.3g}",
+        flush=True,
+    )
+    return oracle
 
 
 def main():

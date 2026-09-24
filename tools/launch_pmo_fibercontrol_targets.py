@@ -46,29 +46,45 @@ def main() -> int:
     parser.add_argument("--base-seed", type=int, default=20260923)
     parser.add_argument("--replicate", type=int, default=0)
     parser.add_argument("--stage", choices=("smoke", "scored"), required=True)
+    parser.add_argument("--transplant-share", type=float, default=0.0,
+                        help="fraction of recombination draws using region transplant")
+    parser.add_argument("--parent-weighting", choices=("uniform", "measured_score"),
+                        default="uniform",
+                        help="bootstrap draw over charged initialization molecules; "
+                             "'uniform' is byte-identical to every run so far")
+    # Two arms of one matched A/B share task, seed and stamp, so without this they would
+    # collide on the same volume namespace and the launcher would refuse the second.
+    parser.add_argument("--label-suffix", default="",
+                        help="arm tag appended to the label and namespace")
+    parser.add_argument("--prescreen", action="store_true",
+                        help="initialize from the per-task ZINC250k prescreen bank")
     parser.add_argument("--receipt", default="diagnostics/pmo_fibercontrol_targets_v1")
     arguments = parser.parse_args()
 
     import modal
 
-    from modal_apps.pmo_fibercontrol_targets_app import derived_seed
+    from modal_apps.pmo_fibercontrol_targets_app import RUN_APP, derived_seed
 
-    function = modal.Function.from_name(
-        "compose-pmo-fibercontrol-targets", "run_target"
-    )
+    # Same override the app honours, so launcher and deployment cannot address
+    # different apps.
+    function = modal.Function.from_name(RUN_APP, "run_target")
     commit = _commit()
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
 
     submitted, labels = [], set()
     for task in arguments.targets:
         seed = derived_seed(task, arguments.base_seed, arguments.replicate)
-        label = f"{arguments.stage}_{task}_seed{seed}_{stamp}"
-        volume = f"pmo-fiber-{task.replace('_', '-')}-seed{seed}"
+        suffix = f"_{arguments.label_suffix}" if arguments.label_suffix else ""
+        label = f"{arguments.stage}_{task}_seed{seed}{suffix}_{stamp}"
+        volume = f"pmo-fiber-{task.replace('_', '-')}-seed{seed}{suffix.replace('_', '-')}"
         if label in labels or volume in {s["volume"] for s in submitted}:
             raise SystemExit(f"two targets would share a namespace: {label} / {volume}")
         labels.add(label)
         spec = {
             "task": task,
+            "prescreen": bool(arguments.prescreen),
+            "transplant_share": float(arguments.transplant_share),
+            "parent_weighting": arguments.parent_weighting,
             "budget": arguments.budget,
             "rounds": arguments.rounds,
             "queries": arguments.queries,

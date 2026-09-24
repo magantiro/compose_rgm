@@ -1,0 +1,189 @@
+{
+ "payload": {
+  "controller": {
+   "calls_per_task": 1000,
+   "continuous_retention": [
+    0.0,
+    1.0
+   ],
+   "early_family_niche_floor": true,
+   "max_rounds": 64,
+   "plateau_escape": true,
+   "program_max_blocks": 8,
+   "program_max_primitives": 32,
+   "proposal_modes": [
+    "global_explore",
+    "jump_from_elite",
+    "refine_elite"
+   ],
+   "queries_per_round": 16,
+   "recursive_archive": true,
+   "seed": 20260920,
+   "task_conditioning_in_proposal_law": false
+  },
+  "implementation_sha256": {
+   "modal_apps/pmo_population_v1_app.py": "36f49f0ecf791e6ba823a1d3f19a2b34b69cc8e269d149f3c69d1ea1b61ad88a",
+   "src/compose_v4/control/adaptive_program_optimizer.py": "dabaff25d07654abebafa3ed42ecc3c454f2d16287bd2a0f2c52f440ed7c04c7",
+   "src/compose_v4/control/anchor_focus.py": "bcddebeb5f829cc88c884b4a1fc1c9c5320388891c4e41d5960a18f76b6f89b1",
+   "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",
+   "src/compose_v4/control/dynamic_program_synthesis.py": "835fe08f3fe9ba498f316ff43421da86f5d6870e2c18d1ba7f415541fcb55560",
+   "src/compose_v4/control/dynamic_program_synthesis_v2.py": "d1c8815fba3dcef451c6f0a69f60448723083ce3b1a5e53d212ae068773f6bb1",
+   "src/compose_v4/control/dynamic_program_synthesis_v21.py": "fc769f2ceb7901df17b5f803ad843ab7ed808e4d0f64c95b69fcc78d06aa6a0a",
+   "src/compose_v4/control/pmo_channels.py": "348dcb9fe75f283061c41375f54965af06002a11da40d1946a29e7d42f98a6c8",
+   "src/compose_v4/control/pmo_credit.py": "ec1eb66589f241dec65eaa73a540f32ac8b032d7562889f7adf1a3b299834112",
+   "src/compose_v4/control/pmo_population_controller.py": "13e742fafed31fd74e72f6ff9cc5d4e343c60ae76f2ba7accab5a4d1de8826af",
+   "src/compose_v4/control/pmo_realization.py": "153d2f49b08186abff6088c1f6c462fe2d96b83ede26587b90a8504c0671b308",
+   "src/compose_v4/control/program_campaign.py": "d10f8ae09462fa78f185f601a507d653f00fde387e4742f74804065a3959989a",
+   "src/compose_v4/control/program_mutation.py": "1f017bb4d69d0b38a29c6c7e740d6857bdab0c6b5d2c28e226c918d9b99b6415",
+   "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+   "src/compose_v4/control/region_replacement_option.py": "16e8af031a18ec7f537f46faedfed21db703ccbdffe5d12caff780cfe5d91474",
+   "src/compose_v4/experiments/pmo_oracle_assets.py": "5ec0b7c9b9185cd2b8edd14c2529f37e825311a2b39d6ce71c68423ab9f4d558",
+   "src/compose_v4/experiments/pmo_population_live_parent_gate.py": "2b44294b0368b0c7f6f5c90dd7e6ae222b4ff49be1475b83fe5065f707f3e204",
+   "src/compose_v4/experiments/pmo_population_v1.py": "1c3f5f34ea5673b1006447bb00d18c30546220386d1b5660581fb6efa529accb"
+  },
+  "initialization": {
+   "all_scores_charged": true,
+   "count": 16,
+   "lock_sha256": "c8032311daa067628048679465fb4397d2a26bf0593143e3ed0a4cbec7195478",
+   "path": "diagnostics/parent_edit_cycles/prepared/init_20260921.json",
+   "sha256": "a1f7840df1f75567565de633c4df3d013c3165df3e43cbf2ac87b156d5f206ff",
+   "source_sha256": "b679b4dc54006acf570fefb80f49d83a46c18c979c9e376fdd4d37b2cec5f860",
+   "task_independent": true
+  },
+  "joint_checkpoint": {
+   "fit_scope": "shared_all_routes",
+   "path": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json",
+   "payload_sha256": "730bc905c128b9feb802262e1f98bdcb6479431b88347a05defb26c2b84fab35",
+   "sha256": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43"
+  },
+  "modal_launch_authorized": false,
+  "oracle": {
+   "adapter": "native PyTDC Oracle(name=task)",
+   "calls_include_initialization": true,
+   "direction": "maximize",
+   "environment": {
+    "numpy": "1.26.4",
+    "pandas": "2.1.4",
+    "pytdc": "1.1.15",
+    "rdkit": "2023.09.6",
+    "requests": "2.32.4",
+    "scikit_learn": "1.2.2",
+    "scipy": "1.15.0",
+    "seaborn": "0.13.2",
+    "setuptools": "75.6.0"
+   },
+   "gsk3b_asset": {
+    "bytes": 27791877,
+    "path": "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets/oracle/gsk3b_current.pkl",
+    "pytdc_dataverse_file_id": 6413412,
+    "sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5"
+   },
+   "prescreen": false,
+   "source_files": {
+    "pytdc_metadata": "0925dc34498dd5502429c6d278be70758f1d536417af9cc95392c28e014fe6e6",
+    "tdc_oracle_py": "211be401ec5f3c06ddca37e72064bbeb4de52437b218bb3f4a4a381eec1de1f5",
+    "tdc_oracles_py": "d2b2194e3573eb620759998e83d8803eacfd5cbd00531e862ebe3283c301cabe"
+   }
+  },
+  "oracle_calls_authorized": 0,
+  "prohibitions": [
+   "no oracle or Modal call under this preflight contract",
+   "no task-to-route or task-to-endpoint lookup",
+   "no frozen-parent restart described as recursive search",
+   "no T4 artifact changes"
+  ],
+  "promotion": {
+   "ivg_targets_postrun_only": {
+    "celecoxib_rediscovery": 0.798,
+    "gsk3b": 0.952,
+    "perindopril_mpo": 0.645
+   },
+   "official_10000_call_claim": false,
+   "require_beating_two_of_three": true,
+   "require_route_scale_descendant_lineage": true,
+   "third_within": 0.02
+  },
+  "realization": {
+   "binder": "compose_v4.control.pmo_realization.realize_plan_binding",
+   "call_site": "pmo_population_controller._generate_jump_pool",
+   "cost": {
+    "attempts_per_45s_lane": 6.5,
+    "beam_attempts_per_lane": 32,
+    "mean_seconds_per_attempt": 6.883,
+    "median_seconds_per_attempt": 0.288,
+    "node_budget_rationale": "Every realization the matched comparison found needed 51-55 expanded nodes, so a node budget below ~55 would discard the entire measured benefit while still paying most of the cost.",
+    "seconds_cap_12_loses_measured_realizations": 3,
+    "seconds_cap_20_retains_measured_realizations": 6,
+    "source": "diagnostics/pmo_realization_binder_cost_v1.json",
+    "throughput_statement": "MEASURED: the jump lane makes about 6.5 attempts per batch instead of up to 32.  This is the intended trade -- fewer, deeper attempts.  It is recorded so a later run is judged against it rather than against the beam's attempt count.  Raising wall_seconds is the available lever and is deliberately not taken here because it affects all three lanes."
+   },
+   "environment_caveat": "The matched comparison and the cost measurement ran on python 3.14.2 / rdkit 2025.09.6, which is NOT the pinned production image (python 3.11, rdkit 2024.3.5).  Absolute rates and absolute seconds are conditional on that chemistry kernel and must not be quoted as production numbers.  The matched comparison is internally valid because all arms ran in one process on the same pairs.",
+   "evidence": {
+    "arms": {
+     "R1_drop_environment_and_lag": {
+      "at_teacher_scale": 1,
+      "completed": 1,
+      "in_teacher_retained_band": 0,
+      "primitive_median": 31.0,
+      "retained_fraction_median": 0.963
+     },
+     "R2_plus_capacity": {
+      "at_teacher_scale": 3,
+      "completed": 3,
+      "in_teacher_retained_band": 3,
+      "primitive_median": 28.0,
+      "retained_fraction_median": 0.852
+     },
+     "v1_exact": {
+      "at_teacher_scale": 5,
+      "completed": 5,
+      "in_teacher_retained_band": 3,
+      "primitive_median": 31.0,
+      "retained_fraction_median": 0.63
+     }
+    },
+    "design": "36 matched teacher-scale (plan, parent) pairs, three arms, identical budgets, one interpreter, so the comparison between arms is internally valid.  100% of budget exhaustion was node-bound and 0% wall-bound, so the comparison is load-independent.",
+    "source": "diagnostics/pmo_realization_repair_v1.json",
+    "what_is_being_repaired": "The seven prior arms produced ZERO complete programs at teacher scale and retained_fraction 1.000 on every program: purely additive edits that removed nothing from the parent.  Retained fraction moving off 1.000 is the defect being repaired, not a side effect.",
+    "why_no_relaxation": "Both relaxations measured WORSE at teacher scale than the pinned predicate, so the repair is the SEARCH ARCHITECTURE -- a complete constraint-propagating DFS replacing a width-4 beam -- and not semantic relaxation.  Production therefore runs a single arm at the pinned role identity.  Relaxing it would trade the property being repaired for a binding-rate number."
+   },
+   "falsifier": {
+    "decision_rule": "Read realized program scale and retained fraction FIRST, from the jump lane's own accepted programs, before reading the bind rate.  A bind-rate gain with median primitives near 16 and retained fraction near 1.000 is the width-4 beam's failure reproduced at a higher rate, and is recorded as a failure of this repair.  Predeclared so a favourable bind-rate number cannot be read as success after the fact.",
+    "predeclared_before_any_scored_run": true,
+    "statement": "If PMO-v2's jump lane yields programs at retained_fraction ~1.000 with median ~16 primitives, the repair did NOT help, REGARDLESS of bind rate.",
+    "success_has_a_measured_shape": {
+     "primitive_median": 31,
+     "retained_fraction_median": 0.63,
+     "teacher_retained_band": [
+      0.52,
+      0.96
+     ]
+    }
+   },
+   "lane_wall_seconds_also_binds": true,
+   "max_realizations": 4,
+   "node_budget": 64,
+   "ranking_behaviour_preserved": "The controller ranks bindings by |retained_fraction - random retention target| and takes the minimum.  All 6 productive pairs return more than one row and 5 of 6 more than one distinct endpoint, so the ranking is not collapsed to a single binding.",
+   "replaces": "pmo_joint_dependency_jump.bind_joint_plan (width-4 beam)",
+   "role_predicate": "v1_exact",
+   "role_predicate_is_relaxed": false,
+   "seconds_cap": 20.0
+  },
+  "runtime_revision": "seed_weighting_v3: the bootstrap parent draw over charged initialization molecules moves from uniform to the archive's own 1/rank rule (initial_parent_weighting='measured_score'). An archive entry carries an EditProgram, so a molecule handed to the campaign can never be one -- measured 0 of 16 initialization molecules among 112 entries -- and the bootstrap draw is its only access path. Uses ONLY counted feedback: the rows are charged through ledger.query(role='initialization'). Absent/'uniform' reproduces v2's draw byte-identically.",
+  "schema_version": "pmo_population_controller_v1",
+  "scientific_question": "Can a PMO population controller combine task-blind route-scale dependency jumps, ordinary exploration, FiberControl allocation, and recursive descendants without restarting from frozen parents?",
+  "scored_launch_authorized": false,
+  "supersedes_payload_sha256": "af08dd4c3bf5b0b9f97a90253eed0687b7b370a947cdc2934da5749c6aef8080",
+  "task_roles": {
+   "celecoxib_rediscovery": "long-program reachability and debugging control",
+   "gsk3b": "highest-priority basin-discovery black-box test",
+   "perindopril_mpo": "jump then multi-generation descendant-refinement stress"
+  },
+  "tasks": [
+   "gsk3b",
+   "perindopril_mpo",
+   "celecoxib_rediscovery"
+  ]
+ },
+ "payload_sha256": "a38e64996bbad5301d56f8c7ad6a9ab72f0c9bf7b3b00b718bd1103339dae88e"
+}

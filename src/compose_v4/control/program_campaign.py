@@ -340,9 +340,13 @@ def run_program_campaign(
                 "endpoint": starts[at]["endpoint"],
                 "index": at,
                 "available_scored_parents": len(starts),
-                "selection": "uniform_all_scored"
-                if initial_choice is not None
-                else "legacy_round_index",
+                # Name the rule that actually drew it: an artifact labelled
+                # "uniform_all_scored" while a weighted draw ran would mislabel the arm.
+                "selection": (
+                    f"{initial_parent_weighting}_all_scored"
+                    if initial_choice is not None
+                    else "legacy_round_index"
+                ),
                 "observation_receipt": ledger.cache[starts[at]["endpoint"]]["receipt_id"],
             }
             bootstrap = True
