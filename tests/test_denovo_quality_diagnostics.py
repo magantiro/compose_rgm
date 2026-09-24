@@ -13,6 +13,7 @@ from denovo_postring_quality_audit import (
     sa_components,
 )
 from denovo_restate_prior_pilot import canonical_payload_hash, verify_contract
+from denovo_source_size_audit import carbon_branchpoints
 from rdkit import Chem
 from rdkit.Contrib.SA_Score import sascorer
 
@@ -80,3 +81,10 @@ def test_pilot_contract_fails_closed_on_payload_change(tmp_path: Path) -> None:
     path.write_text(json.dumps(contract))
     with pytest.raises(ValueError, match="contract payload SHA-256 mismatch"):
         verify_contract(path)
+
+
+def test_carbon_branchpoints_excludes_aromatic_atoms_and_rejects_bad_smiles() -> None:
+    assert carbon_branchpoints("CC(C)C") == 1
+    assert carbon_branchpoints("c1ccccc1") == 0
+    with pytest.raises(ValueError, match="invalid saved/source SMILES"):
+        carbon_branchpoints("not-a-smiles")
