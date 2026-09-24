@@ -111,5 +111,11 @@ def test_cpu_shards_partition_all_prompts_without_changing_drug_pairs():
     assert partitions[0] | partitions[1] == set(range(20))
     assert all((i in part) == (i + 1 in part) for part in partitions for i in range(0, 20, 2))
     assert all(assigned_prompt(i, 0, 1) for i in range(20))
-    with pytest.raises(ValueError, match="one or two"):
-        assigned_prompt(0, 0, 3)
+    for count in (3, 4):
+        assigned = [
+            [i for i in range(20) if assigned_prompt(i, shard, count)] for shard in range(count)
+        ]
+        assert sorted(i for part in assigned for i in part) == list(range(20))
+        assert all((i in part) == (i + 1 in part) for part in assigned for i in range(0, 20, 2))
+    with pytest.raises(ValueError, match="one to four"):
+        assigned_prompt(0, 0, 5)

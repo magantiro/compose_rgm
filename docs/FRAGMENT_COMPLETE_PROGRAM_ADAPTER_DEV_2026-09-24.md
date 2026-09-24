@@ -167,9 +167,13 @@ the unmodified worktree-base file and current file hash to
 No contract or unrelated controller file was changed to pass this test. The
 repository-wide suite has not passed or been claimed to pass for this milestone.
 
-The pilot runner now supports at most two independent one-thread CPU workers,
+The pilot runner supports at most four independent one-thread CPU workers,
 partitioned by whole drug pairs. Seeds remain per prompt; each candidate draw
 and selected attempt is checkpointed. Final reduction requires all 20 named
 prompt rows, not a cross-run glob. This is an execution-speed change only;
 proposal work and candidate law are unchanged. Worker count is part of the
 immutable pilot manifest.
+The local resource check reported 12 logical CPUs and 32 GiB RAM; the preview
+worker used about 1 GiB resident memory. Four independent workers preserve each
+prompt's RNG stream and leave other local workloads CPU/memory headroom. This
+parallelism changes wall time, not sample/candidate budgets or proposal support.

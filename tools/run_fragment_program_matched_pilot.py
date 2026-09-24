@@ -80,8 +80,8 @@ def require_qualified_support(support, support_manifest):
 
 def assigned_prompt(index, shard_index, shard_count):
     """Keep each drug's motif/decoration pair together; preserve per-prompt RNG."""
-    if shard_count not in (1, 2) or not 0 <= shard_index < shard_count:
-        raise ValueError("pilot permits one or two bounded CPU shards")
+    if shard_count not in (1, 2, 3, 4) or not 0 <= shard_index < shard_count:
+        raise ValueError("pilot permits one to four bounded CPU shards")
     return (index // 2) % shard_count == shard_index
 
 
