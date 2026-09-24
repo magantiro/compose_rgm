@@ -1813,11 +1813,11 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - **A metric that cannot vary is not a measurement.** A container census built on
   `os.uname().nodename` reported the literal string "modal" in every container. Check that a
   diagnostic's value is capable of differing before drawing an inference from its uniformity.
-- **The T4 Modal workspace is container-starved and a sibling workspace is not.** A chemistry-free,
-  volume-free scaling probe (40 tasks x 20 busy-seconds, same code, minutes apart) measured
-  `nitya` at 3 containers / 507.7 s against `rahul-94866` at 40 containers / 34.2 s -- **14.8x**.
-  The running campaigns hold `nitya`. Run zero-oracle side work on the other workspace, and re-run
-  the probe (about two cents) rather than assuming capacity.
+- **DELETED 2026-09-24: a "nitya is capped at 3 containers, rahul-94866 gives 40" note lived here
+  and was WRONG by 2026-09-24, when nitya was measured running 45 concurrent tasks.** It had
+  already been quoted once as current justification for placing new work on a different
+  workspace. Capacity is not a durable fact about a workspace -- measure it at launch time
+  (`modal app list`, task-count column) or do not claim it.
 ## 2026-09-20 (T4 region draw: the cap and the uniform weight are ONE joint defect)
 
 - **`MAX_SEGMENT_LENGTH = 8` is not a size preference, it is an EXPRESSIBILITY bound, and the
