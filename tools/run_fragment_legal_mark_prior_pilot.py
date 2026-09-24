@@ -28,7 +28,6 @@ from compose_v4.benchmark.fragment_attachment_control import AttachmentControlCo
 from compose_v4.benchmark.fragment_conditioned_sampler import SamplerConfig
 from compose_v4.benchmark.fragment_constrained import FragmentTask, load_genmol_prompts
 from compose_v4.benchmark.fragment_official_metrics import official_prompt_metrics
-from compose_v4.model.legal_mark_prior import LearnedLegalMarkPrior
 from compose_v4.rewrite.kernel import de_novo_rewrite_system
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,7 +47,7 @@ def _mean(rows: list[dict], key: str) -> float:
 
 
 def run(output: Path, *, attempts: int = 10) -> dict:
-    pilot_contract_path = ROOT / "configs/fragment_legal_mark_prior_pilot_v1.json"
+    pilot_contract_path = ROOT / "configs/fragment_learned_logit_scale_pilot_v1.json"
     pilot_contract = json.loads(pilot_contract_path.read_text())
     pilot_payload = pilot_contract["payload"]
     actual_payload_hash = hashlib.sha256(
@@ -68,8 +67,10 @@ def run(output: Path, *, attempts: int = 10) -> dict:
     # different release or substitute a local metric implementation.
     baseline_cache = ROOT.parent / "fragment-interface-ablation-20260923" / ".official_eval_cache"
     verify_only(baseline_cache)
-    if not default_cache_dir().exists():
-        copytree(baseline_cache, default_cache_dir())
+    # The first offline attempt may have left an incomplete empty cache tree.
+    # Copying the verified pinned files over that tree is safe; the following
+    # verification checks every material blob before any candidate is drawn.
+    copytree(baseline_cache, default_cache_dir(), dirs_exist_ok=True)
     verified_evaluator = verify_only()
     checkpoint = Path(official["checkpoint"]["path"])
     if _sha256(checkpoint) != official["checkpoint"]["sha256"]:
@@ -105,16 +106,13 @@ def run(output: Path, *, attempts: int = 10) -> dict:
     torch.set_num_threads(1)
     model, _meta = load_factorized_rollout_checkpoint(str(checkpoint))
     model.eval()
+    model.sampling_logit_scale = float(planned["sampling_logit_scale"])
     control = AttachmentControlConfig(
         enabled=True,
         condition_initial_locked_family=True,
         hard_lock_effective_chemistry=True,
     )
     config = SamplerConfig(**official["sampler_config"])
-    prior = LearnedLegalMarkPrior(
-        candidates=planned["legal_mark_candidates"],
-        strength=planned["learned_log_probability_strength"],
-    )
     candidate = run_task(
         model,
         de_novo_rewrite_system(),
@@ -125,7 +123,6 @@ def run(output: Path, *, attempts: int = 10) -> dict:
         samples=attempts,
         config=config,
         control=control,
-        learned_prior=prior,
     )
     if candidate["prompts_scored"] != 10 or candidate["build_failures"]:
         raise RuntimeError("pilot did not score all ten prompts")
@@ -153,9 +150,7 @@ def run(output: Path, *, attempts: int = 10) -> dict:
             [{"fidelity_rate": x["emitted_nonempty"] / attempts} for x in candidate_values],
             "fidelity_rate",
         ),
-        "prior_admitted_offers": sum(x["prior_admitted_offers"] for x in candidate_values),
-        "prior_rank_events": sum(x["prior_rank_events"] for x in candidate_values),
-        "prior_nonfirst_selections": sum(x["prior_nonfirst_selections"] for x in candidate_values),
+        "additional_model_evaluations_per_draw": 0,
     }
     result = {
         "schema": SCHEMA,
@@ -179,7 +174,7 @@ def run(output: Path, *, attempts: int = 10) -> dict:
         "implementation_sha256": {
             path: _sha256(ROOT / path)
             for path in (
-                "src/compose_v4/model/legal_mark_prior.py",
+                "src/compose_v4/model/factorized_tracelet_rate_model.py",
                 "src/compose_v4/benchmark/fragment_conditioned_sampler.py",
                 "tools/run_fragment_constrained_suite.py",
                 "tools/run_fragment_legal_mark_prior_pilot.py",
@@ -201,7 +196,7 @@ def run(output: Path, *, attempts: int = 10) -> dict:
                 "condition_initial_locked_family": True,
                 "hard_lock_effective_chemistry": True,
             },
-            "prior": {"candidates": prior.candidates, "strength": prior.strength},
+            "prior": {"sampling_logit_scale": model.sampling_logit_scale},
         },
         "summary": summary,
         "baseline": baseline,

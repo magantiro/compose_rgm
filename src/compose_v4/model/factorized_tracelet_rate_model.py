@@ -4427,6 +4427,19 @@ class FactorizedTraceletRateModel(nn.Module):
             for rule_name, family_index in MARK_RULE_TO_INDEX.items():
                 if rule_name not in allowed_rule_names:
                     enabled[family_index] = False
+        # Development-only learned-prior temperature. The model's own logits
+        # already encode its training distribution; a positive scale sharpens
+        # or flattens that distribution without introducing SA/QED, changing
+        # legal masks, or paying for extra graph encodings. Scale=1 is the
+        # historical byte-identical path, including RNG consumption.
+        sampling_logit_scale = float(getattr(self, "sampling_logit_scale", 1.0))
+        if not np.isfinite(sampling_logit_scale) or sampling_logit_scale <= 0.0:
+            raise ValueError("sampling_logit_scale must be finite and positive")
+        sampling_logits = (
+            logits
+            if sampling_logit_scale == 1.0
+            else {name: value * sampling_logit_scale for name, value in logits.items()}
+        )
         while bool(enabled.any()):
             family_logits = _masked_family_logits(
                 self._family_base_logits(batch, global_state)[0],
@@ -4434,6 +4447,8 @@ class FactorizedTraceletRateModel(nn.Module):
                 enabled,
                 rate_factorization=self.rate_factorization,
             )
+            if sampling_logit_scale != 1.0:
+                family_logits = family_logits * sampling_logit_scale
             family_probabilities = (
                 torch.softmax(family_logits, dim=-1).float().cpu().numpy()
             )
@@ -4447,7 +4462,7 @@ class FactorizedTraceletRateModel(nn.Module):
                 global_state[0],
                 pair[0],
                 masks,
-                logits,
+                sampling_logits,
                 rng,
             )
             if action is None:
