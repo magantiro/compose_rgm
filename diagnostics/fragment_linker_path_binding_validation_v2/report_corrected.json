@@ -1,0 +1,549 @@
+{
+  "baseline": {
+    "attempts": 200,
+    "commits": 24,
+    "committed_exact_chemical_validity": 1.0,
+    "emitted_nonempty": 24,
+    "fragment_containing_commits": 24,
+    "full_task_successes": 24,
+    "genuine_linker_rate_per_attempt": 0.12,
+    "genuine_linkers_longer_than_seed": 24,
+    "official_diversity": 0.1926425,
+    "official_quality_fraction": 0.06500000000000002,
+    "official_uniqueness_fraction": 0.6300000000000001,
+    "path_refusal_census": {},
+    "per_prompt": {
+      "BARICITINIB": {
+        "attempts": 20,
+        "commits": 2,
+        "emitted_nonempty": 2,
+        "fragment_containing_commits": 2,
+        "full_task_successes": 2,
+        "genuine_linkers_longer_than_seed": 2,
+        "official": {
+          "distance": 0.5757575757575757,
+          "distance_to_original_drug": 0.4273892773892774,
+          "diversity": 0.31,
+          "quality": 10.0,
+          "uniqueness": 100.0,
+          "validity": 10.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 2
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 2
+      },
+      "CYCLOTHIAZIDE": {
+        "attempts": 20,
+        "commits": 6,
+        "emitted_nonempty": 6,
+        "fragment_containing_commits": 6,
+        "full_task_successes": 6,
+        "genuine_linkers_longer_than_seed": 6,
+        "official": {
+          "distance": 0.5417946063598237,
+          "distance_to_original_drug": 0.41067643649610863,
+          "diversity": 0.46180000000000004,
+          "quality": 0.0,
+          "uniqueness": 83.33333333333334,
+          "validity": 30.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 6
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 6
+      },
+      "ELIGLUSTAT": {
+        "attempts": 20,
+        "commits": 10,
+        "emitted_nonempty": 10,
+        "fragment_containing_commits": 10,
+        "full_task_successes": 10,
+        "genuine_linkers_longer_than_seed": 10,
+        "official": {
+          "distance": 0.7234101445931149,
+          "distance_to_original_drug": 0.6738986005510972,
+          "diversity": 0.604625,
+          "quality": 40.0,
+          "uniqueness": 80.0,
+          "validity": 50.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 6,
+          "3": 3,
+          "4": 1
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 10
+      },
+      "ERLOTINIB": {
+        "attempts": 20,
+        "commits": 0,
+        "emitted_nonempty": 0,
+        "fragment_containing_commits": 0,
+        "full_task_successes": 0,
+        "genuine_linkers_longer_than_seed": 0,
+        "official": {
+          "distance": NaN,
+          "distance_to_original_drug": NaN,
+          "diversity": 0.0,
+          "quality": 0.0,
+          "uniqueness": 0.0,
+          "validity": 0.0
+        },
+        "realized_linker_length_histogram": {},
+        "seeded_linker_length": 1,
+        "valid_commits": 0
+      },
+      "FUTIBATINIB": {
+        "attempts": 20,
+        "commits": 1,
+        "emitted_nonempty": 1,
+        "fragment_containing_commits": 1,
+        "full_task_successes": 1,
+        "genuine_linkers_longer_than_seed": 1,
+        "official": {
+          "distance": 0.5294117647058824,
+          "distance_to_original_drug": 0.589041095890411,
+          "diversity": 0.0,
+          "quality": 5.0,
+          "uniqueness": 100.0,
+          "validity": 5.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 1
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 1
+      },
+      "LESINURAD": {
+        "attempts": 20,
+        "commits": 1,
+        "emitted_nonempty": 1,
+        "fragment_containing_commits": 1,
+        "full_task_successes": 1,
+        "genuine_linkers_longer_than_seed": 1,
+        "official": {
+          "distance": 0.6170212765957447,
+          "distance_to_original_drug": 0.5614035087719298,
+          "diversity": 0.0,
+          "quality": 5.0,
+          "uniqueness": 100.0,
+          "validity": 5.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 1
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 1
+      },
+      "LIOTHYRONINE": {
+        "attempts": 20,
+        "commits": 0,
+        "emitted_nonempty": 0,
+        "fragment_containing_commits": 0,
+        "full_task_successes": 0,
+        "genuine_linkers_longer_than_seed": 0,
+        "official": {
+          "distance": NaN,
+          "distance_to_original_drug": NaN,
+          "diversity": 0.0,
+          "quality": 0.0,
+          "uniqueness": 0.0,
+          "validity": 0.0
+        },
+        "realized_linker_length_histogram": {},
+        "seeded_linker_length": 1,
+        "valid_commits": 0
+      },
+      "LOVASTATIN": {
+        "attempts": 20,
+        "commits": 1,
+        "emitted_nonempty": 1,
+        "fragment_containing_commits": 1,
+        "full_task_successes": 1,
+        "genuine_linkers_longer_than_seed": 1,
+        "official": {
+          "distance": 0.452054794520548,
+          "distance_to_original_drug": 0.0,
+          "diversity": 0.0,
+          "quality": 0.0,
+          "uniqueness": 100.0,
+          "validity": 5.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 1
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 1
+      },
+      "MARIBAVIR": {
+        "attempts": 20,
+        "commits": 0,
+        "emitted_nonempty": 0,
+        "fragment_containing_commits": 0,
+        "full_task_successes": 0,
+        "genuine_linkers_longer_than_seed": 0,
+        "official": {
+          "distance": NaN,
+          "distance_to_original_drug": NaN,
+          "diversity": 0.0,
+          "quality": 0.0,
+          "uniqueness": 0.0,
+          "validity": 0.0
+        },
+        "realized_linker_length_histogram": {},
+        "seeded_linker_length": 1,
+        "valid_commits": 0
+      },
+      "SPIRAPRIL": {
+        "attempts": 20,
+        "commits": 3,
+        "emitted_nonempty": 3,
+        "fragment_containing_commits": 3,
+        "full_task_successes": 3,
+        "genuine_linkers_longer_than_seed": 3,
+        "official": {
+          "distance": 0.6788488700564972,
+          "distance_to_original_drug": 0.5347901717764731,
+          "diversity": 0.55,
+          "quality": 5.0,
+          "uniqueness": 66.66666666666666,
+          "validity": 15.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 3
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 3
+      }
+    },
+    "prompt_count": 10,
+    "realized_linker_length_histogram": {
+      "2": 20,
+      "3": 3,
+      "4": 1
+    },
+    "valid_commits": 24
+  },
+  "code_revision": "5276edc37198d87b610231fbbc21a2874eea887c",
+  "created_utc": "2026-09-24T05:01:46.373776+00:00",
+  "deltas": {
+    "genuine_linker_rate_per_attempt": 0.615,
+    "official_diversity": 0.3030488206238206,
+    "official_quality_fraction": 0.11499999999999998,
+    "official_uniqueness_fraction": 0.056458806501376024
+  },
+  "inputs": {
+    "analyzer": {
+      "path": "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-interface-ablation-20260923/scripts/analyze_fragment_linker_path_binding_validation.py",
+      "sha256": "311847d416b51f0014dfa8fc5ecb539090b851f908f511da7fa0ed6b74d0f2c1"
+    },
+    "contract": {
+      "path": "configs/fragment_linker_path_binding_validation_v2.json",
+      "sha256": "821be51f49181b7d3eac51475a810c1f26a0f3695c517813fe0b1e249d978b85"
+    },
+    "new_artifact": {
+      "path": "diagnostics/fragment_linker_path_binding_validation_v2/new_seed4_n20.json",
+      "sha256": "13fb42579ffd6a954e27167b3ca20666798f81f2a64ec03dd6a654e14f1ccc24"
+    },
+    "old_artifact": {
+      "path": "diagnostics/fragment_linker_path_binding_validation_v2/old_seed4_n20.json",
+      "sha256": "5fa21161c5f9b9b2683bf2c88a837f474f9efe5285ca591bf53a93fadd9329d5"
+    }
+  },
+  "interpretation_limit": "A numeric pass qualifies only a larger frozen test, not an official paper row; the one-atom bridge was supplied by the harness.",
+  "locked_graph_gate": "not directly observable from canonical SMILES; production RegionLock invariant and focused tests are separate evidence",
+  "numeric_gates": {
+    "committed_exact_chemical_validity": true,
+    "genuine_linker_rate": true,
+    "official_diversity": true,
+    "official_quality": true,
+    "official_uniqueness": true
+  },
+  "numeric_signal_pass": true,
+  "schema": "compose.fragment_linker_path_binding_validation_result.v1",
+  "software": {
+    "python": "3.11.13"
+  },
+  "status": "development signal only, not an official benchmark row",
+  "treatment": {
+    "attempts": 200,
+    "commits": 149,
+    "committed_exact_chemical_validity": 1.0,
+    "emitted_nonempty": 149,
+    "fragment_containing_commits": 149,
+    "full_task_successes": 147,
+    "genuine_linker_rate_per_attempt": 0.735,
+    "genuine_linkers_longer_than_seed": 147,
+    "official_diversity": 0.4956913206238206,
+    "official_quality_fraction": 0.18,
+    "official_uniqueness_fraction": 0.6864588065013761,
+    "path_refusal_census": {
+      "path_controller_refusals": 0,
+      "path_insert_refusals": 52,
+      "path_lock_refusals": 0,
+      "path_nonlengthening_refusals": 0,
+      "path_payload_absent": 68,
+      "path_payload_draws": 5105,
+      "path_payload_exceptions": 0,
+      "path_payload_found": 290,
+      "path_payload_multi_neighbor": 0,
+      "path_payload_noninsert": 4815,
+      "path_payload_rebound": 266,
+      "path_payload_wrong_site": 0,
+      "path_reroute_refusals": 10,
+      "path_transaction_offers": 358,
+      "path_transaction_refusals": 62,
+      "path_transactions": 228,
+      "path_unavailable_sites": 0
+    },
+    "per_prompt": {
+      "BARICITINIB": {
+        "attempts": 20,
+        "commits": 17,
+        "emitted_nonempty": 17,
+        "fragment_containing_commits": 17,
+        "full_task_successes": 17,
+        "genuine_linkers_longer_than_seed": 17,
+        "official": {
+          "distance": 0.6153554410180467,
+          "distance_to_original_drug": 0.49455262745448536,
+          "diversity": 0.4705555555555556,
+          "quality": 25.0,
+          "uniqueness": 52.94117647058824,
+          "validity": 85.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 11,
+          "3": 4,
+          "4": 1,
+          "5": 1
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 17
+      },
+      "CYCLOTHIAZIDE": {
+        "attempts": 20,
+        "commits": 19,
+        "emitted_nonempty": 19,
+        "fragment_containing_commits": 19,
+        "full_task_successes": 19,
+        "genuine_linkers_longer_than_seed": 19,
+        "official": {
+          "distance": 0.5688010091661974,
+          "distance_to_original_drug": 0.46836928064981986,
+          "diversity": 0.5277333333333333,
+          "quality": 0.0,
+          "uniqueness": 78.94736842105263,
+          "validity": 95.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 10,
+          "3": 4,
+          "4": 4,
+          "5": 1
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 19
+      },
+      "ELIGLUSTAT": {
+        "attempts": 20,
+        "commits": 19,
+        "emitted_nonempty": 19,
+        "fragment_containing_commits": 19,
+        "full_task_successes": 19,
+        "genuine_linkers_longer_than_seed": 19,
+        "official": {
+          "distance": 0.7457265218894014,
+          "distance_to_original_drug": 0.6420872594947443,
+          "diversity": 0.6046666666666666,
+          "quality": 50.0,
+          "uniqueness": 63.1578947368421,
+          "validity": 95.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 12,
+          "3": 6,
+          "4": 1
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 19
+      },
+      "ERLOTINIB": {
+        "attempts": 20,
+        "commits": 19,
+        "emitted_nonempty": 19,
+        "fragment_containing_commits": 19,
+        "full_task_successes": 18,
+        "genuine_linkers_longer_than_seed": 18,
+        "official": {
+          "distance": 0.7003259997689705,
+          "distance_to_original_drug": 0.8010804335962021,
+          "diversity": 0.6227692307692307,
+          "quality": 0.0,
+          "uniqueness": 68.42105263157895,
+          "validity": 95.0
+        },
+        "realized_linker_length_histogram": {
+          "1": 1,
+          "2": 11,
+          "3": 5,
+          "4": 2
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 19
+      },
+      "FUTIBATINIB": {
+        "attempts": 20,
+        "commits": 13,
+        "emitted_nonempty": 13,
+        "fragment_containing_commits": 13,
+        "full_task_successes": 13,
+        "genuine_linkers_longer_than_seed": 13,
+        "official": {
+          "distance": 0.5513201313436057,
+          "distance_to_original_drug": 0.6099593330745204,
+          "diversity": 0.45941666666666675,
+          "quality": 40.0,
+          "uniqueness": 92.3076923076923,
+          "validity": 65.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 8,
+          "3": 4,
+          "4": 1
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 13
+      },
+      "LESINURAD": {
+        "attempts": 20,
+        "commits": 11,
+        "emitted_nonempty": 11,
+        "fragment_containing_commits": 11,
+        "full_task_successes": 10,
+        "genuine_linkers_longer_than_seed": 10,
+        "official": {
+          "distance": 0.6613598278691364,
+          "distance_to_original_drug": 0.6024277116488491,
+          "diversity": 0.521125,
+          "quality": 20.0,
+          "uniqueness": 72.72727272727273,
+          "validity": 55.00000000000001
+        },
+        "realized_linker_length_histogram": {
+          "1": 1,
+          "2": 7,
+          "3": 1,
+          "4": 2
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 11
+      },
+      "LIOTHYRONINE": {
+        "attempts": 20,
+        "commits": 7,
+        "emitted_nonempty": 7,
+        "fragment_containing_commits": 7,
+        "full_task_successes": 7,
+        "genuine_linkers_longer_than_seed": 7,
+        "official": {
+          "distance": 0.6091120507399578,
+          "distance_to_original_drug": 0.5123391851905172,
+          "diversity": 0.4934,
+          "quality": 15.0,
+          "uniqueness": 71.42857142857143,
+          "validity": 35.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 5,
+          "3": 2
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 7
+      },
+      "LOVASTATIN": {
+        "attempts": 20,
+        "commits": 16,
+        "emitted_nonempty": 16,
+        "fragment_containing_commits": 16,
+        "full_task_successes": 16,
+        "genuine_linkers_longer_than_seed": 16,
+        "official": {
+          "distance": 0.48563931122740395,
+          "distance_to_original_drug": 0.33676125252610895,
+          "diversity": 0.44881818181818184,
+          "quality": 0.0,
+          "uniqueness": 68.75,
+          "validity": 80.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 10,
+          "3": 4,
+          "5": 2
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 16
+      },
+      "MARIBAVIR": {
+        "attempts": 20,
+        "commits": 10,
+        "emitted_nonempty": 10,
+        "fragment_containing_commits": 10,
+        "full_task_successes": 10,
+        "genuine_linkers_longer_than_seed": 10,
+        "official": {
+          "distance": 0.5824527079921304,
+          "distance_to_original_drug": 0.3498093853382918,
+          "diversity": 0.296,
+          "quality": 0.0,
+          "uniqueness": 40.0,
+          "validity": 50.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 8,
+          "3": 2
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 10
+      },
+      "SPIRAPRIL": {
+        "attempts": 20,
+        "commits": 18,
+        "emitted_nonempty": 18,
+        "fragment_containing_commits": 18,
+        "full_task_successes": 18,
+        "genuine_linkers_longer_than_seed": 18,
+        "official": {
+          "distance": 0.6757849123941797,
+          "distance_to_original_drug": 0.5513920286201321,
+          "diversity": 0.5124285714285713,
+          "quality": 30.0,
+          "uniqueness": 77.77777777777779,
+          "validity": 90.0
+        },
+        "realized_linker_length_histogram": {
+          "2": 11,
+          "3": 3,
+          "4": 3,
+          "5": 1
+        },
+        "seeded_linker_length": 1,
+        "valid_commits": 18
+      }
+    },
+    "prompt_count": 10,
+    "realized_linker_length_histogram": {
+      "1": 2,
+      "2": 93,
+      "3": 35,
+      "4": 14,
+      "5": 5
+    },
+    "valid_commits": 149
+  },
+  "units": "quality and uniqueness converted from official percent to fractions; diversity is already a fraction"
+}

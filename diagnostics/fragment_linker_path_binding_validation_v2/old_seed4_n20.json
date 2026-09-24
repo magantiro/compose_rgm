@@ -1,0 +1,4887 @@
+{
+  "schema": "compose_fragment_official_suite_v1",
+  "protocol": {
+    "source": "in_virtuo_gen/evaluation/downstream.py @ b50bb3ae",
+    "samples_per_prompt": 20,
+    "seeds": 3,
+    "task_row": "unweighted mean over the task's drugs",
+    "scaffold_morphing": "upstream copies the linker result",
+    "linker_bridge_atoms": 1
+  },
+  "kernel": {
+    "rdkit": "2024.03.5",
+    "numpy": "1.26.4",
+    "torch": "2.4.0",
+    "python": "3.11.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit"
+  },
+  "checkpoint": {
+    "path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "completed_steps": 16000,
+    "corpus_scope_hash": "3721d69851110fdd",
+    "atom_vocabulary": "ORGANIC"
+  },
+  "sampler": {
+    "config": {
+      "mark_attempts_per_event": 96,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "config_sha256": "7a7268a2f6cd5ca8d42c9f7560fe2b7ea4f1875cf827668e224914d68fbc1125"
+  },
+  "attachment_control": {
+    "config": {
+      "attachment_first": true,
+      "enabled": true,
+      "path_length_max": 5,
+      "path_length_min": 2,
+      "path_program": true,
+      "realize_redirected_order": true,
+      "redirect_attachment": true,
+      "release_linker_join": true,
+      "require_separated_cores": true,
+      "restrict_interfaces": true
+    },
+    "config_sha256": "4b549c2f62a9042f370d2bdc4bda45549df3acbfdcd7cfad93af68d435220353",
+    "arm": "attachment_control"
+  },
+  "metric_provenance": {
+    "validity_uniqueness_quality_diversity": "official in_virtuo_gen.train_utils.metrics.evaluate_smiles @ b50bb3ae, already_smiles=True",
+    "distance": "NOT in the released evaluator: evaluate_smiles returns no distance key. Estimator is the official in_virtuo_gen.utils.mol.calculate_average_tanimoto(prompt=...); reference = the dummy-stripped prompt fragment(s)",
+    "fragment_preservation": "independent audit, atom-level non-overlapping substructure match, run over COMMITTED endpoints as well as emitted samples"
+  },
+  "results": {
+    "linker_design": {
+      "task": "linker_design",
+      "prompts_declared": 10,
+      "prompts_scored": 10,
+      "samples_per_prompt": 20,
+      "seeds": 3,
+      "per_seed": [
+        {
+          "validity": 12.0,
+          "uniqueness": 63.0,
+          "quality": 6.5,
+          "diversity": 0.1926425,
+          "distance": 0.5883284332270267,
+          "distance_to_original_drug": 0.45674272726789955
+        }
+      ],
+      "summary": {
+        "validity": {
+          "mean": 12.0,
+          "std": 0.0
+        },
+        "uniqueness": {
+          "mean": 63.0,
+          "std": 0.0
+        },
+        "quality": {
+          "mean": 6.5,
+          "std": 0.0
+        },
+        "diversity": {
+          "mean": 0.1926425,
+          "std": 0.0
+        },
+        "distance": {
+          "mean": 0.5883284332270267,
+          "std": 0.0
+        },
+        "distance_to_original_drug": {
+          "mean": 0.45674272726789955,
+          "std": 0.0
+        }
+      },
+      "build_failures": [],
+      "per_drug": {
+        "BARICITINIB": [
+          {
+            "seed": 4,
+            "rng_seed": 2463862530,
+            "official": {
+              "validity": 10.0,
+              "uniqueness": 100.0,
+              "diversity": 0.31,
+              "quality": 10.0,
+              "distance": 0.5757575757575757,
+              "distance_to_original_drug": 0.4273892773892774
+            },
+            "attempts": 20,
+            "validity_denominator": 20,
+            "emitted_nonempty": 2,
+            "distance_reference_prompt": "CCS(=O)(=O)N1CC(CC#N)C1.c1ncc2cc[nH]c2n1",
+            "unique_valid_count": 2,
+            "committed_endpoints": 2,
+            "committed_chemically_valid": 2,
+            "committed_fragment_preserving": 2,
+            "emitted_fragment_preserving": 2,
+            "constraint_failures": 0,
+            "lock_rejections": 1781,
+            "budget_exhausted": 20,
+            "executor_refusals": 0,
+            "mean_events": 0.1,
+            "families": {},
+            "seconds": 39.11,
+            "committed_endpoint_smiles": [
+              "CCS(=O)(=O)N1CC(CC#N)(CCc2ncnc3[nH]ccc23)C1",
+              "CCS(=O)(=O)N1CC(CC#N)(CNc2ncnc3[nH]ccc23)C1"
+            ],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "CCS(=O)(=O)N1CC(CC#N)(CCc2ncnc3[nH]ccc23)C1",
+              "",
+              "",
+              "CCS(=O)(=O)N1CC(CC#N)(CNc2ncnc3[nH]ccc23)C1",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "attempt_records": [
+              {
+                "attempt_index": 0,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 8,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 1,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 93,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 2,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 5,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 3,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 86,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 10,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 4,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 89,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 7,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 5,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 85,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 11,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 6,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 7,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 8,
+                "committed_smiles": "CCS(=O)(=O)N1CC(CC#N)(CCc2ncnc3[nH]ccc23)C1",
+                "emitted_smiles": "CCS(=O)(=O)N1CC(CC#N)(CCc2ncnc3[nH]ccc23)C1",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 89,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 7,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 9,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 10,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 84,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 11,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 11,
+                "committed_smiles": "CCS(=O)(=O)N1CC(CC#N)(CNc2ncnc3[nH]ccc23)C1",
+                "emitted_smiles": "CCS(=O)(=O)N1CC(CC#N)(CNc2ncnc3[nH]ccc23)C1",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 8,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 12,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 9,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 13,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 8,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 14,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 15,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 8,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 16,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 91,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 5,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 17,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 18,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 7,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 19,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              }
+            ],
+            "seeded_linker_length": 1,
+            "realized_linker_lengths": [
+              2,
+              2
+            ],
+            "path_targets": [
+              4,
+              3,
+              4,
+              3,
+              2,
+              5,
+              3,
+              3,
+              5,
+              4,
+              2,
+              2,
+              3,
+              2,
+              2,
+              5,
+              4,
+              4,
+              5,
+              5
+            ],
+            "path_transactions": 2,
+            "path_transaction_refusals": 0,
+            "path_rejections": 5,
+            "interface_rejections": 134,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 2,
+            "declared_interfaces": [
+              7,
+              12
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                7,
+                12
+              ],
+              "requirements": [
+                [
+                  7,
+                  1
+                ],
+                [
+                  12,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                12,
+                9
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                7,
+                12
+              ],
+              "required": {
+                "7": 1,
+                "12": 1
+              },
+              "covered": {
+                "7": 1,
+                "12": 1
+              },
+              "satisfied": true
+            }
+          }
+        ],
+        "CYCLOTHIAZIDE": [
+          {
+            "seed": 4,
+            "rng_seed": 2356049805,
+            "official": {
+              "validity": 30.0,
+              "uniqueness": 83.33333333333334,
+              "diversity": 0.46180000000000004,
+              "quality": 0.0,
+              "distance": 0.5417946063598237,
+              "distance_to_original_drug": 0.41067643649610863
+            },
+            "attempts": 20,
+            "validity_denominator": 20,
+            "emitted_nonempty": 6,
+            "distance_reference_prompt": "NS(=O)(=O)c1cc2c(cc1Cl)NCNS2(=O)=O.C1=CC2CCC1C2",
+            "unique_valid_count": 5,
+            "committed_endpoints": 6,
+            "committed_chemically_valid": 6,
+            "committed_fragment_preserving": 6,
+            "emitted_fragment_preserving": 6,
+            "constraint_failures": 0,
+            "lock_rejections": 1444,
+            "budget_exhausted": 17,
+            "executor_refusals": 0,
+            "mean_events": 1.75,
+            "families": {
+              "atom_insert": 16,
+              "atom_delete": 5,
+              "bond_reorder": 5,
+              "atom_restate": 2,
+              "bond_reroute": 1
+            },
+            "seconds": 39.43,
+            "committed_endpoint_smiles": [
+              "NS(=O)(=O)c1cc2c(cc1Cl)NC(COC1CC3C=CC1C3)NS2(=O)=O",
+              "NS(=O)(=O)c1cc2c(cc1Cl)NC(CCCO)(CCC1CC3C=CC1C3)NS2(=O)=O",
+              "CC(=O)C(C)=C(OC1CC2C=CC1C2)C1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1",
+              "CCC(=CC1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1)C1CC2C=CC1C2",
+              "NS(=O)(=O)c1cc2c(cc1Cl)NC(C[SH2]C1CC3C=CC1C3)NS2(=O)=O",
+              "NS(=O)(=O)c1cc2c(cc1Cl)NC(COC1CC3C=CC1C3)NS2(=O)=O"
+            ],
+            "emitted_samples": [
+              "NS(=O)(=O)c1cc2c(cc1Cl)NC(COC1CC3C=CC1C3)NS2(=O)=O",
+              "NS(=O)(=O)c1cc2c(cc1Cl)NC(CCCO)(CCC1CC3C=CC1C3)NS2(=O)=O",
+              "",
+              "",
+              "",
+              "CC(=O)C(C)=C(OC1CC2C=CC1C2)C1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1",
+              "",
+              "",
+              "",
+              "CCC(=CC1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1)C1CC2C=CC1C2",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "NS(=O)(=O)c1cc2c(cc1Cl)NC(C[SH2]C1CC3C=CC1C3)NS2(=O)=O",
+              "NS(=O)(=O)c1cc2c(cc1Cl)NC(COC1CC3C=CC1C3)NS2(=O)=O"
+            ],
+            "attempt_records": [
+              {
+                "attempt_index": 0,
+                "committed_smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(COC1CC3C=CC1C3)NS2(=O)=O",
+                "emitted_smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(COC1CC3C=CC1C3)NS2(=O)=O",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 81,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 1,
+                "committed_smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CCCO)(CCC1CC3C=CC1C3)NS2(=O)=O",
+                "emitted_smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(CCCO)(CCC1CC3C=CC1C3)NS2(=O)=O",
+                "events": 11,
+                "refusal_deltas": {
+                  "lock_rejections": 12,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 0,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {
+                  "atom_insert": 6,
+                  "atom_delete": 2,
+                  "bond_reorder": 2
+                }
+              },
+              {
+                "attempt_index": 2,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 80,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 9,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 3,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 78,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 10,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 4,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 82,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 9,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 5,
+                "committed_smiles": "CC(=O)C(C)=C(OC1CC2C=CC1C2)C1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1",
+                "emitted_smiles": "CC(=O)C(C)=C(OC1CC2C=CC1C2)C1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1",
+                "events": 14,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 0,
+                  "constraint_failures": 0,
+                  "interface_rejections": 48,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {
+                  "atom_insert": 7,
+                  "atom_delete": 2,
+                  "bond_reorder": 2,
+                  "atom_restate": 2
+                }
+              },
+              {
+                "attempt_index": 6,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 80,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 8,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 7,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 77,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 11,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 8,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 82,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 9,
+                "committed_smiles": "CCC(=CC1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1)C1CC2C=CC1C2",
+                "emitted_smiles": "CCC(=CC1Nc2cc(Cl)c(S(N)(=O)=O)cc2S(=O)(=O)N1)C1CC2C=CC1C2",
+                "events": 7,
+                "refusal_deltas": {
+                  "lock_rejections": 15,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 0,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {
+                  "atom_insert": 3,
+                  "atom_delete": 1,
+                  "bond_reorder": 1,
+                  "bond_reroute": 1
+                }
+              },
+              {
+                "attempt_index": 10,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 82,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 5,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 11,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 73,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 12,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 12,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 83,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 10,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 13,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 83,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 8,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 14,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 81,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 15,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 83,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 5,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 16,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 17,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 74,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 13,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 18,
+                "committed_smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(C[SH2]C1CC3C=CC1C3)NS2(=O)=O",
+                "emitted_smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(C[SH2]C1CC3C=CC1C3)NS2(=O)=O",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 45,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 13,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 19,
+                "committed_smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(COC1CC3C=CC1C3)NS2(=O)=O",
+                "emitted_smiles": "NS(=O)(=O)c1cc2c(cc1Cl)NC(COC1CC3C=CC1C3)NS2(=O)=O",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 78,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              }
+            ],
+            "seeded_linker_length": 1,
+            "realized_linker_lengths": [
+              2,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "path_targets": [
+              3,
+              2,
+              4,
+              5,
+              5,
+              2,
+              2,
+              2,
+              3,
+              2,
+              4,
+              2,
+              4,
+              5,
+              2,
+              4,
+              5,
+              5,
+              4,
+              4
+            ],
+            "path_transactions": 6,
+            "path_transaction_refusals": 2,
+            "path_rejections": 166,
+            "interface_rejections": 193,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 6,
+            "declared_interfaces": [
+              12,
+              14
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                12,
+                14
+              ],
+              "requirements": [
+                [
+                  12,
+                  1
+                ],
+                [
+                  14,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                17,
+                7
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                12,
+                14
+              ],
+              "required": {
+                "12": 1,
+                "14": 1
+              },
+              "covered": {
+                "12": 1,
+                "14": 1
+              },
+              "satisfied": true
+            }
+          }
+        ],
+        "ELIGLUSTAT": [
+          {
+            "seed": 4,
+            "rng_seed": 1365365726,
+            "official": {
+              "validity": 50.0,
+              "uniqueness": 80.0,
+              "diversity": 0.604625,
+              "quality": 40.0,
+              "distance": 0.7234101445931149,
+              "distance_to_original_drug": 0.6738986005510972
+            },
+            "attempts": 20,
+            "validity_denominator": 20,
+            "emitted_nonempty": 10,
+            "distance_reference_prompt": "C1CCNC1.c1ccc2c(c1)OCCO2",
+            "unique_valid_count": 8,
+            "committed_endpoints": 10,
+            "committed_chemically_valid": 10,
+            "committed_fragment_preserving": 10,
+            "emitted_fragment_preserving": 10,
+            "constraint_failures": 0,
+            "lock_rejections": 727,
+            "budget_exhausted": 16,
+            "executor_refusals": 0,
+            "mean_events": 3.35,
+            "families": {
+              "bond_reorder": 6,
+              "atom_insert": 30,
+              "atom_delete": 13,
+              "bond_reroute": 1,
+              "atom_restate": 2
+            },
+            "seconds": 36.38,
+            "committed_endpoint_smiles": [
+              "c1cc2c(cc1NCN1CCCC1)OCCO2",
+              "C=CNN(C)C(=CN1CCCC1)c1ccc2c(c1)OCCO2",
+              "c1cc2c(cc1CNCCN1CCCC1)OCCO2",
+              "c1cc2c(cc1OCCN1CCCC1)OCCO2",
+              "O=PC(=CN1CCCC1)c1ccc2c(c1)OCCO2",
+              "C=C(Sc1ccc2c(c1)OCCO2)C(=O)N1CCCC1",
+              "c1cc2c(cc1NCN1CCCC1)OCCO2",
+              "O=C(O)CC(O)COC(=CCc1ccc2c(c1)OCCO2)N1CCCC1",
+              "c1cc2c(cc1NCN1CCCC1)OCCO2",
+              "c1cc2c(cc1CCN1CCCC1)OCCO2"
+            ],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "c1cc2c(cc1NCN1CCCC1)OCCO2",
+              "C=CNN(C)C(=CN1CCCC1)c1ccc2c(c1)OCCO2",
+              "",
+              "",
+              "",
+              "c1cc2c(cc1CNCCN1CCCC1)OCCO2",
+              "c1cc2c(cc1OCCN1CCCC1)OCCO2",
+              "",
+              "O=PC(=CN1CCCC1)c1ccc2c(c1)OCCO2",
+              "",
+              "C=C(Sc1ccc2c(c1)OCCO2)C(=O)N1CCCC1",
+              "c1cc2c(cc1NCN1CCCC1)OCCO2",
+              "",
+              "O=C(O)CC(O)COC(=CCc1ccc2c(c1)OCCO2)N1CCCC1",
+              "c1cc2c(cc1NCN1CCCC1)OCCO2",
+              "",
+              "c1cc2c(cc1CCN1CCCC1)OCCO2"
+            ],
+            "attempt_records": [
+              {
+                "attempt_index": 0,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 44,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 40,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 1,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 49,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 30,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 2,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 44,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 34,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 3,
+                "committed_smiles": "c1cc2c(cc1NCN1CCCC1)OCCO2",
+                "emitted_smiles": "c1cc2c(cc1NCN1CCCC1)OCCO2",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 45,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 4,
+                "committed_smiles": "C=CNN(C)C(=CN1CCCC1)c1ccc2c(c1)OCCO2",
+                "emitted_smiles": "C=CNN(C)C(=CN1CCCC1)c1ccc2c(c1)OCCO2",
+                "events": 14,
+                "refusal_deltas": {
+                  "lock_rejections": 0,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 0,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {
+                  "bond_reorder": 3,
+                  "atom_insert": 7,
+                  "atom_delete": 2,
+                  "bond_reroute": 1
+                }
+              },
+              {
+                "attempt_index": 5,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 40,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 45,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 6,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 45,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 40,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 7,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 42,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 41,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 8,
+                "committed_smiles": "c1cc2c(cc1CNCCN1CCCC1)OCCO2",
+                "emitted_smiles": "c1cc2c(cc1CNCCN1CCCC1)OCCO2",
+                "events": 3,
+                "refusal_deltas": {
+                  "lock_rejections": 35,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 9,
+                "committed_smiles": "c1cc2c(cc1OCCN1CCCC1)OCCO2",
+                "emitted_smiles": "c1cc2c(cc1OCCN1CCCC1)OCCO2",
+                "events": 2,
+                "refusal_deltas": {
+                  "lock_rejections": 36,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 25,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 10,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 51,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 28,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 11,
+                "committed_smiles": "O=PC(=CN1CCCC1)c1ccc2c(c1)OCCO2",
+                "emitted_smiles": "O=PC(=CN1CCCC1)c1ccc2c(c1)OCCO2",
+                "events": 15,
+                "refusal_deltas": {
+                  "lock_rejections": 5,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 0,
+                  "constraint_failures": 0,
+                  "interface_rejections": 13,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {
+                  "bond_reorder": 1,
+                  "atom_insert": 7,
+                  "atom_delete": 5,
+                  "atom_restate": 1
+                }
+              },
+              {
+                "attempt_index": 12,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 47,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 34,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 13,
+                "committed_smiles": "C=C(Sc1ccc2c(c1)OCCO2)C(=O)N1CCCC1",
+                "emitted_smiles": "C=C(Sc1ccc2c(c1)OCCO2)C(=O)N1CCCC1",
+                "events": 12,
+                "refusal_deltas": {
+                  "lock_rejections": 15,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 0,
+                  "constraint_failures": 0,
+                  "interface_rejections": 9,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {
+                  "bond_reorder": 1,
+                  "atom_insert": 5,
+                  "atom_delete": 3,
+                  "atom_restate": 1
+                }
+              },
+              {
+                "attempt_index": 14,
+                "committed_smiles": "c1cc2c(cc1NCN1CCCC1)OCCO2",
+                "emitted_smiles": "c1cc2c(cc1NCN1CCCC1)OCCO2",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 43,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 15,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 47,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 38,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 16,
+                "committed_smiles": "O=C(O)CC(O)COC(=CCc1ccc2c(c1)OCCO2)N1CCCC1",
+                "emitted_smiles": "O=C(O)CC(O)COC(=CCc1ccc2c(c1)OCCO2)N1CCCC1",
+                "events": 17,
+                "refusal_deltas": {
+                  "lock_rejections": 6,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 0,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {
+                  "bond_reorder": 1,
+                  "atom_insert": 11,
+                  "atom_delete": 3
+                }
+              },
+              {
+                "attempt_index": 17,
+                "committed_smiles": "c1cc2c(cc1NCN1CCCC1)OCCO2",
+                "emitted_smiles": "c1cc2c(cc1NCN1CCCC1)OCCO2",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 50,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 18,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 47,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 35,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 19,
+                "committed_smiles": "c1cc2c(cc1CCN1CCCC1)OCCO2",
+                "emitted_smiles": "c1cc2c(cc1CCN1CCCC1)OCCO2",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 36,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 27,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              }
+            ],
+            "seeded_linker_length": 1,
+            "realized_linker_lengths": [
+              2,
+              2,
+              4,
+              3,
+              2,
+              3,
+              2,
+              3,
+              2,
+              2
+            ],
+            "path_targets": [
+              3,
+              3,
+              3,
+              3,
+              2,
+              2,
+              4,
+              5,
+              5,
+              4,
+              5,
+              2,
+              2,
+              3,
+              4,
+              4,
+              3,
+              3,
+              3,
+              3
+            ],
+            "path_transactions": 15,
+            "path_transaction_refusals": 12,
+            "path_rejections": 399,
+            "interface_rejections": 463,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 10,
+            "declared_interfaces": [
+              5,
+              7
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                5,
+                7
+              ],
+              "requirements": [
+                [
+                  5,
+                  1
+                ],
+                [
+                  7,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                5,
+                10
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                5,
+                7
+              ],
+              "required": {
+                "5": 1,
+                "7": 1
+              },
+              "covered": {
+                "5": 1,
+                "7": 1
+              },
+              "satisfied": true
+            }
+          }
+        ],
+        "ERLOTINIB": [
+          {
+            "seed": 4,
+            "rng_seed": 1538385297,
+            "official": {
+              "validity": 0.0,
+              "uniqueness": 0.0,
+              "diversity": 0.0,
+              "quality": 0.0,
+              "distance": NaN,
+              "distance_to_original_drug": NaN
+            },
+            "attempts": 20,
+            "validity_denominator": 20,
+            "emitted_nonempty": 0,
+            "distance_reference_prompt": "C#C.COCCO",
+            "unique_valid_count": 0,
+            "committed_endpoints": 0,
+            "committed_chemically_valid": 0,
+            "committed_fragment_preserving": 0,
+            "emitted_fragment_preserving": 0,
+            "constraint_failures": 0,
+            "lock_rejections": 1443,
+            "budget_exhausted": 20,
+            "executor_refusals": 0,
+            "mean_events": 0.0,
+            "families": {},
+            "seconds": 39.8,
+            "committed_endpoint_smiles": [],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "attempt_records": [
+              {
+                "attempt_index": 0,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 68,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 28,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 1,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 79,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 15,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 2,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 79,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 15,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 3,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 68,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 21,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 4,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 62,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 33,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 5,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 81,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 13,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 6,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 71,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 23,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 7,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 72,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 23,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 8,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 72,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 21,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 9,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 69,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 25,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 10,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 68,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 26,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 11,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 68,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 27,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 12,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 78,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 17,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 13,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 79,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 14,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 14,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 68,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 25,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 15,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 70,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 22,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 16,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 75,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 16,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 17,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 73,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 19,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 18,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 69,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 24,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 19,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 74,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 18,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              }
+            ],
+            "seeded_linker_length": 1,
+            "realized_linker_lengths": [],
+            "path_targets": [
+              4,
+              3,
+              3,
+              5,
+              3,
+              5,
+              3,
+              5,
+              5,
+              4,
+              4,
+              4,
+              3,
+              5,
+              2,
+              5,
+              3,
+              5,
+              4,
+              2
+            ],
+            "path_transactions": 0,
+            "path_transaction_refusals": 7,
+            "path_rejections": 52,
+            "interface_rejections": 425,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 0,
+            "declared_interfaces": [
+              1,
+              3
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                1,
+                3
+              ],
+              "requirements": [
+                [
+                  1,
+                  1
+                ],
+                [
+                  3,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                2,
+                5
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                1,
+                3
+              ],
+              "required": {
+                "1": 1,
+                "3": 1
+              },
+              "covered": {
+                "1": 1,
+                "3": 1
+              },
+              "satisfied": true
+            }
+          }
+        ],
+        "FUTIBATINIB": [
+          {
+            "seed": 4,
+            "rng_seed": 1087603425,
+            "official": {
+              "validity": 5.0,
+              "uniqueness": 100.0,
+              "diversity": 0.0,
+              "quality": 5.0,
+              "distance": 0.5294117647058824,
+              "distance_to_original_drug": 0.589041095890411
+            },
+            "attempts": 20,
+            "validity_denominator": 20,
+            "emitted_nonempty": 1,
+            "distance_reference_prompt": "C=CC(=O)N1CCCC1.COc1cccc(OC)c1",
+            "unique_valid_count": 1,
+            "committed_endpoints": 1,
+            "committed_chemically_valid": 1,
+            "committed_fragment_preserving": 1,
+            "emitted_fragment_preserving": 1,
+            "constraint_failures": 0,
+            "lock_rejections": 1772,
+            "budget_exhausted": 20,
+            "executor_refusals": 0,
+            "mean_events": 0.05,
+            "families": {},
+            "seconds": 46.0,
+            "committed_endpoint_smiles": [
+              "C=CC(=O)N1CCC(CCc2cc(OC)cc(OC)c2)C1"
+            ],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "C=CC(=O)N1CCC(CCc2cc(OC)cc(OC)c2)C1",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "attempt_records": [
+              {
+                "attempt_index": 0,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 1,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 2,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 3,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 4,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 84,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 8,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 5,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 89,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 6,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 7,
+                "committed_smiles": "C=CC(=O)N1CCC(CCc2cc(OC)cc(OC)c2)C1",
+                "emitted_smiles": "C=CC(=O)N1CCC(CCc2cc(OC)cc(OC)c2)C1",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 8,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 89,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 9,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 10,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 86,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 11,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 12,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 84,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 5,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 13,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 91,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 14,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 15,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 16,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 17,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 18,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 7,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 19,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 89,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              }
+            ],
+            "seeded_linker_length": 1,
+            "realized_linker_lengths": [
+              2
+            ],
+            "path_targets": [
+              3,
+              2,
+              2,
+              5,
+              4,
+              2,
+              3,
+              3,
+              4,
+              2,
+              3,
+              4,
+              5,
+              4,
+              4,
+              4,
+              5,
+              5,
+              2,
+              4
+            ],
+            "path_transactions": 1,
+            "path_transaction_refusals": 1,
+            "path_rejections": 66,
+            "interface_rejections": 82,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 1,
+            "declared_interfaces": [
+              7,
+              9
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                7,
+                9
+              ],
+              "requirements": [
+                [
+                  7,
+                  1
+                ],
+                [
+                  9,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                9,
+                10
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                7,
+                9
+              ],
+              "required": {
+                "7": 1,
+                "9": 1
+              },
+              "covered": {
+                "7": 1,
+                "9": 1
+              },
+              "satisfied": true
+            }
+          }
+        ],
+        "LESINURAD": [
+          {
+            "seed": 4,
+            "rng_seed": 1256403562,
+            "official": {
+              "validity": 5.0,
+              "uniqueness": 100.0,
+              "diversity": 0.0,
+              "quality": 5.0,
+              "distance": 0.6170212765957447,
+              "distance_to_original_drug": 0.5614035087719298
+            },
+            "attempts": 20,
+            "validity_denominator": 20,
+            "emitted_nonempty": 1,
+            "distance_reference_prompt": "O=C(O)CSc1nnc(Br)[nH]1.C1CC1",
+            "unique_valid_count": 1,
+            "committed_endpoints": 1,
+            "committed_chemically_valid": 1,
+            "committed_fragment_preserving": 1,
+            "emitted_fragment_preserving": 1,
+            "constraint_failures": 0,
+            "lock_rejections": 1794,
+            "budget_exhausted": 20,
+            "executor_refusals": 0,
+            "mean_events": 0.05,
+            "families": {},
+            "seconds": 41.44,
+            "committed_endpoint_smiles": [
+              "O=C(O)CSc1nnc(Br)n1CCC1CC1"
+            ],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "O=C(O)CSc1nnc(Br)n1CCC1CC1",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "attempt_records": [
+              {
+                "attempt_index": 0,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 91,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 1,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 86,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 2,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 3,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 4,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 5,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 93,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 6,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 7,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 8,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 9,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 10,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 11,
+                "committed_smiles": "O=C(O)CSc1nnc(Br)n1CCC1CC1",
+                "emitted_smiles": "O=C(O)CSc1nnc(Br)n1CCC1CC1",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 86,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 12,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 13,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 89,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 5,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 14,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 89,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 15,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 91,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 16,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 17,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 91,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 18,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 19,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 93,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              }
+            ],
+            "seeded_linker_length": 1,
+            "realized_linker_lengths": [
+              2
+            ],
+            "path_targets": [
+              4,
+              4,
+              2,
+              4,
+              3,
+              2,
+              2,
+              4,
+              3,
+              4,
+              3,
+              5,
+              5,
+              5,
+              4,
+              4,
+              2,
+              4,
+              5,
+              2
+            ],
+            "path_transactions": 1,
+            "path_transaction_refusals": 3,
+            "path_rejections": 66,
+            "interface_rejections": 60,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 1,
+            "declared_interfaces": [
+              10,
+              12
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                10,
+                12
+              ],
+              "requirements": [
+                [
+                  10,
+                  1
+                ],
+                [
+                  12,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                11,
+                3
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                10,
+                12
+              ],
+              "required": {
+                "10": 1,
+                "12": 1
+              },
+              "covered": {
+                "10": 1,
+                "12": 1
+              },
+              "satisfied": true
+            }
+          }
+        ],
+        "LIOTHYRONINE": [
+          {
+            "seed": 4,
+            "rng_seed": 1118587028,
+            "official": {
+              "validity": 0.0,
+              "uniqueness": 0.0,
+              "diversity": 0.0,
+              "quality": 0.0,
+              "distance": NaN,
+              "distance_to_original_drug": NaN
+            },
+            "attempts": 20,
+            "validity_denominator": 20,
+            "emitted_nonempty": 0,
+            "distance_reference_prompt": "C[C@H](N)C(=O)O.Oc1ccccc1I",
+            "unique_valid_count": 0,
+            "committed_endpoints": 0,
+            "committed_chemically_valid": 0,
+            "committed_fragment_preserving": 0,
+            "emitted_fragment_preserving": 0,
+            "constraint_failures": 0,
+            "lock_rejections": 1873,
+            "budget_exhausted": 20,
+            "executor_refusals": 0,
+            "mean_events": 0.0,
+            "families": {},
+            "seconds": 39.42,
+            "committed_endpoint_smiles": [],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "attempt_records": [
+              {
+                "attempt_index": 0,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 1,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 95,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 2,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 3,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 95,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 4,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 5,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 93,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 6,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 95,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 7,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 8,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 9,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 10,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 93,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 11,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 12,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 91,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 13,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 14,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 15,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 16,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 17,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 95,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 0,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 18,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 19,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              }
+            ],
+            "seeded_linker_length": 1,
+            "realized_linker_lengths": [],
+            "path_targets": [
+              3,
+              4,
+              5,
+              2,
+              3,
+              5,
+              3,
+              5,
+              3,
+              5,
+              3,
+              2,
+              3,
+              2,
+              5,
+              3,
+              5,
+              3,
+              2,
+              3
+            ],
+            "path_transactions": 0,
+            "path_transaction_refusals": 1,
+            "path_rejections": 10,
+            "interface_rejections": 37,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 0,
+            "declared_interfaces": [
+              2,
+              4
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                2,
+                4
+              ],
+              "requirements": [
+                [
+                  2,
+                  1
+                ],
+                [
+                  4,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                6,
+                8
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                2,
+                4
+              ],
+              "required": {
+                "2": 1,
+                "4": 1
+              },
+              "covered": {
+                "2": 1,
+                "4": 1
+              },
+              "satisfied": true
+            }
+          }
+        ],
+        "LOVASTATIN": [
+          {
+            "seed": 4,
+            "rng_seed": 3436354995,
+            "official": {
+              "validity": 5.0,
+              "uniqueness": 100.0,
+              "diversity": 0.0,
+              "quality": 0.0,
+              "distance": 0.452054794520548,
+              "distance_to_original_drug": 0.0
+            },
+            "attempts": 20,
+            "validity_denominator": 20,
+            "emitted_nonempty": 1,
+            "distance_reference_prompt": "CC[C@H](C)C(=O)O[C@H]1C[C@@H](C)C=C2C=C[C@H](C)C[C@H]21.O=C1C[C@H](O)CCO1",
+            "unique_valid_count": 1,
+            "committed_endpoints": 1,
+            "committed_chemically_valid": 1,
+            "committed_fragment_preserving": 1,
+            "emitted_fragment_preserving": 1,
+            "constraint_failures": 0,
+            "lock_rejections": 1794,
+            "budget_exhausted": 20,
+            "executor_refusals": 0,
+            "mean_events": 0.05,
+            "families": {},
+            "seconds": 41.1,
+            "committed_endpoint_smiles": [
+              "CCC(C)C(=O)OC1CC(C)C=C2C=CC(C)C(CCC3CC(O)CC(=O)O3)C21"
+            ],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "CCC(C)C(=O)OC1CC(C)C=C2C=CC(C)C(CCC3CC(O)CC(=O)O3)C21",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "attempt_records": [
+              {
+                "attempt_index": 0,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 91,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 5,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 1,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 2,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 5,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 3,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 4,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 93,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 5,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 8,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 6,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 7,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 83,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 13,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 8,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 7,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 9,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 91,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 5,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 10,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 8,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 11,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 85,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 8,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 12,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 86,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 9,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 13,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 14,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 15,
+                "committed_smiles": "CCC(C)C(=O)OC1CC(C)C=C2C=CC(C)C(CCC3CC(O)CC(=O)O3)C21",
+                "emitted_smiles": "CCC(C)C(=O)OC1CC(C)C=C2C=CC(C)C(CCC3CC(O)CC(=O)O3)C21",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 16,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 89,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 7,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 17,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 18,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 19,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 91,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              }
+            ],
+            "seeded_linker_length": 1,
+            "realized_linker_lengths": [
+              2
+            ],
+            "path_targets": [
+              5,
+              3,
+              2,
+              3,
+              5,
+              2,
+              2,
+              5,
+              5,
+              4,
+              2,
+              3,
+              5,
+              2,
+              4,
+              5,
+              3,
+              5,
+              4,
+              2
+            ],
+            "path_transactions": 1,
+            "path_transaction_refusals": 0,
+            "path_rejections": 15,
+            "interface_rejections": 111,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 1,
+            "declared_interfaces": [
+              17,
+              19
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                17,
+                19
+              ],
+              "requirements": [
+                [
+                  17,
+                  1
+                ],
+                [
+                  19,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                19,
+                8
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                17,
+                19
+              ],
+              "required": {
+                "17": 1,
+                "19": 1
+              },
+              "covered": {
+                "17": 1,
+                "19": 1
+              },
+              "satisfied": true
+            }
+          }
+        ],
+        "MARIBAVIR": [
+          {
+            "seed": 4,
+            "rng_seed": 1028935953,
+            "official": {
+              "validity": 0.0,
+              "uniqueness": 0.0,
+              "diversity": 0.0,
+              "quality": 0.0,
+              "distance": NaN,
+              "distance_to_original_drug": NaN
+            },
+            "attempts": 20,
+            "validity_denominator": 20,
+            "emitted_nonempty": 0,
+            "distance_reference_prompt": "CC(C)Nc1nc2cc(Cl)c(Cl)cc2[nH]1.OC[C@@H]1OC[C@@H](O)[C@H]1O",
+            "unique_valid_count": 0,
+            "committed_endpoints": 0,
+            "committed_chemically_valid": 0,
+            "committed_fragment_preserving": 0,
+            "emitted_fragment_preserving": 0,
+            "constraint_failures": 0,
+            "lock_rejections": 1886,
+            "budget_exhausted": 20,
+            "executor_refusals": 0,
+            "mean_events": 0.0,
+            "families": {},
+            "seconds": 39.43,
+            "committed_endpoint_smiles": [],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "attempt_records": [
+              {
+                "attempt_index": 0,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 92,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 4,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 1,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 95,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 0,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 2,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 96,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 0,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 3,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 4,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 93,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 5,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 95,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 6,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 7,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 93,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 8,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 9,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 95,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 10,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 95,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 11,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 12,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 93,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 13,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 95,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 14,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 94,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 2,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 15,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 93,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 3,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 16,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 95,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 17,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 95,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 18,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 96,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 0,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 19,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 95,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 1,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              }
+            ],
+            "seeded_linker_length": 1,
+            "realized_linker_lengths": [],
+            "path_targets": [
+              2,
+              3,
+              4,
+              4,
+              3,
+              3,
+              5,
+              2,
+              5,
+              3,
+              3,
+              2,
+              5,
+              2,
+              2,
+              2,
+              4,
+              5,
+              3,
+              2
+            ],
+            "path_transactions": 0,
+            "path_transaction_refusals": 0,
+            "path_rejections": 4,
+            "interface_rejections": 30,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 0,
+            "declared_interfaces": [
+              14,
+              16
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                14,
+                16
+              ],
+              "requirements": [
+                [
+                  14,
+                  1
+                ],
+                [
+                  16,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                15,
+                9
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                14,
+                16
+              ],
+              "required": {
+                "14": 1,
+                "16": 1
+              },
+              "covered": {
+                "14": 1,
+                "16": 1
+              },
+              "satisfied": true
+            }
+          }
+        ],
+        "SPIRAPRIL": [
+          {
+            "seed": 4,
+            "rng_seed": 4082472577,
+            "official": {
+              "validity": 15.0,
+              "uniqueness": 66.66666666666666,
+              "diversity": 0.55,
+              "quality": 5.0,
+              "distance": 0.6788488700564972,
+              "distance_to_original_drug": 0.5347901717764731
+            },
+            "attempts": 20,
+            "validity_denominator": 20,
+            "emitted_nonempty": 3,
+            "distance_reference_prompt": "c1ccccc1.O=C(O)[C@@H]1CC2(CN1)SCCS2",
+            "unique_valid_count": 2,
+            "committed_endpoints": 3,
+            "committed_chemically_valid": 3,
+            "committed_fragment_preserving": 3,
+            "emitted_fragment_preserving": 3,
+            "constraint_failures": 0,
+            "lock_rejections": 1618,
+            "budget_exhausted": 19,
+            "executor_refusals": 0,
+            "mean_events": 0.65,
+            "families": {
+              "bond_reorder": 2,
+              "atom_insert": 7,
+              "atom_delete": 1
+            },
+            "seconds": 42.19,
+            "committed_endpoint_smiles": [
+              "O=C(O)C1CC2(CN1CCc1ccccc1)SCCS2",
+              "O=C(O)C1CC2(CN1CCc1ccccc1)SCCS2",
+              "CCCCC(Cl)(C(=O)N1CC2(CC1C(=O)O)SCCS2)c1ccccc1"
+            ],
+            "emitted_samples": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "O=C(O)C1CC2(CN1CCc1ccccc1)SCCS2",
+              "O=C(O)C1CC2(CN1CCc1ccccc1)SCCS2",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "CCCCC(Cl)(C(=O)N1CC2(CC1C(=O)O)SCCS2)c1ccccc1"
+            ],
+            "attempt_records": [
+              {
+                "attempt_index": 0,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 83,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 12,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 1,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 84,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 12,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 2,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 3,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 83,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 11,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 4,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 80,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 12,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 5,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 7,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 6,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 86,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 9,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 7,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 90,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 8,
+                "committed_smiles": "O=C(O)C1CC2(CN1CCc1ccccc1)SCCS2",
+                "emitted_smiles": "O=C(O)C1CC2(CN1CCc1ccccc1)SCCS2",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 82,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 9,
+                "committed_smiles": "O=C(O)C1CC2(CN1CCc1ccccc1)SCCS2",
+                "emitted_smiles": "O=C(O)C1CC2(CN1CCc1ccccc1)SCCS2",
+                "events": 1,
+                "refusal_deltas": {
+                  "lock_rejections": 77,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 9,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 10,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 78,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 16,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 11,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 78,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 13,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 12,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 82,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 13,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 13,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 88,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 7,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 14,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 6,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 15,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 76,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 17,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 16,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 89,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 7,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 17,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 87,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 8,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 18,
+                "committed_smiles": null,
+                "emitted_smiles": null,
+                "events": 0,
+                "refusal_deltas": {
+                  "lock_rejections": 79,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 1,
+                  "constraint_failures": 0,
+                  "interface_rejections": 17,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {}
+              },
+              {
+                "attempt_index": 19,
+                "committed_smiles": "CCCCC(Cl)(C(=O)N1CC2(CC1C(=O)O)SCCS2)c1ccccc1",
+                "emitted_smiles": "CCCCC(Cl)(C(=O)N1CC2(CC1C(=O)O)SCCS2)c1ccccc1",
+                "events": 11,
+                "refusal_deltas": {
+                  "lock_rejections": 35,
+                  "executor_refusals": 0,
+                  "budget_exhausted": 0,
+                  "constraint_failures": 0,
+                  "interface_rejections": 13,
+                  "staging_rejections": 0,
+                  "redirections": 0,
+                  "separation_failures": 0
+                },
+                "family_deltas": {
+                  "bond_reorder": 2,
+                  "atom_insert": 7,
+                  "atom_delete": 1
+                }
+              }
+            ],
+            "seeded_linker_length": 1,
+            "realized_linker_lengths": [
+              2,
+              2,
+              2
+            ],
+            "path_targets": [
+              5,
+              2,
+              3,
+              5,
+              2,
+              3,
+              3,
+              5,
+              5,
+              3,
+              2,
+              5,
+              3,
+              5,
+              2,
+              5,
+              2,
+              3,
+              4,
+              2
+            ],
+            "path_transactions": 3,
+            "path_transaction_refusals": 5,
+            "path_rejections": 47,
+            "interface_rejections": 207,
+            "staging_rejections": 0,
+            "redirections": 0,
+            "separation_failures": 0,
+            "committed_interfaces_covered": 3,
+            "declared_interfaces": [
+              7,
+              9
+            ],
+            "attachment_spec": {
+              "interfaces": [
+                7,
+                9
+              ],
+              "requirements": [
+                [
+                  7,
+                  1
+                ],
+                [
+                  9,
+                  1
+                ]
+              ],
+              "lock_group_sizes": [
+                6,
+                12
+              ],
+              "released_pairs": []
+            },
+            "start_state_interface_coverage": {
+              "interfaces": [
+                7,
+                9
+              ],
+              "required": {
+                "7": 1,
+                "9": 1
+              },
+              "covered": {
+                "7": 1,
+                "9": 1
+              },
+              "satisfied": true
+            }
+          }
+        ]
+      }
+    }
+  }
+}
