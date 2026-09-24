@@ -1,0 +1,40 @@
+{
+ "schema_version": "pmo_transplant_lane_gate_v1",
+ "measured_at_utc": "2026-09-24T09:06:05.833923+00:00",
+ "oracle_calls_spent": 48,
+ "note": "48 local diagnostic calls on thiothixene, not a scored run and not on any ledger",
+ "contract": "configs/pmo_population_controller_v4_transplant_lane.json",
+ "criteria": {
+  "meaningful_footprint": {
+   "pass": true,
+   "before": "5.8% of attempts, 3.8% of charged (transplant as half of the recombination KIND)",
+   "after": "270 of 1090 attempts; 6 of 32 charged (18.8%)"
+  },
+  "novel_endpoint_yield": {
+   "pass": true,
+   "detail": "144 duplicate endpoints skipped by per-source dedup over 90 producing attempts; the old lane returned its deterministic top pick every round (51.3% duplicates)"
+  },
+  "large_structural_scale_preserved": {
+   "pass": true,
+   "detail": "surviving_new_atoms median 13, against ~4 for every other proposal"
+  },
+  "execution_valid": {
+   "pass": true,
+   "detail": "campaign completed 48 charged calls"
+  },
+  "ordinary_lanes_present": {
+   "pass": true,
+   "detail": "shallow 256 / structured 264 / anchored 268 / jump 32 attempts"
+  }
+ },
+ "verdict": "PASS",
+ "two_wiring_defects_the_smoke_caught": [
+  "the contract chain refused the edited lane modules until v4 re-sealed them -- working as designed",
+  "CHANNELS gained a member but the per-channel initialization seed table did not, so the run died naming the channel before doing any work; the guard that names it was already there"
+ ],
+ "still_unpinned_before_v4": [
+  "prescreen_donor_lane.py",
+  "prescreen_reservoir.py",
+  "donor_program.py"
+ ]
+}

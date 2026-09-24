@@ -10,17 +10,18 @@ if any other field of the payload differs -- so "only plumbing moved" is checked
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
-from compose_v4.control.edit_program import identity  # noqa: E402
+from compose_v4.control.edit_program import identity
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-BASE = ROOT / "configs/pmo_population_controller_v2_proposal_repair.json"
-OUT = ROOT / "configs/pmo_population_controller_v3_seed_weighting.json"
+DEFAULT_BASE = "configs/pmo_population_controller_v2_proposal_repair.json"
+DEFAULT_OUT = "configs/pmo_population_controller_v3_seed_weighting.json"
 
 REVISION = (
     "seed_weighting_v3: the bootstrap parent draw over charged initialization molecules "
@@ -34,7 +35,17 @@ REVISION = (
 
 
 def main() -> int:
-    envelope = json.loads(BASE.read_text())
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--base", default=DEFAULT_BASE)
+    ap.add_argument("--out", default=DEFAULT_OUT)
+    ap.add_argument("--revision", default=REVISION)
+    ap.add_argument("--add", nargs="*", default=(),
+                    help="paths to ADD to implementation_sha256; a module on the scoring "
+                         "path that is not pinned is free to drift under a contract that "
+                         "reads as verified")
+    args = ap.parse_args()
+    base, out = ROOT / args.base, ROOT / args.out
+    envelope = json.loads(base.read_text())
     payload = envelope["payload"]
     if envelope["payload_sha256"] != identity(payload):
         raise SystemExit("v2 envelope hash does not match its own payload; refusing to seal")
@@ -49,7 +60,12 @@ def main() -> int:
     if not moved:
         raise SystemExit("no pinned file moved; v3 would be a duplicate of v2")
 
-    new["runtime_revision"] = REVISION
+    for rel in args.add:
+        if rel in new["implementation_sha256"]:
+            raise SystemExit(f"{rel} is already pinned; use the normal re-pin path")
+        new["implementation_sha256"][rel] = hashlib.sha256((ROOT / rel).read_bytes()).hexdigest()
+        moved[rel] = ("ABSENT", new["implementation_sha256"][rel])
+    new["runtime_revision"] = args.revision
     new["supersedes_payload_sha256"] = envelope["payload_sha256"]
 
     # Everything OTHER than the three fields above must be byte-identical to v2, so the
@@ -63,8 +79,8 @@ def main() -> int:
     if unexplained:
         raise SystemExit(f"unexplained payload differences: {sorted(unexplained)}")
 
-    OUT.write_text(json.dumps({"payload": new, "payload_sha256": identity(new)}, indent=1) + "\n")
-    print(f"sealed {OUT.name}")
+    out.write_text(json.dumps({"payload": new, "payload_sha256": identity(new)}, indent=1) + "\n")
+    print(f"sealed {out.name}")
     print(f"  supersedes {envelope['payload_sha256'][:16]}")
     print(f"  payload    {identity(new)[:16]}")
     for rel, (old, cur) in sorted(moved.items()):

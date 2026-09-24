@@ -901,6 +901,7 @@ def initial_dynamic_program_batch_v21(
         SHALLOW_CHANNEL: 71,
         STRUCTURED_CHANNEL: 73,
         ANCHORED_CHANNEL: 79,
+        TRANSPLANT_CHANNEL: 83,
     }
     missing = [name for name in CHANNELS if name not in channel_seed_offsets]
     if missing:
