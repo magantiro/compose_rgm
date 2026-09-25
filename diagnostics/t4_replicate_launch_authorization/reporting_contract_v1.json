@@ -1,0 +1,82 @@
+{
+ "payload": {
+  "caveats_that_must_reach_the_final_artifact": {
+   "delta_0.4_gating_is_INFERRED": "inferred from delta-monotonicity, NOT measured",
+   "docking_is_not_reproducible_across_runs": "qvina02 is seeded and the box is fixed, but obabel --gen3D takes no seed; one fa7_0 seed molecule scored -7.5 / -8.30 / -8.8 across three runs, a 1.3 kcal/mol spread. Per-cell margins narrower than that are not reproducible differences. Within-run search is unaffected, since candidates and incumbent share one pipeline.",
+   "docking_seed_is_non_uniform_by_faithful_inheritance": {
+    "5ht1b": 20260919,
+    "braf": 20260918,
+    "fa7": 20260919,
+    "jak2": 20260919,
+    "parp1": 20260918,
+    "status": "MEASURED from the ten sealed contracts, not relayed"
+   },
+   "fa7_0_delta_0.6_is_n_equals_2": "replicate 1 is blank there and charged 0 calls",
+   "frozen_result_remains_authoritative": "diagnostics/T4_FROZEN_RESULT_v1.json REMAINS AUTHORITATIVE for the IVG comparison. This panel does not supersede it and must not be written into it.",
+   "replicate_1_charged_4114_calls_total": "replicates 2 and 3 will likely charge MORE, because the ladder restores support on cells that previously exhausted in a handful of calls",
+   "route_lane_provenance_is_a_separate_release_question": "77 locked routes, leave-one-target-out, competitor-derived and NC-licensed. FLAGGED, not touched, and not resolved here."
+  },
+  "do_not": [
+   "optimize against IVG or GenMol",
+   "let any comparator number reach the controller",
+   "move a hyperparameter after seeing replicate 2"
+  ],
+  "genmol_comparator_measured": {
+   "cells_with_zero_genmol_success_at_delta_0.6": [
+    "fa7_2",
+    "5ht1b_2",
+    "braf_0",
+    "jak2_2"
+   ],
+   "delta_0.4": {
+    "n_success": "107/120 (89.2%)",
+    "sum_best_of_3": -147.3,
+    "sum_best_of_8": -153.2,
+    "sum_mean_of_successful": -142.8
+   },
+   "delta_0.6": {
+    "n_success": "65/120 (54.2%)",
+    "sum_best_of_3": -99.9,
+    "sum_best_of_8": -108.9,
+    "sum_mean_of_successful": -104.6
+   },
+   "note_on_those_cells": "mean_of_successful is UNDEFINED where n_success is 0, so those cells are 'COMPOSE produced a molecule, GenMol produced none', not a score comparison. Three of the four are also COMPOSE's own historically exhausted cells.",
+   "source": "~/baselines_t4/runs/FINAL_TABLE.csv (read-only, never modified)",
+   "statistic_spread_delta_0.4": 10.4
+  },
+  "per_cell_columns_required": [
+   "fallback_triggered",
+   "kernel_that_fired",
+   "deepest_ladder_rung_reached",
+   "eligible_count_per_rung",
+   "charged_calls_reconciled_from_round_locks",
+   "winning_smiles",
+   "similarity",
+   "qed",
+   "sa"
+  ],
+  "primary_statistic": {
+   "compose": "mean of the 3 replicates +- sd, REPORTED WITH n_success",
+   "genmol": "mean_of_successful, REPORTED WITH n_success",
+   "rule": "compare mean to mean at equal N. Never best-to-best, never across different N."
+  },
+  "reconciliation": {
+   "authority": "round locks, NOT checkpoints",
+   "checks": [
+    "per-cell ladder monotonicity",
+    "reconciled_charged_calls is a LOWER BOUND in both directions: locks are written per round INDEX, so a round that rolled back and was redone rewrites its own lock",
+    "run_cell reads the volume with no volume.reload(), so a restarted container can read a stale view and overwrite newer state"
+   ],
+   "hard_stop": "uncertain accounting refuses to continue; an uncertain call is never a free call",
+   "tool": "scripts/t4_all_runs_reconcile.py (reads locks across EVERY run on each volume)"
+  },
+  "schema_version": "t4_replicate_reporting_contract_v1",
+  "sealed_at_utc": "2026-09-25T03:19:01.532401+00:00",
+  "secondary_statistic": {
+   "compose": "best-of-3",
+   "labelling": "clearly marked SECONDARY; never the headline"
+  },
+  "why_sealed_before_the_numbers": "The GenMol baseline measured that best-of-N is biased and its bias GROWS with N: the same 240 runs move 10.4 kcal/mol across one fixed cell set purely by switching statistic. Choosing the statistic after seeing replicate 2 would be selecting the number that flatters us."
+ },
+ "payload_sha256": "c81eeb835b7b68c21b9c27153def6b1c54a565dd352d395cfc91cd873b65fb62"
+}
