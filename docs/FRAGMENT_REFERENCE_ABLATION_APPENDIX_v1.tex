@@ -1,0 +1,106 @@
+\subsection{Reference-probability ablation in superstructure generation}
+\label{app:fragment-reference-ablation}
+
+We tested the learned edit-selection probabilities in the completed
+superstructure sampler. The comparison law samples uniformly among available
+rewrite families and then uniformly among masked native mark coordinates in
+the selected family. Both arms use the same native action masks, structural
+controls, learned hazard, stopping rules, executor, and benchmark evaluator.
+The comparison is not uniform over distinct canonical successors.
+
+\begin{table}[t]
+\centering
+\small
+\caption{\small\textbf{Learned edit-selection probabilities in superstructure generation.}
+Each arm contains 100 attempted outputs for each of ten prompts and three
+seeds. Quality, uniqueness, and chemical validity are percentages. Diversity
+is a fraction. Prompt compliance counts completed molecules satisfying the
+supplied structural condition. The final row is learned minus uniform.}
+\label{tab:fragment-reference-superstructure}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Selection law & Quality $\uparrow$ & Uniqueness $\uparrow$ & Diversity $\uparrow$ & Validity $\uparrow$ & Prompt compliance \\
+\midrule
+Learned family and mark & 39.033 & 97.333 & 0.725074 & 100.0 & 3,000/3,000 \\
+Uniform family and mark & 25.400 & 90.167 & 0.708503 & 100.0 & 3,000/3,000 \\
+Difference & +13.633 & +7.167 & +0.016571 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Across the ten prompts, the mean quality difference was 13.63 percentage
+points. A percentile bootstrap that resampled prompts after averaging the
+three seeds within each prompt gave a 95\% interval of 4.27 to 23.07 points.
+The corresponding intervals were 1.07 to 11.70 points for uniqueness and
+-0.00052 to 0.03111 for diversity. Generated molecules within a prompt were
+not treated as independent structural problems. The learned law improved
+quality on six prompts, trailed on two, and tied on two
+(\cref{tab:fragment-reference-prompts}). Seed labels match between arms,
+but their random draws do not pair molecular trajectories.
+
+\begin{table}[t]
+\centering
+\small
+\caption{\small\textbf{Superstructure quality by structural prompt.}
+Each value averages three seeds of 100 attempts for the indicated prompt.
+Differences are learned minus uniform in percentage points.}
+\label{tab:fragment-reference-prompts}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Prompt & Learned & Uniform & Difference \\
+\midrule
+Baricitinib & 46.67 & 25.67 & +21.00 \\
+Cyclothiazide & 0.00 & 0.00 & 0.00 \\
+Eliglustat & 66.67 & 41.67 & +25.00 \\
+Erlotinib & 37.00 & 43.67 & -6.67 \\
+Futibatinib & 43.00 & 10.67 & +32.33 \\
+Lesinurad & 49.33 & 36.00 & +13.33 \\
+Liothyronine & 44.00 & 50.33 & -6.33 \\
+Lovastatin & 0.00 & 0.00 & 0.00 \\
+Maribavir & 73.33 & 36.33 & +37.00 \\
+Spirapril & 30.33 & 9.67 & +20.67 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+\caption{\small\textbf{Superstructure ablation by sampling seed.}
+Each seed aggregates the ten structural prompts. Quality, uniqueness, and
+validity are percentages. Diversity is a fraction. Both arms were compliant
+on all 1,000 attempted outputs for every seed.}
+\label{tab:fragment-reference-seeds}
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Seed & Law & Quality & Uniqueness & Diversity & Validity \\
+\midrule
+0 & Learned & 41.8 & 98.0 & 0.724991 & 100.0 \\
+0 & Uniform & 26.3 & 91.3 & 0.711823 & 100.0 \\
+1 & Learned & 35.7 & 97.2 & 0.724446 & 100.0 \\
+1 & Uniform & 23.5 & 89.1 & 0.706222 & 100.0 \\
+2 & Learned & 39.6 & 96.8 & 0.725786 & 100.0 \\
+2 & Uniform & 26.4 & 90.1 & 0.707463 & 100.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The comparison isolates learned edit-selection probabilities in the
+superstructure primitive sampler. The learned hazard remains active in both
+arms. It does not test the complete reference against a wholly unlearned
+generator or establish an effect for the finite-panel program controllers
+used in other fragment tasks.
+
+\paragraph{Selection on recorded linker program panels.}
+As a separate supporting comparison, we replayed learned and uniform endpoint
+selection on the 3,000 saved eight-offer panels from the completed prior
+linker method. Proposal construction, native-support admission, structural
+restrictions, and the evaluator were unchanged. Learned selection gave
+28.6\% quality, 72.4\% uniqueness, and 0.562149 diversity. Uniform selection
+gave 23.333\% quality, 73.367\% uniqueness, and 0.573898 diversity. Both
+arms retained 100\% chemical validity. The mean learned-minus-uniform
+quality difference across ten prompts was 5.267 points, with a 95\%
+prompt-bootstrap interval of 1.967 to 9.133 points. This conditional
+program-panel comparison does not remove the training-derived linker catalog
+or test the entire transition reference. It applies to the recorded linker
+configuration and is not transferred to a later linker or morphing method.
