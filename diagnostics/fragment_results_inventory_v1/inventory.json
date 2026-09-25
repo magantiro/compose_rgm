@@ -1,0 +1,102 @@
+{
+  "schema": "fragment_results_inventory_v1",
+  "as_of_utc": "2026-09-25 16:19:48 UTC",
+  "paper_zip": {
+    "path": "/Users/rmaganti/Downloads/COMPOSE__ICLR_Main_2027_ (3).zip",
+    "sha256": "1e615ddda7fd91398179faa42835d4fcfd723f06fdf269c9cf4b5fab34fe0cdc"
+  },
+  "rows": [
+    {
+      "task": "motif_extension",
+      "printed_development": {
+        "quality_percent": 43.0,
+        "uniqueness_percent": 97.5,
+        "diversity": 0.669,
+        "validity_percent": 100.0,
+        "attempts": 200,
+        "seeds": 1,
+        "source": "diagnostics/fragment_motif_focused_dev_v1/summary.json",
+        "sha256": "71c962306249da7c5a040aba1b505086eb1c7bbe5732645643bf843e5747a88a"
+      },
+      "completed_evaluation": {
+        "quality_percent": 42.63333333333333,
+        "uniqueness_percent": 93.6316,
+        "diversity": 0.664021,
+        "validity_percent": 99.96666666666667,
+        "attempts": 3000,
+        "outputs": 2999,
+        "seeds": 3,
+        "source": "diagnostics/fragment_motif_official_v1/summary.json",
+        "sha256": "fc6658b10f83c44aa2fb6aa447492e7ce0852654899507bef3c887576ce5d33d"
+      }
+    },
+    {
+      "task": "superstructure_generation",
+      "printed_completed_evaluation": {
+        "quality_percent": 39.03,
+        "uniqueness_percent": 97.33,
+        "diversity": 0.725,
+        "validity_percent": 100.0,
+        "attempts": 3000,
+        "seeds": 3,
+        "source": "diagnostics/fragment_superstructure_official_v2/result.json",
+        "sha256": "8406f57dc5ff6736110593d309f207d7a5d0e878eeb1b7a2f2c423fe2d9b3652"
+      },
+      "primary_reference_ablation": {
+        "source": "diagnostics/fragment_superstructure_reference_final_v1/result.json",
+        "comparison_arm": "uniform available family and uniform masked native mark, learned hazard retained"
+      }
+    },
+    {
+      "task": "linker_design",
+      "printed_development": {
+        "quality_percent": 35.0,
+        "uniqueness_percent": 91.5,
+        "diversity": 0.548,
+        "validity_percent": 100.0,
+        "attempts": 200,
+        "seeds": 1,
+        "source": "diagnostics/fragment_training_linker_metric_pilot_v2/summary.json",
+        "sha256": "2eaa9c1782b2f520df0af4d004e238f36c407f517579aa83656aaeced9352ffa"
+      },
+      "completed_evaluation": {
+        "quality_percent": 28.6,
+        "uniqueness_percent": 72.4,
+        "diversity": 0.562149,
+        "validity_percent": 100.0,
+        "attempts": 3000,
+        "seeds": 3,
+        "source": "diagnostics/fragment_linker_official_v1/summary.json",
+        "sha256": "ff6f0fad7f1338540751b1a353c71fce5984108c63225ad80dea542563e87595"
+      },
+      "supporting_panel_ablation": {
+        "source": "diagnostics/fragment_common_panel_linker_v1/result.json",
+        "sha256": "c0be3cd66acbf42ef865b03bf3b4c66775f8e9fbf7f8396cbe1a3073c012e951",
+        "scope": "conditional selection on the original eight-offer program panels"
+      },
+      "active_development_contract_payload_sha256": "47293d60a7c6c34bca93f7b0ffd983debbe63c52111278934ba955cf7903473c"
+    },
+    {
+      "task": "scaffold_morphing",
+      "printed_status": "aliases printed linker development outputs; no independent sampling",
+      "completed_evaluation_status": "the evaluated morphing block aliases the completed linker outputs",
+      "active_development_status": "new method not frozen; alias must be reconsidered if construction changes"
+    },
+    {
+      "task": "scaffold_decoration",
+      "printed_development": {
+        "quality_percent": 22.5,
+        "uniqueness_percent": 99.0,
+        "diversity": 0.628,
+        "validity_percent": 100.0,
+        "attempts": 200,
+        "seeds": 1,
+        "source": "diagnostics/fragment_pendant_decoration_dev_v1/summary.json",
+        "sha256": "e4d064a9786854ae9e5187654d3be7c1c65efd139aea3bacc458825ab897cf88"
+      },
+      "completed_evaluation_status": "no completed three-seed evaluation for the developing method",
+      "active_development_contract_payload_sha256": "a6ecc715ca9fc70900e18d292ab8160f358649ad0e5cf06b7cd4a210cb0c4716"
+    }
+  ],
+  "rule": "Do not merge results from different construction or selection versions into a single method row. Preserve the printed development rows and completed evaluations separately."
+}
