@@ -1,0 +1,160 @@
+{
+  "contract": {
+    "arms": [
+      "frozen",
+      "sqrt_train_mass"
+    ],
+    "attempts_per_prompt_arm": 100,
+    "candidate_draws_per_attempt": 8,
+    "checkpoint_path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "drugs": [
+      "BARICITINIB",
+      "CYCLOTHIAZIDE",
+      "ELIGLUSTAT",
+      "ERLOTINIB",
+      "FUTIBATINIB",
+      "LESINURAD",
+      "LIOTHYRONINE",
+      "LOVASTATIN",
+      "MARIBAVIR",
+      "SPIRAPRIL"
+    ],
+    "material_sha256": {
+      ".official_eval_cache/pkg/in_virtuo_gen/train_utils/metrics.py": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+      "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+      "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+      "diagnostics/fragment_joint_completion_prior_v1/prior.json": "6ae0fcb635ec2876f5d7f1c326cef92c241d42267a897f441d0cc9ee5752eea2",
+      "diagnostics/fragment_training_region_catalog_v1/catalog.json": "a8775b466f479c2594ff5d8afd81049a57969211d3152035c93e9db51e8b1347",
+      "src/compose_v4/benchmark/fragment_linker_sampler.py": "25b578a35182d5fda51e42ae1a0f1732d397106b1465ccefcf99228c314b616a",
+      "tools/run_fragment_linker_broaden_pilot_v1.py": "1c5d087c06aec3ce8b2fec11403417d5da3338606e5854fd82348012eedf2104"
+    },
+    "minimum_free_bytes": 5368709120,
+    "official_evaluator_sha256": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+    "oracle_calls": 0,
+    "output_dir": "diagnostics/fragment_linker_broaden_pilot_v1",
+    "promotion_gate": {
+      "max_diversity_drop": 0.02,
+      "min_outputs_per_arm": 1000,
+      "min_quality_gain_points": 3.0,
+      "min_uniqueness_gain_points": 8.0
+    },
+    "python_executable": "/Users/rmaganti/compose_rgm_git/.venv_pinned_chem/bin/python",
+    "quality_selection": false,
+    "schema": "fragment_linker_broaden_pilot_v1",
+    "seed": 4,
+    "source_revision": "e56006ccee45e9ad7046c2cc80e7559a31aaeea2",
+    "task": "linker_design",
+    "threads": 1,
+    "versions": {
+      "numpy": "1.26.4",
+      "python": "3.11.13",
+      "rdkit": "2024.03.5",
+      "torch": "2.4.0"
+    },
+    "workers": 1
+  },
+  "contract_payload_sha256": "90e0e60d4d4fe8488b058b51b98ec68104e6d5c330609669db35eb92d268c3ea",
+  "device": "cpu",
+  "precision": "float32; no mixed precision",
+  "schema": "fragment_linker_broaden_pilot_manifest_v1",
+  "score_blind_cell_support": [
+    {
+      "compatible_training_connectors": 1256,
+      "drug": "BARICITINIB",
+      "effective_cells": {
+        "frozen": 33.013119926779424,
+        "sqrt_train_mass": 43.993065866612746
+      },
+      "reachable_cells": 52
+    },
+    {
+      "compatible_training_connectors": 74,
+      "drug": "CYCLOTHIAZIDE",
+      "effective_cells": {
+        "frozen": 20.173197911378303,
+        "sqrt_train_mass": 25.917522022794902
+      },
+      "reachable_cells": 30
+    },
+    {
+      "compatible_training_connectors": 1413,
+      "drug": "ELIGLUSTAT",
+      "effective_cells": {
+        "frozen": 40.485981194806804,
+        "sqrt_train_mass": 57.142948966057254
+      },
+      "reachable_cells": 75
+    },
+    {
+      "compatible_training_connectors": 5102,
+      "drug": "ERLOTINIB",
+      "effective_cells": {
+        "frozen": 61.56577712639095,
+        "sqrt_train_mass": 100.33925910472524
+      },
+      "reachable_cells": 147
+    },
+    {
+      "compatible_training_connectors": 1344,
+      "drug": "FUTIBATINIB",
+      "effective_cells": {
+        "frozen": 36.56374458219638,
+        "sqrt_train_mass": 50.586468782678175
+      },
+      "reachable_cells": 61
+    },
+    {
+      "compatible_training_connectors": 71,
+      "drug": "LESINURAD",
+      "effective_cells": {
+        "frozen": 30.558185405768203,
+        "sqrt_train_mass": 34.830708922833985
+      },
+      "reachable_cells": 37
+    },
+    {
+      "compatible_training_connectors": 9318,
+      "drug": "LIOTHYRONINE",
+      "effective_cells": {
+        "frozen": 55.37944920934507,
+        "sqrt_train_mass": 83.81332729097626
+      },
+      "reachable_cells": 114
+    },
+    {
+      "compatible_training_connectors": 64,
+      "drug": "LOVASTATIN",
+      "effective_cells": {
+        "frozen": 16.46817323369374,
+        "sqrt_train_mass": 20.653414426917085
+      },
+      "reachable_cells": 23
+    },
+    {
+      "compatible_training_connectors": 57,
+      "drug": "MARIBAVIR",
+      "effective_cells": {
+        "frozen": 20.006744740732476,
+        "sqrt_train_mass": 24.540403960941717
+      },
+      "reachable_cells": 27
+    },
+    {
+      "compatible_training_connectors": 1365,
+      "drug": "SPIRAPRIL",
+      "effective_cells": {
+        "frozen": 40.77726909748464,
+        "sqrt_train_mass": 53.98349300496665
+      },
+      "reachable_cells": 65
+    }
+  ],
+  "source_revision": "e56006ccee45e9ad7046c2cc80e7559a31aaeea2",
+  "threads": 1,
+  "versions": {
+    "numpy": "1.26.4",
+    "python": "3.11.13",
+    "rdkit": "2024.03.5",
+    "torch": "2.4.0"
+  }
+}
