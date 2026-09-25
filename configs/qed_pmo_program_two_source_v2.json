@@ -1,0 +1,31 @@
+{
+  "payload": {
+    "schema": "qed_pmo_program_two_source_v2",
+    "source_indices": [0, 1],
+    "arms": ["dynamic_v21", "pmo_population"],
+    "charged_qed_calls_per_source_arm": 25,
+    "rounds": 3,
+    "queries_per_round": 8,
+    "proposal_pool_size": 16,
+    "attempts_per_batch": 64,
+    "proposal_wall_seconds": 20.0,
+    "similarity_floor": 0.4,
+    "qed_success_floor": 0.9,
+    "oracle": "local_rdkit_qed_only",
+    "workers": 1,
+    "python_executable": "/Users/rmaganti/compose_rgm_git/.venv_pinned_chem/bin/python",
+    "source_revision": "4f4373ae988a771231b7e37583ef32df976bfd18",
+    "versions": {"python": "3.11.13", "rdkit": "2024.03.5"},
+    "material_sha256": {
+      "tools/run_qed_pmo_program_two_source_v1.py": "8c9d00f57207cf58b5175ea0768deeb0e384d62c9e42847d6db1a1f695e727c1",
+      "configs/benchmarks/jin_iclr19_qed_test_exact_v1.csv": "cab403bf2f92a5f7f0db19f9b508c8d0db860c89993db355a550f330f41c0983",
+      "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43",
+      "src/compose_v4/control/pmo_population_controller.py": "f136d26fe248dab575dfef2d4eddc6741e3dbb8a934755d5cfad057a52a5466a",
+      "src/compose_v4/control/dynamic_program_synthesis_v21.py": "d5f4d432f3a51d49a1c6f962e079a5ae729c731031998d78caf14f1d3891b743",
+      "src/compose_v4/control/program_campaign.py": "884f13cbbe49c06a94aafb59880daf38f313b6f4717af012c1fe8eb9074c469e",
+      "src/compose_v4/control/program_task.py": "56a61194ff4f1a2ef9e5f1b295dc5a90b2a6782a6ac407d56bd4039658cde63c"
+    },
+    "output_dir": "diagnostics/qed_pmo_program_two_source_v2"
+  },
+  "payload_sha256": "ca531c796fb1f41e71656a878fd7e0341f13357de69fff4641166e8c382c9331"
+}
