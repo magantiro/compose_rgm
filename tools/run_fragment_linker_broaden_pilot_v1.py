@@ -82,7 +82,10 @@ def load_contract(path: Path = CONTRACT) -> tuple[dict, str]:
 
 
 def summarize(rows: list[dict], contract: dict) -> dict:
-    expected = {(arm, drug) for arm in ARMS for drug in contract["drugs"]}
+    arms = tuple(contract["arms"])
+    if arms not in (ARMS, ("frozen", "novelty4")):
+        raise ValueError("unrecognized matched linker pilot arms")
+    expected = {(arm, drug) for arm in arms for drug in contract["drugs"]}
     observed = {(row["arm"], row["drug"]) for row in rows}
     if observed != expected or len(rows) != len(expected):
         raise ValueError("linker pilot needs both complete ten-prompt arms")
@@ -101,9 +104,9 @@ def summarize(rows: list[dict], contract: dict) -> dict:
                 row["exact_core_path_fidelity_outputs"] for row in rows if row["arm"] == arm
             ),
         }
-        for arm in ARMS
+        for arm in arms
     }
-    old, new = by_arm["frozen"], by_arm["sqrt_train_mass"]
+    old, new = by_arm["frozen"], by_arm[arms[1]]
     gate = contract["promotion_gate"]
     passed = (
         new["quality"] >= old["quality"] + gate["min_quality_gain_points"]
@@ -113,11 +116,15 @@ def summarize(rows: list[dict], contract: dict) -> dict:
             by_arm[arm]["outputs"] >= gate["min_outputs_per_arm"]
             and by_arm[arm]["exact_core_path_fidelity_outputs"] == by_arm[arm]["outputs"]
             and by_arm[arm]["validity"] == 100.0
-            for arm in ARMS
+            for arm in arms
         )
     )
     return {
-        "schema": "fragment_linker_broaden_pilot_result_v1",
+        "schema": (
+            "fragment_linker_broaden_pilot_result_v1"
+            if arms == ARMS
+            else "fragment_linker_novelty_pilot_result_v1"
+        ),
         "role": "single-seed matched development; not an independent final benchmark",
         "seed": contract["seed"],
         "attempts_per_arm": 1000,
@@ -128,7 +135,7 @@ def summarize(rows: list[dict], contract: dict) -> dict:
     }
 
 
-def cell_support_summary(prompts: tuple) -> list[dict]:
+def cell_support_summary(prompts: tuple, arms: tuple[str, str] = ARMS) -> list[dict]:
     """Record the score-blind structural support before sampling begins."""
     catalog = load_linker_catalog(CATALOG, expected_sha256=CATALOG_SHA)
     prior = JointCompletionPrior.from_dict(json.loads(PRIOR.read_text()))
@@ -138,7 +145,12 @@ def cell_support_summary(prompts: tuple) -> list[dict]:
         if not grouped:
             raise ValueError(f"no compatible linker cell for {prompt.drug_name}")
         cells = tuple(grouped)
-        masses = {arm: linker_cell_probabilities(prior, cells, allocation=arm) for arm in ARMS}
+        masses = {
+            arm: linker_cell_probabilities(
+                prior, cells, allocation="frozen" if arm == "novelty4" else arm
+            )
+            for arm in arms
+        }
         rows.append(
             {
                 "drug": prompt.drug_name,
@@ -193,6 +205,9 @@ def preflight(contract: dict) -> tuple[dict, tuple]:
 
 
 def run(contract: dict, manifest_path: Path, output: Path, prompts: tuple) -> None:
+    arms = tuple(contract["arms"])
+    if arms not in (ARMS, ("frozen", "novelty4")):
+        raise ValueError("unrecognized matched linker pilot arms")
     catalog = load_linker_catalog(CATALOG, expected_sha256=CATALOG_SHA)
     prior = JointCompletionPrior.from_dict(json.loads(PRIOR.read_text()))
     model = None
@@ -201,10 +216,11 @@ def run(contract: dict, manifest_path: Path, output: Path, prompts: tuple) -> No
     manifest_sha = physical_sha256(manifest_path)
     work_seconds = 0.0
     for prompt in prompts:
-        for arm in ARMS:
+        for arm in arms:
             rng = np.random.default_rng(
                 prompt_rng_seed(prompt.drug_name, prompt.task.value, contract["seed"])
             )
+            emitted: set[str] = set()
             attempts: list[dict] = []
             attempt_hashes: dict[str, str] = {}
             for index in range(100):
@@ -244,7 +260,13 @@ def run(contract: dict, manifest_path: Path, output: Path, prompts: tuple) -> No
                     )
                     began = time.monotonic()
                     panel = sample_linker_panel(
-                        prompt, catalog, prior, model, rng, cell_allocation=arm
+                        prompt,
+                        catalog,
+                        prior,
+                        model,
+                        rng,
+                        cell_allocation="frozen" if arm == "novelty4" else arm,
+                        prior_emitted=frozenset(emitted) if arm == "novelty4" else None,
                     )
                     selected = panel.selected
                     fidelity = linker_fidelity(prompt, selected.smiles) if selected else None
@@ -281,6 +303,9 @@ def run(contract: dict, manifest_path: Path, output: Path, prompts: tuple) -> No
                 ):
                     raise ValueError(f"saved attempt manifest changed: {start}")
                 attempts.append(receipt)
+                selected_smiles = receipt["panel"]["selected_smiles"]
+                if selected_smiles is not None:
+                    emitted.add(selected_smiles)
                 work_seconds += receipt["wall_seconds"]
                 attempt_hashes[str(relative)] = physical_sha256(path)
                 if index % 10 == 9:
@@ -288,7 +313,11 @@ def run(contract: dict, manifest_path: Path, output: Path, prompts: tuple) -> No
                     _atomic_json(
                         output / "progress.json",
                         {
-                            "schema": "fragment_linker_broaden_pilot_progress_v1",
+                            "schema": (
+                                "fragment_linker_broaden_pilot_progress_v1"
+                                if arms == ARMS
+                                else "fragment_linker_novelty_pilot_progress_v1"
+                            ),
                             "manifest_sha256": manifest_sha,
                             "completed_attempts": completed,
                             "total_attempts": 2000,
