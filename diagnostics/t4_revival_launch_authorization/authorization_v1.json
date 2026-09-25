@@ -1,11 +1,28 @@
 {
   "arms": {
+    "5ht1b_d04": {
+      "authorized_payload_sha256": "31fded256fe3d3cf02eaba056043f8dc077d841e5c36273ad0e84a3a89adc527",
+      "cells": [
+        "5ht1b_2_r2",
+        "5ht1b_2_r3"
+      ],
+      "contract": "configs/t4_unified_controller_5ht1b_d04_rev_v1.json",
+      "total_charged_call_ceiling": 498
+    },
     "braf_d04": {
       "authorized_payload_sha256": "ab1257e1060a51fb46cf4575de292bbb1243a31175494a289e0296df0466b645",
       "cells": [
         "braf_2_r3"
       ],
       "contract": "configs/t4_unified_controller_braf_d04_rev_v1.json",
+      "total_charged_call_ceiling": 249
+    },
+    "braf_d06": {
+      "authorized_payload_sha256": "095f5e149259ee25758689fe554424815aecc967a09dc6d243884672a213cb99",
+      "cells": [
+        "braf_2_r3"
+      ],
+      "contract": "configs/t4_unified_controller_braf_d06_rev_v1.json",
       "total_charged_call_ceiling": 249
     },
     "fa7_d04": {
@@ -17,15 +34,51 @@
       ],
       "contract": "configs/t4_unified_controller_fa7_d04_rev_v1.json",
       "total_charged_call_ceiling": 747
+    },
+    "jak2_d04": {
+      "authorized_payload_sha256": "db81e2568ff95500616f7b1dab26ef27528e9a882ad18740c00ea1c9c0b58f5c",
+      "cells": [
+        "jak2_2_r2",
+        "jak2_2_r3"
+      ],
+      "contract": "configs/t4_unified_controller_jak2_d04_rev_v1.json",
+      "total_charged_call_ceiling": 498
+    },
+    "jak2_d06": {
+      "authorized_payload_sha256": "136e4b0032975c65e3734079f0a6fe6c5069c5ebe164b305326a89f2c45dd7aa",
+      "cells": [
+        "jak2_2_r2",
+        "jak2_2_r3"
+      ],
+      "contract": "configs/t4_unified_controller_jak2_d06_rev_v1.json",
+      "total_charged_call_ceiling": 498
+    },
+    "parp1_d04": {
+      "authorized_payload_sha256": "834965685c109c347cea2bc424d02672f3f5385eece71a1332c82f5a2f262f92",
+      "cells": [
+        "parp1_2_r3"
+      ],
+      "contract": "configs/t4_unified_controller_parp1_d04_rev_v1.json",
+      "total_charged_call_ceiling": 249
+    },
+    "parp1_d06": {
+      "authorized_payload_sha256": "38bcaa9906e22ba1f73093e645e06f03f637dd7ec022b27411d7c8db247d46a1",
+      "cells": [
+        "parp1_1_r3",
+        "parp1_2_r2",
+        "parp1_2_r3"
+      ],
+      "contract": "configs/t4_unified_controller_parp1_d06_rev_v1.json",
+      "total_charged_call_ceiling": 747
     }
   },
-  "authorized_at_utc": "2026-09-25T08:33:22.692338+00:00",
+  "authorized_at_utc": "2026-09-25T21:22:16.127252+00:00",
   "budget": {
-    "cells": 4,
+    "cells": 15,
     "per_cell_authorized": 250,
     "per_cell_debited_on_rahul": 1,
     "rule": "lifetime spend per revived cell is 1 (rahul) + 249 (nitya) = 250",
-    "total_charged_call_ceiling": 996
+    "total_charged_call_ceiling": 3735
   },
   "context_shown_to_owner": "that fa7_1_r3, fa7_2_r2, fa7_2_r3 and braf_2_r3 died in the round-0 preemption window and can never return a molecule on rahul-94866, because _resume_state raises on an unfinished query lock with no recoverable checkpoint and retries is 0",
   "not_authorized": "the fourteen cells still QUEUED on rahul-94866 are NOT revived; their run_cell calls are live and a second writer would produce a divergent duplicate and double-charge the cell",

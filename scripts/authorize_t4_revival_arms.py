@@ -36,8 +36,18 @@ from compose_v4.control.docking_value import identity
 
 #: The pre-authorization payload hash prefixes being authorized.
 AUTHORIZED = {
+    # WAVE 1 -- already launched and running; re-listed so the on-disk contracts return
+    # to their authorized state after a rebuild.  These arms are NEVER relaunched: their
+    # containers run from a baked image and a second writer would corrupt them.
     "fa7_d04": "a2f50528",
     "braf_d04": "ab1257e1",
+    # WAVE 2 -- the eleven further round-0 corpses.
+    "5ht1b_d04": "31fded25",
+    "braf_d06": "095f5e14",
+    "jak2_d04": "db81e256",
+    "jak2_d06": "136e4b00",
+    "parp1_d04": "83496568",
+    "parp1_d06": "38bcaa99",
 }
 
 RECEIPT = "diagnostics/t4_revival_launch_authorization/authorization_v1.json"

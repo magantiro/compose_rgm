@@ -2,7 +2,7 @@
   "payload": {
     "authorization": {
       "authorized_at_utc": "2026-09-25T21:22:16.127252+00:00",
-      "authorized_payload_sha256": "ab1257e1060a51fb46cf4575de292bbb1243a31175494a289e0296df0466b645",
+      "authorized_payload_sha256": "834965685c109c347cea2bc424d02672f3f5385eece71a1332c82f5a2f262f92",
       "provenance": "direct owner instruction in session; see the receipt",
       "receipt": "diagnostics/t4_revival_launch_authorization/authorization_v1.json",
       "reconstruction_rule": "delete `authorization`, set scored_launch_authorized and modal_launch_authorized to false, and set status to 'FROZEN_PENDING_OWNER_LAUNCH_AUTHORIZATION'; the result must hash to `authorized_payload_sha256`"
@@ -10,18 +10,18 @@
     "batch": 8,
     "cells": [
       {
-        "cell": "braf_2_r3",
+        "cell": "parp1_2_r3",
         "controller_seed": 18026091860,
         "replicate": 3,
         "replicate_1_controller_seed": 2026091802,
-        "smiles": "FC(F)(F)c4cc(NC(=O)Nc3ccc(Oc2ccnc(C(=O)Nc1cccnc1)c2)cc3)ccc4Cl",
-        "source_cell": "braf_2",
-        "source_global_index": 11
+        "smiles": "O/N=C/c1cn3CCNC(=O)c2cccc1c23",
+        "source_cell": "parp1_2",
+        "source_global_index": 2
       }
     ],
-    "central_claim_under_test": "the same multi-expert FiberControl algorithm can autonomously allocate docking calls on BRAF without BRAF-specific controller changes",
+    "central_claim_under_test": "the same multi-expert FiberControl algorithm can autonomously allocate docking calls on PARP1 without PARP1-specific controller changes",
     "charged_calls_per_cell": 250,
-    "claim_boundary": "unified T4 controller on the held-target braf panel at delta 0.4 with 250 charged calls per cell: state routing (t4_unified_routing_v1) selects the rung-0 proposal kernel from the molecular state, and an exhausted round climbs the frozen target-agnostic ladder (t4_frozen_escalation_v1) before any cell may publish candidate exhaustion. This is a NAMED controller distinct from the frozen historical panel; its numbers must never be spliced into an unchanged-v1 table. REPLICATES 2 AND 3: identical controller bytes and settings to replicate 1; only the stochastic replicate seed differs. Report the three-replicate MEAN, never the best of three. REVIVAL ARM: the subset of replicate cells lost to the round-0 preemption window, re-run on the nitya workspace under byte-identical controller bytes with each cell's one prior charged call debited. Report these rows as part of the replicate panel, naming the revival.",
+    "claim_boundary": "unified T4 controller on the held-target parp1 panel at delta 0.4 with 250 charged calls per cell: state routing (t4_unified_routing_v1) selects the rung-0 proposal kernel from the molecular state, and an exhausted round climbs the frozen target-agnostic ladder (t4_frozen_escalation_v1) before any cell may publish candidate exhaustion. This is a NAMED controller distinct from the frozen historical panel; its numbers must never be spliced into an unchanged-v1 table. REPLICATES 2 AND 3: identical controller bytes and settings to replicate 1; only the stochastic replicate seed differs. Report the three-replicate MEAN, never the best of three. REVIVAL ARM: the subset of replicate cells lost to the round-0 preemption window, re-run on the nitya workspace under byte-identical controller bytes with each cell's one prior charged call debited. Report these rows as part of the replicate panel, naming the revival.",
     "declared_support": {
       "endpoint_support": "compose_valid is a strict subset of the official T4 endpoint fiber",
       "maximum_active_atoms": 40,
@@ -43,28 +43,28 @@
         "experimental_setting",
         "delta_provenance"
       ],
-      "derived_from": "configs/t4_unified_controller_braf_d06_v1.json",
-      "derived_from_payload_sha256": "28deab76c30c31144ef53d53888722845b935af7fe0aa7eb210434fda0cd8fe1",
+      "derived_from": "configs/t4_unified_controller_parp1_d06_v1.json",
+      "derived_from_payload_sha256": "89674e94f48cb87858e76a027288baec7c156d6b65278f3a31d694d18f900caa",
       "rule": "delta is a benchmark input supplied per instance, like the start molecule. No controller setting changes between the two thresholds; tests/test_t4_delta04_contracts.py enforces that by enumerating every leaf of both payloads."
     },
     "docking_box": [
       [
-        84.194,
-        6.949,
-        -7.081
+        26.413,
+        11.282,
+        27.238
       ],
       [
-        22.032,
-        19.211,
-        14.106
+        18.521,
+        17.479,
+        19.995
       ]
     ],
     "docking_seed": 20260918,
     "evaluator_sha256": {
       "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
-      "receptor": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a"
+      "receptor": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9"
     },
-    "experimental_setting": "prospective three-cell BRAF delta=0.4 panel under the unified T4 controller; 250 charged calls per cell, 750 per arm; an exhausted round runs the routed frozen support expansion, which spends CPU and never an oracle call, before candidate exhaustion may be published. Candidate exhaustion and abstention remain valid outcomes.",
+    "experimental_setting": "prospective three-cell PARP1 delta=0.4 panel under the unified T4 controller; 250 charged calls per cell, 750 per arm; an exhausted round runs the routed frozen support expansion, which spends CPU and never an oracle call, before candidate exhaustion may be published. Candidate exhaustion and abstention remain valid outcomes.",
     "expert_floor_rounds": 2,
     "exploration": 2,
     "frozen_from": {
@@ -98,8 +98,8 @@
       ],
       "protonation_lane_settings_from": "configs/t4_5ht1b2_protonation_rescue_d06_v1.json",
       "protonation_lane_settings_payload_sha256": "d7d2fbc2982086fd62eddf17a98681a83d44d2212e4729a6646694bb1a7a7ddb",
-      "source_contract": "configs/t4_held_target_distilled_braf_d06_250.json",
-      "source_contract_payload_sha256": "0df84d667ece4c07363493b36d512a66616fa2faf6dacbe66cd5d3b88e1a9f32"
+      "source_contract": "configs/t4_held_target_distilled_parp1_d06_250.json",
+      "source_contract_payload_sha256": "bd68d29c335bc443c87f661480c465236f4f8464bab5005a0e5345f15e2f0b3f"
     },
     "launch_authority": "The five-protein unified panel is an owner decision, not an agent one. `t4_unified_controller_app._local_task` refuses to spawn while either `scored_launch_authorized` or `modal_launch_authorized` is false, so the refusal is executable rather than a status string.",
     "modal_launch_authorized": true,
@@ -237,7 +237,7 @@
         "pool_size": 64,
         "realization_limit": 64,
         "training_scope": "one shared task-independent expert fit on all 77 locked routes",
-        "training_split": "leave-braf-out"
+        "training_split": "leave-parp1-out"
       },
       "shallow": {
         "draws": 480,
@@ -260,9 +260,14 @@
       ]
     },
     "reported_ivg_delta_0_6": {
-      "braf_0": -9.7,
-      "braf_1": -10.4,
-      "braf_2": -10.3
+      "parp1_0": -12.3,
+      "parp1_1": -11.533333333333333,
+      "parp1_2": -10.1
+    },
+    "reported_ivg_source": {
+      "aggregation": "mean of the three published IVG run winners per exact cell, used only after the run for read-only comparison",
+      "artifact": "diagnostics/t4_delta06_route_corpus/attempt_1/training_corpus.json.gz",
+      "artifact_sha256": "d96265ca0f3364a118b10037b8312263f2e627ff629651bca22eca1ae834cded"
     },
     "revival_policy": {
       "ceiling_rule": "DERIVED as sum over cells of (250 - prior spend), never written down; charged_calls_per_cell stays at the panel-uniform 250 and the ceiling carries the debit, the same mechanism replicate_policy.budget_note describes for the historical 249/248 rows",
@@ -270,14 +275,14 @@
       "lifetime_charged_calls_per_cell": 250,
       "prior_charge_evidence": "the cell's own round_000_lock.json; the query's resolution is uncertain and an uncertain call is charged, never freed",
       "prior_charged_calls_debited": {
-        "braf_2_r3": 1
+        "parp1_2_r3": 1
       },
       "revives": [
-        "braf_2_r3"
+        "parp1_2_r3"
       ],
       "separate_namespace_reason": "a Modal volume name is workspace-scoped, so reusing the rahul names would give two distinct volumes one name; -rev keeps them distinct",
-      "source_arm": "configs/t4_unified_controller_braf_d04_r23_v1.json",
-      "source_arm_payload_sha256": "58cf715c2797b0606f64b5bf1a6a43bb0775728637a536fa3de2bad25e1b770f",
+      "source_arm": "configs/t4_unified_controller_parp1_d04_r23_v1.json",
+      "source_arm_payload_sha256": "ed6d60d4835a2ca9b7a067b1b487e43afa925732bf45a57eb14a622da109353e",
       "source_arm_workspace": "rahul-94866",
       "why_these_cells_are_free": "Each holds exactly one round_000_lock.json with one query and no checkpoint.json, so t4_unified_controller_app._resume_state raises 'an unfinished query lock exists with no recoverable checkpoint'. With retries: 0 and that guard, a restarted rahul-94866 container raises on the same guard and can never write the cell again. No other cell of the panel is revived: fourteen are QUEUED on rahul with live run_cell calls and would produce divergent duplicates.",
       "workspace": "nitya"
@@ -290,11 +295,11 @@
       "publish_complete_candidate_pool_before_docking": true
     },
     "runtime_inputs_sha256": {
-      "diagnostics/t4_held_target_distillation_quality_v1/braf_checkpoint.json": "ab5ba04e3ec52a2f92cedcebec4e53ec7159d03d5a4871aa56199ee485c0709a",
+      "diagnostics/t4_held_target_distillation_quality_v1/parp1_checkpoint.json": "73f25dcddb71a3645b7bd45252e37814f837c6f5b1b8d59f5f4e08940439d311",
       "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
       "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
       "modal_apps/t4_unified_controller_app.py": "5426195f80476216fe580d7e09009deb5657f5ba8100b58458ce26416022903b",
-      "modal_apps/t4_unified_controller_braf_d04_rev_app.py": "0ce9e3c816c6badb08bb05e84c5a1c6f6d20f56a1fcc35f12d259f216aaee9c7",
+      "modal_apps/t4_unified_controller_parp1_d04_rev_app.py": "e7240b0babcd4a48545b782330f7ba62f12b7647736ebb84ecbb383026a93a1d",
       "src/compose_v4/control/bridge_region_law.py": "e08422c3ee5e8dcaae4a6dd4821213fff60253289d70f556987b5587c0b5bf68",
       "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
       "src/compose_v4/control/dynamic_program_synthesis.py": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897",
@@ -321,7 +326,7 @@
       "src/compose_v4/rewrite/operators.py": "a1542f2cd7bdae392ef7618636ab8ca9ec49215cda9b8927113e4daf2c9b5c0f"
     },
     "schema_version": "t4_unified_controller_revival_contract_v1",
-    "scientific_problem": "test transfer of a route-trained structural-action prior to braf with every braf route excluded from fitting",
+    "scientific_problem": "test transfer of a route-trained structural-action prior to parp1 with every parp1 route excluded from fitting",
     "scored_launch_authorized": true,
     "state_routing": {
       "policy": "t4_unified_routing_v1",
@@ -340,18 +345,18 @@
       "escalation_policy": "t4_frozen_escalation_v1",
       "escalation_policy_sha256": "c5cf6ab3e3a516b6aca3c9cc410c17d2f712bf60ccac224363ba57343c256a62",
       "per_cell_overrides": [],
-      "round_one_route_expert": "diagnostics/t4_held_target_distillation_quality_v1/braf_checkpoint.json",
+      "round_one_route_expert": "diagnostics/t4_held_target_distillation_quality_v1/parp1_checkpoint.json",
       "rung_zero_route_expert": "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json",
       "state_routing_policy": "t4_unified_routing_v1",
       "state_routing_policy_sha256": "b69cadcba1824ffcf1a45f8f7f894bec284bf09deea406a4e1da271d52bd609a"
     },
     "value_penalty": 1.0,
     "zero_oracle_route_support": {
-      "artifact": "diagnostics/t4_held_target_distillation_quality_v1/braf_smoke.json",
-      "artifact_sha256": "41dd997d40c069f0064889abaeed6fe117fd2854f5301fbb75fa62cda99240ec",
+      "artifact": "diagnostics/t4_held_target_distillation_quality_v1/parp1_smoke.json",
+      "artifact_sha256": "e6b93b2f54de85fef4e54e79ff7ac3337ece4cb198adbe6d86d97af49b7945a7",
       "interpretation": "support outcome is preserved and is not treated as oracle evidence",
-      "result": "leave-braf-out route support artifact is frozen for the scored panel"
+      "result": "leave-parp1-out route support artifact is frozen for the scored panel"
     }
   },
-  "payload_sha256": "f3d3d6e130d2dc9dc9e8f1fb8780e6e322a3a070b74493a92761918e31bb593e"
+  "payload_sha256": "6c5b2b34a424c5a14f1664d0dde9f944ad1554f18a69fc05aa02762a6a5cd583"
 }

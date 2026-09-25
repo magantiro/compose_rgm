@@ -61,8 +61,18 @@ from compose_v4.experiments.continuation_profile import sha256_file
 #: Measured from each cell's own `round_000_lock.json`: one query, no
 #: `charged_before`, no checkpoint.
 REVIVE: dict[tuple[str, str], dict[str, int]] = {
+    # WAVE 1, already running on nitya.
     ("fa7", "d04"): {"fa7_1_r3": 1, "fa7_2_r2": 1, "fa7_2_r3": 1},
     ("braf", "d04"): {"braf_2_r3": 1},
+    # WAVE 2.  Eleven further cells died in the same round-0 window and sat idle for
+    # 362-764 minutes: one round_000_lock.json, one query, no checkpoint, no result.
+    # Measured per cell rather than assumed; every one debits exactly 1.
+    ("5ht1b", "d04"): {"5ht1b_2_r2": 1, "5ht1b_2_r3": 1},
+    ("jak2", "d04"): {"jak2_2_r2": 1, "jak2_2_r3": 1},
+    ("jak2", "d06"): {"jak2_2_r2": 1, "jak2_2_r3": 1},
+    ("parp1", "d04"): {"parp1_2_r3": 1},
+    ("parp1", "d06"): {"parp1_1_r3": 1, "parp1_2_r2": 1, "parp1_2_r3": 1},
+    ("braf", "d06"): {"braf_2_r3": 1},
 }
 
 CHARGED_CALLS_PER_CELL = 250

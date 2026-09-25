@@ -2,7 +2,7 @@
   "payload": {
     "authorization": {
       "authorized_at_utc": "2026-09-25T21:22:16.127252+00:00",
-      "authorized_payload_sha256": "ab1257e1060a51fb46cf4575de292bbb1243a31175494a289e0296df0466b645",
+      "authorized_payload_sha256": "095f5e149259ee25758689fe554424815aecc967a09dc6d243884672a213cb99",
       "provenance": "direct owner instruction in session; see the receipt",
       "receipt": "diagnostics/t4_revival_launch_authorization/authorization_v1.json",
       "reconstruction_rule": "delete `authorization`, set scored_launch_authorized and modal_launch_authorized to false, and set status to 'FROZEN_PENDING_OWNER_LAUNCH_AUTHORIZATION'; the result must hash to `authorized_payload_sha256`"
@@ -21,7 +21,7 @@
     ],
     "central_claim_under_test": "the same multi-expert FiberControl algorithm can autonomously allocate docking calls on BRAF without BRAF-specific controller changes",
     "charged_calls_per_cell": 250,
-    "claim_boundary": "unified T4 controller on the held-target braf panel at delta 0.4 with 250 charged calls per cell: state routing (t4_unified_routing_v1) selects the rung-0 proposal kernel from the molecular state, and an exhausted round climbs the frozen target-agnostic ladder (t4_frozen_escalation_v1) before any cell may publish candidate exhaustion. This is a NAMED controller distinct from the frozen historical panel; its numbers must never be spliced into an unchanged-v1 table. REPLICATES 2 AND 3: identical controller bytes and settings to replicate 1; only the stochastic replicate seed differs. Report the three-replicate MEAN, never the best of three. REVIVAL ARM: the subset of replicate cells lost to the round-0 preemption window, re-run on the nitya workspace under byte-identical controller bytes with each cell's one prior charged call debited. Report these rows as part of the replicate panel, naming the revival.",
+    "claim_boundary": "unified T4 controller on the held-target braf panel at delta 0.6 with 250 charged calls per cell: state routing (t4_unified_routing_v1) selects the rung-0 proposal kernel from the molecular state, and an exhausted round climbs the frozen target-agnostic ladder (t4_frozen_escalation_v1) before any cell may publish candidate exhaustion. This is a NAMED controller distinct from the frozen historical panel; its numbers must never be spliced into an unchanged-v1 table. REPLICATES 2 AND 3: identical controller bytes and settings to replicate 1; only the stochastic replicate seed differs. Report the three-replicate MEAN, never the best of three. REVIVAL ARM: the subset of replicate cells lost to the round-0 preemption window, re-run on the nitya workspace under byte-identical controller bytes with each cell's one prior charged call debited. Report these rows as part of the replicate panel, naming the revival.",
     "declared_support": {
       "endpoint_support": "compose_valid is a strict subset of the official T4 endpoint fiber",
       "maximum_active_atoms": 40,
@@ -34,19 +34,7 @@
       "shallow_and_anchored_horizon": 3,
       "stereochemistry_claim": false
     },
-    "delta": 0.4,
-    "delta_provenance": {
-      "changed": [
-        "delta",
-        "runtime_inputs_sha256",
-        "claim_boundary",
-        "experimental_setting",
-        "delta_provenance"
-      ],
-      "derived_from": "configs/t4_unified_controller_braf_d06_v1.json",
-      "derived_from_payload_sha256": "28deab76c30c31144ef53d53888722845b935af7fe0aa7eb210434fda0cd8fe1",
-      "rule": "delta is a benchmark input supplied per instance, like the start molecule. No controller setting changes between the two thresholds; tests/test_t4_delta04_contracts.py enforces that by enumerating every leaf of both payloads."
-    },
+    "delta": 0.6,
     "docking_box": [
       [
         84.194,
@@ -64,7 +52,7 @@
       "qvina02": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
       "receptor": "707b21bfb654321cb14d33ea07e9accab4cb9a884378285cd562c2324a31213a"
     },
-    "experimental_setting": "prospective three-cell BRAF delta=0.4 panel under the unified T4 controller; 250 charged calls per cell, 750 per arm; an exhausted round runs the routed frozen support expansion, which spends CPU and never an oracle call, before candidate exhaustion may be published. Candidate exhaustion and abstention remain valid outcomes.",
+    "experimental_setting": "prospective three-cell BRAF delta=0.6 panel under the unified T4 controller; 250 charged calls per cell, 750 per arm; an exhausted round runs the routed frozen support expansion, which spends CPU and never an oracle call, before candidate exhaustion may be published. Candidate exhaustion and abstention remain valid outcomes.",
     "expert_floor_rounds": 2,
     "exploration": 2,
     "frozen_from": {
@@ -276,8 +264,8 @@
         "braf_2_r3"
       ],
       "separate_namespace_reason": "a Modal volume name is workspace-scoped, so reusing the rahul names would give two distinct volumes one name; -rev keeps them distinct",
-      "source_arm": "configs/t4_unified_controller_braf_d04_r23_v1.json",
-      "source_arm_payload_sha256": "58cf715c2797b0606f64b5bf1a6a43bb0775728637a536fa3de2bad25e1b770f",
+      "source_arm": "configs/t4_unified_controller_braf_d06_r23_v1.json",
+      "source_arm_payload_sha256": "1f0aaef46c1868fc8c4cd76477b7dab0c9fd2f60e27942cd61ad6fcb8f651799",
       "source_arm_workspace": "rahul-94866",
       "why_these_cells_are_free": "Each holds exactly one round_000_lock.json with one query and no checkpoint.json, so t4_unified_controller_app._resume_state raises 'an unfinished query lock exists with no recoverable checkpoint'. With retries: 0 and that guard, a restarted rahul-94866 container raises on the same guard and can never write the cell again. No other cell of the panel is revived: fourteen are QUEUED on rahul with live run_cell calls and would produce divergent duplicates.",
       "workspace": "nitya"
@@ -294,7 +282,7 @@
       "diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json": "cb0d0bd0130b31f956c320ccf8171ce897f797506c8cf1a524a7f697c749865e",
       "docs/GENMOL_T4_SEEDS.json": "7dcf24541358d04b934a467fbd3e55e6259bd334ca5759245f38e65922a97447",
       "modal_apps/t4_unified_controller_app.py": "5426195f80476216fe580d7e09009deb5657f5ba8100b58458ce26416022903b",
-      "modal_apps/t4_unified_controller_braf_d04_rev_app.py": "0ce9e3c816c6badb08bb05e84c5a1c6f6d20f56a1fcc35f12d259f216aaee9c7",
+      "modal_apps/t4_unified_controller_braf_d06_rev_app.py": "304a60fdaa49997a34844fee4fad013587102ba24e819ed9db150a41fc0f065c",
       "src/compose_v4/control/bridge_region_law.py": "e08422c3ee5e8dcaae4a6dd4821213fff60253289d70f556987b5587c0b5bf68",
       "src/compose_v4/control/complete_region_program.py": "275f59b7cd47c2ed071a049a57fc52a9bd9a0f878ae6fcb20fa0b3fa0ac6c261",
       "src/compose_v4/control/dynamic_program_synthesis.py": "a1370685ccce4ff42be92ee93931cabb810a067fdabfc5666b63df1e7984f897",
@@ -353,5 +341,5 @@
       "result": "leave-braf-out route support artifact is frozen for the scored panel"
     }
   },
-  "payload_sha256": "f3d3d6e130d2dc9dc9e8f1fb8780e6e322a3a070b74493a92761918e31bb593e"
+  "payload_sha256": "90b785dd4ecde92e8b908d34a7d0bec2ad85ff7c2ff0f45467086255445d6d4c"
 }

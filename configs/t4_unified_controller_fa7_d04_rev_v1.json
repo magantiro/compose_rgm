@@ -1,7 +1,7 @@
 {
   "payload": {
     "authorization": {
-      "authorized_at_utc": "2026-09-25T08:33:22.692338+00:00",
+      "authorized_at_utc": "2026-09-25T21:22:16.127252+00:00",
       "authorized_payload_sha256": "a2f50528b85b2e287472444d15d5a9818f4e2f6a4f2089425fe250223999987e",
       "provenance": "direct owner instruction in session; see the receipt",
       "receipt": "diagnostics/t4_revival_launch_authorization/authorization_v1.json",
@@ -410,5 +410,5 @@
       "result": "all three FA7 cells emitted exact small, medium and large protected programs; strict eligible counts were 8, 8 and 15 at delta 0.4 and 2, 1 and 4 at delta 0.6"
     }
   },
-  "payload_sha256": "389a64c5a338c124d31c830b15420ee996bbe36097115e2c340fafd6fc458d3f"
+  "payload_sha256": "ab79306c36ed64e3cc88459f9e9855ab3da4302df7219957557dc31380d7b89c"
 }
