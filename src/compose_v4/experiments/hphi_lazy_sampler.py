@@ -48,12 +48,42 @@ p_lazy(f, a | x) == p_eager(f, a | x), not identical random-number consumption.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
 import numpy as np
 import torch
 
-__all__ = ["LazyDraw", "sample_one_transition", "FALLBACK"]
+__all__ = [
+    "FALLBACK",
+    "LazyDraw",
+    "fixed_size_allowed_families",
+    "sample_one_transition",
+]
+
+
+_SIZE_CHANGING_FAMILIES = frozenset(
+    {
+        "grow_root",
+        "atom_insert",
+        "grow_connected",
+        "atom_delete",
+        "ring_system_grow",
+        "ring_system_delete",
+    }
+)
+
+
+def fixed_size_allowed_families(family_names: tuple[str, ...]) -> frozenset[str]:
+    """Retain all deployed primitive families proven to preserve atom cardinality.
+
+    The executor-level check in the H40 controller remains the final guard: an
+    unexpectedly size-changing mark from a retained family must fail loudly.
+    """
+    if len(family_names) != len(set(family_names)):
+        raise ValueError("model family names must be unique")
+    unknown = set(family_names).difference(_FAMILY_TABLE)
+    if unknown:
+        raise ValueError(f"unknown model families: {sorted(unknown)}")
+    return frozenset(family_names) - _SIZE_CHANGING_FAMILIES
 
 
 class _Fallback:
@@ -120,12 +150,16 @@ def _plackett_luce_order(weights: np.ndarray, rng) -> np.ndarray:
     return np.argsort(-(np.log(np.maximum(weights, 0.0) + 1e-300) + g))
 
 
-def sample_one_transition(model, state, time, rng, *, helpers) -> LazyDraw:
+def sample_one_transition(
+    model, state, time, rng, *, helpers, allowed_families: frozenset[str] | None = None
+) -> LazyDraw:
     """Draw ONE mark from the frozen law, building only what is needed.
 
     `helpers` supplies the per-family mask and legality callables so this module
     stays free of chemistry imports; the caller wires them from the frozen
-    implementations, never from reimplementations.
+    implementations, never from reimplementations. An optional family set
+    removes excluded families before the categorical is normalized; the
+    default retains the unrestricted deployed law.
     """
     import time as _t
 
@@ -151,7 +185,14 @@ def sample_one_transition(model, state, time, rng, *, helpers) -> LazyDraw:
     with torch.no_grad():
         base = model._family_base_logits(batch, glob)[0].double()
     names = helpers["family_names"]
-    alive = np.ones(len(names), dtype=bool)
+    if allowed_families is not None:
+        unknown = allowed_families.difference(names)
+        if unknown:
+            raise ValueError(f"allowed_families contains unknown model families: {sorted(unknown)}")
+    alive = np.asarray(
+        [allowed_families is None or name in allowed_families for name in names],
+        dtype=bool,
+    )
     out.seconds_family = _t.perf_counter() - t0
 
     while alive.any():

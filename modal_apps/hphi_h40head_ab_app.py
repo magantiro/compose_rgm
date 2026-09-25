@@ -146,6 +146,8 @@ def _record_name(task: dict) -> str:
     """
     base = (f"{int(task['index']):03d}_H{task.get('horizon', HORIZON)}"
             f"_{task.get('head_dir', 'hphi_v2').replace('/', '-')}")
+    if task.get("size_fixed", False):
+        base += "_fixed-size"
     if "k_start" in task or "k_end" in task:
         base += f"_k{int(task.get('k_start', 0))}-{int(task.get('k_end', 0))}"
     return base + ".json"
@@ -191,14 +193,21 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
     from compose_v4.chem.state import pad_molecular_graph
     from compose_v4.experiments.hphi_lazy_helpers import make_helpers
-    from compose_v4.experiments.hphi_lazy_sampler import sample_one_transition
+    from compose_v4.experiments.hphi_lazy_sampler import (
+        fixed_size_allowed_families,
+        sample_one_transition,
+    )
     from compose_v4.experiments.hphi_region_features import build_features, in_region
     from compose_v4.experiments.hphi_smc import (
-        effective_sample_size, normalized_weights, should_resample,
-        systematic_resample, terminal_output,
+        effective_sample_size,
+        normalized_weights,
+        should_resample,
+        systematic_resample,
+        terminal_output,
     )
     from compose_v4.experiments.production_successor_kernel import (
-        _coordinate_action, canonical_state_key,
+        _coordinate_action,
+        canonical_state_key,
     )
 
     rt = _runtime()
@@ -209,11 +218,20 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     horizon = int(task.get("horizon", HORIZON))
     head_dir = task.get("head_dir", "hphi_v2")
     budget_max = int(task.get("budget_max", 24))
+    size_fixed = task.get("size_fixed", False)
+    if type(size_fixed) is not bool:
+        raise ValueError("size_fixed must be a boolean")
+    if size_fixed and task["arm"] != "restart":
+        raise ValueError("fixed-size QED ablation requires the deployed restart arm")
     head, _mu, _sd = _load_head(head_dir)
     mu = np.asarray(_mu, dtype=np.float64)
     sd = np.asarray(_sd, dtype=np.float64)
     helpers = make_helpers(model, time_point=float(TIME_POINT),
                            canonical_slots=CANONICAL_SLOTS)
+    allowed_families = (
+        fixed_size_allowed_families(tuple(helpers["family_names"]))
+        if size_fixed else None
+    )
     _TABLE_FAMILY = {"grow_connected": "atom_insert"}
 
     gen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
@@ -265,7 +283,8 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
     def propose(smi, rng):
         st = state_of(smi)
         d = sample_one_transition(model, st, float(TIME_POINT), rng,
-                                  helpers=helpers)
+                                  helpers=helpers,
+                                  allowed_families=allowed_families)
         if d.table is None or d.coordinate is None:
             return ""
         fam = _TABLE_FAMILY.get(d.table, d.table)
@@ -274,7 +293,13 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         rule, action = _coordinate_action(
             model, st, batch, family_name=fam, table_name=d.table,
             coordinate=d.coordinate)
-        y = canonical_state_key(system.apply(st, rule, action))
+        successor = system.apply(st, rule, action)
+        if size_fixed and successor.n_real_atoms != st.n_real_atoms:
+            raise RuntimeError(
+                f"fixed-size transition changed atoms: {fam} "
+                f"{st.n_real_atoms} -> {successor.n_real_atoms}"
+            )
+        y = canonical_state_key(successor)
         return "" if y == smi else y
 
     def run_smc(start_smi: str, start_depth: int, seed: int) -> dict[str, Any]:
@@ -357,13 +382,17 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
             if prior.get("arms", {}).get(task["arm"]):
                 print(f"  src{idx}: already complete, skipping", flush=True)
                 return prior
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001, S110
             pass
 
     out: dict[str, Any] = {"index": idx, "source": source, "horizon": horizon,
                            "stratum": task.get("stratum"),
                            "head_dir": head_dir, "budget_max": budget_max,
                            "arms": {}}
+    if size_fixed:
+        out["size_fixed"] = True
+        out["allowed_families"] = sorted(allowed_families)
+        out["empty_restricted_fiber_rule"] = "kill_particle_no_retry"
     t_all = time.perf_counter()
 
     for arm in [task["arm"]]:
@@ -375,7 +404,6 @@ def run_source(task: dict[str, Any]) -> dict[str, Any]:
         # be free to choose it. v1 forced a branch every time and lost a
         # reliable source (4 -> 3) for exactly that reason.
         archive[source] = (0, h_phi(source, horizon))
-        arm_rng = np.random.default_rng(seed_for(arm, source, 99))
         # CANDIDATE RANGE. For arm="restart" every candidate launches from
         # (source, depth 0) with its own default_rng(seed_for(arm, src, k)) and
         # the loop never breaks on success, so candidates are independent and a
