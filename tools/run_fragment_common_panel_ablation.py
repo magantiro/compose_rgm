@@ -11,10 +11,15 @@ import argparse
 import hashlib
 import json
 import os
+import platform
+import subprocess
+import sys
 import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
+from rdkit import RDLogger, rdBase
 
 from compose_v4.benchmark.fragment_common_panel_ablation import (
     select_common_panel,
@@ -69,6 +74,7 @@ def _quality_flags(samples: list[str]) -> dict[str, bool]:
 
 
 def run(contract_path: Path, run_root: Path, output: Path) -> dict:
+    RDLogger.DisableLog("rdApp.warning")
     payload, contract_hash = load_contract(contract_path)
     task = (
         FragmentTask.MOTIF_EXTENSION
@@ -180,6 +186,11 @@ def run(contract_path: Path, run_root: Path, output: Path) -> dict:
         })
     report = {
         "schema": "fragment_common_panel_selection_ablation_v1",
+        "analysis_revision": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[1], text=True
+        ).strip(),
+        "source_run_revision": payload["source_revision"],
+        "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "interpretation": "conditional finite-panel selection on common native-supported offers; not a primitive transition-reference ablation",
         "task": task.value,
         "source_contract_payload_sha256": contract_hash,
@@ -188,6 +199,15 @@ def run(contract_path: Path, run_root: Path, output: Path) -> dict:
         "source_checkpoint_sha256": payload["checkpoint_sha256"],
         "evaluator_sha256": payload["official_evaluator_sha256"],
         "seed_derivation": "SHA256(contract payload|seed|drug|attempt|uniform-v1), first 64 bits",
+        "execution_environment": {
+            "device": "cpu",
+            "precision": "float64 metric aggregation; original checkpoint scores reused",
+            "python": platform.python_version(),
+            "platform": platform.platform(),
+            "numpy": np.__version__,
+            "rdkit": rdBase.rdkitVersion,
+            "executable": sys.executable,
+        },
         "attempts": len(all_attempts),
         "rows": results,
         "per_prompt": per_prompt,
