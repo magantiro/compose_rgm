@@ -516,6 +516,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--mark-law", choices=("learned", "uniform_native"), default="learned",
+        help="Reference mark law; uniform_native is the superstructure ablation only",
+    )
     parser.add_argument("--task", action="append", default=None, help="repeatable; default = all")
     parser.add_argument("--seeds", type=int, default=OFFICIAL_SEEDS)
     parser.add_argument(
@@ -726,6 +730,12 @@ def main() -> None:
     control = control_from_args(args)
 
     selected = [FragmentTask(t) for t in args.task] if args.task else list(FragmentTask)
+    if args.mark_law == "uniform_native":
+        if selected != [FragmentTask.SUPERSTRUCTURE_GENERATION]:
+            raise ValueError("uniform_native mark law is scoped to superstructure generation")
+        from compose_v4.benchmark.uniform_native_mark_law import UniformNativeMarkLaw
+
+        model = UniformNativeMarkLaw(model)
 
     results = {}
     for task in selected:
@@ -742,6 +752,7 @@ def main() -> None:
 
     payload = {
         "schema": "compose_fragment_official_suite_v2",
+        "mark_law": args.mark_law,
         "protocol": protocol_block(args),
         "kernel": _kernel_provenance(),
         "checkpoint": {
