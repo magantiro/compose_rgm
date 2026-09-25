@@ -513,3 +513,74 @@ def test_the_real_proposal_path_stores_the_program_that_explains_its_endpoint(mo
             "the archived program does not build the molecule the candidate reports"
         )
         assert replay["states"] == candidate["trace"]["states"]
+
+def test_a_modified_program_that_reschedules_differently_is_REFUSED(monkeypatch):
+    """CONSTRUCTED. Rebinding changes the dataflow graph, so the modified program's own
+    canonical schedule need not reproduce the order just executed -- and the archive's
+    admission replays a stored program through `compile_program_graph` +
+    `scheduled_program`. On the development panel this never arises (0 of 640 attempts),
+    so the guard's removal is undetectable from real data and the condition must be
+    constructed: the scheduler is stubbed to return a reordered program, and the wrapper
+    must refuse rather than archive an entry whose program explains a different molecule.
+    """
+    from types import SimpleNamespace
+
+    from compose_v4.control import pmo_binding_intervention as arm_c
+
+    source, program, assignment = next(
+        (s, p, a) for s, p, a in _panel() if len(p.marks) >= 2
+    )
+    graph = compile_program_graph(program)
+    real = arm_c.scheduled_program
+    calls = {"n": 0}
+
+    def reordering(compiled, atoms, **kwargs):
+        scheduled, order, timeline = real(compiled, atoms, **kwargs)
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return scheduled, order, timeline  # the prescribed recipe, untouched
+        # The SECOND call is the modified program's own reschedule: reverse it.
+        reversed_marks = tuple(reversed(scheduled.marks))
+        if reversed_marks == tuple(scheduled.marks):
+            pytest.skip("this program's schedule is symmetric under reversal")
+        # A STAND-IN, not a valid `EditProgram`: reversing a real schedule puts a
+        # reference before its birth, which `EditProgram.__post_init__` rejects before the
+        # guard under test could run.  Only `.marks` is read, because the refusal fires
+        # immediately on the order comparison and the object is never executed.
+        return (SimpleNamespace(marks=reversed_marks), order, timeline)
+
+    monkeypatch.setattr(arm_c, "scheduled_program", reordering)
+    with pytest.raises(ProgramExecutionError) as caught:
+        arm_c.execute_program_graph_rebound(
+            source, graph, assignment, run_seed=41, occurrence=1, **BUDGET
+        )
+    assert caught.value.receipt["failure_stage"] == "rebinding_reschedule"
+    assert caught.value.receipt["complete"] is False
+
+
+def test_a_modified_program_that_replays_differently_is_REFUSED(monkeypatch):
+    """CONSTRUCTED, for the same reason as above: 0 of 640 real attempts reach it.
+
+    The replay check is what proves the ARCHIVED program builds the molecule the candidate
+    reports. Here the replay is stubbed to return a different endpoint, and the wrapper
+    must refuse instead of returning a candidate whose stored program disagrees with it.
+    """
+    from compose_v4.control import pmo_binding_intervention as arm_c
+
+    source, program, assignment = next(iter(_panel()))
+    graph = compile_program_graph(program)
+    real = arm_c.execute_bound_program
+    calls = {"n": 0}
+
+    def wrong_replay(*args, **kwargs):
+        product, receipt = real(*args, **kwargs)
+        calls["n"] += 1
+        return product, {**receipt, "endpoint": receipt["endpoint"] + ".[He]"}
+
+    monkeypatch.setattr(arm_c, "execute_bound_program", wrong_replay)
+    with pytest.raises(ProgramExecutionError) as caught:
+        arm_c.execute_program_graph_rebound(
+            source, graph, assignment, run_seed=43, occurrence=1, **BUDGET
+        )
+    assert caught.value.receipt["failure_stage"] == "rebinding_replay"
+    assert calls["n"] >= 1, "the replay was never attempted"

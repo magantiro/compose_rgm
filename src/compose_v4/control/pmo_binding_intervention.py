@@ -61,12 +61,19 @@ from time import perf_counter
 
 import numpy as np
 
+from compose_v4.control.docking_value import identity as _identity
 from compose_v4.control.edit_program import (
     EditProgram,
     ProgramExecutionError,
     _ordered,
     _slots,
     atom_signature,
+    execute_bound_program,
+)
+from compose_v4.control.edit_program_graph import (
+    changed_input_sites,
+    compile_program_graph,
+    scheduled_program,
 )
 from compose_v4.experiments.whole_ring_plan import execute_program, fresh_slot
 from compose_v4.rewrite.kernel import InvalidRewrite, canonical_state_key
@@ -376,14 +383,6 @@ def execute_program_graph_rebound(
     therefore REFUSED here, rather than being stored as an entry whose recorded program
     explains a different molecule.  That refusal is labelled and never rescued.
     """
-    from compose_v4.control.docking_value import identity as _identity
-    from compose_v4.control.edit_program import execute_bound_program
-    from compose_v4.control.edit_program_graph import (
-        changed_input_sites,
-        compile_program_graph,
-        scheduled_program,
-    )
-
     program, order, timeline = scheduled_program(graph, source.n_real_atoms)
     proposal_id = (
         f"{program.program_id}:{canonical_state_key(source)}"
