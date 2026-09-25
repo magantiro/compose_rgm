@@ -20,9 +20,9 @@
       },
       "completed_evaluation": {
         "quality_percent": 42.63333333333333,
-        "uniqueness_percent": 93.6316,
-        "diversity": 0.664021,
-        "validity_percent": 99.96666666666667,
+        "uniqueness_percent": 93.63164983164984,
+        "diversity": 0.6640208079843859,
+        "validity_percent": 99.96666666666665,
         "attempts": 3000,
         "outputs": 2999,
         "seeds": 3,
@@ -60,9 +60,9 @@
         "sha256": "2eaa9c1782b2f520df0af4d004e238f36c407f517579aa83656aaeced9352ffa"
       },
       "completed_evaluation": {
-        "quality_percent": 28.6,
-        "uniqueness_percent": 72.4,
-        "diversity": 0.562149,
+        "quality_percent": 28.599999999999998,
+        "uniqueness_percent": 72.39999999999999,
+        "diversity": 0.5621494061392205,
         "validity_percent": 100.0,
         "attempts": 3000,
         "seeds": 3,

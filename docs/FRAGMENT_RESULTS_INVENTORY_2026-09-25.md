@@ -28,3 +28,10 @@ configuration only. It compares learned and uniform selection on the same
 uniqueness 72.4% versus 73.367%, and diversity 0.562149 versus 0.573898.
 It does not remove the learned reference from panel construction or establish
 an effect for a later linker or morphing constructor.
+
+The original 3,000 saved linker offer panels, exact run configuration, locks,
+rows, summary, and conditional selection analysis are preserved in the local
+compressed archive described by
+`diagnostics/fragment_linker_panel_archive_v1/manifest.json`. The manifest
+pins the 48,858,886-byte archive by SHA-256. This local binary archive is
+not a new run and must not be reused as evidence for a changed constructor.

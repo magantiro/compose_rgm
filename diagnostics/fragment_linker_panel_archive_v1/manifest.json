@@ -1,0 +1,27 @@
+{
+  "schema": "fragment_linker_panel_archive_v1",
+  "purpose": "Preserve the completed prior-version linker configuration, all saved offer panels, locks, rows, and the conditional panel-selection analysis without launching another experiment.",
+  "archive": {
+    "path": "diagnostics/fragment_linker_panel_archive_v1/payload.tar.zst",
+    "sha256": "1274c09043702481debc8ca5b11c4aaacfcb272b42a1651ba652a1930a24d800",
+    "bytes": 48858886,
+    "compression": "zstd level 1",
+    "entries": 6083,
+    "attempt_receipts": 3000,
+    "integrity_check": "zstd -t passed and tar listing contained 3000 attempt JSON files"
+  },
+  "included": {
+    "contract": {
+      "path": "configs/fragment_linker_official_v1.json",
+      "payload_sha256": "558aef979d5093b5ff5678087fcde292ab4fd3b795e1e218b2474f62c3c2d2fb"
+    },
+    "named_run_directory": "diagnostics/fragment_linker_official_v1",
+    "run_manifest_sha256": "8d3bbc16757b79a3067015e1e3aebe5bfd991c3c2c3d7b4de01c8c01a48a1c9b",
+    "run_summary_sha256": "ff6f0fad7f1338540751b1a353c71fce5984108c63225ad80dea542563e87595",
+    "selection_analysis": {
+      "path": "diagnostics/fragment_common_panel_linker_v1/result.json",
+      "sha256": "c0be3cd66acbf42ef865b03bf3b4c66775f8e9fbf7f8396cbe1a3073c012e951"
+    }
+  },
+  "scope": "The archive belongs to the completed prior linker method only; it does not apply to later linker or morphing constructors."
+}
