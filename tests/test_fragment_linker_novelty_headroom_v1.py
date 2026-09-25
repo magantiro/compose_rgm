@@ -18,7 +18,7 @@ def test_unique_supported_offers_preserves_first_canonical_score() -> None:
         "offered": [
             {"status": "model_supported", "endpoint": "A", "mean_log_mark": -2.0},
             {"status": "model_supported", "endpoint": "A", "mean_log_mark": -1.0},
-            {"status": "compiler_or_constraint_abstention", "endpoint": None, "mean_log_mark": None},
+            {"status": "compiler_or_constraint_abstention"},
             {"status": "model_supported", "endpoint": "B", "mean_log_mark": float("-inf")},
         ]
     }

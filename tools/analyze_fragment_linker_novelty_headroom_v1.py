@@ -22,8 +22,8 @@ def sha256(path: Path) -> str:
 def unique_supported_offers(panel: dict) -> list[tuple[str, float]]:
     kept: dict[str, float] = {}
     for offer in panel["offered"]:
-        endpoint = offer["endpoint"]
-        score = offer["mean_log_mark"]
+        endpoint = offer.get("endpoint")
+        score = offer.get("mean_log_mark")
         if (
             offer["status"] == "model_supported"
             and isinstance(endpoint, str)
