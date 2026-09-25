@@ -29,6 +29,7 @@ from compose_v4.benchmark.fragment_program_adapter import (
     CompleteProgram,
     learned_program_scores,
     select_learned_program,
+    select_learned_program_novelty4,
 )
 from compose_v4.benchmark.joint_completion_prior import JointCompletionPrior
 from compose_v4.benchmark.training_attachment_fragments import atom_context, physical_sha256
@@ -256,6 +257,7 @@ def sample_linker_panel(
     *,
     limits: ProposalLimits | None = None,
     cell_allocation: CellAllocation = "frozen",
+    prior_emitted: frozenset[str] | None = None,
 ) -> LinkerPanelResult:
     """Exactly eight draws, exact endpoint deduplication, shared learned softmax.
 
@@ -305,7 +307,12 @@ def sample_linker_panel(
         offered.append(record)
     selected, selection = None, None
     if candidates:
-        selected, selection = select_learned_program(tuple(candidates), tuple(scores), rng)
+        if prior_emitted is None:
+            selected, selection = select_learned_program(tuple(candidates), tuple(scores), rng)
+        else:
+            selected, selection = select_learned_program_novelty4(
+                tuple(candidates), tuple(scores), rng, prior_emitted
+            )
         selection["selected_draw"] = draw_indices[selection["selected_index"]]
     return LinkerPanelResult(
         selected,

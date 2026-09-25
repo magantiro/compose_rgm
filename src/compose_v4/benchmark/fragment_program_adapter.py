@@ -517,3 +517,33 @@ def select_learned_program(candidates, scores, rng):
         "model_used": True,
         "score_semantics": "mean_log_mark_at_time_zero; finite_panel_softmax; not_path_probability",
     }
+
+
+def select_learned_program_novelty4(candidates, scores, rng, prior_emitted):
+    """Stochastically favor unseen endpoints within the learned-score panel.
+
+    The archive contains only earlier selected outputs. All finite,
+    model-supported candidates retain positive probability; a repeated
+    selection is never rejected or replaced.
+    """
+    emitted = frozenset(prior_emitted)
+    if any(type(smiles) is not str or not smiles for smiles in emitted):
+        raise ValueError("prior emitted endpoints must be nonempty SMILES strings")
+    if len(candidates) != len(scores):
+        raise ValueError("program/score counts disagree")
+    adjusted = tuple(
+        float(score) + (np.log(4.0) if candidate.smiles not in emitted else 0.0)
+        for candidate, score in zip(candidates, scores, strict=True)
+    )
+    selected, receipt = select_learned_program(candidates, adjusted, rng)
+    receipt.update(
+        mean_native_log_mark_probability=float(scores[receipt["selected_index"]]),
+        score_semantics=(
+            "mean_log_mark_at_time_zero_plus_log4_if_unseen; finite_panel_softmax; "
+            "not_path_probability"
+        ),
+        novelty_multiplier=4.0,
+        prior_unique_emissions=len(emitted),
+        selected_already_emitted=selected.smiles in emitted,
+    )
+    return selected, receipt

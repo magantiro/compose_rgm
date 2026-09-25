@@ -280,6 +280,35 @@ def test_panel_uses_shared_scorer_and_records_all_draws_without_uniform_fallback
         assert receipt["offered"][0]["reason"] == "nonfinite_native_probability"
 
 
+def test_panel_can_use_prior_emissions_without_changing_eight_offer_support(monkeypatch):
+    monkeypatch.setattr(sampler, "learned_program_scores", lambda _model, _candidates: (0.0,))
+    library = runtime(entry("[1*]CC[2*]"))
+    result = sampler.sample_linker_panel(
+        prompt(),
+        library,
+        JointCompletionPrior(((5, 0, 1),)),
+        None,
+        np.random.default_rng(0),
+        prior_emitted=frozenset(("CCCN",)),
+    )
+    assert result.receipt["offered_count"] == 8
+    assert result.receipt["model_supported_count"] == 1
+    assert result.receipt["selection"]["novelty_multiplier"] == 4.0
+    assert result.receipt["selection"]["prior_unique_emissions"] == 1
+
+
+def test_default_linker_panel_is_identical_to_explicit_frozen_selector(monkeypatch):
+    monkeypatch.setattr(sampler, "learned_program_scores", lambda _model, _candidates: (0.0,))
+    library = runtime(entry("[1*]CC[2*]"))
+    prior = JointCompletionPrior(((5, 0, 1),))
+    default = sampler.sample_linker_panel(prompt(), library, prior, None, np.random.default_rng(8))
+    explicit = sampler.sample_linker_panel(
+        prompt(), library, prior, None, np.random.default_rng(8), prior_emitted=None
+    )
+    assert default.receipt == explicit.receipt
+    assert default.selected.smiles == explicit.selected.smiles
+
+
 def test_no_compatible_content_records_eight_abstentions_and_no_model_call(monkeypatch):
     def forbidden(*args, **kwargs):
         raise AssertionError("scorer must not run without an exact candidate")

@@ -14,6 +14,7 @@ from compose_v4.benchmark.fragment_program_adapter import (
     native_scoring_mark,
     sample_boundary_content,
     select_learned_program,
+    select_learned_program_novelty4,
     validate_native_compound_membership,
 )
 from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
@@ -144,6 +145,41 @@ def test_model_score_controls_selection_and_no_uniform_unsupported_fallback():
         (first, first, second), (0.0, 0.0, 0.0), np.random.default_rng(0)
     )
     assert receipt["unique_model_supported_endpoints"] == 2
+
+
+def test_novelty4_keeps_positive_support_and_records_native_score():
+    first = CompleteProgram(source("CCC"), {}, {})
+    second = CompleteProgram(source("CCO"), {}, {})
+
+    class CaptureRng:
+        def choice(self, count, *, p):
+            assert count == 2
+            assert np.allclose(p, (0.2, 0.8))
+            return 1
+
+    selected, receipt = select_learned_program_novelty4(
+        (first, second), (0.0, 0.0), CaptureRng(), frozenset((first.smiles,))
+    )
+    assert selected is second
+    assert receipt["selected_probability"] == pytest.approx(0.8)
+    assert receipt["mean_native_log_mark_probability"] == 0.0
+    assert receipt["prior_unique_emissions"] == 1
+    assert receipt["selected_already_emitted"] is False
+    assert receipt["novelty_multiplier"] == 4.0
+
+
+def test_novelty4_does_not_replace_duplicate_when_no_new_offer_exists():
+    first = CompleteProgram(source("CCC"), {}, {})
+    selected, receipt = select_learned_program_novelty4(
+        (first,), (0.0,), np.random.default_rng(0), frozenset((first.smiles,))
+    )
+    assert selected is first
+    assert receipt["selected_probability"] == 1.0
+    assert receipt["selected_already_emitted"] is True
+    with pytest.raises(ValueError, match="prior emitted endpoints"):
+        select_learned_program_novelty4(
+            (first,), (0.0,), np.random.default_rng(0), frozenset(("",))
+        )
 
 
 @pytest.mark.parametrize("region", ["[1*]c1ccccc1", "[1*]c1ccc2ccccc2c1"])
