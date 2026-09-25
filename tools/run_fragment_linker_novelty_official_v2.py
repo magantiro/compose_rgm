@@ -16,6 +16,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from audit_fragment_training_linker import CATALOG_SHA
 from run_fragment_attachment_library_pilot import _atomic_json
 from run_fragment_constrained_suite import prompt_rng_seed
 from run_fragment_linker_broaden_pilot_v1 import cell_support_summary, preflight
@@ -143,6 +144,17 @@ def summarize(output: Path, contract: dict, manifest_sha: str) -> dict:
         "row_sha256": row_hashes,
         "oracle_calls": 0,
     }
+
+
+def load_proposal_inputs():
+    catalog = load_linker_catalog(
+        ROOT / "diagnostics/fragment_training_region_catalog_v1/catalog.json",
+        expected_sha256=CATALOG_SHA,
+    )
+    prior = JointCompletionPrior.from_dict(
+        json.loads((ROOT / "diagnostics/fragment_joint_completion_prior_v1/prior.json").read_text())
+    )
+    return catalog, prior
 
 
 def run_seed(
@@ -326,12 +338,7 @@ def main() -> None:
     from evaluate_tracelet_rollouts import load_factorized_rollout_checkpoint
 
     model, _ = load_factorized_rollout_checkpoint(Path(development["checkpoint_path"]))
-    catalog = load_linker_catalog(
-        ROOT / "diagnostics/fragment_training_region_catalog_v1/catalog.json"
-    )
-    prior = JointCompletionPrior.from_dict(
-        json.loads((ROOT / "diagnostics/fragment_joint_completion_prior_v1/prior.json").read_text())
-    )
+    catalog, prior = load_proposal_inputs()
     run_seed(
         output,
         args.seed,

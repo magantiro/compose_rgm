@@ -7,7 +7,12 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
-from run_fragment_linker_novelty_official_v2 import load_contract, seed_summary
+from run_fragment_linker_novelty_official_v2 import (
+    ROOT,
+    load_contract,
+    load_proposal_inputs,
+    seed_summary,
+)
 
 
 def _row(drug: str, seed: int) -> dict:
@@ -48,3 +53,14 @@ def test_seed_summary_requires_all_faithful_outputs() -> None:
 def test_seed_summary_rejects_missing_prompt() -> None:
     with pytest.raises(ValueError, match="incomplete or unfaithful"):
         seed_summary([_row("A", 6)], 6, ["A", "B"])
+
+
+@pytest.mark.skipif(
+    not (ROOT / "diagnostics/fragment_training_region_catalog_v1/catalog.json").is_file()
+    or not (ROOT / "diagnostics/fragment_joint_completion_prior_v1/prior.json").is_file(),
+    reason="versioned training connector catalog or completion prior is absent",
+)
+def test_pinned_proposal_inputs_load() -> None:
+    catalog, prior = load_proposal_inputs()
+    assert catalog is not None
+    assert prior is not None
