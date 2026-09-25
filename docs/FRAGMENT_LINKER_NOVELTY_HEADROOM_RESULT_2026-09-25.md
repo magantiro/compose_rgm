@@ -17,6 +17,14 @@ run would alter its archive and RNG chain, and could change quality or
 diversity. These numbers must not be reported as counterfactual benchmark
 metrics or as evidence that the predeclared pilot gate passes.
 
+The pinned evaluator counts quality-passing *distinct* valid molecules and
+divides by the fixed attempt count. Returning a molecule already emitted in
+the same prompt cannot add to either uniqueness or quality. Selecting an
+unseen, valid endpoint could add to quality if it passes the existing
+drug-likeness and synthesizability criterion; its effect on diversity remains
+empirical. This explains why a selection-level intervention can plausibly
+improve both headline metrics without using either property as guidance.
+
 The machine-readable result is
 `diagnostics/fragment_linker_novelty_headroom_v1/result.json` (SHA-256
 `b319163bbc9ea2debfba89b2d086a15005aabf8c25af721d0909b4eb61e62735`).
