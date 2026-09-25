@@ -1,0 +1,154 @@
+{
+ "base_seed": 20260923,
+ "seed_rule": "derived_seed(task,base,rep) = base + 1000*TARGET_INDEX[task] + rep",
+ "replicates_already_used_on_modal": [
+  0,
+  50,
+  60,
+  70
+ ],
+ "replicates_reserved_here": {
+  "topup": 80,
+  "trio": [
+   80,
+   81
+  ],
+  "smoke_only": 90
+ },
+ "init_lock_sha256": "c8032311daa067628048679465fb4397d2a26bf0593143e3ed0a4cbec7195478",
+ "contract": "configs/pmo_population_controller_v1.json (hardcoded; 10/10 pins verified)",
+ "deploy_tree_commit": "c7fdddca3b342b6717fc7141e1904a6be19ad70b",
+ "app": "compose-pmo-fibercontrol-replication",
+ "volume": "compose-pmo-fibercontrol-replication",
+ "budget_per_campaign": 1000,
+ "campaigns": [
+  {
+   "task": "amlodipine_mpo",
+   "replicate": 80,
+   "seed": 20272003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "deco_hop",
+   "replicate": 80,
+   "seed": 20279003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "fexofenadine_mpo",
+   "replicate": 80,
+   "seed": 20273003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "isomers_c7h8n2o2",
+   "replicate": 80,
+   "seed": 20267003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "isomers_c9h10n2o2pf2cl",
+   "replicate": 80,
+   "seed": 20281003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "median1",
+   "replicate": 80,
+   "seed": 20266003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "median2",
+   "replicate": 80,
+   "seed": 20282003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "osimertinib_mpo",
+   "replicate": 80,
+   "seed": 20274003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "perindopril_mpo",
+   "replicate": 80,
+   "seed": 20268003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "qed",
+   "replicate": 80,
+   "seed": 20271003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "ranolazine_mpo",
+   "replicate": 80,
+   "seed": 20275003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "scaffold_hop",
+   "replicate": 80,
+   "seed": 20280003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "sitagliptin_mpo",
+   "replicate": 80,
+   "seed": 20276003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "valsartan_smarts",
+   "replicate": 80,
+   "seed": 20278003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "zaleplon_mpo",
+   "replicate": 80,
+   "seed": 20277003,
+   "reason": "2 complete -> 3"
+  },
+  {
+   "task": "drd2",
+   "replicate": 80,
+   "seed": 20283003,
+   "reason": "0 modal campaigns"
+  },
+  {
+   "task": "drd2",
+   "replicate": 81,
+   "seed": 20283004,
+   "reason": "0 modal campaigns"
+  },
+  {
+   "task": "gsk3b",
+   "replicate": 80,
+   "seed": 20269003,
+   "reason": "0 modal campaigns"
+  },
+  {
+   "task": "gsk3b",
+   "replicate": 81,
+   "seed": 20269004,
+   "reason": "0 modal campaigns"
+  },
+  {
+   "task": "jnk3",
+   "replicate": 80,
+   "seed": 20270003,
+   "reason": "0 modal campaigns"
+  },
+  {
+   "task": "jnk3",
+   "replicate": 81,
+   "seed": 20270004,
+   "reason": "0 modal campaigns"
+  }
+ ],
+ "total_campaigns": 21,
+ "total_charged_calls": 21000
+}

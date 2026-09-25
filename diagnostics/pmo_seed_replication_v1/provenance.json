@@ -1,0 +1,51 @@
+{
+ "schema_version": "pmo_seed_replication_provenance_v1",
+ "purpose": "two additional independent seeds of the no-prescreen PMO suite, 1000-call table",
+ "run_revision": "c7fdddca3b342b6717fc7141e1904a6be19ad70b",
+ "run_revision_parent": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+ "runtime_contract": {
+  "path": "configs/pmo_population_controller_v1.json",
+  "payload_sha256": "19aa07e1fdf7f4d5fd9db7b45e8d1580cc4e5b539ef91aecdbd9f9d0ab0276ce",
+  "pins": 10,
+  "all_pins_match_at_run_revision": true
+ },
+ "scored_envelope_contract": {
+  "path": "configs/pmo_population_controller_v1_scored_contract_corrected.json",
+  "payload_sha256": "ba9515615b341019f09f66f3224e590b4ca596dee6bb7c97c759dbe418f1ff4b"
+ },
+ "initialization_bank": {
+  "path": "diagnostics/parent_edit_cycles/prepared/init_20260921.json",
+  "lock_sha256": "c8032311daa067628048679465fb4397d2a26bf0593143e3ed0a4cbec7195478",
+  "count": 16,
+  "task_independent": true,
+  "all_16_present_in": "docs/PMO_INIT_BANK.json"
+ },
+ "launch": {
+  "app": "compose-pmo-fibercontrol-replication",
+  "workspace_profile": "rahul (kosha-labs)",
+  "volume": "compose-pmo-fibercontrol-replication",
+  "budget": 1008,
+  "rounds": 700,
+  "queries_per_round": 16,
+  "stage": "scored",
+  "base_seeds": [
+   20260925,
+   20260926
+  ],
+  "tasks": 23,
+  "budget_note": "1008 = 16 initialization + 62 full rounds of 16, so count=min(queries_per_round, ledger.remaining) is 16 in EVERY round, exactly as in the existing budget-10000 runs; metrics are read at 1000."
+ },
+ "matched_against": {
+  "existing_base_seed": 20260923,
+  "evidence": "campaign/manifest.json diff on qed: 48 leaves compared, 1 difference (/config/seed)"
+ },
+ "oracle_assets": {
+  "root": "diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets",
+  "git_tracked": false,
+  "sha256": {
+   "oracle/gsk3b_current.pkl": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5",
+   "oracle/jnk3_current.pkl": "cde8576fb4fa3f60b9f258ff9cf1b9ff346eb50d196d5cbbe25965efc1864889",
+   "oracle/drd2_current.pkl": "ef1f00e47d5e4670a45b0a4178db3c41b2e1aa9dad7113ac9d0f58e3f9d67532"
+  }
+ }
+}

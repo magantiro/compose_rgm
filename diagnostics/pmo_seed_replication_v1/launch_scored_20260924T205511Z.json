@@ -1,0 +1,22 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "scored",
+ "git_commit": "c7fdddca3b342b6717fc7141e1904a6be19ad70b",
+ "base_seed": 20260926,
+ "budget": 1008,
+ "submitted": [
+  {
+   "task": "isomers_c7h8n2o2",
+   "budget": 1008,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20266926,
+   "base_seed": 20260926,
+   "replicate": 0,
+   "label": "scored_isomers_c7h8n2o2_seed20266926_20260924T205511Z",
+   "volume": "pmo-fiber-isomers-c7h8n2o2-seed20266926",
+   "git_commit": "c7fdddca3b342b6717fc7141e1904a6be19ad70b",
+   "modal_call_id": "fc-01M3AK6V53ASVMWP8PE5WJQKV4"
+  }
+ ]
+}

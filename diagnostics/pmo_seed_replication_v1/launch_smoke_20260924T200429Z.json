@@ -1,0 +1,61 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "smoke",
+ "git_commit": "849c95e8fc74f45d552f5b74e49b4bf3eb5a9fc6",
+ "base_seed": 20260900,
+ "budget": 96,
+ "submitted": [
+  {
+   "task": "gsk3b",
+   "budget": 96,
+   "rounds": 20,
+   "queries": 16,
+   "seed": 20268900,
+   "base_seed": 20260900,
+   "replicate": 0,
+   "label": "smoke_gsk3b_seed20268900_20260924T200429Z",
+   "volume": "pmo-fiber-gsk3b-seed20268900",
+   "git_commit": "849c95e8fc74f45d552f5b74e49b4bf3eb5a9fc6",
+   "modal_call_id": "fc-01M3AG9ZZCGJ152B0VWP460XNJ"
+  },
+  {
+   "task": "jnk3",
+   "budget": 96,
+   "rounds": 20,
+   "queries": 16,
+   "seed": 20269900,
+   "base_seed": 20260900,
+   "replicate": 0,
+   "label": "smoke_jnk3_seed20269900_20260924T200429Z",
+   "volume": "pmo-fiber-jnk3-seed20269900",
+   "git_commit": "849c95e8fc74f45d552f5b74e49b4bf3eb5a9fc6",
+   "modal_call_id": "fc-01M3AGA01X1N9HZJKQ6WJEEKZN"
+  },
+  {
+   "task": "drd2",
+   "budget": 96,
+   "rounds": 20,
+   "queries": 16,
+   "seed": 20282900,
+   "base_seed": 20260900,
+   "replicate": 0,
+   "label": "smoke_drd2_seed20282900_20260924T200429Z",
+   "volume": "pmo-fiber-drd2-seed20282900",
+   "git_commit": "849c95e8fc74f45d552f5b74e49b4bf3eb5a9fc6",
+   "modal_call_id": "fc-01M3AGA06NP2BSFJRDWN2STQPQ"
+  },
+  {
+   "task": "qed",
+   "budget": 96,
+   "rounds": 20,
+   "queries": 16,
+   "seed": 20270900,
+   "base_seed": 20260900,
+   "replicate": 0,
+   "label": "smoke_qed_seed20270900_20260924T200429Z",
+   "volume": "pmo-fiber-qed-seed20270900",
+   "git_commit": "849c95e8fc74f45d552f5b74e49b4bf3eb5a9fc6",
+   "modal_call_id": "fc-01M3AGA093RVJSBZVHBB2CC9M5"
+  }
+ ]
+}
