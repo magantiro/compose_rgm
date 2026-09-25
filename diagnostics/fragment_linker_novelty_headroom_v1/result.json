@@ -1,0 +1,2146 @@
+{
+  "code_revision": "4285014f78398ab16ceb1bc90ea0088fffb4b297",
+  "config": {
+    "attempts_per_prompt": 20,
+    "expected_prompts": 10,
+    "novelty_multiplier": 4.0
+  },
+  "input_dir": "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-attachment-library-20260924/diagnostics/fragment_training_linker_metric_pilot_v2",
+  "input_sha256": {
+    "BARICITINIB_000.json": "046e517876e231251f35137d31a731d34879450eb47fd8635d0c52d84c83eb72",
+    "BARICITINIB_001.json": "0e6971d394b2ebab7d8aa415c89a7a69cf1aa67f8225b556587a56a530afa0ec",
+    "BARICITINIB_002.json": "49f65e737a453a0d2b85eff2ebdb49b30e56d2f96a28c14d60fd2eea7d9e895e",
+    "BARICITINIB_003.json": "efffe7db173852d1c1ff104b0667c0afc922945f2fe935921f1f8296fdca0378",
+    "BARICITINIB_004.json": "8a0433b7c2d7cb42512f50f204fa75feac11d0065f7363c13fc4310290819816",
+    "BARICITINIB_005.json": "62f7688f757a803a051a2316350430a9e340a01c2c681bb285f0775ce56d718d",
+    "BARICITINIB_006.json": "0c2ade9e715a224423a62170174f50874abdc7de29b4932914ea92d6c66c1669",
+    "BARICITINIB_007.json": "cd9507fc725897f4398c6d2eac52ecef07b93ec36139eb85d9bf863ee47064de",
+    "BARICITINIB_008.json": "b3805d75d7b8b5e0bd32490da81cb26d51e68db9fc0fe09bd8a22c9491ecafef",
+    "BARICITINIB_009.json": "fd15eeb5fab85fdf28648241009e78360357e320b3437bb78ee941e01fa359d9",
+    "BARICITINIB_010.json": "cf75bb9d63389b66db3c387a9d1b45be201523d912edcc596832ad3413997179",
+    "BARICITINIB_011.json": "45692e14463dd28c3126971898800cb9d6d93eecd14fa03285ab522bdba2b31d",
+    "BARICITINIB_012.json": "5741a886286040540a4d4943056905158bb813af5a9a76e63c6791b93cf8c3b3",
+    "BARICITINIB_013.json": "b08e16a8b9c5d0be45d93e5aa47dedb5effb72ced95c77a4f1db0ef5e8074b0b",
+    "BARICITINIB_014.json": "05a08c2478fc49b2b72284c84da701dd7101786b91b0148e25931e14e3c4ea94",
+    "BARICITINIB_015.json": "807f3bef5765e4d489a5a1ae55e4013c2be56a09b451542046bc16d7179b022d",
+    "BARICITINIB_016.json": "2532b1e0cb772f6efab7672484cb180ddd9130ca68e42d5e72754006e18cae2b",
+    "BARICITINIB_017.json": "37fedd39fd1395eea8a090fadff126dd5d5406d12ebb993585ef5d0034dc74e8",
+    "BARICITINIB_018.json": "30d36396a0a37042ca310803d4b7e8df93b1172540b0c5224921b6717f932590",
+    "BARICITINIB_019.json": "1edf6512327f407ba9e8bfa861796753ad456c6d4ab9d6b6c879f3d7b30f54d2",
+    "CYCLOTHIAZIDE_000.json": "93a9f53bf2144ba18518944e5f03facb2a9257db10fd8082aae8ea60aecc0aaf",
+    "CYCLOTHIAZIDE_001.json": "085e8982f7aa799d1cfa29a41fadd0677dbb7b60ea72294a4f6c05f344de38f6",
+    "CYCLOTHIAZIDE_002.json": "0346c96e0ef65a1f2c44e450288649136b3e4151723e8d471343e7b4816d14e0",
+    "CYCLOTHIAZIDE_003.json": "47bca7014a2997888c7d1e907dabcad995ea3b1ccf7d6b083258423f76ad3291",
+    "CYCLOTHIAZIDE_004.json": "49ed8e657a13adde7c9916dc4910b01597cff57838a2234e7d916570e94b378f",
+    "CYCLOTHIAZIDE_005.json": "e0aebc0398195751d12b26c8ee68ae692b67599715911425c595dd06e1f414fa",
+    "CYCLOTHIAZIDE_006.json": "bce11c01b88c9210e81cc8d05e1b7fee07fd9a2bbba9dad8299eecc8158e0f09",
+    "CYCLOTHIAZIDE_007.json": "a3c2abaa431d67742aa954cd110ed55ccee2287a9902fbd7888a9f192b504dd0",
+    "CYCLOTHIAZIDE_008.json": "ed9960427144b8da8e8e8ec4d0dda04bf36fc4aa7dbc98f765432cdf3c43d346",
+    "CYCLOTHIAZIDE_009.json": "c9bd61a78ab591968aef9b86bb92dc2fb3cd79ffe3ff34d271c47f8b919e9f43",
+    "CYCLOTHIAZIDE_010.json": "595ec321f36fbc12e8c4f6aa5e6b3c30a6a928c890f14fb250493c0b814a68ae",
+    "CYCLOTHIAZIDE_011.json": "ccc734bff39692a6e8b0d0661398b57416d7d1aff5c61151256dfc3b721c01d7",
+    "CYCLOTHIAZIDE_012.json": "b4d9d6d11bb7b6fe8c2aa5b574106ab65bd4326d4362e5bab5f822a1911a46b2",
+    "CYCLOTHIAZIDE_013.json": "949f9cd3a9b0567bf77a510077d90b96dd7205dd3df55681fa72d55b059438a5",
+    "CYCLOTHIAZIDE_014.json": "7c62c008751d06e253745285401ebcc06b624a55b31367588dbe19d5d63334f9",
+    "CYCLOTHIAZIDE_015.json": "89055b12b5e6ddf33618d421be64113d10c5c12084a094383578c526bb5c4547",
+    "CYCLOTHIAZIDE_016.json": "6775c193c59a0ff3efaf765ddcab9e0906241cd56b174719e55072f0979efae8",
+    "CYCLOTHIAZIDE_017.json": "ed45b3b958daa3f3d91caa5c691524ad56cdd1088d40f91854fa7cdac57fa7ef",
+    "CYCLOTHIAZIDE_018.json": "cd9aa3ddd5a72b8234ae65df999149c726a51b2d8f9057fe5f4b7a69e05cfbb0",
+    "CYCLOTHIAZIDE_019.json": "8f2689669a6b04e6fa2e5cf9a914f73bdec4ea88bdb85b9c7ba9bb63f8429fa7",
+    "ELIGLUSTAT_000.json": "a5cc3c5e07e044a44436f30233404caa2b8921316e1cffdf6b3688731e5c2765",
+    "ELIGLUSTAT_001.json": "839d93ca94726d4af9cedc7a4beda247768a8e4ffdae3a389bdf085684d651c2",
+    "ELIGLUSTAT_002.json": "35533365c67eaad55cf67f18bb4dad667e14128a586f72f6ad21735d34e51f5d",
+    "ELIGLUSTAT_003.json": "349eb459de871f944c1bace289604d4c370cad038947ae831363eadb8a66d446",
+    "ELIGLUSTAT_004.json": "17f0676d170f0a6329db50d4f4712ec9a12d40a7e0c2601ca0735a447bed3501",
+    "ELIGLUSTAT_005.json": "6c5a6bbbaad3e0ccbd133c2f9d309592eb8f1e56f2970e4279d9df5bdc57db3e",
+    "ELIGLUSTAT_006.json": "f401552e0b83add5cd4d32af4a44edcecf95adb4cf808b7f37f7a228ef20937e",
+    "ELIGLUSTAT_007.json": "665c120041696fd027b589a00b5a10667c892be6ebef562daf5dc8fe6cbfa905",
+    "ELIGLUSTAT_008.json": "6693e37a573c137fa09e385e53d76c083c29a1b871ebe3594dd226edf25bc5ee",
+    "ELIGLUSTAT_009.json": "76e954c8e79afdb489cd05e80402ba67d79d666b835f90447fa56fc1dfb9d3ad",
+    "ELIGLUSTAT_010.json": "a84433d449fe97da8c8e8f4094d4ab5f360c5a8a08e4a63203dfbd64ce4c7231",
+    "ELIGLUSTAT_011.json": "81668bbb614a833d0c57009a8637af1aa1752ac4fcea1d7fff13cf68543fecef",
+    "ELIGLUSTAT_012.json": "590fb471fca4f4cb668bcdc619eff3d7c7ccab6a39e2dacff989a51e56b11997",
+    "ELIGLUSTAT_013.json": "324259a84019079a194fbd98e097160d2ce06844d04375a8b87482608d6d1e9f",
+    "ELIGLUSTAT_014.json": "82ae3632990efc92177d9538bd4ac10d63172cc1fde77c7db7cc70998f7d6558",
+    "ELIGLUSTAT_015.json": "ae41e7c366523cfef8cf6ab46eea49750ca6597d079d2b48d213c63a0cb651a2",
+    "ELIGLUSTAT_016.json": "9e61ee9054ba058a7305ae12248cb9d0a0f327011df15382f2bc451043eaa0fa",
+    "ELIGLUSTAT_017.json": "d496213453b528d87c81995bf5fa300f650f6930d297b655006e6445f7070fa9",
+    "ELIGLUSTAT_018.json": "2222ce4d5cc7ac768db5c4493502474d5ab2335e29e758b800714a4f19d640ca",
+    "ELIGLUSTAT_019.json": "b751940008efc5818fc667ceda5bfae0c6090c338c08811c9812f5d83ae2005e",
+    "ERLOTINIB_000.json": "c7cef092b0a0ab1cc118dfced36b0602ca8391ebb936d1476efff19ce337e672",
+    "ERLOTINIB_001.json": "d43af4f071b85265e77e41f25904e2e27c10a5bac505883b75540620c093e152",
+    "ERLOTINIB_002.json": "e7c510c1bc852cbbbe2ba4414b90f20b0bc52d2fa741c70fc77ee3b9d6f3e484",
+    "ERLOTINIB_003.json": "0ae7bc5c22629d1c4a19a65380013d7e0d047ee37633eb51cc16863fb35d570c",
+    "ERLOTINIB_004.json": "89203876756296ff500dcfde62bf07d40b35fdee7e455615ebea3d61154e1463",
+    "ERLOTINIB_005.json": "9b5ef7818690501d18487b800f61fd12e1ba73b164c539ff95fd41ed1c24450f",
+    "ERLOTINIB_006.json": "9608e9ae62c936c5df861b9fffc71e722d5c6ff1cabe51938843f14e5a1e744f",
+    "ERLOTINIB_007.json": "b6177117098fbc1785e68e192058d9b406056386c7cd15ca763e9032c73ae3c0",
+    "ERLOTINIB_008.json": "9c7a6db0b087f11ea3f1cc15a321c0ff09bb2eba1ddab32b139347c92ce4c026",
+    "ERLOTINIB_009.json": "31121cc48cacf3bb8ebfcee7d6dff33cd9e931d9ab445f527096d1a0a0b8e4ed",
+    "ERLOTINIB_010.json": "54b108409abd7804c0140f1846e30102d41162f0476dbc4f9f0191264de025e6",
+    "ERLOTINIB_011.json": "f594acfbf64285596d7aff001f747d4949ed6da7b47ede2aae156772e851e2e5",
+    "ERLOTINIB_012.json": "465624c37a441622531e6f0362dad2250e0bd24be2bbeb01910028aeabac01be",
+    "ERLOTINIB_013.json": "e1012d20308d0e62f393d9f613c8c34bd3df00288e1185176b12421d5dee2ead",
+    "ERLOTINIB_014.json": "1b34f681d0c42622350f4558ee983724b450e95891508f709086d79c291c9866",
+    "ERLOTINIB_015.json": "d5a52a323b26dc717ede6887197aa0e77f298cafa7275a3ff11dc4e447177300",
+    "ERLOTINIB_016.json": "e06b4ae410902e89b7767e57f6955aedb6859d3f382af4343382cf19dd316198",
+    "ERLOTINIB_017.json": "cdcdce51e38c959e8d8ce62dc7be4dc892a70a4b93fd2d15720cdb5680ed8686",
+    "ERLOTINIB_018.json": "8f7260e392c8842f7f1fce943123df99a80e70d9f53c3581b7be9b2fa33e44b7",
+    "ERLOTINIB_019.json": "21bb02833ee822211496094ad4094142004e2deda37e78451d9df075449115b4",
+    "FUTIBATINIB_000.json": "5b453363a47a39aebb061341e15a554e9b7996415c2503f09a89ece35a3b4106",
+    "FUTIBATINIB_001.json": "fb06f449ea64c40b540438035a38a9f3f80cdfc867d359fa6269e4d037d635d7",
+    "FUTIBATINIB_002.json": "cb7de400bbaa0b72662317358939fd6584a361986bdc5f042c931a845e72f580",
+    "FUTIBATINIB_003.json": "7d7eafaf35cc8ab6762b2135863341b5e0b84c5d25ef89a6ad1aeeba757c754e",
+    "FUTIBATINIB_004.json": "6224c70a914fee5f3f51445a747c5c0c20eca17693cf8ce6ca1d05dd22480a17",
+    "FUTIBATINIB_005.json": "436bc636e7e6058ea5399f6bee106750a0f550843881c9070455a9e00575966f",
+    "FUTIBATINIB_006.json": "16f452ac741d45a2892fcc74809ae971d55e6d300dea667638f34efe354b97c8",
+    "FUTIBATINIB_007.json": "6c0a41fba8bacc29f89d863ec47a6f72ae632b58d52eab7d70190b3cdc51a0c3",
+    "FUTIBATINIB_008.json": "61a44ca11f67d222fe6be2a992259c7b03d610dd8c754a30fdd5da91cf6ec314",
+    "FUTIBATINIB_009.json": "abd92b9e5911cc97b9b68d3528b2cd24d161f06c078888c8e458ae2155b96a0c",
+    "FUTIBATINIB_010.json": "d79031e592d3dd6b68a5e91bb3199b856782c7d19c7c8f9b7d3653c5866c894d",
+    "FUTIBATINIB_011.json": "5ff80518c3f342ee9cb4d9752d30f1437b78a356efef631afc234e68a9e84162",
+    "FUTIBATINIB_012.json": "0c443af5ddc5a2b338a204c7a4edaa9dd74d4053d332518fbd8eb12394294580",
+    "FUTIBATINIB_013.json": "e00b58c788124f3111931a501e9b95a02d91fb1aea4df8d2e3ef3bc0737cb77a",
+    "FUTIBATINIB_014.json": "218f18884e22058a7934fa5e204a79a4197be310610e89011736415b138d731e",
+    "FUTIBATINIB_015.json": "a52025b1ff953b6dd82c50a797d943dcc2d8d1cd8fdd9b0615d50a7125f12380",
+    "FUTIBATINIB_016.json": "04476a9ddba905b9047966a9409203d74dafc23c64389b74b53c9f7aeb5b0871",
+    "FUTIBATINIB_017.json": "4044fa1ad062d5fa6b761b77d0697e0ea33ee2da2b85f9da942a0d56bdd56147",
+    "FUTIBATINIB_018.json": "fa474e82e1804d32927e8acf87f452f6baa17ab0c4c02184f64ef50b8091de69",
+    "FUTIBATINIB_019.json": "af196f30c8142e8cb54bdf169ced09d887b4365e9bba8252f7060e8e8d408848",
+    "LESINURAD_000.json": "e888ab561a411279b54702653145d0906e59ca683ec85499427ef704ac64613b",
+    "LESINURAD_001.json": "c59fa547b062b83feb40ccea4f4a52525579ae41de10d48fd93b1b9445b6c2aa",
+    "LESINURAD_002.json": "6a895986bf86eb6644ea9a349033876e70e3147eda922bee4bb6b5fdeb6d2f55",
+    "LESINURAD_003.json": "425a9409ffb014f1537f112247f957a31cc00d6bb3544f3b4f8fd2e3a5dc3489",
+    "LESINURAD_004.json": "d03d9bb8dc78eea1189e46cda986178b505693a21e3c8660f81ebcbc14f18c2f",
+    "LESINURAD_005.json": "0e0ac97523dbc18cabd3e0dadb8cdcfee16e00ceb2d17212dd9869456f11b49c",
+    "LESINURAD_006.json": "17a7212b1c8965df50ddbe96f4050fe196bfb789e61058a8c255a723813b85bb",
+    "LESINURAD_007.json": "50de0620a2f9a6d5d6917c2e361c99101fb1d374550a750b6315abd3f4984ecc",
+    "LESINURAD_008.json": "914ebdb28887e6b686f19e8cbc9d91b1fe15ac699044b75ecdcc93505019ff27",
+    "LESINURAD_009.json": "f37d7a3f442c3fcb6953ebf11d20491a36ed6e21be8211e0e2360a275dd6b491",
+    "LESINURAD_010.json": "113acd7ac2e14fe29984e955eed299ddb4e4badbedaeba9e36e22bdc37645718",
+    "LESINURAD_011.json": "2e1789b9868ee4221981b786317c548e4cf6571d151a7d37d8f09577fb02019f",
+    "LESINURAD_012.json": "92f6e66fb624d6f4fd91697bea8fbf4dfa826f9f99a7dc8d9f6b31e7be97c62f",
+    "LESINURAD_013.json": "cb48cf448d91b774e45094855c4e1fe037add26852aebee5488c421727dd37c3",
+    "LESINURAD_014.json": "d6ffa756399d453d835a483d84a75b8a18019b7f7b398b7ca378d85f8dbc1ed3",
+    "LESINURAD_015.json": "5971b109a77bd526c13a24affa35269f3aca7c9ea8bbeaceb2ab44d7647e20fd",
+    "LESINURAD_016.json": "39d32a2cf104e2d2273ef51bff911bced21f5d0bdcb3e9dc57630e4cbb07199f",
+    "LESINURAD_017.json": "8b32cecf15bcfa04ed6ef91313d9d62e9b7f07def88ad784a99b7f3b0c2c3e6d",
+    "LESINURAD_018.json": "eeb923de65ca633eca70191a6b8450d5939e29f0eb2fa196dcf64f399fb7f095",
+    "LESINURAD_019.json": "9e62125a27bf7f6a401be35d899726349a631d7fa878c2570088504a57098a2e",
+    "LIOTHYRONINE_000.json": "c4ad97dc6598aee6dc67ed1eb808c59ef1303048ec1674ff278d75b639417894",
+    "LIOTHYRONINE_001.json": "a548f99d4909796fb8ef51b41360b90aa54e81749dc8e4e2ffad511e627f19fb",
+    "LIOTHYRONINE_002.json": "7a324bf7ff4856ebd307512c98a03a4fb2f725b323c2befe82f3752ccb62d00d",
+    "LIOTHYRONINE_003.json": "dc6fcb8f7d94a7ba5e341f61f0512b8dfffffcafa755cbbdcddfd288c170f8f6",
+    "LIOTHYRONINE_004.json": "61d867b4c68fb31c9359c693d4bf725b82621b9ba2368fdab5000400620eca3a",
+    "LIOTHYRONINE_005.json": "c77caa5174bc12be7675bdee5a644fa3fd1747ef29b2a9e4263c2f1bc614acec",
+    "LIOTHYRONINE_006.json": "1183411f58dd891e53237617eef2347054614d25254cdc2d2a03c6d610e5dfc3",
+    "LIOTHYRONINE_007.json": "37a1b8700afb1b51c84ebb4a7590a858470959cd6adc1e50317218e923f82cb2",
+    "LIOTHYRONINE_008.json": "ec6db4942c6457bc416adc99ef0f33dc1bfaf597ab9fe74b8c00db853998de9d",
+    "LIOTHYRONINE_009.json": "09db8a60d5efbcc22309072d9027c98740b54b0e78b318b077db5b07a1289d41",
+    "LIOTHYRONINE_010.json": "87f454d17f513358e4e7bab5ba528e6df8d2eb4bdf6deef8f7defd3a89f44d2f",
+    "LIOTHYRONINE_011.json": "7ade94bed07150e93ffd4238fe146fb51fabe8ff8b9b7c33ad8b16da7e01ae01",
+    "LIOTHYRONINE_012.json": "043bf35f476c7cb02b593c316464bda8badeb85e1478ed093e5d1b39332ba3d9",
+    "LIOTHYRONINE_013.json": "ca3b57347bfc65c3b50eb805e9eaca0afc6093963dfd2fbf2afe67f7903c1104",
+    "LIOTHYRONINE_014.json": "bb3c9b2942e6c8e1d7462b6802c4c958e5e9ad84cf2a1d98eec8acac96be2ee9",
+    "LIOTHYRONINE_015.json": "5eb14acecfcb9ccf0ca8c5f0692a23566e9bdf58d748aba9e4eedb8dbca0783b",
+    "LIOTHYRONINE_016.json": "b66e5a8e72a45b9a1179ee434159c1218b9007c5399226bf6208c1d6981a990f",
+    "LIOTHYRONINE_017.json": "3718421ad7cda6d613be1f19213b53df1eca49fa25e3d182c9a714b7152e4403",
+    "LIOTHYRONINE_018.json": "02761c07aa1af8548f42d938febfa21e2a7d3c0a16d324980d6210ea8b540d56",
+    "LIOTHYRONINE_019.json": "a2e115f43d91e8d63be9aba70004f7dc0e5cda470abb33fb573a1fd2817100c1",
+    "LOVASTATIN_000.json": "cbad18b2a7906d202ad9f71c5ee0eb45f99d22135a162e512023a2e5b97139fe",
+    "LOVASTATIN_001.json": "d820e216b1b5f69f235cd9c9265c23d907c1c19bc074cc02438e293c3f6093fb",
+    "LOVASTATIN_002.json": "d49664cfb3f9f9781ea5f830472b97e09a8cad17e2747a6a82025284abb4abe9",
+    "LOVASTATIN_003.json": "e49b5d4786ec91a391107758ca748e0d1bfe894d14bfd370cdeb05a25746493a",
+    "LOVASTATIN_004.json": "ab13fdcee9c8dd9c28f7bf7ce3f58972e675b92fe209bf0220f3e781524eea4c",
+    "LOVASTATIN_005.json": "959f561d3abfb0054223afd96fe7799350e6f45fcd2ae11f3c4a4c1823806520",
+    "LOVASTATIN_006.json": "90b89ba4beef67d7271d6f7f1a250c33bb4c9b05dfe4f2a033b493e4bf265823",
+    "LOVASTATIN_007.json": "9df85893be082fb055535b45288e23bfcf51b9a2890bb638b6edb44200dcda9c",
+    "LOVASTATIN_008.json": "cd12de51cd82b99028958e44191d7d74ea4f9ea8e801a985ab201f5e7b30bf44",
+    "LOVASTATIN_009.json": "8a6409b4762cb8c2ff7e59857db7e833a8569908ad03479c87c686be2fb2f03e",
+    "LOVASTATIN_010.json": "bd9b154b9c271d780b8e74f2ed82fd3f0935fa3b869d7aeacacdb0fabbde8b61",
+    "LOVASTATIN_011.json": "26701e560daed2bf8a50420a10cba5e1f4e2cb765d17211536646d60b936e0a5",
+    "LOVASTATIN_012.json": "123be05c04abee9544819fa2e8f84c1a9884c3d0dda7e2d636e2a06ddec1496d",
+    "LOVASTATIN_013.json": "db77d6512c12c25db798e872ab6b30b265d6ac62b14d242328bb6f4d62f534d4",
+    "LOVASTATIN_014.json": "dc434b8324ef4174a49900f53600a547653f6d4685b890aa336514cd7637ee38",
+    "LOVASTATIN_015.json": "90cce6f1d0e57b4134ae8bed0b3067f0aa520a9f0c84b64f7d095a5fd73e7ec4",
+    "LOVASTATIN_016.json": "59627fa7bb62a837b2935dccd254759aa73a001da870f596bfd9fc19af25c184",
+    "LOVASTATIN_017.json": "96c18cfe247e0c9a5cc8c77ec029627370fd3c64ebf7fe4ee3119bd791010ed8",
+    "LOVASTATIN_018.json": "97203aea99a32b002934c06d5a8661f0fd1fc7132e4fccf3aa539110d7d65277",
+    "LOVASTATIN_019.json": "1cdb49ba00db9a21ec3a4c9c92800eb49969747ec4028d294d900fa4506d712d",
+    "MARIBAVIR_000.json": "dbed4aec79b4b13dd8af9719d453be0020a056ab7155628b737221ba6f281861",
+    "MARIBAVIR_001.json": "7b6b6b953e7760511d5125376faf6d2d03166598894eb1ef8383950eea7c9967",
+    "MARIBAVIR_002.json": "dcb3ccfa127cb035f8728a7c6c108c42cd0e0cf85ca15262544e64ec1ad79d1d",
+    "MARIBAVIR_003.json": "8cdeacb913de3de73e5c47d8ae6cadb21beef0e55678e54ed8f38f380ce9e34e",
+    "MARIBAVIR_004.json": "fda1a22b60179c5b6f33d827d3d7b73bbe187c25994f6332286810c43528eb4e",
+    "MARIBAVIR_005.json": "5c68ee1d8e032b4efb82b62a28613a10e117c059f681f1c52b93a95029084148",
+    "MARIBAVIR_006.json": "d89975c57c60e1d4c1333ef2d01f7b160bc03c394aa946b1d184bbda8515912a",
+    "MARIBAVIR_007.json": "01b92e658410e9daaa761c79874d244e57249404e68961579e5473d8bcabe316",
+    "MARIBAVIR_008.json": "ddae977b12f4879e5b62d2e6d4fdd75f13de1312cb004d6f60ebd12bbda6d3e3",
+    "MARIBAVIR_009.json": "b6e2c9efdc2de776bba44804d60b7f5ca83176cc11f8a053c120a29872cb53f1",
+    "MARIBAVIR_010.json": "b4596940cd30f7c37a0a721f7501d79433891901e493172c2a6753f336c1395b",
+    "MARIBAVIR_011.json": "9f222be4cf873a1633e341cee6bfc7b65131c14ed046d05dd0079e48dece855d",
+    "MARIBAVIR_012.json": "e6adb35271abdc8e894b0ebb57d8d7e68b26cc7fc537ef1293528abaf7a00936",
+    "MARIBAVIR_013.json": "f37d12d03299660fc798af954c2d8b34c35daeb03c74b47494c258d8afff45c6",
+    "MARIBAVIR_014.json": "458de754efb2edad403d268d4094bc98b5d1aeba87842dfa8b1a74a4cab1607f",
+    "MARIBAVIR_015.json": "41ab4ef922d122af170362da969f87f66a899c0ef47a16e6b1a1f05feda64fe0",
+    "MARIBAVIR_016.json": "77ec71d052fda6a96875fd7360afa096308e590326af15d8813f85743143a486",
+    "MARIBAVIR_017.json": "6de540dd49fe310b0c1d314eac733aace91662697761044409430954b81c3233",
+    "MARIBAVIR_018.json": "613459894db889aed87d4a25e80fbe4ea6bb2771989726a737811afb66bdc9f4",
+    "MARIBAVIR_019.json": "95387706adbb9f9294bd5be60e71dadaf18c0c79d38c9a8273229233740cfb4e",
+    "SPIRAPRIL_000.json": "7309133ecb324f923c5a432dbd6d12faac56ef2208a075f2bb44651b239a393c",
+    "SPIRAPRIL_001.json": "fafd3b1c82b95d2ac10c4bfe3d810a37a04aa0dd1369a6567eac00be29d5d3a6",
+    "SPIRAPRIL_002.json": "66d8a3e6f59e34b99706df2d71a1a4b25a6f1a51fdcd629b0ad8e48132894457",
+    "SPIRAPRIL_003.json": "e672cf76fa9219b9f05e6710655b15f3bb905c9c988d8d7554f8649e381b254b",
+    "SPIRAPRIL_004.json": "1ab4bdab420c37eb2687b17072a97e0830269df0f271b1508ecb7b7c95cc126a",
+    "SPIRAPRIL_005.json": "27cfca9022b3bfc0a1d676f3ef8b85d48d2feb7ed4704ceaa13c5168aada4cb7",
+    "SPIRAPRIL_006.json": "97982da7f53198a7ec6760b6f79d190c0824c27643c72499f55835e7efca851f",
+    "SPIRAPRIL_007.json": "9c686638be3245282b1607c28744be15b56fc6c6c2341098fc3a2f31d484df92",
+    "SPIRAPRIL_008.json": "e5bdc04a2ed06362215961c5a3551cb59b185c2cc115526d372de6ba2524139a",
+    "SPIRAPRIL_009.json": "4e3583259a958ed0b79cb63810e8aa63101db951925597fced42ab594e38d402",
+    "SPIRAPRIL_010.json": "5a9ef55d92b9ddb3f4e75d6878da5ea6f03146713c6cfb0c775f43ded9020fd1",
+    "SPIRAPRIL_011.json": "49c309f21c0c2760c670736a21301f5c5259fec95824664e49069d1bed127f94",
+    "SPIRAPRIL_012.json": "2b417c4cbb9a9bd8bfa5c0e616d150775e4cb955dce8908e32700345753d1705",
+    "SPIRAPRIL_013.json": "12b288da2beabd74c43044834cef1e5da14bfdad701b1d0297f206526fe82d00",
+    "SPIRAPRIL_014.json": "86862300fa24e5ee8bc6b67dcf0a62ff855d23f8a7fa935ab8c2f69ea11976a3",
+    "SPIRAPRIL_015.json": "56b2d39005ea58df8ffbd66d10527f68326cbcc2736b3106b82a037bb898a026",
+    "SPIRAPRIL_016.json": "a28f3ca8c0144df6747af5cedc5b623be74264180979958313216a84b3d642fe",
+    "SPIRAPRIL_017.json": "924b675790ee93b1f41bd4ce73f76176c4763d111161e8e29c1e7b00c98df522",
+    "SPIRAPRIL_018.json": "0f26690275c1dfcd61ae6f8ac43fc222b6fa92c76da14eb90fe8eeabaf13fcae",
+    "SPIRAPRIL_019.json": "103bbc5b39e41784b9ff2afc1c9edca22e84a40cf35b1deab595f65565e71647"
+  },
+  "per_prompt": {
+    "BARICITINIB": {
+      "attempts": 20,
+      "conditional_expected_unseen_frozen": 19.850810930511813,
+      "conditional_expected_unseen_novelty4": 19.958003689797124,
+      "mean_supported_distinct_offers": 7.75,
+      "mean_unseen_distinct_offers": 7.7,
+      "rows": [
+        {
+          "attempt_index": 0,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 1,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 2,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 3,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 4,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 5,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 6,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 7,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 8,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 9,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 10,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 11,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 12,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 13,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 14,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 15,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 16,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 17,
+          "conditional_p_unseen_frozen": 0.8508109305118131,
+          "conditional_p_unseen_novelty4": 0.9580036897971252,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 18,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 19,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        }
+      ],
+      "selected_distinct": 20,
+      "selected_repeated": 0,
+      "selected_repeated_despite_unseen_offer": 0
+    },
+    "CYCLOTHIAZIDE": {
+      "attempts": 20,
+      "conditional_expected_unseen_frozen": 16.942300841153944,
+      "conditional_expected_unseen_novelty4": 18.90522864531282,
+      "mean_supported_distinct_offers": 7.4,
+      "mean_unseen_distinct_offers": 6.45,
+      "rows": [
+        {
+          "attempt_index": 0,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 5,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 1,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 2,
+          "conditional_p_unseen_frozen": 0.8205143154535275,
+          "conditional_p_unseen_novelty4": 0.9481486471993129,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 3,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 4,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 5,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 6,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 7,
+          "conditional_p_unseen_frozen": 0.7013563932691342,
+          "conditional_p_unseen_novelty4": 0.9037896421015348,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 8,
+          "conditional_p_unseen_frozen": 0.8486222616463052,
+          "conditional_p_unseen_novelty4": 0.957308678657452,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 9,
+          "conditional_p_unseen_frozen": 0.6524657684913645,
+          "conditional_p_unseen_novelty4": 0.8824864583242314,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 10,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 5,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 11,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 12,
+          "conditional_p_unseen_frozen": 0.5465023879769478,
+          "conditional_p_unseen_novelty4": 0.8281885276842029,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 13,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 14,
+          "conditional_p_unseen_frozen": 0.6782016034263674,
+          "conditional_p_unseen_novelty4": 0.8939570663423432,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 15,
+          "conditional_p_unseen_frozen": 0.8104875708803042,
+          "conditional_p_unseen_novelty4": 0.9447721146957054,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 16,
+          "conditional_p_unseen_frozen": 0.3656495722372823,
+          "conditional_p_unseen_novelty4": 0.6974888213969196,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 4
+        },
+        {
+          "attempt_index": 17,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 18,
+          "conditional_p_unseen_frozen": 0.8357885006056072,
+          "conditional_p_unseen_novelty4": 0.9531809561024276,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 19,
+          "conditional_p_unseen_frozen": 0.682712467167103,
+          "conditional_p_unseen_novelty4": 0.8959077328086907,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 6
+        }
+      ],
+      "selected_distinct": 19,
+      "selected_repeated": 1,
+      "selected_repeated_despite_unseen_offer": 1
+    },
+    "ELIGLUSTAT": {
+      "attempts": 20,
+      "conditional_expected_unseen_frozen": 19.715450974462996,
+      "conditional_expected_unseen_novelty4": 19.923340482340638,
+      "mean_supported_distinct_offers": 6.9,
+      "mean_unseen_distinct_offers": 6.75,
+      "rows": [
+        {
+          "attempt_index": 0,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 1,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 2,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 3,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 4,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 5,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 5,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 6,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 7,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 8,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 9,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 10,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 11,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 12,
+          "conditional_p_unseen_frozen": 0.9003103817807697,
+          "conditional_p_unseen_novelty4": 0.9730636387697481,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 13,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 14,
+          "conditional_p_unseen_frozen": 0.8956637802736631,
+          "conditional_p_unseen_novelty4": 0.9717015284057857,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 15,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 5,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 16,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 17,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 18,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 19,
+          "conditional_p_unseen_frozen": 0.9194768124085639,
+          "conditional_p_unseen_novelty4": 0.9785753151651052,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        }
+      ],
+      "selected_distinct": 18,
+      "selected_repeated": 2,
+      "selected_repeated_despite_unseen_offer": 2
+    },
+    "ERLOTINIB": {
+      "attempts": 20,
+      "conditional_expected_unseen_frozen": 19.823287578634154,
+      "conditional_expected_unseen_novelty4": 19.949072215584376,
+      "mean_supported_distinct_offers": 6.35,
+      "mean_unseen_distinct_offers": 6.3,
+      "rows": [
+        {
+          "attempt_index": 0,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 5,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 1,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 2,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 5,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 3,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 4,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 5,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 6,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 7,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 8,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 9,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 10,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 11,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 12,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 5,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 13,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 14,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 15,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 16,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 5,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 17,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 18,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 19,
+          "conditional_p_unseen_frozen": 0.8232875786341536,
+          "conditional_p_unseen_novelty4": 0.9490722155843764,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        }
+      ],
+      "selected_distinct": 20,
+      "selected_repeated": 0,
+      "selected_repeated_despite_unseen_offer": 0
+    },
+    "FUTIBATINIB": {
+      "attempts": 20,
+      "conditional_expected_unseen_frozen": 19.437383799873203,
+      "conditional_expected_unseen_novelty4": 19.83442329234749,
+      "mean_supported_distinct_offers": 7.3,
+      "mean_unseen_distinct_offers": 7.15,
+      "rows": [
+        {
+          "attempt_index": 0,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 1,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 2,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 5,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 3,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 4,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 5,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 6,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 7,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 8,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 9,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 10,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 11,
+          "conditional_p_unseen_frozen": 0.8722071580376886,
+          "conditional_p_unseen_novelty4": 0.9646651321192935,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 12,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 13,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 14,
+          "conditional_p_unseen_frozen": 0.7589636987486367,
+          "conditional_p_unseen_novelty4": 0.9264436033509015,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 15,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 16,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 17,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 18,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 19,
+          "conditional_p_unseen_frozen": 0.8062129430868781,
+          "conditional_p_unseen_novelty4": 0.9433145568772957,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        }
+      ],
+      "selected_distinct": 20,
+      "selected_repeated": 0,
+      "selected_repeated_despite_unseen_offer": 0
+    },
+    "LESINURAD": {
+      "attempts": 20,
+      "conditional_expected_unseen_frozen": 14.621462975882817,
+      "conditional_expected_unseen_novelty4": 17.919125712996244,
+      "mean_supported_distinct_offers": 6.85,
+      "mean_unseen_distinct_offers": 5.85,
+      "rows": [
+        {
+          "attempt_index": 0,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 1,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 2,
+          "conditional_p_unseen_frozen": 0.7453096072959193,
+          "conditional_p_unseen_novelty4": 0.9212929558334658,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 3,
+          "conditional_p_unseen_frozen": 0.7053738992006596,
+          "conditional_p_unseen_novelty4": 0.9054510287495926,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 4,
+          "conditional_p_unseen_frozen": 0.6986763918370607,
+          "conditional_p_unseen_novelty4": 0.9026741703384665,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 5,
+          "conditional_p_unseen_frozen": 0.5817981108833102,
+          "conditional_p_unseen_novelty4": 0.8476714677585024,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 4
+        },
+        {
+          "attempt_index": 6,
+          "conditional_p_unseen_frozen": 0.7392210640645975,
+          "conditional_p_unseen_novelty4": 0.918953936332409,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 7,
+          "conditional_p_unseen_frozen": 0.6729606669428179,
+          "conditional_p_unseen_novelty4": 0.8916687260491021,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 8,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 9,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 10,
+          "conditional_p_unseen_frozen": 0.6139199608526417,
+          "conditional_p_unseen_novelty4": 0.8641405132372268,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 4,
+          "unseen_distinct_offers": 3
+        },
+        {
+          "attempt_index": 11,
+          "conditional_p_unseen_frozen": 0.5298394145844593,
+          "conditional_p_unseen_novelty4": 0.8184370445932574,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 12,
+          "conditional_p_unseen_frozen": 0.5187800435559379,
+          "conditional_p_unseen_novelty4": 0.811754331643517,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 13,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 14,
+          "conditional_p_unseen_frozen": 0.6616824105687248,
+          "conditional_p_unseen_novelty4": 0.8866625674000134,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 15,
+          "conditional_p_unseen_frozen": 0.589583238403944,
+          "conditional_p_unseen_novelty4": 0.8517681972692661,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 16,
+          "conditional_p_unseen_frozen": 0.6107927632480142,
+          "conditional_p_unseen_novelty4": 0.8625864213967133,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 17,
+          "conditional_p_unseen_frozen": 0.21010398748741696,
+          "conditional_p_unseen_novelty4": 0.5154939479683339,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 3
+        },
+        {
+          "attempt_index": 18,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 19,
+          "conditional_p_unseen_frozen": 0.7434214169573141,
+          "conditional_p_unseen_novelty4": 0.9205704044263785,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        }
+      ],
+      "selected_distinct": 15,
+      "selected_repeated": 5,
+      "selected_repeated_despite_unseen_offer": 5
+    },
+    "LIOTHYRONINE": {
+      "attempts": 20,
+      "conditional_expected_unseen_frozen": 19.71310545439441,
+      "conditional_expected_unseen_novelty4": 19.921523364369364,
+      "mean_supported_distinct_offers": 7.1,
+      "mean_unseen_distinct_offers": 6.95,
+      "rows": [
+        {
+          "attempt_index": 0,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 1,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 2,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 3,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 4,
+          "conditional_p_unseen_frozen": 0.9619658848160652,
+          "conditional_p_unseen_novelty4": 0.9902122704800531,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 5,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 6,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 7,
+          "conditional_p_unseen_frozen": 0.8873738664484183,
+          "conditional_p_unseen_novelty4": 0.9692456597913849,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 8,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 9,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 10,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 11,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 12,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 13,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 14,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 15,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 16,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 17,
+          "conditional_p_unseen_frozen": 0.8637657031299244,
+          "conditional_p_unseen_novelty4": 0.9620654340979257,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 18,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 19,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        }
+      ],
+      "selected_distinct": 20,
+      "selected_repeated": 0,
+      "selected_repeated_despite_unseen_offer": 0
+    },
+    "LOVASTATIN": {
+      "attempts": 20,
+      "conditional_expected_unseen_frozen": 17.25026138676478,
+      "conditional_expected_unseen_novelty4": 19.051466074691998,
+      "mean_supported_distinct_offers": 7.45,
+      "mean_unseen_distinct_offers": 6.6,
+      "rows": [
+        {
+          "attempt_index": 0,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 1,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 2,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 3,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 4,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 5,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 6,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 7,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 8,
+          "conditional_p_unseen_frozen": 0.8236206421196381,
+          "conditional_p_unseen_novelty4": 0.9491828365338083,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 9,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 10,
+          "conditional_p_unseen_frozen": 0.8755401900252855,
+          "conditional_p_unseen_novelty4": 0.9656816014882661,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 11,
+          "conditional_p_unseen_frozen": 0.8417577414030591,
+          "conditional_p_unseen_novelty4": 0.9551120584043697,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 12,
+          "conditional_p_unseen_frozen": 0.863907727876851,
+          "conditional_p_unseen_novelty4": 0.9621094763807534,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 13,
+          "conditional_p_unseen_frozen": 0.5817030340702323,
+          "conditional_p_unseen_novelty4": 0.8476210050839496,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 14,
+          "conditional_p_unseen_frozen": 0.6166531876507543,
+          "conditional_p_unseen_novelty4": 0.865490438063571,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 4
+        },
+        {
+          "attempt_index": 15,
+          "conditional_p_unseen_frozen": 0.47243571869437795,
+          "conditional_p_unseen_novelty4": 0.7817553801642415,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 3
+        },
+        {
+          "attempt_index": 16,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 17,
+          "conditional_p_unseen_frozen": 0.8624175587217703,
+          "conditional_p_unseen_novelty4": 0.9616468496372265,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 18,
+          "conditional_p_unseen_frozen": 0.7328062626894192,
+          "conditional_p_unseen_novelty4": 0.9164606779114259,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 19,
+          "conditional_p_unseen_frozen": 0.5794193235133914,
+          "conditional_p_unseen_novelty4": 0.8464057510243855,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 5
+        }
+      ],
+      "selected_distinct": 17,
+      "selected_repeated": 3,
+      "selected_repeated_despite_unseen_offer": 3
+    },
+    "MARIBAVIR": {
+      "attempts": 20,
+      "conditional_expected_unseen_frozen": 14.376811352283214,
+      "conditional_expected_unseen_novelty4": 17.914644028203718,
+      "mean_supported_distinct_offers": 6.95,
+      "mean_unseen_distinct_offers": 5.2,
+      "rows": [
+        {
+          "attempt_index": 0,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 1,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 2,
+          "conditional_p_unseen_frozen": 0.8297918261852388,
+          "conditional_p_unseen_novelty4": 0.9512210208214074,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 3,
+          "conditional_p_unseen_frozen": 0.8243800920971103,
+          "conditional_p_unseen_novelty4": 0.9494348359317006,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 4,
+          "conditional_p_unseen_frozen": 0.838255018277561,
+          "conditional_p_unseen_novelty4": 0.9539812820489821,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 5,
+          "conditional_p_unseen_frozen": 0.7858887238024886,
+          "conditional_p_unseen_novelty4": 0.9362321132396076,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 6,
+          "conditional_p_unseen_frozen": 0.7225475741063437,
+          "conditional_p_unseen_novelty4": 0.9124104420177371,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 7,
+          "conditional_p_unseen_frozen": 0.8557660046720037,
+          "conditional_p_unseen_novelty4": 0.9595677191080485,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 8,
+          "conditional_p_unseen_frozen": 0.8362411063133774,
+          "conditional_p_unseen_novelty4": 0.9533280687016128,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 9,
+          "conditional_p_unseen_frozen": 0.7245864387374167,
+          "conditional_p_unseen_novelty4": 0.9132216611840377,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 10,
+          "conditional_p_unseen_frozen": 0.5682531810821955,
+          "conditional_p_unseen_novelty4": 0.8403751564549178,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 11,
+          "conditional_p_unseen_frozen": 0.5186774542437719,
+          "conditional_p_unseen_novelty4": 0.8116915291158918,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 4
+        },
+        {
+          "attempt_index": 12,
+          "conditional_p_unseen_frozen": 0.7774225325053639,
+          "conditional_p_unseen_novelty4": 0.9332054041336453,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 5,
+          "unseen_distinct_offers": 4
+        },
+        {
+          "attempt_index": 13,
+          "conditional_p_unseen_frozen": 0.3705497073599419,
+          "conditional_p_unseen_novelty4": 0.701915301146199,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 3
+        },
+        {
+          "attempt_index": 14,
+          "conditional_p_unseen_frozen": 0.8429770370930696,
+          "conditional_p_unseen_novelty4": 0.9555041008295537,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 15,
+          "conditional_p_unseen_frozen": 0.7244853310954861,
+          "conditional_p_unseen_novelty4": 0.9131815063806231,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 16,
+          "conditional_p_unseen_frozen": 0.7085834773386557,
+          "conditional_p_unseen_novelty4": 0.9067691010528329,
+          "selected_repeated": true,
+          "selected_repeated_despite_unseen_offer": true,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 17,
+          "conditional_p_unseen_frozen": 0.6700131211663579,
+          "conditional_p_unseen_novelty4": 0.8903712413747165,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 18,
+          "conditional_p_unseen_frozen": 0.43127939314491864,
+          "conditional_p_unseen_novelty4": 0.7520659425961667,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 3
+        },
+        {
+          "attempt_index": 19,
+          "conditional_p_unseen_frozen": 0.34711333306191244,
+          "conditional_p_unseen_novelty4": 0.6801676020660374,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 5,
+          "unseen_distinct_offers": 2
+        }
+      ],
+      "selected_distinct": 14,
+      "selected_repeated": 6,
+      "selected_repeated_despite_unseen_offer": 6
+    },
+    "SPIRAPRIL": {
+      "attempts": 20,
+      "conditional_expected_unseen_frozen": 19.055715529556558,
+      "conditional_expected_unseen_novelty4": 19.711283673013753,
+      "mean_supported_distinct_offers": 6.75,
+      "mean_unseen_distinct_offers": 6.5,
+      "rows": [
+        {
+          "attempt_index": 0,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 1,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 2,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 3,
+          "conditional_p_unseen_frozen": 0.7471420563818931,
+          "conditional_p_unseen_novelty4": 0.9219917621369883,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 4,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 5,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 6,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 7,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 8,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 9,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 10,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 11,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 12,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 13,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 8
+        },
+        {
+          "attempt_index": 14,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 15,
+          "conditional_p_unseen_frozen": 0.8235896995879429,
+          "conditional_p_unseen_novelty4": 0.9491725622211836,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 7
+        },
+        {
+          "attempt_index": 16,
+          "conditional_p_unseen_frozen": 0.7632658337679094,
+          "conditional_p_unseen_novelty4": 0.9280398972464796,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 5
+        },
+        {
+          "attempt_index": 17,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 6,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 18,
+          "conditional_p_unseen_frozen": 0.7217179398188128,
+          "conditional_p_unseen_novelty4": 0.9120794514091017,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 8,
+          "unseen_distinct_offers": 6
+        },
+        {
+          "attempt_index": 19,
+          "conditional_p_unseen_frozen": 1.0,
+          "conditional_p_unseen_novelty4": 1.0,
+          "selected_repeated": false,
+          "selected_repeated_despite_unseen_offer": false,
+          "supported_distinct_offers": 7,
+          "unseen_distinct_offers": 7
+        }
+      ],
+      "selected_distinct": 20,
+      "selected_repeated": 0,
+      "selected_repeated_despite_unseen_offer": 0
+    }
+  },
+  "role": "locked seed-zero development diagnostic; not a counterfactual benchmark result",
+  "schema": "fragment_linker_novelty_headroom_v1",
+  "software": {
+    "python": "3.12.9"
+  },
+  "totals": {
+    "attempts": 200,
+    "conditional_expected_unseen_frozen": 180.78659082351788,
+    "conditional_expected_unseen_novelty4": 193.08811117865753,
+    "selected_distinct": 183,
+    "selected_repeated": 17,
+    "selected_repeated_despite_unseen_offer": 17
+  }
+}
