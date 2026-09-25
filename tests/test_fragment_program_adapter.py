@@ -210,9 +210,7 @@ def test_strict_unseen_restricts_only_when_supported_unseen_offer_exists():
     assert receipt["forced_repeat_panel"] is True
     assert receipt["selected_already_emitted"] is True
     with pytest.raises(ValueError, match="prior emitted endpoints"):
-        select_learned_program_strict_unseen(
-            (first,), (0.0,), CaptureRng(), frozenset(("",))
-        )
+        select_learned_program_strict_unseen((first,), (0.0,), CaptureRng(), frozenset(("",)))
 
 
 def test_strict_unseen_preserves_native_score_ratios_among_unseen_offers():
@@ -294,7 +292,10 @@ def test_quality_priority_keeps_native_ratios_within_selected_tier():
 def test_quality_priority_falls_back_to_counted_repeat_and_fails_on_missing_scorer():
     first = CompleteProgram(source("CCC"), {}, {})
     selected, receipt = select_learned_program_quality_priority(
-        (first,), (0.0,), np.random.default_rng(0), frozenset((first.smiles,)),
+        (first,),
+        (0.0,),
+        np.random.default_rng(0),
+        frozenset((first.smiles,)),
         lambda _smiles: (5.0, 0.2),
     )
     assert selected is first

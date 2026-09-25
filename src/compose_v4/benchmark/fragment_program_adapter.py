@@ -584,9 +584,7 @@ def select_learned_program_strict_unseen(candidates, scores, rng, prior_emitted)
     return selected, receipt
 
 
-def select_learned_program_quality_priority(
-    candidates, scores, rng, prior_emitted, quality_scorer
-):
+def select_learned_program_quality_priority(candidates, scores, rng, prior_emitted, quality_scorer):
     """Prioritize unseen QED/SA-qualified endpoints within a fixed supported panel.
 
     The caller supplies the pinned property scorer. This is explicit in-loop
@@ -613,9 +611,7 @@ def select_learned_program_quality_priority(
         properties[index] = (float(sa), float(qed))
     unseen = tuple(index for index in supported if candidates[index].smiles not in emitted)
     unseen_quality = tuple(
-        index
-        for index in unseen
-        if properties[index][0] <= 4.0 and properties[index][1] >= 0.6
+        index for index in unseen if properties[index][0] <= 4.0 and properties[index][1] >= 0.6
     )
     if unseen_quality:
         eligible, tier = unseen_quality, "unseen_quality"

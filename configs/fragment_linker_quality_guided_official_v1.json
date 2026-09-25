@@ -1,0 +1,62 @@
+{
+  "payload": {
+    "schema": "fragment_linker_quality_guided_official_v1",
+    "task": "linker_design",
+    "selector": "unseen_quality_then_unseen_then_full_native_softmax",
+    "property_thresholds": {"qed_ge": 0.6, "sa_le": 4.0},
+    "comparison_status": "property_guided_controller_not_unguided_fragment_generator",
+    "drugs": [
+      "BARICITINIB",
+      "CYCLOTHIAZIDE",
+      "ELIGLUSTAT",
+      "ERLOTINIB",
+      "FUTIBATINIB",
+      "LESINURAD",
+      "LIOTHYRONINE",
+      "LOVASTATIN",
+      "MARIBAVIR",
+      "SPIRAPRIL"
+    ],
+    "seeds": [9, 10, 11],
+    "attempts_per_prompt_seed": 100,
+    "candidate_draws_per_attempt": 8,
+    "no_replacement_or_regeneration": true,
+    "checkpoint_path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "development_replay_sha256": "59c560b4e4071ff8a80a8dc5351ede32e5e02b67da14aac7e52e26579c2c3e7e",
+    "output_dir": "diagnostics/fragment_linker_quality_guided_official_v1",
+    "minimum_free_bytes": 5368709120,
+    "max_concurrent_seed_workers": 2,
+    "versions": {
+      "python": "3.11.13",
+      "numpy": "1.26.4",
+      "torch": "2.4.0",
+      "rdkit": "2024.03.5"
+    },
+    "material_sha256": {
+      "local/src/compose_v4/benchmark/fragment_program_adapter.py": "10b0b51c1245968900b979a6d8630633d7f5b4ebe56405aacf9a5fe2cb6eb24a",
+      "local/src/compose_v4/benchmark/fragment_linker_sampler.py": "4b0ca7f32a8aaf7fe7788bc99032ae712a32332d4293ab370f18d848496f3765",
+      "local/src/compose_v4/benchmark/fragment_linker_assembly.py": "86fc1d1b7db54958c9e11f71b88641ed01b002baf84b22d7aa4f78cdf27c389f",
+      "local/src/compose_v4/benchmark/fragment_official_metrics.py": "9406ddffad9e05d67bc7b6333d4b51eef534f2f4b11a2cedc237e80698389459",
+      "local/src/compose_v4/benchmark/joint_completion_prior.py": "a51ec2a5dc6a6b9016f2cb5e9a2c29fd772e39da42e63f62c608aa7fa4100883",
+      "local/src/compose_v4/benchmark/fragment_constrained.py": "cd9113a6afd22e833de462a0ad7d816ed170e8bde0d9d5577d7cae98caf0ddc6",
+      "local/src/compose_v4/benchmark/training_attachment_fragments.py": "66402727a92fe54301ec8890bb6fd0988aea644626199929a595bf47e89eb02d",
+      "local/src/compose_v4/chem/state.py": "4aa1acc257b053a562969ad8cc9b62fd84ce2931b04f1890f1c242888a3cecf5",
+      "local/tools/run_fragment_linker_quality_guided_official_v1.py": "26eaec5a8ccc151cff8f3aa147e83a7b15dbd4c7ed894607c2ba73cdacc26b52",
+      "local/tools/fetch_official_fragment_evaluator.py": "3426da4a3fa126fa5c84afd13cd955c743affb08e3825d9a67506db12f1e0147",
+      "local/tools/run_fragment_linker_official_v1.py": "ba215ef24073d5b05fd44e1ac89006ddaad8e21b6ff3552c110e1bbdc69493e1",
+      "local/tools/run_fragment_training_linker_support.py": "00c456a88fd6db8ac4f41150ed787de7cde7ba39f60a024fa09a63f7734b483e",
+      "local/tools/run_fragment_constrained_suite.py": "768273319dbc3d8e70dd8fd7138ddf57e6d2ac543ec8b10dcd1e94f3b429046e",
+      "local/tools/run_fragment_attachment_library_pilot.py": "b6273ee454308fd7b8a7f02d17c2ddc762ee0608fe6441c36ae5240208be0981",
+      "local/tools/run_fragment_training_linker_metric_pilot.py": "5507ea3f9e3c91c1e057caa5deb51d262ec4d0457f9ea36fb15bf40fb19e3556",
+      "local/tools/audit_fragment_training_linker.py": "824545773dfb024018b43ca48243dd0e38d434dfb11e0ecc10fe37fd610de7c6",
+      "local/scripts/evaluate_tracelet_rollouts.py": "b74ceea950d2f3b3a37ba8f5a397d6be6eb670e3fac92d0814f9752c83e85cf8",
+      "local/.official_eval_cache/pkg/in_virtuo_gen/train_utils/metrics.py": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+      "local/.official_eval_cache/pkg/in_virtuo_gen/utils/mol.py": "ed5609c72a3effe2547f4b264e35be8134affccc206978605307d1365a028145",
+      "source/diagnostics/fragment_training_region_catalog_v1/catalog.json": "a8775b466f479c2594ff5d8afd81049a57969211d3152035c93e9db51e8b1347",
+      "source/diagnostics/fragment_joint_completion_prior_v1/prior.json": "6ae0fcb635ec2876f5d7f1c326cef92c241d42267a897f441d0cc9ee5752eea2",
+      "source/data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+      "checkpoint/ringcore_a7546e2_best.pt": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4"
+    }
+  },
+  "payload_sha256": "5544815d48b7eb26c58aefb78b7de0f4e99ff69812e27b31d79ca355d7a8b521"
+}
