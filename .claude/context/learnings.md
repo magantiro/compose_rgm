@@ -4844,3 +4844,71 @@ independently of whether fa7_0 ever closes.**
   predicts failure well but NOT perfectly** -- all 6 zero-success instances are exposed and
   9 of 10 partials, but one (5ht1b id1 delta=0.6, 6/8) is exposed on neither criterion.
   A strong predictor, not a law; say so rather than rounding it up.
+
+## 2026-09-25 (T4 unified panel: resume is FAITHFUL, the speedup is not, and the drivers die first)
+
+- **RESUME VERIFIED FAITHFUL on real data, not inferred.** `rng_state` is written into BOTH
+  checkpoint sites as `_jsonable(rng.bit_generator.state)` and restored with
+  `rng.bit_generator.state = resumed["rng_state"]`. The real hazard was `_jsonable` coercing
+  PCG64's 128-bit integers to float, which would silently produce a different stream. Ran the
+  PRODUCTION `_resume_state` against two real cells' durable state (two arms, two proteins):
+  `state.inc` type=int bits=128 EXACT, stored == restored, JSON round-trip reproduces
+  identical draws, and every round's `rng_state_after` matches the checkpoint -- a per-round
+  audit trail, not a single restore point. So a resumed cell continues the SAME parent stream,
+  hence the same `controller_seed + 1_000_003*round + 10_007*parent + 101*expert` seeds.
+- **Charged count comes primarily from the CHECKPOINT, not the locks** -- `_resume_state`
+  takes `payload["charged_calls"]` then ADDS forfeits found in locks above the last
+  checkpointed round. Safe here because the checkpoint is hash- AND contract-verified before
+  restore, and the container reads its own freshly-written folder. The historical
+  stale-checkpoint failure (-11.4 vs -12.6) came from a stale MOUNT with no `volume.reload()`;
+  that path is not reachable here. Measured agreement with independent lock counts: exact.
+- **Double-charging is structurally impossible:** an interrupted round's queries are debited
+  in full (`forfeited += len(lock["queries"])`) and never re-docked; `resume_after =
+  max(completed, highest_lock_index)` so the index is never reissued; query ids embed the
+  round index so a re-charged id cannot be constructed; a completed cell short-circuits on
+  `result.json`. NOT closed by observation -- no live forfeit instance was caught, and the
+  unified resume path has NO test coverage for RNG or forfeit.
+- **THE SPEEDUP WAS AN ILLUSION AND THE DIAGNOSIS WAS MINE.** I claimed container caps and
+  `scaledown_window: 20` were throttling the panel. MEASURED: the ten arms are using **92 of
+  the 630 containers their own per-app limits already permit** -- so `max_containers` was
+  never binding, the ~100-container WORKSPACE cap is, and raising per-app limits cannot
+  conjure containers the workspace will not grant. `scaledown_window` is not the cost either:
+  the fastest workers complete in 9-17 s end to end. The per-round critical path is ONE worker
+  at 10-19 minutes of genuine single-threaded computation, which no repacking touches. Even a
+  perfect repack lands at ~23 h, which EXCEEDS the 21 h `drive` timeout.
+  **LESSON: before proposing a concurrency fix, measure what fraction of the ALREADY-PERMITTED
+  concurrency is being used. 15% utilisation of existing limits means the limits are not the
+  constraint.**
+- **`scaledown_window: 20` is a copied house convention, not a tuned choice** -- `git log -S`
+  shows it entered wholesale with the unified app's first commit, and the same value appears
+  in four other T4 apps. Worth knowing before "fixing" it.
+- **Half the panel is serialized and that is the real structural limit:** exactly 30 of 60
+  cells are active, matching `run_cell max_containers=3` per arm. Each arm has 6 cells and 3
+  slots, so the second half queues behind the first. A per-cell rate is therefore NOT a panel
+  rate -- half the cells have no container at all.
+- **The drivers die before the work finishes.** `drive` timeout is 21 h, `run_cell` 20 h, and
+  at the measured 274 calls/h the panel needs ~55 h. Raising either breaks all ten contracts
+  (the app is one of 29 entries in every `runtime_inputs_sha256`, re-hashed INSIDE the
+  container), and a Modal timeout cannot be extended for a call already in flight. The arms
+  are ephemeral/detached -- confirmed because `Function.from_name` returns `NotFoundError`
+  for all 40 (app, function) pairs -- so a redeploy would not touch them anyway.
+- **FREEZE-AND-RESUME IS THE ANSWER, and it needs no code change.** Round locks are durable
+  and immutable, so `charged_before + len(queries)` reconciles any cell exactly. `mode=resume
+  --run-id <id>` continues with the code as-is: same run_ids, same contracts, same
+  authorization, completed cells return instantly without charging. Cost is bounded at <=8
+  forfeited calls per interrupted cell. **Completed vs partial is STRUCTURAL, not a
+  convention:** a finished cell publishes `result.json`, an unfinished one has only
+  checkpoint + locks -- so a partial panel cannot be silently mixed with a complete one.
+  HARD RULE: never resume an arm while its original driver is alive; two `run_cell`
+  containers writing one cell folder is the checkpoint-overwrite race already on this record.
+- **The round-0 preemption window fired on 3 of 60 cells.** `fa7_1_r3`, `fa7_2_r2`,
+  `fa7_2_r3` hold a `round_000_lock.json` with NO checkpoint and are therefore UNRESUMABLE by
+  design -- `_resume_state` raises "an unfinished query lock exists with no recoverable
+  checkpoint". The round-0 checkpoint added in `4a600557` narrowed that window to one docking
+  call wide; it did not close it. Contained by `return_exceptions=True` so siblings are
+  unharmed, but each cell's root call is of uncertain charge status.
+- **The unified lock schema does NOT carry each query's own docked score, only its parent's**,
+  so `t4_all_runs_reconcile.cell_best` returns `best=None` for every cell in this panel.
+  Reconstruct best from `parent_score` instead, and treat both scores and charged counts as
+  LOWER BOUNDS (locks are per round index, so a redone round rewrites its own lock, and a
+  molecule scored in the newest round has not yet become a parent).
