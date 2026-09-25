@@ -4871,3 +4871,40 @@ independently of whether fa7_0 ever closes.**
   5ht1b/fa7/jak2 use 20260919 -- and the replicate arms inherit that split exactly, which is correct
   for a replicate and worth stating rather than discovering. Conformer generation is unseeded in
   every arm regardless, so this is a minor variance term beside the measured ~1.3 kcal/mol.
+
+## 2026-09-24 (resuming a dead agent: the committed reduction lagged the volume by five shards)
+
+- **A brief that says "re-run the missing shard" is a claim about a REDUCTION, not about the
+  work.** The committed gate read `trigger_rows_present: 10` of 15 and the handoff said coverage
+  had reached 14/15 with only fa7_0 outstanding. Both were wrong in the same direction: the
+  VOLUME held all 15 trigger shards and all 20 controls, fa7_0's seed-2 among them at 26,779
+  bytes. The previous agent died between the last shard landing and the reducer running. Re-running
+  fa7_0 would have spent ~86 minutes recomputing a result already on disk, and produced a second
+  shard for a cell that already had one. **Before re-running anything a handoff calls missing, list
+  the durable artifact.** Reduction moved 10/15 -> 15/15 and INCOMPLETE -> PASS with no new
+  compute.
+- **The reducer's `--reduce` flag help contradicts its code** ("reduce the shard directory at
+  --destination") while `main` calls `reduce_shards(args.reduce, args.destination)`. The code is
+  the authority; reading only the help would have pointed the reducer at the output path.
+- **A COLLISION CHECK AGAINST AN EMPTY SET IS VACUOUS AND READS AS A PASS.** Verifying that
+  replicate 2/3 seeds do not collide with replicate 1, a walker looking for keys named
+  `controller_seed`/`seed` found **zero** replicate-1 seeds, and the intersection was duly empty --
+  which is exactly what a correct result looks like. The audit stores them under `replicate_seeds`
+  keyed `"1"/"2"/"3"`. Fixed, the check is non-vacuous (|r1|=12, |r23|=24, intersection empty) and
+  gained a stronger companion: all 60 contract seeds equal the audit's own declarations, 0
+  mismatches. **Report the cardinality of both sides beside any disjointness claim**, or an empty
+  extractor certifies anything.
+- **Run the launch guard as a PREFLIGHT rather than transcribing its checks.** `_local_task()` in
+  `t4_unified_controller_app.py` is the guard -- authorization flags, every `runtime_inputs_sha256`,
+  a clean `git diff` over runtime paths, no untracked runtime inputs -- and it returns the content
+  addressed `run_id`. Importing each wrapper and calling it proved all ten arms launchable, and
+  incidentally proved the ten `run_id`s DISTINCT, which is what rules out a path collision given
+  that d04 and d06 arms for one target share both the volume and the output root and use the SAME
+  cell names (`fa7_0_r2`). The disambiguator is `OUTPUT / run_id / cell`, and run_id is a hash over
+  the contract payload and file hashes. A transcribed check would have confirmed neither.
+- **Authorizing moves the hash being authorized, so the pre-authorization bytes must be
+  RECONSTRUCTIBLE.** `scored_launch_authorized` lives inside the payload. Each arm therefore records
+  the hash it was authorized AS plus a reconstruction rule, and the suite rebuilds those bytes and
+  requires the hash to match. Before the flip the 21 reconstruction tests SKIP as "not authorized
+  yet" and the file reads 22 passed; after it they run, 43 passed / 0 skipped. **A suite whose
+  guards are all skipped is not a green suite** -- read the skip count, again.
