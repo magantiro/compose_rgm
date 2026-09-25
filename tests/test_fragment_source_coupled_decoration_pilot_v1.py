@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from run_fragment_source_coupled_decoration_pilot_v1 import summarize
+from run_fragment_source_coupled_decoration_pilot_v1 import load_contract, summarize
 
 
 def _rows(quality: float, diversity: float) -> list[dict]:
@@ -36,6 +36,14 @@ def _contract() -> dict:
             "all_committed_valid_and_faithful": True,
         },
     }
+
+
+def test_contract_is_self_hashed_and_bound_to_small_comparison() -> None:
+    contract, digest = load_contract()
+    assert digest == "a6ecc715ca9fc70900e18d292ab8160f358649ad0e5cf06b7cd4a210cb0c4716"
+    assert contract["arms"] == ["frozen", "source_coupled"]
+    assert contract["attempts_per_prompt_arm"] == 20
+    assert contract["quality_guided_selection"] is False
 
 
 def test_quality_diversity_gate_requires_both() -> None:
