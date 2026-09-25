@@ -547,3 +547,38 @@ def select_learned_program_novelty4(candidates, scores, rng, prior_emitted):
         selected_already_emitted=selected.smiles in emitted,
     )
     return selected, receipt
+
+
+def select_learned_program_strict_unseen(candidates, scores, rng, prior_emitted):
+    """Sample from unseen supported endpoints if the panel contains any.
+
+    This changes only panel selection. Previously returned endpoints remain
+    available when all supported offers in the current panel were returned
+    earlier, and that forced repeat remains a counted output.
+    """
+    emitted = frozenset(prior_emitted)
+    if any(type(smiles) is not str or not smiles for smiles in emitted):
+        raise ValueError("prior emitted endpoints must be nonempty SMILES strings")
+    if len(candidates) != len(scores):
+        raise ValueError("program/score counts disagree")
+    has_unseen = any(
+        candidate.smiles not in emitted and np.isfinite(score)
+        for candidate, score in zip(candidates, scores, strict=True)
+    )
+    restricted = tuple(
+        score if not has_unseen or candidate.smiles not in emitted else float("-inf")
+        for candidate, score in zip(candidates, scores, strict=True)
+    )
+    selected, receipt = select_learned_program(candidates, restricted, rng)
+    receipt.update(
+        mean_native_log_mark_probability=float(scores[receipt["selected_index"]]),
+        score_semantics=(
+            "mean_log_mark_at_time_zero; finite_panel_softmax_restricted_to_unseen_if_available; "
+            "not_path_probability"
+        ),
+        strict_unseen=True,
+        prior_unique_emissions=len(emitted),
+        forced_repeat_panel=not has_unseen,
+        selected_already_emitted=selected.smiles in emitted,
+    )
+    return selected, receipt

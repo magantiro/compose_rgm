@@ -15,6 +15,7 @@ from compose_v4.benchmark.fragment_program_adapter import (
     sample_boundary_content,
     select_learned_program,
     select_learned_program_novelty4,
+    select_learned_program_strict_unseen,
     validate_native_compound_membership,
 )
 from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
@@ -180,6 +181,59 @@ def test_novelty4_does_not_replace_duplicate_when_no_new_offer_exists():
         select_learned_program_novelty4(
             (first,), (0.0,), np.random.default_rng(0), frozenset(("",))
         )
+
+
+def test_strict_unseen_restricts_only_when_supported_unseen_offer_exists():
+    first = CompleteProgram(source("CCC"), {}, {})
+    second = CompleteProgram(source("CCO"), {}, {})
+
+    class CaptureRng:
+        def choice(self, count, *, p):
+            assert count == 1
+            assert np.allclose(p, (1.0,))
+            return 0
+
+    selected, receipt = select_learned_program_strict_unseen(
+        (first, second), (0.0, -100.0), CaptureRng(), frozenset((first.smiles,))
+    )
+    assert selected is second
+    assert receipt["selected_index"] == 1
+    assert receipt["mean_native_log_mark_probability"] == -100.0
+    assert receipt["forced_repeat_panel"] is False
+    assert receipt["selected_already_emitted"] is False
+
+    selected, receipt = select_learned_program_strict_unseen(
+        (first,), (0.0,), CaptureRng(), frozenset((first.smiles,))
+    )
+    assert selected is first
+    assert receipt["forced_repeat_panel"] is True
+    assert receipt["selected_already_emitted"] is True
+    with pytest.raises(ValueError, match="prior emitted endpoints"):
+        select_learned_program_strict_unseen(
+            (first,), (0.0,), CaptureRng(), frozenset(("",))
+        )
+
+
+def test_strict_unseen_preserves_native_score_ratios_among_unseen_offers():
+    repeated = CompleteProgram(source("CCC"), {}, {})
+    unseen_a = CompleteProgram(source("CCO"), {}, {})
+    unseen_b = CompleteProgram(source("CCN"), {}, {})
+
+    class CaptureRng:
+        def choice(self, count, *, p):
+            assert count == 2
+            assert np.allclose(p, (0.25, 0.75))
+            return 1
+
+    selected, receipt = select_learned_program_strict_unseen(
+        (repeated, unseen_a, unseen_b),
+        (100.0, 0.0, np.log(3.0)),
+        CaptureRng(),
+        frozenset((repeated.smiles,)),
+    )
+    assert selected is unseen_b
+    assert receipt["selected_index"] == 2
+    assert receipt["selected_probability"] == pytest.approx(0.75)
 
 
 @pytest.mark.parametrize("region", ["[1*]c1ccccc1", "[1*]c1ccc2ccccc2c1"])

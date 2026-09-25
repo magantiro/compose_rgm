@@ -30,6 +30,7 @@ from compose_v4.benchmark.fragment_program_adapter import (
     learned_program_scores,
     select_learned_program,
     select_learned_program_novelty4,
+    select_learned_program_strict_unseen,
 )
 from compose_v4.benchmark.joint_completion_prior import JointCompletionPrior
 from compose_v4.benchmark.training_attachment_fragments import atom_context, physical_sha256
@@ -258,6 +259,7 @@ def sample_linker_panel(
     limits: ProposalLimits | None = None,
     cell_allocation: CellAllocation = "frozen",
     prior_emitted: frozenset[str] | None = None,
+    archive_selection: Literal["novelty4", "strict_unseen"] = "novelty4",
 ) -> LinkerPanelResult:
     """Exactly eight draws, exact endpoint deduplication, shared learned softmax.
 
@@ -268,6 +270,10 @@ def sample_linker_panel(
     """
     if cell_allocation not in ("frozen", "sqrt_train_mass"):
         raise ValueError(f"unknown linker cell allocation: {cell_allocation}")
+    if archive_selection not in ("novelty4", "strict_unseen"):
+        raise ValueError(f"unknown linker archive selection: {archive_selection}")
+    if prior_emitted is None and archive_selection == "strict_unseen":
+        raise ValueError("strict-unseen selection requires a prior-emission archive")
     before = copy.deepcopy(rng.bit_generator.state)
     offered, candidates, scores, draw_indices, seen = [], [], [], [], set()
     for draw in range(8):
@@ -309,6 +315,10 @@ def sample_linker_panel(
     if candidates:
         if prior_emitted is None:
             selected, selection = select_learned_program(tuple(candidates), tuple(scores), rng)
+        elif archive_selection == "strict_unseen":
+            selected, selection = select_learned_program_strict_unseen(
+                tuple(candidates), tuple(scores), rng, prior_emitted
+            )
         else:
             selected, selection = select_learned_program_novelty4(
                 tuple(candidates), tuple(scores), rng, prior_emitted

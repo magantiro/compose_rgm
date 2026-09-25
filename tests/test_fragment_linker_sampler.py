@@ -297,6 +297,31 @@ def test_panel_can_use_prior_emissions_without_changing_eight_offer_support(monk
     assert result.receipt["selection"]["prior_unique_emissions"] == 1
 
 
+def test_panel_strict_unseen_dispatch_preserves_offer_count(monkeypatch):
+    monkeypatch.setattr(sampler, "learned_program_scores", lambda _model, _candidates: (0.0,))
+    result = sampler.sample_linker_panel(
+        prompt(),
+        runtime(entry("[1*]CC[2*]")),
+        JointCompletionPrior(((5, 0, 1),)),
+        None,
+        np.random.default_rng(0),
+        prior_emitted=frozenset(("CCCN",)),
+        archive_selection="strict_unseen",
+    )
+    assert result.receipt["offered_count"] == 8
+    assert result.receipt["model_supported_count"] == 1
+    assert result.receipt["selection"]["strict_unseen"] is True
+    with pytest.raises(ValueError, match="requires a prior-emission archive"):
+        sampler.sample_linker_panel(
+            prompt(),
+            runtime(entry("[1*]CC[2*]")),
+            JointCompletionPrior(((5, 0, 1),)),
+            None,
+            np.random.default_rng(0),
+            archive_selection="strict_unseen",
+        )
+
+
 def test_default_linker_panel_is_identical_to_explicit_frozen_selector(monkeypatch):
     monkeypatch.setattr(sampler, "learned_program_scores", lambda _model, _candidates: (0.0,))
     library = runtime(entry("[1*]CC[2*]"))
