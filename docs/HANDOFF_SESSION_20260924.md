@@ -162,7 +162,47 @@ valsartan alone at SEM 0.489; drop it and the SE falls to ~0.30).
 min-max and explicit n. **This column is BEST SCORE, not auc_top10** -- do NOT place 12.185
 beside IVG's 16.676, which is an AUC column.
 
-### 3.2 THE 10k CAMPAIGNS ARE DEAD
+### 3.2 CORRECTED 2026-09-25 -- THE CAMPAIGNS WERE NOT DEAD
+
+**The claim below ("48 of 50 dead") is WRONG and is retained only to show what the error was.**
+
+Measured corrections:
+- **`returncode: 1` is NOT the startup-death signal.** It appears on campaigns that ran to
+  COMPLETION and then hit the fail-closed `pending round needs explicit receipt-based
+  recovery` guard. Only **5** campaigns actually died on the identity mismatch, each
+  charging zero.
+- **46 of the 48 SUCCEEDED**, in a DIFFERENT Modal workspace: **kosha-labs, profile
+  `rahul`**, volume `compose-pmo-fibercontrol-replication` -- 52 dirs, ledger 1008,
+  `returncode 0`, commit `c7fdddca`, no-prescreen, 2 seeds x 23 tasks.
+- Querying those call IDs under `nitya` returns `PermissionDeniedError`, which I read as
+  dead work. **That is verbatim a lesson already in learnings.md** -- a
+  `PermissionDeniedError` means WRONG PROFILE, not dead work -- and I failed to apply it.
+
+**VERIFIED ledger census across all four volumes on both workspaces** (campaigns whose
+oracle ledger holds >= 1000 entries):
+
+    tasks with >=3 usable campaigns : 20/23   (most at n=4, five at n=5)
+    tasks short of n=3              : 3/23    drd2, gsk3b, jnk3 (n=2 each)
+
+So only 3 campaigns were needed, not 20. Launched 2026-09-25 at budget 1000, replicate 80,
+init lock `c8032311daa06762...` identical to every existing seed:
+drd2 `fc-01M3BCR3M0EXWTN8X33DDDJF42`, gsk3b `fc-01M3BCR3RN408P54M2TVA6R7Z8`,
+jnk3 `fc-01M3BCR3VGTYXHVWS8T6QSJ56T`. **3,000 charged calls against a 20,000 ceiling** --
+launching the unreconciled list would have burned ~17,000 reproducing complete work.
+
+ROOT CAUSE of the 5 real deaths, worse than first described: the broken image was built from
+an **uncommitted working tree that no longer exists** AND was internally inconsistent at
+build time -- `src/` baked at one vanished state while the selected contract pinned an
+EARLIER vanished state. Two of the three states are unrecoverable. The fix required ZERO
+contract edits: `.worktrees/pmo-seed-replication-20260924` hardcodes
+`CONTRACT = configs/pmo_population_controller_v1.json`, so the env override is inert.
+
+**METHOD LESSON: the AUC extraction was correct but 19x slower than necessary.** Reading
+1,000 individual `result.json` files per campaign over the network costs ~6 min; one
+`modal volume get` of the whole `oracle/` directory costs **18 s**. Pre-create the
+destination or `volume get` collapses the directory onto one path.
+
+### 3.2b SUPERSEDED original text
 
 **48 of 50 campaigns exited with `returncode: 1`**, all on the identical error:
 
