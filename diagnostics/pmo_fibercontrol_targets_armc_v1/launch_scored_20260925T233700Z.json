@@ -1,0 +1,25 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "scored",
+ "git_commit": "e11cd89d64c03a2183b5ac7c6443c2b4f505290c",
+ "base_seed": 20260923,
+ "budget": 1008,
+ "submitted": [
+  {
+   "task": "gsk3b",
+   "budget": 1008,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20269003,
+   "base_seed": 20260923,
+   "replicate": 80,
+   "label": "scored_rebind_gsk3b_seed20269003_20260925T233700Z",
+   "volume": "pmo-fiber-rebind-gsk3b-seed20269003",
+   "git_commit": "e11cd89d64c03a2183b5ac7c6443c2b4f505290c",
+   "uniform_chain_arm": false,
+   "binding_rebind_arm": true,
+   "arm": "rebind",
+   "modal_call_id": "fc-01M3DEVV4BQXMP9T1FTNN236T6"
+  }
+ ]
+}

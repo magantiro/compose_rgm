@@ -1,0 +1,27 @@
+{
+  "schema_version": "pmo_fibercontrol_launch_v1",
+  "stage": "scored",
+  "git_commit": "e11cd89d64c03a2183b5ac7c6443c2b4f505290c",
+  "base_seed": 20260923,
+  "budget": 1008,
+  "submitted": [
+    {
+      "task": "albuterol_similarity",
+      "budget": 1008,
+      "rounds": 700,
+      "queries": 16,
+      "seed": 20261983,
+      "base_seed": 20260923,
+      "replicate": 60,
+      "label": "scored_rebind_albuterol_similarity_seed20261983_20260925T233700Z",
+      "volume": "pmo-fiber-rebind-albuterol-similarity-seed20261983",
+      "git_commit": "e11cd89d64c03a2183b5ac7c6443c2b4f505290c",
+      "uniform_chain_arm": false,
+      "binding_rebind_arm": true,
+      "arm": "rebind",
+      "modal_call_id": "fc-01M3DEVTN8RWW41WRNZ72W26EZ",
+      "derived_seed": 20261983
+    }
+  ],
+  "RECOVERY_NOTE": "Reconstructed. The launcher names its receipt launch_<stage>_<second-resolution stamp>.json, so this replicate-60 launch and the replicate-80 launch that followed it within the same second wrote the same path and the second overwrote the first. The call id is recovered from launcher stdout; every other field is copied from a sibling receipt of the same invocation. Verify the call id against the volume before treating this as authoritative."
+}

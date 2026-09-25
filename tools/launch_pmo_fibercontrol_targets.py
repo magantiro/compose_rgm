@@ -104,8 +104,21 @@ def main() -> int:
         submitted.append(spec)
         print(f"  {task:28s} seed={seed}  call={handle.object_id}", flush=True)
 
-    receipt = pathlib.Path(arguments.receipt) / f"launch_{arguments.stage}_{stamp}.json"
+    # The stamp is SECOND-resolution, so two launches of the same stage within one second
+    # wrote the same path and the second silently destroyed the first's call ids -- which
+    # happened on the arm-C launch and cost a receipt that had to be reconstructed from
+    # stdout. The name now carries the ARM and the REPLICATE, and an existing path is a
+    # hard error rather than an overwrite: a launch receipt is the only durable record of
+    # which call ids belong to which campaigns.
+    receipt = pathlib.Path(arguments.receipt) / (
+        f"launch_{arguments.stage}_{arm}_r{arguments.replicate}_{stamp}.json"
+    )
     receipt.parent.mkdir(parents=True, exist_ok=True)
+    if receipt.exists():
+        raise SystemExit(
+            f"refusing to overwrite an existing launch receipt: {receipt}\n"
+            f"the campaigns WERE submitted; their call ids are above. Record them by hand."
+        )
     with open(receipt, "w") as handle:
         json.dump(
             {
