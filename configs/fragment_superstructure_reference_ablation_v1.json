@@ -1,0 +1,57 @@
+{
+  "payload": {
+    "schema": "compose_fragment_superstructure_reference_ablation_v1",
+    "status": "user_authorized_local_zero_oracle_transition_reference_comparison",
+    "scientific_role": "Uniform-native-mark comparison against the completed learned superstructure arm on matched prompts, seeds, constraints, evaluator, and attempt accounting",
+    "source_revision": "cc3c8a0f3fe2c9d273c80d5020dffa4ed10fbc7c",
+    "law_definition": "docs/FRAGMENT_SUPERSTRUCTURE_REFERENCE_ABLATION_LAW_2026-09-25.md",
+    "mark_law": "uniform_native",
+    "learned_arm_contract_payload_sha256": "77c994c8364d088c6e5bf1fe688794cac5869c7e4abf98c92a87d08e1b1c751e",
+    "learned_arm_result_path": "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-interface-ablation-20260923/diagnostics/fragment_superstructure_official_v2/result.json",
+    "learned_arm_result_sha256": "8406f57dc5ff6736110593d309f207d7a5d0e878eeb1b7a2f2c423fe2d9b3652",
+    "prompt_manifest": "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv",
+    "checkpoint": {
+      "path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+      "sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4"
+    },
+    "official_evaluator_sha256": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+    "python_executable": "/Users/rmaganti/compose_fragment_pinned_env/bin/python",
+    "material_sha256": {
+      "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+      "docs/FRAGMENT_SUPERSTRUCTURE_REFERENCE_ABLATION_LAW_2026-09-25.md": "fabde2cf1843c6ed8a8b1a4069fd923fa3901f26b0bda5978d763f784b3571e9",
+      "src/compose_v4/benchmark/fragment_attachment_control.py": "cc4a9600e3c7873af2c1c28193cba836522dde5e79dc9ab06fbf0fc350462318",
+      "src/compose_v4/benchmark/fragment_conditioned_sampler.py": "1813d5c606f75e957d4e327fb2e201f97ecfeafda398d8ab53ff1905e473c2aa",
+      "src/compose_v4/benchmark/fragment_constrained.py": "cd9113a6afd22e833de462a0ad7d816ed170e8bde0d9d5577d7cae98caf0ddc6",
+      "src/compose_v4/benchmark/fragment_official_metrics.py": "9406ddffad9e05d67bc7b6333d4b51eef534f2f4b11a2cedc237e80698389459",
+      "src/compose_v4/benchmark/uniform_native_mark_law.py": "c14c1cd000292bbfc64867dcf06faff850bcfdb53437591f4d202163cd974ead",
+      "src/compose_v4/chem/molecular_graph.py": "f25e20f52bd56f90299d93e934038f9caf4768b557b68a3d5781ca925efc16a2",
+      "src/compose_v4/chem/state.py": "4aa1acc257b053a562969ad8cc9b62fd84ce2931b04f1890f1c242888a3cecf5",
+      "src/compose_v4/model/factorized_tracelet_rate_model.py": "9e802713df89be8f7c12dc8caa20157732a28b7d014bfce2498ba2980161a6fc",
+      "src/compose_v4/rewrite/kernel.py": "afdda7d41ee3f437aa1a72e90341dc81f0f776c6e1cb6799f1ad9ff75d5c3e99",
+      "tools/run_fragment_constrained_suite.py": "a61f3dfaf812c7020ab827e107d0dad8c945abc2e821f74fab824b4e835c3d4e",
+      "tools/run_fragment_superstructure_official_v2.py": "415584200159d97487ece723d3c56f026dab4309de3e3eb4cbaca26bcaa0d14c",
+      "tools/run_fragment_superstructure_reference_ablation.py": "d535dc9f9df8898625810aab5da532807e65c3762d4e13f87a5b839f8000536c"
+    },
+    "sampler_config": {
+      "mark_attempts_per_event": 24,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "attachment_control": {
+      "enabled": true,
+      "condition_initial_locked_family": true,
+      "hard_lock_effective_chemistry": true
+    },
+    "task": "superstructure_generation",
+    "prompt_count": 10,
+    "attempts_per_prompt": 100,
+    "seeds": [0, 1, 2],
+    "max_workers": 2,
+    "minimum_free_bytes": 5368709120,
+    "output_dir": "diagnostics/fragment_superstructure_reference_ablation_v1",
+    "headline_population": "all chemically committed endpoints plus no-output placeholders; no prompt-fidelity censoring",
+    "failure_policy": "No replacement or retry of failed attempts or shards; resume only missing shards under identical material hashes"
+  },
+  "payload_sha256": "e5ca9f7e95974d87ca019e385619397aede74e2d36c429bc111fe4507db08df7"
+}

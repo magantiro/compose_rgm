@@ -17,6 +17,7 @@ from run_fragment_superstructure_official_v2 import (
     preflight,
     read_shard,
     reduce_shards,
+    sha256,
     shard_path,
 )
 
@@ -98,6 +99,17 @@ def main() -> None:
     contract, contract_hash = load_contract(args.contract)
     if args.workers < 1 or args.workers > contract["max_workers"]:
         raise ValueError("worker count outside frozen contract")
+    learned_path = Path(contract["learned_arm_result_path"])
+    if not learned_path.is_file() or sha256(learned_path) != contract["learned_arm_result_sha256"]:
+        raise RuntimeError("completed learned superstructure arm is missing or changed")
+    learned = json.loads(learned_path.read_text())
+    if (
+        learned.get("contract_payload_sha256") != contract["learned_arm_contract_payload_sha256"]
+        or learned.get("attempts") != 3000
+        or learned.get("committed") != 3000
+        or learned.get("prompt_compliant") != 3000
+    ):
+        raise RuntimeError("learned arm is not the completed matched 3,000-attempt result")
     drugs = preflight(contract)
     output_dir = ROOT / contract["output_dir"]
     output_dir.mkdir(parents=True, exist_ok=True)
