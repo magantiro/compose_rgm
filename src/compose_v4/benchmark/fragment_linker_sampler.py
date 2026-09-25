@@ -13,7 +13,7 @@ import json
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 from rdkit import Chem
@@ -51,6 +51,25 @@ class LinkerProposalAbstention(ValueError):
     def __init__(self, reason: str, receipt: dict[str, Any]):
         super().__init__(reason)
         self.receipt = receipt
+
+
+CellAllocation = Literal["frozen", "sqrt_train_mass"]
+
+
+def linker_cell_probabilities(
+    prior: JointCompletionPrior,
+    cells: tuple[tuple[int, int], ...],
+    *,
+    allocation: CellAllocation = "frozen",
+) -> np.ndarray:
+    """Temper training-cell mass without changing its reachable support."""
+    probabilities = prior.cell_probabilities(cells)
+    if allocation == "frozen":
+        return probabilities
+    if allocation != "sqrt_train_mass":
+        raise ValueError(f"unknown linker cell allocation: {allocation}")
+    weights = np.sqrt(probabilities)
+    return weights / weights.sum()
 
 
 def prepare_linker_catalog(catalog: dict, *, catalog_sha256: str) -> LinkerCatalog:
@@ -149,13 +168,16 @@ def propose_linker_completion(
     rng: np.random.Generator,
     *,
     limits: ProposalLimits | None = None,
+    cell_allocation: CellAllocation = "frozen",
 ) -> CompleteProgram:
     """Draw a joint structural cell, observed connector and relative orientation."""
+    if cell_allocation not in ("frozen", "sqrt_train_mass"):
+        raise ValueError(f"unknown linker cell allocation: {cell_allocation}")
     grouped, receipt = compatible_linker_cells(prompt, catalog, limits=limits)
     if not grouped:
         raise LinkerProposalAbstention("no context/atom-capacity compatible connector", receipt)
     cells = tuple(grouped)
-    probabilities = prior.cell_probabilities(cells)
+    probabilities = linker_cell_probabilities(prior, cells, allocation=cell_allocation)
     cell_index = int(rng.choice(len(cells), p=probabilities))
     cell = cells[cell_index]
     entries = grouped[cell]
@@ -195,7 +217,12 @@ def propose_linker_completion(
         source_rows=entry["source_rows"],
         training_occurrences=entry["occurrences"],
         source_stereo_annotations=entry.get("source_stereo_annotations", 0),
-        sampling_law="joint_cell_then_sqrt_occurrence_then_uniform_compatible_orientation",
+        cell_allocation=cell_allocation,
+        sampling_law=(
+            "joint_cell_then_sqrt_occurrence_then_uniform_compatible_orientation"
+            if cell_allocation == "frozen"
+            else "sqrt_joint_cell_then_sqrt_occurrence_then_uniform_compatible_orientation"
+        ),
     )
     try:
         candidate = assemble_linker_program(prompt, rooted, limits=limits)
@@ -228,6 +255,7 @@ def sample_linker_panel(
     rng: np.random.Generator,
     *,
     limits: ProposalLimits | None = None,
+    cell_allocation: CellAllocation = "frozen",
 ) -> LinkerPanelResult:
     """Exactly eight draws, exact endpoint deduplication, shared learned softmax.
 
@@ -236,12 +264,16 @@ def sample_linker_panel(
     or an unlearned fallback. Callers must hash-bind the catalog, prior artifact,
     checkpoint and code before any diagnostic or evaluation launch.
     """
+    if cell_allocation not in ("frozen", "sqrt_train_mass"):
+        raise ValueError(f"unknown linker cell allocation: {cell_allocation}")
     before = copy.deepcopy(rng.bit_generator.state)
     offered, candidates, scores, draw_indices, seen = [], [], [], [], set()
     for draw in range(8):
         record = {"draw": draw}
         try:
-            candidate = propose_linker_completion(prompt, catalog, prior, rng, limits=limits)
+            candidate = propose_linker_completion(
+                prompt, catalog, prior, rng, limits=limits, cell_allocation=cell_allocation
+            )
         except ValueError as error:
             record.update(status="compiler_or_constraint_abstention", reason=str(error))
             if isinstance(error, LinkerProposalAbstention):

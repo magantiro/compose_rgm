@@ -87,6 +87,49 @@ def test_cell_mass_is_independent_of_content_multiplicity_and_occurrence():
     assert decode_state(candidate.trace["states"][0]).n_real_atoms == 2
 
 
+def test_sqrt_cell_allocation_broadens_training_mass_without_dropping_support():
+    prior = JointCompletionPrior(((5, 0, 16), (6, 0, 1)))
+    cells = ((5, 0), (6, 0))
+    frozen = sampler.linker_cell_probabilities(prior, cells)
+    broadened = sampler.linker_cell_probabilities(prior, cells, allocation="sqrt_train_mass")
+    assert np.allclose(broadened, np.sqrt(frozen) / np.sqrt(frozen).sum())
+    assert np.isclose(broadened.sum(), 1.0)
+    assert np.all(broadened > 0)
+    assert broadened[1] > frozen[1]
+    with pytest.raises(ValueError, match="unknown linker cell allocation"):
+        sampler.linker_cell_probabilities(prior, cells, allocation="invalid")
+
+
+def test_broadened_cell_law_keeps_exact_linker_execution():
+    library = runtime(entry("[1*]CC[2*]"), entry("[1*]CCC[2*]"))
+    prior = JointCompletionPrior(((5, 0, 16), (6, 0, 1)))
+    frozen = sampler.propose_linker_completion(prompt(), library, prior, np.random.default_rng(7))
+    explicit_frozen = sampler.propose_linker_completion(
+        prompt(), library, prior, np.random.default_rng(7), cell_allocation="frozen"
+    )
+    assert frozen.trace == explicit_frozen.trace
+    broadened = sampler.propose_linker_completion(
+        prompt(), library, prior, np.random.default_rng(7), cell_allocation="sqrt_train_mass"
+    )
+    assert broadened.provenance["fidelity"]["satisfied"]
+    assert broadened.provenance["training_connector"]["cell_allocation"] == "sqrt_train_mass"
+
+
+def test_unknown_cell_law_fails_before_consuming_panel_draws():
+    rng = np.random.default_rng(4)
+    before = deepcopy(rng.bit_generator.state)
+    with pytest.raises(ValueError, match="unknown linker cell allocation"):
+        sampler.sample_linker_panel(
+            prompt(),
+            runtime(),
+            JointCompletionPrior(((5, 0, 1),)),
+            None,
+            rng,
+            cell_allocation="invalid",
+        )
+    assert rng.bit_generator.state == before
+
+
 def test_reversed_context_binding_retains_exact_role_provenance():
     library = runtime(entry("[1*]CO[2*]", contexts=("N:0:0", "C:0:0")))
     candidate = sampler.propose_linker_completion(
