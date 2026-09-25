@@ -322,6 +322,41 @@ def test_panel_strict_unseen_dispatch_preserves_offer_count(monkeypatch):
         )
 
 
+def test_panel_quality_priority_uses_explicit_scorer_and_marks_guidance(monkeypatch):
+    monkeypatch.setattr(sampler, "learned_program_scores", lambda _model, _candidates: (0.0,))
+    calls = []
+
+    def score(smiles):
+        calls.append(smiles)
+        return 2.0, 0.8
+
+    result = sampler.sample_linker_panel(
+        prompt(),
+        runtime(entry("[1*]CC[2*]")),
+        JointCompletionPrior(((5, 0, 1),)),
+        None,
+        np.random.default_rng(0),
+        prior_emitted=frozenset(),
+        archive_selection="quality_priority",
+        quality_scorer=score,
+    )
+    assert result.receipt["offered_count"] == 8
+    assert result.receipt["model_supported_count"] == 1
+    assert result.receipt["qed_sa_guidance"] is True
+    assert result.receipt["selection"]["quality_tier"] == "unseen_quality"
+    assert len(calls) == 1
+    with pytest.raises(ValueError, match="requires a property scorer"):
+        sampler.sample_linker_panel(
+            prompt(),
+            runtime(entry("[1*]CC[2*]")),
+            JointCompletionPrior(((5, 0, 1),)),
+            None,
+            np.random.default_rng(0),
+            prior_emitted=frozenset(),
+            archive_selection="quality_priority",
+        )
+
+
 def test_default_linker_panel_is_identical_to_explicit_frozen_selector(monkeypatch):
     monkeypatch.setattr(sampler, "learned_program_scores", lambda _model, _candidates: (0.0,))
     library = runtime(entry("[1*]CC[2*]"))

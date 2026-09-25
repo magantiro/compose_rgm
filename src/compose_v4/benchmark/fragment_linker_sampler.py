@@ -30,6 +30,7 @@ from compose_v4.benchmark.fragment_program_adapter import (
     learned_program_scores,
     select_learned_program,
     select_learned_program_novelty4,
+    select_learned_program_quality_priority,
     select_learned_program_strict_unseen,
 )
 from compose_v4.benchmark.joint_completion_prior import JointCompletionPrior
@@ -259,7 +260,8 @@ def sample_linker_panel(
     limits: ProposalLimits | None = None,
     cell_allocation: CellAllocation = "frozen",
     prior_emitted: frozenset[str] | None = None,
-    archive_selection: Literal["novelty4", "strict_unseen"] = "novelty4",
+    archive_selection: Literal["novelty4", "strict_unseen", "quality_priority"] = "novelty4",
+    quality_scorer=None,
 ) -> LinkerPanelResult:
     """Exactly eight draws, exact endpoint deduplication, shared learned softmax.
 
@@ -270,10 +272,12 @@ def sample_linker_panel(
     """
     if cell_allocation not in ("frozen", "sqrt_train_mass"):
         raise ValueError(f"unknown linker cell allocation: {cell_allocation}")
-    if archive_selection not in ("novelty4", "strict_unseen"):
+    if archive_selection not in ("novelty4", "strict_unseen", "quality_priority"):
         raise ValueError(f"unknown linker archive selection: {archive_selection}")
-    if prior_emitted is None and archive_selection == "strict_unseen":
-        raise ValueError("strict-unseen selection requires a prior-emission archive")
+    if prior_emitted is None and archive_selection in ("strict_unseen", "quality_priority"):
+        raise ValueError(f"{archive_selection} selection requires a prior-emission archive")
+    if archive_selection == "quality_priority" and quality_scorer is None:
+        raise ValueError("quality-priority selection requires a property scorer")
     before = copy.deepcopy(rng.bit_generator.state)
     offered, candidates, scores, draw_indices, seen = [], [], [], [], set()
     for draw in range(8):
@@ -319,6 +323,10 @@ def sample_linker_panel(
             selected, selection = select_learned_program_strict_unseen(
                 tuple(candidates), tuple(scores), rng, prior_emitted
             )
+        elif archive_selection == "quality_priority":
+            selected, selection = select_learned_program_quality_priority(
+                tuple(candidates), tuple(scores), rng, prior_emitted, quality_scorer
+            )
         else:
             selected, selection = select_learned_program_novelty4(
                 tuple(candidates), tuple(scores), rng, prior_emitted
@@ -338,7 +346,7 @@ def sample_linker_panel(
             "exact_compiled_count": sum("trace" in row for row in offered),
             "unique_compiled_endpoints": len(seen),
             "model_supported_count": len(candidates),
-            "qed_sa_guidance": False,
+            "qed_sa_guidance": archive_selection == "quality_priority",
             "reference_used_for_proposal": False,
             "beam_search": False,
         },

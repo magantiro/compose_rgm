@@ -15,6 +15,7 @@ from compose_v4.benchmark.fragment_program_adapter import (
     sample_boundary_content,
     select_learned_program,
     select_learned_program_novelty4,
+    select_learned_program_quality_priority,
     select_learned_program_strict_unseen,
     validate_native_compound_membership,
 )
@@ -234,6 +235,75 @@ def test_strict_unseen_preserves_native_score_ratios_among_unseen_offers():
     assert selected is unseen_b
     assert receipt["selected_index"] == 2
     assert receipt["selected_probability"] == pytest.approx(0.75)
+
+
+def test_quality_priority_selects_unseen_qualified_endpoint_before_native_favorite():
+    repeated = CompleteProgram(source("CCC"), {}, {})
+    failed = CompleteProgram(source("CCO"), {}, {})
+    qualified = CompleteProgram(source("CCN"), {}, {})
+
+    class CaptureRng:
+        def choice(self, count, *, p):
+            assert count == 1
+            assert np.allclose(p, (1.0,))
+            return 0
+
+    properties = {
+        repeated.smiles: (2.0, 0.9),
+        failed.smiles: (2.0, 0.5),
+        qualified.smiles: (4.0, 0.6),
+    }
+    selected, receipt = select_learned_program_quality_priority(
+        (repeated, failed, qualified),
+        (100.0, 90.0, -5.0),
+        CaptureRng(),
+        frozenset((repeated.smiles,)),
+        properties.__getitem__,
+    )
+    assert selected is qualified
+    assert receipt["quality_tier"] == "unseen_quality"
+    assert receipt["selected_qed"] == 0.6
+    assert receipt["selected_sa"] == 4.0
+    assert receipt["mean_native_log_mark_probability"] == -5.0
+    assert receipt["property_evaluated_candidates"] == 3
+
+
+def test_quality_priority_keeps_native_ratios_within_selected_tier():
+    first = CompleteProgram(source("CCC"), {}, {})
+    second = CompleteProgram(source("CCO"), {}, {})
+    failed = CompleteProgram(source("CCN"), {}, {})
+
+    class CaptureRng:
+        def choice(self, count, *, p):
+            assert count == 2
+            assert np.allclose(p, (0.25, 0.75))
+            return 1
+
+    selected, receipt = select_learned_program_quality_priority(
+        (first, second, failed),
+        (0.0, np.log(3.0), 100.0),
+        CaptureRng(),
+        frozenset(),
+        lambda smiles: (2.0, 0.8) if smiles != failed.smiles else (5.0, 0.4),
+    )
+    assert selected is second
+    assert receipt["selected_probability"] == pytest.approx(0.75)
+    assert receipt["quality_tier"] == "unseen_quality"
+
+
+def test_quality_priority_falls_back_to_counted_repeat_and_fails_on_missing_scorer():
+    first = CompleteProgram(source("CCC"), {}, {})
+    selected, receipt = select_learned_program_quality_priority(
+        (first,), (0.0,), np.random.default_rng(0), frozenset((first.smiles,)),
+        lambda _smiles: (5.0, 0.2),
+    )
+    assert selected is first
+    assert receipt["quality_tier"] == "forced_repeat"
+    assert receipt["selected_already_emitted"] is True
+    with pytest.raises(ValueError, match="requires a property scorer"):
+        select_learned_program_quality_priority(
+            (first,), (0.0,), np.random.default_rng(0), frozenset(), None
+        )
 
 
 @pytest.mark.parametrize("region", ["[1*]c1ccccc1", "[1*]c1ccc2ccccc2c1"])

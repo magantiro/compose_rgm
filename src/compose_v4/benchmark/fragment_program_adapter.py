@@ -582,3 +582,65 @@ def select_learned_program_strict_unseen(candidates, scores, rng, prior_emitted)
         selected_already_emitted=selected.smiles in emitted,
     )
     return selected, receipt
+
+
+def select_learned_program_quality_priority(
+    candidates, scores, rng, prior_emitted, quality_scorer
+):
+    """Prioritize unseen QED/SA-qualified endpoints within a fixed supported panel.
+
+    The caller supplies the pinned property scorer. This is explicit in-loop
+    property guidance, separate from reference-only panel selection.
+    """
+    emitted = frozenset(prior_emitted)
+    if any(type(smiles) is not str or not smiles for smiles in emitted):
+        raise ValueError("prior emitted endpoints must be nonempty SMILES strings")
+    if len(candidates) != len(scores):
+        raise ValueError("program/score counts disagree")
+    if quality_scorer is None:
+        raise ValueError("quality-guided selection requires a property scorer")
+    if len({candidate.smiles for candidate in candidates}) != len(candidates):
+        raise ValueError("quality-guided panel must contain distinct canonical endpoints")
+    supported = tuple(index for index, score in enumerate(scores) if np.isfinite(score))
+    if not supported:
+        raise ValueError("no model-supported complete program")
+    properties = {}
+    for index in supported:
+        smiles = candidates[index].smiles
+        sa, qed = quality_scorer(smiles)
+        if not np.isfinite(sa) or not np.isfinite(qed):
+            raise ValueError(f"nonfinite linker property value for {smiles}")
+        properties[index] = (float(sa), float(qed))
+    unseen = tuple(index for index in supported if candidates[index].smiles not in emitted)
+    unseen_quality = tuple(
+        index
+        for index in unseen
+        if properties[index][0] <= 4.0 and properties[index][1] >= 0.6
+    )
+    if unseen_quality:
+        eligible, tier = unseen_quality, "unseen_quality"
+    elif unseen:
+        eligible, tier = unseen, "unseen_other"
+    else:
+        eligible, tier = supported, "forced_repeat"
+    eligible_set = frozenset(eligible)
+    restricted = tuple(
+        score if index in eligible_set else float("-inf") for index, score in enumerate(scores)
+    )
+    selected, receipt = select_learned_program(candidates, restricted, rng)
+    chosen = receipt["selected_index"]
+    receipt.update(
+        mean_native_log_mark_probability=float(scores[chosen]),
+        score_semantics=(
+            "mean_log_mark_at_time_zero; finite_panel_softmax_within_quality_priority_tier; "
+            "not_path_probability"
+        ),
+        quality_guided=True,
+        quality_tier=tier,
+        property_evaluated_candidates=len(properties),
+        selected_sa=properties[chosen][0],
+        selected_qed=properties[chosen][1],
+        prior_unique_emissions=len(emitted),
+        selected_already_emitted=selected.smiles in emitted,
+    )
+    return selected, receipt
