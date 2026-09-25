@@ -46,6 +46,13 @@ than the margins the verdict turns on. Report mean WITH n_success on both sides;
 only as a labelled secondary column; never best-to-best, never across different N.
 `mean_of_successful` conditions on success and GenMol's delta=0.6 success rate is 54.2%.
 
+**AND: GenMol has FOUR d0.6 cells at n_success = 0** -- fa7_2, 5ht1b_2, braf_0, jak2_2.
+Three are COMPOSE's own historically exhausted cells. `mean_of_successful` is UNDEFINED
+there, so those rows are "COMPOSE produced a molecule, GenMol produced none", NOT a score
+comparison. Say that explicitly or it reads as a win margin.
+The reporting statistic is sealed BEFORE any replicate-2 number exists at
+`diagnostics/t4_replicate_launch_authorization/reporting_contract_v1.json`.
+
 ### 2.3 Why GenMol fails where it fails (mechanism, not variance)
 
 GenMol seeds its fragment population ONLY from the start molecule and grows it solely from
@@ -58,7 +65,36 @@ not a law. `5ht1b id2` is the second mechanism: start QED fine (0.716), start **
 above the ceiling, so it must repair SA by 0.69 while holding similarity -- independently
 reproducing our own 5ht1b_2 diagnosis from a different codebase.
 
-### 2.4 Replicates 2 and 3 (launching)
+### 2.4 Replicates 2 and 3 — LAUNCHED 2026-09-24
+
+All ten arms are live and charging. Staggered 1/4/5; wave 1 was fa7_d06 ALONE with its root
+docking confirmed end-to-end before the other nine, because a prior session lost four root
+dockings to four sequential launch defects on virgin code. All ten root dockings confirmed
+FROM THE VOLUME ARTIFACT, never from `FunctionCall.get`. Branch HEAD `4a600557`, pushed.
+
+    arm        function_call_id                  | arm        function_call_id
+    fa7_d06    fc-01M3B8KYRAVVC1D6R1Q9X5RX35     | fa7_d04    fc-01M3B8W1WPZB14Q0TM3R7Q0CB4
+    braf_d06   fc-01M3B8PCS3MR579TGPBTX7P242     | braf_d04   fc-01M3B8X4JTMZ6G0M3V39HTMPHP
+    5ht1b_d06  fc-01M3B8QDN5VZXSD7M9B0DMTGXG     | 5ht1b_d04  fc-01M3B8Y4PXFH0RBRRFPJR3Y55A
+    jak2_d06   fc-01M3B8RJBGYD29RACPZ6SQX66D     | jak2_d04   fc-01M3B8ZDRA63BN9D1BFC8F2G6V
+    parp1_d06  fc-01M3B8SQ5Z5VQTS5N79KM97BG1     | parp1_d04  fc-01M3B90FBHCMMAGJKDVFRJR307
+
+Status at launch: 3 of 6 cells started per arm (`run_cell` caps at `max_containers=3`),
+**62 / 15,000 charged (0.4%)**, 0 cells finished, 103 live tasks across 15 apps. 20h per-cell
+timeout; hours from done. **Report NO score from checkpoints** -- reconcile from round locks
+with `scripts/t4_all_runs_reconcile.py`, which already handles the r23 layout.
+
+CORRECTION to an earlier brief: the blocker was NOT "fa7_0's shard missing". The committed
+gate read `trigger_rows_present: 10`, and all 15 trigger shards plus all 20 controls were
+ALREADY on the volume -- the previous agent died between the last shard landing and the
+reducer running. Only the reduction was missing. Re-running fa7_0 would have burned ~86
+minutes recomputing an existing result.
+
+GOTCHA, sealed: pre-authorization the replicate test suite read 22 passed / 21 SKIPPED,
+every skip "not authorized yet"; post-flip it is 43 passed / 0 skipped. The reconstruction
+guards only activate AFTER authorization, so the pre-flip green was not coverage.
+
+### 2.4b Original launch plan (superseded by 2.4)
 
 Worktree `.worktrees/t4-matched-panel-20260924`, branch pushed. Gate **PASS** (15/15
 triggers, 20/20 controls). Ten arms authorized, 6 cells each, 1,500 ceiling each = **15,000**.
