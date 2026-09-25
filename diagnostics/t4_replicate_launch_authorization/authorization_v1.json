@@ -1,0 +1,107 @@
+{
+  "authorized_arms": {
+    "5ht1b_d04": {
+      "authorized_payload_sha256": "195f85143563faeb2e310846bd5b3280007f210b41cf6a3bce1dfb4149035223",
+      "cells": 6,
+      "contract": "configs/t4_unified_controller_5ht1b_d04_r23_v1.json",
+      "delta": 0.4,
+      "total_charged_call_ceiling": 1500
+    },
+    "5ht1b_d06": {
+      "authorized_payload_sha256": "15a615eba5afa58771c4be8933ce3641c8cc7b5f02495540cf1ece3768d597e8",
+      "cells": 6,
+      "contract": "configs/t4_unified_controller_5ht1b_d06_r23_v1.json",
+      "delta": 0.6,
+      "total_charged_call_ceiling": 1500
+    },
+    "braf_d04": {
+      "authorized_payload_sha256": "fea9feb112b37e8fcbc2571821ff7fa57c08c2275a821f04166401cfbbbc856e",
+      "cells": 6,
+      "contract": "configs/t4_unified_controller_braf_d04_r23_v1.json",
+      "delta": 0.4,
+      "total_charged_call_ceiling": 1500
+    },
+    "braf_d06": {
+      "authorized_payload_sha256": "770f40b213ec12af1e2dcbecaf82ee8863cc7693fd56a7f5790890b7550cf4b0",
+      "cells": 6,
+      "contract": "configs/t4_unified_controller_braf_d06_r23_v1.json",
+      "delta": 0.6,
+      "total_charged_call_ceiling": 1500
+    },
+    "fa7_d04": {
+      "authorized_payload_sha256": "a933ff36b85e3ccccd786f191eaec795ea453ffe86a84833aacbdb4931171fce",
+      "cells": 6,
+      "contract": "configs/t4_unified_controller_fa7_d04_r23_v1.json",
+      "delta": 0.4,
+      "total_charged_call_ceiling": 1500
+    },
+    "fa7_d06": {
+      "authorized_payload_sha256": "9d6e8a4e118064b3c5a77d081203860220286725620fcefd707f8b893e0b7b4e",
+      "cells": 6,
+      "contract": "configs/t4_unified_controller_fa7_d06_r23_v1.json",
+      "delta": 0.6,
+      "total_charged_call_ceiling": 1500
+    },
+    "jak2_d04": {
+      "authorized_payload_sha256": "03f74ccaa87001c8b6a7703b1628c4885b519c480b81f1caddb3f1d4bce49ac5",
+      "cells": 6,
+      "contract": "configs/t4_unified_controller_jak2_d04_r23_v1.json",
+      "delta": 0.4,
+      "total_charged_call_ceiling": 1500
+    },
+    "jak2_d06": {
+      "authorized_payload_sha256": "a526384405a4add3d9c62333305d7c200147f90edb794ce35d240731d0037f5b",
+      "cells": 6,
+      "contract": "configs/t4_unified_controller_jak2_d06_r23_v1.json",
+      "delta": 0.6,
+      "total_charged_call_ceiling": 1500
+    },
+    "parp1_d04": {
+      "authorized_payload_sha256": "76225d63841d0454e1d036d1982f3c8335bc1ca9910b95dd4609e44aecaf3f32",
+      "cells": 6,
+      "contract": "configs/t4_unified_controller_parp1_d04_r23_v1.json",
+      "delta": 0.4,
+      "total_charged_call_ceiling": 1500
+    },
+    "parp1_d06": {
+      "authorized_payload_sha256": "9210ba343f47f869571aa2de7b4cd842476e77d56a0f214791b7e2bf03adfa96",
+      "cells": 6,
+      "contract": "configs/t4_unified_controller_parp1_d06_r23_v1.json",
+      "delta": 0.6,
+      "total_charged_call_ceiling": 1500
+    }
+  },
+  "authorized_at_utc": "2026-09-25T03:06:05.220762+00:00",
+  "budget": {
+    "arms": 10,
+    "cells": 60,
+    "charged_calls_per_cell": 250,
+    "total_charged_call_ceiling": 15000
+  },
+  "coverage_confirmed_to_the_owner": {
+    "answer": true,
+    "measured": {
+      "canonical_cells_covered": "15/15",
+      "deltas": [
+        0.4,
+        0.6
+      ],
+      "every_smiles_matches_the_verified_inventory": true,
+      "groups_colliding_with_replicate_1": 0,
+      "groups_with_two_distinct_seeds": 30,
+      "molecule_x_delta_groups": 30,
+      "new_replicates_per_group": 2,
+      "runs": 60,
+      "starting_molecules_per_target": 3,
+      "targets": 5
+    },
+    "question": "is ten arms the whole suite?"
+  },
+  "provenance": {
+    "not": "a direct owner signature on this artifact",
+    "owner_words": "yeah i approve but i want the whole suite right please and thank u",
+    "reached_this_agent": "RELAYED by the coordinating agent, which quoted the owner and named the ten payload hashes",
+    "verification_before_flip": "all ten payload hashes re-verified against the sealed files, self-hash included"
+  },
+  "schema_version": "t4_replicate_launch_authorization_v1"
+}

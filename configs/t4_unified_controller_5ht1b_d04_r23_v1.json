@@ -1,5 +1,12 @@
 {
   "payload": {
+    "authorization": {
+      "authorized_at_utc": "2026-09-25T03:06:05.220762+00:00",
+      "authorized_payload_sha256": "195f85143563faeb2e310846bd5b3280007f210b41cf6a3bce1dfb4149035223",
+      "provenance": "relayed owner authorization; see the receipt",
+      "receipt": "diagnostics/t4_replicate_launch_authorization/authorization_v1.json",
+      "reconstruction_rule": "delete `authorization`, set scored_launch_authorized and modal_launch_authorized to false, and set status to 'FROZEN_PENDING_OWNER_LAUNCH_AUTHORIZATION'; the result must hash to `authorized_payload_sha256`"
+    },
     "batch": 8,
     "cells": [
       {
@@ -128,7 +135,7 @@
       "source_contract_payload_sha256": "6959ae96cc0387f8116c6fa4fe9b531eb726959d33a17df6d8fbc51f1bb0e306"
     },
     "launch_authority": "The five-protein unified panel is an owner decision, not an agent one. `t4_unified_controller_app._local_task` refuses to spawn while either `scored_launch_authorized` or `modal_launch_authorized` is false, so the refusal is executable rather than a status string.",
-    "modal_launch_authorized": false,
+    "modal_launch_authorized": true,
     "panel_uniformity": {
       "checked_controller_parameters": [
         "batch",
@@ -344,12 +351,12 @@
     },
     "schema_version": "t4_unified_controller_replicate_contract_v1",
     "scientific_problem": "test transfer of a route-trained structural-action prior to 5ht1b with every 5ht1b route excluded from fitting",
-    "scored_launch_authorized": false,
+    "scored_launch_authorized": true,
     "state_routing": {
       "policy": "t4_unified_routing_v1",
       "policy_sha256": "b69cadcba1824ffcf1a45f8f7f894bec284bf09deea406a4e1da271d52bd609a"
     },
-    "status": "FROZEN_PENDING_OWNER_LAUNCH_AUTHORIZATION",
+    "status": "AUTHORIZED_FOR_SCORED_LAUNCH",
     "support": "compose_valid",
     "support_expansion": {
       "policy": "t4_frozen_escalation_v1",
@@ -380,5 +387,5 @@
       "sha256": "d4047c8556133db262d630c60feac88f1c743418c069448c2acebd9155896eb8"
     }
   },
-  "payload_sha256": "195f85143563faeb2e310846bd5b3280007f210b41cf6a3bce1dfb4149035223"
+  "payload_sha256": "15c2845261f6faab7df188931295c3d4f0decc5fcf742f8e90cb929378372d11"
 }

@@ -1,5 +1,12 @@
 {
   "payload": {
+    "authorization": {
+      "authorized_at_utc": "2026-09-25T03:06:05.220762+00:00",
+      "authorized_payload_sha256": "76225d63841d0454e1d036d1982f3c8335bc1ca9910b95dd4609e44aecaf3f32",
+      "provenance": "relayed owner authorization; see the receipt",
+      "receipt": "diagnostics/t4_replicate_launch_authorization/authorization_v1.json",
+      "reconstruction_rule": "delete `authorization`, set scored_launch_authorized and modal_launch_authorized to false, and set status to 'FROZEN_PENDING_OWNER_LAUNCH_AUTHORIZATION'; the result must hash to `authorized_payload_sha256`"
+    },
     "batch": 8,
     "cells": [
       {
@@ -140,7 +147,7 @@
       "source_contract_payload_sha256": "bd68d29c335bc443c87f661480c465236f4f8464bab5005a0e5345f15e2f0b3f"
     },
     "launch_authority": "The five-protein unified panel is an owner decision, not an agent one. `t4_unified_controller_app._local_task` refuses to spawn while either `scored_launch_authorized` or `modal_launch_authorized` is false, so the refusal is executable rather than a status string.",
-    "modal_launch_authorized": false,
+    "modal_launch_authorized": true,
     "panel_uniformity": {
       "checked_controller_parameters": [
         "batch",
@@ -347,12 +354,12 @@
     },
     "schema_version": "t4_unified_controller_replicate_contract_v1",
     "scientific_problem": "test transfer of a route-trained structural-action prior to parp1 with every parp1 route excluded from fitting",
-    "scored_launch_authorized": false,
+    "scored_launch_authorized": true,
     "state_routing": {
       "policy": "t4_unified_routing_v1",
       "policy_sha256": "b69cadcba1824ffcf1a45f8f7f894bec284bf09deea406a4e1da271d52bd609a"
     },
-    "status": "FROZEN_PENDING_OWNER_LAUNCH_AUTHORIZATION",
+    "status": "AUTHORIZED_FOR_SCORED_LAUNCH",
     "support": "compose_valid",
     "support_expansion": {
       "policy": "t4_frozen_escalation_v1",
@@ -378,5 +385,5 @@
       "result": "leave-parp1-out route support artifact is frozen for the scored panel"
     }
   },
-  "payload_sha256": "76225d63841d0454e1d036d1982f3c8335bc1ca9910b95dd4609e44aecaf3f32"
+  "payload_sha256": "ed6d60d4835a2ca9b7a067b1b487e43afa925732bf45a57eb14a622da109353e"
 }

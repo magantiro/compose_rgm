@@ -1,5 +1,12 @@
 {
   "payload": {
+    "authorization": {
+      "authorized_at_utc": "2026-09-25T03:06:05.220762+00:00",
+      "authorized_payload_sha256": "a933ff36b85e3ccccd786f191eaec795ea453ffe86a84833aacbdb4931171fce",
+      "provenance": "relayed owner authorization; see the receipt",
+      "receipt": "diagnostics/t4_replicate_launch_authorization/authorization_v1.json",
+      "reconstruction_rule": "delete `authorization`, set scored_launch_authorized and modal_launch_authorized to false, and set status to 'FROZEN_PENDING_OWNER_LAUNCH_AUTHORIZATION'; the result must hash to `authorized_payload_sha256`"
+    },
     "batch": 8,
     "causal_ablation_status": "dormant unless the conditional striking-result trigger in AGENTS.md activates",
     "cells": [
@@ -130,7 +137,7 @@
       "source_contract_payload_sha256": "cb34d1d1ecfec41d683dbfe18b082aeb4dc65b0f0dbf8baae9d7186d097cc5ef"
     },
     "launch_authority": "The five-protein unified panel is an owner decision, not an agent one. `t4_unified_controller_app._local_task` refuses to spawn while either `scored_launch_authorized` or `modal_launch_authorized` is false, so the refusal is executable rather than a status string.",
-    "modal_launch_authorized": false,
+    "modal_launch_authorized": true,
     "panel_uniformity": {
       "checked_controller_parameters": [
         "batch",
@@ -350,12 +357,12 @@
     },
     "schema_version": "t4_unified_controller_replicate_contract_v1",
     "scientific_problem": "test transfer of a route-trained structural-action prior to fa7 with every fa7 route excluded from fitting",
-    "scored_launch_authorized": false,
+    "scored_launch_authorized": true,
     "state_routing": {
       "policy": "t4_unified_routing_v1",
       "policy_sha256": "b69cadcba1824ffcf1a45f8f7f894bec284bf09deea406a4e1da271d52bd609a"
     },
-    "status": "FROZEN_PENDING_OWNER_LAUNCH_AUTHORIZATION",
+    "status": "AUTHORIZED_FOR_SCORED_LAUNCH",
     "support": "compose_valid",
     "support_expansion": {
       "policy": "t4_frozen_escalation_v1",
@@ -408,5 +415,5 @@
       "result": "all three FA7 cells emitted exact small, medium and large protected programs; strict eligible counts were 8, 8 and 15 at delta 0.4 and 2, 1 and 4 at delta 0.6"
     }
   },
-  "payload_sha256": "a933ff36b85e3ccccd786f191eaec795ea453ffe86a84833aacbdb4931171fce"
+  "payload_sha256": "aac50b57eb66721904c17444016507949cea0cc2669aaa7aed543a3004ff93a6"
 }

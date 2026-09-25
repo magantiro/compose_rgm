@@ -1,5 +1,12 @@
 {
   "payload": {
+    "authorization": {
+      "authorized_at_utc": "2026-09-25T03:06:05.220762+00:00",
+      "authorized_payload_sha256": "03f74ccaa87001c8b6a7703b1628c4885b519c480b81f1caddb3f1d4bce49ac5",
+      "provenance": "relayed owner authorization; see the receipt",
+      "receipt": "diagnostics/t4_replicate_launch_authorization/authorization_v1.json",
+      "reconstruction_rule": "delete `authorization`, set scored_launch_authorized and modal_launch_authorized to false, and set status to 'FROZEN_PENDING_OWNER_LAUNCH_AUTHORIZATION'; the result must hash to `authorized_payload_sha256`"
+    },
     "batch": 8,
     "cells": [
       {
@@ -128,7 +135,7 @@
       "source_contract_payload_sha256": "df3c113215e84588c86ad9d690e03cdc091d7cf88696165d8a069d0039acba93"
     },
     "launch_authority": "The five-protein unified panel is an owner decision, not an agent one. `t4_unified_controller_app._local_task` refuses to spawn while either `scored_launch_authorized` or `modal_launch_authorized` is false, so the refusal is executable rather than a status string.",
-    "modal_launch_authorized": false,
+    "modal_launch_authorized": true,
     "panel_uniformity": {
       "checked_controller_parameters": [
         "batch",
@@ -339,12 +346,12 @@
     },
     "schema_version": "t4_unified_controller_replicate_contract_v1",
     "scientific_problem": "test transfer of a route-trained structural-action prior to jak2 with every jak2 route excluded from fitting",
-    "scored_launch_authorized": false,
+    "scored_launch_authorized": true,
     "state_routing": {
       "policy": "t4_unified_routing_v1",
       "policy_sha256": "b69cadcba1824ffcf1a45f8f7f894bec284bf09deea406a4e1da271d52bd609a"
     },
-    "status": "FROZEN_PENDING_OWNER_LAUNCH_AUTHORIZATION",
+    "status": "AUTHORIZED_FOR_SCORED_LAUNCH",
     "supersedes_delta": {
       "contract": "configs/t4_held_target_distilled_jak2_d06_250.json",
       "contract_payload_sha256": "3a43ac863683ccfb1a15d69520107fb26f8af54dce9ff0e2ecbab02cc7ed9a02",
@@ -387,5 +394,5 @@
       ]
     }
   },
-  "payload_sha256": "03f74ccaa87001c8b6a7703b1628c4885b519c480b81f1caddb3f1d4bce49ac5"
+  "payload_sha256": "38211ee03555ed768f49627a311374dfe1adb60c1c160fc8fe9db035d176b878"
 }
