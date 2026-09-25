@@ -1,0 +1,43 @@
+{
+  "payload": {
+    "schema": "fragment_linker_broaden_pilot_v1",
+    "arms": ["frozen", "sqrt_train_mass"],
+    "task": "linker_design",
+    "drugs": ["BARICITINIB", "CYCLOTHIAZIDE", "ELIGLUSTAT", "ERLOTINIB", "FUTIBATINIB", "LESINURAD", "LIOTHYRONINE", "LOVASTATIN", "MARIBAVIR", "SPIRAPRIL"],
+    "seed": 4,
+    "attempts_per_prompt_arm": 100,
+    "candidate_draws_per_attempt": 8,
+    "workers": 1,
+    "threads": 1,
+    "quality_selection": false,
+    "oracle_calls": 0,
+    "promotion_gate": {
+      "min_quality_gain_points": 3.0,
+      "min_uniqueness_gain_points": 8.0,
+      "max_diversity_drop": 0.02,
+      "min_outputs_per_arm": 1000
+    },
+    "python_executable": "/Users/rmaganti/compose_rgm_git/.venv_pinned_chem/bin/python",
+    "checkpoint_path": "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt",
+    "source_revision": "e56006ccee45e9ad7046c2cc80e7559a31aaeea2",
+    "versions": {
+      "python": "3.11.13",
+      "rdkit": "2024.03.5",
+      "numpy": "1.26.4",
+      "torch": "2.4.0"
+    },
+    "official_evaluator_sha256": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+    "material_sha256": {
+      "src/compose_v4/benchmark/fragment_linker_sampler.py": "25b578a35182d5fda51e42ae1a0f1732d397106b1465ccefcf99228c314b616a",
+      "tools/run_fragment_linker_broaden_pilot_v1.py": "1c5d087c06aec3ce8b2fec11403417d5da3338606e5854fd82348012eedf2104",
+      "diagnostics/fragment_training_region_catalog_v1/catalog.json": "a8775b466f479c2594ff5d8afd81049a57969211d3152035c93e9db51e8b1347",
+      "diagnostics/fragment_joint_completion_prior_v1/prior.json": "6ae0fcb635ec2876f5d7f1c326cef92c241d42267a897f441d0cc9ee5752eea2",
+      "data/benchmarks/fragment_constrained/genmol_safe_drugs_fragments.csv": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9",
+      ".official_eval_cache/pkg/in_virtuo_gen/train_utils/metrics.py": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+      "/Users/rmaganti/compose_fragment_ckpt/ringcore_a7546e2_best.pt": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4"
+    },
+    "output_dir": "diagnostics/fragment_linker_broaden_pilot_v1",
+    "minimum_free_bytes": 5368709120
+  },
+  "payload_sha256": "90e0e60d4d4fe8488b058b51b98ec68104e6d5c330609669db35eb92d268c3ea"
+}
