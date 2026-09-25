@@ -1,0 +1,636 @@
+{
+ "criterion": "a campaign counts iff its oracle ledger holds >= 1000 entries",
+ "init_lock_all_campaigns": "c8032311daa067628048679465fb4397d2a26bf0593143e3ed0a4cbec7195478",
+ "regime": "no-prescreen default (prescreen/graft_init/transplant_lane/donor_reservoir/parent_weighting all absent)",
+ "per_task": {
+  "albuterol_similarity": {
+   "complete_before_this_session": 5,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 5451
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3354
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3367
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20261925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20261926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 5
+  },
+  "amlodipine_mpo": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3694
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 4528
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20271925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20271926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "celecoxib_rediscovery": {
+   "complete_before_this_session": 5,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 4199
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2879
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2458
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20260925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20260926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 5
+  },
+  "deco_hop": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3524
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3374
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20278925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20278926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "drd2": {
+   "complete_before_this_session": 2,
+   "campaigns": [
+    {
+     "workspace": "kosha-labs",
+     "seed": 20282925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20282926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [
+    {
+     "workspace": "nitya",
+     "seed": 20283003,
+     "budget": 1000
+    }
+   ],
+   "n_after": 3
+  },
+  "fexofenadine_mpo": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 1694
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 1352
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20272925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20272926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "gsk3b": {
+   "complete_before_this_session": 2,
+   "campaigns": [
+    {
+     "workspace": "kosha-labs",
+     "seed": 20268925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20268926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [
+    {
+     "workspace": "nitya",
+     "seed": 20269003,
+     "budget": 1000
+    }
+   ],
+   "n_after": 3
+  },
+  "isomers_c7h8n2o2": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 4570
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3798
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20266925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20266926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "isomers_c9h10n2o2pf2cl": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 4433
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3120
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20280925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20280926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "jnk3": {
+   "complete_before_this_session": 2,
+   "campaigns": [
+    {
+     "workspace": "kosha-labs",
+     "seed": 20269925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20269926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [
+    {
+     "workspace": "nitya",
+     "seed": 20270003,
+     "budget": 1000
+    }
+   ],
+   "n_after": 3
+  },
+  "median1": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2108
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2640
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20265925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20265926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "median2": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 1902
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 1552
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20281925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20281926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "mestranol_similarity": {
+   "complete_before_this_session": 5,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3875
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2268
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3547
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20262925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20262926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 5
+  },
+  "osimertinib_mpo": {
+   "complete_before_this_session": 3,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2858
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20273925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20273926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 3
+  },
+  "perindopril_mpo": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3220
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2089
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20267925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20267926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "qed": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 1215
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 1023
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20270925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20270926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "ranolazine_mpo": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2615
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2524
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20274925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20274926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "scaffold_hop": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2880
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2823
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20279925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20279926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "sitagliptin_mpo": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 1808
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3165
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20275925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20275926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "thiothixene_rediscovery": {
+   "complete_before_this_session": 5,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 4416
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2364
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3445
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20263925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20263926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 5
+  },
+  "troglitazone_rediscovery": {
+   "complete_before_this_session": 5,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 4088
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2130
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3079
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20264925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20264926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 5
+  },
+  "valsartan_smarts": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3904
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2525
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20277925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20277926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  },
+  "zaleplon_mpo": {
+   "complete_before_this_session": 4,
+   "campaigns": [
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 3745
+    },
+    {
+     "workspace": "nitya",
+     "seed": null,
+     "ledger": 2764
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20276925,
+     "ledger": 1008
+    },
+    {
+     "workspace": "kosha-labs",
+     "seed": 20276926,
+     "ledger": 1008
+    }
+   ],
+   "launched_now": [],
+   "n_after": 4
+  }
+ }
+}

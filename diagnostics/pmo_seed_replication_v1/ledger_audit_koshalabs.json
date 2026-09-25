@@ -1,0 +1,418 @@
+[
+ {
+  "label": "scored_albuterol_similarity_seed20261925_20260924T202214Z",
+  "task": "albuterol_similarity",
+  "seed": 20261925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_albuterol_similarity_seed20261926_20260924T202243Z",
+  "task": "albuterol_similarity",
+  "seed": 20261926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_amlodipine_mpo_seed20271925_20260924T202214Z",
+  "task": "amlodipine_mpo",
+  "seed": 20271925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_amlodipine_mpo_seed20271926_20260924T202243Z",
+  "task": "amlodipine_mpo",
+  "seed": 20271926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_celecoxib_rediscovery_seed20260925_20260924T202214Z",
+  "task": "celecoxib_rediscovery",
+  "seed": 20260925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_celecoxib_rediscovery_seed20260926_20260924T202243Z",
+  "task": "celecoxib_rediscovery",
+  "seed": 20260926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_deco_hop_seed20278925_20260924T202214Z",
+  "task": "deco_hop",
+  "seed": 20278925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_deco_hop_seed20278926_20260924T202243Z",
+  "task": "deco_hop",
+  "seed": 20278926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_drd2_seed20282925_20260924T202214Z",
+  "task": "drd2",
+  "seed": 20282925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_drd2_seed20282926_20260924T202243Z",
+  "task": "drd2",
+  "seed": 20282926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_fexofenadine_mpo_seed20272925_20260924T202214Z",
+  "task": "fexofenadine_mpo",
+  "seed": 20272925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_fexofenadine_mpo_seed20272926_20260924T202243Z",
+  "task": "fexofenadine_mpo",
+  "seed": 20272926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_gsk3b_seed20268925_20260924T202214Z",
+  "task": "gsk3b",
+  "seed": 20268925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_gsk3b_seed20268926_20260924T202243Z",
+  "task": "gsk3b",
+  "seed": 20268926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_isomers_c7h8n2o2_seed20266925_20260924T202214Z",
+  "task": "isomers_c7h8n2o2",
+  "seed": 20266925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_isomers_c7h8n2o2_seed20266926_20260924T202243Z",
+  "task": "isomers_c7h8n2o2",
+  "seed": 20266926,
+  "returncode": 1,
+  "budget": 1008,
+  "ledger": 303
+ },
+ {
+  "label": "scored_isomers_c7h8n2o2_seed20266926_20260924T205511Z",
+  "task": "isomers_c7h8n2o2",
+  "seed": 20266926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_isomers_c9h10n2o2pf2cl_seed20280925_20260924T202214Z",
+  "task": "isomers_c9h10n2o2pf2cl",
+  "seed": 20280925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_isomers_c9h10n2o2pf2cl_seed20280926_20260924T202243Z",
+  "task": "isomers_c9h10n2o2pf2cl",
+  "seed": 20280926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_jnk3_seed20269925_20260924T202214Z",
+  "task": "jnk3",
+  "seed": 20269925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_jnk3_seed20269926_20260924T202243Z",
+  "task": "jnk3",
+  "seed": 20269926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_median1_seed20265925_20260924T202214Z",
+  "task": "median1",
+  "seed": 20265925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_median1_seed20265926_20260924T202243Z",
+  "task": "median1",
+  "seed": 20265926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_median2_seed20281925_20260924T202214Z",
+  "task": "median2",
+  "seed": 20281925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_median2_seed20281926_20260924T202243Z",
+  "task": "median2",
+  "seed": 20281926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_mestranol_similarity_seed20262925_20260924T202214Z",
+  "task": "mestranol_similarity",
+  "seed": 20262925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_mestranol_similarity_seed20262926_20260924T202243Z",
+  "task": "mestranol_similarity",
+  "seed": 20262926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_osimertinib_mpo_seed20273925_20260924T202214Z",
+  "task": "osimertinib_mpo",
+  "seed": 20273925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_osimertinib_mpo_seed20273926_20260924T202243Z",
+  "task": "osimertinib_mpo",
+  "seed": 20273926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_perindopril_mpo_seed20267925_20260924T202214Z",
+  "task": "perindopril_mpo",
+  "seed": 20267925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_perindopril_mpo_seed20267926_20260924T202243Z",
+  "task": "perindopril_mpo",
+  "seed": 20267926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_qed_seed20270925_20260924T202214Z",
+  "task": "qed",
+  "seed": 20270925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_qed_seed20270926_20260924T202243Z",
+  "task": "qed",
+  "seed": 20270926,
+  "returncode": 1,
+  "budget": 1008,
+  "ledger": 655
+ },
+ {
+  "label": "scored_qed_seed20270926_20260924T220429Z",
+  "task": "qed",
+  "seed": 20270926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_ranolazine_mpo_seed20274925_20260924T202214Z",
+  "task": "ranolazine_mpo",
+  "seed": 20274925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_ranolazine_mpo_seed20274926_20260924T202243Z",
+  "task": "ranolazine_mpo",
+  "seed": 20274926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_scaffold_hop_seed20279925_20260924T202214Z",
+  "task": "scaffold_hop",
+  "seed": 20279925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_scaffold_hop_seed20279926_20260924T202243Z",
+  "task": "scaffold_hop",
+  "seed": 20279926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_sitagliptin_mpo_seed20275925_20260924T202214Z",
+  "task": "sitagliptin_mpo",
+  "seed": 20275925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_sitagliptin_mpo_seed20275926_20260924T202243Z",
+  "task": "sitagliptin_mpo",
+  "seed": 20275926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_thiothixene_rediscovery_seed20263925_20260924T202214Z",
+  "task": "thiothixene_rediscovery",
+  "seed": 20263925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_thiothixene_rediscovery_seed20263926_20260924T202243Z",
+  "task": "thiothixene_rediscovery",
+  "seed": 20263926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_troglitazone_rediscovery_seed20264925_20260924T202214Z",
+  "task": "troglitazone_rediscovery",
+  "seed": 20264925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_troglitazone_rediscovery_seed20264926_20260924T202243Z",
+  "task": "troglitazone_rediscovery",
+  "seed": 20264926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_valsartan_smarts_seed20277925_20260924T202214Z",
+  "task": "valsartan_smarts",
+  "seed": 20277925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_valsartan_smarts_seed20277926_20260924T202243Z",
+  "task": "valsartan_smarts",
+  "seed": 20277926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_zaleplon_mpo_seed20276925_20260924T202214Z",
+  "task": "zaleplon_mpo",
+  "seed": 20276925,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "scored_zaleplon_mpo_seed20276926_20260924T202243Z",
+  "task": "zaleplon_mpo",
+  "seed": 20276926,
+  "returncode": 0,
+  "budget": 1008,
+  "ledger": 1008
+ },
+ {
+  "label": "smoke_drd2_seed20282901_20260924T201756Z",
+  "task": "drd2",
+  "seed": 20282901,
+  "returncode": 0,
+  "budget": 96,
+  "ledger": 96
+ },
+ {
+  "label": "smoke_gsk3b_seed20268901_20260924T201756Z",
+  "task": "gsk3b",
+  "seed": 20268901,
+  "returncode": 0,
+  "budget": 96,
+  "ledger": 96
+ },
+ {
+  "label": "smoke_jnk3_seed20269901_20260924T201756Z",
+  "task": "jnk3",
+  "seed": 20269901,
+  "returncode": 0,
+  "budget": 96,
+  "ledger": 96
+ },
+ {
+  "label": "smoke_qed_seed20270901_20260924T201756Z",
+  "task": "qed",
+  "seed": 20270901,
+  "returncode": 0,
+  "budget": 96,
+  "ledger": 96
+ }
+]
