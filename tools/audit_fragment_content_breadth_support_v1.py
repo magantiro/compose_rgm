@@ -30,6 +30,12 @@ def _effective_plans(counts: Counter[tuple[str, ...]]) -> float:
     return 1.0 / sum((count / total) ** 2 for count in counts.values())
 
 
+def _plan_contexts(plan: dict) -> tuple[str, ...]:
+    # The generator permutes site order per offer. Compare and sample the
+    # invariant multiset of interface contexts, not the incidental order.
+    return tuple(sorted(draw["context"] for draw in plan["draws"]))
+
+
 def audit(catalog_path: Path, prior_path: Path, attempts_path: Path, draws: int) -> dict:
     if draws < 1:
         raise ValueError("draws per prompt must be positive")
@@ -63,10 +69,10 @@ def audit(catalog_path: Path, prior_path: Path, attempts_path: Path, draws: int)
         ]
         if not plans:
             raise ValueError(f"no model-supported offer for {drug}")
-        contexts = tuple(draw["context"] for draw in plans[0]["draws"])
+        contexts = _plan_contexts(plans[0])
         capacity = 40 - plans[0]["core_heavy_atoms"]
         if any(
-            tuple(draw["context"] for draw in plan["draws"]) != contexts
+            _plan_contexts(plan) != contexts
             or 40 - plan["core_heavy_atoms"] != capacity
             for plan in plans
         ):
@@ -125,6 +131,7 @@ def audit(catalog_path: Path, prior_path: Path, attempts_path: Path, draws: int)
         "precision": "float64",
         "workers": 1,
         "seed_derivation": "first 64 bits of SHA-256(content-breadth-v1:drug)",
+        "interface_context_order": "lexicographically sorted multiset, independent of sampled site order",
         "draws_per_prompt_arm": draws,
         "quality_labels_used": False,
         "benchmark_prompts_used_to_fit": False,

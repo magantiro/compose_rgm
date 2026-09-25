@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.audit_fragment_content_breadth_support_v1 import audit
+from tools.audit_fragment_content_breadth_support_v1 import _plan_contexts, audit
 
 
 def _inputs(root: Path):
@@ -84,3 +84,9 @@ def test_support_audit_is_deterministic_and_hashes_every_attempt(tmp_path):
     (inputs[2] / "D0_000.json").unlink()
     with pytest.raises(ValueError, match="exactly 200 attempts"):
         audit(*inputs, draws=12)
+
+
+def test_context_multiset_ignores_per_offer_interface_permutation():
+    forward = {"draws": [{"context": "N:0:1"}, {"context": "C:0:1"}]}
+    reverse = {"draws": list(reversed(forward["draws"]))}
+    assert _plan_contexts(forward) == _plan_contexts(reverse) == ("C:0:1", "N:0:1")
