@@ -11,6 +11,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from math import isfinite, sqrt
+from typing import Literal
 
 import numpy as np
 from rdkit import Chem
@@ -26,7 +27,16 @@ class _Group:
 
 
 class PendantCompletionSampler:
-    def __init__(self, catalog: dict):
+    def __init__(
+        self,
+        catalog: dict,
+        *,
+        content_allocation: Literal["sqrt_source_weight", "uniform_within_cell"] = (
+            "sqrt_source_weight"
+        ),
+    ):
+        if content_allocation not in ("sqrt_source_weight", "uniform_within_cell"):
+            raise ValueError(f"unknown pendant content allocation: {content_allocation}")
         if catalog.get("schema") != "split_first_training_pendant_catalog_v1":
             raise ValueError("not a split-first training pendant catalog")
         if catalog.get("split", {}).get("partition") != "train":
@@ -65,6 +75,7 @@ class PendantCompletionSampler:
             grouped[entry["context"]][(entry["heavy_atoms"], entry["ring_count"])].append(entry)
         if not grouped:
             raise ValueError("pendant catalog has no train-supported boundary context")
+        self.content_allocation = content_allocation
         self.pools = {}
         self._suffix_cache = {}
         for context, buckets in sorted(grouped.items()):
@@ -73,7 +84,13 @@ class PendantCompletionSampler:
             for (atoms, rings), items in sorted(buckets.items()):
                 entries = tuple(sorted(items, key=lambda e: e["rooted_smiles"]))
                 weights = np.asarray(
-                    [sqrt(e["source_balanced_weight"]) for e in entries], dtype=np.float64
+                    [
+                        1.0
+                        if content_allocation == "uniform_within_cell"
+                        else sqrt(e["source_balanced_weight"])
+                        for e in entries
+                    ],
+                    dtype=np.float64,
                 )
                 weights /= weights.sum()
                 weights.setflags(write=False)

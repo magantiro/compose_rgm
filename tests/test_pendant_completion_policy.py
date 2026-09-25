@@ -66,3 +66,20 @@ def test_ring_content_stays_available_and_invalid_support_fails_closed():
     bad["heavy_atoms"] = 2
     with pytest.raises(ValueError, match="metadata changed"):
         PendantCompletionSampler(catalog(bad))
+
+
+def test_uniform_within_cell_preserves_support_and_group_mass():
+    training = catalog(entry("[1*]C", 1.0), entry("[1*]N", 9.0))
+    frozen = PendantCompletionSampler(training)
+    broader = PendantCompletionSampler(training, content_allocation="uniform_within_cell")
+    frozen_group = frozen.pools["C:0:0"][0]
+    broader_group = broader.pools["C:0:0"][0]
+    assert frozen_group.mass == broader_group.mass == 1.0
+    assert frozen_group.content_probabilities == pytest.approx((0.25, 0.75))
+    assert broader_group.content_probabilities == pytest.approx((0.5, 0.5))
+    assert tuple(item["rooted_smiles"] for item in broader_group.entries) == (
+        "[1*]C",
+        "[1*]N",
+    )
+    with pytest.raises(ValueError, match="unknown pendant content allocation"):
+        PendantCompletionSampler(training, content_allocation="other")

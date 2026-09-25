@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections import Counter
 from math import isfinite
+from typing import Literal
 
 import numpy as np
 
@@ -21,7 +22,15 @@ from compose_v4.benchmark.pendant_completion_policy import PendantCompletionSamp
 class JointMassPendantSampler(PendantCompletionSampler):
     """Sample a feasible whole decoration budget before its constituent pieces."""
 
-    def __init__(self, catalog: dict, prior: dict):
+    def __init__(
+        self,
+        catalog: dict,
+        prior: dict,
+        *,
+        content_allocation: Literal["sqrt_source_weight", "uniform_within_cell"] = (
+            "sqrt_source_weight"
+        ),
+    ):
         if (
             prior.get("schema") != "split_first_training_decoration_mass_prior_v1"
             or catalog.get("source_sha256") != prior.get("source_sha256")
@@ -33,7 +42,7 @@ class JointMassPendantSampler(PendantCompletionSampler):
             raise ValueError(
                 "joint decoration mass prior lacks the same quality-blind train lineage"
             )
-        super().__init__(catalog)
+        super().__init__(catalog, content_allocation=content_allocation)
         counts = Counter()
         for core_size, interfaces, added, count in prior["counts"]:
             if (
@@ -144,7 +153,7 @@ class JointMassPendantSampler(PendantCompletionSampler):
             remaining -= group.atoms
         if remaining != 0:
             raise RuntimeError("joint decoration plan failed to realize selected total mass")
-        return tuple(chosen), {
+        receipt = {
             "schema": "joint_mass_pendant_plan_v1",
             "initial_atom_capacity": capacity,
             "unused_atom_capacity": capacity - selected_added,
@@ -160,3 +169,6 @@ class JointMassPendantSampler(PendantCompletionSampler):
             "qed_sa_guidance": False,
             "all_interfaces_planned_together": True,
         }
+        if self.content_allocation != "sqrt_source_weight":
+            receipt["content_allocation"] = self.content_allocation
+        return tuple(chosen), receipt
