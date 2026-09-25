@@ -1,0 +1,210 @@
+{
+ "payload": {
+  "arms": {
+   "5ht1b_d04": {
+    "authorized_as_payload_sha256_prefix": "195f8514",
+    "automatic_retries": 0,
+    "charged_call_ceiling": 1500,
+    "code_revision": "cd9e1ce56b91b35dd89a5fcbda087bd17f9e1aa7",
+    "contract": "configs/t4_unified_controller_5ht1b_d04_r23_v1.json",
+    "contract_payload_sha256": "15c2845261f6faab7df188931295c3d4f0decc5fcf742f8e90cb929378372d11",
+    "function_call_id": "fc-01M3B8Y4PXFH0RBRRFPJR3Y55A",
+    "observed_at_launch": {
+     "cells_started": 3,
+     "charged_calls": 3,
+     "round_locks": 3
+    },
+    "run_id": "b112644308b9fc8907e7f5251425b3bf8bb041e9e17ffb67a804ad0332882169",
+    "volume": "compose-t4-unified-controller-5ht1b-v1"
+   },
+   "5ht1b_d06": {
+    "authorized_as_payload_sha256_prefix": "15a615eb",
+    "automatic_retries": 0,
+    "charged_call_ceiling": 1500,
+    "code_revision": "cd9e1ce56b91b35dd89a5fcbda087bd17f9e1aa7",
+    "contract": "configs/t4_unified_controller_5ht1b_d06_r23_v1.json",
+    "contract_payload_sha256": "2a9dd7237021f3a71c8b4198d46c697f89f02e4385531efbf0cf72578387f88c",
+    "function_call_id": "fc-01M3B8QDN5VZXSD7M9B0DMTGXG",
+    "observed_at_launch": {
+     "cells_started": 3,
+     "charged_calls": 3,
+     "round_locks": 4
+    },
+    "run_id": "43c5925287549e575f9ef4657a3d4aee33ef53413e353493b58d623e186299e0",
+    "volume": "compose-t4-unified-controller-5ht1b-v1"
+   },
+   "braf_d04": {
+    "authorized_as_payload_sha256_prefix": "fea9feb1",
+    "automatic_retries": 0,
+    "charged_call_ceiling": 1500,
+    "code_revision": "cd9e1ce56b91b35dd89a5fcbda087bd17f9e1aa7",
+    "contract": "configs/t4_unified_controller_braf_d04_r23_v1.json",
+    "contract_payload_sha256": "58cf715c2797b0606f64b5bf1a6a43bb0775728637a536fa3de2bad25e1b770f",
+    "function_call_id": "fc-01M3B8X4JTMZ6G0M3V39HTMPHP",
+    "observed_at_launch": {
+     "cells_started": 3,
+     "charged_calls": 3,
+     "round_locks": 3
+    },
+    "run_id": "0dd3cb002a7b4bba718d3ef91047b714486c70380490c50fda3880a0a9dce76b",
+    "volume": "compose-t4-unified-controller-braf-v1"
+   },
+   "braf_d06": {
+    "authorized_as_payload_sha256_prefix": "770f40b2",
+    "automatic_retries": 0,
+    "charged_call_ceiling": 1500,
+    "code_revision": "cd9e1ce56b91b35dd89a5fcbda087bd17f9e1aa7",
+    "contract": "configs/t4_unified_controller_braf_d06_r23_v1.json",
+    "contract_payload_sha256": "1f0aaef46c1868fc8c4cd76477b7dab0c9fd2f60e27942cd61ad6fcb8f651799",
+    "function_call_id": "fc-01M3B8PCS3MR579TGPBTX7P242",
+    "observed_at_launch": {
+     "cells_started": 3,
+     "charged_calls": 3,
+     "round_locks": 3
+    },
+    "run_id": "59d59e1b61f64c483c0d8bf7f9f469a0f57df6237bac2fe5fe36504df403d4d4",
+    "volume": "compose-t4-unified-controller-braf-v1"
+   },
+   "fa7_d04": {
+    "authorized_as_payload_sha256_prefix": "a933ff36",
+    "automatic_retries": 0,
+    "charged_call_ceiling": 1500,
+    "code_revision": "cd9e1ce56b91b35dd89a5fcbda087bd17f9e1aa7",
+    "contract": "configs/t4_unified_controller_fa7_d04_r23_v1.json",
+    "contract_payload_sha256": "aac50b57eb66721904c17444016507949cea0cc2669aaa7aed543a3004ff93a6",
+    "function_call_id": "fc-01M3B8W1WPZB14Q0TM3R7Q0CB4",
+    "observed_at_launch": {
+     "cells_started": 3,
+     "charged_calls": 3,
+     "round_locks": 3
+    },
+    "run_id": "10da2bfc489e31db4fb3476f28f7db7b997d1fea8f521f9bec5423e974fa0992",
+    "volume": "compose-t4-unified-controller-fa7-v1"
+   },
+   "fa7_d06": {
+    "authorized_as_payload_sha256_prefix": "9d6e8a4e",
+    "automatic_retries": 0,
+    "charged_call_ceiling": 1500,
+    "code_revision": "cd9e1ce56b91b35dd89a5fcbda087bd17f9e1aa7",
+    "contract": "configs/t4_unified_controller_fa7_d06_r23_v1.json",
+    "contract_payload_sha256": "7f8a5f14d40df7fe92af7fdf02d9957e336e7ec778241939024710ce49153723",
+    "function_call_id": "fc-01M3B8KYRAVVC1D6R1Q9X5RX35",
+    "observed_at_launch": {
+     "cells_started": 3,
+     "charged_calls": 3,
+     "round_locks": 3
+    },
+    "run_id": "c89be1e8e220df11e913e2bbf3182937a85012689edac1e7e974f8510bf6fb67",
+    "volume": "compose-t4-unified-controller-fa7-v1"
+   },
+   "jak2_d04": {
+    "authorized_as_payload_sha256_prefix": "03f74cca",
+    "automatic_retries": 0,
+    "charged_call_ceiling": 1500,
+    "code_revision": "cd9e1ce56b91b35dd89a5fcbda087bd17f9e1aa7",
+    "contract": "configs/t4_unified_controller_jak2_d04_r23_v1.json",
+    "contract_payload_sha256": "38211ee03555ed768f49627a311374dfe1adb60c1c160fc8fe9db035d176b878",
+    "function_call_id": "fc-01M3B8ZDRA63BN9D1BFC8F2G6V",
+    "observed_at_launch": {
+     "cells_started": 2,
+     "charged_calls": 0,
+     "round_locks": 2
+    },
+    "run_id": "dcf0d2ba18da623e011ca569b29255828ee22accbeec55aec28da54f380ac9c1",
+    "volume": "compose-t4-unified-controller-jak2-v1"
+   },
+   "jak2_d06": {
+    "authorized_as_payload_sha256_prefix": "a5263844",
+    "automatic_retries": 0,
+    "charged_call_ceiling": 1500,
+    "code_revision": "cd9e1ce56b91b35dd89a5fcbda087bd17f9e1aa7",
+    "contract": "configs/t4_unified_controller_jak2_d06_r23_v1.json",
+    "contract_payload_sha256": "5a43d2a7e54988b12e27cba18024133ffdc8ae8dbd7f2d5e22706cc3ae6a5a8f",
+    "function_call_id": "fc-01M3B8RJBGYD29RACPZ6SQX66D",
+    "observed_at_launch": {
+     "cells_started": 3,
+     "charged_calls": 3,
+     "round_locks": 3
+    },
+    "run_id": "a6b780b2a7d59aceb8f0eb19176b7862384f72405d5e2e59c1012a8f5cb991de",
+    "volume": "compose-t4-unified-controller-jak2-v1"
+   },
+   "parp1_d04": {
+    "authorized_as_payload_sha256_prefix": "76225d63",
+    "automatic_retries": 0,
+    "charged_call_ceiling": 1500,
+    "code_revision": "cd9e1ce56b91b35dd89a5fcbda087bd17f9e1aa7",
+    "contract": "configs/t4_unified_controller_parp1_d04_r23_v1.json",
+    "contract_payload_sha256": "ed6d60d4835a2ca9b7a067b1b487e43afa925732bf45a57eb14a622da109353e",
+    "function_call_id": "fc-01M3B90FBHCMMAGJKDVFRJR307",
+    "observed_at_launch": {
+     "cells_started": 0,
+     "charged_calls": 0,
+     "round_locks": 0
+    },
+    "run_id": "86d34bfb1c680b44e491ac1e075daaab6763cbd5e18c732d860c8038499306bf",
+    "volume": "compose-t4-unified-controller-parp1-v1"
+   },
+   "parp1_d06": {
+    "authorized_as_payload_sha256_prefix": "9210ba34",
+    "automatic_retries": 0,
+    "charged_call_ceiling": 1500,
+    "code_revision": "cd9e1ce56b91b35dd89a5fcbda087bd17f9e1aa7",
+    "contract": "configs/t4_unified_controller_parp1_d06_r23_v1.json",
+    "contract_payload_sha256": "f19260c6db9570400443d57700e681d817970e92fe328ceb0a712e2ee2b64639",
+    "function_call_id": "fc-01M3B8SQ5Z5VQTS5N79KM97BG1",
+    "observed_at_launch": {
+     "cells_started": 3,
+     "charged_calls": 3,
+     "round_locks": 3
+    },
+    "run_id": "8593e6a88d1e8b4dc4ea04821e0014fcb8fd606658484a1a62d954ab1d28f92f",
+    "volume": "compose-t4-unified-controller-parp1-v1"
+   }
+  },
+  "budget": {
+   "arms": 10,
+   "ceiling_is_a_hard_stop": "a cell that would exceed 250 charged calls stops and reports",
+   "cells": 60,
+   "charged_calls_per_cell": 250,
+   "total_charged_call_ceiling": 15000
+  },
+  "controller_identity": {
+   "distinct_signatures_across_ten_arms": 1,
+   "meaning": "target, delta and replicate seed are INPUTS; the controller is byte-identical",
+   "same_policy_hash_the_green_gate_recorded": true,
+   "support_expansion_policy_sha256": "c5cf6ab3e3a516b6aca3c9cc410c17d2f712bf60ccac224363ba57343c256a62"
+  },
+  "gate": {
+   "artifact": "diagnostics/t4_unified_production_gate/t4_unified_production_gate_v1.json",
+   "control_rows": "20/20",
+   "docking_calls": 0,
+   "oracle_calls": 0,
+   "trigger_rows": "15/15",
+   "verdict": "PASS"
+  },
+  "launched_at_utc": "2026-09-25T03:17:22.837851+00:00",
+  "schema_version": "t4_replicate_launch_receipt_v1",
+  "stagger": {
+   "wave_1": [
+    "fa7_d06"
+   ],
+   "wave_2": [
+    "braf_d06",
+    "5ht1b_d06",
+    "jak2_d06",
+    "parp1_d06"
+   ],
+   "wave_3": [
+    "fa7_d04",
+    "braf_d04",
+    "5ht1b_d04",
+    "jak2_d04",
+    "parp1_d04"
+   ],
+   "why": "wave 1 was launched alone and its root docking confirmed end to end before the rest, because the prior session lost four root dockings to sequential launch defects"
+  },
+  "what_this_is": "the ten replicate-2/3 arms of the 30-cell T4 panel, launched detached on Modal"
+ },
+ "payload_sha256": "a2c9a5c54457f1c6c4c7fb4fa717714d47451c1f35580f936c7c330a5d9aac8e"
+}
