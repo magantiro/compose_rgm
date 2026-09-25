@@ -1,0 +1,37 @@
+{
+  "arms": {
+    "braf_d04": {
+      "authorized_payload_sha256": "ab1257e1060a51fb46cf4575de292bbb1243a31175494a289e0296df0466b645",
+      "cells": [
+        "braf_2_r3"
+      ],
+      "contract": "configs/t4_unified_controller_braf_d04_rev_v1.json",
+      "total_charged_call_ceiling": 249
+    },
+    "fa7_d04": {
+      "authorized_payload_sha256": "a2f50528b85b2e287472444d15d5a9818f4e2f6a4f2089425fe250223999987e",
+      "cells": [
+        "fa7_1_r3",
+        "fa7_2_r2",
+        "fa7_2_r3"
+      ],
+      "contract": "configs/t4_unified_controller_fa7_d04_rev_v1.json",
+      "total_charged_call_ceiling": 747
+    }
+  },
+  "authorized_at_utc": "2026-09-25T08:33:22.692338+00:00",
+  "budget": {
+    "cells": 4,
+    "per_cell_authorized": 250,
+    "per_cell_debited_on_rahul": 1,
+    "rule": "lifetime spend per revived cell is 1 (rahul) + 249 (nitya) = 250",
+    "total_charged_call_ceiling": 996
+  },
+  "context_shown_to_owner": "that fa7_1_r3, fa7_2_r2, fa7_2_r3 and braf_2_r3 died in the round-0 preemption window and can never return a molecule on rahul-94866, because _resume_state raises on an unfinished query lock with no recoverable checkpoint and retries is 0",
+  "not_authorized": "the fourteen cells still QUEUED on rahul-94866 are NOT revived; their run_cell calls are live and a second writer would produce a divergent duplicate and double-charge the cell",
+  "owner_words": "ok yeah why don't u start the nitya expansion for now",
+  "provenance": "direct owner instruction in session",
+  "reconstruction_rule": "delete `authorization`, set scored_launch_authorized and modal_launch_authorized to false, and set status to 'FROZEN_PENDING_OWNER_LAUNCH_AUTHORIZATION'; the result must hash to `authorized_payload_sha256`",
+  "schema_version": "t4_revival_launch_authorization_v1",
+  "workspace": "nitya"
+}
