@@ -46,6 +46,10 @@ def main() -> int:
     parser.add_argument("--base-seed", type=int, default=20260923)
     parser.add_argument("--replicate", type=int, default=0)
     parser.add_argument("--stage", choices=("smoke", "scored"), required=True)
+    # ARM SELECTOR for the proposal ablation.  Absent is arm A and leaves the worker
+    # environment untouched, which is byte-identical to the unpatched tree (verified by
+    # execution).  The label carries the arm so two arms can never share a namespace.
+    parser.add_argument("--uniform-chain-arm", action="store_true")
     parser.add_argument("--receipt", default="diagnostics/pmo_fibercontrol_targets_v1")
     arguments = parser.parse_args()
 
@@ -62,8 +66,9 @@ def main() -> int:
     submitted, labels = [], set()
     for task in arguments.targets:
         seed = derived_seed(task, arguments.base_seed, arguments.replicate)
-        label = f"{arguments.stage}_{task}_seed{seed}_{stamp}"
-        volume = f"pmo-fiber-{task.replace('_', '-')}-seed{seed}"
+        arm = "chain" if arguments.uniform_chain_arm else "struct"
+        label = f"{arguments.stage}_{arm}_{task}_seed{seed}_{stamp}"
+        volume = f"pmo-fiber-{arm}-{task.replace('_', '-')}-seed{seed}"
         if label in labels or volume in {s["volume"] for s in submitted}:
             raise SystemExit(f"two targets would share a namespace: {label} / {volume}")
         labels.add(label)
@@ -78,6 +83,8 @@ def main() -> int:
             "label": label,
             "volume": volume,
             "git_commit": commit,
+            "uniform_chain_arm": bool(arguments.uniform_chain_arm),
+            "arm": arm,
         }
         # SPAWN, never call: target B must be submitted without waiting for target A.
         handle = function.spawn(spec)
