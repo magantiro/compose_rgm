@@ -263,7 +263,7 @@ def main() -> None:
     parser.add_argument("phase", choices=("prepare", "run"))
     args = parser.parse_args()
     contract, contract_hash = load_contract()
-    sources = source_rows(contract) if args.phase == "prepare" else preflight(contract)
+    sources = preflight(contract)
     output = ROOT / contract["output_dir"]
     manifest = {
         "schema": "qed_pmo_program_two_source_manifest_v1",
