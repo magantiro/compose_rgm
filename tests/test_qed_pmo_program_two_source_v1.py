@@ -45,6 +45,19 @@ def test_contract_hash_and_fixed_envelope(tmp_path):
         load_contract(path)
 
 
+def test_v2_requires_oversubscribed_proposal_pool(tmp_path):
+    payload = _payload()
+    payload["schema"] = "qed_pmo_program_two_source_v2"
+    payload["proposal_pool_size"] = 16
+    path = tmp_path / "contract.json"
+    path.write_text(json.dumps({"payload": payload, "payload_sha256": digest(payload)}))
+    assert load_contract(path)[0] == payload
+    payload["proposal_pool_size"] = 8
+    path.write_text(json.dumps({"payload": payload, "payload_sha256": digest(payload)}))
+    with pytest.raises(ValueError, match="scientific envelope"):
+        load_contract(path)
+
+
 def test_first_two_exact_jin_sources_are_supported_and_deterministic():
     sources = source_rows(_payload())
     assert [row["index"] for row in sources] == [0, 1]

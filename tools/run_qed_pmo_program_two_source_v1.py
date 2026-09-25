@@ -57,8 +57,9 @@ def load_contract(path: Path = CONTRACT) -> tuple[dict, str]:
     payload = envelope["payload"]
     if digest(payload) != envelope["payload_sha256"]:
         raise ValueError(f"QED pilot contract hash mismatch: {path}")
+    schema = payload["schema"]
     if (
-        payload["schema"] != "qed_pmo_program_two_source_v1"
+        schema not in ("qed_pmo_program_two_source_v1", "qed_pmo_program_two_source_v2")
         or payload["source_indices"] != [0, 1]
         or payload["arms"] != list(ARMS)
         or payload["charged_qed_calls_per_source_arm"] != 25
@@ -70,6 +71,7 @@ def load_contract(path: Path = CONTRACT) -> tuple[dict, str]:
         or payload["qed_success_floor"] != 0.9
         or payload["oracle"] != "local_rdkit_qed_only"
         or payload["workers"] != 1
+        or payload.get("proposal_pool_size", 8) != (8 if schema.endswith("v1") else 16)
     ):
         raise ValueError("QED pilot scientific envelope changed")
     return payload, envelope["payload_sha256"]
@@ -145,7 +147,15 @@ def run_one(contract: dict, source: dict, arm: str, output: Path, checkpoint: di
     folder = output / arm / f"source_{index:03d}"
     result_path = folder / "result.json"
     if result_path.exists():
-        raise FileExistsError(f"QED pilot source already completed: {result_path}")
+        saved = json.loads(result_path.read_text())
+        if (
+            saved.get("source_index") != index
+            or saved.get("source_sha256") != source["source_sha256"]
+            or saved.get("arm") != arm
+            or saved.get("call_ceiling") != contract["charged_qed_calls_per_source_arm"]
+        ):
+            raise ValueError(f"completed QED pilot source identity changed: {result_path}")
+        return saved
     seed = source_seed(source["smiles"], index)
     source_fingerprint = FINGERPRINT.GetFingerprint(Chem.MolFromSmiles(source["smiles"]))
 
@@ -174,7 +184,7 @@ def run_one(contract: dict, source: dict, arm: str, output: Path, checkpoint: di
     config = replace(
         configuration(seed),
         attempts_per_batch=contract["attempts_per_batch"],
-        candidates_per_batch=contract["queries_per_round"],
+        candidates_per_batch=contract.get("proposal_pool_size", contract["queries_per_round"]),
         wall_seconds=contract["proposal_wall_seconds"],
         require_broad_runtime=False,
     )
@@ -230,14 +240,16 @@ def run_one(contract: dict, source: dict, arm: str, output: Path, checkpoint: di
             }
         )
     channel_counts: Counter[str] = Counter()
+    selection_modes: Counter[str] = Counter()
     for pending in sorted((folder / "campaign").glob("round_*/pending.json")):
         batch = json.loads(pending.read_text())["batch"]
+        selection_modes[str(batch.get("selection", {}).get("mode", "unknown"))] += 1
         for candidate in batch["candidates"]:
             channel_counts[
                 str(candidate.get("provenance", {}).get("planner_channel", "unknown"))
             ] += 1
     record = {
-        "schema": "qed_pmo_program_two_source_result_v1",
+        "schema": f"{contract['schema']}_result",
         "role": "two-source matched development diagnostic; not a GrIDDD benchmark result",
         "source_index": index,
         "source_sha256": source["source_sha256"],
@@ -251,6 +263,7 @@ def run_one(contract: dict, source: dict, arm: str, output: Path, checkpoint: di
             (row["qed"] for row in scored if row["similarity_eligible"]), default=None
         ),
         "selected_channel_counts": dict(sorted(channel_counts.items())),
+        "selection_modes": dict(sorted(selection_modes.items())),
         "scored": scored,
         "campaign_rounds": campaign["history"],
     }
@@ -261,12 +274,13 @@ def run_one(contract: dict, source: dict, arm: str, output: Path, checkpoint: di
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=("prepare", "run"))
+    parser.add_argument("--contract", type=Path, default=CONTRACT)
     args = parser.parse_args()
-    contract, contract_hash = load_contract()
+    contract, contract_hash = load_contract(args.contract)
     sources = preflight(contract)
     output = ROOT / contract["output_dir"]
     manifest = {
-        "schema": "qed_pmo_program_two_source_manifest_v1",
+        "schema": f"{contract['schema']}_manifest",
         "contract": contract,
         "contract_payload_sha256": contract_hash,
         "source_identities": [
