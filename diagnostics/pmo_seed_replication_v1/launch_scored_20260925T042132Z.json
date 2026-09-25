@@ -1,0 +1,48 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "scored",
+ "git_commit": "0b9666f47bc53675f38c61e1cb72b49b40138729",
+ "base_seed": 20260923,
+ "budget": 1000,
+ "submitted": [
+  {
+   "task": "drd2",
+   "budget": 1000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20283003,
+   "base_seed": 20260923,
+   "replicate": 80,
+   "label": "scored_drd2_seed20283003_20260925T042132Z",
+   "volume": "pmo-fiber-drd2-seed20283003",
+   "git_commit": "0b9666f47bc53675f38c61e1cb72b49b40138729",
+   "modal_call_id": "fc-01M3BCR3M0EXWTN8X33DDDJF42"
+  },
+  {
+   "task": "gsk3b",
+   "budget": 1000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20269003,
+   "base_seed": 20260923,
+   "replicate": 80,
+   "label": "scored_gsk3b_seed20269003_20260925T042132Z",
+   "volume": "pmo-fiber-gsk3b-seed20269003",
+   "git_commit": "0b9666f47bc53675f38c61e1cb72b49b40138729",
+   "modal_call_id": "fc-01M3BCR3RN408P54M2TVA6R7Z8"
+  },
+  {
+   "task": "jnk3",
+   "budget": 1000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20270003,
+   "base_seed": 20260923,
+   "replicate": 80,
+   "label": "scored_jnk3_seed20270003_20260925T042132Z",
+   "volume": "pmo-fiber-jnk3-seed20270003",
+   "git_commit": "0b9666f47bc53675f38c61e1cb72b49b40138729",
+   "modal_call_id": "fc-01M3BCR3VGTYXHVWS8T6QSJ56T"
+  }
+ ]
+}
