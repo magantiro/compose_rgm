@@ -1,0 +1,112 @@
+{
+  "schema": "compose.qed_h40_fixed_size_ablation_contract",
+  "schema_version": 1,
+  "contract_sha256": "c1ff420d6db73831deaa4070aa3be01f548d68b80f432ae686a4d43298372dfa",
+  "scientific_question": "effect of disabling every size-changing primitive transition in the deployed H40 QED sampler",
+  "source_panel": {
+    "path": "data/jin/qed_test.txt",
+    "sha256": "704103777e8050eb59f4d15d9997ca6070ba05a6b878b8e18738bfb1e706a090",
+    "distinct_sources": 800
+  },
+  "sampler": {
+    "runner": "modal_apps/hphi_h40head_ab_app.py::run_source",
+    "runner_sha256": "45b833d83fe8290f44d6cbc3cd0cd7ae8e63c70d0285f2534820ab34afa31a49",
+    "lazy_sampler_sha256": "63d2ebe6ece8dff09494294e23b2269388a5ce23a326f0728f0e27b7577c3640",
+    "smc_sha256": "20a78291e2162b88b91dfeed7051920cb4e9595396301d0bb4771fe8d9a7b709",
+    "helpers_sha256": "85996bac8e943c1367749025ee8f3ee45d0683113e8ca67926c2751859fb11a3",
+    "arm": "restart",
+    "horizon": 40,
+    "particles": 32,
+    "terminal_returns_per_source": 8,
+    "candidate_indices": [0, 1, 2, 3, 4, 5, 6, 7],
+    "head_dir": "hphi_v2",
+    "future_value_budget_max": 24,
+    "time_coordinate": 0.5,
+    "canonical_slots": 48,
+    "goal": {
+      "qed_min_inclusive": 0.9,
+      "source_morgan_tanimoto_min_inclusive": 0.4,
+      "morgan_radius": 2,
+      "morgan_fingerprint_bits": 2048
+    },
+    "seed_function": "seed_for('restart', source_smiles, candidate_index)",
+    "resampling": "unchanged hphi_smc effective-sample-size rule and systematic_resample",
+    "return_rule": "one terminal return per candidate index; extinct trajectory returns original source as failure; no slot replacement"
+  },
+  "inputs": {
+    "modal_profile": "nitya",
+    "modal_volume": "compose-v4-artifacts",
+    "volume_root": "editing_v2/r_theta_run",
+    "reference_checkpoint": {
+      "volume_path": "editing_v2/r_theta_run/runs/run_v2_01/R_THETA_CHECKPOINT.pt",
+      "sha256": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8"
+    },
+    "future_value_head": {
+      "volume_path": "editing_v2/r_theta_run/hphi_v2/head.pt",
+      "sha256": "9ea51ec4ad8196ad2b4ab1dd2b86edaaa7474101ed84b3ec117fda23dbf25748"
+    },
+    "future_value_normalization": {
+      "volume_path": "editing_v2/r_theta_run/hphi_v2/norm.json",
+      "sha256": "4f93f7ecbb70b02abfa2cca5f89cdbd2350660f4dd557e45cf7008db6021e53b"
+    },
+    "runtime_manifest": {
+      "volume_path": "editing_v2/r_theta_run/run_inputs/RUN_PATHS.json",
+      "sha256": "585286e0fb6dd8fb6b5a050dc3e5f8d1c7e782b105df114cbcb14cabbb5b2bc2"
+    },
+    "materialized_scorer": {
+      "directory": "editing_v2/r_theta_run/materialized_scorer",
+      "receipt_sha256": "908a4885d61d432be7ca75ad6a4d4e4b9a26ff4aecb16981ee3ff7cc82a46050",
+      "predecessor_state_sha256": "294478da6ab6e2dc0c1ef2015a9ddebbf3d31242a30e90b1bdb63a9ce9cc0430",
+      "revised_state_sha256": "12ee4a905c101566e67b52bd7c4a152b3490969371db1644662d63d6755de586"
+    },
+    "active8_complete_sha256": "72ab7c393012396fe6ede595c6f828577e601097dbb99783060a90a4fc898adb",
+    "gate_zero_decision_sha256": "b1327d9c1a575496c0edd43b1e2e329683ca93a546dba25be00584401e39c064"
+  },
+  "intervention": {
+    "full_arm": "same deployed sampler, no family mask",
+    "fixed_size_arm": "remove atom_insert and atom_delete before every primitive family draw, renormalize among legal same-cardinality families and marks, assert unchanged atom count after execution",
+    "retained_families": [
+      "atom_restate",
+      "bond_reorder",
+      "bond_reroute",
+      "cycle_insert",
+      "cycle_attach",
+      "ring_system_restate"
+    ],
+    "empty_restricted_support": "kill particle with zero weight, no retry, no replacement output"
+  },
+  "baseline": {
+    "existing_directory": "editing_v2/r_theta_run/hphi_official800_k8",
+    "existing_complete_sources": 798,
+    "missing_source_indices": [135, 408],
+    "recovery_directory": "editing_v2/r_theta_run/hphi_official800_k8_full_recovery_v1",
+    "recovery_rule": "rerun only indices 135 and 408 under the original unrestricted H40 arm with identical source, seed and candidate indices; never impute or count a missing execution as failure; do not overwrite original shards",
+    "paired_analysis_gate": "require eight validated terminal records in both arms for all 800 sources"
+  },
+  "fixed_size_output_directory": "editing_v2/r_theta_run/hphi_official800_k8_fixed_size_v1",
+  "execution": {
+    "workspace": "nitya",
+    "source_tasks": 800,
+    "baseline_recovery_tasks": 2,
+    "max_containers": 64,
+    "cpu_per_source": 1.0,
+    "memory_mib_per_source": 4608,
+    "source_timeout_seconds": 21600,
+    "driver_timeout_seconds": 43200,
+    "source_level_retry_limit_from_deployed_runner": 1,
+    "restart_unit": "source record; completed shards are reused without rerunning",
+    "historical_unrestricted_mean_seconds_per_source": 1032.008,
+    "estimated_fixed_size_cpu_hours_if_similar": 229.3,
+    "estimated_ideal_wall_hours_at_64_containers": 3.6,
+    "estimated_cost_usd_at_2026_09_25_modal_list_rates": 19.1,
+    "cost_estimate_is_not_a_hard_cap": true
+  },
+  "analysis": {
+    "unit": "source molecule",
+    "success": "at least one of eight terminal returned molecules has QED >= 0.9 and source Morgan Tanimoto >= 0.4",
+    "paired_categories": ["both", "full_only", "fixed_only", "neither"],
+    "difference": "full source-level success rate minus fixed-size source-level success rate",
+    "uncertainty": "20,000 source-level paired bootstrap replicates, seed 20260925, percentile 95% interval",
+    "script": "scripts/qed_h40_fixed_size_analysis.py"
+  }
+}
