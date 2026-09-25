@@ -7,7 +7,11 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
-from run_fragment_decoration_official_v2 import load_contract, seed_summary
+from run_fragment_decoration_official_v2 import (
+    load_contract,
+    prepared_seed_directory,
+    seed_summary,
+)
 
 
 def _row(drug: str, seed: int) -> dict:
@@ -48,3 +52,9 @@ def test_seed_summary_requires_all_valid_faithful_attempts() -> None:
 def test_seed_summary_rejects_missing_prompt() -> None:
     with pytest.raises(ValueError, match="incomplete prompt population"):
         seed_summary([_row("A", 8)], 8, ["A", "B"])
+
+
+def test_seed_namespace_exists_before_first_attempt(tmp_path: Path) -> None:
+    path = prepared_seed_directory(tmp_path, 8)
+    assert path == tmp_path / "seed8"
+    assert path.is_dir()

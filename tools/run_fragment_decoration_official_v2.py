@@ -145,6 +145,13 @@ def summarize(output: Path, contract: dict, manifest_sha: str) -> dict:
     }
 
 
+def prepared_seed_directory(output: Path, seed: int) -> Path:
+    """Create the seed namespace before the reused cell runner checks free space."""
+    path = output / f"seed{seed}"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=("prepare", "run-seed", "summarize"))
@@ -187,7 +194,7 @@ def main() -> None:
         return
     if args.seed not in contract["seeds"]:
         raise ValueError("run-seed needs a declared seed")
-    seed_output = output / f"seed{args.seed}"
+    seed_output = prepared_seed_directory(output, args.seed)
     if (seed_output / "complete.json").exists():
         raise FileExistsError(f"decoration seed already complete: {args.seed}")
     from evaluate_tracelet_rollouts import load_factorized_rollout_checkpoint

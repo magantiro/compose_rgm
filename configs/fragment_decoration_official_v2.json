@@ -12,8 +12,8 @@
     "development_contract_payload_sha256": "a6ecc715ca9fc70900e18d292ab8160f358649ad0e5cf06b7cd4a210cb0c4716",
     "development_summary_sha256": "34f55fda57204b1f99bf352b7bd7b134dd4cd935afdec7d2e409ed1597fd8f04",
     "material_sha256": {
-      "tools/run_fragment_decoration_official_v2.py": "08c90bc84ec93d87f4004d7ce61bd66b391f5b84c3471db015bf625ad41ed288"
+      "tools/run_fragment_decoration_official_v2.py": "2d4ed04ff8489bbd1c6d6192a9d2d51c4dd2129c1b0832a3ba9c0fe5bb8d984e"
     }
   },
-  "payload_sha256": "537ab9794df3a15a997d89366c702497e258637ff407c59ecc10ca5e9ef044da"
+  "payload_sha256": "7fb7eee44720279ebbde34d3e1274c305ad9e6022f8c08c07f8b4e247b46730d"
 }
