@@ -196,6 +196,7 @@ def run_target(spec: dict) -> dict:
         # unpatched tree -- verified by execution, 64/64 identical charged endpoints
         # in identical order.  Present selects the uniform legal-chain arm.
         **({"PMO_UNIFORM_CHAIN": "1"} if spec.get("uniform_chain_arm") else {}),
+        **({"PMO_BINDING_REBIND": "1"} if spec.get("binding_rebind_arm") else {}),
     }
     # STREAM, do not buffer.  `capture_output=True` holds every line until the
     # subprocess exits, so a multi-hour campaign is a black box from outside the

@@ -50,6 +50,10 @@ def main() -> int:
     # environment untouched, which is byte-identical to the unpatched tree (verified by
     # execution).  The label carries the arm so two arms can never share a namespace.
     parser.add_argument("--uniform-chain-arm", action="store_true")
+    # ARM C: the structured recipe is kept and only its created-atom operands are
+    # resampled.  Mutually exclusive with arm B, which discards the recipe entirely;
+    # rebinding a uniform chain would measure neither arm.
+    parser.add_argument("--binding-rebind-arm", action="store_true")
     parser.add_argument("--receipt", default="diagnostics/pmo_fibercontrol_targets_v1")
     arguments = parser.parse_args()
 
@@ -63,10 +67,17 @@ def main() -> int:
     commit = _commit()
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
 
+    if arguments.uniform_chain_arm and arguments.binding_rebind_arm:
+        raise SystemExit("--uniform-chain-arm and --binding-rebind-arm are exclusive arms")
+
     submitted, labels = [], set()
     for task in arguments.targets:
         seed = derived_seed(task, arguments.base_seed, arguments.replicate)
-        arm = "chain" if arguments.uniform_chain_arm else "struct"
+        arm = (
+            "chain"
+            if arguments.uniform_chain_arm
+            else "rebind" if arguments.binding_rebind_arm else "struct"
+        )
         label = f"{arguments.stage}_{arm}_{task}_seed{seed}_{stamp}"
         volume = f"pmo-fiber-{arm}-{task.replace('_', '-')}-seed{seed}"
         if label in labels or volume in {s["volume"] for s in submitted}:
@@ -84,6 +95,7 @@ def main() -> int:
             "volume": volume,
             "git_commit": commit,
             "uniform_chain_arm": bool(arguments.uniform_chain_arm),
+            "binding_rebind_arm": bool(arguments.binding_rebind_arm),
             "arm": arm,
         }
         # SPAWN, never call: target B must be submitted without waiting for target A.

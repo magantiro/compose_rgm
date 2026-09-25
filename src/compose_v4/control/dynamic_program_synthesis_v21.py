@@ -17,10 +17,6 @@ from time import perf_counter
 
 import numpy as np
 
-from compose_v4.control.pmo_uniform_chain import (
-    chain_arm_enabled,
-    uniform_legal_chain,
-)
 from compose_v4.control.adaptive_program_optimizer import (
     ProgramOptimizer,
     dispatch_complete_proposal,
@@ -40,10 +36,19 @@ from compose_v4.control.dynamic_program_synthesis_v2 import (
     STRUCTURED_CHANNEL,
     synthesize_structured_program,
 )
+from compose_v4.control.edit_program import EditProgram
 from compose_v4.control.edit_program_graph import (
     compile_program_graph,
     execute_program_graph,
     program_size_profile,
+)
+from compose_v4.control.pmo_binding_intervention import (
+    binding_arm_enabled,
+    execute_program_graph_rebound,
+)
+from compose_v4.control.pmo_uniform_chain import (
+    chain_arm_enabled,
+    uniform_legal_chain,
 )
 from compose_v4.rewrite.kernel import canonical_state_key
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
@@ -333,6 +338,9 @@ class DynamicV21ProgramOptimizer(DynamicProgramOptimizer):
         self.allocator_state = initial_allocator_state(
             score_direction=self.config.score_direction
         )
+        #: Arm C only.  A per-run proposal ordinal, so the binding generator key is not
+        #: purely content-addressed and a repeated recipe does not replay one choice.
+        self._rebind_occurrence = 0
         self._v21_panel_cache = {}
         self._bootstrap_pool_id = None
 
@@ -422,13 +430,45 @@ class DynamicV21ProgramOptimizer(DynamicProgramOptimizer):
                 size["delta_from_measured_parent"] = (
                     size["final_heavy_atoms"] - measured_atoms
                 )
-                _, trace = execute_program_graph(
-                    source,
-                    graph,
-                    binding,
-                    max_primitives=self.config.max_primitives,
-                    max_blocks=self.config.max_blocks,
-                )
+                if binding_arm_enabled():
+                    # ARM C of the proposal ablation.  `_channel_proposal` above is
+                    # UNCHANGED and has already passed its own success filter, so the
+                    # recipe -- operation sequence, length, block boundaries, payloads
+                    # and every source binding -- is fixed.  Only the operands that
+                    # refer to atoms CREATED by earlier operations are resampled, among
+                    # the currently live created atoms that leave the operation
+                    # admissible.  A construction failure is recorded above as a
+                    # construction failure; a failure introduced here is labelled
+                    # `failure_stage: rebinding` and is NOT rescued by the original.
+                    self._rebind_occurrence += 1
+                    _, trace = execute_program_graph_rebound(
+                        source,
+                        graph,
+                        binding,
+                        run_seed=self.config.seed,
+                        occurrence=self._rebind_occurrence,
+                        max_primitives=self.config.max_primitives,
+                        max_blocks=self.config.max_blocks,
+                    )
+                    # The ARCHIVE must record the program that explains the molecule.
+                    # Admission replays a stored program and requires exact endpoint and
+                    # state identity, so storing the PRESCRIBED program beside arm C's
+                    # endpoint would make every entry self-contradictory.
+                    program = EditProgram.from_payload(trace["modified_program"])
+                    graph = compile_program_graph(program)
+                    size = program_size_profile(graph, source.n_real_atoms)
+                    size["measured_parent_heavy_atoms"] = measured_atoms
+                    size["delta_from_measured_parent"] = (
+                        size["final_heavy_atoms"] - measured_atoms
+                    )
+                else:
+                    _, trace = execute_program_graph(
+                        source,
+                        graph,
+                        binding,
+                        max_primitives=self.config.max_primitives,
+                        max_blocks=self.config.max_blocks,
+                    )
                 if (
                     decode_state(trace["states"][-1]).n_real_atoms
                     != size["final_heavy_atoms"]

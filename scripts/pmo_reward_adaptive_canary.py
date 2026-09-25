@@ -724,6 +724,29 @@ def main():
                 f"halts {_cs['halt_reasons']} noStep {_cs['raised_no_step']}",
                 flush=True,
             )
+        # ARM C streaming: intervention FOOTPRINT per round, printed only when the
+        # rebinding arm is active so arm A's output is byte-identical.  A treatment that
+        # reaches few proposals must say so while the run is happening.
+        from compose_v4.control.pmo_binding_intervention import (
+            binding_arm_enabled as _rebind_on,
+        )
+        if _rebind_on():
+            from compose_v4.control.pmo_binding_intervention import (
+                snapshot_stats as _rebind_stats,
+            )
+            _rs = _rebind_stats()
+            telemetry.setdefault("rebind_rounds", []).append(
+                {"round": last.get("round"), **_rs}
+            )
+            print(
+                f"    REBIND n={_rs['proposals']} applicable {_rs['applicable']} "
+                f"altBindings {_rs['with_alternatives']} bindingMoved "
+                f"{_rs['changed_binding']} endpointMoved {_rs['changed_endpoint']} "
+                f"({_rs['changed_endpoint_rate']:.2f}) refused "
+                f"{_rs['refused_rebinding']}/{_rs['refused_reschedule']}/"
+                f"{_rs['refused_replay']} {_rs['seconds_per_proposal']:.3f}s/prop",
+                flush=True,
+            )
         print(f"    best so far  {best:.4f}  {best_row['endpoint']}", flush=True)
         for row in by_score:
             print(f"    queried      {row['score']:.4f}  {row['endpoint']}", flush=True)
@@ -998,6 +1021,11 @@ def main():
         # Emitted ONLY by arm B, so arm A's artifact is byte-identical to a run of the
         # unpatched tree -- verified by execution, 64/64 identical charged endpoints.
         **({"chain_rounds": telemetry["chain_rounds"]} if telemetry.get("chain_rounds") else {}),
+        **(
+            {"rebind_rounds": telemetry["rebind_rounds"]}
+            if telemetry.get("rebind_rounds")
+            else {}
+        ),
         "hard_round_timeout_seconds": HARD_ROUND_TIMEOUT_SECONDS,
         "attempts_per_batch": config.attempts_per_batch,
         "channel_candidate_limit": POOL_TARGET,
@@ -1019,6 +1047,37 @@ def main():
     # uniform legal chain, so region replacement CANNOT fire there and the arm-A
     # predicate is structurally unsatisfiable.  The guard is therefore re-pointed, not
     # relaxed: arm B must show that CHAINS fired, on the same fail-loud terms.
+    # ARM C keeps the structured proposer, so the arm-A region-replacement predicate
+    # REMAINS satisfiable and is deliberately left in force.  What arm C additionally
+    # must show is that the intervention reached the proposals it governs: a run whose
+    # rebinding never fired, or never changed a molecule, is a WIRING result.
+    from compose_v4.control.pmo_binding_intervention import (
+        binding_arm_enabled as _rebind_on,
+    )
+    if _rebind_on():
+        _rr = telemetry.get("rebind_rounds", [])
+        _props = sum(int(r.get("proposals", 0)) for r in _rr)
+        _appl = sum(int(r.get("applicable", 0)) for r in _rr)
+        _moved = sum(int(r.get("changed_endpoint", 0)) for r in _rr)
+        report["portfolio"]["rebind_arm_integrity"] = {
+            "rounds": len(_rr),
+            "proposals": _props,
+            "applicable": _appl,
+            "endpoint_moved": _moved,
+            "applicable_rate": round(_appl / _props, 4) if _props else None,
+            "endpoint_moved_rate": round(_moved / _props, 4) if _props else None,
+            "why": "arm C is applicable only where a program refers to atoms it created; "
+                   "proposals without such a reference are UNCHANGED by construction and "
+                   "that is the correct behaviour, not a shortfall",
+        }
+        if not _props or not _moved:
+            report["portfolio"]["FAILED"] = (
+                "created-atom rebinding never changed a molecule: the arm ran arm A"
+            )
+            with open(folder / "canary_v1.json", "w") as handle:
+                json.dump(report, handle, indent=2)
+            raise SystemExit("arm C produced no intervention; refusing to report a score")
+
     from compose_v4.control.pmo_uniform_chain import chain_arm_enabled as _chain_on
     if _chain_on():
         _rounds = telemetry.get("chain_rounds", [])
