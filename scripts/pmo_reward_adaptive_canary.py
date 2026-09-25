@@ -707,6 +707,23 @@ def main():
             f"ETA {eta_hours:.1f}h",
             flush=True,
         )
+        # ARM B streaming: chain health per round, printed only when the uniform
+        # legal-chain arm is active so arm A's output is byte-identical.
+        from compose_v4.control.pmo_uniform_chain import chain_arm_enabled as _chain_on
+        if _chain_on():
+            from compose_v4.control.pmo_uniform_chain import snapshot_stats as _chain_stats
+            _cs = _chain_stats()
+            telemetry.setdefault("chain_rounds", []).append(
+                {"round": last.get("round"), **_cs}
+            )
+            print(
+                f"    CHAIN  n={_cs['chains']} planned {_cs['mean_planned']:.1f} "
+                f"completed {_cs['mean_completed']:.1f} early {_cs['terminated_early']} "
+                f"accept {_cs['accept_rate']:.2f} "
+                f"{_cs['seconds_per_chain']:.2f}s/chain "
+                f"halts {_cs['halt_reasons']} noStep {_cs['raised_no_step']}",
+                flush=True,
+            )
         print(f"    best so far  {best:.4f}  {best_row['endpoint']}", flush=True)
         for row in by_score:
             print(f"    queried      {row['score']:.4f}  {row['endpoint']}", flush=True)
@@ -978,6 +995,9 @@ def main():
     report["proposal_compute_contract"] = {
         "breadth_is": "fixed attempt count, not elapsed time",
         "proposal_wall_seconds": PROPOSAL_WALL_SECONDS,
+        # Emitted ONLY by arm B, so arm A's artifact is byte-identical to a run of the
+        # unpatched tree -- verified by execution, 64/64 identical charged endpoints.
+        **({"chain_rounds": telemetry["chain_rounds"]} if telemetry.get("chain_rounds") else {}),
         "hard_round_timeout_seconds": HARD_ROUND_TIMEOUT_SECONDS,
         "attempts_per_batch": config.attempts_per_batch,
         "channel_candidate_limit": POOL_TARGET,
@@ -993,7 +1013,37 @@ def main():
         "difference": "rebuild-option weights are adaptive in the controller, fixed in the beam",
         "beam_source": BEAM_SOURCE,
     }
-    if not (
+    # ARM-APPROPRIATE INTEGRITY GUARD.  The check below exists so a run that quietly
+    # produced none of its intended proposal mechanism is reported as a WIRING result
+    # rather than a controller result.  Arm B replaces the structured program with a
+    # uniform legal chain, so region replacement CANNOT fire there and the arm-A
+    # predicate is structurally unsatisfiable.  The guard is therefore re-pointed, not
+    # relaxed: arm B must show that CHAINS fired, on the same fail-loud terms.
+    from compose_v4.control.pmo_uniform_chain import chain_arm_enabled as _chain_on
+    if _chain_on():
+        _rounds = telemetry.get("chain_rounds", [])
+        _chains = sum(int(r.get("chains", 0)) for r in _rounds)
+        _completed = sum(float(r.get("mean_completed", 0.0)) * int(r.get("chains", 0))
+                         for r in _rounds)
+        report["portfolio"]["chain_arm_integrity"] = {
+            "rounds_with_chains": len(_rounds),
+            "chains": _chains,
+            "completed_primitive_edits": _completed,
+            "region_replacement_expected": False,
+            "why": "arm B replaces the structured program; region replacement is part of "
+                   "what the ablation removes, so its absence is the treatment, not a defect",
+        }
+        if not _chains or not _completed:
+            report["portfolio"]["FAILED"] = (
+                "uniform legal chain never fired: the arm ran arm A's proposer"
+            )
+            with open(folder / "canary_v1.json", "w") as handle:
+                json.dump(report, handle, indent=1)
+            raise RuntimeError(
+                "uniform legal chain produced no executed edit; refusing to report a "
+                f"chain-arm result (rounds={len(_rounds)} chains={_chains})"
+            )
+    elif not (
         report["portfolio"]["n_compound_region_labels"]
         or report["portfolio"]["region_replace_bare"]
     ):

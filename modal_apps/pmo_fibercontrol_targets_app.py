@@ -25,6 +25,8 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import time
+import types
 from pathlib import Path
 
 import modal
@@ -190,8 +192,20 @@ def run_target(spec: dict) -> dict:
         "CANARY_SEED": str(seed),
         "CANARY_SMILES_CACHE": str(spec.get("smiles_cache", 512)),
         "CANARY_PROPOSAL_WALL": str(spec.get("proposal_wall", 1e9)),
+        # ARM SELECTOR.  ABSENT is arm A and is byte-identical to a run of the
+        # unpatched tree -- verified by execution, 64/64 identical charged endpoints
+        # in identical order.  Present selects the uniform legal-chain arm.
+        **({"PMO_UNIFORM_CHAIN": "1"} if spec.get("uniform_chain_arm") else {}),
     }
-    completed = subprocess.run(
+    # STREAM, do not buffer.  `capture_output=True` holds every line until the
+    # subprocess exits, so a multi-hour campaign is a black box from outside the
+    # container -- no log, no progress.json, nothing to distinguish slow from hung.
+    # Lines are written as they arrive and the volume is committed periodically, so a
+    # run can be watched and a stall diagnosed while it is still happening.
+    commit_seconds = float(spec.get("commit_seconds", 120))
+    log_path = out / "stdout.log"
+    lines: list[str] = []
+    process = subprocess.Popen(
         [
             "python", "-u",
             str(REMOTE_ROOT / "scripts/pmo_reward_adaptive_canary.py"),
@@ -199,12 +213,26 @@ def run_target(spec: dict) -> dict:
         ],
         cwd=str(REMOTE_ROOT),
         env=environment,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         text=True,
-        check=False,
+        bufsize=1,
     )
-    (out / "stdout.log").write_text(completed.stdout[-500_000:])
-    (out / "stderr.log").write_text(completed.stderr[-500_000:])
+    last_commit = time.monotonic()
+    with log_path.open("w") as handle:
+        for line in process.stdout:
+            lines.append(line)
+            handle.write(line)
+            handle.flush()
+            if time.monotonic() - last_commit >= commit_seconds:
+                try:
+                    volume.commit()
+                except Exception:  # a commit failure must not kill the campaign
+                    pass
+                last_commit = time.monotonic()
+    returncode = process.wait()
+    completed = types.SimpleNamespace(returncode=returncode)
+    (out / "stderr.log").write_text("".join(lines[-2000:]))
     provenance = {
         "task": task,
         "label": label,

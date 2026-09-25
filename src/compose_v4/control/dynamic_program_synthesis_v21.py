@@ -17,6 +17,10 @@ from time import perf_counter
 
 import numpy as np
 
+from compose_v4.control.pmo_uniform_chain import (
+    chain_arm_enabled,
+    uniform_legal_chain,
+)
 from compose_v4.control.adaptive_program_optimizer import (
     ProgramOptimizer,
     dispatch_complete_proposal,
@@ -374,6 +378,26 @@ class DynamicV21ProgramOptimizer(DynamicProgramOptimizer):
                 proposal_mode=self.config.proposal_mode,
             )
         source, program, binding, metadata = result
+        if chain_arm_enabled():
+            # ARM B of the proposal ablation.  The unchanged arm-A sampler above has
+            # just produced a program; its REALIZED primitive count is this proposal's
+            # planned editing allowance.  The program is then discarded and replaced by
+            # a chain of that many uniform legal primitive edits.  Taking the length
+            # from the arm-A draw is what matches the allowance per proposal using the
+            # existing configuration, and it reads no score, endpoint or answer.
+            planned = len(program.marks)
+            source, program, binding, _chain_trace, chain_metadata = uniform_legal_chain(
+                source,
+                self.rng,
+                length=planned,
+                max_primitives=self.config.max_primitives,
+                max_blocks=self.config.max_blocks,
+            )
+            return source, program, binding, {
+                **chosen,
+                **chain_metadata,
+                "arm_a_metadata_for_allowance_provenance": metadata,
+            }
         return source, program, binding, {**metadata, **chosen}
 
     def _generate_channel_pool(
