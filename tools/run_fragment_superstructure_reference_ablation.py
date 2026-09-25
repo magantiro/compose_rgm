@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -48,6 +49,8 @@ def run_shard(contract: dict, output_dir: Path, drug: str, seed: int) -> Path:
     if path.exists():
         checked_shard(path, drug, seed, contract)
         return path
+    if shutil.disk_usage(output_dir).free < contract["minimum_free_bytes"]:
+        raise RuntimeError("uniform superstructure run reached its frozen disk-free floor")
     if Path(sys.executable).resolve() != Path(contract["python_executable"]).resolve():
         raise ValueError("wrong frozen superstructure Python interpreter")
     command = [
