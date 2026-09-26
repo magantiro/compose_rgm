@@ -1,0 +1,25 @@
+{
+  "commit": "e11cd89d64c03a2183b5ac7c6443c2b4f505290c",
+  "environment": "python 3.11.13 rdkit 2023.09.6",
+  "panel_programs": 80,
+  "development_panel": {
+    "attempts_8_occurrences": 640,
+    "completed": 639,
+    "completion_rate": 0.9984,
+    "applicable": 367,
+    "applicable_rate": 0.5743,
+    "with_alternatives": 335,
+    "endpoint_changed": 301,
+    "endpoint_changed_rate": 0.471,
+    "refusals_by_stage": {
+      "rebinding": 1
+    },
+    "seconds_per_attempt": 0.126
+  },
+  "archive_admission": {
+    "arm_c_admitted": 79,
+    "arm_a_admitted_control": 79,
+    "arm_c_endpoints_differing_from_arm_a": 38,
+    "prescribed_program_would_be_rejected": 38
+  }
+}
