@@ -347,3 +347,338 @@ path for a source of truth, with `COMPOSE_ALLOW_REAPABLE_PATH=1` as an explicit 
 - **Manuscript integration** of the A/B ablation into Section 3.4 plus an appendix subsection,
   and a cleanup pass on stale "same learned R_theta everywhere" language, the T4 Sum row over
   unequal-coverage comparator columns, and two literally broken sentences in the T4 appendix.
+
+---
+
+# PART II — the deep file-level account (added after direct inspection)
+
+Everything in Part II was read in this session with `cat`/`grep`/`json.load`, not recalled.
+Where I still cannot verify something I say so.
+
+---
+
+## 9. The docking path, read line by line
+
+**`src/compose_v4/experiments/t4_docking_adapter.py` is 70 lines and is the whole of docking.**
+`dock_t4(smiles, tag, seed, *, box, cpu=1)` does exactly three subprocess calls in `/tmp/<tag>/`:
+
+    1. obabel -:<SMILES> --gen3D -O l.mol            timeout 120   <- NO SEED ACCEPTED
+    2. obabel l.mol -O l.pdbqt                       timeout  60
+    3. /opt/dock/qvina02 --receptor <box.receptor> --ligand l.pdbqt --out o.pdbqt
+         --center_x/_y/_z <box[0]> --size_x/_y/_z <box[1]>
+         --cpu <cpu> --num_modes 10 --exhaustiveness 1 --seed <seed>
+                                                     timeout 300
+
+The score is parsed from the first line starting `REMARK VINA RESULT`, field index 3.
+
+Three properties that matter and that I had only inferred before:
+
+* **`--exhaustiveness 1`.** That is the minimum. QuickVina's search is a single low-effort Monte
+  Carlo run per mode. With `--seed` fixed the search is deterministic *given a conformer*, so
+  the unseeded `--gen3D` really is the only stochastic input — which upgrades my earlier
+  inference to a well-supported one — but exhaustiveness 1 is why a different conformer moves
+  the score so much. **A reorganizer must not "tidy" these flags; they are hashed.**
+* **Silent `None` on failure.** `except (subprocess.SubprocessError, OSError, ValueError): return None`.
+  A docking failure is indistinguishable from an unscorable molecule at this layer.
+* **It refuses to overwrite scratch:** if `l.mol`/`l.pdbqt`/`o.pdbqt` already exist it raises
+  `"docking scratch collision; refusing an unaccounted retry"` rather than deleting a possibly
+  valuable pose. That is deliberate and is why an interrupted cell cannot silently re-dock.
+
+### Where the receptors and the binary come from
+
+MEASURED in `modal_apps/t4_unified_controller_app.py` lines 96-124. At **image build time** the
+image `apt_install`s `openbabel` and curls both the binary and all five receptors from the MOOD
+repository:
+
+    MOOD = https://raw.githubusercontent.com/SeulLee05/MOOD/main/scorer
+    /opt/dock/qvina02                      sha256 f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0
+    /opt/dock/receptors/{parp1,jak2,braf,5ht1b,fa7}.pdbqt
+
+So **the docking environment is an external network dependency resolved at build time.** If MOOD
+moves or changes those files, a rebuilt image is no longer the pinned evaluator. The contract
+carries `evaluator_sha256` with the `qvina02` hash, and the app re-hashes `RECEPTOR_PATH` into
+the run record, so drift is detected — but only at run time, not prevented.
+
+### The box is per-contract data, not code
+
+`contract["docking_box"]` is `[[center_x, center_y, center_z], [size_x, size_y, size_z]]`.
+MEASURED for parp1: `[[26.413, 11.282, 27.238], [18.521, 17.479, 19.995]]`. `contract["docking_seed"]`
+is a single integer for the whole contract (MEASURED 20260918 for the parp1 δ=0.6 replicate
+contract). So all cells of a contract dock with the same qvina seed; the per-cell variation comes
+from the conformer and from which molecules the search proposes.
+
+### The eligibility gate
+
+`src/compose_v4/experiments/t4_fiber_campaign.py` lines 57-62 and 147-157:
+
+    QED_MIN, SA_MAX = 0.6, 4.0
+    REPRESENTABLE_HEAVY_ATOMS = 40
+    if heavy > REPRESENTABLE_HEAVY_ATOMS: reject
+    if similarity < self.delta or quality < QED_MIN or access > SA_MAX: return None
+
+Note the comparators are **non-strict** (`<`, `>`), which is load-bearing: Tanimoto is a ratio of
+small integers and endpoints land exactly on δ routinely, whereas QED and SA are continuous and
+never do. Changing `<` to `<=` on similarity would silently delete real endpoints.
+
+---
+
+## 10. The T4 Modal app, function by function
+
+`modal_apps/t4_unified_controller_app.py` defines five functions. MEASURED decorators:
+
+    proposal_worker   max_containers=36   timeout=1800    (30 min)
+    dock_worker       max_containers=24   timeout=720     (12 min)
+    run_cell          max_containers=3    timeout=20*3600 (20 h)
+    drive             max_containers=1    timeout=21*3600 (21 h)
+    remote_status     max_containers=1    timeout=120
+
+**This is the whole explanation of the throughput ceiling and of the stall.** Per protein app:
+only 3 cells run concurrently, each fanning out to at most 36 proposal and 24 dock containers;
+and the single `drive` container stops launching queued cells after 21 h. Six cells per run
+against 3 slots means half of every run is queued from the start.
+
+### The app is parameterised by environment, one wrapper per arm
+
+    COMPOSE_HELD_VOLUME     e.g. compose-t4-unified-controller-parp1-v1
+    COMPOSE_HELD_OUTPUT     e.g. /unified_parp1
+    COMPOSE_HELD_RECEPTOR_NAME   one of parp1 jak2 braf 5ht1b fa7
+    COMPOSE_HELD_WRAPPER    the wrapper app file, PINNED in runtime_inputs_sha256
+
+The wrapper must be baked into the image because `_validate_task` re-hashes every pinned entry
+**inside the container**. MEASURED: 25+ wrapper files exist, `modal_apps/t4_unified_controller_*_app.py`,
+including the ten `*_{d04,d06}_r23_app.py` for the replicate panel and eight `*_rev_app.py` for
+the revival arm.
+
+### The contracts
+
+Ten replicate-panel contracts and **eight** revival contracts (there is no `5ht1b_d06_rev` or
+`fa7_d06_rev` — those two cells were not lost to the round-0 window):
+
+    configs/t4_unified_controller_{5ht1b,braf,fa7,jak2,parp1}_{d04,d06}_r23_v1.json
+    configs/t4_unified_controller_{5ht1b_d04,braf_d04,braf_d06,fa7_d04,jak2_d04,jak2_d06,parp1_d04,parp1_d06}_rev_v1.json
+
+A contract payload has **40 keys**. The ones a reorganizer must not touch:
+`runtime_inputs_sha256` (**29 pinned files**, listed below), `delta`, `docking_box`,
+`docking_seed`, `evaluator_sha256`, `cells`, `charged_calls_per_cell`,
+`total_charged_call_ceiling`, `authorization`, `scored_launch_authorized`,
+`modal_launch_authorized`, `claim_boundary`, `promotion_criteria`, `replicate_policy`.
+
+The 29 pinned runtime inputs (MEASURED from the parp1 δ=0.6 replicate contract; the set is the
+same shape for the others, with the wrapper filename differing):
+
+    diagnostics/t4_held_target_distillation_quality_v1/parp1_checkpoint.json
+    diagnostics/t4_shared_retained_rewrite_v1/checkpoint.json
+    docs/GENMOL_T4_SEEDS.json
+    modal_apps/t4_unified_controller_app.py
+    modal_apps/t4_unified_controller_parp1_d06_r23_app.py
+    src/compose_v4/control/bridge_region_law.py
+    src/compose_v4/control/complete_region_program.py
+    src/compose_v4/control/dynamic_program_synthesis.py
+    src/compose_v4/control/fiber_control.py
+    src/compose_v4/control/frozen_proposal_escalation.py
+    src/compose_v4/control/progressive_structured_sampler.py
+    src/compose_v4/control/protonation_aware_proposal.py
+    src/compose_v4/control/protonation_restate_program.py
+    src/compose_v4/control/region_law_contract.py
+    src/compose_v4/control/route_distilled_goal_expert.py
+    src/compose_v4/control/structural_subgoal_policy.py
+    src/compose_v4/control/structural_subgoal_realizer.py
+    src/compose_v4/control/t4_unified_routing.py
+    src/compose_v4/control/zero_support_fallback.py
+    src/compose_v4/experiments/t4_docking_adapter.py
+    src/compose_v4/experiments/t4_fiber_campaign.py
+    src/compose_v4/experiments/t4_integrated_route_fiber.py
+    src/compose_v4/experiments/t4_support_expansion.py
+    src/compose_v4/experiments/t4_unified_controller.py
+    src/compose_v4/experiments/t4_unified_proposal.py
+    src/compose_v4/gates/med_chem_gate.py
+    src/compose_v4/rewrite/action_codec_v5.py
+    src/compose_v4/rewrite/kernel.py
+    src/compose_v4/rewrite/operators.py
+
+**Two of those are under `diagnostics/`.** Any reorganization of `diagnostics/` must treat
+`t4_held_target_distillation_quality_v1/` and `t4_shared_retained_rewrite_v1/` as code.
+
+### Cell identity
+
+`contract["cells"]` is a list of 6 dicts per contract, keys:
+`cell` (e.g. `parp1_0_r2`), `controller_seed`, `replicate`, `replicate_1_controller_seed`,
+`smiles` (**the supplied benchmark lead**), `source_cell`, `source_global_index`.
+So `<protein>_<0..2>_r<2|3>` decodes as protein, benchmark lead index, replicate — and the
+replicate-1 seed is carried alongside so a replicate can be traced to the frozen panel.
+
+### 55+ other T4 apps exist
+
+MEASURED: 34 `modal_apps/*.py` reference `qvina`/`obabel`, and 20+ `src/compose_v4/experiments/t4_*.py`
+do. Most are superseded single-purpose arms (`t4_shared_retained_fiber_*`,
+`t4_integrated_route_fiber_*`, `t4_5ht1b2_protonation_rescue_*`, `t4_nodistill_*`). The repo
+keeps superseded arms deliberately. **Do not consolidate them by similarity of name** — several
+are pinned by hash in their own contracts, and some produced numbers in the frozen panel.
+
+---
+
+## 11. The PMO app and the arm machinery, read directly
+
+### App
+
+`modal_apps/pmo_fibercontrol_targets_app.py`. MEASURED decorator on `run_target`:
+`cpu=(1.0, 1.0)`, `timeout=24*60*60`, `retries=modal.Retries(max_retries=3)`. One task per
+container, so 18 campaigns need 18 containers.
+
+Overridable identity, which is what let arm C deploy without touching arm B:
+
+    PMO_FIBERCONTROL_APP      default compose-pmo-fibercontrol-targets
+    PMO_FIBERCONTROL_VOLUME   default compose-pmo-fibercontrol
+
+Baked into the image with `copy=True` (so fixed at **build** time, not launch time):
+`src/`, `scripts/`, the **whole** `configs/` directory, `diagnostics/parent_edit_cycles/prepared/init_20260921.json`,
+`diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json`,
+`modal_apps/pmo_population_v1_app.py`, and `ASSET_DIR` =
+`diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets` (71 MB, **gitignored**).
+Env: `PYTHONPATH=/root/compose/{src,scripts}:/root/compose`, `OMP/OPENBLAS/MKL_NUM_THREADS=1`,
+and a pinned `PYTHONHASHSEED`.
+
+Note the comment in the source: the whole `configs/` directory is baked because `load_contract`
+reads a base contract the scored contract references, and "guessing the closure file-by-file
+already cost one launch."
+
+### Seed derivation — this fully explains every seed number in the tables
+
+    def derived_seed(task, base_seed, replicate=0):
+        return int(base_seed) + 1000 * TARGET_INDEX[task] + replicate
+
+`TARGET_INDEX` is a fixed 23-entry table (deliberately not `hash()`, which is
+`PYTHONHASHSEED`-salted): celecoxib_rediscovery 0, albuterol_similarity 1, mestranol_similarity 2,
+thiothixene_rediscovery 3, troglitazone_rediscovery 4, median1 5, isomers_c7h8n2o2 6,
+perindopril_mpo 7, gsk3b 8, jnk3 9, qed 10, amlodipine_mpo 11, fexofenadine_mpo 12,
+osimertinib_mpo 13, ranolazine_mpo 14, sitagliptin_mpo 15, zaleplon_mpo 16, valsartan_smarts 17,
+deco_hop 18, scaffold_hop 19, isomers_c9h10n2o2pf2cl 20, median2 21, drd2 22.
+
+With `base_seed = 20260923` that gives, for the six ablation objectives at replicates {0,2,3}
+(plus 60 for albuterol and 80 for gsk3b):
+
+    celecoxib_rediscovery   20260923 / 20260925 / 20260926
+    albuterol_similarity    20261923 / 20261925 / 20261983
+    gsk3b                   20268925 / 20268926 / 20269003
+    ranolazine_mpo          20274923 / 20274925 / 20274926
+    scaffold_hop            20279923 / 20279925 / 20279926
+    isomers_c9h10n2o2pf2cl  20280923 / 20280925 / 20280926
+
+### The contract
+
+`configs/pmo_population_controller_v1_scored_contract_corrected.json`, envelope
+`payload_sha256 = ba9515615b341019...`. Payload keys (19): `budget`, `controller_contract`,
+`controller_contract_sha256`, `corrected_source_capsule_manifest`, `corrected_worker_app`,
+`corrected_worker_path`, `implementation_sha256`, `modal_launch_authorized`, `oracle`,
+`oracle_calls_authorized`, `prior_launch_terminal_failure`, `promotion`, `runtime`,
+`schema_version`, `scientific_question`, `scored_launch_authorized`, `status`,
+`supersedes_payload_sha256`, `task_roles`, `tasks`.
+
+`budget` MEASURED: `charged_calls_per_task 250`, `charged_calls_total 750`,
+`initialization_calls_per_task 16`, `queries_per_round 16`, `max_rounds 64`,
+`candidate_calls_per_task 234`, `cpu_per_worker 1`, `automatic_retries 0`, `backfill False`.
+**The ablation ran at 1,008 charged calls, not 250** — the launcher passes `--budget`, and the
+contract's 250 belongs to the earlier pilot. `status` is
+`FROZEN_FAIL_CLOSED_PENDING_NEW_EXPLICIT_PAYLOAD_AUTHORIZATION` with both
+`scored_launch_authorized` and `modal_launch_authorized` **False** — this contract is a frozen
+record, and `pmo_fibercontrol_targets_app.py` does **not** consult it at run time (`CONTRACT` is
+assigned at line 45 and referenced nowhere else). `load_contract` in
+`src/compose_v4/experiments/pmo_population_v1.py` verifies it only on the *other* PMO app path.
+
+`implementation_sha256` pins **8** files: `modal_apps/pmo_population_v1_app.py`,
+`src/compose_v4/control/{bootstrap_pool_continuity,pmo_credit,pmo_population_controller,pmo_realization,program_campaign}.py`,
+`src/compose_v4/experiments/{pmo_oracle_assets,pmo_population_v1}.py`.
+**The proposal-synthesis path is NOT among them** — so `dynamic_program_synthesis_v21.py`,
+`pmo_uniform_chain.py` and `pmo_binding_intervention.py` are unpinned, and arm identity rests on
+the launch receipt's `git_commit` plus the deployed image.
+
+### The three arm modules
+
+    src/compose_v4/control/pmo_legal_mark_sampler.py   179 lines
+        LegalMarkSampler(graph).draw(rng, max_attempts=512) -> (rule, action) | None
+        CHEAP_RULES = atom_delete, atom_insert, bond_reorder, bond_reroute, cycle_open,
+                      ring_system_restate        (enumerated exhaustively)
+        LAZY_RULES  = cycle_close, atom_restate_semantic
+                      (sampled by rejection from the enumerator's own tentative set)
+        Exactness argument is in the module docstring: family chosen with probability
+        proportional to |S_f|, element uniform within, reject on inadmissibility, so
+        P(a | accepted) = 1/|A(x)|. Choosing the family UNIFORMLY would define a different law.
+
+    src/compose_v4/control/pmo_uniform_chain.py       216 lines   ARM B
+        ENV_FLAG = "PMO_UNIFORM_CHAIN"   STAGE_NAME = "uniform_legal_chain"
+        chain_arm_enabled(), uniform_legal_chain(...), STATS + snapshot_stats(reset=True)
+
+    src/compose_v4/control/pmo_binding_intervention.py 508 lines  ARM C, frozen at e11cd89d
+        ENV_FLAG = "PMO_BINDING_REBIND"  STAGE_NAME = "created_atom_rebinding"
+        MAX_JOINT_CANDIDATES = 256
+        binding_rng(run_seed, proposal_id)      blake2b, never hash()
+        created_operands(record)                excludes an atom_insert's own birth slot
+        execute_rebound_program(...)            per-step resampling, executor decides admissibility
+        execute_program_graph_rebound(...)      production seam; rebuilds + reschedules + replays
+        binding_arm_enabled()                   raises if PMO_UNIFORM_CHAIN is also set
+        STATS + snapshot_stats(reset=True)
+
+Both arms hook the same file, `src/compose_v4/control/dynamic_program_synthesis_v21.py`:
+**arm B at line 389** (`if chain_arm_enabled():` → `uniform_legal_chain` at 397, after
+`source, program, binding, metadata = result` so it inherits arm A's synthesis-success filter and
+its arbitration RNG), **arm C at line 433** (`if binding_arm_enabled():` →
+`execute_program_graph_rebound` at 444, replacing the `execute_program_graph` call inside
+`_generate_channel_pool`). Arm C's is the only call site of the rebound executor in the entire
+tree.
+
+### Launcher and receipts
+
+`tools/launch_pmo_fibercontrol_targets.py` with `--targets --budget --rounds --queries
+--base-seed --replicate --stage {smoke,scored} --receipt` plus `--uniform-chain-arm` /
+`--binding-rebind-arm` (refused together). It `spawn`s, never `call`s, so targets are submitted
+without waiting. The arm appears in the label and the namespace so two arms cannot share one.
+
+Receipts, both directories committed:
+
+    diagnostics/pmo_fibercontrol_targets_v1/        5 files, ARM B launches (20260925T2003xx)
+    diagnostics/pmo_fibercontrol_targets_armc_v1/   5 files, ARM C launches (20260925T2336xx)
+        including launch_scored_20260925T233700Z_replicate60_recovered.json, reconstructed
+        after two same-second launches collided on the receipt path. The path is now
+        arm/replicate-scoped and refuses to overwrite.
+
+---
+
+## 12. The reduction scripts — now in the repo, not /tmp
+
+Every number in the reports came from scripts that lived in `/tmp`. They are promoted to
+`compose_pmo_chain/scripts/reductions_20260927/` with a README giving the exact invocation and
+the required `MODAL_PROFILE` per script: `arm_metrics.py`, `arm_status.py`, `t4_full.py`,
+`t4_eta.py`, `armc_health.py`, `full_report.py`.
+
+**Still ephemeral and not promoted** (probe/one-shot, listed so nobody hunts for them):
+`/tmp/armc_admission.py`, `/tmp/armc_consolidated.py`, `/tmp/armc_prodpath.py`,
+`/tmp/armc_mut*.py` (the mutation batteries), `/tmp/armc_selfconsistency_tests.py`,
+`/tmp/find_armA.py`, `/tmp/scan_armA.py`, `/tmp/gather_arms.py`, `/tmp/t4_timeout.py`,
+`/tmp/t4_table.py`, `/tmp/t4_two_col.md`, `/tmp/full_report.py` inputs. The mutation batteries
+matter most if arm C is ever revised — they are reconstructable from
+`diagnostics/pmo_armc_verification_v1/VERIFICATION.md`, which lists all 13 mutations and their
+verdicts.
+
+`~/compose_pmo_ablation` (unversioned, 140 KB) holds exactly:
+`frozen_config_v1.json`, `CORRECTIONS_AND_BINDINGS.md`, `MECHANISM_REPORT_PART{1..5}.md`,
+`armC/{FROZEN_ARM_C_V1.md,dev_panel.py,dev_panel_v1.json}`, and
+`inputs/pmo_1k_{final,auc,clean,prov}.json`. **`inputs/pmo_1k_final.json` is the only local copy
+of arm A's per-seed best/top10/auc** and is what every A/B table reads.
+
+---
+
+## 13. Things I do not know, stated as such
+
+* I have not audited `archive/`, `output/`, `tmp/`, `upload/`, `results/`, `data/`,
+  `experiments/`, `third_party/` or the four `COMPOSE_ICLR_2027_*` directories. I do not know
+  what references them.
+* I do not know which of the 533 `diagnostics/` entries are pinned by a config. The check is
+  `grep -rl "<name>" configs/ src/ modal_apps/` before moving anything; at least two are pinned
+  by T4 contracts and one gitignored directory is baked into the PMO image by literal path.
+* I have not verified that `configs/` is absent from the training run-identity fingerprint;
+  that came from `learnings.md`, not from my own reading of the fingerprint code.
+* The MOOD receptor/binary URLs are an external dependency I have not checked for stability.
+* Whether the remaining 8 revival contracts correspond exactly to the 15 no-checkpoint cells is
+  unverified; I matched deltas by contract hash but did not cross-check the cell lists.
+* The repo remote now reports **moved to `https://github.com/magantiro/compose_rgm.git`**.
+  Pushes succeed through the redirect. I have not updated any remote URL.
