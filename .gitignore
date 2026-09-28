@@ -118,3 +118,16 @@ diagnostics/**/source_capsule_v[0-9]/
 # Zero-oracle gate workspace: 67 MB of campaign state rebuilt from scratch on every run.
 # The 9 KB report beside it is the artifact worth keeping.
 diagnostics/pmo_reward_adaptive_gate_v1/dryrun/
+
+# Upstream TDC oracle pickles (drd2/gsk3b/jnk3), 71 MB, downloaded on demand by PyTDC
+# into the directory the AssetPinnedOracle pins around every call.  Redownloadable, so
+# never worth a place in history -- but a launch needs them present locally first.
+oracle/*.pkl
+
+# Cumulative per-round campaign snapshots.  round_000N/complete.json CONTAINS every
+# earlier round, so a 7-round campaign stores itself seven times (222 MB across the
+# three canary runs).  pending.json is the same shape for the un-charged batch.  The
+# load-bearing records -- oracle/query_*/result.json receipts, manifest, progress,
+# canary and equivalence reports -- are ~3 MB and ARE committed beside them.
+diagnostics/**/campaign/round_*/complete.json
+diagnostics/**/campaign/round_*/pending.json
