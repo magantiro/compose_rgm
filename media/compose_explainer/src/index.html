@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>COMPOSE explainer</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #222; }
+  #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+  canvas { display: block; width: 1920px; height: 1080px; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="cv" width="3840" height="2160"></canvas></div>
+
+<script src="../assets/molecules.js"></script>
+<script src="core.js"></script>
+<script src="lattice.js"></script>
+<script src="scenes_a.js"></script>
+<script src="canon.js"></script>
+<script src="scenes_b.js"></script>
+<script>
+'use strict';
+
+// ---- Timeline ----
+// Durations in seconds. The film is 71.5 s at FPS frames per second; every
+// frame is a pure function of its index, so renders are reproducible.
+const FPS = 60;
+const SCENES = [
+  { name: 's1_problem',     fn: scene1, dur:  8.5 },
+  { name: 's2_limitation',  fn: scene2, dur: 11.0 },
+  { name: 's3_core',        fn: scene3, dur: 20.0 },
+  { name: 's4_mechanism',   fn: scene4, dur: 14.0 },
+  { name: 's5_results',     fn: scene5, dur: 11.0 },
+  { name: 's6_close',       fn: scene6, dur:  7.0 },
+];
+const XFADE = 0.55;                       // cross-dissolve at scene boundaries
+
+let T0 = 0;
+SCENES.forEach(s => { s.t0 = T0; T0 += s.dur; });
+const TOTAL = T0;
+const NFRAMES = Math.round(TOTAL * FPS);
+
+const cv = document.getElementById('cv');
+const g = cv.getContext('2d', { alpha: false });
+setCtx(g);
+
+let ready = false;
+const ERRORS = [];
+
+/** Render a single frame by index. Deterministic: no clock, no RNG. */
+function renderFrame(i) {
+  const time = i / FPS;
+
+  g.save();
+  g.setTransform(2, 0, 0, 2, 0, 0);       // 2x backing store for crisp lines
+  g.fillStyle = C.bg;
+  g.fillRect(0, 0, W, H);
+  g.textRendering = 'geometricPrecision';
+
+  // Which scenes are live at this time, including the cross-dissolve overlap.
+  SCENES.forEach((s, si) => {
+    const local = time - s.t0;
+    const next = SCENES[si + 1];
+    let a = 0;
+    if (local >= -XFADE && local < s.dur + XFADE) {
+      a = 1;
+      // Fade in over the tail of the previous scene.
+      if (local < 0) a = 0;                   // handled by the previous scene's tail
+      // Outgoing tail.
+      if (next && local > s.dur) a = 1 - c01((local - s.dur) / XFADE);
+      // Incoming head: rise while the previous scene is still fading.
+      if (local >= 0 && local < XFADE && si > 0) a = ease.inOut(c01(local / XFADE));
+    }
+    if (a <= 0.002) return;
+    g.save();
+    g.globalAlpha = a;
+    // Errors are recorded rather than swallowed: a scene that throws must be
+    // visible to the driver, not silently blank.
+    try { s.fn(local, s.dur); }
+    catch (e) { ERRORS.push(`frame ${i} scene ${s.name}: ${e.message}`); }
+    g.restore();
+  });
+
+  g.restore();
+}
+
+// Expose the timeline to the renderer.
+window.COMPOSE = {
+  renderFrame,
+  get nframes() { return NFRAMES; },
+  get fps() { return FPS; },
+  get total() { return TOTAL; },
+  scenes: SCENES.map(s => ({ name: s.name, t0: s.t0, dur: s.dur })),
+  get errors() { return ERRORS.slice(0, 40); },
+  clearErrors() { ERRORS.length = 0; },
+  get ready() { return ready; },
+};
+
+// ---- Bind molecule geometry, then signal readiness ----
+setMolecules(MOLECULES);
+// Warm the font stack so the first screenshot is not unstyled.
+g.save();
+g.font = '600 52px ' + F.sans; g.measureText('warm');
+g.font = 'italic 400 30px ' + F.serif; g.measureText('warm');
+g.font = '400 16px ' + F.mono; g.measureText('warm');
+g.restore();
+renderFrame(0);
+ready = true;
+document.title = 'ready';
+</script>
+</body>
+</html>
