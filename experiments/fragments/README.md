@@ -4,10 +4,11 @@ This is the task entry point for COMPOSE's fragment experiments. It covers motif
 extension, superstructure generation, scaffold decoration, and linker design.
 Scaffold morphing uses the linker outputs and is not a separate generation run.
 
-**Available now:** offline verification and reproduction of COMPOSE's benchmark
-and ablation tables from frozen per-prompt/per-seed metrics. **Not yet available
-from this checkout:** a portable, verified end-to-end generation command. The
-historical generators and complete traces are preserved, not silently replaced.
+Available: offline table reproduction, hash-checked local asset installation,
+and isolated CPU generation for all four tasks and the superstructure ablation.
+See [the generation guide](GENERATION.md) for setup, commands, saved-attempt
+parity checks, and access limits. The original generators are preserved
+byte-for-byte; complete 3,000-slot regeneration is not claimed verified.
 
 ## Reproduce the saved results
 
@@ -85,9 +86,15 @@ src/compose_v4/experiments/fragments/
     evidence.py       schema, path, and hash checks
     reduction.py      pure row aggregation and optional bootstrap
     reporting.py      readable reports, provenance, safe publication
+    assets.py         offline asset validation and safe copies
+    generation.py     source isolation, execution, parity, publication
+    generation_worker.py  thin adapter to preserved task samplers
     __main__.py       thin command-line interface
 experiments/fragments/
     manifest.json     explicit experiment-to-evidence map
+    assets.json       required asset identities and access boundaries
+    runtime/          small source archives with per-file hashes
+    fixtures/         identity-selected original receipts and contracts
     README.md         usage and scientific scope
 diagnostics/          immutable source results and versioned reductions
 tests/test_fragment_evidence.py
@@ -95,7 +102,8 @@ tests/test_fragment_evidence.py
 
 This uses the existing repository conventions: shared code by responsibility,
 experiment navigation by task, and artifacts separate from executable code.
-There is no separate reviewer API or second implementation of COMPOSE.
+There is no separate reviewer API. Source snapshots preserve existing COMPOSE
+implementations; the adapters do not reimplement proposal laws.
 
 The main checkout already contained the locked motif, decoration, and linker
 selection reductions. Four small artifacts were imported **byte-for-byte** from
@@ -113,32 +121,36 @@ preserves the measured values and flags the difference. It does not modify the
 manuscript or rewrite frozen results to match a printed number. Published
 external baseline columns are not re-verified by this command.
 
-## What still blocks end-to-end reproduction
+## Distribution and verification limits
 
 | Component | Current state | Required next step |
 | --- | --- | --- |
 | Saved metric rows | Included and hash-verified | None for table reduction |
 | Full attempted proposal panels and trajectories | Preserved in historical worktrees, not distributed here | Inventory, hash-check, package with access/license information |
 | Fragment checkpoint | Identified by SHA-256 in the manifest; local-only access | Establish a permitted, stable distribution route |
-| Training-derived catalogs and priors | Preserved with the historical tasks | Bring the exact frozen assets into the portable dependency closure |
-| Official InVirtuoGen evaluator | External, pinned revision and metrics hash | Preserve its distinct license/access requirements and verify its fetch path |
-| Generator launchers | Historical worktree revisions indexed in the manifest | Separate orchestration from reusable code, reconcile dependencies, and test parity |
-| Shared model/executor | Frozen fragment versions differ from primary checkout | Audit the differences without overwriting files pinned by other experiments |
+| Training-derived catalogs and priors | Verified local copies; originals preserved | Establish distribution/access and license information |
+| Official InVirtuoGen evaluator | Six pinned blobs required; local copies verified | Keep external licensing distinct; no automatic download |
+| Generator interface | Portable isolated runner; bounded parity available | Full-panel rerun is separate, potentially expensive work |
+| Shared model/executor | Frozen task dependency closures preserved | Future refactors need additional parity; current core unchanged |
 
 Do not use a similarly named development runner as a substitute. The historical
 launchers also check original interpreter paths, ancestry, development records,
 and file hashes. Copying one script into this checkout is not enough to reproduce
 the run. The [integration contract](../../docs/FRAGMENT_REPOSITORY_INTEGRATION.md)
-records the safe migration boundary. Full generation is **not claimed verified**.
+records the migration boundary and measured checks. Local copies on one disk are
+not an off-machine backup. A fresh clone without the assets cannot regenerate
+molecules. CPU/platform portability beyond the checked environment is unverified.
 
 ## Tests
 
 ```bash
-KMP_DUPLICATE_LIB_OK=TRUE OMP_NUM_THREADS=1 .venv/bin/pytest -q tests/test_fragment_evidence.py tests/test_fragment_locked_panel_selection_v1.py
-.venv/bin/ruff check src/compose_v4/experiments/fragments tests/test_fragment_evidence.py
+PYTHONPATH=src:scripts .venv_pinned_chem/bin/python -m pytest -q tests/test_fragment_evidence.py tests/test_fragment_runtime.py tests/test_fragment_locked_panel_selection_v1.py
+.venv/bin/ruff check src/compose_v4/experiments/fragments tests/test_fragment_evidence.py tests/test_fragment_runtime.py
 ```
 
 The integration tests build a minimal source export containing only the declared
 inputs and reduction package, then run it with Python's site packages disabled.
 They cover corrupted/missing inputs, duplicate or incomplete panels, metric and
 lineage mismatches, deterministic output, and refusal to overwrite user files.
+Runtime unit tests also check source archive integrity, traversal/symlink refusal,
+preserving copies, environment drift, and explicit negative parity results.

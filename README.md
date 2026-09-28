@@ -19,8 +19,8 @@ Three layers, kept separate on purpose:
 ## Start here
 
 For the fragment suite, start with **[`experiments/fragments/`](experiments/fragments/)**:
-offline result verification, benchmark/ablation table reproduction, exact evidence
-identities, and the remaining end-to-end generation dependencies. This is a local
+offline table reproduction, verified asset setup, and isolated fragment generation
+with saved-attempt parity checks. This is a local
 integration; it does not change the submitted paper or the PMO/T4 protocols.
 
 1. **[`docs/START_HERE_ICLR.md`](docs/START_HERE_ICLR.md)**: authoritative

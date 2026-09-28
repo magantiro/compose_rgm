@@ -195,7 +195,16 @@ def provenance(evidence: Evidence, report: dict) -> dict:
         "integration_worktree_changes": tracked.stdout.splitlines()
         if tracked.returncode == 0
         else None,
-        "implementation_sha256": {p.name: sha256(p) for p in sorted(code_dir.glob("*.py"))},
+        "implementation_sha256": {
+            name: sha256(code_dir / name)
+            for name in (
+                "__init__.py",
+                "__main__.py",
+                "evidence.py",
+                "reduction.py",
+                "reporting.py",
+            )
+        },
         "manifest_sha256": sha256(evidence.manifest_path),
         "input_artifacts": evidence.manifest["artifacts"],
         "configuration": {
