@@ -35,6 +35,9 @@ from compose_v4.rewrite.trace_shard import decode_state, encode_state
 SCHEMA = "dynamic_program_synthesis_v2"
 SHALLOW_CHANNEL = "shallow_program_channel"
 STRUCTURED_CHANNEL = "structured_program_channel"
+# The third generic lane T4 samples and PMO never imported.  See pmo_channels for the
+# measured yield that makes it a restoration rather than a new mechanism.
+ANCHORED_CHANNEL = "anchored_replacement_channel"
 CHANNELS = (SHALLOW_CHANNEL, STRUCTURED_CHANNEL)
 
 STRUCTURED_PRIOR = 0.25
