@@ -1,0 +1,108 @@
+{
+  "adapter_sha256": {
+    "__init__.py": "0250fe07e87f1413802375589ffc9c45986fc4ab2f2fe5cf0b6e9892c41977b0",
+    "__main__.py": "e0a7fe5507f4d7f6d8dd26d01532f6543163b26b7dbe5435a77869ace885f388",
+    "assets.py": "88f728f09a567909baf95e03bd62e388b667fc4c38567fe083af061072ea5a5f",
+    "evidence.py": "269fae326ce7a4eda4d2d654ca5cef3271325492f5df88d96c51e2576c83e45c",
+    "generation.py": "b7fce699602dba295fe7cc4b7b0d5b0855c7b8a8a71382105274dd38b46fd8b9",
+    "generation_worker.py": "55ffc9bfee4a4319a15c8d94c484b27a5cbc364947eeb2bac4b21e6938060cec",
+    "reduction.py": "0710b8f94d0a73d15960cbd70a8f9f28e1cdba8874a39d0957e159192607280e",
+    "reporting.py": "afcbd77d7829ed5012f8aa78042bc47d685414021157bb6bd3ba7eee4dc0233b"
+  },
+  "asset_registry_sha256": "84b76b45d15dd6c5aa039c34f39ad7cd55ef7d3cf9e830d9518bbe4b180f2a43",
+  "code_revision": "6027450baee3a153df531bce11d4459779a13b1e",
+  "created_at_utc": "2026-09-28T02:22:54.508448+00:00",
+  "limitations": [
+    "Full-suite collection fails on a pre-existing Python 3.11 protocol introspection test.",
+    "Repository-wide Ruff still reports 513 pre-existing findings outside this package.",
+    "Whole-panel generation, other hardware/OS, public asset distribution and raw-panel replay are not verified here.",
+    "Original files are preserved; local copies do not provide off-machine backup."
+  ],
+  "parity": {
+    "linker_design": {
+      "attempts": 2,
+      "files_sha256": {
+        "parity.json": "6191563c7e3e84e26f91a47eba6c4ec17e60742d2eb86440eb7e04da11771bcb",
+        "provenance.json": "ff312efe751c7e2fc475425ff589b1f27ee307565b1c59293546a4023e69f378",
+        "result.json": "e84a7570a7557d65431a65f32accc83c5a03a62be8b355949d3518114d5751c3",
+        "worker.log": "931e8baee88112c95194fadbf8e56d687f3c0fcbb4f19f3d5c3d76818f6a7dd9"
+      },
+      "passed": true,
+      "source": "runs/fragments/verification_20260927_v2/test_source_export_saved_attem2/result"
+    },
+    "motif_extension": {
+      "attempts": 1,
+      "files_sha256": {
+        "parity.json": "c81c53472a6e9ced87aa3c8c24cf53fcc2c88b4f74a50eb37ba7beb13f077f0d",
+        "provenance.json": "d8f47db665770b9896f853170fef91b63e683a5ccaa2e69d122137a743049d3a",
+        "result.json": "ea4f7d833f7559dad850888514408e96e62a42b2ca69e8138526bab28f5b0223",
+        "worker.log": "08801430a7d04633a53a439ba434d9d4f17123c6fcd17cc02169e06a4a68f8d7"
+      },
+      "passed": true,
+      "source": "runs/fragments/verification_20260927_v2/test_source_export_saved_attem0/result"
+    },
+    "scaffold_decoration": {
+      "attempts": 1,
+      "files_sha256": {
+        "parity.json": "f7102fd2e72e42f69d210543f4bf59d5d3b1d21c8d0f6a2675710f9bfd806d2b",
+        "provenance.json": "e84c6f89dfcd22a5ee42c90b0f8ee78267d66043bdef3705341778a9f245ee2f",
+        "result.json": "558547921f0d0455a01c34cf57481e2c6ffd85de3e17103bd9502f44bfe68a0c",
+        "worker.log": "11b3c5f34448593e7cd404d1a639c7ebaec1ffc1ae9dd8ee920716be34b6c4e7"
+      },
+      "passed": true,
+      "source": "runs/fragments/verification_20260927_v2/test_source_export_saved_attem1/result"
+    },
+    "superstructure_generation": {
+      "attempts": 1,
+      "files_sha256": {
+        "parity.json": "af0c06519b8d5aeae62bf33990ce6a34e43bcff42e9779afad4d974817adb3c4",
+        "provenance.json": "4427a2d5114d95c0a46915fa46a936261f4cb225e543d7bab83dcc2ce328e8b6",
+        "result.json": "62a8ba39c22b0f5cb37364bc92c91e5736921470282883b4dc35debbb3b7633f",
+        "worker.log": "c5ba07ef2d92124c19ce875d0a3444b0d3f632ad19037b7dc0c879301f9c131a"
+      },
+      "passed": true,
+      "source": "runs/fragments/verification_20260927_v2/test_source_export_saved_attem3/result"
+    },
+    "superstructure_uniform": {
+      "attempts": 1,
+      "files_sha256": {
+        "parity.json": "9104c9dd6086a1f4cbeca6ba7fcfd223491913b7bb97320c0171a56b037ce020",
+        "provenance.json": "0cebb95a9e11ee41ad7525fc3695b8a3ea4b5565992cece65bd2ea2de3e8f3a5",
+        "result.json": "b98e2fc886e07236e3f4c3f732f9c8ce0e5194f5662be72addfe382c93bb89c3",
+        "worker.log": "f3831e731731b4a1ca8702a71e41293c275c14e02b129090bd1a1613f96d1999"
+      },
+      "passed": true,
+      "source": "runs/fragments/verification_20260927_v2/test_source_export_saved_attem4/result"
+    }
+  },
+  "reporter_sha256": "a9868191d96bfb583a82165700b2e9d7fd4d9acd813da1a3e1cad411512d0596",
+  "schema": "compose_fragment_runtime_verification_v1",
+  "scope": "local source-export saved-attempt parity and workflow tests, not a new benchmark campaign",
+  "task_manifest_sha256": "9668aaf4fda62e4a06e41bae6c9b5239fa6d4daa374b9ed1f4b81712de4e2faa",
+  "test_results": {
+    "focused": {
+      "errors": 0,
+      "failures": 0,
+      "path": "diagnostics/fragment_runtime_integration_v1/focused.xml",
+      "sha256": "fa544025e98e49fd36654b92bc46576d588f048f837f531caee0b8615b247686",
+      "skipped": 0,
+      "tests": 62
+    },
+    "focused_attempt1": {
+      "errors": 0,
+      "failures": 5,
+      "path": "diagnostics/fragment_runtime_integration_v1/focused_attempt1.xml",
+      "sha256": "32b543c5eeb50c74c002fc8d7c25dfb83e7e4f92e4e3639ab16e7e83408f0af6",
+      "skipped": 0,
+      "tests": 61
+    },
+    "full_suite": {
+      "errors": 1,
+      "failures": 0,
+      "path": "diagnostics/fragment_runtime_integration_v1/full_suite.xml",
+      "sha256": "0d9068d34b0171093eebf9ef3b32761523512740f8f7bb648bcabf95f45b15c9",
+      "skipped": 1,
+      "tests": 2
+    }
+  }
+}

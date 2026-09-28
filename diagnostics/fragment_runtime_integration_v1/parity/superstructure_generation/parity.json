@@ -1,0 +1,27 @@
+{
+  "attempts_checked": 1,
+  "comparison": "exact JSON values; complete program panels including RNG/probabilities, or superstructure accepted actions/events/endpoints",
+  "differences": [],
+  "inputs": [
+    {
+      "path": "superstructure_generation/configs/fragment_superstructure_official_v2.json",
+      "sha256": "0b91b3e6aef22743b212c4dd0e45115026df2d512c550a986bac4106ea4d386c",
+      "source_path": "configs/fragment_superstructure_official_v2.json",
+      "source_revision": "a16ef9417cdf44d50381fbb8e5069edc31e7c9df"
+    },
+    {
+      "path": "superstructure_generation/diagnostics/fragment_superstructure_official_v2/shards/superstructure_generation__BARICITINIB__seed0.json",
+      "sha256": "1f70fdfa46c5520bb07556f988cdaceb68f2626fd75dd8aa2504bc4bf8e2b23b",
+      "source_path": "diagnostics/fragment_superstructure_official_v2/shards/superstructure_generation__BARICITINIB__seed0.json",
+      "source_revision": "a16ef9417cdf44d50381fbb8e5069edc31e7c9df"
+    }
+  ],
+  "limit": "bounded implementation parity, not a full benchmark rerun or a statistical result",
+  "matches": [
+    true
+  ],
+  "passed": true,
+  "schema": "compose_fragment_runtime_parity_v1",
+  "selection": "first BARICITINIB attempt at first declared seed; first two linker attempts",
+  "task": "superstructure_generation"
+}

@@ -1,0 +1,27 @@
+{
+  "attempts_checked": 1,
+  "comparison": "exact JSON values; complete program panels including RNG/probabilities, or superstructure accepted actions/events/endpoints",
+  "differences": [],
+  "inputs": [
+    {
+      "path": "scaffold_decoration/configs/fragment_decoration_official_v2.json",
+      "sha256": "e021380fc227faa6456365db12e4b44736663f559c6e0dbdf4a21755915ee033",
+      "source_path": "configs/fragment_decoration_official_v2.json",
+      "source_revision": "b5e47834fb0cdaea4bd24c02aac5ec0e8f737dd6"
+    },
+    {
+      "path": "scaffold_decoration/diagnostics/fragment_decoration_official_v2/seed8/attempts/frozen/BARICITINIB_000.json",
+      "sha256": "52550f5e224dfd6f84edc0587c3808e13ec8fb8cad2f5958d91f417c84e041c8",
+      "source_path": "diagnostics/fragment_decoration_official_v2/seed8/attempts/frozen/BARICITINIB_000.json",
+      "source_revision": "b5e47834fb0cdaea4bd24c02aac5ec0e8f737dd6"
+    }
+  ],
+  "limit": "bounded implementation parity, not a full benchmark rerun or a statistical result",
+  "matches": [
+    true
+  ],
+  "passed": true,
+  "schema": "compose_fragment_runtime_parity_v1",
+  "selection": "first BARICITINIB attempt at first declared seed; first two linker attempts",
+  "task": "scaffold_decoration"
+}

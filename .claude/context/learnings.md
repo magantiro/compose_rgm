@@ -1335,3 +1335,23 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
 - The motif/superstructure interval reductions originally used NumPy 2.5.3;
   decoration/linker used 1.26.4. Recomputing the saved bootstrap algorithms in
   NumPy 1.26.4 matched all four tasks' intervals to absolute tolerance 1e-10.
+
+### 2026-09-27 — isolated fragment runtime integration
+
+- Fragment generators now have an offline task entry point with exact asset
+  installation and source-archive isolation. Keep primary model/executor files
+  unchanged: the historical fragment versions differ and are needed for parity.
+  Twelve local assets were copied and hash-verified; originals and all worktrees
+  remain. This is not a public distribution or an off-machine backup.
+- Static imports alone missed the motif's caller-supplied JointCompletionSampler.
+  Include constructor roots in source captures; the first real parity attempt
+  caught this before a molecule was generated. Five exported runtimes subsequently
+  matched six identity-selected saved attempts. Whole-panel equality is untested.
+- `git -C export rev-parse HEAD` can identify an enclosing checkout even when the
+  export has no Git metadata. Require the source root's own `.git` marker first.
+  A regression test covers this. Use Python `-s -P` with a cleaned environment
+  for runtime isolation; `-I` would ignore the explicitly pinned PYTHONHASHSEED.
+- The focused integration suite passed 62 tests. Full-suite collection still
+  fails under Python 3.11 on `StructuralDecisionIndex.__protocol_attrs__` in the
+  pre-existing structural protocol test. Do not portray the whole repo as green.
+  See `diagnostics/fragment_runtime_integration_v1/` for exact receipts and limits.

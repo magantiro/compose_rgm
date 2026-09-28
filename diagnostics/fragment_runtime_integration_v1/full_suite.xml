@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="1" tests="2" time="7.090" timestamp="2026-09-27T22:17:54.730456-04:00" hostname="BGS-STU23-147"><testcase classname="" name="tests.test_pan_lung_filtering" time="0.000"><skipped message="collection skipped">('/Users/rmaganti/compose_rgm_git/tests/test_pan_lung_filtering.py', 9, "Skipped: could not import 'joblib': No module named 'joblib'")</skipped></testcase><testcase classname="" name="tests.test_process_v2_structural_protocol" time="0.000"><error message="collection failure">tests/test_process_v2_structural_protocol.py:270: in &lt;module&gt;
+    sorted(StructuralDecisionIndex.__protocol_attrs__),
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: type object 'StructuralDecisionIndex' has no attribute '__protocol_attrs__'</error></testcase></testsuite></testsuites>

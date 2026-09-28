@@ -1,0 +1,599 @@
+{
+  "cells": [
+    {
+      "attempts": [
+        {
+          "accepted_actions": [
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 3,
+                "formal_charge": 0,
+                "implicit_h_count": 1,
+                "neighbors": [
+                  [
+                    8,
+                    2
+                  ]
+                ],
+                "slot": 18
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomDelete",
+              "payload": {
+                "v": 18
+              },
+              "rule": "atom_delete"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    9,
+                    1
+                  ]
+                ],
+                "slot": 18
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    18,
+                    1
+                  ]
+                ],
+                "slot": 19
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    19,
+                    1
+                  ]
+                ],
+                "slot": 20
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    20,
+                    1
+                  ]
+                ],
+                "slot": 21
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomDelete",
+              "payload": {
+                "v": 21
+              },
+              "rule": "atom_delete"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    20,
+                    1
+                  ]
+                ],
+                "slot": 21
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    21,
+                    1
+                  ]
+                ],
+                "slot": 22
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    22,
+                    1
+                  ]
+                ],
+                "slot": 23
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 4,
+                "formal_charge": 0,
+                "implicit_h_count": 1,
+                "neighbors": [
+                  [
+                    23,
+                    1
+                  ]
+                ],
+                "slot": 24
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 4,
+                "formal_charge": 0,
+                "implicit_h_count": 0,
+                "neighbors": [
+                  [
+                    23,
+                    2
+                  ]
+                ],
+                "slot": 25
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 3,
+                "formal_charge": 0,
+                "implicit_h_count": 2,
+                "neighbors": [
+                  [
+                    4,
+                    1
+                  ]
+                ],
+                "slot": 26
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 6,
+                "formal_charge": 0,
+                "implicit_h_count": 4,
+                "neighbors": [
+                  [
+                    24,
+                    1
+                  ]
+                ],
+                "slot": 27
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 4,
+                "formal_charge": 0,
+                "implicit_h_count": 1,
+                "neighbors": [
+                  [
+                    27,
+                    1
+                  ]
+                ],
+                "slot": 28
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 4,
+                "formal_charge": 0,
+                "implicit_h_count": 0,
+                "neighbors": [
+                  [
+                    27,
+                    2
+                  ]
+                ],
+                "slot": 29
+              },
+              "rule": "atom_insert"
+            }
+          ],
+          "attempt_index": 0,
+          "committed_smiles": "Nc1nn(C2CN(CCCCCC(=O)O[PH](=O)O)C2)cc1-c1ncnc2[nH]ccc12",
+          "emitted_smiles": "Nc1nn(C2CN(CCCCCC(=O)O[PH](=O)O)C2)cc1-c1ncnc2[nH]ccc12",
+          "events": 16,
+          "rng_state_after": {
+            "bit_generator": "PCG64",
+            "has_uint32": 0,
+            "state": {
+              "inc": 19185800504482561566053635366319880887,
+              "state": 261943192357739678523705391878195525597
+            },
+            "uinteger": 0
+          },
+          "rng_state_before": {
+            "bit_generator": "PCG64",
+            "has_uint32": 0,
+            "state": {
+              "inc": 19185800504482561566053635366319880887,
+              "state": 215803917068374744136410399562320878292
+            },
+            "uinteger": 0
+          }
+        }
+      ],
+      "chemical_samples": [
+        "Nc1nn(C2CN(CCCCCC(=O)O[PH](=O)O)C2)cc1-c1ncnc2[nH]ccc12"
+      ],
+      "prompt": "BARICITINIB",
+      "rng_seed": 722072583,
+      "sampling_receipt": {
+        "action_traces": [
+          [
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 3,
+                "formal_charge": 0,
+                "implicit_h_count": 1,
+                "neighbors": [
+                  [
+                    8,
+                    2
+                  ]
+                ],
+                "slot": 18
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomDelete",
+              "payload": {
+                "v": 18
+              },
+              "rule": "atom_delete"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    9,
+                    1
+                  ]
+                ],
+                "slot": 18
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    18,
+                    1
+                  ]
+                ],
+                "slot": 19
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    19,
+                    1
+                  ]
+                ],
+                "slot": 20
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    20,
+                    1
+                  ]
+                ],
+                "slot": 21
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomDelete",
+              "payload": {
+                "v": 21
+              },
+              "rule": "atom_delete"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    20,
+                    1
+                  ]
+                ],
+                "slot": 21
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    21,
+                    1
+                  ]
+                ],
+                "slot": 22
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 2,
+                "formal_charge": 0,
+                "implicit_h_count": 3,
+                "neighbors": [
+                  [
+                    22,
+                    1
+                  ]
+                ],
+                "slot": 23
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 4,
+                "formal_charge": 0,
+                "implicit_h_count": 1,
+                "neighbors": [
+                  [
+                    23,
+                    1
+                  ]
+                ],
+                "slot": 24
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 4,
+                "formal_charge": 0,
+                "implicit_h_count": 0,
+                "neighbors": [
+                  [
+                    23,
+                    2
+                  ]
+                ],
+                "slot": 25
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 3,
+                "formal_charge": 0,
+                "implicit_h_count": 2,
+                "neighbors": [
+                  [
+                    4,
+                    1
+                  ]
+                ],
+                "slot": 26
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 6,
+                "formal_charge": 0,
+                "implicit_h_count": 4,
+                "neighbors": [
+                  [
+                    24,
+                    1
+                  ]
+                ],
+                "slot": 27
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 4,
+                "formal_charge": 0,
+                "implicit_h_count": 1,
+                "neighbors": [
+                  [
+                    27,
+                    1
+                  ]
+                ],
+                "slot": 28
+              },
+              "rule": "atom_insert"
+            },
+            {
+              "action_type": "AtomInsert",
+              "payload": {
+                "atom_type": 4,
+                "formal_charge": 0,
+                "implicit_h_count": 0,
+                "neighbors": [
+                  [
+                    27,
+                    2
+                  ]
+                ],
+                "slot": 29
+              },
+              "rule": "atom_insert"
+            }
+          ]
+        ],
+        "budget_exhausted": 0,
+        "committed_endpoints": [
+          "Nc1nn(C2CN(CCCCCC(=O)O[PH](=O)O)C2)cc1-c1ncnc2[nH]ccc12"
+        ],
+        "completed": 1,
+        "completed_site_redirect_commits": 0,
+        "completed_site_redirect_offers": 0,
+        "completed_site_redirects": 0,
+        "constraint_failures": 0,
+        "events": [
+          16
+        ],
+        "executor_refusals": 0,
+        "families": {
+          "atom_delete": 2,
+          "atom_insert": 14
+        },
+        "initial_family_conditioned_accepts": 1,
+        "initial_family_conditioned_draws": 1,
+        "interface_covered": 0,
+        "interface_rejections": 0,
+        "linker_lengths": [],
+        "lock_rejections": 1,
+        "path_controller_refusals": 0,
+        "path_insert_refusals": 0,
+        "path_lock_refusals": 0,
+        "path_nonlengthening_refusals": 0,
+        "path_payload_absent": 0,
+        "path_payload_draws": 0,
+        "path_payload_exceptions": 0,
+        "path_payload_found": 0,
+        "path_payload_multi_neighbor": 0,
+        "path_payload_noninsert": 0,
+        "path_payload_rebound": 0,
+        "path_payload_wrong_site": 0,
+        "path_rejections": 0,
+        "path_reroute_refusals": 0,
+        "path_targets": [],
+        "path_transaction_offers": 0,
+        "path_transaction_refusals": 0,
+        "path_transactions": 0,
+        "path_unavailable_sites": 0,
+        "redirections": 0,
+        "separation_failures": 0,
+        "staging_rejections": 0
+      },
+      "seed": 0
+    }
+  ],
+  "deterministic_algorithms": false,
+  "device": "cpu",
+  "dtype": "float32",
+  "elapsed_seconds": 8.627540500019677,
+  "execution_environment": {
+    "KMP_DUPLICATE_LIB_OK": "TRUE",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONHASHSEED": "0"
+  },
+  "hardware": {
+    "machine": "arm64",
+    "processor": "arm"
+  },
+  "metrics_evaluated": false,
+  "ringcore_catalog_fingerprint": "639ff6078c32d43c",
+  "schema": "compose_fragment_generation_v1",
+  "seed_derivation": "BLAKE2b-8 of drug|task|seed, big-endian modulo 2**32; NumPy default_rng",
+  "software": {
+    "networkx": "3.3",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "python": "3.11.13",
+    "rdkit": "2024.3.5",
+    "scipy": "1.13.1",
+    "torch": "2.4.0",
+    "tqdm": "4.70.1"
+  },
+  "task": "superstructure_generation",
+  "torch_interop_threads": 1,
+  "torch_threads": 1
+}

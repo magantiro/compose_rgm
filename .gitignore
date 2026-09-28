@@ -111,6 +111,7 @@ artifacts/tdc_originals/
 # Originals and immutable small reductions remain in their historical locations.
 /local_assets/fragments/
 /runs/fragments/
+!diagnostics/fragment_runtime_integration_v1/parity/*/worker.log
 
 # Downloaded upstream datasets (rebuild with tools/build_dude_pool.py)
 .cache/

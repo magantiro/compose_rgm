@@ -1,0 +1,34 @@
+{
+  "attempts_checked": 2,
+  "comparison": "exact JSON values; complete program panels including RNG/probabilities, or superstructure accepted actions/events/endpoints",
+  "differences": [],
+  "inputs": [
+    {
+      "path": "linker_design/configs/fragment_linker_novelty_official_v2.json",
+      "sha256": "c51c4629f3fdd43a369766c519604db0f2f56d953b9aed5ba8051c160a416a5b",
+      "source_path": "configs/fragment_linker_novelty_official_v2.json",
+      "source_revision": "930a72f03d7aea275dc496afe4a4d6e1c0cfe885"
+    },
+    {
+      "path": "linker_design/diagnostics/fragment_linker_novelty_official_v2/seed6/attempts/BARICITINIB_000.json",
+      "sha256": "202476766e5e8d6ebda63a3be3a4e56370e14942176f49b1021a0402492b6b39",
+      "source_path": "diagnostics/fragment_linker_novelty_official_v2/seed6/attempts/BARICITINIB_000.json",
+      "source_revision": "930a72f03d7aea275dc496afe4a4d6e1c0cfe885"
+    },
+    {
+      "path": "linker_design/diagnostics/fragment_linker_novelty_official_v2/seed6/attempts/BARICITINIB_001.json",
+      "sha256": "79f52e64583fd97df06d21ecd2ba266e20eab47a103a2a919a6de24a36b25ab5",
+      "source_path": "diagnostics/fragment_linker_novelty_official_v2/seed6/attempts/BARICITINIB_001.json",
+      "source_revision": "930a72f03d7aea275dc496afe4a4d6e1c0cfe885"
+    }
+  ],
+  "limit": "bounded implementation parity, not a full benchmark rerun or a statistical result",
+  "matches": [
+    true,
+    true
+  ],
+  "passed": true,
+  "schema": "compose_fragment_runtime_parity_v1",
+  "selection": "first BARICITINIB attempt at first declared seed; first two linker attempts",
+  "task": "linker_design"
+}

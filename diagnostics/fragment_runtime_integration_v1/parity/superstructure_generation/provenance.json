@@ -1,0 +1,160 @@
+{
+  "adapter_sha256": {
+    "__init__.py": "0250fe07e87f1413802375589ffc9c45986fc4ab2f2fe5cf0b6e9892c41977b0",
+    "__main__.py": "e0a7fe5507f4d7f6d8dd26d01532f6543163b26b7dbe5435a77869ace885f388",
+    "assets.py": "88f728f09a567909baf95e03bd62e388b667fc4c38567fe083af061072ea5a5f",
+    "evidence.py": "269fae326ce7a4eda4d2d654ca5cef3271325492f5df88d96c51e2576c83e45c",
+    "generation.py": "b7fce699602dba295fe7cc4b7b0d5b0855c7b8a8a71382105274dd38b46fd8b9",
+    "generation_worker.py": "55ffc9bfee4a4319a15c8d94c484b27a5cbc364947eeb2bac4b21e6938060cec",
+    "reduction.py": "0710b8f94d0a73d15960cbd70a8f9f28e1cdba8874a39d0957e159192607280e",
+    "reporting.py": "afcbd77d7829ed5012f8aa78042bc47d685414021157bb6bd3ba7eee4dc0233b"
+  },
+  "asset_registry_sha256": "84b76b45d15dd6c5aa039c34f39ad7cd55ef7d3cf9e830d9518bbe4b180f2a43",
+  "asset_sha256": {
+    "checkpoint": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+    "evaluator_downstream": "ab34f586b41f1ad6e21cd933b08e7ff86eb44711c9c9a4c31c29f894cc9c7b50",
+    "evaluator_fragments": "43db9adbcf7f8895be6197bccdf729517c4433b7fdbf637f413fa9c8055c3a31",
+    "evaluator_frags": "dceeec39f389dda928a210694449948645be73d12da0ad93bc843ba1f2bb5975",
+    "evaluator_metrics": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+    "evaluator_mol": "ed5609c72a3effe2547f4b264e35be8134affccc206978605307d1365a028145",
+    "evaluator_reference_metrics": "e75676431628987d3d0bacbafc3028ffd7ebc8d797ecb03fb386b13a453823f9",
+    "prompts": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9"
+  },
+  "code_revision": null,
+  "configuration": {
+    "assets": {
+      "checkpoint": "/Users/rmaganti/compose_rgm_git/local_assets/fragments/checkpoint.pt",
+      "evaluator_downstream": "/Users/rmaganti/compose_rgm_git/local_assets/fragments/evaluator/pkg/in_virtuo_gen/evaluation/downstream.py",
+      "evaluator_fragments": "/Users/rmaganti/compose_rgm_git/local_assets/fragments/evaluator/pkg/references/fragments.csv",
+      "evaluator_frags": "/Users/rmaganti/compose_rgm_git/local_assets/fragments/evaluator/pkg/references/frags_downstream.csv",
+      "evaluator_metrics": "/Users/rmaganti/compose_rgm_git/local_assets/fragments/evaluator/pkg/in_virtuo_gen/train_utils/metrics.py",
+      "evaluator_mol": "/Users/rmaganti/compose_rgm_git/local_assets/fragments/evaluator/pkg/in_virtuo_gen/utils/mol.py",
+      "evaluator_reference_metrics": "/Users/rmaganti/compose_rgm_git/local_assets/fragments/evaluator/pkg/references/reference_metrics.csv",
+      "prompts": "/Users/rmaganti/compose_rgm_git/local_assets/fragments/prompts.csv"
+    },
+    "attachment_control": {
+      "condition_initial_locked_family": true,
+      "enabled": true,
+      "hard_lock_effective_chemistry": true
+    },
+    "attempts": 1,
+    "environment": {
+      "networkx": "3.3",
+      "numpy": "1.26.4",
+      "pandas": "2.3.3",
+      "python": "3.11",
+      "rdkit": "2024.3.5",
+      "scipy": "1.13.1",
+      "torch": "2.4.0",
+      "tqdm": "4.70.1"
+    },
+    "evaluate": false,
+    "prompts": [
+      "BARICITINIB"
+    ],
+    "sampler_config": {
+      "mark_attempts_per_event": 24,
+      "max_events": 32,
+      "n_slots": 48,
+      "operational_horizon": 16.0
+    },
+    "seeds": [
+      0
+    ],
+    "task": "superstructure_generation"
+  },
+  "created_at_utc": "2026-09-28T02:20:21.713706+00:00",
+  "historical_protocol_inputs": [
+    {
+      "path": "superstructure_generation/configs/fragment_superstructure_official_v2.json",
+      "sha256": "0b91b3e6aef22743b212c4dd0e45115026df2d512c550a986bac4106ea4d386c",
+      "source_path": "configs/fragment_superstructure_official_v2.json",
+      "source_revision": "a16ef9417cdf44d50381fbb8e5069edc31e7c9df"
+    },
+    {
+      "path": "superstructure_generation/diagnostics/fragment_superstructure_official_v2/shards/superstructure_generation__BARICITINIB__seed0.json",
+      "sha256": "1f70fdfa46c5520bb07556f988cdaceb68f2626fd75dd8aa2504bc4bf8e2b23b",
+      "source_path": "diagnostics/fragment_superstructure_official_v2/shards/superstructure_generation__BARICITINIB__seed0.json",
+      "source_revision": "a16ef9417cdf44d50381fbb8e5069edc31e7c9df"
+    }
+  ],
+  "mode": "bounded_historical_parity",
+  "original_launch_authorization_reused": false,
+  "result_sha256": "62a8ba39c22b0f5cb37364bc92c91e5736921470282883b4dc35debbb3b7633f",
+  "schema": "compose_fragment_generation_provenance_v1",
+  "source_snapshot": {
+    "archive_sha256": "52ff6e4606aff435bcde27110607ddc1bf09768e058a223333d026733a0d9719",
+    "files": {
+      "scripts/evaluate_tracelet_rollouts.py": "b74ceea950d2f3b3a37ba8f5a397d6be6eb670e3fac92d0814f9752c83e85cf8",
+      "src/compose_v4/__init__.py": "22699083a5548758c474dcf324b6473bdda8e1f98e52d64271ebb3f21ffcc2a8",
+      "src/compose_v4/benchmark/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "src/compose_v4/benchmark/fragment_attachment_control.py": "cc4a9600e3c7873af2c1c28193cba836522dde5e79dc9ab06fbf0fc350462318",
+      "src/compose_v4/benchmark/fragment_conditioned_sampler.py": "1813d5c606f75e957d4e327fb2e201f97ecfeafda398d8ab53ff1905e473c2aa",
+      "src/compose_v4/benchmark/fragment_constrained.py": "cd9113a6afd22e833de462a0ad7d816ed170e8bde0d9d5577d7cae98caf0ddc6",
+      "src/compose_v4/benchmark/fragment_official_metrics.py": "9406ddffad9e05d67bc7b6333d4b51eef534f2f4b11a2cedc237e80698389459",
+      "src/compose_v4/chem/__init__.py": "0c0fb60bc1dfd27d2ce7bcaf36fa163373c5b26836590f58f69e62e52bba9152",
+      "src/compose_v4/chem/aromaticity.py": "12669b174e2e2e0a08ab9e88eb33b2dc2da50c0d69b826242bf578d2c64f1127",
+      "src/compose_v4/chem/graph_primitives.py": "7c9952988f00b89205af06a710bb9d6add7335fa516b63233517127aa1c62792",
+      "src/compose_v4/chem/molecular_graph.py": "f25e20f52bd56f90299d93e934038f9caf4768b557b68a3d5781ca925efc16a2",
+      "src/compose_v4/chem/source_prior.py": "216e5d5484ac715c7e4cce6bb6ab963ca73ba1dc0fda4de84751abd2962ae01b",
+      "src/compose_v4/chem/state.py": "4aa1acc257b053a562969ad8cc9b62fd84ce2931b04f1890f1c242888a3cecf5",
+      "src/compose_v4/data/__init__.py": "df08d911d44a1253496b49364e6360de1f876eb4cd13f6fed8986e27e8d8f42b",
+      "src/compose_v4/data/charge_policy.py": "e4fbb52ba8779883b58789afd0a72f2bce426e622b7110101d1fc14cdfb378b2",
+      "src/compose_v4/data/cnof.py": "d11548d567102cf03f3ea961864e6f9d463535a1ad66ffb5a18a0a6d9fb3ff16",
+      "src/compose_v4/data/packed_trace_store.py": "da86b85b9101a469bdc0152bc86d71f5b76f4eca60d57971a36b712fa6fd806d",
+      "src/compose_v4/data/provenance_overlay.py": "697f177fbf34b58be517a9ccaf73895e3866c60f4c4678ed1da1733fa6b1303c",
+      "src/compose_v4/eval/__init__.py": "e9c24411859ec6b6210ac223ffa479a7de56f6f84e782b3a71dc37609fcf05f1",
+      "src/compose_v4/eval/molecular_quality.py": "b5138e5172453408f99f13c0c88efcdd12f5d8565e29bc010fab592741a7a0d7",
+      "src/compose_v4/eval/ring_calibration.py": "5e3258db51bf3eff75786ac3640fec031c6bd506f2b8d0cace7824485c1c8ce8",
+      "src/compose_v4/eval/ring_taxonomy.py": "cd3ca3b265f9009d558be2c9c62fd18a49991cb51ac7604f5c1f60fe320fb2b2",
+      "src/compose_v4/experiments/__init__.py": "d828d1d526307fe7cb8489008b8024ca47ed33c62ac7c53b320a3681fcfb8a12",
+      "src/compose_v4/experiments/analogue_prior.py": "940d1fd5379cfa60038875bbebad3be5cd744f6b1006b0bce561d3349ebf5840",
+      "src/compose_v4/experiments/calibrated_rewrite_sampling.py": "a37aab21c1787d70f03aed76924cce4e2f7f88cca78c9da2990da84c7b34c56a",
+      "src/compose_v4/experiments/cnof_conditional.py": "175334e631f0dbfd0effc0d27366c5f0c659ada162191b37ed32c02f649c2c81",
+      "src/compose_v4/experiments/p50_completion.py": "8201baee3006ccc6f4903e42f072b859e330ee2bb77bb10a499697304333a157",
+      "src/compose_v4/experiments/parallel_tracelet_sampling.py": "83828ab01b1839ea4e66e5d4771c56d0e02c594e9b7018be8a0eb9305888e1d1",
+      "src/compose_v4/experiments/tracelet_conditional.py": "5386f413100bdc7addc2713fce30f207fe6e3f47b4b28bedf87cb7b9faddc73e",
+      "src/compose_v4/gm/__init__.py": "d169489bda53c5247f1a0aeefc8d34c8ef4cdd22b374e0890a7e96c4ad096de3",
+      "src/compose_v4/gm/loss.py": "9a08cae6ca19460d28050b5a7a6232640d080b7cbf70b5e2175dceab171cfe7e",
+      "src/compose_v4/model/__init__.py": "ebf3a043a48c4fee8e1147a6a1f691daa85d1a521d47c776ffea9a4a639565f0",
+      "src/compose_v4/model/factorized_tracelet_rate_model.py": "9e802713df89be8f7c12dc8caa20157732a28b7d014bfce2498ba2980161a6fc",
+      "src/compose_v4/model/rate_model.py": "11dc5833bc76e506251bc3e3512c7bc725169e22a2efd51fe17c253dc2aecd7b",
+      "src/compose_v4/model/time_convention.py": "4d8864645df0275fe361ac741e6470c54be06b0edb35d4a6499533a55f050e89",
+      "src/compose_v4/rewrite/__init__.py": "c252e08a8b0b7ada3d9548c169f2d5a86dfd4e7de68380087425fca1585431e6",
+      "src/compose_v4/rewrite/action_codec.py": "56607896c67e554bb83aa3f4d40f38912d24e6c6941f9a433a2a8a431b8f9230",
+      "src/compose_v4/rewrite/action_codec_v3.py": "305a5b84eef4fd139a60f8ad211ef29df84cc5d77417eed39ca924084e3c0987",
+      "src/compose_v4/rewrite/action_codec_v4.py": "98ff2fe40a11f41519ad3138297a2015097a29ab667a74d3ff509769ef27a9d5",
+      "src/compose_v4/rewrite/aromatic_kekule.py": "254ede544798d712090108424cd42f4ea8560f4064650705528db0b64f4f5f25",
+      "src/compose_v4/rewrite/causal_trace.py": "92bb535057e48dc555e3d485515ac792b3afaacbf69ffda17311cafd821968b9",
+      "src/compose_v4/rewrite/commuting_schedule.py": "5f93e72b3d02213615770aebe28196a695dced243f775c29a80759500374873a",
+      "src/compose_v4/rewrite/compiler.py": "d77ecd9b73da6a65fede819ff5eeda6ace4fec49b1f90707c01d63f5b8cfb4a1",
+      "src/compose_v4/rewrite/editing_v2_process_identity.py": "f45592f3c8bc7c9c794b43f43f170cbef292a9bc4c633c739ade283c07a9431b",
+      "src/compose_v4/rewrite/factorized_fiber.py": "03d65927328c9145158cc3483b47144265882e02b8c26f6eef87f85174d989fa",
+      "src/compose_v4/rewrite/fiber.py": "c9abbcbdcf25e4527f0cd1e135583c910c23ab292ab14fa690e1e8eb99a2e07c",
+      "src/compose_v4/rewrite/kernel.py": "afdda7d41ee3f437aa1a72e90341dc81f0f776c6e1cb6799f1ad9ff75d5c3e99",
+      "src/compose_v4/rewrite/operators.py": "a1542f2cd7bdae392ef7618636ab8ca9ec49215cda9b8927113e4daf2c9b5c0f",
+      "src/compose_v4/rewrite/process_v2_atom_delete.py": "19cf312a5ffb64ee846a5609b5433398d27f538627fe665b732406865a80ced8",
+      "src/compose_v4/rewrite/progress.py": "f39614d05608667cec05c51826ae8a455e85afe4453428d1bd66066efa1ae674",
+      "src/compose_v4/rewrite/ring_restate_semantics.py": "1ae79c7f6253fce7744dc5d8adf361ffcbb70995da31c170e2119f9f2dc7b160",
+      "src/compose_v4/rewrite/ring_system_fiber.py": "fa5f8bce3affb0be7e8f8a4407ed3a19911fd1e42d45dc0b6a43c2a47f364de3",
+      "src/compose_v4/rewrite/semantic_atom_restate.py": "4aee025d7f84e7045ca0cb6440b2c8e51c6e4edf393249952b704ab05bcafa2f",
+      "src/compose_v4/rewrite/semantic_cycle_close.py": "d7561b0fb746f8174df2288b0c7ab3374f737cc641e3f2de65b068431d497b3b",
+      "src/compose_v4/rewrite/semantic_cycle_open.py": "5024d0a83f26d4ccbbdfc87dae5f97d292718f8a76059c508e4429b7124dd8d8",
+      "src/compose_v4/rewrite/trace.py": "caac128899631f44dc2ce55545ffde2c179f108f2cb9a0abb4c830bbeb924376",
+      "src/compose_v4/rewrite/trace_shard.py": "6308218c24b68034b294c08a22bd11a96eadda205bc1a865cb06a54403a6f01c",
+      "src/compose_v4/rewrite/trace_shard_v3.py": "d28c6e9c803cd72cb3e60ab0ca451adb414df4f2bac026ca7c2718939021ff98",
+      "src/compose_v4/rewrite/tracelet_compiler.py": "f54e500ae793c364c3752923e9e6c37894c6d7bc57f26b67f28ec774244c1d71",
+      "src/compose_v4/rewrite/tracelet_fiber.py": "802b0f7367f81411afbc86acd03bace377a582723b566f00f9f3e54c35e2b752",
+      "src/compose_v4/rewrite/tracelets.py": "c1610b04f5da55570f2bd709ec49f4ab57db83d171cac2761cdab2cd3812ce0c",
+      "src/compose_v4/rewrite/tree_transport.py": "4f1bb53f8fe60ff6e7dcf00408cf43d66dc79a0ce4e80bde7d70e72708a736aa",
+      "src/compose_v4/rewrite/typed_ring_catalog.py": "f043fdb1b309ba72555d662a27b90c487e061ab9771b0c4efadd4786e41790d1",
+      "tools/fetch_official_fragment_evaluator.py": "3426da4a3fa126fa5c84afd13cd955c743affb08e3825d9a67506db12f1e0147",
+      "tools/run_fragment_constrained_suite.py": "768273319dbc3d8e70dd8fd7138ddf57e6d2ac543ec8b10dcd1e94f3b429046e"
+    },
+    "schema": "compose_fragment_runtime_source_v1",
+    "scope": "historical Python dependency closure, unchanged bytes; not launch authorization",
+    "source_revision": "a16ef9417cdf44d50381fbb8e5069edc31e7c9df",
+    "task": "superstructure_generation"
+  },
+  "status": "complete"
+}
