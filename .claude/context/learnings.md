@@ -1312,3 +1312,26 @@ Durable, dated gotchas + design calls. Append; don't rewrite history.
   the code was single-copy on one disk even after the corpora were safe. Push
   the branch; replication is the only real protection, the gate just removes
   the failure mode already paid for.
+
+### 2026-09-27 — fragment repository integration, saved metrics first
+
+- The primary checkout did not contain the fragment generators that produced the
+  paper rows. Motif, decoration, novelty-4 linker, and superstructure are on
+  distinct worktree revisions. Some common model/executor files differ from the
+  primary checkout, and old launchers pin absolute interpreter paths. Do not
+  copy a launcher, overwrite shared core files, or re-pin a contract and call it
+  an equivalent portable generation release.
+- `experiments/fragments/manifest.json` now indexes the exact small evidence
+  artifacts. `python -m compose_v4.experiments.fragments` verifies and reduces
+  saved prompt/seed metrics without private worktrees or chemistry dependencies.
+  This is not molecule re-evaluation or generation. Full runtime/asset integration
+  is still pending; no worktree or untracked scientific data was removed.
+- The old motif-bootstrap artifact also contains an earlier linker experiment.
+  Only its motif subtree applies to the current paper panel. The deployed linker
+  comparison is the separate reference-score-plus-novelty-4 artifact.
+- Motif validity from the locked rows is 99.9667%, sample SD 0.0577 percentage
+  points over three seed means. Some original summaries use population SD;
+  paper-style between-seed sample SD must be recomputed from the seed means.
+- The motif/superstructure interval reductions originally used NumPy 2.5.3;
+  decoration/linker used 1.26.4. Recomputing the saved bootstrap algorithms in
+  NumPy 1.26.4 matched all four tasks' intervals to absolute tolerance 1e-10.

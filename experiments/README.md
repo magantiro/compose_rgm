@@ -30,4 +30,5 @@ conditional efficiency.
 
 | Campaign | Status | What it settles |
 |---|---|---|
+| [`fragments`](fragments/) | portable saved-result reduction available; generation integration pending | Fragment benchmark, learned/uniform superstructure ablation, and locked-panel selection/prefix comparisons. |
 | [`region_resampling`](region_resampling/) | splitting phase closed | Directed proposals reach structural handoff where the base kernel does not; budget is not the limiter at fixed breadth; the open item is the general local→global gate. |

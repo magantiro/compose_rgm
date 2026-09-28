@@ -18,6 +18,11 @@ Three layers, kept separate on purpose:
 
 ## Start here
 
+For the fragment suite, start with **[`experiments/fragments/`](experiments/fragments/)**:
+offline result verification, benchmark/ablation table reproduction, exact evidence
+identities, and the remaining end-to-end generation dependencies. This is a local
+integration; it does not change the submitted paper or the PMO/T4 protocols.
+
 1. **[`docs/START_HERE_ICLR.md`](docs/START_HERE_ICLR.md)**: authoritative
    controller status, current T4 and PMO evidence, branch layout, and the next
    scientific decision.
@@ -45,6 +50,9 @@ docs/               notes, plans, indices, handoffs
 diagnostics/        result artifacts written by runs
 archive/            superseded material, kept rather than deleted
 ```
+
+Shared library code is organized by responsibility; experiment instructions and
+evidence maps are organized by task. Frozen paths are preserved during migration.
 
 ## Running an experiment
 

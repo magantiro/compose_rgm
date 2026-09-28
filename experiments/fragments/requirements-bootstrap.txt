@@ -1,0 +1,2 @@
+# Only the optional saved-row bootstrap needs NumPy. No chemistry or ML runtime.
+numpy==1.26.4
