@@ -1,6 +1,6 @@
 # Ionizable-lipid generative programs — research deck
 
-`build/lipid_programs.pptx` — 12 slides, 16:9, editable.
+`build/lipid_programs.pptx` — 17 slides, 16:9, editable.
 
 ## Visual system
 
@@ -24,21 +24,23 @@ title, one diagram or table, and at most one caption line.
 | 5 | COMPOSE-Lipid application | linear 5-step pipeline |
 | 6 | FORGE application | linear 5-step pipeline |
 | 7 | Proposed figure architecture | 5-figure arc |
-| 8 | Figure 1 — the generative model | panel table |
-| 9 | Figure 2 — computational validation | panel table |
-| 10 | Figure 3 — synthesis, formulation, characterisation | panel table |
-| 11 | Figure 4 — in vitro and in vivo reporter | panel table |
-| 12 | Figure 5 — the application study | two panel lists |
+| 8–12 | FORGE, Figures 1–5 | panel wireframe, one per figure |
+| 13–17 | COMPOSE-Lipid, Figures 1–5 | panel wireframe, one per figure |
 
-Slides 2–6 describe the programmes; 7–12 lay out the intended papers. On the
-panel slides a row that **spans both columns** is the same panel in both
-programmes; a **split row** is where they differ.
+Slides 2–6 describe the programmes; 7–17 lay out the intended papers.
+
+Each figure slide is a **wireframe of the figure itself**: panel boxes laid out
+on a shared grid in the arrangement the figure would use, each carrying its
+panel letter and a line saying what that panel shows. Rows and columns are sized
+from relative weights and fill the canvas exactly, so a wide schematic panel
+reads as wide and a row of four small panels reads as four. The point is that
+the layout can be pictured directly rather than reconstructed from a list.
 
 ## Accuracy
 
-Slides 7–12 describe panels that are **proposed, not results**. No panel carries
-a number and no figure reports a measurement — each row says what a panel would
-show. Slide 7 states this explicitly.
+Slides 7–17 describe panels that are **proposed, not results**. No panel carries
+a number and no figure reports a measurement — each box says what that panel
+would show. Slide 7 states this explicitly.
 
 Programme details (Ugi-3, A549, HeLa, intranasal, reporter IM, two hits) are the
 author's own; nothing was invented here.

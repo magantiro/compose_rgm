@@ -306,54 +306,6 @@ function caption(s, text, x, y, w, color) {
 // panel would show, so the deck cannot be misread as data.
 // =====================================================================
 
-/** Column geometry shared by every panel slide. */
-const PC = { pan: M, panW: 0.42, aX: 1.38, aW: 5.28, bX: 7.02, bW: 5.55 };
-
-/** Header row naming the two programmes over their columns. */
-function panelHeads(s, y) {
-  s.addText('FORGE', {
-    x: PC.aX, y, w: PC.aW, h: 0.32, isTextBox: true, margin: 0,
-    fontFace: F, fontSize: 16, bold: true, color: AMBER, valign: 'middle',
-  });
-  s.addText('COMPOSE-Lipid', {
-    x: PC.bX, y, w: PC.bW, h: 0.32, isTextBox: true, margin: 0,
-    fontFace: F, fontSize: 16, bold: true, color: TEAL, valign: 'middle',
-  });
-}
-
-/**
- * Panel rows. Each row is either
- *   [letter, 'shared text']            -> one description spanning both columns
- *   [letter, 'forge text', 'compose text']
- */
-function panelRows(s, rows, y0, dy) {
-  rows.forEach((r, i) => {
-    const y = y0 + i * dy;
-    hairline(s, M, y, W - 2 * M);
-    s.addText(r[0], {
-      x: PC.pan, y: y + 0.14, w: PC.panW, h: 0.40, isTextBox: true, margin: 0,
-      fontFace: F, fontSize: 14, bold: true, color: INK45, valign: 'middle',
-    });
-    if (r.length === 2) {
-      s.addText(r[1], {
-        x: PC.aX, y: y + 0.14, w: PC.aW + PC.bW + (PC.bX - PC.aX - PC.aW),
-        h: 0.40, isTextBox: true, margin: 0,
-        fontFace: F, fontSize: 14.5, color: INK, valign: 'middle',
-      });
-    } else {
-      s.addText(r[1], {
-        x: PC.aX, y: y + 0.14, w: PC.aW, h: 0.40, isTextBox: true, margin: 0,
-        fontFace: F, fontSize: 14.5, color: INK, valign: 'middle',
-      });
-      s.addText(r[2], {
-        x: PC.bX, y: y + 0.14, w: PC.bW, h: 0.40, isTextBox: true, margin: 0,
-        fontFace: F, fontSize: 14.5, color: INK, valign: 'middle',
-      });
-    }
-  });
-  hairline(s, M, y0 + rows.length * dy, W - 2 * M);
-}
-
 // ---------------------------------------------------------------- arc
 {
   const s = newSlide();
@@ -399,134 +351,225 @@ function panelRows(s, rows, y0, dy) {
           M, 5.42, 11.6);
 }
 
-// ---------------------------------------------------------------- figure 1
-{
-  const s = newSlide();
-  title(s, 'Figure 1 — the generative model');
-  panelHeads(s, 1.62);
-  panelRows(s, [
-    ['a', 'Design overview: from data through generation to synthesised candidates'],
-    ['b', 'Ugi-3 precursor inventory and reaction constraints',
-          'Lipid and drug-like corpus; the executable transition set'],
-    ['c', 'Flow-matching model over precursor roles',
-          'Reusable transformation process and its edit vocabulary'],
-    ['d', 'Training objective and convergence'],
-    ['e', 'Held-out reconstruction within the family',
-          'Validity and constraint satisfaction by construction'],
-  ], 2.08, 0.74);
-  caption(s, 'Panel a carries the whole argument; b–e establish that the generator '
-          + 'is sound before any molecule is made.', M, 6.28, 11.6);
-}
 
-// ---------------------------------------------------------------- figure 2
-{
-  const s = newSlide();
-  title(s, 'Figure 2 — computational validation of the generator');
-  panelHeads(s, 1.62);
-  panelRows(s, [
-    ['a', 'Property distributions of generated against reference lipids'],
-    ['b', 'Coverage of the known family and novelty within it',
-          'Scaffold novelty and distance from known lipids'],
-    ['c', 'Diversity of the generated set'],
-    ['d', 'Comparison against baseline generators'],
-    ['e', 'Ablation: reaction grounding removed',
-          'Ablation: fragment constraint and learned prior removed'],
-    ['f', 'Selection funnel: generated → filtered → carried to synthesis'],
-  ], 2.08, 0.66);
-  caption(s, 'A row that spans both columns is the same panel in both programmes. '
-          + 'The ablations separate a working generator from a merely valid one; the '
-          + 'funnel is what licenses the wet-lab spend.', M, 6.36, 11.6);
-}
+// =====================================================================
+// One slide per figure per paper: the panels laid out as the figure would be,
+// so the layout can be pictured directly rather than read off a list.
+//
+// Everything here is PROPOSED. No panel carries a number and none reports a
+// measurement -- each box says what that panel would show.
+// =====================================================================
 
-// ---------------------------------------------------------------- figure 3
-{
-  const s = newSlide();
-  title(s, 'Figure 3 — synthesis, formulation and characterisation');
-  panelHeads(s, 1.62);
-  panelRows(s, [
-    ['a', 'Ugi-3 route for the selected candidates',
-          'Route development for the novel linker scaffolds'],
-    ['b', 'Identity and purity confirmation'],
-    ['c', 'LNP formulation: components and ratios'],
-    ['d', 'Size, polydispersity and surface charge'],
-    ['e', 'Encapsulation efficiency'],
-    ['f', 'Apparent pKa'],
-  ], 2.08, 0.66);
-  caption(s, 'Only panel a differs between the programmes: a known route against one '
-          + 'that has to be developed for a new scaffold.', M, 6.36, 11.6);
-}
-
-// ---------------------------------------------------------------- figure 4
-{
-  const s = newSlide();
-  title(s, 'Figure 4 — in vitro and in vivo reporter');
-  panelHeads(s, 1.62);
-  panelRows(s, [
-    ['a', 'HeLa transfection, dose response', 'A549 transfection, dose response'],
-    ['b', 'Viability across the dose range'],
-    ['c', 'Reporter expression after intramuscular delivery',
-          'Reporter expression after intranasal delivery'],
-    ['d', 'Organ-level biodistribution'],
-    ['e', 'Comparison against a benchmark formulation'],
-    ['f', 'Lead selection carried into the application study'],
-  ], 2.08, 0.66);
-  caption(s, 'Same experimental architecture in both programmes; the cell line and the '
-          + 'route of administration are what change.', M, 6.36, 11.6);
-}
-
-// ---------------------------------------------------------------- figure 5
-{
-  const s = newSlide();
-  title(s, 'Figure 5 — the application study');
-
-  const cx1 = M, cx2 = 7.02, cw = 5.55;
-  s.addText('FORGE · vaccine study', {
-    x: cx1, y: 1.66, w: cw, h: 0.34, isTextBox: true, margin: 0,
-    fontFace: F, fontSize: 17, bold: true, color: AMBER, valign: 'middle',
+/** A single panel: letter top-left, description filling the rest of the box. */
+function panelBox(s, x, y, w, h, letter, text, accent) {
+  s.addShape(pres.ShapeType.rect, {
+    x, y, w, h,
+    fill: { color: 'FFFFFF' }, line: { color: RULE, width: 1 },
   });
-  s.addText('COMPOSE-Lipid · editing study', {
-    x: cx2, y: 1.66, w: cw, h: 0.34, isTextBox: true, margin: 0,
-    fontFace: F, fontSize: 17, bold: true, color: TEAL, valign: 'middle',
+  s.addText(letter, {
+    x: x + 0.13, y: y + 0.09, w: 0.34, h: 0.26, isTextBox: true, margin: 0,
+    fontFace: F, fontSize: 13, bold: true, color: accent, valign: 'middle',
   });
+  // Centred in the space under the letter, so a short caption does not leave the
+  // panel looking empty at the bottom.
+  s.addText(text, {
+    x: x + 0.13, y: y + 0.34, w: w - 0.26, h: h - 0.46, isTextBox: true,
+    margin: 0, fontFace: F, fontSize: 11.5, color: INK, valign: 'middle',
+    lineSpacingMultiple: 1.12,
+  });
+}
 
-  const left = [
-    ['a', 'Immunisation schedule and groups'],
-    ['b', 'Antigen-specific antibody titres'],
-    ['c', 'Cellular response'],
-    ['d', 'Comparison against the benchmark formulation'],
-    ['e', 'Tolerability'],
-  ];
-  const right = [
-    ['a', 'Editing construct and dosing schedule'],
-    ['b', 'Editing efficiency in the lung'],
-    ['c', 'Breakdown across lung cell types'],
-    ['d', 'Durability of editing'],
-    ['e', 'Tolerability'],
-  ];
-
-  const y0 = 2.14, dy = 0.72;
-  for (let i = 0; i < left.length; i++) {
-    const y = y0 + i * dy;
-    hairline(s, cx1, y, cw);
-    hairline(s, cx2, y, cw);
-    [[cx1, left[i]], [cx2, right[i]]].forEach(([x, r]) => {
-      s.addText(r[0], {
-        x, y: y + 0.14, w: 0.42, h: 0.40, isTextBox: true, margin: 0,
-        fontFace: F, fontSize: 14, bold: true, color: INK45, valign: 'middle',
-      });
-      s.addText(r[1], {
-        x: x + 0.52, y: y + 0.14, w: cw - 0.52, h: 0.40, isTextBox: true,
-        margin: 0, fontFace: F, fontSize: 14.5, color: INK, valign: 'middle',
-      });
+/**
+ * Lay panels out as a figure: rows of relative height, cells of relative width,
+ * filling the canvas exactly. Because every box is sized from the same grid,
+ * the result reads as a figure layout rather than as a list of boxes.
+ */
+function figurePanels(s, rows, accent, y0, totalH) {
+  const X0 = M, CW = W - 2 * M, gx = 0.20, gy = 0.20;
+  const sumH = rows.reduce((a, r) => a + r.h, 0);
+  const availH = totalH - gy * (rows.length - 1);
+  let y = y0;
+  rows.forEach(r => {
+    const rh = availH * r.h / sumH;
+    const sumW = r.cells.reduce((a, c) => a + (c.w || 1), 0);
+    const availW = CW - gx * (r.cells.length - 1);
+    let x = X0;
+    r.cells.forEach(c => {
+      const cw = availW * (c.w || 1) / sumW;
+      panelBox(s, x, y, cw, rh, c.k, c.t, accent);
+      x += cw + gx;
     });
-  }
-  hairline(s, cx1, y0 + left.length * dy, cw);
-  hairline(s, cx2, y0 + right.length * dy, cw);
-
-  caption(s, 'This is the only figure where the two programmes stop sharing a shape: '
-          + 'one ends in an immune readout, the other in an editing readout.',
-          M, 6.10, 11.6);
+    y += rh + gy;
+  });
 }
+
+/** Figure slide: programme in its accent, then the figure number and name. */
+function figureSlide(prog, accent, n, name, rows, note) {
+  const s = newSlide();
+  s.addText([
+    { text: prog, options: { bold: true, color: accent, fontSize: 30 } },
+    { text: `  ·  Figure ${n}`, options: { bold: true, color: INK, fontSize: 30 } },
+    { text: `   ${name}`, options: { color: INK70, fontSize: 21 } },
+  ], {
+    x: M, y: 0.58, w: W - 2 * M, h: 0.62, isTextBox: true, margin: 0,
+    fontFace: F, valign: 'middle',
+  });
+  figurePanels(s, rows, accent, 1.62, 4.42);
+  if (note) caption(s, note, M, 6.28, 11.6);
+  return s;
+}
+
+// ---------------------------------------------------------------- FORGE
+figureSlide('FORGE', AMBER, 1, 'the generative model', [
+  { h: 1.05, cells: [
+    { k: 'a', w: 1, t: 'Overview: from the Ugi-3 reaction family through generation to synthesised candidates' },
+  ] },
+  { h: 1.0, cells: [
+    { k: 'b', w: 1, t: 'Precursor inventory and the reaction constraints that define the family' },
+    { k: 'c', w: 1, t: 'Flow-matching model over precursor roles' },
+    { k: 'd', w: 1, t: 'Training objective and convergence' },
+  ] },
+  { h: 0.95, cells: [
+    { k: 'e', w: 1, t: 'Reconstruction of held-out family members' },
+    { k: 'f', w: 1, t: 'Generated set: scale and composition' },
+  ] },
+], 'Panel a is the schematic a reader remembers; b–f establish that the generator is sound before anything is made.');
+
+figureSlide('FORGE', AMBER, 2, 'computational validation', [
+  { h: 1.0, cells: [
+    { k: 'a', w: 1, t: 'Property distributions of generated against reference lipids' },
+    { k: 'b', w: 1, t: 'Coverage of the known family and novelty within it' },
+  ] },
+  { h: 1.0, cells: [
+    { k: 'c', w: 1, t: 'Diversity of the generated set' },
+    { k: 'd', w: 1, t: 'Comparison against baseline generators' },
+    { k: 'e', w: 1, t: 'Ablation: reaction grounding removed' },
+  ] },
+  { h: 0.8, cells: [
+    { k: 'f', w: 1, t: 'Selection funnel: generated → filtered → carried to synthesis' },
+  ] },
+], 'Panel e is what separates a generator that runs from one that matters; panel f is what licenses the wet-lab spend.');
+
+figureSlide('FORGE', AMBER, 3, 'synthesis, formulation, characterisation', [
+  { h: 1.05, cells: [
+    { k: 'a', w: 1, t: 'Ugi-3 synthetic route for the selected candidates' },
+  ] },
+  { h: 1.0, cells: [
+    { k: 'b', w: 1, t: 'Identity and purity confirmation' },
+    { k: 'c', w: 1, t: 'LNP formulation: components and molar ratios' },
+  ] },
+  { h: 0.95, cells: [
+    { k: 'd', w: 1, t: 'Size and polydispersity' },
+    { k: 'e', w: 1, t: 'Surface charge' },
+    { k: 'f', w: 1, t: 'Encapsulation efficiency' },
+    { k: 'g', w: 1, t: 'Apparent pKa' },
+  ] },
+], 'The route is short because the family is known: this is the step COMPOSE-Lipid has to develop.');
+
+figureSlide('FORGE', AMBER, 4, 'in vitro and in vivo reporter', [
+  { h: 0.95, cells: [
+    { k: 'a', w: 1, t: 'HeLa transfection, dose response' },
+    { k: 'b', w: 1, t: 'Viability across the dose range' },
+  ] },
+  { h: 1.05, cells: [
+    { k: 'c', w: 1, t: 'Reporter expression after intramuscular delivery' },
+  ] },
+  { h: 0.95, cells: [
+    { k: 'd', w: 1, t: 'Organ-level biodistribution' },
+    { k: 'e', w: 1, t: 'Comparison against a benchmark formulation' },
+    { k: 'f', w: 1, t: 'Leads selected for the vaccine study' },
+  ] },
+], 'Panel e is the one a reviewer looks for first: the new lipid against an established formulation.');
+
+figureSlide('FORGE', AMBER, 5, 'vaccine study', [
+  { h: 1.0, cells: [
+    { k: 'a', w: 1, t: 'Immunisation schedule, groups and antigen' },
+  ] },
+  { h: 1.05, cells: [
+    { k: 'b', w: 1, t: 'Antigen-specific antibody titres over time' },
+    { k: 'c', w: 1, t: 'Cellular response' },
+  ] },
+  { h: 0.95, cells: [
+    { k: 'd', w: 1, t: 'Comparison against the benchmark formulation' },
+    { k: 'e', w: 1, t: 'Tolerability' },
+  ] },
+], 'The endpoint that closes the programme: a generated lipid carried through to an immune readout.');
+
+// ---------------------------------------------------------- COMPOSE-Lipid
+figureSlide('COMPOSE-Lipid', TEAL, 1, 'the generative model', [
+  { h: 1.05, cells: [
+    { k: 'a', w: 1, t: 'Overview: from a retained linker motif through constrained generation to synthesised candidates' },
+  ] },
+  { h: 1.0, cells: [
+    { k: 'b', w: 1, t: 'Corpus curation and the executable transition set' },
+    { k: 'c', w: 1, t: 'The transformation process and its edit vocabulary' },
+    { k: 'd', w: 1, t: 'The fragment-constraint interface' },
+  ] },
+  { h: 0.95, cells: [
+    { k: 'e', w: 1, t: 'Validity and constraint satisfaction by construction' },
+    { k: 'f', w: 1, t: 'Generated set: scale and scaffold composition' },
+  ] },
+], 'Panel d is the one that distinguishes this model: the constraint is an input, not a filter applied afterwards.');
+
+figureSlide('COMPOSE-Lipid', TEAL, 2, 'computational validation', [
+  { h: 1.0, cells: [
+    { k: 'a', w: 1, t: 'Property distributions against known ionizable lipids' },
+    { k: 'b', w: 1, t: 'Scaffold novelty and distance from known lipids' },
+  ] },
+  { h: 1.0, cells: [
+    { k: 'c', w: 1, t: 'Diversity of the generated set' },
+    { k: 'd', w: 1, t: 'Comparison against baseline generators' },
+    { k: 'e', w: 1, t: 'Ablation: fragment constraint and learned prior removed' },
+  ] },
+  { h: 0.8, cells: [
+    { k: 'f', w: 1, t: 'Selection funnel: generated → filtered → carried to synthesis' },
+  ] },
+], 'Panel b carries the novelty claim, so it has to be quantitative rather than illustrative.');
+
+figureSlide('COMPOSE-Lipid', TEAL, 3, 'synthesis, formulation, characterisation', [
+  { h: 1.05, cells: [
+    { k: 'a', w: 1, t: 'Route development for the novel linker scaffolds' },
+  ] },
+  { h: 1.0, cells: [
+    { k: 'b', w: 1, t: 'Identity and purity confirmation' },
+    { k: 'c', w: 1, t: 'LNP formulation: components and molar ratios' },
+  ] },
+  { h: 0.95, cells: [
+    { k: 'd', w: 1, t: 'Size and polydispersity' },
+    { k: 'e', w: 1, t: 'Surface charge' },
+    { k: 'f', w: 1, t: 'Encapsulation efficiency' },
+    { k: 'g', w: 1, t: 'Apparent pKa' },
+  ] },
+], 'Panel a is the real cost of a novel scaffold, and the reason the linker was constrained rather than generated.');
+
+figureSlide('COMPOSE-Lipid', TEAL, 4, 'in vitro and in vivo reporter', [
+  { h: 0.95, cells: [
+    { k: 'a', w: 1, t: 'A549 transfection, dose response' },
+    { k: 'b', w: 1, t: 'Viability across the dose range' },
+  ] },
+  { h: 1.05, cells: [
+    { k: 'c', w: 1, t: 'Reporter expression after intranasal delivery' },
+  ] },
+  { h: 0.95, cells: [
+    { k: 'd', w: 1, t: 'Organ-level biodistribution, lung against off-target' },
+    { k: 'e', w: 1, t: 'Comparison against a benchmark formulation' },
+    { k: 'f', w: 1, t: 'Leads selected for the editing study' },
+  ] },
+], 'Panel d has to show lung selectivity, not just lung signal, for the intranasal route to mean anything.');
+
+figureSlide('COMPOSE-Lipid', TEAL, 5, 'editing study', [
+  { h: 1.0, cells: [
+    { k: 'a', w: 1, t: 'Editing construct, dosing schedule and groups' },
+  ] },
+  { h: 1.05, cells: [
+    { k: 'b', w: 1, t: 'Editing efficiency in the lung' },
+    { k: 'c', w: 1, t: 'Breakdown across lung cell types' },
+  ] },
+  { h: 0.95, cells: [
+    { k: 'd', w: 1, t: 'Durability of editing' },
+    { k: 'e', w: 1, t: 'Tolerability' },
+  ] },
+], 'Panel c is the claim: editing resolved by cell type, not a single aggregate lung number.');
 
 pres.writeFile({ fileName: 'build/lipid_programs.pptx' })
   .then(f => console.log('wrote', f));
