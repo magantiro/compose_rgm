@@ -1,0 +1,100 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "scored",
+ "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+ "base_seed": 20260923,
+ "budget": 10000,
+ "submitted": [
+  {
+   "task": "amlodipine_mpo",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20271923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_amlodipine_mpo_seed20271923_20260923T233950Z",
+   "volume": "pmo-fiber-amlodipine-mpo-seed20271923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38A7K4WMEGQCK9SXST49KX1"
+  },
+  {
+   "task": "fexofenadine_mpo",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20272923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_fexofenadine_mpo_seed20272923_20260923T233950Z",
+   "volume": "pmo-fiber-fexofenadine-mpo-seed20272923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38A7K7Q7XSGG2SCGQ9ZJ0ZM"
+  },
+  {
+   "task": "osimertinib_mpo",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20273923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_osimertinib_mpo_seed20273923_20260923T233950Z",
+   "volume": "pmo-fiber-osimertinib-mpo-seed20273923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38A7KA878AKDWGWYSVFAW8Z"
+  },
+  {
+   "task": "perindopril_mpo",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20267923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_perindopril_mpo_seed20267923_20260923T233950Z",
+   "volume": "pmo-fiber-perindopril-mpo-seed20267923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38A7KEHXHRQ771NCQKF160P"
+  },
+  {
+   "task": "ranolazine_mpo",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20274923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_ranolazine_mpo_seed20274923_20260923T233950Z",
+   "volume": "pmo-fiber-ranolazine-mpo-seed20274923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38A7KH98YKQ9W94T6KW31G9"
+  },
+  {
+   "task": "sitagliptin_mpo",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20275923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_sitagliptin_mpo_seed20275923_20260923T233950Z",
+   "volume": "pmo-fiber-sitagliptin-mpo-seed20275923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38A7KM2SKSV8GGWKSK7M5WR"
+  },
+  {
+   "task": "zaleplon_mpo",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20276923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_zaleplon_mpo_seed20276923_20260923T233950Z",
+   "volume": "pmo-fiber-zaleplon-mpo-seed20276923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38A7KPRR9YN5XAWPVW5CTRK"
+  }
+ ]
+}

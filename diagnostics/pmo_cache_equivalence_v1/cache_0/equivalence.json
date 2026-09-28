@@ -1,0 +1,543 @@
+{
+ "endpoint_sequence": [
+  [
+   "CC1CCC(C)(C(=O)N2CCCC(C)(C(=O)[O-])C2)O1",
+   0.03389830508474576
+  ],
+  [
+   "CC1(C(=O)[O-])CCCN(C(=O)C2CCCO2)C1",
+   0.03508771929824561
+  ],
+  [
+   "CCCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+   0.049586776859504134
+  ],
+  [
+   "CCC(NC(=O)C1CCOCC1)c1cn(C)nc1C",
+   0.0782608695652174
+  ],
+  [
+   "C#CCC(C)OC(=O)C(C(C)C)S(=O)(=O)c1ccccc1",
+   0.13392857142857142
+  ],
+  [
+   "CC(C)n1cc(S(=O)(=O)[N-]c2ccccc2-c2ncnn2C)cn1",
+   0.1896551724137931
+  ],
+  [
+   "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COc3cccc(F)c3)cc2s1",
+   0.1746031746031746
+  ],
+  [
+   "CCC(CC#N)Nc1ccc(Br)cc1Cl",
+   0.09803921568627451
+  ],
+  [
+   "CC(C)C(=O)N=c1[nH]c2ccc(NC(=O)COc3ccccc3)cc2s1",
+   0.1693548387096774
+  ],
+  [
+   "CC1(C(=O)[O-])CCCN(C(=O)C2(C)CCCO2)C1",
+   0.034482758620689655
+  ],
+  [
+   "CC(Oc1ccccc1Cl)C(=O)N1CCC(C(=O)[O-])C1",
+   0.10526315789473684
+  ],
+  [
+   "CCCC(=O)N=c1[nH]c2ccc(NC(=O)COC3CCCCC3)cc2s1",
+   0.09774436090225563
+  ],
+  [
+   "CC1C(C(=O)[O-])CCN1C(=O)COc1ccccc1Cl",
+   0.10526315789473684
+  ],
+  [
+   "C=CCC(C)OC(=O)C(C(C)C)S(=O)(=O)C1CCCCC1",
+   0.049586776859504134
+  ],
+  [
+   "CC(Oc1ccccc1)C(=O)N1CCC(C(=O)[O-])C1C",
+   0.10526315789473684
+  ],
+  [
+   "CC1(C(=O)N2CCCC(F)(C(=O)[O-])C2)CCCO1",
+   0.043478260869565216
+  ],
+  [
+   "CC(CCN1CCCCC1C#N)Nc1ccc(Br)cc1Cl",
+   0.09243697478991597
+  ],
+  [
+   "CCC(C(=O)C#N)N1c2cc(Br)cc(Cl)c21",
+   0.09615384615384616
+  ],
+  [
+   "CC1c2c(Br)ccc(c2Cl)NC1CC#N",
+   0.08737864077669903
+  ],
+  [
+   "O",
+   0.0
+  ],
+  [
+   "CC(Cc1cccc(Br)c1)Nc1ccccc1Cl",
+   0.17307692307692307
+  ],
+  [
+   "CC1=CC=C(C(C#N)CNc2ccc(Br)cc2Cl)CC1",
+   0.13392857142857142
+  ],
+  [
+   "N",
+   0.0
+  ],
+  [
+   "CCC(CC#N)NC1CCC(Br)(C2CCNC2)CC1Cl",
+   0.007936507936507936
+  ],
+  [
+   "CCNc1ccccc1",
+   0.10227272727272728
+  ],
+  [
+   "C=CN=C(N)C1NC(NC(CC)CC#N)=C(Cl)C=C1Br",
+   0.05042016806722689
+  ],
+  [
+   "CCC(CC#N)NC1=C(Cl)C=C(Br)C1CCC(O)O",
+   0.042735042735042736
+  ],
+  [
+   "BrC1CCOC1",
+   0.0
+  ],
+  [
+   "CCC(F)(CC#N)NC",
+   0.044444444444444446
+  ],
+  [
+   "N#CC(=O)CNc1ccc(Br)cc1Cl",
+   0.10101010101010101
+  ],
+  [
+   "CC(CC#N)N(O)c1ccc(Br)cc1Cl",
+   0.09900990099009901
+  ],
+  [
+   "CCC(CC1CCCCO1)Nc1ccc(Br)cc1Cl",
+   0.08695652173913043
+  ],
+  [
+   "C=C[IH](Br)=CC=CNC(C)CCN1CCCCC1C#N",
+   0.016
+  ],
+  [
+   "CCC(F)(NC)C1(C)CCN1",
+   0.042105263157894736
+  ],
+  [
+   "C=CC=CC=CNCC(C#N)C1=CC=CCC1",
+   0.034482758620689655
+  ],
+  [
+   "CC(N)N",
+   0.025974025974025976
+  ],
+  [
+   "C=CO",
+   0.0
+  ],
+  [
+   "OONNONC1(F)CCCCC1",
+   0.009345794392523364
+  ],
+  [
+   "CC(CCc1cccc(Br)c1)Nc1ccccc1Cl",
+   0.16822429906542055
+  ],
+  [
+   "CCNOONNCF",
+   0.02127659574468085
+  ],
+  [
+   "CCC(=O)OCCOONN",
+   0.030612244897959183
+  ],
+  [
+   "CCC(C)NC",
+   0.011764705882352941
+  ],
+  [
+   "CCCCNNO",
+   0.011235955056179775
+  ],
+  [
+   "CC1=CC=C(C(C#N)CNc2ccc(Br)cc2[IH2])CC1",
+   0.13392857142857142
+  ],
+  [
+   "BrCC1CCC1",
+   0.0
+  ],
+  [
+   "CCC(F)(NC)C(C)C1CCCNC1",
+   0.0380952380952381
+  ],
+  [
+   "CC1C(C#N)=C2CC(Br)CC(Cl)C2N1O",
+   0.037383177570093455
+  ],
+  [
+   "CCC(CC#N)NC1CCC(Br)(I2CCNC2)CC1Cl",
+   0.007936507936507936
+  ],
+  [
+   "C=CC(NC(C)CCc1cccc(Br)c1)=C(Cl)C1CC1",
+   0.08620689655172414
+  ],
+  [
+   "CCC(F)(CCC1CCCNC1)NC",
+   0.03773584905660377
+  ],
+  [
+   "CNC1(F)C(C)CCCC(C23CCC(CC2=O)C3(C)C)CNCCC1C",
+   0.028985507246376812
+  ],
+  [
+   "CONCC(C)CC(c1cccc(Br)c1)C1CCCCN1",
+   0.08264462809917356
+  ],
+  [
+   "F",
+   0.0
+  ],
+  [
+   "NNONC1(F)CC2CCCC2(N)C1",
+   0.018518518518518517
+  ],
+  [
+   "OCCCNc1ccccc1",
+   0.08421052631578947
+  ],
+  [
+   "OBr",
+   0.0
+  ],
+  [
+   "CC1=C(F)NNOON1",
+   0.054945054945054944
+  ],
+  [
+   "CCC1CCOC(CCNc2ccc(Br)cc2Cl)C1",
+   0.08695652173913043
+  ],
+  [
+   "OOCNNONC1(F)CCCCC1",
+   0.00909090909090909
+  ],
+  [
+   "OONNONC1(F)CCCCCC1",
+   0.00909090909090909
+  ],
+  [
+   "CC1CC(C(=O)O)C1CCCCc1cccc(Br)c1",
+   0.09734513274336283
+  ],
+  [
+   "N#CC(=O)CNc1ccc(Br)c(Cl)c1",
+   0.10101010101010101
+  ],
+  [
+   "C=C1C=CN1CC(C#N)C1=Cc2ccoc2CC1",
+   0.09821428571428571
+  ],
+  [
+   "CC(Cc1cccc(Br)c1)Nc1c([SH3])pcc2ccccc12",
+   0.18584070796460178
+  ]
+ ],
+ "observations": [
+  {
+   "delta_raw": -0.07643697478991597,
+   "endpoint": "C=C[IH](Br)=CC=CNC(C)CCN1CCCCC1C#N",
+   "score": 0.016
+  },
+  {
+   "delta_raw": -0.0023391812865497102,
+   "endpoint": "CCC(F)(NC)C1(C)CCN1",
+   "score": 0.042105263157894736
+  },
+  {
+   "delta_raw": -0.09944581280788177,
+   "endpoint": "C=CC=CC=CNCC(C#N)C1=CC=CCC1",
+   "score": 0.034482758620689655
+  },
+  {
+   "delta_raw": -0.07629870129870131,
+   "endpoint": "CC(N)N",
+   "score": 0.025974025974025976
+  },
+  {
+   "delta_raw": -0.05042016806722689,
+   "endpoint": "C=CO",
+   "score": 0.0
+  },
+  {
+   "delta_raw": 0.009345794392523364,
+   "endpoint": "OONNONC1(F)CCCCC1",
+   "score": 0.009345794392523364
+  },
+  {
+   "delta_raw": -0.004852624011502521,
+   "endpoint": "CC(CCc1cccc(Br)c1)Nc1ccccc1Cl",
+   "score": 0.16822429906542055
+  },
+  {
+   "delta_raw": 0.02127659574468085,
+   "endpoint": "CCNOONNCF",
+   "score": 0.02127659574468085
+  },
+  {
+   "delta_raw": -0.10331632653061223,
+   "endpoint": "CCC(=O)OCCOONN",
+   "score": 0.030612244897959183
+  },
+  {
+   "delta_raw": -0.032679738562091505,
+   "endpoint": "CCC(C)NC",
+   "score": 0.011764705882352941
+  },
+  {
+   "delta_raw": 0.011235955056179775,
+   "endpoint": "CCCCNNO",
+   "score": 0.011235955056179775
+  },
+  {
+   "delta_raw": 0.0,
+   "endpoint": "CC1=CC=C(C(C#N)CNc2ccc(Br)cc2[IH2])CC1",
+   "score": 0.13392857142857142
+  },
+  {
+   "delta_raw": 0.0,
+   "endpoint": "BrCC1CCC1",
+   "score": 0.0
+  },
+  {
+   "delta_raw": -0.0063492063492063475,
+   "endpoint": "CCC(F)(NC)C(C)C1CCCNC1",
+   "score": 0.0380952380952381
+  },
+  {
+   "delta_raw": -0.06162672342000556,
+   "endpoint": "CC1C(C#N)=C2CC(Br)CC(Cl)C2N1O",
+   "score": 0.037383177570093455
+  },
+  {
+   "delta_raw": 0.0,
+   "endpoint": "CCC(CC#N)NC1CCC(Br)(I2CCNC2)CC1Cl",
+   "score": 0.007936507936507936
+  },
+  {
+   "delta_raw": -0.08201740251369641,
+   "endpoint": "C=CC(NC(C)CCc1cccc(Br)c1)=C(Cl)C1CC1",
+   "score": 0.08620689655172414
+  },
+  {
+   "delta_raw": -0.00035938903863432653,
+   "endpoint": "CCC(F)(CCC1CCCNC1)NC",
+   "score": 0.03773584905660377
+  },
+  {
+   "delta_raw": -0.009109730848861287,
+   "endpoint": "CNC1(F)C(C)CCCC(C23CCC(CC2=O)C3(C)C)CNCCC1C",
+   "score": 0.028985507246376812
+  },
+  {
+   "delta_raw": -0.085579670966247,
+   "endpoint": "CONCC(C)CC(c1cccc(Br)c1)C1CCCCN1",
+   "score": 0.08264462809917356
+  },
+  {
+   "delta_raw": 0.0,
+   "endpoint": "F",
+   "score": 0.0
+  },
+  {
+   "delta_raw": 0.009172724125995154,
+   "endpoint": "NNONC1(F)CC2CCCC2(N)C1",
+   "score": 0.018518518518518517
+  },
+  {
+   "delta_raw": -0.018062200956937807,
+   "endpoint": "OCCCNc1ccccc1",
+   "score": 0.08421052631578947
+  },
+  {
+   "delta_raw": -0.16822429906542055,
+   "endpoint": "OBr",
+   "score": 0.0
+  },
+  {
+   "delta_raw": 0.03366845920037409,
+   "endpoint": "CC1=C(F)NNOON1",
+   "score": 0.054945054945054944
+  },
+  {
+   "delta_raw": 0.0,
+   "endpoint": "CCC1CCOC(CCNc2ccc(Br)cc2Cl)C1",
+   "score": 0.08695652173913043
+  },
+  {
+   "delta_raw": -0.0002548853016142733,
+   "endpoint": "OOCNNONC1(F)CCCCC1",
+   "score": 0.00909090909090909
+  },
+  {
+   "delta_raw": -0.0002548853016142733,
+   "endpoint": "OONNONC1(F)CCCCCC1",
+   "score": 0.00909090909090909
+  },
+  {
+   "delta_raw": -0.07087916632205772,
+   "endpoint": "CC1CC(C(=O)O)C1CCCCc1cccc(Br)c1",
+   "score": 0.09734513274336283
+  },
+  {
+   "delta_raw": 0.0,
+   "endpoint": "N#CC(=O)CNc1ccc(Br)c(Cl)c1",
+   "score": 0.10101010101010101
+  },
+  {
+   "delta_raw": 0.06373152709359606,
+   "endpoint": "C=C1C=CN1CC(C#N)C1=Cc2ccoc2CC1",
+   "score": 0.09821428571428571
+  },
+  {
+   "delta_raw": 0.012763784887678709,
+   "endpoint": "CC(Cc1cccc(Br)c1)Nc1c([SH3])pcc2ccccc12",
+   "score": 0.18584070796460178
+  }
+ ],
+ "option_policy": [],
+ "parent_policy_history": [
+  {
+   "label": "round_1",
+   "parent_mass": {
+    "BrC1CCOC1": 0.21142857142857163,
+    "C=CN=C(N)C1NC(NC(CC)CC#N)=C(Cl)C=C1Br": 0.011428571428571429,
+    "CC(CC#N)N(O)c1ccc(Br)cc1Cl": 0.017142857142857144,
+    "CC(CCN1CCCCC1C#N)Nc1ccc(Br)cc1Cl": 0.017142857142857144,
+    "CC(Cc1cccc(Br)c1)Nc1ccccc1Cl": 0.08,
+    "CC1=CC=C(C(C#N)CNc2ccc(Br)cc2Cl)CC1": 0.1600000000000001,
+    "CC1c2c(Br)ccc(c2Cl)NC1CC#N": 0.017142857142857144,
+    "CCC(C(=O)C#N)N1c2cc(Br)cc(Cl)c21": 0.022857142857142857,
+    "CCC(CC#N)NC1=C(Cl)C=C(Br)C1CCC(O)O": 0.011428571428571429,
+    "CCC(CC#N)NC1CCC(Br)(C2CCNC2)CC1Cl": 0.12,
+    "CCC(CC1CCCCO1)Nc1ccc(Br)cc1Cl": 0.022857142857142857,
+    "CCC(F)(CC#N)NC": 0.1428571428571429,
+    "CCNc1ccccc1": 0.017142857142857144,
+    "N": 0.08,
+    "O": 0.06857142857142857
+   }
+  },
+  {
+   "label": "after_update_1",
+   "parent_mass": {
+    "BrC1CCOC1": 0.21142857142857163,
+    "C=CN=C(N)C1NC(NC(CC)CC#N)=C(Cl)C=C1Br": 0.011428571428571429,
+    "CC(CC#N)N(O)c1ccc(Br)cc1Cl": 0.017142857142857144,
+    "CC(CCN1CCCCC1C#N)Nc1ccc(Br)cc1Cl": 0.017142857142857144,
+    "CC(Cc1cccc(Br)c1)Nc1ccccc1Cl": 0.08,
+    "CC1=CC=C(C(C#N)CNc2ccc(Br)cc2Cl)CC1": 0.1600000000000001,
+    "CC1c2c(Br)ccc(c2Cl)NC1CC#N": 0.017142857142857144,
+    "CCC(C(=O)C#N)N1c2cc(Br)cc(Cl)c21": 0.022857142857142857,
+    "CCC(CC#N)NC1=C(Cl)C=C(Br)C1CCC(O)O": 0.011428571428571429,
+    "CCC(CC#N)NC1CCC(Br)(C2CCNC2)CC1Cl": 0.12,
+    "CCC(CC1CCCCO1)Nc1ccc(Br)cc1Cl": 0.022857142857142857,
+    "CCC(F)(CC#N)NC": 0.1428571428571429,
+    "CCNc1ccccc1": 0.017142857142857144,
+    "N": 0.08,
+    "O": 0.06857142857142857
+   }
+  },
+  {
+   "label": "round_2",
+   "parent_mass": {
+    "BrC1CCOC1": 0.006896551724137931,
+    "BrCC1CCC1": 0.006896551724137931,
+    "C=CC=CC=CNCC(C#N)C1=CC=CCC1": 0.006896551724137931,
+    "C=CO": 0.11724137931034483,
+    "C=C[IH](Br)=CC=CNC(C)CCN1CCCCC1C#N": 0.013793103448275862,
+    "CC(CCN1CCCCC1C#N)Nc1ccc(Br)cc1Cl": 0.006896551724137931,
+    "CC(CCc1cccc(Br)c1)Nc1ccccc1Cl": 0.1103448275862069,
+    "CC(Cc1cccc(Br)c1)Nc1ccccc1Cl": 0.14482758620689656,
+    "CC(N)N": 0.1655172413793104,
+    "CC1=CC=C(C(C#N)CNc2ccc(Br)cc2Cl)CC1": 0.006896551724137931,
+    "CC1C(C#N)=C2CC(Br)CC(Cl)C2N1O": 0.020689655172413793,
+    "CC1c2c(Br)ccc(c2Cl)NC1CC#N": 0.006896551724137931,
+    "CCC(=O)OCCOONN": 0.006896551724137931,
+    "CCC(C(=O)C#N)N1c2cc(Br)cc(Cl)c21": 0.006896551724137931,
+    "CCC(C)NC": 0.006896551724137931,
+    "CCC(CC#N)NC1CCC(Br)(C2CCNC2)CC1Cl": 0.006896551724137931,
+    "CCC(CC#N)NC1CCC(Br)(I2CCNC2)CC1Cl": 0.006896551724137931,
+    "CCC(CC1CCCCO1)Nc1ccc(Br)cc1Cl": 0.013793103448275862,
+    "CCC(F)(NC)C(C)C1CCCNC1": 0.14482758620689656,
+    "CCNOONNCF": 0.013793103448275862,
+    "CCNc1ccccc1": 0.006896551724137931,
+    "N": 0.013793103448275862,
+    "N#CC(=O)CNc1ccc(Br)cc1Cl": 0.013793103448275862,
+    "O": 0.013793103448275862,
+    "OONNONC1(F)CCCCC1": 0.13103448275862067
+   }
+  }
+ ],
+ "rng_state": {
+  "bit_generator": "PCG64",
+  "has_uint32": 0,
+  "state": {
+   "inc": 127773644024233569000421794108216772193,
+   "state": 160858877585708587297394730479129724674
+  },
+  "uinteger": 1187753197
+ },
+ "selected_endpoints_per_round": [
+  [
+   "C=C[IH](Br)=CC=CNC(C)CCN1CCCCC1C#N",
+   "CCC(F)(NC)C1(C)CCN1",
+   "C=CC=CC=CNCC(C#N)C1=CC=CCC1",
+   "CC(N)N",
+   "C=CO",
+   "OONNONC1(F)CCCCC1",
+   "CC(CCc1cccc(Br)c1)Nc1ccccc1Cl",
+   "CCNOONNCF",
+   "CCC(=O)OCCOONN",
+   "CCC(C)NC",
+   "CCCCNNO",
+   "CC1=CC=C(C(C#N)CNc2ccc(Br)cc2[IH2])CC1",
+   "BrCC1CCC1",
+   "CCC(F)(NC)C(C)C1CCCNC1",
+   "CC1C(C#N)=C2CC(Br)CC(Cl)C2N1O",
+   "CCC(CC#N)NC1CCC(Br)(I2CCNC2)CC1Cl"
+  ],
+  [
+   "C=CC(NC(C)CCc1cccc(Br)c1)=C(Cl)C1CC1",
+   "CCC(F)(CCC1CCCNC1)NC",
+   "CNC1(F)C(C)CCCC(C23CCC(CC2=O)C3(C)C)CNCCC1C",
+   "CONCC(C)CC(c1cccc(Br)c1)C1CCCCN1",
+   "F",
+   "NNONC1(F)CC2CCCC2(N)C1",
+   "OCCCNc1ccccc1",
+   "OBr",
+   "CC1=C(F)NNOON1",
+   "CCC1CCOC(CCNc2ccc(Br)cc2Cl)C1",
+   "OOCNNONC1(F)CCCCC1",
+   "OONNONC1(F)CCCCCC1",
+   "CC1CC(C(=O)O)C1CCCCc1cccc(Br)c1",
+   "N#CC(=O)CNc1ccc(Br)c(Cl)c1",
+   "C=C1C=CN1CC(C#N)C1=Cc2ccoc2CC1",
+   "CC(Cc1cccc(Br)c1)Nc1c([SH3])pcc2ccccc12"
+  ]
+ ],
+ "serialization_cache_entries": 0
+}

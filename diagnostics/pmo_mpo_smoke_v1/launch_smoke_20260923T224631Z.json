@@ -1,0 +1,22 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "smoke",
+ "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+ "base_seed": 20260923,
+ "budget": 96,
+ "submitted": [
+  {
+   "task": "ranolazine_mpo",
+   "budget": 96,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20274925,
+   "base_seed": 20260923,
+   "replicate": 2,
+   "label": "smoke_ranolazine_mpo_seed20274925_20260923T224631Z",
+   "volume": "pmo-fiber-ranolazine-mpo-seed20274925",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M3875ZAMBPJQV77TFY5KP4GB"
+  }
+ ]
+}

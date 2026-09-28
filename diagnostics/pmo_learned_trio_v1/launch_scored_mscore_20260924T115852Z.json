@@ -1,0 +1,27 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "scored",
+ "git_commit": "65beb16c9809b62fd66e289dabee6868e08b42dd",
+ "base_seed": 20260924,
+ "budget": 3000,
+ "submitted": [
+  {
+   "task": "jnk3",
+   "prescreen": true,
+   "transplant_share": 0.0,
+   "parent_weighting": "measured_score",
+   "transplant_lane": false,
+   "donor_reservoir": false,
+   "budget": 3000,
+   "rounds": 260,
+   "queries": 16,
+   "seed": 20269928,
+   "base_seed": 20260924,
+   "replicate": 4,
+   "label": "scored_jnk3_seed20269928_mscore_20260924T115852Z",
+   "volume": "pmo-fiber-jnk3-seed20269928-mscore",
+   "git_commit": "65beb16c9809b62fd66e289dabee6868e08b42dd",
+   "modal_call_id": "fc-01M39MGSWJ1ZXB3HEWAXV4X0VA"
+  }
+ ]
+}

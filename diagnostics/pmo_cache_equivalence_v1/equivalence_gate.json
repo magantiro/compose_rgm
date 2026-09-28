@@ -1,0 +1,44 @@
+{
+ "schema_version": "pmo_cache_equivalence_gate_v1",
+ "evidence_role": "optimization_equivalence_proof",
+ "budget": 64,
+ "checks": {
+  "1_endpoint_sequence": {
+   "identical": false,
+   "field": "endpoint_sequence",
+   "size": 64
+  },
+  "2_parent_probabilities": {
+   "identical": false,
+   "field": "parent_policy_history",
+   "size": 3
+  },
+  "3_rebuild_option_probabilities": {
+   "identical": true,
+   "field": "option_policy",
+   "size": 0
+  },
+  "4_selected_indices": {
+   "identical": false,
+   "field": "selected_endpoints_per_round",
+   "size": 2
+  },
+  "5_oracle_query_order": {
+   "identical": false,
+   "field": "endpoint_sequence",
+   "size": 64
+  },
+  "6_rewards_and_updates": {
+   "identical": false,
+   "field": "observations",
+   "size": 32
+  },
+  "7_rng_progression": {
+   "identical": true,
+   "field": "rng_state",
+   "size": 1
+  }
+ },
+ "evidence_populated": false,
+ "verdict": "DIFFERS"
+}

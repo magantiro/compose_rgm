@@ -1,0 +1,113 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "scored",
+ "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+ "base_seed": 20260923,
+ "budget": 10000,
+ "submitted": [
+  {
+   "task": "scaffold_hop",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20279923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_scaffold_hop_seed20279923_20260924T002249Z",
+   "volume": "pmo-fiber-scaffold-hop-seed20279923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38CP9FQC4P5ZGCWA62DSCRE"
+  },
+  {
+   "task": "deco_hop",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20278923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_deco_hop_seed20278923_20260924T002249Z",
+   "volume": "pmo-fiber-deco-hop-seed20278923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38CP9PGR7FMJQECEGFBSSEY"
+  },
+  {
+   "task": "valsartan_smarts",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20277923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_valsartan_smarts_seed20277923_20260924T002249Z",
+   "volume": "pmo-fiber-valsartan-smarts-seed20277923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38CP9SKZH5JTB462BZ52AD2"
+  },
+  {
+   "task": "isomers_c7h8n2o2",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20266923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_isomers_c7h8n2o2_seed20266923_20260924T002249Z",
+   "volume": "pmo-fiber-isomers-c7h8n2o2-seed20266923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38CP9W2KFMTZ6HHVCNYT3D4"
+  },
+  {
+   "task": "isomers_c9h10n2o2pf2cl",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20280923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_isomers_c9h10n2o2pf2cl_seed20280923_20260924T002249Z",
+   "volume": "pmo-fiber-isomers-c9h10n2o2pf2cl-seed20280923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38CPA084G2RR83Q7CGCP1FS"
+  },
+  {
+   "task": "median1",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20265923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_median1_seed20265923_20260924T002249Z",
+   "volume": "pmo-fiber-median1-seed20265923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38CPA2MXEGPWEJDWN0BFHPV"
+  },
+  {
+   "task": "median2",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20281923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_median2_seed20281923_20260924T002249Z",
+   "volume": "pmo-fiber-median2-seed20281923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38CPA593XM8G0ZX34DWAJKE"
+  },
+  {
+   "task": "qed",
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20270923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "scored_qed_seed20270923_20260924T002249Z",
+   "volume": "pmo-fiber-qed-seed20270923",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38CPA848B25SMKPACGGVHM3"
+  }
+ ]
+}

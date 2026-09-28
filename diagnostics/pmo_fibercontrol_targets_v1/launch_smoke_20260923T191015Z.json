@@ -1,0 +1,74 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "smoke",
+ "git_commit": "f3ff6686484f50aac94b13637cd2d2eddaa3f6ec",
+ "base_seed": 20260923,
+ "budget": 112,
+ "submitted": [
+  {
+   "task": "celecoxib_rediscovery",
+   "budget": 112,
+   "rounds": 8,
+   "queries": 16,
+   "seed": 20260923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "smoke_celecoxib_rediscovery_seed20260923_20260923T191015Z",
+   "volume": "pmo-fiber-celecoxib-rediscovery-seed20260923",
+   "git_commit": "f3ff6686484f50aac94b13637cd2d2eddaa3f6ec",
+   "modal_call_id": "fc-01M37TSZ3PYRJMY5R5HT9RKDYW"
+  },
+  {
+   "task": "albuterol_similarity",
+   "budget": 112,
+   "rounds": 8,
+   "queries": 16,
+   "seed": 20261923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "smoke_albuterol_similarity_seed20261923_20260923T191015Z",
+   "volume": "pmo-fiber-albuterol-similarity-seed20261923",
+   "git_commit": "f3ff6686484f50aac94b13637cd2d2eddaa3f6ec",
+   "modal_call_id": "fc-01M37TSZ715EXF7ZN28NHTG9FD"
+  },
+  {
+   "task": "mestranol_similarity",
+   "budget": 112,
+   "rounds": 8,
+   "queries": 16,
+   "seed": 20262923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "smoke_mestranol_similarity_seed20262923_20260923T191015Z",
+   "volume": "pmo-fiber-mestranol-similarity-seed20262923",
+   "git_commit": "f3ff6686484f50aac94b13637cd2d2eddaa3f6ec",
+   "modal_call_id": "fc-01M37TSZAMGY1CRDV26FWQNM9Q"
+  },
+  {
+   "task": "thiothixene_rediscovery",
+   "budget": 112,
+   "rounds": 8,
+   "queries": 16,
+   "seed": 20263923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "smoke_thiothixene_rediscovery_seed20263923_20260923T191015Z",
+   "volume": "pmo-fiber-thiothixene-rediscovery-seed20263923",
+   "git_commit": "f3ff6686484f50aac94b13637cd2d2eddaa3f6ec",
+   "modal_call_id": "fc-01M37TSZDC2RCG5PJJT6XMG9AH"
+  },
+  {
+   "task": "troglitazone_rediscovery",
+   "budget": 112,
+   "rounds": 8,
+   "queries": 16,
+   "seed": 20264923,
+   "base_seed": 20260923,
+   "replicate": 0,
+   "label": "smoke_troglitazone_rediscovery_seed20264923_20260923T191015Z",
+   "volume": "pmo-fiber-troglitazone-rediscovery-seed20264923",
+   "git_commit": "f3ff6686484f50aac94b13637cd2d2eddaa3f6ec",
+   "modal_call_id": "fc-01M37TSZG7BB37D2HF4PC5PDET"
+  }
+ ]
+}

@@ -1,0 +1,79 @@
+{
+ "schema_version": "pmo_fibercontrol_launch_v1",
+ "stage": "scored",
+ "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+ "base_seed": 20260923,
+ "budget": 10000,
+ "submitted": [
+  {
+   "task": "celecoxib_rediscovery",
+   "prescreen": false,
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20260983,
+   "base_seed": 20260923,
+   "replicate": 60,
+   "label": "scored_celecoxib_rediscovery_seed20260983_20260924T020403Z",
+   "volume": "pmo-fiber-celecoxib-rediscovery-seed20260983",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38JFN6QDXERKH4SW3F8EZQZ"
+  },
+  {
+   "task": "albuterol_similarity",
+   "prescreen": false,
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20261983,
+   "base_seed": 20260923,
+   "replicate": 60,
+   "label": "scored_albuterol_similarity_seed20261983_20260924T020403Z",
+   "volume": "pmo-fiber-albuterol-similarity-seed20261983",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38JFN957EXX2RTAMWSV4JSS"
+  },
+  {
+   "task": "mestranol_similarity",
+   "prescreen": false,
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20262983,
+   "base_seed": 20260923,
+   "replicate": 60,
+   "label": "scored_mestranol_similarity_seed20262983_20260924T020403Z",
+   "volume": "pmo-fiber-mestranol-similarity-seed20262983",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38JFNCE8CP29KRX73M5S59V"
+  },
+  {
+   "task": "thiothixene_rediscovery",
+   "prescreen": false,
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20263983,
+   "base_seed": 20260923,
+   "replicate": 60,
+   "label": "scored_thiothixene_rediscovery_seed20263983_20260924T020403Z",
+   "volume": "pmo-fiber-thiothixene-rediscovery-seed20263983",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38JFNHTRNTM65SXJGM1NAN8"
+  },
+  {
+   "task": "troglitazone_rediscovery",
+   "prescreen": false,
+   "budget": 10000,
+   "rounds": 700,
+   "queries": 16,
+   "seed": 20264983,
+   "base_seed": 20260923,
+   "replicate": 60,
+   "label": "scored_troglitazone_rediscovery_seed20264983_20260924T020403Z",
+   "volume": "pmo-fiber-troglitazone-rediscovery-seed20264983",
+   "git_commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+   "modal_call_id": "fc-01M38JFNMQF4V9SQHSNJSKND94"
+  }
+ ]
+}
