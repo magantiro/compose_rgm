@@ -17,6 +17,8 @@
 <script src="lattice.js"></script>
 <script src="scenes_a.js"></script>
 <script src="canon.js"></script>
+<script src="scenes_trace.js"></script>
+<script src="scenes_tasks.js"></script>
 <script src="scenes_b.js"></script>
 <script>
 'use strict';
@@ -26,12 +28,13 @@
 // frame is a pure function of its index, so renders are reproducible.
 const FPS = 60;
 const SCENES = [
-  { name: 's1_problem',     fn: scene1, dur:  8.5 },
-  { name: 's2_limitation',  fn: scene2, dur: 11.0 },
-  { name: 's3_core',        fn: scene3, dur: 20.0 },
-  { name: 's4_mechanism',   fn: scene4, dur: 14.0 },
-  { name: 's5_results',     fn: scene5, dur: 11.0 },
-  { name: 's6_close',       fn: scene6, dur:  7.0 },
+  { name: 's1_problem',     fn: scene1,     dur:  8.0 },
+  { name: 's2_limitation',  fn: scene2,     dur: 10.0 },
+  { name: 's3_core',        fn: scene3,     dur: 18.0 },
+  { name: 's4_mechanism',   fn: scene4,     dur: 12.0 },
+  { name: 's5_process',     fn: sceneTrace, dur:  9.8 },
+  { name: 's6_tasks',       fn: sceneTasks, dur: 39.0 },
+  { name: 's7_close',       fn: scene6,     dur:  7.5 },
 ];
 const XFADE = 0.55;                       // cross-dissolve at scene boundaries
 

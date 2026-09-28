@@ -60,6 +60,24 @@ SMILES = {
     "n12": "c1cnc2ccccc2n1",
 }
 
+# ---- The long trajectory of the process scene ----
+# Ten committed states. Consecutive pairs differ by exactly one primitive
+# rewrite, so the heavy-atom count moves by at most one at every step. The chain
+# deliberately grows, restructures and shrinks, which is the paper's
+# trans-dimensional claim, and it exercises six of the eight families.
+TRACE = [
+    ("CCCCCN",           None,           ""),
+    ("C1CCNCC1",         "cycle_close",  "="),
+    ("CC1CCNCC1",        "atom_insert",  "+1"),
+    ("CC1CCN(C)CC1",     "atom_insert",  "+1"),
+    ("CC1CCN(CO)CC1",    "atom_insert",  "+1"),
+    ("CC1CCN(C=O)CC1",   "bond_reorder", "="),
+    ("CCCN(C=O)CCC",     "cycle_open",   "="),
+    ("CCCN(C=O)CC",      "atom_delete",  "−1"),
+    ("CCCN(C)CC",        "atom_delete",  "−1"),
+    ("CCCNCC",           "atom_delete",  "−1"),
+]
+
 
 def layout(smiles: str) -> dict:
     mol = Chem.MolFromSmiles(smiles)
@@ -132,8 +150,46 @@ def layout(smiles: str) -> dict:
     }
 
 
+def check_trace(out: dict) -> list[dict]:
+    """Lay out the trajectory and REFUSE any step that is not a single primitive.
+
+    A primitive rewrite changes the heavy-atom count by at most one. If a step
+    violates that, the chain is not a sequence of primitives and the scene would
+    be making a claim the paper does not support -- so this raises rather than
+    quietly rendering it.
+    """
+    steps = []
+    prev = None
+    for i, (smi, family, card) in enumerate(TRACE):
+        m = layout(smi)
+        key = f"trace{i}"
+        out[key] = m
+        if prev is not None:
+            delta = m["heavy"] - prev
+            if abs(delta) > 1:
+                raise ValueError(
+                    f"trace step {i} changes heavy atoms by {delta:+d}: "
+                    f"not a single primitive rewrite ({smi})")
+            expect = {"+1": 1, "−1": -1, "=": 0}[card]
+            if delta != expect:
+                raise ValueError(
+                    f"trace step {i} labelled {family} {card} but heavy-atom "
+                    f"delta is {delta:+d} ({smi})")
+        steps.append({"key": key, "family": family, "card": card,
+                      "heavy": m["heavy"], "smiles": m["smiles"]})
+        prev = m["heavy"]
+    return steps
+
+
 def main() -> None:
     out = {name: layout(smi) for name, smi in SMILES.items()}
+    trace = check_trace(out)
+    out["_trace"] = trace
+    print("trajectory (verified single-primitive steps):")
+    for s in trace:
+        fam = f"{s['family']} {s['card']}" if s["family"] else "source"
+        print(f"  {s['key']:8s} heavy={s['heavy']:2d}  {fam:20s} {s['smiles']}")
+    print()
     assets = pathlib.Path(__file__).resolve().parent.parent / "assets"
     dest = assets / "molecules.json"
     dest.write_text(json.dumps(out, indent=1, sort_keys=True))
@@ -144,6 +200,8 @@ def main() -> None:
                   "const MOLECULES = " + json.dumps(out, sort_keys=True) + ";\n")
     print(f"wrote {dest}\nwrote {js}")
     for name, m in sorted(out.items()):
+        if name.startswith('_') or name.startswith('trace'):
+            continue
         print(f"  {name:12s} heavy={m['heavy']:2d} atoms={len(m['atoms']):2d} "
               f"bonds={len(m['bonds']):2d} rings={len(m['rings'])}  {m['smiles']}")
 

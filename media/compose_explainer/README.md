@@ -1,8 +1,13 @@
 # COMPOSE — animated research explainer
 
-A 71.5 s, 1920×1080, 60 fps explainer for **COMPOSE: Molecular Generation and
+A 104.3 s, 1920×1080, 60 fps explainer for **COMPOSE: Molecular Generation and
 Optimization with a Reusable Stochastic Rewrite Process** (under review at
 ICLR 2027).
+
+The film is about the **process and its control**, not about benchmark results:
+no table, chart or reported figure appears in it. What it shows is the
+executable state space, the frozen reference law, structured programs, and four
+task controllers driving that one unchanged process.
 
 Output: `build/compose_explainer.mp4`
 
@@ -77,14 +82,40 @@ output; every intermediate is a complete, valence-valid molecule.
 
 ## Timeline
 
-| # | scene | start | dur |
-|---|-------|-------|-----|
-| 1 | problem — every edit changes what comes next | 0.0 | 8.5 |
-| 2 | limitation — a new objective means a new model | 8.5 | 11.0 |
-| 3 | core idea — executable state space, canonical successors, frozen R_θ | 19.5 | 20.0 |
-| 4 | mechanism — programs, then control of the frozen process | 39.5 | 14.0 |
-| 5 | results — learned-vs-uniform ablation, PMO-1K, lead optimization | 53.5 | 11.0 |
-| 6 | close — the opening image resolved, title card | 64.5 | 7.0 |
+| # | scene | start | dur | file |
+|---|-------|-------|-----|------|
+| 1 | problem — every edit changes what comes next | 0.0 | 8.0 | `scenes_a.js` |
+| 2 | limitation — a new objective means a new model | 8.0 | 10.0 | `scenes_a.js` |
+| 3 | core idea — executable state space, canonical successors, frozen R_θ | 18.0 | 18.0 | `scenes_a.js`, `canon.js` |
+| 4 | mechanism — programs, then control of the frozen process | 36.0 | 12.0 | `scenes_b.js` |
+| 5 | the process — one long trajectory, ten committed states | 48.0 | 9.8 | `scenes_trace.js` |
+| 6 | four task controllers | 57.8 | 39.0 | `scenes_tasks.js` |
+| 7 | close — the opening image resolved, title card | 96.8 | 7.5 | `scenes_b.js` |
+
+Scene 6 holds four vignettes, each cross-dissolving over 0.5 s:
+
+| vignette | dur | mechanism |
+|---|---|---|
+| fragment-constrained generation | 8.6 | a retained subgraph L is held byte-identical while both of its interfaces ∂L grow |
+| black-box optimization | 9.6 | propose → execute → score → archive → reuse as parents, two rounds |
+| protein-specific lead optimization | 10.2 | the feasible region F(x₀,δ); cheap predicates resolve before the docking oracle; a ligand settles into a cavity |
+| finite-horizon future-value control | 10.6 | terminal desirability backs up the tree; the controlled kernel reweights R_θ by what stays reachable |
 
 Scenes cross-dissolve over 0.55 s; per-scene fades are deliberately absent so
 the dissolve is the single authority on transitions.
+
+### The trajectory in scene 5
+
+`build_molecules.py` holds the ten-state chain and **refuses to build** if any
+consecutive pair differs by more than one heavy atom, or if the heavy-atom delta
+disagrees with the family label the scene prints. So the claim the scene makes —
+that each step is a single primitive rewrite — is enforced by the asset build
+rather than asserted in a comment. The chain grows 6→9 and shrinks back to 6,
+exercising `cycle_close`, `atom_insert`, `bond_reorder`, `cycle_open` and
+`atom_delete`.
+
+### On the one place numbers appear
+
+The utility bars in the optimization vignette are drawn with **no axis and no
+numeric labels**, and are illustrative of the loop's shape only. Nothing in the
+film reports a measured value.

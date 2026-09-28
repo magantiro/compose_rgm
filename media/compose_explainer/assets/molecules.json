@@ -1,4 +1,76 @@
 {
+ "_trace": [
+  {
+   "card": "",
+   "family": null,
+   "heavy": 6,
+   "key": "trace0",
+   "smiles": "CCCCCN"
+  },
+  {
+   "card": "=",
+   "family": "cycle_close",
+   "heavy": 6,
+   "key": "trace1",
+   "smiles": "C1CCNCC1"
+  },
+  {
+   "card": "+1",
+   "family": "atom_insert",
+   "heavy": 7,
+   "key": "trace2",
+   "smiles": "CC1CCNCC1"
+  },
+  {
+   "card": "+1",
+   "family": "atom_insert",
+   "heavy": 8,
+   "key": "trace3",
+   "smiles": "CC1CCN(C)CC1"
+  },
+  {
+   "card": "+1",
+   "family": "atom_insert",
+   "heavy": 9,
+   "key": "trace4",
+   "smiles": "CC1CCN(CO)CC1"
+  },
+  {
+   "card": "=",
+   "family": "bond_reorder",
+   "heavy": 9,
+   "key": "trace5",
+   "smiles": "CC1CCN(C=O)CC1"
+  },
+  {
+   "card": "=",
+   "family": "cycle_open",
+   "heavy": 9,
+   "key": "trace6",
+   "smiles": "CCCN(C=O)CCC"
+  },
+  {
+   "card": "\u22121",
+   "family": "atom_delete",
+   "heavy": 8,
+   "key": "trace7",
+   "smiles": "CCCN(C=O)CC"
+  },
+  {
+   "card": "\u22121",
+   "family": "atom_delete",
+   "heavy": 7,
+   "key": "trace8",
+   "smiles": "CCCN(C)CC"
+  },
+  {
+   "card": "\u22121",
+   "family": "atom_delete",
+   "heavy": 6,
+   "key": "trace9",
+   "smiles": "CCCNCC"
+  }
+ ],
  "core": {
   "atoms": [
    {
@@ -3980,5 +4052,1250 @@
   "heavy": 3,
   "rings": [],
   "smiles": "CCC"
+ },
+ "trace0": {
+  "atoms": [
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": 2.1653567459620198,
+    "y": -0.2482179615235859
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": 1.2988940425242002,
+    "y": 0.25101815197808686
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": 0.43323133900233207,
+    "y": -0.24961805675083637
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": -0.4332313644354878,
+    "y": 0.24961805675083637
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": -1.298893991657888,
+    "y": -0.25101815197808686
+   },
+   {
+    "arom": false,
+    "el": "N",
+    "hs": 2,
+    "ring": false,
+    "x": -2.165356771395176,
+    "y": 0.2482179615235859
+   }
+  ],
+  "bonds": [
+   {
+    "a": 0,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 1,
+    "arom": false,
+    "b": 2,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 2,
+    "arom": false,
+    "b": 3,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 4,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 4,
+    "arom": false,
+    "b": 5,
+    "order": 1,
+    "ring": false
+   }
+  ],
+  "heavy": 6,
+  "rings": [],
+  "smiles": "CCCCCN"
+ },
+ "trace1": {
+  "atoms": [
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 0.8664124504255643,
+    "y": -0.49940719222899865
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 0.0008000234606343621,
+    "y": -1.0000143878593477
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": -0.8656124333228501,
+    "y": -0.5006071988093093
+   },
+   {
+    "arom": false,
+    "el": "N",
+    "hs": 1,
+    "ring": true,
+    "x": -0.8664124631414045,
+    "y": 0.49940710957603573
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": -0.0008000361764747997,
+    "y": 1.0000144387227097
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 0.865612458754531,
+    "y": 0.5006072305989103
+   }
+  ],
+  "bonds": [
+   {
+    "a": 0,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 1,
+    "arom": false,
+    "b": 2,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 2,
+    "arom": false,
+    "b": 3,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 4,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 4,
+    "arom": false,
+    "b": 5,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 5,
+    "arom": false,
+    "b": 0,
+    "order": 1,
+    "ring": true
+   }
+  ],
+  "heavy": 6,
+  "rings": [
+   {
+    "atoms": [
+     0,
+     5,
+     4,
+     3,
+     2,
+     1
+    ],
+    "cx": 2.7520665144923722e-17,
+    "cy": 1.850371707708594e-17
+   }
+  ],
+  "smiles": "C1CCNCC1"
+ },
+ "trace2": {
+  "atoms": [
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": -1.4852701356127986,
+    "y": 0.8560075305040231
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 1,
+    "ring": true,
+    "x": -0.6188625708105726,
+    "y": 0.35660306586351703
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": -0.6180625645828393,
+    "y": -0.643405639106846
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 0.2483450192930399,
+    "y": -1.1426100163589803
+   },
+   {
+    "arom": false,
+    "el": "N",
+    "hs": 1,
+    "ring": true,
+    "x": 1.1139526350884918,
+    "y": -0.642005625824106
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 1.1131526097871056,
+    "y": 0.358003148288249
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 0.24674500683757325,
+    "y": 0.8574075366341432
+   }
+  ],
+  "bonds": [
+   {
+    "a": 0,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 1,
+    "arom": false,
+    "b": 2,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 2,
+    "arom": false,
+    "b": 3,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 4,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 4,
+    "arom": false,
+    "b": 5,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 5,
+    "arom": false,
+    "b": 6,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 6,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": true
+   }
+  ],
+  "heavy": 7,
+  "rings": [
+   {
+    "atoms": [
+     1,
+     6,
+     5,
+     4,
+     3,
+     2
+    ],
+    "cx": 0.2475450226021331,
+    "cy": -0.14266792175067053
+   }
+  ],
+  "smiles": "CC1CCNCC1"
+ },
+ "trace3": {
+  "atoms": [
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": 1.7384051523278161,
+    "y": 0.9888029085053148
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 1,
+    "ring": true,
+    "x": 0.8692025761639081,
+    "y": 0.49440140835694396
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 0.8628025631640861,
+    "y": -0.5056015002482267
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": -0.0064000129998219475,
+    "y": -1.0000029813230544
+   },
+   {
+    "arom": false,
+    "el": "N",
+    "hs": 0,
+    "ring": true,
+    "x": -0.8692025761639081,
+    "y": -0.49440147749853824
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": -1.7384051523278161,
+    "y": -0.9888029490365944
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": -0.8628025631640862,
+    "y": 0.5056015455478918
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 0.006400012999821975,
+    "y": 1.000003045696263
+   }
+  ],
+  "bonds": [
+   {
+    "a": 0,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 1,
+    "arom": false,
+    "b": 2,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 2,
+    "arom": false,
+    "b": 3,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 4,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 4,
+    "arom": false,
+    "b": 5,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 4,
+    "arom": false,
+    "b": 6,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 6,
+    "arom": false,
+    "b": 7,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 7,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": true
+   }
+  ],
+  "heavy": 8,
+  "rings": [
+   {
+    "atoms": [
+     1,
+     7,
+     6,
+     4,
+     3,
+     2
+    ],
+    "cx": -1.3877787807814457e-17,
+    "cy": 6.755213231383432e-09
+   }
+  ],
+  "smiles": "CC1CCN(C)CC1"
+ },
+ "trace4": {
+  "atoms": [
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": 2.027421911613689,
+    "y": -1.042644206459854
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 1,
+    "ring": true,
+    "x": 1.1582220123805378,
+    "y": -0.5480443822425441
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 1.1518220196529447,
+    "y": 0.45175546872383265
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 0.282622196713725,
+    "y": 0.9463553883085566
+   },
+   {
+    "arom": false,
+    "el": "N",
+    "hs": 0,
+    "ring": true,
+    "x": -0.5801777097918331,
+    "y": 0.4407554669181704
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": -1.4493775327310532,
+    "y": 0.9351553819617863
+   },
+   {
+    "arom": false,
+    "el": "O",
+    "hs": 1,
+    "ring": false,
+    "x": -2.31217736294268,
+    "y": 0.42955547964488294
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": -0.5737777170642404,
+    "y": -0.5592443313688659
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 0.29542218216891064,
+    "y": -1.0536442654859648
+   }
+  ],
+  "bonds": [
+   {
+    "a": 0,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 1,
+    "arom": false,
+    "b": 2,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 2,
+    "arom": false,
+    "b": 3,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 4,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 4,
+    "arom": false,
+    "b": 5,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 5,
+    "arom": false,
+    "b": 6,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 4,
+    "arom": false,
+    "b": 7,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 7,
+    "arom": false,
+    "b": 8,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 8,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": true
+   }
+  ],
+  "heavy": 9,
+  "rings": [
+   {
+    "atoms": [
+     1,
+     8,
+     7,
+     4,
+     3,
+     2
+    ],
+    "cx": 0.2890221640100074,
+    "cy": -0.05367777585780253
+   }
+  ],
+  "smiles": "CC1CCN(CO)CC1"
+ },
+ "trace5": {
+  "atoms": [
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": 2.027421911613689,
+    "y": -1.042644206459854
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 1,
+    "ring": true,
+    "x": 1.1582220123805378,
+    "y": -0.5480443822425441
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 1.1518220196529447,
+    "y": 0.45175546872383265
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 0.282622196713725,
+    "y": 0.9463553883085566
+   },
+   {
+    "arom": false,
+    "el": "N",
+    "hs": 0,
+    "ring": true,
+    "x": -0.5801777097918331,
+    "y": 0.4407554669181704
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 1,
+    "ring": false,
+    "x": -1.4493775327310532,
+    "y": 0.9351553819617863
+   },
+   {
+    "arom": false,
+    "el": "O",
+    "hs": 0,
+    "ring": false,
+    "x": -2.31217736294268,
+    "y": 0.42955547964488294
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": -0.5737777170642404,
+    "y": -0.5592443313688659
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": true,
+    "x": 0.29542218216891064,
+    "y": -1.0536442654859648
+   }
+  ],
+  "bonds": [
+   {
+    "a": 0,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 1,
+    "arom": false,
+    "b": 2,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 2,
+    "arom": false,
+    "b": 3,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 4,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 4,
+    "arom": false,
+    "b": 5,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 5,
+    "arom": false,
+    "b": 6,
+    "order": 2,
+    "ring": false
+   },
+   {
+    "a": 4,
+    "arom": false,
+    "b": 7,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 7,
+    "arom": false,
+    "b": 8,
+    "order": 1,
+    "ring": true
+   },
+   {
+    "a": 8,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": true
+   }
+  ],
+  "heavy": 9,
+  "rings": [
+   {
+    "atoms": [
+     1,
+     8,
+     7,
+     4,
+     3,
+     2
+    ],
+    "cx": 0.2890221640100074,
+    "cy": -0.05367777585780253
+   }
+  ],
+  "smiles": "CC1CCN(C=O)CC1"
+ },
+ "trace6": {
+  "atoms": [
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": -2.6947358132908903,
+    "y": 0.5533697500560689
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": -1.8283134695284557,
+    "y": 0.05415697880183344
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": -0.9626913171649355,
+    "y": 0.5547697798205687
+   },
+   {
+    "arom": false,
+    "el": "N",
+    "hs": 0,
+    "ring": false,
+    "x": -0.09626910692032603,
+    "y": 0.05555700856633322
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 1,
+    "ring": false,
+    "x": -0.09546908718718687,
+    "y": -0.9444686878522659
+   },
+   {
+    "arom": false,
+    "el": "O",
+    "hs": 0,
+    "ring": false,
+    "x": 0.7709531039834475,
+    "y": -1.4438814688082797
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": 0.7693531026651192,
+    "y": 0.5561698095850685
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": 1.6357752175398537,
+    "y": 0.05675699048110447
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": 2.501397369903374,
+    "y": 0.5575698393495683
+   }
+  ],
+  "bonds": [
+   {
+    "a": 0,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 1,
+    "arom": false,
+    "b": 2,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 2,
+    "arom": false,
+    "b": 3,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 4,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 4,
+    "arom": false,
+    "b": 5,
+    "order": 2,
+    "ring": false
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 6,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 6,
+    "arom": false,
+    "b": 7,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 7,
+    "arom": false,
+    "b": 8,
+    "order": 1,
+    "ring": false
+   }
+  ],
+  "heavy": 9,
+  "rings": [],
+  "smiles": "CCCN(C=O)CCC"
+ },
+ "trace7": {
+  "atoms": [
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": -2.16555197279062,
+    "y": 0.6232293601885788
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": -1.2991112331259294,
+    "y": 0.12400585775279999
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": -0.4334704350198436,
+    "y": 0.6246294200484095
+   },
+   {
+    "arom": false,
+    "el": "N",
+    "hs": 0,
+    "ring": false,
+    "x": 0.4329704190911568,
+    "y": 0.12540591761263073
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 1,
+    "ring": false,
+    "x": 1.298611179048473,
+    "y": 0.6260294799082402
+   },
+   {
+    "arom": false,
+    "el": "O",
+    "hs": 0,
+    "ring": false,
+    "x": 2.165051995010703,
+    "y": 0.12680597747246147
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": 0.43357042294607295,
+    "y": -0.8746411992687562
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": -0.4320703751600129,
+    "y": -1.3754648137143646
+   }
+  ],
+  "bonds": [
+   {
+    "a": 0,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 1,
+    "arom": false,
+    "b": 2,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 2,
+    "arom": false,
+    "b": 3,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 4,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 4,
+    "arom": false,
+    "b": 5,
+    "order": 2,
+    "ring": false
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 6,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 6,
+    "arom": false,
+    "b": 7,
+    "order": 1,
+    "ring": false
+   }
+  ],
+  "heavy": 8,
+  "rings": [],
+  "smiles": "CCCN(C=O)CC"
+ },
+ "trace8": {
+  "atoms": [
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": -2.2273342073354145,
+    "y": 0.42674001912278486
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": -1.3608819997775061,
+    "y": -0.07249012319001581
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": -0.495229820594037,
+    "y": 0.4281400973900077
+   },
+   {
+    "arom": false,
+    "el": "N",
+    "hs": 0,
+    "ring": false,
+    "x": 0.37122242511314313,
+    "y": -0.07109004492279296
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": 0.3720224153383111,
+    "y": -1.0711503099987305
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": 1.2368744898487973,
+    "y": 0.42954017565723057
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": 2.103326697406706,
+    "y": -0.06968981405848383
+   }
+  ],
+  "bonds": [
+   {
+    "a": 0,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 1,
+    "arom": false,
+    "b": 2,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 2,
+    "arom": false,
+    "b": 3,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 4,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 5,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 5,
+    "arom": false,
+    "b": 6,
+    "order": 1,
+    "ring": false
+   }
+  ],
+  "heavy": 7,
+  "rings": [],
+  "smiles": "CCCN(C)CC"
+ },
+ "trace9": {
+  "atoms": [
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": -2.165356771395176,
+    "y": 0.2482179615235859
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": -1.298893991657888,
+    "y": -0.25101815197808686
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": -0.4332313644354878,
+    "y": 0.24961805675083637
+   },
+   {
+    "arom": false,
+    "el": "N",
+    "hs": 1,
+    "ring": false,
+    "x": 0.43323133900233207,
+    "y": -0.24961805675083637
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 2,
+    "ring": false,
+    "x": 1.2988940425242002,
+    "y": 0.25101815197808686
+   },
+   {
+    "arom": false,
+    "el": "C",
+    "hs": 3,
+    "ring": false,
+    "x": 2.1653567459620198,
+    "y": -0.2482179615235859
+   }
+  ],
+  "bonds": [
+   {
+    "a": 0,
+    "arom": false,
+    "b": 1,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 1,
+    "arom": false,
+    "b": 2,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 2,
+    "arom": false,
+    "b": 3,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 3,
+    "arom": false,
+    "b": 4,
+    "order": 1,
+    "ring": false
+   },
+   {
+    "a": 4,
+    "arom": false,
+    "b": 5,
+    "order": 1,
+    "ring": false
+   }
+  ],
+  "heavy": 6,
+  "rings": [],
+  "smiles": "CCCNCC"
  }
 }

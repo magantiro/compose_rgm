@@ -111,8 +111,7 @@ function scene4(t, d) {
   const ctlP    = [seg(t, 7.05, 8.55, ease.out),
                    seg(t, 8.35, 9.85, ease.out),
                    seg(t, 9.65, 11.15, ease.out)];
-  const legend  = seg(t, 10.9, 12.1, ease.out);
-  const headC   = seg(t, 11.75, 12.85, ease.out);
+  const headC   = seg(t, 10.85, 11.85, ease.out);
   const outro   = 0; // transitions are handled by the global cross-dissolve
 
   save();
@@ -131,7 +130,6 @@ function scene4(t, d) {
   const headAOutF = headAOut0(t);
   alpha(Math.max(headA * headAOutF, headB) * 0.97,
         () => field(G.left - 58, G.head - 124, 570, 296));
-  if (legend > 0.01) alpha(legend, () => field(G.left - 58, 768, 620, 212));
 
   // "R_theta fixed" stays pinned and never changes, which is the whole point.
   alpha(introP * 0.95, () => {
@@ -214,20 +212,6 @@ function scene4(t, d) {
     }
   });
 
-  // Legend: what each controller uses. Placed in a stable column, one accent each.
-  if (legend > 0.01) {
-    TRAJ.forEach((tr, i) => {
-      const p = c01((legend * 3 - i * 0.5) / 1.2);
-      if (p <= 0) return;
-      const lx = G.left, ly = 806 + i * 54;
-      alpha(p, () => {
-        objGlyph(tr.glyph, lx + 8, ly - 6, 8, tr.color, true);
-        text(tr.label, lx + 30, ly, { size: 22, weight: 500, color: tr.color });
-        tag(tr.sub, lx + 30, ly + 20, { size: 15, color: C.ink45 });
-      });
-    });
-  }
-
   // ---- Type ----
   const headAOut = 1 - seg(t, 6.30, 6.95, ease.inOut);
   headline('Coordinated change', G.left, G.head, { size: 52 }, headA * headAOut);
@@ -260,146 +244,7 @@ function scene4(t, d) {
   headline('No retraining.', G.left, G.head + 120, { size: 52, color: C.teal }, headC);
 }
 
-// ---- Scene 5: results ----
-// Panel 1: the learned-vs-uniform superstructure ablation (Table 7).
-// Panel 2: PMO-1K mean final Top-10 (Table 2) with the T4 count (Table 3).
-function scene5(t, d) {
-  const p1 = pulse(t, 0.15, 1.05, 4.15, 4.85, ease.inOut);
-  const p2 = seg(t, 4.65, 5.45, ease.out);
-
-  // ---------- Panel 1 ----------
-  if (p1 > 0.01) {
-    alpha(p1, () => {
-      headline('The learned process matters.', G.left, G.head, { size: 52 }, 1);
-      alpha(seg(t, 0.55, 1.35, ease.out), () => {
-        tag('SUPERSTRUCTURE GENERATION · MEAN QUALITY (%)', G.left, G.sub + 6,
-            { size: 16, color: C.ink45 });
-      });
-
-      const bx = G.left + 430, bw = 860, scale = bw / 46;   // 0..46 %
-      const rows = [
-        ['learned Rθ over executable edits', 39.03, C.teal],
-        ['uniform over the same legal edits', 25.40, C.grey],
-      ];
-      rows.forEach((r, i) => {
-        const y = 430 + i * 132;
-        const gp = seg(t, 0.85 + i * 0.30, 2.35 + i * 0.30, ease.outQuint);
-        text(r[0], bx - 34, y + 7, { size: 23, weight: 400, color: C.ink70, align: 'right' });
-        // Bar.
-        ctx.save(); ctx.fillStyle = r[2];
-        ctx.fillRect(bx, y - 20, r[1] * scale * gp, 40);
-        ctx.restore();
-        // The figure is revealed at its published value rather than counted up,
-        // so no frame ever shows a number that is not the paper's.
-        alpha(c01((gp - 0.82) / 0.18), () => {
-          text(r[1].toFixed(2), bx + r[1] * scale + 22, y + 10,
-               { size: 34, weight: 500, font: F.serif,
-                 color: r[2] === C.teal ? C.teal : C.ink70 });
-        });
-      });
-
-      // Validity is unchanged between the arms, so the gain is not a validity
-      // gain. Stated as an annotation, never as a mark on the quality axis:
-      // validity and quality are different quantities and must not share a scale.
-      alpha(seg(t, 2.35, 3.35, ease.out), () => {
-        rule(G.left, 672, 1180, seg(t, 2.35, 3.15, ease.out), C.ink07, 1);
-        text('100.00%', G.left, 716, { size: 27, weight: 500, font: F.serif, color: C.teal });
-        tag('chemical validity in both arms', G.left + 130, 714,
-            { size: 18, color: C.ink45 });
-      });
-      alpha(seg(t, 2.9, 3.8, ease.out), () => {
-        tag('same executor · same structural constraints · same stopping rule',
-            G.left, 756, { size: 18, color: C.ink45 });
-      });
-    });
-  }
-
-  // ---------- Panel 2 ----------
-  if (p2 > 0.01) {
-    alpha(p2, () => {
-      headline('One process, many objectives.', G.left, G.head, { size: 52 }, 1);
-      alpha(seg(t, 5.0, 5.8, ease.out), () => {
-        tag('PMO-1K · MEAN FINAL TOP-10 OVER 22 OBJECTIVES', G.left, G.sub + 6,
-            { size: 16, color: C.ink45 });
-      });
-
-      const bx = G.left + 330, bw = 880, scale = bw / 0.60;
-      const rows = [
-        ['COMPOSE', 0.563, C.teal, 1],
-        ['GenMol', 0.542, C.grey, 0],
-        ['InVirtuoGen', 0.532, C.grey, 0],
-        ['REINVENT', 0.531, C.grey, 0],
-        ['Graph-GA', 0.530, C.grey, 0],
-      ];
-      rows.forEach((r, i) => {
-        const y = 320 + i * 68;
-        const gp = seg(t, 5.35 + i * 0.16, 6.55 + i * 0.16, ease.outQuint);
-        text(r[0], bx - 30, y + 7, {
-          size: 22, weight: r[3] ? 600 : 400,
-          color: r[3] ? C.ink : C.ink70, align: 'right',
-        });
-        ctx.save(); ctx.fillStyle = r[2];
-        ctx.fillRect(bx, y - 16, r[1] * scale * gp, 32);
-        ctx.restore();
-        // Right-aligned on one column so the COMPOSE marker line, which sits
-        // inside the bar field, never crosses a figure.
-        alpha(c01((gp - 0.82) / 0.18), () => {
-          text(r[1].toFixed(3), bx + bw + 96, y + 9,
-               { size: 26, weight: r[3] ? 500 : 400, font: F.serif, align: 'right',
-                 color: r[3] ? C.teal : C.ink45 });
-        });
-      });
-
-      // A marker at COMPOSE's level, so each shortfall is visible on a full axis.
-      const mp = seg(t, 6.6, 7.4, ease.out);
-      alpha(mp * 0.9, () => {
-        line(bx + 0.563 * scale, 320 - 34, bx + 0.563 * scale, 320 + 4 * 68 + 30,
-             C.teal, 1.2, [5, 5]);
-      });
-      alpha(seg(t, 6.9, 7.7, ease.out), () => {
-        tag('highest mean · led on 11 of 22 objectives', G.left, 668,
-            { size: 18, color: C.ink45 });
-      });
-
-      // T4 lead optimization, as a dot count rather than a second chart.
-      const tp = seg(t, 7.75, 9.15, ease.out);
-      if (tp > 0.01) {
-        alpha(tp, () => {
-          rule(G.left, 728, 1420, seg(t, 7.75, 8.45, ease.out), C.ink12, 1);
-          text('23 of 30', G.left, 800, { size: 44, weight: 600, color: C.teal, track: -0.5 });
-          text('best reported docking scores', G.left + 224, 800,
-               { size: 27, weight: 400, color: C.ink70 });
-          tag('protein-specific lead optimization · 250 evaluations per lead, against 1,000 for the baselines',
-              G.left, 834, { size: 17, color: C.ink45 });
-
-          // 30 cells: 15 per similarity threshold, 10 and 13 filled.
-          const gx = G.left + 1146, gy = 782, cs = 19, gap = 5;
-          [[10, 'δ = 0.4'], [13, 'δ = 0.6']].forEach(([fill, lab], r) => {
-            const yy = gy + r * (cs + 11);
-            for (let i = 0; i < 15; i++) {
-              const xx = gx + i * (cs + gap);
-              const on = i < fill ? c01((tp * 30 - r * 15 - i) / 2.2) : 0;
-              ctx.save();
-              ctx.fillStyle = C.ink07; ctx.fillRect(xx, yy, cs, cs);
-              if (on > 0) { ctx.fillStyle = C.teal; ctx.globalAlpha = on; ctx.fillRect(xx, yy, cs, cs); }
-              ctx.restore();
-            }
-            text(lab, gx - 16, yy + cs / 2 + 5,
-                 { size: 17, color: C.ink45, align: 'right', font: F.sans });
-          });
-        });
-      }
-
-      // The honest caveat the paper itself states.
-      alpha(seg(t, 8.85, 9.75, ease.out), () => {
-        tag('median docking replicate variation 0.70 kcal/mol', G.left, 906,
-            { size: 15.5, color: C.ink25 });
-      });
-    });
-  }
-}
-
-// ---- Scene 6: the opening image, resolved, then the card ----
+// ---- Closing scene: the opening image, resolved, then the card ----
 function scene6(t, d) {
   const k = camIdentity();
   const hold = seg(t, 0.0, 1.0, ease.out);

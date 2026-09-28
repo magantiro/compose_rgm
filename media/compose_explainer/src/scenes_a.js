@@ -335,13 +335,13 @@ function scene3(t, d) {
   const famP    = seg(t, 7.60, 9.30, ease.out);
   const guardP  = pulse(t, 5.15, 5.95, 7.05, 7.70, ease.inOut);
   // Canonicalisation inset.
-  const canonIn = seg(t, 9.85, 10.65, ease.out);
-  const canonOut= seg(t, 14.05, 14.75, ease.inOut);
+  const canonIn = seg(t, 9.55, 10.35, ease.out);
+  const canonOut= seg(t, 13.45, 14.15, ease.inOut);
   const canonA  = canonIn * (1 - canonOut);
   // Learned weights, then frozen.
-  const learnP  = seg(t, 15.05, 17.35, ease.inOut);
-  const freezeP = seg(t, 17.65, 18.60, ease.out);
-  const pull    = seg(t, 18.05, d - 0.15, ease.inOut);
+  const learnP  = seg(t, 14.40, 16.10, ease.inOut);
+  const freezeP = seg(t, 16.25, 17.10, ease.out);
+  const pull    = seg(t, 16.45, 17.85, ease.inOut);
 
   const k = camLerp(CAM3A, CAM3B, pull);
   const bands = pull < 0.22 ? [-1, 0, 1] : LAT.BANDS;
@@ -514,30 +514,6 @@ function scene3(t, d) {
   }
 
   // --- learned, then frozen ---
-  if (learnP > 0.01) {
-    const lx = 1256, ly = 250;
-    alpha(seg(t, 15.05, 15.85, ease.out), () => {
-      field(lx - 58, ly - 76, 534, 246);
-      tag('CANONICAL-SUCCESSOR NLL', lx, ly, { size: 15, color: C.ink45 });
-      rule(lx, ly + 16, 420, seg(t, 15.20, 16.05, ease.out), C.ink12, 1);
-    });
-    alpha(seg(t, 15.35, 16.15, ease.out), () => {
-      // A single figure counting down as the learned weights fill in.
-      // Both figures are the paper's own values. The improvement is carried by
-      // the arrow and the reveal, never by counting through invented numbers.
-      text('5.37', lx, ly + 76, { size: 40, weight: 400, font: F.serif, color: C.ink25 });
-      alpha(c01((learnP - 0.25) / 0.35), () => {
-        text('→', lx + 96, ly + 76, { size: 30, weight: 400, color: C.ink25 });
-      });
-      alpha(c01((learnP - 0.55) / 0.35), () => {
-        text('3.90', lx + 146, ly + 76,
-             { size: 46, weight: 500, font: F.serif, color: C.teal });
-        tag('nats', lx + 258, ly + 70, { size: 17, color: C.ink45 });
-      });
-      tag('3,545 held-out transitions', lx, ly + 112, { size: 16, color: C.ink45 });
-    });
-  }
-
   if (freezeP > 0.01) {
     alpha(freezeP, () => {
       const fx = G.left, fy = 300;
