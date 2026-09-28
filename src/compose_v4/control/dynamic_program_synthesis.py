@@ -23,6 +23,7 @@ from compose_v4.chem.molecular_graph import (
     is_element,
 )
 from compose_v4.control.adaptive_program_optimizer import ProgramOptimizer
+from compose_v4.control.anchor_focus import FocusState
 from compose_v4.control.current_state_edits import current_state_program
 from compose_v4.control.docking_value import identity
 from compose_v4.control.edit_program import extract_program
@@ -128,6 +129,10 @@ def _grow_actions(source, rng, *, length, elements, anchor=None):
     if not anchors:
         raise ValueError("segment growth has no hydrogen-bearing anchor")
     at = anchors[int(rng.integers(len(anchors)))]
+    # The atom this module grew FROM, kept separately because `at` is walked forward to
+    # the tip below.  Returning to `origin` is what produces a branch rather than a
+    # longer chain, so a later module needs both.
+    origin = at
     chosen = []
     for _ in range(length):
         element = elements[int(rng.integers(len(elements)))]
@@ -146,7 +151,7 @@ def _grow_actions(source, rng, *, length, elements, anchor=None):
         actions.append(record)
         at = action.slot
         chosen.append(element)
-    return actions, at, chosen
+    return actions, at, chosen, origin
 
 
 def _terminal_shrink(source, rng, *, requested_length):
@@ -393,13 +398,21 @@ def _local_module(source, rng, *, family, label):
 
 
 def compile_generic_module(
-    source: MolecularGraph, rng, family: str, *, region_law=None
+    source: MolecularGraph, rng, family: str, *, region_law=None,
+    focus=None, focus_policy=None
 ):
     """Bind one generic module to the supplied exact state and execute it.
 
     ``region_law`` is threaded to the two modules that excise a bridge-separated
     substituent (``substituent_delete`` and the delete half of
     ``segment_replace``).  ``None`` keeps v1's uniform bounded law.
+
+    ``focus``/``focus_policy`` carry the previous module's anchor so this one can grow
+    from the same atom instead of redrawing uniformly.  Both ``None`` keeps v1
+    byte-identical including RNG consumption -- the policy is the only thing that draws.
+    Only the two families that grow from a free anchor consult it; the rest are
+    positioned by their own chemistry (an excision picks its own bridge, a ring module
+    its own construction branch) and are left exactly as they were.
     """
     if family not in GENERIC_MODULES:
         raise ValueError(f"unknown dynamic generic module: {family}")
@@ -408,17 +421,38 @@ def compile_generic_module(
         if capacity < 1:
             raise ValueError("segment growth has no remaining heavy-atom capacity")
         length = int(rng.integers(1, capacity + 1))
-        actions, _, elements = _grow_actions(
-            source, rng, length=length, elements=("C", "N", "O")
+        held = (
+            None if focus_policy is None
+            else focus_policy.resolve(source, rng, focus)
+        )
+        actions, tip, elements, origin = _grow_actions(
+            source, rng, length=length, elements=("C", "N", "O"), anchor=held
         )
         return _execute_actions(
-            source, family, actions, {"length": length, "elements": elements}
+            source,
+            family,
+            actions,
+            {
+                "length": length,
+                "elements": elements,
+                "focus_anchor": origin,
+                "focus_tip": tip,
+            },
         )
     if family == "functionalize":
-        actions, _, elements = _grow_actions(
-            source, rng, length=1, elements=("C", "N", "O", "F")
+        held = (
+            None if focus_policy is None
+            else focus_policy.resolve(source, rng, focus)
         )
-        return _execute_actions(source, family, actions, {"element": elements[0]})
+        actions, tip, elements, origin = _grow_actions(
+            source, rng, length=1, elements=("C", "N", "O", "F"), anchor=held
+        )
+        return _execute_actions(
+            source,
+            family,
+            actions,
+            {"element": elements[0], "focus_anchor": origin, "focus_tip": tip},
+        )
     if family == "segment_shrink":
         requested = int(rng.integers(1, MAX_SEGMENT_LENGTH + 1))
         actions, _, _, path = _terminal_shrink(source, rng, requested_length=requested)
@@ -450,7 +484,7 @@ def compile_generic_module(
         if capacity < 1:
             raise ValueError("segment replacement has no insertion capacity")
         growth = int(rng.integers(1, capacity + 1))
-        grow_actions, _, elements = _grow_actions(
+        grow_actions, grow_tip, elements, _origin = _grow_actions(
             contracted,
             rng,
             length=growth,
@@ -468,6 +502,8 @@ def compile_generic_module(
                 "inserted_atoms": growth,
                 "elements": elements,
                 "retained_anchor": anchor,
+                "focus_anchor": anchor,
+                "focus_tip": grow_tip,
             },
         )
     if family == "substituent_delete":
@@ -482,6 +518,12 @@ def compile_generic_module(
                 "fragment_slots": path,
                 "deleted_atoms": len(path),
                 "retained_anchor": anchor,
+                # An excision leaves its anchor free.  Publishing it as the focus is what
+                # lets a following grow module rebuild AT the site just cleared instead
+                # of somewhere unrelated -- the excise-then-rebuild pattern that every
+                # measured productive transition needs.
+                "focus_anchor": anchor,
+                "focus_tip": anchor,
                 "cycle_openings": len(actions) - len(path),
             },
         )
@@ -528,6 +570,7 @@ def synthesize_dynamic_program(
     region_law=None,
     replacement_option=None,
     replacement_option_rate: float = 0.0,
+    focus_policy=None,
 ):
     """Construct one complete K-module program without any task evaluation.
 
@@ -558,6 +601,7 @@ def synthesize_dynamic_program(
     if replacement_option_rate > 0.0 and replacement_option is None:
         raise ValueError("a positive replacement option rate needs an option")
     current, stages, selected, failures = source, [], [], Counter()
+    focus = None
     for module_index in range(count):
         accepted = None
         # WHERE before WHAT: offer the explicit region replacement ahead of the lottery.
@@ -586,7 +630,8 @@ def synthesize_dynamic_program(
         ):
             try:
                 product, stage = compile_generic_module(
-                    current, rng, family, region_law=region_law
+                    current, rng, family, region_law=region_law,
+                    focus=focus, focus_policy=focus_policy,
                 )
             except ValueError as error:
                 failures[f"{family}:{error!s}"] += 1
@@ -607,6 +652,16 @@ def synthesize_dynamic_program(
                 raise ValueError(f"no generic module executed: {dict(failures)}")
             break
         current, stage, program, assignment = accepted
+        # Carry this module's site forward.  A module that publishes no focus (a ring
+        # build, a bond edit) leaves the previous one standing rather than clearing it,
+        # so an intervening positional module does not break a construction in progress.
+        if focus_policy is not None:
+            published = stage["parameters"]
+            if "focus_anchor" in published:
+                focus = FocusState(
+                    anchor=published.get("focus_anchor"),
+                    tip=published.get("focus_tip"),
+                )
         stages.append(stage)
         selected.append(
             {
