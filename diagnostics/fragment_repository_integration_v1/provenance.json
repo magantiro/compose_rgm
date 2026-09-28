@@ -1,0 +1,138 @@
+{
+  "code_revision": "29992b07b4e4fdd47a0925c91b9279b7ce198b88",
+  "code_revision_status": "git",
+  "configuration": {
+    "attempts_per_prompt_seed": 100,
+    "bootstrap": {
+      "draws": 20000,
+      "historical_numpy": {
+        "linker_design": "1.26.4",
+        "motif_extension": "2.5.3",
+        "scaffold_decoration": "1.26.4",
+        "superstructure_generation": "2.5.3"
+      },
+      "method": "numpy default_rng, percentile 2.5 and 97.5, linear quantile",
+      "reduction_numpy": "1.26.4",
+      "seeds": {
+        "linker_design": 20260926,
+        "motif_extension": 20260925,
+        "scaffold_decoration": 20260927,
+        "superstructure_generation": 20260925
+      },
+      "unit": "prompt after averaging generation seeds"
+    },
+    "generation_seeds": {
+      "linker_design": [
+        6,
+        7,
+        8
+      ],
+      "motif_extension": [
+        2,
+        3,
+        4
+      ],
+      "scaffold_decoration": [
+        8,
+        9,
+        10
+      ],
+      "superstructure_generation": [
+        0,
+        1,
+        2
+      ]
+    },
+    "prefix_budgets": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "prompts": [
+      "BARICITINIB",
+      "CYCLOTHIAZIDE",
+      "ELIGLUSTAT",
+      "ERLOTINIB",
+      "FUTIBATINIB",
+      "LESINURAD",
+      "LIOTHYRONINE",
+      "LOVASTATIN",
+      "MARIBAVIR",
+      "SPIRAPRIL"
+    ],
+    "scope": "saved_metric_reduction_only"
+  },
+  "created_at_utc": "2026-09-28T00:19:22.432969+00:00",
+  "determinism": "tables.json is deterministic for the same inputs, code and interval mode; this receipt includes operational time",
+  "environment": {
+    "float_mantissa_bits": 53,
+    "machine": "arm64",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "python": "3.11.13"
+  },
+  "implementation_sha256": {
+    "__init__.py": "0250fe07e87f1413802375589ffc9c45986fc4ab2f2fe5cf0b6e9892c41977b0",
+    "__main__.py": "cee79edfd0461f8c66ce471637f9e4746b946cbef3ded09b324548d095bbe22c",
+    "evidence.py": "269fae326ce7a4eda4d2d654ca5cef3271325492f5df88d96c51e2576c83e45c",
+    "reduction.py": "0710b8f94d0a73d15960cbd70a8f9f28e1cdba8874a39d0957e159192607280e",
+    "reporting.py": "89103ed18d074b4581e90224822472ad4ab942129ca57648c5e875e8c6358829"
+  },
+  "input_artifacts": {
+    "decoration_selection": {
+      "path": "diagnostics/fragment_locked_panel_selection_v1/decoration_result.json",
+      "schema": "fragment_locked_panel_selection_replay_v1",
+      "sha256": "c6452cc46128f7b9cb13f23d0089ef5f582c2168458bad644e82bd1f026655ab"
+    },
+    "linker_selection": {
+      "path": "diagnostics/fragment_locked_panel_selection_v1/linker_result.json",
+      "schema": "fragment_locked_panel_selection_replay_v1",
+      "sha256": "a7b4f41b172ba70e58340f1232e3eb79be78b5cdc35d64cc94e0131128549ee1"
+    },
+    "motif_intervals": {
+      "path": "diagnostics/fragment_common_panel_prompt_ci_v1/result.json",
+      "schema": "fragment_common_panel_prompt_ci_v1",
+      "sha256": "c38507ebe93d3913a24bc4b45103446c23e8d7a491d286ca3ea1e8fbda2e114a"
+    },
+    "motif_selection": {
+      "path": "diagnostics/fragment_locked_panel_selection_v1/motif_prefix_result.json",
+      "schema": "fragment_motif_locked_prefix_v1",
+      "sha256": "6977b8a69257f230a3e8dc2221ea2c3497d41b5975ad5a53d8b59f28f01ef61a"
+    },
+    "superstructure_comparison": {
+      "path": "diagnostics/fragment_superstructure_reference_final_v1/result.json",
+      "schema": "fragment_superstructure_reference_final_v1",
+      "sha256": "bff7c3cca5f60cc903ba89bafda2dc95a81f2c80c8e8df08fbbbeca3bd9cb9e8"
+    },
+    "superstructure_learned": {
+      "path": "diagnostics/fragment_superstructure_official_v2/result.json",
+      "schema": "fragment_superstructure_official_v2_result_v1",
+      "sha256": "8406f57dc5ff6736110593d309f207d7a5d0e878eeb1b7a2f2c423fe2d9b3652"
+    },
+    "superstructure_uniform": {
+      "path": "diagnostics/fragment_superstructure_reference_ablation_v1/result.json",
+      "schema": "fragment_superstructure_official_v2_result_v1",
+      "sha256": "007f59645ffda58f1722eb846444d4f604307468016d4f813740b3ab9c9b0b5d"
+    }
+  },
+  "integration_worktree_changes": [
+    "?? experiments/fragments/",
+    "?? src/compose_v4/experiments/fragments/"
+  ],
+  "interval_modes": {
+    "linker_design": "recomputed_and_matched_saved_interval",
+    "motif_extension": "recomputed_and_matched_saved_interval",
+    "scaffold_decoration": "recomputed_and_matched_saved_interval",
+    "superstructure_generation": "recomputed_and_matched_saved_interval"
+  },
+  "manifest_sha256": "b3b86ed1811a3b09d88f5db017fcb4c8754f6c63b2895d4f2800d65d771897d9",
+  "numpy": "1.26.4",
+  "output_sha256": {
+    "tables.json": "c0905213fe03fba69a481b2c9304288be41a6e6155e03ce78bcaca1658cd48c3",
+    "tables.md": "ac7bff8b91b3f6eec785e07bd2b9c583be435ef3d98dbadbc14f47d73d714f17"
+  },
+  "population": "four independent tasks; 10 prompts x 3 seeds x 100 slots per task/arm; no additional exclusions",
+  "schema": "compose_fragment_reduction_provenance_v1",
+  "split_identity": "the frozen prompt/seed panels in the manifest; no fitting or split modification",
+  "verification_scope": "saved metric rows and input hashes, not raw molecules or generation"
+}

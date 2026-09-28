@@ -1,0 +1,3489 @@
+{
+  "aggregation": "ten prompt means per generation seed; mean and sample SD (n-1) across three seeds",
+  "aliases": {
+    "scaffold_morphing": "linker_design"
+  },
+  "benchmark": {
+    "linker_design": {
+      "attempts": 3000,
+      "metrics": {
+        "diversity": {
+          "mean": 0.563613454933257,
+          "sample_sd": 0.001968873046521416
+        },
+        "prompt_faithful_quality_yield": {
+          "mean": 36.9,
+          "sample_sd": 0.8717797887081349
+        },
+        "prompt_fidelity": {
+          "mean": 100.0,
+          "sample_sd": 0.0
+        },
+        "quality": {
+          "mean": 31.53333333333333,
+          "sample_sd": 1.4011899704655812
+        },
+        "uniqueness": {
+          "mean": 81.03333333333335,
+          "sample_sd": 0.3511884584284262
+        },
+        "validity": {
+          "mean": 100.0,
+          "sample_sd": 0.0
+        }
+      },
+      "per_seed": {
+        "6": {
+          "diversity": 0.5637290049913529,
+          "prompt_faithful_quality_yield": 37.5,
+          "prompt_fidelity": 100.0,
+          "quality": 31.1,
+          "uniqueness": 80.7,
+          "validity": 100.0
+        },
+        "7": {
+          "diversity": 0.5655220082621834,
+          "prompt_faithful_quality_yield": 35.9,
+          "prompt_fidelity": 100.0,
+          "quality": 30.4,
+          "uniqueness": 81.0,
+          "validity": 100.0
+        },
+        "8": {
+          "diversity": 0.5615893515462347,
+          "prompt_faithful_quality_yield": 37.3,
+          "prompt_fidelity": 100.0,
+          "quality": 33.1,
+          "uniqueness": 81.4,
+          "validity": 100.0
+        }
+      },
+      "seeds": [
+        6,
+        7,
+        8
+      ]
+    },
+    "motif_extension": {
+      "attempts": 3000,
+      "metrics": {
+        "diversity": {
+          "mean": 0.6640208079843859,
+          "sample_sd": 0.0013868405681848187
+        },
+        "prompt_faithful_quality_yield": {
+          "mean": 45.46666666666667,
+          "sample_sd": 0.4725815626252608
+        },
+        "prompt_fidelity": {
+          "mean": 99.96666666666665,
+          "sample_sd": 0.05773502691895929
+        },
+        "quality": {
+          "mean": 42.63333333333333,
+          "sample_sd": 0.3785938897200155
+        },
+        "uniqueness": {
+          "mean": 93.63164983164984,
+          "sample_sd": 0.6003997693246869
+        },
+        "validity": {
+          "mean": 99.96666666666665,
+          "sample_sd": 0.05773502691895929
+        }
+      },
+      "per_seed": {
+        "2": {
+          "diversity": 0.6629009068426823,
+          "prompt_faithful_quality_yield": 45.1,
+          "prompt_fidelity": 99.9,
+          "quality": 42.8,
+          "uniqueness": 94.1949494949495,
+          "validity": 99.9
+        },
+        "3": {
+          "diversity": 0.6635894499069492,
+          "prompt_faithful_quality_yield": 46.0,
+          "prompt_fidelity": 100.0,
+          "quality": 42.9,
+          "uniqueness": 93.7,
+          "validity": 100.0
+        },
+        "4": {
+          "diversity": 0.6655720672035261,
+          "prompt_faithful_quality_yield": 45.3,
+          "prompt_fidelity": 100.0,
+          "quality": 42.2,
+          "uniqueness": 93.0,
+          "validity": 100.0
+        }
+      },
+      "seeds": [
+        2,
+        3,
+        4
+      ]
+    },
+    "scaffold_decoration": {
+      "attempts": 3000,
+      "metrics": {
+        "diversity": {
+          "mean": 0.562603236335503,
+          "sample_sd": 0.0018625444017722984
+        },
+        "prompt_faithful_quality_yield": {
+          "mean": 42.36666666666667,
+          "sample_sd": 1.1015141094572196
+        },
+        "prompt_fidelity": {
+          "mean": 100.0,
+          "sample_sd": 0.0
+        },
+        "quality": {
+          "mean": 36.699999999999996,
+          "sample_sd": 1.8000000000000007
+        },
+        "uniqueness": {
+          "mean": 93.66666666666667,
+          "sample_sd": 0.832666399786449
+        },
+        "validity": {
+          "mean": 100.0,
+          "sample_sd": 0.0
+        }
+      },
+      "per_seed": {
+        "10": {
+          "diversity": 0.5609841992832615,
+          "prompt_faithful_quality_yield": 43.1,
+          "prompt_fidelity": 100.0,
+          "quality": 38.5,
+          "uniqueness": 94.6,
+          "validity": 100.0
+        },
+        "8": {
+          "diversity": 0.5621867406218308,
+          "prompt_faithful_quality_yield": 41.1,
+          "prompt_fidelity": 100.0,
+          "quality": 34.9,
+          "uniqueness": 93.4,
+          "validity": 100.0
+        },
+        "9": {
+          "diversity": 0.5646387691014167,
+          "prompt_faithful_quality_yield": 42.9,
+          "prompt_fidelity": 100.0,
+          "quality": 36.7,
+          "uniqueness": 93.0,
+          "validity": 100.0
+        }
+      },
+      "seeds": [
+        8,
+        9,
+        10
+      ]
+    },
+    "superstructure_generation": {
+      "attempts": 3000,
+      "metrics": {
+        "diversity": {
+          "mean": 0.7250740492970243,
+          "sample_sd": 0.0006737782708896392
+        },
+        "quality": {
+          "mean": 39.03333333333333,
+          "sample_sd": 3.08922859842604
+        },
+        "uniqueness": {
+          "mean": 97.33333333333333,
+          "sample_sd": 0.6110100926607795
+        },
+        "validity": {
+          "mean": 100.0,
+          "sample_sd": 0.0
+        }
+      },
+      "per_seed": {
+        "0": {
+          "diversity": 0.7249909536178107,
+          "quality": 41.8,
+          "uniqueness": 98.0,
+          "validity": 100.0
+        },
+        "1": {
+          "diversity": 0.724445672895097,
+          "quality": 35.7,
+          "uniqueness": 97.2,
+          "validity": 100.0
+        },
+        "2": {
+          "diversity": 0.7257855213781652,
+          "quality": 39.6,
+          "uniqueness": 96.8,
+          "validity": 100.0
+        }
+      },
+      "seeds": [
+        0,
+        1,
+        2
+      ]
+    }
+  },
+  "bootstrap": {
+    "draws": 20000,
+    "historical_numpy": {
+      "linker_design": "1.26.4",
+      "motif_extension": "2.5.3",
+      "scaffold_decoration": "1.26.4",
+      "superstructure_generation": "2.5.3"
+    },
+    "method": "numpy default_rng, percentile 2.5 and 97.5, linear quantile",
+    "reduction_numpy": "1.26.4",
+    "seeds": {
+      "linker_design": 20260926,
+      "motif_extension": 20260925,
+      "scaffold_decoration": 20260927,
+      "superstructure_generation": 20260925
+    },
+    "unit": "prompt after averaging generation seeds"
+  },
+  "comparisons": {
+    "linker_design": {
+      "arms": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.563613454933257,
+              "sample_sd": 0.001968873046521416
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 36.9,
+              "sample_sd": 0.8717797887081349
+            },
+            "prompt_fidelity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            },
+            "quality": {
+              "mean": 31.53333333333333,
+              "sample_sd": 1.4011899704655812
+            },
+            "uniqueness": {
+              "mean": 81.03333333333335,
+              "sample_sd": 0.3511884584284262
+            },
+            "validity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            }
+          },
+          "per_seed": {
+            "6": {
+              "diversity": 0.5637290049913529,
+              "prompt_faithful_quality_yield": 37.5,
+              "prompt_fidelity": 100.0,
+              "quality": 31.1,
+              "uniqueness": 80.7,
+              "validity": 100.0
+            },
+            "7": {
+              "diversity": 0.5655220082621834,
+              "prompt_faithful_quality_yield": 35.9,
+              "prompt_fidelity": 100.0,
+              "quality": 30.4,
+              "uniqueness": 81.0,
+              "validity": 100.0
+            },
+            "8": {
+              "diversity": 0.5615893515462347,
+              "prompt_faithful_quality_yield": 37.3,
+              "prompt_fidelity": 100.0,
+              "quality": 33.1,
+              "uniqueness": 81.4,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            6,
+            7,
+            8
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.5744342522720755,
+              "sample_sd": 0.0024849156306558933
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 30.666666666666668,
+              "sample_sd": 0.8326663997864541
+            },
+            "prompt_fidelity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            },
+            "quality": {
+              "mean": 24.0,
+              "sample_sd": 1.6093476939431077
+            },
+            "uniqueness": {
+              "mean": 73.46666666666665,
+              "sample_sd": 1.8770544300401448
+            },
+            "validity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            }
+          },
+          "per_seed": {
+            "6": {
+              "diversity": 0.5753556512924901,
+              "prompt_faithful_quality_yield": 30.4,
+              "prompt_fidelity": 100.0,
+              "quality": 23.8,
+              "uniqueness": 74.6,
+              "validity": 100.0
+            },
+            "7": {
+              "diversity": 0.5716202415679623,
+              "prompt_faithful_quality_yield": 31.6,
+              "prompt_fidelity": 100.0,
+              "quality": 25.7,
+              "uniqueness": 74.5,
+              "validity": 100.0
+            },
+            "8": {
+              "diversity": 0.5763268639557738,
+              "prompt_faithful_quality_yield": 30.0,
+              "prompt_fidelity": 100.0,
+              "quality": 22.5,
+              "uniqueness": 71.3,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            6,
+            7,
+            8
+          ]
+        }
+      },
+      "intervals": {
+        "diversity": {
+          "mean_difference": -0.010820797338818411,
+          "percentile_95": [
+            -0.016988992177196887,
+            -0.0047038868383354115
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        },
+        "quality": {
+          "mean_difference": 7.533333333333334,
+          "percentile_95": [
+            3.5666666666666673,
+            11.5
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        },
+        "uniqueness": {
+          "mean_difference": 7.566666666666668,
+          "percentile_95": [
+            5.066666666666667,
+            10.533333333333331
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        },
+        "validity": {
+          "mean_difference": 0.0,
+          "percentile_95": [
+            0.0,
+            0.0
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        }
+      },
+      "per_prompt": [
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.5013405032170798,
+              "prompt_faithful_quality_yield": 52.0,
+              "prompt_fidelity": 100.0,
+              "quality": 49.0,
+              "uniqueness": 95.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.5124189570119803,
+              "prompt_faithful_quality_yield": 42.666666666666664,
+              "prompt_fidelity": 100.0,
+              "quality": 33.0,
+              "uniqueness": 86.66666666666667,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.011078453794900467,
+            "prompt_faithful_quality_yield": 9.333333333333336,
+            "prompt_fidelity": 0.0,
+            "quality": 16.0,
+            "uniqueness": 9.0,
+            "validity": 0.0
+          },
+          "prompt": "BARICITINIB"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.4658416647087677,
+              "prompt_faithful_quality_yield": 0.0,
+              "prompt_fidelity": 100.0,
+              "quality": 0.0,
+              "uniqueness": 68.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.46965006014365746,
+              "prompt_faithful_quality_yield": 0.0,
+              "prompt_fidelity": 100.0,
+              "quality": 0.0,
+              "uniqueness": 58.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.0038083954348897553,
+            "prompt_faithful_quality_yield": 0.0,
+            "prompt_fidelity": 0.0,
+            "quality": 0.0,
+            "uniqueness": 10.666666666666671,
+            "validity": 0.0
+          },
+          "prompt": "CYCLOTHIAZIDE"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.6484159232440517,
+              "prompt_faithful_quality_yield": 87.33333333333333,
+              "prompt_fidelity": 100.0,
+              "quality": 79.66666666666667,
+              "uniqueness": 91.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.6707195901121114,
+              "prompt_faithful_quality_yield": 78.66666666666667,
+              "prompt_fidelity": 100.0,
+              "quality": 64.66666666666667,
+              "uniqueness": 84.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.022303666868059624,
+            "prompt_faithful_quality_yield": 8.666666666666657,
+            "prompt_fidelity": 0.0,
+            "quality": 15.0,
+            "uniqueness": 6.666666666666671,
+            "validity": 0.0
+          },
+          "prompt": "ELIGLUSTAT"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7742323684764195,
+              "prompt_faithful_quality_yield": 10.666666666666666,
+              "prompt_fidelity": 100.0,
+              "quality": 10.0,
+              "uniqueness": 96.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.7748967556051247,
+              "prompt_faithful_quality_yield": 9.333333333333334,
+              "prompt_fidelity": 100.0,
+              "quality": 9.0,
+              "uniqueness": 94.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.0006643871287052017,
+            "prompt_faithful_quality_yield": 1.3333333333333321,
+            "prompt_fidelity": 0.0,
+            "quality": 1.0,
+            "uniqueness": 2.333333333333343,
+            "validity": 0.0
+          },
+          "prompt": "ERLOTINIB"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.5474271269571779,
+              "prompt_faithful_quality_yield": 68.66666666666667,
+              "prompt_fidelity": 100.0,
+              "quality": 64.66666666666667,
+              "uniqueness": 94.33333333333333,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.5680689403466764,
+              "prompt_faithful_quality_yield": 58.666666666666664,
+              "prompt_fidelity": 100.0,
+              "quality": 51.333333333333336,
+              "uniqueness": 90.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.020641813389498553,
+            "prompt_faithful_quality_yield": 10.000000000000007,
+            "prompt_fidelity": 0.0,
+            "quality": 13.333333333333336,
+            "uniqueness": 4.333333333333329,
+            "validity": 0.0
+          },
+          "prompt": "FUTIBATINIB"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.5965410052910053,
+              "prompt_faithful_quality_yield": 56.333333333333336,
+              "prompt_fidelity": 100.0,
+              "quality": 28.666666666666668,
+              "uniqueness": 55.333333333333336,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.6013289051020925,
+              "prompt_faithful_quality_yield": 47.333333333333336,
+              "prompt_fidelity": 100.0,
+              "quality": 22.333333333333332,
+              "uniqueness": 46.333333333333336,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.004787899811087182,
+            "prompt_faithful_quality_yield": 9.0,
+            "prompt_fidelity": 0.0,
+            "quality": 6.333333333333336,
+            "uniqueness": 9.0,
+            "validity": 0.0
+          },
+          "prompt": "LESINURAD"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.6404242583631391,
+              "prompt_faithful_quality_yield": 21.333333333333332,
+              "prompt_fidelity": 100.0,
+              "quality": 21.0,
+              "uniqueness": 97.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.6670467443249701,
+              "prompt_faithful_quality_yield": 10.666666666666666,
+              "prompt_fidelity": 100.0,
+              "quality": 9.666666666666666,
+              "uniqueness": 93.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.026622485961831033,
+            "prompt_faithful_quality_yield": 10.666666666666666,
+            "prompt_fidelity": 0.0,
+            "quality": 11.333333333333334,
+            "uniqueness": 4.666666666666671,
+            "validity": 0.0
+          },
+          "prompt": "LIOTHYRONINE"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.40950634416520915,
+              "prompt_faithful_quality_yield": 0.0,
+              "prompt_fidelity": 100.0,
+              "quality": 0.0,
+              "uniqueness": 70.33333333333333,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.416092972275951,
+              "prompt_faithful_quality_yield": 0.0,
+              "prompt_fidelity": 100.0,
+              "quality": 0.0,
+              "uniqueness": 52.333333333333336,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.006586628110741843,
+            "prompt_faithful_quality_yield": 0.0,
+            "prompt_fidelity": 0.0,
+            "quality": 0.0,
+            "uniqueness": 17.999999999999993,
+            "validity": 0.0
+          },
+          "prompt": "LOVASTATIN"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.48327886130811665,
+              "prompt_faithful_quality_yield": 7.0,
+              "prompt_fidelity": 100.0,
+              "quality": 1.0,
+              "uniqueness": 46.666666666666664,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.4776416210230164,
+              "prompt_faithful_quality_yield": 6.0,
+              "prompt_fidelity": 100.0,
+              "quality": 1.0,
+              "uniqueness": 38.333333333333336,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.0056372402851002645,
+            "prompt_faithful_quality_yield": 1.0,
+            "prompt_fidelity": 0.0,
+            "quality": 0.0,
+            "uniqueness": 8.333333333333329,
+            "validity": 0.0
+          },
+          "prompt": "MARIBAVIR"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.5691264936016034,
+              "prompt_faithful_quality_yield": 65.66666666666667,
+              "prompt_fidelity": 100.0,
+              "quality": 61.333333333333336,
+              "uniqueness": 94.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.5864779767751741,
+              "prompt_faithful_quality_yield": 53.333333333333336,
+              "prompt_fidelity": 100.0,
+              "quality": 49.0,
+              "uniqueness": 91.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.017351483173570714,
+            "prompt_faithful_quality_yield": 12.333333333333336,
+            "prompt_fidelity": 0.0,
+            "quality": 12.333333333333336,
+            "uniqueness": 2.6666666666666714,
+            "validity": 0.0
+          },
+          "prompt": "SPIRAPRIL"
+        }
+      ]
+    },
+    "motif_extension": {
+      "arms": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.6640208079843859,
+              "sample_sd": 0.0013868405681848187
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 45.46666666666667,
+              "sample_sd": 0.4725815626252608
+            },
+            "prompt_fidelity": {
+              "mean": 99.96666666666665,
+              "sample_sd": 0.05773502691895929
+            },
+            "quality": {
+              "mean": 42.63333333333333,
+              "sample_sd": 0.3785938897200155
+            },
+            "uniqueness": {
+              "mean": 93.63164983164984,
+              "sample_sd": 0.6003997693246869
+            },
+            "validity": {
+              "mean": 99.96666666666665,
+              "sample_sd": 0.05773502691895929
+            }
+          },
+          "per_seed": {
+            "2": {
+              "diversity": 0.6629009068426823,
+              "prompt_faithful_quality_yield": 45.1,
+              "prompt_fidelity": 99.9,
+              "quality": 42.8,
+              "uniqueness": 94.1949494949495,
+              "validity": 99.9
+            },
+            "3": {
+              "diversity": 0.6635894499069492,
+              "prompt_faithful_quality_yield": 46.0,
+              "prompt_fidelity": 100.0,
+              "quality": 42.9,
+              "uniqueness": 93.7,
+              "validity": 100.0
+            },
+            "4": {
+              "diversity": 0.6655720672035261,
+              "prompt_faithful_quality_yield": 45.3,
+              "prompt_fidelity": 100.0,
+              "quality": 42.2,
+              "uniqueness": 93.0,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            2,
+            3,
+            4
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.6755617694336536,
+              "sample_sd": 0.0023328113394323227
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 39.43333333333333,
+              "sample_sd": 1.1930353445448836
+            },
+            "prompt_fidelity": {
+              "mean": 99.96666666666665,
+              "sample_sd": 0.05773502691895929
+            },
+            "quality": {
+              "mean": 37.199999999999996,
+              "sample_sd": 0.6082762530298225
+            },
+            "uniqueness": {
+              "mean": 93.53232323232324,
+              "sample_sd": 0.9287240243675201
+            },
+            "validity": {
+              "mean": 99.96666666666665,
+              "sample_sd": 0.05773502691895929
+            }
+          },
+          "per_seed": {
+            "2": {
+              "diversity": 0.6759689394018497,
+              "prompt_faithful_quality_yield": 38.9,
+              "prompt_fidelity": 99.9,
+              "quality": 36.8,
+              "uniqueness": 93.7969696969697,
+              "validity": 99.9
+            },
+            "3": {
+              "diversity": 0.673052177466016,
+              "prompt_faithful_quality_yield": 40.8,
+              "prompt_fidelity": 100.0,
+              "quality": 37.9,
+              "uniqueness": 92.5,
+              "validity": 100.0
+            },
+            "4": {
+              "diversity": 0.6776641914330952,
+              "prompt_faithful_quality_yield": 38.6,
+              "prompt_fidelity": 100.0,
+              "quality": 36.9,
+              "uniqueness": 94.3,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "intervals": {
+        "diversity": {
+          "mean_difference": -0.011540961449267684,
+          "percentile_95": [
+            -0.017850763028917197,
+            -0.0054497868594081565
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        },
+        "quality": {
+          "mean_difference": 5.433333333333333,
+          "percentile_95": [
+            3.166666666666665,
+            7.866666666666663
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        },
+        "uniqueness": {
+          "mean_difference": 0.0993265993265993,
+          "percentile_95": [
+            -1.5333333333333357,
+            1.867432659932599
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        },
+        "validity": {
+          "mean_difference": 0.0,
+          "percentile_95": [
+            0.0,
+            0.0
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        }
+      },
+      "per_prompt": [
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.6686600012576244,
+              "prompt_faithful_quality_yield": 70.33333333333333,
+              "prompt_fidelity": 100.0,
+              "quality": 64.33333333333333,
+              "uniqueness": 92.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.6774359400289632,
+              "prompt_faithful_quality_yield": 63.666666666666664,
+              "prompt_fidelity": 100.0,
+              "quality": 57.0,
+              "uniqueness": 89.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.008775938771338865,
+            "prompt_faithful_quality_yield": 6.666666666666664,
+            "prompt_fidelity": 0.0,
+            "quality": 7.333333333333329,
+            "uniqueness": 3.333333333333343,
+            "validity": 0.0
+          },
+          "prompt": "BARICITINIB"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.544220337579866,
+              "prompt_faithful_quality_yield": 30.333333333333332,
+              "prompt_fidelity": 100.0,
+              "quality": 26.0,
+              "uniqueness": 93.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.5566369858000293,
+              "prompt_faithful_quality_yield": 28.0,
+              "prompt_fidelity": 100.0,
+              "quality": 22.666666666666668,
+              "uniqueness": 93.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.012416648220163307,
+            "prompt_faithful_quality_yield": 2.333333333333332,
+            "prompt_fidelity": 0.0,
+            "quality": 3.333333333333332,
+            "uniqueness": 0.6666666666666714,
+            "validity": 0.0
+          },
+          "prompt": "CYCLOTHIAZIDE"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7083327609427608,
+              "prompt_faithful_quality_yield": 75.0,
+              "prompt_fidelity": 100.0,
+              "quality": 74.33333333333333,
+              "uniqueness": 99.33333333333333,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.7337159932659932,
+              "prompt_faithful_quality_yield": 62.0,
+              "prompt_fidelity": 100.0,
+              "quality": 61.666666666666664,
+              "uniqueness": 99.66666666666667,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.025383232323232474,
+            "prompt_faithful_quality_yield": 13.0,
+            "prompt_fidelity": 0.0,
+            "quality": 12.666666666666664,
+            "uniqueness": -0.3333333333333428,
+            "validity": 0.0
+          },
+          "prompt": "ELIGLUSTAT"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.8028094473995271,
+              "prompt_faithful_quality_yield": 46.0,
+              "prompt_fidelity": 99.66666666666667,
+              "quality": 44.666666666666664,
+              "uniqueness": 96.98316498316497,
+              "validity": 99.66666666666667
+            },
+            "uniform": {
+              "diversity": 0.7968288554783616,
+              "prompt_faithful_quality_yield": 43.666666666666664,
+              "prompt_fidelity": 99.66666666666667,
+              "quality": 41.666666666666664,
+              "uniqueness": 96.32323232323233,
+              "validity": 99.66666666666667
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.005980591921165512,
+            "prompt_faithful_quality_yield": 2.3333333333333357,
+            "prompt_fidelity": 0.0,
+            "quality": 3.0,
+            "uniqueness": 0.6599326599326361,
+            "validity": 0.0
+          },
+          "prompt": "ERLOTINIB"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.6799726340444877,
+              "prompt_faithful_quality_yield": 63.0,
+              "prompt_fidelity": 100.0,
+              "quality": 60.333333333333336,
+              "uniqueness": 95.33333333333333,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.6931691818832796,
+              "prompt_faithful_quality_yield": 57.333333333333336,
+              "prompt_fidelity": 100.0,
+              "quality": 55.666666666666664,
+              "uniqueness": 96.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.013196547838791872,
+            "prompt_faithful_quality_yield": 5.666666666666664,
+            "prompt_fidelity": 0.0,
+            "quality": 4.666666666666671,
+            "uniqueness": -1.0,
+            "validity": 0.0
+          },
+          "prompt": "FUTIBATINIB"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.6334258597883599,
+              "prompt_faithful_quality_yield": 45.0,
+              "prompt_fidelity": 100.0,
+              "quality": 35.333333333333336,
+              "uniqueness": 84.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.642552060965854,
+              "prompt_faithful_quality_yield": 38.666666666666664,
+              "prompt_fidelity": 100.0,
+              "quality": 34.333333333333336,
+              "uniqueness": 88.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.009126201177494186,
+            "prompt_faithful_quality_yield": 6.333333333333336,
+            "prompt_fidelity": 0.0,
+            "quality": 1.0,
+            "uniqueness": -3.666666666666657,
+            "validity": 0.0
+          },
+          "prompt": "LESINURAD"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7697030536577083,
+              "prompt_faithful_quality_yield": 52.0,
+              "prompt_fidelity": 100.0,
+              "quality": 51.0,
+              "uniqueness": 96.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.7813778945921803,
+              "prompt_faithful_quality_yield": 47.0,
+              "prompt_fidelity": 100.0,
+              "quality": 46.333333333333336,
+              "uniqueness": 98.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.01167484093447202,
+            "prompt_faithful_quality_yield": 5.0,
+            "prompt_fidelity": 0.0,
+            "quality": 4.666666666666664,
+            "uniqueness": -1.6666666666666572,
+            "validity": 0.0
+          },
+          "prompt": "LIOTHYRONINE"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.47498604017705137,
+              "prompt_faithful_quality_yield": 0.0,
+              "prompt_fidelity": 100.0,
+              "quality": 0.0,
+              "uniqueness": 88.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.4761139472455649,
+              "prompt_faithful_quality_yield": 0.0,
+              "prompt_fidelity": 100.0,
+              "quality": 0.0,
+              "uniqueness": 83.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.0011279070685135117,
+            "prompt_faithful_quality_yield": 0.0,
+            "prompt_fidelity": 0.0,
+            "quality": 0.0,
+            "uniqueness": 5.666666666666671,
+            "validity": 0.0
+          },
+          "prompt": "LOVASTATIN"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7435743127147766,
+              "prompt_faithful_quality_yield": 28.666666666666668,
+              "prompt_fidelity": 100.0,
+              "quality": 28.0,
+              "uniqueness": 97.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.7526503984791987,
+              "prompt_faithful_quality_yield": 18.0,
+              "prompt_fidelity": 100.0,
+              "quality": 17.666666666666668,
+              "uniqueness": 96.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.009076085764422093,
+            "prompt_faithful_quality_yield": 10.666666666666668,
+            "prompt_fidelity": 0.0,
+            "quality": 10.333333333333332,
+            "uniqueness": 1.0,
+            "validity": 0.0
+          },
+          "prompt": "MARIBAVIR"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.6145236322816968,
+              "prompt_faithful_quality_yield": 44.333333333333336,
+              "prompt_fidelity": 100.0,
+              "quality": 42.333333333333336,
+              "uniqueness": 91.33333333333333,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.6451364365971108,
+              "prompt_faithful_quality_yield": 36.0,
+              "prompt_fidelity": 100.0,
+              "quality": 35.0,
+              "uniqueness": 95.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.03061280431541402,
+            "prompt_faithful_quality_yield": 8.333333333333336,
+            "prompt_fidelity": 0.0,
+            "quality": 7.333333333333336,
+            "uniqueness": -3.6666666666666714,
+            "validity": 0.0
+          },
+          "prompt": "SPIRAPRIL"
+        }
+      ]
+    },
+    "scaffold_decoration": {
+      "arms": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.562603236335503,
+              "sample_sd": 0.0018625444017722984
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 42.36666666666667,
+              "sample_sd": 1.1015141094572196
+            },
+            "prompt_fidelity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            },
+            "quality": {
+              "mean": 36.699999999999996,
+              "sample_sd": 1.8000000000000007
+            },
+            "uniqueness": {
+              "mean": 93.66666666666667,
+              "sample_sd": 0.832666399786449
+            },
+            "validity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            }
+          },
+          "per_seed": {
+            "10": {
+              "diversity": 0.5609841992832615,
+              "prompt_faithful_quality_yield": 43.1,
+              "prompt_fidelity": 100.0,
+              "quality": 38.5,
+              "uniqueness": 94.6,
+              "validity": 100.0
+            },
+            "8": {
+              "diversity": 0.5621867406218308,
+              "prompt_faithful_quality_yield": 41.1,
+              "prompt_fidelity": 100.0,
+              "quality": 34.9,
+              "uniqueness": 93.4,
+              "validity": 100.0
+            },
+            "9": {
+              "diversity": 0.5646387691014167,
+              "prompt_faithful_quality_yield": 42.9,
+              "prompt_fidelity": 100.0,
+              "quality": 36.7,
+              "uniqueness": 93.0,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            8,
+            9,
+            10
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.5585072135437038,
+              "sample_sd": 0.00016974407280467016
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 38.4,
+              "sample_sd": 1.2124355652982148
+            },
+            "prompt_fidelity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            },
+            "quality": {
+              "mean": 34.46666666666667,
+              "sample_sd": 0.6506407098647733
+            },
+            "uniqueness": {
+              "mean": 95.0,
+              "sample_sd": 0.6999999999999977
+            },
+            "validity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            }
+          },
+          "per_seed": {
+            "10": {
+              "diversity": 0.5583405517642117,
+              "prompt_faithful_quality_yield": 37.0,
+              "prompt_fidelity": 100.0,
+              "quality": 33.8,
+              "uniqueness": 95.3,
+              "validity": 100.0
+            },
+            "8": {
+              "diversity": 0.5586798805330665,
+              "prompt_faithful_quality_yield": 39.1,
+              "prompt_fidelity": 100.0,
+              "quality": 35.1,
+              "uniqueness": 95.5,
+              "validity": 100.0
+            },
+            "9": {
+              "diversity": 0.5585012083338334,
+              "prompt_faithful_quality_yield": 39.1,
+              "prompt_fidelity": 100.0,
+              "quality": 34.5,
+              "uniqueness": 94.2,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            8,
+            9,
+            10
+          ]
+        }
+      },
+      "intervals": {
+        "diversity": {
+          "mean_difference": 0.004096022791799103,
+          "percentile_95": [
+            -0.0032557178864259426,
+            0.011970286767268254
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        },
+        "quality": {
+          "mean_difference": 2.2333333333333343,
+          "percentile_95": [
+            0.6000000000000023,
+            4.066666666666668
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        },
+        "uniqueness": {
+          "mean_difference": -1.3333333333333357,
+          "percentile_95": [
+            -3.400000000000003,
+            0.5999999999999972
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        },
+        "validity": {
+          "mean_difference": 0.0,
+          "percentile_95": [
+            0.0,
+            0.0
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        }
+      },
+      "per_prompt": [
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.43567379847146254,
+              "prompt_faithful_quality_yield": 82.33333333333333,
+              "prompt_fidelity": 100.0,
+              "quality": 59.333333333333336,
+              "uniqueness": 77.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.4362106957745511,
+              "prompt_faithful_quality_yield": 76.0,
+              "prompt_fidelity": 100.0,
+              "quality": 59.666666666666664,
+              "uniqueness": 83.66666666666667,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.0005368973030885904,
+            "prompt_faithful_quality_yield": 6.333333333333329,
+            "prompt_fidelity": 0.0,
+            "quality": -0.3333333333333286,
+            "uniqueness": -6.666666666666671,
+            "validity": 0.0
+          },
+          "prompt": "BARICITINIB"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.4618813716756718,
+              "prompt_faithful_quality_yield": 0.0,
+              "prompt_fidelity": 100.0,
+              "quality": 0.0,
+              "uniqueness": 96.33333333333333,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.4446527554842162,
+              "prompt_faithful_quality_yield": 0.0,
+              "prompt_fidelity": 100.0,
+              "quality": 0.0,
+              "uniqueness": 92.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.017228616191455604,
+            "prompt_faithful_quality_yield": 0.0,
+            "prompt_fidelity": 0.0,
+            "quality": 0.0,
+            "uniqueness": 4.333333333333329,
+            "validity": 0.0
+          },
+          "prompt": "CYCLOTHIAZIDE"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.4905426268273034,
+              "prompt_faithful_quality_yield": 93.33333333333333,
+              "prompt_fidelity": 100.0,
+              "quality": 80.0,
+              "uniqueness": 86.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.49612708430730873,
+              "prompt_faithful_quality_yield": 89.66666666666667,
+              "prompt_fidelity": 100.0,
+              "quality": 80.33333333333333,
+              "uniqueness": 90.66666666666667,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.005584457480005356,
+            "prompt_faithful_quality_yield": 3.666666666666657,
+            "prompt_fidelity": 0.0,
+            "quality": -0.3333333333333286,
+            "uniqueness": -4.0,
+            "validity": 0.0
+          },
+          "prompt": "ELIGLUSTAT"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.5786386373943517,
+              "prompt_faithful_quality_yield": 66.33333333333333,
+              "prompt_fidelity": 100.0,
+              "quality": 65.33333333333333,
+              "uniqueness": 99.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.5815684848484849,
+              "prompt_faithful_quality_yield": 62.0,
+              "prompt_fidelity": 100.0,
+              "quality": 61.666666666666664,
+              "uniqueness": 99.66666666666667,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.002929847454133161,
+            "prompt_faithful_quality_yield": 4.333333333333329,
+            "prompt_fidelity": 0.0,
+            "quality": 3.6666666666666643,
+            "uniqueness": -0.6666666666666714,
+            "validity": 0.0
+          },
+          "prompt": "ERLOTINIB"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.5413702693602693,
+              "prompt_faithful_quality_yield": 26.333333333333332,
+              "prompt_fidelity": 100.0,
+              "quality": 25.666666666666668,
+              "uniqueness": 99.33333333333333,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.5440482202982203,
+              "prompt_faithful_quality_yield": 19.0,
+              "prompt_fidelity": 100.0,
+              "quality": 18.0,
+              "uniqueness": 99.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.002677950937950979,
+            "prompt_faithful_quality_yield": 7.333333333333332,
+            "prompt_fidelity": 0.0,
+            "quality": 7.666666666666668,
+            "uniqueness": 0.3333333333333286,
+            "validity": 0.0
+          },
+          "prompt": "FUTIBATINIB"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.5134934141267612,
+              "prompt_faithful_quality_yield": 87.0,
+              "prompt_fidelity": 100.0,
+              "quality": 68.33333333333333,
+              "uniqueness": 81.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.5295945085495858,
+              "prompt_faithful_quality_yield": 74.0,
+              "prompt_fidelity": 100.0,
+              "quality": 61.666666666666664,
+              "uniqueness": 87.66666666666667,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.01610109442282459,
+            "prompt_faithful_quality_yield": 13.0,
+            "prompt_fidelity": 0.0,
+            "quality": 6.666666666666664,
+            "uniqueness": -6.666666666666671,
+            "validity": 0.0
+          },
+          "prompt": "LESINURAD"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7458666666666668,
+              "prompt_faithful_quality_yield": 61.333333333333336,
+              "prompt_fidelity": 100.0,
+              "quality": 61.333333333333336,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.7455566666666668,
+              "prompt_faithful_quality_yield": 58.666666666666664,
+              "prompt_fidelity": 100.0,
+              "quality": 58.666666666666664,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.00031000000000003247,
+            "prompt_faithful_quality_yield": 2.6666666666666714,
+            "prompt_fidelity": 0.0,
+            "quality": 2.6666666666666714,
+            "uniqueness": 0.0,
+            "validity": 0.0
+          },
+          "prompt": "LIOTHYRONINE"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.6083560544217687,
+              "prompt_faithful_quality_yield": 0.0,
+              "prompt_fidelity": 100.0,
+              "quality": 0.0,
+              "uniqueness": 99.33333333333333,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.5803995183123755,
+              "prompt_faithful_quality_yield": 0.0,
+              "prompt_fidelity": 100.0,
+              "quality": 0.0,
+              "uniqueness": 99.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.027956536109393193,
+            "prompt_faithful_quality_yield": 0.0,
+            "prompt_fidelity": 0.0,
+            "quality": 0.0,
+            "uniqueness": 0.3333333333333286,
+            "validity": 0.0
+          },
+          "prompt": "LOVASTATIN"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7454966666666668,
+              "prompt_faithful_quality_yield": 7.0,
+              "prompt_fidelity": 100.0,
+              "quality": 7.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.73829,
+              "prompt_faithful_quality_yield": 4.666666666666667,
+              "prompt_fidelity": 100.0,
+              "quality": 4.666666666666667,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.0072066666666668056,
+            "prompt_faithful_quality_yield": 2.333333333333333,
+            "prompt_fidelity": 0.0,
+            "quality": 2.333333333333333,
+            "uniqueness": 0.0,
+            "validity": 0.0
+          },
+          "prompt": "MARIBAVIR"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.5047128577441078,
+              "prompt_faithful_quality_yield": 0.0,
+              "prompt_fidelity": 100.0,
+              "quality": 0.0,
+              "uniqueness": 98.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.4886242011956297,
+              "prompt_faithful_quality_yield": 0.0,
+              "prompt_fidelity": 100.0,
+              "quality": 0.0,
+              "uniqueness": 98.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.016088656548478075,
+            "prompt_faithful_quality_yield": 0.0,
+            "prompt_fidelity": 0.0,
+            "quality": 0.0,
+            "uniqueness": -0.3333333333333286,
+            "validity": 0.0
+          },
+          "prompt": "SPIRAPRIL"
+        }
+      ]
+    },
+    "superstructure_generation": {
+      "arms": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.7250740492970243,
+              "sample_sd": 0.0006737782708896392
+            },
+            "quality": {
+              "mean": 39.03333333333333,
+              "sample_sd": 3.08922859842604
+            },
+            "uniqueness": {
+              "mean": 97.33333333333333,
+              "sample_sd": 0.6110100926607795
+            },
+            "validity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            }
+          },
+          "per_seed": {
+            "0": {
+              "diversity": 0.7249909536178107,
+              "quality": 41.8,
+              "uniqueness": 98.0,
+              "validity": 100.0
+            },
+            "1": {
+              "diversity": 0.724445672895097,
+              "quality": 35.7,
+              "uniqueness": 97.2,
+              "validity": 100.0
+            },
+            "2": {
+              "diversity": 0.7257855213781652,
+              "quality": 39.6,
+              "uniqueness": 96.8,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            0,
+            1,
+            2
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.7085027622398062,
+              "sample_sd": 0.0029417798106823635
+            },
+            "quality": {
+              "mean": 25.400000000000002,
+              "sample_sd": 1.6462077633154326
+            },
+            "uniqueness": {
+              "mean": 90.16666666666667,
+              "sample_sd": 1.1015141094572218
+            },
+            "validity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            }
+          },
+          "per_seed": {
+            "0": {
+              "diversity": 0.7118231372040958,
+              "quality": 26.3,
+              "uniqueness": 91.3,
+              "validity": 100.0
+            },
+            "1": {
+              "diversity": 0.7062217680027632,
+              "quality": 23.5,
+              "uniqueness": 89.1,
+              "validity": 100.0
+            },
+            "2": {
+              "diversity": 0.7074633815125596,
+              "quality": 26.4,
+              "uniqueness": 90.1,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            0,
+            1,
+            2
+          ]
+        }
+      },
+      "intervals": {
+        "diversity": {
+          "mean_difference": 0.016571287057218175,
+          "percentile_95": [
+            -0.0005214155941484642,
+            0.031114444889790094
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        },
+        "quality": {
+          "mean_difference": 13.633333333333335,
+          "percentile_95": [
+            4.266666666666666,
+            23.066666666666666
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        },
+        "uniqueness": {
+          "mean_difference": 7.166666666666669,
+          "percentile_95": [
+            1.0666666666666658,
+            11.700000000000005
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        },
+        "validity": {
+          "mean_difference": 0.0,
+          "percentile_95": [
+            0.0,
+            0.0
+          ],
+          "status": "recomputed_and_matched_saved_interval"
+        }
+      },
+      "per_prompt": [
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7126250257678829,
+              "quality": 46.666666666666664,
+              "uniqueness": 98.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.6749680832906639,
+              "quality": 25.666666666666668,
+              "uniqueness": 91.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.03765694247721896,
+            "quality": 20.999999999999996,
+            "uniqueness": 7.333333333333343,
+            "validity": 0.0
+          },
+          "prompt": "BARICITINIB"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7527695760324332,
+              "quality": 0.0,
+              "uniqueness": 99.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.758883786316776,
+              "quality": 0.0,
+              "uniqueness": 97.66666666666667,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.00611421028434278,
+            "quality": 0.0,
+            "uniqueness": 1.3333333333333286,
+            "validity": 0.0
+          },
+          "prompt": "CYCLOTHIAZIDE"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7307828282828283,
+              "quality": 66.66666666666667,
+              "uniqueness": 99.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.7098008895485322,
+              "quality": 41.666666666666664,
+              "uniqueness": 85.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.0209819387342961,
+            "quality": 25.000000000000007,
+            "uniqueness": 14.333333333333343,
+            "validity": 0.0
+          },
+          "prompt": "ELIGLUSTAT"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7468300000000001,
+              "quality": 37.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.7279962852177423,
+              "quality": 43.666666666666664,
+              "uniqueness": 91.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.018833714782257815,
+            "quality": -6.666666666666664,
+            "uniqueness": 9.0,
+            "validity": 0.0
+          },
+          "prompt": "ERLOTINIB"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.639369377277934,
+              "quality": 43.0,
+              "uniqueness": 98.66666666666667,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.6003280487804878,
+              "quality": 10.666666666666666,
+              "uniqueness": 86.66666666666667,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.039041328497446126,
+            "quality": 32.333333333333336,
+            "uniqueness": 12.0,
+            "validity": 0.0
+          },
+          "prompt": "FUTIBATINIB"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7431833333333334,
+              "quality": 49.333333333333336,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.703886885100041,
+              "quality": 36.0,
+              "uniqueness": 84.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.03929644823329237,
+            "quality": 13.333333333333336,
+            "uniqueness": 15.666666666666671,
+            "validity": 0.0
+          },
+          "prompt": "LESINURAD"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7794033333333336,
+              "quality": 44.0,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.7581903077765147,
+              "quality": 50.333333333333336,
+              "uniqueness": 88.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.02121302555681881,
+            "quality": -6.333333333333336,
+            "uniqueness": 11.666666666666671,
+            "validity": 0.0
+          },
+          "prompt": "LIOTHYRONINE"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.735946127946128,
+              "quality": 0.0,
+              "uniqueness": 99.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.7385525905118602,
+              "quality": 0.0,
+              "uniqueness": 93.66666666666667,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.0026064625657321594,
+            "quality": 0.0,
+            "uniqueness": 5.333333333333329,
+            "validity": 0.0
+          },
+          "prompt": "LOVASTATIN"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.7547900000000002,
+              "quality": 73.33333333333333,
+              "uniqueness": 100.0,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.7144408552687622,
+              "quality": 36.333333333333336,
+              "uniqueness": 89.0,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": 0.04034914473123796,
+            "quality": 36.99999999999999,
+            "uniqueness": 11.0,
+            "validity": 0.0
+          },
+          "prompt": "MARIBAVIR"
+        },
+        {
+          "arms": {
+            "deployed": {
+              "diversity": 0.6550408909963704,
+              "quality": 30.333333333333332,
+              "uniqueness": 78.33333333333333,
+              "validity": 100.0
+            },
+            "uniform": {
+              "diversity": 0.6979798905866819,
+              "quality": 9.666666666666666,
+              "uniqueness": 94.33333333333333,
+              "validity": 100.0
+            }
+          },
+          "deployed_minus_uniform": {
+            "diversity": -0.042938999590311444,
+            "quality": 20.666666666666664,
+            "uniqueness": -16.0,
+            "validity": 0.0
+          },
+          "prompt": "SPIRAPRIL"
+        }
+      ]
+    }
+  },
+  "inputs": {
+    "decoration_selection": {
+      "path": "diagnostics/fragment_locked_panel_selection_v1/decoration_result.json",
+      "schema": "fragment_locked_panel_selection_replay_v1",
+      "sha256": "c6452cc46128f7b9cb13f23d0089ef5f582c2168458bad644e82bd1f026655ab"
+    },
+    "linker_selection": {
+      "path": "diagnostics/fragment_locked_panel_selection_v1/linker_result.json",
+      "schema": "fragment_locked_panel_selection_replay_v1",
+      "sha256": "a7b4f41b172ba70e58340f1232e3eb79be78b5cdc35d64cc94e0131128549ee1"
+    },
+    "motif_intervals": {
+      "path": "diagnostics/fragment_common_panel_prompt_ci_v1/result.json",
+      "schema": "fragment_common_panel_prompt_ci_v1",
+      "sha256": "c38507ebe93d3913a24bc4b45103446c23e8d7a491d286ca3ea1e8fbda2e114a"
+    },
+    "motif_selection": {
+      "path": "diagnostics/fragment_locked_panel_selection_v1/motif_prefix_result.json",
+      "schema": "fragment_motif_locked_prefix_v1",
+      "sha256": "6977b8a69257f230a3e8dc2221ea2c3497d41b5975ad5a53d8b59f28f01ef61a"
+    },
+    "superstructure_comparison": {
+      "path": "diagnostics/fragment_superstructure_reference_final_v1/result.json",
+      "schema": "fragment_superstructure_reference_final_v1",
+      "sha256": "bff7c3cca5f60cc903ba89bafda2dc95a81f2c80c8e8df08fbbbeca3bd9cb9e8"
+    },
+    "superstructure_learned": {
+      "path": "diagnostics/fragment_superstructure_official_v2/result.json",
+      "schema": "fragment_superstructure_official_v2_result_v1",
+      "sha256": "8406f57dc5ff6736110593d309f207d7a5d0e878eeb1b7a2f2c423fe2d9b3652"
+    },
+    "superstructure_uniform": {
+      "path": "diagnostics/fragment_superstructure_reference_ablation_v1/result.json",
+      "schema": "fragment_superstructure_official_v2_result_v1",
+      "sha256": "007f59645ffda58f1722eb846444d4f604307468016d4f813740b3ab9c9b0b5d"
+    }
+  },
+  "limitations": [
+    "This manifest indexes saved metrics, not a complete molecule-generation release.",
+    "No new generation, oracle evaluation, or model fitting is performed.",
+    "Scaffold morphing reuses linker outputs and is not independently aggregated.",
+    "Linker selection changes reference scoring and novelty weighting together.",
+    "Prefix results are retrospective truncations of saved attempted offers, not runtime measurements.",
+    "The motif_intervals artifact also contains an older linker comparison; only its motif_extension subtree is applicable here.",
+    "Historical absolute paths inside imported evidence are provenance, never runtime inputs.",
+    "Submitted Table 1 prints motif validity as 100%; saved rows give 99.9667%. No manuscript is edited.",
+    "Saved intervals are carried with provenance unless --recompute-intervals is requested.",
+    "Published external comparator columns are not independently verified or regenerated here."
+  ],
+  "prefixes": {
+    "linker_design": {
+      "1": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.5732753402470547,
+              "sample_sd": 0.002959533415081783
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 27.5,
+              "sample_sd": 1.5620499351813315
+            },
+            "prompt_fidelity": {
+              "mean": 92.2,
+              "sample_sd": 1.252996408614167
+            },
+            "quality": {
+              "mean": 21.833333333333332,
+              "sample_sd": 1.5176736583776282
+            },
+            "uniqueness": {
+              "mean": 73.13607877503945,
+              "sample_sd": 0.44052307467248797
+            },
+            "validity": {
+              "mean": 92.2,
+              "sample_sd": 1.252996408614167
+            }
+          },
+          "per_seed": {
+            "6": {
+              "diversity": 0.5721054386585767,
+              "prompt_faithful_quality_yield": 28.5,
+              "prompt_fidelity": 92.1,
+              "quality": 22.1,
+              "uniqueness": 72.88824808232702,
+              "validity": 92.1
+            },
+            "7": {
+              "diversity": 0.571079583264496,
+              "prompt_faithful_quality_yield": 28.3,
+              "prompt_fidelity": 91.0,
+              "quality": 23.2,
+              "uniqueness": 73.64469600614692,
+              "validity": 91.0
+            },
+            "8": {
+              "diversity": 0.5766409988180914,
+              "prompt_faithful_quality_yield": 25.7,
+              "prompt_fidelity": 93.5,
+              "quality": 20.2,
+              "uniqueness": 72.87529223664443,
+              "validity": 93.5
+            }
+          },
+          "seeds": [
+            6,
+            7,
+            8
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.5732753402470547,
+              "sample_sd": 0.002959533415081783
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 27.5,
+              "sample_sd": 1.5620499351813315
+            },
+            "prompt_fidelity": {
+              "mean": 92.2,
+              "sample_sd": 1.252996408614167
+            },
+            "quality": {
+              "mean": 21.833333333333332,
+              "sample_sd": 1.5176736583776282
+            },
+            "uniqueness": {
+              "mean": 73.13607877503945,
+              "sample_sd": 0.44052307467248797
+            },
+            "validity": {
+              "mean": 92.2,
+              "sample_sd": 1.252996408614167
+            }
+          },
+          "per_seed": {
+            "6": {
+              "diversity": 0.5721054386585767,
+              "prompt_faithful_quality_yield": 28.5,
+              "prompt_fidelity": 92.1,
+              "quality": 22.1,
+              "uniqueness": 72.88824808232702,
+              "validity": 92.1
+            },
+            "7": {
+              "diversity": 0.571079583264496,
+              "prompt_faithful_quality_yield": 28.3,
+              "prompt_fidelity": 91.0,
+              "quality": 23.2,
+              "uniqueness": 73.64469600614692,
+              "validity": 91.0
+            },
+            "8": {
+              "diversity": 0.5766409988180914,
+              "prompt_faithful_quality_yield": 25.7,
+              "prompt_fidelity": 93.5,
+              "quality": 20.2,
+              "uniqueness": 72.87529223664443,
+              "validity": 93.5
+            }
+          },
+          "seeds": [
+            6,
+            7,
+            8
+          ]
+        }
+      },
+      "2": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.5712378554310655,
+              "sample_sd": 0.0009083222620863353
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 31.23333333333333,
+              "sample_sd": 0.7637626158259734
+            },
+            "prompt_fidelity": {
+              "mean": 99.2,
+              "sample_sd": 0.10000000000000142
+            },
+            "quality": {
+              "mean": 26.266666666666666,
+              "sample_sd": 1.0263202878893767
+            },
+            "uniqueness": {
+              "mean": 77.21870110743454,
+              "sample_sd": 0.6630422306006447
+            },
+            "validity": {
+              "mean": 99.2,
+              "sample_sd": 0.10000000000000142
+            }
+          },
+          "per_seed": {
+            "6": {
+              "diversity": 0.5721563674150033,
+              "prompt_faithful_quality_yield": 31.9,
+              "prompt_fidelity": 99.3,
+              "quality": 26.0,
+              "uniqueness": 77.90653027221511,
+              "validity": 99.3
+            },
+            "7": {
+              "diversity": 0.5703400779078993,
+              "prompt_faithful_quality_yield": 31.4,
+              "prompt_fidelity": 99.2,
+              "quality": 27.4,
+              "uniqueness": 77.1659793814433,
+              "validity": 99.2
+            },
+            "8": {
+              "diversity": 0.5712171209702939,
+              "prompt_faithful_quality_yield": 30.4,
+              "prompt_fidelity": 99.1,
+              "quality": 25.4,
+              "uniqueness": 76.58359366864522,
+              "validity": 99.1
+            }
+          },
+          "seeds": [
+            6,
+            7,
+            8
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.574655512423852,
+              "sample_sd": 0.0028250955519039805
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 29.733333333333334,
+              "sample_sd": 1.900876990584434
+            },
+            "prompt_fidelity": {
+              "mean": 99.2,
+              "sample_sd": 0.10000000000000142
+            },
+            "quality": {
+              "mean": 23.433333333333337,
+              "sample_sd": 1.0969655114602903
+            },
+            "uniqueness": {
+              "mean": 72.9905037470575,
+              "sample_sd": 0.8561534608508896
+            },
+            "validity": {
+              "mean": 99.2,
+              "sample_sd": 0.10000000000000142
+            }
+          },
+          "per_seed": {
+            "6": {
+              "diversity": 0.5757559621398101,
+              "prompt_faithful_quality_yield": 29.8,
+              "prompt_fidelity": 99.3,
+              "quality": 23.800000000000004,
+              "uniqueness": 73.678883937205,
+              "validity": 99.3
+            },
+            "7": {
+              "diversity": 0.5714457908664252,
+              "prompt_faithful_quality_yield": 31.6,
+              "prompt_fidelity": 99.2,
+              "quality": 24.3,
+              "uniqueness": 72.03182338852442,
+              "validity": 99.2
+            },
+            "8": {
+              "diversity": 0.5767647842653207,
+              "prompt_faithful_quality_yield": 27.8,
+              "prompt_fidelity": 99.1,
+              "quality": 22.2,
+              "uniqueness": 73.26080391544309,
+              "validity": 99.1
+            }
+          },
+          "seeds": [
+            6,
+            7,
+            8
+          ]
+        }
+      },
+      "4": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.5655764845238935,
+              "sample_sd": 0.0006422442406848451
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 35.13333333333333,
+              "sample_sd": 0.6658328118479383
+            },
+            "prompt_fidelity": {
+              "mean": 99.96666666666665,
+              "sample_sd": 0.05773502691895929
+            },
+            "quality": {
+              "mean": 29.733333333333334,
+              "sample_sd": 0.5507570547286109
+            },
+            "uniqueness": {
+              "mean": 79.89865319865321,
+              "sample_sd": 0.8895041106334064
+            },
+            "validity": {
+              "mean": 99.96666666666665,
+              "sample_sd": 0.05773502691895929
+            }
+          },
+          "per_seed": {
+            "6": {
+              "diversity": 0.5662690550798612,
+              "prompt_faithful_quality_yield": 34.7,
+              "prompt_fidelity": 99.9,
+              "quality": 29.7,
+              "uniqueness": 79.5959595959596,
+              "validity": 99.9
+            },
+            "7": {
+              "diversity": 0.5650005534677038,
+              "prompt_faithful_quality_yield": 34.8,
+              "prompt_fidelity": 100.0,
+              "quality": 30.3,
+              "uniqueness": 80.9,
+              "validity": 100.0
+            },
+            "8": {
+              "diversity": 0.5654598450241154,
+              "prompt_faithful_quality_yield": 35.9,
+              "prompt_fidelity": 100.0,
+              "quality": 29.2,
+              "uniqueness": 79.2,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            6,
+            7,
+            8
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.573678273537919,
+              "sample_sd": 0.0025747641784466353
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 30.433333333333334,
+              "sample_sd": 1.588500340992513
+            },
+            "prompt_fidelity": {
+              "mean": 99.96666666666665,
+              "sample_sd": 0.05773502691895929
+            },
+            "quality": {
+              "mean": 24.066666666666666,
+              "sample_sd": 1.3503086067019392
+            },
+            "uniqueness": {
+              "mean": 73.42861952861954,
+              "sample_sd": 1.0153531802974056
+            },
+            "validity": {
+              "mean": 99.96666666666665,
+              "sample_sd": 0.05773502691895929
+            }
+          },
+          "per_seed": {
+            "6": {
+              "diversity": 0.5739643074524332,
+              "prompt_faithful_quality_yield": 31.4,
+              "prompt_fidelity": 99.9,
+              "quality": 25.4,
+              "uniqueness": 72.88585858585859,
+              "validity": 99.9
+            },
+            "7": {
+              "diversity": 0.5709724360593567,
+              "prompt_faithful_quality_yield": 31.3,
+              "prompt_fidelity": 100.0,
+              "quality": 24.1,
+              "uniqueness": 72.8,
+              "validity": 100.0
+            },
+            "8": {
+              "diversity": 0.5760980771019669,
+              "prompt_faithful_quality_yield": 28.6,
+              "prompt_fidelity": 100.0,
+              "quality": 22.7,
+              "uniqueness": 74.6,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            6,
+            7,
+            8
+          ]
+        }
+      },
+      "8": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.563613454933257,
+              "sample_sd": 0.001968873046521416
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 36.9,
+              "sample_sd": 0.8717797887081349
+            },
+            "prompt_fidelity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            },
+            "quality": {
+              "mean": 31.53333333333333,
+              "sample_sd": 1.4011899704655812
+            },
+            "uniqueness": {
+              "mean": 81.03333333333335,
+              "sample_sd": 0.3511884584284262
+            },
+            "validity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            }
+          },
+          "per_seed": {
+            "6": {
+              "diversity": 0.5637290049913529,
+              "prompt_faithful_quality_yield": 37.5,
+              "prompt_fidelity": 100.0,
+              "quality": 31.1,
+              "uniqueness": 80.7,
+              "validity": 100.0
+            },
+            "7": {
+              "diversity": 0.5655220082621834,
+              "prompt_faithful_quality_yield": 35.9,
+              "prompt_fidelity": 100.0,
+              "quality": 30.4,
+              "uniqueness": 81.0,
+              "validity": 100.0
+            },
+            "8": {
+              "diversity": 0.5615893515462347,
+              "prompt_faithful_quality_yield": 37.3,
+              "prompt_fidelity": 100.0,
+              "quality": 33.1,
+              "uniqueness": 81.4,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            6,
+            7,
+            8
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.5744342522720755,
+              "sample_sd": 0.0024849156306558933
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 30.666666666666668,
+              "sample_sd": 0.8326663997864541
+            },
+            "prompt_fidelity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            },
+            "quality": {
+              "mean": 24.0,
+              "sample_sd": 1.6093476939431077
+            },
+            "uniqueness": {
+              "mean": 73.46666666666665,
+              "sample_sd": 1.8770544300401448
+            },
+            "validity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            }
+          },
+          "per_seed": {
+            "6": {
+              "diversity": 0.5753556512924901,
+              "prompt_faithful_quality_yield": 30.4,
+              "prompt_fidelity": 100.0,
+              "quality": 23.8,
+              "uniqueness": 74.6,
+              "validity": 100.0
+            },
+            "7": {
+              "diversity": 0.5716202415679623,
+              "prompt_faithful_quality_yield": 31.6,
+              "prompt_fidelity": 100.0,
+              "quality": 25.7,
+              "uniqueness": 74.5,
+              "validity": 100.0
+            },
+            "8": {
+              "diversity": 0.5763268639557738,
+              "prompt_faithful_quality_yield": 30.0,
+              "prompt_fidelity": 100.0,
+              "quality": 22.5,
+              "uniqueness": 71.3,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            6,
+            7,
+            8
+          ]
+        }
+      }
+    },
+    "motif_extension": {
+      "1": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.6781252309725411,
+              "sample_sd": 0.00030751227356915785
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 28.366666666666664,
+              "sample_sd": 0.3511884584284242
+            },
+            "prompt_fidelity": {
+              "mean": 75.13333333333333,
+              "sample_sd": 1.5275252316519468
+            },
+            "quality": {
+              "mean": 26.7,
+              "sample_sd": 0.43588989435406744
+            },
+            "uniqueness": {
+              "mean": 93.69266136347629,
+              "sample_sd": 0.5442132759555002
+            },
+            "validity": {
+              "mean": 75.13333333333333,
+              "sample_sd": 1.5275252316519468
+            }
+          },
+          "per_seed": {
+            "2": {
+              "diversity": 0.678405821722034,
+              "prompt_faithful_quality_yield": 28.7,
+              "prompt_fidelity": 74.8,
+              "quality": 27.2,
+              "uniqueness": 93.45506064606325,
+              "validity": 74.8
+            },
+            "3": {
+              "diversity": 0.6777964802400307,
+              "prompt_faithful_quality_yield": 28.4,
+              "prompt_fidelity": 73.8,
+              "quality": 26.5,
+              "uniqueness": 94.3152746974423,
+              "validity": 73.8
+            },
+            "4": {
+              "diversity": 0.6781733909555584,
+              "prompt_faithful_quality_yield": 28.0,
+              "prompt_fidelity": 76.8,
+              "quality": 26.4,
+              "uniqueness": 93.30764874692332,
+              "validity": 76.8
+            }
+          },
+          "seeds": [
+            2,
+            3,
+            4
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.6781252309725411,
+              "sample_sd": 0.00030751227356915785
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 28.366666666666664,
+              "sample_sd": 0.3511884584284242
+            },
+            "prompt_fidelity": {
+              "mean": 75.13333333333333,
+              "sample_sd": 1.5275252316519468
+            },
+            "quality": {
+              "mean": 26.7,
+              "sample_sd": 0.43588989435406744
+            },
+            "uniqueness": {
+              "mean": 93.69266136347629,
+              "sample_sd": 0.5442132759555002
+            },
+            "validity": {
+              "mean": 75.13333333333333,
+              "sample_sd": 1.5275252316519468
+            }
+          },
+          "per_seed": {
+            "2": {
+              "diversity": 0.678405821722034,
+              "prompt_faithful_quality_yield": 28.7,
+              "prompt_fidelity": 74.8,
+              "quality": 27.2,
+              "uniqueness": 93.45506064606325,
+              "validity": 74.8
+            },
+            "3": {
+              "diversity": 0.6777964802400307,
+              "prompt_faithful_quality_yield": 28.4,
+              "prompt_fidelity": 73.8,
+              "quality": 26.5,
+              "uniqueness": 94.3152746974423,
+              "validity": 73.8
+            },
+            "4": {
+              "diversity": 0.6781733909555584,
+              "prompt_faithful_quality_yield": 28.0,
+              "prompt_fidelity": 76.8,
+              "quality": 26.4,
+              "uniqueness": 93.30764874692332,
+              "validity": 76.8
+            }
+          },
+          "seeds": [
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "2": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.6746429583410577,
+              "sample_sd": 0.00037204963776337537
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 36.6,
+              "sample_sd": 0.8717797887081349
+            },
+            "prompt_fidelity": {
+              "mean": 92.8,
+              "sample_sd": 0.5291502622129176
+            },
+            "quality": {
+              "mean": 34.36666666666667,
+              "sample_sd": 0.5033222956847168
+            },
+            "uniqueness": {
+              "mean": 92.91541116354767,
+              "sample_sd": 0.47795550738610354
+            },
+            "validity": {
+              "mean": 92.8,
+              "sample_sd": 0.5291502622129176
+            }
+          },
+          "per_seed": {
+            "2": {
+              "diversity": 0.6750610905547176,
+              "prompt_faithful_quality_yield": 36.2,
+              "prompt_fidelity": 92.2,
+              "quality": 33.9,
+              "uniqueness": 93.37611298057054,
+              "validity": 92.2
+            },
+            "3": {
+              "diversity": 0.6745193031344966,
+              "prompt_faithful_quality_yield": 37.6,
+              "prompt_fidelity": 93.0,
+              "quality": 34.9,
+              "uniqueness": 92.42189330444293,
+              "validity": 93.0
+            },
+            "4": {
+              "diversity": 0.6743484813339589,
+              "prompt_faithful_quality_yield": 36.0,
+              "prompt_fidelity": 93.2,
+              "quality": 34.3,
+              "uniqueness": 92.94822720562952,
+              "validity": 93.2
+            }
+          },
+          "seeds": [
+            2,
+            3,
+            4
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.6774380302989184,
+              "sample_sd": 0.0006435916403169266
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 35.4,
+              "sample_sd": 1.216552506059645
+            },
+            "prompt_fidelity": {
+              "mean": 92.8,
+              "sample_sd": 0.5291502622129176
+            },
+            "quality": {
+              "mean": 33.300000000000004,
+              "sample_sd": 0.9643650760992944
+            },
+            "uniqueness": {
+              "mean": 92.56381300712263,
+              "sample_sd": 0.9280712829771656
+            },
+            "validity": {
+              "mean": 92.8,
+              "sample_sd": 0.5291502622129176
+            }
+          },
+          "per_seed": {
+            "2": {
+              "diversity": 0.6779553606231202,
+              "prompt_faithful_quality_yield": 36.2,
+              "prompt_fidelity": 92.2,
+              "quality": 34.0,
+              "uniqueness": 92.56126233531312,
+              "validity": 92.2
+            },
+            "3": {
+              "diversity": 0.6767173183846031,
+              "prompt_faithful_quality_yield": 36.0,
+              "prompt_fidelity": 93.0,
+              "quality": 33.7,
+              "uniqueness": 93.49315699719145,
+              "validity": 93.0
+            },
+            "4": {
+              "diversity": 0.6776414118890315,
+              "prompt_faithful_quality_yield": 34.0,
+              "prompt_fidelity": 93.2,
+              "quality": 32.2,
+              "uniqueness": 91.63701968886335,
+              "validity": 93.2
+            }
+          },
+          "seeds": [
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "4": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.6664770011942417,
+              "sample_sd": 0.0017959010820326616
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 43.23333333333333,
+              "sample_sd": 0.32145502536643233
+            },
+            "prompt_fidelity": {
+              "mean": 99.2,
+              "sample_sd": 0.1732050807568861
+            },
+            "quality": {
+              "mean": 40.53333333333333,
+              "sample_sd": 0.5507570547286098
+            },
+            "uniqueness": {
+              "mean": 93.81010894366352,
+              "sample_sd": 0.48443139541760505
+            },
+            "validity": {
+              "mean": 99.2,
+              "sample_sd": 0.1732050807568861
+            }
+          },
+          "per_seed": {
+            "2": {
+              "diversity": 0.668098225538514,
+              "prompt_faithful_quality_yield": 43.0,
+              "prompt_fidelity": 99.3,
+              "quality": 40.9,
+              "uniqueness": 94.17739898989899,
+              "validity": 99.3
+            },
+            "3": {
+              "diversity": 0.6645465745662245,
+              "prompt_faithful_quality_yield": 43.1,
+              "prompt_fidelity": 99.0,
+              "quality": 39.9,
+              "uniqueness": 93.26109110639767,
+              "validity": 99.0
+            },
+            "4": {
+              "diversity": 0.6667862034779868,
+              "prompt_faithful_quality_yield": 43.6,
+              "prompt_fidelity": 99.3,
+              "quality": 40.8,
+              "uniqueness": 93.99183673469388,
+              "validity": 99.3
+            }
+          },
+          "seeds": [
+            2,
+            3,
+            4
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.6763343741839773,
+              "sample_sd": 0.0014677478990768077
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 39.800000000000004,
+              "sample_sd": 1.3000000000000007
+            },
+            "prompt_fidelity": {
+              "mean": 99.2,
+              "sample_sd": 0.1732050807568861
+            },
+            "quality": {
+              "mean": 37.300000000000004,
+              "sample_sd": 1.3076696830622003
+            },
+            "uniqueness": {
+              "mean": 92.93964175381701,
+              "sample_sd": 0.4081635338995177
+            },
+            "validity": {
+              "mean": 99.2,
+              "sample_sd": 0.1732050807568861
+            }
+          },
+          "per_seed": {
+            "2": {
+              "diversity": 0.6774123413155714,
+              "prompt_faithful_quality_yield": 39.8,
+              "prompt_fidelity": 99.3,
+              "quality": 36.7,
+              "uniqueness": 92.56792929292929,
+              "validity": 99.3
+            },
+            "3": {
+              "diversity": 0.6746627944665682,
+              "prompt_faithful_quality_yield": 41.1,
+              "prompt_fidelity": 99.0,
+              "quality": 38.8,
+              "uniqueness": 92.87456003332292,
+              "validity": 99.0
+            },
+            "4": {
+              "diversity": 0.6769279867697924,
+              "prompt_faithful_quality_yield": 38.5,
+              "prompt_fidelity": 99.3,
+              "quality": 36.4,
+              "uniqueness": 93.37643593519883,
+              "validity": 99.3
+            }
+          },
+          "seeds": [
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "8": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.6640208079843859,
+              "sample_sd": 0.0013868405681848187
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 45.46666666666667,
+              "sample_sd": 0.4725815626252608
+            },
+            "prompt_fidelity": {
+              "mean": 99.96666666666665,
+              "sample_sd": 0.05773502691895929
+            },
+            "quality": {
+              "mean": 42.63333333333333,
+              "sample_sd": 0.3785938897200155
+            },
+            "uniqueness": {
+              "mean": 93.63164983164984,
+              "sample_sd": 0.6003997693246869
+            },
+            "validity": {
+              "mean": 99.96666666666665,
+              "sample_sd": 0.05773502691895929
+            }
+          },
+          "per_seed": {
+            "2": {
+              "diversity": 0.6629009068426823,
+              "prompt_faithful_quality_yield": 45.1,
+              "prompt_fidelity": 99.9,
+              "quality": 42.8,
+              "uniqueness": 94.1949494949495,
+              "validity": 99.9
+            },
+            "3": {
+              "diversity": 0.6635894499069492,
+              "prompt_faithful_quality_yield": 46.0,
+              "prompt_fidelity": 100.0,
+              "quality": 42.9,
+              "uniqueness": 93.7,
+              "validity": 100.0
+            },
+            "4": {
+              "diversity": 0.6655720672035261,
+              "prompt_faithful_quality_yield": 45.3,
+              "prompt_fidelity": 100.0,
+              "quality": 42.2,
+              "uniqueness": 93.0,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            2,
+            3,
+            4
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.6755617694336536,
+              "sample_sd": 0.0023328113394323227
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 39.43333333333333,
+              "sample_sd": 1.1930353445448836
+            },
+            "prompt_fidelity": {
+              "mean": 99.96666666666665,
+              "sample_sd": 0.05773502691895929
+            },
+            "quality": {
+              "mean": 37.199999999999996,
+              "sample_sd": 0.6082762530298225
+            },
+            "uniqueness": {
+              "mean": 93.53232323232324,
+              "sample_sd": 0.9287240243675201
+            },
+            "validity": {
+              "mean": 99.96666666666665,
+              "sample_sd": 0.05773502691895929
+            }
+          },
+          "per_seed": {
+            "2": {
+              "diversity": 0.6759689394018497,
+              "prompt_faithful_quality_yield": 38.9,
+              "prompt_fidelity": 99.9,
+              "quality": 36.8,
+              "uniqueness": 93.7969696969697,
+              "validity": 99.9
+            },
+            "3": {
+              "diversity": 0.673052177466016,
+              "prompt_faithful_quality_yield": 40.8,
+              "prompt_fidelity": 100.0,
+              "quality": 37.9,
+              "uniqueness": 92.5,
+              "validity": 100.0
+            },
+            "4": {
+              "diversity": 0.6776641914330952,
+              "prompt_faithful_quality_yield": 38.6,
+              "prompt_fidelity": 100.0,
+              "quality": 36.9,
+              "uniqueness": 94.3,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            2,
+            3,
+            4
+          ]
+        }
+      }
+    },
+    "scaffold_decoration": {
+      "1": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.5588584380824251,
+              "sample_sd": 0.0006545782145603803
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 35.699999999999996,
+              "sample_sd": 0.1999999999999993
+            },
+            "prompt_fidelity": {
+              "mean": 91.43333333333334,
+              "sample_sd": 0.49328828623162596
+            },
+            "quality": {
+              "mean": 31.933333333333337,
+              "sample_sd": 0.8621678104251722
+            },
+            "uniqueness": {
+              "mean": 94.55980032485054,
+              "sample_sd": 1.3483353021793658
+            },
+            "validity": {
+              "mean": 91.43333333333334,
+              "sample_sd": 0.49328828623162596
+            }
+          },
+          "per_seed": {
+            "10": {
+              "diversity": 0.5588092573679276,
+              "prompt_faithful_quality_yield": 35.5,
+              "prompt_fidelity": 91.1,
+              "quality": 32.1,
+              "uniqueness": 94.90141632319839,
+              "validity": 91.1
+            },
+            "8": {
+              "diversity": 0.558229837363519,
+              "prompt_faithful_quality_yield": 35.9,
+              "prompt_fidelity": 91.2,
+              "quality": 32.7,
+              "uniqueness": 95.70447017397274,
+              "validity": 91.2
+            },
+            "9": {
+              "diversity": 0.5595362195158285,
+              "prompt_faithful_quality_yield": 35.7,
+              "prompt_fidelity": 92.0,
+              "quality": 31.0,
+              "uniqueness": 93.07351447738054,
+              "validity": 92.0
+            }
+          },
+          "seeds": [
+            8,
+            9,
+            10
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.5588584380824251,
+              "sample_sd": 0.0006545782145603803
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 35.699999999999996,
+              "sample_sd": 0.1999999999999993
+            },
+            "prompt_fidelity": {
+              "mean": 91.43333333333334,
+              "sample_sd": 0.49328828623162596
+            },
+            "quality": {
+              "mean": 31.933333333333337,
+              "sample_sd": 0.8621678104251722
+            },
+            "uniqueness": {
+              "mean": 94.55980032485054,
+              "sample_sd": 1.3483353021793658
+            },
+            "validity": {
+              "mean": 91.43333333333334,
+              "sample_sd": 0.49328828623162596
+            }
+          },
+          "per_seed": {
+            "10": {
+              "diversity": 0.5588092573679276,
+              "prompt_faithful_quality_yield": 35.5,
+              "prompt_fidelity": 91.1,
+              "quality": 32.1,
+              "uniqueness": 94.90141632319839,
+              "validity": 91.1
+            },
+            "8": {
+              "diversity": 0.558229837363519,
+              "prompt_faithful_quality_yield": 35.9,
+              "prompt_fidelity": 91.2,
+              "quality": 32.7,
+              "uniqueness": 95.70447017397274,
+              "validity": 91.2
+            },
+            "9": {
+              "diversity": 0.5595362195158285,
+              "prompt_faithful_quality_yield": 35.7,
+              "prompt_fidelity": 92.0,
+              "quality": 31.0,
+              "uniqueness": 93.07351447738054,
+              "validity": 92.0
+            }
+          },
+          "seeds": [
+            8,
+            9,
+            10
+          ]
+        }
+      },
+      "2": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.563662929661599,
+              "sample_sd": 0.0027602968542823755
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 40.199999999999996,
+              "sample_sd": 0.3000000000000007
+            },
+            "prompt_fidelity": {
+              "mean": 99.13333333333333,
+              "sample_sd": 0.15275252316519375
+            },
+            "quality": {
+              "mean": 35.13333333333333,
+              "sample_sd": 0.6027713773341723
+            },
+            "uniqueness": {
+              "mean": 93.7942760942761,
+              "sample_sd": 0.48028293761765706
+            },
+            "validity": {
+              "mean": 99.13333333333333,
+              "sample_sd": 0.15275252316519375
+            }
+          },
+          "per_seed": {
+            "10": {
+              "diversity": 0.5635803613727206,
+              "prompt_faithful_quality_yield": 40.5,
+              "prompt_fidelity": 99.0,
+              "quality": 35.7,
+              "uniqueness": 93.97676767676768,
+              "validity": 99.0
+            },
+            "8": {
+              "diversity": 0.5609448433013732,
+              "prompt_faithful_quality_yield": 40.2,
+              "prompt_fidelity": 99.1,
+              "quality": 35.2,
+              "uniqueness": 94.15656565656566,
+              "validity": 99.1
+            },
+            "9": {
+              "diversity": 0.5664635843107031,
+              "prompt_faithful_quality_yield": 39.9,
+              "prompt_fidelity": 99.3,
+              "quality": 34.5,
+              "uniqueness": 93.24949494949496,
+              "validity": 99.3
+            }
+          },
+          "seeds": [
+            8,
+            9,
+            10
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.561042456975175,
+              "sample_sd": 0.002791188603182037
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 38.666666666666664,
+              "sample_sd": 0.6429100507328621
+            },
+            "prompt_fidelity": {
+              "mean": 99.13333333333333,
+              "sample_sd": 0.15275252316519375
+            },
+            "quality": {
+              "mean": 34.03333333333333,
+              "sample_sd": 0.9018499505645775
+            },
+            "uniqueness": {
+              "mean": 93.63030303030303,
+              "sample_sd": 0.39020111809161206
+            },
+            "validity": {
+              "mean": 99.13333333333333,
+              "sample_sd": 0.15275252316519375
+            }
+          },
+          "per_seed": {
+            "10": {
+              "diversity": 0.5632649456030923,
+              "prompt_faithful_quality_yield": 38.2,
+              "prompt_fidelity": 99.0,
+              "quality": 34.1,
+              "uniqueness": 94.07676767676767,
+              "validity": 99.0
+            },
+            "8": {
+              "diversity": 0.5579097918632089,
+              "prompt_faithful_quality_yield": 38.4,
+              "prompt_fidelity": 99.1,
+              "quality": 33.1,
+              "uniqueness": 93.45959595959596,
+              "validity": 99.1
+            },
+            "9": {
+              "diversity": 0.5619526334592237,
+              "prompt_faithful_quality_yield": 39.4,
+              "prompt_fidelity": 99.3,
+              "quality": 34.9,
+              "uniqueness": 93.35454545454544,
+              "validity": 99.3
+            }
+          },
+          "seeds": [
+            8,
+            9,
+            10
+          ]
+        }
+      },
+      "4": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.5624104135253482,
+              "sample_sd": 0.0009139326367404109
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 42.36666666666667,
+              "sample_sd": 0.5507570547286109
+            },
+            "prompt_fidelity": {
+              "mean": 99.93333333333334,
+              "sample_sd": 0.05773502691895929
+            },
+            "quality": {
+              "mean": 36.699999999999996,
+              "sample_sd": 0.9000000000000021
+            },
+            "uniqueness": {
+              "mean": 93.33333333333333,
+              "sample_sd": 0.5033222956847172
+            },
+            "validity": {
+              "mean": 99.93333333333334,
+              "sample_sd": 0.05773502691895929
+            }
+          },
+          "per_seed": {
+            "10": {
+              "diversity": 0.5632573784062987,
+              "prompt_faithful_quality_yield": 42.9,
+              "prompt_fidelity": 99.9,
+              "quality": 37.6,
+              "uniqueness": 93.8,
+              "validity": 99.9
+            },
+            "8": {
+              "diversity": 0.5625321473101694,
+              "prompt_faithful_quality_yield": 41.8,
+              "prompt_fidelity": 100.0,
+              "quality": 35.8,
+              "uniqueness": 92.8,
+              "validity": 100.0
+            },
+            "9": {
+              "diversity": 0.5614417148595764,
+              "prompt_faithful_quality_yield": 42.4,
+              "prompt_fidelity": 99.9,
+              "quality": 36.7,
+              "uniqueness": 93.4,
+              "validity": 99.9
+            }
+          },
+          "seeds": [
+            8,
+            9,
+            10
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.5607213926648563,
+              "sample_sd": 0.004297201037704171
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 38.333333333333336,
+              "sample_sd": 1.8876793513023673
+            },
+            "prompt_fidelity": {
+              "mean": 99.93333333333334,
+              "sample_sd": 0.05773502691895929
+            },
+            "quality": {
+              "mean": 34.1,
+              "sample_sd": 2.330236039546209
+            },
+            "uniqueness": {
+              "mean": 94.43333333333334,
+              "sample_sd": 0.378593889720018
+            },
+            "validity": {
+              "mean": 99.93333333333334,
+              "sample_sd": 0.05773502691895929
+            }
+          },
+          "per_seed": {
+            "10": {
+              "diversity": 0.5624503117937311,
+              "prompt_faithful_quality_yield": 37.9,
+              "prompt_fidelity": 99.9,
+              "quality": 33.4,
+              "uniqueness": 94.6,
+              "validity": 99.9
+            },
+            "8": {
+              "diversity": 0.5638848439413889,
+              "prompt_faithful_quality_yield": 36.7,
+              "prompt_fidelity": 100.0,
+              "quality": 32.2,
+              "uniqueness": 94.0,
+              "validity": 100.0
+            },
+            "9": {
+              "diversity": 0.5558290222594489,
+              "prompt_faithful_quality_yield": 40.4,
+              "prompt_fidelity": 99.9,
+              "quality": 36.7,
+              "uniqueness": 94.7,
+              "validity": 99.9
+            }
+          },
+          "seeds": [
+            8,
+            9,
+            10
+          ]
+        }
+      },
+      "8": {
+        "deployed": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.562603236335503,
+              "sample_sd": 0.0018625444017722984
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 42.36666666666667,
+              "sample_sd": 1.1015141094572196
+            },
+            "prompt_fidelity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            },
+            "quality": {
+              "mean": 36.699999999999996,
+              "sample_sd": 1.8000000000000007
+            },
+            "uniqueness": {
+              "mean": 93.66666666666667,
+              "sample_sd": 0.832666399786449
+            },
+            "validity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            }
+          },
+          "per_seed": {
+            "10": {
+              "diversity": 0.5609841992832615,
+              "prompt_faithful_quality_yield": 43.1,
+              "prompt_fidelity": 100.0,
+              "quality": 38.5,
+              "uniqueness": 94.6,
+              "validity": 100.0
+            },
+            "8": {
+              "diversity": 0.5621867406218308,
+              "prompt_faithful_quality_yield": 41.1,
+              "prompt_fidelity": 100.0,
+              "quality": 34.9,
+              "uniqueness": 93.4,
+              "validity": 100.0
+            },
+            "9": {
+              "diversity": 0.5646387691014167,
+              "prompt_faithful_quality_yield": 42.9,
+              "prompt_fidelity": 100.0,
+              "quality": 36.7,
+              "uniqueness": 93.0,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            8,
+            9,
+            10
+          ]
+        },
+        "uniform": {
+          "attempts": 3000,
+          "metrics": {
+            "diversity": {
+              "mean": 0.5585072135437038,
+              "sample_sd": 0.00016974407280467016
+            },
+            "prompt_faithful_quality_yield": {
+              "mean": 38.4,
+              "sample_sd": 1.2124355652982148
+            },
+            "prompt_fidelity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            },
+            "quality": {
+              "mean": 34.46666666666667,
+              "sample_sd": 0.6506407098647733
+            },
+            "uniqueness": {
+              "mean": 95.0,
+              "sample_sd": 0.6999999999999977
+            },
+            "validity": {
+              "mean": 100.0,
+              "sample_sd": 0.0
+            }
+          },
+          "per_seed": {
+            "10": {
+              "diversity": 0.5583405517642117,
+              "prompt_faithful_quality_yield": 37.0,
+              "prompt_fidelity": 100.0,
+              "quality": 33.8,
+              "uniqueness": 95.3,
+              "validity": 100.0
+            },
+            "8": {
+              "diversity": 0.5586798805330665,
+              "prompt_faithful_quality_yield": 39.1,
+              "prompt_fidelity": 100.0,
+              "quality": 35.1,
+              "uniqueness": 95.5,
+              "validity": 100.0
+            },
+            "9": {
+              "diversity": 0.5585012083338334,
+              "prompt_faithful_quality_yield": 39.1,
+              "prompt_fidelity": 100.0,
+              "quality": 34.5,
+              "uniqueness": 94.2,
+              "validity": 100.0
+            }
+          },
+          "seeds": [
+            8,
+            9,
+            10
+          ]
+        }
+      }
+    }
+  },
+  "schema": "compose_fragment_tables_v1",
+  "scope": "saved_metric_reduction_only"
+}
