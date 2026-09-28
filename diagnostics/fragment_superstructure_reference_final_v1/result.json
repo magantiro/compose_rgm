@@ -1,0 +1,1130 @@
+{
+  "analysis_revision": "633c6497a662277093045988ee7413967abdfcae",
+  "analysis_sha256": "924672e5be953bdc341a3a1016872d3f405be31f876526e0c8abce3f90b9a8fe",
+  "arm_inputs": {
+    "learned": {
+      "path": "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-interface-ablation-20260923/diagnostics/fragment_superstructure_official_v2/result.json",
+      "sha256": "8406f57dc5ff6736110593d309f207d7a5d0e878eeb1b7a2f2c423fe2d9b3652"
+    },
+    "uniform": {
+      "path": "/Users/rmaganti/compose_rgm_git/.worktrees/fragment-qed-ablations-20260925/diagnostics/fragment_superstructure_reference_ablation_v1/result.json",
+      "sha256": "007f59645ffda58f1722eb846444d4f604307468016d4f813740b3ab9c9b0b5d"
+    }
+  },
+  "attempts_per_arm": 3000,
+  "bootstrap": {
+    "draws": 20000,
+    "interval": "percentile 95%",
+    "seed": 20260925
+  },
+  "estimates": {
+    "diversity": {
+      "learned_mean": 0.7250740492970243,
+      "paired_prompt_mean_difference": 0.0165712870572182,
+      "prompt_bootstrap_percentile_95": [
+        -0.0005214155941484195,
+        0.031114444889790083
+      ],
+      "prompts_equal": 0,
+      "prompts_learned_higher": 7,
+      "prompts_uniform_higher": 3,
+      "uniform_mean": 0.7085027622398062
+    },
+    "quality": {
+      "learned_mean": 39.03333333333333,
+      "paired_prompt_mean_difference": 13.633333333333335,
+      "prompt_bootstrap_percentile_95": [
+        4.266666666666666,
+        23.066666666666666
+      ],
+      "prompts_equal": 2,
+      "prompts_learned_higher": 6,
+      "prompts_uniform_higher": 2,
+      "uniform_mean": 25.399999999999995
+    },
+    "uniqueness": {
+      "learned_mean": 97.33333333333333,
+      "paired_prompt_mean_difference": 7.166666666666669,
+      "prompt_bootstrap_percentile_95": [
+        1.0666666666666658,
+        11.700000000000005
+      ],
+      "prompts_equal": 0,
+      "prompts_learned_higher": 9,
+      "prompts_uniform_higher": 1,
+      "uniform_mean": 90.16666666666667
+    },
+    "validity": {
+      "learned_mean": 100.0,
+      "paired_prompt_mean_difference": 0.0,
+      "prompt_bootstrap_percentile_95": [
+        0.0,
+        0.0
+      ],
+      "prompts_equal": 10,
+      "prompts_learned_higher": 0,
+      "prompts_uniform_higher": 0,
+      "uniform_mean": 100.0
+    }
+  },
+  "input_contract_payload_sha256": {
+    "learned": "77c994c8364d088c6e5bf1fe688794cac5869c7e4abf98c92a87d08e1b1c751e",
+    "uniform": "e5ca9f7e95974d87ca019e385619397aede74e2d36c429bc111fe4507db08df7"
+  },
+  "interpretation": "learned versus uniform family and within-family native-mark probabilities; learned hazard retained in both arms",
+  "per_prompt": [
+    {
+      "arms": {
+        "learned": {
+          "diversity": 0.7126250257678829,
+          "quality": 46.666666666666664,
+          "uniqueness": 98.66666666666667,
+          "validity": 100.0
+        },
+        "uniform": {
+          "diversity": 0.6749680832906639,
+          "quality": 25.666666666666668,
+          "uniqueness": 91.33333333333333,
+          "validity": 100.0
+        }
+      },
+      "drug": "BARICITINIB",
+      "learned_minus_uniform": {
+        "diversity": 0.03765694247721896,
+        "quality": 20.999999999999996,
+        "uniqueness": 7.333333333333343,
+        "validity": 0.0
+      }
+    },
+    {
+      "arms": {
+        "learned": {
+          "diversity": 0.7527695760324332,
+          "quality": 0.0,
+          "uniqueness": 99.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "diversity": 0.758883786316776,
+          "quality": 0.0,
+          "uniqueness": 97.66666666666667,
+          "validity": 100.0
+        }
+      },
+      "drug": "CYCLOTHIAZIDE",
+      "learned_minus_uniform": {
+        "diversity": -0.00611421028434278,
+        "quality": 0.0,
+        "uniqueness": 1.3333333333333286,
+        "validity": 0.0
+      }
+    },
+    {
+      "arms": {
+        "learned": {
+          "diversity": 0.7307828282828283,
+          "quality": 66.66666666666667,
+          "uniqueness": 99.66666666666667,
+          "validity": 100.0
+        },
+        "uniform": {
+          "diversity": 0.7098008895485322,
+          "quality": 41.666666666666664,
+          "uniqueness": 85.33333333333333,
+          "validity": 100.0
+        }
+      },
+      "drug": "ELIGLUSTAT",
+      "learned_minus_uniform": {
+        "diversity": 0.0209819387342961,
+        "quality": 25.000000000000007,
+        "uniqueness": 14.333333333333343,
+        "validity": 0.0
+      }
+    },
+    {
+      "arms": {
+        "learned": {
+          "diversity": 0.7468300000000001,
+          "quality": 37.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "diversity": 0.7279962852177423,
+          "quality": 43.666666666666664,
+          "uniqueness": 91.0,
+          "validity": 100.0
+        }
+      },
+      "drug": "ERLOTINIB",
+      "learned_minus_uniform": {
+        "diversity": 0.018833714782257815,
+        "quality": -6.666666666666664,
+        "uniqueness": 9.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arms": {
+        "learned": {
+          "diversity": 0.639369377277934,
+          "quality": 43.0,
+          "uniqueness": 98.66666666666667,
+          "validity": 100.0
+        },
+        "uniform": {
+          "diversity": 0.6003280487804878,
+          "quality": 10.666666666666666,
+          "uniqueness": 86.66666666666667,
+          "validity": 100.0
+        }
+      },
+      "drug": "FUTIBATINIB",
+      "learned_minus_uniform": {
+        "diversity": 0.039041328497446126,
+        "quality": 32.333333333333336,
+        "uniqueness": 12.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arms": {
+        "learned": {
+          "diversity": 0.7431833333333334,
+          "quality": 49.333333333333336,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "diversity": 0.7038868851000412,
+          "quality": 36.0,
+          "uniqueness": 84.33333333333333,
+          "validity": 100.0
+        }
+      },
+      "drug": "LESINURAD",
+      "learned_minus_uniform": {
+        "diversity": 0.03929644823329226,
+        "quality": 13.333333333333336,
+        "uniqueness": 15.666666666666671,
+        "validity": 0.0
+      }
+    },
+    {
+      "arms": {
+        "learned": {
+          "diversity": 0.7794033333333336,
+          "quality": 44.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "diversity": 0.7581903077765145,
+          "quality": 50.333333333333336,
+          "uniqueness": 88.33333333333333,
+          "validity": 100.0
+        }
+      },
+      "drug": "LIOTHYRONINE",
+      "learned_minus_uniform": {
+        "diversity": 0.021213025556819032,
+        "quality": -6.333333333333336,
+        "uniqueness": 11.666666666666671,
+        "validity": 0.0
+      }
+    },
+    {
+      "arms": {
+        "learned": {
+          "diversity": 0.735946127946128,
+          "quality": 0.0,
+          "uniqueness": 99.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "diversity": 0.7385525905118602,
+          "quality": 0.0,
+          "uniqueness": 93.66666666666667,
+          "validity": 100.0
+        }
+      },
+      "drug": "LOVASTATIN",
+      "learned_minus_uniform": {
+        "diversity": -0.0026064625657321594,
+        "quality": 0.0,
+        "uniqueness": 5.333333333333329,
+        "validity": 0.0
+      }
+    },
+    {
+      "arms": {
+        "learned": {
+          "diversity": 0.7547900000000002,
+          "quality": 73.33333333333333,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "diversity": 0.7144408552687622,
+          "quality": 36.333333333333336,
+          "uniqueness": 89.0,
+          "validity": 100.0
+        }
+      },
+      "drug": "MARIBAVIR",
+      "learned_minus_uniform": {
+        "diversity": 0.04034914473123796,
+        "quality": 36.99999999999999,
+        "uniqueness": 11.0,
+        "validity": 0.0
+      }
+    },
+    {
+      "arms": {
+        "learned": {
+          "diversity": 0.6550408909963704,
+          "quality": 30.333333333333332,
+          "uniqueness": 78.33333333333333,
+          "validity": 100.0
+        },
+        "uniform": {
+          "diversity": 0.6979798905866818,
+          "quality": 9.666666666666666,
+          "uniqueness": 94.33333333333333,
+          "validity": 100.0
+        }
+      },
+      "drug": "SPIRAPRIL",
+      "learned_minus_uniform": {
+        "diversity": -0.04293899959031133,
+        "quality": 20.666666666666664,
+        "uniqueness": -16.0,
+        "validity": 0.0
+      }
+    }
+  ],
+  "per_seed": [
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6031208084098192,
+          "distance_to_original_drug": 0.7075019749489786,
+          "diversity": 0.7122424242424242,
+          "quality": 45.0,
+          "uniqueness": 99.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5321937834049466,
+          "distance_to_original_drug": 0.6915958154460665,
+          "diversity": 0.6836344086021505,
+          "quality": 28.000000000000004,
+          "uniqueness": 93.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "BARICITINIB",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 0
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.612680945712498,
+          "distance_to_original_drug": 0.7287320171967755,
+          "diversity": 0.7146326530612244,
+          "quality": 42.0,
+          "uniqueness": 98.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5074096557893585,
+          "distance_to_original_drug": 0.6917532679512358,
+          "diversity": 0.6665555555555556,
+          "quality": 25.0,
+          "uniqueness": 90.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "BARICITINIB",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 1
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6001471254457512,
+          "distance_to_original_drug": 0.726486200989635,
+          "diversity": 0.711,
+          "quality": 53.0,
+          "uniqueness": 99.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5156586322821443,
+          "distance_to_original_drug": 0.6994796514279115,
+          "diversity": 0.6747142857142857,
+          "quality": 24.0,
+          "uniqueness": 91.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "BARICITINIB",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 2
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6508796397317622,
+          "distance_to_original_drug": 0.7496407842491271,
+          "diversity": 0.7487040816326532,
+          "quality": 0.0,
+          "uniqueness": 98.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.6507855625731852,
+          "distance_to_original_drug": 0.7547613793581932,
+          "diversity": 0.7655360824742269,
+          "quality": 0.0,
+          "uniqueness": 97.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "CYCLOTHIAZIDE",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 0
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6527299700855006,
+          "distance_to_original_drug": 0.7583675919650521,
+          "diversity": 0.7491399999999999,
+          "quality": 0.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.6251789165856838,
+          "distance_to_original_drug": 0.7299902890392646,
+          "diversity": 0.7502061855670102,
+          "quality": 0.0,
+          "uniqueness": 97.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "CYCLOTHIAZIDE",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 1
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6775846195292221,
+          "distance_to_original_drug": 0.7656333327652695,
+          "diversity": 0.7604646464646465,
+          "quality": 0.0,
+          "uniqueness": 99.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.6544379107325848,
+          "distance_to_original_drug": 0.7592418586071932,
+          "diversity": 0.7609090909090908,
+          "quality": 0.0,
+          "uniqueness": 99.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "CYCLOTHIAZIDE",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 2
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6451705634540216,
+          "distance_to_original_drug": 0.7047987480637404,
+          "diversity": 0.7358999999999999,
+          "quality": 72.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.567539850860139,
+          "distance_to_original_drug": 0.7500821264320021,
+          "diversity": 0.7191630434782607,
+          "quality": 48.0,
+          "uniqueness": 92.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "ELIGLUSTAT",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 0
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6482350729245367,
+          "distance_to_original_drug": 0.6962003393737608,
+          "diversity": 0.7256,
+          "quality": 65.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5639097102293,
+          "distance_to_original_drug": 0.7447464562575213,
+          "diversity": 0.7154444444444444,
+          "quality": 34.0,
+          "uniqueness": 81.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "ELIGLUSTAT",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 1
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6523842789685386,
+          "distance_to_original_drug": 0.700915732497458,
+          "diversity": 0.7308484848484849,
+          "quality": 63.0,
+          "uniqueness": 99.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5407166270040288,
+          "distance_to_original_drug": 0.746397221445274,
+          "diversity": 0.6947951807228916,
+          "quality": 43.0,
+          "uniqueness": 83.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "ELIGLUSTAT",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 2
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6820751973952858,
+          "distance_to_original_drug": 0.7580487488338454,
+          "diversity": 0.7494,
+          "quality": 40.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5851151199353156,
+          "distance_to_original_drug": 0.7594516992869909,
+          "diversity": 0.7304606741573033,
+          "quality": 40.0,
+          "uniqueness": 89.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "ERLOTINIB",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 0
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6913804543129514,
+          "distance_to_original_drug": 0.7522061829601799,
+          "diversity": 0.7510800000000001,
+          "quality": 30.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.587016332932606,
+          "distance_to_original_drug": 0.7574678272189584,
+          "diversity": 0.7295604395604397,
+          "quality": 42.0,
+          "uniqueness": 91.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "ERLOTINIB",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 1
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6683289597810763,
+          "distance_to_original_drug": 0.7596050501358672,
+          "diversity": 0.7400100000000002,
+          "quality": 41.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5792747400853434,
+          "distance_to_original_drug": 0.7540747241935541,
+          "diversity": 0.723967741935484,
+          "quality": 49.0,
+          "uniqueness": 93.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "ERLOTINIB",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 2
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.5408144361991956,
+          "distance_to_original_drug": 0.7046857307511689,
+          "diversity": 0.6391300000000001,
+          "quality": 46.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.4399373334417031,
+          "distance_to_original_drug": 0.7740168677817757,
+          "diversity": 0.5961000000000001,
+          "quality": 14.000000000000002,
+          "uniqueness": 90.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "FUTIBATINIB",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 0
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.5394631439106427,
+          "distance_to_original_drug": 0.7084130995654755,
+          "diversity": 0.6439175257731958,
+          "quality": 37.0,
+          "uniqueness": 97.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.4355311645447007,
+          "distance_to_original_drug": 0.7598426451004942,
+          "diversity": 0.5891341463414634,
+          "quality": 8.0,
+          "uniqueness": 82.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "FUTIBATINIB",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 1
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.5307696831775713,
+          "distance_to_original_drug": 0.7176127247262427,
+          "diversity": 0.6350606060606061,
+          "quality": 46.0,
+          "uniqueness": 99.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.46806248894866154,
+          "distance_to_original_drug": 0.7681082169795278,
+          "diversity": 0.61575,
+          "quality": 10.0,
+          "uniqueness": 88.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "FUTIBATINIB",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 2
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6719217482488594,
+          "distance_to_original_drug": 0.7355841981021781,
+          "diversity": 0.7370300000000001,
+          "quality": 48.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5668696624531734,
+          "distance_to_original_drug": 0.7704287127531637,
+          "diversity": 0.7109418604651162,
+          "quality": 43.0,
+          "uniqueness": 86.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "LESINURAD",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 0
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6792933394603886,
+          "distance_to_original_drug": 0.7334862485643537,
+          "diversity": 0.74355,
+          "quality": 44.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5621549147834255,
+          "distance_to_original_drug": 0.7762136804674855,
+          "diversity": 0.7013658536585365,
+          "quality": 31.0,
+          "uniqueness": 82.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "LESINURAD",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 1
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6870432129405095,
+          "distance_to_original_drug": 0.7470586025551077,
+          "diversity": 0.7489699999999999,
+          "quality": 56.00000000000001,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5596869975348078,
+          "distance_to_original_drug": 0.7619302085566017,
+          "diversity": 0.6993529411764706,
+          "quality": 34.0,
+          "uniqueness": 85.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "LESINURAD",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 2
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.7916752942364291,
+          "distance_to_original_drug": 0.8123200638515601,
+          "diversity": 0.7741100000000002,
+          "quality": 54.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.6857256582957505,
+          "distance_to_original_drug": 0.8497367200562421,
+          "diversity": 0.7645824175824175,
+          "quality": 47.0,
+          "uniqueness": 91.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "LIOTHYRONINE",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 0
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.8035790432158139,
+          "distance_to_original_drug": 0.8205930117819814,
+          "diversity": 0.7896900000000001,
+          "quality": 39.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.6493900235615648,
+          "distance_to_original_drug": 0.8491826361030052,
+          "diversity": 0.7527586206896553,
+          "quality": 50.0,
+          "uniqueness": 87.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "LIOTHYRONINE",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 1
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.7846588355680061,
+          "distance_to_original_drug": 0.8149362806362036,
+          "diversity": 0.7744100000000002,
+          "quality": 39.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.6657296898263226,
+          "distance_to_original_drug": 0.8494284499315776,
+          "diversity": 0.7572298850574711,
+          "quality": 54.0,
+          "uniqueness": 87.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "LIOTHYRONINE",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 2
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6141898241117605,
+          "distance_to_original_drug": 0.7888129615689705,
+          "diversity": 0.7299696969696968,
+          "quality": 0.0,
+          "uniqueness": 99.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5779009115062879,
+          "distance_to_original_drug": 0.8163859312340856,
+          "diversity": 0.7354494382022472,
+          "quality": 0.0,
+          "uniqueness": 89.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "LOVASTATIN",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 0
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6170257880660792,
+          "distance_to_original_drug": 0.7930051239010978,
+          "diversity": 0.7350909090909091,
+          "quality": 0.0,
+          "uniqueness": 99.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5926498387975346,
+          "distance_to_original_drug": 0.8200064392308891,
+          "diversity": 0.7432187499999999,
+          "quality": 0.0,
+          "uniqueness": 96.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "LOVASTATIN",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 1
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6281353261141673,
+          "distance_to_original_drug": 0.8054108298555447,
+          "diversity": 0.7427777777777778,
+          "quality": 0.0,
+          "uniqueness": 99.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5831669595943377,
+          "distance_to_original_drug": 0.8214606215572798,
+          "diversity": 0.7369895833333334,
+          "quality": 0.0,
+          "uniqueness": 96.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "LOVASTATIN",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 2
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.663451051142597,
+          "distance_to_original_drug": 0.8402727423799051,
+          "diversity": 0.75834,
+          "quality": 78.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5799318963547008,
+          "distance_to_original_drug": 0.8638583418698588,
+          "diversity": 0.7181318681318682,
+          "quality": 32.0,
+          "uniqueness": 91.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "MARIBAVIR",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 0
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6622730350776176,
+          "distance_to_original_drug": 0.8370875630788441,
+          "diversity": 0.7467300000000001,
+          "quality": 74.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5750638809748467,
+          "distance_to_original_drug": 0.8695169503284416,
+          "diversity": 0.7138999999999999,
+          "quality": 36.0,
+          "uniqueness": 90.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "MARIBAVIR",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 1
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.6598721955458876,
+          "distance_to_original_drug": 0.8375948763132669,
+          "diversity": 0.7593000000000001,
+          "quality": 68.0,
+          "uniqueness": 100.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.5738373312502977,
+          "distance_to_original_drug": 0.8694052206537246,
+          "diversity": 0.7112906976744185,
+          "quality": 41.0,
+          "uniqueness": 86.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "MARIBAVIR",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 2
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.5626207873736307,
+          "distance_to_original_drug": 0.7077785704098362,
+          "diversity": 0.6650833333333334,
+          "quality": 35.0,
+          "uniqueness": 84.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.534316893901692,
+          "distance_to_original_drug": 0.7387256706739953,
+          "diversity": 0.6942315789473684,
+          "quality": 11.0,
+          "uniqueness": 95.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "SPIRAPRIL",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 0
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.5351617185330894,
+          "distance_to_original_drug": 0.702486382241792,
+          "diversity": 0.6450256410256411,
+          "quality": 26.0,
+          "uniqueness": 78.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.546540343171665,
+          "distance_to_original_drug": 0.7350695333348262,
+          "diversity": 0.7000736842105264,
+          "quality": 9.0,
+          "uniqueness": 95.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "SPIRAPRIL",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 1
+    },
+    {
+      "arms": {
+        "learned": {
+          "distance": 0.5410199721481311,
+          "distance_to_original_drug": 0.7089202992194303,
+          "diversity": 0.6550136986301369,
+          "quality": 30.0,
+          "uniqueness": 73.0,
+          "validity": 100.0
+        },
+        "uniform": {
+          "distance": 0.539349312241854,
+          "distance_to_original_drug": 0.7484634365554561,
+          "diversity": 0.6996344086021505,
+          "quality": 9.0,
+          "uniqueness": 93.0,
+          "validity": 100.0
+        }
+      },
+      "attempts_per_arm": 100,
+      "drug": "SPIRAPRIL",
+      "prompt_compliant_per_arm": {
+        "learned": 100,
+        "uniform": 100
+      },
+      "seed": 2
+    }
+  ],
+  "prompt_compliant_per_arm": {
+    "learned": 3000,
+    "uniform": 3000
+  },
+  "randomization_note": "matching seed labels do not pair molecular trajectories because the arms consume random draws differently",
+  "schema": "fragment_superstructure_reference_final_v1",
+  "structural_unit": "ten prompts; three seeds averaged within each prompt",
+  "versions": {
+    "numpy": "2.5.3",
+    "python": "3.12.9"
+  }
+}

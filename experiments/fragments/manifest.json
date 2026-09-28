@@ -1,0 +1,192 @@
+{
+  "aliases": {
+    "scaffold_morphing": "linker_design"
+  },
+  "artifacts": {
+    "decoration_selection": {
+      "path": "diagnostics/fragment_locked_panel_selection_v1/decoration_result.json",
+      "schema": "fragment_locked_panel_selection_replay_v1",
+      "sha256": "c6452cc46128f7b9cb13f23d0089ef5f582c2168458bad644e82bd1f026655ab"
+    },
+    "linker_selection": {
+      "path": "diagnostics/fragment_locked_panel_selection_v1/linker_result.json",
+      "schema": "fragment_locked_panel_selection_replay_v1",
+      "sha256": "a7b4f41b172ba70e58340f1232e3eb79be78b5cdc35d64cc94e0131128549ee1"
+    },
+    "motif_intervals": {
+      "path": "diagnostics/fragment_common_panel_prompt_ci_v1/result.json",
+      "schema": "fragment_common_panel_prompt_ci_v1",
+      "sha256": "c38507ebe93d3913a24bc4b45103446c23e8d7a491d286ca3ea1e8fbda2e114a"
+    },
+    "motif_selection": {
+      "path": "diagnostics/fragment_locked_panel_selection_v1/motif_prefix_result.json",
+      "schema": "fragment_motif_locked_prefix_v1",
+      "sha256": "6977b8a69257f230a3e8dc2221ea2c3497d41b5975ad5a53d8b59f28f01ef61a"
+    },
+    "superstructure_comparison": {
+      "path": "diagnostics/fragment_superstructure_reference_final_v1/result.json",
+      "schema": "fragment_superstructure_reference_final_v1",
+      "sha256": "bff7c3cca5f60cc903ba89bafda2dc95a81f2c80c8e8df08fbbbeca3bd9cb9e8"
+    },
+    "superstructure_learned": {
+      "path": "diagnostics/fragment_superstructure_official_v2/result.json",
+      "schema": "fragment_superstructure_official_v2_result_v1",
+      "sha256": "8406f57dc5ff6736110593d309f207d7a5d0e878eeb1b7a2f2c423fe2d9b3652"
+    },
+    "superstructure_uniform": {
+      "path": "diagnostics/fragment_superstructure_reference_ablation_v1/result.json",
+      "schema": "fragment_superstructure_official_v2_result_v1",
+      "sha256": "007f59645ffda58f1722eb846444d4f604307468016d4f813740b3ab9c9b0b5d"
+    }
+  },
+  "attempts_per_prompt_seed": 100,
+  "bootstrap": {
+    "draws": 20000,
+    "historical_numpy": {
+      "linker_design": "1.26.4",
+      "motif_extension": "2.5.3",
+      "scaffold_decoration": "1.26.4",
+      "superstructure_generation": "2.5.3"
+    },
+    "method": "numpy default_rng, percentile 2.5 and 97.5, linear quantile",
+    "reduction_numpy": "1.26.4",
+    "seeds": {
+      "linker_design": 20260926,
+      "motif_extension": 20260925,
+      "scaffold_decoration": 20260927,
+      "superstructure_generation": 20260925
+    },
+    "unit": "prompt after averaging generation seeds"
+  },
+  "external_assets": [
+    {
+      "role": "fragment reference checkpoint",
+      "sha256": "24117dfeaee91729bb4ebccb5eb5b993b4a6218605045e51917823d086b4c1e4",
+      "status": "local asset, not distributed here; no public download verified"
+    },
+    {
+      "role": "training-derived catalogs, priors, and full generation traces",
+      "status": "preserved in historical worktrees; not yet portable or distributed"
+    },
+    {
+      "license": "CC BY-NC-SA 4.0 (historical fetcher declaration); not vendored",
+      "metrics_sha256": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099",
+      "repository": "invirtuolabs/InVirtuoGen_results",
+      "revision": "b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb",
+      "role": "official InVirtuoGen evaluator",
+      "status": "not required for metric-row reduction; required for molecule re-evaluation"
+    }
+  ],
+  "generation_environment": {
+    "networkx": "3.3",
+    "numpy": "1.26.4",
+    "python": "3.11",
+    "rdkit": "2024.3.5",
+    "ringcore_catalog_fingerprint": "639ff6078c32d43c",
+    "scipy": "1.13.1",
+    "torch": "2.4.0"
+  },
+  "generation_seeds": {
+    "linker_design": [
+      6,
+      7,
+      8
+    ],
+    "motif_extension": [
+      2,
+      3,
+      4
+    ],
+    "scaffold_decoration": [
+      8,
+      9,
+      10
+    ],
+    "superstructure_generation": [
+      0,
+      1,
+      2
+    ]
+  },
+  "historical_generation": [
+    {
+      "branch": "fragment-attachment-library-20260924",
+      "contract_path": "configs/fragment_motif_official_v1.json",
+      "contract_payload_sha256": "c22e64562dacb57bf6b497a408ffe7030df50c83d5c2fb47787bdeb88670aabe",
+      "contract_sha256": "c57e25dcc73846f94ad87e1b9afbcec5c3dc27f63b079aa05f71008d90151327",
+      "historical_runner": "tools/run_fragment_motif_official_v1.py",
+      "inspected_revision": "ac36485bcfeebe08074f8f8035409020768a1e26",
+      "status": "historical_worktree_only; not a portable launcher in this checkout",
+      "task": "motif_extension"
+    },
+    {
+      "branch": "fragment-decoration-source-coupled-v1",
+      "contract_path": "configs/fragment_decoration_official_v2.json",
+      "contract_payload_sha256": "7fb7eee44720279ebbde34d3e1274c305ad9e6022f8c08c07f8b4e247b46730d",
+      "contract_sha256": "e021380fc227faa6456365db12e4b44736663f559c6e0dbdf4a21755915ee033",
+      "historical_runner": "tools/run_fragment_decoration_official_v2.py",
+      "inspected_revision": "b5e47834fb0cdaea4bd24c02aac5ec0e8f737dd6",
+      "status": "historical_worktree_only; not a portable launcher in this checkout",
+      "task": "scaffold_decoration"
+    },
+    {
+      "branch": "fragment-linker-novelty-v1",
+      "contract_path": "configs/fragment_linker_novelty_official_v2.json",
+      "contract_payload_sha256": "08471bb5b91707bed5cd90922a110c1478cab2fba538b8e9cb814f6301992e97",
+      "contract_sha256": "c51c4629f3fdd43a369766c519604db0f2f56d953b9aed5ba8051c160a416a5b",
+      "historical_runner": "tools/run_fragment_linker_novelty_official_v2.py",
+      "inspected_revision": "930a72f03d7aea275dc496afe4a4d6e1c0cfe885",
+      "status": "historical_worktree_only; not a portable launcher in this checkout",
+      "task": "linker_design"
+    },
+    {
+      "branch": "fragment-interface-ablation-20260923",
+      "contract_path": "configs/fragment_superstructure_official_v2.json",
+      "contract_payload_sha256": "77c994c8364d088c6e5bf1fe688794cac5869c7e4abf98c92a87d08e1b1c751e",
+      "contract_sha256": "0b91b3e6aef22743b212c4dd0e45115026df2d512c550a986bac4106ea4d386c",
+      "historical_runner": "tools/run_fragment_superstructure_official_v2.py",
+      "inspected_revision": "a16ef9417cdf44d50381fbb8e5069edc31e7c9df",
+      "status": "historical_worktree_only; not a portable launcher in this checkout",
+      "task": "superstructure_generation"
+    },
+    {
+      "branch": "fragment-qed-ablations-20260925",
+      "contract_path": "configs/fragment_superstructure_reference_ablation_v1.json",
+      "contract_payload_sha256": "e5ca9f7e95974d87ca019e385619397aede74e2d36c429bc111fe4507db08df7",
+      "contract_sha256": "80c826c7ac68637470c05c6481f2ee9a532546d30e6b588d9a7e197b0d6ea65b",
+      "historical_runner": "tools/run_fragment_superstructure_reference_ablation.py",
+      "inspected_revision": "e1d5cf188d1e563d816e563beab5d589feac495b",
+      "status": "historical_worktree_only; not a portable launcher in this checkout",
+      "task": "superstructure_uniform"
+    }
+  ],
+  "limitations": [
+    "This manifest indexes saved metrics, not a complete molecule-generation release.",
+    "No new generation, oracle evaluation, or model fitting is performed.",
+    "Scaffold morphing reuses linker outputs and is not independently aggregated.",
+    "Linker selection changes reference scoring and novelty weighting together.",
+    "Prefix results are retrospective truncations of saved attempted offers, not runtime measurements.",
+    "The motif_intervals artifact also contains an older linker comparison; only its motif_extension subtree is applicable here.",
+    "Historical absolute paths inside imported evidence are provenance, never runtime inputs."
+  ],
+  "prefix_budgets": [
+    1,
+    2,
+    4,
+    8
+  ],
+  "prompts": [
+    "BARICITINIB",
+    "CYCLOTHIAZIDE",
+    "ELIGLUSTAT",
+    "ERLOTINIB",
+    "FUTIBATINIB",
+    "LESINURAD",
+    "LIOTHYRONINE",
+    "LOVASTATIN",
+    "MARIBAVIR",
+    "SPIRAPRIL"
+  ],
+  "schema": "compose_fragment_evidence_manifest_v1",
+  "scope": "saved_metric_reduction_only"
+}
