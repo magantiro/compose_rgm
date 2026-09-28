@@ -42,11 +42,16 @@ def _tdc_oracle(name):
     return Oracle(name=name)
 
 
+#: Arm tags the launcher writes into a label via --label-suffix. Longest first, because
+#: "donor" is a substring of "nodonor" and a shorter tag would shadow it.
+_ARM_TAGS = ("measured_score", "nodonor", "uniform", "mscore", "donor", "base", "lane")
+
+
 def _arm_of(label: str) -> str:
-    for tag in ("measured_score", "uniform", "nodonor"):
+    for tag in _ARM_TAGS:
         if f"_{tag}_" in label:
             return tag
-    return "donor" if "_donor_" in label else "unknown"
+    return "unknown"
 
 
 def _first(values, predicate):
