@@ -1,0 +1,19 @@
+{
+  "payload": {
+    "schema": "fragment_linker_novelty_official_v2",
+    "task": "linker_design",
+    "selector": "novelty4",
+    "drugs": ["BARICITINIB", "CYCLOTHIAZIDE", "ELIGLUSTAT", "ERLOTINIB", "FUTIBATINIB", "LESINURAD", "LIOTHYRONINE", "LOVASTATIN", "MARIBAVIR", "SPIRAPRIL"],
+    "seeds": [6, 7, 8],
+    "attempts_per_prompt_seed": 100,
+    "candidate_draws_per_attempt": 8,
+    "output_dir": "diagnostics/fragment_linker_novelty_official_v2",
+    "minimum_free_bytes": 5368709120,
+    "development_contract_payload_sha256": "47293d60a7c6c34bca93f7b0ffd983debbe63c52111278934ba955cf7903473c",
+    "development_summary_sha256": "33458214e6073a4f799780313ec874a495a04190662de3f3a1116ed88a60eb1a",
+    "material_sha256": {
+      "tools/run_fragment_linker_novelty_official_v2.py": "a9b3e060707988cccb02532bfd0fc5f6f06b74f29ec700b358e6ee5025611a8b"
+    }
+  },
+  "payload_sha256": "08471bb5b91707bed5cd90922a110c1478cab2fba538b8e9cb814f6301992e97"
+}

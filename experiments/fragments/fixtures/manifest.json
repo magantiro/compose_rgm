@@ -1,0 +1,82 @@
+{
+  "schema": "compose_fragment_parity_fixtures_v1",
+  "selection": "BARICITINIB, first declared seed, first attempt; first TWO linker attempts. Chosen by identity, not quality.",
+  "tasks": {
+    "linker_design": [
+      {
+        "path": "linker_design/configs/fragment_linker_novelty_official_v2.json",
+        "sha256": "c51c4629f3fdd43a369766c519604db0f2f56d953b9aed5ba8051c160a416a5b",
+        "source_path": "configs/fragment_linker_novelty_official_v2.json",
+        "source_revision": "930a72f03d7aea275dc496afe4a4d6e1c0cfe885"
+      },
+      {
+        "path": "linker_design/diagnostics/fragment_linker_novelty_official_v2/seed6/attempts/BARICITINIB_000.json",
+        "sha256": "202476766e5e8d6ebda63a3be3a4e56370e14942176f49b1021a0402492b6b39",
+        "source_path": "diagnostics/fragment_linker_novelty_official_v2/seed6/attempts/BARICITINIB_000.json",
+        "source_revision": "930a72f03d7aea275dc496afe4a4d6e1c0cfe885"
+      },
+      {
+        "path": "linker_design/diagnostics/fragment_linker_novelty_official_v2/seed6/attempts/BARICITINIB_001.json",
+        "sha256": "79f52e64583fd97df06d21ecd2ba266e20eab47a103a2a919a6de24a36b25ab5",
+        "source_path": "diagnostics/fragment_linker_novelty_official_v2/seed6/attempts/BARICITINIB_001.json",
+        "source_revision": "930a72f03d7aea275dc496afe4a4d6e1c0cfe885"
+      }
+    ],
+    "motif_extension": [
+      {
+        "path": "motif_extension/configs/fragment_motif_official_v1.json",
+        "sha256": "c57e25dcc73846f94ad87e1b9afbcec5c3dc27f63b079aa05f71008d90151327",
+        "source_path": "configs/fragment_motif_official_v1.json",
+        "source_revision": "ac36485bcfeebe08074f8f8035409020768a1e26"
+      },
+      {
+        "path": "motif_extension/diagnostics/fragment_motif_official_v1/attempts/seed2/BARICITINIB_000.json",
+        "sha256": "6ccdfb668158a746edb5f16b885f629590ea1ba2d244c1e1bc704ce7d0b7c3b3",
+        "source_path": "diagnostics/fragment_motif_official_v1/attempts/seed2/BARICITINIB_000.json",
+        "source_revision": "ac36485bcfeebe08074f8f8035409020768a1e26"
+      }
+    ],
+    "scaffold_decoration": [
+      {
+        "path": "scaffold_decoration/configs/fragment_decoration_official_v2.json",
+        "sha256": "e021380fc227faa6456365db12e4b44736663f559c6e0dbdf4a21755915ee033",
+        "source_path": "configs/fragment_decoration_official_v2.json",
+        "source_revision": "b5e47834fb0cdaea4bd24c02aac5ec0e8f737dd6"
+      },
+      {
+        "path": "scaffold_decoration/diagnostics/fragment_decoration_official_v2/seed8/attempts/frozen/BARICITINIB_000.json",
+        "sha256": "52550f5e224dfd6f84edc0587c3808e13ec8fb8cad2f5958d91f417c84e041c8",
+        "source_path": "diagnostics/fragment_decoration_official_v2/seed8/attempts/frozen/BARICITINIB_000.json",
+        "source_revision": "b5e47834fb0cdaea4bd24c02aac5ec0e8f737dd6"
+      }
+    ],
+    "superstructure_generation": [
+      {
+        "path": "superstructure_generation/configs/fragment_superstructure_official_v2.json",
+        "sha256": "0b91b3e6aef22743b212c4dd0e45115026df2d512c550a986bac4106ea4d386c",
+        "source_path": "configs/fragment_superstructure_official_v2.json",
+        "source_revision": "a16ef9417cdf44d50381fbb8e5069edc31e7c9df"
+      },
+      {
+        "path": "superstructure_generation/diagnostics/fragment_superstructure_official_v2/shards/superstructure_generation__BARICITINIB__seed0.json",
+        "sha256": "1f70fdfa46c5520bb07556f988cdaceb68f2626fd75dd8aa2504bc4bf8e2b23b",
+        "source_path": "diagnostics/fragment_superstructure_official_v2/shards/superstructure_generation__BARICITINIB__seed0.json",
+        "source_revision": "a16ef9417cdf44d50381fbb8e5069edc31e7c9df"
+      }
+    ],
+    "superstructure_uniform": [
+      {
+        "path": "superstructure_uniform/configs/fragment_superstructure_reference_ablation_v1.json",
+        "sha256": "80c826c7ac68637470c05c6481f2ee9a532546d30e6b588d9a7e197b0d6ea65b",
+        "source_path": "configs/fragment_superstructure_reference_ablation_v1.json",
+        "source_revision": "e1d5cf188d1e563d816e563beab5d589feac495b"
+      },
+      {
+        "path": "superstructure_uniform/diagnostics/fragment_superstructure_reference_ablation_v1/shards/superstructure_generation__BARICITINIB__seed0.json",
+        "sha256": "1e62c879d6b627e943250156d6486bf7601fe4681c89a89134071dc374c65b26",
+        "source_path": "diagnostics/fragment_superstructure_reference_ablation_v1/shards/superstructure_generation__BARICITINIB__seed0.json",
+        "source_revision": "e1d5cf188d1e563d816e563beab5d589feac495b"
+      }
+    ]
+  }
+}

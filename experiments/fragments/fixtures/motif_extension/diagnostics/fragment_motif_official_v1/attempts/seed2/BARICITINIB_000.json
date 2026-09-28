@@ -1,0 +1,2406 @@
+{
+  "attempt_index": 0,
+  "drug": "BARICITINIB",
+  "panel": {
+    "beam_search": false,
+    "benchmark_reference_used": false,
+    "exact_compiled_count": 7,
+    "model_supported_count": 5,
+    "offered": [
+      {
+        "actions": [
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  7,
+                  1
+                ]
+              ],
+              "slot": 12
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  12,
+                  2
+                ]
+              ],
+              "slot": 13
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  12,
+                  1
+                ]
+              ],
+              "slot": 14
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  13,
+                  1
+                ]
+              ],
+              "slot": 15
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  15,
+                  2
+                ]
+              ],
+              "slot": 16
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  14,
+                  2
+                ]
+              ],
+              "slot": 17
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "cycle_close",
+            "model_family": "cycle_insert",
+            "payload": {
+              "a": 16,
+              "b": 17,
+              "order": 1
+            },
+            "payload_type": "CycleCloseEdge",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 3,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  17,
+                  1
+                ]
+              ],
+              "slot": 18
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  18,
+                  1
+                ]
+              ],
+              "slot": 19
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  18,
+                  1
+                ]
+              ],
+              "slot": 20
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          }
+        ],
+        "draw": 0,
+        "endpoint": "CCS(=O)(=O)N1CC(CC#N)(c2cccc(N(C)C)c2)C1",
+        "mean_log_mark": -5.985759520530701,
+        "provenance": {
+          "conflicts": [],
+          "dependencies": [],
+          "joint_plan": {
+            "all_interfaces_planned_together": true,
+            "cell_probability": 0.017338785642253177,
+            "conditional_content_probability": 0.007080681373615484,
+            "core_heavy_atoms": 12,
+            "core_rings": 1,
+            "planned_heavy_atoms": 21,
+            "planned_rings": 2,
+            "qed_sa_guidance": false,
+            "reachable_cells": 105,
+            "schema": "joint_completion_plan_v1"
+          },
+          "lane": "joint_training_regions",
+          "learned_head_flags_changed": false,
+          "module_count": 1,
+          "program_block_labels": [
+            "observed_training_region"
+          ],
+          "program_block_lengths": [
+            10
+          ],
+          "regions": [
+            {
+              "bound_target": {
+                "bindings": [
+                  [
+                    7
+                  ]
+                ],
+                "endpoint": "CCS(=O)(=O)N1CC(CC#N)(c2cccc(N(C)C)c2)C1",
+                "goal_id": "f258363e0e7fea03d2a075606f50ed4e1b537d2ea25f2b17066f1d34f2c10b72",
+                "output_slot_policy": "lowest_available_after_deletion",
+                "output_slots": [
+                  [
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20
+                  ]
+                ],
+                "primitive_teacher_actions_used": 0,
+                "schema_version": "bound_structural_goal_receipt_v1"
+              },
+              "boundary_arity": 1,
+              "compiler_strategy": "deterministic_graph_delta_schedule",
+              "lane": "shared_structural_region",
+              "region": "[1*]c1cccc(N(C)C)c1",
+              "source_rows": [
+                10983
+              ],
+              "training_occurrences": 1
+            }
+          ],
+          "serialization_edges": []
+        },
+        "status": "model_supported"
+      },
+      {
+        "actions": [
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  7,
+                  1
+                ]
+              ],
+              "slot": 12
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  12,
+                  1
+                ]
+              ],
+              "slot": 13
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  13,
+                  2
+                ]
+              ],
+              "slot": 14
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  14,
+                  1
+                ]
+              ],
+              "slot": 15
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  14,
+                  1
+                ]
+              ],
+              "slot": 16
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  16,
+                  1
+                ]
+              ],
+              "slot": 17
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  17,
+                  1
+                ]
+              ],
+              "slot": 18
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  18,
+                  2
+                ]
+              ],
+              "slot": 19
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  19,
+                  1
+                ]
+              ],
+              "slot": 20
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  19,
+                  1
+                ]
+              ],
+              "slot": 21
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  21,
+                  1
+                ]
+              ],
+              "slot": 22
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  22,
+                  1
+                ]
+              ],
+              "slot": 23
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 4,
+              "formal_charge": 0,
+              "implicit_h_count": 1,
+              "neighbors": [
+                [
+                  23,
+                  1
+                ]
+              ],
+              "slot": 24
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  23,
+                  1
+                ]
+              ],
+              "slot": 25
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  25,
+                  1
+                ]
+              ],
+              "slot": 26
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  25,
+                  1
+                ]
+              ],
+              "slot": 27
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 4,
+              "formal_charge": 0,
+              "implicit_h_count": 1,
+              "neighbors": [
+                [
+                  25,
+                  1
+                ]
+              ],
+              "slot": 28
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          }
+        ],
+        "draw": 1,
+        "endpoint": "CCS(=O)(=O)N1CC(CC#N)(CC=C(C)CCC=C(C)CCC(O)C(C)(C)O)C1",
+        "mean_log_mark": -6.594899373895982,
+        "provenance": {
+          "conflicts": [],
+          "dependencies": [],
+          "joint_plan": {
+            "all_interfaces_planned_together": true,
+            "cell_probability": 0.001164710706251316,
+            "conditional_content_probability": 0.25,
+            "core_heavy_atoms": 12,
+            "core_rings": 1,
+            "planned_heavy_atoms": 29,
+            "planned_rings": 1,
+            "qed_sa_guidance": false,
+            "reachable_cells": 105,
+            "schema": "joint_completion_plan_v1"
+          },
+          "lane": "joint_training_regions",
+          "learned_head_flags_changed": false,
+          "module_count": 1,
+          "program_block_labels": [
+            "observed_training_region"
+          ],
+          "program_block_lengths": [
+            17
+          ],
+          "regions": [
+            {
+              "bound_target": {
+                "bindings": [
+                  [
+                    7
+                  ]
+                ],
+                "endpoint": "CCS(=O)(=O)N1CC(CC#N)(CC=C(C)CCC=C(C)CCC(O)C(C)(C)O)C1",
+                "goal_id": "2d25d46c88d2699bb7256300e3da88d0664f9d84da7b70d7e38092b32375c3fe",
+                "output_slot_policy": "lowest_available_after_deletion",
+                "output_slots": [
+                  [
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    28
+                  ]
+                ],
+                "primitive_teacher_actions_used": 0,
+                "schema_version": "bound_structural_goal_receipt_v1"
+              },
+              "boundary_arity": 1,
+              "compiler_strategy": "deterministic_graph_delta_schedule",
+              "lane": "shared_structural_region",
+              "region": "[1*]CC=C(C)CCC=C(C)CCC(O)C(C)(C)O",
+              "source_rows": [
+                1586
+              ],
+              "training_occurrences": 1
+            }
+          ],
+          "serialization_edges": []
+        },
+        "status": "model_supported"
+      },
+      {
+        "actions": [
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  7,
+                  1
+                ]
+              ],
+              "slot": 12
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  12,
+                  2
+                ]
+              ],
+              "slot": 13
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  12,
+                  1
+                ]
+              ],
+              "slot": 14
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  14,
+                  2
+                ]
+              ],
+              "slot": 15
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  13,
+                  1
+                ]
+              ],
+              "slot": 16
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  16,
+                  2
+                ]
+              ],
+              "slot": 17
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 9,
+              "formal_charge": 0,
+              "implicit_h_count": 0,
+              "neighbors": [
+                [
+                  17,
+                  1
+                ]
+              ],
+              "slot": 18
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "cycle_close",
+            "model_family": "cycle_insert",
+            "payload": {
+              "a": 15,
+              "b": 17,
+              "order": 1
+            },
+            "payload_type": "CycleCloseEdge",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          }
+        ],
+        "draw": 2,
+        "endpoint": "CCS(=O)(=O)N1CC(CC#N)(c2ccc(Br)cc2)C1",
+        "mean_log_mark": -6.987182796001434,
+        "provenance": {
+          "conflicts": [],
+          "dependencies": [],
+          "joint_plan": {
+            "all_interfaces_planned_together": true,
+            "cell_probability": 0.016989704888238748,
+            "conditional_content_probability": 0.017914385901440635,
+            "core_heavy_atoms": 12,
+            "core_rings": 1,
+            "planned_heavy_atoms": 19,
+            "planned_rings": 2,
+            "qed_sa_guidance": false,
+            "reachable_cells": 105,
+            "schema": "joint_completion_plan_v1"
+          },
+          "lane": "joint_training_regions",
+          "learned_head_flags_changed": false,
+          "module_count": 1,
+          "program_block_labels": [
+            "observed_training_region"
+          ],
+          "program_block_lengths": [
+            8
+          ],
+          "regions": [
+            {
+              "bound_target": {
+                "bindings": [
+                  [
+                    7
+                  ]
+                ],
+                "endpoint": "CCS(=O)(=O)N1CC(CC#N)(c2ccc(Br)cc2)C1",
+                "goal_id": "0e3c18bdd3db17627c188e20bb07931d247343fd7c3ca94a280e68fcd9022890",
+                "output_slot_policy": "lowest_available_after_deletion",
+                "output_slots": [
+                  [
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18
+                  ]
+                ],
+                "primitive_teacher_actions_used": 0,
+                "schema_version": "bound_structural_goal_receipt_v1"
+              },
+              "boundary_arity": 1,
+              "compiler_strategy": "deterministic_graph_delta_schedule",
+              "lane": "shared_structural_region",
+              "region": "[1*]c1ccc(Br)cc1",
+              "source_rows": [
+                7437,
+                10381,
+                10381
+              ],
+              "training_occurrences": 3
+            }
+          ],
+          "serialization_edges": []
+        },
+        "status": "model_supported"
+      },
+      {
+        "actions": [
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  7,
+                  1
+                ]
+              ],
+              "slot": 12
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  12,
+                  2
+                ]
+              ],
+              "slot": 13
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  12,
+                  1
+                ]
+              ],
+              "slot": 14
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  14,
+                  2
+                ]
+              ],
+              "slot": 15
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  13,
+                  1
+                ]
+              ],
+              "slot": 16
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 4,
+              "formal_charge": 0,
+              "implicit_h_count": 1,
+              "neighbors": [
+                [
+                  16,
+                  1
+                ]
+              ],
+              "slot": 17
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  16,
+                  2
+                ]
+              ],
+              "slot": 18
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  18,
+                  1
+                ]
+              ],
+              "slot": 19
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  19,
+                  1
+                ]
+              ],
+              "slot": 20
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  19,
+                  1
+                ]
+              ],
+              "slot": 21
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  21,
+                  1
+                ]
+              ],
+              "slot": 22
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  20,
+                  1
+                ]
+              ],
+              "slot": 23
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  23,
+                  1
+                ]
+              ],
+              "slot": 24
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  20,
+                  1
+                ]
+              ],
+              "slot": 25
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  25,
+                  1
+                ]
+              ],
+              "slot": 26
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  25,
+                  1
+                ]
+              ],
+              "slot": 27
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  22,
+                  1
+                ]
+              ],
+              "slot": 28
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 10,
+              "formal_charge": 0,
+              "implicit_h_count": 0,
+              "neighbors": [
+                [
+                  28,
+                  1
+                ]
+              ],
+              "slot": 29
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "cycle_close",
+            "model_family": "cycle_insert",
+            "payload": {
+              "a": 22,
+              "b": 24,
+              "order": 1
+            },
+            "payload_type": "CycleCloseEdge",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 4,
+              "formal_charge": 0,
+              "implicit_h_count": 1,
+              "neighbors": [
+                [
+                  25,
+                  1
+                ]
+              ],
+              "slot": 30
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "cycle_close",
+            "model_family": "cycle_insert",
+            "payload": {
+              "a": 15,
+              "b": 18,
+              "order": 1
+            },
+            "payload_type": "CycleCloseEdge",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "cycle_close",
+            "model_family": "cycle_insert",
+            "payload": {
+              "a": 15,
+              "b": 30,
+              "order": 1
+            },
+            "payload_type": "CycleCloseEdge",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "bond_reorder",
+            "model_family": "bond_reorder",
+            "payload": {
+              "a": 12,
+              "b": 14,
+              "new_order": 1
+            },
+            "payload_type": "BondReorder",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "ring_system_restate",
+            "model_family": "ring_system_restate",
+            "payload": {
+              "changes": [
+                {
+                  "a": 12,
+                  "b": 13,
+                  "new_order": 2
+                },
+                {
+                  "a": 13,
+                  "b": 16,
+                  "new_order": 1
+                },
+                {
+                  "a": 14,
+                  "b": 15,
+                  "new_order": 2
+                },
+                {
+                  "a": 15,
+                  "b": 18,
+                  "new_order": 1
+                },
+                {
+                  "a": 16,
+                  "b": 18,
+                  "new_order": 2
+                }
+              ]
+            },
+            "payload_type": "RingSystemRestate",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          }
+        ],
+        "draw": 3,
+        "endpoint": "CCS(=O)(=O)N1CC(CC#N)(c2cc(O)c3c(c2)OC(C)(C)C2CCC(CI)CC32)C1",
+        "provenance": {
+          "conflicts": [],
+          "dependencies": [],
+          "joint_plan": {
+            "all_interfaces_planned_together": true,
+            "cell_probability": 0.026182164743952036,
+            "conditional_content_probability": 0.0278719888337125,
+            "core_heavy_atoms": 12,
+            "core_rings": 1,
+            "planned_heavy_atoms": 31,
+            "planned_rings": 4,
+            "qed_sa_guidance": false,
+            "reachable_cells": 105,
+            "schema": "joint_completion_plan_v1"
+          },
+          "lane": "joint_training_regions",
+          "learned_head_flags_changed": false,
+          "module_count": 1,
+          "program_block_labels": [
+            "observed_training_region"
+          ],
+          "program_block_lengths": [
+            24
+          ],
+          "regions": [
+            {
+              "bound_target": {
+                "bindings": [
+                  [
+                    7
+                  ]
+                ],
+                "endpoint": "CCS(=O)(=O)N1CC(CC#N)(c2cc(O)c3c(c2)OC(C)(C)C2CCC(CI)CC32)C1",
+                "goal_id": "eee2e4280a010a6a5626b87c9eccf496b8cfd803b6088875e079ed690037c001",
+                "output_slot_policy": "lowest_available_after_deletion",
+                "output_slots": [
+                  [
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    28,
+                    29,
+                    30
+                  ]
+                ],
+                "primitive_teacher_actions_used": 0,
+                "schema_version": "bound_structural_goal_receipt_v1"
+              },
+              "boundary_arity": 1,
+              "compiler_strategy": "deterministic_graph_delta_schedule",
+              "lane": "shared_structural_region",
+              "region": "[1*]c1cc(O)c2c(c1)OC(C)(C)C1CCC(CI)CC21",
+              "source_rows": [
+                8979
+              ],
+              "training_occurrences": 1
+            }
+          ],
+          "serialization_edges": []
+        },
+        "reason": "compiled ring restate is outside the frozen model action fiber",
+        "status": "model_support_abstention"
+      },
+      {
+        "draw": 4,
+        "reason": "complete region compiler abstained: charge_policy_abstention",
+        "status": "compiler_or_constraint_abstention"
+      },
+      {
+        "actions": [
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  7,
+                  1
+                ]
+              ],
+              "slot": 12
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  12,
+                  2
+                ]
+              ],
+              "slot": 13
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  12,
+                  1
+                ]
+              ],
+              "slot": 14
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  14,
+                  2
+                ]
+              ],
+              "slot": 15
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  15,
+                  1
+                ]
+              ],
+              "slot": 16
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  16,
+                  2
+                ]
+              ],
+              "slot": 17
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  17,
+                  1
+                ]
+              ],
+              "slot": 18
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  18,
+                  2
+                ]
+              ],
+              "slot": 19
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 4,
+              "formal_charge": 0,
+              "implicit_h_count": 1,
+              "neighbors": [
+                [
+                  13,
+                  1
+                ]
+              ],
+              "slot": 20
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "cycle_close",
+            "model_family": "cycle_insert",
+            "payload": {
+              "a": 19,
+              "b": 20,
+              "order": 1
+            },
+            "payload_type": "CycleCloseEdge",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "cycle_close",
+            "model_family": "cycle_insert",
+            "payload": {
+              "a": 14,
+              "b": 19,
+              "order": 1
+            },
+            "payload_type": "CycleCloseEdge",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          }
+        ],
+        "draw": 5,
+        "endpoint": "CCS(=O)(=O)N1CC(CC#N)(c2coc3ccccc23)C1",
+        "mean_log_mark": -7.479169888929888,
+        "provenance": {
+          "conflicts": [],
+          "dependencies": [],
+          "joint_plan": {
+            "all_interfaces_planned_together": true,
+            "cell_probability": 0.026065804492613896,
+            "conditional_content_probability": 0.060075389888547145,
+            "core_heavy_atoms": 12,
+            "core_rings": 1,
+            "planned_heavy_atoms": 21,
+            "planned_rings": 3,
+            "qed_sa_guidance": false,
+            "reachable_cells": 105,
+            "schema": "joint_completion_plan_v1"
+          },
+          "lane": "joint_training_regions",
+          "learned_head_flags_changed": false,
+          "module_count": 1,
+          "program_block_labels": [
+            "observed_training_region"
+          ],
+          "program_block_lengths": [
+            11
+          ],
+          "regions": [
+            {
+              "bound_target": {
+                "bindings": [
+                  [
+                    7
+                  ]
+                ],
+                "endpoint": "CCS(=O)(=O)N1CC(CC#N)(c2coc3ccccc23)C1",
+                "goal_id": "9d1c76e573df3b348ba2138e589065698b3f3da2f83a6f33c9e1c5180c6fd363",
+                "output_slot_policy": "lowest_available_after_deletion",
+                "output_slots": [
+                  [
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20
+                  ]
+                ],
+                "primitive_teacher_actions_used": 0,
+                "schema_version": "bound_structural_goal_receipt_v1"
+              },
+              "boundary_arity": 1,
+              "compiler_strategy": "deterministic_graph_delta_schedule",
+              "lane": "shared_structural_region",
+              "region": "[1*]c1coc2ccccc12",
+              "source_rows": [
+                5273
+              ],
+              "training_occurrences": 1
+            }
+          ],
+          "serialization_edges": []
+        },
+        "status": "model_supported"
+      },
+      {
+        "actions": [
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  7,
+                  1
+                ]
+              ],
+              "slot": 12
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  12,
+                  2
+                ]
+              ],
+              "slot": 13
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  13,
+                  1
+                ]
+              ],
+              "slot": 14
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  14,
+                  2
+                ]
+              ],
+              "slot": 15
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  12,
+                  1
+                ]
+              ],
+              "slot": 16
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  15,
+                  1
+                ]
+              ],
+              "slot": 17
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 4,
+              "formal_charge": 0,
+              "implicit_h_count": 1,
+              "neighbors": [
+                [
+                  17,
+                  1
+                ]
+              ],
+              "slot": 18
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  18,
+                  1
+                ]
+              ],
+              "slot": 19
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  19,
+                  1
+                ]
+              ],
+              "slot": 20
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 4,
+              "formal_charge": 0,
+              "implicit_h_count": 1,
+              "neighbors": [
+                [
+                  20,
+                  1
+                ]
+              ],
+              "slot": 21
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "cycle_close",
+            "model_family": "cycle_insert",
+            "payload": {
+              "a": 16,
+              "b": 17,
+              "order": 2
+            },
+            "payload_type": "CycleCloseEdge",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "cycle_close",
+            "model_family": "cycle_insert",
+            "payload": {
+              "a": 16,
+              "b": 21,
+              "order": 1
+            },
+            "payload_type": "CycleCloseEdge",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "bond_reorder",
+            "model_family": "bond_reorder",
+            "payload": {
+              "a": 12,
+              "b": 16,
+              "new_order": 1
+            },
+            "payload_type": "BondReorder",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "ring_system_restate",
+            "model_family": "ring_system_restate",
+            "payload": {
+              "changes": [
+                {
+                  "a": 12,
+                  "b": 13,
+                  "new_order": 2
+                },
+                {
+                  "a": 13,
+                  "b": 14,
+                  "new_order": 1
+                },
+                {
+                  "a": 14,
+                  "b": 15,
+                  "new_order": 2
+                },
+                {
+                  "a": 15,
+                  "b": 17,
+                  "new_order": 1
+                },
+                {
+                  "a": 16,
+                  "b": 17,
+                  "new_order": 2
+                }
+              ]
+            },
+            "payload_type": "RingSystemRestate",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          }
+        ],
+        "draw": 6,
+        "endpoint": "CCS(=O)(=O)N1CC(CC#N)(c2cccc3c2OCCO3)C1",
+        "provenance": {
+          "conflicts": [],
+          "dependencies": [],
+          "joint_plan": {
+            "all_interfaces_planned_together": true,
+            "cell_probability": 0.030603854294801464,
+            "conditional_content_probability": 0.03631719073496306,
+            "core_heavy_atoms": 12,
+            "core_rings": 1,
+            "planned_heavy_atoms": 22,
+            "planned_rings": 3,
+            "qed_sa_guidance": false,
+            "reachable_cells": 105,
+            "schema": "joint_completion_plan_v1"
+          },
+          "lane": "joint_training_regions",
+          "learned_head_flags_changed": false,
+          "module_count": 1,
+          "program_block_labels": [
+            "observed_training_region"
+          ],
+          "program_block_lengths": [
+            14
+          ],
+          "regions": [
+            {
+              "bound_target": {
+                "bindings": [
+                  [
+                    7
+                  ]
+                ],
+                "endpoint": "CCS(=O)(=O)N1CC(CC#N)(c2cccc3c2OCCO3)C1",
+                "goal_id": "3c66af6061c622131662deb70173ef0460f4a9e91aa5b021ae377c2b4fb47794",
+                "output_slot_policy": "lowest_available_after_deletion",
+                "output_slots": [
+                  [
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21
+                  ]
+                ],
+                "primitive_teacher_actions_used": 0,
+                "schema_version": "bound_structural_goal_receipt_v1"
+              },
+              "boundary_arity": 1,
+              "compiler_strategy": "deterministic_graph_delta_schedule",
+              "lane": "shared_structural_region",
+              "region": "[1*]c1cccc2c1OCCO2",
+              "source_rows": [
+                1965
+              ],
+              "training_occurrences": 1
+            }
+          ],
+          "serialization_edges": []
+        },
+        "reason": "compiled ring restate is outside the frozen model action fiber",
+        "status": "model_support_abstention"
+      },
+      {
+        "actions": [
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 3,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  7,
+                  1
+                ]
+              ],
+              "slot": 12
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  12,
+                  1
+                ]
+              ],
+              "slot": 13
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 3,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  13,
+                  1
+                ]
+              ],
+              "slot": 14
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 4,
+              "formal_charge": 0,
+              "implicit_h_count": 0,
+              "neighbors": [
+                [
+                  13,
+                  2
+                ]
+              ],
+              "slot": 15
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  14,
+                  1
+                ]
+              ],
+              "slot": 16
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  16,
+                  2
+                ]
+              ],
+              "slot": 17
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  16,
+                  1
+                ]
+              ],
+              "slot": 18
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  18,
+                  2
+                ]
+              ],
+              "slot": 19
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  17,
+                  1
+                ]
+              ],
+              "slot": 20
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 2,
+              "neighbors": [
+                [
+                  20,
+                  2
+                ]
+              ],
+              "slot": 21
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "cycle_close",
+            "model_family": "cycle_insert",
+            "payload": {
+              "a": 19,
+              "b": 21,
+              "order": 1
+            },
+            "payload_type": "CycleCloseEdge",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  21,
+                  1
+                ]
+              ],
+              "slot": 22
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 4,
+              "formal_charge": 0,
+              "implicit_h_count": 0,
+              "neighbors": [
+                [
+                  22,
+                  2
+                ]
+              ],
+              "slot": 23
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 4,
+              "formal_charge": 0,
+              "implicit_h_count": 1,
+              "neighbors": [
+                [
+                  22,
+                  1
+                ]
+              ],
+              "slot": 24
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          },
+          {
+            "executor_rule": "atom_insert",
+            "model_family": "atom_insert",
+            "payload": {
+              "atom_type": 2,
+              "formal_charge": 0,
+              "implicit_h_count": 3,
+              "neighbors": [
+                [
+                  24,
+                  1
+                ]
+              ],
+              "slot": 25
+            },
+            "payload_type": "AtomInsert",
+            "schema": "compose.rewrite.action",
+            "schema_version": 4
+          }
+        ],
+        "draw": 7,
+        "endpoint": "CCS(=O)(=O)N1CC(CC#N)(NC(=O)Nc2ccc(C(=O)OC)cc2)C1",
+        "mean_log_mark": -5.990430132548014,
+        "provenance": {
+          "conflicts": [],
+          "dependencies": [],
+          "joint_plan": {
+            "all_interfaces_planned_together": true,
+            "cell_probability": 0.009193568048583177,
+            "conditional_content_probability": 0.01737303156474643,
+            "core_heavy_atoms": 12,
+            "core_rings": 1,
+            "planned_heavy_atoms": 26,
+            "planned_rings": 2,
+            "qed_sa_guidance": false,
+            "reachable_cells": 105,
+            "schema": "joint_completion_plan_v1"
+          },
+          "lane": "joint_training_regions",
+          "learned_head_flags_changed": false,
+          "module_count": 1,
+          "program_block_labels": [
+            "observed_training_region"
+          ],
+          "program_block_lengths": [
+            15
+          ],
+          "regions": [
+            {
+              "bound_target": {
+                "bindings": [
+                  [
+                    7
+                  ]
+                ],
+                "endpoint": "CCS(=O)(=O)N1CC(CC#N)(NC(=O)Nc2ccc(C(=O)OC)cc2)C1",
+                "goal_id": "b3f0308d3b531d5a7abd9ea0e374b22a7483af51dde318c1cfc511e1a392cfa2",
+                "output_slot_policy": "lowest_available_after_deletion",
+                "output_slots": [
+                  [
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25
+                  ]
+                ],
+                "primitive_teacher_actions_used": 0,
+                "schema_version": "bound_structural_goal_receipt_v1"
+              },
+              "boundary_arity": 1,
+              "compiler_strategy": "deterministic_graph_delta_schedule",
+              "lane": "shared_structural_region",
+              "region": "[1*]NC(=O)Nc1ccc(C(=O)OC)cc1",
+              "source_rows": [
+                10612
+              ],
+              "training_occurrences": 1
+            }
+          ],
+          "serialization_edges": []
+        },
+        "status": "model_supported"
+      }
+    ],
+    "offered_count": 8,
+    "output_count": 1,
+    "qed_sa_guidance": false,
+    "rng_state_after": {
+      "bit_generator": "PCG64",
+      "has_uint32": 0,
+      "state": {
+        "inc": 227353493133890065108299530120880452643,
+        "state": 236819385274766956338349970454776897671
+      },
+      "uinteger": 0
+    },
+    "rng_state_before": {
+      "bit_generator": "PCG64",
+      "has_uint32": 0,
+      "state": {
+        "inc": 227353493133890065108299530120880452643,
+        "state": 7598376201785910800421804261378721628
+      },
+      "uinteger": 0
+    },
+    "schema": "fragment_motif_focused_panel_v1",
+    "selected_smiles": "CCS(=O)(=O)N1CC(CC#N)(c2cccc(N(C)C)c2)C1",
+    "selection": {
+      "mean_native_log_mark_probability": -5.985759520530701,
+      "model_used": true,
+      "score_semantics": "mean_log_mark_at_time_zero; finite_panel_softmax; not_path_probability",
+      "selected_draw": 0,
+      "selected_index": 0,
+      "selected_probability": 0.3193745072676109,
+      "unique_model_supported_endpoints": 5
+    },
+    "unique_compiled_endpoints": 7
+  },
+  "seed": 2,
+  "selected_constraint_fidelity": true,
+  "selected_valid_connected": true,
+  "wall_seconds": 5.137028499972075
+}

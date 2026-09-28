@@ -105,6 +105,12 @@ artifacts/tdc_originals/
 
 # Distribution bundles rebuilt from sources
 *.zip
+!experiments/fragments/runtime/*/source.zip
+
+# Verified local fragment assets and user-requested generation outputs.
+# Originals and immutable small reductions remain in their historical locations.
+/local_assets/fragments/
+/runs/fragments/
 
 # Downloaded upstream datasets (rebuild with tools/build_dude_pool.py)
 .cache/
