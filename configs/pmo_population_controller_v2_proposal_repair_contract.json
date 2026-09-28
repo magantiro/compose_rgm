@@ -1,0 +1,106 @@
+{
+  "payload": {
+    "budget": {
+      "automatic_retries": 0,
+      "backfill": false,
+      "candidate_calls_per_task": 234,
+      "charged_calls_per_task": 250,
+      "charged_calls_total": 750,
+      "cpu_per_worker": 1,
+      "gpu": false,
+      "initialization_calls_per_task": 16,
+      "max_rounds": 64,
+      "queries_per_round": 16
+    },
+    "controller_contract": "configs/pmo_population_controller_v2_proposal_repair.json",
+    "controller_contract_sha256": "af08dd4c3bf5b0b9f97a90253eed0687b7b370a947cdc2934da5749c6aef8080",
+    "corrected_source_capsule_manifest": "diagnostics/pmo_population_controller_v1/source_capsule_manifest_v2.json",
+    "corrected_worker_app": "compose-pmo-population-v1-corrected",
+    "corrected_worker_path": "modal_apps/pmo_population_v1_app.py",
+    "implementation_sha256": {
+      "modal_apps/pmo_population_v1_app.py": "36f49f0ecf791e6ba823a1d3f19a2b34b69cc8e269d149f3c69d1ea1b61ad88a",
+      "src/compose_v4/control/anchor_focus.py": "bcddebeb5f829cc88c884b4a1fc1c9c5320388891c4e41d5960a18f76b6f89b1",
+      "src/compose_v4/control/bootstrap_pool_continuity.py": "ed4da8902bbae02d9897e40289ba2a8b2828712efef9f98a5bef8b6eb0ab3744",
+      "src/compose_v4/control/dynamic_program_synthesis.py": "835fe08f3fe9ba498f316ff43421da86f5d6870e2c18d1ba7f415541fcb55560",
+      "src/compose_v4/control/dynamic_program_synthesis_v2.py": "d1c8815fba3dcef451c6f0a69f60448723083ce3b1a5e53d212ae068773f6bb1",
+      "src/compose_v4/control/dynamic_program_synthesis_v21.py": "3e5912975cabc27be631da568e807f5ee404a0ba19c9a1fb36da5222715256f7",
+      "src/compose_v4/control/pmo_channels.py": "348dcb9fe75f283061c41375f54965af06002a11da40d1946a29e7d42f98a6c8",
+      "src/compose_v4/control/pmo_credit.py": "ec1eb66589f241dec65eaa73a540f32ac8b032d7562889f7adf1a3b299834112",
+      "src/compose_v4/control/pmo_population_controller.py": "13e742fafed31fd74e72f6ff9cc5d4e343c60ae76f2ba7accab5a4d1de8826af",
+      "src/compose_v4/control/pmo_realization.py": "153d2f49b08186abff6088c1f6c462fe2d96b83ede26587b90a8504c0671b308",
+      "src/compose_v4/control/program_campaign.py": "884f13cbbe49c06a94aafb59880daf38f313b6f4717af012c1fe8eb9074c469e",
+      "src/compose_v4/control/program_mutation.py": "1f017bb4d69d0b38a29c6c7e740d6857bdab0c6b5d2c28e226c918d9b99b6415",
+      "src/compose_v4/control/progressive_structured_sampler.py": "f3716d34d9e53ffff78ec8c753a34ee9d3a46082f1877e51766d990c1ff4a6e6",
+      "src/compose_v4/control/region_replacement_option.py": "16e8af031a18ec7f537f46faedfed21db703ccbdffe5d12caff780cfe5d91474",
+      "src/compose_v4/experiments/pmo_oracle_assets.py": "5ec0b7c9b9185cd2b8edd14c2529f37e825311a2b39d6ce71c68423ab9f4d558",
+      "src/compose_v4/experiments/pmo_population_v1.py": "1c3f5f34ea5673b1006447bb00d18c30546220386d1b5660581fb6efa529accb"
+    },
+    "modal_launch_authorized": true,
+    "oracle": {
+      "adapter": "native PyTDC Oracle(name=task)",
+      "calls_include_initialization": true,
+      "direction": "maximize",
+      "prescreen": false
+    },
+    "oracle_calls_authorized": 0,
+    "prior_launch_terminal_failure": "ModuleNotFoundError: torch before durable task/oracle work",
+    "promotion": {
+      "beat_at_least": 2,
+      "ivg_targets_postrun_only": {
+        "celecoxib_rediscovery": 0.798,
+        "gsk3b": 0.952,
+        "perindopril_mpo": 0.645
+      },
+      "official_10000_call_claim": false,
+      "route_scale_descendant_required": true,
+      "third_task_within": 0.02
+    },
+    "runtime": {
+      "live_parent_support_gate": "configs/pmo_population_live_parent_gate_v2.json",
+      "live_parent_support_gate_sha256": "510f6920e947e128557d48f52baa43392e7fb4bf9b0469aa864010ca85651ef0",
+      "parent_modes": [
+        "global_explore",
+        "jump_from_elite",
+        "refine_elite"
+      ],
+      "recursive_descendants": true,
+      "task_to_endpoint_lookup": false,
+      "task_to_route_lookup": false,
+      "winner_injection": false
+    },
+    "runtime_revision": {
+      "authorized_by": "owner instruction, 2026-09-23: freeze the corrected PMO runtime, create a new versioned contract that explicitly supersedes the old one and pins the new hashes",
+      "changes": [
+        "restored anchored_replacement, the one T4 proposal lane PMO never imported (T4 15-cell audit: 921/2383 eligible endpoints, 16/74 selections, higher gate-call yield than shallow; on a live PMO molecule the only lane reaching piperazine at 7.6% and best at quaternary carbon 6.0%, at 29s vs 141s)",
+        "program_mutation: added sibling_branch (extend_segment rewires the original birth onto the fresh atom so it can never raise an anchor's degree -- measured 0/70 vs sibling_branch 39/70)",
+        "program_mutation: added created_bond_order (no move touched a created edge's bond order; alkyne 0 -> 9/200, terminal alkyne 0 -> 3/200)",
+        "anchor_focus: optional cross-module anchor context, default OFF and verified byte-identical to the prior runtime on 150/150 endpoints",
+        "implementation_sha256 widened from 8 to 16 files so the synthesis and mutation stack beneath the controller can no longer move without the identity moving"
+      ],
+      "commit": "3e6baf94ded01dc83128894cdff09421cd94a84d",
+      "revision_id": "proposal_repair_v2",
+      "supersedes_contract": "configs/pmo_population_controller_v1_scored_contract_corrected.json",
+      "supersedes_payload_sha256": "ba9515615b341019f09f66f3224e590b4ca596dee6bb7c97c759dbe418f1ff4b",
+      "the_old_contract_is_unmodified": true,
+      "unchanged": [
+        "reward definition, parent-offset acquisition, both value heads, fitting threshold, temperature, model/random split, family and lineage floors, pool target, macro vocabulary, region law, intent-vs-realized credit, endpoint dedup, decision-only clipping, max_modules=3, element vocabulary"
+      ]
+    },
+    "schema_version": "pmo_population_controller_v2_proposal_repair",
+    "scientific_question": "Does the shared COMPOSE program backbone plus PMO population control, FiberControl and recursive descendants achieve competitive no-prescreen PMO performance on three prospectively selected tasks?",
+    "scored_launch_authorized": true,
+    "status": "AUTHORIZED_PROPOSAL_REPAIR_RUNTIME",
+    "supersedes_payload_sha256": "ba9515615b341019f09f66f3224e590b4ca596dee6bb7c97c759dbe418f1ff4b",
+    "task_roles": {
+      "celecoxib_rediscovery": "long-program reachability control",
+      "gsk3b": "basin-discovery black-box",
+      "perindopril_mpo": "jump to multi-generation refinement"
+    },
+    "tasks": [
+      "gsk3b",
+      "perindopril_mpo",
+      "celecoxib_rediscovery"
+    ]
+  },
+  "payload_sha256": "4f1ee11ec7d4e66c12530301eb21d4e233ff09b742f391df104fad0e26818dad"
+}
