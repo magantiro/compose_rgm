@@ -1,6 +1,9 @@
 # Experiments
 
-Three kinds of file live here, and they answer different questions.
+**[`paper/`](paper/) is the front door: how to reproduce every table in the ICLR
+submission, with no credentials and no oracle calls.**
+
+Three other kinds of file live here, and they answer different questions.
 
 - **`<task>/README.md` + `<task>/manifest.json`** — *how do I verify this
   benchmark, and how do I run it?* One per benchmark task
@@ -44,6 +47,7 @@ conditional efficiency.
 
 | Task | Result status | Reproduce with |
 |---|---|---|
+| [`paper`](paper/) | **the ICLR submission's tables** | `python3 tools/reproduce_paper_tables.py` |
 | [`t4`](t4/) | **FROZEN** — the submitted table | `python3 tools/reproduce_t4_table.py` |
 | [`pmo`](pmo/) | **DEVELOPMENT** — no frozen table exists | `PYTHONPATH=src python3 tools/reproduce_pmo_tables.py` |
 
