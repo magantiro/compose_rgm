@@ -1,0 +1,7 @@
+# Validated core chemistry/ML environment. PMO oracle images use a separate kernel.
+numpy==1.26.4
+scipy==1.13.1
+torch==2.4.0
+rdkit==2024.3.5
+networkx==3.3
+PyYAML==6.0.3

@@ -115,3 +115,8 @@ artifacts/tdc_originals/
 
 # Downloaded upstream datasets (rebuild with tools/build_dude_pool.py)
 .cache/
+
+# Local repository-readiness diagnostics (the checked interpretation is in docs/).
+/diagnostics/repository_readiness_v1/*.json
+/diagnostics/repository_readiness_v1/*.xml
+/diagnostics/repository_readiness_v1/*sample.txt

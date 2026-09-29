@@ -15,6 +15,7 @@ dependencies = [
     "rdkit>=2023.9",
     "scipy>=1.10",
     "torch>=2.0",
+    "PyYAML>=6.0",
 ]
 
 [project.optional-dependencies]

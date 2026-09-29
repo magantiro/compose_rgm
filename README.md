@@ -1,12 +1,12 @@
 # COMPOSE
 
-COMPOSE treats molecular design as **control of a frozen learned process**. A
-generator `R_θ` is learned once over executable chemical rewrites; a controller
-then steers trajectories without changing it, as a KL-regularised change of path
-measure implemented through finite-horizon Doob/committor values. Every
-transformation is realised as primitive executable steps through complete,
-chemically valid molecules — never as an endpoint that a search must later
-justify.
+COMPOSE represents molecular design through executable rewrites between complete,
+supported molecular graphs. A learned reference law assigns preferences to legal
+edits in reference-guided settings. Task-specific controllers can use that law,
+structural constraints, or evaluated endpoint feedback to construct and select
+transformations. The reference-guided editing controller uses finite-horizon
+future values; the optimization controllers are distinct. Checkpoint sharing and
+numerical reference use are experiment-specific, not universal across benchmarks.
 
 Three layers, kept separate on purpose:
 
@@ -18,14 +18,18 @@ Three layers, kept separate on purpose:
 
 ## Start here
 
+For installation and local checks, use
+[`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) and the pinned environments under
+[`requirements/`](requirements/).
+
 For the fragment suite, start with **[`experiments/fragments/`](experiments/fragments/)**:
 offline table reproduction, verified asset setup, and isolated fragment generation
 with saved-attempt parity checks. This is a local
 integration; it does not change the submitted paper or the PMO/T4 protocols.
 
-1. **[`docs/START_HERE_ICLR.md`](docs/START_HERE_ICLR.md)**: authoritative
-   controller status, current T4 and PMO evidence, branch layout, and the next
-   scientific decision.
+1. **[`docs/START_HERE_ICLR.md`](docs/START_HERE_ICLR.md)**: a dated controller
+   campaign handoff. Check its as-of date and the experiment-specific contract
+   before treating any operational status as current.
 2. **[`docs/PAPER_TO_CURRENT_CODE.md`](docs/PAPER_TO_CURRENT_CODE.md)**:
    submitted-paper code and evidence versus post-submission controller
    extensions, plus a fresh-laptop first-hour path.
@@ -41,7 +45,7 @@ integration; it does not change the submitted paper or the PMO/T4 protocols.
 ## Layout
 
 ```
-src/compose_v4/     library. importable, no experiment logic
+src/compose_v4/     importable domain library and experiment adapters
 modal_apps/         experiment entrypoints; obey each experiment's launch contract
 experiments/        what each experiment asks, how to rerun it, what it produced
 tools/              repo tooling (audit, index generation, dataset rebuild)
@@ -56,12 +60,13 @@ evidence maps are organized by task. Frozen paths are preserved during migration
 
 ## Running an experiment
 
-Read the experiment contract before choosing a launcher. For the long T4
-driver, use `modal deploy modal_apps/genmol_t4_opt_app.py` followed by the
-durable entrypoint in `tools/t4_launch.py`; do not substitute an ephemeral
-`modal run --detach` invocation.
+Read the experiment contract and its result provenance before choosing a
+launcher. The historical T4 launcher in `tools/t4_launch.py` is not a generic
+entry point for every T4 result; similarly, PMO and fragment evaluations have
+separate task-specific recipes. An offline import or table check does not
+authorize a new scored campaign.
 
-Four facts that are easy to learn the hard way:
+For that historical deployed-app workflow, four facts are easy to learn the hard way:
 
 - **Use the campaign's durable deployed-app launcher for long work.** The T4
   launcher persists a function-call ID and volume namespace so the run survives
@@ -73,7 +78,9 @@ Four facts that are easy to learn the hard way:
   `modal_apps/run_process_v2_p50_app.py`. A container cannot import any other
   `modal_apps` module, so shared helpers belong in `src/` or in the app itself.
   That file computes `ROOT = parents[1]` and cannot move.
-- **Artifacts live on the `compose-v4-artifacts` volume**, not in the repo.
+- **That workflow's artifacts live on the `compose-v4-artifacts` volume**, not in
+  the repo. Other experiments use other volumes and may require a different
+  Modal profile.
 
 ## Tools
 

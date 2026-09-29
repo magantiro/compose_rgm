@@ -1,5 +1,12 @@
 # COMPOSE ICLR controller: start here
 
+> Historical controller handoff, not current launch status. The operational
+> snapshot below is dated 2026-09-13. For local installation and verification,
+> use [DEVELOPMENT.md](DEVELOPMENT.md); for the 2026-09-29 readiness assessment,
+> use [REPOSITORY_READINESS_20260929.md](REPOSITORY_READINESS_20260929.md).
+> Reconfirm each experiment's contract and receipts before any run. This page
+> does not authorize a new launch.
+
 This is the authoritative collaborator handoff for the controller campaign as
 of 2026-09-13. Read this page before the chronological logs. The active
 integration branch is `compose-iclr`; the Modal session name is
