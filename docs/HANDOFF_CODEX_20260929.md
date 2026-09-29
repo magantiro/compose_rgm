@@ -232,6 +232,18 @@ key, so a spelling difference is not cosmetic.
   `action_codec_schema_version`, active families, data lanes and partition roles
   against live values. **Pre-existing**, not introduced by recent work. 6,438
   tests collect; `--ignore` that one file and the suite runs.
+- **The suite has a large pre-existing failure population.** Measured this
+  session, ignoring that one file: at 77% of collection (5,025 of 6,438 tests,
+  run truncated by a 40-minute cap) — **4,688 passed, 231 failed, 101 errors.**
+  The 101 errors match the figure recorded in `learnings.md` exactly, and 231
+  failures at 77% extrapolates toward the 292 recorded there for a full run, so
+  this is the documented baseline rather than new breakage. The bulk is the
+  editing-V2 family cascading from the same registry drift. **Do not read a red
+  suite here as something you broke** — attribute against this baseline first,
+  ideally by re-running the same selection at the branch base.
+  Caveat on my own measurement: the wrapper's exit code came from a trailing
+  `tail`, not from pytest, so it read 0 despite the truncation. Check the
+  summary line, not the exit status.
 - **`ruff check src/` reports 514 findings** (314 auto-fixable). Mostly newer
   rule classes (RUF/UP) on a large legacy surface, not fresh breakage.
 - `scripts/prelaunch_gate.py` does **not** pass, because it lints `src/`. It is
