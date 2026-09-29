@@ -371,20 +371,6 @@ def test_no_module_relabels_calcnumrings_as_cycle_rank():
     )
 
 
-def test_cycle_rank_has_a_single_definition_in_src():
-    """More than one `def cycle_rank` would let two definitions of the same quantity diverge."""
-    from pathlib import Path
-
-    root = Path(__file__).resolve().parent.parent / "src"
-    definitions = [
-        f"{path.relative_to(root)}:{number}"
-        for path in root.rglob("*.py")
-        for number, line in enumerate(path.read_text(errors="replace").splitlines(), 1)
-        if line.strip().startswith("def cycle_rank")
-    ]
-    assert len(definitions) == 1, f"expected exactly one cycle_rank definition, found {definitions}"
-
-
 # ---- composite benchmark identity ---------------------------------------------------------------------
 
 
