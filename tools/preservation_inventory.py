@@ -180,6 +180,82 @@ def git_branch_replication(root: Path) -> dict:
 # ---- Classification ----
 
 
+def git_dirty(root: Path) -> set[str]:
+    """Tracked paths whose WORKING-TREE bytes are not what git stores.
+
+    `git ls-files` lists tracked PATHS, which is not the same as saying the
+    current content is preserved. A modified-but-uncommitted file is tracked and
+    its present bytes exist nowhere else. Treating it as protected is how an
+    edit gets lost between a clean-looking status and a reap.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(root), "status", "--porcelain", "-z",
+             "--untracked-files=no"],
+            capture_output=True, check=True, timeout=180,
+        ).stdout.decode()
+    except (OSError, subprocess.SubprocessError):
+        return set()
+    dirty: set[str] = set()
+    for record in out.split("\0"):
+        if len(record) > 3:
+            dirty.add(record[3:])
+    return dirty
+
+
+def recovery_dependency_ok(root: Path, relative: str, rule_name: str) -> str | None:
+    """Check the thing a 'regenerable' claim actually depends on.
+
+    A filename pattern is a guess about provenance, not evidence of recovery. A
+    source capsule is only rebuildable while its manifest survives; a cumulative
+    round snapshot is only droppable while the oracle receipts beside it exist.
+    Where the dependency is absent the file is NOT regenerable and must fall
+    through to at_risk.
+
+    Returns None when the dependency holds, or a reason string when it does not.
+    """
+    path = root / relative
+    if rule_name == "source_capsule":
+        # The sibling manifest records git_blob_oid + sha256 for every entry and
+        # is what tools/rebuild_source_capsule.py consumes.  A capsule is a
+        # verbatim copy of a source tree, so its files nest arbitrarily deep --
+        # anchor on the capsule DIRECTORY itself rather than walking a fixed
+        # number of parents, which was wrong and demoted 5,136 recoverable files.
+        parts = path.parts
+        for index in range(len(parts) - 1, -1, -1):
+            if parts[index].startswith("source_capsule"):
+                capsule_parent = Path(*parts[:index])
+                if any(capsule_parent.glob("source_capsule_manifest*.json")):
+                    return None
+                return (f"no source_capsule_manifest*.json in "
+                        f"{capsule_parent.name or capsule_parent}")
+        return "path does not contain a source_capsule component"
+    if rule_name == "cumulative_round_snapshot":
+        # campaign/round_N/<file> -> the ledger root is two levels up.
+        campaign = path.parent.parent
+        ledger = campaign.parent
+        if (ledger / "oracle").is_dir() and any(
+            (ledger / "oracle").glob("query_*/result.json")
+        ):
+            return None
+        return "no oracle/query_*/result.json receipts beside it"
+    if rule_name == "zero_oracle_gate_workspace":
+        # The committed report beside it is the artifact worth keeping.
+        for parent in list(path.parents)[:4]:
+            if any(
+                candidate.is_file() and candidate.name != "manifest.json"
+                for candidate in parent.glob("*.json")
+            ):
+                return None
+        return "no committed report found beside the dryrun workspace"
+    if rule_name == "upstream_oracle_asset":
+        # Redownloadable by definition; nothing local to depend on.
+        return None
+    if rule_name == "run_log":
+        return None
+    return None
+
+
 def classify(relative: str) -> tuple[str, str, str] | None:
     for pattern, name, why, recipe in REGENERABLE_RULES:
         if fnmatch.fnmatch(relative, pattern):
@@ -198,10 +274,12 @@ def sha256_file(path: Path) -> str | None:
     return digest.hexdigest()
 
 
-def walk(root: Path, tracked: set[str]) -> dict:
+def walk(root: Path, tracked: set[str], dirty: set[str]) -> dict:
     at_risk: list[dict] = []
     regenerable: dict[str, dict] = {}
+    demoted: list[dict] = []
     tracked_count = tracked_bytes = 0
+    dirty_count = 0
 
     for current, dirs, files in os.walk(root):
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
@@ -219,12 +297,24 @@ def walk(root: Path, tracked: set[str]) -> dict:
             # commit it would otherwise report itself.
             if relative == str(MANIFEST):
                 continue
-            if relative in tracked:
+            if relative in tracked and relative not in dirty:
                 tracked_count += 1
                 try:
                     tracked_bytes += path.stat().st_size
                 except OSError:
                     pass
+                continue
+            if relative in dirty:
+                # Tracked, but the bytes on disk are not the bytes git holds.
+                dirty_count += 1
+                try:
+                    size = path.stat().st_size
+                except OSError:
+                    continue
+                at_risk.append({"path": relative, "bytes": size,
+                                "sha256": sha256_file(path),
+                                "reason": "tracked but MODIFIED; current bytes "
+                                          "are not committed anywhere"})
                 continue
             if name.endswith(".pyc"):
                 continue
@@ -236,6 +326,14 @@ def walk(root: Path, tracked: set[str]) -> dict:
             rule = classify(relative)
             if rule is not None:
                 name_, why, recipe = rule
+                problem = recovery_dependency_ok(root, relative, name_)
+                if problem is not None:
+                    demoted.append({"path": relative, "rule": name_,
+                                    "reason": problem})
+                    at_risk.append({"path": relative, "bytes": size,
+                                    "sha256": sha256_file(path),
+                                    "reason": f"claimed {name_} but {problem}"})
+                    continue
                 bucket = regenerable.setdefault(
                     name_, {"why": why, "recipe": recipe, "files": 0, "bytes": 0}
                 )
@@ -251,27 +349,61 @@ def walk(root: Path, tracked: set[str]) -> dict:
         "tracked": {"files": tracked_count, "bytes": tracked_bytes},
         "regenerable": regenerable,
         "at_risk": at_risk,
+        "demoted": demoted,
+        "dirty_tracked": dirty_count,
     }
 
 
 # ---- Verify ----
 
 
-def verify(inventory: dict, backup: Path) -> int:
-    print(f"\nVerifying at-risk files against {backup}")
-    missing = differing = matched = 0
-    for entry in inventory["at_risk"]:
+def verify(root: Path, backup: Path) -> int:
+    """Check a backup against the SAVED MANIFEST, never against a fresh scan.
+
+    Verifying against a freshly-walked inventory is worse than useless: a file
+    that was recorded earlier and has since been DELETED is absent from the new
+    scan, so it is never looked for, and the backup passes. The saved manifest
+    is the only record of what was supposed to exist.
+    """
+    manifest_path = root / MANIFEST
+    if not manifest_path.exists():
+        print(f"FAIL: {MANIFEST} does not exist. Nothing to verify against.",
+              file=sys.stderr)
+        print("  Run with --write-manifest first, and commit the result.",
+              file=sys.stderr)
+        return 2
+    try:
+        saved = json.loads(manifest_path.read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        print(f"FAIL: cannot read {MANIFEST}: {error}", file=sys.stderr)
+        return 2
+
+    recorded = saved.get("at_risk") or []
+    print(f"\nVerifying {len(recorded)} recorded at-risk file(s) against {backup}")
+    print(f"  manifest written {saved.get('created_at_utc')}")
+
+    missing = differing = matched = gone_locally = 0
+    for entry in recorded:
         candidate = backup / entry["path"]
+        if not (root / entry["path"]).exists():
+            gone_locally += 1
         if not candidate.exists():
             missing += 1
+            print(f"  ABSENT FROM BACKUP: {entry['path']}"
+                  + ("   (and gone locally -- this file may be LOST)"
+                     if not (root / entry["path"]).exists() else ""))
             continue
         if sha256_file(candidate) == entry["sha256"]:
             matched += 1
         else:
             differing += 1
             print(f"  DIFFERS: {entry['path']}")
-    total = len(inventory["at_risk"])
-    print(f"  matched {matched} / {total};  missing {missing};  differing {differing}")
+
+    print(f"  matched {matched} / {len(recorded)};  absent from backup {missing};  "
+          f"differing {differing}")
+    if gone_locally:
+        print(f"  {gone_locally} recorded file(s) no longer exist in the working "
+              f"tree either.")
     return 0 if (missing == 0 and differing == 0) else 1
 
 
@@ -321,11 +453,17 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print(f"  remote:   {status} ({replication.get('reason')})")
 
-    inventory = walk(root, tracked)
+    dirty = git_dirty(root)
+    inventory = walk(root, tracked, dirty)
 
     tracked_stats = inventory["tracked"]
     print(f"\n  tracked:      {tracked_stats['files']:>6} files  "
-          f"{tracked_stats['bytes'] / 1048576:>9.1f} MB   (protected by git)")
+          f"{tracked_stats['bytes'] / 1048576:>9.1f} MB   (committed AND unmodified)")
+    if inventory.get("dirty_tracked"):
+        print(f"  MODIFIED:     {inventory['dirty_tracked']:>6} files             "
+              f"   tracked but uncommitted -- counted AT RISK below,")
+        print("                                          because the bytes on "
+              "disk are in no commit")
 
     regen_files = sum(b["files"] for b in inventory["regenerable"].values())
     regen_bytes = sum(b["bytes"] for b in inventory["regenerable"].values())
@@ -336,8 +474,22 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  AT RISK:      {len(inventory['at_risk']):>6} files  "
           f"{risk_bytes / 1048576:>9.1f} MB   (no recipe, not in git)")
 
+    if inventory.get("demoted"):
+        print(f"\n  DEMOTED TO AT-RISK ({len(inventory['demoted'])}) -- matched a "
+              f"regenerable pattern but")
+        print("  the thing its recovery actually depends on is missing:")
+        seen = set()
+        for item in inventory["demoted"]:
+            key = (item["rule"], item["reason"])
+            if key in seen:
+                continue
+            seen.add(key)
+            count = sum(1 for d in inventory["demoted"]
+                        if (d["rule"], d["reason"]) == key)
+            print(f"    {item['rule']}: {item['reason']}  ({count} files)")
+
     if inventory["regenerable"]:
-        print("\n  REGENERABLE CLASSES")
+        print("\n  REGENERABLE CLASSES (recovery dependency verified present)")
         for name, bucket in sorted(inventory["regenerable"].items(),
                                    key=lambda kv: -kv[1]["bytes"]):
             print(f"    {name}  ({bucket['files']} files, "
@@ -354,7 +506,17 @@ def main(argv: list[str] | None = None) -> int:
             print(f"    ... and {len(inventory['at_risk']) - args.top} more "
                   f"(full list in the manifest)")
     else:
-        print("\n  No at-risk files: everything present is tracked or regenerable.")
+        print("\n  No at-risk files: everything present is committed, unmodified, "
+              "or\n  regenerable by a recipe whose dependency was checked.")
+
+    print("\n  THIS IS NOT PERMISSION TO DELETE ANYTHING.")
+    print("  'regenerable' means a recipe exists and its dependency is present "
+          "TODAY.")
+    print("  It does not mean the recipe has been RUN, that it reproduces the "
+          "bytes,")
+    print("  or that re-running it is free. Verify a backup with --verify "
+          "<dir> before")
+    print("  removing anything, and prefer preserving over reclaiming space.")
 
     payload = {
         "schema_version": "preservation_inventory_v1",
@@ -374,7 +536,7 @@ def main(argv: list[str] | None = None) -> int:
     }
 
     if args.verify:
-        return verify(inventory, args.verify.resolve())
+        return verify(root, args.verify.resolve())
 
     if args.write_manifest:
         target = root / MANIFEST
