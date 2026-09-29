@@ -9,8 +9,8 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-import modal_apps.run_editing_t1_uniform_successor_capacity_v2 as modal_runner
 import compose_v4.experiments.editing_t1_uniform_successor_capacity_v2 as capacity_v2
+import modal_apps.run_editing_t1_uniform_successor_capacity_v2 as modal_runner
 import scripts.run_editing_t1_uniform_successor_capacity_v2 as v2_runner
 from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY
 from compose_v4.experiments.cycle_op_prior import build_cycle_op_records
@@ -256,6 +256,53 @@ def test_probability_floor_proves_all_v1_probability_nll_top1_checks() -> None:
         thresholds=capacity_v2.EXPECTED_V1_THRESHOLDS,
     )
     assert failed["minimum_every_example_teacher_successor_probability"] is False
+
+
+def test_frozen_probability_floor_is_strict_even_one_ulp_below() -> None:
+    floor = torch.tensor(0.8, dtype=torch.float64)
+    below = torch.nextafter(floor, torch.zeros_like(floor)).reshape(1)
+    checks, _ = capacity_v2.probability_implication_checks(
+        below, thresholds=capacity_v2.EXPECTED_V1_THRESHOLDS
+    )
+    assert checks["minimum_every_example_teacher_successor_probability"] is False
+    assert checks["minimum_unique_state_teacher_successor_probability"] is False
+
+
+@pytest.mark.parametrize(
+    "field,delta",
+    [
+        ("mean_canonical_successor_nll", 0.01),
+        ("mean_teacher_successor_probability", -0.01),
+        ("maximum_teacher_successor_nll", -1.0),
+    ],
+)
+def test_trajectory_validator_refuses_material_bound_violations(monkeypatch, field, delta):
+    monkeypatch.setattr(capacity_v2, "forward_teacher_successor_batch", _toy_forward)
+    monkeypatch.setattr(capacity_v2, "successor_panel_metrics", _toy_metrics)
+    report = capacity_v2.train_uniform_successor_capacity_v2(
+        _ToyModel(),
+        _toy_panel(),
+        maximum_updates=10,
+        learning_rate=0.4,
+        weight_decay=0.0,
+        scope="all",
+        seed=7,
+        gradient_clip_norm=10.0,
+        thresholds=capacity_v2.EXPECTED_V1_THRESHOLDS,
+    )
+    mutated = copy.deepcopy(report)
+    mutated["trajectory"][-1][field] += delta
+    mutated["trajectory_sha256"] = capacity_v2.stable_sha256(mutated["trajectory"])
+    with pytest.raises(SuccessorMicroOverfitError, match="trajectory metric is invalid"):
+        capacity_v2.validate_v2_training_report(
+            mutated,
+            family="cycle_attach",
+            maximum_updates=10,
+            learning_rate=0.4,
+            weight_decay=0.0,
+            gradient_clip_norm=10.0,
+            seed=7,
+        )
 
 
 def test_v2_optimizer_stops_only_after_probability_and_gradient_gates(

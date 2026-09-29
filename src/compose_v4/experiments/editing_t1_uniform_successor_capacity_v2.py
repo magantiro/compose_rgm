@@ -27,8 +27,8 @@ from compose_v4.experiments.factorized_successor_training import (
 )
 from compose_v4.experiments.successor_micro_overfit import (
     _HEAD_PREFIXES_BY_FAMILY,
-    PreparedSuccessorPanel,
     RINGCORE_EDITING_FAMILIES,
+    PreparedSuccessorPanel,
     SuccessorMicroOverfitError,
     configure_micro_overfit_parameters,
     successor_panel_metrics,
@@ -862,6 +862,8 @@ def validate_v2_training_report(
             raise SuccessorMicroOverfitError(
                 "uniform T1 V2 trajectory metric is malformed"
             ) from error
+        # Float32 reductions can cross an input extremum by a few ULPs. This
+        # reconstruction tolerance does not apply to the frozen gates below.
         if (
             not all(
                 math.isfinite(value)
@@ -873,10 +875,21 @@ def validate_v2_training_report(
                     maximum_nll,
                 )
             )
-            or not 0.0 <= minimum_probability <= mean_probability <= 1.0
+            or not 0.0 <= minimum_probability <= 1.0
+            or not 0.0 <= mean_probability <= 1.0
+            or (
+                minimum_probability > mean_probability
+                and not math.isclose(
+                    minimum_probability, mean_probability, rel_tol=2**-22, abs_tol=1e-12
+                )
+            )
             or minimum_log_probability > 0.0
             or mean_nll < 0.0
-            or maximum_nll < mean_nll
+            or maximum_nll < 0.0
+            or (
+                maximum_nll < mean_nll
+                and not math.isclose(maximum_nll, mean_nll, rel_tol=2**-22, abs_tol=1e-12)
+            )
             or not math.isclose(
                 minimum_probability,
                 math.exp(minimum_log_probability),
@@ -1096,8 +1109,8 @@ def validate_v2_training_report(
 
 __all__ = [
     "EARLY_STOP_RULE",
-    "EXPECTED_V1_THRESHOLDS",
     "EXPECTED_UNIFORM_V2_CONTRACT_SHA256",
+    "EXPECTED_V1_THRESHOLDS",
     "SELECTION_RULE",
     "TOTAL_HAZARD_PARAMETER_PREFIX",
     "UNIFORM_V2_CONTRACT_SCHEMA",
