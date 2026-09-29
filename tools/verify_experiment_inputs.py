@@ -35,7 +35,17 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 EXPERIMENTS = "experiments"
 
 
-def sha256_16(path: Path) -> str | None:
+#: Schemas this tool understands. An unrecognized schema is REJECTED rather than
+#: skipped: a verifier that returns success on a manifest it cannot read is
+#: worse than no verifier, because the success is quoted.
+SUPPORTED_SCHEMAS = frozenset({"experiment_task_manifest_v1"})
+
+#: Accepted hash field names and their exact hex length. A truncated hash is
+#: allowed only where the field NAME says it is truncated.
+HASH_FIELDS = {"sha256": 64, "sha256_16": 16}
+
+
+def sha256_hex(path: Path) -> str | None:
     digest = hashlib.sha256()
     try:
         with path.open("rb") as handle:
@@ -43,7 +53,29 @@ def sha256_16(path: Path) -> str | None:
                 digest.update(chunk)
     except OSError:
         return None
-    return digest.hexdigest()[:16]
+    return digest.hexdigest()
+
+
+def declared_hash(item: dict) -> tuple[str, str] | str:
+    """Return ``(field, value)`` or an error string.
+
+    A missing or malformed hash is an ERROR, never a pass. The original version
+    of this tool treated `expected is None` as "verified", so an input with no
+    hash at all counted toward a green result.
+    """
+    present = [f for f in HASH_FIELDS if f in item]
+    if not present:
+        return (f"declares no hash (expected one of {sorted(HASH_FIELDS)})")
+    if len(present) > 1:
+        return f"declares several hashes {present}; exactly one is required"
+    field = present[0]
+    value = item[field]
+    width = HASH_FIELDS[field]
+    if not isinstance(value, str) or len(value) != width:
+        return f"{field} must be {width} hex characters, got {value!r}"
+    if any(c not in "0123456789abcdef" for c in value.lower()):
+        return f"{field} is not hexadecimal: {value!r}"
+    return field, value.lower()
 
 
 def manifests(root: Path, only: str | None) -> list[Path]:
@@ -54,26 +86,67 @@ def manifests(root: Path, only: str | None) -> list[Path]:
 
 
 def check(manifest_path: Path, root: Path) -> tuple[int, int, int]:
-    payload = json.loads(manifest_path.read_text())
+    try:
+        payload = json.loads(manifest_path.read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        print(f"\n  {manifest_path.relative_to(root)}")
+        print(f"    REJECTED  unreadable manifest: {error}")
+        return 0, 0, 1
+
     task = payload.get("task", manifest_path.parent.name)
     print(f"\n  {task}  ({manifest_path.relative_to(root)})")
+
+    schema = payload.get("schema_version")
+    if schema not in SUPPORTED_SCHEMAS:
+        print(f"    REJECTED  schema_version={schema!r} is not supported by this "
+              f"tool.")
+        print(f"              supported: {sorted(SUPPORTED_SCHEMAS)}")
+        print("              Refusing to report success on a manifest whose "
+              "shape is unknown;")
+        print("              a green result here would mean nothing was checked.")
+        return 0, 0, 1
 
     reported = payload.get("reported_result") or {}
     print(f"    reported result: {reported.get('status')}")
     if reported.get("reproduce"):
         print(f"    reproduce with:  {reported['reproduce']}")
 
+    inputs = payload.get("inputs") or []
+    if not inputs:
+        print("    REJECTED  the manifest declares no inputs; there is nothing "
+              "to verify,")
+        print("              and '0 verified' must not read as a pass.")
+        return 0, 0, 1
+
     failures = drift = ok = 0
-    for item in payload.get("inputs") or []:
+    for item in inputs:
+        if "path" not in item:
+            print(f"    REJECTED  an input entry has no 'path': {item!r}")
+            failures += 1
+            continue
         path = root / item["path"]
         strength = item.get("pin", "informational")
+
+        resolved = declared_hash(item)
+        if isinstance(resolved, str):
+            print(f"    REJECTED  {item['path']}: {resolved}")
+            failures += 1
+            continue
+        field, expected = resolved
+
         if not path.exists():
             print(f"    MISSING   {item['path']}  ({item.get('role','')})")
             failures += 1
             continue
-        actual = sha256_16(path)
-        expected = item.get("sha256_16")
-        if expected is None or actual == expected:
+
+        full = sha256_hex(path)
+        if full is None:
+            print(f"    UNREADABLE {item['path']}")
+            failures += 1
+            continue
+        actual = full if field == "sha256" else full[:16]
+
+        if actual == expected:
             ok += 1
             continue
         if strength == "strict":
@@ -124,6 +197,10 @@ def main(argv: list[str] | None = None) -> int:
     print("\n" + "=" * 78)
     print(f"{total_ok} verified, {total_drift} drifted (informational), "
           f"{total_fail} FAILED")
+    if total_ok == 0:
+        print("NOTHING WAS VERIFIED. That is a failure, not a pass -- a run that "
+              "checks\nzero inputs cannot tell you the inputs are intact.")
+        return 1
     if total_fail:
         print("A strict pin moved or an input is missing -- the recorded results "
               "were not produced from what is on disk now.")

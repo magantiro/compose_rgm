@@ -28,31 +28,31 @@
    "path": "docs/PMO_INIT_BANK.json",
    "role": "objective-blind initialization bank, 100 molecules, fixed before any task; the controller draws 16",
    "pin": "strict",
-   "sha256_16": "b679b4dc54006acf"
+   "sha256": "b679b4dc54006acf570fefb80f49d83a46c18c979c9e376fdd4d37b2cec5f860"
   },
   {
    "path": "configs/pmo_population_controller_v1.json",
    "role": "preflight contract for the v1 scored runtime",
    "pin": "strict",
-   "sha256_16": "1c095ecde7239167"
+   "sha256": "1c095ecde7239167990c70bd98f8a923e2fa1ccef1c2f8f7ebd3af8e3c5bd6d6"
   },
   {
    "path": "src/compose_v4/control/program_task.py",
    "role": "pmo_top_ten_auc -- the official mol_opt top_auc convention; the reproducer imports it rather than transcribing it",
    "pin": "informational",
-   "sha256_16": "56a61194ff4f1a2e"
+   "sha256": "56a61194ff4f1a2ef9e5f1b295dc5a90b2a6782a6ac407d56bd4039658cde63c"
   },
   {
    "path": "src/compose_v4/experiments/pmo_population_v1.py",
    "role": "scored entry point (execute_task)",
    "pin": "informational",
-   "sha256_16": "1c3f5f34ea5673b1"
+   "sha256": "1c3f5f34ea5673b1006447bb00d18c30546220386d1b5660581fb6efa529accb"
   },
   {
    "path": "modal_apps/pmo_population_v1_app.py",
    "role": "Modal app; bakes the contract at IMAGE BUILD time with copy=True",
    "pin": "informational",
-   "sha256_16": "36f49f0ecf791e6b"
+   "sha256": "36f49f0ecf791e6ba823a1d3f19a2b34b69cc8e269d149f3c69d1ea1b61ad88a"
   }
  ],
  "missing_assets": [
