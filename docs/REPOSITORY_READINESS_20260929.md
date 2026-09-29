@@ -76,11 +76,82 @@ and do not by themselves prove that every failure was pre-existing.
   extremum by up to two ULPs. Frozen scientific thresholds remain strict.
 - Removed a full-checkout recursive scan from a source-identity test; its
   replacement still refuses omitted serialized inputs. Removed a vacuous
-  golden-path assertion and consolidated the cycle-rank definition.
-- The first full-suite diagnostic on this checkout was deliberately interrupted
-  during a CPU-bound section: 2,586 passed, no failures, in 15m46s of pytest
-  time. This is a partial run, not suite sign-off. The final clean-export run
-  and any remaining findings must be recorded before completion.
+  golden-path assertion. An attempted shared cycle-rank refactor touched frozen
+  scientific source files; it was reversed after the scope audit. The current
+  source bytes match the pre-refactor revision.
+- A complete clean-clone diagnostic in the pinned core environment finished
+  with **5,301 passed, 70 failed, 6 skipped, 1 xfailed** in 58m59s. The actual
+  pytest exit status was 1. Its log and JUnit XML are at
+  `diagnostics/repository_readiness_v1/clean_clone_full_final.{log,xml}`.
+  This is a baseline, not suite sign-off for the subsequent repairs.
 - `ruff check src/` currently reports 494 legacy findings. Touched Python
   files are checked separately. Mass formatting hash-bound historical sources
   would change their physical identity and is outside this repair.
+
+## What the complete diagnostic established
+
+The 70 failures were not 70 unrelated defects. Forty-four gradient tests were
+contaminated by `load_package` disabling PyTorch gradients process-wide. One
+test each exposed a leaked temporary import path, a stale literal source-code
+assertion, and exact comparison of rounded float32 values. These four causes
+have targeted implementation or test repairs. Their focused tests passed; the
+full suite has not yet been rerun on the repaired candidate.
+
+Nine RingCore failures and one T4 qualification failure were tests that treated
+historical source identities as if they were the current checkout. The frozen
+RingCore operator and cycle hashes reproduce exactly from Git revision
+`a7546e2`; the frozen panel sampler hash reproduces from `65e0feca`.
+The T4 qualification's registry hash reproduces from the parent of
+`d613c9b8`, before a later registry repair. Tests now exercise the frozen
+identity and require the current checkout to refuse those historical inputs.
+No frozen hash, result, or source file was re-pinned.
+
+Five PMO recovery tests need the original pre-recovery campaign tree, and four
+PMO source-parity tests need the hash-bound InVirtuoGen source checkout. Those
+ignored inputs are absent from a source export. Tests now identify the exact
+missing prerequisite and skip there, or fail with
+`COMPOSE_REQUIRE_EXTERNAL_ASSETS=1`. The local PMO recovery folder has since
+advanced: three of those tests still fail against it. The old snapshot is not
+reconstructed or silently substituted from the later state.
+
+Two legacy PMO tests require PyTDC 0.3.6, not the core kernel. One serialized
+pan-lung test requires the exact stack in its bundle manifest. They skip when
+the prerequisite kernel is absent and fail with
+`COMPOSE_REQUIRE_ALTERNATE_KERNELS=1`. The legacy property-program source hash
+does not match the available PyTDC 1.1.15 environment; its 0.3.6 kernel remains
+unverified locally.
+
+The slot-safety gate found a real remaining defect: PMO Dynamic-v2.1's context
+key treats a `SCAR` slot as an atom. A candidate fix passed the local safety
+test but broke the frozen PMO source identity. The file was restored byte for
+byte (SHA-256 `d5f4d432f3a51d49a1c6f962e079a5ae729c731031998d78caf14f1d3891b743`),
+and the test remains red. Correcting it requires a new versioned proposer
+lineage and an explicit decision about how that lineage relates to reported
+campaigns. Existing PMO numbers must not be relabeled as having used the fix.
+
+Post-repair focused checks: 53 RingCore/T4 provenance tests passed; 93 tests
+covering the gradient, import, PMO, pan-lung, and assertion repairs passed with
+3 separately identified kernel skips; 2 prerequisite-gate tests passed. The
+slot-safety module had 4 passes and the one deliberate, real failure at
+`dynamic_program_synthesis_v21.py:94`. These are focused outcomes, not a final
+full-suite result.
+
+The documented fragment CLI verified seven artifact hashes and the complete
+saved metric panels for four independent tasks. Its offline table command
+produced `tables.json`, `tables.md`, and `provenance.json` in a fresh temporary
+directory; the observed motif, decoration, linker/morphing, and superstructure
+quality means were 42.633, 36.700, 31.533, and 39.033 percent. This reproduces
+saved-table reductions only, not generation from model weights or raw molecular
+evaluation. The isolated Python 3.11 environment passed `uv pip check` for 60
+installed packages. The command was run with `PYTHONPATH=src` so imports came
+from this checkout rather than the environment's earlier editable clone.
+
+## Release status
+
+Not yet ready to present as a fully reproducible public repository. The current
+branch still has a real slot-safety failure, missing historical recovery input,
+unverified legacy kernels, and an unresolved integration choice between this
+checkout and the separately developed PMO/T4 branch. A fresh source export can
+run thousands of offline tests, but a green subset alone would not resolve
+those provenance and input-access boundaries. No branch was merged, pushed, or
+published during this repair.
