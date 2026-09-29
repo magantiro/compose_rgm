@@ -1,0 +1,539 @@
+{
+  "schema_version": "pmo_abc_ablation_reduction_v1",
+  "created_utc": "2026-09-26T06:53:23.063235+00:00",
+  "STATUS": "PROVISIONAL -- arm B has 2 of 18 campaigns still running (ranolazine_mpo seeds 20274923, 20274925). Arm C is complete except 1 failed campaign. Do NOT publish as final.",
+  "arms": {
+    "A": "structured programs, unchanged COMPOSE configuration; pre-existing completed campaigns, reused (0 new oracle calls)",
+    "B": "length-matched uniform legal edit chains: the arm-A synthesis supplies the realized primitive count, then the program is discarded and replaced by that many uniform draws from the recomputed legal Active8 fiber",
+    "C": "created-atom rebinding: the structured recipe is KEPT (operation sequence, length, block boundaries, payloads and all source-atom bindings preserved byte-for-byte) and only operands referring to atoms created by earlier operations are resampled among the currently live created atoms that leave the operation admissible"
+  },
+  "protocol": {
+    "budget_charged_calls": 1008,
+    "reporting_prefix": 1000,
+    "metric_source": "each campaign's own canary_v1.json: best_score, final_top10, auc_official",
+    "arm_C_commit": "e11cd89d64c03a2183b5ac7c6443c2b4f505290c",
+    "arm_C_workspace": "kosha-labs",
+    "arm_B_workspace": "nitya",
+    "initialization": "held fixed across arms"
+  },
+  "failures": [
+    {
+      "arm": "C",
+      "task": "ranolazine_mpo",
+      "seed": 20274925,
+      "charged": 400,
+      "cause": "pending round needs explicit receipt-based recovery after preemption"
+    },
+    {
+      "arm": "B",
+      "task": "celecoxib_rediscovery",
+      "seed": 20260923,
+      "charged": 431,
+      "cause": "pending round needs explicit receipt-based recovery after preemption"
+    },
+    {
+      "arm": "B",
+      "task": "albuterol_similarity",
+      "seed": 20261923,
+      "charged": 64,
+      "cause": "IndexError in pmo_contextual_macro.edge_features (shared value model, triggered by arm-B molecules) -- an asymmetry between arms, not random attrition"
+    }
+  ],
+  "cells": [
+    {
+      "task": "albuterol_similarity",
+      "seed": 20261923,
+      "A": {
+        "best": 0.7868852459016393,
+        "top10": 0.7602824806321633,
+        "auc": 0.5670139751475033,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.35,
+        "top10": 0.31320281709376857,
+        "auc": null,
+        "state": "FAILED"
+      },
+      "C": {
+        "best": 0.7149758454106281,
+        "top10": 0.690657248406609,
+        "auc": 0.5566861928056763,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "albuterol_similarity",
+      "seed": 20261925,
+      "A": {
+        "best": 0.7999999999999999,
+        "top10": 0.7999999999999999,
+        "auc": 0.6146753450476375,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.6666666666666666,
+        "top10": 0.6588744588744587,
+        "auc": 0.5056213994594044,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.6349206349206349,
+        "top10": 0.6251920122887864,
+        "auc": 0.5633391150952872,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "albuterol_similarity",
+      "seed": 20261983,
+      "A": {
+        "best": 0.7953216374269005,
+        "top10": 0.787755073682552,
+        "auc": 0.5230668355198356,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.5267489711934156,
+        "top10": 0.5161642262417456,
+        "auc": 0.4590856587346075,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.6153846153846154,
+        "top10": 0.5989667989667989,
+        "auc": 0.5363626206480429,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "celecoxib_rediscovery",
+      "seed": 20260923,
+      "A": {
+        "best": 0.391304347826087,
+        "top10": 0.3887264910158331,
+        "auc": 0.31743459182080136,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.23529411764705882,
+        "top10": 0.22719325220752978,
+        "auc": null,
+        "state": "FAILED"
+      },
+      "C": {
+        "best": 0.36134453781512604,
+        "top10": 0.35596916452531424,
+        "auc": 0.2976917054844854,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "celecoxib_rediscovery",
+      "seed": 20260925,
+      "A": {
+        "best": 0.3333333333333333,
+        "top10": 0.33159016945348446,
+        "auc": 0.268051078723534,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.2764227642276423,
+        "top10": 0.27195069267010386,
+        "auc": 0.2216092533803061,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.2740740740740741,
+        "top10": 0.26866311408291715,
+        "auc": 0.22285308691379258,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "celecoxib_rediscovery",
+      "seed": 20260926,
+      "A": {
+        "best": 0.2890625,
+        "top10": 0.2837691823144457,
+        "auc": 0.2388203910831096,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.24193548387096775,
+        "top10": 0.2365064841189206,
+        "auc": 0.20123789680714685,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.26785714285714285,
+        "top10": 0.2602653696680246,
+        "auc": 0.22691732554853825,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "gsk3b",
+      "seed": 20268925,
+      "A": {
+        "best": 0.47,
+        "top10": 0.46299999999999997,
+        "auc": 0.38794999999999996,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.43,
+        "top10": 0.3945,
+        "auc": 0.31654861111111116,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.51,
+        "top10": 0.48299999999999993,
+        "auc": 0.3526924603174603,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "gsk3b",
+      "seed": 20268926,
+      "A": {
+        "best": 0.58,
+        "top10": 0.5529999999999999,
+        "auc": 0.46325000000000005,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.46,
+        "top10": 0.43099999999999994,
+        "auc": 0.35188293650793656,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.39,
+        "top10": 0.374,
+        "auc": 0.31745238095238104,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "gsk3b",
+      "seed": 20269003,
+      "A": {
+        "best": 0.6,
+        "top10": 0.589,
+        "auc": 0.41464999999999996,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.49,
+        "top10": 0.471,
+        "auc": 0.3994722222222222,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.53,
+        "top10": 0.5130000000000001,
+        "auc": 0.3117599206349206,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "isomers_c9h10n2o2pf2cl",
+      "seed": 20280923,
+      "A": {
+        "best": 0.8290291181804004,
+        "top10": 0.821317375085564,
+        "auc": 0.7070389829187795,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.9844964370054085,
+        "top10": 0.9484297376518622,
+        "auc": 0.8050650106431967,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.9394130628134758,
+        "top10": 0.9394130628134757,
+        "auc": 0.7760585069863553,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "isomers_c9h10n2o2pf2cl",
+      "seed": 20280925,
+      "A": {
+        "best": 0.9248488132162048,
+        "top10": 0.9248488132162047,
+        "auc": 0.7397599368640427,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.8824969025845953,
+        "top10": 0.8824969025845955,
+        "auc": 0.6631326789783414,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.8161762130223398,
+        "top10": 0.7624568457165347,
+        "auc": 0.6478664451044124,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "isomers_c9h10n2o2pf2cl",
+      "seed": 20280926,
+      "A": {
+        "best": 0.9394130628134758,
+        "top10": 0.9394130628134756,
+        "auc": 0.7219300519501888,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.9248488132162048,
+        "top10": 0.9121432400267219,
+        "auc": 0.7450469846445263,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.8824969025845955,
+        "top10": 0.8824969025845955,
+        "auc": 0.8165478126609419,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "ranolazine_mpo",
+      "seed": 20274923,
+      "A": {
+        "best": 0.7185527058036646,
+        "top10": 0.7110743897334529,
+        "auc": 0.6422979688530083,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.7036821162647426,
+        "top10": 0.6956760048778745,
+        "auc": null,
+        "state": "PARTIAL@512"
+      },
+      "C": {
+        "best": 0.7625228780919374,
+        "top10": 0.754097143318324,
+        "auc": 0.6619945986096852,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "ranolazine_mpo",
+      "seed": 20274925,
+      "A": {
+        "best": 0.7949150011240961,
+        "top10": 0.7879498454116843,
+        "auc": 0.6831200347012312,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.6337751591380005,
+        "top10": 0.619883326360024,
+        "auc": null,
+        "state": "PARTIAL@528"
+      },
+      "C": {
+        "best": 0.6765159534148442,
+        "top10": 0.6744493882729585,
+        "auc": null,
+        "state": "FAILED"
+      }
+    },
+    {
+      "task": "ranolazine_mpo",
+      "seed": 20274926,
+      "A": {
+        "best": 0.8140420802710525,
+        "top10": 0.8107853159444167,
+        "auc": 0.6980004848703654,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.6828907726183198,
+        "top10": 0.678271975788914,
+        "auc": 0.5672217529040374,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.7656444817859117,
+        "top10": 0.7589245160335133,
+        "auc": 0.670033802348249,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "scaffold_hop",
+      "seed": 20279923,
+      "A": {
+        "best": 0.45795795795795796,
+        "top10": 0.45391064861174035,
+        "auc": 0.41418933925345847,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.46278317152103554,
+        "top10": 0.4592505957045928,
+        "auc": 0.41726317858285983,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.46455505279034687,
+        "top10": 0.45694484228326254,
+        "auc": 0.41536179595331135,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "scaffold_hop",
+      "seed": 20279925,
+      "A": {
+        "best": 0.46705653021442495,
+        "top10": 0.4625759541206434,
+        "auc": 0.4264593303231106,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.48192109022969554,
+        "top10": 0.4778253084438499,
+        "auc": 0.44254238366590326,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.4705738705738705,
+        "top10": 0.46533338094191184,
+        "auc": 0.4337604247877049,
+        "state": "COMPLETE"
+      }
+    },
+    {
+      "task": "scaffold_hop",
+      "seed": 20279926,
+      "A": {
+        "best": 0.47135169357391576,
+        "top10": 0.4674322105922064,
+        "auc": 0.4231198984230006,
+        "state": "COMPLETE"
+      },
+      "B": {
+        "best": 0.4737279335410176,
+        "top10": 0.46824207352159614,
+        "auc": 0.4152820418857849,
+        "state": "COMPLETE"
+      },
+      "C": {
+        "best": 0.46948998178506374,
+        "top10": 0.4624341372733999,
+        "auc": 0.4189957225102212,
+        "state": "COMPLETE"
+      }
+    }
+  ],
+  "paired_on_common_cells": {
+    "n_common_cells": 14,
+    "tasks_represented": [
+      "albuterol_similarity",
+      "celecoxib_rediscovery",
+      "gsk3b",
+      "isomers_c9h10n2o2pf2cl",
+      "ranolazine_mpo",
+      "scaffold_hop"
+    ],
+    "tasks_missing": [],
+    "auc_C_minus_A": {
+      "n": 17,
+      "mean": -0.02007848784922999,
+      "median": -0.01190306553457135,
+      "sd": 0.05869865600667542,
+      "C_better": 6,
+      "paired_t_p": 0.17758089112904746,
+      "wilcoxon_p": 0.1454315185546875
+    },
+    "auc_B_minus_A": {
+      "n": 14,
+      "mean": -0.03785354753211987,
+      "median": -0.04201215980959533,
+      "sd": 0.06243406704714713,
+      "B_better": 4,
+      "paired_t_p": 0.04097801186120153,
+      "wilcoxon_p": 0.0494384765625
+    },
+    "auc_C_minus_B": {
+      "n": 14,
+      "mean": 0.014213529352445308,
+      "median": 0.002478757078961405,
+      "sd": 0.05127050530239557,
+      "C_better": 8,
+      "paired_t_p": 0.31851268892683987,
+      "wilcoxon_p": 0.42626953125
+    },
+    "top10_C_minus_A": {
+      "n": 17,
+      "mean": -0.05274509578310087,
+      "median": -0.05186079991090342,
+      "sd": 0.08503437509968532,
+      "C_better": 5,
+      "paired_t_p": 0.02108195303219309,
+      "wilcoxon_p": 0.017425537109375
+    },
+    "top10_B_minus_A": {
+      "n": 16,
+      "mean": -0.06657543838216318,
+      "median": -0.05345108748945285,
+      "sd": 0.09203336607944337,
+      "B_better": 4,
+      "paired_t_p": 0.011139753496998922,
+      "wilcoxon_p": 0.00762939453125
+    },
+    "top10_C_minus_B": {
+      "n": 15,
+      "mean": 0.006857095031087264,
+      "median": -0.0032875785871867014,
+      "sd": 0.057438662520969054,
+      "C_better": 6,
+      "paired_t_p": 0.6509261815453395,
+      "wilcoxon_p": 0.803955078125
+    },
+    "best_C_minus_A": {
+      "n": 17,
+      "mean": -0.04698410191819377,
+      "median": -0.0483975984851408,
+      "sd": 0.08150907543568613,
+      "C_better": 5,
+      "paired_t_p": 0.030291608689332037,
+      "wilcoxon_p": 0.0347900390625
+    },
+    "best_B_minus_A": {
+      "n": 16,
+      "mean": -0.06015550948985713,
+      "median": -0.044739463380320865,
+      "sd": 0.0950029754188035,
+      "B_better": 4,
+      "paired_t_p": 0.022968089042920057,
+      "wilcoxon_p": 0.013092041015625
+    },
+    "best_C_minus_B": {
+      "n": 15,
+      "mean": 0.006965852516286441,
+      "median": -0.0023486901535682003,
+      "sd": 0.05371790725366562,
+      "C_better": 7,
+      "paired_t_p": 0.6233137261625934,
+      "wilcoxon_p": 0.803955078125
+    }
+  },
+  "caveats": [
+    "gsk3b is a reward-hackable ML-predictor oracle in every arm; its leaders are off-manifold (QED 0.03-0.23, SA 6.2-6.6) and that row is not a chemistry result for any arm",
+    "arm B's completed subset currently EXCLUDES ranolazine_mpo entirely, so any B-vs-A figure rests on a task mix missing one sixth of the panel",
+    "AUC-top10 trapezoids from (0,0), so a 1000-call AUC is structurally depressed ~5% and must never be compared to a published 10000-call figure",
+    "no arm's proposal-synthesis path is in the contract's implementation_sha256; arm identity rests on the launch receipt git_commit plus the deployed image"
+  ]
+}

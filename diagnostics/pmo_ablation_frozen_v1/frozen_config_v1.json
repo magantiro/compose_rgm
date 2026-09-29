@@ -1,0 +1,136 @@
+{
+  "arm_a": {
+    "definition": "unchanged existing COMPOSE PMO configuration",
+    "name": "structured_programs",
+    "new_oracle_calls": 0,
+    "source": "existing completed campaigns, reused"
+  },
+  "arm_a_seed_verification": {
+    "CORRECTION_RECORDED": "An earlier pass of this verification WRONGLY reported albuterol seed 20261923 as a 112-call smoke and substituted 20261983. The verifier skipped any namespace whose provenance.json was absent (`if p.get('returncode') is None: continue`), and the real run `scored_albuterol_similarity_seed20261923_20260923T194810Z` (budget 10000, 5975 charged, 5991 receipts, best 0.8506) carries no provenance.json. Only the 112-call smoke of the same seed was seen. The substitution is WITHDRAWN and the reported albuterol row 0.782 +- 0.020 stands. Lesson: count the artifact the work produces, never gate the count on a metadata file the producer may not write.",
+    "receipts_per_seed": {
+      "albuterol_similarity": {
+        "20261923": 5991,
+        "20261925": 1008,
+        "20261983": 3367
+      },
+      "celecoxib_rediscovery": {
+        "20260923": 4199,
+        "20260925": 1008,
+        "20260926": 1008
+      },
+      "gsk3b": {
+        "20268925": 1008,
+        "20268926": 1008,
+        "20269003": 1000
+      },
+      "isomers_c9h10n2o2pf2cl": {
+        "20280923": 4433,
+        "20280925": 1008,
+        "20280926": 1008
+      },
+      "ranolazine_mpo": {
+        "20274923": 2615,
+        "20274925": 1008,
+        "20274926": 1008
+      },
+      "scaffold_hop": {
+        "20279923": 2880,
+        "20279925": 1008,
+        "20279926": 1008
+      }
+    },
+    "reporting_prefix": "first 1000 oracle query receipts in charge order; every seed has >=1000, gsk3b 20269003 has exactly 1000",
+    "requirement": "at least 1000 oracle query RECEIPTS (oracle/query_*), counted directly and NOT gated on provenance.json",
+    "result": "18 of 18 PASS",
+    "superseded_low_entries": "ranolazine 20274925/20274926 also appear on nitya as 96-budget smokes with 0 receipts; those are superseded by the kosha 1008-receipt runs of the same seeds."
+  },
+  "arm_b": {
+    "definition": "successive legal primitive edits sampled from the legal Active8 fiber, the fiber RECOMPUTED after every intermediate, with the planned length taken from the unchanged arm-A synthesis for that same proposal",
+    "name": "length_matched_legal_chains",
+    "new_oracle_calls": 18144,
+    "not_constructed_by": "shuffling a compiled program"
+  },
+  "budget_note": "Arm A's dominant wave ran budget 1008 and its third seeds 1000 (or a 10k prefix). The controller policy provably never reads remaining budget -- charged_calls_per_task enters only ProgramQueryLedger's stop condition and the AUC denominator -- so trajectories are comparable. BOTH arms are reported at exactly 1000 charged calls from the ledger prefix.",
+  "chain_arm_uniformity_definition": {
+    "DEFINITION": "uniform over DISTINCT CANONICAL SUCCESSORS, not over native marks",
+    "enumerator": "compose_v4.experiments.pmo_legal_action_policy.enumerate_legal_successors",
+    "measured_cost": "~3.6 s per chain step on a real 48-slot PMO state (full fiber ~471 successors)",
+    "not_constructed_by": "shuffling or replaying a compiled program",
+    "recomputed_every_step": true,
+    "why_this_is_the_definition": "enumerate_rule_successors applies each candidate action through the editing-V2 rewrite system, computes canonical_state_key(successor), drops the source key and any duplicate key, and returns one LegalSuccessor per distinct canonical successor. Several native marks landing on one molecule are therefore collapsed to a single draw. This is stated BEFORE any arm-B run and must not be changed afterwards."
+  },
+  "charged_call_accounting": {
+    "authoritative_charged_count": "resolved oracle receipts: oracle/query_NNNNNN/ directories containing result.json, which is exactly ProgramQueryLedger.rows",
+    "consequence": "the 988 figure that looked like a shortfall on the exactly-1000-receipt seed is a lagging snapshot, not missing evaluations; all 18 arm-A seeds supply >=1000 charged evaluations",
+    "do_not_use": "progress.json:charged_oracle_calls -- it is a PER-ROUND SNAPSHOT that lags the final calls",
+    "measured_evidence": {
+      "gsk3b_20268925": {
+        "progress_charged": 1006,
+        "query_dirs": 1008
+      },
+      "gsk3b_20269003": {
+        "progress_charged": 988,
+        "query_dirs": 1000,
+        "started_without_result": 0,
+        "with_result_json": 1000
+      }
+    },
+    "receipts_vs_charged_note": "the albuterol 20261923 run shows 5991 receipts against 5975 charged in its own progress snapshot; the prefix is taken on resolved receipts, so the two never have to be reconciled by subtraction",
+    "reporting_prefix": "the first 1000 RESOLVED receipts in charge (index) order, for BOTH arms"
+  },
+  "known_asymmetries_to_disclose": [
+    "there is NO learned rate model on the scored PMO path (verified: zero torch.load / rate-model instantiation in the import closure), so the 'frozen local reference' for the chain arm is the uniform law over the legal Active8 fiber, not a learned R_theta",
+    "the jump lane reads a teacher-derived plan library (diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json, fit_scope shared_all_routes) that the chain arm has no analogue for; measured footprint is ~0.39% of attempts",
+    "the credit feature vector carries one-hot indicators for shallow/structured/jump channels; anchored and transplant already encode as all-zero, so a chain proposal inherits an existing valid encoding rather than a novel missing-feature penalty"
+  ],
+  "protocol": "no-prescreen PMO, task-independent initialization bank, endpoint-only oracle scoring",
+  "question": "Do structured programs outperform learned local editing when the planned editing allowance is matched?",
+  "reporting_budget_charged_calls": 1000,
+  "retain_all": "all six objectives and all three seeds are reported regardless of outcome",
+  "run_budget_charged_calls": 1008,
+  "schema_version": "pmo_structured_vs_chain_ablation_v1",
+  "scored_closure_identity": {
+    "claim": "every arm-A run is byte-identical on the scored PMO import closure",
+    "closure_files_changed_between_them": 0,
+    "commits_pooled": [
+      "3e6baf94",
+      "c7fdddca",
+      "0b9666f4"
+    ],
+    "method": "import closure of compose_v4.experiments.pmo_population_v1 taken by execution, intersected with git diff --name-only between each commit pair"
+  },
+  "seed_rule": "arm B uses the SAME three seeds per task that arm A used, so initialization is matched per seed; the triples were recovered by reproducing the published table to three decimals, not chosen on score",
+  "tasks_and_seeds": {
+    "albuterol_similarity": [
+      20261923,
+      20261983,
+      20261925
+    ],
+    "celecoxib_rediscovery": [
+      20260923,
+      20260925,
+      20260926
+    ],
+    "gsk3b": [
+      20268925,
+      20268926,
+      20269003
+    ],
+    "isomers_c9h10n2o2pf2cl": [
+      20280923,
+      20280925,
+      20280926
+    ],
+    "ranolazine_mpo": [
+      20274923,
+      20274925,
+      20274926
+    ],
+    "scaffold_hop": [
+      20279923,
+      20279925,
+      20279926
+    ]
+  },
+  "workspace": "nitya"
+}
