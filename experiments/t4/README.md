@@ -1,6 +1,14 @@
 # T4 — constrained lead optimization
 
-**Status: table FROZEN (`diagnostics/T4_FROZEN_RESULT_v1.json`, locked 2026-09-22).**
+**Status: SUBMITTED table is `diagnostics/t4_combined_table.json`.**
+
+> **Correction (see `other_experiments` in the manifest).** An earlier version of
+> this guide called `diagnostics/T4_FROZEN_RESULT_v1.json` "the submitted table".
+> It is not. That artifact is a **later** experiment against InVirtuoGen at 250
+> calls. The submitted result is reduced by `scripts/t4_combined_table.py` into
+> `paper_gem_neurips2026/tables/t4_summary_row.tex`, which `main_gem.tex` inputs,
+> and its comparators are GenMol, RetMol and GraphGA. The two disagree per cell
+> by construction and neither corrects the other.
 
 The question: given a lead molecule, a similarity ball `δ`, and QED/SA
 constraints, can a validity-closed rewrite process find a better-docking
@@ -8,16 +16,36 @@ eligible molecule than the comparator within a fixed oracle budget?
 
     objective   QuickVina2 docking of the best eligible endpoint, lower is better
     subject to  Tanimoto ≥ δ  AND  QED ≥ 0.6  AND  SA ≤ 4  AND  heavy ≤ 40
-    budget      COMPOSE 250 charged docking calls per cell vs InVirtuoGen 1000
-    panel       5 targets × 3 seeds × δ ∈ {0.4, 0.6}
+    panel       5 targets × 3 seeds × δ ∈ {0.4, 0.6} = 30 cells
+    budget      A (submitted): 500 calls/cell vs GenMol 3,000
+                B (later):     250 calls/cell vs InVirtuoGen 1,000
 
 ---
 
-## 1. Reproduce the reported table — no credentials, no docking
+## 1. Reproduce the reported tables — no credentials, no docking
 
 ```
-python3 tools/reproduce_t4_table.py
+python3 tools/reproduce_t4_table.py              # both experiments
+python3 tools/reproduce_t4_table.py --submitted  # only the paper's table
+python3 tools/reproduce_t4_table.py --ivg        # only the later IVG panel
 ```
+
+**A — SUBMITTED** (`diagnostics/t4_combined_table.json`, 30 cells vs GenMol /
+RetMol / GraphGA, 500 calls per cell against GenMol's 3,000):
+
+    19W / 6L / 1T   coverage 26/30   head-to-head 16W/6L
+    paired n=23     mean difference -0.335 kcal/mol   95% CI [-0.651, -0.019]
+
+Verified three ways: every summary field recomputed from the 30 rows; per row
+`combined == min(new100, old200)` with `verdict` following from `combined` vs
+`genmol`; and the recomputed summary cross-checked against the LaTeX macros the
+paper typesets, which a different program wrote.
+
+Its estimator is a **max over two controller generations** against GenMol's
+mean-of-3 — measured selection gain 0.156 kcal/mol, 0.22x the 0.70 docking noise
+floor. That caveat prints with the table.
+
+**B — LATER IVG panel** (`diagnostics/T4_FROZEN_RESULT_v1.json`), below.
 
 Bare `python3`; no RDKit, no torch, no Modal, no oracle. It rebuilds the table
 from the sealed artifact and runs three checks, each able to fail on its own:
@@ -33,7 +61,7 @@ missing.
 
 **It currently exits 1, and that is correct.** See §4.
 
-## 2. What the table says
+## 2. What the LATER (B) panel says
 
     δ = 0.4   COMPOSE -169.4  IVG -160.4   sum gap -9.0   wins 10/15   coverage 15/15
     δ = 0.6   COMPOSE -153.9  IVG -145.4   sum gap -8.5   wins 13/14   coverage 14/15

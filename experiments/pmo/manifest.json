@@ -8,7 +8,8 @@
   "status": "DEVELOPMENT -- there is no frozen PMO paper table",
   "artifact": null,
   "reproduce": "PYTHONPATH=src python3 tools/reproduce_pmo_tables.py",
-  "note": "Every PMO number in this repo is development evidence recomputed from charged-call receipts. Nothing is a submitted result. The reproducer says so on every run."
+  "note": "Every PMO number in this repo is development evidence recomputed from charged-call receipts. Nothing is a submitted result. The reproducer says so on every run.",
+  "evidence_for_no_submitted_table": "Checked, not assumed: 'pmo' appears nowhere in paper_gem_neurips2026/sections/ or tables/, and main_gem.tex inputs no PMO table. In paper_iclr2027 it appears only in references.bib and under archive/superseded_2026-08-19/. If a PMO table is added to either paper, this manifest must be updated and this tool taught to reproduce it."
  },
  "environment": {
   "role": "pinned production kernel for PMO -- NOT the same as T4's",
