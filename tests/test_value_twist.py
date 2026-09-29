@@ -15,7 +15,7 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
-from griddd_value_twist import (  # noqa: E402
+from griddd_value_twist import (
     ValueTwistNet,
     build_reward_to_go_labels,
     fingerprint_array,
@@ -29,7 +29,7 @@ def test_reward_to_go_is_best_feasible_ahead() -> None:
     features, targets = build_reward_to_go_labels(traj)
     assert features.shape[1] == 2048
     # states are emitted in reversed order: hexane, benzene, ethanol
-    assert list(np.round(targets, 3)) == [0.5, 0.9, 0.9]
+    np.testing.assert_allclose(targets, [0.5, 0.9, 0.9], rtol=0, atol=1e-6)
 
 
 def test_infeasible_states_do_not_raise_the_target() -> None:

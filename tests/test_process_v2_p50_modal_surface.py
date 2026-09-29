@@ -129,9 +129,11 @@ def test_split_drivers_order_preparation_before_explicit_gpu_training() -> None:
     )
     assert "run_p50_gpu_remote" not in prepare_body
     assert train_body.count("run_p50_gpu_remote.remote(") == 1
-    assert combined_body.index("prepare_driver.remote(") < combined_body.index(
-        "collate_driver.remote("
-    ) < combined_body.index("train_driver.remote(")
+    assert (
+        combined_body.index("prepare_driver.remote(")
+        < combined_body.index("collate_driver.remote(")
+        < combined_body.index("train_driver.remote(")
+    )
 
 
 def test_canary_publishes_one_reusable_worst_case_leaf_without_gpu() -> None:
@@ -353,9 +355,7 @@ def test_collation_balances_measured_mark_work_without_changing_inventory() -> N
         )
     tasks = launcher._balanced_collated_tasks(leaves, maximum=2)
     observed = [identifier for task in tasks for identifier in task["p50_entry_sha256s"]]
-    expected = sorted(
-        entry["p50_entry_sha256"] for leaf in leaves for entry in leaf["entries"]
-    )
+    expected = sorted(entry["p50_entry_sha256"] for leaf in leaves for entry in leaf["entries"])
     assert sorted(observed) == expected
     assert len(observed) == len(set(observed))
     assert len(tasks) == 2
@@ -553,13 +553,10 @@ def test_write_targets_resolve_the_artifact_symlink_but_reads_do_not() -> None:
     """
 
     source = _source()
-    assert (
-        'output_root=_require_physical_artifact_path(output_root, field="output_root")'
-        in source
-    )
-    assert 'output_root=_require_artifact_path(' not in source
+    assert 'output_root=_require_physical_artifact_path(output_root, field="output_root")' in source
+    assert "output_root=_require_artifact_path(" not in source
     # Reads keep the logical form.
-    assert 'active8_run_root=_require_artifact_path(' in source
+    assert "active8_run_root=_require_artifact_path(" in source
 
 
 def test_a_prep_slice_proves_it_can_write_before_it_computes_anything() -> None:
@@ -628,10 +625,22 @@ def test_an_explicit_slice_list_replaces_the_derived_plan() -> None:
     """
 
     source = _source()
-    assert "slice_list_path: str = \"\"" in source
+    assert 'slice_list_path: str = ""' in source
     assert "if slice_list_path:" in source
     assert '"source": "explicit_slice_list"' in source
-    # Both paths must fan out through the SAME helper, or failure isolation and
-    # the completeness flag drift apart between them.
-    assert source.count("_run_prep_work(work, output_root=output_root)") == 2
+    # Both paths must fan out through the SAME helper with the same budgeted
+    # slice list; formatting and keyword layout are not part of the contract.
+    calls = [
+        node
+        for node in ast.walk(_function("prep_subset"))
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "_run_prep_work"
+    ]
+    assert len(calls) == 2
+    assert all(ast.dump(call.args[0]) == ast.dump(calls[0].args[0]) for call in calls)
+    assert isinstance(calls[0].args[0], ast.Call)
+    assert isinstance(calls[0].args[0].func, ast.Name)
+    assert calls[0].args[0].func.id == "_fit_budget"
+    assert all(any(keyword.arg == "output_root" for keyword in call.keywords) for call in calls)
     assert "def _run_prep_work(" in source

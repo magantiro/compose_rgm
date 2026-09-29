@@ -123,5 +123,4 @@ def load_package(
     if state_dict_semantic_sha256(model.state_dict()) != manifest["tensor_sha256"]:
         raise ValueError("inference package selected tensor state changed")
     torch.set_num_threads(1)
-    torch.set_grad_enabled(False)
     return model, manifest

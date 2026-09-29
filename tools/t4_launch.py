@@ -383,7 +383,10 @@ def launch_continuation_profile(
     import sys
 
     sys.path.insert(0, str(ROOT))
-    from modal_apps.run_process_v2_p50_app import local_image_revision
+    try:
+        from modal_apps.run_process_v2_p50_app import local_image_revision
+    finally:
+        sys.path.pop(0)
 
     kind = (
         "t4_winner_refinement"

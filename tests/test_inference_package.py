@@ -43,7 +43,9 @@ def package(tmp_path):
 
 def test_roundtrip_has_exact_production_law(package):
     path, original, digest = package
-    loaded, manifest = load_package(path, manifest_sha256=digest, repo_root=ROOT)
+    with torch.enable_grad():
+        loaded, manifest = load_package(path, manifest_sha256=digest, repo_root=ROOT)
+        assert torch.is_grad_enabled()
     graph = pad_molecular_graph(smiles_to_molecular_graph("CCO"), 12)
     assert law_values(original, graph)[1] == law_values(loaded, graph)[1]
     assert manifest["software"]["torch"] == torch.__version__

@@ -305,6 +305,7 @@ def test_launcher_spawns_only_the_selected_profile(tmp_path, monkeypatch, kind):
     (tmp_path / "modal_apps/genmol_t4_opt_app.py").write_text("# launch boundary fixture\n")
     revision = {"commit": "a" * 40, "image_revision_sha256": "b" * 64}
     monkeypatch.setattr(t4_launch, "ROOT", tmp_path)
+    original_path = sys.path.copy()
     monkeypatch.setitem(
         sys.modules,
         "modal_apps.run_process_v2_p50_app",
@@ -330,6 +331,7 @@ def test_launcher_spawns_only_the_selected_profile(tmp_path, monkeypatch, kind):
         partial=kind == "t4_partial_docking",
         uncapped_probe=kind == "t4_uncapped_lookahead_probe",
     )
+    assert sys.path == original_path
     assert len(calls) == 2
     assert calls[0] == ("genmol-t4-opt", kind)
     receipt = json.loads((tmp_path / f"diagnostics/{kind}_spawn.json").read_text())
