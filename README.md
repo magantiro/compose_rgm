@@ -37,9 +37,9 @@ integration; it does not change the submitted paper or the PMO/T4 protocols.
 3. **[`experiments/INDEX.md`](experiments/INDEX.md)** — every runnable
    experiment and its source-derived command. Regenerate it with
    `tools/gen_experiment_index.py` after adding an entrypoint.
-4. **[`experiments/region_resampling/`](experiments/region_resampling/)** — the
-   current campaign, with its preregistered gates, inputs, outputs and known
-   limitations.
+4. **[`experiments/region_resampling/`](experiments/region_resampling/)** — a
+   historical campaign with its preregistered gates, inputs, outputs and known
+   limitations; it is not the submitted PMO/T4 reproduction path.
 5. **[`docs/INDEX.md`](docs/INDEX.md)** — historical document census, classified CURRENT /
    SUPERSEDED / HISTORICAL.
 

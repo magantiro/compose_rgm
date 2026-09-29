@@ -177,6 +177,34 @@ paper-to-code map.
 ## Paper-release path audit
 
 A passing test suite on `compose-iclr` would not yet make a reviewer release.
+The compact-evidence paths are currently split as follows:
+
+| Submitted result | Preserved evidence | Clean `compose-iclr` export |
+| --- | --- | --- |
+| Reference likelihood | `diagnostics/editing_v2_experiment1_reference_law_paper.json` | Summary present; raw transition corpus external |
+| Fragment benchmark and ablations | `experiments/fragments/manifest.json` and its pinned reductions | Saved metrics reproducible; full generation assets external |
+| QED editing | `fragment-qed-ablations-20260925:diagnostics/qed_griddd_arm_a_rederivation_v1.json` | Final rederivation absent |
+| PMO-1K headline | Historical `99d87b65:diagnostics/pmo_ablation_frozen_v1/inputs/pmo_1k_final.json` | Per-seed reduction absent; raw receipts external |
+| PMO A/B ablation | `pmo-chain-ablation-20260925:diagnostics/pmo_abc_ablation_v1/reduction_v1.json` | Reduction and arm producer absent |
+| T4 table | `bc8cc421:diagnostics/T4_FROZEN_RESULT_v1.json` | Frozen table and producer absent; docking receipts external |
+
+The later `pmo_1k_final.json` per-seed reduction yields means of 0.563212
+final Top-10 and 0.481770 AUC over the declared 22 objectives, matching the
+manuscript's rounded 0.563 and 0.482. It does **not** reproduce every printed
+objective cell. Its JNK3 third seed has Top-10 0.210 and AUC 0.1886,
+giving three-seed means 0.246 and 0.209833, while the manuscript prints 0.245
+and 0.208. The earlier `pmo_1k_prov.json` instead marks that same seed
+`partial: 815` with Top-10 0.206 and AUC 0.183914; combining it with the two
+other seeds gives 0.244667 (sample SD 0.0406) and 0.208271 (sample SD 0.0317),
+which round to **both** printed JNK3 mean±SD cells. The evidence therefore
+points to a provisional 815-call snapshot being copied into a table captioned
+as 1,000 calls. The source files are preserved at Git revision `99d87b65`.
+The available direct receipt-count verification covers the six ablation
+objectives, not JNK3, so the later JNK3 seed's receipt count still needs an
+independent check. Do not relabel the printed row as a completed 1,000-call
+measurement in the release; record a correction or explicit caveat after
+checking the original receipts.
+
 This checkout contains the fragment saved-result reducer and its pinned small
 artifacts, but it does not track the submitted PMO/T4 producer entry points
 `scripts/pmo_reward_adaptive_canary.py`,
@@ -185,12 +213,26 @@ artifacts, but it does not track the submitted PMO/T4 producer entry points
 artifact. Those paths are present on the separate PMO/T4 development line
 (except that its later commits removed the PMO A/B reduction from the branch
 tip). The A/B result is preserved on the `pmo-chain-ablation-20260925` branch.
+The final QED rederivation used by the local compact-evidence draft is on
+`fragment-qed-ablations-20260925`. The tracked
+`docs/OFFICIAL800_QED_CURVE.json` is explicitly incomplete (`complete: false`,
+199 landed sources) and must not be substituted for the submitted 800-source
+result.
 The two lines have 23 and 615 commits, respectively, since their merge base
 `101cc73d`; this is a scientific-lineage integration, not a cosmetic directory
 merge. A no-checkout `git merge-tree` dry run found eight conflict paths,
 including the source-identity ledger, a T4 app, inference loading, three PMO
 experiment modules, and a T4 contract builder. No branch was merged or
 rebased during this audit.
+
+A separate no-checkout merge preview between `bc8cc421` and
+`pmo-chain-ablation-20260925` found four conflicts in the PMO app, scored
+runner, Dynamic-v2.1 synthesis hook, and launcher. These are arm-defining
+files. Resolving them into a new hybrid HEAD would not by itself reproduce the
+historical A/B campaigns, whose identities depend on their launch revisions
+and deployed images. The release map must point each result to its exact
+producer revision and verified artifact, even if the default checkout offers
+one convenient development interface.
 
 The other branch's `experiments/paper/README.md` claims a single reference
 checkpoint for every benchmark. Its PMO and T4 guides still point to
@@ -214,7 +256,11 @@ producer: `diagnostics/T4_FROZEN_RESULT_v1.json` on that branch declares a
 250-call ceiling, while its 30 rows record `charged_calls` from 0 to 249 rather
 than 250 each. The submitted text's phrase "using 250 evaluations per lead"
 should not be interpreted as measured 250 calls for every row without checking
-the producer receipts. The frozen artifact remains unchanged.
+the producer receipts. Specifically, FA7 starting molecule 1 at similarity
+floor 0.6 has `compose: null` and `charged_calls: 0` in the frozen artifact,
+while the submitted table prints -6.4, equal to the starting molecule's score.
+That displayed fallback must be labeled as such in a release reducer; it is not
+a measured COMPOSE endpoint from that cell. The frozen artifact remains unchanged.
 
 The intended release gate is end-to-end and has separate outcomes: (1) exact
 submitted-manuscript identity; (2) source export plus pinned environment;
@@ -223,3 +269,11 @@ and, where supported, generation parity; (5) full-suite and focused scientific
 invariants; (6) an explicit list of non-distributed assets and unsupported
 reproduction steps. Missing evidence is a failed or unavailable gate, never an
 implicit pass.
+
+The local manuscript candidates are distinct: `COMPOSE_ICLR_2027_revision4/main.pdf`
+has SHA-256 `e05a8fff0da6201f77c29ca218d5c79f6acf505bc6101afd1797f07bc7ff3db8`,
+and `COMPOSE_ICLR_2027_zip5_appendix_results/main.pdf` has SHA-256
+`9a1117459ad5bc38e27c9c6bbe67593cd7fa6d6384db1f5e5041907fe92b41dd`.
+Their corresponding copies under `output/pdf/` match byte-for-byte. The owner
+has not yet identified which exact PDF was submitted, so neither hash is
+promoted to the release manifest.
