@@ -4,17 +4,6 @@
  "title": "T4 constrained lead optimization",
  "recorded_at_commit": "c26d18c70b2c73918cf18cd5db3870af86190e89",
  "recorded_at_checkout": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916",
- "reported_result": {
-  "status": "SUBMITTED",
-  "artifact": "diagnostics/t4_combined_table.json",
-  "reducer": "scripts/t4_combined_table.py",
-  "typeset_in": "paper_gem_neurips2026/tables/t4_summary_row.tex (input by main_gem.tex)",
-  "comparators": "GenMol, RetMol, GraphGA",
-  "budget": "500 charged docking calls per cell vs GenMol's 3,000",
-  "headline": "19W/6L/1T, coverage 26/30, paired n=23, mean difference -0.335 kcal/mol, 95% CI [-0.651, -0.019]",
-  "reproduce": "python3 tools/reproduce_t4_table.py --submitted",
-  "estimator_caveat": "The statistic is per cell the BETTER of two controller generations (new mean-of-3 at 100 calls, old single run at 200) against GenMol's mean-of-3. Measured selection gain 0.156 kcal/mol = 0.22x the 0.70 docking noise floor."
- },
  "environment": {
   "role": "pinned production chemistry kernel for T4 and the editing corpus",
   "python": "3.11",
@@ -29,30 +18,6 @@
   "reproduction_needs_none_of_this": "tools/reproduce_t4_table.py reads only committed JSON and runs on a bare python3."
  },
  "inputs": [
-  {
-   "path": "diagnostics/t4_combined_table.json",
-   "role": "the SUBMITTED result, 30 rows",
-   "pin": "strict",
-   "sha256": "ace8b4f8db303d3eab2931b7d0c321dda89fa4a8cbe9e4e0beb18962cb7446ff"
-  },
-  {
-   "path": "scripts/t4_combined_table.py",
-   "role": "reducer that writes the typeset macros",
-   "pin": "informational",
-   "sha256": "665ba7d3d331688d2ea488bdaba9191231ddd58cbaadaa19fb41c37ec64e188e"
-  },
-  {
-   "path": "paper_gem_neurips2026/tables/t4_summary_row.tex",
-   "role": "the macros the paper typesets",
-   "pin": "strict",
-   "sha256": "f19516a0c051e1fc1b5726912dbefdec7e85e25377e70b6825034d345618335f"
-  },
-  {
-   "path": "diagnostics/T4_FROZEN_RESULT_v1.json",
-   "role": "the LATER IVG panel, not submitted",
-   "pin": "strict",
-   "sha256": "87584d49ceacff2b861f1479b283f47d58f9c60513e1fb63c61fc5f5d8230b9b"
-  },
   {
    "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
    "role": "eligibility gate (Fiber.check) and campaign loop",
@@ -92,16 +57,5 @@
   "Docking is not reproducible across runs: obabel --gen3D takes no seed, and one molecule scored -7.5 / -8.30 / -8.8 across three runs. Quote the aggregate and the win count; do not lean on a single cell's 0.2-0.7 margin.",
   "One blank cell (FA7 seed 1, delta 0.6) is a deliberate scoped negative, not a missing measurement."
  ],
- "other_experiments": [
-  {
-   "status": "LATER -- NOT SUBMITTED",
-   "artifact": "diagnostics/T4_FROZEN_RESULT_v1.json",
-   "payload_sha256": "ea181ab3ace706d39c6e0a2f33c4547f88594c3cf77a1c1797dfc4f967ab80ef",
-   "comparator": "InVirtuoGen only",
-   "budget": "250 charged docking calls per cell vs IVG's 1,000",
-   "reproduce": "python3 tools/reproduce_t4_table.py --ivg",
-   "why_separate": "Different comparator, different budget, different molecules. It disagrees with the submitted table per cell BY CONSTRUCTION (e.g. PARP1 seed 1 at delta 0.4 is -10.733 submitted vs -11.9 here). Neither corrects the other, and its own two_experiments_do_not_conflate field says so.",
-   "correction": "An earlier version of this manifest called this artifact 'the submitted table'. That was wrong."
-  }
- ]
+ "scope": "Protocol, pinned environment and required external assets. Measured scores are not shipped; see experiments/paper/ for what the submission reports and which module implements it."
 }

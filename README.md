@@ -16,25 +16,21 @@ Three layers, kept separate on purpose:
 | `R_θ` | what is *plausible* | `src/compose_v4/gm`, `src/compose_v4/model` |
 | Controller | what is *purposeful* | `src/compose_v4/control`, `src/compose_v4/policy` |
 
-## Reproducing the paper
+## The paper
 
-**[`experiments/paper/`](experiments/paper/)** maps every table in the ICLR 2027
-submission to the artifact that backs it and the command that regenerates it.
+**[`experiments/paper/`](experiments/paper/)** maps the ICLR 2027 submission to
+the code that implements it: method sections to modules, each benchmark to its
+entry point, and the external assets you need to run anything.
 
-```bash
-python3 tools/reproduce_paper_tables.py     # PMO Tables 2 & 11, T4 Table 3
-```
-
-No credentials, no oracle calls, no docking, no GPU. T4 Table 3 reproduces
-exactly (30/30 cells, 23 of 30 best); PMO Tables 2 and 11 reproduce 42 of 44
-published values and both headline means, 0.563 and 0.482. The single known gap
-and everything that is *not* reproducible from a checkout are stated there.
+Measured scores are not stored in this repository. It ships the machinery that
+produces them; the numbers are in the paper. Nothing runs without the reference
+checkpoint `R_theta`, which lives outside the tree.
 
 ### Which paper is which
 
 | Directory | What it is |
 |---|---|
-| `experiments/paper/` | **reproduction guide for the current ICLR submission — read this** |
+| `experiments/paper/` | **index for the current ICLR submission — read this** |
 | `paper_iclr2027/` | ICLR manuscript source |
 | `paper_gem_neurips2026/` | NeurIPS **workshop** package — a *different* T4 experiment (GenMol/RetMol/GraphGA at 500 calls); do not mix its numbers with the ICLR table |
 | `paper/`, `paper_arxiv/`, `paper_iclr_control_substrate/`, `paper_iclr_stochastic_rewriting/` | superseded drafts, retained for the record |
@@ -62,17 +58,6 @@ and everything that is *not* reproducible from a checkout are stated there.
    limitations.
 6. **[`docs/INDEX.md`](docs/INDEX.md)** — historical document census, classified CURRENT /
    SUPERSEDED / HISTORICAL.
-
-## Verifying a result without running anything
-
-```bash
-python3 tools/reproduce_t4_table.py                        # frozen T4 table
-PYTHONPATH=src python3 tools/reproduce_pmo_tables.py       # PMO, from charged receipts
-python3 tools/verify_experiment_inputs.py                  # inputs match their manifests
-python3 tools/preservation_inventory.py                    # what git does NOT protect
-```
-
-None of these touch the network, an oracle, or a credential.
 
 ## Layout
 

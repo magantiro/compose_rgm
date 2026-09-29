@@ -4,13 +4,6 @@
  "title": "PMO black-box molecular optimization (no-prescreen)",
  "recorded_at_commit": "c26d18c70b2c73918cf18cd5db3870af86190e89",
  "recorded_at_checkout": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916",
- "reported_result": {
-  "status": "DEVELOPMENT -- there is no frozen PMO paper table",
-  "artifact": null,
-  "reproduce": "PYTHONPATH=src python3 tools/reproduce_pmo_tables.py",
-  "note": "Every PMO number in this repo is development evidence recomputed from charged-call receipts. Nothing is a submitted result. The reproducer says so on every run.",
-  "evidence_for_no_submitted_table": "Checked, not assumed: 'pmo' appears nowhere in paper_gem_neurips2026/sections/ or tables/, and main_gem.tex inputs no PMO table. In paper_iclr2027 it appears only in references.bib and under archive/superseded_2026-08-19/. If a PMO table is added to either paper, this manifest must be updated and this tool taught to reproduce it."
- },
  "environment": {
   "role": "pinned production kernel for PMO -- NOT the same as T4's",
   "python": "3.11",
@@ -91,5 +84,6 @@
   "permitted": "task-independent chemical prior, plus feedback COUNTED against the run's own budget. Online adaptation from scored observations is legitimate no-prescreen optimization.",
   "prohibited": "oracle internals, hidden component scores, uncounted same-task history, same-task winner routes, prescreened vocabularies. Computing a property on an uncounted candidate in order to select it IS objective evaluation.",
   "note": "A benchmark-declared target is a task INPUT only where the evaluated task actually supplies it. PMO black-box search supplies scalar feedback only, so handing the controller a reference structure evaluates reference-conditioned construction, not black-box discovery -- a different experiment that needs its own label."
- }
+ },
+ "scope": "Protocol, pinned environment and required external assets. Measured scores are not shipped; see experiments/paper/ for what the submission reports and which module implements it."
 }

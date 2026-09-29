@@ -131,3 +131,16 @@ oracle/*.pkl
 # canary and equivalence reports -- are ~3 MB and ARE committed beside them.
 diagnostics/**/campaign/round_*/complete.json
 diagnostics/**/campaign/round_*/pending.json
+
+# Result artifacts carrying measured scores. The repository ships the machinery
+# that produces them, not the numbers: those belong in the paper. Kept locally
+# and backed up to ~/compose_paper_artifacts_backup, never committed.
+diagnostics/pmo_ablation_frozen_v1/
+diagnostics/pmo_abc_ablation_v1/
+diagnostics/compose_status_report/
+# Local score-verification tooling: these read the result artifacts above, which
+# are not shipped, so they are inert in a clone. Kept locally.
+tools/reproduce_paper_tables.py
+tools/reproduce_t4_table.py
+tools/reproduce_pmo_tables.py
+tests/test_reproduction_tools.py

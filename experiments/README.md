@@ -1,7 +1,7 @@
 # Experiments
 
-**[`paper/`](paper/) is the front door: how to reproduce every table in the ICLR
-submission, with no credentials and no oracle calls.**
+**[`paper/`](paper/) is the front door: what the current ICLR submission
+contains, which module implements each part, and what you need to run it.**
 
 Three other kinds of file live here, and they answer different questions.
 
@@ -47,9 +47,9 @@ conditional efficiency.
 
 | Task | Result status | Reproduce with |
 |---|---|---|
-| [`paper`](paper/) | **the ICLR submission's tables** | `python3 tools/reproduce_paper_tables.py` |
-| [`t4`](t4/) | task guide; also covers the NeurIPS **workshop** T4 table and the later IVG panel | `python3 tools/reproduce_t4_table.py` |
-| [`pmo`](pmo/) | task guide; recomputes development ledgers, *not* the paper's table | `PYTHONPATH=src python3 tools/reproduce_pmo_tables.py` |
+| [`paper`](paper/) | **the current ICLR submission** | paper section/table -> module, plus required external assets |
+| [`t4`](t4/) | T4 task guide | protocol, pinned environment, reading hazards |
+| [`pmo`](pmo/) | PMO task guide | protocol, information boundary, reading hazards |
 
 A task guide is not a campaign manifest: it describes a standing benchmark and
 its reproduction path, not one question asked once. Campaigns above may target
