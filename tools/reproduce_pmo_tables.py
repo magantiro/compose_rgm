@@ -46,11 +46,18 @@ printed below its official budget is therefore labelled, and the script states
 the depression explicitly.  Never scale one of these and compare it to a
 published 10,000-call figure.
 
-OPTIONAL CHEMISTRY
-------------------
-With RDKit importable, a manifold column (median QED, median SA, % on-manifold)
-is added.  Without it the score table is unchanged and the column is reported as
-UNAVAILABLE rather than silently omitted.  This matters because three PMO
+DEPENDENCIES -- stated accurately, because an earlier version was wrong
+-----------------------------------------------------------------------
+This needs numpy AND RDKit.  RDKit is NOT optional: importing the production
+``compose_v4.control.program_task`` for ``pmo_top_ten_auc`` transitively pulls
+about twenty ``rdkit.*`` modules, so the score table cannot be produced without
+it.  Importing the real function rather than transcribing it is the right
+trade -- a transcribed AUC could drift from what the campaign scored -- but the
+cost is a hard RDKit dependency and it should not be advertised as optional.
+
+What IS optional is the manifold COLUMN (median QED, median SA, % on-manifold),
+which additionally needs RDKit's Contrib ``SA_Score``.  Without that the score
+table is unchanged and the column reports UNAVAILABLE rather than vanishing.  This matters because three PMO
 oracles (gsk3b, jnk3, drd2) are ML predictors that reward leaving the drug-like
 manifold, so a headline score on those tasks must be read beside its chemistry.
 """
@@ -109,6 +116,32 @@ def self_test(auc) -> None:
                 f"closed form.\n  level={level} budget={budget} "
                 f"expected={expected!r} got={got!r}"
             )
+
+
+def measured_depression(auc, budget: int | None) -> float | None:
+    """How much of a flat top-ten level this budget's AUC removes -- MEASURED.
+
+    ``top_auc`` trapezoids up from (0, 0) and logs on a grid of `frequency`, so
+    a constant sequence `c` does NOT simply score `c*(1 - frequency/(2*budget))`:
+    below one logging period the grid never fires and the whole run is a single
+    trapezoid, which removes exactly 50% at ANY budget under `frequency`.  The
+    closed form overstates it there -- it reports 78.1% at budget 64 where the
+    true figure is 50.0%.
+
+    Rather than carry a piecewise formula that can drift from the production
+    implementation, this CALLS that implementation on a constant sequence.  It
+    cannot disagree with what the campaign scored.
+    """
+    if not budget or budget < 1:
+        return None
+    level = 0.5
+    try:
+        scored = auc([level] * budget, budget=budget, frequency=AUC_FREQUENCY)
+    except (ValueError, TypeError):
+        return None
+    if scored is None:
+        return None
+    return 1.0 - (scored / level)
 
 
 # ---- Ledger discovery ----
@@ -243,7 +276,7 @@ def score_ledger(entry: dict, auc) -> dict:
         result["auc"] = None
         result["auc_error"] = str(error)
     result["auc_budget"] = budget
-    result["depression"] = AUC_FREQUENCY / (2 * budget) if budget else None
+    result["depression"] = measured_depression(auc, budget)
     return result
 
 
@@ -304,7 +337,7 @@ def chemistry(entry: dict) -> dict | None:
 # ---- Rendering ----
 
 
-def render(entries: list[tuple[dict, dict, dict | None]], root: Path) -> None:
+def render(entries: list[tuple[dict, dict, dict | None]], root: Path, auc) -> None:
     by_task: dict[str, list] = {}
     for entry, scores, chem in entries:
         by_task.setdefault(entry["task"], []).append((entry, scores, chem))
@@ -325,14 +358,14 @@ def render(entries: list[tuple[dict, dict, dict | None]], root: Path) -> None:
                 name = "..." + name[-45:]
             best = "--" if scores["best"] is None else f"{scores['best']:.4f}"
             top10 = "--" if scores["top10"] is None else f"{scores['top10']:.4f}"
-            auc = "--" if scores["auc"] is None else f"{scores['auc']:.4f}"
+            auc_text = "--" if scores["auc"] is None else f"{scores['auc']:.4f}"
             # A partial run's AUC integrates few points over the full declared
             # budget, so it is tiny for reasons that have nothing to do with
             # search quality.  Showing charged/budget is what makes that legible.
             span = f"{scores['charged']}/{scores['auc_budget']}"
             mark = {True: "yes", False: "NO", None: "?"}[entry["tracked"]]
             line = (f"    {name:<48} {mark:>3} {span:>13} {best:>7} "
-                    f"{top10:>7} {auc:>7}")
+                    f"{top10:>7} {auc_text:>7}")
             if chem:
                 line += (f" {chem['median_qed']:>7.3f} {chem['median_sa']:>6.2f} "
                          f"{chem['on_manifold'] * 100:>5.1f}%")
@@ -354,9 +387,16 @@ def render(entries: list[tuple[dict, dict, dict | None]], root: Path) -> None:
 
         budgets = {s["auc_budget"] for _, s, _ in rows}
         for budget in sorted(b for b in budgets if b and b < OFFICIAL_BUDGET):
-            pct = AUC_FREQUENCY / (2 * budget) * 100
+            fraction = measured_depression(auc, budget)
+            if fraction is None:
+                # Never report a masked failure as 0.0% -- that reads as "no
+                # depression", the opposite of not knowing.
+                print(f"    NOTE: AUC at budget {budget}: depression COULD NOT BE "
+                      f"MEASURED.")
+                continue
             print(f"    NOTE: AUC at budget {budget} is structurally depressed "
-                  f"{pct:.1f}% vs the official {OFFICIAL_BUDGET}-call budget.")
+                  f"{fraction * 100:.1f}% vs the official {OFFICIAL_BUDGET}-call "
+                  f"budget.")
 
 
 # ---- Entry point ----
@@ -460,7 +500,7 @@ def main(argv: list[str] | None = None) -> int:
         print("        chemistry column: UNAVAILABLE (RDKit not importable) -- "
               "score table is unaffected")
 
-    render(entries, args.repo_root)
+    render(entries, args.repo_root, auc)
 
     print("\n" + "=" * 78)
     print("RECOMPUTED -- 0 new oracle calls, 0 network requests.")

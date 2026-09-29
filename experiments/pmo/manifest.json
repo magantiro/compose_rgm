@@ -21,7 +21,7 @@
   "why_no_deps": "PyTDC 1.1.15 pins rdkit>=2023.9.5,<2024.3.1, so installing it against 2024.3.5 is unsatisfiable. Production uses --no-deps plus a six shim, because PyTDC imports rdkit.six which modern RDKit does not ship.",
   "why_old_setuptools": "setuptools>=81 removes pkg_resources, which tdc/metadata.py imports.",
   "the_image_holds_one_rdkit": "So the PMO runtime -- oracle AND COMPOSE executor -- is 2023.9.6. A PMO number computed locally under 2024.3.5 needs a parity statement.",
-  "reproduction_needs_none_of_this": "tools/reproduce_pmo_tables.py needs numpy (for the production AUC) and optionally RDKit for the chemistry column. It never imports PyTDC and never calls an oracle."
+  "reproduction_needs_none_of_this": "tools/reproduce_pmo_tables.py needs numpy AND RDKit -- importing the production pmo_top_ten_auc transitively pulls ~20 rdkit modules, so RDKit is NOT optional. It never imports PyTDC and never calls an oracle. Only the manifold column is optional (it additionally needs RDKit Contrib SA_Score)."
  },
  "inputs": [
   {
