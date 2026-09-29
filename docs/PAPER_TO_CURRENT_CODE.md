@@ -1,5 +1,11 @@
 # COMPOSE paper-to-current code map
 
+> Historical workshop-era map. This page does **not** identify all producer
+> revisions or assets for the submitted ICLR 2027 manuscript, particularly its
+> PMO and T4 results. Do not use the commands below as a reproduction recipe
+> for that submission. The current integration boundary is recorded in
+> [the repository-readiness audit](REPOSITORY_READINESS_20260929.md).
+
 This page separates the implementation represented in the submitted workshop
 paper from controller development performed after that submission. It is an
 onboarding and lineage map, not a new scientific result. For current outcomes

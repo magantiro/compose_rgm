@@ -111,8 +111,13 @@ PMO source-parity tests need the hash-bound InVirtuoGen source checkout. Those
 ignored inputs are absent from a source export. Tests now identify the exact
 missing prerequisite and skip there, or fail with
 `COMPOSE_REQUIRE_EXTERNAL_ASSETS=1`. The local PMO recovery folder has since
-advanced: three of those tests still fail against it. The old snapshot is not
-reconstructed or silently substituted from the later state.
+advanced: three of those tests still fail against it. A read-only audit found
+that all 8,828 census-listed original files (4,539,938,269 bytes) remain
+present with their exact recorded SHA-256 hashes; the folder also contains
+8,236 additional post-recovery files. This supports materializing an exact
+pre-recovery view by selecting the census-listed bytes, but that view has not
+yet been built or validated. The old snapshot is not silently substituted from
+the later state.
 
 Two legacy PMO tests require PyTDC 0.3.6, not the core kernel. One serialized
 pan-lung test requires the exact stack in its bundle manifest. They skip when
@@ -121,20 +126,26 @@ the prerequisite kernel is absent and fail with
 does not match the available PyTDC 1.1.15 environment; its 0.3.6 kernel remains
 unverified locally.
 
-The slot-safety gate found a real remaining defect: PMO Dynamic-v2.1's context
-key treats a `SCAR` slot as an atom. A candidate fix passed the local safety
-test but broke the frozen PMO source identity. The file was restored byte for
-byte (SHA-256 `d5f4d432f3a51d49a1c6f962e079a5ae729c731031998d78caf14f1d3891b743`),
-and the test remains red. Correcting it requires a new versioned proposer
-lineage and an explicit decision about how that lineage relates to reported
-campaigns. Existing PMO numbers must not be relabeled as having used the fix.
+The slot-safety scan initially flagged Dynamic-v2.1's `atom_types > 0` context
+calculation. A code-path audit changed that verdict: the expression selects
+**occupied slots** (including a SCAR), which is the appropriate predicate for
+the graph-topology part of that context. The reported Active8 route starts from
+SMILES graphs without SCARs; admissible insertion/restatement exclude SCAR,
+deletion writes NULL, and the other primitive edits do not create it. Replacing
+the expression with `is_element` would change the meaning of a scar-bearing
+topology calculation and the frozen PMO source identity. The attempted edit was
+reversed byte-for-byte (SHA-256
+`d5f4d432f3a51d49a1c6f962e079a5ae729c731031998d78caf14f1d3891b743`).
+The test now ratchets this one historical site and checks the producer-domain
+invariant and context behavior. This is a corrected **test false positive**, not
+a repaired PMO defect. A separate future path that supplies scar-bearing
+states would need its own audit; none is asserted here.
 
 Post-repair focused checks: 53 RingCore/T4 provenance tests passed; 93 tests
 covering the gradient, import, PMO, pan-lung, and assertion repairs passed with
 3 separately identified kernel skips; 2 prerequisite-gate tests passed. The
-slot-safety module had 4 passes and the one deliberate, real failure at
-`dynamic_program_synthesis_v21.py:94`. These are focused outcomes, not a final
-full-suite result.
+slot-safety module passed all six tests after that audit. These are focused
+outcomes, not a final full-suite result.
 
 The documented fragment CLI verified seven artifact hashes and the complete
 saved metric panels for four independent tasks. Its offline table command
@@ -149,9 +160,66 @@ from this checkout rather than the environment's earlier editable clone.
 ## Release status
 
 Not yet ready to present as a fully reproducible public repository. The current
-branch still has a real slot-safety failure, missing historical recovery input,
-unverified legacy kernels, and an unresolved integration choice between this
+branch still has missing historical recovery input, unverified legacy kernels,
+and an unresolved integration choice between this
 checkout and the separately developed PMO/T4 branch. A fresh source export can
 run thousands of offline tests, but a green subset alone would not resolve
 those provenance and input-access boundaries. No branch was merged, pushed, or
 published during this repair.
+
+The PMO/T4 branch at `bc8cc421` contains useful offline reproducers, but its
+paper-facing guide still asserts that one checkpoint is required by every
+benchmark. That is inconsistent with the experiment-specific reference usage
+recorded for this manuscript. Treat its tools as candidates for selective
+integration, not its documentation as an authority to overwrite this branch's
+paper-to-code map.
+
+## Paper-release path audit
+
+A passing test suite on `compose-iclr` would not yet make a reviewer release.
+This checkout contains the fragment saved-result reducer and its pinned small
+artifacts, but it does not track the submitted PMO/T4 producer entry points
+`scripts/pmo_reward_adaptive_canary.py`,
+`modal_apps/pmo_fibercontrol_targets_app.py`,
+`src/compose_v4/experiments/t4_fiber_campaign.py`, or the frozen T4 table
+artifact. Those paths are present on the separate PMO/T4 development line
+(except that its later commits removed the PMO A/B reduction from the branch
+tip). The A/B result is preserved on the `pmo-chain-ablation-20260925` branch.
+The two lines have 23 and 615 commits, respectively, since their merge base
+`101cc73d`; this is a scientific-lineage integration, not a cosmetic directory
+merge. A no-checkout `git merge-tree` dry run found eight conflict paths,
+including the source-identity ledger, a T4 app, inference loading, three PMO
+experiment modules, and a T4 contract builder. No branch was merged or
+rebased during this audit.
+
+The other branch's `experiments/paper/README.md` claims a single reference
+checkpoint for every benchmark. Its PMO and T4 guides still point to
+reproduction commands and data files deleted by later commit `1f1c2c86`.
+Those pages are therefore not an authoritative release guide as currently
+committed. A safe integration must carry verified producer code, exact result
+reductions, and a correct experiment-specific input map together. It must
+distinguish arithmetic reduction of saved metrics from re-running molecular
+generation, oracle search, or docking.
+
+There is also an untracked local `reviewer/` compact-evidence draft. Its
+standard-library verifier passes the five included file hashes and recomputes
+the fragment comparisons and the submitted 14 completed PMO A/B pairs. This
+is an arithmetic check on projected metric rows, not raw experiment replay.
+The draft currently omits T4, records the submitted PDF hash as pending, and
+prints an instruction to read `KNOWN_GAPS.md` although that file is absent.
+It has not been added to Git or presented as a completed reviewer package.
+
+One additional table-accounting check is pending resolution with the T4
+producer: `diagnostics/T4_FROZEN_RESULT_v1.json` on that branch declares a
+250-call ceiling, while its 30 rows record `charged_calls` from 0 to 249 rather
+than 250 each. The submitted text's phrase "using 250 evaluations per lead"
+should not be interpreted as measured 250 calls for every row without checking
+the producer receipts. The frozen artifact remains unchanged.
+
+The intended release gate is end-to-end and has separate outcomes: (1) exact
+submitted-manuscript identity; (2) source export plus pinned environment;
+(3) hash-verified input availability; (4) task-specific saved-result reduction
+and, where supported, generation parity; (5) full-suite and focused scientific
+invariants; (6) an explicit list of non-distributed assets and unsupported
+reproduction steps. Missing evidence is a failed or unavailable gate, never an
+implicit pass.

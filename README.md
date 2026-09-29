@@ -31,8 +31,9 @@ integration; it does not change the submitted paper or the PMO/T4 protocols.
    campaign handoff. Check its as-of date and the experiment-specific contract
    before treating any operational status as current.
 2. **[`docs/PAPER_TO_CURRENT_CODE.md`](docs/PAPER_TO_CURRENT_CODE.md)**:
-   submitted-paper code and evidence versus post-submission controller
-   extensions, plus a fresh-laptop first-hour path.
+   the historical workshop-era code map. It is not yet the reproduction guide
+   for the submitted ICLR 2027 PMO/T4 results; see the
+   [release-readiness audit](docs/REPOSITORY_READINESS_20260929.md).
 3. **[`experiments/INDEX.md`](experiments/INDEX.md)** — every runnable
    experiment and its source-derived command. Regenerate it with
    `tools/gen_experiment_index.py` after adding an entrypoint.

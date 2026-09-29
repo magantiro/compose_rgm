@@ -70,10 +70,11 @@ git diff --check
 
 The complete-suite result and known unresolved gates are in
 [`REPOSITORY_READINESS_20260929.md`](REPOSITORY_READINESS_20260929.md).
-At present, the full suite is **not green**. In particular, the PMO v2.1
-slot-safety failure is a real source issue, and the ignored local recovery
-directory is no longer the original frozen pre-recovery snapshot. Neither
-should be converted into a passing result by relaxing a test.
+The last complete diagnostic was **not green**; a final candidate run is
+pending. The PMO v2.1 slot-safety scan was a false positive after auditing its
+occupied-topology semantics and scar-free producer domain. The ignored local
+recovery directory is still not the original frozen pre-recovery snapshot;
+do not silently treat its later state as that input.
 
 On macOS installations with duplicate OpenMP runtimes, the documented local
 invocation additionally sets `KMP_DUPLICATE_LIB_OK=TRUE`. Keep the one-thread
