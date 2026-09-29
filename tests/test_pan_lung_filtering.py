@@ -1,26 +1,22 @@
 from __future__ import annotations
 
-from hashlib import sha256
 import json
+from hashlib import sha256
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
-pytest.importorskip("joblib")
-pd = pytest.importorskip("pandas")
-pytest.importorskip("rdkit")
-
-from compose_v4.oracles.pan_lung_filtering import (  # noqa: E402
+from compose_v4.oracles.pan_lung_filtering import (
     fit_lut_applicability_domain,
     fit_molecular_applicability_domain,
     lut_admission,
     molecular_admission,
 )
-from compose_v4.oracles.reward_guard import (  # noqa: E402
+from compose_v4.oracles.reward_guard import (
     FilteringRewardGuard,
     RewardFineTuningDisabledError,
 )
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BUNDLE_MANIFEST = REPO_ROOT / "artifacts/oracles/pan_lung_filtering_v1/manifest.json"
@@ -56,9 +52,23 @@ def test_lut_gate_allows_novel_pair_of_known_components_only() -> None:
     assert not lut_admission(domain, "1A1", "B2", 3)["admitted"]
 
 
-def test_reward_guard_is_filtering_only_and_ood_returns_no_reward() -> None:
-    if not BUNDLE_MANIFEST.exists():
-        pytest.skip("serialized filtering bundle is not present")
+@pytest.mark.alternate_kernel
+def test_reward_guard_is_filtering_only_and_ood_returns_no_reward(
+    require_software_versions,
+) -> None:
+    assert BUNDLE_MANIFEST.is_file(), "tracked pan-lung bundle manifest is missing"
+    software = json.loads(BUNDLE_MANIFEST.read_text())["software"]
+    require_software_versions(
+        {
+            "joblib": software["joblib"],
+            "numpy": software["numpy"],
+            "pandas": software["pandas"],
+            "rdkit": software["rdkit"],
+            "scikit-learn": software["scikit_learn"],
+            "xgboost": software["xgboost"],
+        },
+        purpose="pan-lung serialized filtering bundle",
+    )
     audit = json.loads(
         (REPO_ROOT / "diagnostics/pan_lung_filtering_admission_test.json").read_text()
     )

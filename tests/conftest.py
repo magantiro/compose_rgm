@@ -2,11 +2,64 @@
 
 from __future__ import annotations
 
+import importlib.metadata
 import json
+import os
 import shutil
 from pathlib import Path
 
 import pytest
+
+
+@pytest.fixture
+def require_local_artifacts():
+    """Skip absent external evidence in a source export, or fail in strict mode.
+
+    Present but altered artifacts are never skipped: the experiment's own hash
+    verifier still decides whether those inputs are authentic.
+    """
+
+    def require(paths: list[Path], *, purpose: str) -> None:
+        missing = [str(path) for path in paths if not path.is_file()]
+        if not missing:
+            return
+        message = f"{purpose} requires external local artifact(s): " + ", ".join(missing)
+        if os.environ.get("COMPOSE_REQUIRE_EXTERNAL_ASSETS") == "1":
+            pytest.fail(message)
+        pytest.skip(message)
+
+    return require
+
+
+@pytest.fixture
+def require_software_versions():
+    """Route serialized-model tests to their exact recorded software kernel."""
+
+    def require(expected: dict[str, str], *, purpose: str) -> None:
+        mismatches = []
+        for distribution, version in sorted(expected.items()):
+            try:
+                if distribution == "rdkit":
+                    # Recorded chemistry identities use RDKit's own version
+                    # spelling (for example 2025.09.6), not PEP-440's
+                    # normalized distribution spelling (2025.9.6).
+                    from rdkit import rdBase
+
+                    observed = rdBase.rdkitVersion
+                else:
+                    observed = importlib.metadata.version(distribution)
+            except (ImportError, importlib.metadata.PackageNotFoundError):
+                observed = "absent"
+            if observed != version:
+                mismatches.append(f"{distribution}={observed} (need {version})")
+        if not mismatches:
+            return
+        message = f"{purpose} requires a separate kernel: " + ", ".join(mismatches)
+        if os.environ.get("COMPOSE_REQUIRE_ALTERNATE_KERNELS") == "1":
+            pytest.fail(message)
+        pytest.skip(message)
+
+    return require
 
 
 @pytest.fixture(scope="session")

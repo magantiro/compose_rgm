@@ -44,6 +44,10 @@ include = ["compose_v4*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "external_artifact: requires a documented hash-bound artifact that is not distributed in the source tree",
+    "alternate_kernel: requires a separately pinned software environment",
+]
 
 [tool.ruff]
 line-length = 100

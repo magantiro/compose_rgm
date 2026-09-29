@@ -28,9 +28,7 @@ def test_contract_freezes_three_tasks_and_forty_eight_queries():
 
 def test_frozen_forest_assets_match_the_official_pickle_lineage():
     contract = load_contract(ROOT)
-    manifest = json.loads(
-        (ROOT / contract["oracle"]["forest_manifest_path"]).read_text()
-    )
+    manifest = json.loads((ROOT / contract["oracle"]["forest_manifest_path"]).read_text())
 
     for task in ("gsk3b", "jnk3"):
         assert (
@@ -38,12 +36,13 @@ def test_frozen_forest_assets_match_the_official_pickle_lineage():
             == contract["tasks"][task]["official_pickle_sha256"]
         )
         assert (
-            manifest[task]["parameters_npz_sha256"]
-            == contract["tasks"][task]["parameters_sha256"]
+            manifest[task]["parameters_npz_sha256"] == contract["tasks"][task]["parameters_sha256"]
         )
 
 
-def test_compatibility_is_installed_before_pinned_tdc_source_import():
+@pytest.mark.alternate_kernel
+def test_compatibility_is_installed_before_pinned_tdc_source_import(require_software_versions):
+    require_software_versions({"PyTDC": "0.3.6"}, purpose="the frozen PMO property-program oracle")
     adapters = verified_adapters(ROOT, load_contract(ROOT))
 
     assert tuple(sorted(adapters)) == ("gsk3b", "jnk3", "qed")

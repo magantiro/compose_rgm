@@ -27,14 +27,21 @@ from compose_v4.experiments.pmo_dynamic_v21_recovery import (
 from compose_v4.experiments.t4_matched_pilot import unseal
 
 ROOT = Path(__file__).resolve().parents[1]
+pytestmark = pytest.mark.external_artifact
+
+
+@pytest.fixture(autouse=True)
+def _require_original_recovery_ledgers(require_local_artifacts):
+    # The self-hashed recovery census pins these original campaign receipts.
+    # The 11-GB run tree is intentionally outside the source distribution.
+    receipt = _unit_folder(ROOT, "celecoxib_rediscovery") / "campaign/round_0000/complete.json"
+    require_local_artifacts([receipt], purpose="PMO Dynamic-v2.1 recovery integration")
 
 
 def _locked_rows(task="celecoxib_rediscovery"):
     folder = _unit_folder(ROOT, task)
     complete = json.loads((folder / "campaign/round_0000/complete.json").read_text())
-    pending = json.loads((folder / "campaign/round_0001/pending.json").read_text())[
-        "batch"
-    ]
+    pending = json.loads((folder / "campaign/round_0001/pending.json").read_text())["batch"]
     query = json.loads((folder / "oracle/query_000032/result.json").read_text())
     return folder, complete, pending, query
 
@@ -43,9 +50,7 @@ def test_campaign_boundary_adapter_preserves_core_pool_mismatch_invariant():
     _, complete, pending, query = _locked_rows()
     candidate = pending["candidates"][0]
     unchanged = DynamicV21ProgramOptimizer.restore(complete["snapshot"])
-    with pytest.raises(
-        ValueError, match="bootstrap candidates came from different pools"
-    ):
+    with pytest.raises(ValueError, match="bootstrap candidates came from different pools"):
         unchanged.add_measured_program(
             candidate, receipt_id=query["receipt_id"], score=query["score"]
         )
@@ -57,9 +62,7 @@ def test_campaign_boundary_adapter_preserves_core_pool_mismatch_invariant():
         recovered.allocator_state["channels"][channel]["selected_for_oracle"]
         for channel in recovered.allocator_state["channels"]
     )
-    recovered.add_measured_program(
-        candidate, receipt_id=query["receipt_id"], score=query["score"]
-    )
+    recovered.add_measured_program(candidate, receipt_id=query["receipt_id"], score=query["score"])
     after_selected = sum(
         recovered.allocator_state["channels"][channel]["selected_for_oracle"]
         for channel in recovered.allocator_state["channels"]
@@ -103,18 +106,14 @@ def test_zero_oracle_audit_covers_four_contiguous_failed_ledgers_read_only():
         ROOT / original.LAUNCH_V2,
         ROOT / original.RESULT,
     ]
-    protected.extend(
-        _unit_folder(ROOT, task) / "failure.json" for task in original.TASKS
-    )
+    protected.extend(_unit_folder(ROOT, task) / "failure.json" for task in original.TASKS)
     before = {str(path): sha256_file(path) for path in protected}
     rows = [audit_recovery_unit(ROOT, task) for task in original.TASKS]
     after = {str(path): sha256_file(path) for path in protected}
     assert before == after
     assert {row["task"] for row in rows} == set(original.TASKS)
     assert all(row["source_run_id"] == SOURCE_RUN_ID for row in rows)
-    assert all(
-        row["charged_completed_queries"] == FAILED_V21_CALLS_PER_TASK for row in rows
-    )
+    assert all(row["charged_completed_queries"] == FAILED_V21_CALLS_PER_TASK for row in rows)
     assert all(row["unresolved_queries"] == 0 for row in rows)
     assert all(row["round0_complete"] and row["round1_pending"] for row in rows)
     assert all(row["round1_consumed_prefix"] == 1 for row in rows)
@@ -161,9 +160,7 @@ def test_pending_round_recovery_keeps_locked_order_after_cached_score(tmp_path):
         calls.append(endpoint)
         return 0.25
 
-    ledger = ProgramQueryLedger(
-        copied / "oracle", task, synthetic, budget=original.QUERY_BUDGET
-    )
+    ledger = ProgramQueryLedger(copied / "oracle", task, synthetic, budget=original.QUERY_BUDGET)
     summary = recover_pending_round(ROOT, copied, task, initialized, ledger)
     assert len(calls) == 15
     assert calls[0] == pending["candidates"][1]["endpoint"]

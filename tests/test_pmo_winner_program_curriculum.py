@@ -65,7 +65,11 @@ def test_contract_records_winner_informed_role():
     assert raw["targets"]["perindopril_mpo"] == 0.753
 
 
-def test_pinned_oracle_adapter_installs_legacy_rdkit_compatibility_before_import():
+@pytest.mark.alternate_kernel
+def test_pinned_oracle_adapter_installs_legacy_rdkit_compatibility_before_import(
+    require_software_versions,
+):
+    require_software_versions({"PyTDC": "0.3.6"}, purpose="the frozen PMO winner-program oracle")
     sys.modules.pop("rdkit.six", None)
 
     evaluate = pmo_oracle("perindopril_mpo", {"perindopril_mpo": "pinned"})

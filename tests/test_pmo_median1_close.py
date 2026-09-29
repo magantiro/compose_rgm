@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from compose_v4.control.edit_program import EditProgram, execute_bound_program
 from compose_v4.experiments.pmo_ivg_oracle_parity import load_contract as load_parity
 from compose_v4.experiments.pmo_ivg_oracle_parity import score_values
@@ -14,9 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_contract_preserves_one_query_and_claim_boundary() -> None:
     contract = load_contract(ROOT)
     assert contract["oracle"]["new_query_ceiling"] == 1
-    assert (
-        contract["candidate"]["source_role"] == "pre_score_panel_series_extrapolation"
-    )
+    assert contract["candidate"]["source_role"] == "pre_score_panel_series_extrapolation"
     assert contract["information_regime"]["held_out_claim"] is False
     assert contract["information_regime"]["t4_affected"] is False
 
@@ -38,11 +38,16 @@ def test_query_lock_contains_one_exact_replay_program() -> None:
     assert receipt["primitive_edits"] == 14
 
 
-def test_expected_series_score_would_close_prescreen_gap() -> None:
+@pytest.mark.external_artifact
+def test_expected_series_score_would_close_prescreen_gap(require_local_artifacts) -> None:
+    require_local_artifacts(
+        [ROOT / "tmp/ivg_repo/InVirtuoGen_results-main/Dockerfile"],
+        purpose="PMO InVirtuoGen source-parity integration",
+    )
     contract = load_contract(ROOT)
-    prior = __import__("json").loads(
-        (ROOT / contract["prior_result"]["path"]).read_text()
-    )["payload"]
+    prior = __import__("json").loads((ROOT / contract["prior_result"]["path"]).read_text())[
+        "payload"
+    ]
     values = [row["parity_score"] for row in prior["results"]["median1"]["rows"]]
     metrics = score_values(values + [0.39488251846572103], load_parity(ROOT))
     assert (

@@ -10,10 +10,18 @@ from compose_v4.experiments.pmo_ivg_oracle_parity import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+IVG_DOCKERFILE = ROOT / "tmp/ivg_repo/InVirtuoGen_results-main/Dockerfile"
 
 
-def test_contract_freezes_eleven_tasks_and_all_parity_calls():
-    contract = load_contract(ROOT)
+@pytest.fixture
+def parity_contract(require_local_artifacts):
+    require_local_artifacts([IVG_DOCKERFILE], purpose="PMO InVirtuoGen source-parity integration")
+    return load_contract(ROOT)
+
+
+@pytest.mark.external_artifact
+def test_contract_freezes_eleven_tasks_and_all_parity_calls(parity_contract):
+    contract = parity_contract
 
     assert len(contract["tasks"]) == 11
     assert sum(row["queries"] for row in contract["tasks"].values()) == 150
@@ -29,8 +37,9 @@ def test_contract_freezes_eleven_tasks_and_all_parity_calls():
     assert contract["information_regime"]["general_pmo_claim"] is False
 
 
-def test_query_lock_preserves_all_source_rows_without_selection():
-    lock = build_query_lock(ROOT, load_contract(ROOT))
+@pytest.mark.external_artifact
+def test_query_lock_preserves_all_source_rows_without_selection(parity_contract):
+    lock = build_query_lock(ROOT, parity_contract)
 
     assert lock["task_count"] == 11
     assert lock["authoritative_query_count"] == 150
@@ -68,8 +77,9 @@ def test_source_normalization_supports_direct_perindopril_rows():
     assert rows[0]["prior_protocol_score"] == 0.25
 
 
-def test_official_metric_finishes_with_locked_top_ten_value():
-    summary = score_values([0.0] + [1.0] * 10, load_contract(ROOT))
+@pytest.mark.external_artifact
+def test_official_metric_finishes_with_locked_top_ten_value(parity_contract):
+    summary = score_values([0.0] + [1.0] * 10, parity_contract)
 
     assert summary["oracle_calls"] == 11
     assert summary["best_score"] == 1.0
