@@ -227,6 +227,7 @@ def run_a2_3_readiness_audit(
         a2_2b_artifact,
         contract=a2_2b_contract,
         registry_path=registry_path,
+        repo_root=root,
     )
 
     if a2_2b_contract["contract_sha256"] != inputs["expected_a2_2b_contract_sha256"]:
@@ -236,15 +237,9 @@ def run_a2_3_readiness_audit(
     if a2_2b_artifact["graph_audit_hash"] != inputs["expected_graph_audit_hash"]:
         raise E6A23ReadinessError("A2.2b graph audit identity drifted")
     benchmark = a2_2b_artifact["benchmark"]
-    if (
-        benchmark["structural_graph_fingerprint"]
-        != inputs["expected_structural_graph_fingerprint"]
-    ):
+    if benchmark["structural_graph_fingerprint"] != inputs["expected_structural_graph_fingerprint"]:
         raise E6A23ReadinessError("A2.2b structural graph identity drifted")
-    if (
-        a2_2b_artifact["state_index"]["state_index_sha256"]
-        != inputs["expected_state_index_sha256"]
-    ):
+    if a2_2b_artifact["state_index"]["state_index_sha256"] != inputs["expected_state_index_sha256"]:
         raise E6A23ReadinessError("A2.2b state index identity drifted")
 
     task_paths = tuple(str(e6["task_artifacts"][kind]) for kind in ("development", "final"))
@@ -273,22 +268,18 @@ def run_a2_3_readiness_audit(
         )
 
     confirmed = {
-        "registry_protocol_content_hash": registry["protocol"]["protocol_freeze"][
-            "content_hash"
-        ],
+        "registry_protocol_content_hash": registry["protocol"]["protocol_freeze"]["content_hash"],
         "selected_benchmark": {
             "candidate_id": selected["candidate_id"],
             "n_states": selected["n_states"],
             "n_edges": selected["n_edges"],
             "structural_graph_fingerprint": selected["graph_fingerprint"],
-            "state_index_sha256": a2_2b_artifact["state_index"][
-                "state_index_sha256"
-            ],
+            "state_index_sha256": a2_2b_artifact["state_index"]["state_index_sha256"],
         },
         "a2_2b_complete": a2_2b_artifact["status"],
-        "a2_2b_diagnostic_law_is_solver_kernel": a2_2b_artifact["benchmark"][
-            "diagnostic_mark_law"
-        ]["is_solver_kernel"],
+        "a2_2b_diagnostic_law_is_solver_kernel": a2_2b_artifact["benchmark"]["diagnostic_mark_law"][
+            "is_solver_kernel"
+        ],
         "stage_1_solver_kernel_specification": contract["confirmed_stage_1_kernel"],
         "registry_tilt_names_are_unparameterized": list(e6["tilts"]),
         "e6_horizon_fields_present": e6_horizon_fields,
@@ -298,22 +289,18 @@ def run_a2_3_readiness_audit(
     invariants = {
         "a2_2b_artifact_validated": True,
         "selected_graph_identity_unchanged": (
-            selected["graph_fingerprint"]
-            == inputs["expected_structural_graph_fingerprint"]
+            selected["graph_fingerprint"] == inputs["expected_structural_graph_fingerprint"]
         ),
         "stage_1_law_is_successor_level": (
-            contract["confirmed_stage_1_kernel"]["level"]
-            == "canonical_molecular_successor"
+            contract["confirmed_stage_1_kernel"]["level"] == "canonical_molecular_successor"
         ),
         "diagnostic_mark_law_not_promoted_to_solver_kernel": (
-            a2_2b_artifact["benchmark"]["diagnostic_mark_law"]["is_solver_kernel"]
-            is False
+            a2_2b_artifact["benchmark"]["diagnostic_mark_law"]["is_solver_kernel"] is False
         ),
         "e7_dynamic_horizon_not_imported": not e6_horizon_fields,
         "unparameterized_tilt_names_not_treated_as_g": not e6_desirability_fields,
         "all_required_control_decisions_reported": (
-            tuple(item["decision_id"] for item in missing_decisions)
-            == _REQUIRED_DECISION_IDS
+            tuple(item["decision_id"] for item in missing_decisions) == _REQUIRED_DECISION_IDS
         ),
         "solver_not_run": True,
         "solver_kernel_not_materialized": True,
@@ -354,9 +341,9 @@ def run_a2_3_readiness_audit(
             "implementation_sources": list(_IMPLEMENTATION_SOURCES),
             "registry_path": inputs["registry_path"],
             "registry_file_sha256": file_sha256(registry_path),
-            "registry_protocol_content_hash": registry["protocol"][
-                "protocol_freeze"
-            ]["content_hash"],
+            "registry_protocol_content_hash": registry["protocol"]["protocol_freeze"][
+                "content_hash"
+            ],
             "infrastructure_plan_path": inputs["infrastructure_plan_path"],
             "infrastructure_plan_file_sha256": file_sha256(plan_path),
             "handoff_path": inputs["handoff_path"],
@@ -407,9 +394,7 @@ def freeze_a2_3_readiness_artifact(
     encoded = _canonical_json_bytes(artifact) + b"\n"
     if output.exists():
         if output.read_bytes() != encoded:
-            raise E6A23ReadinessError(
-                f"immutable A2.3 readiness artifact collision: {output}"
-            )
+            raise E6A23ReadinessError(f"immutable A2.3 readiness artifact collision: {output}")
         return
     output.parent.mkdir(parents=True, exist_ok=True)
     try:

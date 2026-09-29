@@ -43,9 +43,7 @@ _ROOT = Path(__file__).resolve().parent.parent
 _CONTRACT_PATH = _ROOT / "configs/exact_control_a2_2b_graph_audit_v1.json"
 _REGISTRY_PATH = _ROOT / "configs/experiment_registry.yaml"
 _ARTIFACT_PATH = (
-    _ROOT
-    / "diagnostics/exactness/"
-    "e6_carbon_6_slots_a2_2b_graph_audit_v1_2026-07-30.json"
+    _ROOT / "diagnostics/exactness/e6_carbon_6_slots_a2_2b_graph_audit_v1_2026-07-30.json"
 )
 
 
@@ -123,10 +121,7 @@ def _fresh_dictionary_oracle(state, source_key, candidate, state_keys):
 
     productive_total = sum(productive.values())
     legal_total = productive_total + dispositions[VIRTUAL_SELF]
-    probabilities = {
-        key: count / productive_total
-        for key, count in sorted(productive.items())
-    }
+    probabilities = {key: count / productive_total for key, count in sorted(productive.items())}
     return {
         "raw_count": raw_count,
         "dispositions": dispositions,
@@ -168,8 +163,9 @@ def test_structural_graph_identity_is_unchanged(full_graph, contract):
     assert full_graph.stop_reason == "closed"
     assert full_graph.n_states == contract["benchmark"]["expected_n_states"]
     assert full_graph.n_edges == contract["benchmark"]["expected_n_edges"]
-    assert graph_fingerprint(full_graph) == (
-        contract["benchmark"]["expected_structural_graph_fingerprint"]
+    assert (
+        graph_fingerprint(full_graph)
+        == (contract["benchmark"]["expected_structural_graph_fingerprint"])
     )
 
 
@@ -218,19 +214,13 @@ def test_exhaustive_segmented_rows_match_fresh_dictionary_oracle(
             candidate,
             set(keys),
         )
-        observed_dispositions = Counter(
-            action.disposition for action in audited.actions
-        )
+        observed_dispositions = Counter(action.disposition for action in audited.actions)
         assert len(audited.actions) == reference["raw_count"], key
         assert observed_dispositions == reference["dispositions"], key
         assert audited.alias_multiplicities == reference["aliases"], key
-        assert set(audited.successor_probabilities) == set(
-            reference["probabilities"]
-        ), key
+        assert set(audited.successor_probabilities) == set(reference["probabilities"]), key
         for successor_key, probability in audited.successor_probabilities.items():
-            residual = abs(
-                probability - reference["probabilities"][successor_key]
-            )
+            residual = abs(probability - reference["probabilities"][successor_key])
             maximum_residual = max(maximum_residual, residual)
             assert residual <= tolerance, (key, successor_key, residual)
         assert audited.raw_productive_mass == pytest.approx(
@@ -244,25 +234,30 @@ def test_exhaustive_segmented_rows_match_fresh_dictionary_oracle(
     assert maximum_residual <= tolerance
 
 
-def test_frozen_artifact_is_self_hashed_provenance_bound_and_green(contract):
+def test_historical_artifact_is_intact_but_refused_as_current(contract):
     artifact = json.loads(_ARTIFACT_PATH.read_text())
-    validate_a2_2b_artifact(
-        artifact,
-        contract=contract,
-        registry_path=_REGISTRY_PATH,
-    )
+    with pytest.raises(E6GraphAuditError, match="provenance.*current sources"):
+        validate_a2_2b_artifact(artifact, contract=contract, registry_path=_REGISTRY_PATH)
     assert artifact["artifact_sha256"] == artifact_self_hash(artifact)
-    assert artifact["benchmark"]["structural_graph_fingerprint"] == (
-        "84121ff86cbc1ba8"
-    )
+    assert artifact["benchmark"]["structural_graph_fingerprint"] == ("84121ff86cbc1ba8")
     assert len(artifact["graph_audit_hash"]) == 64
-    assert artifact["graph_audit_hash"] != (
-        artifact["benchmark"]["structural_graph_fingerprint"]
-    )
+    assert artifact["graph_audit_hash"] != (artifact["benchmark"]["structural_graph_fingerprint"])
     assert all(artifact["invariants"].values())
     assert artifact["paper_claim_authorized"] is False
     assert artifact["checkpoint_used"] is None
     assert artifact["control_solver_run"] is False
+
+
+def test_fresh_graph_audit_validates_without_mocking_provenance(current_e6_inputs):
+    root, _, contract, artifact = current_e6_inputs
+    validate_a2_2b_artifact(
+        artifact,
+        contract=contract,
+        registry_path=root / "configs/experiment_registry.yaml",
+        repo_root=root,
+    )
+    assert artifact["artifact_sha256"] == artifact_self_hash(artifact)
+    assert all(artifact["invariants"].values())
 
 
 def test_artifact_tampering_fails_closed(contract):
@@ -280,12 +275,8 @@ def test_artifact_tampering_fails_closed(contract):
 def test_audit_has_no_silent_disposition_or_boundary_loss():
     artifact = json.loads(_ARTIFACT_PATH.read_text())
     aggregate = artifact["aggregate"]
-    assert aggregate["raw_action_count"] == sum(
-        aggregate["disposition_counts"].values()
-    )
-    assert aggregate["disposition_counts"][
-        EXCLUDED_OUTSIDE_CLOSED_SLICE
-    ] == 0
+    assert aggregate["raw_action_count"] == sum(aggregate["disposition_counts"].values())
+    assert aggregate["disposition_counts"][EXCLUDED_OUTSIDE_CLOSED_SLICE] == 0
     assert aggregate["canonical_directed_edge_count"] == 14_432
     assert aggregate["productive_mark_count"] >= 14_432
     assert aggregate["raw_productive_mark_to_canonical_edge_compression"] == (

@@ -18,31 +18,29 @@ from compose_v4.experiments.e6_a2_3_readiness import (
     run_a2_3_readiness_audit,
     validate_a2_3_readiness_artifact,
 )
+from compose_v4.experiments.e6_graph_audit import E6GraphAuditError
 
 _ROOT = Path(__file__).resolve().parent.parent
 _CONTRACT_PATH = _ROOT / "configs/exact_control_a2_3_readiness_v1.json"
-_ARTIFACT_PATH = (
-    _ROOT
-    / "diagnostics/exactness/"
-    "e6_a2_3_readiness_blocked_v1_2026-07-30.json"
-)
+_ARTIFACT_PATH = _ROOT / "diagnostics/exactness/e6_a2_3_readiness_blocked_v1_2026-07-30.json"
 
 
 @pytest.fixture(scope="module")
-def contract():
-    return load_a2_3_readiness_contract(_CONTRACT_PATH)
+def contract(current_e6_inputs):
+    return current_e6_inputs[1]
+
+
+@pytest.fixture(scope="module")
+def fixture_root(current_e6_inputs):
+    return current_e6_inputs[0]
 
 
 def test_contract_is_self_hashed_and_fail_closed(contract):
     assert contract["contract_sha256"] == contract_self_hash(contract)
     assert contract["paper_claim_authorized"] is False
     assert contract["solver_execution_authorized"] is False
-    assert contract["confirmed_stage_1_kernel"]["level"] == (
-        "canonical_molecular_successor"
-    )
-    assert contract["confirmed_stage_1_kernel"][
-        "is_a2_2b_diagnostic_mark_law"
-    ] is False
+    assert contract["confirmed_stage_1_kernel"]["level"] == ("canonical_molecular_successor")
+    assert contract["confirmed_stage_1_kernel"]["is_a2_2b_diagnostic_mark_law"] is False
 
 
 def test_contract_tampering_fails_closed(tmp_path):
@@ -54,8 +52,8 @@ def test_contract_tampering_fails_closed(tmp_path):
         load_a2_3_readiness_contract(path)
 
 
-def test_audit_reports_exact_missing_decisions_without_solver(contract):
-    artifact = run_a2_3_readiness_audit(contract)
+def test_audit_reports_exact_missing_decisions_without_solver(contract, fixture_root):
+    artifact = run_a2_3_readiness_audit(contract, repo_root=fixture_root)
     assert artifact["status"] == A2_3_BLOCKED_STATUS
     assert artifact["control_solver_run"] is False
     assert artifact["solver_kernel_materialized"] is False
@@ -74,38 +72,47 @@ def test_audit_reports_exact_missing_decisions_without_solver(contract):
     ]
 
 
-def test_e7_dynamic_horizon_is_not_imported(contract):
-    artifact = run_a2_3_readiness_audit(contract)
+def test_e7_dynamic_horizon_is_not_imported(contract, fixture_root):
+    artifact = run_a2_3_readiness_audit(contract, repo_root=fixture_root)
     assert artifact["confirmed"]["e6_horizon_fields_present"] == {}
     assert artifact["invariants"]["e7_dynamic_horizon_not_imported"] is True
 
 
-def test_named_tilt_families_are_not_misrepresented_as_g(contract):
-    artifact = run_a2_3_readiness_audit(contract)
+def test_named_tilt_families_are_not_misrepresented_as_g(contract, fixture_root):
+    artifact = run_a2_3_readiness_audit(contract, repo_root=fixture_root)
     assert artifact["confirmed"]["registry_tilt_names_are_unparameterized"]
     assert artifact["confirmed"]["e6_desirability_fields_present"] == {}
-    assert artifact["invariants"][
-        "unparameterized_tilt_names_not_treated_as_g"
-    ] is True
+    assert artifact["invariants"]["unparameterized_tilt_names_not_treated_as_g"] is True
 
 
-def test_frozen_artifact_matches_current_inputs(contract):
+def test_historical_artifact_is_intact_but_not_current(contract, fixture_root):
     artifact = json.loads(_ARTIFACT_PATH.read_text())
-    validate_a2_3_readiness_artifact(
-        artifact,
-        contract=contract,
-        repo_root=_ROOT,
-    )
     assert artifact["artifact_sha256"] == artifact_self_hash(artifact)
+    assert artifact["status"] == A2_3_BLOCKED_STATUS
+    assert artifact["paper_claim_authorized"] is False
+    assert artifact["control_solver_run"] is False
+    with pytest.raises(E6A23ReadinessError, match="current frozen inputs"):
+        validate_a2_3_readiness_artifact(artifact, contract=contract, repo_root=fixture_root)
     assert artifact["confirmed"]["selected_benchmark"] == {
         "candidate_id": "carbon_6_slots",
         "n_states": 967,
         "n_edges": 14_432,
         "structural_graph_fingerprint": "84121ff86cbc1ba8",
-        "state_index_sha256": (
-            "4fe916579503e2b4750556e4dff479127a812d33b0df1f4f1dc2db23036d676c"
-        ),
+        "state_index_sha256": ("4fe916579503e2b4750556e4dff479127a812d33b0df1f4f1dc2db23036d676c"),
     }
+
+
+def test_historical_graph_receipt_is_refused_before_readiness():
+    historical_contract = load_a2_3_readiness_contract(_CONTRACT_PATH)
+    with pytest.raises(E6GraphAuditError, match="provenance.*current sources"):
+        run_a2_3_readiness_audit(historical_contract, repo_root=_ROOT)
+
+
+def test_current_fixture_artifact_validates_against_requested_source_root(contract, fixture_root):
+    artifact = run_a2_3_readiness_audit(contract, repo_root=fixture_root)
+    validate_a2_3_readiness_artifact(artifact, contract=contract, repo_root=fixture_root)
+    assert artifact["provenance"]["registry_path"] == "configs/experiment_registry.yaml"
+    assert artifact["invariants"]["a2_2b_artifact_validated"] is True
 
 
 def test_artifact_tampering_fails_closed(contract):
@@ -120,21 +127,21 @@ def test_artifact_tampering_fails_closed(contract):
         )
 
 
-def test_freeze_is_idempotent_but_never_overwrites(contract, tmp_path):
-    artifact = run_a2_3_readiness_audit(contract)
+def test_freeze_is_idempotent_but_never_overwrites(contract, fixture_root, tmp_path):
+    artifact = run_a2_3_readiness_audit(contract, repo_root=fixture_root)
     output = tmp_path / "readiness.json"
     freeze_a2_3_readiness_artifact(
         artifact,
         output,
         contract=contract,
-        repo_root=_ROOT,
+        repo_root=fixture_root,
     )
     frozen = output.read_bytes()
     freeze_a2_3_readiness_artifact(
         artifact,
         output,
         contract=contract,
-        repo_root=_ROOT,
+        repo_root=fixture_root,
     )
     assert output.read_bytes() == frozen
 
@@ -144,14 +151,12 @@ def test_freeze_is_idempotent_but_never_overwrites(contract, tmp_path):
             artifact,
             output,
             contract=contract,
-            repo_root=_ROOT,
+            repo_root=fixture_root,
         )
 
 
 def test_result_producer_contains_no_solver_or_old_evidence_import():
-    source = (
-        _ROOT / "src/compose_v4/experiments/e6_a2_3_readiness.py"
-    ).read_text()
+    source = (_ROOT / "src/compose_v4/experiments/e6_a2_3_readiness.py").read_text()
     assert "exact_doob_enumerable_benchmark" not in source
     assert "doob_guidance_ground_truth" not in source
     assert "e0_toy_h_exactness" not in source
