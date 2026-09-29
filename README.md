@@ -24,14 +24,32 @@ Three layers, kept separate on purpose:
 2. **[`docs/PAPER_TO_CURRENT_CODE.md`](docs/PAPER_TO_CURRENT_CODE.md)**:
    submitted-paper code and evidence versus post-submission controller
    extensions, plus a fresh-laptop first-hour path.
-3. **[`experiments/INDEX.md`](experiments/INDEX.md)** — every runnable
+3. **[`experiments/t4/`](experiments/t4/)** and
+   **[`experiments/pmo/`](experiments/pmo/)** — the two benchmark task guides.
+   Each states what the task asks, how to regenerate its reported numbers
+   **without cloud credentials or oracle calls**, its exact input manifest, its
+   environment, and what the result does not support. T4's table is frozen;
+   PMO is development evidence with no frozen table. **The two tasks run
+   different pinned chemistry kernels** (rdkit 2024.3.5 vs 2023.9.6).
+4. **[`experiments/INDEX.md`](experiments/INDEX.md)** — every runnable
    experiment and its source-derived command. Regenerate it with
    `tools/gen_experiment_index.py` after adding an entrypoint.
-4. **[`experiments/region_resampling/`](experiments/region_resampling/)** — the
-   current campaign, with its preregistered gates, inputs, outputs and known
+5. **[`experiments/region_resampling/`](experiments/region_resampling/)** — a
+   campaign manifest, with its preregistered gates, inputs, outputs and known
    limitations.
-5. **[`docs/INDEX.md`](docs/INDEX.md)** — historical document census, classified CURRENT /
+6. **[`docs/INDEX.md`](docs/INDEX.md)** — historical document census, classified CURRENT /
    SUPERSEDED / HISTORICAL.
+
+## Verifying a result without running anything
+
+```bash
+python3 tools/reproduce_t4_table.py                        # frozen T4 table
+PYTHONPATH=src python3 tools/reproduce_pmo_tables.py       # PMO, from charged receipts
+python3 tools/verify_experiment_inputs.py                  # inputs match their manifests
+python3 tools/preservation_inventory.py                    # what git does NOT protect
+```
+
+None of these touch the network, an oracle, or a credential.
 
 ## Layout
 

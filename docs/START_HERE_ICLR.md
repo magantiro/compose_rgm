@@ -16,6 +16,22 @@ cd compose_rgm
 git log --oneline -8
 ```
 
+**To verify a reported number before reading any of the prose below**, use the
+per-task guides — they need no cloud credentials, no oracle calls and no
+docking:
+
+| Task | Guide | Reproduce with |
+| --- | --- | --- |
+| T4 (frozen table) | [`experiments/t4/`](../experiments/t4/) | `python3 tools/reproduce_t4_table.py` |
+| PMO (development) | [`experiments/pmo/`](../experiments/pmo/) | `PYTHONPATH=src python3 tools/reproduce_pmo_tables.py` |
+
+Each guide carries the task's exact input manifest
+(`python3 tools/verify_experiment_inputs.py`), its pinned environment — **the two
+tasks run different chemistry kernels**, rdkit 2024.3.5 for T4 and 2023.9.6 for
+PMO — and its documented missing assets. `python3 tools/preservation_inventory.py`
+reports what git does *not* protect, which a clean status and a pushed branch do
+not tell you.
+
 The paper-result track is currently running on Modal from the immutable clean
 commit `c272b881bd23ebf1f46bbd1989e6e2871ad20687`. Later documentation and
 controller commits do not alter that deployed code or its sealed recipe.
