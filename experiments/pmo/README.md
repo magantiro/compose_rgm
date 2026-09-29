@@ -1,10 +1,17 @@
 # PMO — black-box molecular optimization (no-prescreen)
 
-**Status: DEVELOPMENT. There is no frozen PMO paper table.**
+**Status: the ICLR submission reports PMO-1K (Tables 2 and 11). This guide
+covers the development ledgers, which are a DIFFERENT set of runs.**
 
-Every PMO number in this repo is development evidence. Nothing here is a
-submitted result, and the reproducer says so on every run. That is the single
-most important difference from `experiments/t4/`, which is frozen.
+> To reproduce the paper's PMO table, use
+> **[`experiments/paper/`](../paper/)** and
+> `python3 tools/reproduce_paper_tables.py --pmo`. It reads
+> `diagnostics/pmo_ablation_frozen_v1/inputs/pmo_1k_final.json` and reproduces
+> 21 of 22 objectives exactly plus both headline means, 0.563 and 0.482.
+
+Everything below concerns the *development* ledgers committed under
+`diagnostics/pmo_*`. Those are not the paper's runs, and
+`tools/reproduce_pmo_tables.py` says so on every run.
 
 The question: given a task-independent initial population and a scalar oracle
 under a fixed call budget, can the controller improve the top-ten score curve?

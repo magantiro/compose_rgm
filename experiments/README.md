@@ -48,8 +48,8 @@ conditional efficiency.
 | Task | Result status | Reproduce with |
 |---|---|---|
 | [`paper`](paper/) | **the ICLR submission's tables** | `python3 tools/reproduce_paper_tables.py` |
-| [`t4`](t4/) | **FROZEN** — the submitted table | `python3 tools/reproduce_t4_table.py` |
-| [`pmo`](pmo/) | **DEVELOPMENT** — no frozen table exists | `PYTHONPATH=src python3 tools/reproduce_pmo_tables.py` |
+| [`t4`](t4/) | task guide; also covers the NeurIPS **workshop** T4 table and the later IVG panel | `python3 tools/reproduce_t4_table.py` |
+| [`pmo`](pmo/) | task guide; recomputes development ledgers, *not* the paper's table | `PYTHONPATH=src python3 tools/reproduce_pmo_tables.py` |
 
 A task guide is not a campaign manifest: it describes a standing benchmark and
 its reproduction path, not one question asked once. Campaigns above may target
