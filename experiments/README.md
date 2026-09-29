@@ -1,6 +1,14 @@
 # Experiments
 
-Two kinds of file live here, and they answer different questions.
+Three kinds of file live here, and they answer different questions.
+
+- **`<task>/README.md` + `<task>/manifest.json`** — *how do I verify this
+  benchmark, and how do I run it?* One per benchmark task
+  ([`t4`](t4/), [`pmo`](pmo/)): the objective, a reproduction path that needs no
+  cloud credentials and makes no oracle calls, the exact input manifest with
+  hashes, the pinned environment, documented missing assets, and the
+  limitations. Verify a manifest with
+  `python3 tools/verify_experiment_inputs.py`.
 
 - **[`INDEX.md`](INDEX.md)** — *what can I run?* Every app and entrypoint in the
   tree with its exact command, generated from source by
@@ -31,3 +39,14 @@ conditional efficiency.
 | Campaign | Status | What it settles |
 |---|---|---|
 | [`region_resampling`](region_resampling/) | splitting phase closed | Directed proposals reach structural handoff where the base kernel does not; budget is not the limiter at fixed breadth; the open item is the general local→global gate. |
+
+## Benchmark tasks
+
+| Task | Result status | Reproduce with |
+|---|---|---|
+| [`t4`](t4/) | **FROZEN** — the submitted table | `python3 tools/reproduce_t4_table.py` |
+| [`pmo`](pmo/) | **DEVELOPMENT** — no frozen table exists | `PYTHONPATH=src python3 tools/reproduce_pmo_tables.py` |
+
+A task guide is not a campaign manifest: it describes a standing benchmark and
+its reproduction path, not one question asked once. Campaigns above may target
+either task.
