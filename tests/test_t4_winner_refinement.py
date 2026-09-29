@@ -41,7 +41,7 @@ def test_resume_reuses_only_the_exact_completed_controls():
         reused_winner_controls(ROOT, {**contract, "docking": {"seeds": [1, 2, 3]}}, winner)
 
 
-def test_qualified_inference_dependencies_and_reference_inputs_match():
+def test_qualified_inference_receipt_is_bound_to_its_source_revision():
     from compose_v4.experiments.continuation_profile import verify_file
     from compose_v4.experiments.t4_matched_pilot import unseal
 
@@ -55,8 +55,18 @@ def test_qualified_inference_dependencies_and_reference_inputs_match():
         package["provenance"]["reference_inputs"]["checkpoint"]["sha256"]
         == c["expected_input_sha256"]["r_theta_checkpoint"]
     )
+    later_repaired_registry = "src/compose_v4/data/editing_v2_process_v2_policy_registry.py"
     for path, digest in package["provenance"]["dependency_sources"].items():
-        verify_file(ROOT / path, receipt["cache_sources"].get(path, digest))
+        expected = receipt["cache_sources"].get(path, digest)
+        if path == later_repaired_registry:
+            # The September 10 package pins the earlier registry source. The
+            # September 13 repair changed it, so the current checkout must
+            # refuse the historical package rather than silently requalify it.
+            assert expected == "1c7b0da5c87842c8d5e4e034a4db57c1a3455fb86b3d3713e7447a6a36b430eb"
+            with pytest.raises(ValueError, match="input identity mismatch"):
+                verify_file(ROOT / path, expected)
+        else:
+            verify_file(ROOT / path, expected)
     for path, digest in config["extra_model_sources"].items():
         verify_file(ROOT / path, digest)
 

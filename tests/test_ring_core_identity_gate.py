@@ -1,6 +1,7 @@
 """Negative tests for the strict RING_CORE_V1 checkpoint-identity gate (requirement 1 of the rollout-harness
 hardening). A base-B checkpoint, wrong max_atoms, stale operator registry, cycle ops disabled, ring macros
 enabled, legacy grow enabled, or missing metadata must FAIL LOUDLY -- never be analyzed as RingCore."""
+
 from __future__ import annotations
 
 import sys
@@ -11,7 +12,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from ring_core_identity import (  # noqa: E402
+import ring_core_identity as identity
+from ring_core_identity import (
     BASE_B_SHA256,
     SCHEDULER_CONFIG_HASH,
     SCOPE_HASH,
@@ -20,6 +22,18 @@ from ring_core_identity import (  # noqa: E402
     scheduler_config_hash_from_args,
     verify_checkpoint_identity,
 )
+
+
+@pytest.fixture(autouse=True)
+def _simulate_frozen_source_hashes(monkeypatch):
+    """Unit-test checkpoint fields independently of the later checkout's source drift."""
+
+    monkeypatch.setattr(
+        identity, "recompute_operator_registry_hash", lambda: identity.OPERATOR_REGISTRY_HASH
+    )
+    monkeypatch.setattr(
+        identity, "recompute_cycle_op_semantic_hash", lambda: identity.CYCLE_OP_SEMANTIC_HASH
+    )
 
 
 def _valid_payload() -> dict:
@@ -44,6 +58,18 @@ def test_valid_ring_core_payload_passes():
     assert report["enable_cycle_ops"] and not report["enable_ring_grow_macro"]
     assert report["enable_ring_restates"] is True
     assert report["enable_ring_system_delete"] is True
+
+
+def test_current_source_checkout_refuses_frozen_ringcore_identity(monkeypatch):
+    # The frozen hashes are reproduced by the recorded source revision a7546e2.
+    # This later checkout must not be accepted as that historical RingCore build.
+    monkeypatch.undo()
+    assert identity.recompute_operator_registry_hash() != identity.OPERATOR_REGISTRY_HASH
+    assert identity.recompute_cycle_op_semantic_hash() != identity.CYCLE_OP_SEMANTIC_HASH
+    with pytest.raises(
+        RingCoreIdentityError, match="operator-registry hash.*cycle-op semantic hash"
+    ):
+        verify_checkpoint_identity(_valid_payload(), checkpoint_path=None)
 
 
 @pytest.mark.parametrize("value", [False, None, "false", 0])
@@ -174,13 +200,13 @@ def test_locked_scheduler_args_reproduce_hash():
 )
 def test_scheduler_drift_changes_hash(override):
     # any drift from the locked scheduler yields a different hash -> the gate launch guard aborts
-    base = dict(
-        warmup_steps=500,
-        schedule_steps=16000,
-        minimum_learning_rate_fraction=0.05,
-        peak_learning_rate=3e-4,
-        weight_decay=1e-5,
-    )
+    base = {
+        "warmup_steps": 500,
+        "schedule_steps": 16000,
+        "minimum_learning_rate_fraction": 0.05,
+        "peak_learning_rate": 3e-4,
+        "weight_decay": 1e-5,
+    }
     base.update(override)
     assert scheduler_config_hash_from_args(**base) != SCHEDULER_CONFIG_HASH
 

@@ -73,6 +73,11 @@ def _record(*, layer: str, entry_index: int) -> PathRecord:
 
 def _fixture() -> tuple[dict, dict, LayeredEditCorpus]:
     config = load_json_object(CONFIG_PATH)
+    # These synthetic records test today's builder behavior, not a re-sealed
+    # version of the frozen July panel. Keep the on-disk contract unchanged.
+    config["validation_data"]["record_sampling"]["implementation_sha256"] = (
+        panel_sampler_implementation_sha256()
+    )
     config["panels"]["production_law"]["initial_draws"] = 12
     config["panels"]["production_law"]["expanded_draws"] = 24
     config["panels"]["family_forensics"]["active_families"] = ["atom_insert"]
@@ -117,11 +122,15 @@ def _fixture() -> tuple[dict, dict, LayeredEditCorpus]:
     return config, load_json_object(INVENTORY_PATH), corpus
 
 
-def test_sampler_implementation_hash_matches_frozen_protocol() -> None:
-    config, _inventory, _corpus = _fixture()
+def test_frozen_panel_protocol_refuses_later_sampler_source() -> None:
+    frozen = load_json_object(CONFIG_PATH)
+    config, _inventory, corpus = _fixture()
     observed = panel_sampler_implementation_sha256()
     assert observed == config["validation_data"]["record_sampling"]["implementation_sha256"]
+    assert observed != frozen["validation_data"]["record_sampling"]["implementation_sha256"]
     assert len(observed) == 64
+    with pytest.raises(ValidationPanelError, match="implementation changed after protocol freeze"):
+        validate_panel_corpus_sampler(corpus, config=frozen)
 
 
 def test_production_panel_is_deterministic_exact_addressed_prefix() -> None:

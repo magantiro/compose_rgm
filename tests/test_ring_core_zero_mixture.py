@@ -4,6 +4,7 @@ zero-mixture (denovo_weight=0, no grow, cycle ops enabled, frozen hashes); the m
 de-novo layer at denovo_keep=0; the production ring catalog reconstructs deterministically from the seeds
 (not de-novo paths); and the instrumentation counters behave. The corpus-dependent proof (a real gate run
 emits denovo_path_compile_calls=0 + reaches the first editing batch) is the CPU Modal dry-launch (§8)."""
+
 from __future__ import annotations
 
 import json
@@ -13,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-from compose_v4.experiments import zero_mixture_instrumentation as zmi  # noqa: E402
+from compose_v4.experiments import zero_mixture_instrumentation as zmi
 
 _MANIFEST = (
     Path(__file__).resolve().parent.parent
@@ -43,7 +44,7 @@ def test_manifest_is_zero_mixture_ring_core():
     from ring_core_identity import (
         CALIBRATION_POLICY_HASH,
         CAPABILITY_HASH,
-        recompute_operator_registry_hash,
+        OPERATOR_REGISTRY_HASH,
     )
 
     m = json.loads(_MANIFEST.read_text())
@@ -54,7 +55,9 @@ def test_manifest_is_zero_mixture_ring_core():
     assert "cycle_insert" in pe and "cycle_attach" in pe
     cap = m["ring_core_capability"]
     assert cap["capability_hash"] == CAPABILITY_HASH
-    assert cap["operator_registry_hash"] == recompute_operator_registry_hash()
+    # Historical manifest identity is compared with its frozen hash. Later
+    # checkout source drift is tested by test_ring_core_identity_gate.
+    assert cap["operator_registry_hash"] == OPERATOR_REGISTRY_HASH
     assert cap["calibration_policy_hash"] == CALIBRATION_POLICY_HASH
     assert cap["enable_cycle_ops"] and not cap["enable_ring_macros"]
     assert not cap["enable_ring_grow_macro"]
@@ -64,9 +67,9 @@ def test_scaled_sampler_has_no_denovo_layer_at_denovo_keep_zero():
     # At denovo_keep=0 the "denovo" layer key is never created, so no de-novo record can be sampled -- the
     # zero-mixture invariant at the sampler boundary. Uses real edit records (corruption + cycle).
     import numpy as np
+    from train_tracelet_cnof_gate import _build_scaled_manifest_sampler
 
     from compose_v4.experiments.cycle_op_prior import build_cycle_op_records
-    from train_tracelet_cnof_gate import _build_scaled_manifest_sampler
 
     records, _ = build_cycle_op_records(
         ["c1ccc2ccccc2c1CCN", "C1CCNCC1C(=O)O", "CSc1ccc(N)cc1CC"], n_slots=40, seed=0
@@ -81,11 +84,14 @@ def test_scaled_sampler_has_no_denovo_layer_at_denovo_keep_zero():
     rng = np.random.default_rng(0)
     for _ in range(200):
         idx = int(sampler.draw(rng))
-        assert 0 <= idx < len(edit_records)  # every draw is an edit record; no de-novo region exists
+        assert (
+            0 <= idx < len(edit_records)
+        )  # every draw is an edit record; no de-novo region exists
 
 
 def test_seed_ring_catalog_reconstructs_deterministically():
     from train_tracelet_cnof_gate import _build_ring_core_seed_ring_catalog
+
     from compose_v4.rewrite.typed_ring_catalog import ring_catalog_fingerprint
 
     a = _build_ring_core_seed_ring_catalog(40)
