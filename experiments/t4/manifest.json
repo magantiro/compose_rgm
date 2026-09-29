@@ -29,19 +29,19 @@
    "path": "diagnostics/T4_FROZEN_RESULT_v1.json",
    "role": "the frozen result table",
    "pin": "strict",
-   "sha256_16": "87584d49ceacff2b"
+   "sha256": "87584d49ceacff2b861f1479b283f47d58f9c60513e1fb63c61fc5f5d8230b9b"
   },
   {
    "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
    "role": "eligibility gate (Fiber.check) and the campaign loop",
    "pin": "informational",
-   "sha256_16": "e9bfbea451eabc92"
+   "sha256": "e9bfbea451eabc923ad137331d42e592dc88ed0aec787c6d1b504e3f2cd6f864"
   },
   {
    "path": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
    "role": "shared per-cell launcher; the ten held-target apps are 9-line env-var wrappers that import its app and main",
    "pin": "informational",
-   "sha256_16": "256e8c2ef94a794f"
+   "sha256": "256e8c2ef94a794fedc8e90237a764812a0f2e36d8a983b79c183e57ff17b975"
   }
  ],
  "missing_assets": [
