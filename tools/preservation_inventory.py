@@ -106,6 +106,16 @@ REGENERABLE_RULES: tuple[tuple[str, str, str, str], ...] = (
         "Re-fetched by the parity gate; not an input to any COMPOSE result.",
     ),
     (
+        "diagnostics/*/dryrun/*",
+        "zero_oracle_gate_workspace",
+        ("Campaign state from a gate that charged no oracle calls. Its own "
+         "committed report is the artifact worth keeping; the workspace is "
+         "rebuilt from scratch on every run."),
+        ("Re-run the gate. NOTE its ledger is shaped like a scored run but its "
+         "scores are NOT production scores -- tools/reproduce_pmo_tables.py "
+         "excludes it on that evidence."),
+    ),
+    (
         "*.log",
         "run_log",
         "Worker stdout/stderr from a completed run.",
@@ -201,6 +211,14 @@ def walk(root: Path, tracked: set[str]) -> dict:
                 relative = str(path.relative_to(root))
             except ValueError:
                 continue
+            # In a git WORKTREE, .git is a FILE pointing at the parent repo, so
+            # skipping directories by name does not catch it.
+            if relative == ".git":
+                continue
+            # This tool's own output is not an asset at risk; before its first
+            # commit it would otherwise report itself.
+            if relative == str(MANIFEST):
+                continue
             if relative in tracked:
                 tracked_count += 1
                 try:
@@ -276,7 +294,12 @@ def main(argv: list[str] | None = None) -> int:
     root = args.repo_root.resolve()
     tracked = git_tracked(root)
     if tracked is None:
-        print("FAIL: not a git repository (or git unavailable)", file=sys.stderr)
+        print(f"FAIL: {root} is not a git repository, or git is unavailable.",
+              file=sys.stderr)
+        print("  This tool answers 'what is NOT protected by git', which has no "
+              "meaning\n  without a repository to compare against. Run it inside "
+              "the working\n  tree, not in a source export or an unpacked "
+              "archive.", file=sys.stderr)
         return 2
 
     print("=" * 78)

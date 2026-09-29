@@ -1,0 +1,53 @@
+{
+ "at_risk": [],
+ "checkout": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916",
+ "created_at_utc": "2026-09-29T02:26:53.433021+00:00",
+ "git": {
+  "branch": "t4-objective-dynamic-reset-20260916",
+  "head": "c6e3ca4b6ad2d754a7aedffd487e04b377a60f94",
+  "remote_head": "c26d18c70b2c73918cf18cd5db3870af86190e89",
+  "status": "AHEAD_OF_REMOTE",
+  "unpushed_commits": 5
+ },
+ "regenerable": {
+  "cumulative_round_snapshot": {
+   "bytes": 297250369,
+   "files": 50,
+   "recipe": "Not regenerated: the load-bearing records (oracle/query_*/result.json receipts, manifests, progress reports) are committed beside it.",
+   "why": "Each round's snapshot CONTAINS every earlier round, so a K-round campaign stores itself K times."
+  },
+  "run_log": {
+   "bytes": 7047,
+   "files": 18,
+   "recipe": "Not regenerated; the run's own artifacts carry its results.",
+   "why": "Worker stdout/stderr from a completed run."
+  },
+  "source_capsule": {
+   "bytes": 128015945,
+   "files": 5204,
+   "recipe": "python3 tools/rebuild_source_capsule.py <source_capsule_manifest*.json> --out <dir>",
+   "why": "Verbatim copy of every file a run read, 12-17 MB per attempt."
+  },
+  "upstream_oracle_asset": {
+   "bytes": 148196920,
+   "files": 6,
+   "recipe": "PyTDC downloads these on first use into the directory AssetPinnedOracle pins around every call.",
+   "why": "Upstream PyTDC predictor pickles (drd2/gsk3b/jnk3), ~71 MB."
+  },
+  "zero_oracle_gate_workspace": {
+   "bytes": 106382,
+   "files": 227,
+   "recipe": "Re-run the gate. NOTE its ledger is shaped like a scored run but its scores are NOT production scores -- tools/reproduce_pmo_tables.py excludes it on that evidence.",
+   "why": "Campaign state from a gate that charged no oracle calls. Its own committed report is the artifact worth keeping; the workspace is rebuilt from scratch on every run."
+  }
+ },
+ "schema_version": "preservation_inventory_v1",
+ "summary": {
+  "at_risk_bytes": 0,
+  "at_risk_files": 0,
+  "regenerable_bytes": 573576663,
+  "regenerable_files": 5505,
+  "tracked_bytes": 1486301049,
+  "tracked_files": 12568
+ }
+}
