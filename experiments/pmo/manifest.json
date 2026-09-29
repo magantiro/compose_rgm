@@ -1,0 +1,94 @@
+{
+ "schema_version": "experiment_task_manifest_v1",
+ "task": "pmo",
+ "title": "PMO black-box molecular optimization (no-prescreen)",
+ "recorded_at_commit": "c26d18c70b2c73918cf18cd5db3870af86190e89",
+ "recorded_at_checkout": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916",
+ "reported_result": {
+  "status": "DEVELOPMENT -- there is no frozen PMO paper table",
+  "artifact": null,
+  "reproduce": "PYTHONPATH=src python3 tools/reproduce_pmo_tables.py",
+  "note": "Every PMO number in this repo is development evidence recomputed from charged-call receipts. Nothing is a submitted result. The reproducer says so on every run."
+ },
+ "environment": {
+  "role": "pinned production kernel for PMO -- NOT the same as T4's",
+  "python": "3.11",
+  "rdkit": "2023.9.6",
+  "pytdc": "1.1.15",
+  "numpy": "1.26.4",
+  "setuptools": "69.5.1",
+  "build": "uv venv --python 3.11 <dir> && uv pip install --python <dir>/bin/python 'PyTDC==1.1.15' --no-deps && uv pip install --python <dir>/bin/python rdkit==2023.9.6 numpy==1.26.4 setuptools==69.5.1",
+  "why_no_deps": "PyTDC 1.1.15 pins rdkit>=2023.9.5,<2024.3.1, so installing it against 2024.3.5 is unsatisfiable. Production uses --no-deps plus a six shim, because PyTDC imports rdkit.six which modern RDKit does not ship.",
+  "why_old_setuptools": "setuptools>=81 removes pkg_resources, which tdc/metadata.py imports.",
+  "the_image_holds_one_rdkit": "So the PMO runtime -- oracle AND COMPOSE executor -- is 2023.9.6. A PMO number computed locally under 2024.3.5 needs a parity statement.",
+  "reproduction_needs_none_of_this": "tools/reproduce_pmo_tables.py needs numpy (for the production AUC) and optionally RDKit for the chemistry column. It never imports PyTDC and never calls an oracle."
+ },
+ "inputs": [
+  {
+   "path": "docs/PMO_INIT_BANK.json",
+   "role": "objective-blind initialization bank, 100 molecules, fixed before any task; the controller draws 16",
+   "pin": "strict",
+   "sha256_16": "b679b4dc54006acf"
+  },
+  {
+   "path": "configs/pmo_population_controller_v1.json",
+   "role": "preflight contract for the v1 scored runtime",
+   "pin": "strict",
+   "sha256_16": "1c095ecde7239167"
+  },
+  {
+   "path": "src/compose_v4/control/program_task.py",
+   "role": "pmo_top_ten_auc -- the official mol_opt top_auc convention; the reproducer imports it rather than transcribing it",
+   "pin": "informational",
+   "sha256_16": "56a61194ff4f1a2e"
+  },
+  {
+   "path": "src/compose_v4/experiments/pmo_population_v1.py",
+   "role": "scored entry point (execute_task)",
+   "pin": "informational",
+   "sha256_16": "1c3f5f34ea5673b1"
+  },
+  {
+   "path": "modal_apps/pmo_population_v1_app.py",
+   "role": "Modal app; bakes the contract at IMAGE BUILD time with copy=True",
+   "pin": "informational",
+   "sha256_16": "36f49f0ecf791e6b"
+  }
+ ],
+ "missing_assets": [
+  {
+   "what": "oracle/drd2_current.pkl, oracle/gsk3b_current.pkl, oracle/jnk3_current.pkl (71 MB)",
+   "needed_for": "running gsk3b, jnk3 or drd2",
+   "not_needed_for": "tools/reproduce_pmo_tables.py",
+   "where": "gitignored; PyTDC downloads them on first use into the directory AssetPinnedOracle pins around every call. A fresh clone cannot build a working image for these three tasks until they are present."
+  },
+  {
+   "what": "Modal volumes holding the 10k campaigns and several matched A/B arms",
+   "needed_for": "recomputing those specific runs",
+   "not_needed_for": "the ledgers committed under diagnostics/, which the reproducer reads",
+   "where": "Modal volumes; note they live under two profiles and a cross-profile listing reports them as absent"
+  }
+ ],
+ "reading_hazards": [
+  {
+   "what": "AUC is structurally depressed at short budgets",
+   "why": "top_auc trapezoids up from (0,0), so a run holding a constant top-ten level c scores c*(1 - frequency/(2*budget)): 20% removed at budget 250, 5% at 1000, 0.5% at the official 10000",
+   "handling": "the reproducer labels every sub-official budget and refuses to let a 250-call AUC be compared to a published 10k figure"
+  },
+  {
+   "what": "three oracles reward leaving the drug-like manifold",
+   "why": "gsk3b, jnk3 and drd2 are ML predictors over fingerprints; measured r(score, QED) = -0.705 on gsk3b and -0.750 on jnk3, and top molecules carry hypervalent iodine, trioxide chains and stacked hydrazines",
+   "handling": "the reproducer prints a chemistry column and flags these three tasks. Read the SMILES before banking a number."
+  },
+  {
+   "what": "a ledger from a zero-oracle gate looks exactly like a scored run",
+   "why": "same schema, same task name, same oracle_protocol, but the scores come from a non-production scorer -- one such workspace holds a celecoxib best of 0.9167 against a real best of ~0.25",
+   "handling": "the reproducer excludes any ledger whose own committed report declares new_charged_oracle_calls == 0 or a zero-charged evidence_role, detected from that evidence rather than from the directory being named 'dryrun'"
+  }
+ ],
+ "information_boundary": {
+  "permitted": "task-independent chemical prior, plus feedback COUNTED against the run's own budget. Online adaptation from scored observations is legitimate no-prescreen optimization.",
+  "prohibited": "oracle internals, hidden component scores, uncounted same-task history, same-task winner routes, prescreened vocabularies. Computing a property on an uncounted candidate in order to select it IS objective evaluation.",
+  "note": "A benchmark-declared target is a task INPUT only where the evaluated task actually supplies it. PMO black-box search supplies scalar feedback only, so handing the controller a reference structure evaluates reference-conditioned construction, not black-box discovery -- a different experiment that needs its own label."
+ }
+}

@@ -1,0 +1,73 @@
+{
+ "schema_version": "experiment_task_manifest_v1",
+ "task": "t4",
+ "title": "T4 constrained lead optimization",
+ "recorded_at_commit": "c26d18c70b2c73918cf18cd5db3870af86190e89",
+ "recorded_at_checkout": "/Users/rmaganti/compose_rgm_git/.worktrees/t4-objective-dynamic-reset-20260916",
+ "reported_result": {
+  "status": "FROZEN",
+  "artifact": "diagnostics/T4_FROZEN_RESULT_v1.json",
+  "payload_sha256": "ea181ab3ace706d39c6e0a2f33c4547f88594c3cf77a1c1797dfc4f967ab80ef",
+  "reproduce": "python3 tools/reproduce_t4_table.py",
+  "note": "The submitted table. Rows carry source=panel (the historical per-cell procedure that produced it) or source=support_expansion (a later campaign); they are counted separately by the reproducer and must not be merged in prose."
+ },
+ "environment": {
+  "role": "pinned production chemistry kernel for T4 and the editing corpus",
+  "python": "3.11",
+  "rdkit": "2024.3.5",
+  "numpy": "1.26.4",
+  "scipy": "1.13.1",
+  "networkx": "3.3",
+  "torch": "2.4.0",
+  "build": "uv venv --python 3.11 <dir> && uv pip install --python <dir>/bin/python rdkit==2024.3.5 numpy==1.26.4 scipy==1.13.1 networkx==3.3 torch==2.4.0 pytest",
+  "why_torch": "t4_fiber_campaign imports it transitively. Omitting it forces you to transcribe the eligibility gate instead of importing it, and a transcribed gate cannot fail usefully.",
+  "not_the_pmo_kernel": "PMO runs rdkit 2023.9.6. See experiments/pmo/manifest.json. Two production kernels exist in this repo and a number computed under the wrong one needs a parity statement.",
+  "reproduction_needs_none_of_this": "tools/reproduce_t4_table.py reads only committed JSON and runs on a bare python3."
+ },
+ "inputs": [
+  {
+   "path": "diagnostics/T4_FROZEN_RESULT_v1.json",
+   "role": "the frozen result table",
+   "pin": "strict",
+   "sha256_16": "87584d49ceacff2b"
+  },
+  {
+   "path": "src/compose_v4/experiments/t4_fiber_campaign.py",
+   "role": "eligibility gate (Fiber.check) and the campaign loop",
+   "pin": "informational",
+   "sha256_16": "e9bfbea451eabc92"
+  },
+  {
+   "path": "modal_apps/t4_integrated_route_fiber_parp1_app.py",
+   "role": "shared per-cell launcher; the ten held-target apps are 9-line env-var wrappers that import its app and main",
+   "pin": "informational",
+   "sha256_16": "256e8c2ef94a794f"
+  }
+ ],
+ "missing_assets": [
+  {
+   "what": "QuickVina2 docking binary and receptor boxes",
+   "needed_for": "running new T4 cells",
+   "not_needed_for": "tools/reproduce_t4_table.py",
+   "where": "baked into the Modal image; not in the repo"
+  },
+  {
+   "what": "per-cell Modal volumes (compose-t4-*), holding round locks and checkpoints",
+   "needed_for": "reconstructing a cell's per-round history",
+   "not_needed_for": "tools/reproduce_t4_table.py",
+   "where": "Modal volumes under two profiles; a volume NAME is not a volume identity, so pin the profile and creation date before concluding an artifact is absent"
+  }
+ ],
+ "known_discrepancies": [
+  {
+   "what": "delta 0.6 stored sum_gap = -7.6, but the rows sum to -8.5",
+   "corroboration": "compose_sum - ivg_sum = -8.5 and mean_gap * paired_cells = -8.4994 both agree with the rows; only sum_gap disagrees",
+   "direction": "the stored value UNDERSTATES COMPOSE's aggregate margin by 0.9 kcal/mol",
+   "handling": "tools/reproduce_t4_table.py prints the row sum, flags the stored field, and exits 1. The frozen artifact is LOCKED and was deliberately NOT edited."
+  }
+ ],
+ "caveats_carried_by_the_artifact": [
+  "Docking is not reproducible across runs: obabel --gen3D takes no seed, and one molecule scored -7.5 / -8.30 / -8.8 across three runs. Quote the aggregate and the win count; do not lean on a single cell's 0.2-0.7 margin.",
+  "One blank cell (FA7 seed 1, delta 0.6) is a deliberate scoped negative, not a missing measurement."
+ ]
+}
