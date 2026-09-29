@@ -10,9 +10,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import lru_cache
 
-import numpy as np
-
 from compose_v4.chem.molecular_graph import MolecularGraph, is_element
+from compose_v4.chem.topology import cycle_rank
 from compose_v4.control.region_rewrite import RewriteContext
 from compose_v4.control.ring_program import RingProgress, RingSpec, ring_spec
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
@@ -38,12 +37,6 @@ def released_slots(graph, context):
     return frozenset(
         int(i) for i in context.locus - context.frozen if is_element(graph.atom_types[i])
     )
-
-
-def cycle_rank(graph):
-    slots = np.flatnonzero(is_element(graph.atom_types))
-    edges = np.count_nonzero(graph.bonds[np.ix_(slots, slots)]) // 2
-    return int(edges - len(slots) + 1)  # complete connected states only
 
 
 def maximum_horizon(graph, context, spec):

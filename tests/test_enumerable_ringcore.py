@@ -4,13 +4,14 @@ The failure this guards against is a sizing result that looks authoritative but 
 reported as closed, a degenerate graph passing the conditions, or a selection that quietly depends on
 something other than the preregistered rule.
 """
+
 from __future__ import annotations
 
 import pytest
 
 pytest.importorskip("rdkit")
 
-from compose_v4.experiments.enumerable_ringcore import (  # noqa: E402
+from compose_v4.experiments.enumerable_ringcore import (
     EMPTY_STATE_POLICY,
     EMPTY_STATE_PRODUCTION_SEMANTICS,
     NULL_KEY,
@@ -20,8 +21,8 @@ from compose_v4.experiments.enumerable_ringcore import (  # noqa: E402
     cycle_rank,
     default_candidate_ladder,
     evaluate_candidate,
-    graph_statistics,
     graph_fingerprint,
+    graph_statistics,
     non_degeneracy,
     root_insertion_transitions,
     select_candidate,
@@ -43,9 +44,7 @@ def test_the_reachable_set_never_exceeds_the_seed_slot_count():
     This is the mechanism that makes the slot count the size dial, so it is asserted rather than assumed.
     """
     graph = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
-    largest = max(
-        state.n_real_atoms for key, state in graph.states.items() if key != NULL_KEY
-    )
+    largest = max(state.n_real_atoms for key, state in graph.states.items() if key != NULL_KEY)
     assert largest == 3, f"expected no molecule above the 3 seed slots, saw {largest}"
 
 
@@ -80,10 +79,15 @@ def test_a_horizon_stops_at_the_declared_depth():
 
 @pytest.mark.parametrize(
     "smiles,expected",
-    [("CCC", 0), ("C1CC1", 1), ("C1CCCCC1", 1), ("c1ccccc1", 1),
-     # Bridged bicyclic: 8 atoms, 9 bonds -> rank 2. RDKit's symmetrized SSSR reports 3 here, which is
-     # why the implementation must use the Betti number and not a ring-perception count.
-     ("C1CC2CCC1CC2", 2)],
+    [
+        ("CCC", 0),
+        ("C1CC1", 1),
+        ("C1CCCCC1", 1),
+        ("c1ccccc1", 1),
+        # Bridged bicyclic: 8 atoms, 9 bonds -> rank 2. RDKit's symmetrized SSSR reports 3 here, which is
+        # why the implementation must use the Betti number and not a ring-perception count.
+        ("C1CC2CCC1CC2", 2),
+    ],
 )
 def test_cycle_rank_on_hand_checkable_molecules(smiles, expected):
     """bonds - atoms + components, checked against molecules whose answer is obvious by inspection."""
@@ -120,7 +124,7 @@ def test_statistics_separate_the_null_state_from_chemistry():
     assert statistics["null_state_reachable"] is True
     assert statistics["n_states_excluding_null"] == statistics["n_states"] - 1
     # the null state must not appear as an atom count or a cycle rank
-    assert 0 not in statistics["atom_count_distribution"] or True  # 0-atom excluded by construction
+    assert 0 not in statistics["atom_count_distribution"]
     assert statistics["n_states_excluding_null"] > 0
 
 
@@ -175,18 +179,37 @@ def test_a_too_small_candidate_is_rejected_with_an_explicit_reason():
 
 def test_selection_takes_the_smallest_qualifying_candidate():
     reports = [
-        {"candidate_id": "big", "qualifies": True, "statistics": {"n_states": 5000, "n_edges": 90000}},
-        {"candidate_id": "small", "qualifies": True, "statistics": {"n_states": 900, "n_edges": 14000}},
-        {"candidate_id": "tiny_rejected", "qualifies": False,
-         "statistics": {"n_states": 50, "n_edges": 300}},
+        {
+            "candidate_id": "big",
+            "qualifies": True,
+            "statistics": {"n_states": 5000, "n_edges": 90000},
+        },
+        {
+            "candidate_id": "small",
+            "qualifies": True,
+            "statistics": {"n_states": 900, "n_edges": 14000},
+        },
+        {
+            "candidate_id": "tiny_rejected",
+            "qualifies": False,
+            "statistics": {"n_states": 50, "n_edges": 300},
+        },
     ]
     assert select_candidate(reports)["candidate_id"] == "small"
 
 
 def test_ties_break_deterministically_by_edges_then_id():
     reports = [
-        {"candidate_id": "b_seed", "qualifies": True, "statistics": {"n_states": 967, "n_edges": 14431}},
-        {"candidate_id": "a_seed", "qualifies": True, "statistics": {"n_states": 967, "n_edges": 14431}},
+        {
+            "candidate_id": "b_seed",
+            "qualifies": True,
+            "statistics": {"n_states": 967, "n_edges": 14431},
+        },
+        {
+            "candidate_id": "a_seed",
+            "qualifies": True,
+            "statistics": {"n_states": 967, "n_edges": 14431},
+        },
     ]
     assert select_candidate(reports)["candidate_id"] == "a_seed"
     fewer_edges = [
@@ -197,7 +220,9 @@ def test_ties_break_deterministically_by_edges_then_id():
 
 
 def test_no_qualifying_candidate_reports_infeasible_rather_than_approximating():
-    reports = [{"candidate_id": "x", "qualifies": False, "statistics": {"n_states": 3, "n_edges": 4}}]
+    reports = [
+        {"candidate_id": "x", "qualifies": False, "statistics": {"n_states": 3, "n_edges": 4}}
+    ]
     with pytest.raises(SizingInfeasible, match="INFEASIBLE|infeasible|no candidate"):
         select_candidate(reports)
 
@@ -205,11 +230,19 @@ def test_no_qualifying_candidate_reports_infeasible_rather_than_approximating():
 def test_selection_uses_only_size_and_id_so_no_controller_result_can_enter():
     """Adding a flattering controller score must not change the selection."""
     base = [
-        {"candidate_id": "small", "qualifies": True, "statistics": {"n_states": 900, "n_edges": 14000}},
-        {"candidate_id": "big", "qualifies": True, "statistics": {"n_states": 5000, "n_edges": 90000}},
+        {
+            "candidate_id": "small",
+            "qualifies": True,
+            "statistics": {"n_states": 900, "n_edges": 14000},
+        },
+        {
+            "candidate_id": "big",
+            "qualifies": True,
+            "statistics": {"n_states": 5000, "n_edges": 90000},
+        },
     ]
     tempting = [dict(report) for report in base]
-    tempting[1]["controller_regret"] = 0.0      # the "nicer" graph
+    tempting[1]["controller_regret"] = 0.0  # the "nicer" graph
     tempting[0]["controller_regret"] = 0.9
     assert select_candidate(base)["candidate_id"] == select_candidate(tempting)["candidate_id"]
 
@@ -218,8 +251,11 @@ def test_the_default_ladder_is_ordered_smallest_first():
     """The primary slot progression is monotone; variant seeds/vocabularies are appended after it."""
     ladder = default_candidate_ladder()
     primary = [
-        c for c in ladder
-        if c.elements == ("C",) and c.candidate_id.endswith("_slots") and "nitrogen" not in c.candidate_id
+        c
+        for c in ladder
+        if c.elements == ("C",)
+        and c.candidate_id.endswith("_slots")
+        and "nitrogen" not in c.candidate_id
     ]
     slot_counts = [len(c.seed_smiles.replace("1", "")) for c in primary]
     assert slot_counts == sorted(slot_counts), slot_counts
@@ -377,8 +413,11 @@ def test_benchmark_identity_captures_more_than_the_graph_fingerprint():
     horizon_changed = _identity(horizon=4)
     sizing_changed = _identity(exact_sizing={"N_min": 1000})
     registry_changed = _identity(registry_protocol_hash="bbbb")
-    for label, other in (("horizon", horizon_changed), ("exact_sizing", sizing_changed),
-                         ("registry", registry_changed)):
+    for label, other in (
+        ("horizon", horizon_changed),
+        ("exact_sizing", sizing_changed),
+        ("registry", registry_changed),
+    ):
         assert other["graph_fingerprint"] == base["graph_fingerprint"], label
         assert other["benchmark_identity_hash"] != base["benchmark_identity_hash"], (
             f"changing {label} left the benchmark identity unchanged, so the identity is incomplete"
@@ -435,7 +474,9 @@ def test_action_target_table_is_not_the_set_of_reachable_atom_states():
     graph = build_reachable_graph(_tiny(), state_cap=10_000, edge_cap=1_000_000)
     reached = {
         entry["implicit_h_count"]
-        for entry in root_insertion_atom_states(graph.states[NULL_KEY], _tiny(), de_novo_rewrite_system())
+        for entry in root_insertion_atom_states(
+            graph.states[NULL_KEY], _tiny(), de_novo_rewrite_system()
+        )
     }
     assert reached - targets, (
         "expected a reachable atom state outside the declared action-target table; if this no longer holds "

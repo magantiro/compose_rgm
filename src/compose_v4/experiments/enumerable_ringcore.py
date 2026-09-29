@@ -29,20 +29,23 @@ null state's root insertions, filtered to the declared element vocabulary. The r
 statistics, fingerprint, non-degeneracy tests and selection rule are written here from scratch. No prior
 exact-control script is imported.
 """
+
 from __future__ import annotations
 
 import time
 from collections import Counter
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Any, Sequence
+from typing import Any
 
 from compose_v4.chem.molecular_graph import (
     ELEMENT_TO_IDX,
     MolecularGraph,
     smiles_to_molecular_graph,
 )
+from compose_v4.chem.topology import cycle_rank
 from compose_v4.rewrite.fiber import ActionFiberSpec, AtomState, enumerate_action_fiber
-from compose_v4.rewrite.kernel import canonical_state_key, de_novo_rewrite_system
+from compose_v4.rewrite.kernel import InvalidRewrite, canonical_state_key, de_novo_rewrite_system
 
 # The zero-atom state, whose canonical key the production canonicalizer special-cases.
 NULL_KEY = "<NULL>"
@@ -150,7 +153,7 @@ def _successor_elements(key: str) -> set[str]:
     """Element symbols present in a canonical key, for the declared-vocabulary restriction."""
     if key == NULL_KEY:
         return set()
-    from rdkit import Chem  # noqa: PLC0415
+    from rdkit import Chem
 
     molecule = Chem.MolFromSmiles(key, sanitize=False)
     if molecule is None:
@@ -169,15 +172,16 @@ def root_insertion_transitions(
     governs every other action in the slice. Filtering on the SUCCESSOR rather than on the action payload
     keeps this robust to the payload representation.
     """
-    from compose_v4.rewrite.factorized_fiber import _factorized_candidates  # noqa: PLC0415
-    from compose_v4.rewrite.fiber import MarkedTransition  # noqa: PLC0415
+    from compose_v4.rewrite.factorized_fiber import _factorized_candidates
+    from compose_v4.rewrite.fiber import MarkedTransition
 
     allowed = set(candidate.elements)
     transitions = []
     for rule_name, action in _factorized_candidates(empty_state, allow_bond_reroute=False):
         try:
             successor = system.apply(empty_state, rule_name, action)
-        except Exception:
+        except InvalidRewrite:
+            # A rejected edit creates no molecular successor in the declared support.
             continue
         key = canonical_state_key(successor)
         if key == NULL_KEY:
@@ -194,7 +198,7 @@ def graph_fingerprint(graph: ReachableGraph) -> str:
     support-rule correction, an operator change -- gets a visibly different identity instead of silently
     replacing an earlier one.
     """
-    import hashlib  # noqa: PLC0415
+    import hashlib
 
     digest = hashlib.sha256()
     for key in sorted(graph.states):
@@ -215,14 +219,14 @@ def serialize_atom_state(state: Any) -> dict[str, Any]:
     leaves the charge and hydrogen count ambiguous, so the bounded support would not be reproducible from
     the artifact. Every field of the production ``AtomState`` is therefore emitted.
     """
-    from compose_v4.chem.molecular_graph import IDX_TO_ELEMENT  # noqa: PLC0415
+    from compose_v4.chem.molecular_graph import IDX_TO_ELEMENT
 
-    atom_type = int(getattr(state, "atom_type"))
+    atom_type = int(state.atom_type)
     return {
         "element": str(IDX_TO_ELEMENT[atom_type]),
         "atom_type_index": atom_type,
-        "formal_charge": int(getattr(state, "formal_charge")),
-        "implicit_h_count": int(getattr(state, "implicit_h_count")),
+        "formal_charge": int(state.formal_charge),
+        "implicit_h_count": int(state.implicit_h_count),
     }
 
 
@@ -246,9 +250,10 @@ def root_insertion_atom_states(
     Derived from the executed successors rather than from the action payload, matching how
     ``root_insertion_transitions`` filters, so the artifact records what the slice really admits.
     """
-    from compose_v4.chem.molecular_graph import IDX_TO_ELEMENT  # noqa: PLC0415
-
-    from compose_v4.chem.molecular_graph import is_element  # noqa: PLC0415
+    from compose_v4.chem.molecular_graph import (
+        IDX_TO_ELEMENT,
+        is_element,
+    )
 
     states = []
     for transition in root_insertion_transitions(empty_state, candidate, system):
@@ -289,8 +294,8 @@ def benchmark_identity(
     frozen protocol block only. It legitimately stays unchanged when ``exact_sizing`` changes, which is
     exactly why it must not be presented as the complete E6 identity either.
     """
-    import hashlib  # noqa: PLC0415
-    import json  # noqa: PLC0415
+    import hashlib
+    import json
 
     sizing_hash = hashlib.sha256(
         json.dumps(exact_sizing, sort_keys=True, separators=(",", ":"), default=str).encode()
@@ -331,8 +336,12 @@ def benchmark_identity(
     # PROVENANCE: semantics plus the implementing commit, so an artifact is traceable to the code that made
     # it while the semantics hash stays stable across non-semantic changes.
     identity["artifact_provenance_hash"] = hashlib.sha256(
-        json.dumps({"semantics": semantics_hash, "commit": implementation_commit},
-                   sort_keys=True, separators=(",", ":"), default=str).encode()
+        json.dumps(
+            {"semantics": semantics_hash, "commit": implementation_commit},
+            sort_keys=True,
+            separators=(",", ":"),
+            default=str,
+        ).encode()
     ).hexdigest()[:16]
     # Retained for continuity with the artifact already committed under this name.
     identity["benchmark_identity_hash"] = identity["artifact_provenance_hash"]
@@ -413,27 +422,6 @@ def build_reachable_graph(
         seconds=round(time.monotonic() - started, 3),
         parent_counts=Counter({key: len(value) for key, value in parents.items()}),
     )
-
-
-def cycle_rank(state: MolecularGraph, key: str | None = None) -> int:
-    """First Betti number: ``bonds - atoms + components``. Zero for the null state.
-
-    Computed directly from the graph, NOT from a ring-perception count. RDKit's ``CalcNumRings`` is the
-    SYMMETRIZED SSSR count, which over-counts symmetry-equivalent rings in bridged systems: for
-    bicyclo[2.2.2]octane (8 atoms, 9 bonds) the cycle rank is 9 - 8 + 1 = 2 but ``CalcNumRings`` returns 3.
-    An earlier version of this function used that count and therefore mis-reported the cycle-rank
-    distribution for every bridged state. The Betti number needs no ring perception and is exact.
-    """
-    resolved = key if key is not None else canonical_state_key(state)
-    if resolved == NULL_KEY:
-        return 0
-    from rdkit import Chem  # noqa: PLC0415
-
-    molecule = Chem.MolFromSmiles(resolved, sanitize=False)
-    if molecule is None:
-        return 0
-    components = len(Chem.GetMolFrags(molecule))
-    return int(molecule.GetNumBonds() - molecule.GetNumAtoms() + components)
 
 
 def graph_statistics(graph: ReachableGraph) -> dict[str, Any]:
