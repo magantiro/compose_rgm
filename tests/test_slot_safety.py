@@ -33,13 +33,16 @@ _ENFORCED = (
     "scripts/run_e6_sizing_sweep.py",
 )
 
-# These two historical applications parse a fresh, compact SMILES graph immediately
-# before the count. That parser emits one real atom per slot, with no NULL or SCAR.
-# Preserve their pinned source bytes; this exception does not extend to padded states.
+# The historical applications parse compact SMILES graphs before counting. The
+# Dynamic-v2.1 context key instead uses occupied slots for graph topology. Its
+# production Active8 route starts from a SMILES graph, and its admissible edits
+# do not create SCAR. Preserve these pinned source bytes, while testing the
+# relevant producer invariant below; neither exception applies generally.
 _RATCHET: frozenset[str] = frozenset(
     {
         "modal_apps/experiment_b_exact_control_app.py:145",
         "modal_apps/experiment_b_exact_control_app.py:170",
+        "src/compose_v4/control/dynamic_program_synthesis_v21.py:94",
     }
 )
 
@@ -152,3 +155,36 @@ def test_historical_compact_smiles_exception_has_no_padding_or_scar():
         graph = smiles_to_molecular_graph(smiles)
         assert graph.n_real_atoms == graph.n_atoms
         assert is_element(graph.atom_types).all()
+
+
+def test_dynamic_v21_context_follows_active8_occupancy_semantics():
+    """Do not reinterpret the frozen topology calculation as an element count."""
+    import numpy as np
+
+    from compose_v4.chem.molecular_graph import (
+        SCAR_IDX,
+        is_occupied,
+        smiles_to_molecular_graph,
+    )
+    from compose_v4.control.dynamic_program_synthesis_v21 import _context_key
+    from compose_v4.rewrite.operators import (
+        REAL_ATOM_TYPES,
+        AtomDelete,
+        AtomRestate,
+        apply_atom_delete,
+        is_valid_atom_restate,
+    )
+
+    ring = smiles_to_molecular_graph("C1CCCCC1")
+    assert _context_key(ring).startswith("ring:")
+    assert np.array_equal(ring.atom_types > 0, is_occupied(ring.atom_types))
+
+    chain = smiles_to_molecular_graph("CCC")
+    deleted = apply_atom_delete(chain, AtomDelete(v=0))
+    assert SCAR_IDX not in deleted.atom_types
+    assert _context_key(deleted).startswith("acyclic:")
+    assert SCAR_IDX not in REAL_ATOM_TYPES
+    assert not is_valid_atom_restate(
+        chain,
+        AtomRestate(v=0, atom_type=SCAR_IDX, formal_charge=0, implicit_h_count=0),
+    )
