@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+import torch
 
 from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
 from compose_v4.chem.state import pad_molecular_graph
@@ -137,8 +138,10 @@ def test_real_population_moves_to_next_parent_after_share_stop(
         "warm_start_sha256": payload_hash(warm),
     }
     units = []
+    assert torch.is_grad_enabled()
     with ExecutorMeter(20000).instrument() as meter:
         lock = prepare(task, units.append, warm_start=warm)
+    assert torch.is_grad_enabled()
     assert len(units) == len(lock["work"]) == 8
     assert meter.calls <= 8 * fixture_limit and lock["oracle_calls"] == 0
     assert all(unit["parent_budget"]["exhausted"] for unit in lock["work"])

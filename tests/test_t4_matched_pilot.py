@@ -233,7 +233,18 @@ def population_fixture(monkeypatch, tmp_path):
         )
 
     monkeypatch.setattr(option_selector, "sample_option", forced_fused)
-    return ns["t4_population_cell"]
+
+    def isolated_prepare(*args, **kwargs):
+        # The app runs in a dedicated inference container, where disabling
+        # autograd process-wide is safe. This fixture executes that same body
+        # inside pytest, so restore the caller's gradient mode afterward.
+        grad_enabled = torch.is_grad_enabled()
+        try:
+            return ns["t4_population_cell"](*args, **kwargs)
+        finally:
+            torch.set_grad_enabled(grad_enabled)
+
+    return isolated_prepare
 
 
 @torch.enable_grad()
