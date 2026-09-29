@@ -8,6 +8,7 @@ agree. The global invariant `teacher in A_exact(x)` must hold with zero mismatch
 production path silently uses different capabilities (the eval-collator bug class) or a divergent executor,
 this test fails.
 """
+
 from __future__ import annotations
 
 import sys
@@ -19,37 +20,42 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-from compose_v4.chem.molecular_graph import ORGANIC_VOCABULARY, smiles_to_molecular_graph  # noqa: E402
-from compose_v4.chem.state import (  # noqa: E402
+from compose_v4.chem.molecular_graph import (
+    ORGANIC_VOCABULARY,
+    smiles_to_molecular_graph,
+)
+from compose_v4.chem.state import (
     is_connected_or_null,
     is_valid_state,
     pad_molecular_graph,
 )
-from compose_v4.experiments.corrupted_source_prior import build_corrupted_prior_records  # noqa: E402
-from compose_v4.experiments.cycle_op_prior import build_cycle_op_records  # noqa: E402
-from compose_v4.experiments.factorized_mark_conditional import (  # noqa: E402
+from compose_v4.experiments.corrupted_source_prior import (
+    build_corrupted_prior_records,
+)
+from compose_v4.experiments.cycle_op_prior import build_cycle_op_records
+from compose_v4.experiments.factorized_mark_conditional import (
     FactorizedMarkCollator,
     FactorizedMarkDataset,
     assert_teachers_in_exact_candidates,
     factorized_mark_metrics,
     sample_factorized_mark_batch,
 )
-from compose_v4.model.factorized_tracelet_rate_model import (  # noqa: E402
+from compose_v4.model.factorized_tracelet_rate_model import (
     FactorizedTraceletRateModel,
     canonical_state_key,
 )
-from compose_v4.rewrite.kernel import de_novo_rewrite_system  # noqa: E402
+from compose_v4.rewrite.kernel import de_novo_rewrite_system
 
 # One diverse panel: neutral CNOF, sulfur, halogen, charged (cation/anion/zwitterion), aromatic, fused, cycle.
 _PANEL = [
-    "c1ccncc1CC",            # neutral aromatic hetero
-    "CSc1ccc(N)cc1",         # sulfur
-    "Clc1ccc(CCN)cc1",       # halogen
-    "C[N+](C)(C)CCC1CCCCC1", # cation + saturated ring
-    "[O-]C(=O)c1ccccc1N",    # anion (carboxylate)
+    "c1ccncc1CC",  # neutral aromatic hetero
+    "CSc1ccc(N)cc1",  # sulfur
+    "Clc1ccc(CCN)cc1",  # halogen
+    "C[N+](C)(C)CCC1CCCCC1",  # cation + saturated ring
+    "[O-]C(=O)c1ccccc1N",  # anion (carboxylate)
     "O=[N+]([O-])c1ccccc1",  # zwitterion (nitro)
-    "O=C1NC(=O)c2ccccc21",   # fused (phthalimide)
-    "C1CCNCC1C(=O)O",        # saturated heterocycle
+    "O=C1NC(=O)c2ccccc21",  # fused (phthalimide)
+    "C1CCNCC1C(=O)O",  # saturated heterocycle
 ]
 
 
@@ -62,9 +68,16 @@ def _catalog():
 def _ringcore_model(catalog):
     torch.manual_seed(0)
     return FactorizedTraceletRateModel(
-        catalog, hidden_dim=48, message_passing_steps=2, atom_vocabulary=ORGANIC_VOCABULARY,
-        enable_ring_restates=True, enable_cyclic_graft=True, enable_heteroatom_scan=True,
-        enable_ring_opening=True, enable_cycle_ops=True, enable_ring_grow_macro=False,
+        catalog,
+        hidden_dim=48,
+        message_passing_steps=2,
+        atom_vocabulary=ORGANIC_VOCABULARY,
+        enable_ring_restates=True,
+        enable_cyclic_graft=True,
+        enable_heteroatom_scan=True,
+        enable_ring_opening=True,
+        enable_cycle_ops=True,
+        enable_ring_grow_macro=False,
     ).eval()
 
 
@@ -76,7 +89,12 @@ def test_golden_path_one_contract_all_paths():
 
     # 1. production data/teacher construction (corruption + cycle), with the teacher-in-candidate filter
     edit, _ = build_corrupted_prior_records(
-        _PANEL, n_slots=40, depth_max=5, seed=17, catalog=catalog, vocabulary=ORGANIC_VOCABULARY,
+        _PANEL,
+        n_slots=40,
+        depth_max=5,
+        seed=17,
+        catalog=catalog,
+        vocabulary=ORGANIC_VOCABULARY,
         couplings_per_target=2,
     )
     cyc, _ = build_cycle_op_records(_PANEL, n_slots=40, seed=18)
@@ -85,11 +103,18 @@ def test_golden_path_one_contract_all_paths():
 
     # 2. training-batch path (FactorizedMarkDataset + collator with the model's capabilities)
     dataset = FactorizedMarkDataset(
-        records, start_index=0, length=48, seed=0, ring_catalog=catalog,
-        late_time_fraction=0.5, operational_horizon=16.0, progress_stratification_fraction=0.5,
+        records,
+        start_index=0,
+        length=48,
+        seed=0,
+        ring_catalog=catalog,
+        late_time_fraction=0.5,
+        operational_horizon=16.0,
+        progress_stratification_fraction=0.5,
     )
     train_collator = FactorizedMarkCollator(
-        True, catalog,
+        True,
+        catalog,
         compute_ring_grow_support=caps.compute_ring_grow_support,
         compute_ring_restates=caps.compute_ring_restates,
         compute_cyclic_graft=caps.compute_cyclic_graft,
@@ -100,9 +125,17 @@ def test_golden_path_one_contract_all_paths():
 
     # 3. validation-batch path (sample_factorized_mark_batch with the SAME capability object)
     val_batch = sample_factorized_mark_batch(
-        records, batch_size=48, seed=1, late_time_fraction=0.5, operational_horizon=16.0,
-        progress_stratification_fraction=0.5, use_aromatic_bond_view=True, workers=0,
-        ring_catalog=catalog, ring_electronic_mode="factorized_local", capabilities=caps,
+        records,
+        batch_size=48,
+        seed=1,
+        late_time_fraction=0.5,
+        operational_horizon=16.0,
+        progress_stratification_fraction=0.5,
+        use_aromatic_bond_view=True,
+        workers=0,
+        ring_catalog=catalog,
+        ring_electronic_mode="factorized_local",
+        capabilities=caps,
     )
     assert_teachers_in_exact_candidates(val_batch)  # §7 invariant on the validation path
 
@@ -122,7 +155,8 @@ def test_golden_path_one_contract_all_paths():
             grow_draws += int(mark.rule_name == "ring_system_grow")
             succ = system.apply(state, mark.rule_name, mark.action)  # one canonical executor
             assert is_valid_state(succ) and is_connected_or_null(succ)
-            assert int((succ.atom_types >= 0).sum()) <= 40 or True  # padded slots; validity already checked
+            assert succ.n_atoms == 40
+            assert 0 < succ.n_real_atoms <= succ.n_atoms
             assert canonical_state_key(succ) is not None  # one canonical-successor function
     assert grow_draws == 0, "legacy ring_system_grow must never be sampled under RingCore-V1"
 

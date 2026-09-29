@@ -18,15 +18,16 @@ TREE = "b" * 40
 
 
 def _clean_git(_root: Path, *arguments: str) -> str:
+    if arguments == ("ls-files",):
+        # Inspect exactly the serialized input closure, not local environments,
+        # caches and other worktrees. This still uses both production inventories.
+        paths = set(active8_app._serialized_source_paths(_root))
+        paths.update(p50_cache_app._serialized_source_paths(_root))
+        return "\n".join(sorted(paths))
     return {
         ("rev-parse", "HEAD"): COMMIT,
         ("rev-parse", "HEAD^{tree}"): TREE,
         ("status", "--porcelain=v1", "--untracked-files=all"): "",
-        ("ls-files",): "\n".join(
-            path.relative_to(_root).as_posix()
-            for path in _root.rglob("*")
-            if path.is_file() and ".git" not in path.parts
-        ),
     }[arguments]
 
 
@@ -34,6 +35,32 @@ def _reseal(revision: dict[str, object], sha_function) -> None:
     body = dict(revision)
     body.pop("source_revision_sha256", None)
     revision["source_revision_sha256"] = sha_function(body)
+
+
+def test_git_fixture_only_enumerates_sources_for_the_requested_inventory(monkeypatch):
+    def unexpected_inventory(_root):
+        raise AssertionError("a commit lookup must not enumerate any files")
+
+    monkeypatch.setattr(active8_app, "_serialized_source_paths", unexpected_inventory)
+    monkeypatch.setattr(p50_cache_app, "_serialized_source_paths", unexpected_inventory)
+    assert _clean_git(ROOT, "rev-parse", "HEAD") == COMMIT
+    assert _clean_git(ROOT, "rev-parse", "HEAD^{tree}") == TREE
+    assert _clean_git(ROOT, "status", "--porcelain=v1", "--untracked-files=all") == ""
+
+
+@pytest.mark.parametrize("producer", [active8_app, p50_cache_app])
+def test_producer_refuses_an_untracked_serialized_input(monkeypatch, producer):
+    missing = producer._serialized_source_paths(ROOT)[0]
+
+    def git_without_one_input(root, *arguments):
+        value = _clean_git(root, *arguments)
+        if arguments == ("ls-files",):
+            return "\n".join(path for path in value.splitlines() if path != missing)
+        return value
+
+    monkeypatch.setattr(producer, "_git", git_without_one_input)
+    with pytest.raises(RuntimeError, match="must be Git-tracked"):
+        producer.local_source_revision(expected_commit=COMMIT, repo_root=ROOT)
 
 
 def test_real_producer_attestations_share_only_nested_execution_identity(

@@ -65,10 +65,11 @@ from __future__ import annotations
 import gzip
 import json
 import sys
+from collections.abc import Iterator, Mapping
 from dataclasses import fields as dataclass_fields
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Iterator, Mapping
+from typing import Any
 
 import pytest
 
@@ -97,7 +98,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT / "tests") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "tests"))
 
-import test_editing_process_v2_rebind as v1_fixture  # noqa: E402
+import test_editing_process_v2_rebind as v1_fixture
 
 # ---- Fixture provenance and the values a fixture may never carry ----
 
@@ -119,6 +120,18 @@ FORBIDDEN_PRODUCTION_SHA256 = (
     "a7698306bf1977a6a4cf3d7003948084729a428dd609f5b44058b9ace160ce24",
 )
 FORBIDDEN_PRODUCTION_COUNTS = (695638, 646779, 48859)
+
+# The frozen public interface, independent of typing.Protocol's private
+# implementation attributes (which differ between Python 3.11 and 3.12).
+REQUIRED_INDEX_MEMBERS = frozenset(
+    {
+        "process_identity_sha256",
+        "completion_sha256",
+        "counts",
+        "rejected_traces_by_code",
+        "identity",
+    }
+)
 
 
 # ---- A fake V2 decision index, satisfying the protocol structurally ----
@@ -233,14 +246,9 @@ def test_a_v1_shaped_object_is_not_a_structural_decision_index() -> None:
     becoming an acceptable V2 decision index.
     """
 
-    required = set(StructuralDecisionIndex.__protocol_attrs__)
-    assert required == {
-        "process_identity_sha256",
-        "completion_sha256",
-        "counts",
-        "rejected_traces_by_code",
-        "identity",
-    }
+    required = REQUIRED_INDEX_MEMBERS
+    public_members = {name for name in vars(StructuralDecisionIndex) if not name.startswith("_")}
+    assert public_members == required
 
     # Measured: both real V1 loaders lack exactly the same three members.
     for v1_class in (
@@ -257,17 +265,14 @@ def test_a_v1_shaped_object_is_not_a_structural_decision_index() -> None:
     # instance.  The field names come from the real dataclass, so this cannot
     # drift into testing a straw man.
     v1_shaped = SimpleNamespace(
-        **{
-            field.name: None
-            for field in dataclass_fields(EditingV2SemanticActive8SourceInventory)
-        }
+        **{field.name: None for field in dataclass_fields(EditingV2SemanticActive8SourceInventory)}
     )
     assert not isinstance(v1_shaped, StructuralDecisionIndex)
 
 
 @pytest.mark.parametrize(
     "dropped",
-    sorted(StructuralDecisionIndex.__protocol_attrs__),
+    sorted(REQUIRED_INDEX_MEMBERS),
 )
 def test_every_protocol_member_is_load_bearing_for_the_instance_check(dropped: str) -> None:
     """Without this the protocol could be satisfiable while missing a member.
@@ -279,7 +284,7 @@ def test_every_protocol_member_is_load_bearing_for_the_instance_check(dropped: s
     five are enforced rather than only the first one checked.
     """
 
-    members = sorted(StructuralDecisionIndex.__protocol_attrs__)
+    members = sorted(REQUIRED_INDEX_MEMBERS)
     partial = type(
         "PartialIndex",
         (),
@@ -287,9 +292,7 @@ def test_every_protocol_member_is_load_bearing_for_the_instance_check(dropped: s
     )()
     assert not isinstance(partial, StructuralDecisionIndex)
 
-    complete = type(
-        "CompleteIndex", (), {member: (lambda self: {}) for member in members}
-    )()
+    complete = type("CompleteIndex", (), {member: (lambda self: {}) for member in members})()
     assert isinstance(complete, StructuralDecisionIndex)
 
 

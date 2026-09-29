@@ -8,6 +8,7 @@ Two things are checked here:
   2. the oracle stays an oracle: a scan test fails if any non-test module imports it, which is what keeps
      it from silently becoming the source of a reported number.
 """
+
 from __future__ import annotations
 
 import ast
@@ -107,9 +108,7 @@ def _oracle_import_edges(source: str, *, importer: str, filename: str) -> tuple[
                 and isinstance(module_arg.value, str)
                 and _is_oracle_module(module_arg.value)
             ):
-                findings.append(
-                    f"line {node.lineno}: literal dynamic import {module_arg.value}"
-                )
+                findings.append(f"line {node.lineno}: literal dynamic import {module_arg.value}")
     return tuple(findings)
 
 
@@ -208,9 +207,7 @@ def test_all_mass_virtual_yields_a_terminal_batch():
 def test_zero_mass_marks_are_dropped_not_counted_as_aliases():
     source, target = _mol("CCO"), _mol("CCC")
     system = _StubSystem({("r1", "a"): target, ("r2", "b"): target})
-    batch = reference_successor_batch(
-        source, [("r1", "a", 1.0), ("r2", "b", 0.0)], system=system
-    )
+    batch = reference_successor_batch(source, [("r1", "a", 1.0), ("r2", "b", 0.0)], system=system)
     assert batch.successors[0].alias_count == 1
 
 
@@ -252,24 +249,20 @@ def test_real_executor_grouping_on_a_symmetric_molecule():
     Benzene is chosen because its symmetry means several distinct marks land on the same molecule -- the
     alias structure that makes a mark-level law differ from a molecular one.
     """
-    from compose_v4.rewrite.factorized_fiber import _factorized_candidates  # noqa: PLC0415
-    from compose_v4.rewrite.kernel import de_novo_rewrite_system  # noqa: PLC0415
+    from compose_v4.rewrite.factorized_fiber import _factorized_candidates
+    from compose_v4.rewrite.kernel import de_novo_rewrite_system
 
     state = _mol("c1ccccc1")
     system = de_novo_rewrite_system()
-    try:
-        candidates = _factorized_candidates(state, allow_bond_reroute=False)
-    except Exception as error:  # pragma: no cover - enumerator signature drift is a real finding
-        pytest.skip(f"factorized enumerator unavailable with this signature: {error}")
-
+    candidates = _factorized_candidates(state, allow_bond_reroute=False)
     marks = [(name, action, 1.0) for name, action in list(candidates)[:12]]
-    if not marks:
-        pytest.skip("no candidates enumerated for benzene under the de-novo system")
+    assert marks, "benzene must expose legal edits under the declared de-novo system"
     batch = reference_successor_batch(state, marks, system=system)
     validate_successor_batch(batch)
-    # Aliasing must be real: fewer distinct successors than marks, or at least a merged group somewhere.
-    assert batch.support_size <= len(marks)
-    assert sum(s.alias_count for s in batch.successors) + 0 <= len(marks)
+    # This fixture must actually exercise many-to-one mark aggregation.
+    assert batch.support_size < len(marks)
+    assert any(successor.alias_count > 1 for successor in batch.successors)
+    assert sum(successor.alias_count for successor in batch.successors) == len(marks)
 
 
 # ---- the oracle must stay an oracle ---------------------------------------------------------------------
@@ -280,8 +273,7 @@ def test_real_executor_grouping_on_a_symmetric_molecule():
     (
         ("import compose_v4.experiments.reference_successor_kernel\n", "scripts.direct"),
         (
-            "from compose_v4.experiments.reference_successor_kernel import "
-            "reference_successor_batch\n",
+            "from compose_v4.experiments.reference_successor_kernel import reference_successor_batch\n",
             "scripts.from_direct",
         ),
         (
@@ -299,11 +291,11 @@ def test_oracle_boundary_scanner_detects_static_import_edges(source: str, import
     "source",
     (
         "import importlib\nimportlib.import_module("
-        "'compose_v4.experiments.reference_successor_kernel')\n",
+        + "'compose_v4.experiments.reference_successor_kernel')\n",
         "import importlib as il\nil.import_module("
-        "'compose_v4.experiments.reference_successor_kernel')\n",
+        + "'compose_v4.experiments.reference_successor_kernel')\n",
         "from importlib import import_module as load\nload("
-        "'compose_v4.experiments.reference_successor_kernel')\n",
+        + "'compose_v4.experiments.reference_successor_kernel')\n",
         "__import__('compose_v4.experiments.reference_successor_kernel')\n",
     ),
 )
@@ -317,7 +309,9 @@ IMPLEMENTATION_FILES = (
     "src/compose_v4/experiments/reference_successor_kernel.py",
 )
 """
-    assert not _oracle_import_edges(source, importer="compose_v4.rewrite.identity", filename="safe.py")
+    assert not _oracle_import_edges(
+        source, importer="compose_v4.rewrite.identity", filename="safe.py"
+    )
 
 
 def test_oracle_boundary_scanner_fails_closed_on_unparseable_python():
