@@ -8,7 +8,21 @@ transformations. The reference-guided editing controller uses finite-horizon
 future values; the optimization controllers are distinct. Checkpoint sharing and
 numerical reference use are experiment-specific, not universal across benchmarks.
 
-Three layers, kept separate on purpose:
+## Choose a path
+
+| Goal | Start here | What the checkout currently supports |
+| --- | --- | --- |
+| Understand the method | [The three layers below](#the-three-layers) | Read the executor, reference, and controller as distinct components |
+| Check the submitted paper's evidence | [`experiments/paper/`](experiments/paper/) | Verify the exact PDF and historical result-artifact identities; this is not yet full benchmark replay |
+| Reproduce fragment tables | [`experiments/fragments/`](experiments/fragments/) | Hash-check and reduce saved rows; isolated generation requires declared external assets |
+| Develop or test the code | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | Install the pinned core environment and run offline tests |
+| Locate a historical experiment | [`experiments/INDEX.md`](experiments/INDEX.md) | Find its entry point, then read that experiment's contract before any launch |
+
+The published PMO, T4, and QED result paths still need task-specific offline
+reductions and external-asset access checks in this integration branch. Do not
+interpret a passing source-identity check as reproduction of a paper table.
+
+## The three layers
 
 | Layer | Question | Where |
 |---|---|---|
@@ -16,16 +30,11 @@ Three layers, kept separate on purpose:
 | `R_θ` | what is *plausible* | `src/compose_v4/gm`, `src/compose_v4/model` |
 | Controller | what is *purposeful* | `src/compose_v4/control`, `src/compose_v4/policy` |
 
-## Start here
+## Project history and navigation
 
 For installation and local checks, use
 [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) and the pinned environments under
 [`requirements/`](requirements/).
-
-For the fragment suite, start with **[`experiments/fragments/`](experiments/fragments/)**:
-offline table reproduction, verified asset setup, and isolated fragment generation
-with saved-attempt parity checks. This is a local
-integration; it does not change the submitted paper or the PMO/T4 protocols.
 
 1. **[`docs/START_HERE_ICLR.md`](docs/START_HERE_ICLR.md)**: a dated controller
    campaign handoff. Check its as-of date and the experiment-specific contract

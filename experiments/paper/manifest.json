@@ -1,0 +1,65 @@
+{
+  "schema_version": "compose_submitted_paper_lineage_v1",
+  "paper": {
+    "filename": "19340_COMPOSE_Molecular_Genera.pdf",
+    "sha256": "a609e9dc9c43ad22d8b4fa2acbb415a2dff5938ba932b2a3fcaf5093a977a447",
+    "pages": 35,
+    "identity_note": "Owner-identified latest submitted PDF on 2026-09-30. The PDF is not copied into the source repository."
+  },
+  "sources": [
+    {
+      "id": "reference_likelihood",
+      "paper_location": "Section 3.1 and Table 6",
+      "artifact_revision": "e07a45f8566862ec32eb744fb0697975eae8eb43",
+      "artifact_path": "diagnostics/editing_v2_experiment1_reference_law_paper.json",
+      "artifact_sha256": "d7063140545e1c0d57276b37f0bf3ffde513ee1c005e523c62424facb951e298",
+      "evidence_level": "stored summary",
+      "release_limit": "The raw transition corpus and checkpoint are external. Artifact identity does not rerun likelihood evaluation."
+    },
+    {
+      "id": "fragment_benchmark_and_ablations",
+      "paper_location": "Section 3.2 and Tables 1, 7-9, 15-17",
+      "artifact_revision": "e07a45f8566862ec32eb744fb0697975eae8eb43",
+      "artifact_path": "experiments/fragments/manifest.json",
+      "artifact_sha256": "9668aaf4fda62e4a06e41bae6c9b5239fa6d4daa374b9ed1f4b81712de4e2faa",
+      "evidence_level": "hash-checked saved-result reduction",
+      "release_limit": "Full molecular generation requires external checkpoint, catalogs, prompts, and evaluator assets. The saved motif validity is 99.9667%, whereas submitted Table 1 prints 100%."
+    },
+    {
+      "id": "qed_editing",
+      "paper_location": "Section 3.3 and Table 10",
+      "artifact_revision": "e1d5cf188d1e563d816e563beab5d589feac495b",
+      "artifact_path": "diagnostics/qed_griddd_arm_a_rederivation_v1.json",
+      "artifact_sha256": "813d575156f2687c93ce0b85b60bed061c200ce8b71e2cb7104587561a298c14",
+      "evidence_level": "saved final-result reduction on historical branch",
+      "release_limit": "The final reduction is not in the current checkout. Full trajectory and checkpoint access remain external."
+    },
+    {
+      "id": "pmo_1k",
+      "paper_location": "Section 3.4 and Tables 2, 11",
+      "artifact_revision": "99d87b651246669bf279e82ae55e520606d98fe9",
+      "artifact_path": "diagnostics/pmo_ablation_frozen_v1/inputs/pmo_1k_final.json",
+      "artifact_sha256": "251107785ab8b63bfa95a41e7b9eac5c2710ce7ef76f69872f90d4346644b13a",
+      "evidence_level": "saved per-seed metric reduction on historical revision",
+      "release_limit": "Raw receipts and producer environment remain external. The printed JNK3 cell matches an earlier 815-call provisional seed, not this later final file; verify original receipts before declaring that row reproduced."
+    },
+    {
+      "id": "pmo_structured_proposals",
+      "paper_location": "Section 3.4 and Tables 18-21",
+      "artifact_revision": "3e01fed6bcea4a517aa5dc4fcb59be7d6444fe5a",
+      "artifact_path": "diagnostics/pmo_abc_ablation_v1/reduction_v1.json",
+      "artifact_sha256": "7cfc1084bc2a13a88fbc1afb09f7bf1d62962217e11c5db4827a4f0e7ddc22ae",
+      "evidence_level": "14 completed matched A/B cells in saved reduction",
+      "release_limit": "The artifact itself is labeled provisional because some B campaigns were unfinished when created. The submitted paper uses only 14 completed matched cells for both metrics; do not substitute later 16-cell summaries or partial Top-10 rows. Raw receipts and exact deployed images remain external."
+    },
+    {
+      "id": "t4_lead_optimization",
+      "paper_location": "Section 3.5 and Table 3",
+      "artifact_revision": "bc8cc4216516d7c5ba7181d2b6ac7d473d6b7b7a",
+      "artifact_path": "diagnostics/T4_FROZEN_RESULT_v1.json",
+      "artifact_sha256": "87584d49ceacff2b861f1479b283f47d58f9c60513e1fb63c61fc5f5d8230b9b",
+      "evidence_level": "frozen table artifact on historical revision",
+      "release_limit": "Raw docking receipts, receptors, binary, and image remain external. Charged calls are 0-249 per row under a 250-call ceiling, and the FA7 starting-molecule-1 delta-0.6 paper value is a zero-call starting-score fallback. The artifact also has a stored sum_gap arithmetic discrepancy; preserve its seal and report the row-derived value separately."
+    }
+  ]
+}
