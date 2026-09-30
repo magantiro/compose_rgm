@@ -262,3 +262,54 @@ replicate noise floor. Per-cell margins below that are not resolved.
 was run, launched, re-pinned or edited. The GenMol column is transcribed in the
 paper and was not re-derived. Everything marked MISSING above requires Modal
 access under the right profile, and I did not query Modal.
+
+## 8. CORRECTION — the reference law, and where it is and is not used
+
+Added after the sections above were written; they do not contradict it, but this
+supersedes any impression they give.
+
+**T4 loads no reference checkpoint.** Measured: 0 rate-model instantiations
+across every reachable proposal lane; the Modal image ships no `.pt` and mounts
+no artifacts volume; no loader exists in `t4_fiber_campaign`,
+`protonation_aware_proposal`, `route_distilled_goal_expert` or the app. The same
+holds for PMO, confirmed four ways including a name-agnostic sweep for every
+model-shaped file extension.
+
+**This is stated in the paper.** §E.4, on feedback-driven program control:
+
+> *"the frozen T4 program-only benchmark ... does not fit a program-value model.
+> Its scored outcomes extend the archive and determine the reported incumbent,
+> but they do not turn the proposal law into a sample from R_theta or an exact
+> Doob transform."*
+
+An earlier draft of this document called that an **undisclosed asymmetry**. That
+was wrong and is withdrawn.
+
+**Where R_theta IS used — three of four benchmarks:**
+
+| Benchmark | Loads it | Evidence |
+|---|---|---|
+| §3.1 reference-law evaluation | yes | evaluating it is the experiment |
+| §3.2 fragment | yes | `scripts/fragment_proposal_scoring_probe.py:87` -- **lives on the fragment branches, not this one** |
+| §3.3 QED editing | yes | `scripts/evaluate_qed_controlled_rollouts.py:241` |
+| §3.4 PMO, §3.5 T4 | no, by design | §E.4 |
+
+T4 and PMO steer by structured program synthesis over the shared executor.
+What T4 does carry is a **route-distilled goal expert** -- 109 templates, pure
+Python, no torch, leave-one-target-out with `held_target_absent_from_training:
+true`, ~110 KB per target, all five committed under
+`diagnostics/t4_held_target_distillation_quality_v1/`.
+
+**Navigation hazard for the next agent:** the fragment `R_theta` loader is not on
+this branch. Searching only this worktree makes it look as though fragment has no
+learned component. It does.
+
+**One item for the owner, not a defect:** §3.4 and §3.5 both open with "the
+GuacaMol-trained R_theta and rewrite system remained fixed". That is true --
+nothing was retrained -- but it reads as though R_theta is sampled during PMO and
+T4, and the qualifier is twelve pages away in §E.4. A pointer in §3.4/§3.5 would
+close the gap.
+
+**Also corrected:** QuickVina2 and all five receptors are fetched at image build
+from a public URL (`raw.githubusercontent.com/SeulLee05/MOOD/main/scorer`), not
+supplied privately. Nothing about T4 requires a private asset.
