@@ -118,6 +118,7 @@ artifacts/tdc_originals/
 
 # Local repository-readiness diagnostics (the checked interpretation is in docs/).
 /diagnostics/repository_readiness_v1/*.json
+!/diagnostics/repository_readiness_v1/clean_clone_verification_20260929.json
 /diagnostics/repository_readiness_v1/*.xml
 /diagnostics/repository_readiness_v1/*.exit
 /diagnostics/repository_readiness_v1/*sample.txt

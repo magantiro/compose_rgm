@@ -84,9 +84,29 @@ and do not by themselves prove that every failure was pre-existing.
   pytest exit status was 1. Its log and JUnit XML are at
   `diagnostics/repository_readiness_v1/clean_clone_full_final.{log,xml}`.
   This is a baseline, not suite sign-off for the subsequent repairs.
+- The first complete post-repair clean-clone run at `6f55922b` finished with
+  **5,347 passed, 10 failed, 18 skipped, 1 xfailed** in 59m03s. All ten
+  failures required gradients. An in-memory after-test probe found that the
+  T4 population fixture executed an inference app body that disabled gradients
+  process-wide in pytest. The test harness now restores the caller's gradient
+  mode in a `finally` block without editing the frozen app. The ten failing
+  test modules passed together (42 tests), and the complete T4 test group
+  passed with the after-test gradient probe (272 tests).
+- The final full clean-clone run at `4ca47afa` passed with **5,357 passed,
+  0 failed, 18 skipped, 1 xfailed** in 58m55s and actual pytest exit code 0.
+  The log, JUnit XML, and captured exit code are local under
+  `diagnostics/repository_readiness_v1/clean_clone_final_4ca47afa_20260929.*`;
+  their SHA-256 values, source revision, environment, and skip categories are
+  recorded in `diagnostics/repository_readiness_v1/clean_clone_verification_20260929.json`.
+  The read-only Process-V2 hash-chain verifier also exited 0 with status
+  `AGREES`; it retains warnings about historical or unverifiable pointers.
 - `ruff check src/` currently reports 494 legacy findings. Touched Python
-  files are checked separately. Mass formatting hash-bound historical sources
-  would change their physical identity and is outside this repair.
+  files pass scoped Ruff lint. Scoped format checking passes 31 of 32 touched
+  Python files; `tools/t4_launch.py` retains one unrelated argument-layout
+  difference that is also present at the pre-repair base revision. Formatting
+  that historical launcher would change its physical identity without fixing
+  this milestone's behavior, so it is not silently reformatted. Mass
+  formatting hash-bound historical sources is outside this repair.
 
 ## What the complete diagnostic established
 
@@ -94,8 +114,9 @@ The 70 failures were not 70 unrelated defects. Forty-four gradient tests were
 contaminated by `load_package` disabling PyTorch gradients process-wide. One
 test each exposed a leaked temporary import path, a stale literal source-code
 assertion, and exact comparison of rounded float32 values. These four causes
-have targeted implementation or test repairs. Their focused tests passed; the
-full suite has not yet been rerun on the repaired candidate.
+have targeted implementation or test repairs. Their focused tests passed.
+The first complete rerun exposed the separate T4 test-fixture leak described
+above. Its focused repair and the final full clean-clone suite passed.
 
 Nine RingCore failures and one T4 qualification failure were tests that treated
 historical source identities as if they were the current checkout. The frozen
@@ -126,6 +147,15 @@ the prerequisite kernel is absent and fail with
 does not match the available PyTDC 1.1.15 environment; its 0.3.6 kernel remains
 unverified locally.
 
+The clean export's 18 skips are five fragment-generation asset checks, five
+PMO pre-recovery artifact checks, four InVirtuoGen source-parity checks, two
+legacy PMO-kernel checks, one pan-lung-kernel check, and one CUDA pinned-memory
+check. The single strict expected failure is a known Process-V2 import-boundary
+defect: its source resolver still imports a V1 loader that revalidates the live
+V1 identity. That is an explicitly deferred Wave-2 repair, not a passing
+invariant or a hidden skip. The final full run confirmed the same 18 skip
+classifications and one strict expected failure.
+
 The slot-safety scan initially flagged Dynamic-v2.1's `atom_types > 0` context
 calculation. A code-path audit changed that verdict: the expression selects
 **occupied slots** (including a SCAR), which is the appropriate predicate for
@@ -144,8 +174,8 @@ states would need its own audit; none is asserted here.
 Post-repair focused checks: 53 RingCore/T4 provenance tests passed; 93 tests
 covering the gradient, import, PMO, pan-lung, and assertion repairs passed with
 3 separately identified kernel skips; 2 prerequisite-gate tests passed. The
-slot-safety module passed all six tests after that audit. These are focused
-outcomes, not a final full-suite result.
+slot-safety module passed all six tests after that audit. These focused checks
+are supplemented by the final full-suite result above.
 
 The documented fragment CLI verified seven artifact hashes and the complete
 saved metric panels for four independent tasks. Its offline table command
@@ -155,17 +185,20 @@ quality means were 42.633, 36.700, 31.533, and 39.033 percent. This reproduces
 saved-table reductions only, not generation from model weights or raw molecular
 evaluation. The isolated Python 3.11 environment passed `uv pip check` for 60
 installed packages. The command was run with `PYTHONPATH=src` so imports came
-from this checkout rather than the environment's earlier editable clone.
+from this checkout rather than the environment's earlier editable clone. The
+fragment `verify` command also passed from the final `4ca47afa` clean clone:
+seven artifact hashes and four complete saved metric panels.
 
 ## Release status
 
 Not yet ready to present as a fully reproducible public repository. The current
 branch still has missing historical recovery input, unverified legacy kernels,
 and an unresolved integration choice between this
-checkout and the separately developed PMO/T4 branch. A fresh source export can
-run thousands of offline tests, but a green subset alone would not resolve
-those provenance and input-access boundaries. No branch was merged, pushed, or
-published during this repair.
+checkout and the separately developed PMO/T4 branch. A fresh source export
+passes the complete core suite, but its 18 skips, one known expected failure,
+and the provenance and input-access boundaries below preclude a claim of full
+paper-result reproduction. No branch was merged, pushed, or published during
+this repair.
 
 The PMO/T4 branch at `bc8cc421` contains useful offline reproducers, but its
 paper-facing guide still asserts that one checkpoint is required by every
@@ -236,7 +269,8 @@ one convenient development interface.
 
 The other branch's `experiments/paper/README.md` claims a single reference
 checkpoint for every benchmark. Its PMO and T4 guides still point to
-reproduction commands and data files deleted by later commit `1f1c2c86`.
+reproduction commands and data files removed by later commit `1f1c2c86`
+following the owner's instruction to keep score artifacts out of Git.
 Those pages are therefore not an authoritative release guide as currently
 committed. A safe integration must carry verified producer code, exact result
 reductions, and a correct experiment-specific input map together. It must
@@ -275,5 +309,25 @@ has SHA-256 `e05a8fff0da6201f77c29ca218d5c79f6acf505bc6101afd1797f07bc7ff3db8`,
 and `COMPOSE_ICLR_2027_zip5_appendix_results/main.pdf` has SHA-256
 `9a1117459ad5bc38e27c9c6bbe67593cd7fa6d6384db1f5e5041907fe92b41dd`.
 Their corresponding copies under `output/pdf/` match byte-for-byte. The owner
-has not yet identified which exact PDF was submitted, so neither hash is
-promoted to the release manifest.
+has not yet identified which exact PDF was submitted. The PMO/T4 handoff calls
+the zip5 directory the submitted one based on file timestamps and the deadline,
+but supplies no submission receipt hash. Neither candidate hash is therefore
+promoted to the release manifest yet.
+
+## Safe integration sequence after this software gate
+
+1. Confirm the exact submitted PDF bytes and choose the repository's release
+   base. Keep historical PMO A/B and frozen T4 producer revisions separately
+   addressable; do not resolve arm-defining conflicts into an invented producer.
+2. Declare which checkpoints, catalogs, evaluator sources, raw receipts, and
+   docking assets may be distributed. For non-distributed inputs, publish their
+   expected identities and an honest access requirement, not a substitute.
+3. Add task-specific offline reductions with explicit input hashes for the
+   final QED, PMO-1K, PMO A/B, and T4 rows. Reconcile the JNK3 provisional
+   seed and the FA7 zero-call fallback against their original receipts before
+   marking the corresponding paper rows reproduced.
+4. Test those reducers from a fresh source export and, only where all exact
+   external inputs are available, run bounded generation or evaluator parity.
+   Keep saved-metric arithmetic, full campaign replay, and docking reruns as
+   distinct verification levels. Commit scoped integration units locally; do
+   not push or publish until the owner approves the evidence and access map.

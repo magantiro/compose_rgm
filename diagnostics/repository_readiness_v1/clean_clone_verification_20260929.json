@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-30T00:24:22Z",
+  "source_revision": "4ca47afa558c17df58bc98bec927022e4528c525",
+  "source_scope": "clean clone with tracked files only",
+  "environment": {
+    "python": "3.11.13",
+    "pytest": "9.1.1",
+    "numpy": "1.26.4",
+    "scipy": "1.13.1",
+    "torch": "2.4.0",
+    "rdkit": "2024.3.5",
+    "networkx": "3.3",
+    "pyyaml": "6.0.3",
+    "omp_num_threads": 1,
+    "openblas_num_threads": 1,
+    "mkl_num_threads": 1
+  },
+  "full_suite": {
+    "command": "python -m pytest tests/ -q -ra --tb=short --durations=20 --junitxml=clean_clone_final_4ca47afa_20260929.xml",
+    "junit_started_at_local": "2026-09-29T19:22:08.256478-04:00",
+    "duration_seconds": 3535.89,
+    "exit_code": 0,
+    "tests": 5376,
+    "passed": 5357,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 18,
+    "xfailed": 1,
+    "skips_by_prerequisite": {
+      "fragment_generation_assets": 5,
+      "pmo_pre_recovery_artifacts": 5,
+      "invirtuogen_source_parity_assets": 4,
+      "legacy_pmo_kernel": 2,
+      "pan_lung_kernel": 1,
+      "cuda_pinned_memory": 1
+    },
+    "log_sha256": "e6e1744e3b5fc2e97b35529473d6de9dffcacc80132b02208c318e7f4c47bffe",
+    "junit_xml_sha256": "d07c11bf012e4d494de93f57d9cba52a49bb4e9fa5a333a4efe741b4478266a3",
+    "exit_file_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "process_v2_hash_chain": {
+    "command": "python scripts/verify_process_v2_hash_chain.py",
+    "exit_code": 0,
+    "status": "AGREES",
+    "warning_boundary": "Historical and unverifiable-pointer warnings remain; exit 0 does not certify every experiment asset."
+  },
+  "release_boundary": "Core clean-clone software verification passed. Full paper-result reproduction and distribution are not yet established."
+}

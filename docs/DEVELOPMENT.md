@@ -70,8 +70,10 @@ git diff --check
 
 The complete-suite result and known unresolved gates are in
 [`REPOSITORY_READINESS_20260929.md`](REPOSITORY_READINESS_20260929.md).
-The last complete diagnostic was **not green**; a final candidate run is
-pending. The PMO v2.1 slot-safety scan was a false positive after auditing its
+The final clean-clone core suite at `4ca47afa` passed with 5,357 tests passed,
+18 prerequisite/platform skips, and one strict expected failure for a known
+Process-V2 import boundary. This is not full paper-result reproduction. The
+PMO v2.1 slot-safety scan was a false positive after auditing its
 occupied-topology semantics and scar-free producer domain. The ignored local
 recovery directory is still not the original frozen pre-recovery snapshot;
 do not silently treat its later state as that input.
