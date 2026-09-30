@@ -16,13 +16,15 @@ numerical reference use are experiment-specific, not universal across benchmarks
 | Check the submitted paper's evidence | [`experiments/paper/`](experiments/paper/) | Verify the exact PDF and historical result-artifact identities; this is not yet full benchmark replay |
 | Reproduce fragment tables | [`experiments/fragments/`](experiments/fragments/) | Hash-check and reduce saved rows; isolated generation requires declared external assets |
 | Check the submitted PMO A/B table | [`experiments/pmo/`](experiments/pmo/) | Recompute the reported 14-pair subset from its saved reduction; raw oracle receipts remain external |
+| Trace the submitted T4 table | [`experiments/t4/`](experiments/t4/) | Inspect the frozen row source and its unresolved table reconciliation; fresh docking assets are external |
 | Develop or test the code | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | Install the pinned core environment and run offline tests |
 | Locate a historical experiment | [`experiments/INDEX.md`](experiments/INDEX.md) | Find its entry point, then read that experiment's contract before any launch |
 
 The published T4 and QED result paths still need task-specific offline
 reductions and external-asset access checks in this integration branch. The
-PMO A/B saved-data check does not replay raw oracle receipts. Do not interpret
-a passing source-identity check as reproduction of a paper table.
+PMO A/B saved-data check does not replay raw oracle receipts. T4 has an
+unresolved paper-row provenance question. Do not interpret a passing
+source-identity check as reproduction of a paper table.
 
 ## The three layers
 
