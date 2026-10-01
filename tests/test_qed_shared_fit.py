@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import math
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -17,6 +18,7 @@ from compose_v4.experiments.qed_shared_fit import (
     inspect_feature_corpus,
     training_normalization,
 )
+from tools import fit_qed_shared_value as fit_cli
 from tools.fit_qed_shared_value import input_shard_manifest
 
 REFERENCE = {"checkpoint_sha256": "fragment-checkpoint", "time": 0.5}
@@ -298,3 +300,17 @@ def test_all_negative_target_rows_do_not_qualify_guidance(tmp_path: Path) -> Non
     )
     assert report["guidance_validation_positive_labels"] == 0
     assert report["qualified_for_guidance"] is False
+
+
+def test_fit_revision_requires_a_full_matching_commit(monkeypatch: pytest.MonkeyPatch) -> None:
+    commit = "a" * 40
+    monkeypatch.setattr(
+        fit_cli.subprocess,
+        "run",
+        lambda *_args, **_kwargs: SimpleNamespace(returncode=1, stdout=""),
+    )
+    monkeypatch.setenv("COMPOSE_SOURCE_REVISION", commit)
+    assert fit_cli.revision() == commit
+    monkeypatch.setenv("COMPOSE_SOURCE_REVISION", "short")
+    with pytest.raises(ValueError, match="full Git SHA"):
+        fit_cli.revision()

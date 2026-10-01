@@ -36,10 +36,18 @@ def sha256(path: Path) -> str:
 
 
 def revision() -> str | None:
+    declared = os.environ.get("COMPOSE_SOURCE_REVISION")
+    if declared is not None and (
+        len(declared) != 40 or any(character not in "0123456789abcdef" for character in declared)
+    ):
+        raise ValueError("COMPOSE_SOURCE_REVISION must be a lowercase full Git SHA")
     result = subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=False
     )
-    return result.stdout.strip() if result.returncode == 0 else None
+    local = result.stdout.strip() if result.returncode == 0 else None
+    if declared is not None and local is not None and declared != local:
+        raise ValueError("COMPOSE_SOURCE_REVISION differs from the checked-out commit")
+    return declared if declared is not None else local
 
 
 def _write_json(path: Path, value: dict) -> None:
