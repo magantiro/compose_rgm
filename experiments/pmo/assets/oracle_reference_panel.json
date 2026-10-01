@@ -1,0 +1,176 @@
+{
+  "reference_scores": [
+    {
+      "drd2": 0.0022522728400335154,
+      "gsk3b": 0.99,
+      "jnk3": 0.0,
+      "smiles": "BrC1=C2N(N=C1)C(NCC3=CC=CN=C3)=CC(=N2)C=4C=CC=CC4"
+    },
+    {
+      "drd2": 0.014348031855951019,
+      "gsk3b": 0.0,
+      "jnk3": 0.0,
+      "smiles": "C#CCN(Cc1ccccc1Cl)C1CCCC1"
+    },
+    {
+      "drd2": 0.004852413437157671,
+      "gsk3b": 0.26,
+      "jnk3": 1.0,
+      "smiles": "C1(=C(C=2C=CN(N2)C)C=C(N=C1)NC=3C=CC(N4N=C(N=C4)N5CCOCC5)=CC3)F"
+    },
+    {
+      "drd2": 0.009419098619588583,
+      "gsk3b": 0.11,
+      "jnk3": 1.0,
+      "smiles": "C1(C(F)(F)F)=C(NC=2C=CC=CC2C(=O)N)C=C(OC3=CC=CC(=C3)OC)N=C1"
+    },
+    {
+      "drd2": 0.004512837389046983,
+      "gsk3b": 1.0,
+      "jnk3": 0.44,
+      "smiles": "C1(C2=CN(CCCO)C=3C2=CC=CN3)=C(C(=O)NC1=O)C4=NC=CC=C4"
+    },
+    {
+      "drd2": 0.003029507675054526,
+      "gsk3b": 1.0,
+      "jnk3": 0.08,
+      "smiles": "C12=C(C=3C=C(C(F)(F)F)C=CC3N1)CC(=O)NC=4C2=CC(/C=C/C(=O)OC)=CC4"
+    },
+    {
+      "drd2": 0.014378318909585158,
+      "gsk3b": 0.33,
+      "jnk3": 1.0,
+      "smiles": "C1=C(Cl)C(=NC(N[C@@H]2CCCN(C2)C(=O)NCC)=N1)C=3C4=C(C=CC=C4)NC3"
+    },
+    {
+      "drd2": 0.0023125493993224927,
+      "gsk3b": 0.58,
+      "jnk3": 0.58,
+      "smiles": "C=1(C(=C(C=C(C1Br)Br)/C=C/C(=O)O)Br)Br"
+    },
+    {
+      "drd2": 3.0298196625955345e-05,
+      "gsk3b": 0.0,
+      "jnk3": 0.85,
+      "smiles": "C=1(C=CSC1C(OCC)=O)NC(CC2=CC=CC=C2)=O"
+    },
+    {
+      "drd2": 0.012670080701165185,
+      "gsk3b": 0.18,
+      "jnk3": 0.59,
+      "smiles": "C=1C(=CC(=NC1)NC2=C(C=CC=C2)OC)C3=CC(=NC=C3)NC4=CC=CC=C4OC"
+    },
+    {
+      "drd2": 0.7537053303355454,
+      "gsk3b": 0.62,
+      "jnk3": 0.66,
+      "smiles": "C=1C(=CC=C(C1)OCCN2CCCC2)NC3=NC=C(S3)C4=CC=CC=C4"
+    },
+    {
+      "drd2": 0.009423312800973586,
+      "gsk3b": 0.02,
+      "jnk3": 0.99,
+      "smiles": "C=1C(C(=O)NCC)=CC=2N(C(=C(C2C1)N=O)O)CC3=C4C(=CC(=C3)F)COCO4"
+    },
+    {
+      "drd2": 0.00017777364019028896,
+      "gsk3b": 0.57,
+      "jnk3": 0.59,
+      "smiles": "C=1C=C(S(/C=C/C#N)(=O)=O)C=CC1C"
+    },
+    {
+      "drd2": 0.5475828952606038,
+      "gsk3b": 0.97,
+      "jnk3": 0.0,
+      "smiles": "C=1C=CC(N2CCN(CC2)CCCNC(=O)C=3ON=C(N3)C=4C=NC=CC4)=C(C1)F"
+    },
+    {
+      "drd2": 0.002100222388044785,
+      "gsk3b": 0.05,
+      "jnk3": 0.0,
+      "smiles": "C=CCN1C(=O)C(C#N)=C(C)/C(=C\\c2cn(-c3ccccc3)nc2-c2ccc(OCC)cc2)C1=O"
+    },
+    {
+      "drd2": 0.0007510801280799864,
+      "gsk3b": 0.0,
+      "jnk3": 0.0,
+      "smiles": "CC(=O)CCC(C(C)=O)C(C)=O"
+    },
+    {
+      "drd2": 0.16003438414126,
+      "gsk3b": 0.0,
+      "jnk3": 0.0,
+      "smiles": "CC(C)Cc1ccc2c(c1)[C@@H](Cl)CC2"
+    },
+    {
+      "drd2": 0.00026824092057762004,
+      "gsk3b": 0.31,
+      "jnk3": 0.06,
+      "smiles": "CC(C)NC(=O)C(=O)NCc1nc(-c2cccc(F)c2)c(-c2ccccn2)[nH]1"
+    },
+    {
+      "drd2": 0.00025755207365012596,
+      "gsk3b": 0.0,
+      "jnk3": 0.11,
+      "smiles": "CC(C)[C@@H](O)c1cccc([N+](=O)[O-])c1"
+    },
+    {
+      "drd2": 0.18060387163257433,
+      "gsk3b": 0.0,
+      "jnk3": 0.03,
+      "smiles": "CCc1noc(CC)c1CC(=O)N1c2ccccc2C[C@H]1C"
+    },
+    {
+      "drd2": 0.004947126850423851,
+      "gsk3b": 0.23,
+      "jnk3": 0.02,
+      "smiles": "COc1ccc(-c2n[nH]cc2C[NH+]2CCC[C@@H](N3CCNC3=O)C2)cc1"
+    },
+    {
+      "drd2": 1.8113384239191436e-05,
+      "gsk3b": 0.01,
+      "jnk3": 0.0,
+      "smiles": "Cc1cc(OCC(=O)Nc2ccc([N-]S(C)(=O)=O)cc2)no1"
+    },
+    {
+      "drd2": 0.0410026122021196,
+      "gsk3b": 1.0,
+      "jnk3": 0.15,
+      "smiles": "ClC1=NC(=NC(C=2C3=C(NC2)N=CC=C3)=C1)NC4C(N)CCCC4"
+    },
+    {
+      "drd2": 0.0003522352490502688,
+      "gsk3b": 0.49,
+      "jnk3": 0.1,
+      "smiles": "NS(=O)(=O)C1=CC=C(N/N=C/2\\C(=O)NC3=CC=C4N=CC=CC4=C23)C=C1"
+    },
+    {
+      "drd2": 0.004844439678359326,
+      "gsk3b": 0.58,
+      "jnk3": 0.0,
+      "smiles": "O1[C@H](CCCC(=O)CCCC=CC=2C(C1=O)=C(O)C=C(O)C2)C"
+    },
+    {
+      "drd2": 0.0031267761570531313,
+      "gsk3b": 0.66,
+      "jnk3": 0.08,
+      "smiles": "O=C([O-])C1(Cc2ccccc2Cl)CCN(c2ncnc3[nH]ccc23)CC1"
+    },
+    {
+      "drd2": 0.0003991255916332107,
+      "gsk3b": 0.02,
+      "jnk3": 0.14,
+      "smiles": "O=[N+]([O-])c1ccc(/C=N/Nc2ccc(C(F)(F)F)cc2[N+](=O)[O-])o1"
+    },
+    {
+      "drd2": 0.0005563544047617112,
+      "gsk3b": 0.51,
+      "jnk3": 0.0,
+      "smiles": "S(=O)(=O)(NC=1C=C2N=C(C(=NC2=CC1)C)C)C3=CC=C(N)C=C3"
+    }
+  ],
+  "schema_version": "compose.pmo.oracle_reference_panel.v1",
+  "selection": "union of POSITIVE_CONTROLS SMILES; all three raw oracle columns",
+  "source_path": "artifacts/oracles/molleo_task3_v1/molleo_task3_oracle_manifest.json",
+  "source_sha256": "c4ca22fb8eddf087c687d245da2353817f643459cfc86be08f58993aab3979cf"
+}

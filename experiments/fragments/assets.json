@@ -1,0 +1,28 @@
+{
+  "schema": "compose_fragment_assets_v1",
+  "catalog_fingerprint": "639ff6078c32d43c",
+  "assets": {
+    "checkpoint": {"path": "r_theta_nll.pt", "sha256": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8", "origin": "Frozen NLL-trained reference checkpoint selected at step 12500. This user-owned research artifact is distributed through Git LFS with SHA-256 verification."},
+    "catalog": {"path": "catalog.json", "sha256": "685ba9ca156c6bb864b8405aa9b4c342dca5d455ec15d9bb2c55530e78f96337", "origin": "Training-derived ring catalog for the NLL reference process, stored as versioned data."},
+    "prompts": {"path": "prompts.csv", "sha256": "a4fb8357d0f1102cbdc8d79d802e15f66a59a9722c0b7125ce693fe7a29872a9", "source_sha256": "43db9adbcf7f8895be6197bccdf729517c4433b7fdbf637f413fa9c8055c3a31", "origin": "InVirtuoGen_results@b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb:references/fragments.csv with one terminal newline appended."},
+    "region_catalog": {"path": "region_catalog.json", "sha256": "8acb075edf610bdc3dc364fdb4514aa67732239fe4b6a548ef8bbe642b0cd3ee", "source_sha256": "a8775b466f479c2594ff5d8afd81049a57969211d3152035c93e9db51e8b1347", "origin": "Path-neutral export of the split-first training region catalog, fragment_training_region_catalog_v1. This is a derived research artifact, not a reaction corpus."},
+    "joint_prior": {"path": "joint_prior.json", "sha256": "6562c4a78937b041be3cd8b984173ddf9220e5976e549fecf106a8337e52a0a6", "source_sha256": "6ae0fcb635ec2876f5d7f1c326cef92c241d42267a897f441d0cc9ee5752eea2", "origin": "Path-neutral export of the split-first training joint completion prior. Only provenance path labels changed."},
+    "pendant_catalog": {"path": "pendant_catalog.json", "sha256": "ab4f6e6c209c5cb57c5a2bd5391a488d8345a9493fc977fdfdaf31fb7cab34cc", "source_sha256": "fad4dd91495b46d08a66f219c0887f0f8acdaf9f245613e1202904891b9211be", "origin": "Path-neutral export of the split-first training pendant catalog, fragment_training_pendant_catalog_v1."},
+    "mass_prior": {"path": "mass_prior.json", "sha256": "209df083e412984ac5e4a5b43816f143319c3a7450b2f14c82da47fa7d63bb3c", "source_sha256": "288a012905cd461c4f31e18e3c6cd6dbc43248f74b764ccda4877a9fbc6da3bd", "origin": "Path-neutral export of the split-first training decoration mass prior. Only provenance path labels changed."},
+    "evaluator_metrics": {"path": "evaluator/pkg/in_virtuo_gen/train_utils/metrics.py", "sha256": "3c4bb7c6727cbeaf02d3d5eebf1deac27f77bab68d929b61dbe4154911e2b099", "origin": "InVirtuoGen_results@b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb:in_virtuo_gen/train_utils/metrics.py"},
+    "evaluator_mol": {"path": "evaluator/pkg/in_virtuo_gen/utils/mol.py", "sha256": "ed5609c72a3effe2547f4b264e35be8134affccc206978605307d1365a028145", "origin": "InVirtuoGen_results@b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb:in_virtuo_gen/utils/mol.py"},
+    "evaluator_downstream": {"path": "evaluator/pkg/in_virtuo_gen/evaluation/downstream.py", "sha256": "ab34f586b41f1ad6e21cd933b08e7ff86eb44711c9c9a4c31c29f894cc9c7b50", "origin": "InVirtuoGen_results@b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb:in_virtuo_gen/evaluation/downstream.py"},
+    "evaluator_frags": {"path": "evaluator/pkg/references/frags_downstream.csv", "sha256": "dceeec39f389dda928a210694449948645be73d12da0ad93bc843ba1f2bb5975", "origin": "InVirtuoGen_results@b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb:references/frags_downstream.csv"},
+    "evaluator_reference_metrics": {"path": "evaluator/pkg/references/reference_metrics.csv", "sha256": "e75676431628987d3d0bacbafc3028ffd7ebc8d797ecb03fb386b13a453823f9", "origin": "InVirtuoGen_results@b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb:references/reference_metrics.csv"},
+    "evaluator_fragments": {"path": "evaluator/pkg/references/fragments.csv", "sha256": "43db9adbcf7f8895be6197bccdf729517c4433b7fdbf637f413fa9c8055c3a31", "origin": "InVirtuoGen_results@b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb:references/fragments.csv"}
+  },
+  "environment": {"python": "3.11", "numpy": "1.26.4", "torch": "2.4.0", "rdkit": "2024.3.5", "scipy": "1.13.1", "networkx": "3.3", "pandas": "2.3.3", "tqdm": "4.70.1"},
+  "evaluator_license": "CC BY-NC-SA 4.0 per the upstream LICENSE at commit b50bb3ae2bdcb9df581f0b219d79cf14b05d0fbb. Files are fetched on demand and not vendored here.",
+  "task_assets": {
+    "motif_extension": ["checkpoint", "catalog", "prompts", "region_catalog", "joint_prior"],
+    "scaffold_decoration": ["checkpoint", "catalog", "prompts", "pendant_catalog", "mass_prior"],
+    "linker_design": ["checkpoint", "catalog", "prompts", "region_catalog", "joint_prior"],
+    "superstructure_generation": ["checkpoint", "catalog", "prompts"],
+    "superstructure_uniform": ["checkpoint", "catalog", "prompts"]
+  }
+}

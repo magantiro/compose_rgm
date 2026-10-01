@@ -1,0 +1,5 @@
+# Keep the exact, hash-pinned COMPOSE model and training-derived catalogs in Git LFS.
+# Do not match all *.pt or *.json files. Other assets have separate provenance.
+local_assets/fragments/r_theta_nll.pt filter=lfs diff=lfs merge=lfs -text
+local_assets/fragments/region_catalog.json filter=lfs diff=lfs merge=lfs -text
+local_assets/fragments/pendant_catalog.json filter=lfs diff=lfs merge=lfs -text

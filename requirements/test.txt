@@ -1,0 +1,8 @@
+# Offline tests for the local task runners.
+-r core.txt
+pytest==9.1.1
+pytest-cov==7.1.0
+ruff==0.16.9
+pandas==2.3.3
+tqdm==4.70.1
+joblib==1.5.3

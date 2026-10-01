@@ -1,0 +1,25 @@
+{
+  "schema": "compose.hphi.pilot",
+  "version": "hphi-pilot-v1",
+  "n": 64,
+  "trajectories_per_source": 4,
+  "horizon": 6,
+  "total_trajectories": 256,
+  "total_transitions": 1536,
+  "fraction_of_full_corpus": "~3%",
+  "status": "PERMANENTLY EXCLUDED from the 1,024 training pool and the 128 validation pool",
+  "excluded_from_selection": [
+    "qed_test.txt",
+    "logp06_test.txt",
+    "logp04_test.txt",
+    "dev_panel_qed_64.txt",
+    "hphi_train_1024.txt",
+    "hphi_valid_128.txt"
+  ],
+  "n_excluded": 2668,
+  "eligible_pool": 65480,
+  "selection": "QED-stratified, 10 strata of width 0.01, deterministic sha256 rank; no RNG",
+  "purpose": "staged-compute gate: does the 1,024x8 run deserve to be bought?",
+  "census_may_be_read": true,
+  "regions_are_frozen": "the 20-region grid does NOT move in response to this pilot"
+}

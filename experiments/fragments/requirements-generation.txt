@@ -1,0 +1,9 @@
+# Validated local environment with the historical chemistry/ML versions.
+# Install separately from PMO. Pandas/tqdm record the local evaluator environment.
+numpy==1.26.4
+scipy==1.13.1
+torch==2.4.0
+rdkit==2024.3.5
+networkx==3.3
+pandas==2.3.3
+tqdm==4.70.1

@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "compose-v4"
+version = "0.1.0"
+description = "COMPOSE molecular generation through executable graph transformations"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+license = { text = "MIT" }
+dependencies = [
+    "numpy>=1.24",
+    "networkx>=3.0",
+    "rdkit>=2023.9",
+    "scipy>=1.10",
+    "torch>=2.0",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "ruff",
+]
+eval = [
+    "fcd-torch==1.0.7",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["compose_v4*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "external_artifact: requires a documented hash-bound artifact that is not distributed in the source tree",
+    "alternate_kernel: requires a separately pinned software environment",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

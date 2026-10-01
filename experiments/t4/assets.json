@@ -1,0 +1,14 @@
+{
+  "schema": "compose_t4_route_assets_v1",
+  "source_revision": "1d2e002988d73cc3cc7ed964088d7b36859bdd65",
+  "source_directory": "diagnostics/t4_held_target_distillation_quality_v1",
+  "route_experts": {
+    "5ht1b": {"file": "assets/5ht1b_checkpoint.json", "sha256": "ed06806c889d68ee235f2724826dc848e7fe2c58e6f7d6aa6ce107442ff5f608"},
+    "braf": {"file": "assets/braf_checkpoint.json", "sha256": "ab5ba04e3ec52a2f92cedcebec4e53ec7159d03d5a4871aa56199ee485c0709a"},
+    "fa7": {"file": "assets/fa7_checkpoint.json", "sha256": "c86bd1a58b747e9807cfb4ad6171b39e668eb0db2d01c6bcef6ad991994270a0"},
+    "jak2": {"file": "assets/jak2_checkpoint.json", "sha256": "d9771225c7a9dc855330318ea4475246b7328107c9ad95da11c976098ca3fb25"},
+    "parp1": {"file": "assets/parp1_checkpoint.json", "sha256": "73f25dcddb71a3645b7bd45252e37814f837c6f5b1b8d59f5f4e08940439d311"}
+  },
+  "fit_scope": "leave_one_target_out",
+  "role": "T4 proposal controller input, not the GuacaMol-trained molecular reference"
+}

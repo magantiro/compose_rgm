@@ -1,0 +1,144 @@
+# Operating-system and editor files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Python environments and caches
+.venv*/
+.uv-cache*/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local scratch space and generated training artifacts
+# Task outputs stay outside Git. Only the exact reference assets allowed below
+# are tracked from local_assets/.
+/runs/
+/results/
+/diagnostics/
+/local_assets/
+# Persistent branch checkouts live here; each has its own Git index.
+/.worktrees/
+tmp/
+*.pt
+*.pth
+*.ckpt
+*.rollouts.*
+results/**/rollouts.pt
+
+# Modal/local credentials must never enter source control
+.modal.toml
+.env
+.env.*
+!.env.example
+
+# LaTeX build intermediates (source, bibliography, PDFs, and release ZIPs remain tracked)
+paper_iclr_stochastic_rewriting/*.aux
+paper_iclr_stochastic_rewriting/*.blg
+paper_iclr_stochastic_rewriting/*.log
+paper_iclr_stochastic_rewriting/*.out
+paper_iclr_stochastic_rewriting/tmp/
+scratch/
+paper_iclr_stochastic_rewriting/main.aux
+paper_iclr_stochastic_rewriting/main.log
+paper_iclr_stochastic_rewriting/main.out
+paper_iclr_stochastic_rewriting/main.fls
+paper_iclr_stochastic_rewriting/main.fdb_latexmk
+paper_iclr_stochastic_rewriting/main.bbl
+paper_iclr_stochastic_rewriting/main.blg
+scripts/presentation/__pycache__/
+.claude/settings.local.json
+diagnostics/.v2_scan_cache.pkl
+diagnostics/.v2_successor_cache.pkl
+diagnostics/pmo_ivg_oracle_parity/ivg_oracle_assets/
+# Durable local mirror of the completed PMO v2.1 campaign. The sealed summary
+# is tracked; the 11 GB per-query working tree remains an operational artifact.
+diagnostics/pmo_dynamic_v21/runs/
+
+# Frozen h_phi controller weights: 5.1 MB total, and the manifest records
+# their sha256, so the blanket *.pt rule above would leave a frozen model
+# unreproducible. Tracked deliberately.
+!artifacts/h_phi_frozen_v1/*.pt
+local_runtime/
+runs/run_v2_01/
+local_runtime/zinc250k/
+
+# Large run artifacts pulled from the Modal volume. The volume is the source of
+# truth; these are local working copies and must not enter git.
+artifacts/
+
+# Task 3 benchmark run directories: ledgers and checkpoints are working state,
+# regenerable in under a minute per seed. The summaries that matter are copied
+# into diagnostics/ and tracked there.
+runs/task3_dev/
+runs/task3_smoke/
+runs/task3_mechanism/
+runs/task3_mechanism2/
+runs/task3_reachable/
+runs/task3_reachable_k05/
+runs/task3_reachable_3seed/
+
+# LaTeX build intermediates for the ICLR 2027 paper (PDF and sources stay tracked)
+paper_iclr2027/*.aux
+paper_iclr2027/*.bbl
+paper_iclr2027/*.blg
+paper_iclr2027/*.log
+paper_iclr2027/*.out
+paper_iclr2027/*.fls
+paper_iclr2027/*.fdb_latexmk
+
+# isolated PyTDC benchmark env; never mix with the pinned chemistry env
+.venv_tdc/
+
+# 74MB of upstream TDC oracle pickles, kept for the parity gate only
+artifacts/tdc_originals/
+
+# LaTeX build artifacts (sources and figures are tracked; build output is not)
+*.aux
+*.log
+*.out
+*.blg
+*.bbl
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.toc
+
+# Distribution bundles rebuilt from sources
+*.zip
+
+# Local model assets and generated outputs.
+/local_assets/fragments/
+/local_assets/qed/
+/runs/fragments/
+/runs/reference_guidance/
+/runs/qed_shared/
+
+# Downloaded upstream datasets (rebuild with tools/build_dude_pool.py)
+.cache/
+
+# Local repository-readiness diagnostics (the checked interpretation is in docs/).
+/diagnostics/repository_readiness_v1/*.json
+!/diagnostics/repository_readiness_v1/clean_clone_verification_20260929.json
+/diagnostics/repository_readiness_v1/*.xml
+/diagnostics/repository_readiness_v1/*.exit
+/diagnostics/repository_readiness_v1/*sample.txt
+
+# The hash-pinned, project-owned reference assets are distributed through Git LFS.
+# All other local assets, including third-party evaluators and oracle pickles,
+# remain untracked until their distribution basis is documented.
+!/local_assets/
+/local_assets/*
+!/local_assets/fragments/
+/local_assets/fragments/*
+!/local_assets/fragments/r_theta_nll.pt
+!/local_assets/fragments/catalog.json
+!/local_assets/fragments/region_catalog.json
+!/local_assets/fragments/pendant_catalog.json
+!/local_assets/fragments/joint_prior.json
+!/local_assets/fragments/mass_prior.json

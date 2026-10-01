@@ -1,0 +1,62 @@
+{
+  "schema_version": "compose.pmo.oracle_asset_audit.v1",
+  "source_revision": "fd340c48",
+  "source_path": "diagnostics/pmo_oracle_asset_audit_v1.json",
+  "source_sha256": "fba3d59a97ea0c10ff8a708422ca0546f9b3d1371b36832a64a9dae13315bfdb",
+  "asset_backed_tasks": ["drd2", "gsk3b", "jnk3"],
+  "tasks": {
+    "albuterol_similarity": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "amlodipine_mpo": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "celecoxib_rediscovery": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "deco_hop": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "drd2": {"classification": "ASSET_BACKED_LAZY_RELATIVE"},
+    "fexofenadine_mpo": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "gsk3b": {"classification": "ASSET_BACKED_LAZY_RELATIVE"},
+    "isomers_c7h8n2o2": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "isomers_c9h10n2o2pf2cl": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "jnk3": {"classification": "ASSET_BACKED_EAGER_RELATIVE"},
+    "median1": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "median2": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "mestranol_similarity": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "osimertinib_mpo": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "perindopril_mpo": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "qed": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "ranolazine_mpo": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "scaffold_hop": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "sitagliptin_mpo": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "thiothixene_rediscovery": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "troglitazone_rediscovery": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "valsartan_smarts": {"classification": "PURE_RDKIT_NO_ASSET"},
+    "zaleplon_mpo": {"classification": "PURE_RDKIT_NO_ASSET"}
+  },
+  "dynamic": {
+    "drd2": {
+      "status": "POSITIVE_CONTROL_PASSED",
+      "cwd_dependent": true,
+      "score_from_unpinned_cwd": 0.0,
+      "score_with_cwd_pinned_at_call": 0.7537053303355454,
+      "elsewhere_has_oracle_dir": false,
+      "positive_control": {"passed": true, "n_agreeing": 6, "n_references": 6, "max_abs_delta": 0.0, "all_zero": false}
+    },
+    "gsk3b": {
+      "status": "POSITIVE_CONTROL_PASSED",
+      "cwd_dependent": true,
+      "score_from_unpinned_cwd": 0.0,
+      "score_with_cwd_pinned_at_call": 1.0,
+      "elsewhere_has_oracle_dir": false,
+      "positive_control": {"passed": true, "n_agreeing": 13, "n_references": 13, "max_abs_delta": 0.0, "all_zero": false}
+    },
+    "jnk3": {
+      "status": "POSITIVE_CONTROL_PASSED",
+      "cwd_dependent": false,
+      "score_from_unpinned_cwd": 1.0,
+      "score_with_cwd_pinned_at_call": 1.0,
+      "elsewhere_has_oracle_dir": false,
+      "positive_control": {"passed": true, "n_agreeing": 10, "n_references": 10, "max_abs_delta": 0.0, "all_zero": false}
+    }
+  },
+  "swallow": {
+    "oracle_call_has_bare_except": true,
+    "default_property_returned_on_failure": true
+  }
+}

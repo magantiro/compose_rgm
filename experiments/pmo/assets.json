@@ -1,0 +1,45 @@
+{
+  "schema_version": "compose.pmo.assets.v1",
+  "jump_plans": {
+    "path": "assets/jump_plans.json.gz",
+    "sha256": "5c18e61591cb40be779c5688cb619b95819af38556603ad2c173dcc197bc727b",
+    "uncompressed_sha256": "550725ab759ef7e16226b3728d2d1614ec69abafd25ea34df0e5b6364c94ca43",
+    "source_revision": "fd340c48",
+    "source_path": "diagnostics/pmo_joint_dependency_jump_gate_v1/attempt_2/checkpoints.json",
+    "fit_scope": "shared_all_routes",
+    "role": "generic PMO proposal controller input"
+  },
+  "initialization": {
+    "path": "assets/initialization.json",
+    "sha256": "a1f7840df1f75567565de633c4df3d013c3165df3e43cbf2ac87b156d5f206ff",
+    "role": "task-independent charged initialization bank"
+  },
+  "oracle_audit": {
+    "path": "assets/oracle_asset_audit.json",
+    "sha256": "3e3cde3a3a8e582d0ba23f2c25f4077b1a3be7c3213c95f007f6cb7105619862",
+    "role": "positive-control and asset-resolution test fixture"
+  },
+  "oracle_reference_panel": {
+    "path": "assets/oracle_reference_panel.json",
+    "sha256": "a7073e53f2f3fc5649d603efad59d5b2cb518bc13bfe289f4cc2d770aba2ef3a",
+    "source_sha256": "c4ca22fb8eddf087c687d245da2353817f643459cfc86be08f58993aab3979cf",
+    "role": "28 raw-score rows used by the asset-backed oracle positive controls"
+  },
+  "oracle_assets": {
+    "drd2": {
+      "relative_path": "oracle/drd2_current.pkl",
+      "sha256": "ef1f00e47d5e4670a45b0a4178db3c41b2e1aa9dad7113ac9d0f58e3f9d67532",
+      "dataverse_file_id": 6413411
+    },
+    "gsk3b": {
+      "relative_path": "oracle/gsk3b_current.pkl",
+      "sha256": "d3a20701b80e5179c88c3ad4dc3483dd7ab35c50dc055c6773a7f5b63e89b6d5",
+      "dataverse_file_id": 6413412
+    },
+    "jnk3": {
+      "relative_path": "oracle/jnk3_current.pkl",
+      "sha256": "cde8576fb4fa3f60b9f258ff9cf1b9ff346eb50d196d5cbbe25965efc1864889",
+      "dataverse_file_id": 6413420
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "schema_version": "compose.pmo.config.v1",
+  "task": "albuterol_similarity",
+  "budget": 1008,
+  "metrics_calls": 1000,
+  "rounds": 64,
+  "queries_per_round": 16,
+  "seed": 20261925,
+  "arm": "created_atom_rebinding",
+  "proposal": {
+    "candidate_pool_limit": 128,
+    "replacement_option_rate": 0.5,
+    "realization_seconds_cap": 1000000000.0
+  },
+  "guidance": {
+    "mode": "active",
+    "strength": 0.25,
+    "log_weight_cap": 1.0,
+    "on_unsupported": "preserve_mass"
+  },
+  "reference": {
+    "path": "../../local_assets/fragments/r_theta_nll.pt",
+    "sha256": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+    "catalog_fingerprint": "639ff6078c32d43c",
+    "catalog_path": "../../local_assets/fragments/catalog.json",
+    "catalog_sha256": "685ba9ca156c6bb864b8405aa9b4c342dca5d455ec15d9bb2c55530e78f96337"
+  },
+  "jump_plans": {
+    "path": "assets/jump_plans.json.gz",
+    "sha256": "5c18e61591cb40be779c5688cb619b95819af38556603ad2c173dcc197bc727b"
+  },
+  "initialization": {
+    "path": "assets/initialization.json",
+    "sha256": "a1f7840df1f75567565de633c4df3d013c3165df3e43cbf2ac87b156d5f206ff"
+  },
+  "oracle": {
+    "python": "../../local_assets/pmo/oracle-env/bin/python",
+    "asset_root": null
+  }
+}

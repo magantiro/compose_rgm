@@ -1,0 +1,75 @@
+{
+  "max_attempts_per_prompt_seed": 100,
+  "prompts": [
+    "BARICITINIB",
+    "CYCLOTHIAZIDE",
+    "ELIGLUSTAT",
+    "ERLOTINIB",
+    "FUTIBATINIB",
+    "LESINURAD",
+    "LIOTHYRONINE",
+    "LOVASTATIN",
+    "MARIBAVIR",
+    "SPIRAPRIL"
+  ],
+  "schema": "compose_fragment_generation_config_v1",
+  "tasks": {
+    "linker_design": {
+      "seeds": [
+        6,
+        7,
+        8
+      ]
+    },
+    "motif_extension": {
+      "seeds": [
+        2,
+        3,
+        4
+      ]
+    },
+    "scaffold_decoration": {
+      "seeds": [
+        8,
+        9,
+        10
+      ]
+    },
+    "superstructure_generation": {
+      "attachment_control": {
+        "condition_initial_locked_family": true,
+        "enabled": true,
+        "hard_lock_effective_chemistry": true
+      },
+      "sampler_config": {
+        "mark_attempts_per_event": 24,
+        "max_events": 32,
+        "n_slots": 48,
+        "operational_horizon": 16.0
+      },
+      "seeds": [
+        0,
+        1,
+        2
+      ]
+    },
+    "superstructure_uniform": {
+      "attachment_control": {
+        "condition_initial_locked_family": true,
+        "enabled": true,
+        "hard_lock_effective_chemistry": true
+      },
+      "sampler_config": {
+        "mark_attempts_per_event": 24,
+        "max_events": 32,
+        "n_slots": 48,
+        "operational_horizon": 16.0
+      },
+      "seeds": [
+        0,
+        1,
+        2
+      ]
+    }
+  }
+}

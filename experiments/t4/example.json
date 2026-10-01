@@ -1,0 +1,53 @@
+{
+  "schema_version": "compose.t4.config.v1",
+  "search": {
+    "lead": "CN(C)Cc3ccc2c(CNC(=O)c1cccn12)c3",
+    "delta": 0.6,
+    "seed": 2026091800,
+    "budget": 250,
+    "batch": 8,
+    "max_rounds": 250,
+    "parents": 3,
+    "parent_exploration": 0.3,
+    "draws_per_parent": 8,
+    "horizon": 3,
+    "compiler_expansions": 4000,
+    "expert_floor_rounds": 2,
+    "route_scale_floor_rounds": 2,
+    "endpoint_support": "compose_valid",
+    "lanes": ["shallow", "anchored_replacement", "route_complete_region"],
+    "route": {
+      "pool_size": 64,
+      "realization_limit": 32,
+      "beam_width": 32,
+      "expansion_width": 24,
+      "max_bindings_per_template": 4,
+      "maximum_expansions": 4000,
+      "scale_balanced": false
+    },
+    "guidance": {"mode": "active", "strength": 0.25, "log_weight_cap": 1.0, "on_unsupported": "preserve_mass"}
+  },
+  "reference": {
+    "path": "../../local_assets/fragments/r_theta_nll.pt",
+    "sha256": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+    "catalog_fingerprint": "639ff6078c32d43c",
+    "catalog_path": "../../local_assets/fragments/catalog.json",
+    "catalog_sha256": "685ba9ca156c6bb864b8405aa9b4c342dca5d455ec15d9bb2c55530e78f96337"
+  },
+  "route_expert": {
+    "path": "assets/parp1_checkpoint.json",
+    "sha256": "73f25dcddb71a3645b7bd45252e37814f837c6f5b1b8d59f5f4e08940439d311"
+  },
+  "docking": {
+    "obabel": "../../local_assets/t4/bin/obabel",
+    "obabel_sha256": "REPLACE_WITH_YOUR_OPEN_BABEL_EXECUTABLE_SHA256",
+    "qvina": "../../local_assets/t4/bin/qvina02",
+    "qvina_sha256": "f8ac045235025e98b15fd90aae6617edfdcc125081f72a5a5315db22be1f46e0",
+    "receptor": "../../local_assets/t4/receptors/parp1.pdbqt",
+    "receptor_sha256": "8d0891ddf915f51cf3108f39dd9dc01dfcf86be342c566021956afdd79eb4ad9",
+    "center": [26.413, 11.282, 27.238],
+    "size": [18.521, 17.479, 19.995],
+    "seed": 20260918,
+    "cpu": 1
+  }
+}

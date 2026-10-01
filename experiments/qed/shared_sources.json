@@ -1,0 +1,8 @@
+{
+  "schema_version": "compose.qed.shared_sources.v1",
+  "group_key": "canonical_nonisomeric_smiles",
+  "train": {"path": "data/jin/hphi_train_1024.txt", "sha256": "236269717633b96c97ec0fddf4a0120f6028881ddd663f7c697042c74b45825a", "rows": 1024},
+  "validation": {"path": "data/jin/hphi_valid_128.txt", "sha256": "ff6ee760b0b2ce5d6de3486a83d36bc8a8df0ac064d807d895c85d973bb6c460", "rows": 128},
+  "test": {"path": "data/jin/qed_test.txt", "sha256": "704103777e8050eb59f4d15d9997ca6070ba05a6b878b8e18738bfb1e706a090", "rows": 800},
+  "excluded_train_rows": [{"index_zero_based": 115, "reason": "same_nonisomeric_graph_as_test_source"}]
+}

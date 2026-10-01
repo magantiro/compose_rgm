@@ -1,0 +1,20 @@
+{
+  "schema": "compose.reference.v1",
+  "checkpoint": {
+    "path": "../../local_assets/fragments/r_theta_nll.pt",
+    "sha256": "c979cdb3d7b0b403bfbf7bfb0aa5098b2588c6d4217770c2c58292b7c4e53de8",
+    "selected_step": 12500,
+    "selected_model_state_sha256": "c977ee3fe0cfdcafa204a2add27f3feef59f5dfcf4f3384659d8902a9006167c",
+    "training_objective": "canonical_successor_negative_log_likelihood"
+  },
+  "catalog": {
+    "path": "../../local_assets/fragments/catalog.json",
+    "sha256": "685ba9ca156c6bb864b8405aa9b4c342dca5d455ec15d9bb2c55530e78f96337",
+    "fingerprint": "639ff6078c32d43c"
+  },
+  "process_semantics": "semantic_editing_v2_v2",
+  "active_families": [
+    "atom_insert", "atom_delete", "atom_restate", "bond_reorder",
+    "bond_reroute", "cycle_insert", "cycle_attach", "ring_system_restate"
+  ]
+}
