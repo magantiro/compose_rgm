@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -14,6 +15,23 @@ from compose_v4.chem.state import pad_molecular_graph
 from compose_v4.experiments.hphi_region_features import build_features, in_region, input_dim
 from compose_v4.experiments.hphi_rollout import registered_regions
 from compose_v4.experiments.qed_shared_rollouts import rollout_seed
+
+LEGACY_H24_CORPUS_SHA256 = "647f8265f5143e2b15dc047de42e837203593c42beb7e45e2b94e55e41602581"
+
+
+def _expected_seed(rollout: dict, source: Chem.Mol, represented: str, replicate: int) -> int:
+    if rollout["schema_version"] == "compose.qed.shared_rollout.v1":
+        return rollout_seed(represented, replicate)
+    if rollout["schema_version"] != "compose.qed.imported_h24_rollout.v1":
+        raise ValueError("unsupported QED rollout schema")
+    if rollout.get("source_role") != "train" or rollout.get("import_provenance") != {
+        "corpus_sha256": LEGACY_H24_CORPUS_SHA256,
+        "seed_scheme": "hphi-corpus-v1",
+    }:
+        raise ValueError("QED imported rollout has unsupported provenance or role")
+    canonical_source = Chem.MolToSmiles(source)
+    payload = f"hphi-corpus-v1|{canonical_source}|{replicate}".encode()
+    return int.from_bytes(hashlib.sha256(payload).digest()[:8], "big")
 
 
 @dataclass(frozen=True)
@@ -59,7 +77,10 @@ def value_examples_with_bellman(
     regions: Sequence[tuple[float, float]] | None = None,
 ) -> ValueExamples:
     """Bind each Bellman row to its successor or exact terminal boundary."""
-    if rollout.get("schema_version") != "compose.qed.shared_rollout.v1":
+    if rollout.get("schema_version") not in (
+        "compose.qed.shared_rollout.v1",
+        "compose.qed.imported_h24_rollout.v1",
+    ):
         raise ValueError("unsupported QED rollout schema")
     if rollout.get("reference") != reference.identity():
         raise ValueError("QED rollout belongs to another reference configuration")
@@ -102,7 +123,7 @@ def value_examples_with_bellman(
     for replicate, trajectory in enumerate(trajectories):
         if trajectory.get("replicate") != replicate:
             raise ValueError("QED rollout replicate order or identity changed")
-        if trajectory.get("seed") != rollout_seed(source, replicate):
+        if trajectory.get("seed") != _expected_seed(rollout, original, source, replicate):
             raise ValueError("QED rollout seed differs from the declared derivation")
         path = trajectory["path"]
         if not path or path[0]["smiles"] != source or len(path) > horizon + 1:

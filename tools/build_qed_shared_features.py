@@ -105,6 +105,8 @@ def main() -> None:
         "source_split_sha256": roles.manifest_sha256,
         "rollout_path": portable_rollout_path,
         "rollout_sha256": hashlib.sha256(rollout_bytes).hexdigest(),
+        "rollout_schema": rollout["schema_version"],
+        "import_provenance": rollout.get("import_provenance"),
         "reference": reference.identity(),
         "reference_manifest_sha256": sha256(manifest_path),
         "budget_max": args.budget_max,
