@@ -17,6 +17,9 @@ support is the loaded checkpoint's declared vocabulary and native action fiber,
 with at most 40 active atoms for the supplied editing checkpoint. A legal program
 need not have a score under that checkpoint. Neither endpoint SMILES nor a trace
 from a different proposed transformation can substitute for its executed trace.
+Exact replay is checked before an otherwise legal program outside the
+checkpoint's atom-count support is marked `unsupported_state`. The candidate
+remains in the selection panel under the declared coverage policy.
 
 The implementation acceptance checks are:
 

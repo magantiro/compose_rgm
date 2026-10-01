@@ -16,9 +16,10 @@ against the complete production successor kernel.
 
 The four task configurations pin the same NLL-trained checkpoint by SHA-256.
 Its parameters are not retrained or fine-tuned for fragment generation, QED
-editing, PMO or T4. Each task also uses the same executable rewrite system and
-the same primitive molecular state space. The controllers differ in how they
-use the checkpoint's mark probabilities and induced canonical successor kernel.
+editing, PMO or T4. Each task uses the same primitive rewrite semantics. The
+checkpoint scores states within its declared molecular support. The controllers
+differ in how they use its mark probabilities and induced canonical successor
+kernel.
 
 | Task | Where the fixed reference affects decisions | Task-specific control |
 | --- | --- | --- |

@@ -57,8 +57,8 @@ python tools/fetch_pmo_oracle_assets.py --download
 The command verifies every file against [assets.json](assets.json) before
 placing it under `local_assets/pmo/oracle-assets/oracle/`. Without `--download`,
 it checks local files and makes no network request. The pickles are not
-redistributed here. Follow the terms of their Dataverse records. The install
-recipe has not yet been tested on another machine.
+redistributed here. Follow the terms of their Dataverse records. The isolated
+chemistry preflight runs in CI without constructing or calling an oracle.
 The [positive-control fixture](assets/oracle_reference_panel.json) contains only
 the 28 reference molecules used by the test. It records the SHA-256 of the
 original 400-molecule panel. It is not a replacement for the oracle pickles.
