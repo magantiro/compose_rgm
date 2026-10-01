@@ -19,7 +19,7 @@ SCORE_SEMANTICS = "mean_productive_canonical_successor_log_probability; finite_p
 class ProgramScore:
     candidate_id: str
     value: float | None
-    status: Literal["scored", "unsupported_native_mark", "missing_trace"]
+    status: Literal["scored", "unsupported_state", "unsupported_native_mark", "missing_trace"]
     detail: str = ""
 
     def __post_init__(self) -> None:
@@ -28,7 +28,7 @@ class ProgramScore:
         if self.status == "scored":
             if self.value is None or not math.isfinite(self.value) or self.value > 0:
                 raise ValueError("a scored successor log-probability must be finite and <= 0")
-        elif self.status in ("unsupported_native_mark", "missing_trace"):
+        elif self.status in ("unsupported_state", "unsupported_native_mark", "missing_trace"):
             if self.value is not None or not self.detail:
                 raise ValueError("unscored programs require a reason and no numerical substitute")
         else:

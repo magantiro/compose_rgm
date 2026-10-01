@@ -251,10 +251,6 @@ class FrozenProgramReference:
                 f"{program.candidate_id}: trace needs a nonempty program and L+1 states"
             )
         graphs = tuple(decode_state(state) for state in states)
-        if any(not 1 <= graph.n_real_atoms <= self.reference.max_active_atoms for graph in graphs):
-            raise ValueError(
-                f"{program.candidate_id}: trace exceeds the checkpoint's active-atom bound"
-            )
         if canonical_state_key(graphs[-1]) != program.endpoint:
             raise ValueError(f"{program.candidate_id}: trace endpoint differs from the candidate")
         system = editing_v2_semantic_rewrite_system()
@@ -265,6 +261,19 @@ class FrozenProgramReference:
             product = system.apply(graphs[index], rule, action)
             if exact_graph_key(product) != exact_graph_key(graphs[index + 1]):
                 raise ValueError(f"{program.candidate_id}: exact replay mismatch at step {index}")
+        outside = [
+            (index, graph.n_real_atoms)
+            for index, graph in enumerate(graphs)
+            if not 1 <= graph.n_real_atoms <= self.reference.max_active_atoms
+        ]
+        if outside:
+            return ProgramScore(
+                program.candidate_id,
+                None,
+                "unsupported_state",
+                f"states {outside} exceed checkpoint active-atom support "
+                f"[1, {self.reference.max_active_atoms}]",
+            )
         model = self.reference.model
         rows = []
         for index, (rule, action) in enumerate(decoded):

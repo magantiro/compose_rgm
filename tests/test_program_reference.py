@@ -86,6 +86,17 @@ def example_program(element="O"):
     return source, trace, endpoint
 
 
+def outside_checkpoint_program():
+    source = pad_molecular_graph(smiles_to_molecular_graph("C" * 40), 48)
+    action = AtomInsert(40, ELEMENT_TO_IDX["C"], 0, 3, ((39, 1),))
+    successor = editing_v2_semantic_rewrite_system().apply(source, "atom_insert", action)
+    trace = {
+        "actions": [encode_action("atom_insert", action)],
+        "states": [encode_state(source), encode_state(successor)],
+    }
+    return ProgramInput.from_trace("C41", canonical_state_key(successor), trace), trace
+
+
 def programs():
     return tuple(
         ProgramInput.from_trace(element, endpoint, trace)
@@ -251,6 +262,35 @@ def test_false_intermediate_state_fails_exact_replay(loaded):
     trace["states"][0] = copy.deepcopy(trace["states"][1])
     with pytest.raises(ValueError):
         FrozenProgramReference(loaded).score((ProgramInput.from_trace("x", endpoint, trace),))
+
+
+def test_legal_program_outside_checkpoint_size_support_remains_eligible(loaded):
+    outside, _ = outside_checkpoint_program()
+    covered = programs()
+    scored = FrozenProgramReference(loaded).score((*covered, outside))
+    assert scored.scores[-1].status == "unsupported_state"
+    assert scored.scores[-1].value is None
+    assert "41" in scored.scores[-1].detail
+    guided = guide_panel(
+        ("O", "N", "C41"),
+        (0.3, 0.3, 0.4),
+        score=lambda: scored,
+        config=GuidanceConfig("active", strength=0.25, on_unsupported="preserve_mass"),
+    )
+    assert guided.outcome == "active_partial"
+    assert guided.probabilities[2] == 0.4
+    assert guided.probabilities_changed
+
+
+def test_outside_checkpoint_size_does_not_hide_invalid_replay(loaded):
+    outside, trace = outside_checkpoint_program()
+    altered = copy.deepcopy(trace)
+    altered["actions"][0] = encode_action(
+        "atom_insert", AtomInsert(40, ELEMENT_TO_IDX["C"], 0, 3, ((38, 1),))
+    )
+    invalid = ProgramInput.from_trace("C41", outside.endpoint, altered)
+    with pytest.raises(ValueError, match="exact replay mismatch"):
+        FrozenProgramReference(loaded).score((invalid,))
 
 
 def test_wrong_endpoint_and_empty_program_are_rejected(loaded):
