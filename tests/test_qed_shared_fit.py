@@ -18,6 +18,7 @@ from compose_v4.experiments.qed_shared_fit import (
     inspect_feature_corpus,
     training_normalization,
 )
+from tools import build_qed_shared_features as feature_cli
 from tools import fit_qed_shared_value as fit_cli
 from tools.fit_qed_shared_value import input_shard_manifest
 
@@ -311,6 +312,25 @@ def test_fit_revision_requires_a_full_matching_commit(monkeypatch: pytest.Monkey
     )
     monkeypatch.setenv("COMPOSE_SOURCE_REVISION", commit)
     assert fit_cli.revision() == commit
+
+    def missing_git(*_args, **_kwargs):
+        raise FileNotFoundError("git")
+
+    monkeypatch.setattr(fit_cli.subprocess, "run", missing_git)
+    assert fit_cli.revision() == commit
     monkeypatch.setenv("COMPOSE_SOURCE_REVISION", "short")
     with pytest.raises(ValueError, match="full Git SHA"):
         fit_cli.revision()
+
+
+def test_feature_revision_survives_an_image_without_git(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commit = "b" * 40
+
+    def missing_git(*_args, **_kwargs):
+        raise FileNotFoundError("git")
+
+    monkeypatch.setenv("COMPOSE_SOURCE_REVISION", commit)
+    monkeypatch.setattr(feature_cli.subprocess, "run", missing_git)
+    assert feature_cli.git_revision() == commit

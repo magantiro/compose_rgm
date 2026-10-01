@@ -29,10 +29,22 @@ def sha256(path: Path) -> str:
 
 
 def git_revision() -> str | None:
-    result = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=False
-    )
-    return result.stdout.strip() if result.returncode == 0 else None
+    declared = os.environ.get("COMPOSE_SOURCE_REVISION")
+    if declared is not None and (
+        len(declared) != 40 or any(character not in "0123456789abcdef" for character in declared)
+    ):
+        raise ValueError("COMPOSE_SOURCE_REVISION must be a lowercase full Git SHA")
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=False
+        )
+    except FileNotFoundError:
+        local = None
+    else:
+        local = result.stdout.strip() if result.returncode == 0 else None
+    if declared is not None and local is not None and declared != local:
+        raise ValueError("COMPOSE_SOURCE_REVISION differs from the checked-out commit")
+    return declared if declared is not None else local
 
 
 def main() -> None:
