@@ -57,9 +57,11 @@ PYTHONPATH=src python tools/run_qed_shared_value_pipeline.py \
   --workspace runs/qed_shared --workers 4
 ```
 
-Use `--resume` after an interruption. Existing source outputs are kept. The
-feature builder checks each rollout, and the fit stage checks the complete
-feature corpus. The stages can also be
+Use `--resume` after an interruption. Existing source outputs are kept only
+when their source, split, reference, horizon, and replicate count match the
+request. Existing feature shards must also match their rollout hash and
+terminal-label builder. The feature builder checks each rollout, and the fit
+stage checks the complete feature corpus. The stages can also be
 run separately with `--stage rollouts`, `--stage features`, or `--stage fit`.
 For an individual source, the corresponding commands are:
 
