@@ -148,6 +148,7 @@ def main() -> None:
                 "reference_manifest_sha256": sha256(manifest_path),
                 "source_split_sha256": roles.manifest_sha256,
                 "feature_schema": "region_features_v1",
+                "target_semantics": "terminal_region",
                 "budget_max": config.budget_max,
                 "training_configuration": asdict(config),
                 "train_sources": len(roles.train),

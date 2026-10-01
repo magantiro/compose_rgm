@@ -32,13 +32,13 @@ def _write_shard(
     labels: np.ndarray,
     region_indices: np.ndarray | None = None,
     next_row_indices: np.ndarray | None = None,
-    next_in_region: np.ndarray | None = None,
+    next_terminal_targets: np.ndarray | None = None,
     *,
     reference: dict = REFERENCE,
 ) -> Path:
     path = folder / f"{role}_{index:04d}.npz"
     metadata = {
-        "schema_version": "compose.qed.shared_features.v3",
+        "schema_version": "compose.qed.shared_features.v4",
         "role": role,
         "source_index": index,
         "source_input_row_index": input_index,
@@ -46,6 +46,7 @@ def _write_shard(
         "reference": reference,
         "budget_max": 1,
         "feature_schema": "region_features_v1",
+        "target_semantics": "terminal_region",
         "builder_sha256": "builder",
         "goal_regions": [[0.9, 0.4]],
         "examples": len(labels),
@@ -57,17 +58,18 @@ def _write_shard(
         region_indices = np.zeros(len(labels), dtype=np.int16)
     if next_row_indices is None:
         next_row_indices = np.full(len(labels), -1, dtype=np.int32)
-    if next_in_region is None:
-        next_in_region = np.zeros(len(labels), dtype=np.uint8)
-    metadata["bellman_pairs"] = int(np.sum((next_row_indices >= 0) | (next_in_region == 1)))
-    metadata["bellman_boundary_pairs"] = int(np.sum(next_in_region))
+    if next_terminal_targets is None:
+        next_terminal_targets = labels.astype(np.int8)
+        next_terminal_targets[next_row_indices >= 0] = -1
+    metadata["bellman_pairs"] = int(np.sum((next_row_indices >= 0) | (next_terminal_targets >= 0)))
+    metadata["bellman_boundary_pairs"] = int(np.sum(next_terminal_targets >= 0))
     np.savez_compressed(
         path,
         features=features,
         labels=labels,
         region_indices=region_indices,
         next_row_indices=next_row_indices,
-        next_in_region=next_in_region,
+        next_terminal_targets=next_terminal_targets,
         metadata=np.str_(json.dumps(metadata)),
     )
     return path
@@ -230,7 +232,7 @@ def test_bellman_pairs_are_counted_and_invalid_links_fail(tmp_path: Path) -> Non
         np.zeros((4, width), np.float32),
         np.asarray([0, 1, 0, 1], np.float32),
         next_row_indices=np.asarray([1, -1, -1, -1], np.int32),
-        next_in_region=np.asarray([0, 0, 0, 1], np.uint8),
+        next_terminal_targets=np.asarray([-1, 1, 0, 1], np.int8),
     )
     refreshed = inspect_feature_corpus(
         tmp_path,
@@ -241,13 +243,13 @@ def test_bellman_pairs_are_counted_and_invalid_links_fail(tmp_path: Path) -> Non
         budget_max=1,
         goal_regions=((0.9, 0.4),),
     )
-    assert sum(shard.bellman_pairs for shard in refreshed) == 2
+    assert next(shard.bellman_pairs for shard in refreshed if shard.role == "train") == 4
     _, _, _, report = fit_value_head(
         refreshed,
         QEDFitConfig(budget_max=1, epochs=1, patience=1, batch_size=2, seed=3),
         guidance_region_index=0,
     )
-    assert report["train_bellman_pairs"] == 2
+    assert report["train_bellman_pairs"] == 4
     _write_shard(
         tmp_path,
         "train",

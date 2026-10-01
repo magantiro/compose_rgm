@@ -44,7 +44,7 @@ def example_rollout():
     }
 
 
-def test_value_examples_label_future_hit_without_training_on_boundary() -> None:
+def test_value_examples_label_terminal_state_without_training_at_budget_zero() -> None:
     features, labels = value_examples(
         TinyReference(), example_rollout(), budget_max=1, regions=((0.365, 0.0),)
     )
@@ -57,7 +57,7 @@ def test_value_examples_label_future_hit_without_training_on_boundary() -> None:
         budget_max=1,
         regions=((0.9, 0.4), (0.365, 0.0)),
     )
-    assert region_indices.tolist() == [0, 1, 0]
+    assert region_indices.tolist() == [0, 1]
 
 
 def test_value_examples_label_terminal_no_hit() -> None:
@@ -71,17 +71,31 @@ def test_value_examples_label_terminal_no_hit() -> None:
     assert labels.tolist() == [0.0]
 
 
-def test_bellman_links_follow_same_region_and_exact_goal_boundary() -> None:
+def test_bellman_links_use_exact_terminal_boundary() -> None:
     values = value_examples_with_bellman(
         TinyReference(),
         example_rollout(),
         budget_max=1,
         regions=((0.9, 0.4), (0.365, 0.0)),
     )
-    assert values.region_indices.tolist() == [0, 1, 0]
-    assert values.labels.tolist() == [0.0, 1.0, 0.0]
-    assert values.next_row_indices.tolist() == [2, -1, -1]
-    assert values.next_in_region.tolist() == [0, 1, 0]
+    assert values.region_indices.tolist() == [0, 1]
+    assert values.labels.tolist() == [0.0, 1.0]
+    assert values.next_row_indices.tolist() == [-1, -1]
+    assert values.next_terminal_targets.tolist() == [0, 1]
+
+
+def test_intermediate_goal_hit_is_not_a_terminal_success() -> None:
+    rollout = example_rollout()
+    rollout["configuration"]["horizon"] = 2
+    rollout["trajectories"][0]["path"].append(
+        {"smiles": "C", "qed": 0.3597849378839701, "similarity_to_source": 1.0}
+    )
+    values = value_examples_with_bellman(
+        TinyReference(), rollout, budget_max=2, regions=((0.365, 0.0),)
+    )
+    assert values.labels.tolist() == [0.0, 0.0]
+    assert values.next_row_indices.tolist() == [1, -1]
+    assert values.next_terminal_targets.tolist() == [-1, 0]
 
 
 def test_value_examples_reject_unmatched_reference_or_test_role() -> None:

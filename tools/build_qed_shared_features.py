@@ -91,14 +91,14 @@ def main() -> None:
         values.region_indices,
     )
     if len(features) == 0:
-        raise ValueError("QED source produced no non-boundary value examples")
+        raise ValueError("QED source produced no positive-budget value examples")
     portable_rollout_path = (
         rollout_path.relative_to(ROOT).as_posix()
         if rollout_path.is_relative_to(ROOT)
         else rollout_path.name
     )
     metadata = {
-        "schema_version": "compose.qed.shared_features.v3",
+        "schema_version": "compose.qed.shared_features.v4",
         "role": args.role,
         "source_index": args.index,
         "source_input_row_index": expected_input_index,
@@ -109,6 +109,7 @@ def main() -> None:
         "reference_manifest_sha256": sha256(manifest_path),
         "budget_max": args.budget_max,
         "feature_schema": "region_features_v1",
+        "target_semantics": "terminal_region",
         "goal_regions": [list(region) for region in registered_regions()],
         "examples": len(labels),
         "positive_labels": int(labels.sum()),
@@ -118,8 +119,10 @@ def main() -> None:
         "region_positive_labels": [
             int(np.sum(labels[region_indices == i])) for i in range(len(registered_regions()))
         ],
-        "bellman_pairs": int(np.sum((values.next_row_indices >= 0) | (values.next_in_region == 1))),
-        "bellman_boundary_pairs": int(np.sum(values.next_in_region)),
+        "bellman_pairs": int(
+            np.sum((values.next_row_indices >= 0) | (values.next_terminal_targets >= 0))
+        ),
+        "bellman_boundary_pairs": int(np.sum(values.next_terminal_targets >= 0)),
         "builder_sha256": sha256(ROOT / "src/compose_v4/experiments/qed_shared_training.py"),
         "code_revision": git_revision(),
         "code_sha256": {
@@ -144,7 +147,7 @@ def main() -> None:
         labels=labels,
         region_indices=region_indices,
         next_row_indices=values.next_row_indices,
-        next_in_region=values.next_in_region,
+        next_terminal_targets=values.next_terminal_targets,
         metadata=np.str_(json.dumps(metadata, sort_keys=True)),
     )
     output = args.output.resolve()

@@ -77,9 +77,9 @@ The runner stores the original source and its input row, exact reference
 identity, derived seeds, every visited molecular state, QED, source similarity,
 and code and input hashes. It makes no oracle call and refuses to overwrite a
 prior rollout. It cannot select a test source. The feature command verifies the
-source role and reference identity before building finite-horizon hitting
-labels. It excludes states already in the goal region, whose value is fixed by
-the exact boundary condition.
+source role and reference identity before building finite-horizon terminal
+labels. A value is fixed by the exact region indicator only when no transitions
+remain. Reaching the region earlier does not end a trajectory.
 
 After producing one feature shard for every training and validation source,
 fit the head with:
@@ -105,9 +105,9 @@ The fitted reference remains unchanged. No fitted head or 800-source result for
 this reference identity is bundled here.
 
 `QEDSharedValueHead` loads a fitted head only when its file hashes, complete
-reference configuration, feature schema, and source split match the supplied
-identities. Its source-bound evaluator applies the exact target boundary at
-budget zero and for molecules already in the goal region.
+reference configuration, terminal-target semantics, feature schema, and source
+split match the supplied identities. Its source-bound evaluator applies the
+exact target boundary at budget zero.
 
 The generic sequential Monte Carlo operations are in
 `compose_v4.experiments.hphi_smc`. The source-level controller is

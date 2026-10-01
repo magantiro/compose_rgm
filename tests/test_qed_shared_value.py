@@ -44,6 +44,7 @@ def make_value() -> QEDSharedValueHead:
             "schema_version": "compose.qed.shared_value.v1",
             "reference": TinyReference().identity(),
             "feature_schema": "region_features_v1",
+            "target_semantics": "terminal_region",
             "budget_max": budget_max,
             "source_split_sha256": "split-hash",
             "guidance_target": {"region": [0.9, 0.4], "qualified": True},
@@ -58,7 +59,16 @@ def test_value_head_uses_exact_boundary_and_fitted_head() -> None:
     assert bound.value(state, 4, (0.9, 0.4)) == pytest.approx(0.5)
     assert bound.owner.reference.encode_calls == 1
     assert bound.value(state, 0, (0.9, 0.4)) == 0.0
-    assert bound.value(state, 4, (0.1, 0.4)) == 1.0
+    assert bound.value(state, 4, (0.1, 0.4)) == pytest.approx(0.5)
+    assert bound.value(state, 0, (0.1, 0.4)) == 1.0
+
+
+def test_value_head_refuses_hitting_target_metadata() -> None:
+    value = make_value()
+    metadata = dict(value.metadata)
+    metadata["target_semantics"] = "ever_hit_region"
+    with pytest.raises(ValueError, match="terminal region"):
+        QEDSharedValueHead(value.reference, value.head, value.mean, value.scale, metadata)
 
 
 def test_value_head_refuses_reference_identity_mismatch() -> None:

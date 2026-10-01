@@ -70,7 +70,7 @@ def _read_shard(
             "labels",
             "region_indices",
             "next_row_indices",
-            "next_in_region",
+            "next_terminal_targets",
             "metadata",
         }:
             raise ValueError(f"QED feature shard has unexpected fields: {path}")
@@ -78,11 +78,19 @@ def _read_shard(
         labels = archive["labels"]
         region_indices = archive["region_indices"]
         next_row_indices = archive["next_row_indices"]
-        next_in_region = archive["next_in_region"]
+        next_terminal_targets = archive["next_terminal_targets"]
         metadata = json.loads(str(archive["metadata"]))
     if not isinstance(metadata, dict):
         raise TypeError(f"QED feature shard metadata must be an object: {path}")
-    return features, labels, region_indices, next_row_indices, next_in_region, metadata, observed
+    return (
+        features,
+        labels,
+        region_indices,
+        next_row_indices,
+        next_terminal_targets,
+        metadata,
+        observed,
+    )
 
 
 def inspect_feature_corpus(
@@ -118,10 +126,16 @@ def inspect_feature_corpus(
     shards = []
     for name, (role, index, input_index) in sorted(expected.items()):
         path = directory / name
-        features, labels, region_indices, next_row_indices, next_in_region, metadata, digest = (
-            _read_shard(path)
-        )
-        if metadata.get("schema_version") != "compose.qed.shared_features.v3":
+        (
+            features,
+            labels,
+            region_indices,
+            next_row_indices,
+            next_terminal_targets,
+            metadata,
+            digest,
+        ) = _read_shard(path)
+        if metadata.get("schema_version") != "compose.qed.shared_features.v4":
             raise ValueError(f"QED feature schema mismatch: {path}")
         if (
             features.dtype != np.float32
@@ -132,8 +146,8 @@ def inspect_feature_corpus(
             or region_indices.shape != labels.shape
             or next_row_indices.dtype != np.int32
             or next_row_indices.shape != labels.shape
-            or next_in_region.dtype != np.uint8
-            or next_in_region.shape != labels.shape
+            or next_terminal_targets.dtype != np.int8
+            or next_terminal_targets.shape != labels.shape
             or len(labels) == 0
             or features.shape != (len(labels), width)
             or not np.isfinite(features).all()
@@ -144,10 +158,12 @@ def inspect_feature_corpus(
         if (
             np.any(next_row_indices < -1)
             or np.any(next_row_indices >= len(labels))
-            or np.any(~np.isin(next_in_region, (0, 1)))
-            or np.any((next_row_indices >= 0) & (next_in_region == 1))
+            or np.any(~np.isin(next_terminal_targets, (-1, 0, 1)))
+            or np.any((next_row_indices >= 0) == (next_terminal_targets >= 0))
             or np.any((next_row_indices >= 0) & (next_row_indices <= np.arange(len(labels))))
-            or np.any((next_in_region == 1) & (labels != 1.0))
+            or np.any(
+                (next_terminal_targets >= 0) & (next_terminal_targets.astype(np.float32) != labels)
+            )
             or np.any(
                 region_indices[next_row_indices[next_row_indices >= 0]]
                 != region_indices[next_row_indices >= 0]
@@ -166,7 +182,7 @@ def inspect_feature_corpus(
         region_positive_labels = [
             int(np.sum(labels[region_indices == i])) for i in range(len(recorded_regions))
         ]
-        bellman_pairs = int(np.sum((next_row_indices >= 0) | (next_in_region == 1)))
+        bellman_pairs = int(np.sum((next_row_indices >= 0) | (next_terminal_targets >= 0)))
         required = {
             "role": role,
             "source_index": index,
@@ -175,12 +191,13 @@ def inspect_feature_corpus(
             "reference": reference_identity,
             "budget_max": budget_max,
             "feature_schema": "region_features_v1",
+            "target_semantics": "terminal_region",
             "examples": len(labels),
             "positive_labels": int(np.sum(labels)),
             "region_examples": region_examples,
             "region_positive_labels": region_positive_labels,
             "bellman_pairs": bellman_pairs,
-            "bellman_boundary_pairs": int(np.sum(next_in_region)),
+            "bellman_boundary_pairs": int(np.sum(next_terminal_targets >= 0)),
         }
         for field, value in required.items():
             if metadata.get(field) != value:
@@ -202,10 +219,10 @@ def inspect_feature_corpus(
 def _arrays(
     shard: FeatureShard,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    features, labels, region_indices, next_row_indices, next_in_region, _, _ = _read_shard(
+    features, labels, region_indices, next_row_indices, next_terminal_targets, _, _ = _read_shard(
         shard.path, shard.sha256
     )
-    return features, labels, region_indices, next_row_indices, next_in_region
+    return features, labels, region_indices, next_row_indices, next_terminal_targets
 
 
 def training_normalization(
@@ -289,14 +306,16 @@ def fit_value_head(
         train_losses = []
         for source_position in order_rng.permutation(len(train)):
             shard = train[int(source_position)]
-            features, labels, _, next_rows, next_boundary = _arrays(shard)
+            features, labels, _, next_rows, next_terminal_targets = _arrays(shard)
             x = _normalized(features, mean, scale, config.device)
             y = torch.from_numpy(labels).to(config.device).unsqueeze(1)
             successor_rows = torch.from_numpy(next_rows.astype(np.int64)).to(config.device)
-            boundary = torch.from_numpy(next_boundary.astype(np.bool_)).to(config.device)
-            bellman_mask = (successor_rows >= 0) | boundary
+            boundary_values = torch.from_numpy(next_terminal_targets.astype(np.float32)).to(
+                config.device
+            )
+            bellman_mask = (successor_rows >= 0) | (boundary_values >= 0)
             bellman_count = int(bellman_mask.sum())
-            targets = boundary.to(torch.float32).unsqueeze(1)
+            targets = boundary_values.clamp(min=0).unsqueeze(1)
             if config.bellman_weight > 0 and bellman_count:
                 model.eval()
                 with torch.no_grad():

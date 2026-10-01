@@ -22,7 +22,7 @@ class ValueExamples:
     labels: np.ndarray
     region_indices: np.ndarray
     next_row_indices: np.ndarray
-    next_in_region: np.ndarray
+    next_terminal_targets: np.ndarray
 
 
 def value_examples(
@@ -32,7 +32,7 @@ def value_examples(
     budget_max: int,
     regions: Sequence[tuple[float, float]] | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Return source-local features and MC hitting labels, excluding exact boundaries."""
+    """Return source-local features and terminal-region Monte Carlo labels."""
     features, labels, _ = value_examples_with_regions(
         reference, rollout, budget_max=budget_max, regions=regions
     )
@@ -58,7 +58,7 @@ def value_examples_with_bellman(
     budget_max: int,
     regions: Sequence[tuple[float, float]] | None = None,
 ) -> ValueExamples:
-    """Bind each Bellman row to its observed successor or exact goal boundary."""
+    """Bind each Bellman row to its successor or exact terminal boundary."""
     if rollout.get("schema_version") != "compose.qed.shared_rollout.v1":
         raise ValueError("unsupported QED rollout schema")
     if rollout.get("reference") != reference.identity():
@@ -98,7 +98,7 @@ def value_examples_with_bellman(
     region_indices = []
     row_by_key: dict[tuple[int, int, int], int] = {}
     next_keys: list[tuple[int, int, int] | None] = []
-    next_in_region: list[int] = []
+    next_terminal_targets: list[int] = []
     for replicate, trajectory in enumerate(trajectories):
         if trajectory.get("replicate") != replicate:
             raise ValueError("QED rollout replicate order or identity changed")
@@ -111,6 +111,8 @@ def value_examples_with_bellman(
             raise ValueError("QED horizon trajectory ended before its declared horizon")
         if trajectory["status"] not in ("HORIZON", "TERMINAL"):
             raise ValueError("unsupported QED rollout terminal status")
+        if trajectory["status"] == "TERMINAL" and len(path) == horizon + 1:
+            raise ValueError("QED terminal trajectory cannot fill the declared horizon")
         for step, node in enumerate(path):
             molecule = Chem.MolFromSmiles(node["smiles"])
             if molecule is None:
@@ -127,18 +129,20 @@ def value_examples_with_bellman(
             ):
                 raise ValueError(f"QED rollout replicate {replicate} step {step} metric drift")
         path_embedding = [encode(node["smiles"]) for node in path]
+        completed = trajectory["status"] == "HORIZON"
         for step, node in enumerate(path):
             budget = horizon - step
+            if budget == 0:
+                continue
             quality = float(node["qed"])
             similarity = float(node["similarity_to_source"])
             if not np.isfinite(quality) or not np.isfinite(similarity):
                 raise ValueError("QED rollout has non-finite benchmark properties")
             for region_index, region in enumerate(goals):
-                if in_region(quality, similarity, region):
-                    continue
-                hit = any(
-                    in_region(float(later["qed"]), float(later["similarity_to_source"]), region)
-                    for later in path[step + 1 :]
+                terminal_success = completed and in_region(
+                    float(path[-1]["qed"]),
+                    float(path[-1]["similarity_to_source"]),
+                    region,
                 )
                 examples.append(
                     build_features(
@@ -151,28 +155,25 @@ def value_examples_with_bellman(
                         budget_max,
                     ).astype(np.float32)
                 )
-                labels.append(float(hit))
+                labels.append(float(terminal_success))
                 region_indices.append(region_index)
                 row_by_key[(replicate, step, region_index)] = len(examples) - 1
                 if step + 1 == len(path):
                     next_keys.append(None)
-                    next_in_region.append(0)
+                    next_terminal_targets.append(0)
+                elif step + 1 == horizon:
+                    next_keys.append(None)
+                    next_terminal_targets.append(int(terminal_success))
                 else:
-                    successor = path[step + 1]
-                    boundary = in_region(
-                        float(successor["qed"]),
-                        float(successor["similarity_to_source"]),
-                        region,
-                    )
-                    next_keys.append(None if boundary else (replicate, step + 1, region_index))
-                    next_in_region.append(int(boundary))
+                    next_keys.append((replicate, step + 1, region_index))
+                    next_terminal_targets.append(-1)
     if not examples:
         return ValueExamples(
             features=np.empty((0, input_dim(budget_max)), np.float32),
             labels=np.empty((0,), np.float32),
             region_indices=np.empty((0,), np.int16),
             next_row_indices=np.empty((0,), np.int32),
-            next_in_region=np.empty((0,), np.uint8),
+            next_terminal_targets=np.empty((0,), np.int8),
         )
     if any(key is not None and key not in row_by_key for key in next_keys):
         raise ValueError("QED Bellman successor is absent from the source-local feature rows")
@@ -183,5 +184,5 @@ def value_examples_with_bellman(
         next_row_indices=np.asarray(
             [-1 if key is None else row_by_key[key] for key in next_keys], dtype=np.int32
         ),
-        next_in_region=np.asarray(next_in_region, dtype=np.uint8),
+        next_terminal_targets=np.asarray(next_terminal_targets, dtype=np.int8),
     )

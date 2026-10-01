@@ -89,6 +89,8 @@ def verify_assets(root: Path, checkpoint_path: Path, value_dir: Path | None = No
         raise ValueError("QED value head did not qualify on the benchmark goal")
     if metadata.get("feature_schema") != "region_features_v1":
         raise ValueError("unsupported QED value feature schema")
+    if metadata.get("target_semantics") != "terminal_region":
+        raise ValueError("QED value head must estimate the terminal region")
     budget_max = metadata.get("budget_max")
     if type(budget_max) is not int or budget_max < 1:
         raise ValueError("QED value head has no positive budget_max")

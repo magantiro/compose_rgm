@@ -61,9 +61,7 @@ def _canonical_state(state, slots: int):
 def run_candidate(reference, bound_value, source_state, config: QEDSMCConfig, rng):
     """Return one candidate, or an explicit extinct slot, from one particle run."""
     states = [source_state] * config.particles
-    stopped = [bound_value.in_target(source_state, config.region)] * config.particles
-    if all(stopped):
-        return {"status": "OK", "state": source_state, "steps": 0, "resamples": 0, "extinct": False}
+    dead = [False] * config.particles
     log_weights = np.zeros(config.particles, dtype=np.float64)
     resamples = 0
     steps = 0
@@ -71,39 +69,36 @@ def run_candidate(reference, bound_value, source_state, config: QEDSMCConfig, rn
         budget = config.horizon - step
         steps = step + 1
         for index in range(config.particles):
-            if stopped[index]:
+            if dead[index]:
                 continue
             current = states[index]
             current_value = bound_value.value(current, budget, config.region)
             if current_value <= 0.0:
                 log_weights[index] = -np.inf
-                stopped[index] = True
+                dead[index] = True
                 continue
             successor = reference.sample(current, rng)
             if successor is None:
                 log_weights[index] = -np.inf
-                stopped[index] = True
+                dead[index] = True
                 continue
             successor = _canonical_state(successor, reference.config.persistent_slots)
             next_value = bound_value.value(successor, budget - 1, config.region)
             if next_value <= 0.0:
                 log_weights[index] = -np.inf
-                stopped[index] = True
+                dead[index] = True
                 continue
             log_weights[index] += math.log(next_value) - math.log(current_value)
             states[index] = successor
-            stopped[index] = bound_value.in_target(successor, config.region)
 
         if np.all(np.isneginf(log_weights)):
             break
         if should_resample(normalized_weights(log_weights)):
             indices = systematic_resample(normalized_weights(log_weights), rng)
             states = [states[index] for index in indices]
-            stopped = [stopped[index] for index in indices]
+            dead = [dead[index] for index in indices]
             log_weights = np.zeros(config.particles, dtype=np.float64)
             resamples += 1
-        if all(stopped):
-            break
 
     selected, status = terminal_output(log_weights, rng)
     return {

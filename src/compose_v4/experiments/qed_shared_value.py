@@ -91,6 +91,8 @@ class QEDSharedValueHead:
             raise ValueError("QED value head was fitted to another reference configuration")
         if metadata.get("feature_schema") != "region_features_v1":
             raise ValueError("unsupported QED value feature schema")
+        if metadata.get("target_semantics") != "terminal_region":
+            raise ValueError("QED value head must estimate the terminal region")
         budget_max = metadata.get("budget_max")
         if type(budget_max) is not int or budget_max < 1:
             raise ValueError("QED value metadata needs a positive budget_max")
@@ -212,12 +214,10 @@ class BoundQEDValue:
         if cached is not None:
             return cached
         quality, similarity = self.properties(state)
-        if in_region(quality, similarity, region):
-            self.value_cache[cache_key] = 1.0
-            return 1.0
         if budget == 0:
-            self.value_cache[cache_key] = 0.0
-            return 0.0
+            exact = float(in_region(quality, similarity, region))
+            self.value_cache[cache_key] = exact
+            return exact
         embedding = self.embedding_cache.get(state_key)
         if embedding is None:
             embedding = self.owner.reference.encode(state)
