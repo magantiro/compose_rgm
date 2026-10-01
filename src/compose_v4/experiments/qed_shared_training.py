@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import hashlib
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 import numpy as np
@@ -75,6 +75,7 @@ def value_examples_with_bellman(
     *,
     budget_max: int,
     regions: Sequence[tuple[float, float]] | None = None,
+    embedding_lookup: Mapping[str, np.ndarray] | None = None,
 ) -> ValueExamples:
     """Bind each Bellman row to its successor or exact terminal boundary."""
     if rollout.get("schema_version") not in (
@@ -108,8 +109,13 @@ def value_examples_with_bellman(
     def encode(smiles: str) -> np.ndarray:
         cached = cache.get(smiles)
         if cached is None:
-            state = pad_molecular_graph(smiles_to_molecular_graph(smiles), slots)
-            cached = reference.encode(state)
+            cached = embedding_lookup.get(smiles) if embedding_lookup is not None else None
+            if cached is None:
+                state = pad_molecular_graph(smiles_to_molecular_graph(smiles), slots)
+                cached = reference.encode(state)
+            cached = np.asarray(cached, dtype=np.float64)
+            if cached.shape != (256,) or not np.isfinite(cached).all():
+                raise ValueError(f"QED reference embedding is invalid for {smiles!r}")
             cache[smiles] = cached
         return cached
 

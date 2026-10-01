@@ -114,3 +114,33 @@ def test_value_examples_reject_metric_drift() -> None:
     rollout["trajectories"][0]["path"][1]["qed"] = 0.99
     with pytest.raises(ValueError, match="metric drift"):
         value_examples(TinyReference(), rollout, budget_max=1, regions=((0.365, 0.0),))
+
+
+def test_cached_reference_embeddings_preserve_terminal_features() -> None:
+    class CacheOnlyReference(TinyReference):
+        def encode(self, _state):
+            raise AssertionError("cached embeddings must avoid a second encoder call")
+
+    expected = value_examples_with_bellman(
+        TinyReference(), example_rollout(), budget_max=1, regions=((0.365, 0.0),)
+    )
+    observed = value_examples_with_bellman(
+        CacheOnlyReference(),
+        example_rollout(),
+        budget_max=1,
+        regions=((0.365, 0.0),),
+        embedding_lookup={"C": np.zeros(256), "CC": np.zeros(256)},
+    )
+    np.testing.assert_array_equal(observed.features, expected.features)
+    np.testing.assert_array_equal(observed.labels, expected.labels)
+    np.testing.assert_array_equal(observed.next_terminal_targets, expected.next_terminal_targets)
+
+
+def test_cached_reference_embedding_must_be_finite_and_256_wide() -> None:
+    with pytest.raises(ValueError, match="embedding is invalid"):
+        value_examples_with_bellman(
+            TinyReference(),
+            example_rollout(),
+            budget_max=1,
+            embedding_lookup={"C": np.full(256, np.nan)},
+        )
