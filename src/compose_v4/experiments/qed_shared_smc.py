@@ -10,7 +10,7 @@ import numpy as np
 
 from compose_v4.chem.molecular_graph import molecular_graph_to_smiles, smiles_to_molecular_graph
 from compose_v4.chem.state import pad_molecular_graph
-from compose_v4.experiments.hphi_smc import (
+from compose_v4.experiments.qed_particle_ops import (
     normalized_weights,
     should_resample,
     systematic_resample,

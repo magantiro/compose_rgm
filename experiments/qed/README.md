@@ -111,8 +111,8 @@ reference configuration, terminal-target semantics, feature schema, and source
 split match the supplied identities. Its source-bound evaluator applies the
 exact target boundary at budget zero.
 
-The generic sequential Monte Carlo operations are in
-`compose_v4.experiments.hphi_smc`. The source-level controller is
+The particle-weight and resampling operations are in
+`compose_v4.experiments.qed_particle_ops`. The source-level controller is
 `compose_v4.experiments.qed_shared_smc.run_source`. It returns one terminal
 candidate per independent particle run. If all particles lose target support,
 it records `EXTINCT_NO_HIT` and fills that failed output slot with the original
