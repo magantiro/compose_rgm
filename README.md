@@ -42,9 +42,10 @@ python examples/reference_guidance.py \
   --output runs/reference_guidance/guided-example.json
 ```
 
-The example strength is illustrative, not a validated benchmark setting. Outputs
-include exact programs, asset/code identities, configuration and selection
-probabilities. Existing outputs are never overwritten.
+For scored comparisons, set the guidance strength in the task configuration
+before running either arm. Example outputs include exact programs, asset/code
+identities, configuration and selection probabilities. Existing outputs are
+never overwritten.
 
 ## Tasks
 

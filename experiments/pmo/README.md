@@ -25,12 +25,13 @@ integration, not a PMO optimization result. Active mode needs the verified
 ## Complete local campaign
 
 The local campaign runner uses the structured PMO proposer, a task-independent
-16-molecule initialization bank, a generic jump-plan checkpoint, the explicit
-region-replacement option and durable oracle receipts. It can use the same fixed molecular reference checkpoint as
-fragment generation. The reference scores exact executed programs in the
-remaining exploration panel. Off mode keeps that slot uniform, shadow mode
-records reference scores without changing the draw, and active mode reweights
-that slot. The other allocation decisions still use the PMO online controller.
+16-molecule initialization bank, a generic jump-plan library, the explicit
+region-replacement option and durable oracle receipts. It can use the same fixed
+molecular reference checkpoint as fragment generation. The reference scores
+exact executed programs in the remaining exploration panel. Off mode keeps
+that slot uniform, shadow mode records reference scores without changing the
+draw, and active mode reweights that slot. The other allocation decisions still
+use the PMO online controller.
 
 The core process requires Python 3.11 and [the pinned core environment](../../requirements/core.txt).
 PyTDC scoring runs in a second Python 3.11 process with RDKit 2023.9.6 and

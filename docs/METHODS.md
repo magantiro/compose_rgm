@@ -35,9 +35,8 @@ configured coverage policy handles programs that cannot be scored by the
 checkpoint. T4's program template prior and QED's value head are separate
 controller inputs. Neither changes or retrains `R_theta`.
 
-The PMO and T4 example strengths are implementation settings, not operating
-points selected by a completed benchmark comparison. Offline tests verify model
-identity, executable traces, probability normalization, selection behavior,
-resume guards and scoring boundaries. They do not reproduce the manuscript's
-reported optimization or docking measurements. See the task guides in
-[`experiments/`](../experiments/README.md) for assets and commands.
+Guidance strength is an explicit task setting that must be fixed before scored
+comparisons. Offline tests verify model identity, executable traces, probability
+normalization, selection behavior, resume guards and scoring boundaries. The
+task guides in [`experiments/`](../experiments/README.md) list the required
+assets and commands for running each benchmark.

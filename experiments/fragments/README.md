@@ -32,5 +32,5 @@ model directly for edit selection. Both paths use the same hash-verified weights
 
 Each output includes attempted slots, exact configuration, input identities and
 source hashes. Missing assets fail explicitly. No private worktree, source
-archive or cloud account is needed by the driver. The checkpoint and catalogs
-still need a public distribution location before fresh-clone use is available.
+archive or cloud account is needed by the driver. Fetch the checkpoint and
+catalogs through Git LFS as described in the generation guide.

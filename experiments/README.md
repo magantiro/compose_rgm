@@ -13,7 +13,8 @@ Start with a single local example before running a full panel.
 Generated outputs belong outside the source tree in `runs/`. Every task records
 its model and input identities, code revision, settings, seeds, and attempted
 candidates. External assets must be installed with the declared hashes before
-a task can run. A local implementation check is not a benchmark result.
+a task can run. Use the task guides for complete-panel commands and the local
+examples for quick checks.
 
-The [ablation guide](ABLATIONS.md) identifies which intervention each command
-runs and which comparisons remain unvalidated.
+The [ablation guide](ABLATIONS.md) identifies each intervention and its run
+command.

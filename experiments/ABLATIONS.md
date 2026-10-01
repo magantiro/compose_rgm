@@ -3,9 +3,8 @@
 Each comparison changes one declared part of the method while keeping its
 listed inputs fixed. The molecular output remains a complete, executable graph
 within the supported atom, bond, size and charge rules. Task evaluators can
-impose narrower endpoint conditions. Run outputs are new experiments, not
-reconstructions of the submitted paper's score artifacts. Do not compare arms
-until their input identities, seeds, budgets and completed receipts match.
+impose narrower endpoint conditions. For a paired comparison, match input
+identities, seeds and budgets, and require completed receipts for both arms.
 
 | Comparison | Arms | What changes | Run status |
 | --- | --- | --- | --- |
@@ -15,7 +14,7 @@ until their input identities, seeds, budgets and completed receipts match.
 | T4 reference selection | off, shadow, active | reference scoring and non-floor selection | panel preparer, real docking assets required |
 | QED future control | local, future-aware | continuation policy | value-head workflow available, matched comparator not frozen |
 
-The first four commands below are runnable after their stated assets are
+The fragment, PMO and T4 recipes below run after their stated assets are
 installed. QED's value head is a separate fitted model and is not supplied
 as part of the fixed molecular reference.
 

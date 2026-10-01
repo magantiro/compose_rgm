@@ -9,7 +9,7 @@ from evaluation examples.
 
 | Asset | Used by | Location | Identity and source |
 | --- | --- | --- | --- |
-| Fixed molecular reference checkpoint | Fragment, QED, PMO, T4 | `local_assets/fragments/r_theta_nll.pt` | [Reference manifest](reference/model.json). Tracked through Git LFS. The anonymous mirror served hash-matched checkpoint bytes on 2026-10-01. |
+| Fixed molecular reference checkpoint | Fragment, QED, PMO, T4 | `local_assets/fragments/r_theta_nll.pt` | [Reference manifest](reference/model.json). Tracked through Git LFS and verified by SHA-256. |
 | Frozen model catalog | Fragment, QED, PMO, T4 | `local_assets/fragments/catalog.json` | Hash-pinned by the reference manifest and used directly by the fragment runner. |
 | Fragment prompts and training-derived catalogs | Fragment | `local_assets/fragments/` | [Fragment asset manifest](fragments/assets.json). The prompt table is fetched from pinned upstream bytes. Path-neutral region and pendant catalogs are tracked through Git LFS. The joint completion and mass priors are tracked directly. |
 | Fragment benchmark evaluator | Fragment | `local_assets/fragments/evaluator/` | The manifest pins files from a specific InVirtuoGen revision. Use the [hash-checked fetch command](fragments/GENERATION.md#assets). The files are not vendored here. |
@@ -31,9 +31,8 @@ PYTHONPATH=src python -m compose_v4.experiments.fragments assets \
 ```
 
 The last command verifies the checkpoint and reports the other inputs still
-needed for that task. A Git LFS pointer is not a checkpoint. The anonymous
-review mirror served the hash-matched checkpoint bytes on 2026-10-01. Verify
-the same hash after any later mirror update.
+needed for that task. A Git LFS pointer is not a checkpoint. Verify the file
+hash after fetching it.
 
 ## Install remaining assets
 
