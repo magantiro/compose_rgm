@@ -59,10 +59,8 @@ never overwritten.
 
 The QED transition adapter uses the shared NLL-trained reference checkpoint. Its
 finite-horizon value head is fitted under that same checkpoint using the
-documented source split. Each reported benchmark result retains its original
-frozen run identity. The active-reference PMO and T4 configurations here have
-distinct identities and must not be substituted for the runs behind the paper's
-tables. Runnable examples check implementation behavior, not benchmark scores.
+documented source split. The task guides give the inputs, configurations and
+commands for generating and reducing fresh results under each controller.
 
 ## Weights and data
 

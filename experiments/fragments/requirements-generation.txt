@@ -1,4 +1,4 @@
-# Validated local environment with the historical chemistry/ML versions.
+# Validated fragment-generation chemistry and ML environment.
 # Install separately from PMO. Pandas/tqdm record the local evaluator environment.
 numpy==1.26.4
 scipy==1.13.1
