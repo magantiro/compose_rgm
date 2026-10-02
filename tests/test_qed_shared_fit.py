@@ -208,20 +208,38 @@ def test_out_of_grid_region_index_fails(tmp_path: Path) -> None:
         )
 
 
-def test_synthetic_fit_returns_source_level_validation(tmp_path: Path) -> None:
+@pytest.mark.parametrize("selection", ("overall_bce", "guidance_brier"))
+def test_synthetic_fit_returns_source_level_validation(tmp_path: Path, selection: str) -> None:
     shards = _corpus(tmp_path)
     model, mean, scale, report = fit_value_head(
         shards,
-        QEDFitConfig(budget_max=1, epochs=2, patience=1, batch_size=2, seed=3),
+        QEDFitConfig(
+            budget_max=1,
+            epochs=2,
+            patience=1,
+            batch_size=2,
+            seed=3,
+            checkpoint_selection=selection,
+        ),
         guidance_region_index=0,
     )
     assert mean.shape == scale.shape == (input_dim(1),)
     assert report["selected_epoch"] in (0, 1)
     assert math.isfinite(report["selected_validation_source_mean_brier"])
+    assert report["checkpoint_selection"] == selection
+    assert math.isfinite(report["selected_validation_selection_loss"])
+    assert all(
+        math.isfinite(row["validation_guidance_source_mean_brier"]) for row in report["history"]
+    )
     assert report["guidance_train_positive_labels"] == 2
     assert report["guidance_validation_positive_labels"] == 1
     with torch.no_grad():
         assert model(torch.zeros((1, input_dim(1)))).shape == (1, 1)
+
+
+def test_unsupported_checkpoint_selection_fails() -> None:
+    with pytest.raises(ValueError, match="checkpoint selection"):
+        QEDFitConfig(checkpoint_selection="test_score").validate()
 
 
 def test_bellman_pairs_are_counted_and_invalid_links_fail(tmp_path: Path) -> None:

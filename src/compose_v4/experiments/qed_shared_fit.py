@@ -38,6 +38,7 @@ class QEDFitConfig:
     batch_size: int = 4096
     seed: int = 0
     device: str = "cpu"
+    checkpoint_selection: str = "overall_bce"
 
     def validate(self) -> None:
         if any(
@@ -55,6 +56,8 @@ class QEDFitConfig:
             raise ValueError("QED value fit needs finite nonnegative Bellman weight")
         if self.device not in ("cpu", "cuda"):
             raise ValueError("QED value fit device must be cpu or cuda")
+        if self.checkpoint_selection not in ("overall_bce", "guidance_brier"):
+            raise ValueError("QED value fit checkpoint selection is unsupported")
 
 
 def _read_shard(
@@ -347,9 +350,10 @@ def fit_value_head(
         model.eval()
         validation_losses = []
         brier_losses = []
+        guidance_brier_losses = []
         with torch.no_grad():
             for shard in validation:
-                features, labels, _, _, _ = _arrays(shard)
+                features, labels, region_indices, _, _ = _arrays(shard)
                 x = _normalized(features, mean, scale, config.device)
                 y = torch.from_numpy(labels).to(config.device).unsqueeze(1)
                 logits = model(x)
@@ -357,17 +361,35 @@ def fit_value_head(
                     float(nn.functional.binary_cross_entropy_with_logits(logits, y))
                 )
                 brier_losses.append(float(torch.mean((torch.sigmoid(logits) - y) ** 2)))
+                guidance_rows = torch.from_numpy(region_indices == guidance_region_index).to(
+                    config.device
+                )
+                if bool(guidance_rows.any()):
+                    guidance_brier_losses.append(
+                        float(
+                            torch.mean(
+                                (torch.sigmoid(logits[guidance_rows]) - y[guidance_rows]) ** 2
+                            )
+                        )
+                    )
         val_loss = float(np.mean(validation_losses))
+        guidance_brier = (
+            float(np.mean(guidance_brier_losses)) if guidance_brier_losses else math.inf
+        )
         history.append(
             {
                 "epoch": epoch,
                 "train_source_mean_objective": float(np.mean(train_losses)),
                 "validation_source_mean_bce": val_loss,
                 "validation_source_mean_brier": float(np.mean(brier_losses)),
+                "validation_guidance_source_mean_brier": guidance_brier,
             }
         )
-        if val_loss < best_loss:
-            best_loss = val_loss
+        selection_loss = (
+            guidance_brier if config.checkpoint_selection == "guidance_brier" else val_loss
+        )
+        if selection_loss < best_loss:
+            best_loss = selection_loss
             best_epoch = epoch
             best_state = {
                 key: value.detach().cpu().clone() for key, value in model.state_dict().items()
@@ -438,10 +460,14 @@ def fit_value_head(
         scale,
         {
             "selected_epoch": best_epoch,
+            "checkpoint_selection": config.checkpoint_selection,
+            "selected_validation_selection_loss": best_loss,
             "bellman_weight": config.bellman_weight,
             "train_bellman_pairs": sum(shard.bellman_pairs for shard in train),
             "validation_bellman_pairs": sum(shard.bellman_pairs for shard in validation),
-            "selected_validation_source_mean_bce": best_loss,
+            "selected_validation_source_mean_bce": history[best_epoch][
+                "validation_source_mean_bce"
+            ],
             "selected_validation_source_mean_brier": selected_brier,
             "train_source_mean_positive_rate": train_prevalence,
             "validation_constant_brier": constant_brier,

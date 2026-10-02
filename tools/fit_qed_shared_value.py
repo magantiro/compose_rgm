@@ -88,6 +88,11 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=4096)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+    parser.add_argument(
+        "--checkpoint-selection",
+        choices=("overall_bce", "guidance_brier"),
+        default="overall_bce",
+    )
     args = parser.parse_args()
 
     if args.device == "cuda" and os.environ.get("CUBLAS_WORKSPACE_CONFIG") not in (
@@ -105,6 +110,7 @@ def main() -> None:
         batch_size=args.batch_size,
         seed=args.seed,
         device=args.device,
+        checkpoint_selection=args.checkpoint_selection,
     )
     config.validate()
     output = args.output.resolve()
