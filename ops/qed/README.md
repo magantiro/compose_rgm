@@ -32,7 +32,9 @@ Use Modal profile `rahul-94866` and volume `compose-v4-artifacts`.
 | `fit_watch_app.py` | `ap-J4hzkLk3MbdqCkfFIRIGYJ` | `qed_shared_value_attempt_v4/` only after all 1,151 feature shards exist |
 | `rollout_supervisor_app.py` | `ap-jHitWZ5RXNAsWZGYeWXLuA` | `qed_shared_train16_supervisor_v1.json` |
 
-The rollout driver runs at most 32 source containers concurrently. The
+The rollout worker cap was set to 32 at 13:22 EDT, then raised to 48 at
+14:10 EDT after the first run's hard-source gaps limited throughput. The
+source code and output identity did not change. The
 supervisor may resume it at most three times, only after the prior call is
 terminal and no committed output is still arriving. It refuses another run if
 the last one made no progress. The feature app checks every ten minutes for
