@@ -142,18 +142,23 @@ def export_all(source_dir: Path, output_dir: Path) -> dict:
                     expected=entry["sha256"],
                 )
             )
-        revision = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+        try:
+            revision = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except FileNotFoundError:
+            git_commit = None
+        else:
+            git_commit = revision.stdout.strip() if revision.returncode == 0 else None
         receipt = {
             "schema_version": "compose.fragment.path_neutral_export.v1",
             "source_manifest_sha256": sha256(MANIFEST),
             "implementation_sha256": sha256(Path(__file__)),
-            "git_commit": revision.stdout.strip() if revision.returncode == 0 else None,
+            "git_commit": git_commit,
             "assets": results,
         }
         publish(staging / "export_manifest.json", stable_bytes(receipt))

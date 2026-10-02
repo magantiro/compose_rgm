@@ -79,6 +79,10 @@ def test_export_requires_distinct_source_and_output(tmp_path: Path):
 
 
 def test_export_writes_path_free_receipt(tmp_path: Path, monkeypatch):
+    def missing_git(*args, **kwargs):
+        raise FileNotFoundError("git is not installed")
+
+    monkeypatch.setattr(export.subprocess, "run", missing_git)
     source_dir = tmp_path / "inputs"
     output_dir = tmp_path / "outputs"
     source_dir.mkdir()
@@ -98,6 +102,7 @@ def test_export_writes_path_free_receipt(tmp_path: Path, monkeypatch):
 
     receipt = export.export_all(source_dir, output_dir)
     assert receipt == export.export_all(source_dir, output_dir)
+    assert receipt["git_commit"] is None
     assert receipt["source_manifest_sha256"] == hashlib.sha256(manifest.read_bytes()).hexdigest()
     assert receipt["implementation_sha256"] == export.sha256(Path(export.__file__))
     assert {row["asset"] for row in receipt["assets"]} == set(export.ASSET_KEYS)
