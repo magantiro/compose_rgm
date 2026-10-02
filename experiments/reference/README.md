@@ -31,6 +31,5 @@ the fragment, PMO, and T4 example configurations name the same model. It makes
 no oracle or docking call. QED's asset check is
 `PYTHONPATH=src python tools/verify_qed_assets.py`.
 
-The submitted benchmark numbers retain their original run identities. The
-example configurations in this release define the shared-reference method and
-do not reassign those numbers to different model weights.
+Each task runner records the checkpoint identity, configuration, seeds and
+outputs for its own run. The task guides give the commands and required assets.
