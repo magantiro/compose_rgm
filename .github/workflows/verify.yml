@@ -44,6 +44,8 @@ jobs:
             src/compose_v4/experiments/fragments \
             src/compose_v4/experiments/pmo \
             src/compose_v4/experiments/pmo_panel.py \
+            src/compose_v4/experiments/hphi_region_features.py \
+            src/compose_v4/experiments/qed_goal_regions.py \
             src/compose_v4/experiments/qed_shared* \
             src/compose_v4/experiments/t4 \
             src/compose_v4/model/reference_checkpoint.py \
@@ -53,6 +55,8 @@ jobs:
             src/compose_v4/experiments/fragments \
             src/compose_v4/experiments/pmo \
             src/compose_v4/experiments/pmo_panel.py \
+            src/compose_v4/experiments/hphi_region_features.py \
+            src/compose_v4/experiments/qed_goal_regions.py \
             src/compose_v4/experiments/qed_shared* \
             src/compose_v4/experiments/t4 \
             src/compose_v4/model/reference_checkpoint.py \

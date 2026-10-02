@@ -18,7 +18,7 @@ import numpy as np
 import rdkit
 import torch
 
-from compose_v4.experiments.hphi_rollout import registered_regions
+from compose_v4.experiments.qed_goal_regions import registered_regions
 from compose_v4.experiments.qed_shared_fit import (
     FeatureShard,
     QEDFitConfig,

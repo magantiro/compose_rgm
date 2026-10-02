@@ -109,6 +109,13 @@ def test_value_examples_reject_unmatched_reference_or_test_role() -> None:
         value_examples(TinyReference(), rollout, budget_max=1)
 
 
+def test_value_examples_reject_another_rollout_schema() -> None:
+    rollout = example_rollout()
+    rollout["schema_version"] = "compose.qed.other_rollout.v1"
+    with pytest.raises(ValueError, match="unsupported QED rollout schema"):
+        value_examples(TinyReference(), rollout, budget_max=1)
+
+
 def test_value_examples_reject_metric_drift() -> None:
     rollout = example_rollout()
     rollout["trajectories"][0]["path"][1]["qed"] = 0.99

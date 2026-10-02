@@ -16,7 +16,7 @@ import numpy as np
 import rdkit
 import torch
 
-from compose_v4.experiments.hphi_rollout import registered_regions
+from compose_v4.experiments.qed_goal_regions import registered_regions
 from compose_v4.experiments.qed_shared_reference import QEDSharedReference, SharedReferenceConfig
 from compose_v4.experiments.qed_shared_sources import load_qed_source_roles
 from compose_v4.experiments.qed_shared_training import value_examples_with_bellman
@@ -118,7 +118,6 @@ def main() -> None:
         "rollout_path": portable_rollout_path,
         "rollout_sha256": hashlib.sha256(rollout_bytes).hexdigest(),
         "rollout_schema": rollout["schema_version"],
-        "import_provenance": rollout.get("import_provenance"),
         "reference": reference.identity(),
         "reference_manifest_sha256": sha256(manifest_path),
         "budget_max": args.budget_max,
@@ -143,7 +142,7 @@ def main() -> None:
             "script": sha256(Path(__file__)),
             "reference": sha256(ROOT / "src/compose_v4/experiments/qed_shared_reference.py"),
             "features": sha256(ROOT / "src/compose_v4/experiments/hphi_region_features.py"),
-            "regions": sha256(ROOT / "src/compose_v4/experiments/hphi_rollout.py"),
+            "regions": sha256(ROOT / "src/compose_v4/experiments/qed_goal_regions.py"),
         },
         "software": {
             "python": platform.python_version(),
