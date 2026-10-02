@@ -11,10 +11,12 @@ from typing import Any
 import numpy as np
 import torch
 
+from compose_v4.chem.aromaticity import resonance_invariant_bond_classes
+from compose_v4.chem.graph_primitives import compute_topology_features
 from compose_v4.chem.molecular_graph import MolecularGraph
+from compose_v4.chem.state import is_valid_state
 from compose_v4.experiments.production_successor_kernel import (
     FactorizedCanonicalSuccessorKernel,
-    _one_state_batch,
 )
 from compose_v4.model.reference_checkpoint import LoadedReference, load_frozen_reference
 
@@ -36,6 +38,44 @@ class SharedReferenceConfig:
             raise ValueError("persistent_slots must be a positive integer")
         if (self.catalog_path is None) != (self.catalog_sha256 is None):
             raise ValueError("catalog_path and catalog_sha256 must be supplied together")
+
+
+@dataclass(frozen=True)
+class _EncoderBatch:
+    """Only the frozen encoder inputs, without constructing legal mark tables."""
+
+    atom_types: torch.Tensor
+    formal_charges: torch.Tensor
+    implicit_h_counts: torch.Tensor
+    neural_bonds: torch.Tensor
+    times: torch.Tensor
+    atom_topology: torch.Tensor
+    closure_topology: torch.Tensor
+    ring_system_topology: torch.Tensor
+    property_condition_values: None = None
+    property_condition_mask: None = None
+
+    @property
+    def batch_size(self) -> int:
+        return int(self.atom_types.shape[0])
+
+
+def _encoder_batch(state: MolecularGraph, time: float, device: torch.device) -> _EncoderBatch:
+    atom_topology, closure_topology, ring_system_topology = compute_topology_features(state)
+
+    def one_long(values: np.ndarray) -> torch.Tensor:
+        return torch.from_numpy(np.stack((values,))).long().to(device)
+
+    return _EncoderBatch(
+        atom_types=one_long(state.atom_types),
+        formal_charges=one_long(state.formal_charges),
+        implicit_h_counts=one_long(state.implicit_h_counts),
+        neural_bonds=one_long(resonance_invariant_bond_classes(state)),
+        times=torch.tensor((time,), dtype=torch.float32, device=device),
+        atom_topology=one_long(atom_topology),
+        closure_topology=one_long(closure_topology),
+        ring_system_topology=one_long(ring_system_topology),
+    )
 
 
 class QEDSharedReference:
@@ -84,12 +124,9 @@ class QEDSharedReference:
     def encode(self, state: MolecularGraph) -> np.ndarray:
         """Return the frozen encoder's state embedding for a matched value head."""
         self._check_state(state)
-        batch = _one_state_batch(
-            self.reference.model,
-            state,
-            self.config.time,
-            prepared_batch=None,
-        )
+        if not is_valid_state(state):
+            raise ValueError("QED state is not a valid molecule")
+        batch = _encoder_batch(state, self.config.time, self.reference.model.device)
         with torch.no_grad():
             _nodes, global_state, _pairs = self.reference.model._encode_batch(batch)
         embedding = global_state[0].detach().cpu().numpy().astype(np.float64)

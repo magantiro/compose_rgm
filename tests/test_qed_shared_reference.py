@@ -4,9 +4,11 @@ from types import SimpleNamespace
 
 import numpy as np
 import pytest
+import torch
 
 from compose_v4.chem.molecular_graph import smiles_to_molecular_graph
 from compose_v4.chem.state import pad_molecular_graph
+from compose_v4.experiments.production_successor_kernel import _one_state_batch
 from compose_v4.experiments.qed_shared_reference import (
     QEDSharedReference,
     SharedReferenceConfig,
@@ -71,6 +73,28 @@ def test_qed_adapter_uses_nll_checkpoint_for_canonical_transitions() -> None:
     assert canonical_state_key(result) in {item.key for item in successors}
     assert process.identity()["checkpoint_sha256"] == SHA256
     assert process.identity()["catalog_sha256"] == CATALOG_SHA256
+
+
+@pytest.mark.external_artifact
+@pytest.mark.parametrize("smiles", ("CCO", "c1ccccc1O", "CC(=O)O", "C1CCNCC1"))
+def test_qed_encoder_only_batch_matches_full_mark_batch(smiles: str) -> None:
+    if not CHECKPOINT.is_file():
+        pytest.skip("shared reference asset is absent. See experiments/fragments/assets.json")
+    process = QEDSharedReference.load(
+        SharedReferenceConfig(
+            CHECKPOINT,
+            SHA256,
+            CATALOG,
+            time=0.5,
+            catalog_path=CATALOG_PATH,
+            catalog_sha256=CATALOG_SHA256,
+        )
+    )
+    state = pad_molecular_graph(smiles_to_molecular_graph(smiles), 48)
+    full_batch = _one_state_batch(process.reference.model, state, 0.5, prepared_batch=None)
+    with torch.no_grad():
+        full_embedding = process.reference.model._encode_batch(full_batch)[1][0].cpu().numpy()
+    np.testing.assert_array_equal(process.encode(state), full_embedding.astype(np.float64))
 
 
 @pytest.mark.external_artifact
