@@ -10,13 +10,12 @@ import hashlib
 import json
 import math
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from itertools import pairwise
 from typing import Any
 
-import numpy as np
 import torch
 
-from compose_v4.chem.aromaticity import resonance_invariant_bond_classes
 from compose_v4.chem.molecular_graph import MolecularGraph
 from compose_v4.control.option_continuation import exact_graph_key
 from compose_v4.control.reference_guidance import (
@@ -26,39 +25,21 @@ from compose_v4.control.reference_guidance import (
     ScoredPanel,
     guide_panel,
 )
+from compose_v4.experiments.factorized_mark_conditional import (
+    operator_capability_batch_kwargs,
+)
 from compose_v4.experiments.factorized_successor_training import (
     SuccessorTrainingError,
     compile_teacher_successor_fibers_support_only,
     forward_teacher_successor_batch,
-    resolve_successor_process_runtime,
-    rewrite_action_codec_sha256,
 )
 from compose_v4.model.factorized_tracelet_rate_model import (
-    _CYCLE_OP_EXECUTOR_TO_FAMILY,
-    LEGACY_ATOM_RESTATE_ACTION_SEMANTICS,
-    LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS,
-    LEGACY_CYCLE_OPEN_ACTION_SEMANTICS,
-    PROCESS_V2_EDITING_PROCESS_SEMANTICS,
     prepare_factorized_mark_batch,
 )
 from compose_v4.model.reference_checkpoint import LoadedReference
 from compose_v4.rewrite.action_codec_v4 import decode_action
-from compose_v4.rewrite.kernel import (
-    InvalidRewrite,
-    canonical_state_key,
-    de_novo_rewrite_system,
-    editing_v2_semantic_rewrite_system,
-)
-from compose_v4.rewrite.operators import (
-    AtomRestate,
-    BondDelete,
-    BondInsert,
-    CycleCloseEdge,
-    CycleOpenEdge,
-    SemanticAtomRestate,
-)
+from compose_v4.rewrite.kernel import canonical_state_key, editing_v2_semantic_rewrite_system
 from compose_v4.rewrite.trace_shard import decode_state, encode_state
-from compose_v4.rewrite.tracelets import RingSystemRestate
 
 
 @dataclass(frozen=True)
@@ -145,65 +126,6 @@ def t4_program_input(
     return ProgramInput.from_trace(candidate_id, endpoint, {"actions": actions, "states": states})
 
 
-class NativeMarkUnsupported(ValueError):
-    """A legal executed transition has no score through this native mark adapter.
-
-    This is not a claim that its canonical successor has zero reference mass.
-    """
-
-
-def _native_mark(model, predecessor, successor, rule, action):
-    if (
-        isinstance(action, CycleCloseEdge)
-        and model.cycle_close_action_semantics == LEGACY_CYCLE_CLOSE_ACTION_SEMANTICS
-    ):
-        rule, action = "bond_insert", BondInsert(action.a, action.b, action.order)
-    elif (
-        isinstance(action, CycleOpenEdge)
-        and model.cycle_open_action_semantics == LEGACY_CYCLE_OPEN_ACTION_SEMANTICS
-    ):
-        rule, action = "bond_delete", BondDelete(action.a, action.b)
-    elif (
-        isinstance(action, SemanticAtomRestate)
-        and model.atom_restate_action_semantics == LEGACY_ATOM_RESTATE_ACTION_SEMANTICS
-    ):
-        slot = action.v
-        rule, action = (
-            "atom_restate",
-            AtomRestate(
-                slot,
-                int(successor.atom_types[slot]),
-                int(successor.formal_charges[slot]),
-                int(successor.implicit_h_counts[slot]),
-            ),
-        )
-    try:
-        system = (
-            editing_v2_semantic_rewrite_system()
-            if model.editing_process_semantics == PROCESS_V2_EDITING_PROCESS_SEMANTICS
-            else de_novo_rewrite_system()
-        )
-        native = system.apply(predecessor, rule, action)
-    except InvalidRewrite as error:
-        raise NativeMarkUnsupported(f"native replay rejected {rule}: {error}") from error
-    if exact_graph_key(native) != exact_graph_key(successor):
-        same_atoms = all(
-            np.array_equal(getattr(native, name), getattr(successor, name))
-            for name in ("atom_types", "formal_charges", "implicit_h_counts")
-        )
-        same_chemistry = (
-            same_atoms
-            and canonical_state_key(native) == canonical_state_key(successor)
-            and np.array_equal(
-                resonance_invariant_bond_classes(native),
-                resonance_invariant_bond_classes(successor),
-            )
-        )
-        if not same_chemistry:
-            raise NativeMarkUnsupported("native mark changes the slot-mapped successor chemistry")
-    return rule, action
-
-
 class FrozenProgramReference:
     """Deterministic CPU float32 scoring, using the loaded model's actual support."""
 
@@ -275,84 +197,47 @@ class FrozenProgramReference:
                 f"[1, {self.reference.max_active_atoms}]",
             )
         model = self.reference.model
-        rows = []
-        for index, (rule, action) in enumerate(decoded):
-            try:
-                native_rule, native_action = _native_mark(
-                    model, graphs[index], graphs[index + 1], rule, action
-                )
-            except NativeMarkUnsupported as error:
-                return ProgramScore(
-                    program.candidate_id, None, "unsupported_native_mark", f"step {index}: {error}"
-                )
-            rows.append((graphs[index], graphs[index + 1], native_rule, native_action))
-        options = {
-            key: getattr(model, key)
-            for key in (
-                "editing_process_semantics",
-                "atom_restate_action_semantics",
-                "ring_restate_scorer_mode",
-                "cycle_close_action_semantics",
-                "cycle_open_action_semantics",
-                "atom_delete_action_semantics",
-            )
-        }
-        options.update(
-            ring_catalog=model.ring_catalog,
-            compute_ring_grow_support=model.enable_ring_grow_macro,
-            compute_ring_restates=model.enable_ring_restates,
-            compute_cyclic_graft=model.enable_cyclic_graft,
-            compute_ring_opening=model.enable_ring_opening,
-            compute_ring_system_delete=model.enable_ring_system_delete,
-        )
+        rows = tuple(pairwise(graphs))
+        options = operator_capability_batch_kwargs(model.operator_capabilities)
+        options["ring_catalog"] = model.ring_catalog
         values = []
-        process = resolve_successor_process_runtime(model)
         for start in range(0, len(rows), self.batch_size):
             part = rows[start : start + self.batch_size]
-            batch = prepare_factorized_mark_batch(
-                tuple(row[0] for row in part),
-                (self.progress,) * len(part),
-                tuple(row[3] for row in part),
-                tuple(row[2] for row in part),
-                (1.0,) * len(part),
-                **options,
-            )
-            for index, action in enumerate(batch.teacher_actions):
-                if (
-                    isinstance(action, RingSystemRestate)
-                    and action not in batch.ring_restate_actions[index]
-                ):
-                    return ProgramScore(
-                        program.candidate_id,
-                        None,
-                        "unsupported_native_mark",
-                        f"step {start + index}: ring restate outside native finite fiber",
-                    )
             try:
                 compiled = compile_teacher_successor_fibers_support_only(
                     model,
                     tuple(row[0] for row in part),
                     tuple(row[1] for row in part),
-                    teacher_action_sha256s=tuple(
-                        rewrite_action_codec_sha256(
-                            row[2], row[3], schema_version=process.action_codec_schema_version
-                        )
-                        for row in part
-                    ),
-                    teacher_families=tuple(
-                        _CYCLE_OP_EXECUTOR_TO_FAMILY.get(row[2], row[2]) for row in part
-                    ),
                     times=(self.progress,) * len(part),
+                    require_exact_teacher_action=False,
                 )
             except SuccessorTrainingError as error:
-                if "teacher action is not one exact coordinate" not in str(error):
+                if "canonical target is absent from production marked support" not in str(error):
                     raise
                 return ProgramScore(
                     program.candidate_id,
                     None,
                     "unsupported_native_mark",
-                    f"step {start}: {error}",
+                    f"batch starting at step {start}: {error}",
                 )
+            # The exact executed edit has already been replay-checked.  The
+            # reference law is over canonical molecular successors, so its
+            # scoring batch uses a native alias family, not the program's
+            # possibly different edit coordinate or family.
+            batch = prepare_factorized_mark_batch(
+                tuple(row[0] for row in part),
+                (self.progress,) * len(part),
+                (None,) * len(part),
+                (None,) * len(part),
+                (1.0,) * len(part),
+                **options,
+            )
+            batch = replace(
+                batch,
+                teacher_rule_names=tuple(
+                    row.teacher_fiber.aliases[0].family_name for row in compiled
+                ),
+            )
             values.extend(
                 forward_teacher_successor_batch(
                     model, batch, tuple(row.teacher_fiber for row in compiled)

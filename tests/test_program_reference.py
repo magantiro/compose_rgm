@@ -21,6 +21,12 @@ from compose_v4.control.reference_programs import (
     pmo_program_input,
     t4_program_input,
 )
+from compose_v4.experiments.factorized_successor_training import (
+    SuccessorTrainingError,
+    compile_teacher_successor_fibers_support_only,
+    resolve_successor_process_runtime,
+    rewrite_action_codec_sha256,
+)
 from compose_v4.experiments.production_successor_kernel import canonical_successor_result
 from compose_v4.model.factorized_tracelet_rate_model import FactorizedTraceletRateModel
 from compose_v4.model.reference_checkpoint import load_frozen_reference
@@ -190,6 +196,40 @@ def test_reference_score_aggregates_marks_by_canonical_successor(loaded):
     assert target.alias_count > 1
     assert score.status == "scored"
     assert score.value == pytest.approx(math.log(target.probability), abs=2e-5)
+
+
+def test_inference_scores_canonical_target_without_native_edit_coordinate(loaded):
+    source = pad_molecular_graph(smiles_to_molecular_graph("CC"), 12)
+    action = AtomInsert(5, ELEMENT_TO_IDX["O"], 0, 1, ((1, 1),))
+    successor = editing_v2_semantic_rewrite_system().apply(source, "atom_insert", action)
+    runtime = resolve_successor_process_runtime(loaded.model)
+    inputs = {
+        "teacher_action_sha256s": (
+            rewrite_action_codec_sha256(
+                "atom_insert", action, schema_version=runtime.action_codec_schema_version
+            ),
+        ),
+        "teacher_families": ("atom_insert",),
+        "times": (0.5,),
+    }
+    with pytest.raises(SuccessorTrainingError, match="not one exact coordinate"):
+        compile_teacher_successor_fibers_support_only(
+            loaded.model, (source,), (successor,), **inputs
+        )
+    endpoint = canonical_state_key(successor)
+    program = ProgramInput.from_trace(
+        "noncanonical-slot",
+        endpoint,
+        {
+            "actions": [encode_action("atom_insert", action)],
+            "states": [encode_state(source), encode_state(successor)],
+        },
+    )
+    score = FrozenProgramReference(loaded).score((program,)).scores[0]
+    expected = canonical_successor_result(loaded.model, source, 0.5).batch.probability_of(endpoint)
+    assert expected > 0
+    assert score.status == "scored"
+    assert score.value == pytest.approx(math.log(expected), abs=2e-5)
 
 
 def test_batch_size_preserves_score(loaded):
