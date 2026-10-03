@@ -12,10 +12,11 @@ executable programs. The output is a distribution over the caller's already
 eligible, deduplicated candidate panel. The proposed benefit is better selection.
 Implementation tests do not establish an optimization improvement.
 
-The reference scores exact persistent-slot actions and intermediate states. Its
-support is the loaded checkpoint's declared vocabulary and native action fiber,
-with at most 40 active atoms for the supplied editing checkpoint. A legal program
-need not have a score under that checkpoint. Neither endpoint SMILES nor a trace
+The scorer replays exact persistent-slot actions and scores the resulting
+canonical molecular transitions. Its support is the loaded checkpoint's
+declared vocabulary and canonical successor fiber, with at most 40 active atoms
+for the supplied editing checkpoint. A legal program need not have a score under
+that checkpoint. Neither endpoint SMILES nor a trace
 from a different proposed transformation can substitute for its executed trace.
 Exact replay is checked before an otherwise legal program outside the
 checkpoint's atom-count support is marked `unsupported_state`. The candidate
@@ -29,7 +30,7 @@ The implementation acceptance checks are:
 - inference leaves reference parameters unchanged and uses CPU float32.
 - malformed traces, checkpoint identity drift and unexpected numerical errors
   fail explicitly.
-- missing native-mark coverage is reported and never silently removes candidates.
+- missing canonical-successor coverage is reported and never silently removes candidates.
 - the interface works without network access, oracle calls or a cloud account.
 
 The comparison baseline is the same controller and candidate generator with
@@ -59,7 +60,7 @@ The reference cannot make an ineligible candidate eligible.
 
 Off and shadow return the original baseline probabilities without renormalizing
 them. Shadow only records scores. Active mode requires a positive strength and
-cap. If any candidate is outside native-mark scoring coverage, the default policy
+cap. If any candidate is outside reference scoring coverage, the default policy
 retains the entire baseline panel and records the reason. A strict policy can
 instead require complete coverage and stop. Unexpected errors are never converted
 into a fallback.
@@ -71,7 +72,7 @@ candidates with positive baseline probability. Otherwise it returns the baseline
 The receipt reports coverage and marks mixed guidance as `active_partial`.
 This rule preserves first-draw mass. It does not preserve marginal inclusion
 probabilities in a multi-candidate batch and cannot guarantee improved scores.
-Missing traces and unsupported marks remain visible with no invented score.
+Missing traces and unsupported successors remain visible with no invented score.
 
 ## Integration boundary
 
