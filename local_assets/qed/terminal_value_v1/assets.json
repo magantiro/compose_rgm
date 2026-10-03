@@ -1,0 +1,15 @@
+{
+  "head": {
+    "path": "head.pt",
+    "sha256": "8ebe9832a6789748ac3c7e1ed28cbe5cea39615f1b3063183a7cb735cbdded6d"
+  },
+  "metadata": {
+    "path": "metadata.json",
+    "sha256": "1139c3d1c1127b7646b3440f641b590af84c3fa14387e7b76a4ac7c05e60a806"
+  },
+  "normalization": {
+    "path": "normalization.json",
+    "sha256": "68ba9ef8460dd9d5b6f87990dec48911310a38f8c0e2b29b194cd462a4000bd6"
+  },
+  "schema_version": "compose.qed.shared_value_assets.v1"
+}

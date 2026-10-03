@@ -1,9 +1,10 @@
 # Model and evaluator assets
 
 The source repository contains code, task configurations and small input
-registries. The fixed NLL-trained reference checkpoint and two training-derived catalogs
-are tracked through Git LFS on the release branch. Other assets remain
-separate. Every task checks declared SHA-256 identities before using them.
+registries. The fixed NLL-trained reference checkpoint, two training-derived
+catalogs and the QED terminal-value head are tracked through Git LFS. Other
+assets remain separate. Every task checks declared SHA-256 identities before
+using them.
 Do not replace a missing asset with another checkpoint or rebuild a catalog
 from evaluation examples.
 
@@ -13,7 +14,7 @@ from evaluation examples.
 | Frozen model catalog | Fragment, QED, PMO, T4 | `local_assets/fragments/catalog.json` | Hash-pinned by the reference manifest and used directly by the fragment runner. |
 | Fragment prompts and training-derived catalogs | Fragment | `local_assets/fragments/` | [Fragment asset manifest](fragments/assets.json). The prompt table is fetched from pinned upstream bytes. Path-neutral region and pendant catalogs are tracked through Git LFS. The joint completion and mass priors are tracked directly. |
 | Fragment benchmark evaluator | Fragment | `local_assets/fragments/evaluator/` | The manifest pins files from a specific InVirtuoGen revision. Use the [hash-checked fetch command](fragments/GENERATION.md#assets). The files are not vendored here. |
-| Finite-horizon value head | QED | task-selected output path | Fit from reference rollouts using the [QED workflow](qed/README.md). It is distinct from the fixed molecular reference. |
+| Finite-horizon value head | QED | `local_assets/qed/terminal_value_v1/` | Hash-bound fitted head and metadata. It is distinct from the fixed molecular reference. The [QED workflow](qed/README.md) also fits a new head from reference rollouts. |
 | PyTDC oracle environment and model files | PMO | `local_assets/pmo/` | [PMO asset manifest](pmo/assets.json) and [verified fetch command](pmo/README.md#complete-local-campaign). PyTDC uses a separate RDKit version. |
 | Program template priors | T4 | `experiments/t4/assets/` | Tracked here and verified by the [T4 asset manifest](t4/assets.json). They are controller inputs, distinct from the fixed molecular reference. |
 | QuickVina2, Open Babel and receptors | T4 | `local_assets/t4/` | Public MOOD scoring files are identified in the [T4 guide](t4/README.md). The local executable and receptor must pass the configured hashes. |
@@ -25,7 +26,7 @@ tracked assets:
 
 ```bash
 git lfs install
-git lfs pull --include="local_assets/fragments/r_theta_nll.pt,local_assets/fragments/region_catalog.json,local_assets/fragments/pendant_catalog.json"
+git lfs pull --include="local_assets/fragments/r_theta_nll.pt,local_assets/fragments/region_catalog.json,local_assets/fragments/pendant_catalog.json,local_assets/qed/terminal_value_v1/head.pt"
 PYTHONPATH=src python -m compose_v4.experiments.fragments assets \
   --assets local_assets/fragments --task superstructure_generation --no-evaluator
 ```
@@ -33,6 +34,13 @@ PYTHONPATH=src python -m compose_v4.experiments.fragments assets \
 The last command verifies the checkpoint and reports the other inputs still
 needed for that task. A Git LFS pointer is not a checkpoint. Verify the file
 hash after fetching it.
+
+Verify the QED head against the same reference and its frozen source split:
+
+```bash
+PYTHONPATH=src python tools/verify_qed_assets.py \
+  --value local_assets/qed/terminal_value_v1
+```
 
 ## Install remaining assets
 

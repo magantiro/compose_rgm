@@ -33,7 +33,7 @@ jobs:
       - name: Verify shared molecular reference
         run: |
           python tools/verify_shared_reference.py
-          python tools/verify_qed_assets.py
+          python tools/verify_qed_assets.py --value local_assets/qed/terminal_value_v1
       - name: Fetch pinned fragment evaluator
         run: python tools/fetch_fragment_evaluator.py --download
       - name: Run offline tests

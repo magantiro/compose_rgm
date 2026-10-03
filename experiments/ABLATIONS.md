@@ -12,11 +12,10 @@ identities, seeds and budgets, and require completed receipts for both arms.
 | Fragment fixed-panel selection | deployed, uniform | selection on identical saved offers | replay command, verified assets required |
 | PMO proposal construction | structured, uniform chain, created-atom rebinding | proposed executable programs | local runner, real oracle assets required |
 | T4 reference selection | off, shadow, active | reference scoring and non-floor selection | panel preparer, real docking assets required |
-| QED future control | local, future-aware | continuation policy | value-head workflow available, matched comparator not frozen |
+| QED future control | local, future-aware | continuation policy | fitted value head and source workflow. A matched comparator is not frozen. |
 
 The fragment, PMO and T4 recipes below run after their stated assets are
-installed. QED's value head is a separate fitted model and is not supplied
-as part of the fixed molecular reference.
+installed. QED's fitted value head is separate from the fixed molecular reference.
 
 ## Fragment edit probabilities
 
@@ -125,7 +124,7 @@ example](../examples/t4_reference_panel.py) checks selection without docking.
 QED uses the same fixed molecular reference and a separately fitted
 finite-horizon value head. The [QED guide](qed/README.md) gives the complete
 source split, reference rollouts, head fitting, source evaluation and
-reduction commands. The fitted head is not bundled. A matched local-versus-
+reduction commands. The fitted head is bundled. A matched local-versus-
 future-aware performance comparison needs that head and a frozen comparator
 policy. Do not treat a reference-only successor sample as the full QED
 ablation.

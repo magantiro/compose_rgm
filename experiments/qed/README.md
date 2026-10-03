@@ -12,7 +12,8 @@ generation. In the Python 3.11 environment from `requirements/core.txt`, run:
 ```bash
 PYTHONPATH=src python tools/check_qed_source_support.py \
   --expected-sha256 704103777e8050eb59f4d15d9997ca6070ba05a6b878b8e18738bfb1e706a090
-PYTHONPATH=src python tools/verify_qed_assets.py
+PYTHONPATH=src python tools/verify_qed_assets.py \
+  --value local_assets/qed/terminal_value_v1
 PYTHONPATH=src python examples/qed_shared_reference.py --time 0.5
 ```
 
@@ -32,8 +33,8 @@ validation sources, and 800 test sources. Run
 `PYTHONPATH=src python -m pytest -q tests/test_qed_shared_sources.py` to check
 the split without fitting a model.
 
-The asset check verifies the shared checkpoint and source-role hashes. It
-reports `reference_only` until a matched value head is supplied with `--value`.
+The asset check verifies the shared checkpoint, source-role hashes and the
+bundled terminal-value head. It reports `ready` only when all identities match.
 The final command draws one canonical successor from `CCO`. It checks the model
 hash, scores the complete legal successor set, and samples from the normalized
 distribution. It does not use a value head or run the benchmark.
@@ -103,10 +104,12 @@ loss weight as the other 19 registered goals. Checkpoint selection minimizes
 held-source mean Brier loss for QED 0.9 and similarity 0.4. The evaluator refuses
 a head unless both training and validation examples include hits and misses for
 that goal and its source-mean validation Brier score beats a training-only
-constant predictor. A failed check is recorded, not hidden. CUDA training is optional
-with `--device cuda` and `CUBLAS_WORKSPACE_CONFIG=:4096:8` set before launch.
-The fitted reference remains unchanged. No fitted head or 800-source result for
-this reference identity is bundled here.
+constant predictor. A failed check is recorded, not hidden. CUDA training is
+optional with `--device cuda` and `CUBLAS_WORKSPACE_CONFIG=:4096:8` set before
+launch.
+The fitted reference remains unchanged. The hash-bound fitted head is bundled at
+`local_assets/qed/terminal_value_v1/`. A new fit belongs in a distinct output
+directory and must pass the same qualification checks before evaluation.
 
 `QEDSharedValueHead` loads a fitted head only when its file hashes, complete
 reference configuration, terminal-target semantics, feature schema, and source
@@ -122,11 +125,11 @@ source. Source-level success is evaluated on the 800 molecules in
 `data/jin/qed_test.txt`. Returned candidates must satisfy the QED and
 Morgan-fingerprint similarity thresholds above.
 
-After fitting a head, run the 800-source test panel with bounded local workers:
+Run the 800-source test panel with the bundled head and bounded local workers:
 
 ```bash
 PYTHONPATH=src python tools/run_qed_shared_panel.py \
-  --value runs/qed_shared/value \
+  --value local_assets/qed/terminal_value_v1 \
   --output runs/qed_shared/test --workers 2
 ```
 
@@ -137,7 +140,7 @@ an existing receipt. To run one source independently, use:
 
 ```bash
 PYTHONPATH=src python tools/run_qed_shared_source.py \
-  --index 0 --time 0.5 --value runs/qed_shared/value \
+  --index 0 --time 0.5 --value local_assets/qed/terminal_value_v1 \
   --output runs/qed_shared/test/source_0000.json
 ```
 

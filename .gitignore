@@ -46,3 +46,11 @@ htmlcov/
 !/local_assets/fragments/pendant_catalog.json
 !/local_assets/fragments/joint_prior.json
 !/local_assets/fragments/mass_prior.json
+!/local_assets/qed/
+/local_assets/qed/*
+!/local_assets/qed/terminal_value_v1/
+/local_assets/qed/terminal_value_v1/*
+!/local_assets/qed/terminal_value_v1/assets.json
+!/local_assets/qed/terminal_value_v1/head.pt
+!/local_assets/qed/terminal_value_v1/metadata.json
+!/local_assets/qed/terminal_value_v1/normalization.json

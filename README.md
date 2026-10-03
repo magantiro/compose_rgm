@@ -53,7 +53,7 @@ never overwritten.
 | --- | --- | --- |
 | Fragment-constrained generation | [Generate and evaluate](experiments/fragments/GENERATION.md) | Motif extension, scaffold decoration, linker design and superstructure generation |
 | Frozen-reference selection | [Reference guidance](docs/reference_guidance.md) | Off, shadow and active modes with exact program replay and coverage checks |
-| Similarity-constrained QED editing | [QED editing](experiments/qed/README.md) | Shared-reference rollouts, value-head training, source evaluation and complete-panel reduction. A fitted head is not bundled |
+| Similarity-constrained QED editing | [QED editing](experiments/qed/README.md) | Shared-reference rollouts, a fitted terminal-value head, source evaluation and complete-panel reduction |
 | PMO optimization | [PMO](experiments/pmo/README.md) | Local campaign runner, 22-objective panel preparer, reference-aware exploration and durable receipts |
 | T4 lead optimization | [T4](experiments/t4/README.md) | Local generation, reference-aware selection, docking adapter and explicit resume |
 

@@ -96,11 +96,11 @@ git diff --check
 
 The [automated check](../.github/workflows/verify.yml) runs these commands on
 Linux after downloading the Git LFS weights. It verifies the reference, QED
-source, and QED asset identities, then fetches the six hash-pinned public
+source, and fitted QED value identities, then fetches the six hash-pinned public
 fragment evaluator files. Tests run offline with the checkpoint and evaluator
 installed. A separate job installs the pinned PMO oracle environment and checks
 its chemistry kernel without constructing or calling an oracle. The workflow
-does not install PMO oracle assets, fit a QED value head, or run docking. Lint
+does not install PMO oracle assets, refit the QED value head, or run docking. Lint
 covers the task interfaces and tools named above.
 The full source tree has additional lint findings and is not presented as
 repository-wide Ruff clean.
