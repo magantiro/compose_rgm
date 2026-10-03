@@ -35,6 +35,7 @@ class QEDFitConfig:
     learning_rate: float = 1e-3
     weight_decay: float = 1e-5
     bellman_weight: float = 0.3
+    guidance_region_weight: float = 1.0
     batch_size: int = 4096
     seed: int = 0
     device: str = "cpu"
@@ -53,6 +54,8 @@ class QEDFitConfig:
             raise ValueError("QED value fit needs finite nonnegative weight decay")
         if not math.isfinite(self.bellman_weight) or self.bellman_weight < 0:
             raise ValueError("QED value fit needs finite nonnegative Bellman weight")
+        if not math.isfinite(self.guidance_region_weight) or self.guidance_region_weight < 1:
+            raise ValueError("QED value fit needs a finite guidance-region weight of at least one")
         if self.device not in ("cpu", "cuda"):
             raise ValueError("QED value fit device must be cpu or cuda")
 
@@ -306,15 +309,24 @@ def fit_value_head(
         train_losses = []
         for source_position in order_rng.permutation(len(train)):
             shard = train[int(source_position)]
-            features, labels, _, next_rows, next_terminal_targets = _arrays(shard)
+            features, labels, region_indices, next_rows, next_terminal_targets = _arrays(shard)
             x = _normalized(features, mean, scale, config.device)
             y = torch.from_numpy(labels).to(config.device).unsqueeze(1)
+            row_weights = torch.from_numpy(
+                np.where(
+                    region_indices == guidance_region_index,
+                    config.guidance_region_weight,
+                    1.0,
+                ).astype(np.float32)
+            ).to(config.device)
+            weight_total = row_weights.sum()
             successor_rows = torch.from_numpy(next_rows.astype(np.int64)).to(config.device)
             boundary_values = torch.from_numpy(next_terminal_targets.astype(np.float32)).to(
                 config.device
             )
             bellman_mask = (successor_rows >= 0) | (boundary_values >= 0)
             bellman_count = int(bellman_mask.sum())
+            bellman_weight_total = row_weights[bellman_mask].sum() if bellman_count else None
             targets = boundary_values.clamp(min=0).unsqueeze(1)
             if config.bellman_weight > 0 and bellman_count:
                 model.eval()
@@ -328,17 +340,23 @@ def fit_value_head(
             for start in range(0, len(x), config.batch_size):
                 indices = row_order[start : start + config.batch_size]
                 logits = model(x[indices])
-                loss = nn.functional.binary_cross_entropy_with_logits(
-                    logits, y[indices], reduction="sum"
-                ) / len(x)
+                loss = (
+                    nn.functional.binary_cross_entropy_with_logits(
+                        logits, y[indices], reduction="none"
+                    ).flatten()
+                    * row_weights[indices]
+                ).sum() / weight_total
                 if config.bellman_weight > 0 and bellman_count:
                     paired = bellman_mask[indices]
                     if bool(paired.any()):
                         loss = loss + config.bellman_weight * (
-                            nn.functional.binary_cross_entropy_with_logits(
-                                logits[paired], targets[indices][paired], reduction="sum"
-                            )
-                            / bellman_count
+                            (
+                                nn.functional.binary_cross_entropy_with_logits(
+                                    logits[paired], targets[indices][paired], reduction="none"
+                                ).flatten()
+                                * row_weights[indices][paired]
+                            ).sum()
+                            / bellman_weight_total
                         )
                 loss.backward()
                 source_loss += float(loss.detach())
@@ -346,23 +364,36 @@ def fit_value_head(
             train_losses.append(source_loss)
         model.eval()
         validation_losses = []
+        validation_weighted_losses = []
         brier_losses = []
         with torch.no_grad():
             for shard in validation:
-                features, labels, _, _, _ = _arrays(shard)
+                features, labels, region_indices, _, _ = _arrays(shard)
                 x = _normalized(features, mean, scale, config.device)
                 y = torch.from_numpy(labels).to(config.device).unsqueeze(1)
                 logits = model(x)
-                validation_losses.append(
-                    float(nn.functional.binary_cross_entropy_with_logits(logits, y))
+                per_row_bce = nn.functional.binary_cross_entropy_with_logits(
+                    logits, y, reduction="none"
+                )
+                validation_losses.append(float(per_row_bce.mean()))
+                row_weights = torch.from_numpy(
+                    np.where(
+                        region_indices == guidance_region_index,
+                        config.guidance_region_weight,
+                        1.0,
+                    ).astype(np.float32)
+                ).to(config.device)
+                validation_weighted_losses.append(
+                    float((per_row_bce.flatten() * row_weights).sum() / row_weights.sum())
                 )
                 brier_losses.append(float(torch.mean((torch.sigmoid(logits) - y) ** 2)))
-        val_loss = float(np.mean(validation_losses))
+        val_loss = float(np.mean(validation_weighted_losses))
         history.append(
             {
                 "epoch": epoch,
                 "train_source_mean_objective": float(np.mean(train_losses)),
-                "validation_source_mean_bce": val_loss,
+                "validation_source_mean_bce": float(np.mean(validation_losses)),
+                "validation_source_mean_weighted_bce": val_loss,
                 "validation_source_mean_brier": float(np.mean(brier_losses)),
             }
         )
@@ -441,7 +472,10 @@ def fit_value_head(
             "bellman_weight": config.bellman_weight,
             "train_bellman_pairs": sum(shard.bellman_pairs for shard in train),
             "validation_bellman_pairs": sum(shard.bellman_pairs for shard in validation),
-            "selected_validation_source_mean_bce": best_loss,
+            "selected_validation_source_mean_bce": history[best_epoch][
+                "validation_source_mean_bce"
+            ],
+            "selected_validation_source_mean_weighted_bce": best_loss,
             "selected_validation_source_mean_brier": selected_brier,
             "train_source_mean_positive_rate": train_prevalence,
             "validation_constant_brier": constant_brier,

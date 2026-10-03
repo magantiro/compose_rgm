@@ -85,6 +85,7 @@ def main() -> None:
     parser.add_argument("--learning-rate", type=float, default=1e-3)
     parser.add_argument("--weight-decay", type=float, default=1e-5)
     parser.add_argument("--bellman-weight", type=float, default=0.3)
+    parser.add_argument("--guidance-region-weight", type=float, default=1.0)
     parser.add_argument("--batch-size", type=int, default=4096)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
@@ -102,6 +103,7 @@ def main() -> None:
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
         bellman_weight=args.bellman_weight,
+        guidance_region_weight=args.guidance_region_weight,
         batch_size=args.batch_size,
         seed=args.seed,
         device=args.device,

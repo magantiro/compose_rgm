@@ -38,6 +38,7 @@ def _write_shard(
     next_terminal_targets: np.ndarray | None = None,
     *,
     reference: dict = REFERENCE,
+    goal_regions: tuple[tuple[float, float], ...] = ((0.9, 0.4),),
 ) -> Path:
     path = folder / f"{role}_{index:04d}.npz"
     metadata = {
@@ -51,14 +52,18 @@ def _write_shard(
         "feature_schema": "region_features_v1",
         "target_semantics": "terminal_region",
         "builder_sha256": "builder",
-        "goal_regions": [[0.9, 0.4]],
+        "goal_regions": [list(region) for region in goal_regions],
         "examples": len(labels),
         "positive_labels": int(labels.sum()),
-        "region_examples": [len(labels)],
-        "region_positive_labels": [int(labels.sum())],
     }
     if region_indices is None:
         region_indices = np.zeros(len(labels), dtype=np.int16)
+    metadata["region_examples"] = [
+        int(np.sum(region_indices == value)) for value in range(len(goal_regions))
+    ]
+    metadata["region_positive_labels"] = [
+        int(np.sum(labels[region_indices == value])) for value in range(len(goal_regions))
+    ]
     if next_row_indices is None:
         next_row_indices = np.full(len(labels), -1, dtype=np.int32)
     if next_terminal_targets is None:
@@ -301,6 +306,65 @@ def test_all_negative_target_rows_do_not_qualify_guidance(tmp_path: Path) -> Non
     )
     assert report["guidance_validation_positive_labels"] == 0
     assert report["qualified_for_guidance"] is False
+
+
+def test_guidance_region_weight_changes_fit_without_reweighting_labels(tmp_path: Path) -> None:
+    width = input_dim(1)
+    regions = ((0.9, 0.4), (0.8, 0.4))
+    for role, input_index in (("train", 17), ("validation", 0)):
+        _write_shard(
+            tmp_path,
+            role,
+            0,
+            input_index,
+            np.zeros((4, width), np.float32),
+            np.asarray([1, 0, 0, 0], np.float32),
+            region_indices=np.asarray([0, 0, 1, 1], np.int16),
+            goal_regions=regions,
+        )
+    shards = inspect_feature_corpus(
+        tmp_path,
+        reference_identity=REFERENCE,
+        source_split_sha256=SPLIT,
+        train_input_indices=(17,),
+        validation_count=1,
+        budget_max=1,
+        goal_regions=regions,
+    )
+    ordinary = fit_value_head(
+        shards,
+        QEDFitConfig(budget_max=1, epochs=1, patience=1, batch_size=4, seed=3),
+        guidance_region_index=0,
+    )[3]
+    weighted = fit_value_head(
+        shards,
+        QEDFitConfig(
+            budget_max=1,
+            epochs=1,
+            patience=1,
+            batch_size=4,
+            seed=3,
+            guidance_region_weight=19.0,
+        ),
+        guidance_region_index=0,
+    )[3]
+    assert (
+        weighted["train_source_mean_positive_rate"] == ordinary["train_source_mean_positive_rate"]
+    )
+    assert (
+        weighted["history"][0]["train_source_mean_objective"]
+        != ordinary["history"][0]["train_source_mean_objective"]
+    )
+    assert (
+        weighted["selected_validation_source_mean_weighted_bce"]
+        != weighted["selected_validation_source_mean_bce"]
+    )
+
+
+def test_invalid_guidance_region_weights_fail() -> None:
+    for weight in (0.0, float("nan"), float("inf")):
+        with pytest.raises(ValueError, match="guidance-region weight"):
+            QEDFitConfig(guidance_region_weight=weight).validate()
 
 
 def test_fit_revision_requires_a_full_matching_commit(monkeypatch: pytest.MonkeyPatch) -> None:
