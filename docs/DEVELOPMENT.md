@@ -36,6 +36,7 @@ OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q \
   tests/test_qed_shared_training.py \
   tests/test_qed_shared_fit.py \
   tests/test_qed_shared_pipeline.py \
+  tests/test_qed_shared_panel.py \
   tests/test_qed_shared_value.py \
   tests/test_qed_shared_reduction.py \
   tests/test_qed_shared_reference.py \

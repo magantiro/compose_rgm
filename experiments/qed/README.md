@@ -122,7 +122,18 @@ source. Source-level success is evaluated on the 800 molecules in
 `data/jin/qed_test.txt`. Returned candidates must satisfy the QED and
 Morgan-fingerprint similarity thresholds above.
 
-After fitting a head, run each test source into a separate file. For example:
+After fitting a head, run the 800-source test panel with bounded local workers:
+
+```bash
+PYTHONPATH=src python tools/run_qed_shared_panel.py \
+  --value runs/qed_shared/value \
+  --output runs/qed_shared/test --workers 2
+```
+
+Use `--resume` after an interruption. The runner verifies every existing source
+receipt against the source split, model and code hashes, reference time and
+candidate protocol before starting any missing sources. It does not overwrite
+an existing receipt. To run one source independently, use:
 
 ```bash
 PYTHONPATH=src python tools/run_qed_shared_source.py \
@@ -130,8 +141,7 @@ PYTHONPATH=src python tools/run_qed_shared_source.py \
   --output runs/qed_shared/test/source_0000.json
 ```
 
-Repeat this command for indices 0 through 799 with matching output names. Then
-verify and reduce the complete panel:
+Then verify and reduce the complete panel:
 
 ```bash
 PYTHONPATH=src python tools/reduce_qed_shared.py \
