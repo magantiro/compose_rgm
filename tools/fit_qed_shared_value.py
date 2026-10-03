@@ -86,6 +86,9 @@ def main() -> None:
     parser.add_argument("--weight-decay", type=float, default=1e-5)
     parser.add_argument("--bellman-weight", type=float, default=0.3)
     parser.add_argument("--guidance-region-weight", type=float, default=1.0)
+    parser.add_argument(
+        "--selection-metric", choices=("weighted_bce", "target_brier"), default="weighted_bce"
+    )
     parser.add_argument("--batch-size", type=int, default=4096)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
@@ -104,6 +107,7 @@ def main() -> None:
         weight_decay=args.weight_decay,
         bellman_weight=args.bellman_weight,
         guidance_region_weight=args.guidance_region_weight,
+        selection_metric=args.selection_metric,
         batch_size=args.batch_size,
         seed=args.seed,
         device=args.device,

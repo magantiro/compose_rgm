@@ -367,6 +367,55 @@ def test_invalid_guidance_region_weights_fail() -> None:
             QEDFitConfig(guidance_region_weight=weight).validate()
 
 
+def test_target_brier_selection_uses_guidance_region_only(tmp_path: Path) -> None:
+    width = input_dim(1)
+    regions = ((0.9, 0.4), (0.8, 0.4))
+    for role, input_index in (("train", 17), ("validation", 0)):
+        _write_shard(
+            tmp_path,
+            role,
+            0,
+            input_index,
+            np.zeros((4, width), np.float32),
+            np.asarray([1, 0, 0, 0], np.float32),
+            region_indices=np.asarray([0, 0, 1, 1], np.int16),
+            goal_regions=regions,
+        )
+    shards = inspect_feature_corpus(
+        tmp_path,
+        reference_identity=REFERENCE,
+        source_split_sha256=SPLIT,
+        train_input_indices=(17,),
+        validation_count=1,
+        budget_max=1,
+        goal_regions=regions,
+    )
+    report = fit_value_head(
+        shards,
+        QEDFitConfig(
+            budget_max=1,
+            epochs=2,
+            patience=1,
+            batch_size=4,
+            seed=3,
+            selection_metric="target_brier",
+        ),
+        guidance_region_index=0,
+    )[3]
+    selected = report["history"][report["selected_epoch"]]
+    assert report["selection_metric"] == "target_brier"
+    assert report["selected_selection_loss"] == selected["validation_guidance_source_mean_brier"]
+    assert (
+        report["selected_validation_source_mean_weighted_bce"]
+        == selected["validation_source_mean_weighted_bce"]
+    )
+
+
+def test_invalid_selection_metric_fails() -> None:
+    with pytest.raises(ValueError, match="selection metric"):
+        QEDFitConfig(selection_metric="test_score").validate()
+
+
 def test_fit_revision_requires_a_full_matching_commit(monkeypatch: pytest.MonkeyPatch) -> None:
     commit = "a" * 40
     monkeypatch.setattr(

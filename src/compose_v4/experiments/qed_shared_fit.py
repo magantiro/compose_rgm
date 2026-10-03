@@ -36,6 +36,7 @@ class QEDFitConfig:
     weight_decay: float = 1e-5
     bellman_weight: float = 0.3
     guidance_region_weight: float = 1.0
+    selection_metric: str = "weighted_bce"
     batch_size: int = 4096
     seed: int = 0
     device: str = "cpu"
@@ -56,6 +57,8 @@ class QEDFitConfig:
             raise ValueError("QED value fit needs finite nonnegative Bellman weight")
         if not math.isfinite(self.guidance_region_weight) or self.guidance_region_weight < 1:
             raise ValueError("QED value fit needs a finite guidance-region weight of at least one")
+        if self.selection_metric not in ("weighted_bce", "target_brier"):
+            raise ValueError("QED value fit selection metric must be weighted_bce or target_brier")
         if self.device not in ("cpu", "cuda"):
             raise ValueError("QED value fit device must be cpu or cuda")
 
@@ -366,6 +369,7 @@ def fit_value_head(
         validation_losses = []
         validation_weighted_losses = []
         brier_losses = []
+        target_brier_losses = []
         with torch.no_grad():
             for shard in validation:
                 features, labels, region_indices, _, _ = _arrays(shard)
@@ -387,7 +391,18 @@ def fit_value_head(
                     float((per_row_bce.flatten() * row_weights).sum() / row_weights.sum())
                 )
                 brier_losses.append(float(torch.mean((torch.sigmoid(logits) - y) ** 2)))
+                target_rows = torch.from_numpy(region_indices == guidance_region_index).to(
+                    config.device
+                )
+                if bool(target_rows.any()):
+                    target_brier_losses.append(
+                        float(
+                            torch.mean((torch.sigmoid(logits[target_rows]) - y[target_rows]) ** 2)
+                        )
+                    )
         val_loss = float(np.mean(validation_weighted_losses))
+        target_val_loss = float(np.mean(target_brier_losses)) if target_brier_losses else math.inf
+        selection_loss = target_val_loss if config.selection_metric == "target_brier" else val_loss
         history.append(
             {
                 "epoch": epoch,
@@ -395,10 +410,11 @@ def fit_value_head(
                 "validation_source_mean_bce": float(np.mean(validation_losses)),
                 "validation_source_mean_weighted_bce": val_loss,
                 "validation_source_mean_brier": float(np.mean(brier_losses)),
+                "validation_guidance_source_mean_brier": target_val_loss,
             }
         )
-        if val_loss < best_loss:
-            best_loss = val_loss
+        if selection_loss < best_loss:
+            best_loss = selection_loss
             best_epoch = epoch
             best_state = {
                 key: value.detach().cpu().clone() for key, value in model.state_dict().items()
@@ -475,7 +491,11 @@ def fit_value_head(
             "selected_validation_source_mean_bce": history[best_epoch][
                 "validation_source_mean_bce"
             ],
-            "selected_validation_source_mean_weighted_bce": best_loss,
+            "selected_validation_source_mean_weighted_bce": history[best_epoch][
+                "validation_source_mean_weighted_bce"
+            ],
+            "selection_metric": config.selection_metric,
+            "selected_selection_loss": best_loss,
             "selected_validation_source_mean_brier": selected_brier,
             "train_source_mean_positive_rate": train_prevalence,
             "validation_constant_brier": constant_brier,

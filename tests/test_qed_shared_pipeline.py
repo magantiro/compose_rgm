@@ -112,6 +112,8 @@ def test_pipeline_forwards_guidance_region_weight_to_fit(
             "fit",
             "--guidance-region-weight",
             "19",
+            "--selection-metric",
+            "target_brier",
         ],
     )
 
@@ -119,6 +121,7 @@ def test_pipeline_forwards_guidance_region_weight_to_fit(
 
     assert len(commands) == 1
     assert commands[0][commands[0].index("--guidance-region-weight") + 1] == "19.0"
+    assert commands[0][commands[0].index("--selection-metric") + 1] == "target_brier"
 
 
 def test_resume_preserves_existing_outputs_and_runs_missing_jobs(

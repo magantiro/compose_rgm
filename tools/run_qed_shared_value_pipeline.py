@@ -297,6 +297,9 @@ def main() -> None:
     parser.add_argument("--time", type=float, default=0.5)
     parser.add_argument("--guidance-region-weight", type=float, default=1.0)
     parser.add_argument(
+        "--selection-metric", choices=("weighted_bce", "target_brier"), default="weighted_bce"
+    )
+    parser.add_argument(
         "--checkpoint", type=Path, default=ROOT / "local_assets/fragments/r_theta_nll.pt"
     )
     parser.add_argument("--resume", action="store_true")
@@ -339,6 +342,8 @@ def main() -> None:
             str(args.horizon),
             "--guidance-region-weight",
             str(args.guidance_region_weight),
+            "--selection-metric",
+            args.selection_metric,
             "--output",
             str(workspace / "value"),
         ]
