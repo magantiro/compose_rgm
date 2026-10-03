@@ -44,7 +44,6 @@ from compose_v4.rewrite.operators import (
 )
 from compose_v4.rewrite.scaffold_construction import ScaffoldContext
 
-
 PUBLIC_DISCRETE_FAMILIES = frozenset(
     {
         "atom_insert",
