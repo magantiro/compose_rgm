@@ -54,7 +54,7 @@ rollout, feature and fit workflow with bounded local workers, use:
 
 ```bash
 PYTHONPATH=src python tools/run_qed_shared_value_pipeline.py \
-  --workspace runs/qed_shared --workers 4
+  --workspace runs/qed_shared --workers 4 --replicates 16
 ```
 
 Use `--resume` after an interruption. Existing source outputs are kept only
@@ -67,7 +67,7 @@ For an individual source, the corresponding commands are:
 
 ```bash
 PYTHONPATH=src python tools/run_qed_shared_rollout.py \
-  --role train --index 0 --horizon 24 --replicates 8 --time 0.5 \
+  --role train --index 0 --horizon 24 --replicates 16 --time 0.5 \
   --output runs/qed_shared/train_0000.json
 PYTHONPATH=src python tools/build_qed_shared_features.py \
   --rollout runs/qed_shared/train_0000.json --role train --index 0 \

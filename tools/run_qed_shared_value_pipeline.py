@@ -293,7 +293,7 @@ def main() -> None:
     parser.add_argument("--stage", choices=("rollouts", "features", "fit", "all"), default="all")
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--horizon", type=int, default=24)
-    parser.add_argument("--replicates", type=int, default=2)
+    parser.add_argument("--replicates", type=int, default=16)
     parser.add_argument("--time", type=float, default=0.5)
     parser.add_argument(
         "--checkpoint", type=Path, default=ROOT / "local_assets/fragments/r_theta_nll.pt"

@@ -73,6 +73,28 @@ def test_pipeline_commands_bind_role_index_and_shared_checkpoint(tmp_path: Path)
     assert feature_command[feature_command.index("--rollout") + 1] == str(rollout)
 
 
+def test_pipeline_defaults_to_frozen_rollout_replicate_count(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    observed = []
+    monkeypatch.setattr(pipeline, "source_jobs", lambda: ())
+    monkeypatch.setattr(
+        pipeline, "run_stage", lambda *args, **kwargs: observed.append(kwargs) or (0, 0)
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["run_qed_shared_value_pipeline.py", "--workspace", str(tmp_path), "--stage", "rollouts"],
+    )
+
+    pipeline.main()
+
+    assert len(observed) == 1
+    assert observed[0]["horizon"] == 24
+    assert observed[0]["replicates"] == 16
+    assert observed[0]["time"] == 0.5
+
+
 def test_resume_preserves_existing_outputs_and_runs_missing_jobs(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
