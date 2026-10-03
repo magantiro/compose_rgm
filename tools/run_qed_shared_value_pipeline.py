@@ -295,6 +295,7 @@ def main() -> None:
     parser.add_argument("--horizon", type=int, default=24)
     parser.add_argument("--replicates", type=int, default=16)
     parser.add_argument("--time", type=float, default=0.5)
+    parser.add_argument("--guidance-region-weight", type=float, default=1.0)
     parser.add_argument(
         "--checkpoint", type=Path, default=ROOT / "local_assets/fragments/r_theta_nll.pt"
     )
@@ -304,6 +305,8 @@ def main() -> None:
         parser.error("workers, horizon and replicates must be positive")
     if not math.isfinite(args.time) or not 0 < args.time < 1:
         parser.error("reference time must be finite and strictly between zero and one")
+    if not math.isfinite(args.guidance_region_weight) or args.guidance_region_weight < 1:
+        parser.error("guidance-region weight must be finite and at least one")
     workspace = args.workspace.resolve()
     jobs = source_jobs()
     stages = ("rollouts", "features") if args.stage == "all" else (args.stage,)
@@ -334,6 +337,8 @@ def main() -> None:
             str(args.checkpoint.resolve()),
             "--budget-max",
             str(args.horizon),
+            "--guidance-region-weight",
+            str(args.guidance_region_weight),
             "--output",
             str(workspace / "value"),
         ]

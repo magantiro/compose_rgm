@@ -95,6 +95,32 @@ def test_pipeline_defaults_to_frozen_rollout_replicate_count(
     assert observed[0]["time"] == 0.5
 
 
+def test_pipeline_forwards_guidance_region_weight_to_fit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    commands = []
+    monkeypatch.setattr(pipeline, "source_jobs", lambda: ())
+    monkeypatch.setattr(pipeline, "_run", lambda command, _output: commands.append(command))
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_qed_shared_value_pipeline.py",
+            "--workspace",
+            str(tmp_path),
+            "--stage",
+            "fit",
+            "--guidance-region-weight",
+            "19",
+        ],
+    )
+
+    pipeline.main()
+
+    assert len(commands) == 1
+    assert commands[0][commands[0].index("--guidance-region-weight") + 1] == "19.0"
+
+
 def test_resume_preserves_existing_outputs_and_runs_missing_jobs(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
