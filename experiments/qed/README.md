@@ -54,7 +54,8 @@ rollout, feature and fit workflow with bounded local workers, use:
 
 ```bash
 PYTHONPATH=src python tools/run_qed_shared_value_pipeline.py \
-  --workspace runs/qed_shared --workers 4 --replicates 16
+  --workspace runs/qed_shared --workers 4 --replicates 16 \
+  --guidance-region-weight 19 --selection-metric target_brier
 ```
 
 Use `--resume` after an interruption. Existing source outputs are kept only
@@ -89,6 +90,7 @@ fit the head with:
 ```bash
 PYTHONPATH=src python tools/fit_qed_shared_value.py \
   --shards runs/qed_shared/features --time 0.5 \
+  --guidance-region-weight 19 --selection-metric target_brier \
   --output runs/qed_shared/value
 ```
 
@@ -96,9 +98,9 @@ The trainer refuses an incomplete or mixed corpus. It fits normalization only
 on training sources and uses binary cross-entropy with a 0.3-weighted Bellman
 consistency term. The Bellman targets use the observed next state, with the
 goal boundary fixed exactly. Each training source contributes one optimizer
-update per epoch. The trainer selects a checkpoint by source-level validation
-loss and also checks the
-benchmark goal, QED 0.9 and similarity 0.4, separately. The evaluator refuses
+update per epoch. The weight of 19 gives the benchmark goal the same aggregate
+loss weight as the other 19 registered goals. Checkpoint selection minimizes
+held-source mean Brier loss for QED 0.9 and similarity 0.4. The evaluator refuses
 a head unless both training and validation examples include hits and misses for
 that goal and its source-mean validation Brier score beats a training-only
 constant predictor. A failed check is recorded, not hidden. CUDA training is optional
